@@ -57,7 +57,7 @@ export const Route = createFileRoute('/admin')({
     }
 
     if (location.pathname === '/admin') {
-      throw redirect({ to: '/admin/users' })
+      throw redirect({ to: '/admin/library' })
     }
 
     return { user: context.user }

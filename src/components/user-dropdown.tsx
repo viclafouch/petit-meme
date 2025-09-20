@@ -94,7 +94,6 @@ export const UserDropdown = ({ user }: { user: UserWithRole }) => {
         <DropdownMenuGroup>
           {!subscription ? (
             <DropdownMenuItem
-              variant="info"
               onClick={() => {
                 checkoutPremium()
               }}

@@ -72,8 +72,7 @@ export const TwitterForm = ({ onSuccess, closeDialog }: TwitterFormProps) => {
         loading: 'Ajout en cours...',
         success: () => {
           return 'Mème créé avec succès !'
-        },
-        error: 'Une erreur est survenue'
+        }
       })
       closeDialog()
 
@@ -81,6 +80,9 @@ export const TwitterForm = ({ onSuccess, closeDialog }: TwitterFormProps) => {
     },
     onSuccess: (data) => {
       onSuccess?.({ memeId: data.id })
+    },
+    onError: (error) => {
+      toast.error(error.message)
     }
   })
 

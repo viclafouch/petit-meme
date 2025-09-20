@@ -65,9 +65,10 @@ export const dropdownMenuItemVariants = cva(
     variants: {
       variant: {
         default: '',
+        primary:
+          'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
         destructive:
-          'text-destructive-foreground focus:bg-destructive/10 dark:focus:bg-destructive/60 focus:text-destructive-foreground *:[svg]:!text-destructive',
-        info: 'text-info-foreground focus:bg-info/10 dark:focus:bg-info/60 focus:text-info-foreground *:[svg]:!text-info-foreground'
+          'text-destructive-foreground focus:bg-destructive/10 dark:focus:bg-destructive/60 focus:text-destructive-foreground *:[svg]:!text-destructive'
       },
       inset: {
         true: 'pl-8'

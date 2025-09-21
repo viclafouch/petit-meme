@@ -4,6 +4,7 @@ import {
   getFavoritesMemesQueryOpts,
   getRecentCountMemesQueryOpts
 } from '@/lib/queries'
+import { Faq } from '@/routes/_public__root/-components/faq'
 import { createFileRoute } from '@tanstack/react-router'
 import { Demo } from './-components/demo'
 import { Hero } from './-components/hero'
@@ -19,6 +20,7 @@ const RouteComponent = () => {
         <React.Suspense fallback={<div />}>
           <Demo bestMemesPromise={bestMemesPromise} />
         </React.Suspense>
+        <Faq />
       </section>
     </PageContainer>
   )

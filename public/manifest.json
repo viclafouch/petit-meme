@@ -1,10 +1,10 @@
 {
   "name": "Petit Meme",
   "short_name": "Petit Meme",
-  "start_url": "/reels?utm_medium=PWA&utm_source=launcher",
+  "start_url": "/memes?utm_medium=PWA&utm_source=launcher",
   "scope": "/",
   "display": "standalone",
-  "orientation": "any",
+  "orientation": "portrait-primary",
   "background_color": "#000000",
   "theme_color": "#000000",
   "lang": "fr",

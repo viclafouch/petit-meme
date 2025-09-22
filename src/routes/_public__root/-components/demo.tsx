@@ -2,7 +2,6 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
 import { MemesList } from '@/components/Meme/memes-list'
-import { buttonVariants } from '@/components/ui/button'
 import type { MemeWithVideo } from '@/constants/meme'
 import { Link } from '@tanstack/react-router'
 
@@ -36,14 +35,8 @@ export const Demo = ({
             Les meilleurs mèmes du moment.
           </p>
         </div>
-        <section className="flex flex-col items-center gap-y-6">
+        <section>
           <MemesList layoutContext="index" memes={bestMemesQuery} />
-          <Link
-            to="/memes"
-            className={buttonVariants({ variant: 'default', size: 'lg' })}
-          >
-            Voir tous les mèmes
-          </Link>
         </section>
       </motion.div>
     </div>

@@ -78,10 +78,11 @@ export const Faq = ({
                 </AccordionTrigger>
                 <AccordionContent
                   itemProp="acceptedAnswer"
+                  itemType="https://schema.org/Answer"
                   itemScope
                   className="text-muted-foreground"
                 >
-                  {item.answer}
+                  <span itemProp="text">{item.answer}</span>
                 </AccordionContent>
               </AccordionItem>
             )

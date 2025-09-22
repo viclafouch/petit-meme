@@ -64,6 +64,24 @@ export const PageHeading = ({
   )
 }
 
+export const PageHeading2 = ({
+  className,
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLHeadingElement>) => {
+  return (
+    <h2
+      className={cn(
+        'font-bricolage text-foreground max-w-4xl text-center text-2xl leading-[1.1] font-semibold text-balance sm:text-3xl lg:text-4xl mx-auto',
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </h2>
+  )
+}
+
 export const PageDescription = forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>

@@ -108,14 +108,16 @@ export const Responsive = () => {
           mobile, tablette et ordinateur, sans rien installer.
         </p>
       </div>
-      <div className="relative mx-auto max-w-5xl lg:[&_video]:blur-sm max-lg:[&_video+div]:hidden [&:not(:has(video:hover))]:[&>:first-child_video]:blur-none [&_video]:hover:blur-none [&_video:hover]:[&+div]:scale-0 [&_video]:transition-[filter] [&_video]:duration-500 [&:not(:has(video:hover))]:[&>:first-child_video+div]:scale-0">
+      <motion.div
+        className="relative mx-auto max-w-5xl lg:[&_video]:blur-sm max-lg:[&_video+div]:hidden [&:not(:has(video:hover))]:[&>:first-child_video]:blur-none [&_video]:hover:blur-none [&_video:hover]:[&+div]:scale-0 [&_video]:transition-[filter] [&_video]:duration-500 [&:not(:has(video:hover))]:[&>:first-child_video+div]:scale-0"
+        initial="offscreen"
+        whileInView="onscreen"
+        viewport={{ amount: 0.4, once: true }}
+      >
         <motion.div
           data-slot="card"
           data-card
           className="bg-card text-card-foreground flex flex-col gap-0 rounded-xl pt-6 overflow-hidden border-2 shadow-2xl"
-          initial="offscreen"
-          whileInView="onscreen"
-          viewport={{ amount: 0.4, once: true }}
           variants={desktopVariants}
         >
           <div className="bg-muted flex items-center gap-2 border-b px-2 md:px-4 py-1 md:py-3">
@@ -148,9 +150,6 @@ export const Responsive = () => {
         <motion.div
           data-slot="card"
           className="bg-card text-card-foreground flex flex-col gap-0 rounded-xl pt-3 md:pt-6 absolute lg:top-1/3 bottom-0 lg:bottom-auto lg:-right-8 right-0 lg:w-60 w-24 sm:w-36 overflow-hidden border-2 shadow-2xl"
-          initial="offscreen"
-          whileInView="onscreen"
-          viewport={{ amount: 0.4, once: true }}
           variants={mobileVariants}
         >
           <div className="bg-muted items-center justify-center border-b py-1 md:py-2 flex">
@@ -179,9 +178,6 @@ export const Responsive = () => {
         <motion.div
           data-slot="card"
           className="bg-card text-card-foreground flex-col gap-0 rounded-xl pb-6 absolute top-1/4 -left-8 w-80 overflow-hidden border-2 shadow-2xl hidden lg:flex"
-          initial="offscreen"
-          whileInView="onscreen"
-          viewport={{ amount: 0.5, once: true }}
           variants={tabletVariants}
         >
           <div className="bg-card items-center justify-center border-b py-3 hidden lg:flex">
@@ -209,9 +205,6 @@ export const Responsive = () => {
         </motion.div>
         <motion.div
           className="absolute lg:top-0 lg:right-0 flex gap-4 bottom-0 left-0 lg:left-auto lg:bottom-auto"
-          initial="offscreen"
-          whileInView="onscreen"
-          viewport={{ amount: 0.4, once: true }}
           variants={infoVariants}
         >
           <div
@@ -229,7 +222,7 @@ export const Responsive = () => {
             </p>
           </div>
         </motion.div>
-      </div>
+      </motion.div>
     </div>
   )
 }

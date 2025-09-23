@@ -5,8 +5,9 @@ import {
   getRecentCountMemesQueryOpts
 } from '@/lib/queries'
 import { Faq } from '@/routes/_public__root/-components/faq'
+import { Responsive } from '@/routes/_public__root/-components/responsive'
 import { createFileRoute } from '@tanstack/react-router'
-import { Demo } from './-components/demo'
+import { BestMemes } from './-components/best-memes'
 import { Hero } from './-components/hero'
 import { PageContainer } from './-components/page-headers'
 
@@ -15,12 +16,19 @@ const RouteComponent = () => {
 
   return (
     <PageContainer>
-      <section className="flex w-full flex-col gap-16 py-30 pb-10 sm:pt-42">
+      <section className="flex w-full flex-col py-30 pb-10 sm:pt-42">
         <Hero />
-        <React.Suspense fallback={<div />}>
-          <Demo bestMemesPromise={bestMemesPromise} />
-        </React.Suspense>
-        <Faq />
+        <div className="container lg:mt-36 mt-24">
+          <React.Suspense fallback={<div />}>
+            <BestMemes bestMemesPromise={bestMemesPromise} />
+          </React.Suspense>
+          <div className="mt-16">
+            <Responsive />
+          </div>
+          <div className="mt-16 lg:mt-40">
+            <Faq />
+          </div>
+        </div>
       </section>
     </PageContainer>
   )

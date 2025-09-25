@@ -61,5 +61,15 @@ export const Route = createFileRoute('/admin')({
     }
 
     return { user: context.user }
+  },
+  head: () => {
+    return {
+      meta: [
+        {
+          name: 'robots',
+          content: 'noindex'
+        }
+      ]
+    }
   }
 })

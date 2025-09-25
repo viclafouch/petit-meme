@@ -1,12 +1,23 @@
 import type { MemeWithCategories, MemeWithVideo } from '@/constants/meme'
 import { buildVideoImageUrl } from '@/lib/bunny'
+import type { AnyRouteMatch } from '@tanstack/react-router'
 
 export const appProdUrl = 'https://petit-meme.io'
 
 export const websiteOrigin =
   process.env.NODE_ENV === 'production' ? appProdUrl : 'http://localhost:3000'
 
-export function seo({
+export const buildUrl = (pathname: string) => {
+  let url = websiteOrigin
+
+  try {
+    url = new URL(pathname, websiteOrigin).href
+  } catch (error) {}
+
+  return url
+}
+
+export const seo = ({
   title,
   description,
   keywords,
@@ -20,7 +31,7 @@ export function seo({
   keywords?: string
   isAdmin?: boolean
   pathname?: string
-}) {
+}) => {
   const titlePrefixed = isAdmin
     ? `Admin Petit Meme - ${title}`
     : `Petit Meme - ${title}`
@@ -53,7 +64,7 @@ export function seo({
           { name: 'og:image', content: image }
         ]
       : [])
-  ]
+  ] satisfies AnyRouteMatch['meta']
 
   return tags
 }

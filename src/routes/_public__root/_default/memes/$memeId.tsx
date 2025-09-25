@@ -30,7 +30,7 @@ import { useShareMeme } from '@/hooks/use-share-meme'
 import { buildVideoImageUrl, buildVideoStreamUrl } from '@/lib/bunny'
 import { getMemeByIdQueryOpts } from '@/lib/queries'
 import { matchIsUserAdmin } from '@/lib/role'
-import { buildMemeSeo } from '@/lib/seo'
+import { buildMemeSeo, buildUrl } from '@/lib/seo'
 import { cn } from '@/lib/utils'
 import { getRandomMeme } from '@/server/meme'
 import { useSuspenseQuery } from '@tanstack/react-query'
@@ -297,7 +297,13 @@ export const Route = createFileRoute('/_public__root/_default/memes/$memeId')({
   head: ({ loaderData, match }) => {
     if (loaderData?.meme) {
       return {
-        meta: [...buildMemeSeo(loaderData.meme, { pathname: match.pathname })]
+        meta: [...buildMemeSeo(loaderData.meme, { pathname: match.pathname })],
+        links: [
+          {
+            rel: 'canonical',
+            href: buildUrl(match.pathname)
+          }
+        ]
       }
     }
 

@@ -196,6 +196,7 @@ export const StudioDialog = ({
                     playsInline
                     autoPlay
                     loop
+                    enableFullscreenOnDoubleClick
                     disablePictureInPicture
                     disableRemotePlayback
                     preload="auto"

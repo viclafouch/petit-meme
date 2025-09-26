@@ -106,6 +106,7 @@ export const PlayerDialog = ({
                 className="w-full h-full"
                 playsInline
                 loop
+                enableFullscreenOnDoubleClick
                 disablePictureInPicture
                 disableRemotePlayback
                 preload="auto"

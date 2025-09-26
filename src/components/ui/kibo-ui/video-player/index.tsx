@@ -1,7 +1,12 @@
 import type { ComponentProps, CSSProperties } from 'react'
 import {
+  MediaProvider,
+  useMediaRef
+} from 'media-chrome/dist/react/media-store.js'
+import {
   MediaControlBar,
   MediaController,
+  MediaFullscreenButton,
   MediaMuteButton,
   MediaPlayButton,
   MediaSeekBackwardButton,
@@ -10,7 +15,9 @@ import {
   MediaTimeRange,
   MediaVolumeRange
 } from 'media-chrome/react'
+import useDoubleClickFullscreen from '@/hooks/double-click-fullscreen'
 import { cn } from '@/lib/utils'
+import { mergeRefs } from '@/utils/merge-ref'
 
 export type VideoPlayerProps = ComponentProps<typeof MediaController>
 
@@ -28,13 +35,15 @@ const variables = {
 
 export const VideoPlayer = ({ style, ...props }: VideoPlayerProps) => {
   return (
-    <MediaController
-      style={{
-        ...variables,
-        ...style
-      }}
-      {...props}
-    />
+    <MediaProvider>
+      <MediaController
+        style={{
+          ...variables,
+          ...style
+        }}
+        {...props}
+      />
+    </MediaProvider>
   )
 }
 
@@ -84,6 +93,17 @@ export const VideoPlayerPlayButton = ({
   return <MediaPlayButton className={cn('p-2.5', className)} {...props} />
 }
 
+export type VideoFullScreenButtonProps = ComponentProps<
+  typeof MediaFullscreenButton
+>
+
+export const VideoFullScreenButton = ({
+  className,
+  ...props
+}: VideoFullScreenButtonProps) => {
+  return <MediaFullscreenButton className={cn('p-2.5', className)} {...props} />
+}
+
 export type VideoPlayerSeekBackwardButtonProps = ComponentProps<
   typeof MediaSeekBackwardButton
 >
@@ -119,11 +139,27 @@ export const VideoPlayerMuteButton = ({
   return <MediaMuteButton className={cn('p-2.5', className)} {...props} />
 }
 
-export type VideoPlayerContentProps = ComponentProps<'video'>
+export type VideoPlayerContentProps = ComponentProps<'video'> & {
+  enableFullscreenOnDoubleClick?: boolean
+}
 
 export const VideoPlayerContent = ({
   className,
+  enableFullscreenOnDoubleClick = false,
+  ref,
   ...props
 }: VideoPlayerContentProps) => {
-  return <video className={cn('mt-0 mb-0', className)} {...props} />
+  const doubleClickFullscreen = useDoubleClickFullscreen()
+  const mediaRef = useMediaRef()
+
+  return (
+    <video
+      className={cn('mt-0 mb-0', className)}
+      ref={mergeRefs<HTMLVideoElement>(ref, mediaRef)}
+      onClick={
+        enableFullscreenOnDoubleClick ? doubleClickFullscreen : undefined
+      }
+      {...props}
+    />
+  )
 }

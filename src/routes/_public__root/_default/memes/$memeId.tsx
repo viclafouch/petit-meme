@@ -14,6 +14,7 @@ import ToggleLikeButton from '@/components/Meme/toggle-like-button'
 import { Badge } from '@/components/ui/badge'
 import { Button, buttonVariants } from '@/components/ui/button'
 import {
+  VideoFullScreenButton,
   VideoPlayer,
   VideoPlayerContent,
   VideoPlayerControlBar,
@@ -158,6 +159,7 @@ const RouteComponent = () => {
                   playsInline
                   autoPlay
                   loop
+                  enableFullscreenOnDoubleClick
                   disablePictureInPicture
                   disableRemotePlayback
                   preload="auto"
@@ -171,6 +173,7 @@ const RouteComponent = () => {
                   <VideoPlayerTimeDisplay showDuration />
                   <VideoPlayerMuteButton />
                   <VideoPlayerVolumeRange />
+                  <VideoFullScreenButton />
                 </VideoPlayerControlBar>
               </VideoPlayer>
             </div>

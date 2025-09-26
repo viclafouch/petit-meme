@@ -47,7 +47,7 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => {
   const { _storedTheme } = Route.useLoaderData()
 
   return (
-    <html lang="fr" suppressHydrationWarning>
+    <html lang="fr" suppressHydrationWarning dir="ltr">
       <head>
         <meta name="algolia-site-verification" content="57C07DF31C29F6D0" />
         <HeadContent />
@@ -125,6 +125,10 @@ export const Route = createRootRouteWithContext<{
         {
           name: 'color-scheme',
           content: 'dark light'
+        },
+        {
+          name: 'robots',
+          content: 'index, follow, max-image-preview:large'
         },
         {
           name: 'mobile-web-app-capable',

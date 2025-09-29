@@ -97,7 +97,7 @@ export const Responsive = () => {
   }, [isInView])
 
   return (
-    <div className="relative" ref={containerRef}>
+    <div className="relative dark" ref={containerRef}>
       <div className="mx-auto mb-10 max-w-3xl text-center">
         <Badge variant="secondary">Application multiplateforme</Badge>
         <PageHeading2 className="mb-4 mt-2 scroll-m-20">

@@ -21,8 +21,7 @@ const NAVIGATIONS_LINKS = [
     items: [
       { to: '/memes', label: 'Mèmes' },
       { to: '/pricing', label: 'Plans' },
-      { to: '/reels', label: 'Reels', className: 'md:hidden' },
-      { to: '/', label: 'À propos' }
+      { to: '/reels', label: 'Reels', className: 'md:hidden' }
     ]
   }
 ] as const satisfies {

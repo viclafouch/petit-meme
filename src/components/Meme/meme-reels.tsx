@@ -4,6 +4,7 @@ import { Pause, Play, Volume2, VolumeX } from 'lucide-react'
 import { ShareMemeButton } from '@/components/Meme/share-meme-button'
 import ToggleLikeButton from '@/components/Meme/toggle-like-button'
 import { Button, buttonVariants } from '@/components/ui/button'
+import { LoadingSpinner } from '@/components/ui/spinner'
 import type { MemeWithVideo } from '@/constants/meme'
 import { buildVideoImageUrl, buildVideoStreamUrl } from '@/lib/bunny'
 import { getInfiniteReelsQueryOpts } from '@/lib/queries'
@@ -96,6 +97,9 @@ export const Reel = React.memo(
           alt={meme.title}
           className="absolute size-full inset-0 object-cover blur-xl opacity-80"
         />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full flex items-center justify-center">
+          <LoadingSpinner />
+        </div>
         <video
           className="absolute inset-0 size-full"
           muted={isMuted}

@@ -18,7 +18,10 @@ export const getFavoritesMemes = createServerFn({ method: 'GET' })
 
     const bookmarks = await prismaClient.userBookmark.findMany({
       where: {
-        userId: context.user.id
+        userId: context.user.id,
+        meme: {
+          status: 'PUBLISHED'
+        }
       },
       orderBy: {
         createdAt: 'desc'

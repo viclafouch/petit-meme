@@ -4,11 +4,13 @@ import Hls from 'hls.js'
 import {
   ArrowLeft,
   Clapperboard,
+  Clipboard,
   Download,
   Pencil,
   Share2,
   Shuffle
 } from 'lucide-react'
+import { toast } from 'sonner'
 import { StudioDialog } from '@/components/Meme/studio-dialog'
 import ToggleLikeButton from '@/components/Meme/toggle-like-button'
 import { Badge } from '@/components/ui/badge'
@@ -40,6 +42,7 @@ import {
   createFileRoute,
   Link,
   notFound,
+  useLinkProps,
   useRouteContext,
   useRouter
 } from '@tanstack/react-router'
@@ -55,6 +58,23 @@ const RouteComponent = () => {
   const memeQuery = useSuspenseQuery(getMemeByIdQueryOpts(memeId))
   const meme = memeQuery.data
   const [isStudioDialogOpened, setIsStudioDialogOpened] = React.useState(false)
+  const memeLink = useLinkProps({
+    to: '/memes/$memeId',
+    params: { memeId: meme.id }
+  })
+
+  const copyMemeLink = async () => {
+    const text = buildUrl(memeLink.href as string)
+
+    try {
+      await navigator.clipboard.writeText(text)
+      toast.success('Lien copié', {
+        position: 'bottom-center'
+      })
+    } catch (error) {
+      toast.error('Impossible de copier le lien')
+    }
+  }
 
   const shareMutation = useShareMeme()
   const downloadMutation = useDownloadMeme()
@@ -236,6 +256,17 @@ const RouteComponent = () => {
                   Télécharger la vidéo
                 </LoadingButton>
               </div>
+              <LoadingButton
+                isLoading={shareMutation.isPending}
+                variant="outline"
+                className="shrink-0 flex-1"
+                onClick={() => {
+                  return copyMemeLink()
+                }}
+              >
+                <Clipboard />
+                Copier le lien
+              </LoadingButton>
               <Button variant="outline" onClick={goToNextRandomMeme}>
                 <Shuffle />
                 Aléatoire

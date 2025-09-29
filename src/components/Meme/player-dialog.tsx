@@ -2,7 +2,8 @@ import React from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { motion } from 'framer-motion'
 import Hls from 'hls.js'
-import { Clapperboard, Download, Share2, X } from 'lucide-react'
+import { Clapperboard, Clipboard, Download, Share2, X } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
   VideoPlayer,
@@ -18,6 +19,8 @@ import type { MemeWithVideo } from '@/constants/meme'
 import { useDownloadMeme } from '@/hooks/use-download-meme'
 import { useShareMeme } from '@/hooks/use-share-meme'
 import { buildVideoImageUrl, buildVideoStreamUrl } from '@/lib/bunny'
+import { buildUrl } from '@/lib/seo'
+import { useLinkProps } from '@tanstack/react-router'
 
 export const PlayerDialog = ({
   meme,
@@ -34,6 +37,23 @@ export const PlayerDialog = ({
   const hls = React.useRef<Hls>(null)
   const shareMeme = useShareMeme()
   const downloadMeme = useDownloadMeme()
+  const memeLink = useLinkProps({
+    to: '/memes/$memeId',
+    params: { memeId: meme.id }
+  })
+
+  const copyMemeLink = async () => {
+    const text = buildUrl(memeLink.href as string)
+
+    try {
+      await navigator.clipboard.writeText(text)
+      toast.success('Lien copié', {
+        position: 'bottom-center'
+      })
+    } catch (error) {
+      toast.error('Impossible de copier le lien')
+    }
+  }
 
   const close = () => {
     videoRef.current?.pause()
@@ -158,30 +178,42 @@ export const PlayerDialog = ({
               <Clapperboard />
               Ouvrir dans Studio
             </Button>
-            <div className="flex gap-2 flex-wrap">
+            <div className="grid gap-2 grid-cols-2">
               <Button
                 size="lg"
                 variant="secondary"
                 disabled={shareMeme.isPending}
-                className="md:hidden flex-1"
+                className="md:hidden w-full"
                 onClick={() => {
                   return shareMeme.mutate(meme)
                 }}
               >
                 <Share2 />
-                Partager
+                Partager la vidéo
               </Button>
               <Button
                 size="lg"
                 variant="secondary"
-                className="flex-1"
+                disabled={shareMeme.isPending}
+                className="w-full"
+                onClick={() => {
+                  return copyMemeLink()
+                }}
+              >
+                <Clipboard />
+                Copier le lien
+              </Button>
+              <Button
+                size="lg"
+                variant="secondary"
+                className="col-span-2 md:col-span-1 w-full"
                 disabled={downloadMeme.isPending}
                 onClick={() => {
                   return downloadMeme.mutate(meme)
                 }}
               >
                 <Download />
-                Télécharger
+                Télécharger la vidéo
               </Button>
             </div>
           </div>

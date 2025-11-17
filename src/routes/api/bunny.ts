@@ -6,7 +6,7 @@ import {
   memeToAlgoliaRecord
 } from '@/lib/algolia'
 import { getVideoPlayData } from '@/lib/bunny'
-import { createServerFileRoute } from '@tanstack/react-start/server'
+import { createFileRoute } from '@tanstack/react-router'
 
 // see https://docs.bunny.net/docs/stream-webhook
 const WEBHOOK_RESPONSE_SCHEMA = z.object({
@@ -15,65 +15,69 @@ const WEBHOOK_RESPONSE_SCHEMA = z.object({
   Status: z.number()
 })
 
-export const ServerRoute = createServerFileRoute('/api/bunny').methods({
-  POST: async ({ request }) => {
-    const data = await request.json()
-    const result = WEBHOOK_RESPONSE_SCHEMA.parse(data)
+export const Route = createFileRoute('/api/bunny')({
+  server: {
+    handlers: {
+      POST: async ({ request }) => {
+        const data = await request.json()
+        const result = WEBHOOK_RESPONSE_SCHEMA.parse(data)
 
-    const videoPlayData = await getVideoPlayData(result.VideoGuid)
+        const videoPlayData = await getVideoPlayData(result.VideoGuid)
 
-    try {
-      const { meme } = await prismaClient.video.update({
-        where: {
-          bunnyId: result.VideoGuid,
-          bunnyStatus: { lt: result.Status }
-        },
-        data: {
-          bunnyStatus: result.Status,
-          duration: videoPlayData.video.length
-        },
-        include: {
-          meme: {
+        try {
+          const { meme } = await prismaClient.video.update({
+            where: {
+              bunnyId: result.VideoGuid,
+              bunnyStatus: { lt: result.Status }
+            },
+            data: {
+              bunnyStatus: result.Status,
+              duration: videoPlayData.video.length
+            },
             include: {
-              video: true,
-              categories: {
+              meme: {
                 include: {
-                  category: true
+                  video: true,
+                  categories: {
+                    include: {
+                      category: true
+                    }
+                  }
                 }
               }
             }
+          })
+
+          if (meme) {
+            await algoliaClient
+              .partialUpdateObject({
+                indexName: algoliaIndexName,
+                objectID: meme.id,
+                attributesToUpdate: memeToAlgoliaRecord(meme)
+              })
+              .catch((error) => {
+                // eslint-disable-next-line no-console
+                console.error(error)
+              })
           }
+
+          // eslint-disable-next-line no-console
+          console.log('Vidéo mise à jour !', {
+            videoId: result.VideoGuid,
+            status: result.Status
+          })
+
+          return Response.json({ success: true })
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.log('Mise à jour non effectuée', {
+            videoId: result.VideoGuid,
+            status: result.Status
+          })
+
+          return Response.json({ success: true })
         }
-      })
-
-      if (meme) {
-        await algoliaClient
-          .partialUpdateObject({
-            indexName: algoliaIndexName,
-            objectID: meme.id,
-            attributesToUpdate: memeToAlgoliaRecord(meme)
-          })
-          .catch((error) => {
-            // eslint-disable-next-line no-console
-            console.error(error)
-          })
       }
-
-      // eslint-disable-next-line no-console
-      console.log('Vidéo mise à jour !', {
-        videoId: result.VideoGuid,
-        status: result.Status
-      })
-
-      return Response.json({ success: true })
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log('Mise à jour non effectuée', {
-        videoId: result.VideoGuid,
-        status: result.Status
-      })
-
-      return Response.json({ success: true })
     }
   }
 })

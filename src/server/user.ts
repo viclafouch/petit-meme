@@ -8,7 +8,7 @@ import { getActiveSubscription } from '@/server/customer'
 import { authUserRequiredMiddleware } from '@/server/user-auth'
 import type { Meme } from '@prisma/client'
 import { notFound } from '@tanstack/react-router'
-import { createServerFn, serverOnly } from '@tanstack/react-start'
+import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 import { setResponseStatus } from '@tanstack/react-start/server'
 
 export const getFavoritesMemes = createServerFn({ method: 'GET' })
@@ -75,7 +75,7 @@ export const checkGeneration = createServerFn({ method: 'POST' })
     return { result: 'ok' } as const
   })
 
-const toggleBookmark = serverOnly(
+const toggleBookmark = createServerOnlyFn(
   async (userId: User['id'], memeId: Meme['id']) => {
     const bookmark = await prismaClient.userBookmark.findUnique({
       // eslint-disable-next-line camelcase
@@ -113,7 +113,7 @@ const toggleBookmark = serverOnly(
 )
 
 export const toggleBookmarkByMemeId = createServerFn({ method: 'POST' })
-  .validator((data) => {
+  .inputValidator((data) => {
     return z.string().parse(data)
   })
   .middleware([authUserRequiredMiddleware])

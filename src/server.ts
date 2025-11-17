@@ -1,17 +1,13 @@
-import type { RequestHandler } from '@tanstack/react-start/server'
 import {
   createStartHandler,
-  defaultStreamHandler
+  defaultStreamHandler,
+  defineHandlerCallback
 } from '@tanstack/react-start/server'
-import { createAppRouter } from './router'
-
-const handler = createStartHandler({
-  createRouter: createAppRouter
-})(defaultStreamHandler)
+import { createServerEntry } from '@tanstack/react-start/server-entry'
 
 const canonicalHost = 'petit-meme.io'
 
-const withHeaders: RequestHandler = async (context) => {
+const customHandler = defineHandlerCallback(async (context) => {
   const url = new URL(context.request.url)
 
   if (url.hostname.includes('www.')) {
@@ -25,11 +21,16 @@ const withHeaders: RequestHandler = async (context) => {
     })
   }
 
-  const response = await handler(context)
+  const response = await defaultStreamHandler(context)
+
   response.headers.set('Cross-Origin-Opener-Policy', 'same-origin')
   response.headers.set('Cross-Origin-Resource-Policy', 'cross-origin')
 
   return response
-}
+})
 
-export default withHeaders
+const fetch = createStartHandler(customHandler)
+
+export default createServerEntry({
+  fetch
+})

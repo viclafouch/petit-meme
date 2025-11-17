@@ -7,7 +7,7 @@ export const Route = createFileRoute('/_public__root/_default/random/')({
     const meme = await getRandomMeme()
 
     if (meme) {
-      return redirect({
+      throw redirect({
         to: '/memes/$memeId',
         params: {
           memeId: meme.id
@@ -16,7 +16,7 @@ export const Route = createFileRoute('/_public__root/_default/random/')({
       })
     }
 
-    return redirect({
+    throw redirect({
       to: '/memes'
     })
   }

@@ -23,7 +23,7 @@ export const getCategories = createServerFn({ method: 'GET' }).handler(
 
 export const addCategory = createServerFn({ method: 'POST' })
   .middleware([adminRequiredMiddleware])
-  .validator((data) => {
+  .inputValidator((data) => {
     return CATEGORY_FORM_SCHEMA.parse(data)
   })
   .handler(async ({ data }) => {
@@ -34,7 +34,7 @@ export const addCategory = createServerFn({ method: 'POST' })
 
 export const editCategory = createServerFn({ method: 'POST' })
   .middleware([adminRequiredMiddleware])
-  .validator((data) => {
+  .inputValidator((data) => {
     return CATEGORY_FORM_SCHEMA.extend({
       id: z.string()
     }).parse(data)
@@ -52,7 +52,7 @@ export const editCategory = createServerFn({ method: 'POST' })
 
 export const deleteCategory = createServerFn({ method: 'POST' })
   .middleware([adminRequiredMiddleware])
-  .validator((data) => {
+  .inputValidator((data) => {
     return z.string().parse(data)
   })
   .handler(async ({ data: categoryId }) => {

@@ -5,7 +5,7 @@ import { authUserRequiredMiddleware } from '@/server/user-auth'
 import { createServerFn } from '@tanstack/react-start'
 
 export const getTweetFromUrl = createServerFn({ method: 'GET' })
-  .validator((url: string) => {
+  .inputValidator((url: string) => {
     return TWEET_LINK_SCHEMA.parse(url)
   })
   .middleware([authUserRequiredMiddleware])

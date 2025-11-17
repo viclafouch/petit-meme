@@ -13,7 +13,7 @@ export const getStoredTheme = createServerFn().handler(async () => {
 })
 
 export const setStoredTheme = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => {
+  .inputValidator((data: unknown) => {
     if (typeof data !== 'string' || !themes.includes(data as UserTheme)) {
       throw new Error('Invalid theme')
     }

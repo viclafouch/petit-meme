@@ -22,11 +22,11 @@ import {
 } from '@/lib/react-tweet'
 import { adminRequiredMiddleware } from '@/server/user-auth'
 import { createServerFn } from '@tanstack/react-start'
-import { getWebRequest } from '@tanstack/react-start/server'
+import { getRequest } from '@tanstack/react-start/server'
 
 export const getListUsers = createServerFn({ method: 'GET' }).handler(
   async () => {
-    const { headers } = getWebRequest()
+    const { headers } = getRequest()
 
     const listUsers = await auth.api.listUsers({
       query: {
@@ -57,7 +57,7 @@ export const MEME_FORM_SCHEMA = z.object({
 })
 
 export const editMeme = createServerFn({ method: 'POST' })
-  .validator((data) => {
+  .inputValidator((data) => {
     return MEME_FORM_SCHEMA.extend({ id: z.string() }).parse(data)
   })
   .middleware([adminRequiredMiddleware])
@@ -120,7 +120,7 @@ export const editMeme = createServerFn({ method: 'POST' })
   })
 
 export const deleteMemeById = createServerFn({ method: 'POST' })
-  .validator((data) => {
+  .inputValidator((data) => {
     return z.string().parse(data)
   })
   .middleware([adminRequiredMiddleware])
@@ -156,7 +156,7 @@ export const deleteMemeById = createServerFn({ method: 'POST' })
   })
 
 export const createMemeFromTwitterUrl = createServerFn({ method: 'POST' })
-  .validator((url: string) => {
+  .inputValidator((url: string) => {
     return TWEET_LINK_SCHEMA.parse(url)
   })
   .middleware([adminRequiredMiddleware])
@@ -222,7 +222,7 @@ export const CREATE_MEME_FROM_FILE_SCHEMA = z.object({
 })
 
 export const createMemeFromFile = createServerFn({ method: 'POST' })
-  .validator((data) => {
+  .inputValidator((data) => {
     const formData = z.instanceof(FormData).parse(data)
 
     return CREATE_MEME_FROM_FILE_SCHEMA.parse({
@@ -277,7 +277,7 @@ export const createMemeFromFile = createServerFn({ method: 'POST' })
 
 export const getAdminMemes = createServerFn({ method: 'GET' })
   .middleware([adminRequiredMiddleware])
-  .validator(MEMES_FILTERS_SCHEMA)
+  .inputValidator(MEMES_FILTERS_SCHEMA)
   .handler(async ({ data }) => {
     const response = await algoliaClient.searchSingleIndex<
       MemeWithVideo & MemeWithCategories
@@ -309,7 +309,7 @@ export const getAdminMemes = createServerFn({ method: 'GET' })
 
 export const removeUser = createServerFn({ method: 'POST' })
   .middleware([adminRequiredMiddleware])
-  .validator(z.string())
+  .inputValidator(z.string())
   .handler(async ({ data: userId }) => {
     const user = await prismaClient.user.findUnique({
       where: {
@@ -325,7 +325,7 @@ export const removeUser = createServerFn({ method: 'POST' })
       body: {
         userId: user.id
       },
-      headers: await getWebRequest().headers
+      headers: await getRequest().headers
     })
 
     return { success: true }

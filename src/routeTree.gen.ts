@@ -8,18 +8,19 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { createServerRootRoute } from '@tanstack/react-start/server'
-
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ReelsRouteImport } from './routes/reels'
+import { Route as HealthRouteImport } from './routes/health'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as Public__rootRouteRouteImport } from './routes/_public__root/route'
 import { Route as Public__rootIndexRouteImport } from './routes/_public__root/index'
+import { Route as ApiBunnyRouteImport } from './routes/api/bunny'
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as AdminDownloaderRouteImport } from './routes/admin/downloader'
 import { Route as Public__rootDefaultRouteRouteImport } from './routes/_public__root/_default/route'
 import { Route as AdminLibraryIndexRouteImport } from './routes/admin/library/index'
 import { Route as AdminCategoriesIndexRouteImport } from './routes/admin/categories/index'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as AdminLibraryMemeIdRouteImport } from './routes/admin/library/$memeId'
 import { Route as Public__rootDefaultTermsOfUseRouteImport } from './routes/_public__root/_default/terms-of-use'
 import { Route as Public__rootDefaultPricingRouteImport } from './routes/_public__root/_default/pricing'
@@ -32,15 +33,15 @@ import { Route as Public__rootDefaultPasswordResetRouteImport } from './routes/_
 import { Route as Public__rootDefaultPasswordCreateNewRouteImport } from './routes/_public__root/_default/password.create-new'
 import { Route as Public__rootDefaultMemesMemeIdRouteImport } from './routes/_public__root/_default/memes/$memeId'
 import { Route as Public__rootDefaultCheckoutSuccessRouteImport } from './routes/_public__root/_default/checkout.success'
-import { ServerRoute as HealthServerRouteImport } from './routes/health'
-import { ServerRoute as ApiBunnyServerRouteImport } from './routes/api/bunny'
-import { ServerRoute as ApiAuthSplatServerRouteImport } from './routes/api/auth.$'
-
-const rootServerRouteImport = createServerRootRoute()
 
 const ReelsRoute = ReelsRouteImport.update({
   id: '/reels',
   path: '/reels',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HealthRoute = HealthRouteImport.update({
+  id: '/health',
+  path: '/health',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRouteRoute = AdminRouteRouteImport.update({
@@ -56,6 +57,11 @@ const Public__rootIndexRoute = Public__rootIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => Public__rootRouteRoute,
+} as any)
+const ApiBunnyRoute = ApiBunnyRouteImport.update({
+  id: '/api/bunny',
+  path: '/api/bunny',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/users',
@@ -81,6 +87,11 @@ const AdminCategoriesIndexRoute = AdminCategoriesIndexRouteImport.update({
   id: '/categories/',
   path: '/categories/',
   getParentRoute: () => AdminRouteRoute,
+} as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminLibraryMemeIdRoute = AdminLibraryMemeIdRouteImport.update({
   id: '/library/$memeId',
@@ -153,33 +164,21 @@ const Public__rootDefaultCheckoutSuccessRoute =
     path: '/checkout/success',
     getParentRoute: () => Public__rootDefaultRouteRoute,
   } as any)
-const HealthServerRoute = HealthServerRouteImport.update({
-  id: '/health',
-  path: '/health',
-  getParentRoute: () => rootServerRouteImport,
-} as any)
-const ApiBunnyServerRoute = ApiBunnyServerRouteImport.update({
-  id: '/api/bunny',
-  path: '/api/bunny',
-  getParentRoute: () => rootServerRouteImport,
-} as any)
-const ApiAuthSplatServerRoute = ApiAuthSplatServerRouteImport.update({
-  id: '/api/auth/$',
-  path: '/api/auth/$',
-  getParentRoute: () => rootServerRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteRouteWithChildren
+  '/health': typeof HealthRoute
   '/reels': typeof ReelsRoute
   '/admin/downloader': typeof AdminDownloaderRoute
   '/admin/users': typeof AdminUsersRoute
+  '/api/bunny': typeof ApiBunnyRoute
   '/': typeof Public__rootIndexRoute
   '/settings': typeof Public__rootDefaultSettingsRouteRouteWithChildren
   '/favorites': typeof Public__rootDefaultFavoritesRoute
   '/pricing': typeof Public__rootDefaultPricingRoute
   '/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/categories': typeof AdminCategoriesIndexRoute
   '/admin/library': typeof AdminLibraryIndexRoute
   '/checkout/success': typeof Public__rootDefaultCheckoutSuccessRoute
@@ -192,14 +191,17 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/admin': typeof AdminRouteRouteWithChildren
+  '/health': typeof HealthRoute
   '/reels': typeof ReelsRoute
   '/admin/downloader': typeof AdminDownloaderRoute
   '/admin/users': typeof AdminUsersRoute
+  '/api/bunny': typeof ApiBunnyRoute
   '/': typeof Public__rootIndexRoute
   '/favorites': typeof Public__rootDefaultFavoritesRoute
   '/pricing': typeof Public__rootDefaultPricingRoute
   '/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/categories': typeof AdminCategoriesIndexRoute
   '/admin/library': typeof AdminLibraryIndexRoute
   '/checkout/success': typeof Public__rootDefaultCheckoutSuccessRoute
@@ -214,16 +216,19 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_public__root': typeof Public__rootRouteRouteWithChildren
   '/admin': typeof AdminRouteRouteWithChildren
+  '/health': typeof HealthRoute
   '/reels': typeof ReelsRoute
   '/_public__root/_default': typeof Public__rootDefaultRouteRouteWithChildren
   '/admin/downloader': typeof AdminDownloaderRoute
   '/admin/users': typeof AdminUsersRoute
+  '/api/bunny': typeof ApiBunnyRoute
   '/_public__root/': typeof Public__rootIndexRoute
   '/_public__root/_default/settings': typeof Public__rootDefaultSettingsRouteRouteWithChildren
   '/_public__root/_default/favorites': typeof Public__rootDefaultFavoritesRoute
   '/_public__root/_default/pricing': typeof Public__rootDefaultPricingRoute
   '/_public__root/_default/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/categories/': typeof AdminCategoriesIndexRoute
   '/admin/library/': typeof AdminLibraryIndexRoute
   '/_public__root/_default/checkout/success': typeof Public__rootDefaultCheckoutSuccessRoute
@@ -238,15 +243,18 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/admin'
+    | '/health'
     | '/reels'
     | '/admin/downloader'
     | '/admin/users'
+    | '/api/bunny'
     | '/'
     | '/settings'
     | '/favorites'
     | '/pricing'
     | '/terms-of-use'
     | '/admin/library/$memeId'
+    | '/api/auth/$'
     | '/admin/categories'
     | '/admin/library'
     | '/checkout/success'
@@ -259,14 +267,17 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/admin'
+    | '/health'
     | '/reels'
     | '/admin/downloader'
     | '/admin/users'
+    | '/api/bunny'
     | '/'
     | '/favorites'
     | '/pricing'
     | '/terms-of-use'
     | '/admin/library/$memeId'
+    | '/api/auth/$'
     | '/admin/categories'
     | '/admin/library'
     | '/checkout/success'
@@ -280,16 +291,19 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_public__root'
     | '/admin'
+    | '/health'
     | '/reels'
     | '/_public__root/_default'
     | '/admin/downloader'
     | '/admin/users'
+    | '/api/bunny'
     | '/_public__root/'
     | '/_public__root/_default/settings'
     | '/_public__root/_default/favorites'
     | '/_public__root/_default/pricing'
     | '/_public__root/_default/terms-of-use'
     | '/admin/library/$memeId'
+    | '/api/auth/$'
     | '/admin/categories/'
     | '/admin/library/'
     | '/_public__root/_default/checkout/success'
@@ -304,36 +318,10 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   Public__rootRouteRoute: typeof Public__rootRouteRouteWithChildren
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
+  HealthRoute: typeof HealthRoute
   ReelsRoute: typeof ReelsRoute
-}
-export interface FileServerRoutesByFullPath {
-  '/health': typeof HealthServerRoute
-  '/api/bunny': typeof ApiBunnyServerRoute
-  '/api/auth/$': typeof ApiAuthSplatServerRoute
-}
-export interface FileServerRoutesByTo {
-  '/health': typeof HealthServerRoute
-  '/api/bunny': typeof ApiBunnyServerRoute
-  '/api/auth/$': typeof ApiAuthSplatServerRoute
-}
-export interface FileServerRoutesById {
-  __root__: typeof rootServerRouteImport
-  '/health': typeof HealthServerRoute
-  '/api/bunny': typeof ApiBunnyServerRoute
-  '/api/auth/$': typeof ApiAuthSplatServerRoute
-}
-export interface FileServerRouteTypes {
-  fileServerRoutesByFullPath: FileServerRoutesByFullPath
-  fullPaths: '/health' | '/api/bunny' | '/api/auth/$'
-  fileServerRoutesByTo: FileServerRoutesByTo
-  to: '/health' | '/api/bunny' | '/api/auth/$'
-  id: '__root__' | '/health' | '/api/bunny' | '/api/auth/$'
-  fileServerRoutesById: FileServerRoutesById
-}
-export interface RootServerRouteChildren {
-  HealthServerRoute: typeof HealthServerRoute
-  ApiBunnyServerRoute: typeof ApiBunnyServerRoute
-  ApiAuthSplatServerRoute: typeof ApiAuthSplatServerRoute
+  ApiBunnyRoute: typeof ApiBunnyRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -343,6 +331,13 @@ declare module '@tanstack/react-router' {
       path: '/reels'
       fullPath: '/reels'
       preLoaderRoute: typeof ReelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/health': {
+      id: '/health'
+      path: '/health'
+      fullPath: '/health'
+      preLoaderRoute: typeof HealthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -365,6 +360,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof Public__rootIndexRouteImport
       parentRoute: typeof Public__rootRouteRoute
+    }
+    '/api/bunny': {
+      id: '/api/bunny'
+      path: '/api/bunny'
+      fullPath: '/api/bunny'
+      preLoaderRoute: typeof ApiBunnyRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/users': {
       id: '/admin/users'
@@ -400,6 +402,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/categories'
       preLoaderRoute: typeof AdminCategoriesIndexRouteImport
       parentRoute: typeof AdminRouteRoute
+    }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/library/$memeId': {
       id: '/admin/library/$memeId'
@@ -484,31 +493,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/checkout/success'
       preLoaderRoute: typeof Public__rootDefaultCheckoutSuccessRouteImport
       parentRoute: typeof Public__rootDefaultRouteRoute
-    }
-  }
-}
-declare module '@tanstack/react-start/server' {
-  interface ServerFileRoutesByPath {
-    '/health': {
-      id: '/health'
-      path: '/health'
-      fullPath: '/health'
-      preLoaderRoute: typeof HealthServerRouteImport
-      parentRoute: typeof rootServerRouteImport
-    }
-    '/api/bunny': {
-      id: '/api/bunny'
-      path: '/api/bunny'
-      fullPath: '/api/bunny'
-      preLoaderRoute: typeof ApiBunnyServerRouteImport
-      parentRoute: typeof rootServerRouteImport
-    }
-    '/api/auth/$': {
-      id: '/api/auth/$'
-      path: '/api/auth/$'
-      fullPath: '/api/auth/$'
-      preLoaderRoute: typeof ApiAuthSplatServerRouteImport
-      parentRoute: typeof rootServerRouteImport
     }
   }
 }
@@ -600,16 +584,20 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   Public__rootRouteRoute: Public__rootRouteRouteWithChildren,
   AdminRouteRoute: AdminRouteRouteWithChildren,
+  HealthRoute: HealthRoute,
   ReelsRoute: ReelsRoute,
+  ApiBunnyRoute: ApiBunnyRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-const rootServerRouteChildren: RootServerRouteChildren = {
-  HealthServerRoute: HealthServerRoute,
-  ApiBunnyServerRoute: ApiBunnyServerRoute,
-  ApiAuthSplatServerRoute: ApiAuthSplatServerRoute,
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
 }
-export const serverRouteTree = rootServerRouteImport
-  ._addFileChildren(rootServerRouteChildren)
-  ._addFileTypes<FileServerRouteTypes>()

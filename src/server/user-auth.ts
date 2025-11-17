@@ -2,11 +2,11 @@ import type { UserWithRole } from 'better-auth/plugins'
 import { StudioError } from '@/constants/error'
 import { auth } from '@/lib/auth'
 import { createMiddleware, createServerFn } from '@tanstack/react-start'
-import { getWebRequest, setResponseStatus } from '@tanstack/react-start/server'
+import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
 
 export const getAuthUser = createServerFn({ method: 'GET' }).handler(
   async () => {
-    const { headers } = getWebRequest()
+    const { headers } = getRequest()
     const session = await auth.api.getSession({ headers })
 
     return (session?.user as UserWithRole | undefined) || null
@@ -16,7 +16,7 @@ export const getAuthUser = createServerFn({ method: 'GET' }).handler(
 export const authUserRequiredMiddleware = createMiddleware({
   type: 'function'
 }).server(async ({ next }) => {
-  const { headers } = getWebRequest()
+  const { headers } = getRequest()
 
   const session = await auth.api.getSession({ headers })
 

@@ -5,7 +5,7 @@ import { prismaClient } from '@/db'
 import { createServerFn } from '@tanstack/react-start'
 
 export const getInfiniteReels = createServerFn({ method: 'POST' })
-  .validator((data) => {
+  .inputValidator((data) => {
     return z
       .object({
         excludedIds: z.array(z.string()).default([])

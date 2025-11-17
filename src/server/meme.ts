@@ -9,7 +9,7 @@ import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 
 export const getMemeById = createServerFn({ method: 'GET' })
-  .validator((data) => {
+  .inputValidator((data) => {
     return z.string().parse(data)
   })
   .handler(async ({ data: memeId }) => {
@@ -33,7 +33,7 @@ export const getMemeById = createServerFn({ method: 'GET' })
   })
 
 export const getVideoStatusById = createServerFn({ method: 'GET' })
-  .validator((data) => {
+  .inputValidator((data) => {
     return z.number().parse(data)
   })
   .middleware([authUserRequiredMiddleware])
@@ -54,7 +54,7 @@ export const getVideoStatusById = createServerFn({ method: 'GET' })
   })
 
 export const getMemes = createServerFn({ method: 'GET' })
-  .validator(MEMES_FILTERS_SCHEMA)
+  .inputValidator(MEMES_FILTERS_SCHEMA)
   .handler(async ({ data }) => {
     const THIRTY_DAYS_AGO = Date.now() - 30 * 24 * 60 * 60 * 1000
 
@@ -127,13 +127,16 @@ export const getBestMemes = createServerFn({ method: 'GET' }).handler(
 )
 
 export const getRandomMeme = createServerFn({ method: 'GET' })
-  .validator((data) => {
+  .inputValidator((data) => {
     return z.string().optional().parse(data)
   })
   .handler(async ({ data: exceptId }) => {
     const memes = await prismaClient.meme.findMany({
       include: {
         video: true
+      },
+      where: {
+        status: 'PUBLISHED'
       }
     })
 
@@ -146,8 +149,8 @@ export const getRandomMeme = createServerFn({ method: 'GET' })
     return withoutCurrentMeme[randomIndex]
   })
 
-export const shareMeme = createServerFn({ method: 'GET', response: 'raw' })
-  .validator((data) => {
+export const shareMeme = createServerFn({ method: 'GET' })
+  .inputValidator((data) => {
     return z.string().parse(data)
   })
   .handler(async ({ data: memeId }) => {

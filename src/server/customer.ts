@@ -1,7 +1,7 @@
 import { auth } from '@/lib/auth'
 import { getAuthUser } from '@/server/user-auth'
 import { createServerFn } from '@tanstack/react-start'
-import { getWebRequest } from '@tanstack/react-start/server'
+import { getRequest } from '@tanstack/react-start/server'
 
 export const getActiveSubscription = createServerFn({ method: 'GET' }).handler(
   async () => {
@@ -11,7 +11,7 @@ export const getActiveSubscription = createServerFn({ method: 'GET' }).handler(
       return null
     }
 
-    const request = getWebRequest()
+    const request = getRequest()
 
     try {
       const subscriptions = await auth.api.listActiveSubscriptions({

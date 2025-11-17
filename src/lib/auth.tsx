@@ -7,11 +7,11 @@ import { prismaClient } from '@/db'
 import { resendClient } from '@/lib/resend'
 import { stripeClient } from '@/lib/stripe'
 import { stripe } from '@better-auth/stripe'
-import { serverOnly } from '@tanstack/react-start'
+import { createServerOnlyFn } from '@tanstack/react-start'
 import EmailVerification from '../../emails/email-verification'
 import ResetPassword from '../../emails/reset-password'
 
-const getAuthConfig = serverOnly(() => {
+const getAuthConfig = createServerOnlyFn(() => {
   return betterAuth({
     appName: 'Petit Meme',
     basePath: '/api/auth',

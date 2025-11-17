@@ -1,9 +1,13 @@
-import { createServerFileRoute } from '@tanstack/react-start/server'
+import { createFileRoute } from '@tanstack/react-router'
 
-export const ServerRoute = createServerFileRoute('/health').methods({
-  GET: () => {
-    return new Response('Hello, World!', {
-      status: 200
-    })
+export const Route = createFileRoute('/health')({
+  server: {
+    handlers: {
+      GET: () => {
+        return new Response('Hello, World!', {
+          status: 200
+        })
+      }
+    }
   }
 })

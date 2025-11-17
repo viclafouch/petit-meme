@@ -1,13 +1,13 @@
 import { z } from 'zod'
 import { ENV } from '@/constants/env'
-import { serverOnly } from '@tanstack/react-start'
+import { createServerOnlyFn } from '@tanstack/react-start'
 import { fetchWithZod } from './utils'
 
 export const buildBunnyUrl = (pathname: `/${string}`) => {
   return new URL(pathname, `https://${ENV.VITE_BUNNY_HOSTNAME}`).toString()
 }
 
-export const getBunnyHeaders = serverOnly(() => {
+export const getBunnyHeaders = createServerOnlyFn(() => {
   const headers = new Headers()
   headers.set('AccessKey', ENV.BUNNY_ACCESS_KEY)
   headers.set('accept', 'application/json')
@@ -32,7 +32,7 @@ export const buildVideoStreamUrl = (videoId: string) => {
   return buildBunnyUrl(`/${videoId}/playlist.m3u8`)
 }
 
-export const deleteVideo = serverOnly(async (videoId: string) => {
+export const deleteVideo = createServerOnlyFn(async (videoId: string) => {
   return fetchWithZod(
     DEFAULT_RESPONSE_SCHEMA,
     `https://video.bunnycdn.com/library/${ENV.BUNNY_LIBRARY_ID}/videos/${videoId}`,
@@ -51,7 +51,7 @@ const VIDEO_PLAY_DATA_SCHEMA = z.object({
   })
 })
 
-export const getVideoPlayData = serverOnly(async (videoId: string) => {
+export const getVideoPlayData = createServerOnlyFn(async (videoId: string) => {
   return fetchWithZod(
     VIDEO_PLAY_DATA_SCHEMA,
     `https://video.bunnycdn.com/library/${ENV.BUNNY_LIBRARY_ID}/videos/${videoId}/play`,
@@ -66,7 +66,7 @@ const UPLOAD_RESPONSE_SCHEMA = z.object({
   guid: z.string()
 })
 
-export const createVideo = serverOnly(async (title: string) => {
+export const createVideo = createServerOnlyFn(async (title: string) => {
   const { guid: videoId } = await fetchWithZod(
     UPLOAD_RESPONSE_SCHEMA,
     `https://video.bunnycdn.com/library/${ENV.BUNNY_LIBRARY_ID}/videos`,
@@ -83,7 +83,7 @@ export const createVideo = serverOnly(async (title: string) => {
   return { videoId }
 })
 
-export const uploadVideo = serverOnly(
+export const uploadVideo = createServerOnlyFn(
   async (videoId: string, videoBuffer: Buffer) => {
     const headers = getBunnyHeaders()
     headers.set('Content-Type', 'video/mp4')

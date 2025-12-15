@@ -36,4 +36,5 @@ certificates
 backup.json
 
 dist
+.output
 .nitro

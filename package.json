@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
-    "start": "node .output/server/index.mjs",
+    "start": "node --env-file=.env .output/server/index.mjs",
     "prisma:migrate": "npx prisma migrate deploy",
     "prisma:seed": "tsx --env-file=.env prisma/seed.ts",
     "prisma:db-push": "npx prisma db push",
@@ -69,6 +69,7 @@
     "lucide-react": "^0.544.0",
     "media-chrome": "^4.13.1",
     "motion": "^12.23.15",
+    "nitro": "^3.0.1-alpha.1",
     "radix-ui": "^1.4.3",
     "react": "^19",
     "react-dom": "^19",

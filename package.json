@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
-    "start": "node --env-file=.env .output/server/index.mjs",
+    "start": "node .output/server/index.mjs",
     "prisma:migrate": "npx prisma migrate deploy",
     "prisma:seed": "tsx --env-file=.env prisma/seed.ts",
     "prisma:db-push": "npx prisma db push",

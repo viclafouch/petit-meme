@@ -15,10 +15,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
+import type { Category } from '@/db/generated/prisma/client'
 import { getCategoriesListQueryOpts } from '@/lib/queries'
 import { CategoryForm } from '@/routes/admin/categories/-components/category-form'
 import { deleteCategory } from '@/server/categories'
-import type { Category } from '@prisma/client'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 

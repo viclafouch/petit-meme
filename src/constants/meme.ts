@@ -1,7 +1,7 @@
 import type { VariantProps } from 'class-variance-authority'
 import { z } from 'zod'
 import type { badgeVariants } from '@/components/ui/badge'
-import type { MemeStatus as PrismaMemeStatus, Prisma } from '@prisma/client'
+import type { MemeStatus, Prisma } from '@/db/generated/prisma/client'
 
 export const MemeStatusFixed = {
   PENDING: 'PENDING',
@@ -9,10 +9,8 @@ export const MemeStatusFixed = {
   REJECTED: 'REJECTED',
   ARCHIVED: 'ARCHIVED'
 } as const satisfies {
-  [key in PrismaMemeStatus]: key
+  [key in MemeStatus]: key
 }
-
-export type MemeStatus = (typeof MemeStatusFixed)[keyof typeof MemeStatusFixed]
 
 export const MemeStatusMeta = {
   PENDING: {

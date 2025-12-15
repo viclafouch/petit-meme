@@ -1,4 +1,5 @@
 import type { MemesFilters } from '@/constants/meme'
+import type { Meme, Video } from '@/db/generated/prisma/client'
 import { getAdminMemes } from '@/server/admin'
 import { getCategories } from '@/server/categories'
 import { getActiveSubscription } from '@/server/customer'
@@ -12,7 +13,6 @@ import {
 import { getInfiniteReels } from '@/server/reels'
 import { getFavoritesMemes } from '@/server/user'
 import { getAuthUser } from '@/server/user-auth'
-import type { Meme, Video } from '@prisma/client'
 import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
 
 export const getMemesListQueryOpts = (filters: MemesFilters) => {

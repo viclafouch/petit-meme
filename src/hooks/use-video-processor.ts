@@ -1,6 +1,7 @@
 import React from 'react'
 import { toast } from 'sonner'
 import { StudioError, wrapServerFn } from '@/constants/error'
+import type { Meme } from '@/db/generated/prisma/client'
 import { getErrorMessage } from '@/lib/auth-client'
 import { shareMeme } from '@/server/meme'
 import { checkGeneration, incrementGenerationCount } from '@/server/user'
@@ -8,7 +9,6 @@ import { useShowDialog } from '@/stores/dialog.store'
 import type { ProgressEvent } from '@ffmpeg/ffmpeg'
 import { FFmpeg } from '@ffmpeg/ffmpeg'
 import { fetchFile } from '@ffmpeg/util'
-import type { Meme } from '@prisma/client'
 import { useMutation, useSuspenseQuery } from '@tanstack/react-query'
 
 type VideoProcessingOptions = {

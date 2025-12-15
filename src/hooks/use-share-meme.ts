@@ -1,6 +1,6 @@
+import type { Meme } from '@/db/generated/prisma/client'
 import { shareMeme } from '@/server/meme'
 import { shareBlob } from '@/utils/download'
-import type { Meme } from '@prisma/client'
 import { useMutation } from '@tanstack/react-query'
 
 export const useShareMeme = () => {

@@ -7,8 +7,8 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import type { MemeStatus } from '@/constants/meme'
 import { MemeStatusFixed } from '@/constants/meme'
+import type { MemeStatus } from '@/db/generated/prisma/enums'
 
 export const MemesFilterStatus = React.memo(
   ({

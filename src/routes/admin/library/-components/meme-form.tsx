@@ -21,15 +21,14 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import {
-  type MemeStatus,
   MemeStatusFixed,
   MemeStatusMeta,
   type MemeWithCategories
 } from '@/constants/meme'
+import type { Meme, MemeStatus } from '@/db/generated/prisma/client'
 import { getCategoriesListQueryOpts } from '@/lib/queries'
 import { getFieldErrorMessage } from '@/lib/utils'
 import { editMeme, MEME_FORM_SCHEMA } from '@/server/admin'
-import type { Meme } from '@prisma/client'
 import { useForm } from '@tanstack/react-form'
 import { useMutation, useQuery } from '@tanstack/react-query'
 

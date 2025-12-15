@@ -4,10 +4,10 @@ import { AdminTable } from '@/components/admin/admin-table'
 import { PageHeader } from '@/components/page-header'
 import { Badge } from '@/components/ui/badge'
 import { Container } from '@/components/ui/container'
+import type { Category } from '@/db/generated/prisma/client'
 import { AddCategoryButton } from '@/routes/admin/categories/-components/add-category-button'
 import { CategoryDropdown } from '@/routes/admin/categories/-components/category-dropdown'
 import { getCategories } from '@/server/categories'
-import type { Category } from '@prisma/client'
 import { createFileRoute } from '@tanstack/react-router'
 import {
   createColumnHelper,

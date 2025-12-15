@@ -14,12 +14,7 @@ export default [
   ...typescriptConfig,
   ...prettierConfig,
   {
-    ignores: [
-      '**/node_modules/**',
-      '**/.output/**',
-      '**/.nitro/**',
-      '**/.tanstack/**'
-    ]
+    ignores: ['**/node_modules/**', '**/dist/**', '**/db/generated/**']
   },
   {
     rules: {

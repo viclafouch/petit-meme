@@ -1,7 +1,7 @@
 import { toast } from 'sonner'
+import type { Meme } from '@/db/generated/prisma/client'
 import { shareMeme } from '@/server/meme'
 import { downloadBlob } from '@/utils/download'
-import type { Meme } from '@prisma/client'
 import { useMutation } from '@tanstack/react-query'
 
 export const useDownloadMeme = () => {

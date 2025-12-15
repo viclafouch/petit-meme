@@ -12,13 +12,13 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { LoadingButton } from '@/components/ui/loading-button'
+import type { Category } from '@/db/generated/prisma/client'
 import { getFieldErrorMessage } from '@/lib/utils'
 import {
   addCategory,
   CATEGORY_FORM_SCHEMA,
   editCategory
 } from '@/server/categories'
-import type { Category } from '@prisma/client'
 import { useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 

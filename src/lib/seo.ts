@@ -78,8 +78,8 @@ export const buildMemeSeo = (
   })
 
   return seo({
-    title: meme.title,
-    description: `Découvrez et partagez ce mème de "${meme.title}" avec tous vos proches. Petit Meme vous permet de rechercher, partager et découvrir des mèmes...`,
+    title: `Meme de ${meme.title}`,
+    description: `Découvrez, téléchargez et partagez ce mème de "${meme.title}" avec tous vos proches. Télécharger le mème vidéo gratuitement.`,
     keywords: [...meme.keywords, ...categoryKeywords].join(', '),
     image: buildVideoImageUrl(meme.video.bunnyId),
     ...overrideOptions

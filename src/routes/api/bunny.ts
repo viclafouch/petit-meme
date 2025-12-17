@@ -22,7 +22,7 @@ export const Route = createFileRoute('/api/bunny')({
         const data = await request.json()
         const result = WEBHOOK_RESPONSE_SCHEMA.parse(data)
 
-        const videoPlayData = await getVideoPlayData(result.VideoGuid)
+        const videoPlayData = await getVideoPlayData({ data: result.VideoGuid })
 
         try {
           const { meme } = await prismaClient.video.update({

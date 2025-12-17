@@ -1,4 +1,5 @@
 import React from 'react'
+import Hls from 'hls.js'
 import { Download, Share2 } from 'lucide-react'
 import { toast } from 'sonner'
 import {
@@ -30,7 +31,7 @@ import {
   useVideoInitializer,
   useVideoProcessor
 } from '@/hooks/use-video-processor'
-import { buildVideoImageUrl } from '@/lib/bunny'
+import { buildVideoImageUrl, buildVideoStreamUrl } from '@/lib/bunny'
 import { downloadBlob, shareBlob } from '@/utils/download'
 
 export const StudioDialog = ({
@@ -44,6 +45,7 @@ export const StudioDialog = ({
 }) => {
   const { data: ffmpeg } = useVideoInitializer()
   const [text, setText] = React.useState('')
+  const hls = React.useRef<Hls>(null)
   const [textPosition, setTextPosition] = React.useState<'top' | 'bottom'>(
     'top'
   )
@@ -194,8 +196,6 @@ export const StudioDialog = ({
                     className="w-full h-full"
                     src={data.url}
                     playsInline
-                    autoPlay
-                    loop
                     enableFullscreenOnDoubleClick
                     disablePictureInPicture
                     disableRemotePlayback
@@ -212,14 +212,47 @@ export const StudioDialog = ({
                   </VideoPlayerControlBar>
                 </VideoPlayer>
               ) : (
-                <div className="absolute top-0 left-0 w-full h-full bg-muted/50">
-                  <img
-                    src={buildVideoImageUrl(meme.video.bunnyId)}
-                    className="blur-2xl w-full h-full opacity-40 object-cover"
-                    alt={meme.title}
-                    loading="eager"
+                <VideoPlayer className="overflow-hidden w-full h-full max-h-full dark">
+                  <VideoPlayerContent
+                    crossOrigin=""
+                    className="w-full h-full"
+                    enableFullscreenOnDoubleClick
+                    disablePictureInPicture
+                    disableRemotePlayback
+                    preload="auto"
+                    poster={buildVideoImageUrl(meme.video.bunnyId)}
+                    slot="media"
+                    tabIndex={-1}
+                    ref={(element) => {
+                      if (!element) {
+                        return () => {}
+                      }
+
+                      const videoSrc = buildVideoStreamUrl(meme.video.bunnyId)
+
+                      if (
+                        element.canPlayType('application/vnd.apple.mpegurl')
+                      ) {
+                        element.src = videoSrc
+                      } else if (Hls.isSupported()) {
+                        hls.current = new Hls()
+                        hls.current.loadSource(videoSrc)
+                        hls.current.attachMedia(element)
+                      }
+
+                      return () => {
+                        hls.current?.destroy()
+                      }
+                    }}
                   />
-                </div>
+                  <VideoPlayerControlBar>
+                    <VideoPlayerPlayButton />
+                    <VideoPlayerTimeRange />
+                    <VideoPlayerTimeDisplay showDuration />
+                    <VideoPlayerMuteButton />
+                    <VideoPlayerVolumeRange />
+                  </VideoPlayerControlBar>
+                </VideoPlayer>
               )}
             </div>
           </div>

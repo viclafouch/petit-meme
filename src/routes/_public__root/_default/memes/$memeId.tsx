@@ -30,7 +30,11 @@ import { LoadingButton } from '@/components/ui/loading-button'
 import { OverlaySpinner } from '@/components/ui/overlay-spinner'
 import { useDownloadMeme } from '@/hooks/use-download-meme'
 import { useShareMeme } from '@/hooks/use-share-meme'
-import { buildVideoImageUrl, buildVideoStreamUrl } from '@/lib/bunny'
+import {
+  buildVideoImageUrl,
+  buildVideoStreamUrl,
+  getVideoPlayData
+} from '@/lib/bunny'
 import { getMemeByIdQueryOpts } from '@/lib/queries'
 import { matchIsUserAdmin } from '@/lib/role'
 import { buildMemeSeo, buildUrl } from '@/lib/seo'
@@ -48,7 +52,7 @@ import {
 } from '@tanstack/react-router'
 
 const RouteComponent = () => {
-  const { nextRandomMeme } = Route.useLoaderData()
+  const { nextRandomMeme, originalUrl } = Route.useLoaderData()
   const { user } = useRouteContext({ from: '__root__' })
   const hls = React.useRef<Hls>(null)
   const videoRef = React.useRef<HTMLVideoElement>(null)
@@ -178,12 +182,12 @@ const RouteComponent = () => {
                   className="w-full h-full"
                   playsInline
                   autoPlay
-                  loop
                   enableFullscreenOnDoubleClick
                   disablePictureInPicture
                   disableRemotePlayback
                   preload="auto"
                   slot="media"
+                  src={originalUrl}
                   tabIndex={-1}
                   ref={videoRef}
                 />
@@ -272,7 +276,7 @@ const RouteComponent = () => {
               </Button>
             </div>
             {allTags.length > 0 ? (
-              <div className="w-full flex justify-center md:justify-start flex-wrap gap-1.5 max-w-[500px] mx-auto">
+              <div className="w-full flex justify-center md:justify-start flex-wrap gap-1.5 max-w-125 mx-auto">
                 {allTags.map((tag) => {
                   return (
                     <Badge variant="secondary" key={tag}>
@@ -316,6 +320,8 @@ export const Route = createFileRoute('/_public__root/_default/memes/$memeId')({
       getMemeByIdQueryOpts(params.memeId)
     )
 
+    const { originalUrl } = await getVideoPlayData({ data: meme.video.bunnyId })
+
     if (meme.status !== 'PUBLISHED') {
       throw notFound()
     }
@@ -324,6 +330,7 @@ export const Route = createFileRoute('/_public__root/_default/memes/$memeId')({
 
     return {
       meme,
+      originalUrl,
       nextRandomMeme
     }
   },

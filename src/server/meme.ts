@@ -167,7 +167,7 @@ export const shareMeme = createServerFn({ method: 'GET' })
       throw notFound()
     }
 
-    const { originalUrl } = await getVideoPlayData(meme.video.bunnyId)
+    const { originalUrl } = await getVideoPlayData({ data: meme.video.bunnyId })
 
     const response = await fetch(originalUrl)
     const blob = await response.blob()

@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { ENV } from '@/constants/env'
-import { createServerOnlyFn } from '@tanstack/react-start'
+import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 import { fetchWithZod } from './utils'
 
 export const buildBunnyUrl = (pathname: `/${string}`) => {
@@ -43,7 +43,7 @@ export const deleteVideo = createServerOnlyFn(async (videoId: string) => {
   )
 })
 
-const VIDEO_PLAY_DATA_SCHEMA = z.object({
+export const VIDEO_PLAY_DATA_SCHEMA = z.object({
   originalUrl: z.url(),
   video: z.object({
     length: z.number(),
@@ -51,16 +51,20 @@ const VIDEO_PLAY_DATA_SCHEMA = z.object({
   })
 })
 
-export const getVideoPlayData = createServerOnlyFn(async (videoId: string) => {
-  return fetchWithZod(
-    VIDEO_PLAY_DATA_SCHEMA,
-    `https://video.bunnycdn.com/library/${ENV.BUNNY_LIBRARY_ID}/videos/${videoId}/play`,
-    {
-      method: 'GET',
-      headers: getBunnyHeaders()
-    }
-  )
-})
+export const getVideoPlayData = createServerFn({ method: 'POST' })
+  .inputValidator((data) => {
+    return z.string().parse(data)
+  })
+  .handler(async ({ data: videoId }) => {
+    return fetchWithZod(
+      VIDEO_PLAY_DATA_SCHEMA,
+      `https://video.bunnycdn.com/library/${ENV.BUNNY_LIBRARY_ID}/videos/${videoId}/play`,
+      {
+        method: 'GET',
+        headers: getBunnyHeaders()
+      }
+    )
+  })
 
 const UPLOAD_RESPONSE_SCHEMA = z.object({
   guid: z.string()

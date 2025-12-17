@@ -50,7 +50,7 @@ const StarLayer = ({
       animate={{ y: [0, -2000] }}
       transition={transition}
       className={cn(
-        'absolute top-0 left-0 w-full h-[2000px] will-change-transform',
+        'absolute top-0 left-0 w-full h-500 will-change-transform',
         className
       )}
       {...props}
@@ -64,7 +64,7 @@ const StarLayer = ({
         }}
       />
       <div
-        className="absolute bg-transparent rounded-full top-[2000px]"
+        className="absolute bg-transparent rounded-full top-500"
         style={{
           width: `${size}px`,
           height: `${size}px`,
@@ -100,10 +100,11 @@ export const StarsBackground = ({
     <div
       data-slot="stars-background"
       className={cn(
-        'relative size-full overflow-hidden dark:bg-[radial-gradient(ellipse_at_bottom,_#262626_0%,_#000_100%)] bg-white',
+        'relative size-full overflow-hidden dark:bg-[radial-gradient(ellipse_at_bottom,#262626_0%,#000_100%)] bg-white',
         className
       )}
       {...props}
+      role="presentation"
     >
       <motion.div style={{ x: springX, y: springY }} className="max-lg:hidden">
         <StarLayer

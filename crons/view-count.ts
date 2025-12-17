@@ -1,12 +1,14 @@
 /* eslint-disable no-console */
 /* eslint-disable no-await-in-loop */
+import { ENV } from '@/constants/env'
 import { prismaClient } from '@/db'
 import {
   algoliaClient,
   algoliaIndexName,
   memeToAlgoliaRecord
 } from '@/lib/algolia'
-import { getVideoPlayData } from '@/lib/bunny'
+import { getBunnyHeaders, VIDEO_PLAY_DATA_SCHEMA } from '@/lib/bunny'
+import { fetchWithZod } from '@/lib/utils'
 
 const reindexMemes = async () => {
   const memes = await prismaClient.meme.findMany({
@@ -36,7 +38,14 @@ const task = async () => {
   for (const meme of memes) {
     const { bunnyId } = meme.video
 
-    const { video } = await getVideoPlayData(bunnyId)
+    const { video } = await fetchWithZod(
+      VIDEO_PLAY_DATA_SCHEMA,
+      `https://video.bunnycdn.com/library/${ENV.BUNNY_LIBRARY_ID}/videos/${bunnyId}/play`,
+      {
+        method: 'GET',
+        headers: getBunnyHeaders()
+      }
+    )
 
     await prismaClient.meme.update({
       where: {

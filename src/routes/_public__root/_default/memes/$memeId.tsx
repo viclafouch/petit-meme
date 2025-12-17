@@ -256,8 +256,7 @@ const RouteComponent = () => {
                   Télécharger la vidéo
                 </LoadingButton>
               </div>
-              <LoadingButton
-                isLoading={shareMutation.isPending}
+              <Button
                 variant="outline"
                 className="shrink-0 flex-1"
                 onClick={() => {
@@ -266,7 +265,7 @@ const RouteComponent = () => {
               >
                 <Clipboard />
                 Copier le lien
-              </LoadingButton>
+              </Button>
               <Button variant="outline" onClick={goToNextRandomMeme}>
                 <Shuffle />
                 Aléatoire

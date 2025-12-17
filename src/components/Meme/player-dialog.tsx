@@ -112,13 +112,13 @@ export const PlayerDialog = ({
       <motion.div
         layoutId={`${layoutContext}-item-${meme.id}`}
         onLayoutAnimationComplete={playVideo}
-        className="relative w-[800px] max-w-[90vw]"
+        className="relative w-200 max-w-[90vw]"
       >
         <div className="w-full h-full flex flex-col items-center gap-y-4">
           <h3 className="text-center w-full text-balance text-lg font-bold text-primary">
             {meme.title}
           </h3>
-          <div className="bg-muted relative aspect-video w-full overflow-hidden rounded-lg text-sm border border-white/10 z-[1]">
+          <div className="bg-muted relative aspect-video w-full overflow-hidden rounded-lg text-sm border border-white/10 z-1">
             <VideoPlayer className="overflow-hidden w-full h-full max-h-full">
               <VideoPlayerContent
                 crossOrigin=""
@@ -161,7 +161,7 @@ export const PlayerDialog = ({
             </VideoPlayer>
           </div>
           <div
-            className="absolute bg-transparent inset-0 -z-[1]"
+            className="absolute bg-transparent inset-0 -z-1"
             onClick={close}
             role="presentation"
           />
@@ -194,7 +194,6 @@ export const PlayerDialog = ({
               <Button
                 size="lg"
                 variant="secondary"
-                disabled={shareMeme.isPending}
                 className="w-full"
                 onClick={() => {
                   return copyMemeLink()

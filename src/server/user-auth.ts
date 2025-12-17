@@ -22,7 +22,7 @@ export const authUserRequiredMiddleware = createMiddleware({
 
   if (!session) {
     setResponseStatus(401)
-    throw new StudioError('UNAUTHORIZED')
+    throw new StudioError('unauthorized', { code: 'UNAUTHORIZED' })
   }
 
   return next({ context: { user: session.user } })
@@ -37,7 +37,7 @@ export const adminRequiredMiddleware = createMiddleware({
 
     if (user.role !== 'admin') {
       setResponseStatus(401)
-      throw new StudioError('UNAUTHORIZED')
+      throw new StudioError('unauthorized', { code: 'UNAUTHORIZED' })
     }
 
     return next({ context: { user } })

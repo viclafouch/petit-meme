@@ -1,28 +1,32 @@
+import { createSerializationAdapter } from '@tanstack/react-router'
+
 export type StudioErrorCode = 'PREMIUM_REQUIRED' | 'UNAUTHORIZED'
 
 export class StudioError extends Error {
-  public readonly code: StudioErrorCode
+  public code: StudioErrorCode
 
-  constructor(code: StudioErrorCode) {
-    super(code.toLocaleLowerCase())
-    this.code = code
+  constructor(message: string, options: { code: StudioErrorCode }) {
+    super(message)
+
+    Object.setPrototypeOf(this, new.target.prototype)
+
     this.name = this.constructor.name
-    Error.captureStackTrace(this, this.constructor)
+    this.code = options.code
   }
 }
 
-export const wrapServerFn = async <T extends Promise<unknown>>(fn: T) => {
-  try {
-    return await fn
-  } catch (error) {
-    if (
-      error instanceof Error &&
-      error.name === 'StudioError' &&
-      'code' in error
-    ) {
-      throw new StudioError(error.code as StudioErrorCode)
+export const customErrorAdapter = createSerializationAdapter({
+  key: 'custom-error',
+  test: (value) => {
+    return value instanceof StudioError
+  },
+  toSerializable: ({ message, code }) => {
+    return {
+      message,
+      code
     }
-
-    throw error
+  },
+  fromSerializable: ({ message, code }) => {
+    return new StudioError(message, { code })
   }
-}
+})

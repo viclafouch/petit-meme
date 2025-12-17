@@ -69,7 +69,7 @@ export const checkGeneration = createServerFn({ method: 'POST' })
       !matchIsUserAdmin(context.user)
     ) {
       setResponseStatus(403)
-      throw new StudioError('PREMIUM_REQUIRED')
+      throw new StudioError('auth', { code: 'UNAUTHORIZED' })
     }
 
     return { result: 'ok' } as const
@@ -100,7 +100,7 @@ const toggleBookmark = createServerOnlyFn(
 
       if (!activeSubscription) {
         setResponseStatus(403)
-        throw new StudioError('PREMIUM_REQUIRED')
+        throw new StudioError('premium required', { code: 'PREMIUM_REQUIRED' })
       }
     }
 

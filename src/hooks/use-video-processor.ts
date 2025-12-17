@@ -1,6 +1,6 @@
 import React from 'react'
 import { toast } from 'sonner'
-import { StudioError, wrapServerFn } from '@/constants/error'
+import { StudioError } from '@/constants/error'
 import type { Meme } from '@/db/generated/prisma/client'
 import { getErrorMessage } from '@/lib/auth-client'
 import { shareMeme } from '@/server/meme'
@@ -155,7 +155,7 @@ export const useVideoProcessor = (
       ffmpeg.on('progress', progressSubscription)
     },
     mutationFn: async ({ meme, ...restOptions }: MutationBody) => {
-      await wrapServerFn(checkGeneration())
+      await checkGeneration()
       const response = await shareMeme({ data: meme.id })
       const videoBlob = await response.blob()
       const blob = await addTextToVideo(ffmpeg, videoBlob, restOptions)

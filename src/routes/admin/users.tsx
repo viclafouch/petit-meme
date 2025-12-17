@@ -12,7 +12,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import { wrapServerFn } from '@/constants/error'
 import { authClient } from '@/lib/auth-client'
 import { getListUsers, removeUser } from '@/server/admin'
 import { useMutation } from '@tanstack/react-query'
@@ -53,7 +52,7 @@ const DropdownMenuUser = ({ user }: { user: UserWithRole }) => {
 
   const deleteUserMutation = useMutation({
     mutationFn: async () => {
-      const promise = wrapServerFn(removeUser({ data: user.id }))
+      const promise = removeUser({ data: user.id })
       toast.promise(promise, {
         loading: 'Suppression en cours...',
         success: 'Utilisateur supprimé avec succès'

@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/kibo-ui/video-player'
 import type { MemeWithVideo } from '@/constants/meme'
 import { useDownloadMeme } from '@/hooks/use-download-meme'
+import { useRegisterMemeView } from '@/hooks/use-register-meme-view'
 import { useShareMeme } from '@/hooks/use-share-meme'
 import { buildVideoImageUrl, buildVideoStreamUrl } from '@/lib/bunny'
 import { buildUrl } from '@/lib/seo'
@@ -40,6 +41,14 @@ export const PlayerDialog = ({
   const memeLink = useLinkProps({
     to: '/memes/$memeId',
     params: { memeId: meme.id }
+  })
+
+  useRegisterMemeView({
+    memeId: meme.id,
+    videoRef,
+    ratio: 0.3,
+    minMs: 2500,
+    maxMs: 12000
   })
 
   const copyMemeLink = async () => {
@@ -84,10 +93,26 @@ export const PlayerDialog = ({
   }
 
   React.useEffect(() => {
+    const video = videoRef.current
+
+    if (!video) {
+      return () => {}
+    }
+
+    const videoSrc = buildVideoStreamUrl(meme.video.bunnyId)
+
+    if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = videoSrc
+    } else if (Hls.isSupported()) {
+      hls.current = new Hls()
+      hls.current.loadSource(videoSrc)
+      hls.current.attachMedia(video)
+    }
+
     return () => {
       hls.current?.destroy()
     }
-  }, [])
+  }, [meme.id])
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 overflow-hidden dark">
@@ -125,31 +150,12 @@ export const PlayerDialog = ({
                 poster={buildVideoImageUrl(meme.video.bunnyId)}
                 className="w-full h-full"
                 playsInline
-                loop
                 enableFullscreenOnDoubleClick
                 disablePictureInPicture
                 disableRemotePlayback
                 preload="auto"
                 slot="media"
-                ref={(element) => {
-                  videoRef.current = element
-
-                  if (!element) {
-                    return () => {}
-                  }
-
-                  const videoSrc = buildVideoStreamUrl(meme.video.bunnyId)
-
-                  if (element.canPlayType('application/vnd.apple.mpegurl')) {
-                    element.src = videoSrc
-                  } else if (Hls.isSupported() && !hls.current) {
-                    hls.current = new Hls()
-                    hls.current.loadSource(videoSrc)
-                    hls.current.attachMedia(element)
-                  }
-
-                  return () => {}
-                }}
+                ref={videoRef}
               />
               <VideoPlayerControlBar>
                 <VideoPlayerPlayButton />

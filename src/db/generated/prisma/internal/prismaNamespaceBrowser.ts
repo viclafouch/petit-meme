@@ -56,6 +56,7 @@ export const ModelName = {
   MemeCategory: 'MemeCategory',
   Video: 'Video',
   Meme: 'Meme',
+  MemeViewDaily: 'MemeViewDaily',
   User: 'User',
   Session: 'Session',
   Subscription: 'Subscription',
@@ -134,6 +135,18 @@ export const MemeScalarFieldEnum = {
 } as const
 
 export type MemeScalarFieldEnum = (typeof MemeScalarFieldEnum)[keyof typeof MemeScalarFieldEnum]
+
+
+export const MemeViewDailyScalarFieldEnum = {
+  id: 'id',
+  memeId: 'memeId',
+  viewerKey: 'viewerKey',
+  day: 'day',
+  watchMs: 'watchMs',
+  createdAt: 'createdAt'
+} as const
+
+export type MemeViewDailyScalarFieldEnum = (typeof MemeViewDailyScalarFieldEnum)[keyof typeof MemeViewDailyScalarFieldEnum]
 
 
 export const UserScalarFieldEnum = {
@@ -286,6 +299,15 @@ export const MemeOrderByRelevanceFieldEnum = {
 } as const
 
 export type MemeOrderByRelevanceFieldEnum = (typeof MemeOrderByRelevanceFieldEnum)[keyof typeof MemeOrderByRelevanceFieldEnum]
+
+
+export const MemeViewDailyOrderByRelevanceFieldEnum = {
+  id: 'id',
+  memeId: 'memeId',
+  viewerKey: 'viewerKey'
+} as const
+
+export type MemeViewDailyOrderByRelevanceFieldEnum = (typeof MemeViewDailyOrderByRelevanceFieldEnum)[keyof typeof MemeViewDailyOrderByRelevanceFieldEnum]
 
 
 export const UserOrderByRelevanceFieldEnum = {

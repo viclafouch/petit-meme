@@ -43,6 +43,11 @@ export type Video = Prisma.VideoModel
  */
 export type Meme = Prisma.MemeModel
 /**
+ * Model MemeViewDaily
+ * 
+ */
+export type MemeViewDaily = Prisma.MemeViewDailyModel
+/**
  * Model User
  * 
  */

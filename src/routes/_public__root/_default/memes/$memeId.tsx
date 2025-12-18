@@ -29,6 +29,7 @@ import {
 import { LoadingButton } from '@/components/ui/loading-button'
 import { OverlaySpinner } from '@/components/ui/overlay-spinner'
 import { useDownloadMeme } from '@/hooks/use-download-meme'
+import { useRegisterMemeView } from '@/hooks/use-register-meme-view'
 import { useShareMeme } from '@/hooks/use-share-meme'
 import {
   buildVideoImageUrl,
@@ -65,6 +66,14 @@ const RouteComponent = () => {
   const memeLink = useLinkProps({
     to: '/memes/$memeId',
     params: { memeId: meme.id }
+  })
+
+  useRegisterMemeView({
+    memeId: meme.id,
+    videoRef,
+    ratio: 0.3,
+    minMs: 2500,
+    maxMs: 12000
   })
 
   const copyMemeLink = async () => {

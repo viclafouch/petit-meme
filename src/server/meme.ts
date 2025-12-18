@@ -7,6 +7,7 @@ import { getVideoPlayData } from '@/lib/bunny'
 import { authUserRequiredMiddleware } from '@/server/user-auth'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
+import { getCookie, setCookie } from '@tanstack/react-start/server'
 
 export const getMemeById = createServerFn({ method: 'GET' })
   .inputValidator((data) => {
@@ -177,6 +178,62 @@ export const shareMeme = createServerFn({ method: 'GET' })
         'Content-Type': blob.type,
         'Cache-Control': 'no-cache',
         Connection: 'keep-alive'
+      }
+    })
+  })
+
+export const registerMemeView = createServerFn({ method: 'POST' })
+  .inputValidator((data) => {
+    return z
+      .object({
+        memeId: z.string(),
+        watchMs: z
+          .number()
+          .int()
+          .min(0)
+          .max(60 * 60 * 1000)
+      })
+      .parse(data)
+  })
+  .handler(async ({ data }) => {
+    const { memeId, watchMs } = data
+
+    let viewerKey = getCookie('anonId')
+
+    if (!viewerKey) {
+      viewerKey = crypto.randomUUID()
+
+      setCookie('anonId', viewerKey, {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 365
+      })
+    }
+
+    const now = new Date()
+    const day = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+    )
+
+    await prismaClient.$transaction(async (tx) => {
+      const result = await tx.memeViewDaily.createMany({
+        data: [
+          {
+            memeId,
+            viewerKey,
+            day,
+            watchMs
+          }
+        ],
+        skipDuplicates: true
+      })
+
+      if (result.count === 1) {
+        await tx.meme.update({
+          where: { id: memeId },
+          data: { viewCount: { increment: 1 } }
+        })
       }
     })
   })

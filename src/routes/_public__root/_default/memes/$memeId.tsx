@@ -296,9 +296,11 @@ const RouteComponent = () => {
               </div>
             ) : null}
             <div className="flex flex-col gap-y-1 text-center md:text-left">
-              <span className="text-muted-foreground text-xs">
-                Ajouté le {formatDate(meme.createdAt, 'dd/MM/yyyy')}
-              </span>
+              {meme.publishedAt ? (
+                <span className="text-muted-foreground text-xs">
+                  Ajouté le {formatDate(meme.publishedAt, 'dd/MM/yyyy')}
+                </span>
+              ) : null}
               <span className="text-muted-foreground text-xs">
                 {meme.viewCount} vues
               </span>

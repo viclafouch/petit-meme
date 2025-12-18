@@ -50,6 +50,7 @@ const createMemeFromTwitterUrl = async (url: string, title: string) => {
       title,
       tweetUrl: tweet.url,
       status: 'PUBLISHED',
+      publishedAt: new Date(),
       video: {
         create: {
           duration: 0,

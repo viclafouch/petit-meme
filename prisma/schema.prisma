@@ -69,6 +69,7 @@ model Meme {
   keywords     String[]       @default([])
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
+  publishedAt  DateTime?
   video        Video          @relation(fields: [videoId], references: [id], onDelete: Cascade)
   bookmarkedBy UserBookmark[]
   categories   MemeCategory[]

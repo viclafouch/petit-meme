@@ -20,6 +20,7 @@ export function memeToAlgoliaRecord(meme: MemeWithVideo & MemeWithCategories) {
     categorySlugs: meme.categories.map(({ category }) => {
       return category.slug
     }),
-    createdAtTime: meme.createdAt.getTime()
+    createdAtTime: meme.createdAt.getTime(),
+    publishedAtTime: meme.publishedAt?.getTime()
   }
 }

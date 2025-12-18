@@ -24,7 +24,7 @@ export const getInfiniteReels = createServerFn({ method: 'POST' })
         'viewCount', m."viewCount",
         'tweetUrl', m."tweetUrl",
         'keywords', m."keywords",
-        'createdAt', m."createdAt",
+        'publishedAt', m."publishedAt",
         'updatedAt', m."updatedAt",
         'status', m."status",
         'submittedBy', m."submittedBy",

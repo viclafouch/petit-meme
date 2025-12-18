@@ -130,6 +130,7 @@ export const MemeScalarFieldEnum = {
   keywords: 'keywords',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  publishedAt: 'publishedAt',
   status: 'status',
   submittedBy: 'submittedBy'
 } as const

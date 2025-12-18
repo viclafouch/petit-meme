@@ -71,7 +71,7 @@ export const getMemes = createServerFn({ method: 'GET' })
           const filters: string[] = [`status:${MemeStatusFixed.PUBLISHED}`]
 
           if (data.category === 'news') {
-            filters.push(`createdAtTime >= ${THIRTY_DAYS_AGO}`)
+            filters.push(`publishedAtTime >= ${THIRTY_DAYS_AGO}`)
           } else if (data.category) {
             filters.push(`categorySlugs:${data.category}`)
           }
@@ -98,7 +98,7 @@ export const getRecentCountMemes = createServerFn({ method: 'GET' }).handler(
       searchParams: {
         filters: [
           `status:${MemeStatusFixed.PUBLISHED}`,
-          `createdAtTime >= ${THIRTY_DAYS_AGO}`
+          `publishedAtTime >= ${THIRTY_DAYS_AGO}`
         ].join(' AND '),
         hitsPerPage: 0
       }

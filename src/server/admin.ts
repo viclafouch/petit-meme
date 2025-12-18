@@ -75,6 +75,14 @@ export const editMeme = createServerFn({ method: 'POST' })
       throw new Error('Meme not found')
     }
 
+    let { publishedAt } = meme
+
+    if (values.status === 'PUBLISHED' && meme.status !== 'PUBLISHED') {
+      publishedAt = new Date()
+    } else if (values.status !== 'PUBLISHED') {
+      publishedAt = null
+    }
+
     const memeUpdated = await prismaClient.meme.update({
       where: {
         id: values.id
@@ -82,6 +90,7 @@ export const editMeme = createServerFn({ method: 'POST' })
       data: {
         title: values.title,
         status: values.status,
+        publishedAt,
         categories: {
           deleteMany: {},
           create: values.categoryIds.map((categoryId) => {

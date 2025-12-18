@@ -11,6 +11,7 @@
     "prisma:seed": "tsx --env-file=.env prisma/seed.ts",
     "prisma:db-push": "npx prisma db push",
     "prisma:reset-db": "npx prisma migrate reset",
+    "crons:sync-aloglia": "vite-node crons/sync-algolia.ts",
     "crons:update-title-bunny": "vite-node crons/update-title-bunny.ts",
     "postinstall": "prisma generate",
     "lint": "npx tsc && eslint",

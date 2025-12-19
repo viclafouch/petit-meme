@@ -127,6 +127,7 @@ export const MemeScalarFieldEnum = {
   videoId: 'videoId',
   viewCount: 'viewCount',
   tweetUrl: 'tweetUrl',
+  description: 'description',
   keywords: 'keywords',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -295,6 +296,7 @@ export const MemeOrderByRelevanceFieldEnum = {
   id: 'id',
   title: 'title',
   tweetUrl: 'tweetUrl',
+  description: 'description',
   keywords: 'keywords',
   submittedBy: 'submittedBy'
 } as const

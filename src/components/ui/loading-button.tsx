@@ -6,9 +6,13 @@ import { Button } from '@/components/ui/button'
 export const LoadingButton = ({
   children,
   disabled,
+  loadingText = 'Chargement...',
   isLoading = false,
   ...props
-}: React.ComponentProps<typeof Button> & { isLoading: boolean }) => {
+}: React.ComponentProps<typeof Button> & {
+  isLoading: boolean
+  loadingText?: string
+}) => {
   const showSpinner = useSpinDelay(isLoading, { delay: 500, minDuration: 200 })
 
   return (
@@ -16,7 +20,7 @@ export const LoadingButton = ({
       {showSpinner ? (
         <>
           <Loader2Icon className="animate-spin" />
-          Chargement...
+          {loadingText}
         </>
       ) : (
         children

@@ -1,5 +1,5 @@
 import React from 'react'
-import { X } from 'lucide-react'
+import { Stars, X } from 'lucide-react'
 import { toast } from 'sonner'
 import type { z } from 'zod'
 import { Badge } from '@/components/ui/badge'
@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 import {
   MemeStatusFixed,
   MemeStatusMeta,
@@ -29,6 +30,8 @@ import type { Meme, MemeStatus } from '@/db/generated/prisma/client'
 import { getCategoriesListQueryOpts } from '@/lib/queries'
 import { getFieldErrorMessage } from '@/lib/utils'
 import { editMeme, MEME_FORM_SCHEMA } from '@/server/admin'
+import { generateMemeContent } from '@/server/ai'
+import { removeDuplicates } from '@/utils/array'
 import { useForm } from '@tanstack/react-form'
 import { useMutation, useQuery } from '@tanstack/react-query'
 
@@ -83,6 +86,7 @@ export const MemeForm = ({
       keywords: meme.keywords,
       tweetUrl: meme.tweetUrl,
       title: meme.title,
+      description: meme.description,
       status: meme.status,
       categoryIds: meme.categories.map((category) => {
         return category.categoryId
@@ -100,6 +104,7 @@ export const MemeForm = ({
         title: value.title,
         keywords: value.keywords,
         tweetUrl: value.tweetUrl,
+        description: value.description,
         status: value.status,
         id: meme.id,
         categoryIds: value.categoryIds
@@ -110,24 +115,38 @@ export const MemeForm = ({
   const handleAddKeyword = () => {
     if (keywordValue.trim()) {
       form.setFieldValue('keywords', (prevState) => {
-        return [
-          ...new Set([
-            ...prevState,
-            ...keywordValue
-              .split(',')
-              .map((keyword) => {
-                return keyword.trim().toLowerCase()
-              })
-              .filter((word) => {
-                return Boolean(word.trim())
-              })
-          ])
-        ]
+        return removeDuplicates([
+          ...prevState,
+          ...keywordValue
+            .split(',')
+            .map((keyword) => {
+              return keyword.trim().toLowerCase()
+            })
+            .filter((word) => {
+              return Boolean(word.trim())
+            })
+        ])
       })
     }
 
     setKeywordValue('')
   }
+
+  const generateContentMutation = useMutation({
+    mutationKey: ['generate-content'],
+    mutationFn: () => {
+      return generateMemeContent({ data: { memeId: meme.id } })
+    },
+    onSuccess: (result) => {
+      form.setFieldValue('description', result.description)
+      form.setFieldValue('keywords', (prevValue) => {
+        return removeDuplicates([...prevValue, ...result.keywords])
+      })
+    },
+    onError: (error) => {
+      toast.error(error.message)
+    }
+  })
 
   const handleRemoveKeyword = (keywordIndex: number) => {
     form.setFieldValue('keywords', (prevState) => {
@@ -175,39 +194,42 @@ export const MemeForm = ({
           }}
         />
         <form.Field
-          name="status"
+          name="description"
           children={(field) => {
             const errorMessage = getFieldErrorMessage({ field })
 
             return (
               <FormItem error={errorMessage}>
-                <FormLabel>Statut</FormLabel>
+                <FormLabel>Description</FormLabel>
                 <FormControl>
-                  <Select
+                  <Textarea
+                    required
+                    name={field.name}
+                    onBlur={field.handleBlur}
                     value={field.state.value}
-                    onValueChange={(value) => {
-                      return field.handleChange(value as MemeStatus)
+                    onChange={(event) => {
+                      return field.handleChange(event.target.value)
+                    }}
+                  />
+                </FormControl>
+                <div className="flex justify-end gap-2 items-center">
+                  <span className="text-xs text-muted-foreground">
+                    {field.state.value.length}/200 caractères
+                  </span>
+                  <LoadingButton
+                    isLoading={generateContentMutation.isPending}
+                    loadingText="Génération en cours..."
+                    size="sm"
+                    type="button"
+                    variant="default"
+                    onClick={() => {
+                      return generateContentMutation.mutate()
                     }}
                   >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Sélectionnez un statut" />
-                    </SelectTrigger>
-                    <SelectContent className="w-full">
-                      <SelectItem value={MemeStatusFixed.PENDING}>
-                        {MemeStatusMeta.PENDING.label}
-                      </SelectItem>
-                      <SelectItem value={MemeStatusFixed.PUBLISHED}>
-                        {MemeStatusMeta.PUBLISHED.label}
-                      </SelectItem>
-                      <SelectItem value={MemeStatusFixed.ARCHIVED}>
-                        {MemeStatusMeta.ARCHIVED.label}
-                      </SelectItem>
-                      <SelectItem value={MemeStatusFixed.REJECTED}>
-                        {MemeStatusMeta.REJECTED.label}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
+                    <Stars />
+                    Générer une description
+                  </LoadingButton>
+                </div>
                 <FormMessage />
               </FormItem>
             )
@@ -264,6 +286,45 @@ export const MemeForm = ({
                     })}
                   </div>
                 ) : null}
+                <FormMessage />
+              </FormItem>
+            )
+          }}
+        />
+        <form.Field
+          name="status"
+          children={(field) => {
+            const errorMessage = getFieldErrorMessage({ field })
+
+            return (
+              <FormItem error={errorMessage}>
+                <FormLabel>Statut</FormLabel>
+                <FormControl>
+                  <Select
+                    value={field.state.value}
+                    onValueChange={(value) => {
+                      return field.handleChange(value as MemeStatus)
+                    }}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Sélectionnez un statut" />
+                    </SelectTrigger>
+                    <SelectContent className="w-full">
+                      <SelectItem value={MemeStatusFixed.PENDING}>
+                        {MemeStatusMeta.PENDING.label}
+                      </SelectItem>
+                      <SelectItem value={MemeStatusFixed.PUBLISHED}>
+                        {MemeStatusMeta.PUBLISHED.label}
+                      </SelectItem>
+                      <SelectItem value={MemeStatusFixed.ARCHIVED}>
+                        {MemeStatusMeta.ARCHIVED.label}
+                      </SelectItem>
+                      <SelectItem value={MemeStatusFixed.REJECTED}>
+                        {MemeStatusMeta.REJECTED.label}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )

@@ -69,6 +69,14 @@ export const seo = ({
   return tags
 }
 
+const buildDescription = (meme: MemeWithVideo & MemeWithCategories) => {
+  if (meme.description) {
+    return meme.description
+  }
+
+  return `Découvrez, téléchargez et partagez ce mème de "${meme.title}" avec tous vos proches. Télécharger le mème vidéo gratuitement.`
+}
+
 export const buildMemeSeo = (
   meme: MemeWithVideo & MemeWithCategories,
   overrideOptions: Partial<Parameters<typeof seo>[0]> = {}
@@ -77,11 +85,13 @@ export const buildMemeSeo = (
     return category.category.keywords
   })
 
+  const description = buildDescription(meme)
+
   return seo({
     title: `Meme de ${meme.title}`,
-    description: `Découvrez, téléchargez et partagez ce mème de "${meme.title}" avec tous vos proches. Télécharger le mème vidéo gratuitement.`,
     keywords: [...meme.keywords, ...categoryKeywords].join(', '),
     image: buildVideoImageUrl(meme.video.bunnyId),
+    description,
     ...overrideOptions
   })
 }

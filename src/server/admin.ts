@@ -44,6 +44,7 @@ export const getListUsers = createServerFn({ method: 'GET' }).handler(
 export const MEME_FORM_SCHEMA = z.object({
   title: z.string().min(3),
   keywords: z.array(z.string()),
+  description: z.string().max(200),
   categoryIds: z.array(z.string()),
   status: z.enum(MemeStatusFixed),
   tweetUrl: TWEET_LINK_SCHEMA.nullable().or(
@@ -90,6 +91,7 @@ export const editMeme = createServerFn({ method: 'POST' })
       data: {
         title: values.title,
         status: values.status,
+        description: values.description,
         publishedAt,
         categories: {
           deleteMany: {},

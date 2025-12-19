@@ -42,6 +42,7 @@ export type MemeMinAggregateOutputType = {
   videoId: number | null
   viewCount: number | null
   tweetUrl: string | null
+  description: string | null
   createdAt: Date | null
   updatedAt: Date | null
   publishedAt: Date | null
@@ -55,6 +56,7 @@ export type MemeMaxAggregateOutputType = {
   videoId: number | null
   viewCount: number | null
   tweetUrl: string | null
+  description: string | null
   createdAt: Date | null
   updatedAt: Date | null
   publishedAt: Date | null
@@ -68,6 +70,7 @@ export type MemeCountAggregateOutputType = {
   videoId: number
   viewCount: number
   tweetUrl: number
+  description: number
   keywords: number
   createdAt: number
   updatedAt: number
@@ -94,6 +97,7 @@ export type MemeMinAggregateInputType = {
   videoId?: true
   viewCount?: true
   tweetUrl?: true
+  description?: true
   createdAt?: true
   updatedAt?: true
   publishedAt?: true
@@ -107,6 +111,7 @@ export type MemeMaxAggregateInputType = {
   videoId?: true
   viewCount?: true
   tweetUrl?: true
+  description?: true
   createdAt?: true
   updatedAt?: true
   publishedAt?: true
@@ -120,6 +125,7 @@ export type MemeCountAggregateInputType = {
   videoId?: true
   viewCount?: true
   tweetUrl?: true
+  description?: true
   keywords?: true
   createdAt?: true
   updatedAt?: true
@@ -221,6 +227,7 @@ export type MemeGroupByOutputType = {
   videoId: number
   viewCount: number
   tweetUrl: string | null
+  description: string
   keywords: string[]
   createdAt: Date
   updatedAt: Date
@@ -258,6 +265,7 @@ export type MemeWhereInput = {
   videoId?: Prisma.IntFilter<"Meme"> | number
   viewCount?: Prisma.IntFilter<"Meme"> | number
   tweetUrl?: Prisma.StringNullableFilter<"Meme"> | string | null
+  description?: Prisma.StringFilter<"Meme"> | string
   keywords?: Prisma.StringNullableListFilter<"Meme">
   createdAt?: Prisma.DateTimeFilter<"Meme"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Meme"> | Date | string
@@ -277,6 +285,7 @@ export type MemeOrderByWithRelationInput = {
   videoId?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
   tweetUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  description?: Prisma.SortOrder
   keywords?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -300,6 +309,7 @@ export type MemeWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.MemeWhereInput | Prisma.MemeWhereInput[]
   title?: Prisma.StringFilter<"Meme"> | string
   viewCount?: Prisma.IntFilter<"Meme"> | number
+  description?: Prisma.StringFilter<"Meme"> | string
   keywords?: Prisma.StringNullableListFilter<"Meme">
   createdAt?: Prisma.DateTimeFilter<"Meme"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Meme"> | Date | string
@@ -319,6 +329,7 @@ export type MemeOrderByWithAggregationInput = {
   videoId?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
   tweetUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  description?: Prisma.SortOrder
   keywords?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -341,6 +352,7 @@ export type MemeScalarWhereWithAggregatesInput = {
   videoId?: Prisma.IntWithAggregatesFilter<"Meme"> | number
   viewCount?: Prisma.IntWithAggregatesFilter<"Meme"> | number
   tweetUrl?: Prisma.StringNullableWithAggregatesFilter<"Meme"> | string | null
+  description?: Prisma.StringWithAggregatesFilter<"Meme"> | string
   keywords?: Prisma.StringNullableListFilter<"Meme">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Meme"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Meme"> | Date | string
@@ -354,6 +366,7 @@ export type MemeCreateInput = {
   title: string
   viewCount?: number
   tweetUrl?: string | null
+  description?: string
   keywords?: Prisma.MemeCreatekeywordsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -372,6 +385,7 @@ export type MemeUncheckedCreateInput = {
   videoId: number
   viewCount?: number
   tweetUrl?: string | null
+  description?: string
   keywords?: Prisma.MemeCreatekeywordsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -388,6 +402,7 @@ export type MemeUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   tweetUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   keywords?: Prisma.MemeUpdatekeywordsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -406,6 +421,7 @@ export type MemeUncheckedUpdateInput = {
   videoId?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   tweetUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   keywords?: Prisma.MemeUpdatekeywordsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -423,6 +439,7 @@ export type MemeCreateManyInput = {
   videoId: number
   viewCount?: number
   tweetUrl?: string | null
+  description?: string
   keywords?: Prisma.MemeCreatekeywordsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -436,6 +453,7 @@ export type MemeUpdateManyMutationInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   tweetUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   keywords?: Prisma.MemeUpdatekeywordsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -449,6 +467,7 @@ export type MemeUncheckedUpdateManyInput = {
   videoId?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   tweetUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   keywords?: Prisma.MemeUpdatekeywordsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -479,6 +498,7 @@ export type MemeCountOrderByAggregateInput = {
   videoId?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
   tweetUrl?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   keywords?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -498,6 +518,7 @@ export type MemeMaxOrderByAggregateInput = {
   videoId?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
   tweetUrl?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
@@ -511,6 +532,7 @@ export type MemeMinOrderByAggregateInput = {
   videoId?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
   tweetUrl?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
@@ -675,6 +697,7 @@ export type MemeCreateWithoutBookmarkedByInput = {
   title: string
   viewCount?: number
   tweetUrl?: string | null
+  description?: string
   keywords?: Prisma.MemeCreatekeywordsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -692,6 +715,7 @@ export type MemeUncheckedCreateWithoutBookmarkedByInput = {
   videoId: number
   viewCount?: number
   tweetUrl?: string | null
+  description?: string
   keywords?: Prisma.MemeCreatekeywordsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -723,6 +747,7 @@ export type MemeUpdateWithoutBookmarkedByInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   tweetUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   keywords?: Prisma.MemeUpdatekeywordsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -740,6 +765,7 @@ export type MemeUncheckedUpdateWithoutBookmarkedByInput = {
   videoId?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   tweetUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   keywords?: Prisma.MemeUpdatekeywordsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -755,6 +781,7 @@ export type MemeCreateWithoutCategoriesInput = {
   title: string
   viewCount?: number
   tweetUrl?: string | null
+  description?: string
   keywords?: Prisma.MemeCreatekeywordsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -772,6 +799,7 @@ export type MemeUncheckedCreateWithoutCategoriesInput = {
   videoId: number
   viewCount?: number
   tweetUrl?: string | null
+  description?: string
   keywords?: Prisma.MemeCreatekeywordsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -803,6 +831,7 @@ export type MemeUpdateWithoutCategoriesInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   tweetUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   keywords?: Prisma.MemeUpdatekeywordsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -820,6 +849,7 @@ export type MemeUncheckedUpdateWithoutCategoriesInput = {
   videoId?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   tweetUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   keywords?: Prisma.MemeUpdatekeywordsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -835,6 +865,7 @@ export type MemeCreateWithoutVideoInput = {
   title: string
   viewCount?: number
   tweetUrl?: string | null
+  description?: string
   keywords?: Prisma.MemeCreatekeywordsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -851,6 +882,7 @@ export type MemeUncheckedCreateWithoutVideoInput = {
   title: string
   viewCount?: number
   tweetUrl?: string | null
+  description?: string
   keywords?: Prisma.MemeCreatekeywordsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -883,6 +915,7 @@ export type MemeUpdateWithoutVideoInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   tweetUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   keywords?: Prisma.MemeUpdatekeywordsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -899,6 +932,7 @@ export type MemeUncheckedUpdateWithoutVideoInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   tweetUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   keywords?: Prisma.MemeUpdatekeywordsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -915,6 +949,7 @@ export type MemeCreateWithoutViewsDailyInput = {
   title: string
   viewCount?: number
   tweetUrl?: string | null
+  description?: string
   keywords?: Prisma.MemeCreatekeywordsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -932,6 +967,7 @@ export type MemeUncheckedCreateWithoutViewsDailyInput = {
   videoId: number
   viewCount?: number
   tweetUrl?: string | null
+  description?: string
   keywords?: Prisma.MemeCreatekeywordsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -963,6 +999,7 @@ export type MemeUpdateWithoutViewsDailyInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   tweetUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   keywords?: Prisma.MemeUpdatekeywordsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -980,6 +1017,7 @@ export type MemeUncheckedUpdateWithoutViewsDailyInput = {
   videoId?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   tweetUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   keywords?: Prisma.MemeUpdatekeywordsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -995,6 +1033,7 @@ export type MemeCreateWithoutSubmitterInput = {
   title: string
   viewCount?: number
   tweetUrl?: string | null
+  description?: string
   keywords?: Prisma.MemeCreatekeywordsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1012,6 +1051,7 @@ export type MemeUncheckedCreateWithoutSubmitterInput = {
   videoId: number
   viewCount?: number
   tweetUrl?: string | null
+  description?: string
   keywords?: Prisma.MemeCreatekeywordsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1057,6 +1097,7 @@ export type MemeScalarWhereInput = {
   videoId?: Prisma.IntFilter<"Meme"> | number
   viewCount?: Prisma.IntFilter<"Meme"> | number
   tweetUrl?: Prisma.StringNullableFilter<"Meme"> | string | null
+  description?: Prisma.StringFilter<"Meme"> | string
   keywords?: Prisma.StringNullableListFilter<"Meme">
   createdAt?: Prisma.DateTimeFilter<"Meme"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Meme"> | Date | string
@@ -1071,6 +1112,7 @@ export type MemeCreateManySubmitterInput = {
   videoId: number
   viewCount?: number
   tweetUrl?: string | null
+  description?: string
   keywords?: Prisma.MemeCreatekeywordsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1083,6 +1125,7 @@ export type MemeUpdateWithoutSubmitterInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   tweetUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   keywords?: Prisma.MemeUpdatekeywordsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1100,6 +1143,7 @@ export type MemeUncheckedUpdateWithoutSubmitterInput = {
   videoId?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   tweetUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   keywords?: Prisma.MemeUpdatekeywordsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1116,6 +1160,7 @@ export type MemeUncheckedUpdateManyWithoutSubmitterInput = {
   videoId?: Prisma.IntFieldUpdateOperationsInput | number
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   tweetUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   keywords?: Prisma.MemeUpdatekeywordsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1178,6 +1223,7 @@ export type MemeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   videoId?: boolean
   viewCount?: boolean
   tweetUrl?: boolean
+  description?: boolean
   keywords?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1198,6 +1244,7 @@ export type MemeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   videoId?: boolean
   viewCount?: boolean
   tweetUrl?: boolean
+  description?: boolean
   keywords?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1214,6 +1261,7 @@ export type MemeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   videoId?: boolean
   viewCount?: boolean
   tweetUrl?: boolean
+  description?: boolean
   keywords?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1230,6 +1278,7 @@ export type MemeSelectScalar = {
   videoId?: boolean
   viewCount?: boolean
   tweetUrl?: boolean
+  description?: boolean
   keywords?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1238,7 +1287,7 @@ export type MemeSelectScalar = {
   submittedBy?: boolean
 }
 
-export type MemeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "videoId" | "viewCount" | "tweetUrl" | "keywords" | "createdAt" | "updatedAt" | "publishedAt" | "status" | "submittedBy", ExtArgs["result"]["meme"]>
+export type MemeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "videoId" | "viewCount" | "tweetUrl" | "description" | "keywords" | "createdAt" | "updatedAt" | "publishedAt" | "status" | "submittedBy", ExtArgs["result"]["meme"]>
 export type MemeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   video?: boolean | Prisma.VideoDefaultArgs<ExtArgs>
   bookmarkedBy?: boolean | Prisma.Meme$bookmarkedByArgs<ExtArgs>
@@ -1271,6 +1320,7 @@ export type $MemePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     videoId: number
     viewCount: number
     tweetUrl: string | null
+    description: string
     keywords: string[]
     createdAt: Date
     updatedAt: Date
@@ -1710,6 +1760,7 @@ export interface MemeFieldRefs {
   readonly videoId: Prisma.FieldRef<"Meme", 'Int'>
   readonly viewCount: Prisma.FieldRef<"Meme", 'Int'>
   readonly tweetUrl: Prisma.FieldRef<"Meme", 'String'>
+  readonly description: Prisma.FieldRef<"Meme", 'String'>
   readonly keywords: Prisma.FieldRef<"Meme", 'String[]'>
   readonly createdAt: Prisma.FieldRef<"Meme", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Meme", 'DateTime'>

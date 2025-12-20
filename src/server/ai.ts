@@ -54,7 +54,7 @@ export const generateMemeContent = createServerFn({ method: 'POST' })
             }
           },
           {
-            text: `Cette vidéo est un mème. Le titre de la vidéo est "${meme.title}". En français, que se passe-t-il dans cette vidéo ? Donne moi une description pertinente courte pour le SEO et les moteurs de recherche. Ta réponse ne doit intégrer que la description exacte (150 caractères grand maximum) de la vidéo en expliquant que c'est un mème. Le mème est surement populaire. Cherche pourquoi. Cela doit toujours commencer par : "Découvrez et téléchargez ce mème de [ta mini description de 150 caractères]`
+            text: `Cette vidéo est un mème. Le titre de la vidéo est "${meme.title}". En français, que se passe-t-il dans cette vidéo ? Donne moi une description pertinente courte pour le SEO et les moteurs de recherche. Ta réponse ne doit intégrer que la description exacte (150 caractères grand maximum) de la vidéo en expliquant que c'est un mème. Le mème est surement populaire. Cherche pourquoi. Cela doit toujours commencer par : "Découvrez et téléchargez ce mème de [ta mini description de 150 caractères grand grand max]`
           }
         ]
       }

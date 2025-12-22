@@ -1,5 +1,6 @@
 import { ENV } from '@/constants/env'
 import type { MemeWithCategories, MemeWithVideo } from '@/constants/meme'
+import { buildVideoImageUrl } from '@/lib/bunny'
 import { searchClient } from '@algolia/client-search'
 
 const appID = 'W4S6H0K8DZ'
@@ -17,6 +18,7 @@ export function memeToAlgoliaRecord(meme: MemeWithVideo & MemeWithCategories) {
     categoryKeywords: meme.categories.map(({ category }) => {
       return category.keywords
     }),
+    imageURL: buildVideoImageUrl(meme.video.bunnyId),
     categorySlugs: meme.categories.map(({ category }) => {
       return category.slug
     }),

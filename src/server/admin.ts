@@ -4,10 +4,10 @@ import type { MemeWithCategories, MemeWithVideo } from '@/constants/meme'
 import {
   MAX_SIZE_MEME_IN_BYTES,
   MEMES_FILTERS_SCHEMA,
-  MemeStatusFixed,
   TWEET_LINK_SCHEMA
 } from '@/constants/meme'
 import { prismaClient } from '@/db'
+import { MemeStatus } from '@/db/generated/prisma/enums'
 import {
   algoliaClient,
   algoliaIndexName,
@@ -46,7 +46,7 @@ export const MEME_FORM_SCHEMA = z.object({
   keywords: z.array(z.string()),
   description: z.string().max(200),
   categoryIds: z.array(z.string()),
-  status: z.enum(MemeStatusFixed),
+  status: z.enum(MemeStatus),
   tweetUrl: TWEET_LINK_SCHEMA.nullable().or(
     z
       .string()

@@ -21,12 +21,9 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  MemeStatusFixed,
-  MemeStatusMeta,
-  type MemeWithCategories
-} from '@/constants/meme'
-import type { Meme, MemeStatus } from '@/db/generated/prisma/client'
+import { MemeStatusMeta, type MemeWithCategories } from '@/constants/meme'
+import type { Meme } from '@/db/generated/prisma/client'
+import { MemeStatus } from '@/db/generated/prisma/enums'
 import { getCategoriesListQueryOpts } from '@/lib/queries'
 import { getFieldErrorMessage } from '@/lib/utils'
 import { editMeme, MEME_FORM_SCHEMA } from '@/server/admin'
@@ -310,16 +307,16 @@ export const MemeForm = ({
                       <SelectValue placeholder="Sélectionnez un statut" />
                     </SelectTrigger>
                     <SelectContent className="w-full">
-                      <SelectItem value={MemeStatusFixed.PENDING}>
+                      <SelectItem value={MemeStatus.PENDING}>
                         {MemeStatusMeta.PENDING.label}
                       </SelectItem>
-                      <SelectItem value={MemeStatusFixed.PUBLISHED}>
+                      <SelectItem value={MemeStatus.PUBLISHED}>
                         {MemeStatusMeta.PUBLISHED.label}
                       </SelectItem>
-                      <SelectItem value={MemeStatusFixed.ARCHIVED}>
+                      <SelectItem value={MemeStatus.ARCHIVED}>
                         {MemeStatusMeta.ARCHIVED.label}
                       </SelectItem>
-                      <SelectItem value={MemeStatusFixed.REJECTED}>
+                      <SelectItem value={MemeStatus.REJECTED}>
                         {MemeStatusMeta.REJECTED.label}
                       </SelectItem>
                     </SelectContent>

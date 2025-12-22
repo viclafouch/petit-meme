@@ -1,16 +1,8 @@
 import type { VariantProps } from 'class-variance-authority'
 import { z } from 'zod'
 import type { badgeVariants } from '@/components/ui/badge'
-import type { MemeStatus, Prisma } from '@/db/generated/prisma/client'
-
-export const MemeStatusFixed = {
-  PENDING: 'PENDING',
-  PUBLISHED: 'PUBLISHED',
-  REJECTED: 'REJECTED',
-  ARCHIVED: 'ARCHIVED'
-} as const satisfies {
-  [key in MemeStatus]: key
-}
+import { type Prisma } from '@/db/generated/prisma/client'
+import { MemeStatus } from '@/db/generated/prisma/enums'
 
 export const MemeStatusMeta = {
   PENDING: {
@@ -45,7 +37,7 @@ export const MEMES_FILTERS_SCHEMA = z.object({
   query: z.string().optional().catch(undefined),
   page: z.coerce.number().optional().catch(1),
   category: z.string().optional(),
-  status: z.enum(MemeStatusFixed).optional()
+  status: z.enum(MemeStatus).optional()
 })
 
 export type MemeWithVideo = Prisma.MemeGetPayload<{

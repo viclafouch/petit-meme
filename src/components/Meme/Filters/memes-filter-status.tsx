@@ -7,8 +7,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import { MemeStatusFixed } from '@/constants/meme'
-import type { MemeStatus } from '@/db/generated/prisma/enums'
+import { MemeStatus } from '@/db/generated/prisma/enums'
 
 export const MemesFilterStatus = React.memo(
   ({
@@ -37,19 +36,16 @@ export const MemesFilterStatus = React.memo(
             <DropdownMenuRadioItem value="all" key="all">
               Tous
             </DropdownMenuRadioItem>
-            <DropdownMenuRadioItem
-              value={MemeStatusFixed.PUBLISHED}
-              key="published"
-            >
+            <DropdownMenuRadioItem value={MemeStatus.PUBLISHED} key="published">
               Publiés
             </DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value={MemeStatusFixed.PENDING}>
+            <DropdownMenuRadioItem value={MemeStatus.PENDING}>
               En attente
             </DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value={MemeStatusFixed.REJECTED}>
+            <DropdownMenuRadioItem value={MemeStatus.REJECTED}>
               Rejetés
             </DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value={MemeStatusFixed.ARCHIVED}>
+            <DropdownMenuRadioItem value={MemeStatus.ARCHIVED}>
               Archivés
             </DropdownMenuRadioItem>
           </DropdownMenuRadioGroup>

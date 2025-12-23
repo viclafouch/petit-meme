@@ -14,7 +14,7 @@ import { fetchWithZod } from '@/lib/utils'
 export const updateVideoTitle = async (videoId: string, title: string) => {
   return fetchWithZod(
     z.object({ success: z.literal(true) }),
-    `https://video.bunnycdn.com/library/${ENV.BUNNY_LIBRARY_ID}/videos/${videoId}`,
+    `https://video.bunnycdn.com/library/${ENV.VITE_BUNNY_LIBRARY_ID}/videos/${videoId}`,
     {
       method: 'POST',
       headers: getBunnyHeaders(),

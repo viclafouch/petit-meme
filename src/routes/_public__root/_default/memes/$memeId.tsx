@@ -38,7 +38,7 @@ import {
 } from '@/lib/bunny'
 import { getMemeByIdQueryOpts } from '@/lib/queries'
 import { matchIsUserAdmin } from '@/lib/role'
-import { buildMemeSeo, buildUrl } from '@/lib/seo'
+import { buildJsonLdSeo, buildMemeSeo, buildUrl } from '@/lib/seo'
 import { cn } from '@/lib/utils'
 import { getRandomMeme } from '@/server/meme'
 import { useSuspenseQuery } from '@tanstack/react-query'
@@ -352,6 +352,20 @@ export const Route = createFileRoute('/_public__root/_default/memes/$memeId')({
       originalUrl,
       nextRandomMeme
     }
+  },
+  scripts: ({ loaderData }) => {
+    if (loaderData) {
+      return [
+        {
+          type: 'application/ld+json',
+          children: JSON.stringify(
+            buildJsonLdSeo(loaderData.meme, loaderData.originalUrl)
+          )
+        }
+      ]
+    }
+
+    return []
   },
   head: ({ loaderData, match }) => {
     if (loaderData?.meme) {

@@ -14,12 +14,12 @@ export const ENV = createEnv({
     STRIPE_SECRET_KEY: z.string(),
     STRIPE_WEBHOOK_SECRET: z.string(),
     STRIPE_PRICE_ID: z.string(),
-    BUNNY_LIBRARY_ID: z.string(),
     BUNNY_COLLECTION_ID: z.string(),
     RESEND_EMAIL_TO: z.string().optional()
   },
   clientPrefix: 'VITE_',
   client: {
+    VITE_BUNNY_LIBRARY_ID: z.string(),
     VITE_BUNNY_HOSTNAME: z.string()
   },
   runtimeEnv: {

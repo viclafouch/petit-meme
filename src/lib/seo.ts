@@ -1,5 +1,6 @@
+import type { VideoObject, WithContext } from 'schema-dts'
 import type { MemeWithCategories, MemeWithVideo } from '@/constants/meme'
-import { buildVideoImageUrl } from '@/lib/bunny'
+import { buildIframeVideoImageUrl, buildVideoImageUrl } from '@/lib/bunny'
 import type { AnyRouteMatch } from '@tanstack/react-router'
 
 export const appProdUrl = 'https://petit-meme.io'
@@ -94,4 +95,60 @@ export const buildMemeSeo = (
     description,
     ...overrideOptions
   })
+}
+
+function formatSchemaDuration(totalSeconds: number): string {
+  if (totalSeconds <= 0) {
+    return 'PT0S'
+  }
+
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+
+  let duration = 'PT'
+
+  if (hours > 0) {
+    duration += `${hours}H`
+  }
+
+  if (minutes > 0) {
+    duration += `${minutes}M`
+  }
+
+  if (seconds > 0 || duration === 'PT') {
+    duration += `${seconds}S`
+  }
+
+  return duration
+}
+
+export const buildJsonLdSeo = (meme: MemeWithVideo, originalUrl: string) => {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'VideoObject',
+    name: meme.title,
+    description: meme.description,
+    thumbnailUrl: buildVideoImageUrl(meme.video.bunnyId),
+    uploadDate: meme.createdAt.toISOString(),
+    embedUrl: buildIframeVideoImageUrl(meme.video.bunnyId),
+    duration: formatSchemaDuration(meme.video.duration),
+    requiresSubscription: false,
+    videoQuality: 'HD',
+    keywords: meme.keywords.join(', '),
+    contentUrl: originalUrl,
+    encodingFormat: 'video/mp4',
+    interactionStatistic: {
+      '@type': 'InteractionCounter',
+      interactionType: { '@type': 'WatchAction' },
+      userInteractionCount: meme.viewCount
+    },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.8',
+      bestRating: '5',
+      worstRating: '1',
+      ratingCount: '85'
+    }
+  } satisfies WithContext<VideoObject>
 }

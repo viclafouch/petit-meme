@@ -24,6 +24,10 @@ export const buildVideoImageUrl = (videoId: string) => {
   return buildBunnyUrl(`/${videoId}/thumbnail.jpg`)
 }
 
+export const buildIframeVideoImageUrl = (videoId: string) => {
+  return `https://iframe.mediadelivery.net/embed/${ENV.VITE_BUNNY_LIBRARY_ID}/${videoId}`
+}
+
 export const buildVideoPreviewUrl = (videoId: string) => {
   return buildBunnyUrl(`/${videoId}/preview.webp`)
 }
@@ -35,7 +39,7 @@ export const buildVideoStreamUrl = (videoId: string) => {
 export const deleteVideo = createServerOnlyFn(async (videoId: string) => {
   return fetchWithZod(
     DEFAULT_RESPONSE_SCHEMA,
-    `https://video.bunnycdn.com/library/${ENV.BUNNY_LIBRARY_ID}/videos/${videoId}`,
+    `https://video.bunnycdn.com/library/${ENV.VITE_BUNNY_LIBRARY_ID}/videos/${videoId}`,
     {
       method: 'DELETE',
       headers: getBunnyHeaders()
@@ -58,7 +62,7 @@ export const getVideoPlayData = createServerFn({ method: 'POST' })
   .handler(async ({ data: videoId }) => {
     return fetchWithZod(
       VIDEO_PLAY_DATA_SCHEMA,
-      `https://video.bunnycdn.com/library/${ENV.BUNNY_LIBRARY_ID}/videos/${videoId}/play`,
+      `https://video.bunnycdn.com/library/${ENV.VITE_BUNNY_LIBRARY_ID}/videos/${videoId}/play`,
       {
         method: 'GET',
         headers: getBunnyHeaders()
@@ -73,7 +77,7 @@ const UPLOAD_RESPONSE_SCHEMA = z.object({
 export const createVideo = createServerOnlyFn(async (title: string) => {
   const { guid: videoId } = await fetchWithZod(
     UPLOAD_RESPONSE_SCHEMA,
-    `https://video.bunnycdn.com/library/${ENV.BUNNY_LIBRARY_ID}/videos`,
+    `https://video.bunnycdn.com/library/${ENV.VITE_BUNNY_LIBRARY_ID}/videos`,
     {
       method: 'POST',
       headers: getBunnyHeaders(),
@@ -94,7 +98,7 @@ export const uploadVideo = createServerOnlyFn(
 
     await fetchWithZod(
       DEFAULT_RESPONSE_SCHEMA,
-      `https://video.bunnycdn.com/library/${ENV.BUNNY_LIBRARY_ID}/videos/${videoId}`,
+      `https://video.bunnycdn.com/library/${ENV.VITE_BUNNY_LIBRARY_ID}/videos/${videoId}`,
       {
         method: 'PUT',
         headers,

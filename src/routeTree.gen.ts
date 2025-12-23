@@ -33,6 +33,7 @@ import { Route as Public__rootDefaultPasswordResetRouteImport } from './routes/_
 import { Route as Public__rootDefaultPasswordCreateNewRouteImport } from './routes/_public__root/_default/password.create-new'
 import { Route as Public__rootDefaultMemesMemeIdRouteImport } from './routes/_public__root/_default/memes/$memeId'
 import { Route as Public__rootDefaultCheckoutSuccessRouteImport } from './routes/_public__root/_default/checkout.success'
+import { Route as Public__rootDefaultMemesCategorySlugRouteImport } from './routes/_public__root/_default/memes/category/$slug'
 
 const ReelsRoute = ReelsRouteImport.update({
   id: '/reels',
@@ -164,6 +165,12 @@ const Public__rootDefaultCheckoutSuccessRoute =
     path: '/checkout/success',
     getParentRoute: () => Public__rootDefaultRouteRoute,
   } as any)
+const Public__rootDefaultMemesCategorySlugRoute =
+  Public__rootDefaultMemesCategorySlugRouteImport.update({
+    id: '/memes/category/$slug',
+    path: '/memes/category/$slug',
+    getParentRoute: () => Public__rootDefaultRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteRouteWithChildren
@@ -188,6 +195,7 @@ export interface FileRoutesByFullPath {
   '/memes': typeof Public__rootDefaultMemesIndexRoute
   '/random': typeof Public__rootDefaultRandomIndexRoute
   '/settings/': typeof Public__rootDefaultSettingsIndexRoute
+  '/memes/category/$slug': typeof Public__rootDefaultMemesCategorySlugRoute
 }
 export interface FileRoutesByTo {
   '/admin': typeof AdminRouteRouteWithChildren
@@ -211,6 +219,7 @@ export interface FileRoutesByTo {
   '/memes': typeof Public__rootDefaultMemesIndexRoute
   '/random': typeof Public__rootDefaultRandomIndexRoute
   '/settings': typeof Public__rootDefaultSettingsIndexRoute
+  '/memes/category/$slug': typeof Public__rootDefaultMemesCategorySlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -238,6 +247,7 @@ export interface FileRoutesById {
   '/_public__root/_default/memes/': typeof Public__rootDefaultMemesIndexRoute
   '/_public__root/_default/random/': typeof Public__rootDefaultRandomIndexRoute
   '/_public__root/_default/settings/': typeof Public__rootDefaultSettingsIndexRoute
+  '/_public__root/_default/memes/category/$slug': typeof Public__rootDefaultMemesCategorySlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -264,6 +274,7 @@ export interface FileRouteTypes {
     | '/memes'
     | '/random'
     | '/settings/'
+    | '/memes/category/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/admin'
@@ -287,6 +298,7 @@ export interface FileRouteTypes {
     | '/memes'
     | '/random'
     | '/settings'
+    | '/memes/category/$slug'
   id:
     | '__root__'
     | '/_public__root'
@@ -313,6 +325,7 @@ export interface FileRouteTypes {
     | '/_public__root/_default/memes/'
     | '/_public__root/_default/random/'
     | '/_public__root/_default/settings/'
+    | '/_public__root/_default/memes/category/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -494,6 +507,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Public__rootDefaultCheckoutSuccessRouteImport
       parentRoute: typeof Public__rootDefaultRouteRoute
     }
+    '/_public__root/_default/memes/category/$slug': {
+      id: '/_public__root/_default/memes/category/$slug'
+      path: '/memes/category/$slug'
+      fullPath: '/memes/category/$slug'
+      preLoaderRoute: typeof Public__rootDefaultMemesCategorySlugRouteImport
+      parentRoute: typeof Public__rootDefaultRouteRoute
+    }
   }
 }
 
@@ -523,6 +543,7 @@ interface Public__rootDefaultRouteRouteChildren {
   Public__rootDefaultPasswordResetRoute: typeof Public__rootDefaultPasswordResetRoute
   Public__rootDefaultMemesIndexRoute: typeof Public__rootDefaultMemesIndexRoute
   Public__rootDefaultRandomIndexRoute: typeof Public__rootDefaultRandomIndexRoute
+  Public__rootDefaultMemesCategorySlugRoute: typeof Public__rootDefaultMemesCategorySlugRoute
 }
 
 const Public__rootDefaultRouteRouteChildren: Public__rootDefaultRouteRouteChildren =
@@ -541,6 +562,8 @@ const Public__rootDefaultRouteRouteChildren: Public__rootDefaultRouteRouteChildr
       Public__rootDefaultPasswordResetRoute,
     Public__rootDefaultMemesIndexRoute: Public__rootDefaultMemesIndexRoute,
     Public__rootDefaultRandomIndexRoute: Public__rootDefaultRandomIndexRoute,
+    Public__rootDefaultMemesCategorySlugRoute:
+      Public__rootDefaultMemesCategorySlugRoute,
   }
 
 const Public__rootDefaultRouteRouteWithChildren =

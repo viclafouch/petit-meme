@@ -33,11 +33,15 @@ export const MemeStatusMeta = {
   }
 }
 
-export const MEMES_FILTERS_SCHEMA = z.object({
+export const MEMES_SEARCH_SCHEMA = z.object({
   query: z.string().optional().catch(undefined),
   page: z.coerce.number().optional().catch(1),
-  category: z.string().optional(),
   status: z.enum(MemeStatus).optional()
+})
+
+export const MEMES_FILTERS_SCHEMA = z.object({
+  ...MEMES_SEARCH_SCHEMA.shape,
+  category: z.string().optional()
 })
 
 export type MemeWithVideo = Prisma.MemeGetPayload<{

@@ -1,134 +1,16 @@
-import React from 'react'
-import { Shuffle, Smartphone } from 'lucide-react'
-import { CategoriesList } from '@/components/categories/categories-list'
-import MemesPagination from '@/components/Meme/Filters/memes-pagination'
-import { MemesQuery } from '@/components/Meme/Filters/memes-query'
-import MemesToggleGrid from '@/components/Meme/Filters/memes-toggle-grid'
-import { MemesList } from '@/components/Meme/memes-list'
-import { buttonVariants } from '@/components/ui/button'
-import { LoadingSpinner } from '@/components/ui/spinner'
-import { MEMES_FILTERS_SCHEMA } from '@/constants/meme'
-import {
-  getCategoriesListQueryOpts,
-  getMemesListQueryOpts
-} from '@/lib/queries'
+import { MEMES_SEARCH_SCHEMA } from '@/constants/meme'
+import { getCategoriesListQueryOpts } from '@/lib/queries'
 import { seo } from '@/lib/seo'
-import { cn } from '@/lib/utils'
-import { useDebouncedValue } from '@tanstack/react-pacer'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { PageDescription, PageHeading } from '../../-components/page-headers'
-
-const MemesListWrapper = ({ columnGridCount }: { columnGridCount: number }) => {
-  const search = Route.useSearch()
-
-  const [debouncedValue] = useDebouncedValue(search.query, {
-    wait: 300,
-    leading: false
-  })
-
-  const filters = React.useMemo(() => {
-    return {
-      query: debouncedValue,
-      page: search.page,
-      category: search.category
-    }
-  }, [debouncedValue, search.page, search.category])
-
-  const memesListQuery = useSuspenseQuery(getMemesListQueryOpts(filters))
-
-  return (
-    <div className="w-full flex flex-col gap-12">
-      <MemesList
-        columnGridCount={columnGridCount}
-        layoutContext="library"
-        memes={memesListQuery.data.memes}
-      />
-      <div className="flex justify-end z-0">
-        <MemesPagination
-          currentPage={(memesListQuery.data.page || 0) + 1}
-          totalPages={memesListQuery.data.totalPages ?? 0}
-        />
-      </div>
-    </div>
-  )
-}
-
-const RouteComponent = () => {
-  const [columnGridCount, setColumnGridCount] = React.useState<number>(4)
-  const navigate = Route.useNavigate()
-  const search = Route.useSearch()
-
-  const handleQueryChange = (value: string) => {
-    navigate({
-      to: '/memes',
-      search: (prevState) => {
-        return {
-          page: 1,
-          query: value,
-          category: prevState.category
-        }
-      },
-      viewTransition: false,
-      replace: true
-    })
-  }
-
-  return (
-    <div>
-      <PageHeading>Memes</PageHeading>
-      <PageDescription>
-        Tape, clique, rigole : découvre tous les mèmes en un seul endroit.
-      </PageDescription>
-      <div className="w-full mx-auto py-12">
-        <div className="flex flex-col gap-y-4">
-          <div className="flex justify-between flex-col sm:flex-row gap-2">
-            <MemesQuery
-              query={search.query ?? ''}
-              onQueryChange={handleQueryChange}
-            />
-            <div className="gap-x-2 flex shrink-0">
-              <div className="hidden lg:flex">
-                <MemesToggleGrid
-                  columnValue={columnGridCount}
-                  onColumnValueChange={setColumnGridCount}
-                />
-              </div>
-              <Link
-                to="/random"
-                className={cn('flex-1', buttonVariants({ variant: 'outline' }))}
-              >
-                <Shuffle />
-                Aléatoire
-              </Link>
-              <Link
-                to="/reels"
-                className={cn('flex-1', buttonVariants({ variant: 'outline' }))}
-              >
-                <Smartphone />
-                Mode Reels
-              </Link>
-            </div>
-          </div>
-          <div className="w-full border-y border-muted">
-            <CategoriesList />
-          </div>
-          <React.Suspense fallback={<LoadingSpinner />}>
-            <MemesListWrapper columnGridCount={columnGridCount} />
-          </React.Suspense>
-        </div>
-      </div>
-    </div>
-  )
-}
+import { SearchMemes } from '@/routes/_public__root/_default/memes/-components/search-memes'
+import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_public__root/_default/memes/')({
-  component: RouteComponent,
+  component: SearchMemes,
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData(getCategoriesListQueryOpts())
   },
   validateSearch: (search) => {
-    return MEMES_FILTERS_SCHEMA.parse(search)
+    return MEMES_SEARCH_SCHEMA.parse(search)
   },
   head: () => {
     return {

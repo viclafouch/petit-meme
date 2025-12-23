@@ -157,19 +157,21 @@ export const MemeListItem = React.memo(
         className="relative flex w-full flex-col gap-2 text-sm sm:min-w-0 group"
         layoutId={`${layoutContext}-item-${meme.id}`}
       >
-        <motion.div className="group bg-muted relative aspect-video w-full overflow-hidden rounded-lg text-sm border border-white/10">
+        <motion.div className="group relative aspect-video w-full text-sm">
           <div className="relative w-full h-full isolate">
-            <img
-              src={buildVideoImageUrl(meme.video.bunnyId)}
-              alt={meme.title}
-              loading="lazy"
-              className="absolute w-full h-full inset-0 object-cover"
-            />
+            <div className="absolute inset-0 border rounded-lg border-white/10 overflow-hidden">
+              <img
+                src={buildVideoImageUrl(meme.video.bunnyId)}
+                alt={meme.title}
+                loading="lazy"
+                className="w-full h-full object-cover"
+              />
+            </div>
             <img
               src={buildVideoPreviewUrl(meme.video.bunnyId)}
               alt={meme.title}
               loading="lazy"
-              className="absolute w-full h-full inset-0 hidden duration-600 group-hover:block transition-discrete z-10 object-cover opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 group-focus-within:block"
+              className="absolute w-full h-full inset-0 duration-600 group-hover:block transition-discrete z-10 object-cover opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 group-focus-within:block group-hover:scale-105 border-2 border-white/70 rounded-lg"
             />
             <div className="absolute bottom-1 left-1 z-30">
               <Badge size="sm" variant="black">
@@ -187,7 +189,7 @@ export const MemeListItem = React.memo(
             >
               <div className="sr-only">Play</div>
               <div className="rounded-full text-white w-8 h-8 md:w-10 md:h-10 aspect-square flex justify-center items-center bg-black/70 opacity-90 border border-muted-foreground md:scale-0 group-hover:scale-100 duration-300 md:opacity-0 group-hover:opacity-100 transition-all group-focus-within:opacity-100 group-focus-within:scale-0 md:group-focus-within:scale-100">
-                <BunnyPlayIcon className="fill-white w-[14px] md:w-[18px]" />
+                <BunnyPlayIcon className="fill-white w-3.5 md:w-4.5" />
               </div>
             </button>
           </div>

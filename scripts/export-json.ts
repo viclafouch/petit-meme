@@ -24,6 +24,8 @@ export const exportJson = async () => {
   console.log(
     `${memes.length} memes and ${categories.length} categories exported ✅`
   )
+
+  process.exit(0)
 }
 
 // npx vite-node scripts/export-json.ts

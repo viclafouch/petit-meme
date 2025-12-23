@@ -128,7 +128,15 @@ export const Route = createRootRouteWithContext<{
         },
         {
           name: 'robots',
-          content: 'index, follow, max-image-preview:large'
+          content: 'index,follow,noai,noimageai'
+        },
+        {
+          httpEquiv: 'Content-Language',
+          content: 'fr'
+        },
+        {
+          httpEquiv: 'X-Robots-Tag',
+          content: 'noai,noimageai'
         },
         {
           name: 'mobile-web-app-capable',

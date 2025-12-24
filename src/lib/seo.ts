@@ -3,7 +3,11 @@ import type {
   Graph,
   ItemList,
   ListItem,
+  Organization,
+  SearchAction,
   VideoObject,
+  WebPage,
+  WebSite,
   WithContext
 } from 'schema-dts'
 import type { MemeWithCategories, MemeWithVideo } from '@/constants/meme'
@@ -188,7 +192,7 @@ export const buildCategoryJsonLd = (
         description,
         isPartOf: { '@id': websiteId },
         mainEntity: { '@id': `${categoryUrl}#itemlist` }
-      } as CollectionPage,
+      } satisfies CollectionPage,
       {
         '@type': 'ItemList',
         '@id': `${categoryUrl}#itemlist`,
@@ -206,6 +210,52 @@ export const buildCategoryJsonLd = (
           }
         })
       } satisfies ItemList
+    ]
+  }
+}
+
+type QueryAction = SearchAction & {
+  'query-input': string
+}
+
+export const buildHomeJsonLd = (): SchemaGraph => {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        '@id': `${websiteOrigin}/#website`,
+        url: websiteOrigin,
+        name: 'Petit Meme',
+        publisher: { '@id': `${websiteOrigin}/#organization` },
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: {
+            '@type': 'EntryPoint',
+            urlTemplate: `${websiteOrigin}/memes?query={search_term_string}`
+          },
+          'query-input': 'required name=search_term_string'
+        } as QueryAction
+      } satisfies WebSite,
+      {
+        '@type': 'Organization',
+        '@id': `${websiteOrigin}/#organization`,
+        name: 'Petit Meme',
+        url: websiteOrigin,
+        logo: `${websiteOrigin}/images/logo.png`,
+        description:
+          'Découvre Petit Meme, la plateforme où tu peux parcourir, créer et partager des mèmes gratuitement. Explore notre bibliothèque de vidéos et images humoristiques, sauvegarde tes favoris et amuse-toi avec des contenus toujours à jour.'
+      } satisfies Organization,
+      {
+        '@type': 'WebPage',
+        '@id': `${websiteOrigin}/#webpage`,
+        url: websiteOrigin,
+        name: 'Petit Meme - Les meilleurs mèmes vidéo',
+        isPartOf: { '@id': `${websiteOrigin}/#website` },
+        about: { '@id': `${websiteOrigin}/#organization` },
+        description:
+          'Découvre Petit Meme, la plateforme où tu peux parcourir, créer et partager des mèmes gratuitement. Explore notre bibliothèque de vidéos et images humoristiques, sauvegarde tes favoris et amuse-toi avec des contenus toujours à jour.'
+      } satisfies WebPage
     ]
   }
 }

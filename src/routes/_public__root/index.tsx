@@ -4,6 +4,7 @@ import {
   getFavoritesMemesQueryOpts,
   getRecentCountMemesQueryOpts
 } from '@/lib/queries'
+import { buildHomeJsonLd } from '@/lib/seo'
 import { Faq } from '@/routes/_public__root/-components/faq'
 import { Responsive } from '@/routes/_public__root/-components/responsive'
 import { createFileRoute } from '@tanstack/react-router'
@@ -37,6 +38,14 @@ const RouteComponent = () => {
 export const Route = createFileRoute('/_public__root/')({
   component: RouteComponent,
   pendingMs: 3000,
+  scripts: () => {
+    return [
+      {
+        type: 'application/ld+json',
+        children: JSON.stringify(buildHomeJsonLd())
+      }
+    ]
+  },
   loader: ({ context }) => {
     context.queryClient.ensureQueryData(getRecentCountMemesQueryOpts())
     const bestMemesPromise = context.queryClient.ensureQueryData(

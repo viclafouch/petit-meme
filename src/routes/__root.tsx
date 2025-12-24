@@ -50,6 +50,11 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => {
     <html lang="fr" suppressHydrationWarning dir="ltr">
       <head>
         <meta name="algolia-site-verification" content="57C07DF31C29F6D0" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin=""
+        />
         <HeadContent />
       </head>
       <body>

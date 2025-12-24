@@ -26,7 +26,6 @@ import {
   VideoPlayerTimeRange,
   VideoPlayerVolumeRange
 } from '@/components/ui/kibo-ui/video-player'
-import { LoadingButton } from '@/components/ui/loading-button'
 import { OverlaySpinner } from '@/components/ui/overlay-spinner'
 import { useDownloadMeme } from '@/hooks/use-download-meme'
 import { useRegisterMemeView } from '@/hooks/use-register-meme-view'
@@ -246,8 +245,8 @@ const RouteComponent = () => {
                 Ouvrir dans Studio
               </Button>
               <div className="flex gap-2 flex-wrap">
-                <LoadingButton
-                  isLoading={shareMutation.isPending}
+                <Button
+                  disabled={shareMutation.isPending}
                   variant="outline"
                   className="md:hidden shrink-0 flex-1"
                   onClick={() => {
@@ -256,7 +255,7 @@ const RouteComponent = () => {
                 >
                   <Share2 />
                   Partager la vidéo
-                </LoadingButton>
+                </Button>
                 <Button
                   disabled={downloadMutation.isPending}
                   variant="outline"

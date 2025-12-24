@@ -1,9 +1,8 @@
 import React from 'react'
 import { StarsBackground } from '@/components/animate-ui/backgrounds/stars'
-import { FeedbackButton } from '@/components/feedback-button'
 import { Footer } from '@/components/footer'
 import { Navbar } from '@/components/navbar'
-import { ClientOnly, createFileRoute, Outlet } from '@tanstack/react-router'
+import { createFileRoute, Outlet } from '@tanstack/react-router'
 
 const RouteComponent = () => {
   return (
@@ -15,9 +14,9 @@ const RouteComponent = () => {
         </main>
         <Footer />
       </div>
-      <ClientOnly>
+      {/* <ClientOnly>
         <FeedbackButton />
-      </ClientOnly>
+      </ClientOnly> */}
     </StarsBackground>
   )
 }

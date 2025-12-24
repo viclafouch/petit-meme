@@ -3,7 +3,10 @@ import type {
   Graph,
   ItemList,
   ListItem,
+  Offer,
   Organization,
+  PriceSpecification,
+  Product,
   SearchAction,
   VideoObject,
   WebPage,
@@ -11,6 +14,7 @@ import type {
   WithContext
 } from 'schema-dts'
 import type { MemeWithCategories, MemeWithVideo } from '@/constants/meme'
+import type { Plan } from '@/constants/plan'
 import type { CategoryModel } from '@/db/generated/prisma/models'
 import { buildIframeVideoImageUrl, buildVideoImageUrl } from '@/lib/bunny'
 import type { AnyRouteMatch } from '@tanstack/react-router'
@@ -256,6 +260,70 @@ export const buildHomeJsonLd = (): SchemaGraph => {
         description:
           'Découvre Petit Meme, la plateforme où tu peux parcourir, créer et partager des mèmes gratuitement. Explore notre bibliothèque de vidéos et images humoristiques, sauvegarde tes favoris et amuse-toi avec des contenus toujours à jour.'
       } satisfies WebPage
+    ]
+  }
+}
+
+export const buildPricingJsonLd = (plans: Plan[]): SchemaGraph => {
+  const pricingUrl = `${websiteOrigin}/pricing`
+  const title = 'Plans et Tarifs'
+  const description =
+    'Découvre les plans de Petit Meme : gratuit ou Premium avec accès illimité aux mèmes, favoris et générations de vidéos. Choisis le plan qui te permet de créer et partager des mèmes sans limites !'
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebPage',
+        '@id': `${pricingUrl}#webpage`,
+        url: pricingUrl,
+        name: title,
+        description,
+        isPartOf: { '@id': `${websiteOrigin}/#website` }
+      } as WebPage,
+      {
+        '@type': 'Product',
+        '@id': `${pricingUrl}#product`,
+        name: 'Abonnement Petit Meme',
+        image: `${websiteOrigin}/images/logo.png`,
+        description,
+        offers: {
+          '@type': 'AggregateOffer',
+          priceCurrency: 'EUR',
+          offerCount: plans.length,
+          lowPrice: Math.min(
+            ...plans.map((plan) => {
+              return plan.monthlyPriceInCents / 100
+            })
+          ).toFixed(2),
+          highPrice: Math.max(
+            ...plans.map((plan) => {
+              return plan.monthlyPriceInCents / 100
+            })
+          ).toFixed(2),
+          offers: plans.map((plan): Offer => {
+            return {
+              '@type': 'Offer',
+              name: plan.title,
+              description: plan.description,
+              price: (plan.monthlyPriceInCents / 100).toFixed(2),
+              priceCurrency: 'EUR',
+              url: pricingUrl,
+              availability: 'https://schema.org/InStock',
+              priceSpecification: {
+                '@type': 'UnitPriceSpecification',
+                price: (plan.monthlyPriceInCents / 100).toFixed(2),
+                priceCurrency: 'EUR',
+                referenceQuantity: {
+                  '@type': 'QuantitativeValue',
+                  value: 1,
+                  unitCode: 'MON' // Indique un cycle mensuel
+                }
+              } as PriceSpecification
+            }
+          })
+        }
+      } as Product
     ]
   }
 }

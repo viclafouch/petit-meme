@@ -13,7 +13,7 @@ import { FREE_PLAN, type Plan, PREMIUM_PLAN } from '@/constants/plan'
 import { formatCentsToEuros } from '@/helpers/number'
 import { useStripeCheckout } from '@/hooks/use-stripe-checkout'
 import { getActiveSubscriptionQueryOpts } from '@/lib/queries'
-import { seo } from '@/lib/seo'
+import { buildPricingJsonLd, seo } from '@/lib/seo'
 import { cn } from '@/lib/utils'
 import {
   PageDescription,
@@ -64,7 +64,7 @@ const PricingCard = ({
       className={cn(
         `flex flex-col justify-between py-1 border-zinc-300 flex-1`,
         {
-          'animate-background-shine bg-white dark:bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] transition-colors':
+          'animate-background-shine bg-white dark:bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-size-[200%_100%] transition-colors':
             isExclusive && !isActive
         }
       )}
@@ -198,6 +198,14 @@ const RouteComponent = () => {
 
 export const Route = createFileRoute('/_public__root/_default/pricing')({
   component: RouteComponent,
+  scripts: () => {
+    return [
+      {
+        type: 'application/ld+json',
+        children: JSON.stringify(buildPricingJsonLd([FREE_PLAN, PREMIUM_PLAN]))
+      }
+    ]
+  },
   head: () => {
     return {
       meta: [

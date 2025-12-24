@@ -3,6 +3,7 @@
 /* eslint-disable jsx-a11y/heading-has-content */
 import Markdown from 'react-markdown'
 import { Separator } from '@/components/ui/separator'
+import { seo } from '@/lib/seo'
 import md from '~/md/terms-of-use.md?raw'
 import { createFileRoute } from '@tanstack/react-router'
 
@@ -40,5 +41,16 @@ const RouteComponent = () => {
 }
 
 export const Route = createFileRoute('/_public__root/_default/terms-of-use')({
-  component: RouteComponent
+  component: RouteComponent,
+  head: () => {
+    return {
+      meta: [
+        ...seo({
+          title: "Conditions d'utilisation",
+          description:
+            "En utilisant notre site (https://petit-meme.io) et nos services, vous acceptez les présentes Conditions d'utilisation."
+        })
+      ]
+    }
+  }
 })

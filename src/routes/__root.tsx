@@ -4,7 +4,6 @@ import { OnlyPortrait } from '@/components/only-portrait'
 import { TailwindIndicator } from '@/components/tailwind-indicator'
 import { Toaster } from '@/components/ui/sonner'
 import { getAuthUserQueryOpts } from '@/lib/queries'
-import { seo } from '@/lib/seo'
 import { getStoredTheme, ThemeProvider } from '@/lib/theme'
 import type { getAuthUser } from '@/server/user-auth'
 import { DialogProvider } from '@/stores/dialog.store'
@@ -148,12 +147,7 @@ export const Route = createRootRouteWithContext<{
           content: 'yes'
         },
         { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
-        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        ...seo({
-          title: 'Ta banque de mèmes vidéo, prête à faire rire Internet',
-          description:
-            'Découvre Petit Meme, la plateforme où tu peux parcourir, créer et partager des mèmes gratuitement. Explore notre bibliothèque de vidéos et images humoristiques, sauvegarde tes favoris et amuse-toi avec des contenus toujours à jour.'
-        })
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' }
       ],
       links: [
         { rel: 'stylesheet', href: appCss },

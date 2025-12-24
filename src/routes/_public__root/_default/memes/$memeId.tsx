@@ -257,8 +257,8 @@ const RouteComponent = () => {
                   <Share2 />
                   Partager la vidéo
                 </LoadingButton>
-                <LoadingButton
-                  isLoading={downloadMutation.isPending}
+                <Button
+                  disabled={downloadMutation.isPending}
                   variant="outline"
                   className="flex-1 shrink-0"
                   onClick={() => {
@@ -267,7 +267,7 @@ const RouteComponent = () => {
                 >
                   <Download />
                   Télécharger la vidéo
-                </LoadingButton>
+                </Button>
               </div>
               <Button
                 variant="outline"

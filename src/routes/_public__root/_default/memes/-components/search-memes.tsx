@@ -12,6 +12,7 @@ import {
   getCategoriesListQueryOpts,
   getMemesListQueryOpts
 } from '@/lib/queries'
+import { buildCategoryJsonLd } from '@/lib/seo'
 import { cn } from '@/lib/utils'
 import {
   PageDescription,
@@ -19,11 +20,21 @@ import {
 } from '@/routes/_public__root/-components/page-headers'
 import { useDebouncedValue } from '@tanstack/react-pacer'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { Link, useNavigate, useParams, useSearch } from '@tanstack/react-router'
+import {
+  Link,
+  useLoaderData,
+  useNavigate,
+  useParams,
+  useSearch
+} from '@tanstack/react-router'
 
 const MemesListWrapper = ({ columnGridCount }: { columnGridCount: number }) => {
   const search = useSearch({ strict: false })
   const { slug } = useParams({ strict: false })
+
+  const selectedCategory = useLoaderData({
+    strict: false
+  })?.category
 
   const [debouncedValue] = useDebouncedValue(search.query, {
     wait: 300,
@@ -40,8 +51,16 @@ const MemesListWrapper = ({ columnGridCount }: { columnGridCount: number }) => {
 
   const memesListQuery = useSuspenseQuery(getMemesListQueryOpts(filters))
 
+  const categoryJsonLd = buildCategoryJsonLd(selectedCategory, {
+    page: memesListQuery.data.page || 1,
+    memes: memesListQuery.data.memes
+  })
+
   return (
     <div className="w-full flex flex-col gap-12">
+      <script type="application/ld+json">
+        {JSON.stringify(categoryJsonLd)}
+      </script>
       <MemesList
         columnGridCount={columnGridCount}
         layoutContext="library"

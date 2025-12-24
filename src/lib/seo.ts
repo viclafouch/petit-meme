@@ -1,5 +1,13 @@
-import type { VideoObject, WithContext } from 'schema-dts'
+import type {
+  CollectionPage,
+  Graph,
+  ItemList,
+  ListItem,
+  VideoObject,
+  WithContext
+} from 'schema-dts'
 import type { MemeWithCategories, MemeWithVideo } from '@/constants/meme'
+import type { CategoryModel } from '@/db/generated/prisma/models'
 import { buildIframeVideoImageUrl, buildVideoImageUrl } from '@/lib/bunny'
 import type { AnyRouteMatch } from '@tanstack/react-router'
 
@@ -7,6 +15,7 @@ export const appProdUrl = 'https://petit-meme.io'
 
 export const websiteOrigin =
   process.env.NODE_ENV === 'production' ? appProdUrl : 'http://localhost:3000'
+const websiteId = `${websiteOrigin}/#website`
 
 export const buildUrl = (pathname: string) => {
   let url = websiteOrigin
@@ -128,6 +137,7 @@ export const buildMemeJsonLd = (meme: MemeWithVideo, originalUrl: string) => {
     '@context': 'https://schema.org',
     '@type': 'VideoObject',
     name: meme.title,
+    '@id': `${websiteOrigin}/memes/${meme.id}#video`, // On utilise le même ID
     description: meme.description,
     thumbnailUrl: buildVideoImageUrl(meme.video.bunnyId),
     uploadDate: meme.createdAt.toISOString(),
@@ -151,4 +161,51 @@ export const buildMemeJsonLd = (meme: MemeWithVideo, originalUrl: string) => {
       ratingCount: '85'
     }
   } satisfies WithContext<VideoObject>
+}
+
+type SchemaGraph = Graph & { '@context': 'https://schema.org' }
+
+// TODO: typing route
+export const buildCategoryJsonLd = (
+  category: CategoryModel | undefined,
+  { page, memes }: { page: number; memes: MemeWithVideo[] }
+): SchemaGraph => {
+  const basePath = category ? `/memes/category/${category.slug}` : '/memes'
+  const categoryUrl = `${websiteOrigin}${basePath}${page > 1 ? `?page=${page}` : ''}`
+  const title = category ? category.title : 'Tous les mèmes'
+  const description = category
+    ? `Découvrez la page ${page} des meilleurs mèmes vidéo de la catégorie ${title}.`
+    : `Découvrez la page ${page} de notre collection complète de mèmes vidéo.`
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'CollectionPage',
+        '@id': `${categoryUrl}#webpage`,
+        url: categoryUrl,
+        name: `${title} - Page ${page}`,
+        description,
+        isPartOf: { '@id': websiteId },
+        mainEntity: { '@id': `${categoryUrl}#itemlist` }
+      } as CollectionPage,
+      {
+        '@type': 'ItemList',
+        '@id': `${categoryUrl}#itemlist`,
+        numberOfItems: memes.length,
+        itemListElement: memes.map((meme, index): ListItem => {
+          return {
+            '@type': 'ListItem',
+            position: index + 1,
+            item: {
+              '@type': 'VideoObject',
+              '@id': `${websiteOrigin}/memes/${meme.id}#video`,
+              name: meme.title,
+              url: `${websiteOrigin}/memes/${meme.id}`
+            } satisfies VideoObject
+          }
+        })
+      } satisfies ItemList
+    ]
+  }
 }

@@ -37,7 +37,7 @@ export const PlayerDialog = ({
   const videoRef = React.useRef<HTMLVideoElement>(null)
   const hls = React.useRef<Hls>(null)
   const shareMeme = useShareMeme()
-  const downloadMeme = useDownloadMeme()
+  const downloadMutation = useDownloadMeme()
   const memeLink = useLinkProps({
     to: '/memes/$memeId',
     params: { memeId: meme.id }
@@ -211,10 +211,10 @@ export const PlayerDialog = ({
               <Button
                 size="lg"
                 variant="secondary"
+                disabled={downloadMutation.isPending}
                 className="col-span-2 md:col-span-1 w-full"
-                disabled={downloadMeme.isPending}
                 onClick={() => {
-                  return downloadMeme.mutate(meme)
+                  return downloadMutation.mutate(meme)
                 }}
               >
                 <Download />

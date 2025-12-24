@@ -123,7 +123,7 @@ function formatSchemaDuration(totalSeconds: number): string {
   return duration
 }
 
-export const buildJsonLdSeo = (meme: MemeWithVideo, originalUrl: string) => {
+export const buildMemeJsonLd = (meme: MemeWithVideo, originalUrl: string) => {
   return {
     '@context': 'https://schema.org',
     '@type': 'VideoObject',

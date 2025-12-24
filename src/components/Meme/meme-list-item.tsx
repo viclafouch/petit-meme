@@ -167,12 +167,14 @@ export const MemeListItem = React.memo(
                 className="w-full h-full object-cover"
               />
             </div>
-            <img
-              src={buildVideoPreviewUrl(meme.video.bunnyId)}
-              alt={meme.title}
-              loading="lazy"
-              className="absolute w-full h-full inset-0 duration-600 group-hover:block transition-discrete z-10 object-cover opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 group-focus-within:block group-hover:scale-105 border-2 border-white/70 rounded-lg"
-            />
+            <div className="absolute inset-0 border-2 z-10 hidden opacity-0 rounded-lg border-white/50 overflow-hidden duration-600 group-hover:block transition-discrete object-cover group-hover:opacity-100 group-focus-within:opacity-100 group-focus-within:block">
+              <img
+                src={buildVideoPreviewUrl(meme.video.bunnyId)}
+                alt={meme.title}
+                loading="lazy"
+                className="w-full h-full object-cover"
+              />
+            </div>
             <div className="absolute bottom-1 left-1 z-30">
               <Badge size="sm" variant="black">
                 {meme.video.duration} sec

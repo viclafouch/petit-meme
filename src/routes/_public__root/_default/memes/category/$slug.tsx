@@ -29,7 +29,7 @@ export const Route = createFileRoute(
     return {
       meta: [
         ...seo({
-          title: `Catégorie ${loaderData.category.title}`,
+          title: `Mèmes ${loaderData.category.title}`,
           description: `Découvrez les mèmes de ${loaderData.category.title}. Gratuit et accessible à tous !`,
           keywords: loaderData.category.keywords.join(', ')
         })

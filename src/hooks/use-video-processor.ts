@@ -4,7 +4,7 @@ import { StudioError } from '@/constants/error'
 import type { Meme } from '@/db/generated/prisma/client'
 import { getErrorMessage } from '@/lib/auth-client'
 import { shareMeme } from '@/server/meme'
-import { checkGeneration, incrementGenerationCount } from '@/server/user'
+import { incrementGenerationCount } from '@/server/user'
 import { useShowDialog } from '@/stores/dialog.store'
 import type { ProgressEvent } from '@ffmpeg/ffmpeg'
 import { FFmpeg } from '@ffmpeg/ffmpeg'
@@ -155,7 +155,7 @@ export const useVideoProcessor = (
       ffmpeg.on('progress', progressSubscription)
     },
     mutationFn: async ({ meme, ...restOptions }: MutationBody) => {
-      await checkGeneration()
+      // await checkGeneration()
       const response = await shareMeme({ data: meme.id })
       const videoBlob = await response.blob()
       const blob = await addTextToVideo(ffmpeg, videoBlob, restOptions)

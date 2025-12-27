@@ -32,8 +32,8 @@ import { useRegisterMemeView } from '@/hooks/use-register-meme-view'
 import { useShareMeme } from '@/hooks/use-share-meme'
 import {
   buildVideoImageUrl,
-  buildVideoStreamUrl,
-  getVideoPlayData
+  buildVideoOriginalUrl,
+  buildVideoStreamUrl
 } from '@/lib/bunny'
 import { getMemeByIdQueryOpts } from '@/lib/queries'
 import { matchIsUserAdmin } from '@/lib/role'
@@ -338,7 +338,7 @@ export const Route = createFileRoute('/_public__root/_default/memes/$memeId')({
       getMemeByIdQueryOpts(params.memeId)
     )
 
-    const { originalUrl } = await getVideoPlayData({ data: meme.video.bunnyId })
+    const originalUrl = buildVideoOriginalUrl(meme.video.bunnyId)
 
     if (meme.status !== 'PUBLISHED') {
       throw notFound()

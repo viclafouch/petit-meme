@@ -4,7 +4,7 @@ import { MEMES_FILTERS_SCHEMA } from '@/constants/meme'
 import { prismaClient } from '@/db'
 import { MemeStatus } from '@/db/generated/prisma/enums'
 import { algoliaClient, algoliaIndexName } from '@/lib/algolia'
-import { getVideoPlayData } from '@/lib/bunny'
+import { buildVideoOriginalUrl } from '@/lib/bunny'
 import { authUserRequiredMiddleware } from '@/server/user-auth'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
@@ -83,7 +83,14 @@ export const getMemes = createServerFn({ method: 'GET' })
     })
 
     return {
-      memes: response.hits as (MemeWithVideo & MemeWithCategories)[],
+      memes: response.hits.map((hit) => {
+        return {
+          ...hit,
+          createdAt: new Date(hit.createdAt),
+          updatedAt: new Date(hit.updatedAt),
+          publishedAt: hit.publishedAt ? new Date(hit.publishedAt) : null
+        } satisfies MemeWithVideo & MemeWithCategories
+      }),
       query: data.query,
       page: response.page,
       totalPages: response.nbPages
@@ -169,7 +176,7 @@ export const shareMeme = createServerFn({ method: 'GET' })
       throw notFound()
     }
 
-    const { originalUrl } = await getVideoPlayData({ data: meme.video.bunnyId })
+    const originalUrl = buildVideoOriginalUrl(meme.video.bunnyId)
 
     const response = await fetch(originalUrl)
     const blob = await response.blob()

@@ -16,7 +16,11 @@ import type {
 import type { MemeWithCategories, MemeWithVideo } from '@/constants/meme'
 import type { Plan } from '@/constants/plan'
 import type { CategoryModel } from '@/db/generated/prisma/models'
-import { buildIframeVideoImageUrl, buildVideoImageUrl } from '@/lib/bunny'
+import {
+  buildIframeVideoUrl,
+  buildVideoImageUrl,
+  buildVideoOriginalUrl
+} from '@/lib/bunny'
 import type { AnyRouteMatch } from '@tanstack/react-router'
 
 export const appProdUrl = 'https://petit-meme.io'
@@ -149,7 +153,7 @@ export const buildMemeJsonLd = (meme: MemeWithVideo, originalUrl: string) => {
     description: meme.description,
     thumbnailUrl: buildVideoImageUrl(meme.video.bunnyId),
     uploadDate: meme.createdAt.toISOString(),
-    embedUrl: buildIframeVideoImageUrl(meme.video.bunnyId),
+    embedUrl: buildIframeVideoUrl(meme.video.bunnyId),
     duration: formatSchemaDuration(meme.video.duration),
     requiresSubscription: false,
     videoQuality: 'HD',
@@ -209,6 +213,11 @@ export const buildCategoryJsonLd = (
               '@type': 'VideoObject',
               '@id': `${websiteOrigin}/memes/${meme.id}#video`,
               name: meme.title,
+              description: meme.description,
+              contentUrl: buildVideoOriginalUrl(meme.video.bunnyId),
+              embedUrl: buildIframeVideoUrl(meme.video.bunnyId),
+              thumbnailUrl: buildVideoImageUrl(meme.video.bunnyId),
+              uploadDate: meme.publishedAt?.toISOString(),
               url: `${websiteOrigin}/memes/${meme.id}`
             } satisfies VideoObject
           }

@@ -2,7 +2,7 @@ import { z } from 'zod/v3'
 import zodToJsonSchema from 'zod-to-json-schema'
 import { ENV } from '@/constants/env'
 import { prismaClient } from '@/db'
-import { getVideoPlayData } from '@/lib/bunny'
+import { buildVideoOriginalUrl } from '@/lib/bunny'
 import { adminRequiredMiddleware } from '@/server/user-auth'
 import { GoogleGenAI } from '@google/genai'
 import { createServerFn } from '@tanstack/react-start'
@@ -41,7 +41,7 @@ export const generateMemeContent = createServerFn({ method: 'POST' })
       throw new Error('Meme not found')
     }
 
-    const { originalUrl } = await getVideoPlayData({ data: meme.video.bunnyId })
+    const originalUrl = buildVideoOriginalUrl(meme.video.bunnyId)
 
     const contents = [
       {

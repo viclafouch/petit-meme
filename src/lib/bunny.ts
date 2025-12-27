@@ -24,7 +24,11 @@ export const buildVideoImageUrl = (videoId: string) => {
   return buildBunnyUrl(`/${videoId}/thumbnail.jpg`)
 }
 
-export const buildIframeVideoImageUrl = (videoId: string) => {
+export const buildVideoOriginalUrl = (videoId: string) => {
+  return buildBunnyUrl(`/${videoId}/original`)
+}
+
+export const buildIframeVideoUrl = (videoId: string) => {
   return `https://iframe.mediadelivery.net/embed/${ENV.VITE_BUNNY_LIBRARY_ID}/${videoId}`
 }
 
@@ -48,10 +52,8 @@ export const deleteVideo = createServerOnlyFn(async (videoId: string) => {
 })
 
 export const VIDEO_PLAY_DATA_SCHEMA = z.object({
-  originalUrl: z.url(),
   video: z.object({
-    length: z.number(),
-    views: z.number()
+    length: z.number()
   })
 })
 

@@ -110,7 +110,7 @@ export const buildMemeSeo = (
   const description = buildDescription(meme)
 
   return seo({
-    title: `Meme de ${meme.title}`,
+    title: meme.title,
     keywords: [...meme.keywords, ...categoryKeywords].join(', '),
     image: buildVideoImageUrl(meme.video.bunnyId),
     description,

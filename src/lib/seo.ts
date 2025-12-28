@@ -218,7 +218,12 @@ export const buildCategoryJsonLd = (
               embedUrl: buildIframeVideoUrl(meme.video.bunnyId),
               thumbnailUrl: buildVideoImageUrl(meme.video.bunnyId),
               uploadDate: meme.publishedAt?.toISOString(),
-              url: `${websiteOrigin}/memes/${meme.id}`
+              url: `${websiteOrigin}/memes/${meme.id}`,
+              interactionStatistic: {
+                '@type': 'InteractionCounter',
+                interactionType: { '@type': 'WatchAction' },
+                userInteractionCount: meme.viewCount
+              }
             } satisfies VideoObject
           }
         })

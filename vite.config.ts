@@ -30,6 +30,9 @@ export default defineConfig({
       routeRules: {
         '/images/**': {
           headers: { 'cache-control': 'public, max-age=31536000, immutable' }
+        },
+        '/videos/**': {
+          headers: { 'cache-control': 'public, max-age=31536000, immutable' }
         }
       }
     })

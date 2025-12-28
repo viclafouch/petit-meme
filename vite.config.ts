@@ -33,6 +33,9 @@ export default defineConfig({
         },
         '/videos/**': {
           headers: { 'cache-control': 'public, max-age=31536000, immutable' }
+        },
+        '/admin/**': {
+          headers: { 'X-Robots-Tag': 'noindex, nofollow' }
         }
       }
     })

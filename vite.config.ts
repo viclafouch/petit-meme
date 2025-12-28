@@ -26,7 +26,12 @@ export default defineConfig({
     }),
     react(),
     nitro({
-      preset: 'node-server'
+      preset: 'node-server',
+      routeRules: {
+        '/images/**': {
+          headers: { 'cache-control': 'public, max-age=31536000, immutable' }
+        }
+      }
     })
   ]
 })

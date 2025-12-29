@@ -29,12 +29,15 @@ import {
 } from '@tanstack/react-router'
 
 const MemesListWrapper = ({ columnGridCount }: { columnGridCount: number }) => {
-  const search = useSearch({ strict: false })
-  const { slug } = useParams({ strict: false })
-
+  const search = useSearch({
+    from: '/_public__root/_default/memes/category/$slug'
+  })
+  const { slug } = useParams({
+    from: '/_public__root/_default/memes/category/$slug'
+  })
   const selectedCategory = useLoaderData({
-    strict: false
-  })?.category
+    from: '/_public__root/_default/memes/category/$slug'
+  }).category
 
   const [debouncedValue] = useDebouncedValue(search.query, {
     wait: 300,
@@ -45,9 +48,9 @@ const MemesListWrapper = ({ columnGridCount }: { columnGridCount: number }) => {
     return {
       query: debouncedValue,
       page: search.page,
-      category: slug
+      category: slug === 'all' ? undefined : slug
     } satisfies MemesFilters
-  }, [debouncedValue, search.page, search.category, slug])
+  }, [debouncedValue, search.page, slug])
 
   const memesListQuery = useSuspenseQuery(getMemesListQueryOpts(filters))
 

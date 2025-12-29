@@ -182,7 +182,9 @@ export const buildCategoryJsonLd = (
   category: CategoryModel | undefined,
   { page, memes }: { page: number; memes: MemeWithVideo[] }
 ): SchemaGraph => {
-  const basePath = category ? `/memes/category/${category.slug}` : '/memes'
+  const basePath = category
+    ? `/memes/category/${category.slug}`
+    : '/memes/category/all'
   const categoryUrl = `${websiteOrigin}${basePath}${page > 1 ? `?page=${page}` : ''}`
   const title = category ? category.title : 'Tous les mèmes'
   const description = category

@@ -1,3 +1,4 @@
+import { MEMES_SEARCH_SCHEMA } from '@/constants/meme'
 import { getCategoriesListQueryOpts } from '@/lib/queries'
 import { seo } from '@/lib/seo'
 import { SearchMemes } from '@/routes/_public__root/_default/memes/-components/search-memes'
@@ -7,10 +8,18 @@ export const Route = createFileRoute(
   '/_public__root/_default/memes/category/$slug'
 )({
   component: SearchMemes,
+  validateSearch: (search) => {
+    return MEMES_SEARCH_SCHEMA.parse(search)
+  },
   loader: async ({ context, params }) => {
     const categories = await context.queryClient.ensureQueryData(
       getCategoriesListQueryOpts()
     )
+
+    if (params.slug === 'all') {
+      return { category: undefined }
+    }
+
     const category = categories.find((item) => {
       return item.slug === params.slug
     })
@@ -22,16 +31,26 @@ export const Route = createFileRoute(
     return { category }
   },
   head: ({ loaderData }) => {
-    if (!loaderData) {
-      return {}
+    const category = loaderData?.category
+
+    if (!category) {
+      return {
+        meta: [
+          ...seo({
+            title: 'Bibliothèque de mèmes en ligne',
+            description:
+              'Découvre la plus grande bibliothèque de mèmes : crée, explore et partage des mèmes légendaires sur Petit Meme. Gratuit et accessible à tous !'
+          })
+        ]
+      }
     }
 
     return {
       meta: [
         ...seo({
-          title: `Mèmes ${loaderData.category.title}`,
-          description: `Découvrez les mèmes de ${loaderData.category.title}. Gratuit et accessible à tous !`,
-          keywords: loaderData.category.keywords.join(', ')
+          title: `Mèmes ${category.title}`,
+          description: `Découvrez les mèmes de ${category.title}. Gratuit et accessible à tous !`,
+          keywords: category.keywords.join(', ')
         })
       ]
     }

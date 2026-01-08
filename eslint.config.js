@@ -1,16 +1,18 @@
-import importsConfig from '@viclafouch/eslint-config-viclafouch/imports.mjs'
-import baseConfig from '@viclafouch/eslint-config-viclafouch/index.mjs'
-import prettierConfig from '@viclafouch/eslint-config-viclafouch/prettier.mjs'
-import reactConfig from '@viclafouch/eslint-config-viclafouch/react.mjs'
-import typescriptConfig from '@viclafouch/eslint-config-viclafouch/typescript.mjs'
+import {
+  baseConfig,
+  importsConfig,
+  prettierConfig,
+  reactConfig,
+  typescriptConfig
+} from '@viclafouch/eslint-config-viclafouch'
 
 /**
  * @type {import("eslint").Linter.Config}
  */
 export default [
   ...baseConfig,
-  ...importsConfig,
   ...reactConfig,
+  ...importsConfig,
   ...typescriptConfig,
   ...prettierConfig,
   {
@@ -32,6 +34,8 @@ export default [
       'react/no-array-index-key': 'off',
       'promise/prefer-await-to-then': 'off',
       'no-inline-comments': 'off',
+      'better-tailwindcss/enforce-consistent-line-wrapping': 'off',
+      '@typescript-eslint/no-deprecated': 'off',
       'id-length': ['error', { exceptions: ['R', '_'] }]
     }
   }

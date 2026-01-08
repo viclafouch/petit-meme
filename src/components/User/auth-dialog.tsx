@@ -196,7 +196,6 @@ export const LoginForm = ({
         </span>
       </div>
       <Button variant="outline" className="w-full" onClick={onTwitterSignIn}>
-        {/* eslint-disable-next-line @typescript-eslint/no-deprecated */}
         <Twitter />
         Connexion avec Twitter
       </Button>

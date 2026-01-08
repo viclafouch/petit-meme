@@ -55,7 +55,6 @@ export const AdminSidebar = ({
                 </SidebarMenuButton>
                 <SidebarMenuButton asChild>
                   <Link to="/admin/downloader">
-                    {/* eslint-disable-next-line @typescript-eslint/no-deprecated */}
                     <Twitter />
                     <span>Téléchargeur Twitter</span>
                   </Link>

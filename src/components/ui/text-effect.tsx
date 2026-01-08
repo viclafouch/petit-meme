@@ -1,5 +1,4 @@
 /* eslint-disable id-length */
-/* eslint-disable @typescript-eslint/no-deprecated */
 /* eslint-disable @typescript-eslint/no-misused-spread */
 /* eslint-disable complexity */
 import React from 'react'

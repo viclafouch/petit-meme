@@ -100,7 +100,7 @@
     "@types/node": "^25",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@viclafouch/eslint-config-viclafouch": "4.22.0",
+    "@viclafouch/eslint-config-viclafouch": "4.22.1-beta.1",
     "@vitejs/plugin-react": "^5.1.2",
     "dotenv": "^17.2.3",
     "eslint": "^9",

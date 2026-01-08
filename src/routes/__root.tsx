@@ -24,9 +24,8 @@ const TanStackQueryDevtools =
         return null
       }
     : React.lazy(async () => {
-        const result = await import(
-          '@tanstack/react-query-devtools/build/modern/production.js'
-        )
+        const result =
+          await import('@tanstack/react-query-devtools/build/modern/production.js')
 
         return { default: result.ReactQueryDevtools }
       })

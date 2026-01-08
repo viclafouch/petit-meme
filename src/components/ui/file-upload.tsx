@@ -313,11 +313,10 @@ function useFileUploadContext(consumerName: string) {
   return context
 }
 
-interface FileUploadRootProps
-  extends Omit<
-    React.ComponentPropsWithoutRef<'div'>,
-    'defaultValue' | 'onChange'
-  > {
+interface FileUploadRootProps extends Omit<
+  React.ComponentPropsWithoutRef<'div'>,
+  'defaultValue' | 'onChange'
+> {
   value?: File[]
   defaultValue?: File[]
   onValueChange?: (files: File[]) => void
@@ -685,8 +684,7 @@ const FileUploadRoot = (props: FileUploadRootProps) => {
   )
 }
 
-interface FileUploadDropzoneProps
-  extends React.ComponentPropsWithoutRef<'div'> {
+interface FileUploadDropzoneProps extends React.ComponentPropsWithoutRef<'div'> {
   asChild?: boolean
 }
 
@@ -916,8 +914,7 @@ const FileUploadDropzone = (props: FileUploadDropzoneProps) => {
   )
 }
 
-interface FileUploadTriggerProps
-  extends React.ComponentPropsWithoutRef<'button'> {
+interface FileUploadTriggerProps extends React.ComponentPropsWithoutRef<'button'> {
   asChild?: boolean
 }
 
@@ -1169,8 +1166,7 @@ function getFileIcon(file: File) {
   return <FileIcon />
 }
 
-interface FileUploadItemPreviewProps
-  extends React.ComponentPropsWithoutRef<'div'> {
+interface FileUploadItemPreviewProps extends React.ComponentPropsWithoutRef<'div'> {
   render?: (file: File) => React.ReactNode
   asChild?: boolean
 }
@@ -1227,8 +1223,7 @@ const FileUploadItemPreview = (props: FileUploadItemPreviewProps) => {
   )
 }
 
-interface FileUploadItemMetadataProps
-  extends React.ComponentPropsWithoutRef<'div'> {
+interface FileUploadItemMetadataProps extends React.ComponentPropsWithoutRef<'div'> {
   asChild?: boolean
   size?: 'default' | 'sm'
 }
@@ -1292,8 +1287,7 @@ const FileUploadItemMetadata = (props: FileUploadItemMetadataProps) => {
   )
 }
 
-interface FileUploadItemProgressProps
-  extends React.ComponentPropsWithoutRef<'div'> {
+interface FileUploadItemProgressProps extends React.ComponentPropsWithoutRef<'div'> {
   variant?: 'linear' | 'circular' | 'fill'
   size?: number
   asChild?: boolean
@@ -1427,8 +1421,7 @@ const FileUploadItemProgress = (props: FileUploadItemProgressProps) => {
   }
 }
 
-interface FileUploadItemDeleteProps
-  extends React.ComponentPropsWithoutRef<'button'> {
+interface FileUploadItemDeleteProps extends React.ComponentPropsWithoutRef<'button'> {
   asChild?: boolean
 }
 
@@ -1472,8 +1465,7 @@ const FileUploadItemDelete = (props: FileUploadItemDeleteProps) => {
   )
 }
 
-interface FileUploadClearProps
-  extends React.ComponentPropsWithoutRef<'button'> {
+interface FileUploadClearProps extends React.ComponentPropsWithoutRef<'button'> {
   forceMount?: boolean
   asChild?: boolean
 }

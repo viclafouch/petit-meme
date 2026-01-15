@@ -3,6 +3,7 @@ import { useHotkeys } from 'react-hotkeys-hook'
 import { motion } from 'framer-motion'
 import Hls from 'hls.js'
 import { Clapperboard, Clipboard, Download, Share2, X } from 'lucide-react'
+import mixpanel from 'mixpanel-browser'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -42,6 +43,13 @@ export const PlayerDialog = ({
     to: '/memes/$memeId',
     params: { memeId: meme.id }
   })
+
+  React.useEffect(() => {
+    mixpanel.track('View Meme Details', {
+      memeId: meme.id,
+      memeTitle: meme.title
+    })
+  }, [meme.id, meme.title])
 
   useRegisterMemeView({
     memeId: meme.id,

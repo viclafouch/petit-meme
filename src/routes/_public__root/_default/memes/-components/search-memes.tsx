@@ -1,5 +1,6 @@
 import React from 'react'
 import { Shuffle, Smartphone } from 'lucide-react'
+import mixpanel from 'mixpanel-browser'
 import { CategoriesList } from '@/components/categories/categories-list'
 import MemesPagination from '@/components/Meme/Filters/memes-pagination'
 import { MemesQuery } from '@/components/Meme/Filters/memes-query'
@@ -53,6 +54,15 @@ const MemesListWrapper = ({ columnGridCount }: { columnGridCount: number }) => {
   }, [debouncedValue, search.page, slug])
 
   const memesListQuery = useSuspenseQuery(getMemesListQueryOpts(filters))
+
+  React.useEffect(() => {
+    if (debouncedValue) {
+      mixpanel.track('Search', {
+        searchQuery: debouncedValue,
+        resultsCount: memesListQuery.data.memes.length
+      })
+    }
+  }, [debouncedValue, memesListQuery.data.memes.length])
 
   const categoryJsonLd = buildCategoryJsonLd(selectedCategory, {
     page: memesListQuery.data.page || 1,

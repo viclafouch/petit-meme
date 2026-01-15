@@ -1,6 +1,7 @@
 import React from 'react'
 import type { ErrorContext } from 'better-auth/react'
 import { CheckCircle, CircleAlert, Twitter } from 'lucide-react'
+import mixpanel from 'mixpanel-browser'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import type { WithDialog } from '@/@types/dialog'
@@ -89,6 +90,22 @@ export const LoginForm = ({
     onSuccess: async () => {
       await queryClient.invalidateQueries(getAuthUserQueryOpts())
       await queryClient.invalidateQueries(getActiveSubscriptionQueryOpts())
+
+      const user = queryClient.getQueryData(getAuthUserQueryOpts().queryKey)
+
+      if (user) {
+        mixpanel.identify(user.id)
+        mixpanel.people.set({
+          $name: user.name,
+          $email: user.email
+        })
+        mixpanel.track('Sign In', {
+          userId: user.id,
+          loginMethod: 'email',
+          success: true
+        })
+      }
+
       router.invalidate()
       onSuccess?.()
     },
@@ -295,6 +312,9 @@ const SignupForm = ({
       })
     },
     onSuccess: async () => {
+      mixpanel.track('Sign Up', {
+        signupMethod: 'email'
+      })
       form.reset()
     },
     onError: (context: ErrorContext) => {
@@ -492,6 +512,10 @@ export const AuthDialog = ({ open, onOpenChange }: WithDialog<unknown>) => {
     event: React.MouseEvent<HTMLButtonElement>
   ) => {
     event.preventDefault()
+    mixpanel.track('Sign In', {
+      loginMethod: 'twitter',
+      success: true
+    })
     await authClient.signIn.social({
       provider: 'twitter'
     })

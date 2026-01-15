@@ -11,8 +11,6 @@ mixpanel.init('5800e2b9e077ccdaf4cadb637f919c14', {
   // eslint-disable-next-line camelcase
   track_pageview: true,
   autocapture: true,
-  // eslint-disable-next-line camelcase
-  record_sessions_percent: 0,
   debug: process.env.NODE_ENV === 'development',
   persistence: 'localStorage'
 })

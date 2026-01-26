@@ -14,7 +14,9 @@ mixpanel.init('5800e2b9e077ccdaf4cadb637f919c14', {
   // eslint-disable-next-line camelcase
   ignore_dnt: true,
   debug: process.env.NODE_ENV === 'development',
-  persistence: 'localStorage'
+  persistence: 'localStorage',
+  // eslint-disable-next-line camelcase
+  api_host: 'https://api-eu.mixpanel.com'
 })
 
 const router = getRouter()

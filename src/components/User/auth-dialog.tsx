@@ -73,22 +73,18 @@ export const LoginForm = ({
       email: string
       password: string
     }) => {
-      return new Promise((resolve, reject) => {
-        authClient.signIn.email(
-          {
-            email,
-            password,
-            rememberMe: true
-          },
-          {
-            onError: reject,
-            onSuccess: resolve
-          }
-        )
+      const { error } = await authClient.signIn.email({
+        email,
+        password
       })
+
+      if (error) {
+        throw new Error(error.code)
+      }
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries(getAuthUserQueryOpts())
+      await router.invalidate({ sync: true })
       await queryClient.invalidateQueries(getActiveSubscriptionQueryOpts())
 
       const user = queryClient.getQueryData(getAuthUserQueryOpts().queryKey)
@@ -106,7 +102,6 @@ export const LoginForm = ({
         })
       }
 
-      router.invalidate()
       onSuccess?.()
     },
     onError: (context: ErrorContext) => {

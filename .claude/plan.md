@@ -182,3 +182,38 @@ Dédupliquer avant le refactoring pour éviter de refactorer du code en double.
 - [ ] Mettre à jour `better-auth` 1.3.12 → 1.4.18 (préparer déconnexion utilisateurs)
 - [ ] Mettre à jour `stripe` 18.5.0 → 19.3.1 (compatible better-auth/stripe)
 - [ ] Évaluer `stripe` 19.x → 20.x
+
+---
+
+## Étape 12 — Best practices (depuis estcequecestlasaison)
+
+> Audit : [`audits/best-practices.md`](../audits/best-practices.md)
+
+Appliquer les bonnes pratiques extraites du projet reference.
+
+- [ ] CRITICAL : configurer les defaults QueryClient (staleTime, gcTime, retry, refetchOnWindowFocus)
+- [ ] CRITICAL : configurer les options du router (defaultPreload, viewTransition, scrollRestoration)
+- [ ] CRITICAL : ajouter les HTTP cache headers via Nitro routeRules
+- [ ] CRITICAL : completer le SEO (meta tags root, canonical, alternate, JSON-LD, sitemap dynamique)
+- [ ] HIGH : creer un composant image optimise (srcSet, sizes, loading, fetchPriority, decoding)
+- [ ] HIGH : ajouter les security headers via routeRules
+- [ ] HIGH : valider les inputs de toutes les server functions avec Zod
+- [ ] HIGH : utiliser ensureQueryData + Promise.all dans les loaders
+- [ ] MEDIUM : ajouter le skip-to-content link + semantic HTML
+- [ ] MEDIUM : respecter prefers-reduced-motion dans les animations
+- [ ] MEDIUM : utiliser placeholderData: keepPreviousData sur les queries filtrees
+- [ ] LOW : optimiser le chargement des fonts
+
+---
+
+## Futur
+
+Items non planifiés, à traiter après les audits.
+
+### Internationalisation (FR / EN)
+
+Passer le site en bilingue français / anglais. Étudier la meilleure approche avec TanStack Start (routing i18n, détection de langue, etc.).
+
+### Migration Prisma → Drizzle
+
+Remplacer Prisma par Drizzle ORM. Préparer la migration une fois la codebase stabilisée (audits terminés, deps à jour).

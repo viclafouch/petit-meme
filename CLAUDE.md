@@ -94,6 +94,12 @@ Toutes les conventions de code (TypeScript, React, code style, Tailwind, SEO, Gi
 
 ---
 
+## Plans
+
+| Plan | Fichier |
+|------|---------|
+| **Correction des audits** | [`.claude/plan.md`](.claude/plan.md) |
+
 ## Workflow
 
 **Avant** :

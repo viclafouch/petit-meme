@@ -112,34 +112,66 @@ Deux versions majeures à traverser. **Attention :** `@better-auth/stripe` v1.4.
 
 ---
 
-### `eslint` — 9.39.2 → 10.0.0
+### `@viclafouch/eslint-config-viclafouch` — 4.22.1-beta.1 → 5.0.0
 
-**Indice de mise à jour : 3/10**
+**Indice de mise à jour : 7/10**
 
-ESLint 10 est fraîchement sorti. **Bloqueur potentiel :** la compatibilité de `@viclafouch/eslint-config-viclafouch` avec ESLint 10.
+La v5 restructure complètement les configs exportées. Breaking changes identifiés par comparaison du README v5 avec la config actuelle (`eslint.config.js`).
 
-#### Breaking changes
+#### Peer deps v5
 
-1. **Suppression complète du support eslintrc** — Seul le flat config est supporté. Le projet utilise déjà le flat config, pas d'impact direct.
-2. **Suppression des méthodes dépréciées de `SourceCode`** — `getTokenOrCommentBefore`, etc. Impact sur les plugins custom.
-3. **Suppression des méthodes dépréciées du rule context** — Impact sur les plugins qui utilisent `context.getScope()` etc.
-4. **`chalk` remplacé par `styleText`** — Impact si des formatters custom utilisent chalk.
-5. **JSX reference tracking activé par défaut** — Peut générer de nouveaux warnings/errors dans le code JSX existant.
-6. **Ajout de `name` obligatoire aux configs** — Les configs sans `name` émettent un warning.
-7. **`minimatch` mis à jour vers v10** — Changement potentiel de comportement des globs.
-8. **Rule tester plus strict** — Impact seulement si on a des tests custom de règles ESLint.
+- `eslint >= 9` — OK (9.39.2 installé)
+- `prettier >= 3` — **A ajouter** comme dépendance directe (actuellement seulement transitive via react-email et eslint-config)
+- `typescript >= 5` — OK
 
-#### Prérequis
+#### Breaking changes vs config actuelle
 
-- **Vérifier que `@viclafouch/eslint-config-viclafouch` supporte ESLint 10** — C'est le bloqueur principal. La version actuelle est une beta (`4.22.1-beta.1`).
-- Tous les plugins ESLint utilisés doivent aussi supporter v10.
+1. **`baseConfig` supprimé** — Le projet importe `baseConfig` qui n'existe plus en v5. `typescriptConfig` est désormais la base requise.
+2. **`hooksConfig` séparé** — Les règles React Hooks sont extraites dans un config dédié `hooksConfig`. Le projet ne l'importe pas actuellement → les règles de hooks seront perdues sans ajout.
+3. **`jsxA11yConfig` nouveau** — Config d'accessibilité web (jsx-a11y) disponible en v5. Optionnel mais recommandé.
+4. **Ordre des configs changé** — v5 exige : `ignores` (premier) → `typescriptConfig` → `reactConfig` → `hooksConfig` → `jsxA11yConfig` → `importsConfig` → `prettierConfig` (dernier). La config actuelle met `ignores` après les configs et `typescriptConfig` après `reactConfig`.
+5. **Règle `better-tailwindcss/enforce-consistent-line-wrapping`** — Vérifier si ce plugin existe toujours en v5.
+
+#### Config actuelle → Config v5
+
+**Avant :**
+```js
+import { baseConfig, importsConfig, prettierConfig, reactConfig, typescriptConfig } from '...'
+export default [
+  ...baseConfig,           // ← SUPPRIMÉ en v5
+  ...reactConfig,
+  ...importsConfig,
+  ...typescriptConfig,     // ← mauvais ordre
+  ...prettierConfig,
+  { ignores: [...] },      // ← devrait être premier
+  { rules: { ... } }
+]
+```
+
+**Après :**
+```js
+import { typescriptConfig, reactConfig, hooksConfig, jsxA11yConfig, importsConfig, prettierConfig } from '...'
+export default [
+  { ignores: [...] },      // ← premier
+  ...typescriptConfig,     // ← base, juste après ignores
+  ...reactConfig,
+  ...hooksConfig,          // ← NOUVEAU
+  ...jsxA11yConfig,        // ← NOUVEAU (optionnel)
+  ...importsConfig,
+  ...prettierConfig,       // ← dernier
+  { rules: { ... } }
+]
+```
 
 #### Migration
 
-1. Attendre que `@viclafouch/eslint-config-viclafouch` supporte officiellement ESLint 10
-2. `npm install eslint@10`
-3. `npm run lint` et corriger les éventuelles nouvelles erreurs (JSX reference tracking)
-4. Ajouter des `name` aux configs si nécessaire
+1. `npm install -D prettier@3 @viclafouch/eslint-config-viclafouch@5`
+2. Réécrire `eslint.config.js` selon le nouveau format (voir ci-dessus)
+3. Retirer `baseConfig` de l'import
+4. Ajouter `hooksConfig` et optionnellement `jsxA11yConfig`
+5. Corriger l'ordre : ignores → typescript → react → hooks → a11y → imports → prettier
+6. `npm run lint` — corriger les nouvelles erreurs potentielles (hooks, a11y)
+7. Vérifier si la règle `better-tailwindcss/enforce-consistent-line-wrapping` existe toujours
 
 ---
 
@@ -453,5 +485,5 @@ Les packages suivants sont à leur dernière version et ne nécessitent aucune a
 
 ### Phase 5 — A évaluer
 
-16. **eslint** 9 → 10 — Attendre la compatibilité de `@viclafouch/eslint-config-viclafouch`
+16. **@viclafouch/eslint-config-viclafouch** 4.x → 5.x — Suivre les peer deps
 17. **stripe** 19.x → 20.x — Évaluer après la phase 4, breaking changes limités

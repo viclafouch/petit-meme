@@ -45,30 +45,13 @@ const memesRefs = React.useMemo(() => {
 
 ## MEDIUM
 
-### 2. Dépendance `user` inutile dans `useMemo` de `isMemeBookmarked`
+### 2. ~~Dépendance `user` inutile dans `useMemo`~~ ✅ FAIT
 
-**Fichier :** `src/components/Meme/meme-list-item.tsx:56-64`
-
-Le `useMemo` liste `user` dans ses dépendances mais ne l'utilise pas dans le calcul. Recalcul inutile à chaque changement de référence `user` (token refresh, query refetch).
-
-```tsx
-const isMemeBookmarked = React.useMemo(() => {
-  if (!query.data) { return false }
-  return query.data.bookmarks.some((bookmark) => bookmark.id === meme.id)
-}, [user, query.data]) // <-- `user` inutilisé, `meme.id` manquant
-```
-
-**Fix :** Retirer `user`, ajouter `meme.id`.
+`user` retiré des deps dans `meme-list-item.tsx` et `toggle-like-button.tsx`. `meme.id` ajouté. Prop `user` supprimée de `FavoriteItem` (devenue inutile).
 
 ---
 
-### 3. Même problème dans `toggle-like-button.tsx`
-
-**Fichier :** `src/components/Meme/toggle-like-button.tsx:30-34`
-
-Même pattern : `user` dans les dépendances mais pas utilisé.
-
-**Fix :** Retirer `user` des dépendances.
+### 3. ~~Même problème dans `toggle-like-button.tsx`~~ ✅ FAIT (voir #2)
 
 ---
 
@@ -90,13 +73,9 @@ Une arrow function anonyme est créée inline à chaque render et passée à `St
 
 ---
 
-### 7. `useLayoutEffect` avec dépendances vides mais utilise `setTheme`
+### 7. ~~`useLayoutEffect` avec dépendances vides~~ ✅ FAIT
 
-**Fichier :** `src/routes/admin/route.tsx:19-21`
-
-`setTheme('dark')` est appelé dans un `useLayoutEffect` avec `[]`, mais `setTheme` n'est pas dans les dépendances. Force le thème dark à chaque mount de l'admin layout → flash visuel en navigant entre admin et public.
-
-**Fix :** Ajouter `setTheme` aux dépendances.
+`setTheme` ajouté aux dépendances dans `admin/route.tsx`.
 
 ---
 
@@ -138,33 +117,15 @@ Les keywords sont rendus avec `index` comme `key`. Les keywords peuvent être r�
 
 ---
 
-### 16. `useVideoInitializer` — cleanup avec dépendances vides mais utilise `query.data`
+### 16. ~~`useVideoInitializer` — cleanup avec dépendances vides~~ ✅ FAIT
 
-**Fichier :** `src/hooks/use-video-processor.ts:123-128`
-
-Le cleanup appelle `query.data.terminate()` mais a `[]` comme dépendances. Si l'instance FFmpeg change (via `refetchOnMount: 'always'`), le cleanup référence l'ancienne instance.
-
-```tsx
-React.useEffect(() => {
-  return () => { query.data.terminate() }
-}, []) // <-- query.data manquant
-```
-
-**Fix :** Ajouter `query.data` aux dépendances, ou utiliser un ref.
-
-**Impact :** Fuite mémoire potentielle — l'ancienne instance FFmpeg ne sera pas terminée.
+`query.data` ajouté aux deps du cleanup FFmpeg.
 
 ---
 
-### 17. Même pattern de cleanup dans `useVideoProcessor`
+### 17. ~~Même pattern de cleanup~~ ✅ FAIT
 
-**Fichier :** `src/hooks/use-video-processor.ts:197-201`
-
-Même problème : le cleanup termine `ffmpeg` mais `[]` comme dépendances.
-
-**Fix :** Ajouter `ffmpeg` aux dépendances.
-
-**Impact :** Même risque de fuite de ressource FFmpeg.
+`ffmpeg` ajouté aux deps du cleanup.
 
 ---
 

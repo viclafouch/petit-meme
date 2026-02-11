@@ -36,21 +36,21 @@ export const MemesList = ({
   )
 
   React.useEffect(() => {
-    if (selectedId) {
-      const handleMessage = (event: MessageEvent) => {
-        if (event.data?.type === 'escapeKey') {
-          setSelectedId(null)
-        }
-      }
+    if (!selectedId) {
+      return () => {}
+    }
 
-      window.addEventListener('message', handleMessage, false)
-
-      return () => {
-        window.removeEventListener('message', handleMessage, false)
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'escapeKey') {
+        setSelectedId(null)
       }
     }
 
-    return undefined
+    window.addEventListener('message', handleMessage, false)
+
+    return () => {
+      window.removeEventListener('message', handleMessage, false)
+    }
   }, [selectedId])
 
   if (memes.length === 0) {

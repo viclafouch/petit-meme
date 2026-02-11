@@ -102,15 +102,20 @@ La condition `=== 0` est déjà couverte par `!filteredRefs.length`. Bug probabl
 
 ## Résumé des actions
 
-### Quick wins (impact immédiat, risque zéro)
+### Quick wins (impact immédiat, risque zéro) — FAIT
 
-1. **Supprimer 11 fichiers** inutilisés — aucun import nulle part
-2. **Retirer `export`** de 8 symboles qui ne sont utilisés que localement
-3. **Supprimer 2 fonctions** mortes (`matchIsVideoFullyReady`, `useCloseDialog`)
-4. **Corriger le bug** dans `merge-ref.ts` (`=== 0` → `=== 1`)
+1. ~~**Supprimer 11 fichiers** inutilisés~~ ✅
+2. ~~**Retirer `export`** de 8 symboles utilisés uniquement localement~~ ✅
+3. ~~**Supprimer 2 fonctions** mortes (`matchIsVideoFullyReady`, `useCloseDialog`)~~ ✅
+4. ~~**Corriger le bug** dans `merge-ref.ts` (`=== 0` → `=== 1`)~~ ✅
 
-### Nettoyage packages (faire un `npm run build` après)
+### Nettoyage packages — FAIT (sauf consolidation motion)
 
-5. **`npm uninstall`** : `@prisma/extension-accelerate`, `@date-fns/tz`, `@radix-ui/react-use-controllable-state`, `usehooks-ts`
-6. **`npm uninstall algoliasearch`** puis ajouter `@algolia/client-search` explicitement
-7. **Consolider** `motion` / `framer-motion` vers un seul package
+5. ~~**`npm uninstall`** : `@prisma/extension-accelerate`, `@date-fns/tz`, `@radix-ui/react-use-controllable-state`, `usehooks-ts`~~ ✅
+6. ~~**`npm uninstall algoliasearch`** puis ajouter `@algolia/client-search` explicitement~~ ✅
+7. **Consolider** `motion` / `framer-motion` vers un seul package — **Étape 10**
+
+### Notes de migration (découvertes pendant l'implémentation)
+
+- `SUPPORTED_LOCALES` dans `i18n/config.ts` : après retrait de `export`, le const déclenchait `no-unused-vars` car utilisé uniquement comme type. Fix : inliner le type `export type Locale = 'en' | 'fr'` directement.
+- `user` prop dans `FavoriteItem` (`meme-list-item.tsx`) : après correction des deps `useMemo`, `user` n'était plus utilisé → prop et import `User` supprimés.

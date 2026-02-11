@@ -29,4 +29,4 @@ export const exportJson = async () => {
 }
 
 // npx vite-node scripts/export-json.ts
-exportJson()
+void exportJson()

@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 
 // Define the structure for our logo objects
-export interface Logo {
+export type Logo = {
   name: string
   id: number
   img: string
@@ -32,9 +32,9 @@ const distributeLogos = (allLogos: Logo[], columnCount: number): Logo[][] => {
   })
 
   // Distribute logos evenly across columns
-  shuffled.forEach((logo, index) => {
+  for (const [index, logo] of shuffled.entries()) {
     columns[index % columnCount]!.push(logo)
-  })
+  }
 
   // Ensure all columns have the same number of logos by filling shorter columns
   const maxLength = Math.max(
@@ -42,17 +42,18 @@ const distributeLogos = (allLogos: Logo[], columnCount: number): Logo[][] => {
       return col.length
     })
   )
-  columns.forEach((col) => {
+
+  for (const col of columns) {
     while (col.length < maxLength) {
       col.push(shuffled[Math.floor(Math.random() * shuffled.length)]!)
     }
-  })
+  }
 
   return columns
 }
 
 // Props for the LogoColumn component
-interface LogoColumnProps {
+type LogoColumnProps = {
   logos: Logo[]
   index: number
   currentTime: number

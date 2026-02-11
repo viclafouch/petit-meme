@@ -68,11 +68,11 @@ export const FloatingLogos = ({ variants }: { variants: Variants }) => {
               }}
               transition={{
                 repeat: Infinity,
-                // Random duration between 4-8 seconds
+                // eslint-disable-next-line react-hooks/purity
                 duration: 4 + Math.random() * 4,
                 ease: 'easeInOut',
                 times: [0, 0.5, 1],
-                // Random delay up to 2 seconds
+                // eslint-disable-next-line react-hooks/purity
                 delay: Math.random() * 2
               }}
             >

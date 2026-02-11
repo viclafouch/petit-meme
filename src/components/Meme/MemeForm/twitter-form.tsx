@@ -57,7 +57,7 @@ export const TwitterForm = ({ onSuccess, closeDialog }: TwitterFormProps) => {
   })
 
   const handlePasteFromClipboard = async () => {
-    clipboardMutation.mutateAsync().finally(() => {
+    void clipboardMutation.mutateAsync().finally(() => {
       setTimeout(() => {
         clipboardMutation.reset()
       }, 3000)
@@ -90,7 +90,7 @@ export const TwitterForm = ({ onSuccess, closeDialog }: TwitterFormProps) => {
     <form
       onSubmit={(event) => {
         event.preventDefault()
-        form.handleSubmit()
+        void form.handleSubmit()
       }}
       className="flex flex-col gap-4"
       noValidate

@@ -17,7 +17,7 @@ type ErrorTypes = Partial<
   >
 >
 
-export const ERROR_CODES = {
+const ERROR_CODES = {
   USER_ALREADY_EXISTS: {
     en: 'User already registered',
     fr: 'Utilisateur déjà inscrit'

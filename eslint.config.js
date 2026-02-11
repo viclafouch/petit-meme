@@ -1,6 +1,7 @@
 import {
-  baseConfig,
+  hooksConfig,
   importsConfig,
+  jsxA11yConfig,
   prettierConfig,
   reactConfig,
   typescriptConfig
@@ -10,20 +11,23 @@ import {
  * @type {import("eslint").Linter.Config}
  */
 export default [
-  ...baseConfig,
-  ...reactConfig,
-  ...importsConfig,
-  ...typescriptConfig,
-  ...prettierConfig,
   {
     ignores: [
       '**/node_modules/**',
       '**/.output/**',
       '**/.nitro/**',
       '**/.tanstack/**',
-      '**/db/generated/**'
+      '**/db/generated/**',
+      '**/components/ui/**',
+      '**/components/animate-ui/**'
     ]
   },
+  ...typescriptConfig,
+  ...reactConfig,
+  ...hooksConfig,
+  ...jsxA11yConfig,
+  ...importsConfig,
+  ...prettierConfig,
   {
     rules: {
       '@typescript-eslint/require-await': 'off',
@@ -34,7 +38,6 @@ export default [
       'react/no-array-index-key': 'off',
       'promise/prefer-await-to-then': 'off',
       'no-inline-comments': 'off',
-      'better-tailwindcss/enforce-consistent-line-wrapping': 'off',
       '@typescript-eslint/no-deprecated': 'off',
       'id-length': ['error', { exceptions: ['R', '_'] }]
     }

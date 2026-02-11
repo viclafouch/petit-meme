@@ -27,11 +27,12 @@ const AuthBookmarkButton = ({
   const queryClient = useQueryClient()
   const query = useSuspenseQuery(getFavoritesMemesQueryOpts())
 
+  // eslint-disable-next-line no-restricted-syntax
   const isMemeBookmarked = React.useMemo(() => {
     return query.data.bookmarks.some((bookmark) => {
       return bookmark.id === meme.id
     })
-  }, [user, query.data, meme])
+  }, [query.data, meme])
 
   const toggleLikeMutation = useMutation({
     mutationFn: toggleBookmarkByMemeId,
@@ -43,28 +44,28 @@ const AuthBookmarkButton = ({
       })
 
       queryClient.setQueryData(getFavoritesMemesQueryOpts().queryKey, (old) => {
-        if (old) {
-          if (!newValue) {
-            return {
-              bookmarks: old.bookmarks.filter((bookmark) => {
-                return bookmark.id !== meme.id
-              }),
-              count: old.count - 1
-            }
-          }
+        if (!old) {
+          return old
+        }
 
+        if (!newValue) {
           return {
-            bookmarks: [meme, ...old.bookmarks],
-            count: old.count + 1
+            bookmarks: old.bookmarks.filter((bookmark) => {
+              return bookmark.id !== meme.id
+            }),
+            count: old.count - 1
           }
         }
 
-        return undefined
+        return {
+          bookmarks: [meme, ...old.bookmarks],
+          count: old.count + 1
+        }
       })
     },
     onSettled: () => {
-      queryClient.invalidateQueries(getMemeByIdQueryOpts(meme.id))
-      queryClient.invalidateQueries(getFavoritesMemesQueryOpts())
+      void queryClient.invalidateQueries(getMemeByIdQueryOpts(meme.id))
+      void queryClient.invalidateQueries(getFavoritesMemesQueryOpts())
     }
   })
 

@@ -56,7 +56,7 @@ export const CreateNewPasswordForm = ({ token }: { token: string }) => {
         return
       }
 
-      router.navigate({ to: '/' })
+      void router.navigate({ to: '/' })
     }
   })
 
@@ -64,7 +64,7 @@ export const CreateNewPasswordForm = ({ token }: { token: string }) => {
     <form
       onSubmit={(event) => {
         event.preventDefault()
-        form.handleSubmit()
+        void form.handleSubmit()
       }}
       noValidate
       className="flex flex-col items-center gap-y-4 w-full"

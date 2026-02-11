@@ -34,6 +34,6 @@ export const Route = createFileRoute('/_public__root/_default/favorites')({
     }
   },
   loader: async ({ context }) => {
-    context.queryClient.ensureQueryData(getFavoritesMemesQueryOpts())
+    void context.queryClient.ensureQueryData(getFavoritesMemesQueryOpts())
   }
 })

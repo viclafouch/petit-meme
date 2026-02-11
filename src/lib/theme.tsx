@@ -88,11 +88,13 @@ export const ThemeProvider = ({
   const appTheme: AppTheme =
     userTheme === 'system' ? getSystemTheme() : userTheme
 
+  // eslint-disable-next-line no-restricted-syntax
   const setTheme = React.useCallback((newUserTheme: UserTheme) => {
     setUserTheme(newUserTheme)
-    setStoredTheme({ data: newUserTheme })
+    void setStoredTheme({ data: newUserTheme })
   }, [])
 
+  // eslint-disable-next-line no-restricted-syntax
   const value = React.useMemo(() => {
     return { userTheme, appTheme, setTheme }
   }, [userTheme, appTheme, setTheme])

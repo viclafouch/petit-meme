@@ -128,4 +128,4 @@ const seed = async () => {
   }
 }
 
-seed()
+void seed()

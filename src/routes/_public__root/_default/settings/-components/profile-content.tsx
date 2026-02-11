@@ -78,7 +78,7 @@ export const ProfileContent = ({
                   variant="outline"
                   onClick={(event) => {
                     event.preventDefault()
-                    goToBillingPortal()
+                    void goToBillingPortal()
                   }}
                 >
                   <CreditCard />
@@ -89,7 +89,7 @@ export const ProfileContent = ({
                   variant="info"
                   onClick={(event) => {
                     event.preventDefault()
-                    checkoutPremium()
+                    void checkoutPremium()
                   }}
                 >
                   <Stars />

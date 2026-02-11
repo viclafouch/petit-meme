@@ -61,7 +61,7 @@ export const StudioDialog = ({
       return
     }
 
-    processVideo({ meme, text, textPosition })
+    void processVideo({ meme, text, textPosition })
   }
 
   return (
@@ -145,7 +145,7 @@ export const StudioDialog = ({
                 className="md:hidden"
                 onClick={() => {
                   if (data) {
-                    shareBlob(data.blob, data.title)
+                    void shareBlob(data.blob, data.title)
                   }
                 }}
               >
@@ -189,7 +189,8 @@ export const StudioDialog = ({
                     <Progress value={progress} />
                   </div>
                 </div>
-              ) : data ? (
+              ) : null}
+              {!isLoading && data ? (
                 <VideoPlayer className="overflow-hidden w-full h-full max-h-full dark">
                   <VideoPlayerContent
                     crossOrigin=""
@@ -211,7 +212,8 @@ export const StudioDialog = ({
                     <VideoPlayerVolumeRange />
                   </VideoPlayerControlBar>
                 </VideoPlayer>
-              ) : (
+              ) : null}
+              {!isLoading && !data ? (
                 <VideoPlayer className="overflow-hidden w-full h-full max-h-full dark">
                   <VideoPlayerContent
                     crossOrigin=""
@@ -253,7 +255,7 @@ export const StudioDialog = ({
                     <VideoPlayerVolumeRange />
                   </VideoPlayerControlBar>
                 </VideoPlayer>
-              )}
+              ) : null}
             </div>
           </div>
         </form>

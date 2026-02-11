@@ -46,7 +46,9 @@ export const Route = createFileRoute(
   validateSearch: (search) => {
     return z
       .object({
+        // eslint-disable-next-line unicorn/no-useless-undefined
         token: z.string().optional().catch(undefined),
+        // eslint-disable-next-line unicorn/no-useless-undefined
         error: z.literal('INVALID_TOKEN').optional().catch(undefined)
       })
       .parse(search)

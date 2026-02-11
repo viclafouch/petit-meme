@@ -11,7 +11,7 @@ import {
 } from '@react-email/components'
 import { baseUrl, styles } from './_utils'
 
-interface EmailVerificationProps {
+type EmailVerificationProps = {
   username: string
   verificationUrl: string
 }

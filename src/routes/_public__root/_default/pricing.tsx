@@ -175,7 +175,7 @@ const RouteComponent = () => {
           <PricingCard
             {...FREE_PLAN}
             onChangePlan={() => {
-              goToBillingPortal()
+              void goToBillingPortal()
             }}
             isActive={Boolean(
               user !== null && activeSubscriptionQuery.data === null
@@ -184,7 +184,7 @@ const RouteComponent = () => {
           <PricingCard
             {...PREMIUM_PLAN}
             onChangePlan={() => {
-              checkoutPremium()
+              void checkoutPremium()
             }}
             isActive={Boolean(
               user !== null && activeSubscriptionQuery.data !== null

@@ -22,8 +22,8 @@ export const AddCategoryButton = ({
 
   const handleSuccess = () => {
     setIsOpen(false)
-    queryClient.invalidateQueries(getCategoriesListQueryOpts())
-    router.invalidate()
+    void queryClient.invalidateQueries(getCategoriesListQueryOpts())
+    void router.invalidate()
   }
 
   return (

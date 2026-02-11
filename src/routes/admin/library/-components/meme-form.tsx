@@ -32,6 +32,7 @@ import { removeDuplicates } from '@/utils/array'
 import { useForm } from '@tanstack/react-form'
 import { useMutation, useQuery } from '@tanstack/react-query'
 
+// eslint-disable-next-line max-lines-per-function
 export const MemeForm = ({
   meme,
   onCancel,
@@ -45,6 +46,7 @@ export const MemeForm = ({
 
   const categoriesListQuery = useQuery(getCategoriesListQueryOpts())
 
+  // eslint-disable-next-line no-restricted-syntax
   const categoriesOptions = React.useMemo(() => {
     return (
       categoriesListQuery.data
@@ -161,7 +163,7 @@ export const MemeForm = ({
       onSubmit={(event) => {
         event.preventDefault()
         handleAddKeyword()
-        form.handleSubmit()
+        void form.handleSubmit()
       }}
     >
       <div className="flex flex-col gap-y-6">

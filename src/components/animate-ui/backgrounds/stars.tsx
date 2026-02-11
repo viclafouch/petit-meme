@@ -31,10 +31,10 @@ function generateStars(count: number, starColor: string) {
 }
 
 const StarLayer = ({
-  count = 1000,
-  size = 1,
-  transition = { repeat: Infinity, duration: 50, ease: 'linear' },
-  starColor = '#fff',
+  count,
+  size,
+  transition,
+  starColor,
   className,
   ...props
 }: StarLayerProps) => {

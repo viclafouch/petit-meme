@@ -1,5 +1,4 @@
-export const SUPPORTED_LOCALES = ['en', 'fr'] as const
-export type Locale = (typeof SUPPORTED_LOCALES)[number]
+export type Locale = 'en' | 'fr'
 
 export type ValuesByLocale<T> = {
   [key in Locale]: T

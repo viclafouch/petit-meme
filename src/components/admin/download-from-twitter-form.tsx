@@ -61,7 +61,7 @@ export const DownloadFromTwitterForm = () => {
   })
 
   const handlePasteFromClipboard = async () => {
-    clipboardMutation.mutateAsync().finally(() => {
+    void clipboardMutation.mutateAsync().finally(() => {
       setTimeout(() => {
         clipboardMutation.reset()
       }, 3000)
@@ -83,7 +83,7 @@ export const DownloadFromTwitterForm = () => {
     <form
       onSubmit={(event) => {
         event.preventDefault()
-        form.handleSubmit()
+        void form.handleSubmit()
       }}
       noValidate
     >

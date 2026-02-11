@@ -27,7 +27,7 @@ export const getFavoritesMemes = createServerFn({ method: 'GET' })
         createdAt: 'desc'
       },
       take:
-        // @ts-expect-error
+        // @ts-expect-error: better-auth user type lacks role field but it exists at runtime
         activeSubscription || matchIsUserAdmin(context.user)
           ? undefined
           : FREE_PLAN.maxFavoritesCount,
@@ -65,7 +65,7 @@ export const checkGeneration = createServerFn({ method: 'POST' })
     if (
       generationCount >= FREE_PLAN.maxGenerationsCount &&
       !activeSubscription &&
-      // @ts-expect-error
+      // @ts-expect-error: better-auth user type lacks role field but it exists at runtime
       !matchIsUserAdmin(context.user)
     ) {
       setResponseStatus(403)

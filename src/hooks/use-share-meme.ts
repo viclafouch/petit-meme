@@ -15,7 +15,7 @@ export const useShareMeme = () => {
 
       const blob = await blobPromise
 
-      shareBlob(blob, meme.title)
+      void shareBlob(blob, meme.title)
     },
     onError: () => {
       toast.error('Une erreur s’est produite pendant le partage')

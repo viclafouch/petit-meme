@@ -35,16 +35,16 @@ export const CategoryDropdown = ({ category }: { category: Category }) => {
       toast.error(error.message)
     },
     onSuccess: () => {
-      router.invalidate()
+      void router.invalidate()
     }
   })
 
   const handleEditSuccess = () => {
     setIsEditDialogOpen(false)
-    queryClient.invalidateQueries({
+    void queryClient.invalidateQueries({
       queryKey: getCategoriesListQueryOpts.all
     })
-    router.invalidate()
+    void router.invalidate()
   }
 
   return (

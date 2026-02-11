@@ -120,7 +120,7 @@ export const PlayerDialog = ({
     return () => {
       hls.current?.destroy()
     }
-  }, [meme.id])
+  }, [meme.id, meme.video.bunnyId])
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 overflow-hidden dark">

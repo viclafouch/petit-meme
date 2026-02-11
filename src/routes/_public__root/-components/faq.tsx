@@ -5,7 +5,7 @@ import {
   AccordionTrigger
 } from '@/components/ui/accordion'
 
-interface FaqItem {
+type FaqItem = {
   question: string
   answer: string
 }

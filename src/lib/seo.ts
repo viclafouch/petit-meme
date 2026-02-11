@@ -23,7 +23,7 @@ import {
 } from '@/lib/bunny'
 import type { AnyRouteMatch } from '@tanstack/react-router'
 
-export const appProdUrl = 'https://petit-meme.io'
+const appProdUrl = 'https://petit-meme.io'
 
 export const websiteOrigin =
   process.env.NODE_ENV === 'production' ? appProdUrl : 'http://localhost:3000'

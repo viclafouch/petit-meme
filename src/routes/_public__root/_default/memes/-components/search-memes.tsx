@@ -45,6 +45,7 @@ const MemesListWrapper = ({ columnGridCount }: { columnGridCount: number }) => {
     leading: false
   })
 
+  // eslint-disable-next-line no-restricted-syntax
   const filters = React.useMemo(() => {
     return {
       query: debouncedValue,
@@ -98,6 +99,7 @@ export const SearchMemes = () => {
 
   const categories = useSuspenseQuery(getCategoriesListQueryOpts())
 
+  // eslint-disable-next-line no-restricted-syntax
   const currentCategory = React.useMemo(() => {
     return categories.data.find((category) => {
       return category.slug === activeSlug
@@ -105,7 +107,7 @@ export const SearchMemes = () => {
   }, [categories.data, activeSlug])
 
   const handleQueryChange = (value: string) => {
-    navigate({
+    void navigate({
       to: '.',
       search: {
         page: undefined,

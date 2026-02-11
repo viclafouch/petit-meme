@@ -442,34 +442,40 @@ Les packages suivants sont à leur dernière version et ne nécessitent aucune a
 
 ## Roadmap de mise à jour
 
-### Phase 1 — Routine (risque zéro, 15 min)
+### Phase 1 — ✅ FAIT
 
-1. **Appliquer tous les patches** : `npx taze -Ilw` pour les 16 packages routine
-2. **Supprimer les packages morts** (→ voir `dead-code.md` pour la liste)
-3. `npm run build` pour vérifier
+1. ~~**Appliquer tous les patches**~~ ✅
+2. ~~**Supprimer les packages morts**~~ ✅ (sauf consolidation motion → étape 10)
+3. ~~`npm run build` pour vérifier~~ ✅
 
-### Phase 2 — Importantes sans risque (30 min)
+### Phase 2 — ✅ FAIT
 
-4. **TanStack Router ecosystem** → 1.159.5
-5. **Prisma** → 7.3.0 + `npx prisma generate`
-6. **@google/genai** → 1.40.0
-7. **Resend** → 6.9.1
-8. **React Email** → 5.2.8 / 1.0.7
-9. **TanStack Form** → 1.28.0
-10. **Motion** → 12.34.0
+4. ~~**TanStack Router ecosystem** → latest~~ ✅
+5. ~~**Prisma** → 7.3.0 + `npx prisma generate`~~ ✅
+6. ~~**@google/genai** → latest~~ ✅
+7. ~~**Resend** → latest~~ ✅
+8. ~~**React Email** → latest~~ ✅
+9. ~~**TanStack Form** → latest~~ ✅
+10. ~~**Motion** → latest~~ ✅
 
-### Phase 3 — Importantes avec précaution (1-2h)
+### Phase 3 — ✅ FAIT (sauf consolidation)
 
-11. **TanStack Pacer** → 0.19.4 (vérifier API)
-12. **Nitro** → 3.0.1-alpha.2 (tester le build)
-13. **Consolider motion/framer-motion** → `motion` uniquement
+11. ~~**TanStack Pacer** → latest~~ ✅
+12. ~~**Nitro** → 3.0.1-alpha.2~~ ✅
+13. **Consolider motion/framer-motion** → `motion` uniquement — **Étape 10**
 
 ### Phase 4 — Critiques (demi-journée chacune)
 
-14. **better-auth** 1.3.12 → 1.4.18 — Préparer la déconnexion des utilisateurs, tester tout le flow auth
-15. **stripe** 18.5.0 → 19.3.1 — Vérifier la compatibilité better-auth/stripe, tester les paiements
+14. **better-auth** 1.3.12 → 1.4.18 — Préparer la déconnexion des utilisateurs, tester tout le flow auth — **Étape 10**
+15. **stripe** 18.5.0 → 19.3.1 — Vérifier la compatibilité better-auth/stripe, tester les paiements — **Étape 10**
 
-### Phase 5 — A évaluer
+### Phase 5 — ✅ FAIT
 
-16. **@viclafouch/eslint-config-viclafouch** 4.x → 5.x — Suivre les peer deps
-17. **stripe** 19.x → 20.x — Évaluer après la phase 4, breaking changes limités
+16. ~~**@viclafouch/eslint-config-viclafouch** 4.x → 5.x~~ ✅
+17. **stripe** 19.x → 20.x — Évaluer après la phase 4, breaking changes limités — **Étape 10**
+
+### Notes de migration (découvertes pendant l'implémentation)
+
+- **tsconfig.json** : `lib` mis à jour de `ES2022` à `ES2023` pour supporter `toSorted()`/`toReversed()` introduits par les fixes ESLint v5 (`unicorn/no-array-sort`, `unicorn/no-array-reverse`).
+- **Zod 4 + ESLint v5 conflit** : `.catch()` sans argument ne compile plus en Zod 4. `unicorn/no-useless-undefined` supprime le `undefined`. Nécessite `eslint-disable-next-line` sur chaque `.catch(undefined)`.
+- **`consistent-return` + `unicorn/no-useless-undefined` conflit** : Utiliser `return old` (setQueryData) ou `return () => {}` (useEffect cleanup) au lieu de `return undefined`.

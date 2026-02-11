@@ -23,4 +23,4 @@ const task = async () => {
   process.exit(0)
 }
 
-task()
+void task()

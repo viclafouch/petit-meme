@@ -29,7 +29,7 @@ export type UJWidgetState = {
   section: UJSection
 }
 
-export interface UserJotWidgetSDK {
+export type UserJotWidgetSDK = {
   // Core
   init(projectId: string, options?: UJInitOptions): void
 
@@ -51,6 +51,7 @@ export interface UserJotWidgetSDK {
 
 // Extend the global Window interface
 declare global {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   interface Window {
     uj: UserJotWidgetSDK
   }

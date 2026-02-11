@@ -38,7 +38,7 @@ export const DeleteMemeButton = ({
         exact: false
       })
       await queryClient.removeQueries(getMemeByIdQueryOpts(meme.id))
-      router.navigate({ to: '/admin/library' })
+      void router.navigate({ to: '/admin/library' })
     }
   })
 

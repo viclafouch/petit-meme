@@ -59,13 +59,13 @@ export const Route = createFileRoute('/_public__root/')({
     ]
   },
   loader: ({ context }) => {
-    context.queryClient.ensureQueryData(getRecentCountMemesQueryOpts())
+    void context.queryClient.ensureQueryData(getRecentCountMemesQueryOpts())
     const bestMemesPromise = context.queryClient.ensureQueryData(
       getBestMemesQueryOpts()
     )
 
     if (context.user) {
-      context.queryClient.fetchQuery(getFavoritesMemesQueryOpts())
+      void context.queryClient.fetchQuery(getFavoritesMemesQueryOpts())
     }
 
     return {

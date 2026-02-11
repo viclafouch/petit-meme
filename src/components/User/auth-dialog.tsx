@@ -127,7 +127,7 @@ export const LoginForm = ({
     <form
       onSubmit={(event) => {
         event.preventDefault()
-        form.handleSubmit()
+        void form.handleSubmit()
       }}
       noValidate
       className="flex flex-col items-center gap-y-4 w-full"
@@ -292,7 +292,7 @@ const SignupForm = ({
       name: string
     }) => {
       return new Promise((resolve, reject) => {
-        authClient.signUp.email(
+        void authClient.signUp.email(
           {
             email,
             password,
@@ -332,7 +332,7 @@ const SignupForm = ({
     <form
       onSubmit={(event) => {
         event.preventDefault()
-        form.handleSubmit()
+        void form.handleSubmit()
       }}
       noValidate
       className="flex flex-col items-center gap-y-4 w-full"

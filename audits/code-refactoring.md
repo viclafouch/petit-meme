@@ -11,23 +11,9 @@
 
 ## Bug logique / Code mort
 
-### #46 — HIGH — Condition inatteignable dans `merge-ref.ts`
+### #46 — ~~HIGH~~ ✅ FAIT — Condition inatteignable dans `merge-ref.ts`
 
-**Fichier :** `src/utils/merge-ref.ts:10-15`
-
-```tsx
-if (!filteredRefs.length) {
-  return null
-}
-
-if (filteredRefs.length === 0) {   // <-- JAMAIS atteint
-  return filteredRefs[0] as React.Ref<T>
-}
-```
-
-La deuxième condition (`=== 0`) ne peut jamais être vraie car la première (`!filteredRefs.length`) couvre déjà `length === 0`. Bug probable : devrait être `=== 1`.
-
-**Fix :** Changer en `filteredRefs.length === 1`.
+Corrigé : `=== 0` → `=== 1`.
 
 ---
 
@@ -52,21 +38,9 @@ Le `catch` avale l'erreur détaillée du `try`. Le message enrichi n'est jamais 
 
 ## Ternaire conditionnel `&&` et ternaires imbriqués
 
-### #21 — HIGH — Ternaire imbriqué dans `studio-dialog.tsx`
+### #21 — ~~HIGH~~ ✅ FAIT — Ternaire imbriqué dans `studio-dialog.tsx`
 
-**Fichier :** `src/components/Meme/studio-dialog.tsx:177-256`
-
-```tsx
-{isLoading ? (
-  <div>...</div>
-) : data ? (
-  <VideoPlayer>...</VideoPlayer>
-) : (
-  <VideoPlayer>...</VideoPlayer>
-)}
-```
-
-3 niveaux de ternaire. Doit utiliser `if/else` extrait dans une fonction helper.
+Converti en trois expressions conditionnelles séparées.
 
 ---
 
@@ -98,15 +72,9 @@ Les composants/fonctions suivants dépassent largement la limite de 30 lignes :
 
 ## Max 2 paramètres positionnels
 
-### #9 — HIGH — 4 paramètres dans `getTresholdMs`
+### #9 — ~~HIGH~~ ✅ FAIT — 4 paramètres dans `getTresholdMs`
 
-**Fichier :** `src/hooks/use-register-meme-view.ts:21-26`
-
-```tsx
-const getTresholdMs = (video, ratio, minMs, maxMs) => { ... }
-```
-
-**Fix :** `getTresholdMs(video, { ratio, minMs, maxMs }: ThresholdParams)`
+Converti en objet `GetTresholdMsParams`. Typo `getTresholdMs` → `getThresholdMs` restante (étape 7).
 
 ---
 
@@ -267,13 +235,9 @@ Utilise `as FaqItem[]` (assertion) au lieu de `as const satisfies readonly FaqIt
 
 ---
 
-## `@ts-ignore` / `@ts-expect-error`
+## ~~`@ts-ignore` / `@ts-expect-error`~~ ✅ FAIT
 
-| Fichier | Ligne | Problème | Sévérité |
-|---------|-------|----------|----------|
-| `src/hooks/use-video-processor.ts` | 105 | `@ts-ignore` → devrait être `@ts-expect-error` | MEDIUM |
-| `src/server/user.ts` | 30-31, 68-69 | `@ts-expect-error` sans explication — type mismatch `context.user` vs `UserWithRole` à corriger | MEDIUM |
-| `src/lib/bunny.ts` | 107 | `@ts-ignore` → devrait être `@ts-expect-error` ou fix du type | MEDIUM |
+Tous corrigés : `@ts-ignore` → `@ts-expect-error` avec descriptions dans `use-video-processor.ts`, `bunny.ts`, `checkout.success.tsx`, `only-portrait.tsx`. Descriptions ajoutées dans `server/user.ts`.
 
 ---
 

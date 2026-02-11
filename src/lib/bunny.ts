@@ -51,7 +51,7 @@ export const deleteVideo = createServerOnlyFn(async (videoId: string) => {
   )
 })
 
-export const VIDEO_PLAY_DATA_SCHEMA = z.object({
+const VIDEO_PLAY_DATA_SCHEMA = z.object({
   video: z.object({
     length: z.number()
   })
@@ -104,7 +104,7 @@ export const uploadVideo = createServerOnlyFn(
       {
         method: 'PUT',
         headers,
-        // @ts-ignore
+        // @ts-expect-error: fetch body type doesn't accept Buffer but it works at runtime
         body: videoBuffer
       }
     )

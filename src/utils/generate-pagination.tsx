@@ -1,4 +1,4 @@
-import type { JSX } from 'react'
+import React from 'react'
 import { PaginationItem, PaginationLink } from '@/components/ui/pagination'
 import type { LinkProps } from '@tanstack/react-router'
 
@@ -6,8 +6,8 @@ export const generatePaginationLinks = (
   currentPage: number,
   totalPages: number,
   getLinkProps: (page: number) => LinkProps
-): JSX.Element[] => {
-  const pages: JSX.Element[] = []
+): React.JSX.Element[] => {
+  const pages: React.JSX.Element[] = []
   const maxVisible = 6
 
   if (totalPages <= maxVisible) {

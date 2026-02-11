@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/filename-case */
 import React from 'react'
 import { formatDate } from 'date-fns'
 import { ExternalLink, Pen, Trash } from 'lucide-react'
@@ -30,12 +31,12 @@ const RouteComponent = () => {
 
   const handleEditSuccess = () => {
     setIsEditDialogOpen(false)
-    queryClient.invalidateQueries({
+    void queryClient.invalidateQueries({
       queryKey: getAdminMemesListQueryOpts.all,
       exact: false
     })
-    queryClient.invalidateQueries(getMemeByIdQueryOpts(meme.id))
-    router.invalidate()
+    void queryClient.invalidateQueries(getMemeByIdQueryOpts(meme.id))
+    void router.invalidate()
   }
 
   return (

@@ -19,24 +19,24 @@ ESLint v5 d'abord pour que tout le code modifié ensuite soit lint correctement.
 
 ### ESLint v5
 
-- [ ] `npm install -D prettier@3 @viclafouch/eslint-config-viclafouch@5`
-- [ ] Réécrire `eslint.config.js` : retirer `baseConfig`, ajouter `hooksConfig` + `jsxA11yConfig`, corriger l'ordre (ignores → typescript → react → hooks → a11y → imports → prettier)
-- [ ] `npm run lint:fix` et corriger les nouvelles erreurs
+- [x] `npm install -D prettier@3 @viclafouch/eslint-config-viclafouch@5`
+- [x] Réécrire `eslint.config.js` : retirer `baseConfig`, ajouter `hooksConfig` + `jsxA11yConfig`, corriger l'ordre (ignores → typescript → react → hooks → a11y → imports → prettier)
+- [x] `npm run lint:fix` et corriger les nouvelles erreurs
 
 ### Dead code
 
-- [ ] Supprimer les 11 fichiers inutilisés
-- [ ] Retirer `export` des 8 symboles utilisés uniquement localement
-- [ ] Supprimer les 2 fonctions mortes (`matchIsVideoFullyReady`, `useCloseDialog`)
-- [ ] Corriger le bug dans `merge-ref.ts` (`=== 0` → `=== 1`)
-- [ ] `npm uninstall` les 4 packages inutilisés
-- [ ] Remplacer `algoliasearch` par `@algolia/client-search` explicite
+- [x] Supprimer les 11 fichiers inutilisés
+- [x] Retirer `export` des 8 symboles utilisés uniquement localement
+- [x] Supprimer les 2 fonctions mortes (`matchIsVideoFullyReady`, `useCloseDialog`)
+- [x] Corriger le bug dans `merge-ref.ts` (`=== 0` → `=== 1`)
+- [x] `npm uninstall` les 4 packages inutilisés
+- [x] Remplacer `algoliasearch` par `@algolia/client-search` explicite
 
 ### Deps routine
 
-- [ ] Appliquer les 16 patches routine (`npx taze -Ilw`)
-- [ ] Mettre à jour TanStack Router ecosystem, Prisma 7.3.0, @google/genai, resend, react-email, TanStack Form, motion 12.34.0, nitro alpha.2
-- [ ] `npx prisma generate` + `npm run build` pour valider
+- [x] Appliquer les 16 patches routine
+- [x] Mettre à jour TanStack Router ecosystem, Prisma 7.3.0, @google/genai, resend, react-email, TanStack Form, motion 12.34.0, nitro alpha.2
+- [x] `npx prisma generate` + `npm run build` pour valider
 
 ---
 
@@ -193,13 +193,14 @@ Dédupliquer d'abord, refactorer ensuite, Tailwind en dernier (mécanique). Tout
 - [ ] Fix bug : erreur avalée dans `utils.ts` (catch qui perd le message détaillé)
 - [ ] Extraire le ternaire imbriqué dans `studio-dialog.tsx`
 - [ ] Découper les composants > 200 lignes (MemeForm, $memeId, SignupForm, PlayerDialog)
-- [ ] `getTresholdMs` → objet params + typo → `getThresholdMs`
+- [x] `getTresholdMs` → objet params (typo rename `getThresholdMs` restante)
+
 - [ ] Mutations `let` → fonctions pures
 - [ ] `as const satisfies` sur `BUNNY_STATUS`, FAQ items
 - [ ] Renommer `open` → `isOpen` dans mobile-nav et user-dropdown
 - [ ] Supprimer commentaires inutiles + code commenté mort
 - [ ] `return () => {}` → `return`
-- [ ] `@ts-ignore` → `@ts-expect-error` avec explication
+- [x] `@ts-ignore` → `@ts-expect-error` avec explication
 
 ### Tailwind
 
@@ -221,9 +222,9 @@ Dédupliquer d'abord, refactorer ensuite, Tailwind en dernier (mécanique). Tout
 Après le refactoring (étape 7) pour ne pas optimiser du code qui va changer.
 
 - [ ] HIGH : `createRef` dans `useMemo` pour Reels → Map persistante de refs
-- [ ] MEDIUM : dépendances inutiles dans les `useMemo` (`user` dans meme-list-item et toggle-like-button)
+- [x] MEDIUM : dépendances inutiles dans les `useMemo` (`user` dans meme-list-item et toggle-like-button)
 - [ ] MEDIUM : guard SSR pour `IntersectionObserver` (initialiser dans useEffect, pas useRef)
-- [ ] MEDIUM : cleanup FFmpeg dans `useVideoProcessor` (ajouter `query.data` / `ffmpeg` aux deps)
+- [x] MEDIUM : cleanup FFmpeg dans `useVideoProcessor` (ajouter `query.data` / `ffmpeg` aux deps)
 - [ ] MEDIUM : optimiser `DialogProvider` → selectors Zustand
 - [ ] MEDIUM : `virtualItems` comme dépendance de useEffect → dériver une dépendance stable
 - [ ] LOW : stabiliser les callbacks passés aux composants memo (`handleSelect`, `handleUnSelect`)

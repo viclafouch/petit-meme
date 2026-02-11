@@ -1,5 +1,4 @@
 import React from 'react'
-import type { User } from 'better-auth'
 import { motion } from 'framer-motion'
 import {
   ArrowRight,
@@ -49,10 +48,11 @@ const sizes = {
   }
 } as const
 
-const FavoriteItem = ({ user, meme }: { user: User; meme: MemeWithVideo }) => {
+const FavoriteItem = ({ meme }: { meme: MemeWithVideo }) => {
   const queryClient = useQueryClient()
   const query = useQuery(getFavoritesMemesQueryOpts())
 
+  // eslint-disable-next-line no-restricted-syntax
   const isMemeBookmarked = React.useMemo(() => {
     if (!query.data) {
       return false
@@ -61,7 +61,7 @@ const FavoriteItem = ({ user, meme }: { user: User; meme: MemeWithVideo }) => {
     return query.data.bookmarks.some((bookmark) => {
       return bookmark.id === meme.id
     })
-  }, [user, query.data])
+  }, [query.data, meme.id])
 
   const toggleFavorite = useMutation({
     mutationFn: toggleBookmarkByMemeId,
@@ -73,28 +73,28 @@ const FavoriteItem = ({ user, meme }: { user: User; meme: MemeWithVideo }) => {
       })
 
       queryClient.setQueryData(getFavoritesMemesQueryOpts().queryKey, (old) => {
-        if (old) {
-          if (!newValue) {
-            return {
-              bookmarks: old.bookmarks.filter((bookmark) => {
-                return bookmark.id !== meme.id
-              }),
-              count: old.count - 1
-            }
-          }
+        if (!old) {
+          return old
+        }
 
+        if (!newValue) {
           return {
-            bookmarks: [meme, ...old.bookmarks],
-            count: old.count + 1
+            bookmarks: old.bookmarks.filter((bookmark) => {
+              return bookmark.id !== meme.id
+            }),
+            count: old.count - 1
           }
         }
 
-        return undefined
+        return {
+          bookmarks: [meme, ...old.bookmarks],
+          count: old.count + 1
+        }
       })
     },
     onSettled: () => {
-      queryClient.invalidateQueries(getMemeByIdQueryOpts(meme.id))
-      queryClient.invalidateQueries(getFavoritesMemesQueryOpts())
+      void queryClient.invalidateQueries(getMemeByIdQueryOpts(meme.id))
+      void queryClient.invalidateQueries(getFavoritesMemesQueryOpts())
     }
   })
 
@@ -138,7 +138,7 @@ const FavoriteItemGuard = ({ meme }: { meme: MemeWithVideo }) => {
     )
   }
 
-  return <FavoriteItem user={user} meme={meme} />
+  return <FavoriteItem meme={meme} />
 }
 
 export const MemeListItem = React.memo(
@@ -147,7 +147,7 @@ export const MemeListItem = React.memo(
     onPlayClick,
     layoutContext,
     onOpenStudioClick,
-    size = 'md'
+    size
   }: MemeListItemProps) => {
     const shareMeme = useShareMeme()
     const downloadMutation = useDownloadMeme()

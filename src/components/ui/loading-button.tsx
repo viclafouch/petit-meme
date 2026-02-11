@@ -7,7 +7,7 @@ export const LoadingButton = ({
   children,
   disabled,
   loadingText = 'Chargement...',
-  isLoading = false,
+  isLoading,
   ...props
 }: React.ComponentProps<typeof Button> & {
   isLoading: boolean

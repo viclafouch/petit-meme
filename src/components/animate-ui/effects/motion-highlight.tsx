@@ -563,7 +563,6 @@ const MotionHighlightItem = ({
               />
             ) : null}
           </AnimatePresence>
-
           <div
             data-slot="motion-highlight-item"
             className={cn('relative z-[1]', className)}
@@ -623,7 +622,6 @@ const MotionHighlightItem = ({
           ) : null}
         </AnimatePresence>
       ) : null}
-
       {React.cloneElement(element, {
         className: cn('relative z-[1]', element.props.className),
         ...getNonOverridingDataAttributes(element, {

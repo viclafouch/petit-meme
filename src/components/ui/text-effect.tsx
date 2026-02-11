@@ -225,13 +225,14 @@ const splitReactNodes = (
   const processNode = (node: React.ReactNode, currentIndex = 0): number => {
     if (typeof node === 'string') {
       const words = node.split(/(\s+)/)
-      words.forEach((word) => {
+
+      for (const word of words) {
         if (word.trim()) {
           segments.push(word)
         } else if (word) {
           segments.push(word)
         }
-      })
+      }
 
       return currentIndex + words.length
     }
@@ -248,9 +249,10 @@ const splitReactNodes = (
 
     if (Array.isArray(node)) {
       let index = currentIndex
-      node.forEach((child) => {
+
+      for (const child of node) {
         index = processNode(child, index)
-      })
+      }
 
       return index
     }

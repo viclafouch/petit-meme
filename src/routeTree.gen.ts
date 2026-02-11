@@ -173,27 +173,27 @@ const Public__rootDefaultMemesCategorySlugRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof Public__rootIndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
   '/health': typeof HealthRoute
   '/reels': typeof ReelsRoute
   '/admin/downloader': typeof AdminDownloaderRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/bunny': typeof ApiBunnyRoute
-  '/': typeof Public__rootIndexRoute
   '/settings': typeof Public__rootDefaultSettingsRouteRouteWithChildren
   '/favorites': typeof Public__rootDefaultFavoritesRoute
   '/pricing': typeof Public__rootDefaultPricingRoute
   '/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/admin/categories': typeof AdminCategoriesIndexRoute
-  '/admin/library': typeof AdminLibraryIndexRoute
+  '/admin/categories/': typeof AdminCategoriesIndexRoute
+  '/admin/library/': typeof AdminLibraryIndexRoute
   '/checkout/success': typeof Public__rootDefaultCheckoutSuccessRoute
   '/memes/$memeId': typeof Public__rootDefaultMemesMemeIdRoute
   '/password/create-new': typeof Public__rootDefaultPasswordCreateNewRoute
   '/password/reset': typeof Public__rootDefaultPasswordResetRoute
-  '/memes': typeof Public__rootDefaultMemesIndexRoute
-  '/random': typeof Public__rootDefaultRandomIndexRoute
+  '/memes/': typeof Public__rootDefaultMemesIndexRoute
+  '/random/': typeof Public__rootDefaultRandomIndexRoute
   '/settings/': typeof Public__rootDefaultSettingsIndexRoute
   '/memes/category/$slug': typeof Public__rootDefaultMemesCategorySlugRoute
 }
@@ -201,10 +201,10 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRouteRouteWithChildren
   '/health': typeof HealthRoute
   '/reels': typeof ReelsRoute
+  '/': typeof Public__rootIndexRoute
   '/admin/downloader': typeof AdminDownloaderRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/bunny': typeof ApiBunnyRoute
-  '/': typeof Public__rootIndexRoute
   '/favorites': typeof Public__rootDefaultFavoritesRoute
   '/pricing': typeof Public__rootDefaultPricingRoute
   '/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
@@ -252,27 +252,27 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
     | '/admin'
     | '/health'
     | '/reels'
     | '/admin/downloader'
     | '/admin/users'
     | '/api/bunny'
-    | '/'
     | '/settings'
     | '/favorites'
     | '/pricing'
     | '/terms-of-use'
     | '/admin/library/$memeId'
     | '/api/auth/$'
-    | '/admin/categories'
-    | '/admin/library'
+    | '/admin/categories/'
+    | '/admin/library/'
     | '/checkout/success'
     | '/memes/$memeId'
     | '/password/create-new'
     | '/password/reset'
-    | '/memes'
-    | '/random'
+    | '/memes/'
+    | '/random/'
     | '/settings/'
     | '/memes/category/$slug'
   fileRoutesByTo: FileRoutesByTo
@@ -280,10 +280,10 @@ export interface FileRouteTypes {
     | '/admin'
     | '/health'
     | '/reels'
+    | '/'
     | '/admin/downloader'
     | '/admin/users'
     | '/api/bunny'
-    | '/'
     | '/favorites'
     | '/pricing'
     | '/terms-of-use'
@@ -363,7 +363,7 @@ declare module '@tanstack/react-router' {
     '/_public__root': {
       id: '/_public__root'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof Public__rootRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -398,21 +398,21 @@ declare module '@tanstack/react-router' {
     '/_public__root/_default': {
       id: '/_public__root/_default'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof Public__rootDefaultRouteRouteImport
       parentRoute: typeof Public__rootRouteRoute
     }
     '/admin/library/': {
       id: '/admin/library/'
       path: '/library'
-      fullPath: '/admin/library'
+      fullPath: '/admin/library/'
       preLoaderRoute: typeof AdminLibraryIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/categories/': {
       id: '/admin/categories/'
       path: '/categories'
-      fullPath: '/admin/categories'
+      fullPath: '/admin/categories/'
       preLoaderRoute: typeof AdminCategoriesIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
@@ -468,14 +468,14 @@ declare module '@tanstack/react-router' {
     '/_public__root/_default/random/': {
       id: '/_public__root/_default/random/'
       path: '/random'
-      fullPath: '/random'
+      fullPath: '/random/'
       preLoaderRoute: typeof Public__rootDefaultRandomIndexRouteImport
       parentRoute: typeof Public__rootDefaultRouteRoute
     }
     '/_public__root/_default/memes/': {
       id: '/_public__root/_default/memes/'
       path: '/memes'
-      fullPath: '/memes'
+      fullPath: '/memes/'
       preLoaderRoute: typeof Public__rootDefaultMemesIndexRouteImport
       parentRoute: typeof Public__rootDefaultRouteRoute
     }

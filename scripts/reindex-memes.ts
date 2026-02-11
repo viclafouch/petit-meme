@@ -25,4 +25,4 @@ async function reindexMemes() {
 }
 
 // npx vite-node scripts/reindex-memes.ts
-reindexMemes()
+void reindexMemes()

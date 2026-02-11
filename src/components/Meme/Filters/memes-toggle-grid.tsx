@@ -14,7 +14,7 @@ const MemesToggleGrid = ({
 }) => {
   const handleChange = (value: string) => {
     if (value) {
-      onColumnValueChange(parseInt(value, 10))
+      onColumnValueChange(Number.parseInt(value, 10))
     }
   }
 

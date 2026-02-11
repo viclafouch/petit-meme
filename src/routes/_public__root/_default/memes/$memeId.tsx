@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/filename-case */
 import React from 'react'
 import { formatDate } from 'date-fns'
 import Hls from 'hls.js'
@@ -51,6 +52,7 @@ import {
   useRouter
 } from '@tanstack/react-router'
 
+// eslint-disable-next-line max-lines-per-function
 const RouteComponent = () => {
   const { nextRandomMeme, originalUrl } = Route.useLoaderData()
   const { user } = useRouteContext({ from: '__root__' })
@@ -91,6 +93,7 @@ const RouteComponent = () => {
   const shareMutation = useShareMeme()
   const downloadMutation = useDownloadMeme()
 
+  // eslint-disable-next-line no-restricted-syntax
   const allTags = React.useMemo(() => {
     return [
       ...new Set([
@@ -121,7 +124,7 @@ const RouteComponent = () => {
       }
     }
 
-    preload()
+    void preload()
   }, [router, nextRandomMeme])
 
   React.useEffect(() => {
@@ -144,7 +147,7 @@ const RouteComponent = () => {
     return () => {
       hls.current?.destroy()
     }
-  }, [meme.id])
+  }, [meme.id, meme.video.bunnyId])
 
   const goToNextRandomMeme = async () => {
     try {
@@ -152,9 +155,9 @@ const RouteComponent = () => {
       const newMeme = await nextRandomMeme
 
       if (newMeme) {
-        navigate({ to: '/memes/$memeId', params: { memeId: newMeme.id } })
+        void navigate({ to: '/memes/$memeId', params: { memeId: newMeme.id } })
       } else {
-        navigate({ to: '/memes' })
+        void navigate({ to: '/memes' })
       }
     } catch (error) {
       // eslint-disable-next-line no-console

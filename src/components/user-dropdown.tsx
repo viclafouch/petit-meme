@@ -95,7 +95,7 @@ export const UserDropdown = ({ user }: { user: UserWithRole }) => {
           {!subscription ? (
             <DropdownMenuItem
               onClick={() => {
-                checkoutPremium()
+                void checkoutPremium()
               }}
             >
               <SparklesIcon />
@@ -104,7 +104,7 @@ export const UserDropdown = ({ user }: { user: UserWithRole }) => {
           ) : (
             <DropdownMenuItem
               onClick={() => {
-                goToBillingPortal()
+                void goToBillingPortal()
               }}
               className="flex-col items-start gap-0.5"
             >

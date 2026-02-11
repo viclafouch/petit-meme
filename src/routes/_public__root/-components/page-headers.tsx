@@ -1,4 +1,4 @@
-import { forwardRef } from 'react'
+import React from 'react'
 import { cn } from '@/lib/utils'
 import type { LinkOptions } from '@tanstack/react-router'
 import { Link } from '@tanstack/react-router'
@@ -82,7 +82,7 @@ export const PageHeading2 = ({
   )
 }
 
-export const PageDescription = forwardRef<
+export const PageDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, children, ...props }, ref) => {

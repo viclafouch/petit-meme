@@ -35,7 +35,7 @@ const DropdownMenuUser = ({ user }: { user: UserWithRole }) => {
       })
     },
     onSuccess: () => {
-      router.invalidate()
+      void router.invalidate()
     }
   })
 
@@ -46,7 +46,7 @@ const DropdownMenuUser = ({ user }: { user: UserWithRole }) => {
       })
     },
     onSuccess: () => {
-      router.invalidate()
+      void router.invalidate()
     }
   })
 
@@ -61,7 +61,7 @@ const DropdownMenuUser = ({ user }: { user: UserWithRole }) => {
       return promise
     },
     onSuccess: () => {
-      router.invalidate()
+      void router.invalidate()
     }
   })
 
@@ -161,6 +161,7 @@ const columns = [
 const RouteComponent = () => {
   const data = Route.useLoaderData()
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: data.listUsers.users,
     columns,

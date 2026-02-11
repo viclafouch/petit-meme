@@ -18,12 +18,14 @@ const matchIsEligible = (video: HTMLVideoElement) => {
   return isDocVisible && isPlaying
 }
 
-const getTresholdMs = (
-  video: HTMLVideoElement,
-  ratio: number,
-  minMs: number,
+type GetTresholdMsParams = {
+  video: HTMLVideoElement
+  ratio: number
+  minMs: number
   maxMs: number
-) => {
+}
+
+const getTresholdMs = ({ video, ratio, minMs, maxMs }: GetTresholdMsParams) => {
   const duration = Number.isFinite(video.duration) ? video.duration : 0
   const ratioMs = duration > 0 ? duration * 1000 * ratio : 0
   const raw = Math.max(minMs, ratioMs)
@@ -61,7 +63,7 @@ export function useRegisterMemeView({
         return
       }
 
-      const needed = getTresholdMs(video, ratio, minMs, maxMs)
+      const needed = getTresholdMs({ video, ratio, minMs, maxMs })
 
       if (watchMsRef.current < needed) {
         return

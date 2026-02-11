@@ -25,12 +25,12 @@ import { LoadingSpinner } from '@/components/ui/spinner'
 import { cn } from '@/lib/utils'
 import type { PopoverContentProps } from '@radix-ui/react-popover'
 
-export interface Option {
+export type Option = {
   label: string
   value: string
 }
 
-interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+type Props = {
   /**
    * An array of objects to be displayed in the Select.Option.
    */
@@ -154,9 +154,9 @@ interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
    * Receives the search input value.
    */
   onSearch?: (value: string) => void
-}
+} & React.ButtonHTMLAttributes<HTMLButtonElement>
 
-interface MultiAsyncSelectRef {
+type MultiAsyncSelectRef = {
   setIsPopoverOpen: (open: boolean) => void
   setSearchValue: (value: string) => void
 }

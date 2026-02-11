@@ -34,6 +34,7 @@ export const MemeStatusMeta = {
 }
 
 export const MEMES_SEARCH_SCHEMA = z.object({
+  // eslint-disable-next-line unicorn/no-useless-undefined
   query: z.string().optional().catch(undefined),
   page: z.coerce.number().optional().catch(1),
   status: z.enum(MemeStatus).optional()
@@ -52,7 +53,7 @@ export type MemeWithCategories = Prisma.MemeGetPayload<{
   include: { categories: { include: { category: true } } }
 }>
 
-export const TWITTER_REGEX_THAT_INCLUDES_ID =
+const TWITTER_REGEX_THAT_INCLUDES_ID =
   /^https?:\/\/(?:twitter\.com|x\.com)\/(?:[A-Za-z0-9_]+\/status\/\d+|i\/bookmarks\?post_id=\d+)/
 
 export const TWEET_LINK_SCHEMA = z

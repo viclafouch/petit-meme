@@ -104,12 +104,6 @@ export function useShowDialog() {
   })
 }
 
-export function useCloseDialog() {
-  return useDialog((state) => {
-    return state.closeDialog
-  })
-}
-
 export const DialogProvider = ({ children }: { children: React.ReactNode }) => {
   const { component: Component, componentProps, forceCloseDialog } = useDialog()
 

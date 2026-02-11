@@ -90,7 +90,7 @@ export const getCategoriesListQueryOpts = () => {
     },
     staleTime: 1000 * 60 * 10, // 10min
     select: (categories) => {
-      return [...categories].sort((categoryA, categoryB) => {
+      return categories.toSorted((categoryA, categoryB) => {
         if (categoryA.slug === 'news') {
           return -1
         }

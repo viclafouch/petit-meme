@@ -102,7 +102,7 @@ const addTextToVideo = async (
 
   const data = await ffmpeg.readFile('output.mp4')
 
-  // @ts-ignore
+  // @ts-expect-error: FFmpeg readFile returns FileData which includes Uint8Array at runtime
   return new Blob([data as Uint8Array], { type: 'video/mp4' })
 }
 
@@ -124,7 +124,7 @@ export const useVideoInitializer = () => {
     return () => {
       query.data.terminate()
     }
-  }, [])
+  }, [query.data])
 
   return query
 }
@@ -140,6 +140,7 @@ export const useVideoProcessor = (
   const [progress, setProgress] = React.useState(0)
   const showDialog = useShowDialog()
 
+  // eslint-disable-next-line no-restricted-syntax
   const progressSubscription = React.useCallback(
     (progressEvent: ProgressEvent) => {
       setProgress(Math.round(progressEvent.progress * 100))
@@ -168,7 +169,7 @@ export const useVideoProcessor = (
     },
     onSuccess: ({ blob }) => {
       options?.onSuccess?.(blob)
-      incrementGenerationCount()
+      void incrementGenerationCount()
     },
     onError: (error) => {
       if (error instanceof StudioError && error.code === 'UNAUTHORIZED') {
@@ -198,7 +199,7 @@ export const useVideoProcessor = (
     return () => {
       ffmpeg.terminate()
     }
-  }, [])
+  }, [ffmpeg])
 
   return {
     processVideo: mutation.mutate,

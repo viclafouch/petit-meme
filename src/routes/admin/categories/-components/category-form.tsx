@@ -139,7 +139,7 @@ export const CategoryForm = ({
       onSubmit={(event) => {
         event.preventDefault()
         handleAddKeyword()
-        form.handleSubmit()
+        void form.handleSubmit()
       }}
     >
       <div className="flex flex-col gap-y-6">

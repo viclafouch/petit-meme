@@ -42,6 +42,7 @@ const TanStackRouterDevtools =
       })
 
 const RootDocument = ({ children }: { children: React.ReactNode }) => {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { _storedTheme } = Route.useLoaderData()
 
   return (

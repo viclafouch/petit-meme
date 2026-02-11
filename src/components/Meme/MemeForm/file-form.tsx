@@ -72,6 +72,7 @@ export const FileForm = ({ onSuccess, closeDialog }: FileFormProps) => {
     }
   })
 
+  // eslint-disable-next-line no-restricted-syntax
   const onFileReject = React.useCallback((file: File, message: string) => {
     toast(message, {
       description: `"${file.name.length > 20 ? `${file.name.slice(0, 20)}...` : file.name}" has been rejected`
@@ -82,7 +83,7 @@ export const FileForm = ({ onSuccess, closeDialog }: FileFormProps) => {
     <form
       onSubmit={(event) => {
         event.preventDefault()
-        form.handleSubmit()
+        void form.handleSubmit()
       }}
       noValidate
       className="flex flex-col gap-4"

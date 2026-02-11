@@ -8,7 +8,7 @@ import {
 import { createFileRoute, Link } from '@tanstack/react-router'
 
 const showCanvas = async (canvasElement: HTMLCanvasElement) => {
-  // @ts-ignore
+  // @ts-expect-error: canvas-confetti has no type declarations
   const confetti = await import('canvas-confetti')
   const myConfetti = confetti.create(canvasElement, {
     resize: true,
@@ -32,7 +32,7 @@ const RouteComponent = () => {
     }
 
     setTimeout(() => {
-      showCanvas(canvas)
+      void showCanvas(canvas)
     }, 300)
   }, [])
 

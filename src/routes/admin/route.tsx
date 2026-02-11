@@ -18,7 +18,7 @@ const RouteComponent = () => {
 
   React.useLayoutEffect(() => {
     setTheme('dark')
-  }, [])
+  }, [setTheme])
 
   return (
     <SidebarProvider

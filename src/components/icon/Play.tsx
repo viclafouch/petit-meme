@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/filename-case */
 import React from 'react'
 
 export const BunnyPlayIcon = (props: React.ComponentProps<'svg'>) => {

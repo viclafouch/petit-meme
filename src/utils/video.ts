@@ -7,7 +7,3 @@ export const matchIsVideoPlayable = (bunnyStatus: number) => {
     bunnyStatus !== BUNNY_STATUS.PRESIGNED_UPLOAD_FAILED
   )
 }
-
-export const matchIsVideoFullyReady = (bunnyStatus: number) => {
-  return bunnyStatus === BUNNY_STATUS.FINISHED
-}

@@ -8,24 +8,20 @@ type NumberFormatOptionsWithLocale = Intl.NumberFormatOptions & {
   locale?: Locale
 }
 
-export const FORMAT_OPTIONS_BY_LOCALE: ValuesByLocale<Intl.NumberFormatOptions> =
-  {
-    fr: {
-      style: 'currency',
-      minimumFractionDigits: 0,
-      currency: 'EUR'
-    },
-    en: {
-      style: 'currency',
-      minimumFractionDigits: 0,
-      currency: 'EUR'
-    }
+const FORMAT_OPTIONS_BY_LOCALE: ValuesByLocale<Intl.NumberFormatOptions> = {
+  fr: {
+    style: 'currency',
+    minimumFractionDigits: 0,
+    currency: 'EUR'
+  },
+  en: {
+    style: 'currency',
+    minimumFractionDigits: 0,
+    currency: 'EUR'
   }
+}
 
-export function formatEuros(
-  euros: number,
-  options?: NumberFormatOptionsWithLocale
-) {
+function formatEuros(euros: number, options?: NumberFormatOptionsWithLocale) {
   const locale = options?.locale ?? LOCALE_FALLBACK
   const defaultOptions = FORMAT_OPTIONS_BY_LOCALE[locale]
 
@@ -35,7 +31,7 @@ export function formatEuros(
   })
 }
 
-export function convertCentsToEuros(cents: number) {
+function convertCentsToEuros(cents: number) {
   return cents / 100
 }
 

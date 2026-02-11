@@ -69,6 +69,7 @@ const columns = [
 const RouteComponent = () => {
   const { categories } = Route.useLoaderData()
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: categories,
     columns,

@@ -27,11 +27,11 @@ export const NewMemeButton = ({ ...restButtonProps }: NewMemeButtonProps) => {
   }
 
   const handleAddMeme = ({ memeId }: { memeId: string }) => {
-    queryClient.invalidateQueries({
+    void queryClient.invalidateQueries({
       queryKey: getAdminMemesListQueryOpts.all,
       exact: false
     })
-    navigate({ to: '/admin/library/$memeId', params: { memeId } })
+    void navigate({ to: '/admin/library/$memeId', params: { memeId } })
     closeDialog()
   }
 

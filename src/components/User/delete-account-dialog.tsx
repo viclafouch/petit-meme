@@ -54,7 +54,7 @@ const DeleteAccountForm = ({ onCancel }: { onCancel: () => void }) => {
   const deleteAccountMutation = useMutation({
     mutationFn: async ({ currentPassword }: { currentPassword: string }) => {
       return new Promise((resolve, reject) => {
-        authClient.deleteUser(
+        void authClient.deleteUser(
           {
             password: currentPassword
           },
@@ -67,7 +67,7 @@ const DeleteAccountForm = ({ onCancel }: { onCancel: () => void }) => {
       queryClient.removeQueries(getActiveSubscriptionQueryOpts())
       queryClient.removeQueries(getFavoritesMemesQueryOpts())
       toast.success('Votre compte a bien été supprimé !')
-      router.navigate({ to: '/', from: '/' })
+      void router.navigate({ to: '/', from: '/' })
       await router.invalidate()
     },
     onError: (context: Error | ErrorContext) => {
@@ -87,7 +87,7 @@ const DeleteAccountForm = ({ onCancel }: { onCancel: () => void }) => {
     <form
       onSubmit={(event) => {
         event.preventDefault()
-        form.handleSubmit()
+        void form.handleSubmit()
       }}
       noValidate
       className="flex flex-col items-center gap-y-6 w-full"

@@ -79,7 +79,7 @@ export const Reel = React.memo(
       }
 
       return () => {}
-    }, [meme.video.id])
+    }, [meme.video.id, meme.video.bunnyId])
 
     return (
       <div className="size-full relative select-none">
@@ -181,12 +181,15 @@ export const MemeReels = () => {
   const observerRef = React.useRef(
     new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
+        for (const entry of entries) {
           if (entry.isIntersecting) {
-            const index = parseInt(entry.target.getAttribute('data-index')!, 10)
+            const index = Number.parseInt(
+              entry.target.getAttribute('data-index')!,
+              10
+            )
             setActiveDebouncer.maybeExecute(index)
           }
-        })
+        }
       },
       { threshold: 0.7 }
     )
@@ -200,6 +203,7 @@ export const MemeReels = () => {
     { wait: 300 }
   )
 
+  // eslint-disable-next-line no-restricted-syntax
   const memesRefs = React.useMemo(() => {
     return (
       infiniteReels.data?.pages
@@ -217,6 +221,7 @@ export const MemeReels = () => {
     )
   }, [infiniteReels.data])
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const rowVirtualizer = useVirtualizer({
     count: memesRefs.length,
     getScrollElement: () => {
@@ -231,23 +236,23 @@ export const MemeReels = () => {
   const virtualItems = rowVirtualizer.getVirtualItems()
 
   React.useEffect(() => {
-    virtualItems.forEach((virtualRow) => {
+    for (const virtualRow of virtualItems) {
       const item = memesRefs[virtualRow.index]
 
-      if (item) {
-        if (item.ref.current) {
-          observerRef.current.observe(item.ref.current)
-        }
+      if (item && item.ref.current) {
+        observerRef.current.observe(item.ref.current)
       }
-    })
+    }
+
+    const observer = observerRef.current
 
     return () => {
-      return observerRef.current.disconnect()
+      return observer.disconnect()
     }
   }, [memesRefs, virtualItems])
 
   React.useEffect(() => {
-    const [item] = [...virtualItems].reverse()
+    const [item] = virtualItems.toReversed()
 
     if (!item) {
       return
@@ -258,14 +263,15 @@ export const MemeReels = () => {
       infiniteReels.hasNextPage &&
       !infiniteReels.isFetchingNextPage
     ) {
-      infiniteReels.fetchNextPage()
+      void infiniteReels.fetchNextPage()
     }
   }, [
     infiniteReels.hasNextPage,
     infiniteReels.fetchNextPage,
     memesRefs.length,
     infiniteReels.isFetchingNextPage,
-    virtualItems
+    virtualItems,
+    infiniteReels
   ])
 
   return (

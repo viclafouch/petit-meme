@@ -37,7 +37,7 @@ export const ErrorComponent = ({ error }: { error: Error }) => {
           <Button
             className="w-full"
             onClick={() => {
-              router.invalidate()
+              void router.invalidate()
             }}
           >
             Réessayer

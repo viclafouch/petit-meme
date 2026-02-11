@@ -90,9 +90,9 @@ export const Responsive = () => {
 
   React.useEffect(() => {
     if (isInView) {
-      tabletVideoRef.current?.play()
-      mobileVideoRef.current?.play()
-      desktopVideoRef.current?.play()
+      void tabletVideoRef.current?.play()
+      void mobileVideoRef.current?.play()
+      void desktopVideoRef.current?.play()
     }
   }, [isInView])
 

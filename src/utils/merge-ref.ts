@@ -11,7 +11,7 @@ export function mergeRefs<T>(
     return null
   }
 
-  if (filteredRefs.length === 0) {
+  if (filteredRefs.length === 1) {
     return filteredRefs[0] as React.Ref<T>
   }
 

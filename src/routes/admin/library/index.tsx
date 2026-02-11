@@ -23,6 +23,7 @@ const MemesListWrapper = () => {
     leading: false
   })
 
+  // eslint-disable-next-line no-restricted-syntax
   const filters = React.useMemo(() => {
     return {
       query: debouncedValue,
@@ -68,7 +69,7 @@ const RouteComponent = () => {
   const search = Route.useSearch()
 
   const handleStatusChange = (status: MemeStatus | null) => {
-    navigate({
+    void navigate({
       to: '/admin/library',
       search: (prevState) => {
         return {
@@ -83,7 +84,7 @@ const RouteComponent = () => {
   }
 
   const handleQueryChange = (value: string) => {
-    navigate({
+    void navigate({
       to: '/admin/library',
       search: (prevState) => {
         return {

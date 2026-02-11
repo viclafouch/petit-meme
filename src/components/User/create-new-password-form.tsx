@@ -1,6 +1,8 @@
 import React from 'react'
+import { CircleAlert } from 'lucide-react'
 import { toast } from 'sonner'
 import { z } from 'zod'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
   FormControl,
   FormItem,
@@ -9,9 +11,11 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { LoadingButton } from '@/components/ui/loading-button'
-import { authClient, getErrorMessage } from '@/lib/auth-client'
+import { getAuthErrorMessage } from '@/helpers/auth-errors'
+import { authClient } from '@/lib/auth-client'
 import { getFieldErrorMessage } from '@/lib/utils'
 import { formOptions, useForm } from '@tanstack/react-form'
+import { useMutation } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 
 const createNewPasswordForm = z
@@ -42,21 +46,29 @@ const createNewPasswordFormOpts = formOptions({
 export const CreateNewPasswordForm = ({ token }: { token: string }) => {
   const router = useRouter()
 
-  const form = useForm({
-    ...createNewPasswordFormOpts,
-    onSubmit: async ({ value }) => {
+  const resetPasswordMutation = useMutation({
+    mutationFn: async ({ newPassword }: { newPassword: string }) => {
       const { error } = await authClient.resetPassword({
-        newPassword: value.password,
+        newPassword,
         token
       })
 
       if (error) {
-        toast.error(getErrorMessage(error, 'fr'))
-
-        return
+        throw new Error(error.code)
       }
-
+    },
+    onSuccess: () => {
+      toast.success('Votre mot de passe a bien été modifié !')
       void router.navigate({ to: '/' })
+    }
+  })
+
+  const form = useForm({
+    ...createNewPasswordFormOpts,
+    onSubmit: async ({ value }) => {
+      return resetPasswordMutation.mutateAsync({
+        newPassword: value.password
+      })
     }
   })
 
@@ -142,6 +154,14 @@ export const CreateNewPasswordForm = ({ token }: { token: string }) => {
           )
         }}
       />
+      {resetPasswordMutation.error ? (
+        <Alert variant="destructive">
+          <CircleAlert />
+          <AlertDescription>
+            {getAuthErrorMessage(resetPasswordMutation.error.message)}
+          </AlertDescription>
+        </Alert>
+      ) : null}
     </form>
   )
 }

@@ -78,6 +78,9 @@ model Meme {
   submittedBy  String?
   submitter    User?          @relation(fields: [submittedBy], references: [id])
   viewsDaily   MemeViewDaily[]
+
+  @@index([status])
+  @@index([status, viewCount])
 }
 
 model MemeViewDaily {

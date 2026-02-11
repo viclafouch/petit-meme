@@ -5,7 +5,7 @@ import { FREE_PLAN } from '@/constants/plan'
 import { prismaClient } from '@/db'
 import type { Meme } from '@/db/generated/prisma/client'
 import { matchIsUserAdmin } from '@/lib/role'
-import { getActiveSubscription } from '@/server/customer'
+import { findActiveSubscription } from '@/server/customer'
 import { authUserRequiredMiddleware } from '@/server/user-auth'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
@@ -14,7 +14,7 @@ import { setResponseStatus } from '@tanstack/react-start/server'
 export const getFavoritesMemes = createServerFn({ method: 'GET' })
   .middleware([authUserRequiredMiddleware])
   .handler(async ({ context }) => {
-    const activeSubscription = await getActiveSubscription()
+    const activeSubscription = await findActiveSubscription(context.user.id)
 
     const bookmarks = await prismaClient.userBookmark.findMany({
       where: {
@@ -60,7 +60,7 @@ export const checkGeneration = createServerFn({ method: 'POST' })
       }
     })
 
-    const activeSubscription = await getActiveSubscription()
+    const activeSubscription = await findActiveSubscription(context.user.id)
 
     if (
       generationCount >= FREE_PLAN.maxGenerationsCount &&
@@ -96,7 +96,7 @@ const toggleBookmark = createServerOnlyFn(
     })
 
     if (totalBookmarks >= FREE_PLAN.maxFavoritesCount) {
-      const activeSubscription = await getActiveSubscription()
+      const activeSubscription = await findActiveSubscription(userId)
 
       if (!activeSubscription) {
         setResponseStatus(403)

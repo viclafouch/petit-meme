@@ -6,6 +6,7 @@ export function downloadBlob(blob: Blob, filename: string) {
   document.body.appendChild(element)
   element.click()
   element.remove()
+  URL.revokeObjectURL(url)
 }
 
 export async function shareBlob(blob: Blob, title: string, extension = 'mp4') {

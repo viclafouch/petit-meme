@@ -1,28 +1,25 @@
+import type { User } from 'better-auth'
 import { auth } from '@/lib/auth'
 import { getAuthUser } from '@/server/user-auth'
-import { createServerFn } from '@tanstack/react-start'
+import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
 
-export const getActiveSubscription = createServerFn({ method: 'GET' }).handler(
-  async () => {
-    const user = await getAuthUser()
-
-    if (!user) {
-      return null
-    }
-
-    const request = getRequest()
+export const findActiveSubscription = createServerOnlyFn(
+  async (userId: User['id']) => {
+    const { headers } = getRequest()
 
     try {
       const subscriptions = await auth.api.listActiveSubscriptions({
-        headers: request.headers,
+        headers,
         query: {
-          referenceId: user.id
+          referenceId: userId
         }
       })
 
-      const activeSubscription = subscriptions.find((sub) => {
-        return sub.status === 'active' || sub.status === 'trialing'
+      const activeSubscription = subscriptions.find((subscription) => {
+        return (
+          subscription.status === 'active' || subscription.status === 'trialing'
+        )
       })
 
       return activeSubscription ?? null
@@ -32,6 +29,18 @@ export const getActiveSubscription = createServerFn({ method: 'GET' }).handler(
 
       return null
     }
+  }
+)
+
+export const getActiveSubscription = createServerFn({ method: 'GET' }).handler(
+  async () => {
+    const user = await getAuthUser()
+
+    if (!user) {
+      return null
+    }
+
+    return findActiveSubscription(user.id)
   }
 )
 

@@ -33,7 +33,7 @@ After Prisma schema changes: `npx prisma generate` (also runs on `postinstall`).
 - **Build:** Vite + Nitro (node-server preset)
 - **Database:** PostgreSQL + Prisma ORM
 - **Auth:** Better Auth (Twitter OAuth + email/password)
-- **Styling:** Tailwind CSS v4 + Shadcn UI (New York style) + Framer Motion
+- **Styling:** Tailwind CSS v4 + Shadcn UI (New York style) + Motion
 - **State:** TanStack Query (server state) + Zustand (client state)
 - **Forms:** TanStack Form + Zod validation
 - **Video:** Bunny CDN + HLS.js

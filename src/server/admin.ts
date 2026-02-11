@@ -154,23 +154,22 @@ export const deleteMemeById = createServerFn({ method: 'POST' })
       }
     })
 
-    await prismaClient.video.delete({
-      where: {
-        id: meme.videoId
-      }
-    })
-
-    await algoliaClient
-      .deleteObject({
-        indexName: algoliaIndexName,
-        objectID: meme.id
-      })
-      .catch((error) => {
+    await Promise.all([
+      prismaClient.video.delete({ where: { id: meme.videoId } }),
+      algoliaClient
+        .deleteObject({
+          indexName: algoliaIndexName,
+          objectID: meme.id
+        })
+        .catch((error: unknown) => {
+          // eslint-disable-next-line no-console
+          console.error(error)
+        }),
+      deleteVideo(meme.video.bunnyId).catch((error: unknown) => {
         // eslint-disable-next-line no-console
         console.error(error)
       })
-
-    await deleteVideo(meme.video.bunnyId)
+    ])
 
     return { id: meme.id }
   })
@@ -220,17 +219,18 @@ export const createMemeFromTwitterUrl = createServerFn({ method: 'POST' })
       }
     })
 
-    await algoliaClient
-      .saveObject({
-        indexName: algoliaIndexName,
-        body: memeToAlgoliaRecord(meme)
-      })
-      .catch((error) => {
-        // eslint-disable-next-line no-console
-        console.error(error)
-      })
-
-    await uploadVideo(videoId, buffer)
+    await Promise.all([
+      algoliaClient
+        .saveObject({
+          indexName: algoliaIndexName,
+          body: memeToAlgoliaRecord(meme)
+        })
+        .catch((error: unknown) => {
+          // eslint-disable-next-line no-console
+          console.error(error)
+        }),
+      uploadVideo(videoId, buffer)
+    ])
 
     return {
       id: meme.id
@@ -278,17 +278,18 @@ export const createMemeFromFile = createServerFn({ method: 'POST' })
       }
     })
 
-    await uploadVideo(videoId, buffer)
-
-    await algoliaClient
-      .saveObject({
-        indexName: algoliaIndexName,
-        body: memeToAlgoliaRecord(meme)
-      })
-      .catch((error) => {
-        // eslint-disable-next-line no-console
-        console.error(error)
-      })
+    await Promise.all([
+      uploadVideo(videoId, buffer),
+      algoliaClient
+        .saveObject({
+          indexName: algoliaIndexName,
+          body: memeToAlgoliaRecord(meme)
+        })
+        .catch((error: unknown) => {
+          // eslint-disable-next-line no-console
+          console.error(error)
+        })
+    ])
 
     return {
       id: meme.id

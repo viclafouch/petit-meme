@@ -18,12 +18,12 @@ const RouteComponent = () => {
 
 export const Route = createFileRoute('/_public__root/_default')({
   component: RouteComponent,
-  loader: async ({ context }) => {
+  loader: ({ context }) => {
     if (context.user) {
-      void context.queryClient.fetchQuery(getFavoritesMemesQueryOpts())
-      void context.queryClient.fetchQuery(getActiveSubscriptionQueryOpts())
+      void context.queryClient.ensureQueryData(getFavoritesMemesQueryOpts())
+      void context.queryClient.ensureQueryData(getActiveSubscriptionQueryOpts())
     }
 
-    void context.queryClient.fetchQuery(getCategoriesListQueryOpts())
+    void context.queryClient.ensureQueryData(getCategoriesListQueryOpts())
   }
 })

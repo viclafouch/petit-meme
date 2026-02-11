@@ -2,7 +2,6 @@ import React from 'react'
 import { toast } from 'sonner'
 import { StudioError } from '@/constants/error'
 import type { Meme } from '@/db/generated/prisma/client'
-import { getErrorMessage } from '@/lib/auth-client'
 import { shareMeme } from '@/server/meme'
 import { incrementGenerationCount } from '@/server/user'
 import { useShowDialog } from '@/stores/dialog.store'
@@ -102,6 +101,13 @@ const addTextToVideo = async (
 
   const data = await ffmpeg.readFile('output.mp4')
 
+  await Promise.all([
+    ffmpeg.deleteFile('input.mp4'),
+    ffmpeg.deleteFile('arial.ttf'),
+    ffmpeg.deleteFile('text.txt'),
+    ffmpeg.deleteFile('output.mp4')
+  ]).catch(() => {})
+
   // @ts-expect-error: FFmpeg readFile returns FileData which includes Uint8Array at runtime
   return new Blob([data as Uint8Array], { type: 'video/mp4' })
 }
@@ -138,6 +144,7 @@ export const useVideoProcessor = (
   }
 ) => {
   const [progress, setProgress] = React.useState(0)
+  const objectUrlRef = React.useRef<string | null>(null)
   const showDialog = useShowDialog()
 
   // eslint-disable-next-line no-restricted-syntax
@@ -161,9 +168,16 @@ export const useVideoProcessor = (
       const videoBlob = await response.blob()
       const blob = await addTextToVideo(ffmpeg, videoBlob, restOptions)
 
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current)
+      }
+
+      const url = URL.createObjectURL(blob)
+      objectUrlRef.current = url
+
       return {
         blob,
-        url: URL.createObjectURL(blob),
+        url,
         title: meme.title
       }
     },
@@ -179,7 +193,7 @@ export const useVideoProcessor = (
       }
 
       if (error instanceof StudioError && error.code === 'PREMIUM_REQUIRED') {
-        toast.error(getErrorMessage(error, 'fr'))
+        toast.error(error.message)
 
         return
       }
@@ -187,17 +201,19 @@ export const useVideoProcessor = (
       options?.onError?.(error)
     },
     onSettled: () => {
-      try {
-        ffmpeg.terminate()
-      } catch (error) {
-        console.log(error)
-      }
+      ffmpeg.off('progress', progressSubscription)
     }
   })
 
   React.useEffect(() => {
     return () => {
-      ffmpeg.terminate()
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current)
+      }
+
+      try {
+        ffmpeg.terminate()
+      } catch {}
     }
   }, [ffmpeg])
 

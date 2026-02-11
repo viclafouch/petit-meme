@@ -32,7 +32,8 @@ export const getBestMemesQueryOpts = () => {
     queryKey: [...getBestMemesQueryOpts.all],
     queryFn: async () => {
       return getBestMemes()
-    }
+    },
+    staleTime: 5 * MINUTE
   })
 }
 
@@ -43,7 +44,8 @@ export const getMemeByIdQueryOpts = (memeId: Meme['id']) => {
     queryKey: [...getMemeByIdQueryOpts.all, memeId],
     queryFn: async () => {
       return getMemeById({ data: memeId })
-    }
+    },
+    staleTime: 5 * MINUTE
   })
 }
 
@@ -65,7 +67,8 @@ export const getAuthUserQueryOpts = () => {
     queryKey: [...getAuthUserQueryOpts.all],
     queryFn: async () => {
       return getAuthUser()
-    }
+    },
+    staleTime: 5 * MINUTE
   })
 }
 
@@ -136,7 +139,8 @@ export const getActiveSubscriptionQueryOpts = () => {
     queryKey: [...getActiveSubscriptionQueryOpts.all],
     queryFn: async () => {
       return getActiveSubscription()
-    }
+    },
+    staleTime: 5 * MINUTE
   })
 }
 

@@ -149,22 +149,24 @@ export const getRandomMeme = createServerFn({ method: 'GET' })
     return z.string().optional().parse(data)
   })
   .handler(async ({ data: exceptId }) => {
-    const memes = await prismaClient.meme.findMany({
-      include: {
-        video: true
-      },
-      where: {
-        status: 'PUBLISHED'
-      }
+    const where = {
+      status: MemeStatus.PUBLISHED,
+      ...(exceptId ? { id: { not: exceptId } } : {})
+    } as const
+
+    const count = await prismaClient.meme.count({ where })
+
+    if (count === 0) {
+      return null
+    }
+
+    const skip = Math.floor(Math.random() * count)
+
+    return prismaClient.meme.findFirst({
+      where,
+      include: { video: true },
+      skip
     })
-
-    const withoutCurrentMeme = memes.filter((meme) => {
-      return meme.id !== exceptId
-    })
-
-    const randomIndex = Math.floor(Math.random() * withoutCurrentMeme.length)
-
-    return withoutCurrentMeme[randomIndex]
   })
 
 export const shareMeme = createServerFn({ method: 'GET' })
@@ -188,13 +190,11 @@ export const shareMeme = createServerFn({ method: 'GET' })
     const originalUrl = buildVideoOriginalUrl(meme.video.bunnyId)
 
     const response = await fetch(originalUrl)
-    const blob = await response.blob()
 
-    return new Response(blob, {
+    return new Response(response.body, {
       headers: {
-        'Content-Type': blob.type,
-        'Cache-Control': 'no-cache',
-        Connection: 'keep-alive'
+        'Content-Type': response.headers.get('Content-Type') ?? 'video/mp4',
+        'Cache-Control': 'no-cache'
       }
     })
   })

@@ -1,7 +1,6 @@
 import React from 'react'
 import type { User } from 'better-auth'
-import type { ErrorContext } from 'better-auth/react'
-import { MessageCircleWarning } from 'lucide-react'
+import { CircleAlert, MessageCircleWarning } from 'lucide-react'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import type { WithDialog } from '@/@types/dialog'
@@ -23,7 +22,8 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { LoadingButton } from '@/components/ui/loading-button'
-import { authClient, getErrorMessage } from '@/lib/auth-client'
+import { getAuthErrorMessage } from '@/helpers/auth-errors'
+import { authClient } from '@/lib/auth-client'
 import {
   getActiveSubscriptionQueryOpts,
   getAuthUserQueryOpts,
@@ -53,14 +53,13 @@ const DeleteAccountForm = ({ onCancel }: { onCancel: () => void }) => {
 
   const deleteAccountMutation = useMutation({
     mutationFn: async ({ currentPassword }: { currentPassword: string }) => {
-      return new Promise((resolve, reject) => {
-        void authClient.deleteUser(
-          {
-            password: currentPassword
-          },
-          { onError: reject, onSuccess: resolve }
-        )
+      const { error } = await authClient.deleteUser({
+        password: currentPassword
       })
+
+      if (error) {
+        throw new Error(error.code)
+      }
     },
     onSuccess: async () => {
       queryClient.removeQueries(getAuthUserQueryOpts())
@@ -69,15 +68,6 @@ const DeleteAccountForm = ({ onCancel }: { onCancel: () => void }) => {
       toast.success('Votre compte a bien été supprimé !')
       void router.navigate({ to: '/', from: '/' })
       await router.invalidate()
-    },
-    onError: (context: Error | ErrorContext) => {
-      form.reset()
-
-      if ('error' in context) {
-        toast.error(getErrorMessage(context.error, 'fr'))
-      } else {
-        toast.error(getErrorMessage(context, 'fr'))
-      }
     }
   })
 
@@ -127,13 +117,20 @@ const DeleteAccountForm = ({ onCancel }: { onCancel: () => void }) => {
                   variant="default"
                   type="button"
                   className="w-full"
-                  onClick={(event) => {
-                    event.preventDefault()
+                  onClick={() => {
                     onCancel()
                   }}
                 >
                   Annuler
                 </Button>
+                {deleteAccountMutation.error ? (
+                  <Alert variant="destructive">
+                    <CircleAlert />
+                    <AlertDescription>
+                      {getAuthErrorMessage(deleteAccountMutation.error.message)}
+                    </AlertDescription>
+                  </Alert>
+                ) : null}
               </div>
             ) : (
               <div className="flex flex-col items-center gap-y-4 w-full">

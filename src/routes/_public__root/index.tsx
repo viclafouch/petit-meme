@@ -65,7 +65,7 @@ export const Route = createFileRoute('/_public__root/')({
     )
 
     if (context.user) {
-      void context.queryClient.fetchQuery(getFavoritesMemesQueryOpts())
+      void context.queryClient.ensureQueryData(getFavoritesMemesQueryOpts())
     }
 
     return {

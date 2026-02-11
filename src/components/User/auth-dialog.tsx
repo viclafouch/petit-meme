@@ -1,8 +1,6 @@
 import React from 'react'
-import type { ErrorContext } from 'better-auth/react'
 import { CheckCircle, CircleAlert, Twitter } from 'lucide-react'
 import mixpanel from 'mixpanel-browser'
-import { toast } from 'sonner'
 import { z } from 'zod'
 import type { WithDialog } from '@/@types/dialog'
 import {
@@ -23,7 +21,8 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { LoadingButton } from '@/components/ui/loading-button'
-import { authClient, getErrorMessage } from '@/lib/auth-client'
+import { getAuthErrorMessage } from '@/helpers/auth-errors'
+import { authClient } from '@/lib/auth-client'
 import {
   getActiveSubscriptionQueryOpts,
   getAuthUserQueryOpts
@@ -63,7 +62,6 @@ export const LoginForm = ({
 }: FormProps) => {
   const router = useRouter()
   const queryClient = useQueryClient()
-  const [emailIsNotValid, setEmailIsNotValid] = React.useState(false)
 
   const signInMutation = useMutation({
     mutationFn: async ({
@@ -103,15 +101,11 @@ export const LoginForm = ({
       }
 
       onSuccess?.()
-    },
-    onError: (context: ErrorContext) => {
-      if (context.error.code === 'EMAIL_NOT_VERIFIED') {
-        setEmailIsNotValid(true)
-      } else {
-        toast.error(getErrorMessage(context.error, 'fr'))
-      }
     }
   })
+
+  const matchIsEmailNotVerified =
+    signInMutation.error?.message === 'EMAIL_NOT_VERIFIED'
 
   const form = useForm({
     ...loginFormOpts,
@@ -202,6 +196,14 @@ export const LoginForm = ({
           )
         }}
       />
+      {signInMutation.error && !matchIsEmailNotVerified ? (
+        <Alert variant="destructive">
+          <CircleAlert />
+          <AlertDescription>
+            {getAuthErrorMessage(signInMutation.error.message)}
+          </AlertDescription>
+        </Alert>
+      ) : null}
       <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t w-full">
         <span className="bg-background text-muted-foreground relative z-10 px-2">
           Ou continuer avec
@@ -235,13 +237,13 @@ export const LoginForm = ({
           </button>
         </div>
       </div>
-      {emailIsNotValid ? (
+      {matchIsEmailNotVerified ? (
         <Alert variant="destructive" className="mt-4">
           <CircleAlert />
           <AlertTitle>Vous devez vérifier votre email !</AlertTitle>
           <AlertDescription>
-            Votre compte n’est pas activé. Veuillez l’activer avant d’essayer de
-            vous connecter. Si vous avez besoin d’aide, contactez-nous.
+            Votre compte n'est pas activé. Veuillez l'activer avant d'essayer de
+            vous connecter. Si vous avez besoin d'aide, contactez-nous.
           </AlertDescription>
         </Alert>
       ) : null}
@@ -291,29 +293,22 @@ const SignupForm = ({
       password: string
       name: string
     }) => {
-      return new Promise((resolve, reject) => {
-        void authClient.signUp.email(
-          {
-            email,
-            password,
-            name,
-            callbackURL: '/'
-          },
-          {
-            onError: reject,
-            onSuccess: resolve
-          }
-        )
+      const { error } = await authClient.signUp.email({
+        email,
+        password,
+        name,
+        callbackURL: '/'
       })
+
+      if (error) {
+        throw new Error(error.code)
+      }
     },
     onSuccess: async () => {
       mixpanel.track('Sign Up', {
         signupMethod: 'email'
       })
       form.reset()
-    },
-    onError: (context: ErrorContext) => {
-      toast.error(getErrorMessage(context.error, 'fr'))
     }
   })
 
@@ -461,6 +456,14 @@ const SignupForm = ({
           )
         }}
       />
+      {signupMutation.error ? (
+        <Alert variant="destructive">
+          <CircleAlert />
+          <AlertDescription>
+            {getAuthErrorMessage(signupMutation.error.message)}
+          </AlertDescription>
+        </Alert>
+      ) : null}
       <form.Subscribe
         selector={(state) => {
           return state.isSubmitted
@@ -475,7 +478,7 @@ const SignupForm = ({
               <AlertDescription>
                 Votre compte a été créé avec succès, mais il doit être activé
                 avant que vous puissiez vous connecter. Nous venons de vous
-                envoyer un e-mail pour l’activer. Si vous ne le recevez pas dans
+                envoyer un e-mail pour l'activer. Si vous ne le recevez pas dans
                 quelques minutes, veuillez vérifier votre dossier spam ou
                 contactez-nous.
               </AlertDescription>

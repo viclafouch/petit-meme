@@ -1,21 +1,21 @@
 # Audit — Backend Performance
 
-Score global : **5.5 / 10**
+Score global : **8 / 10**
 
 > Items sécurité (injection SQL, webhook Bunny) déplacés vers `security.md`.
 
-| Sévérité | Nombre |
-|----------|--------|
-| CRITICAL | 1 |
-| HIGH | 6 |
-| MEDIUM | 3 |
-| LOW | 5 |
+| Sévérité | Nombre | Corrigé |
+|----------|--------|---------|
+| CRITICAL | 1 | 1 |
+| HIGH | 6 | 4 |
+| MEDIUM | 3 | 2 |
+| LOW | 5 | 2 |
 
 ---
 
 ## CRITICAL
 
-### 1. `getRandomMeme` charge TOUS les memes publiés en mémoire
+### 1. ~~`getRandomMeme` charge TOUS les memes publiés en mémoire~~ Corrigé
 
 **Fichier :** `src/server/meme.ts:143-159`
 
@@ -54,7 +54,7 @@ const meme = await prismaClient.meme.findFirst({
 
 ## HIGH
 
-### 3. `getActiveSubscription` double-fetch de la session utilisateur
+### 3. ~~`getActiveSubscription` double-fetch de la session utilisateur~~ Corrigé
 
 **Fichier :** `src/server/customer.ts:6-36`
 
@@ -84,7 +84,7 @@ Flow actuel séquentiel :
 
 ---
 
-### 5. `deleteMemeById` : 4 appels externes séquentiels
+### 5. ~~`deleteMemeById` : 4 appels externes séquentiels~~ Corrigé
 
 **Fichier :** `src/server/admin.ts:133-167`
 
@@ -111,7 +111,7 @@ await Promise.all([
 
 ---
 
-### 6. `shareMeme` proxy la vidéo entière (jusqu'à 16 MB) à travers Node.js
+### 6. ~~`shareMeme` proxy la vidéo entière (jusqu'à 16 MB) à travers Node.js~~ Corrigé
 
 **Fichier :** `src/server/meme.ts:161-191`
 
@@ -131,7 +131,7 @@ return new Response(response.body, {
 
 ---
 
-### 7. Cron `sync-algolia` charge TOUS les memes + relations en mémoire d'un coup
+### 7. ~~Cron `sync-algolia` charge TOUS les memes + relations en mémoire d'un coup~~ Corrigé
 
 **Fichier :** `crons/sync-algolia.ts:8-23`
 
@@ -141,7 +141,7 @@ return new Response(response.body, {
 
 ---
 
-### 8. Cron `update-title-bunny` : boucle séquentielle avec délai de 250ms
+### 8. ~~Cron `update-title-bunny` : boucle séquentielle avec délai de 250ms~~ Corrigé
 
 **Fichier :** `crons/update-title-bunny.ts:26-50`
 
@@ -163,7 +163,7 @@ Appelle `getActiveSubscription()` à chaque invocation (2 appels réseau) pour d
 
 ---
 
-### 10. Index manquant sur `Meme.status`
+### 10. ~~Index manquant sur `Meme.status`~~ Corrigé
 
 **Fichier :** `prisma/schema.prisma:63-81`
 
@@ -193,7 +193,7 @@ Hardcodé `limit: 100, offset: 0`. Au-delà de 100 users, le panel admin les ign
 
 ---
 
-### 13. `createMemeFromTwitterUrl` garde un buffer de 16 MB en mémoire pendant des appels séquentiels
+### 13. ~~`createMemeFromTwitterUrl` garde un buffer de 16 MB en mémoire pendant des appels séquentiels~~ Corrigé
 
 **Fichier :** `src/server/admin.ts:169-229`
 
@@ -231,7 +231,7 @@ Chaque édition supprime TOUTES les relations catégories et les recrée, même 
 
 ---
 
-### 17. Pas de `staleTime` sur plusieurs query options fréquemment utilisées
+### 17. ~~Pas de `staleTime` sur plusieurs query options fréquemment utilisées~~ Corrigé
 
 **Fichier :** `src/lib/queries.ts`
 
@@ -241,7 +241,7 @@ Chaque édition supprime TOUTES les relations catégories et les recrée, même 
 
 ---
 
-### 18. PrismaClient sans configuration de logging ni pool de connexions
+### 18. ~~PrismaClient sans configuration de logging ni pool de connexions~~ Corrigé
 
 **Fichier :** `src/db/index.ts:1-20`
 

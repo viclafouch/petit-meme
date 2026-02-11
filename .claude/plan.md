@@ -99,25 +99,45 @@ Corriger les problèmes de perf serveur maintenant que l'infra caching est en pl
 
 ### CRITICAL
 
-- [ ] `getRandomMeme` — remplacer `findMany` par `ORDER BY RANDOM() LIMIT 1`
+- [x] `getRandomMeme` — remplacer `findMany` par count + skip random
 
 ### HIGH
 
-- [ ] Refactorer `getActiveSubscription` pour accepter userId en paramètre (double fetch session)
-- [ ] Paralléliser les requêtes séquentielles dans `toggleBookmark` et `deleteMeme`
-- [ ] Proxy vidéo — rediriger vers Bunny CDN au lieu de streamer via Node
-- [ ] Utiliser `ensureQueryData` au lieu de `fetchQuery` dans les loaders
-- [ ] Paralléliser les prefetch avec `Promise.all()` dans les loaders
+- [x] Refactorer `getActiveSubscription` pour accepter userId en paramètre (`findActiveSubscription` via `createServerOnlyFn`)
+- [x] Paralléliser les requêtes séquentielles dans `deleteMeme`, `createMemeFromTwitterUrl`, `createMemeFromFile`
+- [x] Proxy vidéo — streamer `response.body` au lieu de buffer en mémoire
+- [x] Utiliser `ensureQueryData` au lieu de `fetchQuery` dans les loaders
+- [x] `staleTime: 5 * MINUTE` sur les query options fréquentes
 
 ### MEDIUM
 
-- [ ] Ajouter les index Prisma manquants (`@@index([status])`, `@@index([status, viewCount])`)
-- [ ] Valider les inputs de toutes les server functions avec Zod + spécifier `method`
-- [ ] Optimiser les cron jobs (batch 500, cursor-based pagination, concurrence contrôlée)
+- [x] Ajouter les index Prisma manquants (`@@index([status])`, `@@index([status, viewCount])`)
+- [x] Valider les inputs de toutes les server functions avec Zod + spécifier `method` (déjà fait)
+- [x] Optimiser les cron jobs (batch 500, cursor-based pagination, concurrence contrôlée)
 
 ### LOW
 
 - [ ] Réduire la taille des payloads API
+
+### Error Handling (audit complémentaire)
+
+> Audit : [`error-handling.md`](../audits/error-handling.md)
+
+- [x] Créer `src/helpers/auth-errors.ts` avec map exhaustive `authClient.$ERROR_CODES` → messages FR
+- [x] Supprimer `getErrorMessage` / `ERROR_CODES` de `auth-client.ts`
+- [x] Migrer `auth-dialog.tsx` (LoginForm + SignupForm) → pattern `throw new Error(error.code)` + JSX
+- [x] Migrer `update-password-dialog.tsx` → pattern cible
+- [x] Migrer `delete-account-dialog.tsx` → pattern cible
+- [x] Migrer `create-new-password-form.tsx` → `useMutation` + pattern cible
+- [x] Séparer erreurs auth / erreurs app dans `use-video-processor.ts`
+
+### Memory Leaks (audit complémentaire)
+
+- [x] Object URL leak dans `downloadBlob` — ajouté `URL.revokeObjectURL`
+- [x] FFmpeg virtual filesystem jamais nettoyé — ajouté `deleteFile` après traitement
+- [x] FFmpeg terminate appelé deux fois — `onSettled` = `ffmpeg.off('progress')`, terminate dans cleanup uniquement
+- [x] Object URL leak dans `useVideoProcessor` — `objectUrlRef` pour tracker et révoquer
+- [x] Prisma connection pool non configuré — `PrismaPg` avec `max: 20`, timeouts
 
 ---
 

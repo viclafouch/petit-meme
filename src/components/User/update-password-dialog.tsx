@@ -1,8 +1,6 @@
 import React from 'react'
 import type { User } from 'better-auth'
-import type { ErrorContext } from 'better-auth/react'
 import { CircleAlert } from 'lucide-react'
-import { toast } from 'sonner'
 import { z } from 'zod'
 import type { WithDialog } from '@/@types/dialog'
 import {
@@ -22,7 +20,8 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { LoadingButton } from '@/components/ui/loading-button'
-import { authClient, getErrorMessage } from '@/lib/auth-client'
+import { getChangePasswordErrorMessage } from '@/helpers/auth-errors'
+import { authClient } from '@/lib/auth-client'
 import { getFieldErrorMessage } from '@/lib/utils'
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
@@ -63,39 +62,27 @@ const UpdatePasswordForm = () => {
       currentPassword: string
       newPassword: string
     }) => {
-      return new Promise((resolve, reject) => {
-        void authClient.changePassword(
-          {
-            currentPassword,
-            newPassword
-          },
-          { onError: reject, onSuccess: resolve }
-        )
+      const { error } = await authClient.changePassword({
+        currentPassword,
+        newPassword
       })
-    },
-    onSuccess: async () => {
-      form.reset()
-    },
-    onError: (context: Error | ErrorContext) => {
-      if ('error' in context) {
-        toast.error(getErrorMessage(context.error, 'fr'))
-      } else {
-        toast.error(getErrorMessage(context, 'fr'))
+
+      if (error) {
+        throw new Error(error.code)
       }
+    },
+    onSuccess: () => {
+      form.reset()
     }
   })
 
   const form = useForm({
     ...updatePasswordFormOpts,
     onSubmit: async ({ value }) => {
-      if (!updatePasswordMutation.isPending) {
-        return updatePasswordMutation.mutateAsync({
-          currentPassword: value.currentPassword,
-          newPassword: value.newPassword
-        })
-      }
-
-      return () => {}
+      return updatePasswordMutation.mutateAsync({
+        currentPassword: value.currentPassword,
+        newPassword: value.newPassword
+      })
     }
   })
 
@@ -206,6 +193,16 @@ const UpdatePasswordForm = () => {
             )
           }}
         />
+        {updatePasswordMutation.error ? (
+          <Alert variant="destructive">
+            <CircleAlert />
+            <AlertDescription>
+              {getChangePasswordErrorMessage(
+                updatePasswordMutation.error.message
+              )}
+            </AlertDescription>
+          </Alert>
+        ) : null}
         <form.Subscribe
           selector={(state) => {
             return state.isSubmitted

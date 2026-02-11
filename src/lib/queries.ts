@@ -1,4 +1,5 @@
 import type { MemesFilters } from '@/constants/meme'
+import { MINUTE } from '@/constants/time'
 import type { Meme, Video } from '@/db/generated/prisma/client'
 import { getAdminMemes } from '@/server/admin'
 import { getCategories } from '@/server/categories'
@@ -76,7 +77,7 @@ export const getFavoritesMemesQueryOpts = () => {
     queryFn: async () => {
       return getFavoritesMemes()
     },
-    staleTime: 1000 * 60 * 5 // 5min
+    staleTime: 5 * MINUTE
   })
 }
 
@@ -88,7 +89,7 @@ export const getCategoriesListQueryOpts = () => {
     queryFn: async () => {
       return getCategories()
     },
-    staleTime: 1000 * 60 * 10, // 10min
+    staleTime: 10 * MINUTE,
     select: (categories) => {
       return categories.toSorted((categoryA, categoryB) => {
         if (categoryA.slug === 'news') {
@@ -113,7 +114,7 @@ export const getRecentCountMemesQueryOpts = () => {
     queryFn: async () => {
       return getRecentCountMemes()
     },
-    staleTime: 1000 * 60 * 10 // 10min
+    staleTime: 10 * MINUTE
   })
 }
 

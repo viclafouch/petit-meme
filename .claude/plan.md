@@ -82,12 +82,12 @@ Vulnérabilités actives. L'injection SQL est exploitable en production. On fixe
 
 Les quick wins les plus impactants du projet. Configurer le caching transforme l'expérience utilisateur et pose les fondations pour le SEO.
 
-- [ ] Configurer QueryClient defaults : `staleTime: 30s`, `gcTime: 5min`, `refetchOnWindowFocus` prod only, `retry: false`
-- [ ] Configurer router options : `defaultPreload: 'intent'`, `defaultPreloadDelay: 50`, `defaultPreloadStaleTime: 30_000`, `defaultPendingMs: 1000`, `defaultPendingMinMs: 200`, `defaultViewTransition: true`, `scrollRestoration: true`
-- [ ] Ajouter `routeRules` Nitro : cache immutable pour `/images/**` et `/fonts/**`
-- [ ] Activer `cookieCache` dans Better Auth (`maxAge: 5 * 60`)
-- [ ] Ajouter `staleTime` aux query options fréquentes (`queries.ts`)
-- [ ] Configurer locale FR pour Zod : `z.config(fr())`
+- [x] Configurer QueryClient defaults : `staleTime: 30s`, `gcTime: 5min`, `refetchOnWindowFocus` prod only, `retry: false`
+- [x] Configurer router options : `defaultPreload: 'intent'`, `defaultPreloadDelay: 50`, `defaultPreloadStaleTime: 30_000`, `defaultPendingMs: 1000`, `defaultPendingMinMs: 200`, `scrollRestoration: true`
+- [x] Ajouter `routeRules` Nitro : cache immutable pour `/images/**` et `/fonts/**`
+- [x] Activer `cookieCache` dans Better Auth (`maxAge: 5 * 60`)
+- [x] Ajouter `staleTime` aux query options fréquentes (`queries.ts`)
+- [x] Configurer locale FR pour Zod : `z.config(fr())`
 
 ---
 

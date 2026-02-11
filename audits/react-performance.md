@@ -4,7 +4,7 @@
 |----------|--------|
 | HIGH | 1 |
 | MEDIUM | 8 |
-| LOW | 8 |
+| LOW | 7 |
 
 **Zone critique :** la feature Reels (issues #1, #8, #9) concentre les problèmes les plus impactants.
 
@@ -244,10 +244,4 @@ Nouvelle closure à chaque render. Hook utilisé uniquement dans `StudioDialog` 
 
 ---
 
-### 19. `onTimeUpdate` retourne des fonctions cleanup inutiles
-
-**Fichier :** `src/hooks/use-register-meme-view.ts:96-126`
-
-Les event handlers retournent `() => {}` dans les early-return paths. Les valeurs de retour des event handlers DOM sont ignorées. `timeupdate` fire 4-66 fois/seconde → allocations inutiles.
-
-**Fix :** Remplacer `return () => {}` par `return`.
+### 19. ~~`return () => {}` inutiles~~ → déplacé vers `code-refactoring.md`

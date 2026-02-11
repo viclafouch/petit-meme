@@ -2,11 +2,13 @@
 
 Score global : **5.5 / 10**
 
+> Items sécurité (injection SQL, webhook Bunny) déplacés vers `security.md`.
+
 | Sévérité | Nombre |
 |----------|--------|
-| CRITICAL | 2 |
+| CRITICAL | 1 |
 | HIGH | 6 |
-| MEDIUM | 5 |
+| MEDIUM | 3 |
 | LOW | 5 |
 
 ---
@@ -46,26 +48,7 @@ const meme = await prismaClient.meme.findFirst({
 
 ---
 
-### 2. Injection SQL dans `getInfiniteReels` via interpolation de string dans raw query
-
-**Fichier :** `src/server/reels.ts:36-43`
-
-Le tableau `excludedIds` est directement interpolé dans une raw SQL query avec `'${id}'`. `$queryRawUnsafe` empêche aussi Prisma de cacher/préparer le plan de requête. De plus, `ORDER BY RANDOM()` sur de grosses tables est lent.
-
-**Fix suggéré :**
-```ts
-const memes = await prismaClient.$queryRaw<{ meme: MemeWithVideo }[]>`
-  SELECT json_build_object(...) AS meme
-  FROM "Meme" m
-  JOIN "Video" v ON m."videoId" = v."id"
-  WHERE m."status" = 'PUBLISHED'
-  ${excludedIds.length
-    ? Prisma.sql`AND m."id" != ALL(${excludedIds}::text[])`
-    : Prisma.empty}
-  ORDER BY RANDOM()
-  LIMIT 20
-`
-```
+### 2. ~~Injection SQL dans `getInfiniteReels`~~ → déplacé vers `security.md` CRITICAL #1
 
 ---
 
@@ -196,13 +179,7 @@ model Meme {
 
 ---
 
-### 11. Webhook Bunny sans vérification d'authentification/signature
-
-**Fichier :** `src/routes/api/bunny.ts:18-83`
-
-Le handler POST accepte n'importe quel JSON valide et met à jour la DB. Pas de vérification de signature webhook, ni de secret partagé, ni de whitelist IP.
-
-**Fix suggéré :** Vérifier la signature du webhook ou ajouter une vérification de header secret.
+### 11. ~~Webhook Bunny sans authentification~~ → déplacé vers `security.md` HIGH #2
 
 ---
 
@@ -275,7 +252,7 @@ Pas de logging de requêtes, pas de tuning du pool de connexions, pas de timeout
 ## Top 5 Quick Wins
 
 1. **Fix `getRandomMeme`** (CRITICAL #1) — Remplacer `findMany` par `ORDER BY RANDOM() LIMIT 1`. 1 fichier, réduction massive de mémoire et charge DB.
-2. **Fix injection SQL `getInfiniteReels`** (CRITICAL #2) — Passer de `$queryRawUnsafe` à `$queryRaw` avec tagged template literals.
-3. **Ajouter `@@index([status])` et `@@index([status, viewCount])`** (MEDIUM #10) — 1 migration, accélère toutes les requêtes les plus utilisées.
-4. **Paralléliser `deleteMemeById`** (HIGH #5) — Passer de 4 awaits séquentiels à `Promise.all`. Économie de 100-400ms par suppression.
+2. **Ajouter `@@index([status])` et `@@index([status, viewCount])`** (MEDIUM #10) — 1 migration, accélère toutes les requêtes les plus utilisées.
+3. **Paralléliser `deleteMemeById`** (HIGH #5) — Passer de 4 awaits séquentiels à `Promise.all`. Économie de 100-400ms par suppression.
+4. **Refactorer `getActiveSubscription`** (HIGH #3) — Accepter userId en paramètre, éviter le double fetch session.
 5. **Ajouter `staleTime` aux query options** (LOW #17) — Quelques lignes dans `queries.ts` pour éviter les refetch inutiles.

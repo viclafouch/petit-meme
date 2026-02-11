@@ -197,11 +197,13 @@ La suppression via `authClient.deleteUser()` cascade bien en base (Sessions, Acc
 
 ### 10. Longueur minimale de mot de passe de 4 caractères (côté serveur)
 
+> → Voir aussi `security.md` HIGH #4 pour le volet technique.
+
 **Articles :** Art. 32, Recommandation CNIL mots de passe (2022)
 
 **Fichier :** `src/lib/auth.tsx:38` → `minPasswordLength: 4`
 
-Le formulaire client valide `z.string().min(8).max(20)`, mais la config serveur accepte 4. Des appels API contournant l'UI pourraient créer des comptes avec 4 caractères. La CNIL exige minimum 8 caractères avec 3 types sur 4, ou 12 caractères sans complexité.
+La CNIL exige minimum 8 caractères avec 3 types sur 4, ou 12 caractères sans complexité.
 
 **Fix :** `minPasswordLength: 12` (ou 8 avec règles de complexité).
 
@@ -209,16 +211,13 @@ Le formulaire client valide `z.string().min(8).max(20)`, mais la config serveur 
 
 ### 11. PII loggées en console en production
 
+> → Voir aussi `security.md` LOW #12 pour le volet technique.
+
 **Articles :** Art. 5(1)(f), Art. 32
 
 **Fichier :** `src/lib/auth.tsx:76-77, 89-91`
 
-```javascript
-console.log(`${user.email} has been successfully verified!`)
-console.log("Connecting to Twitter's API with profile", user)
-```
-
-Ces logs tournent inconditionnellement (pas de check `NODE_ENV`), exposant emails et profils Twitter dans les logs de production.
+Emails et profils Twitter loggés inconditionnellement en production.
 
 **Fix :** Conditionner derrière `process.env.NODE_ENV !== 'production'`.
 

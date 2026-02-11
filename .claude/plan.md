@@ -1,34 +1,29 @@
 # Plan — Correction des audits
 
-Chaque étape correspond à un audit réalisé. Les détails complets (fichiers, lignes, fixes) sont dans `audits/<nom>.md`.
+Les détails complets (fichiers, lignes, code) sont dans `audits/<nom>.md`.
 
 **Workflow par étape :**
-1. Lire l'audit correspondant dans `audits/`
+1. Lire les audits référencés
 2. Appliquer les corrections
 3. `npm run lint:fix`
 4. Lancer l'agent `code-refactoring` si code significatif modifié
-5. Cocher `[x]` les items terminés ici
+5. Cocher `[x]` les items terminés
 
 ---
 
-## Étape 1 — ESLint config v5
+## Étape 1 — Fondations
 
-> Audit : [`audits/dependency-updates.md`](../audits/dependency-updates.md) — Section `@viclafouch/eslint-config-viclafouch`
+> Audits : [`dependency-updates.md`](../audits/dependency-updates.md), [`dead-code.md`](../audits/dead-code.md)
 
-Mettre à jour en premier pour que tout le code modifié ensuite soit lint avec les nouvelles règles.
+ESLint v5 d'abord pour que tout le code modifié ensuite soit lint correctement. Dead code ensuite pour réduire le bruit. Deps routine pour partir sur une base à jour.
+
+### ESLint v5
 
 - [ ] `npm install -D prettier@3 @viclafouch/eslint-config-viclafouch@5`
 - [ ] Réécrire `eslint.config.js` : retirer `baseConfig`, ajouter `hooksConfig` + `jsxA11yConfig`, corriger l'ordre (ignores → typescript → react → hooks → a11y → imports → prettier)
 - [ ] `npm run lint:fix` et corriger les nouvelles erreurs
-- [ ] Vérifier la règle `better-tailwindcss/enforce-consistent-line-wrapping`
 
----
-
-## Étape 2 — Dead code
-
-> Audit : [`audits/dead-code.md`](../audits/dead-code.md)
-
-Nettoyer pour réduire le bruit dans les étapes suivantes.
+### Dead code
 
 - [ ] Supprimer les 11 fichiers inutilisés
 - [ ] Retirer `export` des 8 symboles utilisés uniquement localement
@@ -37,172 +32,248 @@ Nettoyer pour réduire le bruit dans les étapes suivantes.
 - [ ] `npm uninstall` les 4 packages inutilisés
 - [ ] Remplacer `algoliasearch` par `@algolia/client-search` explicite
 
----
-
-## Étape 3 — Dependency updates (routine)
-
-> Audit : [`audits/dependency-updates.md`](../audits/dependency-updates.md) — Phases 1 et 2
-
-Appliquer les mises à jour sans risque pendant que la codebase est propre.
+### Deps routine
 
 - [ ] Appliquer les 16 patches routine (`npx taze -Ilw`)
-- [ ] Mettre à jour TanStack Router ecosystem → 1.159.5
-- [ ] Mettre à jour Prisma → 7.3.0 + `npx prisma generate`
-- [ ] Mettre à jour @google/genai, resend, react-email, TanStack Form
-- [ ] Mettre à jour motion/framer-motion → 12.34.0
-- [ ] Mettre à jour nitro → 3.0.1-alpha.2
-- [ ] `npm run build` pour valider
+- [ ] Mettre à jour TanStack Router ecosystem, Prisma 7.3.0, @google/genai, resend, react-email, TanStack Form, motion 12.34.0, nitro alpha.2
+- [ ] `npx prisma generate` + `npm run build` pour valider
 
 ---
 
-## Étape 4 — Security
+## Étape 2 — Sécurité
 
-> Audit : [`audits/security.md`](../audits/security.md)
+> Audits : [`security.md`](../audits/security.md), [`best-practices.md`](../audits/best-practices.md) §5 §8
 
-Corriger les vulnérabilités critiques avant toute autre modification fonctionnelle.
+Vulnérabilités actives. L'injection SQL est exploitable en production. On fixe tout ce qui est sécurité ici, y compris les items auth et headers issus des best-practices.
 
-- [ ] Fix CRITICAL : injection SQL dans `reels.ts` (`$queryRawUnsafe` → `$queryRaw` avec template tagged)
-- [ ] Fix HIGH : authentification webhook Bunny (`bunny.ts`)
-- [ ] Fix HIGH : middleware admin manquant sur `getListUsers`
-- [ ] Fix HIGH : `minPasswordLength` serveur 4 → 12
-- [ ] Fix HIGH : rate limiting sur les endpoints sensibles
-- [ ] Fix MEDIUM : flag `secure` sur le cookie `anonId`
-- [ ] Fix MEDIUM : injection de filtres Algolia
-- [ ] Fix MEDIUM : authentification `getVideoPlayData`
-- [ ] Fix LOW : en-têtes de sécurité, CSP, HSTS
+### CRITICAL
 
----
+- [ ] Injection SQL dans `reels.ts` — `$queryRawUnsafe` → `$queryRaw` avec tagged template
+- [ ] `minPasswordLength` serveur 4 → 12
 
-## Étape 5 — GDPR
+### HIGH
 
-> Audit : [`audits/gdpr.md`](../audits/gdpr.md)
+- [ ] Authentification webhook Bunny (header secret)
+- [ ] Middleware admin manquant sur `getListUsers`
+- [ ] Rate limiting sur auth, génération IA, webhooks
+- [ ] Security headers via Nitro routeRules (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`)
+- [ ] Vérifier pattern middleware composable (auth → admin chainé, `setResponseStatus` avant throw)
+- [ ] `beforeLoad` sur toutes les routes protégées (pas de check dans le composant)
 
-Conformité légale — les items CRITICAL sont des obligations réglementaires.
+### MEDIUM
 
-- [ ] CRITICAL : implémenter un bandeau de consentement cookies (bloquer Mixpanel et `anonId` sans consentement)
-- [ ] CRITICAL : gater Mixpanel derrière le consentement, retirer `ignore_dnt: true`, stopper l'envoi de PII
-- [ ] CRITICAL : créer la page politique de confidentialité (`/privacy`)
-- [ ] HIGH : créer la page mentions légales (`/mentions-legales`)
-- [ ] HIGH : ajouter checkbox CGU + lien privacy au formulaire d'inscription
-- [ ] HIGH : implémenter l'export de données utilisateur (JSON)
-- [ ] HIGH : définir et implémenter les durées de rétention + cron de nettoyage
-- [ ] MEDIUM : ajouter l'édition de profil (nom, email)
-- [ ] MEDIUM : compléter le flux de suppression (Mixpanel, Stripe)
-- [ ] MEDIUM : conditionner les `console.log` de PII à `NODE_ENV`
-- [ ] LOW : auto-héberger Google Fonts
+- [ ] Flag `secure` sur le cookie `anonId`
+- [ ] Injection de filtres Algolia (quoter la valeur `category`)
+- [ ] Authentification `getVideoPlayData` (vérifier que la vidéo est publiée)
+- [ ] CSRF : valider le header `Origin` sur les requêtes state-changing
+- [ ] Séparer env vars client/server dans des fichiers distincts + validations `.startsWith()`
+
+### LOW
+
+- [ ] Algolia App ID en env var
+- [ ] Conditionner messages d'erreur détaillés au `NODE_ENV`
+- [ ] `VITE_BUNNY_LIBRARY_ID` → server-only si possible
 
 ---
 
-## Étape 6 — Backend performance
+## Étape 3 — Caching + Infrastructure
 
-> Audit : [`audits/backend-performance.md`](../audits/backend-performance.md)
+> Audit : [`best-practices.md`](../audits/best-practices.md) §1 §8
 
-- [ ] Fix CRITICAL : `getRandomMeme` — remplacer le chargement de tous les memes par un `ORDER BY RANDOM() LIMIT 1`
-- [ ] Fix HIGH : double fetch session dans `getAdminSession`
-- [ ] Fix HIGH : paralléliser les requêtes séquentielles dans `toggleBookmark` et `deleteMeme`
-- [ ] Fix HIGH : proxy vidéo — rediriger vers Bunny CDN au lieu de streamer via Node
-- [ ] Fix MEDIUM : ajouter des index Prisma manquants
-- [ ] Fix MEDIUM : ajouter `staleTime` aux queries TanStack Query
-- [ ] Fix MEDIUM : optimiser les cron jobs (batch, curseur)
-- [ ] Fix LOW : réduire la taille des payloads API
+Les quick wins les plus impactants du projet. Configurer le caching transforme l'expérience utilisateur et pose les fondations pour le SEO.
 
----
-
-## Étape 7 — Duplicate code
-
-> Audit : [`audits/duplicate-code.md`](../audits/duplicate-code.md)
-
-Dédupliquer avant le refactoring pour éviter de refactorer du code en double.
-
-- [ ] HIGH : extraire `useToggleBookmark` hook (~50 lignes dupliquées)
-- [ ] HIGH : extraire `useKeywordsField` hook + composant `KeywordsField` (~70 lignes)
-- [ ] HIGH : extraire `createMemeWithVideo` server function (~40 lignes)
-- [ ] MEDIUM : extraire `MEME_FULL_INCLUDE` constante Prisma (5 répétitions)
-- [ ] MEDIUM : extraire `DEFAULT_MEME_TITLE` et `NEWS_CATEGORY_SLUG` constantes
-- [ ] MEDIUM : extraire `FormFooter` composant (4 répétitions)
-- [ ] MEDIUM : extraire `MemeVideoThumbnail` composant
-- [ ] MEDIUM : extraire `safeAlgoliaOp` wrapper
-- [ ] MEDIUM : extraire `searchMemesFromAlgolia` helper
-- [ ] LOW : consolider les petites duplications restantes
+- [ ] Configurer QueryClient defaults : `staleTime: 30s`, `gcTime: 5min`, `refetchOnWindowFocus` prod only, `retry: false`
+- [ ] Configurer router options : `defaultPreload: 'intent'`, `defaultPreloadDelay: 50`, `defaultPreloadStaleTime: 30_000`, `defaultPendingMs: 1000`, `defaultPendingMinMs: 200`, `defaultViewTransition: true`, `scrollRestoration: true`
+- [ ] Ajouter `routeRules` Nitro : cache immutable pour `/images/**` et `/fonts/**`
+- [ ] Activer `cookieCache` dans Better Auth (`maxAge: 5 * 60`)
+- [ ] Ajouter `staleTime` aux query options fréquentes (`queries.ts`)
+- [ ] Configurer locale FR pour Zod : `z.config(fr())`
 
 ---
 
-## Étape 8 — Code refactoring
+## Étape 4 — Backend Performance
 
-> Audit : [`audits/code-refactoring.md`](../audits/code-refactoring.md)
+> Audits : [`backend-performance.md`](../audits/backend-performance.md), [`best-practices.md`](../audits/best-practices.md) §6 §7
+
+Corriger les problèmes de perf serveur maintenant que l'infra caching est en place.
+
+### CRITICAL
+
+- [ ] `getRandomMeme` — remplacer `findMany` par `ORDER BY RANDOM() LIMIT 1`
+
+### HIGH
+
+- [ ] Refactorer `getActiveSubscription` pour accepter userId en paramètre (double fetch session)
+- [ ] Paralléliser les requêtes séquentielles dans `toggleBookmark` et `deleteMeme`
+- [ ] Proxy vidéo — rediriger vers Bunny CDN au lieu de streamer via Node
+- [ ] Utiliser `ensureQueryData` au lieu de `fetchQuery` dans les loaders
+- [ ] Paralléliser les prefetch avec `Promise.all()` dans les loaders
+
+### MEDIUM
+
+- [ ] Ajouter les index Prisma manquants (`@@index([status])`, `@@index([status, viewCount])`)
+- [ ] Valider les inputs de toutes les server functions avec Zod + spécifier `method`
+- [ ] Optimiser les cron jobs (batch 500, cursor-based pagination, concurrence contrôlée)
+
+### LOW
+
+- [ ] Réduire la taille des payloads API
+
+---
+
+## Étape 5 — SEO
+
+> Audit : [`best-practices.md`](../audits/best-practices.md) §2
+
+Profite des headers et du caching déjà en place (étapes 2-3).
+
+- [ ] Compléter les meta tags root : `viewport-fit=cover`, `color-scheme`, `application-name`, `apple-mobile-web-app-*`, `theme-color`
+- [ ] Vérifier le helper `seo()` : og:image dimensions, og:locale, twitter:image:alt, canonical, alternate hrefLang
+- [ ] Ajouter `noai,noimageai` double protection (meta + httpEquiv)
+- [ ] Créer les schemas JSON-LD : `WebSite` global avec `SearchAction`, `VideoObject` par meme, `BreadcrumbList`
+- [ ] Utiliser `schema-dts` + `as const satisfies WithContext<Type>`
+- [ ] Créer la route `sitemap[.]xml.ts` dynamique (pages publiques + memes)
+- [ ] Créer/compléter `robots.txt` avec `Disallow: /admin/`, `/api/` + lien sitemap
+- [ ] Créer le `manifest.webmanifest` complet + vérifier favicons
+- [ ] `staleTime: Infinity` sur les routes statiques (CGU, mentions légales)
+- [ ] `preload: 'viewport'` sur les liens de navigation critiques
+- [ ] `head()` avec SEO complet sur chaque route publique + `noindex,nofollow` sur les 404
+
+---
+
+## Étape 6 — GDPR
+
+> Audit : [`gdpr.md`](../audits/gdpr.md)
+
+Conformité légale. Les CRITICAL sont des obligations réglementaires.
+
+### CRITICAL
+
+- [ ] Implémenter un bandeau de consentement cookies (bloquer Mixpanel et `anonId` sans consentement)
+- [ ] Gater Mixpanel derrière le consentement, retirer `ignore_dnt: true`, stopper l'envoi de PII
+- [ ] Créer la page politique de confidentialité (`/privacy`)
+
+### HIGH
+
+- [ ] Créer la page mentions légales (`/mentions-legales`)
+- [ ] Ajouter checkbox CGU + lien privacy au formulaire d'inscription
+- [ ] Implémenter l'export de données utilisateur (JSON)
+- [ ] Définir et implémenter les durées de rétention + cron de nettoyage
+
+### MEDIUM
+
+- [ ] Ajouter l'édition de profil (nom, email)
+- [ ] Compléter le flux de suppression (Mixpanel, Stripe)
+- [ ] Conditionner les `console.log` de PII à `NODE_ENV`
+
+### LOW
+
+- [ ] Auto-héberger Google Fonts
+
+---
+
+## Étape 7 — Code Quality
+
+> Audits : [`duplicate-code.md`](../audits/duplicate-code.md), [`code-refactoring.md`](../audits/code-refactoring.md), [`tailwind.md`](../audits/tailwind.md)
+
+Dédupliquer d'abord, refactorer ensuite, Tailwind en dernier (mécanique). Tout le code ajouté aux étapes précédentes bénéficie de ce nettoyage.
+
+### Duplicate code
+
+- [ ] Extraire `useToggleBookmark` hook (~50 lignes)
+- [ ] Extraire `useKeywordsField` hook + composant `KeywordsField` (~70 lignes)
+- [ ] Extraire `createMemeWithVideo` server function (~40 lignes)
+- [ ] Extraire `MEME_FULL_INCLUDE` constante Prisma (5 répétitions)
+- [ ] Extraire `DEFAULT_MEME_TITLE` et `NEWS_CATEGORY_SLUG` constantes
+- [ ] Extraire `FormFooter`, `MemeVideoThumbnail` composants
+- [ ] Extraire `safeAlgoliaOp` wrapper + `searchMemesFromAlgolia` helper
+
+### Code refactoring
 
 - [ ] Fix bug : erreur avalée dans `utils.ts` (catch qui perd le message détaillé)
 - [ ] Extraire le ternaire imbriqué dans `studio-dialog.tsx`
 - [ ] Découper les composants > 200 lignes (MemeForm, $memeId, SignupForm, PlayerDialog)
-- [ ] Refactorer `getTresholdMs` → objet params + corriger typo → `getThresholdMs`
-- [ ] Refactorer les mutations `let` → fonctions pures
-- [ ] Ajouter `satisfies` aux `as const` (`BUNNY_STATUS`, FAQ items)
+- [ ] `getTresholdMs` → objet params + typo → `getThresholdMs`
+- [ ] Mutations `let` → fonctions pures
+- [ ] `as const satisfies` sur `BUNNY_STATUS`, FAQ items
 - [ ] Renommer `open` → `isOpen` dans mobile-nav et user-dropdown
-- [ ] Supprimer les commentaires inutiles
-- [ ] Remplacer les `return () => {}` inutiles par `return`
-- [ ] Remplacer `@ts-ignore` par `@ts-expect-error` avec explication
-- [ ] Supprimer le code commenté mort
+- [ ] Supprimer commentaires inutiles + code commenté mort
+- [ ] `return () => {}` → `return`
+- [ ] `@ts-ignore` → `@ts-expect-error` avec explication
 
----
-
-## Étape 9 — Tailwind CSS
-
-> Audit : [`audits/tailwind.md`](../audits/tailwind.md)
+### Tailwind
 
 - [ ] Bulk replace `w-full h-full` → `size-full` (~20 emplacements)
-- [ ] Remplacer `w-N h-N` → `size-N` sur les icônes (~7 emplacements)
-- [ ] Remplacer les couleurs hardcodées gray/zinc/stone par les tokens thème
-- [ ] Résoudre le conflit `h-7 w-7` + `size-6` dans twitter-form et download-from-twitter-form
-- [ ] Remplacer les `hover:scale-*` interdits par des transitions d'opacité
-- [ ] Appliquer les shorthands restants (`px-6 py-6` → `p-6`, `right-0 left-0` → `inset-x-0`)
-- [ ] Supprimer les classes mortes/redondantes (`max-w-full` avec `w-full`, `container mx-auto`)
-- [ ] Remplacer `mt-*`/`space-y-*` → `gap` où applicable
+- [ ] `w-N h-N` → `size-N` sur les icônes
+- [ ] Couleurs hardcodées gray/zinc/stone → tokens thème
+- [ ] Résoudre le conflit `h-7 w-7` + `size-6` dans twitter-form
+- [ ] `hover:scale-*` → transitions d'opacité
+- [ ] Shorthands restants (`px-6 py-6` → `p-6`, `right-0 left-0` → `inset-x-0`)
+- [ ] Classes mortes/redondantes
+- [ ] `mt-*`/`space-y-*` → `gap`
 
 ---
 
-## Étape 10 — React performance
+## Étape 8 — React Performance
 
-> Audit : [`audits/react-performance.md`](../audits/react-performance.md)
+> Audit : [`react-performance.md`](../audits/react-performance.md)
 
-- [ ] Fix HIGH : `createRef` dans `useMemo` pour Reels → extraire hors du render
-- [ ] Fix MEDIUM : dépendances inutiles dans les `useMemo`
-- [ ] Fix MEDIUM : guard SSR pour `IntersectionObserver`
-- [ ] Fix MEDIUM : cleanup FFmpeg dans `useVideoProcessor`
-- [ ] Fix MEDIUM : optimiser `DialogProvider` store subscription
-- [ ] Fix LOW : composants à mémoïser, callbacks à stabiliser
-- [ ] Fix LOW : virtualisation des listes longues
+Après le refactoring (étape 7) pour ne pas optimiser du code qui va changer.
 
----
-
-## Étape 11 — Dependency updates (breaking changes)
-
-> Audit : [`audits/dependency-updates.md`](../audits/dependency-updates.md) — Phases 3 à 5
-
-- [ ] Consolider `motion`/`framer-motion` → `motion` uniquement
-- [ ] Mettre à jour `better-auth` 1.3.12 → 1.4.18 (préparer déconnexion utilisateurs)
-- [ ] Mettre à jour `stripe` 18.5.0 → 19.3.1 (compatible better-auth/stripe)
-- [ ] Évaluer `stripe` 19.x → 20.x
+- [ ] HIGH : `createRef` dans `useMemo` pour Reels → Map persistante de refs
+- [ ] MEDIUM : dépendances inutiles dans les `useMemo` (`user` dans meme-list-item et toggle-like-button)
+- [ ] MEDIUM : guard SSR pour `IntersectionObserver` (initialiser dans useEffect, pas useRef)
+- [ ] MEDIUM : cleanup FFmpeg dans `useVideoProcessor` (ajouter `query.data` / `ffmpeg` aux deps)
+- [ ] MEDIUM : optimiser `DialogProvider` → selectors Zustand
+- [ ] MEDIUM : `virtualItems` comme dépendance de useEffect → dériver une dépendance stable
+- [ ] LOW : stabiliser les callbacks passés aux composants memo (`handleSelect`, `handleUnSelect`)
 
 ---
 
-## Étape 12 — Best practices (depuis estcequecestlasaison)
+## Étape 9 — Images + Accessibilité + DX
 
-> Audit : [`audits/best-practices.md`](../audits/best-practices.md)
+> Audit : [`best-practices.md`](../audits/best-practices.md) §3 §10 §11 §12 §13
 
-Appliquer les bonnes pratiques extraites du projet reference.
+Items de polish qui améliorent la qualité globale sans urgence.
 
-- [ ] CRITICAL : configurer les defaults QueryClient (staleTime, gcTime, retry, refetchOnWindowFocus)
-- [ ] CRITICAL : configurer les options du router (defaultPreload, viewTransition, scrollRestoration)
-- [ ] CRITICAL : ajouter les HTTP cache headers via Nitro routeRules
-- [ ] CRITICAL : completer le SEO (meta tags root, canonical, alternate, JSON-LD, sitemap dynamique)
-- [ ] HIGH : creer un composant image optimise (srcSet, sizes, loading, fetchPriority, decoding)
-- [ ] HIGH : ajouter les security headers via routeRules
-- [ ] HIGH : valider les inputs de toutes les server functions avec Zod
-- [ ] HIGH : utiliser ensureQueryData + Promise.all dans les loaders
-- [ ] MEDIUM : ajouter le skip-to-content link + semantic HTML
-- [ ] MEDIUM : respecter prefers-reduced-motion dans les animations
-- [ ] MEDIUM : utiliser placeholderData: keepPreviousData sur les queries filtrees
-- [ ] LOW : optimiser le chargement des fonts
+### Images
+
+- [ ] Créer un composant image optimisé (srcSet, sizes, width/height, loading, fetchPriority, decoding)
+- [ ] `<picture>` avec source WebP + fallback pour les images critiques
+- [ ] Precharger les images hero dans `head()` + priority aux 4 premiers memes visibles
+- [ ] S'assurer que Bunny CDN sert en WebP + générer OG images PNG 1200x630
+
+### Accessibilité
+
+- [ ] Skip-to-content link + `<main id="main-content">`
+- [ ] Semantic HTML (headings h1→h2→h3, nav, article, section)
+- [ ] `prefers-reduced-motion` dans les animations Motion
+- [ ] `aria-label` sur boutons sans texte, `aria-hidden` sur icônes, `aria-live` sur messages dynamiques
+
+### DX
+
+- [ ] `placeholderData: keepPreviousData` sur les queries avec filtres/pagination
+- [ ] `useSyncExternalStore` pour les hooks media query (SSR-safe)
+- [ ] Husky pre-commit `npm run lint`
+- [ ] Scripts `deps` / `deps:major` avec taze dans package.json
+- [ ] `.npmrc` strict (`engine-strict`, `legacy-peer-deps=false`, `package-lock=true`)
+
+### Fonts
+
+- [ ] `font-display: swap` + precharger les fonts critiques (woff2)
+
+---
+
+## Étape 10 — Breaking Dependencies
+
+> Audit : [`dependency-updates.md`](../audits/dependency-updates.md) — Phases 3 à 5
+
+En dernier car nécessite une codebase stable et testée. Chaque update peut casser des choses.
+
+- [ ] Consolider `motion`/`framer-motion` → `motion` uniquement (remplacer tous les imports `framer-motion` → `motion/react`)
+- [ ] Mettre à jour `better-auth` 1.3.12 → 1.4.18 (JWE cookies → tous les utilisateurs déconnectés, tester tout le flow auth)
+- [ ] Mettre à jour `stripe` 18.5.0 → 19.3.1 (compatible better-auth/stripe, vérifier `discount.coupon` → `discount.source.coupon`)
+- [ ] Évaluer `stripe` 19.x → 20.x (breaking changes limités si pas d'API V2)
 
 ---
 
@@ -216,4 +287,8 @@ Passer le site en bilingue français / anglais. Étudier la meilleure approche a
 
 ### Migration Prisma → Drizzle
 
-Remplacer Prisma par Drizzle ORM. Préparer la migration une fois la codebase stabilisée (audits terminés, deps à jour).
+Remplacer Prisma par Drizzle ORM. Conventions cibles documentées dans `best-practices.md` §9. Préparer la migration une fois la codebase stabilisée.
+
+### Stripe — Payment Elements
+
+Évaluer la migration vers Payment Elements (au lieu de Checkout redirect). Pattern documenté dans `best-practices.md` §4. Dépend de la mise à jour Stripe 20.x (étape 10).

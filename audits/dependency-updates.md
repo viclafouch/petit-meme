@@ -7,8 +7,8 @@
 | CRITIQUE (breaking changes majeurs) | 3 |
 | IMPORTANTE (features / perf) | 9 |
 | ROUTINE (patch / types) | 16 |
-| A SUPPRIMER (dead code) | 5 (+1 doublon) |
-| **Total packages à mettre à jour** | **33** |
+| A SUPPRIMER | → voir `dead-code.md` |
+| **Total packages à mettre à jour** | **28** |
 
 ---
 
@@ -428,21 +428,7 @@ npx taze -Ilw
 
 ## A SUPPRIMER — Packages morts
 
-Identifiés dans l'audit dead-code. Aucun import trouvé dans `src/`.
-
-| Package | Raison | Action |
-|---------|--------|--------|
-| `@prisma/extension-accelerate` | Jamais importé. Le DB layer utilise `@prisma/adapter-pg` | `npm uninstall` |
-| `@date-fns/tz` | Jamais importé. Le code utilise `date-fns` directement | `npm uninstall` |
-| `@radix-ui/react-use-controllable-state` | Jamais importé dans `src/` | `npm uninstall` |
-| `usehooks-ts` | Jamais importé dans `src/` | `npm uninstall` |
-| `algoliasearch` | Le code importe `@algolia/client-search` (dep transitive). Aucun import direct | `npm uninstall` puis `npm install @algolia/client-search` |
-
-### Doublon de package
-
-| Packages | Action |
-|----------|--------|
-| `motion` + `framer-motion` | Consolider vers `motion` uniquement |
+> Voir `dead-code.md` pour la liste complète (5 packages + 1 doublon motion/framer-motion).
 
 ---
 
@@ -459,7 +445,7 @@ Les packages suivants sont à leur dernière version et ne nécessitent aucune a
 ### Phase 1 — Routine (risque zéro, 15 min)
 
 1. **Appliquer tous les patches** : `npx taze -Ilw` pour les 16 packages routine
-2. **Supprimer les 5 packages morts** : `npm uninstall @prisma/extension-accelerate @date-fns/tz @radix-ui/react-use-controllable-state usehooks-ts algoliasearch` puis `npm install @algolia/client-search`
+2. **Supprimer les packages morts** (→ voir `dead-code.md` pour la liste)
 3. `npm run build` pour vérifier
 
 ### Phase 2 — Importantes sans risque (30 min)

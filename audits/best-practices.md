@@ -1,6 +1,23 @@
-# Audit — Best Practices (depuis estcequecestlasaison)
+# Audit — Best Practices
 
-> Learnings extraits du projet **estcequecestlasaison.fr** — considere comme reference pour les bonnes pratiques SEO, performance, caching, images, securite et accessibilite.
+> Learnings extraits des projets de reference **estcequecestlasaison** et **pasiopadelclub**. Ces deux projets utilisent le meme stack (TanStack Start, Vite, Nitro) et representent les bonnes pratiques a adopter.
+
+| Categorie | Priorite | Items |
+|-----------|----------|-------|
+| Caching (QueryClient + Router + HTTP) | CRITICAL | 14 |
+| SEO (meta, JSON-LD, sitemap, robots, PWA) | CRITICAL | 16 |
+| Stripe (Payment Elements, webhooks, idempotence) | CRITICAL | 8 |
+| Auth et Middleware (composable, beforeLoad, cookie cache) | CRITICAL | 5 |
+| Images (srcSet, sizes, preload, WebP, picture) | HIGH | 9 |
+| Server Functions (validation, method) | HIGH | 3 |
+| Route Loaders (ensureQueryData, head) | HIGH | 6 |
+| Security Headers + Env Vars | HIGH | 5 |
+| Database / Drizzle (transactions, schema) | HIGH | 3 |
+| Accessibilite (skip-link, ARIA, motion) | MEDIUM | 7 |
+| Performance (debounce, placeholder, SSR) | MEDIUM | 4 |
+| DX (Husky, taze, npmrc, useSyncExternalStore) | MEDIUM | 4 |
+| Fonts | LOW | 3 |
+| **Total** | | **87** |
 
 ---
 
@@ -32,7 +49,7 @@ const queryClient = new QueryClient({
 - [ ] Definir `staleTime` global (30s minimum) — actuellement les queries refetchent a chaque mount
 - [ ] Definir `gcTime` global (5 min)
 - [ ] `refetchOnWindowFocus` seulement en production
-- [ ] `retry: false` par defaut (evite les retries silencieux)
+- [ ] `retry: false` par defaut
 - [ ] Overrides per-query pour les cas specifiques (search suggestions → 60s staleTime)
 
 ### Router options
@@ -73,10 +90,7 @@ nitro({
     '/fonts/**': { headers: { ...SECURITY_HEADERS, ...IMMUTABLE_CACHE } }
   }
 })
-```
 
-Avec :
-```typescript
 const IMMUTABLE_CACHE = {
   'Cache-Control': 'public, max-age=31536000, immutable'
 }
@@ -85,7 +99,6 @@ const IMMUTABLE_CACHE = {
 **A faire dans memes-by-lafouch :**
 - [ ] Ajouter `routeRules` dans la config Nitro (vite.config.ts)
 - [ ] Cache immutable (1 an) pour `/images/**` et `/fonts/**`
-- [ ] Headers de securite sur toutes les routes (`/**`)
 
 ---
 
@@ -93,29 +106,25 @@ const IMMUTABLE_CACHE = {
 
 ### Helper SEO structure
 
-**Reference** (`lib/seo.ts`) — fonction `seo()` qui retourne `{ meta, links }` :
+**Reference** — fonction `seo()` qui retourne `{ meta, links }` :
 ```typescript
 function seo({ title, description, keywords, image, imageAlt, pathname, ogType }: SeoParams) {
   return {
     meta: [
       { title: `${title} | ${SITE_NAME}` },
-      // Open Graph
       { property: 'og:type', content: ogType },
       { property: 'og:site_name', content: SITE_NAME },
       { property: 'og:title', content: fullTitle },
       { property: 'og:url', content: url },
       { property: 'og:locale', content: 'fr_FR' },
       { property: 'og:image', content: ogImage },
-      { property: 'og:image:type', content: 'image/png' },
       { property: 'og:image:width', content: '1200' },
       { property: 'og:image:height', content: '630' },
       { property: 'og:image:alt', content: ogImageAlt },
-      // Twitter Cards
       { name: 'twitter:card', content: 'summary_large_image' },
       { name: 'twitter:title', content: fullTitle },
       { name: 'twitter:image', content: ogImage },
-      { name: 'twitter:image:alt', content: ogImageAlt },
-      // Description + Keywords (conditionnels)
+      { name: 'twitter:image:alt', content: ogImageAlt }
     ],
     links: [
       { rel: 'canonical', href: url },
@@ -126,68 +135,54 @@ function seo({ title, description, keywords, image, imageAlt, pathname, ogType }
 ```
 
 **A faire dans memes-by-lafouch :**
-- [ ] Verifier que le helper SEO existant couvre tous ces champs (og:image dimensions, og:locale, twitter:image:alt)
+- [ ] Verifier que le helper SEO couvre tous ces champs (og:image dimensions, og:locale, twitter:image:alt)
 - [ ] Ajouter `canonical` et `alternate` hrefLang sur chaque route
 - [ ] S'assurer que chaque route a un `head()` avec SEO complet
 
 ### Root route meta tags
 
-**Reference** (`__root.tsx`) :
-```typescript
-meta: [
-  { charSet: 'utf-8' },
-  { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
-  { name: 'theme-color', content: '#10b981' },
-  { name: 'color-scheme', content: 'light' },
-  { name: 'robots', content: 'index,follow,noai,noimageai' },
-  { name: 'application-name', content: SITE_NAME },
-  { name: 'apple-mobile-web-app-title', content: SITE_NAME },
-  { name: 'apple-mobile-web-app-capable', content: 'yes' },
-  { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
-  { name: 'mobile-web-app-capable', content: 'yes' },
-  { name: 'format-detection', content: 'telephone=no' },
-  { name: 'author', content: SITE_DOMAIN },
-  { name: 'copyright', content: SITE_DOMAIN }
-]
-```
-
 **A faire dans memes-by-lafouch :**
-- [ ] Ajouter `noai,noimageai` au robots meta (bloquer les crawlers IA)
 - [ ] Ajouter `viewport-fit=cover` pour les ecrans encoche
 - [ ] Ajouter `color-scheme`, `application-name`, `apple-mobile-web-app-*`, `format-detection`
 - [ ] Verifier la presence de `theme-color`
 
-### Structured Data (JSON-LD)
+### Anti-AI double protection
 
-**Reference** — schemas utilises :
+**Reference** — meta tag + HTTP header :
+```typescript
+{ name: 'robots', content: 'index,follow,noai,noimageai' },
+{ httpEquiv: 'X-Robots-Tag', content: 'noai,noimageai' }
+```
+
+**A faire dans memes-by-lafouch :**
+- [ ] Ajouter le double `noai,noimageai` (meta + httpEquiv)
+
+### Structured Data (JSON-LD) type-safe
+
+**Reference** — utiliser `schema-dts` pour le typage :
+```typescript
+import type { WebSite, WithContext } from 'schema-dts'
+
+const WEBSITE_SCHEMA = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  // ...
+} as const satisfies WithContext<WebSite>
+```
+
+Schemas pertinents :
 - `WebSite` avec `SearchAction` (global, dans `__root.tsx`)
-- `FAQPage` (page FAQ + pages produit)
+- `FAQPage` avec microdata (si page FAQ)
 - `BreadcrumbList` (navigation fil d'ariane)
-- `Thing` / `ItemList` (pages produit, calendrier)
+- `VideoObject` (pages meme video)
 
 **A faire dans memes-by-lafouch :**
 - [ ] Ajouter un schema `WebSite` global avec `SearchAction`
-- [ ] Ajouter `BreadcrumbList` sur les pages avec navigation hierarchique
-- [ ] Ajouter des schemas pertinents par page (VideoObject pour les memes video, etc.)
-- [ ] Utiliser le package `schema-dts` pour le typage TypeScript des schemas
+- [ ] Ajouter des schemas pertinents par page (VideoObject, BreadcrumbList)
+- [ ] Utiliser `schema-dts` + `as const satisfies WithContext<Type>`
+- [ ] Ajouter microdata FAQ si une page FAQ existe
 
 ### Sitemap dynamique
-
-**Reference** — route `sitemap[.]xml.ts` :
-```typescript
-export const Route = createFileRoute('/sitemap.xml')({
-  server: {
-    handlers: {
-      GET: async () => {
-        // Generer le XML dynamiquement
-        return new Response(sitemap, {
-          headers: { 'Content-Type': 'application/xml' }
-        })
-      }
-    }
-  }
-})
-```
 
 **A faire dans memes-by-lafouch :**
 - [ ] Creer une route `sitemap[.]xml.ts` si inexistante
@@ -201,57 +196,42 @@ export const Route = createFileRoute('/sitemap.xml')({
 ```
 User-agent: *
 Allow: /
-Sitemap: https://memesbylafouch.fr/sitemap.xml
+Disallow: /admin/
+Disallow: /api/
+Sitemap: https://...
 ```
-
-Plus le meta tag `noai,noimageai` dans `__root.tsx`.
 
 **A faire dans memes-by-lafouch :**
 - [ ] Verifier/creer `robots.txt` avec lien vers sitemap
-- [ ] Ajouter `noai,noimageai` dans les meta robots
+- [ ] Bloquer `/admin/` et `/api/`
 
-### Web Manifest
+### staleTime: Infinity pour les pages statiques
 
-**Reference :**
-```json
-{
-  "name": "...",
-  "short_name": "...",
-  "description": "...",
-  "start_url": "/",
-  "lang": "fr",
-  "icons": [...],
-  "theme_color": "...",
-  "background_color": "#ffffff",
-  "display": "standalone"
-}
+**A faire dans memes-by-lafouch :**
+- [ ] Ajouter `staleTime: Infinity` sur les routes statiques (CGU, mentions legales, etc.)
+
+### PWA manifest
+
+**A faire dans memes-by-lafouch :**
+- [ ] Creer un `manifest.webmanifest` complet (name, short_name, icons, theme_color, lang)
+- [ ] Ajouter le `<link rel="manifest">` dans `__root.tsx`
+- [ ] Verifier que tous les favicons sont declares avec les bons sizes et types
+
+### Preload viewport sur les liens de navigation
+
+**Reference** — prefetch au viewport pour les liens critiques :
+```typescript
+{ linkOptions: { to: '/tarifs', preload: 'viewport' }, label: 'Tarifs' }
 ```
 
 **A faire dans memes-by-lafouch :**
-- [ ] Verifier/completer `site.webmanifest` (icons, theme_color, lang)
-- [ ] Lien `<link rel="manifest">` dans `__root.tsx`
+- [ ] Utiliser `preload: 'viewport'` sur les liens de navigation les plus importants
 
 ---
 
 ## 3. Images — HIGH
 
 ### Composant image optimise
-
-**Reference** (`produce-image.tsx`) :
-```typescript
-<img
-  src={getProduceImageSrc(slug)}
-  srcSet={getProduceImageSrcSet(slug)}
-  sizes={sizes}
-  alt={alt}
-  width={256}
-  height={256}
-  loading={loading}           // lazy par defaut, eager pour above-the-fold
-  fetchPriority={fetchPriority} // high pour les images critiques
-  decoding={fetchPriority === 'high' ? 'sync' : 'async'}
-  className="size-full object-cover"
-/>
-```
 
 **Attributs critiques :**
 - `srcSet` avec plusieurs tailles (256w, 512w)
@@ -267,114 +247,165 @@ Plus le meta tag `noai,noimageai` dans `__root.tsx`.
 - [ ] Utiliser `srcSet` + `sizes` sur toutes les images de memes
 - [ ] Toujours specifier `width` + `height` pour eviter le CLS
 - [ ] `loading="lazy"` par defaut, `"eager"` + `fetchPriority="high"` pour les premiers items visibles
-- [ ] `decoding="async"` par defaut
+
+### `<picture>` avec WebP + fallback
+
+**Reference :**
+```tsx
+<picture>
+  <source srcSet="/images/hero.webp" type="image/webp" />
+  <img src="/images/hero.png" alt="..." fetchPriority="high" loading="eager" decoding="async" />
+</picture>
+```
+
+**A faire dans memes-by-lafouch :**
+- [ ] Utiliser `<picture>` avec source WebP et fallback pour les images critiques
 
 ### Preload des images critiques
 
-**Reference** — dans `head()` des routes :
-```typescript
-links: [
-  {
-    rel: 'preload',
-    as: 'image',
-    type: 'image/webp',
-    href: `/images/produce/${slug}-512w.webp`
-  }
-]
-```
-
 **A faire dans memes-by-lafouch :**
 - [ ] Precharger l'image hero des pages meme dans `head()`
-- [ ] Precharger le background hero de la homepage (si applicable)
-- [ ] Utiliser `media` pour conditionner le preload au viewport
-
-### Priority loading pattern
-
-**Reference** — les N premiers items d'un carousel :
-```typescript
-const PRIORITY_COUNT = 4
-
-{produceList.map((produce, index) => (
-  <Card priority={index < PRIORITY_COUNT} />
-))}
-```
-
-**A faire dans memes-by-lafouch :**
 - [ ] Appliquer `priority` aux 4 premiers memes visibles dans les listes
-- [ ] Lazy-loader le reste
 
 ### Format WebP
 
-**Reference** — toutes les images en WebP, qualite 80, generees via Sharp.
-
 **A faire dans memes-by-lafouch :**
 - [ ] S'assurer que Bunny CDN sert les thumbnails en WebP
-- [ ] Generer des OG images en PNG 1200x630 pour chaque meme (ou via Bunny CDN transform)
+- [ ] Generer des OG images en PNG 1200x630
 
 ---
 
-## 4. Security Headers — HIGH
+## 4. Stripe — CRITICAL
 
-**Reference** (via Nitro routeRules) :
+### Payment Elements (pas Checkout redirect)
+
+**Reference** — Stripe 20.x avec Payment Elements :
 ```typescript
-const SECURITY_HEADERS = {
-  'X-Content-Type-Options': 'nosniff',
-  'X-Frame-Options': 'DENY',
-  'Referrer-Policy': 'strict-origin-when-cross-origin'
+const paymentIntent = await stripe.paymentIntents.create({
+  amount: courtData.price,
+  currency: 'eur',
+  payment_method_types: ['card'],
+  receipt_email: context.session.user.email,
+  metadata: { courtId, userId: context.session.user.id }
+})
+return { clientSecret: paymentIntent.client_secret }
+```
+
+**Points cles :**
+- `redirect: 'if_required'` dans `confirmPayment`
+- Polling post-paiement (1s interval, 30s timeout) au lieu de redirect vers success page
+
+**A faire dans memes-by-lafouch :**
+- [ ] Comparer le flow de paiement actuel avec le pattern Payment Elements
+- [ ] Implementer le polling post-paiement pour meilleur UX
+
+### Webhook avec verification de signature
+
+**Reference :**
+```typescript
+const signature = request.headers.get('stripe-signature')
+if (!signature) {
+  return new Response('Invalid request', { status: 400 })
+}
+const event = stripe.webhooks.constructEvent(rawBody, signature, serverEnv.STRIPE_WEBHOOK_SECRET)
+```
+
+**A faire dans memes-by-lafouch :**
+- [ ] Verifier que le webhook Stripe utilise `constructEvent` avec signature
+
+### Idempotence des webhooks
+
+**Reference** — double protection : verification en DB avant insertion + UNIQUE constraint avec `onConflictDoNothing`.
+
+**A faire dans memes-by-lafouch :**
+- [ ] Ajouter une colonne UNIQUE sur le payment ID dans les tables concernees
+- [ ] Implementer la verification d'idempotence dans les handlers webhook
+
+### Auto-refund et validation de prix
+
+**A faire dans memes-by-lafouch :**
+- [ ] Implementer un helper `safeRefund` avec gestion du `charge_already_refunded`
+- [ ] Auto-refund sur echec de validation post-paiement
+- [ ] Verifier le montant paye vs prix attendu dans les webhooks Stripe
+
+### Env vars Stripe validees
+
+**A faire dans memes-by-lafouch :**
+- [ ] Ajouter des validations `startsWith` sur les cles Stripe dans env.ts (`sk_`, `whsec_`, `pk_`)
+
+---
+
+## 5. Auth et Middleware — CRITICAL
+
+### Middleware composable et type-safe
+
+**Reference** — pattern middleware chainable :
+```typescript
+export const authUserRequiredMiddleware = createMiddleware({ type: 'function' })
+  .server(async ({ next }) => {
+    const session = await auth.api.getSession({ headers: getRequest().headers })
+    if (!session) {
+      setResponseStatus(401)
+      throw new StudioError('unauthorized', { code: 'UNAUTHORIZED' })
+    }
+    return next({ context: { user: session.user } })
+  })
+
+export const adminRequiredMiddleware = createMiddleware({ type: 'function' })
+  .middleware([authUserRequiredMiddleware])
+  .server(async ({ context, next }) => {
+    if (context.user.role !== 'admin') {
+      setResponseStatus(401)
+      throw new StudioError('unauthorized', { code: 'UNAUTHORIZED' })
+    }
+    return next({ context: { user: context.user } })
+  })
+```
+
+**A faire dans memes-by-lafouch :**
+- [ ] Verifier que le pattern middleware est utilise partout (pas de verification manuelle dans les handlers)
+- [ ] S'assurer que `adminRequiredMiddleware` chaine `authUserRequiredMiddleware`
+- [ ] Utiliser `setResponseStatus()` avant de throw les erreurs auth
+
+### Route guards avec beforeLoad
+
+**A faire dans memes-by-lafouch :**
+- [ ] Verifier que toutes les routes protegees utilisent `beforeLoad` (pas de check dans le composant)
+
+### Session cookie cache
+
+**Reference :**
+```typescript
+session: {
+  cookieCache: {
+    enabled: true,
+    maxAge: 5 * 60
+  }
 }
 ```
 
 **A faire dans memes-by-lafouch :**
-- [ ] Ajouter ces headers via `routeRules` dans vite.config.ts
-- [ ] Completer avec CSP et HSTS (deja prevu dans l'audit securite)
+- [ ] Activer `cookieCache` dans la config Better Auth (evite de refetch la session a chaque requete)
 
 ---
 
-## 5. Server Functions — HIGH
+## 6. Server Functions — HIGH
 
 ### Pattern createServerFn
-
-**Reference :**
-```typescript
-export const getSlugPageData = createServerFn({ method: 'GET' })
-  .inputValidator(slugInputSchema)
-  .handler(async ({ data }) => {
-    const { getProductBySlug } = await import('@estcequecestlasaison/shared/services')
-    return getProductBySlug({ slug: data.slug })
-  })
-```
 
 **Principes :**
 1. Toujours specifier `method: 'GET'` ou `'POST'`
 2. Toujours valider les inputs avec `.inputValidator()` + Zod
 3. Imports dynamiques pour eviter le bundling client
-4. Fonctions fines — validation + delegation
 
 **A faire dans memes-by-lafouch :**
 - [ ] Verifier que toutes les server functions ont un `.inputValidator()` avec Zod
 - [ ] Specifier le `method` explicitement sur chaque `createServerFn`
 - [ ] Utiliser des imports dynamiques pour les modules lourds server-only
 
-### Query Options Factory
-
-**Reference** (`constants/queries.ts`) :
-```typescript
-export function groupedProduceOptions({ searchQuery, category, month }: Params) {
-  return queryOptions({
-    queryKey: ['grouped-produce', searchQuery, category, month],
-    queryFn: () => getGroupedProduceData({ data: { searchQuery, category, month } })
-  })
-}
-```
-
-**A faire dans memes-by-lafouch :**
-- [ ] Verifier que toutes les query options sont dans `constants/queries.ts`
-- [ ] Pattern `queryOptions()` avec `queryKey` incluant tous les parametres
-- [ ] Reutiliser les memes options dans loader + composant
-
 ---
 
-## 6. Route Loaders — HIGH
+## 7. Route Loaders — HIGH
 
 ### Pattern loader avec ensureQueryData
 
@@ -385,63 +416,128 @@ export const Route = createFileRoute('/')({
   loaderDeps: ({ search }) => ({ q: search.q }),
   loader: async ({ context: { queryClient }, deps: { q } }) => {
     await Promise.all([
-      queryClient.ensureQueryData(groupedProduceOptions({ ... })),
-      queryClient.ensureQueryData(monthStatsOptions(month))
+      queryClient.ensureQueryData(queryA(q)),
+      queryClient.ensureQueryData(queryB())
     ])
   }
 })
 ```
 
-**Principes :**
-1. `validateSearch` avec Zod pour les search params
-2. `loaderDeps` pour tracker les dependances du loader
-3. `queryClient.ensureQueryData()` — ne refetch pas si deja en cache
-4. `Promise.all()` pour paralleliser les prefetch
-5. `throw notFound()` pour les 404
-
 **A faire dans memes-by-lafouch :**
-- [ ] Utiliser `ensureQueryData` au lieu de `fetchQuery` dans les loaders (evite les refetch inutiles)
-- [ ] Paralleliser les prefetch avec `Promise.all()` dans les loaders
+- [ ] Utiliser `ensureQueryData` au lieu de `fetchQuery` dans les loaders
+- [ ] Paralleliser les prefetch avec `Promise.all()`
 - [ ] Ajouter `validateSearch` avec Zod sur les routes avec search params
 - [ ] Ajouter `loaderDeps` pour les loaders qui dependent de search params
 
 ### Pattern head() pour le SEO
 
+**A faire dans memes-by-lafouch :**
+- [ ] Chaque route publique doit avoir un `head()` avec SEO complet
+- [ ] Les pages 404 doivent avoir `noindex,nofollow`
+
+---
+
+## 8. Security Headers + Env Vars — HIGH
+
+### Security Headers (Nitro routeRules)
+
 **Reference :**
 ```typescript
-export const Route = createFileRoute('/$slug')({
-  head: ({ loaderData }) => {
-    if (!loaderData) {
-      return { meta: [{ name: 'robots', content: 'noindex,nofollow' }] }
-    }
-    return produceSeo({ produce: loaderData.produce, month: loaderData.currentMonth })
+const SECURITY_HEADERS = {
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'Referrer-Policy': 'strict-origin-when-cross-origin'
+}
+```
+
+> Voir aussi `security.md` pour les headers additionnels (CSP, HSTS).
+
+**A faire dans memes-by-lafouch :**
+- [ ] Ajouter ces headers via `routeRules` dans vite.config.ts
+
+### Env vars avec validation stricte
+
+**Reference** — separation client/server avec `@t3-oss/env-core` :
+```typescript
+// src/env/client.ts
+export const clientEnv = createEnv({
+  clientPrefix: 'VITE_',
+  client: { VITE_SITE_URL: z.url() },
+  runtimeEnv: import.meta.env,
+  emptyStringAsUndefined: true
+})
+
+// src/env/server.ts
+export const serverEnv = createEnv({
+  server: {
+    STRIPE_SECRET_KEY: z.string().startsWith('sk_'),
+    STRIPE_WEBHOOK_SECRET: z.string().startsWith('whsec_')
   },
-  notFoundComponent: NotFound
+  runtimeEnv: process.env,
+  emptyStringAsUndefined: true
 })
 ```
 
 **A faire dans memes-by-lafouch :**
-- [ ] Chaque route publique doit avoir un `head()` avec SEO complet
-- [ ] Les pages 404 doivent avoir `noindex,nofollow`
-- [ ] Preloader les images critiques via `head().links`
+- [ ] Separer clairement client env et server env dans des fichiers distincts
+- [ ] Ajouter des validations `.startsWith()` pour les cles API
+- [ ] `emptyStringAsUndefined: true`
+
+### Zod 4 avec locale FR
+
+**A faire dans memes-by-lafouch :**
+- [ ] Configurer la locale francaise Zod : `z.config(fr())`
+- [ ] Les messages d'erreur de validation seront automatiquement en francais
 
 ---
 
-## 7. Accessibilite — MEDIUM
+## 9. Database / Drizzle — HIGH
+
+> Ces patterns sont pertinents pour la future migration Prisma → Drizzle.
+
+### Transactions serializables
+
+**Reference** — isolation `serializable` pour eviter les race conditions :
+```typescript
+const result = await db.transaction(
+  async (tx) => {
+    const [existing] = await tx.select({ id: booking.id })
+      .from(booking)
+      .where(and(eq(booking.courtId, courtId), eq(booking.status, 'confirmed')))
+      .limit(1)
+
+    if (existing) {
+      return { success: false, reason: 'slot_conflict' }
+    }
+
+    const [created] = await tx.insert(booking).values({ ... }).returning()
+    return { success: true, bookingId: created.id }
+  },
+  { isolationLevel: 'serializable' }
+)
+```
+
+**A faire dans memes-by-lafouch :**
+- [ ] Utiliser des transactions pour les operations critiques (toggle bookmark avec count, etc.)
+
+### Schema design patterns
+
+Conventions a adopter pour la migration Drizzle :
+- Tables en pluriel, colonnes en `snake_case`
+- Timestamps avec suffixe `_at`, booleans avec prefixe `is_`
+- Prix en centimes (integer, pas float), UUIDs partout
+- `ON DELETE CASCADE` pour auth, `NO ACTION` pour donnees business
+- Champ `is_anonymized` pour GDPR (soft delete)
+
+**A faire dans memes-by-lafouch :**
+- [ ] Adopter ces conventions pour la migration Drizzle
+- [ ] Ajouter `is_anonymized` au modele User pour la suppression GDPR
+
+---
+
+## 10. Accessibilite — MEDIUM
 
 ### Skip to main content
-
-**Reference :**
-```tsx
-<a
-  href="#main-content"
-  className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-100"
->
-  Aller au contenu principal
-</a>
-
-<main id="main-content">...</main>
-```
 
 **A faire dans memes-by-lafouch :**
 - [ ] Ajouter un lien "Aller au contenu principal" dans le layout root
@@ -449,45 +545,17 @@ export const Route = createFileRoute('/$slug')({
 
 ### Semantic HTML
 
-**Reference** — utilisation correcte de `<main>`, `<nav>`, `<aside>`, `<article>`, `<section>`.
-
 **A faire dans memes-by-lafouch :**
 - [ ] Verifier l'usage de balises semantiques dans les layouts
 - [ ] S'assurer que les headings suivent une hierarchie correcte (h1 → h2 → h3)
 
 ### Reduced motion
 
-**Reference :**
-```typescript
-const isReducedMotion = useReducedMotion()
-
-<motion.div
-  whileHover={isReducedMotion ? undefined : 'hover'}
-/>
-```
-
-```css
-@media (prefers-reduced-motion: reduce) {
-  .animated { transition: none; }
-}
-```
-
 **A faire dans memes-by-lafouch :**
 - [ ] Respecter `prefers-reduced-motion` dans les animations Motion
 - [ ] Ajouter des fallbacks CSS pour reduced motion
 
 ### ARIA
-
-**Reference :**
-```tsx
-<button aria-label="Rechercher (Ctrl+K)" aria-expanded={isOpen}>
-  <Search aria-hidden="true" />
-</button>
-
-<div role="status" aria-live="polite" className="sr-only">
-  {resultMessage}
-</div>
-```
 
 **A faire dans memes-by-lafouch :**
 - [ ] Ajouter `aria-label` sur les boutons sans texte visible
@@ -496,97 +564,62 @@ const isReducedMotion = useReducedMotion()
 
 ---
 
-## 8. Performance — MEDIUM
+## 11. Performance — MEDIUM
 
 ### Debounced search
 
-**Reference :**
-```typescript
-const [debouncedSearch] = useDebouncedValue(searchQuery, { wait: 200 })
-const suggestionsQuery = useQuery(searchSuggestionsOptions(debouncedSearch))
-```
-
 **A faire dans memes-by-lafouch :**
 - [ ] Utiliser `useDebouncedValue` de `@tanstack/react-pacer` pour la recherche
-- [ ] Ne pas lancer de requete avant debounce
 
 ### placeholderData pour les transitions
 
-**Reference :**
-```typescript
-const query = useQuery({
-  ...groupedProduceOptions({ searchQuery, category, month }),
-  placeholderData: keepPreviousData
-})
-```
-
 **A faire dans memes-by-lafouch :**
 - [ ] Utiliser `placeholderData: keepPreviousData` sur les queries avec filtres/pagination
-- [ ] Evite le flash de contenu vide entre les changements de parametres
 
 ### SSR Query Integration
 
-**Reference :**
-```typescript
-setupRouterSsrQueryIntegration({ router, queryClient })
-```
-
 **A faire dans memes-by-lafouch :**
 - [ ] Verifier que `setupRouterSsrQueryIntegration` est configure
-- [ ] Les donnees prefetchees en SSR doivent hydrater le cache client
 
----
-
-## 9. Environment Variables — MEDIUM
-
-### Validation avec @t3-oss/env-core
+### useSyncExternalStore pour media queries
 
 **Reference :**
 ```typescript
-import { createEnv } from '@t3-oss/env-core'
-
-export const clientEnv = createEnv({
-  clientPrefix: 'VITE_',
-  client: {
-    VITE_SITE_URL: z.url()
-  },
-  runtimeEnv: import.meta.env,
-  emptyStringAsUndefined: true
-})
+export function useIsMobile() {
+  return React.useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
+}
+function getServerSnapshot() {
+  return false
+}
 ```
 
 **A faire dans memes-by-lafouch :**
-- [ ] Verifier que `src/constants/env.ts` valide toutes les variables avec Zod
-- [ ] Separer client env et server env clairement
-- [ ] `emptyStringAsUndefined: true` pour eviter les strings vides
+- [ ] Utiliser `useSyncExternalStore` pour les hooks media query (SSR-safe)
 
 ---
 
-## 10. Fonts — LOW
+## 12. DX — MEDIUM
 
-### System fonts
-
-**Reference** — pas de chargement de web fonts en production. Utilise la stack systeme avec Inter en premier (fallback).
+### Husky pre-commit
 
 **A faire dans memes-by-lafouch :**
-- [ ] Evaluer l'auto-hebergement des Google Fonts (deja prevu dans l'audit GDPR)
-- [ ] Utiliser `font-display: swap` si web fonts chargees
-- [ ] Precharger les fonts critiques
+- [ ] Ajouter Husky avec pre-commit `npm run lint` (bloque les commits avec erreurs TS/ESLint)
+
+### Script deps avec taze
+
+**A faire dans memes-by-lafouch :**
+- [ ] Ajouter les scripts `deps` et `deps:major` dans package.json
+
+### .npmrc strict
+
+**A faire dans memes-by-lafouch :**
+- [ ] Verifier/creer `.npmrc` avec `engine-strict=true`, `legacy-peer-deps=false`, `package-lock=true`
 
 ---
 
-## Resume
+## 13. Fonts — LOW
 
-| Categorie | Priorite | Items |
-|-----------|----------|-------|
-| Caching (QueryClient + Router + HTTP) | CRITICAL | 14 |
-| SEO (meta, JSON-LD, sitemap, robots) | CRITICAL | 13 |
-| Images (srcSet, sizes, preload, WebP) | HIGH | 8 |
-| Security Headers (Nitro routeRules) | HIGH | 2 |
-| Server Functions (validation, method) | HIGH | 3 |
-| Route Loaders (ensureQueryData, head) | HIGH | 6 |
-| Accessibilite (skip-link, ARIA, motion) | MEDIUM | 7 |
-| Performance (debounce, placeholder) | MEDIUM | 4 |
-| Environment Variables | MEDIUM | 3 |
-| Fonts | LOW | 3 |
-| **Total** | | **63** |
+**A faire dans memes-by-lafouch :**
+- [ ] Evaluer l'auto-hebergement des Google Fonts (→ voir aussi `gdpr.md`)
+- [ ] Utiliser `font-display: swap` si web fonts chargees
+- [ ] Precharger les fonts critiques avec `<link rel="preload" as="font" type="font/woff2" crossorigin>`

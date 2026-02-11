@@ -1,7 +1,7 @@
 import { z } from 'zod/v3'
 import zodToJsonSchema from 'zod-to-json-schema'
-import { ENV } from '@/constants/env'
 import { prismaClient } from '@/db'
+import { serverEnv } from '@/env/server'
 import { buildVideoOriginalUrl } from '@/lib/bunny'
 import { adminRequiredMiddleware } from '@/server/user-auth'
 import { GoogleGenAI } from '@google/genai'
@@ -16,7 +16,7 @@ const videoSchema = z.object({
   keywords: z.array(z.string()).describe('Mots clefs de la vidéo')
 })
 
-const ai = new GoogleGenAI({ apiKey: ENV.GEMINI_API_KEY })
+const ai = new GoogleGenAI({ apiKey: serverEnv.GEMINI_API_KEY })
 
 export const generateMemeContent = createServerFn({ method: 'POST' })
   .middleware([adminRequiredMiddleware])

@@ -1,19 +1,22 @@
 import { z } from 'zod'
-import { ENV } from '@/constants/env'
-import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
+import { clientEnv } from '@/env/client'
+import { serverEnv } from '@/env/server'
+import { createServerOnlyFn } from '@tanstack/react-start'
 import { fetchWithZod } from './utils'
 
 export const buildBunnyUrl = (pathname: `/${string}`) => {
-  return new URL(pathname, `https://${ENV.VITE_BUNNY_HOSTNAME}`).toString()
+  return new URL(
+    pathname,
+    `https://${clientEnv.VITE_BUNNY_HOSTNAME}`
+  ).toString()
 }
 
 export const getBunnyHeaders = createServerOnlyFn(() => {
-  const headers = new Headers()
-  headers.set('AccessKey', ENV.BUNNY_ACCESS_KEY)
-  headers.set('accept', 'application/json')
-  headers.set('Content-Type', 'application/json')
-
-  return headers
+  return new Headers({
+    AccessKey: serverEnv.BUNNY_ACCESS_KEY,
+    Accept: 'application/json',
+    'Content-Type': 'application/json'
+  })
 })
 
 const DEFAULT_RESPONSE_SCHEMA = z.object({
@@ -29,7 +32,7 @@ export const buildVideoOriginalUrl = (videoId: string) => {
 }
 
 export const buildIframeVideoUrl = (videoId: string) => {
-  return `https://iframe.mediadelivery.net/embed/${ENV.VITE_BUNNY_LIBRARY_ID}/${videoId}`
+  return `https://iframe.mediadelivery.net/embed/${clientEnv.VITE_BUNNY_LIBRARY_ID}/${videoId}`
 }
 
 export const buildVideoPreviewUrl = (videoId: string) => {
@@ -43,7 +46,7 @@ export const buildVideoStreamUrl = (videoId: string) => {
 export const deleteVideo = createServerOnlyFn(async (videoId: string) => {
   return fetchWithZod(
     DEFAULT_RESPONSE_SCHEMA,
-    `https://video.bunnycdn.com/library/${ENV.VITE_BUNNY_LIBRARY_ID}/videos/${videoId}`,
+    `https://video.bunnycdn.com/library/${clientEnv.VITE_BUNNY_LIBRARY_ID}/videos/${videoId}`,
     {
       method: 'DELETE',
       headers: getBunnyHeaders()
@@ -57,20 +60,16 @@ const VIDEO_PLAY_DATA_SCHEMA = z.object({
   })
 })
 
-export const getVideoPlayData = createServerFn({ method: 'POST' })
-  .inputValidator((data) => {
-    return z.string().parse(data)
-  })
-  .handler(async ({ data: videoId }) => {
-    return fetchWithZod(
-      VIDEO_PLAY_DATA_SCHEMA,
-      `https://video.bunnycdn.com/library/${ENV.VITE_BUNNY_LIBRARY_ID}/videos/${videoId}/play`,
-      {
-        method: 'GET',
-        headers: getBunnyHeaders()
-      }
-    )
-  })
+export const getVideoPlayData = createServerOnlyFn(async (videoId: string) => {
+  return fetchWithZod(
+    VIDEO_PLAY_DATA_SCHEMA,
+    `https://video.bunnycdn.com/library/${clientEnv.VITE_BUNNY_LIBRARY_ID}/videos/${videoId}/play`,
+    {
+      method: 'GET',
+      headers: getBunnyHeaders()
+    }
+  )
+})
 
 const UPLOAD_RESPONSE_SCHEMA = z.object({
   guid: z.string()
@@ -79,13 +78,13 @@ const UPLOAD_RESPONSE_SCHEMA = z.object({
 export const createVideo = createServerOnlyFn(async (title: string) => {
   const { guid: videoId } = await fetchWithZod(
     UPLOAD_RESPONSE_SCHEMA,
-    `https://video.bunnycdn.com/library/${ENV.VITE_BUNNY_LIBRARY_ID}/videos`,
+    `https://video.bunnycdn.com/library/${clientEnv.VITE_BUNNY_LIBRARY_ID}/videos`,
     {
       method: 'POST',
       headers: getBunnyHeaders(),
       body: JSON.stringify({
         title,
-        collectionId: ENV.BUNNY_COLLECTION_ID
+        collectionId: serverEnv.BUNNY_COLLECTION_ID
       })
     }
   )
@@ -100,7 +99,7 @@ export const uploadVideo = createServerOnlyFn(
 
     await fetchWithZod(
       DEFAULT_RESPONSE_SCHEMA,
-      `https://video.bunnycdn.com/library/${ENV.VITE_BUNNY_LIBRARY_ID}/videos/${videoId}`,
+      `https://video.bunnycdn.com/library/${clientEnv.VITE_BUNNY_LIBRARY_ID}/videos/${videoId}`,
       {
         method: 'PUT',
         headers,

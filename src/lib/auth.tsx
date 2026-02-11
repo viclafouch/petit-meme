@@ -2,8 +2,15 @@ import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { admin } from 'better-auth/plugins'
 import { reactStartCookies } from 'better-auth/react-start'
-import { ENV } from '@/constants/env'
+import {
+  FIVE_MINUTES_IN_SECONDS,
+  ONE_DAY_IN_SECONDS,
+  ONE_HOUR_IN_SECONDS,
+  SEVEN_DAYS_IN_SECONDS
+} from '@/constants/time'
 import { prismaClient } from '@/db'
+import { clientEnv } from '@/env/client'
+import { serverEnv } from '@/env/server'
 import { resendClient } from '@/lib/resend'
 import { stripeClient } from '@/lib/stripe'
 import { stripe } from '@better-auth/stripe'
@@ -15,16 +22,16 @@ const getAuthConfig = createServerOnlyFn(() => {
   return betterAuth({
     appName: 'Petit Meme',
     basePath: '/api/auth',
-    secret: ENV.BETTER_AUTH_SECRET,
+    secret: serverEnv.BETTER_AUTH_SECRET,
     database: prismaAdapter(prismaClient, {
       provider: 'postgresql'
     }),
     session: {
-      expiresIn: 60 * 60 * 24 * 7, // 7 days
-      updateAge: 60 * 60 * 24, // 1 day (every 1 day the session expiration is updated)
+      expiresIn: SEVEN_DAYS_IN_SECONDS,
+      updateAge: ONE_DAY_IN_SECONDS,
       cookieCache: {
         enabled: true,
-        maxAge: 5 * 60 // Cache duration in seconds
+        maxAge: FIVE_MINUTES_IN_SECONDS
       }
     },
     user: {
@@ -35,12 +42,12 @@ const getAuthConfig = createServerOnlyFn(() => {
     emailAndPassword: {
       enabled: true,
       autoSignIn: true,
-      minPasswordLength: 4,
+      minPasswordLength: 12,
       maxPasswordLength: 100,
       sendResetPassword: async ({ user, url }) => {
         await resendClient.emails.send({
           from: 'Petit Meme <hello@petit-meme.io>',
-          to: ENV.RESEND_EMAIL_TO ?? user.email,
+          to: serverEnv.RESEND_EMAIL_TO ?? user.email,
           subject: 'Réinitialise ton mot de passe Petit Mème',
           react: <ResetPassword username={user.name} resetUrl={url} />
         })
@@ -55,11 +62,11 @@ const getAuthConfig = createServerOnlyFn(() => {
     emailVerification: {
       sendOnSignUp: true,
       autoSignInAfterVerification: true,
-      expiresIn: 3600, // 1 hour
+      expiresIn: ONE_HOUR_IN_SECONDS,
       sendVerificationEmail: async ({ user, url }) => {
         await resendClient.emails.send({
           from: 'Petit Meme <hello@petit-meme.io>',
-          to: ENV.RESEND_EMAIL_TO ?? user.email,
+          to: serverEnv.RESEND_EMAIL_TO ?? user.email,
           subject: 'Confirme ton inscription à Petit Mème',
           react: (
             <EmailVerification username={user.name} verificationUrl={url} />
@@ -72,40 +79,62 @@ const getAuthConfig = createServerOnlyFn(() => {
         }
       },
       async afterEmailVerification(user) {
-        // eslint-disable-next-line no-console
-        console.log(`${user.email} has been successfully verified!`)
+        if (process.env.NODE_ENV !== 'production') {
+          // eslint-disable-next-line no-console
+          console.log(`${user.email} has been successfully verified!`)
+        }
       }
     },
     socialProviders: {
       twitter: {
-        clientId: ENV.AUTH_TWITTER_ID,
-        clientSecret: ENV.AUTH_TWITTER_SECRET,
+        clientId: serverEnv.AUTH_TWITTER_ID,
+        clientSecret: serverEnv.AUTH_TWITTER_SECRET,
         mapProfileToUser: async (profile) => {
           const user = {
             name: profile.data.username,
             email: profile.data.email,
             image: profile.data.profile_image_url
           }
-          // eslint-disable-next-line no-console
-          console.log("Connecting to Twitter's API with profile", user)
+
+          if (process.env.NODE_ENV !== 'production') {
+            // eslint-disable-next-line no-console
+            console.log("Connecting to Twitter's API with profile", user)
+          }
 
           return user
         }
       }
     },
+    rateLimit: {
+      enabled: process.env.NODE_ENV === 'production',
+      window: 60,
+      max: 100,
+      storage: 'memory',
+      customRules: {
+        '/sign-in/email': { window: 300, max: 10 },
+        '/sign-up/email': { window: 3600, max: 3 },
+        '/forget-password': { window: 3600, max: 3 },
+        '/change-password': { window: 900, max: 5 },
+        '/send-verification-email': { window: 60, max: 2 }
+      }
+    },
+    advanced: {
+      useSecureCookies: process.env.NODE_ENV === 'production'
+    },
+    trustedOrigins: [clientEnv.VITE_SITE_URL],
     plugins: [
       admin(),
       reactStartCookies(),
       stripe({
         stripeClient,
-        stripeWebhookSecret: ENV.STRIPE_WEBHOOK_SECRET,
+        stripeWebhookSecret: serverEnv.STRIPE_WEBHOOK_SECRET,
         createCustomerOnSignUp: true,
         subscription: {
           enabled: true,
           plans: [
             {
               name: 'premium',
-              priceId: ENV.STRIPE_PRICE_ID
+              priceId: serverEnv.STRIPE_PRICE_ID
             }
           ]
         }

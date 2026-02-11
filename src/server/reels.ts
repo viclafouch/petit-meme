@@ -2,6 +2,7 @@ import * as R from 'remeda'
 import { z } from 'zod'
 import type { MemeWithVideo } from '@/constants/meme'
 import { prismaClient } from '@/db'
+import { Prisma } from '@/db/generated/prisma/client'
 import { createServerFn } from '@tanstack/react-start'
 
 export const getInfiniteReels = createServerFn({ method: 'POST' })
@@ -15,9 +16,11 @@ export const getInfiniteReels = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const { excludedIds } = data
 
-    const memes = await prismaClient
-      .$queryRawUnsafe<{ meme: MemeWithVideo }[]>(
-        `
+    const excludeClause = excludedIds.length
+      ? Prisma.sql`AND m."id" NOT IN (${Prisma.join(excludedIds)})`
+      : Prisma.empty
+
+    const memes = await prismaClient.$queryRaw<{ meme: MemeWithVideo }[]>`
       SELECT json_build_object(
         'id', m."id",
         'title', m."title",
@@ -33,24 +36,14 @@ export const getInfiniteReels = createServerFn({ method: 'POST' })
       FROM "Meme" m
       JOIN "Video" v ON m."videoId" = v."id"
       WHERE m."status" = 'PUBLISHED'
-      ${
-        excludedIds.length
-          ? `AND m."id" NOT IN (${excludedIds
-              .map((id) => {
-                return `'${id}'`
-              })
-              .join(',')})`
-          : ''
-      }
+      ${excludeClause}
       ORDER BY RANDOM()
       LIMIT 20
-    `
-      )
-      .then((result) => {
-        return result.map(({ meme }) => {
-          return meme
-        })
+    `.then((rows) => {
+      return rows.map((row) => {
+        return row.meme
       })
+    })
 
     const newExcludedIds = [
       ...R.takeLast(excludedIds, excludedIds.length / 2),

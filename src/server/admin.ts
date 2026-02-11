@@ -24,8 +24,9 @@ import { adminRequiredMiddleware } from '@/server/user-auth'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
 
-export const getListUsers = createServerFn({ method: 'GET' }).handler(
-  async () => {
+export const getListUsers = createServerFn({ method: 'GET' })
+  .middleware([adminRequiredMiddleware])
+  .handler(async () => {
     const { headers } = getRequest()
 
     const listUsers = await auth.api.listUsers({
@@ -38,8 +39,7 @@ export const getListUsers = createServerFn({ method: 'GET' }).handler(
     })
 
     return listUsers
-  }
-)
+  })
 
 export const MEME_FORM_SCHEMA = z.object({
   title: z.string().min(3),
@@ -56,6 +56,21 @@ export const MEME_FORM_SCHEMA = z.object({
       })
   )
 })
+
+function resolvePublishedAt(
+  newStatus: string,
+  meme: { status: string; publishedAt: Date | null }
+) {
+  if (newStatus === 'PUBLISHED' && meme.status !== 'PUBLISHED') {
+    return new Date()
+  }
+
+  if (newStatus !== 'PUBLISHED') {
+    return null
+  }
+
+  return meme.publishedAt
+}
 
 export const editMeme = createServerFn({ method: 'POST' })
   .inputValidator((data) => {
@@ -76,13 +91,7 @@ export const editMeme = createServerFn({ method: 'POST' })
       throw new Error('Meme not found')
     }
 
-    let { publishedAt } = meme
-
-    if (values.status === 'PUBLISHED' && meme.status !== 'PUBLISHED') {
-      publishedAt = new Date()
-    } else if (values.status !== 'PUBLISHED') {
-      publishedAt = null
-    }
+    const publishedAt = resolvePublishedAt(values.status, meme)
 
     const memeUpdated = await prismaClient.meme.update({
       where: {
@@ -290,6 +299,8 @@ export const getAdminMemes = createServerFn({ method: 'GET' })
   .middleware([adminRequiredMiddleware])
   .inputValidator(MEMES_FILTERS_SCHEMA)
   .handler(async ({ data }) => {
+    const filters = data.status ? `status:${data.status}` : undefined
+
     const response = await algoliaClient.searchSingleIndex<
       MemeWithVideo & MemeWithCategories
     >({
@@ -298,15 +309,7 @@ export const getAdminMemes = createServerFn({ method: 'GET' })
         query: data.query,
         page: data.page ? data.page - 1 : 0,
         hitsPerPage: 30,
-        filters: (() => {
-          const filters: string[] = []
-
-          if (data.status) {
-            filters.push(`status:${data.status}`)
-          }
-
-          return filters.length ? filters.join(' AND ') : undefined
-        })()
+        filters
       }
     })
 
@@ -332,11 +335,13 @@ export const removeUser = createServerFn({ method: 'POST' })
       throw new Error('User not found')
     }
 
+    const { headers } = getRequest()
+
     await auth.api.removeUser({
       body: {
         userId: user.id
       },
-      headers: await getRequest().headers
+      headers
     })
 
     return { success: true }

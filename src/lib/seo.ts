@@ -16,6 +16,7 @@ import type {
 import type { MemeWithCategories, MemeWithVideo } from '@/constants/meme'
 import type { Plan } from '@/constants/plan'
 import type { CategoryModel } from '@/db/generated/prisma/models'
+import { clientEnv } from '@/env/client'
 import {
   buildIframeVideoUrl,
   buildVideoImageUrl,
@@ -23,10 +24,7 @@ import {
 } from '@/lib/bunny'
 import type { AnyRouteMatch } from '@tanstack/react-router'
 
-const appProdUrl = 'https://petit-meme.io'
-
-export const websiteOrigin =
-  process.env.NODE_ENV === 'production' ? appProdUrl : 'http://localhost:3000'
+export const websiteOrigin = clientEnv.VITE_SITE_URL
 const websiteId = `${websiteOrigin}/#website`
 
 export const buildUrl = (pathname: string) => {

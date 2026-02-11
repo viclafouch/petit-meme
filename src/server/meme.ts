@@ -1,6 +1,11 @@
 import { z } from 'zod'
 import type { MemeWithCategories, MemeWithVideo } from '@/constants/meme'
 import { MEMES_FILTERS_SCHEMA } from '@/constants/meme'
+import {
+  ONE_HOUR_MS,
+  ONE_YEAR_IN_SECONDS,
+  THIRTY_DAYS_MS
+} from '@/constants/time'
 import { prismaClient } from '@/db'
 import { MemeStatus } from '@/db/generated/prisma/enums'
 import { algoliaClient, algoliaIndexName } from '@/lib/algolia'
@@ -9,6 +14,19 @@ import { authUserRequiredMiddleware } from '@/server/user-auth'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getCookie, setCookie } from '@tanstack/react-start/server'
+
+function buildMemeFilters(category: string | undefined, thirtyDaysAgo: number) {
+  const filters = [`status:${MemeStatus.PUBLISHED}`]
+
+  if (category === 'news') {
+    filters.push(`publishedAtTime >= ${thirtyDaysAgo}`)
+  } else if (category) {
+    const sanitizedCategory = category.replaceAll('"', '')
+    filters.push(`categorySlugs:"${sanitizedCategory}"`)
+  }
+
+  return filters.join(' AND ')
+}
 
 export const getMemeById = createServerFn({ method: 'GET' })
   .inputValidator((data) => {
@@ -58,7 +76,8 @@ export const getVideoStatusById = createServerFn({ method: 'GET' })
 export const getMemes = createServerFn({ method: 'GET' })
   .inputValidator(MEMES_FILTERS_SCHEMA)
   .handler(async ({ data }) => {
-    const THIRTY_DAYS_AGO = Date.now() - 30 * 24 * 60 * 60 * 1000
+    const thirtyDaysAgo = Date.now() - THIRTY_DAYS_MS
+    const filters = buildMemeFilters(data.category, thirtyDaysAgo)
 
     const response = await algoliaClient.searchSingleIndex<
       MemeWithVideo & MemeWithCategories
@@ -68,17 +87,7 @@ export const getMemes = createServerFn({ method: 'GET' })
         query: data.query,
         page: data.page ? data.page - 1 : 0,
         hitsPerPage: 30,
-        filters: (() => {
-          const filters: string[] = [`status:${MemeStatus.PUBLISHED}`]
-
-          if (data.category === 'news') {
-            filters.push(`publishedAtTime >= ${THIRTY_DAYS_AGO}`)
-          } else if (data.category) {
-            filters.push(`categorySlugs:${data.category}`)
-          }
-
-          return filters.length ? filters.join(' AND ') : undefined
-        })()
+        filters
       }
     })
 
@@ -99,14 +108,14 @@ export const getMemes = createServerFn({ method: 'GET' })
 
 export const getRecentCountMemes = createServerFn({ method: 'GET' }).handler(
   async () => {
-    const THIRTY_DAYS_AGO = Date.now() - 30 * 24 * 60 * 60 * 1000 // 1 month ago
+    const thirtyDaysAgo = Date.now() - THIRTY_DAYS_MS
 
     const countResult = await algoliaClient.searchSingleIndex({
       indexName: algoliaIndexName,
       searchParams: {
         filters: [
           `status:${MemeStatus.PUBLISHED}`,
-          `publishedAtTime >= ${THIRTY_DAYS_AGO}`
+          `publishedAtTime >= ${thirtyDaysAgo}`
         ].join(' AND '),
         hitsPerPage: 0
       }
@@ -195,11 +204,7 @@ export const registerMemeView = createServerFn({ method: 'POST' })
     return z
       .object({
         memeId: z.string(),
-        watchMs: z
-          .number()
-          .int()
-          .min(0)
-          .max(60 * 60 * 1000)
+        watchMs: z.number().int().min(0).max(ONE_HOUR_MS)
       })
       .parse(data)
   })
@@ -213,9 +218,10 @@ export const registerMemeView = createServerFn({ method: 'POST' })
 
       setCookie('anonId', viewerKey, {
         httpOnly: true,
+        secure: true,
         sameSite: 'lax',
         path: '/',
-        maxAge: 60 * 60 * 24 * 365
+        maxAge: ONE_YEAR_IN_SECONDS
       })
     }
 

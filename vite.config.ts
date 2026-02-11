@@ -5,6 +5,16 @@ import tailwindcss from '@tailwindcss/vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import react from '@vitejs/plugin-react'
 
+const SECURITY_HEADERS = {
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'Referrer-Policy': 'strict-origin-when-cross-origin'
+}
+
+const IMMUTABLE_CACHE = {
+  'Cache-Control': 'public, max-age=31536000, immutable'
+}
+
 export default defineConfig({
   server: {
     port: 3000
@@ -28,14 +38,18 @@ export default defineConfig({
     nitro({
       preset: 'node-server',
       routeRules: {
+        '/**': { headers: SECURITY_HEADERS },
         '/images/**': {
-          headers: { 'cache-control': 'public, max-age=31536000, immutable' }
+          headers: { ...SECURITY_HEADERS, ...IMMUTABLE_CACHE }
         },
         '/videos/**': {
-          headers: { 'cache-control': 'public, max-age=31536000, immutable' }
+          headers: { ...SECURITY_HEADERS, ...IMMUTABLE_CACHE }
         },
         '/admin/**': {
-          headers: { 'X-Robots-Tag': 'noindex, nofollow' }
+          headers: {
+            ...SECURITY_HEADERS,
+            'X-Robots-Tag': 'noindex, nofollow'
+          }
         }
       }
     })

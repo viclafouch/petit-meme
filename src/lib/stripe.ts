@@ -1,6 +1,6 @@
 import Stripe from 'stripe'
-import { ENV } from '@/constants/env'
+import { serverEnv } from '@/env/server'
 
-export const stripeClient = new Stripe(ENV.STRIPE_SECRET_KEY, {
+export const stripeClient = new Stripe(serverEnv.STRIPE_SECRET_KEY, {
   apiVersion: '2025-08-27.basil'
 })

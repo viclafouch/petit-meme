@@ -22,7 +22,7 @@ export const Route = createFileRoute('/api/bunny')({
         const data = await request.json()
         const result = WEBHOOK_RESPONSE_SCHEMA.parse(data)
 
-        const videoPlayData = await getVideoPlayData({ data: result.VideoGuid })
+        const videoPlayData = await getVideoPlayData(result.VideoGuid)
 
         try {
           const { meme } = await prismaClient.video.update({
@@ -68,7 +68,7 @@ export const Route = createFileRoute('/api/bunny')({
           })
 
           return Response.json({ success: true })
-        } catch (error) {
+        } catch (_error) {
           // eslint-disable-next-line no-console
           console.log('Mise à jour non effectuée', {
             videoId: result.VideoGuid,

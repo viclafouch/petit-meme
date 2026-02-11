@@ -1,12 +1,14 @@
-import { ENV } from '@/constants/env'
 import type { MemeWithCategories, MemeWithVideo } from '@/constants/meme'
+import { serverEnv } from '@/env/server'
 import { buildVideoImageUrl } from '@/lib/bunny'
 import { searchClient } from '@algolia/client-search'
 
-const appID = 'W4S6H0K8DZ'
-export const algoliaIndexName = ENV.ALGOLIA_INDEX
+export const algoliaIndexName = serverEnv.ALGOLIA_INDEX
 
-export const algoliaClient = searchClient(appID, ENV.ALGOLIA_SECRET)
+export const algoliaClient = searchClient(
+  serverEnv.ALGOLIA_APP_ID,
+  serverEnv.ALGOLIA_SECRET
+)
 
 export function memeToAlgoliaRecord(meme: MemeWithVideo & MemeWithCategories) {
   return {

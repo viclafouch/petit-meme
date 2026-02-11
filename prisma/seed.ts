@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
 /* eslint-disable no-await-in-loop */
 import { z } from 'zod'
-import { ENV } from '@/constants/env'
 import { prismaClient } from '@/db'
+import { clientEnv } from '@/env/client'
 import {
   algoliaClient,
   algoliaIndexName,
@@ -26,7 +26,7 @@ import mocks from './seed-mock.json' assert { type: 'json' }
 const getListVideos = async () => {
   return fetchWithZod(
     z.object({ items: z.array(z.object({ guid: z.string() })) }),
-    `https://video.bunnycdn.com/library/${ENV.VITE_BUNNY_LIBRARY_ID}/videos`,
+    `https://video.bunnycdn.com/library/${clientEnv.VITE_BUNNY_LIBRARY_ID}/videos`,
     {
       method: 'GET',
       headers: getBunnyHeaders()

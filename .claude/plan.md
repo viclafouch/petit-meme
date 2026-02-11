@@ -48,31 +48,31 @@ Vulnérabilités actives. L'injection SQL est exploitable en production. On fixe
 
 ### CRITICAL
 
-- [ ] Injection SQL dans `reels.ts` — `$queryRawUnsafe` → `$queryRaw` avec tagged template
-- [ ] `minPasswordLength` serveur 4 → 12
+- [x] Injection SQL dans `reels.ts` — `$queryRawUnsafe` → `$queryRaw` avec tagged template
+- [x] `minPasswordLength` serveur 4 → 12
 
 ### HIGH
 
-- [ ] Authentification webhook Bunny (header secret)
-- [ ] Middleware admin manquant sur `getListUsers`
-- [ ] Rate limiting sur auth, génération IA, webhooks
-- [ ] Security headers via Nitro routeRules (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`)
-- [ ] Vérifier pattern middleware composable (auth → admin chainé, `setResponseStatus` avant throw)
-- [ ] `beforeLoad` sur toutes les routes protégées (pas de check dans le composant)
+- [ ] ~~Authentification webhook Bunny~~ (pas de support natif Bunny, skippé)
+- [x] Middleware admin manquant sur `getListUsers`
+- [x] Rate limiting sur auth (Better Auth built-in, custom skippé)
+- [x] Security headers via Nitro routeRules (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`)
+- [x] Vérifier pattern middleware composable (auth → admin chainé, `setResponseStatus` avant throw)
+- [x] `beforeLoad` sur toutes les routes protégées (pas de check dans le composant)
 
 ### MEDIUM
 
-- [ ] Flag `secure` sur le cookie `anonId`
-- [ ] Injection de filtres Algolia (quoter la valeur `category`)
-- [ ] Authentification `getVideoPlayData` (vérifier que la vidéo est publiée)
-- [ ] CSRF : valider le header `Origin` sur les requêtes state-changing
-- [ ] Séparer env vars client/server dans des fichiers distincts + validations `.startsWith()`
+- [x] Flag `secure` sur le cookie `anonId`
+- [x] Injection de filtres Algolia (quoter la valeur `category`)
+- [x] Authentification `getVideoPlayData` (vérifier que la vidéo est publiée)
+- [x] CSRF : valider le header `Origin` sur les requêtes state-changing
+- [x] Séparer env vars client/server dans des fichiers distincts + validations `.startsWith()`
 
 ### LOW
 
-- [ ] Algolia App ID en env var
-- [ ] Conditionner messages d'erreur détaillés au `NODE_ENV`
-- [ ] `VITE_BUNNY_LIBRARY_ID` → server-only si possible
+- [x] Algolia App ID en env var
+- [x] Conditionner messages d'erreur détaillés au `NODE_ENV`
+- [x] `VITE_BUNNY_LIBRARY_ID` → server-only si possible
 
 ---
 

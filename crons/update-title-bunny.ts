@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
 /* eslint-disable no-await-in-loop */
 import { z } from 'zod'
-import { ENV } from '@/constants/env'
 import { prismaClient } from '@/db'
+import { clientEnv } from '@/env/client'
 import { getBunnyHeaders } from '@/lib/bunny'
 import { fetchWithZod } from '@/lib/utils'
 
@@ -14,7 +14,7 @@ import { fetchWithZod } from '@/lib/utils'
 export const updateVideoTitle = async (videoId: string, title: string) => {
   return fetchWithZod(
     z.object({ success: z.literal(true) }),
-    `https://video.bunnycdn.com/library/${ENV.VITE_BUNNY_LIBRARY_ID}/videos/${videoId}`,
+    `https://video.bunnycdn.com/library/${clientEnv.VITE_BUNNY_LIBRARY_ID}/videos/${videoId}`,
     {
       method: 'POST',
       headers: getBunnyHeaders(),

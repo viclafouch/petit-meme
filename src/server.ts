@@ -1,3 +1,4 @@
+import { clientEnv } from '@/env/client'
 import {
   createStartHandler,
   defaultStreamHandler,
@@ -5,7 +6,7 @@ import {
 } from '@tanstack/react-start/server'
 import { createServerEntry } from '@tanstack/react-start/server-entry'
 
-const canonicalHost = 'petit-meme.io'
+const canonicalHost = new URL(clientEnv.VITE_SITE_URL).hostname
 
 const customHandler = defineHandlerCallback(async (context) => {
   const url = new URL(context.request.url)

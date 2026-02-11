@@ -1,4 +1,4 @@
 import { Resend } from 'resend'
-import { ENV } from '@/constants/env'
+import { serverEnv } from '@/env/server'
 
-export const resendClient = new Resend(ENV.RESEND_SECRET)
+export const resendClient = new Resend(serverEnv.RESEND_SECRET)

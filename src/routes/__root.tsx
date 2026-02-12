@@ -69,15 +69,7 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => {
           {`window.$ujq=window.$ujq||[];window.uj=window.uj||new Proxy({},{get:(_,p)=>(...a)=>window.$ujq.push([p,...a])});document.head.appendChild(Object.assign(document.createElement('script'),{src:'https://cdn.userjot.com/sdk/v2/uj.js',type:'module',async:!0}));`}
         </ScriptOnce> */}
         <ScriptOnce>
-          {`(function() {
-          const storedTheme = ${JSON.stringify(_storedTheme)};
-          if (storedTheme === 'system') {
-            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            document.documentElement.className = systemTheme;
-          } else {
-            document.documentElement.className = storedTheme;
-          }
-        })();`}
+          {`document.documentElement.className = ${JSON.stringify(_storedTheme)};`}
         </ScriptOnce>
         <ThemeProvider initialTheme={_storedTheme}>
           <OnlyPortrait>
@@ -133,13 +125,7 @@ export const Route = createRootRouteWithContext<{
         { charSet: 'utf-8' },
         {
           name: 'theme-color',
-          content: '#ffffff',
-          media: '(prefers-color-scheme: light)'
-        },
-        {
-          name: 'theme-color',
-          content: '#000000',
-          media: '(prefers-color-scheme: dark)'
+          content: '#000000'
         },
         {
           name: 'color-scheme',

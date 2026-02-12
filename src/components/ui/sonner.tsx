@@ -3,11 +3,11 @@ import { Toaster as Sonner } from 'sonner'
 import { useTheme } from '@/lib/theme'
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { appTheme } = useTheme()
+  const { theme } = useTheme()
 
   return (
     <Sonner
-      theme={appTheme}
+      theme={theme}
       className="toaster group"
       style={
         {

@@ -8,7 +8,7 @@ import { useRouteContext } from '@tanstack/react-router'
 const PROJECT_ID = 'cmfkxs01n00y0pa15s2ep13b3'
 
 export const FeedbackButton = () => {
-  const { appTheme } = useTheme()
+  const { theme } = useTheme()
   const { user } = useRouteContext({ from: '__root__' })
 
   React.useEffect(() => {
@@ -34,8 +34,8 @@ export const FeedbackButton = () => {
   }, [user])
 
   React.useEffect(() => {
-    window.uj.setTheme(appTheme)
-  }, [appTheme])
+    window.uj.setTheme(theme)
+  }, [theme])
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault()

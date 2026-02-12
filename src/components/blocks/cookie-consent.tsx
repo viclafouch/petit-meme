@@ -64,7 +64,7 @@ export const CookieConsentBanner = ({
                 </div>
                 <p className="text-sm font-semibold tracking-tight">Cookies</p>
               </div>
-              <p className="text-xs leading-relaxed text-muted-foreground">
+              <p className="text-xs text-balance leading-relaxed text-muted-foreground">
                 Nous utilisons des cookies analytiques pour améliorer votre
                 expérience et analyser le trafic.{' '}
                 <a

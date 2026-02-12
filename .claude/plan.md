@@ -170,9 +170,9 @@ Conformité légale. Les CRITICAL sont des obligations réglementaires.
 
 ### CRITICAL
 
-- [ ] Implémenter un bandeau de consentement cookies (bloquer Mixpanel et `anonId` sans consentement)
-- [ ] Gater Mixpanel derrière le consentement, retirer `ignore_dnt: true`, stopper l'envoi de PII
-- [ ] Créer la page politique de confidentialité (`/privacy`)
+- [x] Implémenter un bandeau de consentement cookies (bloquer Mixpanel et `anonId` sans consentement)
+- [x] Gater Mixpanel derrière le consentement, retirer `ignore_dnt: true`, stopper l'envoi de PII
+- [x] Créer la page politique de confidentialité (`/privacy`)
 
 ### HIGH
 
@@ -190,6 +190,7 @@ Conformité légale. Les CRITICAL sont des obligations réglementaires.
 ### LOW
 
 - [ ] Auto-héberger Google Fonts
+- [ ] Activer les adresses email de contact (hello@petit-meme.io, legal@petit-meme.io)
 
 ---
 

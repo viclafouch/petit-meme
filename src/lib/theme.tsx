@@ -1,28 +1,39 @@
 import React from 'react'
-import { createServerFn } from '@tanstack/react-start'
-import { getCookie, setCookie } from '@tanstack/react-start/server'
+import { ONE_YEAR_IN_SECONDS } from '@/constants/time'
+import { createIsomorphicFn } from '@tanstack/react-start'
+import { getCookie } from '@tanstack/react-start/server'
 
 export type UserTheme = 'light' | 'dark' | 'system'
 export type AppTheme = Exclude<UserTheme, 'system'>
 
-const themeCookie = 'ui-theme'
-const themes = ['light', 'dark', 'system'] as const satisfies UserTheme[]
+const THEME_COOKIE_KEY = 'ui-theme'
 
-export const getStoredTheme = createServerFn().handler(async () => {
-  return (getCookie(themeCookie) || 'system') as UserTheme
-})
+const VALID_THEMES = [
+  'light',
+  'dark',
+  'system'
+] as const satisfies readonly UserTheme[]
 
-export const setStoredTheme = createServerFn({ method: 'POST' })
-  .inputValidator((data: unknown) => {
-    if (typeof data !== 'string' || !themes.includes(data as UserTheme)) {
-      throw new Error('Invalid theme')
+export const getStoredTheme = createIsomorphicFn()
+  .server(() => {
+    return (getCookie(THEME_COOKIE_KEY) || 'system') as UserTheme
+  })
+  .client(() => {
+    const match = document.cookie.match(
+      new RegExp(`(?:^|; )${THEME_COOKIE_KEY}=([^;]*)`)
+    )
+    const value = match?.[1]
+
+    if (value && VALID_THEMES.includes(value as UserTheme)) {
+      return value as UserTheme
     }
 
-    return data as UserTheme
+    return 'system' as UserTheme
   })
-  .handler(({ data }) => {
-    setCookie(themeCookie, data)
-  })
+
+export function setStoredTheme(theme: UserTheme) {
+  document.cookie = `${THEME_COOKIE_KEY}=${theme}; path=/; max-age=${ONE_YEAR_IN_SECONDS}; SameSite=Lax`
+}
 
 function getSystemTheme(): AppTheme {
   if (typeof window === 'undefined') {
@@ -91,7 +102,7 @@ export const ThemeProvider = ({
   // eslint-disable-next-line no-restricted-syntax
   const setTheme = React.useCallback((newUserTheme: UserTheme) => {
     setUserTheme(newUserTheme)
-    void setStoredTheme({ data: newUserTheme })
+    setStoredTheme(newUserTheme)
   }, [])
 
   // eslint-disable-next-line no-restricted-syntax

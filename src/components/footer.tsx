@@ -14,7 +14,7 @@ export const Footer = () => {
             Contact & Support
           </a>
           <Link
-            to="/"
+            to="/privacy"
             className="text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
             Confidentialité

@@ -25,6 +25,7 @@ import { Route as AdminCategoriesIndexRouteImport } from './routes/admin/categor
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as AdminLibraryMemeIdRouteImport } from './routes/admin/library/$memeId'
 import { Route as Public__rootDefaultTermsOfUseRouteImport } from './routes/_public__root/_default/terms-of-use'
+import { Route as Public__rootDefaultPrivacyRouteImport } from './routes/_public__root/_default/privacy'
 import { Route as Public__rootDefaultPricingRouteImport } from './routes/_public__root/_default/pricing'
 import { Route as Public__rootDefaultFavoritesRouteImport } from './routes/_public__root/_default/favorites'
 import { Route as Public__rootDefaultSettingsRouteRouteImport } from './routes/_public__root/_default/settings/route'
@@ -117,6 +118,12 @@ const Public__rootDefaultTermsOfUseRoute =
     path: '/terms-of-use',
     getParentRoute: () => Public__rootDefaultRouteRoute,
   } as any)
+const Public__rootDefaultPrivacyRoute =
+  Public__rootDefaultPrivacyRouteImport.update({
+    id: '/privacy',
+    path: '/privacy',
+    getParentRoute: () => Public__rootDefaultRouteRoute,
+  } as any)
 const Public__rootDefaultPricingRoute =
   Public__rootDefaultPricingRouteImport.update({
     id: '/pricing',
@@ -197,6 +204,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof Public__rootDefaultSettingsRouteRouteWithChildren
   '/favorites': typeof Public__rootDefaultFavoritesRoute
   '/pricing': typeof Public__rootDefaultPricingRoute
+  '/privacy': typeof Public__rootDefaultPrivacyRoute
   '/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -223,6 +231,7 @@ export interface FileRoutesByTo {
   '/api/bunny': typeof ApiBunnyRoute
   '/favorites': typeof Public__rootDefaultFavoritesRoute
   '/pricing': typeof Public__rootDefaultPricingRoute
+  '/privacy': typeof Public__rootDefaultPrivacyRoute
   '/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -253,6 +262,7 @@ export interface FileRoutesById {
   '/_public__root/_default/settings': typeof Public__rootDefaultSettingsRouteRouteWithChildren
   '/_public__root/_default/favorites': typeof Public__rootDefaultFavoritesRoute
   '/_public__root/_default/pricing': typeof Public__rootDefaultPricingRoute
+  '/_public__root/_default/privacy': typeof Public__rootDefaultPrivacyRoute
   '/_public__root/_default/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -282,6 +292,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/favorites'
     | '/pricing'
+    | '/privacy'
     | '/terms-of-use'
     | '/admin/library/$memeId'
     | '/api/auth/$'
@@ -308,6 +319,7 @@ export interface FileRouteTypes {
     | '/api/bunny'
     | '/favorites'
     | '/pricing'
+    | '/privacy'
     | '/terms-of-use'
     | '/admin/library/$memeId'
     | '/api/auth/$'
@@ -337,6 +349,7 @@ export interface FileRouteTypes {
     | '/_public__root/_default/settings'
     | '/_public__root/_default/favorites'
     | '/_public__root/_default/pricing'
+    | '/_public__root/_default/privacy'
     | '/_public__root/_default/terms-of-use'
     | '/admin/library/$memeId'
     | '/api/auth/$'
@@ -477,6 +490,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Public__rootDefaultTermsOfUseRouteImport
       parentRoute: typeof Public__rootDefaultRouteRoute
     }
+    '/_public__root/_default/privacy': {
+      id: '/_public__root/_default/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof Public__rootDefaultPrivacyRouteImport
+      parentRoute: typeof Public__rootDefaultRouteRoute
+    }
     '/_public__root/_default/pricing': {
       id: '/_public__root/_default/pricing'
       path: '/pricing'
@@ -576,6 +596,7 @@ interface Public__rootDefaultRouteRouteChildren {
   Public__rootDefaultSettingsRouteRoute: typeof Public__rootDefaultSettingsRouteRouteWithChildren
   Public__rootDefaultFavoritesRoute: typeof Public__rootDefaultFavoritesRoute
   Public__rootDefaultPricingRoute: typeof Public__rootDefaultPricingRoute
+  Public__rootDefaultPrivacyRoute: typeof Public__rootDefaultPrivacyRoute
   Public__rootDefaultTermsOfUseRoute: typeof Public__rootDefaultTermsOfUseRoute
   Public__rootDefaultCheckoutSuccessRoute: typeof Public__rootDefaultCheckoutSuccessRoute
   Public__rootDefaultMemesMemeIdRoute: typeof Public__rootDefaultMemesMemeIdRoute
@@ -592,6 +613,7 @@ const Public__rootDefaultRouteRouteChildren: Public__rootDefaultRouteRouteChildr
       Public__rootDefaultSettingsRouteRouteWithChildren,
     Public__rootDefaultFavoritesRoute: Public__rootDefaultFavoritesRoute,
     Public__rootDefaultPricingRoute: Public__rootDefaultPricingRoute,
+    Public__rootDefaultPrivacyRoute: Public__rootDefaultPrivacyRoute,
     Public__rootDefaultTermsOfUseRoute: Public__rootDefaultTermsOfUseRoute,
     Public__rootDefaultCheckoutSuccessRoute:
       Public__rootDefaultCheckoutSuccessRoute,

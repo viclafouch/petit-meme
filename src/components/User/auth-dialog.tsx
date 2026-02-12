@@ -1,6 +1,5 @@
 import React from 'react'
 import { CheckCircle, CircleAlert, Twitter } from 'lucide-react'
-import mixpanel from 'mixpanel-browser'
 import { z } from 'zod'
 import type { WithDialog } from '@/@types/dialog'
 import {
@@ -23,6 +22,7 @@ import { Input } from '@/components/ui/input'
 import { LoadingButton } from '@/components/ui/loading-button'
 import { getAuthErrorMessage } from '@/helpers/auth-errors'
 import { authClient } from '@/lib/auth-client'
+import { identify, peopleSet, track } from '@/lib/mixpanel'
 import {
   getActiveSubscriptionQueryOpts,
   getAuthUserQueryOpts
@@ -88,12 +88,12 @@ export const LoginForm = ({
       const user = queryClient.getQueryData(getAuthUserQueryOpts().queryKey)
 
       if (user) {
-        mixpanel.identify(user.id)
-        mixpanel.people.set({
+        identify(user.id)
+        peopleSet({
           $name: user.name,
           $email: user.email
         })
-        mixpanel.track('Sign In', {
+        track('Sign In', {
           userId: user.id,
           loginMethod: 'email',
           success: true
@@ -305,7 +305,7 @@ const SignupForm = ({
       }
     },
     onSuccess: async () => {
-      mixpanel.track('Sign Up', {
+      track('Sign Up', {
         signupMethod: 'email'
       })
       form.reset()
@@ -510,7 +510,7 @@ export const AuthDialog = ({ open, onOpenChange }: WithDialog<unknown>) => {
     event: React.MouseEvent<HTMLButtonElement>
   ) => {
     event.preventDefault()
-    mixpanel.track('Sign In', {
+    track('Sign In', {
       loginMethod: 'twitter',
       success: true
     })

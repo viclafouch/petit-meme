@@ -3,7 +3,6 @@ import { useHotkeys } from 'react-hotkeys-hook'
 import { motion } from 'framer-motion'
 import Hls from 'hls.js'
 import { Clapperboard, Clipboard, Download, Share2, X } from 'lucide-react'
-import mixpanel from 'mixpanel-browser'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -21,6 +20,7 @@ import { useDownloadMeme } from '@/hooks/use-download-meme'
 import { useRegisterMemeView } from '@/hooks/use-register-meme-view'
 import { useShareMeme } from '@/hooks/use-share-meme'
 import { buildVideoImageUrl, buildVideoStreamUrl } from '@/lib/bunny'
+import { track } from '@/lib/mixpanel'
 import { buildUrl } from '@/lib/seo'
 import { useLinkProps } from '@tanstack/react-router'
 
@@ -45,7 +45,7 @@ export const PlayerDialog = ({
   })
 
   React.useEffect(() => {
-    mixpanel.track('View Meme Details', {
+    track('View Meme Details', {
       memeId: meme.id,
       memeTitle: meme.title
     })

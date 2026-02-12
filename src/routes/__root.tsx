@@ -1,8 +1,11 @@
 /// <reference types="vite/client" />
 import React from 'react'
+import { CookieConsentBanner } from '@/components/blocks/cookie-consent'
 import { OnlyPortrait } from '@/components/only-portrait'
 import { TailwindIndicator } from '@/components/tailwind-indicator'
 import { Toaster } from '@/components/ui/sonner'
+import { getCookieConsent } from '@/lib/cookie-consent'
+import { initMixpanel } from '@/lib/mixpanel'
 import { getAuthUserQueryOpts } from '@/lib/queries'
 import { getStoredTheme, ThemeProvider } from '@/lib/theme'
 import type { getAuthUser } from '@/server/user-auth'
@@ -43,7 +46,7 @@ const TanStackRouterDevtools =
 
 const RootDocument = ({ children }: { children: React.ReactNode }) => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { _storedTheme } = Route.useLoaderData()
+  const { _storedTheme, _cookieConsent } = Route.useLoaderData()
 
   return (
     <html lang="fr" suppressHydrationWarning dir="ltr">
@@ -83,6 +86,12 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => {
           <ClientOnly>
             <Toaster richColors />
           </ClientOnly>
+          <CookieConsentBanner
+            initialConsent={_cookieConsent}
+            onAccept={() => {
+              initMixpanel()
+            }}
+          />
           <React.Suspense>
             <TanStackRouterDevtools position="bottom-left" />
             <TanStackQueryDevtools buttonPosition="bottom-right" />
@@ -114,7 +123,8 @@ export const Route = createRootRouteWithContext<{
   },
   loader: async () => {
     return {
-      _storedTheme: await getStoredTheme()
+      _storedTheme: getStoredTheme(),
+      _cookieConsent: getCookieConsent()
     }
   },
   head: () => {

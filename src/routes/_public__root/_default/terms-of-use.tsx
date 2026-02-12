@@ -1,8 +1,5 @@
-/* eslint-disable jsx-a11y/anchor-has-content */
-/* eslint-disable id-length */
-/* eslint-disable jsx-a11y/heading-has-content */
 import Markdown from 'react-markdown'
-import { Separator } from '@/components/ui/separator'
+import { BASE_MARKDOWN_COMPONENTS } from '@/constants/markdown'
 import { seo } from '@/lib/seo'
 import md from '~/md/terms-of-use.md?raw'
 import { createFileRoute } from '@tanstack/react-router'
@@ -10,32 +7,7 @@ import { createFileRoute } from '@tanstack/react-router'
 const RouteComponent = () => {
   return (
     <div>
-      <Markdown
-        components={{
-          h1: (props) => {
-            return <h1 className="text-2xl font-bold text-primary" {...props} />
-          },
-          h2: (props) => {
-            return <h2 className="text-xl font-bold text-primary" {...props} />
-          },
-          p: (props) => {
-            return <p className="my-3" {...props} />
-          },
-          ul: (props) => {
-            return <ul className="list-disc my-3 ml-3" {...props} />
-          },
-          hr: () => {
-            return <Separator className="my-4" />
-          },
-          a: (props) => {
-            return (
-              <a className="text-info underline" target="_blank" {...props} />
-            )
-          }
-        }}
-      >
-        {md}
-      </Markdown>
+      <Markdown components={BASE_MARKDOWN_COMPONENTS}>{md}</Markdown>
     </div>
   )
 }

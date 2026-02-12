@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { COOKIE_ANON_ID_KEY, COOKIE_CONSENT_KEY } from '@/constants/cookie'
 import type { MemeWithCategories, MemeWithVideo } from '@/constants/meme'
 import { MEMES_FILTERS_SCHEMA } from '@/constants/meme'
 import {
@@ -211,12 +212,12 @@ export const registerMemeView = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const { memeId, watchMs } = data
 
-    let viewerKey = getCookie('anonId')
+    const hasConsentedToCookies = getCookie(COOKIE_CONSENT_KEY) === 'accepted'
+    const existingViewerKey = getCookie(COOKIE_ANON_ID_KEY)
+    const viewerKey = existingViewerKey ?? crypto.randomUUID()
 
-    if (!viewerKey) {
-      viewerKey = crypto.randomUUID()
-
-      setCookie('anonId', viewerKey, {
+    if (!existingViewerKey && hasConsentedToCookies) {
+      setCookie(COOKIE_ANON_ID_KEY, viewerKey, {
         httpOnly: true,
         secure: true,
         sameSite: 'lax',

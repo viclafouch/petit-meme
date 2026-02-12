@@ -65,9 +65,6 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => {
         <HeadContent />
       </head>
       <body>
-        {/* <ScriptOnce>
-          {`window.$ujq=window.$ujq||[];window.uj=window.uj||new Proxy({},{get:(_,p)=>(...a)=>window.$ujq.push([p,...a])});document.head.appendChild(Object.assign(document.createElement('script'),{src:'https://cdn.userjot.com/sdk/v2/uj.js',type:'module',async:!0}));`}
-        </ScriptOnce> */}
         <ScriptOnce>
           {`document.documentElement.className = ${JSON.stringify(_storedTheme)};`}
         </ScriptOnce>

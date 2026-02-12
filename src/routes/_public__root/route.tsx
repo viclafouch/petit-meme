@@ -14,9 +14,6 @@ const RouteComponent = () => {
         </main>
         <Footer />
       </div>
-      {/* <ClientOnly>
-        <FeedbackButton />
-      </ClientOnly> */}
     </StarsBackground>
   )
 }

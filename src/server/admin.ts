@@ -72,6 +72,20 @@ function resolvePublishedAt(
   return meme.publishedAt
 }
 
+function resolveInitialViewCount(
+  newStatus: string,
+  meme: { status: string; viewCount: number }
+) {
+  const isFirstPublish =
+    newStatus === 'PUBLISHED' && meme.status !== 'PUBLISHED'
+
+  if (isFirstPublish && meme.viewCount === 0) {
+    return Math.floor(Math.random() * (120 - 30 + 1)) + 30
+  }
+
+  return meme.viewCount
+}
+
 export const editMeme = createServerFn({ method: 'POST' })
   .inputValidator((data) => {
     return MEME_FORM_SCHEMA.extend({ id: z.string() }).parse(data)
@@ -92,6 +106,7 @@ export const editMeme = createServerFn({ method: 'POST' })
     }
 
     const publishedAt = resolvePublishedAt(values.status, meme)
+    const viewCount = resolveInitialViewCount(values.status, meme)
 
     const memeUpdated = await prismaClient.meme.update({
       where: {
@@ -102,6 +117,7 @@ export const editMeme = createServerFn({ method: 'POST' })
         status: values.status,
         description: values.description,
         publishedAt,
+        viewCount,
         categories: {
           deleteMany: {},
           create: values.categoryIds.map((categoryId) => {

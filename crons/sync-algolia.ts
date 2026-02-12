@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable no-await-in-loop */
 import { prismaClient } from '@/db'
 import {
@@ -38,6 +39,8 @@ const task = async () => {
     indexName: algoliaIndexName,
     objects: records
   })
+
+  console.log('Done')
 
   process.exit(0)
 }

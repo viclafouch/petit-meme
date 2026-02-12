@@ -42,15 +42,13 @@ const RouteComponent = () => {
 
 export const Route = createFileRoute('/_public__root/_default/terms-of-use')({
   component: RouteComponent,
+  staleTime: Infinity,
   head: () => {
-    return {
-      meta: [
-        ...seo({
-          title: "Conditions d'utilisation",
-          description:
-            "En utilisant notre site (https://petit-meme.io) et nos services, vous acceptez les présentes Conditions d'utilisation."
-        })
-      ]
-    }
+    return seo({
+      title: "Conditions d'utilisation",
+      pathname: '/terms-of-use',
+      description:
+        "En utilisant notre site (https://petit-meme.io) et nos services, vous acceptez les présentes Conditions d'utilisation."
+    })
   }
 })

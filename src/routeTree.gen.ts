@@ -9,6 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as ReelsRouteImport } from './routes/reels'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
@@ -35,6 +37,16 @@ import { Route as Public__rootDefaultMemesMemeIdRouteImport } from './routes/_pu
 import { Route as Public__rootDefaultCheckoutSuccessRouteImport } from './routes/_public__root/_default/checkout.success'
 import { Route as Public__rootDefaultMemesCategorySlugRouteImport } from './routes/_public__root/_default/memes/category/$slug'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReelsRoute = ReelsRouteImport.update({
   id: '/reels',
   path: '/reels',
@@ -177,6 +189,8 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteRouteWithChildren
   '/health': typeof HealthRoute
   '/reels': typeof ReelsRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/downloader': typeof AdminDownloaderRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/bunny': typeof ApiBunnyRoute
@@ -201,6 +215,8 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRouteRouteWithChildren
   '/health': typeof HealthRoute
   '/reels': typeof ReelsRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/': typeof Public__rootIndexRoute
   '/admin/downloader': typeof AdminDownloaderRoute
   '/admin/users': typeof AdminUsersRoute
@@ -227,6 +243,8 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteRouteWithChildren
   '/health': typeof HealthRoute
   '/reels': typeof ReelsRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_public__root/_default': typeof Public__rootDefaultRouteRouteWithChildren
   '/admin/downloader': typeof AdminDownloaderRoute
   '/admin/users': typeof AdminUsersRoute
@@ -256,6 +274,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/health'
     | '/reels'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/admin/downloader'
     | '/admin/users'
     | '/api/bunny'
@@ -280,6 +300,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/health'
     | '/reels'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/'
     | '/admin/downloader'
     | '/admin/users'
@@ -305,6 +327,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/health'
     | '/reels'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/_public__root/_default'
     | '/admin/downloader'
     | '/admin/users'
@@ -333,12 +357,28 @@ export interface RootRouteChildren {
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
   HealthRoute: typeof HealthRoute
   ReelsRoute: typeof ReelsRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiBunnyRoute: typeof ApiBunnyRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reels': {
       id: '/reels'
       path: '/reels'
@@ -609,6 +649,8 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRouteRoute: AdminRouteRouteWithChildren,
   HealthRoute: HealthRoute,
   ReelsRoute: ReelsRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiBunnyRoute: ApiBunnyRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }

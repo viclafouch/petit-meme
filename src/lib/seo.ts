@@ -1,4 +1,5 @@
 import type {
+  BreadcrumbList,
   CollectionPage,
   Graph,
   ItemList,
@@ -28,13 +29,26 @@ export const websiteOrigin = clientEnv.VITE_SITE_URL
 const websiteId = `${websiteOrigin}/#website`
 
 export const buildUrl = (pathname: string) => {
-  let url = websiteOrigin
-
   try {
-    url = new URL(pathname, websiteOrigin).href
-  } catch (error) {}
+    return new URL(pathname, websiteOrigin).href
+  } catch {
+    return websiteOrigin
+  }
+}
 
-  return url
+type SeoParams = {
+  title: string
+  description?: string
+  image?: string
+  imageAlt?: string
+  keywords?: string
+  isAdmin?: boolean
+  pathname?: string
+}
+
+type SeoResult = {
+  meta: NonNullable<AnyRouteMatch['meta']>
+  links: NonNullable<AnyRouteMatch['links']>
 }
 
 export const seo = ({
@@ -42,27 +56,17 @@ export const seo = ({
   description,
   keywords,
   image,
+  imageAlt,
   isAdmin = false,
   pathname = '/'
-}: {
-  title: string
-  description?: string
-  image?: string
-  keywords?: string
-  isAdmin?: boolean
-  pathname?: string
-}) => {
+}: SeoParams): SeoResult => {
   const titlePrefixed = isAdmin
     ? `Admin Petit Meme - ${title}`
     : `Petit Meme - ${title}`
 
-  let url = websiteOrigin
+  const url = buildUrl(pathname)
 
-  try {
-    url = new URL(pathname, websiteOrigin).href
-  } catch (error) {}
-
-  const tags = [
+  const meta = [
     { title: titlePrefixed },
     { name: 'description', content: description },
     { name: 'keywords', content: keywords },
@@ -71,22 +75,37 @@ export const seo = ({
     { name: 'twitter:description', content: description },
     { name: 'twitter:creator', content: '@TrustedSheriff' },
     { name: 'twitter:site', content: '@TrustedSheriff' },
-    { name: 'og:type', content: 'website' },
-    { name: 'og:site_name', content: titlePrefixed },
-    { name: 'og:title', content: titlePrefixed },
-    { name: 'og:description', content: description },
-    { name: 'og:url', content: url },
-    { name: 'og:locale', content: 'fr_FR' },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:site_name', content: 'Petit Meme' },
+    { property: 'og:title', content: titlePrefixed },
+    { property: 'og:description', content: description },
+    { property: 'og:url', content: url },
+    { property: 'og:locale', content: 'fr_FR' },
     ...(image
       ? [
           { name: 'twitter:image', content: image },
           { name: 'twitter:card', content: 'summary_large_image' },
-          { name: 'og:image', content: image }
+          { property: 'og:image', content: image },
+          { property: 'og:image:width', content: '1200' },
+          { property: 'og:image:height', content: '630' },
+          ...(imageAlt
+            ? [
+                { name: 'twitter:image:alt', content: imageAlt },
+                { property: 'og:image:alt', content: imageAlt }
+              ]
+            : [])
         ]
       : [])
   ] satisfies AnyRouteMatch['meta']
 
-  return tags
+  const links: NonNullable<AnyRouteMatch['links']> = isAdmin
+    ? []
+    : [
+        { rel: 'canonical', href: url },
+        { rel: 'alternate', hrefLang: 'fr', href: url }
+      ]
+
+  return { meta, links }
 }
 
 const buildDescription = (meme: MemeWithVideo & MemeWithCategories) => {
@@ -99,8 +118,8 @@ const buildDescription = (meme: MemeWithVideo & MemeWithCategories) => {
 
 export const buildMemeSeo = (
   meme: MemeWithVideo & MemeWithCategories,
-  overrideOptions: Partial<Parameters<typeof seo>[0]> = {}
-) => {
+  overrideOptions: Partial<SeoParams> = {}
+): SeoResult => {
   const categoryKeywords = meme.categories.flatMap((category) => {
     return category.category.keywords
   })
@@ -111,12 +130,13 @@ export const buildMemeSeo = (
     title: meme.title,
     keywords: [...meme.keywords, ...categoryKeywords].join(', '),
     image: buildVideoImageUrl(meme.video.bunnyId),
+    imageAlt: `Mème vidéo : ${meme.title}`,
     description,
     ...overrideOptions
   })
 }
 
-function formatSchemaDuration(totalSeconds: number): string {
+const formatSchemaDuration = (totalSeconds: number) => {
   if (totalSeconds <= 0) {
     return 'PT0S'
   }
@@ -147,7 +167,7 @@ export const buildMemeJsonLd = (meme: MemeWithVideo, originalUrl: string) => {
     '@context': 'https://schema.org',
     '@type': 'VideoObject',
     name: meme.title,
-    '@id': `${websiteOrigin}/memes/${meme.id}#video`, // On utilise le même ID
+    '@id': `${websiteOrigin}/memes/${meme.id}#video`,
     description: meme.description,
     thumbnailUrl: buildVideoImageUrl(meme.video.bunnyId),
     uploadDate: meme.createdAt.toISOString(),
@@ -175,7 +195,6 @@ export const buildMemeJsonLd = (meme: MemeWithVideo, originalUrl: string) => {
 
 type SchemaGraph = Graph & { '@context': 'https://schema.org' }
 
-// TODO: typing route
 export const buildCategoryJsonLd = (
   category: CategoryModel | undefined,
   { page, memes }: { page: number; memes: MemeWithVideo[] }
@@ -242,7 +261,7 @@ export const buildHomeJsonLd = (): SchemaGraph => {
     '@graph': [
       {
         '@type': 'WebSite',
-        '@id': `${websiteOrigin}/#website`,
+        '@id': websiteId,
         url: websiteOrigin,
         name: 'Petit Meme',
         publisher: { '@id': `${websiteOrigin}/#organization` },
@@ -269,12 +288,34 @@ export const buildHomeJsonLd = (): SchemaGraph => {
         '@id': `${websiteOrigin}/#webpage`,
         url: websiteOrigin,
         name: 'Petit Meme - Les meilleurs mèmes vidéo',
-        isPartOf: { '@id': `${websiteOrigin}/#website` },
+        isPartOf: { '@id': websiteId },
         about: { '@id': `${websiteOrigin}/#organization` },
         description:
           'Découvre Petit Meme, la plateforme où tu peux parcourir, créer et partager des mèmes gratuitement. Explore notre bibliothèque de vidéos et images humoristiques, sauvegarde tes favoris et amuse-toi avec des contenus toujours à jour.'
       } satisfies WebPage
     ]
+  }
+}
+
+type BreadcrumbItem = {
+  name: string
+  pathname: string
+}
+
+export const buildBreadcrumbJsonLd = (
+  items: readonly BreadcrumbItem[]
+): WithContext<BreadcrumbList> => {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, index): ListItem => {
+      return {
+        '@type': 'ListItem',
+        position: index + 1,
+        name: item.name,
+        item: buildUrl(item.pathname)
+      }
+    })
   }
 }
 
@@ -293,7 +334,7 @@ export const buildPricingJsonLd = (plans: Plan[]): SchemaGraph => {
         url: pricingUrl,
         name: title,
         description,
-        isPartOf: { '@id': `${websiteOrigin}/#website` }
+        isPartOf: { '@id': websiteId }
       } as WebPage,
       {
         '@type': 'Product',
@@ -331,7 +372,7 @@ export const buildPricingJsonLd = (plans: Plan[]): SchemaGraph => {
                 referenceQuantity: {
                   '@type': 'QuantitativeValue',
                   value: 1,
-                  unitCode: 'MON' // Indique un cycle mensuel
+                  unitCode: 'MON'
                 }
               } as PriceSpecification
             }

@@ -19,9 +19,14 @@ const NAVIGATIONS_LINKS = [
   {
     name: 'Menu',
     items: [
-      { to: '/memes', label: 'Mèmes' },
-      { to: '/pricing', label: 'Plans' },
-      { to: '/reels', label: 'Reels', className: 'md:hidden' }
+      { to: '/memes', label: 'Mèmes', preload: 'viewport' },
+      { to: '/pricing', label: 'Plans', preload: 'viewport' },
+      {
+        to: '/reels',
+        label: 'Reels',
+        className: 'md:hidden',
+        preload: 'intent'
+      }
     ]
   }
 ] as const satisfies {
@@ -31,6 +36,7 @@ const NAVIGATIONS_LINKS = [
     label: string
     active?: boolean
     className?: string
+    preload: LinkOptions['preload']
   }[]
 }[]
 
@@ -65,7 +71,9 @@ export const Navbar = () => {
                     'className' in link && link.className
                   )}
                 >
-                  <Link to={link.to}>{link.label}</Link>
+                  <Link to={link.to} preload={link.preload}>
+                    {link.label}
+                  </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
             )

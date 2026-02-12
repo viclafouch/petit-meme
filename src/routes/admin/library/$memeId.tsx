@@ -149,9 +149,7 @@ export const Route = createFileRoute('/admin/library/$memeId')({
   },
   head: ({ loaderData }) => {
     if (loaderData?.meme) {
-      return {
-        meta: [...buildMemeSeo(loaderData.meme, { isAdmin: true })]
-      }
+      return buildMemeSeo(loaderData.meme, { isAdmin: true })
     }
 
     return {}

@@ -20,15 +20,12 @@ export const Route = createFileRoute('/reels')({
     return <DefaultLoading className="bg-primary-foreground dark h-screen" />
   },
   head: () => {
-    return {
-      meta: [
-        ...seo({
-          title: 'Mode reels',
-          description:
-            'Découvre la plus grande bibliothèque de mèmes : crée, explore et partage des mèmes légendaires sur Petit Meme. Gratuit et accessible à tous !'
-        })
-      ]
-    }
+    return seo({
+      title: 'Mode reels',
+      pathname: '/reels',
+      description:
+        'Découvre la plus grande bibliothèque de mèmes : crée, explore et partage des mèmes légendaires sur Petit Meme. Gratuit et accessible à tous !'
+    })
   },
   loader: async ({ context }) => {
     await context.queryClient.ensureInfiniteQueryData(

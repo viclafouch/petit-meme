@@ -53,5 +53,13 @@ export const Route = createFileRoute(
       })
       .parse(search)
   },
-  component: RouteComponent
+  component: RouteComponent,
+  head: () => {
+    return {
+      meta: [
+        { title: 'Petit Meme - Nouveau mot de passe' },
+        { name: 'robots', content: 'noindex,nofollow' }
+      ]
+    }
+  }
 })

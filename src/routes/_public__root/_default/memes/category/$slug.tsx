@@ -34,25 +34,19 @@ export const Route = createFileRoute(
     const category = loaderData?.category
 
     if (!category) {
-      return {
-        meta: [
-          ...seo({
-            title: 'Bibliothèque de mèmes en ligne',
-            description:
-              'Découvre la plus grande bibliothèque de mèmes : crée, explore et partage des mèmes légendaires sur Petit Meme. Gratuit et accessible à tous !'
-          })
-        ]
-      }
+      return seo({
+        title: 'Bibliothèque de mèmes en ligne',
+        pathname: '/memes/category/all',
+        description:
+          'Découvre la plus grande bibliothèque de mèmes : crée, explore et partage des mèmes légendaires sur Petit Meme. Gratuit et accessible à tous !'
+      })
     }
 
-    return {
-      meta: [
-        ...seo({
-          title: `Mèmes ${category.title}`,
-          description: `Découvrez les mèmes de ${category.title}. Gratuit et accessible à tous !`,
-          keywords: category.keywords.join(', ')
-        })
-      ]
-    }
+    return seo({
+      title: `Mèmes ${category.title}`,
+      pathname: `/memes/category/${category.slug}`,
+      description: `Découvrez les mèmes de ${category.title}. Gratuit et accessible à tous !`,
+      keywords: category.keywords.join(', ')
+    })
   }
 })

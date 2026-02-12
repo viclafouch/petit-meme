@@ -147,17 +147,18 @@ Corriger les problèmes de perf serveur maintenant que l'infra caching est en pl
 
 Profite des headers et du caching déjà en place (étapes 2-3).
 
-- [ ] Compléter les meta tags root : `viewport-fit=cover`, `color-scheme`, `application-name`, `apple-mobile-web-app-*`, `theme-color`
-- [ ] Vérifier le helper `seo()` : og:image dimensions, og:locale, twitter:image:alt, canonical, alternate hrefLang
-- [ ] Ajouter `noai,noimageai` double protection (meta + httpEquiv)
-- [ ] Créer les schemas JSON-LD : `WebSite` global avec `SearchAction`, `VideoObject` par meme, `BreadcrumbList`
-- [ ] Utiliser `schema-dts` + `as const satisfies WithContext<Type>`
-- [ ] Créer la route `sitemap[.]xml.ts` dynamique (pages publiques + memes)
-- [ ] Créer/compléter `robots.txt` avec `Disallow: /admin/`, `/api/` + lien sitemap
-- [ ] Créer le `manifest.webmanifest` complet + vérifier favicons
-- [ ] `staleTime: Infinity` sur les routes statiques (CGU, mentions légales)
-- [ ] `preload: 'viewport'` sur les liens de navigation critiques
-- [ ] `head()` avec SEO complet sur chaque route publique + `noindex,nofollow` sur les 404
+- [x] Compléter les meta tags root : `viewport-fit=cover`, `color-scheme`, `application-name`, `apple-mobile-web-app-*`, `theme-color`
+- [x] Vérifier le helper `seo()` : og:image dimensions, og:locale, twitter:image:alt, canonical, alternate hrefLang
+- [x] Ajouter `noai,noimageai` double protection (meta + httpEquiv)
+- [x] Créer les schemas JSON-LD : `WebSite` global avec `SearchAction`, `VideoObject` par meme, `BreadcrumbList`
+- [x] Utiliser `schema-dts` + `as const satisfies WithContext<Type>`
+- [x] Créer la route `sitemap[.]xml.ts` dynamique (pages publiques + memes)
+- [x] Créer/compléter `robots.txt` avec `Disallow: /admin/`, `/api/` + lien sitemap
+- [x] Créer le `manifest.webmanifest` complet + vérifier favicons
+- [x] `staleTime: Infinity` sur les routes statiques (CGU, mentions légales)
+- [x] `preload: 'viewport'` sur les liens de navigation critiques
+- [x] `head()` avec SEO complet sur chaque route publique + `noindex,nofollow` sur les 404
+- [x] Titres `<title>` sur toutes les routes admin (Librairie, Catégories, Utilisateurs, Téléchargeur, $memeId)
 
 ---
 

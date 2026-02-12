@@ -38,7 +38,12 @@ import {
 } from '@/lib/bunny'
 import { getMemeByIdQueryOpts } from '@/lib/queries'
 import { matchIsUserAdmin } from '@/lib/role'
-import { buildMemeJsonLd, buildMemeSeo, buildUrl } from '@/lib/seo'
+import {
+  buildBreadcrumbJsonLd,
+  buildMemeJsonLd,
+  buildMemeSeo,
+  buildUrl
+} from '@/lib/seo'
 import { cn } from '@/lib/utils'
 import { getRandomMeme } from '@/server/meme'
 import { useSuspenseQuery } from '@tanstack/react-query'
@@ -357,11 +362,28 @@ export const Route = createFileRoute('/_public__root/_default/memes/$memeId')({
   },
   scripts: ({ loaderData }) => {
     if (loaderData) {
+      const { meme } = loaderData
+      const categoryName = meme.categories[0]?.category.title ?? 'Mèmes'
+      const categorySlug = meme.categories[0]?.category.slug ?? 'all'
+
       return [
         {
           type: 'application/ld+json',
           children: JSON.stringify(
-            buildMemeJsonLd(loaderData.meme, loaderData.originalUrl)
+            buildMemeJsonLd(meme, loaderData.originalUrl)
+          )
+        },
+        {
+          type: 'application/ld+json',
+          children: JSON.stringify(
+            buildBreadcrumbJsonLd([
+              { name: 'Accueil', pathname: '/' },
+              {
+                name: categoryName,
+                pathname: `/memes/category/${categorySlug}`
+              },
+              { name: meme.title, pathname: `/memes/${meme.id}` }
+            ])
           )
         }
       ]
@@ -371,15 +393,7 @@ export const Route = createFileRoute('/_public__root/_default/memes/$memeId')({
   },
   head: ({ loaderData, match }) => {
     if (loaderData?.meme) {
-      return {
-        meta: [...buildMemeSeo(loaderData.meme, { pathname: match.pathname })],
-        links: [
-          {
-            rel: 'canonical',
-            href: buildUrl(match.pathname)
-          }
-        ]
-      }
+      return buildMemeSeo(loaderData.meme, { pathname: match.pathname })
     }
 
     return {}

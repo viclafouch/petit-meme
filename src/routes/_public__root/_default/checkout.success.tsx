@@ -65,5 +65,13 @@ const RouteComponent = () => {
 export const Route = createFileRoute(
   '/_public__root/_default/checkout/success'
 )({
-  component: RouteComponent
+  component: RouteComponent,
+  head: () => {
+    return {
+      meta: [
+        { title: 'Petit Meme - Paiement réussi' },
+        { name: 'robots', content: 'noindex,nofollow' }
+      ]
+    }
+  }
 })

@@ -152,7 +152,13 @@ export const Route = createRootRouteWithContext<{
           content: 'yes'
         },
         { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
-        { name: 'viewport', content: 'width=device-width, initial-scale=1' }
+        { name: 'apple-mobile-web-app-title', content: 'Petit Meme' },
+        { name: 'application-name', content: 'Petit Meme' },
+        { name: 'format-detection', content: 'telephone=no' },
+        {
+          name: 'viewport',
+          content: 'width=device-width, initial-scale=1, viewport-fit=cover'
+        }
       ],
       links: [
         { rel: 'stylesheet', href: appCss },

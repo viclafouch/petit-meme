@@ -64,12 +64,7 @@ export const Route = createFileRoute('/admin')({
   },
   head: () => {
     return {
-      meta: [
-        {
-          name: 'robots',
-          content: 'noindex'
-        }
-      ]
+      meta: [{ name: 'robots', content: 'noindex,nofollow' }]
     }
   }
 })

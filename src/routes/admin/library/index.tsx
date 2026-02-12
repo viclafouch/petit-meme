@@ -131,6 +131,9 @@ const RouteComponent = () => {
 
 export const Route = createFileRoute('/admin/library/')({
   component: RouteComponent,
+  head: () => {
+    return { meta: [{ title: 'Admin Petit Meme - Librairie' }] }
+  },
   validateSearch: (search) => {
     return MEMES_FILTERS_SCHEMA.parse(search)
   },

@@ -15,6 +15,9 @@ const RouteComponent = () => {
 
 export const Route = createFileRoute('/admin/downloader')({
   component: RouteComponent,
+  head: () => {
+    return { meta: [{ title: 'Admin Petit Meme - Téléchargeur' }] }
+  },
   loader: async () => {
     return {
       crumb: 'Téléchargeur'

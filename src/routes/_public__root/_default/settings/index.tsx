@@ -16,5 +16,13 @@ const RouteComponent = () => {
 }
 
 export const Route = createFileRoute('/_public__root/_default/settings/')({
-  component: RouteComponent
+  component: RouteComponent,
+  head: () => {
+    return {
+      meta: [
+        { title: 'Petit Meme - Paramètres' },
+        { name: 'robots', content: 'noindex,nofollow' }
+      ]
+    }
+  }
 })

@@ -12,5 +12,13 @@ const RouteComponent = () => {
 }
 
 export const Route = createFileRoute('/_public__root/_default/password/reset')({
-  component: RouteComponent
+  component: RouteComponent,
+  head: () => {
+    return {
+      meta: [
+        { title: 'Petit Meme - Réinitialiser le mot de passe' },
+        { name: 'robots', content: 'noindex,nofollow' }
+      ]
+    }
+  }
 })

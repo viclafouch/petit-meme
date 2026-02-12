@@ -13,7 +13,7 @@ import {
   getCategoriesListQueryOpts,
   getMemesListQueryOpts
 } from '@/lib/queries'
-import { buildCategoryJsonLd } from '@/lib/seo'
+import { buildBreadcrumbJsonLd, buildCategoryJsonLd } from '@/lib/seo'
 import { cn } from '@/lib/utils'
 import {
   PageDescription,
@@ -70,10 +70,20 @@ const MemesListWrapper = ({ columnGridCount }: { columnGridCount: number }) => {
     memes: memesListQuery.data.memes
   })
 
+  const categoryName = selectedCategory?.title ?? 'Tous les mèmes'
+  const categoryPath = `/memes/category/${slug}`
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: 'Accueil', pathname: '/' },
+    { name: categoryName, pathname: categoryPath }
+  ])
+
   return (
     <div className="w-full flex flex-col gap-12">
       <script type="application/ld+json">
         {JSON.stringify(categoryJsonLd)}
+      </script>
+      <script type="application/ld+json">
+        {JSON.stringify(breadcrumbJsonLd)}
       </script>
       <MemesList
         columnGridCount={columnGridCount}

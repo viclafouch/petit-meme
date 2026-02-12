@@ -98,6 +98,9 @@ const RouteComponent = () => {
 
 export const Route = createFileRoute('/admin/categories/')({
   component: RouteComponent,
+  head: () => {
+    return { meta: [{ title: 'Admin Petit Meme - Catégories' }] }
+  },
   loader: async () => {
     const categories = await getCategories()
 

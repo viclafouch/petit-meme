@@ -207,14 +207,11 @@ export const Route = createFileRoute('/_public__root/_default/pricing')({
     ]
   },
   head: () => {
-    return {
-      meta: [
-        ...seo({
-          title: 'Plans et Tarifs',
-          description:
-            'Découvre les plans de Petit Meme : gratuit ou Premium avec accès illimité aux mèmes, favoris et générations de vidéos. Choisis le plan qui te permet de créer et partager des mèmes sans limites !'
-        })
-      ]
-    }
+    return seo({
+      title: 'Plans et Tarifs',
+      pathname: '/pricing',
+      description:
+        'Découvre les plans de Petit Meme : gratuit ou Premium avec accès illimité aux mèmes, favoris et générations de vidéos. Choisis le plan qui te permet de créer et partager des mèmes sans limites !'
+    })
   }
 })

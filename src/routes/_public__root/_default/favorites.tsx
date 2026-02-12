@@ -28,6 +28,14 @@ const RouteComponent = () => {
 
 export const Route = createFileRoute('/_public__root/_default/favorites')({
   component: RouteComponent,
+  head: () => {
+    return {
+      meta: [
+        { title: 'Petit Meme - Favoris' },
+        { name: 'robots', content: 'noindex,nofollow' }
+      ]
+    }
+  },
   beforeLoad: ({ context }) => {
     if (!context.user) {
       throw redirect({ to: '/memes' })

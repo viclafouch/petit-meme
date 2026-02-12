@@ -39,16 +39,12 @@ export const Route = createFileRoute('/_public__root/')({
   component: RouteComponent,
   pendingMs: 3000,
   head: () => {
-    return {
-      meta: [
-        ...seo({
-          title: 'Ta banque de mèmes vidéo, prête à faire rire Internet',
-          keywords: ['banque', 'memes', 'gratuit', 'francais'].join(','),
-          description:
-            'Découvre Petit Meme, la plateforme où tu peux parcourir, créer et partager des mèmes gratuitement. Explore notre bibliothèque de vidéos et images humoristiques, sauvegarde tes favoris et amuse-toi avec des contenus toujours à jour.'
-        })
-      ]
-    }
+    return seo({
+      title: 'Ta banque de mèmes vidéo, prête à faire rire Internet',
+      keywords: ['banque', 'memes', 'gratuit', 'francais'].join(','),
+      description:
+        'Découvre Petit Meme, la plateforme où tu peux parcourir, créer et partager des mèmes gratuitement. Explore notre bibliothèque de vidéos et images humoristiques, sauvegarde tes favoris et amuse-toi avec des contenus toujours à jour.'
+    })
   },
   scripts: () => {
     return [

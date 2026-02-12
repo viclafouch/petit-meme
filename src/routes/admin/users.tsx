@@ -183,6 +183,9 @@ const RouteComponent = () => {
 
 export const Route = createFileRoute('/admin/users')({
   component: RouteComponent,
+  head: () => {
+    return { meta: [{ title: 'Admin Petit Meme - Utilisateurs' }] }
+  },
   loader: async () => {
     const listUsers = await getListUsers()
 

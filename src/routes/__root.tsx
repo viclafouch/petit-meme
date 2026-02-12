@@ -108,9 +108,7 @@ export const Route = createRootRouteWithContext<{
   user: Awaited<ReturnType<typeof getAuthUser>>
 }>()({
   beforeLoad: async ({ context }) => {
-    const user = await context.queryClient.ensureQueryData(
-      getAuthUserQueryOpts()
-    )
+    const user = await context.queryClient.fetchQuery(getAuthUserQueryOpts())
 
     return { user }
   },

@@ -1,5 +1,7 @@
 # Plan — Correction des audits
 
+**L'app est en production avec des utilisateurs et des données réelles.** Toute migration Prisma doit être additive (nouveaux champs optionnels, nouveaux index). Ne jamais supprimer/renommer de colonnes, reset la base, ou faire de migration destructive.
+
 Les détails complets (fichiers, lignes, code) sont dans `audits/<nom>.md`.
 
 **Workflow par étape :**
@@ -176,21 +178,33 @@ Conformité légale. Les CRITICAL sont des obligations réglementaires.
 
 ### HIGH
 
-- [ ] Créer la page mentions légales (`/mentions-legales`)
-- [ ] Ajouter checkbox CGU + lien privacy au formulaire d'inscription
-- [ ] Implémenter l'export de données utilisateur (JSON)
-- [ ] Définir et implémenter les durées de rétention + cron de nettoyage
+- [x] Créer la page mentions légales (`/mentions-legales`)
+- [x] Ajouter checkbox CGU + lien privacy au formulaire d'inscription
+- [x] Implémenter l'export de données utilisateur (JSON)
+- [x] Définir et implémenter les durées de rétention + cron de nettoyage
+
+### Audit post-implémentation (CRITICAL)
+
+- [ ] Stocker le consentement CGU en base — ajouter `termsAcceptedAt` + `privacyAcceptedAt` au modèle User, envoyer `acceptTerms` côté serveur (Art. 7(1) : pouvoir démontrer le consentement)
+- [x] Compléter l'export de données — ajouter `generationCount`, `banned`/`banReason`/`banExpires`, `stripeCustomerId` (Art. 15 : droit d'accès complet)
+- [x] Corriger le wording privacy.md sur les tokens de vérification — préciser "24h après expiration" (cohérence doc/code)
+
+### Audit post-implémentation (HIGH)
+
+- [x] Compléter les mentions légales LCEN — ajouter forme juridique (EI), mention RCS (dispensé ou non), TVA (franchise en base)
 
 ### MEDIUM
 
 - [ ] Ajouter l'édition de profil (nom, email)
-- [ ] Compléter le flux de suppression (Mixpanel, Stripe)
+- [ ] Compléter le flux de suppression (Mixpanel, Stripe, anonymiser `submittedBy` sur les memes)
 - [ ] Conditionner les `console.log` de PII à `NODE_ENV`
+- [ ] Vérifier et documenter les DPA signés avec chaque sous-traitant (Stripe, Resend, Bunny, Algolia, Mixpanel, Railway)
 
 ### LOW
 
 - [ ] Auto-héberger Google Fonts
 - [ ] Activer les adresses email de contact (hello@petit-meme.io, legal@petit-meme.io)
+- [ ] Ajouter un audit log pour l'export de données utilisateur
 
 ---
 

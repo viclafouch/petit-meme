@@ -12,6 +12,7 @@ import {
 } from '@/components/animate-ui/radix/dialog'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   FormControl,
   FormItem,
@@ -256,7 +257,10 @@ const signupSchema = z
     name: z.string(),
     email: z.email(),
     password: z.string().min(8).max(20),
-    confirmPassword: z.string().min(8).max(20)
+    confirmPassword: z.string().min(8).max(20),
+    acceptTerms: z.literal(true, {
+      message: 'Vous devez accepter les conditions pour continuer'
+    })
   })
   .refine(
     (data) => {
@@ -273,12 +277,28 @@ const signupFormOpts = formOptions({
     name: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    acceptTerms: false as boolean
   },
   validators: {
     onChange: signupSchema
   }
 })
+
+const SignupSuccessAlert = () => {
+  return (
+    <Alert variant="success" className="mt-4">
+      <CheckCircle />
+      <AlertTitle>Parfait, plus qu&apos;à valider ton email !</AlertTitle>
+      <AlertDescription>
+        Votre compte a été créé avec succès, mais il doit être activé avant que
+        vous puissiez vous connecter. Nous venons de vous envoyer un e-mail pour
+        l'activer. Si vous ne le recevez pas dans quelques minutes, veuillez
+        vérifier votre dossier spam ou contactez-nous.
+      </AlertDescription>
+    </Alert>
+  )
+}
 
 const SignupForm = ({
   onAuthTypeChange
@@ -440,6 +460,49 @@ const SignupForm = ({
           )
         }}
       />
+      <form.Field
+        name="acceptTerms"
+        children={(field) => {
+          const errorMessage = getFieldErrorMessage({ field })
+
+          return (
+            <FormItem error={errorMessage} className="w-full">
+              <div className="flex items-start gap-x-2">
+                <Checkbox
+                  id="acceptTerms"
+                  checked={field.state.value === true}
+                  onCheckedChange={(checked) => {
+                    return field.handleChange(checked === true)
+                  }}
+                  onBlur={field.handleBlur}
+                />
+                <label
+                  htmlFor="acceptTerms"
+                  className="text-xs text-muted-foreground leading-snug"
+                >
+                  J&apos;accepte les{' '}
+                  <Link
+                    to="/terms-of-use"
+                    className="text-info underline"
+                    target="_blank"
+                  >
+                    Conditions Générales d&apos;Utilisation
+                  </Link>{' '}
+                  et la{' '}
+                  <Link
+                    to="/privacy"
+                    className="text-info underline"
+                    target="_blank"
+                  >
+                    Politique de confidentialité
+                  </Link>
+                </label>
+              </div>
+              <FormMessage />
+            </FormItem>
+          )
+        }}
+      />
       <form.Subscribe
         selector={(state) => {
           return state.isSubmitting
@@ -470,19 +533,7 @@ const SignupForm = ({
         }}
         children={(isSubmitted) => {
           return isSubmitted && signupMutation.isSuccess ? (
-            <Alert variant="success" className="mt-4">
-              <CheckCircle />
-              <AlertTitle>
-                Parfait, plus qu&apos;à valider ton email !
-              </AlertTitle>
-              <AlertDescription>
-                Votre compte a été créé avec succès, mais il doit être activé
-                avant que vous puissiez vous connecter. Nous venons de vous
-                envoyer un e-mail pour l'activer. Si vous ne le recevez pas dans
-                quelques minutes, veuillez vérifier votre dossier spam ou
-                contactez-nous.
-              </AlertDescription>
-            </Alert>
+            <SignupSuccessAlert />
           ) : null
         }}
       />

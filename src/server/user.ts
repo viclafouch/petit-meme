@@ -133,6 +133,111 @@ export const toggleBookmarkByMemeId = createServerFn({ method: 'POST' })
     return { bookmarked }
   })
 
+export const exportUserData = createServerFn({ method: 'GET' })
+  .middleware([authUserRequiredMiddleware])
+  .handler(async ({ context }) => {
+    const user = await prismaClient.user.findUniqueOrThrow({
+      where: { id: context.user.id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        emailVerified: true,
+        image: true,
+        createdAt: true,
+        updatedAt: true,
+        role: true,
+        generationCount: true,
+        stripeCustomerId: true,
+        banned: true,
+        banReason: true,
+        banExpires: true,
+        accounts: {
+          select: {
+            providerId: true,
+            accountId: true,
+            createdAt: true
+          }
+        },
+        sessions: {
+          select: {
+            createdAt: true,
+            expiresAt: true,
+            ipAddress: true,
+            userAgent: true
+          }
+        },
+        bookmarks: {
+          select: {
+            createdAt: true,
+            meme: {
+              select: {
+                title: true
+              }
+            }
+          }
+        }
+      }
+    })
+
+    const subscriptions = await prismaClient.subscription.findMany({
+      where: { referenceId: context.user.id },
+      select: {
+        plan: true,
+        status: true,
+        periodStart: true,
+        periodEnd: true
+      }
+    })
+
+    return {
+      profile: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        emailVerified: user.emailVerified,
+        image: user.image,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        role: user.role,
+        generationCount: user.generationCount,
+        stripeCustomerId: user.stripeCustomerId,
+        banned: user.banned,
+        banReason: user.banReason,
+        banExpires: user.banExpires
+      },
+      accounts: user.accounts.map((account) => {
+        return {
+          providerId: account.providerId,
+          accountId: account.accountId,
+          createdAt: account.createdAt
+        }
+      }),
+      sessions: user.sessions.map((session) => {
+        return {
+          createdAt: session.createdAt,
+          expiresAt: session.expiresAt,
+          ipAddress: session.ipAddress,
+          userAgent: session.userAgent
+        }
+      }),
+      bookmarks: user.bookmarks.map((bookmark) => {
+        return {
+          memeTitle: bookmark.meme.title,
+          createdAt: bookmark.createdAt
+        }
+      }),
+      subscriptions: subscriptions.map((subscription) => {
+        return {
+          plan: subscription.plan,
+          status: subscription.status,
+          periodStart: subscription.periodStart,
+          periodEnd: subscription.periodEnd
+        }
+      })
+    }
+  })
+
 export const incrementGenerationCount = createServerFn({ method: 'POST' })
   .middleware([authUserRequiredMiddleware])
   .handler(async ({ context }) => {

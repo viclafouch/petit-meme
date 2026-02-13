@@ -115,11 +115,17 @@ européenne).
 | Données | Durée de conservation |
 |---------|----------------------|
 | Données de compte | Jusqu'à suppression du compte par l'utilisateur |
-| Données de session | Durée de la session active |
+| Données de session | Durée de la session active (supprimées automatiquement à expiration) |
+| Tokens de vérification | Supprimés automatiquement 24h après leur expiration |
+| Données de vues détaillées (`MemeViewDaily`) | 90 jours, puis agrégées (compteur global) et supprimées |
 | Cookie `anonId` | 1 an (avec consentement) |
 | Données analytiques (Mixpanel) | Selon la politique de rétention de Mixpanel |
 | Données de paiement (Stripe) | Selon les obligations légales de Stripe |
 | E-mails transactionnels | Selon la politique de rétention de Resend |
+
+Un processus automatisé de nettoyage s'exécute une fois par semaine pour
+supprimer les sessions expirées, les tokens de vérification obsolètes et
+agréger les données de vues au-delà de 90 jours.
 
 À la suppression de votre compte, vos données personnelles sont supprimées
 dans un délai de 30 jours, à l'exception des données que nous sommes tenus de

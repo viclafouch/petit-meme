@@ -17,6 +17,12 @@ export const Footer = () => {
           >
             Conditions
           </Link>
+          <Link
+            to="/mentions-legales"
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Mentions légales
+          </Link>
         </div>
       </div>
     </footer>

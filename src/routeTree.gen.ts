@@ -27,6 +27,7 @@ import { Route as AdminLibraryMemeIdRouteImport } from './routes/admin/library/$
 import { Route as Public__rootDefaultTermsOfUseRouteImport } from './routes/_public__root/_default/terms-of-use'
 import { Route as Public__rootDefaultPrivacyRouteImport } from './routes/_public__root/_default/privacy'
 import { Route as Public__rootDefaultPricingRouteImport } from './routes/_public__root/_default/pricing'
+import { Route as Public__rootDefaultMentionsLegalesRouteImport } from './routes/_public__root/_default/mentions-legales'
 import { Route as Public__rootDefaultFavoritesRouteImport } from './routes/_public__root/_default/favorites'
 import { Route as Public__rootDefaultSettingsRouteRouteImport } from './routes/_public__root/_default/settings/route'
 import { Route as Public__rootDefaultSettingsIndexRouteImport } from './routes/_public__root/_default/settings/index'
@@ -130,6 +131,12 @@ const Public__rootDefaultPricingRoute =
     path: '/pricing',
     getParentRoute: () => Public__rootDefaultRouteRoute,
   } as any)
+const Public__rootDefaultMentionsLegalesRoute =
+  Public__rootDefaultMentionsLegalesRouteImport.update({
+    id: '/mentions-legales',
+    path: '/mentions-legales',
+    getParentRoute: () => Public__rootDefaultRouteRoute,
+  } as any)
 const Public__rootDefaultFavoritesRoute =
   Public__rootDefaultFavoritesRouteImport.update({
     id: '/favorites',
@@ -203,6 +210,7 @@ export interface FileRoutesByFullPath {
   '/api/bunny': typeof ApiBunnyRoute
   '/settings': typeof Public__rootDefaultSettingsRouteRouteWithChildren
   '/favorites': typeof Public__rootDefaultFavoritesRoute
+  '/mentions-legales': typeof Public__rootDefaultMentionsLegalesRoute
   '/pricing': typeof Public__rootDefaultPricingRoute
   '/privacy': typeof Public__rootDefaultPrivacyRoute
   '/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
@@ -230,6 +238,7 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AdminUsersRoute
   '/api/bunny': typeof ApiBunnyRoute
   '/favorites': typeof Public__rootDefaultFavoritesRoute
+  '/mentions-legales': typeof Public__rootDefaultMentionsLegalesRoute
   '/pricing': typeof Public__rootDefaultPricingRoute
   '/privacy': typeof Public__rootDefaultPrivacyRoute
   '/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
@@ -261,6 +270,7 @@ export interface FileRoutesById {
   '/_public__root/': typeof Public__rootIndexRoute
   '/_public__root/_default/settings': typeof Public__rootDefaultSettingsRouteRouteWithChildren
   '/_public__root/_default/favorites': typeof Public__rootDefaultFavoritesRoute
+  '/_public__root/_default/mentions-legales': typeof Public__rootDefaultMentionsLegalesRoute
   '/_public__root/_default/pricing': typeof Public__rootDefaultPricingRoute
   '/_public__root/_default/privacy': typeof Public__rootDefaultPrivacyRoute
   '/_public__root/_default/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
@@ -291,6 +301,7 @@ export interface FileRouteTypes {
     | '/api/bunny'
     | '/settings'
     | '/favorites'
+    | '/mentions-legales'
     | '/pricing'
     | '/privacy'
     | '/terms-of-use'
@@ -318,6 +329,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/api/bunny'
     | '/favorites'
+    | '/mentions-legales'
     | '/pricing'
     | '/privacy'
     | '/terms-of-use'
@@ -348,6 +360,7 @@ export interface FileRouteTypes {
     | '/_public__root/'
     | '/_public__root/_default/settings'
     | '/_public__root/_default/favorites'
+    | '/_public__root/_default/mentions-legales'
     | '/_public__root/_default/pricing'
     | '/_public__root/_default/privacy'
     | '/_public__root/_default/terms-of-use'
@@ -504,6 +517,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Public__rootDefaultPricingRouteImport
       parentRoute: typeof Public__rootDefaultRouteRoute
     }
+    '/_public__root/_default/mentions-legales': {
+      id: '/_public__root/_default/mentions-legales'
+      path: '/mentions-legales'
+      fullPath: '/mentions-legales'
+      preLoaderRoute: typeof Public__rootDefaultMentionsLegalesRouteImport
+      parentRoute: typeof Public__rootDefaultRouteRoute
+    }
     '/_public__root/_default/favorites': {
       id: '/_public__root/_default/favorites'
       path: '/favorites'
@@ -595,6 +615,7 @@ const Public__rootDefaultSettingsRouteRouteWithChildren =
 interface Public__rootDefaultRouteRouteChildren {
   Public__rootDefaultSettingsRouteRoute: typeof Public__rootDefaultSettingsRouteRouteWithChildren
   Public__rootDefaultFavoritesRoute: typeof Public__rootDefaultFavoritesRoute
+  Public__rootDefaultMentionsLegalesRoute: typeof Public__rootDefaultMentionsLegalesRoute
   Public__rootDefaultPricingRoute: typeof Public__rootDefaultPricingRoute
   Public__rootDefaultPrivacyRoute: typeof Public__rootDefaultPrivacyRoute
   Public__rootDefaultTermsOfUseRoute: typeof Public__rootDefaultTermsOfUseRoute
@@ -612,6 +633,8 @@ const Public__rootDefaultRouteRouteChildren: Public__rootDefaultRouteRouteChildr
     Public__rootDefaultSettingsRouteRoute:
       Public__rootDefaultSettingsRouteRouteWithChildren,
     Public__rootDefaultFavoritesRoute: Public__rootDefaultFavoritesRoute,
+    Public__rootDefaultMentionsLegalesRoute:
+      Public__rootDefaultMentionsLegalesRoute,
     Public__rootDefaultPricingRoute: Public__rootDefaultPricingRoute,
     Public__rootDefaultPrivacyRoute: Public__rootDefaultPrivacyRoute,
     Public__rootDefaultTermsOfUseRoute: Public__rootDefaultTermsOfUseRoute,

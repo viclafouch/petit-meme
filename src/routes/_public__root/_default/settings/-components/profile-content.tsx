@@ -1,7 +1,7 @@
 import React from 'react'
 import type { User } from 'better-auth'
 import { formatDate } from 'date-fns'
-import { CreditCard, Key, Stars, Trash2 } from 'lucide-react'
+import { CreditCard, Download, Key, Stars, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -19,6 +19,8 @@ import { FREE_PLAN, PREMIUM_PLAN } from '@/constants/plan'
 import { formatCentsToEuros } from '@/helpers/number'
 import { useStripeCheckout } from '@/hooks/use-stripe-checkout'
 import type { ActiveSubscription } from '@/server/customer'
+import { exportUserData } from '@/server/user'
+import { downloadBlob } from '@/utils/download'
 
 export const ProfileContent = ({
   user,
@@ -33,6 +35,19 @@ export const ProfileContent = ({
     React.useState(false)
 
   const { goToBillingPortal, checkoutPremium } = useStripeCheckout()
+
+  const handleExportData = async () => {
+    try {
+      const data = await exportUserData()
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: 'application/json'
+      })
+      downloadBlob(blob, 'mes-donnees-petit-meme.json')
+      toast.success('Données téléchargées')
+    } catch {
+      toast.error('Erreur lors du téléchargement')
+    }
+  }
 
   return (
     <div>
@@ -113,6 +128,24 @@ export const ProfileContent = ({
               >
                 <Key />
                 Modifier mon mot de passe
+              </Button>
+            </div>
+            <Separator />
+            <div className="flex md:items-center justify-between gap-6 flex-col md:flex-row">
+              <div className="space-y-1">
+                <Label className="text-base">Mes données personnelles</Label>
+                <p className="text-muted-foreground text-sm">
+                  Télécharger une copie de vos données au format JSON (RGPD)
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  void handleExportData()
+                }}
+              >
+                <Download />
+                Télécharger mes données
               </Button>
             </div>
           </CardContent>

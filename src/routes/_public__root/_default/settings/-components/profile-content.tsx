@@ -12,6 +12,7 @@ import {
   CardTitle
 } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
+import { LoadingButton } from '@/components/ui/loading-button'
 import { Separator } from '@/components/ui/separator'
 import { DeleteAccountDialog } from '@/components/User/delete-account-dialog'
 import { UpdatePasswordDialog } from '@/components/User/update-password-dialog'
@@ -21,6 +22,7 @@ import { useStripeCheckout } from '@/hooks/use-stripe-checkout'
 import type { ActiveSubscription } from '@/server/customer'
 import { exportUserData } from '@/server/user'
 import { downloadBlob } from '@/utils/download'
+import { useMutation } from '@tanstack/react-query'
 
 export const ProfileContent = ({
   user,
@@ -36,18 +38,21 @@ export const ProfileContent = ({
 
   const { goToBillingPortal, checkoutPremium } = useStripeCheckout()
 
-  const handleExportData = async () => {
-    try {
+  const exportMutation = useMutation({
+    mutationFn: async () => {
       const data = await exportUserData()
       const blob = new Blob([JSON.stringify(data, null, 2)], {
         type: 'application/json'
       })
       downloadBlob(blob, 'mes-donnees-petit-meme.json')
+    },
+    onSuccess: () => {
       toast.success('Données téléchargées')
-    } catch {
+    },
+    onError: () => {
       toast.error('Erreur lors du téléchargement')
     }
-  }
+  })
 
   return (
     <div>
@@ -138,15 +143,16 @@ export const ProfileContent = ({
                   Télécharger une copie de vos données au format JSON (RGPD)
                 </p>
               </div>
-              <Button
+              <LoadingButton
                 variant="outline"
+                isLoading={exportMutation.isPending}
                 onClick={() => {
-                  void handleExportData()
+                  exportMutation.mutate()
                 }}
               >
                 <Download />
                 Télécharger mes données
-              </Button>
+              </LoadingButton>
             </div>
           </CardContent>
         </Card>

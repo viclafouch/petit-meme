@@ -1,7 +1,6 @@
 import React from 'react'
 import { CircleAlert } from 'lucide-react'
 import { toast } from 'sonner'
-import { z } from 'zod'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
   FormControl,
@@ -11,6 +10,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { LoadingButton } from '@/components/ui/loading-button'
+import { passwordWithConfirmationSchema } from '@/constants/auth'
 import { getAuthErrorMessage } from '@/helpers/auth-errors'
 import { authClient } from '@/lib/auth-client'
 import { getFieldErrorMessage } from '@/lib/utils'
@@ -18,28 +18,13 @@ import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 
-const createNewPasswordForm = z
-  .object({
-    password: z.string(),
-    confirmPassword: z.string()
-  })
-  .refine(
-    (data) => {
-      return data.password === data.confirmPassword
-    },
-    {
-      message: 'Les mots de passe ne correspondent pas',
-      path: ['confirmPassword']
-    }
-  )
-
 const createNewPasswordFormOpts = formOptions({
   defaultValues: {
     password: '',
     confirmPassword: ''
   },
   validators: {
-    onChange: createNewPasswordForm
+    onChange: passwordWithConfirmationSchema
   }
 })
 

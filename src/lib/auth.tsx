@@ -2,6 +2,7 @@ import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { admin } from 'better-auth/plugins'
 import { reactStartCookies } from 'better-auth/react-start'
+import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '@/constants/auth'
 import {
   FIVE_MINUTES_IN_SECONDS,
   ONE_DAY_IN_SECONDS,
@@ -42,8 +43,8 @@ const getAuthConfig = createServerOnlyFn(() => {
     emailAndPassword: {
       enabled: true,
       autoSignIn: true,
-      minPasswordLength: 12,
-      maxPasswordLength: 100,
+      minPasswordLength: PASSWORD_MIN_LENGTH,
+      maxPasswordLength: PASSWORD_MAX_LENGTH,
       sendResetPassword: async ({ user, url }) => {
         await resendClient.emails.send({
           from: 'Petit Meme <hello@petit-meme.io>',
@@ -57,7 +58,8 @@ const getAuthConfig = createServerOnlyFn(() => {
           console.log('Sending reset password email to:', user.email, url)
         }
       },
-      requireEmailVerification: true
+      requireEmailVerification: true,
+      revokeSessionsOnPasswordReset: true
     },
     emailVerification: {
       sendOnSignUp: true,

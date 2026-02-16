@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { LoadingButton } from '@/components/ui/loading-button'
+import { passwordWithConfirmationSchema } from '@/constants/auth'
 import { getAuthErrorMessage } from '@/helpers/auth-errors'
 import { authClient } from '@/lib/auth-client'
 import { identify, peopleSet, track } from '@/lib/mixpanel'
@@ -256,21 +257,11 @@ const signupSchema = z
   .object({
     name: z.string(),
     email: z.email(),
-    password: z.string().min(8).max(20),
-    confirmPassword: z.string().min(8).max(20),
     acceptTerms: z.literal(true, {
       message: 'Vous devez accepter les conditions pour continuer'
     })
   })
-  .refine(
-    (data) => {
-      return data.password === data.confirmPassword
-    },
-    {
-      message: 'Les mots de passe ne correspondent pas',
-      path: ['confirmPassword']
-    }
-  )
+  .and(passwordWithConfirmationSchema)
 
 const signupFormOpts = formOptions({
   defaultValues: {

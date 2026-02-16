@@ -10,6 +10,17 @@ export const algoliaClient = searchClient(
   serverEnv.ALGOLIA_SECRET
 )
 
+export async function safeAlgoliaOp<T>(promise: Promise<T>) {
+  try {
+    return await promise
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error)
+
+    return null
+  }
+}
+
 export function memeToAlgoliaRecord(meme: MemeWithVideo & MemeWithCategories) {
   return {
     ...meme,

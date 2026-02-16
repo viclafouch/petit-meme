@@ -13,7 +13,6 @@ import { isMatch, Link, useMatches } from '@tanstack/react-router'
 export const PathBreadcrumbs = () => {
   const matches = useMatches()
 
-  // Don't render if any match is still pending
   if (
     matches.some((match) => {
       return match.status === 'pending'
@@ -22,12 +21,10 @@ export const PathBreadcrumbs = () => {
     return null
   }
 
-  // Filter matches that have breadcrumb data
   const matchesWithCrumbs = matches.filter((match) => {
     return isMatch(match, 'loaderData.crumb')
   })
 
-  // Don't render breadcrumbs if no matches have crumb data
   if (matchesWithCrumbs.length === 0) {
     return null
   }
@@ -38,7 +35,7 @@ export const PathBreadcrumbs = () => {
         <BreadcrumbItem className="shrink-0">
           <BreadcrumbLink asChild>
             <Link to="/admin">
-              <Home className="h-4 w-4" />
+              <Home className="size-4" />
             </Link>
           </BreadcrumbLink>
         </BreadcrumbItem>

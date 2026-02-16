@@ -1,8 +1,11 @@
 import { filesize } from 'filesize'
 import { z } from 'zod'
+import { BUNNY_STATUS } from '@/constants/bunny'
 import type { MemeWithCategories, MemeWithVideo } from '@/constants/meme'
 import {
+  DEFAULT_MEME_TITLE,
   MAX_SIZE_MEME_IN_BYTES,
+  MEME_FULL_INCLUDE,
   MEMES_FILTERS_SCHEMA,
   TWEET_LINK_SCHEMA
 } from '@/constants/meme'
@@ -11,7 +14,8 @@ import { MemeStatus } from '@/db/generated/prisma/enums'
 import {
   algoliaClient,
   algoliaIndexName,
-  memeToAlgoliaRecord
+  memeToAlgoliaRecord,
+  safeAlgoliaOp
 } from '@/lib/algolia'
 import { auth } from '@/lib/auth'
 import { createVideo, deleteVideo, uploadVideo } from '@/lib/bunny'
@@ -133,24 +137,16 @@ export const editMeme = createServerFn({ method: 'POST' })
         }),
         tweetUrl: values.tweetUrl || null
       },
-      include: {
-        video: true,
-        categories: {
-          include: { category: true }
-        }
-      }
+      include: MEME_FULL_INCLUDE
     })
 
-    await algoliaClient
-      .partialUpdateObject({
+    await safeAlgoliaOp(
+      algoliaClient.partialUpdateObject({
         indexName: algoliaIndexName,
         objectID: meme.id,
         attributesToUpdate: memeToAlgoliaRecord(memeUpdated)
       })
-      .catch((error) => {
-        // eslint-disable-next-line no-console
-        console.error(error)
-      })
+    )
 
     return { id: memeUpdated.id }
   })
@@ -172,15 +168,12 @@ export const deleteMemeById = createServerFn({ method: 'POST' })
 
     await Promise.all([
       prismaClient.video.delete({ where: { id: meme.videoId } }),
-      algoliaClient
-        .deleteObject({
+      safeAlgoliaOp(
+        algoliaClient.deleteObject({
           indexName: algoliaIndexName,
           objectID: meme.id
         })
-        .catch((error: unknown) => {
-          // eslint-disable-next-line no-console
-          console.error(error)
-        }),
+      ),
       deleteVideo(meme.video.bunnyId).catch((error: unknown) => {
         // eslint-disable-next-line no-console
         console.error(error)
@@ -189,6 +182,50 @@ export const deleteMemeById = createServerFn({ method: 'POST' })
 
     return { id: meme.id }
   })
+
+type CreateMemeWithVideoParams = {
+  buffer: Buffer
+  tweetUrl?: string
+}
+
+async function createMemeWithVideo({
+  buffer,
+  tweetUrl
+}: CreateMemeWithVideoParams) {
+  const title = DEFAULT_MEME_TITLE
+  const { videoId } = await createVideo(title)
+
+  const meme = await prismaClient.meme.create({
+    data: {
+      title,
+      tweetUrl,
+      status: 'PENDING',
+      video: {
+        create: {
+          duration: 0,
+          bunnyStatus:
+            process.env.NODE_ENV !== 'production'
+              ? BUNNY_STATUS.RESOLUTION_FINISHED
+              : undefined,
+          bunnyId: videoId
+        }
+      }
+    },
+    include: MEME_FULL_INCLUDE
+  })
+
+  await Promise.all([
+    safeAlgoliaOp(
+      algoliaClient.saveObject({
+        indexName: algoliaIndexName,
+        body: memeToAlgoliaRecord(meme)
+      })
+    ),
+    uploadVideo(videoId, buffer)
+  ])
+
+  return { id: meme.id }
+}
 
 export const createMemeFromTwitterUrl = createServerFn({ method: 'POST' })
   .inputValidator((url: string) => {
@@ -207,50 +244,10 @@ export const createMemeFromTwitterUrl = createServerFn({ method: 'POST' })
       )
     }
 
-    const title = 'Sans titre'
     const arrayBuffer = await media.video.blob.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
 
-    const { videoId } = await createVideo(title)
-
-    const meme = await prismaClient.meme.create({
-      data: {
-        title,
-        tweetUrl: tweet.url,
-        status: 'PENDING',
-        video: {
-          create: {
-            duration: 0,
-            // Webhooks are not working in local env
-            bunnyStatus: process.env.NODE_ENV !== 'production' ? 4 : undefined,
-            bunnyId: videoId
-          }
-        }
-      },
-      include: {
-        video: true,
-        categories: {
-          include: { category: true }
-        }
-      }
-    })
-
-    await Promise.all([
-      algoliaClient
-        .saveObject({
-          indexName: algoliaIndexName,
-          body: memeToAlgoliaRecord(meme)
-        })
-        .catch((error: unknown) => {
-          // eslint-disable-next-line no-console
-          console.error(error)
-        }),
-      uploadVideo(videoId, buffer)
-    ])
-
-    return {
-      id: meme.id
-    }
+    return createMemeWithVideo({ buffer, tweetUrl: tweet.url })
   })
 
 export const CREATE_MEME_FROM_FILE_SCHEMA = z.object({
@@ -267,49 +264,10 @@ export const createMemeFromFile = createServerFn({ method: 'POST' })
   })
   .middleware([adminRequiredMiddleware])
   .handler(async ({ data: values }) => {
-    const title = 'Sans titre'
     const arrayBuffer = await values.video.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
 
-    const { videoId } = await createVideo(title)
-
-    const meme = await prismaClient.meme.create({
-      data: {
-        title,
-        status: 'PENDING',
-        video: {
-          create: {
-            duration: 0,
-            // Webhooks are not working in local env
-            bunnyStatus: process.env.NODE_ENV !== 'production' ? 4 : undefined,
-            bunnyId: videoId
-          }
-        }
-      },
-      include: {
-        video: true,
-        categories: {
-          include: { category: true }
-        }
-      }
-    })
-
-    await Promise.all([
-      uploadVideo(videoId, buffer),
-      algoliaClient
-        .saveObject({
-          indexName: algoliaIndexName,
-          body: memeToAlgoliaRecord(meme)
-        })
-        .catch((error: unknown) => {
-          // eslint-disable-next-line no-console
-          console.error(error)
-        })
-    ])
-
-    return {
-      id: meme.id
-    }
+    return createMemeWithVideo({ buffer })
   })
 
 export const getAdminMemes = createServerFn({ method: 'GET' })

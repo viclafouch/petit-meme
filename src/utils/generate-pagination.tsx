@@ -2,11 +2,17 @@ import React from 'react'
 import { PaginationItem, PaginationLink } from '@/components/ui/pagination'
 import type { LinkProps } from '@tanstack/react-router'
 
-export const generatePaginationLinks = (
-  currentPage: number,
-  totalPages: number,
+type GeneratePaginationLinksParams = {
+  currentPage: number
+  totalPages: number
   getLinkProps: (page: number) => LinkProps
-): React.JSX.Element[] => {
+}
+
+export const generatePaginationLinks = ({
+  currentPage,
+  totalPages,
+  getLinkProps
+}: GeneratePaginationLinksParams): React.JSX.Element[] => {
   const pages: React.JSX.Element[] = []
   const maxVisible = 6
 
@@ -29,12 +35,12 @@ export const generatePaginationLinks = (
   }
 
   const halfVisible = Math.floor(maxVisible / 2)
-  let startPage = Math.max(1, currentPage - halfVisible)
-  const endPage = Math.min(totalPages, startPage + maxVisible - 1)
-
-  if (endPage - startPage + 1 < maxVisible) {
-    startPage = Math.max(1, endPage - maxVisible + 1)
-  }
+  const rawStart = Math.max(1, currentPage - halfVisible)
+  const endPage = Math.min(totalPages, rawStart + maxVisible - 1)
+  const startPage =
+    endPage - rawStart + 1 < maxVisible
+      ? Math.max(1, endPage - maxVisible + 1)
+      : rawStart
 
   for (let index = startPage; index <= endPage; index += 1) {
     pages.push(

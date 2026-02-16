@@ -69,13 +69,15 @@ const addTextToVideo = async (
   const baselineOffset = Math.floor(fontSize * 0.2)
   const totalTextHeight = lineCount * fontSize + (lineCount - 1) * lineSpacing
 
-  let padFilter = `pad=iw:ih+${bandHeight}:0:0:white`
-  let yPosition = `h-${Math.floor(bandHeight / 2)}-${Math.floor(totalTextHeight / 2)}+${baselineOffset}`
+  const isTop = textPosition === 'top'
 
-  if (textPosition === 'top') {
-    padFilter = `pad=iw:ih+${bandHeight}:0:${bandHeight}:white`
-    yPosition = `${Math.floor(bandHeight / 2)}-${Math.floor(totalTextHeight / 2)}+${baselineOffset}`
-  }
+  const padFilter = isTop
+    ? `pad=iw:ih+${bandHeight}:0:${bandHeight}:white`
+    : `pad=iw:ih+${bandHeight}:0:0:white`
+
+  const yPosition = isTop
+    ? `${Math.floor(bandHeight / 2)}-${Math.floor(totalTextHeight / 2)}+${baselineOffset}`
+    : `h-${Math.floor(bandHeight / 2)}-${Math.floor(totalTextHeight / 2)}+${baselineOffset}`
 
   const result = await ffmpeg.exec([
     '-i',
@@ -163,7 +165,6 @@ export const useVideoProcessor = (
       ffmpeg.on('progress', progressSubscription)
     },
     mutationFn: async ({ meme, ...restOptions }: MutationBody) => {
-      // await checkGeneration()
       const response = await shareMeme({ data: meme.id })
       const videoBlob = await response.blob()
       const blob = await addTextToVideo(ffmpeg, videoBlob, restOptions)

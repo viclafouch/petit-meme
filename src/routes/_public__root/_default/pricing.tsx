@@ -36,7 +36,7 @@ const CheckItem = ({ feature }: { feature: Plan['features'][number] }) => {
         size={18}
         className={cn('my-auto', StatusColorByFeatureStatus[feature.status])}
       />
-      <p className="pt-0.5 text-zinc-700 dark:text-zinc-300 text-sm">
+      <p className="pt-0.5 text-foreground text-sm">
         {feature.label}{' '}
         {feature.note ? (
           <span className="text-muted-foreground text-xs">{`(${feature.note})`}</span>
@@ -61,21 +61,18 @@ const PricingCard = ({
 }) => {
   return (
     <Card
-      className={cn(
-        `flex flex-col justify-between py-1 border-zinc-300 flex-1`,
-        {
-          'animate-background-shine bg-white dark:bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-size-[200%_100%] transition-colors':
-            isExclusive && !isActive
-        }
-      )}
+      className={cn(`flex flex-col justify-between py-1 border-border flex-1`, {
+        'animate-background-shine bg-background dark:bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-size-[200%_100%] transition-colors':
+          isExclusive && !isActive
+      })}
     >
       <div>
         <CardHeader className="pb-8 pt-4">
-          <CardTitle className="text-zinc-700 dark:text-zinc-300 text-lg flex items-center justify-between">
+          <CardTitle className="text-foreground text-lg flex items-center justify-between">
             {title}
             {isExclusive ? (
               <svg
-                className="animate-ping-slow h-5 w-5 text-amber-400 dark:hidden"
+                className="animate-ping-slow size-5 text-amber-400 dark:hidden"
                 viewBox="0 0 50 50"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"

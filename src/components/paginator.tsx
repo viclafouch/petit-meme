@@ -32,7 +32,7 @@ export const Paginator = ({
             />
           </PaginationItem>
         ) : null}
-        {generatePaginationLinks(currentPage, totalPages, getLinkProps)}
+        {generatePaginationLinks({ currentPage, totalPages, getLinkProps })}
         {showPreviousNext && totalPages && currentPage + 1 <= totalPages ? (
           <PaginationItem>
             <PaginationNext size="default" {...getLinkProps(currentPage + 1)} />

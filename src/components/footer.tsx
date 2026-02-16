@@ -3,7 +3,7 @@ import { Link } from '@tanstack/react-router'
 export const Footer = () => {
   return (
     <footer className="border-t bg-background/40 relative">
-      <div className="container mx-auto px-4 py-6">
+      <div className="container py-6">
         <div className="flex items-center justify-center flex-wrap gap-x-8 gap-y-6">
           <Link
             to="/privacy"

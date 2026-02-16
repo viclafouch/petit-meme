@@ -1,9 +1,11 @@
 import { z } from 'zod'
+import { MEME_FULL_INCLUDE } from '@/constants/meme'
 import { prismaClient } from '@/db'
 import {
   algoliaClient,
   algoliaIndexName,
-  memeToAlgoliaRecord
+  memeToAlgoliaRecord,
+  safeAlgoliaOp
 } from '@/lib/algolia'
 import { getVideoPlayData } from '@/lib/bunny'
 import { createFileRoute } from '@tanstack/react-router'
@@ -36,29 +38,19 @@ export const Route = createFileRoute('/api/bunny')({
             },
             include: {
               meme: {
-                include: {
-                  video: true,
-                  categories: {
-                    include: {
-                      category: true
-                    }
-                  }
-                }
+                include: MEME_FULL_INCLUDE
               }
             }
           })
 
           if (meme) {
-            await algoliaClient
-              .partialUpdateObject({
+            await safeAlgoliaOp(
+              algoliaClient.partialUpdateObject({
                 indexName: algoliaIndexName,
                 objectID: meme.id,
                 attributesToUpdate: memeToAlgoliaRecord(meme)
               })
-              .catch((error) => {
-                // eslint-disable-next-line no-console
-                console.error(error)
-              })
+            )
           }
 
           // eslint-disable-next-line no-console

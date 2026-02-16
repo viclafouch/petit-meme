@@ -8,13 +8,13 @@ export const DefaultLoading = ({
   return (
     <div
       className={cn(
-        'mx-auto flex flex-col items-center justify-center',
+        'mx-auto flex flex-col items-center justify-center gap-2',
         className
       )}
       {...restProps}
     >
       <Loader2Icon className="animate-spin text-primary" />
-      <p className="mt-2 text-muted-foreground text-sm">Chargement...</p>
+      <p className="text-muted-foreground text-sm">Chargement...</p>
     </div>
   )
 }

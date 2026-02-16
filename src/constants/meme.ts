@@ -4,6 +4,15 @@ import type { badgeVariants } from '@/components/ui/badge'
 import { type Prisma } from '@/db/generated/prisma/client'
 import { MemeStatus } from '@/db/generated/prisma/enums'
 
+export const MEME_FULL_INCLUDE = {
+  video: true,
+  categories: { include: { category: true } }
+} as const satisfies Prisma.MemeInclude
+
+export const DEFAULT_MEME_TITLE = 'Sans titre'
+
+export const NEWS_CATEGORY_SLUG = 'news'
+
 export const MemeStatusMeta = {
   PENDING: {
     label: 'En attente',

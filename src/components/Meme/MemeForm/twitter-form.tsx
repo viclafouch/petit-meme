@@ -122,7 +122,7 @@ export const TwitterForm = ({ onSuccess, closeDialog }: TwitterFormProps) => {
                     active={
                       clipboardMutation.isPending || clipboardMutation.isSuccess
                     }
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 size-6"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 size-7 text-muted-foreground hover:text-foreground"
                     onClick={handlePasteFromClipboard}
                     type="button"
                     onlyStars

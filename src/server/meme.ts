@@ -1,7 +1,11 @@
 import { z } from 'zod'
 import { COOKIE_ANON_ID_KEY, COOKIE_CONSENT_KEY } from '@/constants/cookie'
 import type { MemeWithCategories, MemeWithVideo } from '@/constants/meme'
-import { MEMES_FILTERS_SCHEMA } from '@/constants/meme'
+import {
+  MEME_FULL_INCLUDE,
+  MEMES_FILTERS_SCHEMA,
+  NEWS_CATEGORY_SLUG
+} from '@/constants/meme'
 import {
   ONE_HOUR_MS,
   ONE_YEAR_IN_SECONDS,
@@ -19,7 +23,7 @@ import { getCookie, setCookie } from '@tanstack/react-start/server'
 function buildMemeFilters(category: string | undefined, thirtyDaysAgo: number) {
   const filters = [`status:${MemeStatus.PUBLISHED}`]
 
-  if (category === 'news') {
+  if (category === NEWS_CATEGORY_SLUG) {
     filters.push(`publishedAtTime >= ${thirtyDaysAgo}`)
   } else if (category) {
     const sanitizedCategory = category.replaceAll('"', '')
@@ -38,12 +42,7 @@ export const getMemeById = createServerFn({ method: 'GET' })
       where: {
         id: memeId
       },
-      include: {
-        video: true,
-        categories: {
-          include: { category: true }
-        }
-      }
+      include: MEME_FULL_INCLUDE
     })
 
     if (!meme) {

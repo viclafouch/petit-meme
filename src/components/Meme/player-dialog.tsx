@@ -104,7 +104,7 @@ export const PlayerDialog = ({
     const video = videoRef.current
 
     if (!video) {
-      return () => {}
+      return
     }
 
     const videoSrc = buildVideoStreamUrl(meme.video.bunnyId)
@@ -117,6 +117,7 @@ export const PlayerDialog = ({
       hls.current.attachMedia(video)
     }
 
+    // eslint-disable-next-line consistent-return
     return () => {
       hls.current?.destroy()
     }
@@ -147,16 +148,16 @@ export const PlayerDialog = ({
         onLayoutAnimationComplete={playVideo}
         className="relative w-200 max-w-[90vw]"
       >
-        <div className="w-full h-full flex flex-col items-center gap-y-4">
+        <div className="size-full flex flex-col items-center gap-y-4">
           <h3 className="text-center w-full text-balance text-lg font-bold text-primary">
             {meme.title}
           </h3>
           <div className="bg-muted relative aspect-video w-full overflow-hidden rounded-lg text-sm border border-white/10 z-1">
-            <VideoPlayer className="overflow-hidden w-full h-full max-h-full">
+            <VideoPlayer className="overflow-hidden size-full max-h-full">
               <VideoPlayerContent
                 crossOrigin=""
                 poster={buildVideoImageUrl(meme.video.bunnyId)}
-                className="w-full h-full"
+                className="size-full"
                 playsInline
                 enableFullscreenOnDoubleClick
                 disablePictureInPicture

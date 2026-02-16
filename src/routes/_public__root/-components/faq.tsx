@@ -42,7 +42,7 @@ const items = [
     answer:
       'Petit Mème ne revend pas les vidéos et ne prétend pas en détenir les droits. L’accès est gratuit et destiné à un usage personnel, comme on le retrouve sur les réseaux sociaux. Les fonctionnalités premium concernent uniquement des services additionnels (favoris illimités, téléchargement sans watermark, etc.) et ne confèrent aucun droit commercial sur les vidéos.'
   }
-] as FaqItem[]
+] as const satisfies readonly FaqItem[]
 
 export const Faq = ({
   heading = 'Questions fréquentes'

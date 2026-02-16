@@ -32,7 +32,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useRouter } from '@tanstack/react-router'
 
 export const UserDropdown = ({ user }: { user: UserWithRole }) => {
-  const [open, setOpen] = React.useState(false)
+  const [isOpen, setIsOpen] = React.useState(false)
   const queryClient = useQueryClient()
   const router = useRouter()
   const { goToBillingPortal, checkoutPremium } = useStripeCheckout()
@@ -51,7 +51,7 @@ export const UserDropdown = ({ user }: { user: UserWithRole }) => {
   const subscription = activeSubscriptionQuery.data
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="gap-2 px-2">
           <Avatar className="size-6 rounded-lg">

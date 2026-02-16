@@ -136,7 +136,7 @@ const RouteComponent = () => {
     const video = videoRef.current
 
     if (!video) {
-      return () => {}
+      return
     }
 
     const videoSrc = buildVideoStreamUrl(meme.video.bunnyId)
@@ -149,6 +149,7 @@ const RouteComponent = () => {
       hls.current.attachMedia(video)
     }
 
+    // eslint-disable-next-line consistent-return
     return () => {
       hls.current?.destroy()
     }
@@ -183,19 +184,19 @@ const RouteComponent = () => {
         <div className="w-full grid md:grid-cols-[auto_300px] gap-x-2.5 gap-y-4">
           <div className="w-full flex flex-col gap-y-2 md:gap-y-2 items-center md:items-start">
             <div className="aspect-video w-full flex relative isolate border rounded-lg border-input overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-full bg-muted/50">
+              <div className="absolute top-0 left-0 size-full bg-muted/50">
                 <img
                   src={buildVideoImageUrl(meme.video.bunnyId)}
-                  className="blur-2xl w-full h-full opacity-40 object-cover"
+                  className="blur-2xl size-full opacity-40 object-cover"
                   alt={meme.title}
                   loading="eager"
                 />
               </div>
-              <VideoPlayer className="overflow-hidden w-full h-full max-h-full dark">
+              <VideoPlayer className="overflow-hidden size-full max-h-full dark">
                 <VideoPlayerContent
                   crossOrigin=""
                   poster={buildVideoImageUrl(meme.video.bunnyId)}
-                  className="w-full h-full"
+                  className="size-full"
                   playsInline
                   autoPlay
                   enableFullscreenOnDoubleClick

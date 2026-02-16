@@ -1,8 +1,7 @@
 import React from 'react'
-import { X } from 'lucide-react'
 import { toast } from 'sonner'
 import type { z } from 'zod'
-import { Badge } from '@/components/ui/badge'
+import { KeywordsField } from '@/components/admin/keywords-field'
 import { Button } from '@/components/ui/button'
 import {
   FormControl,
@@ -13,6 +12,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { LoadingButton } from '@/components/ui/loading-button'
 import type { Category } from '@/db/generated/prisma/client'
+import { useKeywordsField } from '@/hooks/use-keywords-field'
 import { getFieldErrorMessage } from '@/lib/utils'
 import {
   addCategory,
@@ -42,8 +42,6 @@ export const CategoryForm = ({
   onSuccess,
   onClose
 }: CategoryFormProps) => {
-  const [keywordValue, setKeywordValue] = React.useState<string>('')
-
   const manageCategoryMutation = useMutation({
     mutationFn: async (body: z.infer<typeof CATEGORY_FORM_SCHEMA>) => {
       if (type === 'edit') {
@@ -101,35 +99,11 @@ export const CategoryForm = ({
     }
   })
 
-  const handleAddKeyword = () => {
-    if (keywordValue.trim()) {
-      form.setFieldValue('keywords', (prevState) => {
-        return [
-          ...new Set([
-            ...prevState,
-            ...keywordValue
-              .split(',')
-              .map((keyword) => {
-                return keyword.trim().toLowerCase()
-              })
-              .filter((word) => {
-                return Boolean(word.trim())
-              })
-          ])
-        ]
-      })
+  const keywordsField = useKeywordsField({
+    setKeywordsValue: (updater) => {
+      return form.setFieldValue('keywords', updater)
     }
-
-    setKeywordValue('')
-  }
-
-  const handleRemoveKeyword = (keywordIndex: number) => {
-    form.setFieldValue('keywords', (prevState) => {
-      return prevState.filter((_, index) => {
-        return index !== keywordIndex
-      })
-    })
-  }
+  })
 
   return (
     <form
@@ -138,7 +112,7 @@ export const CategoryForm = ({
       className="w-full flex flex-col gap-y-6"
       onSubmit={(event) => {
         event.preventDefault()
-        handleAddKeyword()
+        keywordsField.handleAddKeyword()
         void form.handleSubmit()
       }}
     >
@@ -198,57 +172,7 @@ export const CategoryForm = ({
         <form.Field
           name="keywords"
           children={(field) => {
-            const errorMessage = getFieldErrorMessage({ field })
-
-            return (
-              <FormItem error={errorMessage}>
-                <FormLabel>Mots clés ({field.state.value.length})</FormLabel>
-                <FormControl>
-                  <Input
-                    required
-                    type="text"
-                    name={field.name}
-                    onBlur={field.handleBlur}
-                    value={keywordValue}
-                    onChange={(event) => {
-                      setKeywordValue(event.target.value)
-                    }}
-                    enterKeyHint="done"
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter') {
-                        event.preventDefault()
-                        event.stopPropagation()
-                        handleAddKeyword()
-                      }
-                    }}
-                  />
-                </FormControl>
-                {field.state.value.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {field.state.value.map((keyword, index) => {
-                      return (
-                        <Badge variant="secondary" key={keyword}>
-                          {keyword}
-                          <button
-                            onClick={(event) => {
-                              event.preventDefault()
-                              event.stopPropagation()
-                              handleRemoveKeyword(index)
-                            }}
-                            aria-label="Supprimer"
-                            type="button"
-                            className="hover:bg-muted flex items-center p-0 cursor-pointer"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </Badge>
-                      )
-                    })}
-                  </div>
-                ) : null}
-                <FormMessage />
-              </FormItem>
-            )
+            return <KeywordsField field={field} {...keywordsField} />
           }}
         />
       </div>

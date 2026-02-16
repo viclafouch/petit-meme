@@ -1,8 +1,8 @@
 import React from 'react'
-import { Stars, X } from 'lucide-react'
+import { Stars } from 'lucide-react'
 import { toast } from 'sonner'
 import type { z } from 'zod'
-import { Badge } from '@/components/ui/badge'
+import { KeywordsField } from '@/components/admin/keywords-field'
 import { Button } from '@/components/ui/button'
 import {
   FormControl,
@@ -21,9 +21,14 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { MemeStatusMeta, type MemeWithCategories } from '@/constants/meme'
+import {
+  MemeStatusMeta,
+  type MemeWithCategories,
+  NEWS_CATEGORY_SLUG
+} from '@/constants/meme'
 import type { Meme } from '@/db/generated/prisma/client'
 import { MemeStatus } from '@/db/generated/prisma/enums'
+import { useKeywordsField } from '@/hooks/use-keywords-field'
 import { getCategoriesListQueryOpts } from '@/lib/queries'
 import { getFieldErrorMessage } from '@/lib/utils'
 import { editMeme, MEME_FORM_SCHEMA } from '@/server/admin'
@@ -42,8 +47,6 @@ export const MemeForm = ({
   onCancel: () => void
   onSuccess?: () => void
 }) => {
-  const [keywordValue, setKeywordValue] = React.useState<string>('')
-
   const categoriesListQuery = useQuery(getCategoriesListQueryOpts())
 
   // eslint-disable-next-line no-restricted-syntax
@@ -51,7 +54,7 @@ export const MemeForm = ({
     return (
       categoriesListQuery.data
         ?.filter((category) => {
-          return category.slug !== 'news'
+          return category.slug !== NEWS_CATEGORY_SLUG
         })
         .map((category) => {
           return {
@@ -111,25 +114,11 @@ export const MemeForm = ({
     }
   })
 
-  const handleAddKeyword = () => {
-    if (keywordValue.trim()) {
-      form.setFieldValue('keywords', (prevState) => {
-        return removeDuplicates([
-          ...prevState,
-          ...keywordValue
-            .split(',')
-            .map((keyword) => {
-              return keyword.trim().toLowerCase()
-            })
-            .filter((word) => {
-              return Boolean(word.trim())
-            })
-        ])
-      })
+  const keywordsField = useKeywordsField({
+    setKeywordsValue: (updater) => {
+      return form.setFieldValue('keywords', updater)
     }
-
-    setKeywordValue('')
-  }
+  })
 
   const generateContentMutation = useMutation({
     mutationKey: ['generate-content'],
@@ -147,14 +136,6 @@ export const MemeForm = ({
     }
   })
 
-  const handleRemoveKeyword = (keywordIndex: number) => {
-    form.setFieldValue('keywords', (prevState) => {
-      return prevState.filter((_, index) => {
-        return index !== keywordIndex
-      })
-    })
-  }
-
   return (
     <form
       id="edit-meme-form"
@@ -162,7 +143,7 @@ export const MemeForm = ({
       className="w-full flex flex-col gap-y-6"
       onSubmit={(event) => {
         event.preventDefault()
-        handleAddKeyword()
+        keywordsField.handleAddKeyword()
         void form.handleSubmit()
       }}
     >
@@ -237,57 +218,7 @@ export const MemeForm = ({
         <form.Field
           name="keywords"
           children={(field) => {
-            const errorMessage = getFieldErrorMessage({ field })
-
-            return (
-              <FormItem error={errorMessage}>
-                <FormLabel>Mots clés ({field.state.value.length})</FormLabel>
-                <FormControl>
-                  <Input
-                    required
-                    type="text"
-                    name={field.name}
-                    onBlur={field.handleBlur}
-                    value={keywordValue}
-                    onChange={(event) => {
-                      setKeywordValue(event.target.value)
-                    }}
-                    enterKeyHint="done"
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter') {
-                        event.preventDefault()
-                        event.stopPropagation()
-                        handleAddKeyword()
-                      }
-                    }}
-                  />
-                </FormControl>
-                {field.state.value.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {field.state.value.map((keyword, index) => {
-                      return (
-                        <Badge variant="secondary" key={keyword}>
-                          {keyword}
-                          <button
-                            onClick={(event) => {
-                              event.preventDefault()
-                              event.stopPropagation()
-                              handleRemoveKeyword(index)
-                            }}
-                            aria-label="Supprimer"
-                            type="button"
-                            className="hover:bg-muted flex items-center p-0 cursor-pointer"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </Badge>
-                      )
-                    })}
-                  </div>
-                ) : null}
-                <FormMessage />
-              </FormItem>
-            )
+            return <KeywordsField field={field} {...keywordsField} />
           }}
         />
         <form.Field
@@ -341,9 +272,7 @@ export const MemeForm = ({
                   <MultiAsyncSelect
                     loading={categoriesListQuery.isLoading}
                     error={categoriesListQuery.error}
-                    options={categoriesOptions.filter((category) => {
-                      return category.value !== 'news'
-                    })}
+                    options={categoriesOptions}
                     value={field.state.value}
                     onValueChange={(value) => {
                       return field.handleChange(value)

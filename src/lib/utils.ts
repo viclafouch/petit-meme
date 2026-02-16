@@ -20,15 +20,14 @@ export async function fetchWithZod<T>(
   const response = await fetch(...args)
 
   if (!response.ok) {
+    let message = `Fetch failed with status ${response.status}`
+
     try {
       const error = await response.json()
+      message = `${message}: ${error.message}`
+    } catch {}
 
-      throw new Error(
-        `Fetch failed with status ${response.status}: ${error.message}`
-      )
-    } catch (error) {
-      throw new Error(`Fetch failed with status ${response.status}`)
-    }
+    throw new Error(message)
   }
 
   const result = await response.json()

@@ -1,4 +1,5 @@
 import type { MemesFilters } from '@/constants/meme'
+import { NEWS_CATEGORY_SLUG } from '@/constants/meme'
 import { MINUTE } from '@/constants/time'
 import type { Meme, Video } from '@/db/generated/prisma/client'
 import { getAdminMemes } from '@/server/admin'
@@ -95,11 +96,11 @@ export const getCategoriesListQueryOpts = () => {
     staleTime: 10 * MINUTE,
     select: (categories) => {
       return categories.toSorted((categoryA, categoryB) => {
-        if (categoryA.slug === 'news') {
+        if (categoryA.slug === NEWS_CATEGORY_SLUG) {
           return -1
         }
 
-        if (categoryB.slug === 'news') {
+        if (categoryB.slug === NEWS_CATEGORY_SLUG) {
           return 1
         }
 

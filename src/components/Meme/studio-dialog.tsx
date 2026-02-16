@@ -175,11 +175,11 @@ export const StudioDialog = ({
           <div className="w-full -order-1">
             <div className="group bg-muted relative aspect-video w-full overflow-hidden rounded-lg text-sm border border-white/10">
               {isLoading ? (
-                <div className="w-full h-full flex items-center justify-center relative">
-                  <Skeleton className="w-full h-full absolute inset-0">
+                <div className="size-full flex items-center justify-center relative">
+                  <Skeleton className="size-full absolute inset-0">
                     <img
                       src={buildVideoImageUrl(meme.video.bunnyId)}
-                      className="blur-xl w-full h-full opacity-60 object-cover"
+                      className="blur-xl size-full opacity-60 object-cover"
                       alt={meme.title}
                       loading="eager"
                     />
@@ -191,10 +191,10 @@ export const StudioDialog = ({
                 </div>
               ) : null}
               {!isLoading && data ? (
-                <VideoPlayer className="overflow-hidden w-full h-full max-h-full dark">
+                <VideoPlayer className="overflow-hidden size-full max-h-full dark">
                   <VideoPlayerContent
                     crossOrigin=""
-                    className="w-full h-full"
+                    className="size-full"
                     src={data.url}
                     playsInline
                     enableFullscreenOnDoubleClick
@@ -214,10 +214,10 @@ export const StudioDialog = ({
                 </VideoPlayer>
               ) : null}
               {!isLoading && !data ? (
-                <VideoPlayer className="overflow-hidden w-full h-full max-h-full dark">
+                <VideoPlayer className="overflow-hidden size-full max-h-full dark">
                   <VideoPlayerContent
                     crossOrigin=""
-                    className="w-full h-full"
+                    className="size-full"
                     enableFullscreenOnDoubleClick
                     disablePictureInPicture
                     disableRemotePlayback
@@ -227,7 +227,7 @@ export const StudioDialog = ({
                     tabIndex={-1}
                     ref={(element) => {
                       if (!element) {
-                        return () => {}
+                        return
                       }
 
                       const videoSrc = buildVideoStreamUrl(meme.video.bunnyId)
@@ -242,6 +242,7 @@ export const StudioDialog = ({
                         hls.current.attachMedia(element)
                       }
 
+                      // eslint-disable-next-line consistent-return
                       return () => {
                         hls.current?.destroy()
                       }

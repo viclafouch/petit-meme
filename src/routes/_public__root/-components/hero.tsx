@@ -4,6 +4,7 @@ import type { Variants } from 'framer-motion'
 import { motion } from 'framer-motion'
 import { buttonVariants } from '@/components/ui/button'
 import { TextEffect } from '@/components/ui/text-effect'
+import { NEWS_CATEGORY_SLUG } from '@/constants/meme'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { getRecentCountMemesQueryOpts } from '@/lib/queries'
 import { cn } from '@/lib/utils'
@@ -50,7 +51,10 @@ const AnnouncementQuery = () => {
 
   return recentMemesCountQuery.data > 0 ? (
     <Announcement
-      linkOptions={{ to: '/memes/category/$slug', params: { slug: 'news' } }}
+      linkOptions={{
+        to: '/memes/category/$slug',
+        params: { slug: NEWS_CATEGORY_SLUG }
+      }}
       text={`${recentMemesCountQuery.data} nouveaux mèmes ajoutés récemment !`}
     />
   ) : null

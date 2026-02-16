@@ -1,4 +1,3 @@
-// See https://docs.bunny.net/docs/stream-webhook#status-list
 export const BUNNY_STATUS = {
   QUEUED: 0,
   PROCESSING: 1,
@@ -11,4 +10,4 @@ export const BUNNY_STATUS = {
   PRESIGNED_UPLOAD_FAILED: 8,
   CAPTIONS_GENERATED: 9,
   TITLE_OR_DESCRIPTION_GENERATED: 10
-} as const
+} as const satisfies Record<string, number>

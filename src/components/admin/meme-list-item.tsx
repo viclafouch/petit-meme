@@ -3,10 +3,12 @@ import { motion } from 'framer-motion'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
+  DEFAULT_MEME_TITLE,
   MemeStatusMeta,
   type MemeWithCategories,
   type MemeWithVideo
 } from '@/constants/meme'
+import { formatViewCount } from '@/helpers/format'
 import { buildVideoImageUrl, buildVideoPreviewUrl } from '@/lib/bunny'
 import { getVideoStatusByIdQueryOpts } from '@/lib/queries'
 import { cn } from '@/lib/utils'
@@ -14,11 +16,11 @@ import { matchIsVideoPlayable } from '@/utils/video'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 
-export type MemeListItemProps = {
+export type AdminMemeListItemProps = {
   meme: MemeWithVideo & MemeWithCategories
 }
 
-export const MemeListItem = React.memo(({ meme }: MemeListItemProps) => {
+export const MemeListItem = React.memo(({ meme }: AdminMemeListItemProps) => {
   const isVideoInitialPlayable = matchIsVideoPlayable(meme.video.bunnyStatus)
 
   const videoStatusQuery = useQuery({
@@ -44,17 +46,17 @@ export const MemeListItem = React.memo(({ meme }: MemeListItemProps) => {
             initial={{ opacity: isVideoInitialPlayable ? 1 : 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 2 }}
-            className="relative w-full h-full isolate"
+            className="relative size-full isolate"
           >
             <img
               src={buildVideoImageUrl(meme.video.bunnyId)}
               alt={meme.title}
-              className="absolute w-full h-full inset-0 object-cover"
+              className="absolute size-full inset-0 object-cover"
             />
             <img
               src={buildVideoPreviewUrl(meme.video.bunnyId)}
               alt={meme.title}
-              className="absolute w-full h-full inset-0 hidden duration-600 group-hover:block transition-discrete z-10 object-cover opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 group-focus-within:block"
+              className="absolute size-full inset-0 hidden duration-600 group-hover:block transition-discrete z-10 object-cover opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 group-focus-within:block"
             />
             <div className="absolute bottom-1 left-1 z-30">
               <Badge size="sm" variant="black">
@@ -68,8 +70,8 @@ export const MemeListItem = React.memo(({ meme }: MemeListItemProps) => {
             />
           </motion.div>
         ) : (
-          <div className="w-full h-full flex items-center justify-center relative">
-            <Skeleton className="w-full h-full bg-stone-700 absolute inset-0" />
+          <div className="size-full flex items-center justify-center relative">
+            <Skeleton className="size-full bg-muted absolute inset-0" />
             <div className="absolute">
               <Badge variant="outline">Processing...</Badge>
             </div>
@@ -83,26 +85,27 @@ export const MemeListItem = React.memo(({ meme }: MemeListItemProps) => {
             params={{ memeId: meme.id }}
             title={meme.title}
             className={cn(
-              'line-clamp-1 font-medium leading-none text-gray-100',
-              meme.title === 'Titre inconnu' || meme.title === 'Sans titre'
+              'line-clamp-1 font-medium leading-none text-foreground',
+              meme.title === 'Titre inconnu' ||
+                meme.title === DEFAULT_MEME_TITLE
                 ? 'text-destructive-foreground'
                 : undefined
             )}
           >
             {meme.title}
           </Link>
-          <div className="flex flex-row items-center gap-1.5 text-gray-500 w-full relative">
-            <span className="text-[13px] leading-none">
-              {meme.viewCount} vue{meme.viewCount > 1 ? 's' : ''}
+          <div className="flex flex-row items-center gap-1.5 text-muted-foreground w-full relative">
+            <span className="text-xs leading-none">
+              {formatViewCount(meme.viewCount)}
             </span>
             {' • '}
             {meme.categories.length > 0 ? (
-              <span className="text-gray-500 text-[13px]">
+              <span className="text-muted-foreground text-xs">
                 {meme.categories.length} catégorie
                 {meme.categories.length > 1 ? 's' : ''}
               </span>
             ) : (
-              <span className="text-destructive-foreground text-[13px]">
+              <span className="text-destructive-foreground text-xs">
                 Aucune catégorie
               </span>
             )}

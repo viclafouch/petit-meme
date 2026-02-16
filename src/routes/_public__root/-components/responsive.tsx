@@ -128,10 +128,10 @@ export const Responsive = () => {
             </div>
           </div>
           <div className="bg-muted aspect-[16/9] relative">
-            <VideoPlayer className="overflow-hidden w-full h-full max-h-full dark relative">
+            <VideoPlayer className="overflow-hidden size-full max-h-full dark relative">
               <VideoPlayerContent
                 crossOrigin=""
-                className="w-full h-full"
+                className="size-full"
                 playsInline
                 loop
                 muted
@@ -156,10 +156,10 @@ export const Responsive = () => {
             <div className="bg-muted-foreground/20 h-1 md:h-2 w-10 md:w-16 rounded-full" />
           </div>
           <div className="bg-muted aspect-[9/16]">
-            <VideoPlayer className="overflow-hidden w-full h-full max-h-full dark">
+            <VideoPlayer className="overflow-hidden size-full max-h-full dark">
               <VideoPlayerContent
                 crossOrigin=""
-                className="w-full h-full"
+                className="size-full"
                 playsInline
                 loop
                 muted
@@ -184,10 +184,10 @@ export const Responsive = () => {
             <div className="bg-muted-foreground/20 size-2 rounded-full" />
           </div>
           <div className="bg-muted aspect-[4/3]">
-            <VideoPlayer className="overflow-hidden w-full h-full max-h-full dark">
+            <VideoPlayer className="overflow-hidden size-full max-h-full dark">
               <VideoPlayerContent
                 crossOrigin=""
-                className="h-full w-full"
+                className="size-full"
                 playsInline
                 loop
                 muted

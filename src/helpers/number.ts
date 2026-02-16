@@ -31,7 +31,7 @@ function formatEuros(euros: number, options?: NumberFormatOptionsWithLocale) {
   })
 }
 
-function convertCentsToEuros(cents: number) {
+export function convertCentsToEuros(cents: number) {
   return cents / 100
 }
 

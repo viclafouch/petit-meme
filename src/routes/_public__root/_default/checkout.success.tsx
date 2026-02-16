@@ -57,7 +57,7 @@ const RouteComponent = () => {
       >
         Retour à la page d&apos;accueil
       </Link>
-      <canvas ref={canvasRef} className="fixed w-full h-full inset-0 -z-10" />
+      <canvas ref={canvasRef} className="fixed size-full inset-0 -z-10" />
     </motion.div>
   )
 }

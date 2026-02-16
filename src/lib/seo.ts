@@ -18,6 +18,7 @@ import type { MemeWithCategories, MemeWithVideo } from '@/constants/meme'
 import type { Plan } from '@/constants/plan'
 import type { CategoryModel } from '@/db/generated/prisma/models'
 import { clientEnv } from '@/env/client'
+import { convertCentsToEuros } from '@/helpers/number'
 import {
   buildIframeVideoUrl,
   buildVideoImageUrl,
@@ -348,12 +349,12 @@ export const buildPricingJsonLd = (plans: Plan[]): SchemaGraph => {
           offerCount: plans.length,
           lowPrice: Math.min(
             ...plans.map((plan) => {
-              return plan.monthlyPriceInCents / 100
+              return convertCentsToEuros(plan.monthlyPriceInCents)
             })
           ).toFixed(2),
           highPrice: Math.max(
             ...plans.map((plan) => {
-              return plan.monthlyPriceInCents / 100
+              return convertCentsToEuros(plan.monthlyPriceInCents)
             })
           ).toFixed(2),
           offers: plans.map((plan): Offer => {
@@ -361,13 +362,13 @@ export const buildPricingJsonLd = (plans: Plan[]): SchemaGraph => {
               '@type': 'Offer',
               name: plan.title,
               description: plan.description,
-              price: (plan.monthlyPriceInCents / 100).toFixed(2),
+              price: convertCentsToEuros(plan.monthlyPriceInCents).toFixed(2),
               priceCurrency: 'EUR',
               url: pricingUrl,
               availability: 'https://schema.org/InStock',
               priceSpecification: {
                 '@type': 'UnitPriceSpecification',
-                price: (plan.monthlyPriceInCents / 100).toFixed(2),
+                price: convertCentsToEuros(plan.monthlyPriceInCents).toFixed(2),
                 priceCurrency: 'EUR',
                 referenceQuantity: {
                   '@type': 'QuantitativeValue',

@@ -32,7 +32,9 @@ export const BestMemes = ({
             <ChevronRight size={16} />
           </Link>
         </div>
-        <p className="text-sm text-gray-500">Les meilleurs mèmes du moment.</p>
+        <p className="text-sm text-muted-foreground">
+          Les meilleurs mèmes du moment.
+        </p>
       </div>
       <section>
         <MemesList layoutContext="index" memes={bestMemesQuery} />

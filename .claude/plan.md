@@ -216,38 +216,38 @@ Dédupliquer d'abord, refactorer ensuite, Tailwind en dernier (mécanique). Tout
 
 ### Duplicate code
 
-- [ ] Extraire `useToggleBookmark` hook (~50 lignes)
-- [ ] Extraire `useKeywordsField` hook + composant `KeywordsField` (~70 lignes)
-- [ ] Extraire `createMemeWithVideo` server function (~40 lignes)
-- [ ] Extraire `MEME_FULL_INCLUDE` constante Prisma (5 répétitions)
-- [ ] Extraire `DEFAULT_MEME_TITLE` et `NEWS_CATEGORY_SLUG` constantes
+- [x] Extraire `useToggleBookmark` hook (~50 lignes)
+- [x] Extraire `useKeywordsField` hook + composant `KeywordsField` (~70 lignes)
+- [x] Extraire `createMemeWithVideo` server function (~40 lignes)
+- [x] Extraire `MEME_FULL_INCLUDE` constante Prisma (5 répétitions)
+- [x] Extraire `DEFAULT_MEME_TITLE` et `NEWS_CATEGORY_SLUG` constantes
 - [ ] Extraire `FormFooter`, `MemeVideoThumbnail` composants
-- [ ] Extraire `safeAlgoliaOp` wrapper + `searchMemesFromAlgolia` helper
+- [x] Extraire `safeAlgoliaOp` wrapper (~`searchMemesFromAlgolia` skippé, trop peu de gain)
 
 ### Code refactoring
 
-- [ ] Fix bug : erreur avalée dans `utils.ts` (catch qui perd le message détaillé)
+- [x] Fix bug : erreur avalée dans `utils.ts` (catch qui perd le message détaillé)
 - [ ] Extraire le ternaire imbriqué dans `studio-dialog.tsx`
 - [ ] Découper les composants > 200 lignes (MemeForm, $memeId, SignupForm, PlayerDialog)
 - [x] `getTresholdMs` → objet params (typo rename `getThresholdMs` restante)
 
-- [ ] Mutations `let` → fonctions pures
-- [ ] `as const satisfies` sur `BUNNY_STATUS`, FAQ items
-- [ ] Renommer `open` → `isOpen` dans mobile-nav et user-dropdown
-- [ ] Supprimer commentaires inutiles + code commenté mort
-- [ ] `return () => {}` → `return`
+- [x] Mutations `let` → fonctions pures
+- [x] `as const satisfies` sur `BUNNY_STATUS`, FAQ items
+- [x] Renommer `open` → `isOpen` dans mobile-nav et user-dropdown
+- [x] Supprimer commentaires inutiles + code commenté mort
+- [x] `consistent-return` sur les useEffect avec cleanup HLS (eslint-disable-next-line)
 - [x] `@ts-ignore` → `@ts-expect-error` avec explication
 
 ### Tailwind
 
-- [ ] Bulk replace `w-full h-full` → `size-full` (~20 emplacements)
-- [ ] `w-N h-N` → `size-N` sur les icônes
-- [ ] Couleurs hardcodées gray/zinc/stone → tokens thème
-- [ ] Résoudre le conflit `h-7 w-7` + `size-6` dans twitter-form
-- [ ] `hover:scale-*` → transitions d'opacité
-- [ ] Shorthands restants (`px-6 py-6` → `p-6`, `right-0 left-0` → `inset-x-0`)
-- [ ] Classes mortes/redondantes
-- [ ] `mt-*`/`space-y-*` → `gap`
+- [x] Bulk replace `w-full h-full` → `size-full` (~20 emplacements)
+- [x] `w-N h-N` → `size-N` sur les icônes
+- [x] Couleurs hardcodées gray/zinc/stone → tokens thème
+- [x] Résoudre le conflit `h-7 w-7` + `size-6` dans twitter-form
+- [x] `hover:scale-*` → transitions d'opacité
+- [x] Shorthands restants (`px-6 py-6` → `p-6`, `right-0 left-0` → `inset-x-0`)
+- [x] Classes mortes/redondantes
+- [x] `mt-*`/`space-y-*` → `gap`
 
 ---
 

@@ -22,10 +22,10 @@ type MobileNavProps = {
 }
 
 export const MobileNav = ({ nav }: MobileNavProps) => {
-  const [open, setOpen] = React.useState(false)
+  const [isOpen, setIsOpen] = React.useState(false)
 
   return (
-    <Popover open={open} onOpenChange={setOpen} modal>
+    <Popover open={isOpen} onOpenChange={setIsOpen} modal>
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
@@ -39,13 +39,13 @@ export const MobileNav = ({ nav }: MobileNavProps) => {
               <span
                 className={cn(
                   'bg-foreground absolute left-0 block h-0.5 w-4 transition-all duration-100',
-                  open ? 'top-[0.4rem] -rotate-45' : 'top-1'
+                  isOpen ? 'top-[0.4rem] -rotate-45' : 'top-1'
                 )}
               />
               <span
                 className={cn(
                   'bg-foreground absolute left-0 block h-0.5 w-4 transition-all duration-100',
-                  open ? 'top-[0.4rem] rotate-45' : 'top-2.5'
+                  isOpen ? 'top-[0.4rem] rotate-45' : 'top-2.5'
                 )}
               />
             </div>
@@ -58,7 +58,7 @@ export const MobileNav = ({ nav }: MobileNavProps) => {
         align="start"
         side="bottom"
       >
-        <div className="flex flex-col gap-12 overflow-auto px-6 py-6">
+        <div className="flex flex-col gap-12 overflow-auto p-6">
           {nav.map((category, index) => {
             return (
               <div className="flex flex-col gap-4" key={index}>
@@ -74,7 +74,7 @@ export const MobileNav = ({ nav }: MobileNavProps) => {
                         preload={item.preload}
                         className={cn('text-2xl font-medium', item.className)}
                         onClick={() => {
-                          setOpen(false)
+                          setIsOpen(false)
                         }}
                       >
                         {item.label}

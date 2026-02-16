@@ -15,6 +15,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { MemeStatusMeta } from '@/constants/meme'
+import { formatViewCount } from '@/helpers/format'
 import { getAdminMemesListQueryOpts, getMemeByIdQueryOpts } from '@/lib/queries'
 import { buildMemeSeo } from '@/lib/seo'
 import { MemeForm } from '@/routes/admin/library/-components/meme-form'
@@ -56,9 +57,8 @@ const RouteComponent = () => {
         }
         description={
           <div className="flex flex-col gap-y-2">
-            <span className="text-sm text-gray-500">
-              {`${meme.viewCount} vue${meme.viewCount > 1 ? 's' : ''}`} -
-              {' Ajouté le '}
+            <span className="text-sm text-muted-foreground">
+              {formatViewCount(meme.viewCount)} -{' Ajouté le '}
               {formatDate(meme.createdAt, 'dd/MM/yyyy')}
               {' - '}
               <Badge
@@ -127,7 +127,7 @@ const RouteComponent = () => {
           <iframe
             src={`https://iframe.mediadelivery.net/embed/471900/${meme.video.bunnyId}?autoplay=false&loop=false&muted=true&preload=true&responsive=true`}
             title={meme.title}
-            className="w-full h-full"
+            className="size-full"
             allow="autoplay; fullscreen"
           />
         </div>

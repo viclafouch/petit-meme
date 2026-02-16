@@ -10,7 +10,7 @@ export const CategoriesList = () => {
   const { slug: activeSlug } = useParams({ strict: false })
 
   return (
-    <div className="w-full overflow-x-auto max-w-full no-scrollbar py-2">
+    <div className="w-full overflow-x-auto no-scrollbar py-2">
       <ul className="flex items-center gap-x-2">
         {categories.data.map((category) => {
           const isActive = activeSlug === category.slug

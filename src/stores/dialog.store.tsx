@@ -4,6 +4,11 @@ import type { WithDialog } from '@/@types/dialog'
 import { OverlaySpinner } from '@/components/ui/overlay-spinner'
 import { ClientOnly } from '@tanstack/react-router'
 
+type DialogEntry = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  component: React.LazyExoticComponent<React.ComponentType<any>>
+}
+
 export const DIALOGS = {
   auth: {
     component: React.lazy(async () => {
@@ -14,7 +19,7 @@ export const DIALOGS = {
       }
     })
   }
-} as const
+} as const satisfies Record<string, DialogEntry>
 
 type Dialogs = typeof DIALOGS
 type DialogKey = keyof Dialogs

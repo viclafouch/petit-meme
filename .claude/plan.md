@@ -221,14 +221,14 @@ Dédupliquer d'abord, refactorer ensuite, Tailwind en dernier (mécanique). Tout
 - [x] Extraire `createMemeWithVideo` server function (~40 lignes)
 - [x] Extraire `MEME_FULL_INCLUDE` constante Prisma (5 répétitions)
 - [x] Extraire `DEFAULT_MEME_TITLE` et `NEWS_CATEGORY_SLUG` constantes
-- [ ] Extraire `FormFooter`, `MemeVideoThumbnail` composants
+- [x] Extraire `FormFooter`, `MemeVideoThumbnail` composants
 - [x] Extraire `safeAlgoliaOp` wrapper (~`searchMemesFromAlgolia` skippé, trop peu de gain)
 
 ### Code refactoring
 
 - [x] Fix bug : erreur avalée dans `utils.ts` (catch qui perd le message détaillé)
-- [ ] Extraire le ternaire imbriqué dans `studio-dialog.tsx`
-- [ ] Découper les composants > 200 lignes (MemeForm, $memeId, SignupForm, PlayerDialog)
+- [x] Extraire le ternaire imbriqué dans `studio-dialog.tsx`
+- [x] Découper les composants > 200 lignes (MemeForm, $memeId, SignupForm, PlayerDialog)
 - [x] `getTresholdMs` → objet params (typo rename `getThresholdMs` restante)
 
 - [x] Mutations `let` → fonctions pures

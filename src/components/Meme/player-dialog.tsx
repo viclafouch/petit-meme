@@ -1,6 +1,5 @@
 import React from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
-import Hls from 'hls.js'
 import { Clapperboard, Clipboard, Download, Share2, X } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 import { toast } from 'sonner'
@@ -17,26 +16,31 @@ import {
 } from '@/components/ui/kibo-ui/video-player'
 import type { MemeWithVideo } from '@/constants/meme'
 import { useDownloadMeme } from '@/hooks/use-download-meme'
+import { useMemeHls } from '@/hooks/use-meme-hls'
 import { useRegisterMemeView } from '@/hooks/use-register-meme-view'
 import { useShareMeme } from '@/hooks/use-share-meme'
-import { buildVideoImageUrl, buildVideoStreamUrl } from '@/lib/bunny'
+import { buildVideoImageUrl } from '@/lib/bunny'
 import { track } from '@/lib/mixpanel'
 import { buildUrl } from '@/lib/seo'
 import { useLinkProps } from '@tanstack/react-router'
+
+type PlayerDialogParams = {
+  meme: MemeWithVideo
+  layoutContext: string
+  onClose: () => void
+  onOpenStudio: (meme: MemeWithVideo) => void
+}
 
 export const PlayerDialog = ({
   meme,
   layoutContext,
   onClose,
   onOpenStudio
-}: {
-  meme: MemeWithVideo
-  layoutContext: string
-  onClose: () => void
-  onOpenStudio: (meme: MemeWithVideo) => void
-}) => {
-  const videoRef = React.useRef<HTMLVideoElement>(null)
-  const hls = React.useRef<Hls>(null)
+}: PlayerDialogParams) => {
+  const { videoRef } = useMemeHls({
+    memeId: meme.id,
+    bunnyId: meme.video.bunnyId
+  })
   const isReducedMotion = useReducedMotion()
   const shareMeme = useShareMeme()
   const downloadMutation = useDownloadMeme()
@@ -100,29 +104,6 @@ export const PlayerDialog = ({
       })
     })
   }
-
-  React.useEffect(() => {
-    const video = videoRef.current
-
-    if (!video) {
-      return
-    }
-
-    const videoSrc = buildVideoStreamUrl(meme.video.bunnyId)
-
-    if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      video.src = videoSrc
-    } else if (Hls.isSupported()) {
-      hls.current = new Hls()
-      hls.current.loadSource(videoSrc)
-      hls.current.attachMedia(video)
-    }
-
-    // eslint-disable-next-line consistent-return
-    return () => {
-      hls.current?.destroy()
-    }
-  }, [meme.id, meme.video.bunnyId])
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 overflow-hidden dark">

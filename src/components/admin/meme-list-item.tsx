@@ -1,26 +1,27 @@
 import React from 'react'
 import { motion } from 'motion/react'
+import { MemeVideoThumbnail } from '@/components/Meme/meme-video-thumbnail'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   DEFAULT_MEME_TITLE,
+  LEGACY_MEME_TITLE,
   MemeStatusMeta,
   type MemeWithCategories,
   type MemeWithVideo
 } from '@/constants/meme'
 import { formatViewCount } from '@/helpers/format'
-import { buildVideoImageUrl, buildVideoPreviewUrl } from '@/lib/bunny'
 import { getVideoStatusByIdQueryOpts } from '@/lib/queries'
 import { cn } from '@/lib/utils'
 import { matchIsVideoPlayable } from '@/utils/video'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 
-export type AdminMemeListItemProps = {
+export type AdminMemeListItemParams = {
   meme: MemeWithVideo & MemeWithCategories
 }
 
-export const MemeListItem = React.memo(({ meme }: AdminMemeListItemProps) => {
+export const MemeListItem = React.memo(({ meme }: AdminMemeListItemParams) => {
   const isVideoInitialPlayable = matchIsVideoPlayable(meme.video.bunnyStatus)
 
   const videoStatusQuery = useQuery({
@@ -46,32 +47,19 @@ export const MemeListItem = React.memo(({ meme }: AdminMemeListItemProps) => {
             initial={{ opacity: isVideoInitialPlayable ? 1 : 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 2 }}
-            className="relative size-full isolate"
+            className="relative size-full"
           >
-            <img
-              src={buildVideoImageUrl(meme.video.bunnyId)}
+            <MemeVideoThumbnail
+              bunnyId={meme.video.bunnyId}
               alt={meme.title}
-              loading="lazy"
-              decoding="async"
-              className="absolute size-full inset-0 object-cover"
-            />
-            <img
-              src={buildVideoPreviewUrl(meme.video.bunnyId)}
-              alt={meme.title}
-              loading="lazy"
-              decoding="async"
-              className="absolute size-full inset-0 hidden duration-600 group-hover:block transition-discrete z-10 object-cover opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 group-focus-within:block"
-            />
-            <div className="absolute bottom-1 left-1 z-30">
-              <Badge size="sm" variant="black">
-                {meme.video.duration} sec
-              </Badge>
-            </div>
-            <Link
-              to="/admin/library/$memeId"
-              className="absolute inset-0 md:opacity-0 group-hover:opacity-100 transition-all z-40 delay-75 cursor-pointer text-white/80 place-items-center group-focus-within:opacity-100 outline-none grid"
-              params={{ memeId: meme.id }}
-            />
+              duration={meme.video.duration}
+            >
+              <Link
+                to="/admin/library/$memeId"
+                className="size-full md:opacity-0 group-hover:opacity-100 transition-all delay-75 cursor-pointer text-white/80 place-items-center group-focus-within:opacity-100 outline-none grid"
+                params={{ memeId: meme.id }}
+              />
+            </MemeVideoThumbnail>
           </motion.div>
         ) : (
           <div className="size-full flex items-center justify-center relative">
@@ -90,7 +78,7 @@ export const MemeListItem = React.memo(({ meme }: AdminMemeListItemProps) => {
             title={meme.title}
             className={cn(
               'line-clamp-1 font-medium leading-none text-foreground',
-              meme.title === 'Titre inconnu' ||
+              meme.title === LEGACY_MEME_TITLE ||
                 meme.title === DEFAULT_MEME_TITLE
                 ? 'text-destructive-foreground'
                 : undefined

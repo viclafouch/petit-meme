@@ -1,7 +1,6 @@
 /* eslint-disable unicorn/filename-case */
 import React from 'react'
 import { formatDate } from 'date-fns'
-import Hls from 'hls.js'
 import {
   ArrowLeft,
   Clapperboard,
@@ -29,13 +28,10 @@ import {
 } from '@/components/ui/kibo-ui/video-player'
 import { OverlaySpinner } from '@/components/ui/overlay-spinner'
 import { useDownloadMeme } from '@/hooks/use-download-meme'
+import { useMemeHls } from '@/hooks/use-meme-hls'
 import { useRegisterMemeView } from '@/hooks/use-register-meme-view'
 import { useShareMeme } from '@/hooks/use-share-meme'
-import {
-  buildVideoImageUrl,
-  buildVideoOriginalUrl,
-  buildVideoStreamUrl
-} from '@/lib/bunny'
+import { buildVideoImageUrl, buildVideoOriginalUrl } from '@/lib/bunny'
 import { getMemeByIdQueryOpts } from '@/lib/queries'
 import { matchIsUserAdmin } from '@/lib/role'
 import {
@@ -57,17 +53,18 @@ import {
   useRouter
 } from '@tanstack/react-router'
 
-// eslint-disable-next-line max-lines-per-function
 const RouteComponent = () => {
   const { nextRandomMeme, originalUrl } = Route.useLoaderData()
   const { user } = useRouteContext({ from: '__root__' })
-  const hls = React.useRef<Hls>(null)
-  const videoRef = React.useRef<HTMLVideoElement>(null)
   const { memeId } = Route.useParams()
-  const navigate = Route.useNavigate()
-  const router = useRouter()
   const memeQuery = useSuspenseQuery(getMemeByIdQueryOpts(memeId))
   const meme = memeQuery.data
+  const { videoRef } = useMemeHls({
+    memeId: meme.id,
+    bunnyId: meme.video.bunnyId
+  })
+  const navigate = Route.useNavigate()
+  const router = useRouter()
   const [isStudioDialogOpened, setIsStudioDialogOpened] = React.useState(false)
   const memeLink = useLinkProps({
     to: '/memes/$memeId',
@@ -131,29 +128,6 @@ const RouteComponent = () => {
 
     void preload()
   }, [router, nextRandomMeme])
-
-  React.useEffect(() => {
-    const video = videoRef.current
-
-    if (!video) {
-      return
-    }
-
-    const videoSrc = buildVideoStreamUrl(meme.video.bunnyId)
-
-    if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      video.src = videoSrc
-    } else if (Hls.isSupported()) {
-      hls.current = new Hls()
-      hls.current.loadSource(videoSrc)
-      hls.current.attachMedia(video)
-    }
-
-    // eslint-disable-next-line consistent-return
-    return () => {
-      hls.current?.destroy()
-    }
-  }, [meme.id, meme.video.bunnyId])
 
   const goToNextRandomMeme = async () => {
     try {

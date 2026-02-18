@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 import { motion } from 'motion/react'
 import { BunnyPlayIcon } from '@/components/icon/Play'
-import { Badge } from '@/components/ui/badge'
+import { MemeVideoThumbnail } from '@/components/Meme/meme-video-thumbnail'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,14 +21,13 @@ import { formatViewCount } from '@/helpers/format'
 import { useDownloadMeme } from '@/hooks/use-download-meme'
 import { useShareMeme } from '@/hooks/use-share-meme'
 import { useToggleBookmark } from '@/hooks/use-toggle-bookmark'
-import { buildVideoImageUrl, buildVideoPreviewUrl } from '@/lib/bunny'
 import { getFavoritesMemesQueryOpts } from '@/lib/queries'
 import { cn } from '@/lib/utils'
 import { useShowDialog } from '@/stores/dialog.store'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useRouteContext } from '@tanstack/react-router'
 
-export type MemeListItemProps = {
+export type MemeListItemParams = {
   meme: MemeWithVideo
   layoutContext: string
   size: keyof typeof sizes
@@ -101,7 +100,7 @@ export const MemeListItem = React.memo(
     layoutContext,
     onOpenStudioClick,
     size
-  }: MemeListItemProps) => {
+  }: MemeListItemParams) => {
     const shareMeme = useShareMeme()
     const downloadMutation = useDownloadMeme()
 
@@ -110,33 +109,14 @@ export const MemeListItem = React.memo(
         className="relative flex w-full flex-col gap-2 text-sm sm:min-w-0 group"
         layoutId={`${layoutContext}-item-${meme.id}`}
       >
-        <motion.div className="group relative aspect-video w-full text-sm">
-          <div className="relative size-full isolate">
-            <div className="absolute inset-0 border rounded-lg border-white/10 overflow-hidden">
-              <img
-                src={buildVideoImageUrl(meme.video.bunnyId)}
-                alt={meme.title}
-                loading="lazy"
-                decoding="async"
-                className="size-full object-cover"
-              />
-            </div>
-            <div className="absolute inset-0 border-2 z-10 hidden opacity-0 rounded-lg border-white/50 overflow-hidden duration-600 group-hover:block transition-discrete object-cover group-hover:opacity-100 group-focus-within:opacity-100 group-focus-within:block">
-              <img
-                src={buildVideoPreviewUrl(meme.video.bunnyId)}
-                alt={meme.title}
-                loading="lazy"
-                decoding="async"
-                className="size-full object-cover"
-              />
-            </div>
-            <div className="absolute bottom-1 left-1 z-30">
-              <Badge size="sm" variant="black">
-                {meme.video.duration} sec
-              </Badge>
-            </div>
+        <motion.div className="group relative aspect-video w-full text-sm overflow-hidden rounded-lg border border-white/10">
+          <MemeVideoThumbnail
+            bunnyId={meme.video.bunnyId}
+            alt={meme.title}
+            duration={meme.video.duration}
+          >
             <button
-              className="absolute inset-0 z-40 delay-75 cursor-pointer text-white/80 place-items-center outline-none grid"
+              className="size-full delay-75 cursor-pointer text-white/80 place-items-center outline-none grid"
               type="button"
               onClick={(event) => {
                 event.preventDefault()
@@ -149,7 +129,7 @@ export const MemeListItem = React.memo(
                 <BunnyPlayIcon className="fill-white w-3.5 md:w-4.5" />
               </div>
             </button>
-          </div>
+          </MemeVideoThumbnail>
         </motion.div>
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col gap-y-1">

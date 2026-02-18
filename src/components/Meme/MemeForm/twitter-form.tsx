@@ -1,9 +1,8 @@
-import React from 'react'
 import { ClipboardPaste } from 'lucide-react'
 import { toast } from 'sonner'
 import { z } from 'zod'
+import { FormFooter } from '@/components/admin/form-footer'
 import { IconButtonStars } from '@/components/animate-ui/buttons/icon-button-stars'
-import { Button } from '@/components/ui/button'
 import {
   FormControl,
   FormItem,
@@ -28,12 +27,12 @@ const formOpts = formOptions({
   }
 })
 
-type TwitterFormProps = {
+type TwitterFormParams = {
   onSuccess?: ({ memeId }: { memeId: string }) => void
   closeDialog: () => void
 }
 
-export const TwitterForm = ({ onSuccess, closeDialog }: TwitterFormProps) => {
+export const TwitterForm = ({ onSuccess, closeDialog }: TwitterFormParams) => {
   const form = useForm({
     ...formOpts,
     onSubmit: async ({ value }) => {
@@ -56,7 +55,7 @@ export const TwitterForm = ({ onSuccess, closeDialog }: TwitterFormProps) => {
     }
   })
 
-  const handlePasteFromClipboard = async () => {
+  const handlePasteFromClipboard = () => {
     void clipboardMutation.mutateAsync().finally(() => {
       setTimeout(() => {
         clipboardMutation.reset()
@@ -140,20 +139,14 @@ export const TwitterForm = ({ onSuccess, closeDialog }: TwitterFormProps) => {
         selector={(state) => {
           return [state.canSubmit, state.isSubmitting]
         }}
-        children={([canSubmit, isSubmitting]) => {
+        children={([canSubmit = false, isSubmitting = false]) => {
           return (
-            <div className="w-full flex justify-end gap-x-2">
-              <Button onClick={closeDialog} variant="outline" type="button">
-                Annuler
-              </Button>
-              <Button
-                variant="default"
-                disabled={!canSubmit || isSubmitting}
-                type="submit"
-              >
-                Ajouter
-              </Button>
-            </div>
+            <FormFooter
+              canSubmit={canSubmit}
+              isSubmitting={isSubmitting}
+              onCancel={closeDialog}
+              submitLabel="Ajouter"
+            />
           )
         }}
       />

@@ -2,8 +2,8 @@ import React from 'react'
 import { Stars } from 'lucide-react'
 import { toast } from 'sonner'
 import type { z } from 'zod'
+import { FormFooter } from '@/components/admin/form-footer'
 import { KeywordsField } from '@/components/admin/keywords-field'
-import { Button } from '@/components/ui/button'
 import {
   FormControl,
   FormItem,
@@ -37,16 +37,14 @@ import { removeDuplicates } from '@/utils/array'
 import { useForm } from '@tanstack/react-form'
 import { useMutation, useQuery } from '@tanstack/react-query'
 
-// eslint-disable-next-line max-lines-per-function
-export const MemeForm = ({
-  meme,
-  onCancel,
-  onSuccess
-}: {
+type MemeFormParams = {
   meme: MemeWithCategories
   onCancel: () => void
   onSuccess?: () => void
-}) => {
+}
+
+// eslint-disable-next-line max-lines-per-function
+export const MemeForm = ({ meme, onCancel, onSuccess }: MemeFormParams) => {
   const categoriesListQuery = useQuery(getCategoriesListQueryOpts())
 
   // eslint-disable-next-line no-restricted-syntax
@@ -321,21 +319,16 @@ export const MemeForm = ({
         selector={(state) => {
           return [state.canSubmit, state.isSubmitting]
         }}
-        children={([canSubmit, isSubmitting = false]) => {
+        children={([canSubmit = false, isSubmitting = false]) => {
           return (
-            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-              <Button onClick={onCancel} type="button" variant="outline">
-                Annuler
-              </Button>
-              <LoadingButton
-                type="submit"
-                form="edit-meme-form"
-                isLoading={isSubmitting}
-                disabled={!canSubmit}
-              >
-                Enregistrer
-              </LoadingButton>
-            </div>
+            <FormFooter
+              canSubmit={canSubmit}
+              isSubmitting={isSubmitting}
+              onCancel={onCancel}
+              submitLabel="Enregistrer"
+              isLoadingButton
+              formId="edit-meme-form"
+            />
           )
         }}
       />

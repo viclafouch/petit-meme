@@ -10,6 +10,7 @@ export const MEME_FULL_INCLUDE = {
 } as const satisfies Prisma.MemeInclude
 
 export const DEFAULT_MEME_TITLE = 'Sans titre'
+export const LEGACY_MEME_TITLE = 'Titre inconnu'
 
 export const NEWS_CATEGORY_SLUG = 'news'
 

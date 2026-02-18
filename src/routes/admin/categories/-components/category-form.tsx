@@ -1,8 +1,8 @@
 import React from 'react'
 import { toast } from 'sonner'
 import type { z } from 'zod'
+import { FormFooter } from '@/components/admin/form-footer'
 import { KeywordsField } from '@/components/admin/keywords-field'
-import { Button } from '@/components/ui/button'
 import {
   FormControl,
   FormItem,
@@ -10,7 +10,6 @@ import {
   FormMessage
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { LoadingButton } from '@/components/ui/loading-button'
 import type { Category } from '@/db/generated/prisma/client'
 import { useKeywordsField } from '@/hooks/use-keywords-field'
 import { getFieldErrorMessage } from '@/lib/utils'
@@ -22,7 +21,7 @@ import {
 import { useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 
-export type CategoryFormProps =
+export type CategoryFormParams =
   | {
       type: 'edit'
       onClose?: () => void
@@ -41,7 +40,7 @@ export const CategoryForm = ({
   category,
   onSuccess,
   onClose
-}: CategoryFormProps) => {
+}: CategoryFormParams) => {
   const manageCategoryMutation = useMutation({
     mutationFn: async (body: z.infer<typeof CATEGORY_FORM_SCHEMA>) => {
       if (type === 'edit') {
@@ -180,20 +179,17 @@ export const CategoryForm = ({
         selector={(state) => {
           return [state.canSubmit, state.isSubmitting]
         }}
-        children={([canSubmit, isSubmitting = false]) => {
+        children={([canSubmit = false, isSubmitting = false]) => {
           return (
-            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-              <Button type="button" variant="outline" onClick={onClose}>
-                Annuler
-              </Button>
-              <LoadingButton
-                type="submit"
-                isLoading={isSubmitting}
-                disabled={!canSubmit}
-              >
-                Enregistrer
-              </LoadingButton>
-            </div>
+            <FormFooter
+              canSubmit={canSubmit}
+              isSubmitting={isSubmitting}
+              onCancel={() => {
+                return onClose?.()
+              }}
+              submitLabel="Enregistrer"
+              isLoadingButton
+            />
           )
         }}
       />

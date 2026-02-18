@@ -1,7 +1,7 @@
 import React from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { AnimatePresence } from 'motion/react'
-import type { MemeListItemProps } from '@/components/Meme/meme-list-item'
+import type { MemeListItemParams } from '@/components/Meme/meme-list-item'
 import { MemeListItem } from '@/components/Meme/meme-list-item'
 import { PlayerDialog } from '@/components/Meme/player-dialog'
 import { StudioDialog } from '@/components/Meme/studio-dialog'
@@ -9,7 +9,7 @@ import { OverlaySpinner } from '@/components/ui/overlay-spinner'
 import type { MemeWithVideo } from '@/constants/meme'
 import { ClientOnly } from '@tanstack/react-router'
 
-export type MemesListProps = {
+export type MemesListParams = {
   memes: MemeWithVideo[]
   layoutContext: string
   columnGridCount?: number
@@ -19,7 +19,7 @@ export const MemesList = ({
   memes,
   layoutContext,
   columnGridCount = 4
-}: MemesListProps) => {
+}: MemesListParams) => {
   const [selectedId, setSelectedId] = React.useState<string | null>(null)
   const [studioMemeSelected, setStudioMemeSelected] =
     React.useState<MemeWithVideo | null>(null)
@@ -73,7 +73,7 @@ export const MemesList = ({
     return meme.id === selectedId
   })
 
-  const size: MemeListItemProps['size'] = columnGridCount < 5 ? 'md' : 'sm'
+  const size: MemeListItemParams['size'] = columnGridCount < 5 ? 'md' : 'sm'
 
   return (
     <div className="w-full">

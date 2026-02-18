@@ -2,6 +2,7 @@ import React from 'react'
 import { Upload, X } from 'lucide-react'
 import { toast } from 'sonner'
 import type { z } from 'zod'
+import { FormFooter } from '@/components/admin/form-footer'
 import { Button } from '@/components/ui/button'
 import {
   FileUpload,
@@ -22,7 +23,7 @@ import {
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 
-type FileFormProps = {
+type FileFormParams = {
   onSuccess?: ({ memeId }: { memeId: string }) => void
   closeDialog: () => void
 }
@@ -37,7 +38,7 @@ const formOpts = formOptions({
   }
 })
 
-export const FileForm = ({ onSuccess, closeDialog }: FileFormProps) => {
+export const FileForm = ({ onSuccess, closeDialog }: FileFormParams) => {
   const form = useForm({
     ...formOpts,
     onSubmit: async ({ value }) => {
@@ -151,20 +152,14 @@ export const FileForm = ({ onSuccess, closeDialog }: FileFormProps) => {
         selector={(state) => {
           return [state.canSubmit, state.isSubmitting]
         }}
-        children={([canSubmit, isSubmitting]) => {
+        children={([canSubmit = false, isSubmitting = false]) => {
           return (
-            <div className="w-full flex justify-end gap-x-2">
-              <Button onClick={closeDialog} variant="outline" type="button">
-                Annuler
-              </Button>
-              <Button
-                variant="default"
-                disabled={!canSubmit || isSubmitting}
-                type="submit"
-              >
-                Ajouter
-              </Button>
-            </div>
+            <FormFooter
+              canSubmit={canSubmit}
+              isSubmitting={isSubmitting}
+              onCancel={closeDialog}
+              submitLabel="Ajouter"
+            />
           )
         }}
       />

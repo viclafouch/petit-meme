@@ -15,18 +15,6 @@
           }
         ]
       }
-    ],
-    "Notification": [
-      {
-        "matcher": "idle_prompt",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "afplay -v 0.1 .claude/sounds/need-human.mp3 &",
-            "timeout": 10
-          }
-        ]
-      }
     ]
   }
 }

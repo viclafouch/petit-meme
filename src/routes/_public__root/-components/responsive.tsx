@@ -1,8 +1,8 @@
 /* eslint-disable id-length */
 import React from 'react'
-import type { Variants } from 'framer-motion'
-import { motion, useInView } from 'framer-motion'
 import { Eye, MonitorSmartphone } from 'lucide-react'
+import type { Variants } from 'motion/react'
+import { motion, useInView, useReducedMotion } from 'motion/react'
 import { Badge } from '@/components/ui/badge'
 import {
   VideoPlayer,
@@ -83,6 +83,7 @@ export const Responsive = () => {
   const mobileVideoRef = React.useRef<HTMLVideoElement>(null)
   const desktopVideoRef = React.useRef<HTMLVideoElement>(null)
   const containerRef = React.useRef<HTMLDivElement>(null)
+  const isReducedMotion = useReducedMotion()
 
   const isInView = useInView(containerRef, {
     once: true
@@ -110,7 +111,7 @@ export const Responsive = () => {
       </div>
       <motion.div
         className="relative mx-auto max-w-5xl lg:[&_video]:blur-sm max-lg:[&_video+div]:hidden [&:not(:has(video:hover))]:[&>:first-child_video]:blur-none [&_video]:hover:blur-none [&_video:hover]:[&+div]:scale-0 [&_video]:transition-[filter] [&_video]:duration-500 [&:not(:has(video:hover))]:[&>:first-child_video+div]:scale-0"
-        initial="offscreen"
+        initial={isReducedMotion ? false : 'offscreen'}
         whileInView="onscreen"
         viewport={{ amount: 0.4, once: true }}
       >

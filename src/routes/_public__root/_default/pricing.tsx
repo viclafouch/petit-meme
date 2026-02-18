@@ -105,9 +105,9 @@ const PricingCard = ({
             ) : null}
           </CardTitle>
           <div className="flex gap-0.5">
-            <h3 className="text-3xl font-bold">
+            <p className="text-3xl font-bold">
               {formatCentsToEuros(monthlyPriceInCents)}
-            </h3>
+            </p>
             <span className="flex flex-col justify-end text-sm mb-1">
               /mois
             </span>

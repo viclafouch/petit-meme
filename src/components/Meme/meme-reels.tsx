@@ -93,6 +93,8 @@ export const Reel = React.memo(
         <img
           src={buildVideoImageUrl(meme.video.bunnyId)}
           alt={meme.title}
+          loading="eager"
+          decoding="async"
           className="absolute size-full inset-0 object-cover blur-xl opacity-80"
         />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full flex items-center justify-center">
@@ -125,7 +127,14 @@ export const Reel = React.memo(
                 to="/"
                 className={buttonVariants({ variant: 'outline', size: 'sm' })}
               >
-                <img src="/images/logo.png" alt="Logo" className="w-5" />
+                <img
+                  src="/images/logo.png"
+                  alt="Logo"
+                  width={20}
+                  height={20}
+                  decoding="async"
+                  className="w-5"
+                />
                 Retour au site
               </Link>
             </div>

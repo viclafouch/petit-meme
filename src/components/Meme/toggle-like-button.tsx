@@ -37,6 +37,9 @@ const AuthBookmarkButton = ({
       {...restProps}
       active={isMemeBookmarked}
       onClick={handleToggleLike}
+      aria-label={
+        isMemeBookmarked ? 'Retirer des favoris' : 'Ajouter aux favoris'
+      }
     >
       <Star />
     </IconButtonStars>
@@ -56,6 +59,7 @@ const ToggleLikeButton = ({ meme, ...restProps }: ToggleLikeButtonProps) => {
           event.preventDefault()
           showDialog('auth', {})
         }}
+        aria-label="Ajouter aux favoris"
       >
         <Star />
       </IconButtonStars>

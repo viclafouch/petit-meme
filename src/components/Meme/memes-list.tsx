@@ -1,6 +1,6 @@
 import React from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
-import { AnimatePresence } from 'framer-motion'
+import { AnimatePresence } from 'motion/react'
 import type { MemeListItemProps } from '@/components/Meme/meme-list-item'
 import { MemeListItem } from '@/components/Meme/meme-list-item'
 import { PlayerDialog } from '@/components/Meme/player-dialog'

@@ -182,6 +182,7 @@ export const StudioDialog = ({
                       className="blur-xl size-full opacity-60 object-cover"
                       alt={meme.title}
                       loading="eager"
+                      decoding="async"
                     />
                   </Skeleton>
                   <div className="absolute flex flex-col gap-2 px-4 w-full text-center max-w-md items-center justify-center">

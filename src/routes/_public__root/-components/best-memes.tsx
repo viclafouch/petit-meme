@@ -1,6 +1,6 @@
 import React from 'react'
-import { motion } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
+import { motion, useReducedMotion } from 'motion/react'
 import { MemesList } from '@/components/Meme/memes-list'
 import { buttonVariants } from '@/components/ui/button'
 import type { MemeWithVideo } from '@/constants/meme'
@@ -13,10 +13,11 @@ export const BestMemes = ({
   bestMemesPromise: Promise<MemeWithVideo[]>
 }) => {
   const bestMemesQuery = React.use(bestMemesPromise)
+  const isReducedMotion = useReducedMotion()
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
+      initial={isReducedMotion ? false : { opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: 1.2, duration: 0.6 }}
       className="flex flex-col gap-y-4"

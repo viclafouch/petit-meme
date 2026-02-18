@@ -29,6 +29,7 @@ export const ShareMemeButton = ({
       <IconButtonStars
         active={shareMutation.isPending}
         onClick={handleShare}
+        aria-label="Partager"
         {...restProps}
       >
         <Share2 />

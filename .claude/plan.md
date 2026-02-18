@@ -275,29 +275,38 @@ Items de polish qui améliorent la qualité globale sans urgence.
 
 ### Images
 
-- [ ] Créer un composant image optimisé (srcSet, sizes, width/height, loading, fetchPriority, decoding)
-- [ ] `<picture>` avec source WebP + fallback pour les images critiques
-- [ ] Precharger les images hero dans `head()` + priority aux 4 premiers memes visibles
-- [ ] S'assurer que Bunny CDN sert en WebP + générer OG images PNG 1200x630
+- [x] Preconnect Bunny CDN dans `__root.tsx`
+- [x] `decoding="async"` sur toutes les images (meme-list-item, admin/meme-list-item, meme-reels, studio-dialog, navbar)
+- [x] `loading="lazy"` sur les images admin
+- [x] `fetchPriority="high"` + preload hero image dans `head()` (page mème détail)
+- [x] `width`/`height` sur le logo reels
+- [ ] ~~srcSet, sizes, composant image multi-tailles~~ (Bunny Stream ne supporte pas les transformations URL)
+- [ ] ~~`<picture>` WebP + fallback~~ (thumb=JPEG et preview=WebP servent des buts différents)
+- [ ] ~~Bunny CDN WebP + OG images 1200x630~~ (nécessite un service séparé)
 
 ### Accessibilité
 
-- [ ] Skip-to-content link + `<main id="main-content">`
-- [ ] Semantic HTML (headings h1→h2→h3, nav, article, section)
-- [ ] `prefers-reduced-motion` dans les animations Motion
-- [ ] `aria-label` sur boutons sans texte, `aria-hidden` sur icônes, `aria-live` sur messages dynamiques
+- [x] Skip-to-content link + `<main id="main-content">`
+- [x] Heading hierarchy : `<h3>` prix → `<p>` (pricing.tsx)
+- [x] `aria-label` sur boutons icon-only (player-dialog, toggle-like-button, share-meme-button, memeId edit, file-form delete)
+- [x] `prefers-reduced-motion` CSS global + `useReducedMotion` (motion/react) sur hero, best-memes, floating-logo, responsive, checkout.success, player-dialog
 
 ### DX
 
-- [ ] `placeholderData: keepPreviousData` sur les queries avec filtres/pagination
-- [ ] `useSyncExternalStore` pour les hooks media query (SSR-safe)
-- [ ] Husky pre-commit `npm run lint`
-- [ ] Scripts `deps` / `deps:major` avec taze dans package.json
-- [ ] `.npmrc` strict (`engine-strict`, `legacy-peer-deps=false`, `package-lock=true`)
+- [x] `placeholderData: keepPreviousData` sur `getMemesListQueryOpts` et `getAdminMemesListQueryOpts`
+- [x] `useSyncExternalStore` pour `useIsMobile` (SSR-safe)
+- [x] `.npmrc` strict (`engine-strict`, `legacy-peer-deps=false`, `package-lock=true`)
+- [ ] ~~Husky pre-commit~~ (déjà configuré)
+- [ ] ~~Scripts deps/deps:major~~ (déjà dans package.json)
 
 ### Fonts
 
-- [ ] `font-display: swap` + precharger les fonts critiques (woff2)
+- [ ] ~~`font-display: swap`~~ (déjà inclus via `&display=swap` dans l'URL Google Fonts)
+- [ ] ~~Preload woff2~~ (Google Fonts sert des URL différentes par UA — self-hosting prévu GDPR LOW)
+
+### Bonus
+
+- [x] Migration `framer-motion` → `motion/react` sur tous les fichiers modifiables (6 fichiers)
 
 ---
 
@@ -307,7 +316,7 @@ Items de polish qui améliorent la qualité globale sans urgence.
 
 En dernier car nécessite une codebase stable et testée. Chaque update peut casser des choses.
 
-- [ ] Consolider `motion`/`framer-motion` → `motion` uniquement (remplacer tous les imports `framer-motion` → `motion/react`)
+- [x] Consolider `motion`/`framer-motion` → `motion` uniquement (remplacer tous les imports `framer-motion` → `motion/react`) — fait en étape 9
 - [ ] Mettre à jour `better-auth` 1.3.12 → 1.4.18 (JWE cookies → tous les utilisateurs déconnectés, tester tout le flow auth)
 - [ ] Mettre à jour `stripe` 18.5.0 → 19.3.1 (compatible better-auth/stripe, vérifier `discount.coupon` → `discount.source.coupon`)
 - [ ] Évaluer `stripe` 19.x → 20.x (breaking changes limités si pas d'API V2)

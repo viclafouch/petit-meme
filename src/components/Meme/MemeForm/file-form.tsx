@@ -129,7 +129,12 @@ export const FileForm = ({ onSuccess, closeDialog }: FileFormProps) => {
                       <FileUploadItemPreview />
                       <FileUploadItemMetadata />
                       <FileUploadItemDelete asChild>
-                        <Button variant="ghost" size="icon" className="size-7">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-7"
+                          aria-label="Supprimer le fichier"
+                        >
                           <X />
                         </Button>
                       </FileUploadItemDelete>

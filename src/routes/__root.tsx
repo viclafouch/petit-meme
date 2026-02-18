@@ -4,6 +4,7 @@ import { CookieConsentBanner } from '@/components/blocks/cookie-consent'
 import { OnlyPortrait } from '@/components/only-portrait'
 import { TailwindIndicator } from '@/components/tailwind-indicator'
 import { Toaster } from '@/components/ui/sonner'
+import { clientEnv } from '@/env/client'
 import { getCookieConsent } from '@/lib/cookie-consent'
 import { initMixpanel } from '@/lib/mixpanel'
 import { getAuthUserQueryOpts } from '@/lib/queries'
@@ -57,6 +58,10 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => {
           rel="preconnect"
           href="https://fonts.gstatic.com"
           crossOrigin=""
+        />
+        <link
+          rel="preconnect"
+          href={`https://${clientEnv.VITE_BUNNY_HOSTNAME}`}
         />
         <link
           href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap"

@@ -1,5 +1,5 @@
 import React from 'react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
@@ -51,11 +51,15 @@ export const MemeListItem = React.memo(({ meme }: AdminMemeListItemProps) => {
             <img
               src={buildVideoImageUrl(meme.video.bunnyId)}
               alt={meme.title}
+              loading="lazy"
+              decoding="async"
               className="absolute size-full inset-0 object-cover"
             />
             <img
               src={buildVideoPreviewUrl(meme.video.bunnyId)}
               alt={meme.title}
+              loading="lazy"
+              decoding="async"
               className="absolute size-full inset-0 hidden duration-600 group-hover:block transition-discrete z-10 object-cover opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 group-focus-within:block"
             />
             <div className="absolute bottom-1 left-1 z-30">

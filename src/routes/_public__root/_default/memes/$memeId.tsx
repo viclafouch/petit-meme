@@ -190,6 +190,8 @@ const RouteComponent = () => {
                   className="blur-2xl size-full opacity-40 object-cover"
                   alt={meme.title}
                   loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
                 />
               </div>
               <VideoPlayer className="overflow-hidden size-full max-h-full dark">
@@ -232,6 +234,7 @@ const RouteComponent = () => {
                     })}
                     to="/admin/library/$memeId"
                     params={{ memeId: meme.id }}
+                    aria-label="Modifier le mème"
                   >
                     <Pencil />
                   </Link>
@@ -394,7 +397,19 @@ export const Route = createFileRoute('/_public__root/_default/memes/$memeId')({
   },
   head: ({ loaderData, match }) => {
     if (loaderData?.meme) {
-      return buildMemeSeo(loaderData.meme, { pathname: match.pathname })
+      const seo = buildMemeSeo(loaderData.meme, { pathname: match.pathname })
+
+      return {
+        ...seo,
+        links: [
+          ...(seo.links ?? []),
+          {
+            rel: 'preload',
+            as: 'image',
+            href: buildVideoImageUrl(loaderData.meme.video.bunnyId)
+          }
+        ]
+      }
     }
 
     return {}

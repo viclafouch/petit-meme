@@ -1,7 +1,7 @@
 /* eslint-disable id-length */
 import React from 'react'
-import type { Variants } from 'framer-motion'
-import { motion } from 'framer-motion'
+import type { Variants } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
 import { buttonVariants } from '@/components/ui/button'
 import { TextEffect } from '@/components/ui/text-effect'
 import { NEWS_CATEGORY_SLUG } from '@/constants/meme'
@@ -62,13 +62,14 @@ const AnnouncementQuery = () => {
 
 export const Hero = () => {
   const isMobile = useIsMobile()
+  const isReducedMotion = useReducedMotion()
 
   return (
     <PageHeader as="div">
       <React.Suspense fallback={<div />}>
         <motion.div
           variants={variants}
-          initial="hidden"
+          initial={isReducedMotion ? false : 'hidden'}
           animate="visible"
           custom={{ delay: 0.5 }}
         >
@@ -90,7 +91,7 @@ export const Hero = () => {
       </PageHeading>
       <PageDescriptionMotion
         variants={variants}
-        initial="hidden"
+        initial={isReducedMotion ? false : 'hidden'}
         animate="visible"
         custom={{ delay: 0.8 }}
       >
@@ -106,7 +107,7 @@ export const Hero = () => {
       <PageActions className="w-full max-w-sm md:max-w-none justify-center">
         <motion.div
           variants={variants}
-          initial="hidden"
+          initial={isReducedMotion ? false : 'hidden'}
           animate="visible"
           className="flex gap-2 flex-col md:flex-row w-full justify-center"
           custom={{ delay: 1.1 }}

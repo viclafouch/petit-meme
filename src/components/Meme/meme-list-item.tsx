@@ -1,5 +1,4 @@
 import React from 'react'
-import { motion } from 'framer-motion'
 import {
   ArrowRight,
   Clapperboard,
@@ -8,6 +7,7 @@ import {
   Share2,
   Star
 } from 'lucide-react'
+import { motion } from 'motion/react'
 import { BunnyPlayIcon } from '@/components/icon/Play'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -117,6 +117,7 @@ export const MemeListItem = React.memo(
                 src={buildVideoImageUrl(meme.video.bunnyId)}
                 alt={meme.title}
                 loading="lazy"
+                decoding="async"
                 className="size-full object-cover"
               />
             </div>
@@ -125,6 +126,7 @@ export const MemeListItem = React.memo(
                 src={buildVideoPreviewUrl(meme.video.bunnyId)}
                 alt={meme.title}
                 loading="lazy"
+                decoding="async"
                 className="size-full object-cover"
               />
             </div>

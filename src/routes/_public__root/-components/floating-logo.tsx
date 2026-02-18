@@ -1,7 +1,7 @@
 /* eslint-disable id-length */
 import React from 'react'
-import type { Variants } from 'framer-motion'
-import { motion } from 'framer-motion'
+import type { Variants } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
 import LogoCarousel from '@/components/ui/logo-carousel'
 import { logos } from '@/constants/config'
 
@@ -30,6 +30,7 @@ const logoPositions = [
 }[]
 
 export const FloatingLogos = ({ variants }: { variants: Variants }) => {
+  const isReducedMotion = useReducedMotion()
   const logosPerPosition = Math.floor(logos.length / logoPositions.length)
   const remainingLogos = logos.length % logoPositions.length
 
@@ -53,7 +54,7 @@ export const FloatingLogos = ({ variants }: { variants: Variants }) => {
         return (
           <motion.div
             variants={variants}
-            initial="hidden"
+            initial={isReducedMotion ? false : 'hidden'}
             animate="visible"
             custom={{
               delay: 1 + 0.2 * index
@@ -62,10 +63,14 @@ export const FloatingLogos = ({ variants }: { variants: Variants }) => {
             className={`absolute ${position.x} ${position.y}`}
           >
             <motion.div
-              animate={{
-                y: [0, -20, 0],
-                rotate: [0, 10, -10, 0]
-              }}
+              animate={
+                isReducedMotion
+                  ? undefined
+                  : {
+                      y: [0, -20, 0],
+                      rotate: [0, 10, -10, 0]
+                    }
+              }
               transition={{
                 repeat: Infinity,
                 // eslint-disable-next-line react-hooks/purity

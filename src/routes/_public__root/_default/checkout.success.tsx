@@ -1,5 +1,5 @@
 import React from 'react'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'motion/react'
 import { buttonVariants } from '@/components/ui/button'
 import {
   PageDescription,
@@ -23,6 +23,7 @@ const showCanvas = async (canvasElement: HTMLCanvasElement) => {
 
 const RouteComponent = () => {
   const canvasRef = React.useRef<HTMLCanvasElement>(null)
+  const isReducedMotion = useReducedMotion()
 
   React.useEffect(() => {
     const canvas = canvasRef.current
@@ -38,7 +39,7 @@ const RouteComponent = () => {
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
+      initial={isReducedMotion ? false : { opacity: 0 }}
       animate={{ opacity: 1 }}
       className="flex flex-col gap-6 items-center pt-20"
     >

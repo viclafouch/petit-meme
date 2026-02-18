@@ -1,8 +1,8 @@
 import React from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
-import { motion } from 'framer-motion'
 import Hls from 'hls.js'
 import { Clapperboard, Clipboard, Download, Share2, X } from 'lucide-react'
+import { motion, useReducedMotion } from 'motion/react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -37,6 +37,7 @@ export const PlayerDialog = ({
 }) => {
   const videoRef = React.useRef<HTMLVideoElement>(null)
   const hls = React.useRef<Hls>(null)
+  const isReducedMotion = useReducedMotion()
   const shareMeme = useShareMeme()
   const downloadMutation = useDownloadMeme()
   const memeLink = useLinkProps({
@@ -126,7 +127,7 @@ export const PlayerDialog = ({
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 overflow-hidden dark">
       <motion.div
-        initial={{ opacity: 0 }}
+        initial={isReducedMotion ? false : { opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={close}
@@ -136,10 +137,10 @@ export const PlayerDialog = ({
       <motion.div
         className="absolute top-4 right-4"
         animate={{ opacity: 1 }}
-        initial={{ opacity: 0 }}
+        initial={isReducedMotion ? false : { opacity: 0 }}
         exit={{ opacity: 0 }}
       >
-        <Button size="icon" onClick={close}>
+        <Button size="icon" onClick={close} aria-label="Fermer">
           <X />
         </Button>
       </motion.div>

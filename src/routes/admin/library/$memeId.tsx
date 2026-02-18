@@ -28,7 +28,6 @@ const RouteComponent = () => {
   const router = useRouter()
   const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false)
   const memeQuery = useSuspenseQuery(getMemeByIdQueryOpts(memeId))
-  const meme = memeQuery.data
 
   const handleEditSuccess = () => {
     setIsEditDialogOpen(false)
@@ -36,7 +35,7 @@ const RouteComponent = () => {
       queryKey: getAdminMemesListQueryOpts.all,
       exact: false
     })
-    void queryClient.invalidateQueries(getMemeByIdQueryOpts(meme.id))
+    void queryClient.invalidateQueries(getMemeByIdQueryOpts(memeQuery.data.id))
     void router.invalidate()
   }
 
@@ -45,11 +44,11 @@ const RouteComponent = () => {
       <PageHeader
         title={
           <>
-            {meme.title}{' '}
+            {memeQuery.data.title}{' '}
             <Link
               className={buttonVariants({ size: 'icon', variant: 'ghost' })}
               to="/memes/$memeId"
-              params={{ memeId: meme.id }}
+              params={{ memeId: memeQuery.data.id }}
             >
               <ExternalLink className="inline" />
             </Link>
@@ -58,18 +57,18 @@ const RouteComponent = () => {
         description={
           <div className="flex flex-col gap-y-2">
             <span className="text-sm text-muted-foreground">
-              {formatViewCount(meme.viewCount)} -{' Ajouté le '}
-              {formatDate(meme.createdAt, 'dd/MM/yyyy')}
+              {formatViewCount(memeQuery.data.viewCount)} -{' Ajouté le '}
+              {formatDate(memeQuery.data.createdAt, 'dd/MM/yyyy')}
               {' - '}
               <Badge
-                variant={MemeStatusMeta[meme.status].badgeVariant}
+                variant={MemeStatusMeta[memeQuery.data.status].badgeVariant}
                 size="sm"
               >
-                {MemeStatusMeta[meme.status].label}
+                {MemeStatusMeta[memeQuery.data.status].label}
               </Badge>
             </span>
             <div className="flex gap-2">
-              {meme.categories.map(({ category }) => {
+              {memeQuery.data.categories.map(({ category }) => {
                 return (
                   <Badge variant="secondary" key={category.id}>
                     {category.title}
@@ -78,9 +77,9 @@ const RouteComponent = () => {
               })}
             </div>
             <div className="flex flex-wrap gap-1">
-              {meme.keywords.map((keyword, index) => {
+              {memeQuery.data.keywords.map((keyword) => {
                 return (
-                  <Badge variant="outline" key={index}>
+                  <Badge variant="outline" key={keyword}>
                     {keyword}
                   </Badge>
                 )
@@ -100,7 +99,7 @@ const RouteComponent = () => {
               >
                 <Pen /> Modifier
               </Button>
-              <DeleteMemeButton size="sm" meme={meme}>
+              <DeleteMemeButton size="sm" meme={memeQuery.data}>
                 <Trash /> Supprimer
               </DeleteMemeButton>
             </div>
@@ -111,7 +110,7 @@ const RouteComponent = () => {
                   <DialogDescription />
                 </DialogHeader>
                 <MemeForm
-                  meme={meme}
+                  meme={memeQuery.data}
                   onSuccess={handleEditSuccess}
                   onCancel={() => {
                     return setIsEditDialogOpen(false)
@@ -125,8 +124,8 @@ const RouteComponent = () => {
       <div className="py-10">
         <div className="bg-muted relative aspect-video w-full overflow-hidden rounded-lg text-sm border border-white/10">
           <iframe
-            src={`https://iframe.mediadelivery.net/embed/471900/${meme.video.bunnyId}?autoplay=false&loop=false&muted=true&preload=true&responsive=true`}
-            title={meme.title}
+            src={`https://iframe.mediadelivery.net/embed/471900/${memeQuery.data.video.bunnyId}?autoplay=false&loop=false&muted=true&preload=true&responsive=true`}
+            title={memeQuery.data.title}
             className="size-full"
             allow="autoplay; fullscreen"
           />

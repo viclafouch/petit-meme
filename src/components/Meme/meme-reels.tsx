@@ -50,9 +50,7 @@ export const Reel = React.memo(
         }
 
         if (isActive && isPlaying) {
-          video.play().catch(() => {
-            // Ignore autoplay errors
-          })
+          video.play().catch(() => {})
         } else {
           video.pause()
         }
@@ -83,7 +81,7 @@ export const Reel = React.memo(
 
     return (
       <div className="size-full relative select-none">
-        <div className="absolute top-0 right-0 left-0 z-20 p-4 pt-6 bg-gradient-to-b from-black/60 to-transparent">
+        <div className="absolute top-0 right-0 left-0 z-20 p-4 pt-6 bg-linear-to-b from-black/60 to-transparent">
           <Link
             to="/memes/$memeId"
             params={{ memeId: meme.id }}
@@ -120,7 +118,7 @@ export const Reel = React.memo(
             return setIsPlaying(true)
           }}
         />
-        <div className="absolute bottom-0 inset-x-0 z-10 bg-gradient-to-b to-black/60 from-transparent p-3">
+        <div className="absolute bottom-0 inset-x-0 z-10 bg-linear-to-b to-black/60 from-transparent p-3">
           <div className="w-full flex justify-between items-end">
             <div>
               <Link
@@ -178,8 +176,68 @@ export const MemeReels = () => {
 
   const infiniteReels = useInfiniteQuery(getInfiniteReelsQueryOpts())
 
-  const observerRef = React.useRef(
-    new IntersectionObserver(
+  const observerRef = React.useRef<IntersectionObserver | null>(null)
+
+  const setActiveDebouncer = useDebouncer(
+    (index: number) => {
+      setCurrentIndex(index)
+      setIsPlaying(true)
+    },
+    { wait: 300 }
+  )
+
+  const refsMapRef = React.useRef(
+    new Map<string, React.RefObject<HTMLDivElement | null>>()
+  )
+
+  // eslint-disable-next-line no-restricted-syntax
+  const memesWithRefs = React.useMemo(() => {
+    const refsMap = refsMapRef.current
+
+    return (
+      infiniteReels.data?.pages
+        .flatMap(({ memes }) => {
+          return memes
+        })
+        .map((meme, index) => {
+          let ref = refsMap.get(meme.id)
+
+          if (!ref) {
+            ref = React.createRef<HTMLDivElement | null>()
+            refsMap.set(meme.id, ref)
+          }
+
+          return {
+            data: meme,
+            id: meme.id,
+            ref,
+            index
+          }
+        }) ?? []
+    )
+  }, [infiniteReels.data])
+
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const rowVirtualizer = useVirtualizer({
+    count: memesWithRefs.length,
+    getScrollElement: () => {
+      return parentRef.current
+    },
+    estimateSize: () => {
+      return window.innerHeight
+    },
+    overscan: 1
+  })
+
+  const virtualItemsKey = rowVirtualizer
+    .getVirtualItems()
+    .map((item) => {
+      return item.index
+    })
+    .join(',')
+
+  React.useEffect(() => {
+    const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
@@ -193,73 +251,32 @@ export const MemeReels = () => {
       },
       { threshold: 0.7 }
     )
-  )
 
-  const setActiveDebouncer = useDebouncer(
-    (index: number) => {
-      setCurrentIndex(index)
-      setIsPlaying(true)
-    },
-    { wait: 300 }
-  )
+    observerRef.current = observer
 
-  // eslint-disable-next-line no-restricted-syntax
-  const memesRefs = React.useMemo(() => {
-    return (
-      infiniteReels.data?.pages
-        .flatMap(({ memes }) => {
-          return memes
-        })
-        .map((meme, index) => {
-          return {
-            data: meme,
-            id: meme.id,
-            ref: React.createRef<HTMLDivElement | null>(),
-            index
-          }
-        }) ?? []
-    )
-  }, [infiniteReels.data])
+    for (const virtualRow of rowVirtualizer.getVirtualItems()) {
+      const item = memesWithRefs[virtualRow.index]
 
-  // eslint-disable-next-line react-hooks/incompatible-library
-  const rowVirtualizer = useVirtualizer({
-    count: memesRefs.length,
-    getScrollElement: () => {
-      return parentRef.current
-    },
-    estimateSize: () => {
-      return window.innerHeight
-    },
-    overscan: 1
-  })
-
-  const virtualItems = rowVirtualizer.getVirtualItems()
-
-  React.useEffect(() => {
-    for (const virtualRow of virtualItems) {
-      const item = memesRefs[virtualRow.index]
-
-      if (item && item.ref.current) {
-        observerRef.current.observe(item.ref.current)
+      if (item?.ref.current) {
+        observer.observe(item.ref.current)
       }
     }
 
-    const observer = observerRef.current
-
     return () => {
-      return observer.disconnect()
+      observer.disconnect()
     }
-  }, [memesRefs, virtualItems])
+  }, [memesWithRefs, virtualItemsKey, setActiveDebouncer, rowVirtualizer])
 
   React.useEffect(() => {
-    const [item] = virtualItems.toReversed()
+    const items = rowVirtualizer.getVirtualItems()
+    const [lastItem] = items.toReversed()
 
-    if (!item) {
+    if (!lastItem) {
       return
     }
 
     if (
-      memesRefs.length - 3 < item.index &&
+      memesWithRefs.length - 3 < lastItem.index &&
       infiniteReels.hasNextPage &&
       !infiniteReels.isFetchingNextPage
     ) {
@@ -268,16 +285,17 @@ export const MemeReels = () => {
   }, [
     infiniteReels.hasNextPage,
     infiniteReels.fetchNextPage,
-    memesRefs.length,
+    memesWithRefs.length,
     infiniteReels.isFetchingNextPage,
-    virtualItems,
-    infiniteReels
+    virtualItemsKey,
+    infiniteReels,
+    rowVirtualizer
   ])
 
   return (
     <div className="flex flex-col h-dvh overflow-hidden">
       <div
-        className="size-full md:aspect-[9/16] bg-muted lg:border-x border-muted md:max-w-md mx-auto flex flex-col overflow-auto snap-y snap-mandatory no-scrollbar overscroll-contain"
+        className="size-full md:aspect-9/16 bg-muted lg:border-x border-muted md:max-w-md mx-auto flex flex-col overflow-auto snap-y snap-mandatory no-scrollbar overscroll-contain"
         ref={parentRef}
       >
         <div
@@ -287,8 +305,8 @@ export const MemeReels = () => {
             width: '100%'
           }}
         >
-          {virtualItems.map((virtualRow) => {
-            const item = memesRefs[virtualRow.index]
+          {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+            const item = memesWithRefs[virtualRow.index]
 
             if (!item) {
               return null

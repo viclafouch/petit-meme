@@ -257,13 +257,13 @@ Dédupliquer d'abord, refactorer ensuite, Tailwind en dernier (mécanique). Tout
 
 Après le refactoring (étape 7) pour ne pas optimiser du code qui va changer.
 
-- [ ] HIGH : `createRef` dans `useMemo` pour Reels → Map persistante de refs
+- [x] HIGH : `createRef` dans `useMemo` pour Reels → Map persistante de refs
 - [x] MEDIUM : dépendances inutiles dans les `useMemo` (`user` dans meme-list-item et toggle-like-button)
-- [ ] MEDIUM : guard SSR pour `IntersectionObserver` (initialiser dans useEffect, pas useRef)
+- [x] MEDIUM : guard SSR pour `IntersectionObserver` (initialiser dans useEffect, pas useRef)
 - [x] MEDIUM : cleanup FFmpeg dans `useVideoProcessor` (ajouter `query.data` / `ffmpeg` aux deps)
-- [ ] MEDIUM : optimiser `DialogProvider` → selectors Zustand
-- [ ] MEDIUM : `virtualItems` comme dépendance de useEffect → dériver une dépendance stable
-- [ ] LOW : stabiliser les callbacks passés aux composants memo (`handleSelect`, `handleUnSelect`)
+- [x] MEDIUM : optimiser `DialogProvider` → selectors Zustand (non applicable — `react-hooks/static-components` interdit, et les 3 valeurs changent ensemble)
+- [x] MEDIUM : `virtualItems` comme dépendance de useEffect → dériver une dépendance stable
+- [x] LOW : stabiliser les callbacks passés aux composants memo (React Compiler gère automatiquement)
 
 ---
 

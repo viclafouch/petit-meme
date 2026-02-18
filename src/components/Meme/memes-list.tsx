@@ -61,8 +61,12 @@ export const MemesList = ({
     setSelectedId(meme.id)
   }
 
-  const handleUnSelect = () => {
+  const handleDeselect = () => {
     setSelectedId(null)
+  }
+
+  const handleCloseStudio = () => {
+    setStudioMemeSelected(null)
   }
 
   const selectedMeme = memes.find((meme) => {
@@ -79,7 +83,7 @@ export const MemesList = ({
             '--cols': `repeat(${columnGridCount}, 1fr)`
           } as React.CSSProperties
         }
-        className="grid gap-5 grid-cols-2 lg:[grid-template-columns:var(--cols)]"
+        className="grid gap-5 grid-cols-2 lg:grid-cols-(--cols)"
       >
         {memes.map((meme) => {
           return (
@@ -99,7 +103,7 @@ export const MemesList = ({
           <PlayerDialog
             meme={selectedMeme}
             layoutContext={layoutContext}
-            onClose={handleUnSelect}
+            onClose={handleDeselect}
             onOpenStudio={setStudioMemeSelected}
           />
         ) : null}
@@ -110,9 +114,7 @@ export const MemesList = ({
             <StudioDialog
               meme={studioMemeSelected}
               open
-              onOpenChange={() => {
-                setStudioMemeSelected(null)
-              }}
+              onOpenChange={handleCloseStudio}
             />
           </React.Suspense>
         ) : null}

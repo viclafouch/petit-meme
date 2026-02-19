@@ -27,7 +27,7 @@ const AUTH_ERRORS_FR = {
   FAILED_TO_UNLINK_LAST_ACCOUNT: 'Impossible de dissocier votre dernier compte',
   ACCOUNT_NOT_FOUND: 'Compte introuvable',
   USER_ALREADY_HAS_PASSWORD: 'Vous avez déjà un mot de passe'
-} as const satisfies Record<AuthErrorCode, string>
+} as const satisfies Partial<Record<AuthErrorCode, string>>
 
 export function getAuthErrorMessage(code: string) {
   const message = AUTH_ERRORS_FR[code as keyof typeof AUTH_ERRORS_FR]

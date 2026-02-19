@@ -1,7 +1,7 @@
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { admin } from 'better-auth/plugins'
-import { reactStartCookies } from 'better-auth/react-start'
+import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '@/constants/auth'
 import {
   FIVE_MINUTES_IN_SECONDS,
@@ -140,7 +140,7 @@ const getAuthConfig = createServerOnlyFn(() => {
     trustedOrigins: [clientEnv.VITE_SITE_URL],
     plugins: [
       admin(),
-      reactStartCookies(),
+      tanstackStartCookies(),
       stripe({
         stripeClient,
         stripeWebhookSecret: serverEnv.STRIPE_WEBHOOK_SECRET,

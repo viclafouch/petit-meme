@@ -317,9 +317,8 @@ Items de polish qui améliorent la qualité globale sans urgence.
 En dernier car nécessite une codebase stable et testée. Chaque update peut casser des choses.
 
 - [x] Consolider `motion`/`framer-motion` → `motion` uniquement (remplacer tous les imports `framer-motion` → `motion/react`) — fait en étape 9
-- [ ] Mettre à jour `better-auth` 1.3.12 → 1.4.18 (JWE cookies → tous les utilisateurs déconnectés, tester tout le flow auth)
-- [ ] Mettre à jour `stripe` 18.5.0 → 19.3.1 (compatible better-auth/stripe, vérifier `discount.coupon` → `discount.source.coupon`)
-- [ ] Évaluer `stripe` 19.x → 20.x (breaking changes limités si pas d'API V2)
+- [x] Mettre à jour `better-auth` 1.3.12 → 1.4.18 (`reactStartCookies` → `tanstackStartCookies`, JWE cookies par défaut, nouveaux error codes)
+- [x] Mettre à jour `stripe` 18.5.0 → 20.3.1 + `@better-auth/stripe` 1.4.18 (apiVersion `2026-01-28.clover`, strip `limits` incompatible avec sérialisation TanStack)
 
 ---
 

@@ -22,7 +22,13 @@ export const findActiveSubscription = createServerOnlyFn(
         )
       })
 
-      return activeSubscription ?? null
+      if (!activeSubscription) {
+        return null
+      }
+
+      const { limits: unusedLimits, ...rest } = activeSubscription
+
+      return rest
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error)

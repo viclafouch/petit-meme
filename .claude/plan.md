@@ -196,7 +196,7 @@ Conformité légale. Les CRITICAL sont des obligations réglementaires.
 ### MEDIUM
 
 - [ ] Ajouter l'édition de profil (nom, email)
-- [ ] Compléter le flux de suppression (Mixpanel, Stripe, anonymiser `submittedBy` sur les memes)
+- [x] Compléter le flux de suppression (Mixpanel, Stripe, anonymiser `submittedBy` sur les memes)
 - [ ] Conditionner les `console.log` de PII à `NODE_ENV`
 - [ ] Vérifier et documenter les DPA signés avec chaque sous-traitant (Stripe, Resend, Bunny, Algolia, Mixpanel, Railway)
 

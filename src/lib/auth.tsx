@@ -37,7 +37,21 @@ const getAuthConfig = createServerOnlyFn(() => {
     },
     user: {
       deleteUser: {
-        enabled: true
+        enabled: true,
+        beforeDelete: async (user) => {
+          const dbUser = await prismaClient.user.findUnique({
+            where: { id: user.id },
+            select: { stripeCustomerId: true }
+          })
+
+          if (dbUser?.stripeCustomerId) {
+            await stripeClient.customers.del(dbUser.stripeCustomerId)
+          }
+
+          await prismaClient.subscription.deleteMany({
+            where: { referenceId: user.id }
+          })
+        }
       }
     },
     emailAndPassword: {

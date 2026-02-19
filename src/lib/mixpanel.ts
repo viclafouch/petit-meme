@@ -45,4 +45,13 @@ function peopleSet(...args: Parameters<typeof mixpanel.people.set>) {
   mixpanel.people.set(...args)
 }
 
-export { identify, initMixpanel, peopleSet, track }
+function deleteMixpanelUser() {
+  if (!isInitialized) {
+    return
+  }
+
+  mixpanel.people.delete_user()
+  mixpanel.reset()
+}
+
+export { deleteMixpanelUser, identify, initMixpanel, peopleSet, track }

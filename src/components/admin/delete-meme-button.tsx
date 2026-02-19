@@ -3,7 +3,10 @@ import { toast } from 'sonner'
 import ConfirmAlert from '@/components/confirm-alert'
 import { Button } from '@/components/ui/button'
 import type { Meme } from '@/db/generated/prisma/client'
-import { getAdminMemesListQueryOpts, getMemeByIdQueryOpts } from '@/lib/queries'
+import {
+  getAdminMemeByIdQueryOpts,
+  getAdminMemesListQueryOpts
+} from '@/lib/queries'
 import { deleteMemeById } from '@/server/admin'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
@@ -37,7 +40,7 @@ export const DeleteMemeButton = ({
         queryKey: getAdminMemesListQueryOpts.all,
         exact: false
       })
-      await queryClient.removeQueries(getMemeByIdQueryOpts(meme.id))
+      await queryClient.removeQueries(getAdminMemeByIdQueryOpts(meme.id))
       void router.navigate({ to: '/admin/library' })
     }
   })

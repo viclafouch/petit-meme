@@ -16,7 +16,10 @@ import {
 } from '@/components/ui/dialog'
 import { MemeStatusMeta } from '@/constants/meme'
 import { formatViewCount } from '@/helpers/format'
-import { getAdminMemesListQueryOpts, getMemeByIdQueryOpts } from '@/lib/queries'
+import {
+  getAdminMemeByIdQueryOpts,
+  getAdminMemesListQueryOpts
+} from '@/lib/queries'
 import { buildMemeSeo } from '@/lib/seo'
 import { MemeForm } from '@/routes/admin/library/-components/meme-form'
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
@@ -27,7 +30,7 @@ const RouteComponent = () => {
   const queryClient = useQueryClient()
   const router = useRouter()
   const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false)
-  const memeQuery = useSuspenseQuery(getMemeByIdQueryOpts(memeId))
+  const memeQuery = useSuspenseQuery(getAdminMemeByIdQueryOpts(memeId))
 
   const handleEditSuccess = () => {
     setIsEditDialogOpen(false)
@@ -35,7 +38,9 @@ const RouteComponent = () => {
       queryKey: getAdminMemesListQueryOpts.all,
       exact: false
     })
-    void queryClient.invalidateQueries(getMemeByIdQueryOpts(memeQuery.data.id))
+    void queryClient.invalidateQueries(
+      getAdminMemeByIdQueryOpts(memeQuery.data.id)
+    )
     void router.invalidate()
   }
 
@@ -139,7 +144,7 @@ export const Route = createFileRoute('/admin/library/$memeId')({
   component: RouteComponent,
   loader: async ({ params, context }) => {
     const meme = await context.queryClient.ensureQueryData(
-      getMemeByIdQueryOpts(params.memeId)
+      getAdminMemeByIdQueryOpts(params.memeId)
     )
 
     return {

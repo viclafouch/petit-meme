@@ -43,16 +43,19 @@ export const MemeStatusMeta = {
   }
 }
 
+const CATEGORY_SLUG_REGEX = /^[\da-z-]{1,60}$/
+
 export const MEMES_SEARCH_SCHEMA = z.object({
   // eslint-disable-next-line unicorn/no-useless-undefined
-  query: z.string().optional().catch(undefined),
-  page: z.coerce.number().optional().catch(1),
+  query: z.string().max(200).optional().catch(undefined),
+  page: z.coerce.number().int().min(1).max(1000).optional().catch(1),
   status: z.enum(MemeStatus).optional()
 })
 
 export const MEMES_FILTERS_SCHEMA = z.object({
   ...MEMES_SEARCH_SCHEMA.shape,
-  category: z.string().optional()
+  // eslint-disable-next-line unicorn/no-useless-undefined
+  category: z.string().regex(CATEGORY_SLUG_REGEX).optional().catch(undefined)
 })
 
 export type MemeWithVideo = Prisma.MemeGetPayload<{

@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { prismaClient } from '@/db'
 import {
-  algoliaClient,
+  algoliaAdminClient,
   algoliaIndexName,
   memeToAlgoliaRecord
 } from '@/lib/algolia'
@@ -16,7 +16,7 @@ async function reindexMemes() {
     }
   })
 
-  const response = await algoliaClient.replaceAllObjects({
+  const response = await algoliaAdminClient.replaceAllObjects({
     indexName: algoliaIndexName,
     objects: memes.map(memeToAlgoliaRecord)
   })

@@ -13,7 +13,13 @@ import {
 } from '@/constants/time'
 import { prismaClient } from '@/db'
 import { MemeStatus } from '@/db/generated/prisma/enums'
-import { algoliaClient, algoliaIndexName } from '@/lib/algolia'
+import {
+  ALGOLIA_SEARCH_PARAMS_BASE,
+  algoliaIndexName,
+  algoliaSearchClient,
+  normalizeAlgoliaHit,
+  withAlgoliaCache
+} from '@/lib/algolia'
 import { buildVideoOriginalUrl } from '@/lib/bunny'
 import { authUserRequiredMiddleware } from '@/server/user-auth'
 import { notFound } from '@tanstack/react-router'
@@ -26,8 +32,7 @@ function buildMemeFilters(category: string | undefined, thirtyDaysAgo: number) {
   if (category === NEWS_CATEGORY_SLUG) {
     filters.push(`publishedAtTime >= ${thirtyDaysAgo}`)
   } else if (category) {
-    const sanitizedCategory = category.replaceAll('"', '')
-    filters.push(`categorySlugs:"${sanitizedCategory}"`)
+    filters.push(`categorySlugs:"${category}"`)
   }
 
   return filters.join(' AND ')
@@ -40,7 +45,8 @@ export const getMemeById = createServerFn({ method: 'GET' })
   .handler(async ({ data: memeId }) => {
     const meme = await prismaClient.meme.findUnique({
       where: {
-        id: memeId
+        id: memeId,
+        status: MemeStatus.PUBLISHED
       },
       include: MEME_FULL_INCLUDE
     })
@@ -79,52 +85,55 @@ export const getVideoStatusById = createServerFn({ method: 'GET' })
 export const getMemes = createServerFn({ method: 'GET' })
   .inputValidator(MEMES_FILTERS_SCHEMA)
   .handler(async ({ data }) => {
-    const thirtyDaysAgo = Date.now() - THIRTY_DAYS_MS
-    const filters = buildMemeFilters(data.category, thirtyDaysAgo)
+    const cacheKey = `memes:${data.query ?? ''}:${data.page ?? 1}:${data.category ?? ''}`
 
-    const response = await algoliaClient.searchSingleIndex<
-      MemeWithVideo & MemeWithCategories
-    >({
-      indexName: algoliaIndexName,
-      searchParams: {
+    return withAlgoliaCache(cacheKey, async () => {
+      const thirtyDaysAgo = Date.now() - THIRTY_DAYS_MS
+      const filters = buildMemeFilters(data.category, thirtyDaysAgo)
+
+      const response = await algoliaSearchClient.searchSingleIndex<
+        MemeWithVideo & MemeWithCategories
+      >({
+        indexName: algoliaIndexName,
+        searchParams: {
+          query: data.query,
+          page: data.page ? data.page - 1 : 0,
+          hitsPerPage: 30,
+          filters,
+          ...ALGOLIA_SEARCH_PARAMS_BASE
+        }
+      })
+
+      return {
+        memes: response.hits.map(normalizeAlgoliaHit),
         query: data.query,
-        page: data.page ? data.page - 1 : 0,
-        hitsPerPage: 30,
-        filters
+        page: response.page,
+        totalPages: response.nbPages
       }
     })
-
-    return {
-      memes: response.hits.map((hit) => {
-        return {
-          ...hit,
-          createdAt: new Date(hit.createdAt),
-          updatedAt: new Date(hit.updatedAt),
-          publishedAt: hit.publishedAt ? new Date(hit.publishedAt) : null
-        } satisfies MemeWithVideo & MemeWithCategories
-      }),
-      query: data.query,
-      page: response.page,
-      totalPages: response.nbPages
-    }
   })
 
 export const getRecentCountMemes = createServerFn({ method: 'GET' }).handler(
   async () => {
-    const thirtyDaysAgo = Date.now() - THIRTY_DAYS_MS
+    return withAlgoliaCache('recent-count', async () => {
+      const thirtyDaysAgo = Date.now() - THIRTY_DAYS_MS
 
-    const countResult = await algoliaClient.searchSingleIndex({
-      indexName: algoliaIndexName,
-      searchParams: {
-        filters: [
-          `status:${MemeStatus.PUBLISHED}`,
-          `publishedAtTime >= ${thirtyDaysAgo}`
-        ].join(' AND '),
-        hitsPerPage: 0
-      }
+      const countResult = await algoliaSearchClient.searchSingleIndex({
+        indexName: algoliaIndexName,
+        searchParams: {
+          filters: [
+            `status:${MemeStatus.PUBLISHED}`,
+            `publishedAtTime >= ${thirtyDaysAgo}`
+          ].join(' AND '),
+          hitsPerPage: 0,
+          attributesToRetrieve: [],
+          attributesToHighlight: [],
+          attributesToSnippet: []
+        }
+      })
+
+      return countResult.nbHits ?? 0
     })
-
-    return countResult.nbHits ?? 0
   }
 )
 
@@ -181,7 +190,8 @@ export const shareMeme = createServerFn({ method: 'GET' })
   .handler(async ({ data: memeId }) => {
     const meme = await prismaClient.meme.findUnique({
       where: {
-        id: memeId
+        id: memeId,
+        status: MemeStatus.PUBLISHED
       },
       select: {
         video: {

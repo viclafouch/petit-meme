@@ -47,7 +47,6 @@ import {
   ClientOnly,
   createFileRoute,
   Link,
-  notFound,
   useLinkProps,
   useRouteContext,
   useRouter
@@ -325,11 +324,6 @@ export const Route = createFileRoute('/_public__root/_default/memes/$memeId')({
     )
 
     const originalUrl = buildVideoOriginalUrl(meme.video.bunnyId)
-
-    if (meme.status !== 'PUBLISHED') {
-      throw notFound()
-    }
-
     const nextRandomMeme = getRandomMeme({ data: meme.id })
 
     return {

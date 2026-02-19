@@ -2,7 +2,7 @@
 /* eslint-disable no-await-in-loop */
 import { prismaClient } from '@/db'
 import {
-  algoliaClient,
+  algoliaAdminClient,
   algoliaIndexName,
   memeToAlgoliaRecord
 } from '@/lib/algolia'
@@ -35,7 +35,7 @@ const task = async () => {
     cursor = memes.at(-1)?.id
   }
 
-  await algoliaClient.replaceAllObjects({
+  await algoliaAdminClient.replaceAllObjects({
     indexName: algoliaIndexName,
     objects: records
   })

@@ -2,7 +2,7 @@ import type { MemesFilters } from '@/constants/meme'
 import { NEWS_CATEGORY_SLUG } from '@/constants/meme'
 import { MINUTE } from '@/constants/time'
 import type { Meme, Video } from '@/db/generated/prisma/client'
-import { getAdminMemes } from '@/server/admin'
+import { getAdminMemeById, getAdminMemes } from '@/server/admin'
 import { getCategories } from '@/server/categories'
 import { getActiveSubscription } from '@/server/customer'
 import {
@@ -20,9 +20,10 @@ import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
 export const getMemesListQueryOpts = (filters: MemesFilters) => {
   return queryOptions({
     queryKey: [...getMemesListQueryOpts.all, filters],
-    queryFn: async () => {
+    queryFn: () => {
       return getMemes({ data: filters })
-    }
+    },
+    staleTime: 5 * MINUTE
   })
 }
 
@@ -31,7 +32,7 @@ getMemesListQueryOpts.all = ['memes-list'] as const
 export const getBestMemesQueryOpts = () => {
   return queryOptions({
     queryKey: [...getBestMemesQueryOpts.all],
-    queryFn: async () => {
+    queryFn: () => {
       return getBestMemes()
     },
     staleTime: 5 * MINUTE
@@ -43,7 +44,7 @@ getBestMemesQueryOpts.all = ['best-memes'] as const
 export const getMemeByIdQueryOpts = (memeId: Meme['id']) => {
   return queryOptions({
     queryKey: [...getMemeByIdQueryOpts.all, memeId],
-    queryFn: async () => {
+    queryFn: () => {
       return getMemeById({ data: memeId })
     },
     staleTime: 5 * MINUTE
@@ -55,7 +56,7 @@ getMemeByIdQueryOpts.all = ['meme'] as const
 export const getVideoStatusByIdQueryOpts = (videoId: Video['id']) => {
   return queryOptions({
     queryKey: [...getVideoStatusByIdQueryOpts.all, videoId],
-    queryFn: async () => {
+    queryFn: () => {
       return getVideoStatusById({ data: videoId })
     }
   })
@@ -66,7 +67,7 @@ getVideoStatusByIdQueryOpts.all = ['video-status'] as const
 export const getAuthUserQueryOpts = () => {
   return queryOptions({
     queryKey: [...getAuthUserQueryOpts.all],
-    queryFn: async () => {
+    queryFn: () => {
       return getAuthUser()
     },
     staleTime: 5 * MINUTE
@@ -78,7 +79,7 @@ getAuthUserQueryOpts.all = ['auth-user'] as const
 export const getFavoritesMemesQueryOpts = () => {
   return queryOptions({
     queryKey: [...getFavoritesMemesQueryOpts.all],
-    queryFn: async () => {
+    queryFn: () => {
       return getFavoritesMemes()
     },
     staleTime: 5 * MINUTE
@@ -114,7 +115,7 @@ getCategoriesListQueryOpts.all = ['categories-list'] as const
 export const getRecentCountMemesQueryOpts = () => {
   return queryOptions({
     queryKey: [...getRecentCountMemesQueryOpts.all],
-    queryFn: async () => {
+    queryFn: () => {
       return getRecentCountMemes()
     },
     staleTime: 10 * MINUTE
@@ -123,12 +124,25 @@ export const getRecentCountMemesQueryOpts = () => {
 
 getRecentCountMemesQueryOpts.all = ['recent-count-memes'] as const
 
+export const getAdminMemeByIdQueryOpts = (memeId: Meme['id']) => {
+  return queryOptions({
+    queryKey: [...getAdminMemeByIdQueryOpts.all, memeId],
+    queryFn: () => {
+      return getAdminMemeById({ data: memeId })
+    },
+    staleTime: 2 * MINUTE
+  })
+}
+
+getAdminMemeByIdQueryOpts.all = ['admin-meme'] as const
+
 export const getAdminMemesListQueryOpts = (filters: MemesFilters) => {
   return queryOptions({
     queryKey: [...getAdminMemesListQueryOpts.all, filters],
-    queryFn: async () => {
+    queryFn: () => {
       return getAdminMemes({ data: filters })
-    }
+    },
+    staleTime: 2 * MINUTE
   })
 }
 
@@ -137,7 +151,7 @@ getAdminMemesListQueryOpts.all = ['admin-memes-list'] as const
 export const getActiveSubscriptionQueryOpts = () => {
   return queryOptions({
     queryKey: [...getActiveSubscriptionQueryOpts.all],
-    queryFn: async () => {
+    queryFn: () => {
       return getActiveSubscription()
     },
     staleTime: 5 * MINUTE
@@ -150,11 +164,7 @@ export const getInfiniteReelsQueryOpts = (excludedIds: string[] = []) => {
   return infiniteQueryOptions({
     queryKey: [...getInfiniteReelsQueryOpts.all],
     queryFn: ({ pageParam }) => {
-      return getInfiniteReels({
-        data: {
-          excludedIds: pageParam
-        }
-      })
+      return getInfiniteReels({ data: { excludedIds: pageParam } })
     },
     initialPageParam: excludedIds,
     getNextPageParam: (lastPage) => {

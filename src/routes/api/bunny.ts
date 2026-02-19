@@ -2,8 +2,9 @@ import { z } from 'zod'
 import { MEME_FULL_INCLUDE } from '@/constants/meme'
 import { prismaClient } from '@/db'
 import {
-  algoliaClient,
+  algoliaAdminClient,
   algoliaIndexName,
+  invalidateAlgoliaCache,
   memeToAlgoliaRecord,
   safeAlgoliaOp
 } from '@/lib/algolia'
@@ -45,12 +46,14 @@ export const Route = createFileRoute('/api/bunny')({
 
           if (meme) {
             await safeAlgoliaOp(
-              algoliaClient.partialUpdateObject({
+              algoliaAdminClient.partialUpdateObject({
                 indexName: algoliaIndexName,
                 objectID: meme.id,
                 attributesToUpdate: memeToAlgoliaRecord(meme)
               })
             )
+
+            invalidateAlgoliaCache()
           }
 
           // eslint-disable-next-line no-console
@@ -60,7 +63,7 @@ export const Route = createFileRoute('/api/bunny')({
           })
 
           return Response.json({ success: true })
-        } catch (_error) {
+        } catch {
           // eslint-disable-next-line no-console
           console.log('Mise à jour non effectuée', {
             videoId: result.VideoGuid,

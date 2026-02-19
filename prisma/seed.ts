@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { prismaClient } from '@/db'
 import { clientEnv } from '@/env/client'
 import {
-  algoliaClient,
+  algoliaAdminClient,
   algoliaIndexName,
   memeToAlgoliaRecord
 } from '@/lib/algolia'
@@ -67,7 +67,7 @@ const createMemeFromTwitterUrl = async (url: string, title: string) => {
     }
   })
 
-  await algoliaClient
+  await algoliaAdminClient
     .saveObject({
       indexName: algoliaIndexName,
       body: memeToAlgoliaRecord(meme)
@@ -90,7 +90,7 @@ const seed = async () => {
   await prismaClient.user.deleteMany({})
 
   console.log('Deleting all objects from Algolia index...')
-  await algoliaClient.replaceAllObjects({
+  await algoliaAdminClient.replaceAllObjects({
     indexName: algoliaIndexName,
     objects: []
   })

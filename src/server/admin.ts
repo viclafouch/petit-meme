@@ -12,10 +12,15 @@ import {
 import { prismaClient } from '@/db'
 import { MemeStatus } from '@/db/generated/prisma/enums'
 import {
-  algoliaClient,
+  ALGOLIA_SEARCH_PARAMS_BASE,
+  algoliaAdminClient,
   algoliaIndexName,
+  algoliaSearchClient,
+  invalidateAlgoliaCache,
   memeToAlgoliaRecord,
-  safeAlgoliaOp
+  normalizeAlgoliaHit,
+  safeAlgoliaOp,
+  withAlgoliaCache
 } from '@/lib/algolia'
 import { auth } from '@/lib/auth'
 import { createVideo, deleteVideo, uploadVideo } from '@/lib/bunny'
@@ -25,8 +30,29 @@ import {
   getTweetMedia
 } from '@/lib/react-tweet'
 import { adminRequiredMiddleware } from '@/server/user-auth'
+import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
+
+export const getAdminMemeById = createServerFn({ method: 'GET' })
+  .inputValidator((data) => {
+    return z.string().parse(data)
+  })
+  .middleware([adminRequiredMiddleware])
+  .handler(async ({ data: memeId }) => {
+    const meme = await prismaClient.meme.findUnique({
+      where: {
+        id: memeId
+      },
+      include: MEME_FULL_INCLUDE
+    })
+
+    if (!meme) {
+      throw notFound()
+    }
+
+    return meme
+  })
 
 export const getListUsers = createServerFn({ method: 'GET' })
   .middleware([adminRequiredMiddleware])
@@ -113,16 +139,14 @@ export const editMeme = createServerFn({ method: 'POST' })
     const publishedAt = resolvePublishedAt(values.status, meme)
     const viewCount = resolveInitialViewCount(values.status, meme)
 
-    const currentCategoryIds = meme.categories.map((relation) => {
-      return relation.categoryId
+    const currentCategoryIds = meme.categories.map(({ categoryId }) => {
+      return categoryId
     })
-
-    const toAdd = values.categoryIds.filter((id) => {
-      return !currentCategoryIds.includes(id)
+    const toAdd = values.categoryIds.filter((categoryId) => {
+      return !currentCategoryIds.includes(categoryId)
     })
-
-    const toRemove = currentCategoryIds.filter((id) => {
-      return !values.categoryIds.includes(id)
+    const toRemove = currentCategoryIds.filter((categoryId) => {
+      return !values.categoryIds.includes(categoryId)
     })
 
     const memeUpdated = await prismaClient.meme.update({
@@ -155,12 +179,14 @@ export const editMeme = createServerFn({ method: 'POST' })
     })
 
     await safeAlgoliaOp(
-      algoliaClient.partialUpdateObject({
+      algoliaAdminClient.partialUpdateObject({
         indexName: algoliaIndexName,
         objectID: meme.id,
         attributesToUpdate: memeToAlgoliaRecord(memeUpdated)
       })
     )
+
+    invalidateAlgoliaCache()
 
     return { id: memeUpdated.id }
   })
@@ -183,7 +209,7 @@ export const deleteMemeById = createServerFn({ method: 'POST' })
     await Promise.all([
       prismaClient.video.delete({ where: { id: meme.videoId } }),
       safeAlgoliaOp(
-        algoliaClient.deleteObject({
+        algoliaAdminClient.deleteObject({
           indexName: algoliaIndexName,
           objectID: meme.id
         })
@@ -193,6 +219,8 @@ export const deleteMemeById = createServerFn({ method: 'POST' })
         console.error(error)
       })
     ])
+
+    invalidateAlgoliaCache()
 
     return { id: meme.id }
   })
@@ -230,13 +258,15 @@ async function createMemeWithVideo({
 
   await Promise.all([
     safeAlgoliaOp(
-      algoliaClient.saveObject({
+      algoliaAdminClient.saveObject({
         indexName: algoliaIndexName,
         body: memeToAlgoliaRecord(meme)
       })
     ),
     uploadVideo(videoId, buffer)
   ])
+
+  invalidateAlgoliaCache()
 
   return { id: meme.id }
 }
@@ -286,26 +316,31 @@ export const getAdminMemes = createServerFn({ method: 'GET' })
   .middleware([adminRequiredMiddleware])
   .inputValidator(MEMES_FILTERS_SCHEMA)
   .handler(async ({ data }) => {
-    const filters = data.status ? `status:${data.status}` : undefined
+    const cacheKey = `admin-memes:${data.query ?? ''}:${data.page ?? 1}:${data.status ?? ''}`
 
-    const response = await algoliaClient.searchSingleIndex<
-      MemeWithVideo & MemeWithCategories
-    >({
-      indexName: algoliaIndexName,
-      searchParams: {
+    return withAlgoliaCache(cacheKey, async () => {
+      const filters = data.status ? `status:${data.status}` : undefined
+
+      const response = await algoliaSearchClient.searchSingleIndex<
+        MemeWithVideo & MemeWithCategories
+      >({
+        indexName: algoliaIndexName,
+        searchParams: {
+          query: data.query,
+          page: data.page ? data.page - 1 : 0,
+          hitsPerPage: 30,
+          filters,
+          ...ALGOLIA_SEARCH_PARAMS_BASE
+        }
+      })
+
+      return {
+        memes: response.hits.map(normalizeAlgoliaHit),
         query: data.query,
-        page: data.page ? data.page - 1 : 0,
-        hitsPerPage: 30,
-        filters
+        page: response.page,
+        totalPages: response.nbPages
       }
     })
-
-    return {
-      memes: response.hits as (MemeWithVideo & MemeWithCategories)[],
-      query: data.query,
-      page: response.page,
-      totalPages: response.nbPages
-    }
   })
 
 export const removeUser = createServerFn({ method: 'POST' })

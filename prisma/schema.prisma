@@ -117,7 +117,9 @@ model User {
   banExpires DateTime?
   Meme       Meme[]
 
-  stripeCustomerId String?
+  stripeCustomerId  String?
+  termsAcceptedAt   DateTime? @map("terms_accepted_at")
+  privacyAcceptedAt DateTime? @map("privacy_accepted_at")
 
   @@map("user")
 }

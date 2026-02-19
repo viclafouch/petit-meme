@@ -137,6 +137,23 @@ const getAuthConfig = createServerOnlyFn(() => {
     advanced: {
       useSecureCookies: process.env.NODE_ENV === 'production'
     },
+    databaseHooks: {
+      user: {
+        create: {
+          before: async (user) => {
+            const now = new Date()
+
+            return {
+              data: {
+                ...user,
+                termsAcceptedAt: now,
+                privacyAcceptedAt: now
+              }
+            }
+          }
+        }
+      }
+    },
     trustedOrigins: [clientEnv.VITE_SITE_URL],
     plugins: [
       admin(),

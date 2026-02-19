@@ -185,7 +185,7 @@ Conformité légale. Les CRITICAL sont des obligations réglementaires.
 
 ### Audit post-implémentation (CRITICAL)
 
-- [ ] Stocker le consentement CGU en base — ajouter `termsAcceptedAt` + `privacyAcceptedAt` au modèle User, envoyer `acceptTerms` côté serveur (Art. 7(1) : pouvoir démontrer le consentement)
+- [x] Stocker le consentement CGU en base — ajouter `termsAcceptedAt` + `privacyAcceptedAt` au modèle User, envoyer `acceptTerms` côté serveur (Art. 7(1) : pouvoir démontrer le consentement)
 - [x] Compléter l'export de données — ajouter `generationCount`, `banned`/`banReason`/`banExpires`, `stripeCustomerId` (Art. 15 : droit d'accès complet)
 - [x] Corriger le wording privacy.md sur les tokens de vérification — préciser "24h après expiration" (cohérence doc/code)
 

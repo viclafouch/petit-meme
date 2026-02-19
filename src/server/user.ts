@@ -153,6 +153,8 @@ export const exportUserData = createServerFn({ method: 'GET' })
         role: true,
         generationCount: true,
         stripeCustomerId: true,
+        termsAcceptedAt: true,
+        privacyAcceptedAt: true,
         banned: true,
         banReason: true,
         banExpires: true,
@@ -206,6 +208,8 @@ export const exportUserData = createServerFn({ method: 'GET' })
         role: user.role,
         generationCount: user.generationCount,
         stripeCustomerId: user.stripeCustomerId,
+        termsAcceptedAt: user.termsAcceptedAt,
+        privacyAcceptedAt: user.privacyAcceptedAt,
         banned: user.banned,
         banReason: user.banReason,
         banExpires: user.banExpires

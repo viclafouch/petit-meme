@@ -1,6 +1,5 @@
 import { z } from 'zod'
 import { COOKIE_ANON_ID_KEY, COOKIE_CONSENT_KEY } from '@/constants/cookie'
-import type { MemeWithCategories, MemeWithVideo } from '@/constants/meme'
 import {
   MEME_FULL_INCLUDE,
   MEMES_FILTERS_SCHEMA,
@@ -13,6 +12,7 @@ import {
 } from '@/constants/time'
 import { prismaClient } from '@/db'
 import { MemeStatus } from '@/db/generated/prisma/enums'
+import type { AlgoliaMemeRecord } from '@/lib/algolia'
 import {
   ALGOLIA_SEARCH_PARAMS_BASE,
   algoliaIndexName,
@@ -91,18 +91,17 @@ export const getMemes = createServerFn({ method: 'GET' })
       const thirtyDaysAgo = Date.now() - THIRTY_DAYS_MS
       const filters = buildMemeFilters(data.category, thirtyDaysAgo)
 
-      const response = await algoliaSearchClient.searchSingleIndex<
-        MemeWithVideo & MemeWithCategories
-      >({
-        indexName: algoliaIndexName,
-        searchParams: {
-          query: data.query,
-          page: data.page ? data.page - 1 : 0,
-          hitsPerPage: 30,
-          filters,
-          ...ALGOLIA_SEARCH_PARAMS_BASE
-        }
-      })
+      const response =
+        await algoliaSearchClient.searchSingleIndex<AlgoliaMemeRecord>({
+          indexName: algoliaIndexName,
+          searchParams: {
+            query: data.query,
+            page: data.page ? data.page - 1 : 0,
+            hitsPerPage: 30,
+            filters,
+            ...ALGOLIA_SEARCH_PARAMS_BASE
+          }
+        })
 
       return {
         memes: response.hits.map(normalizeAlgoliaHit),

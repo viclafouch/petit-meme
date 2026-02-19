@@ -27,11 +27,12 @@ export async function safeAlgoliaOp<T>(promise: Promise<T>) {
   }
 }
 
-export const ALGOLIA_SEARCH_RETRIEVE = [
+const ALGOLIA_SEARCH_RETRIEVE = [
   '*',
   '-categoryTitles',
   '-categoryKeywords',
   '-categorySlugs',
+  '-categoryCount',
   '-createdAtTime',
   '-publishedAtTime',
   '-imageURL'
@@ -39,7 +40,16 @@ export const ALGOLIA_SEARCH_RETRIEVE = [
 
 export const ALGOLIA_SEARCH_PARAMS_BASE = {
   attributesToRetrieve: [...ALGOLIA_SEARCH_RETRIEVE],
-  attributesToHighlight: [] as string[],
+  attributesToSnippet: [] as string[]
+}
+
+export const ALGOLIA_ADMIN_SEARCH_PARAMS = {
+  attributesToRetrieve: [
+    '*',
+    '-createdAtTime',
+    '-publishedAtTime',
+    '-imageURL'
+  ],
   attributesToSnippet: [] as string[]
 }
 
@@ -111,13 +121,15 @@ export async function withAlgoliaCache<T>(
   return promise
 }
 
-export function normalizeAlgoliaHit(hit: MemeWithVideo & MemeWithCategories) {
+export type AlgoliaMemeRecord = ReturnType<typeof memeToAlgoliaRecord>
+
+export function normalizeAlgoliaHit(hit: AlgoliaMemeRecord): AlgoliaMemeRecord {
   return {
     ...hit,
     createdAt: new Date(hit.createdAt),
     updatedAt: new Date(hit.updatedAt),
     publishedAt: hit.publishedAt ? new Date(hit.publishedAt) : null
-  } satisfies MemeWithVideo & MemeWithCategories
+  }
 }
 
 export function memeToAlgoliaRecord(meme: MemeWithVideo & MemeWithCategories) {
@@ -132,11 +144,29 @@ export function memeToAlgoliaRecord(meme: MemeWithVideo & MemeWithCategories) {
   }
 
   return {
-    ...meme,
     objectID: meme.id,
+    id: meme.id,
+    title: meme.title,
+    description: meme.description,
+    keywords: meme.keywords,
+    status: meme.status,
+    viewCount: meme.viewCount,
+    tweetUrl: meme.tweetUrl,
+    videoId: meme.videoId,
+    submittedBy: meme.submittedBy,
+    createdAt: meme.createdAt,
+    updatedAt: meme.updatedAt,
+    publishedAt: meme.publishedAt,
+    video: {
+      id: meme.video.id,
+      bunnyId: meme.video.bunnyId,
+      duration: meme.video.duration,
+      bunnyStatus: meme.video.bunnyStatus
+    },
     categoryTitles,
     categoryKeywords,
     categorySlugs,
+    categoryCount: meme.categories.length,
     imageURL: buildVideoImageUrl(meme.video.bunnyId),
     createdAtTime: meme.createdAt.getTime(),
     publishedAtTime: meme.publishedAt?.getTime()

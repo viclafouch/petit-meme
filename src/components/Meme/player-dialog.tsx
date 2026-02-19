@@ -72,7 +72,7 @@ export const PlayerDialog = ({
       toast.success('Lien copié', {
         position: 'bottom-center'
       })
-    } catch (error) {
+    } catch {
       toast.error('Impossible de copier le lien')
     }
   }

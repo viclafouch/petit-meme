@@ -1,7 +1,6 @@
 import { filesize } from 'filesize'
 import { z } from 'zod'
 import { BUNNY_STATUS } from '@/constants/bunny'
-import type { MemeWithCategories, MemeWithVideo } from '@/constants/meme'
 import {
   DEFAULT_MEME_TITLE,
   MAX_SIZE_MEME_IN_BYTES,
@@ -11,8 +10,9 @@ import {
 } from '@/constants/meme'
 import { prismaClient } from '@/db'
 import { MemeStatus } from '@/db/generated/prisma/enums'
+import type { AlgoliaMemeRecord } from '@/lib/algolia'
 import {
-  ALGOLIA_SEARCH_PARAMS_BASE,
+  ALGOLIA_ADMIN_SEARCH_PARAMS,
   algoliaAdminClient,
   algoliaIndexName,
   algoliaSearchClient,
@@ -321,18 +321,17 @@ export const getAdminMemes = createServerFn({ method: 'GET' })
     return withAlgoliaCache(cacheKey, async () => {
       const filters = data.status ? `status:${data.status}` : undefined
 
-      const response = await algoliaSearchClient.searchSingleIndex<
-        MemeWithVideo & MemeWithCategories
-      >({
-        indexName: algoliaIndexName,
-        searchParams: {
-          query: data.query,
-          page: data.page ? data.page - 1 : 0,
-          hitsPerPage: 30,
-          filters,
-          ...ALGOLIA_SEARCH_PARAMS_BASE
-        }
-      })
+      const response =
+        await algoliaSearchClient.searchSingleIndex<AlgoliaMemeRecord>({
+          indexName: algoliaIndexName,
+          searchParams: {
+            query: data.query,
+            page: data.page ? data.page - 1 : 0,
+            hitsPerPage: 30,
+            filters,
+            ...ALGOLIA_ADMIN_SEARCH_PARAMS
+          }
+        })
 
       return {
         memes: response.hits.map(normalizeAlgoliaHit),

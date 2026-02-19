@@ -81,15 +81,17 @@ const OriginalVideoPreview = React.memo(({ bunnyId }: { bunnyId: string }) => {
   )
 })
 
+type StudioDialogParams = {
+  meme: MemeWithVideo
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+
 export const StudioDialog = ({
   meme,
   open,
   onOpenChange
-}: {
-  meme: MemeWithVideo
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}) => {
+}: StudioDialogParams) => {
   const { data: ffmpeg } = useVideoInitializer()
   const [text, setText] = React.useState('')
   const [textPosition, setTextPosition] = React.useState<'top' | 'bottom'>(

@@ -6,11 +6,10 @@ import { Skeleton } from '@/components/ui/skeleton'
 import {
   DEFAULT_MEME_TITLE,
   LEGACY_MEME_TITLE,
-  MemeStatusMeta,
-  type MemeWithCategories,
-  type MemeWithVideo
+  MemeStatusMeta
 } from '@/constants/meme'
 import { formatViewCount } from '@/helpers/format'
+import type { AlgoliaMemeRecord } from '@/lib/algolia'
 import { getVideoStatusByIdQueryOpts } from '@/lib/queries'
 import { cn } from '@/lib/utils'
 import { matchIsVideoPlayable } from '@/utils/video'
@@ -18,7 +17,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 
 export type AdminMemeListItemParams = {
-  meme: MemeWithVideo & MemeWithCategories
+  meme: AlgoliaMemeRecord
 }
 
 export const MemeListItem = React.memo(({ meme }: AdminMemeListItemParams) => {
@@ -91,10 +90,10 @@ export const MemeListItem = React.memo(({ meme }: AdminMemeListItemParams) => {
               {formatViewCount(meme.viewCount)}
             </span>
             {' • '}
-            {meme.categories.length > 0 ? (
+            {meme.categoryCount > 0 ? (
               <span className="text-muted-foreground text-xs">
-                {meme.categories.length} catégorie
-                {meme.categories.length > 1 ? 's' : ''}
+                {meme.categoryCount} catégorie
+                {meme.categoryCount > 1 ? 's' : ''}
               </span>
             ) : (
               <span className="text-destructive-foreground text-xs">

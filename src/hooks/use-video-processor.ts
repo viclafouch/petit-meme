@@ -1,7 +1,7 @@
 import React from 'react'
 import { toast } from 'sonner'
 import { StudioError } from '@/constants/error'
-import type { Meme } from '@/db/generated/prisma/client'
+import type { MemeWithVideo } from '@/constants/meme'
 import { shareMeme } from '@/server/meme'
 import { incrementGenerationCount } from '@/server/user'
 import { useShowDialog } from '@/stores/dialog.store'
@@ -20,7 +20,7 @@ type VideoProcessingOptions = {
 }
 
 type MutationBody = {
-  meme: Meme
+  meme: Pick<MemeWithVideo, 'id' | 'title'>
 } & VideoProcessingOptions
 
 const wrapText = (text: string, maxLength: number): string => {

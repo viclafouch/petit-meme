@@ -387,13 +387,13 @@ Quand le site sera bilingue : `["fr", "en"]`.
 
 ### Phase 0 — Corrections de bugs et config index (prioritaire)
 
-- [ ] Corriger `searchableAttributes` : remplacer `categories.category.title` → `categoryTitles`, `categories.category.keywords` → `categoryKeywords`, ajouter `description`, retirer `categorySlugs`
-- [ ] Ajouter `queryLanguages: ["fr"]`, `indexLanguages: ["fr"]`, `ignorePlurals: ["fr"]`, `removeStopWords: ["fr"]`
-- [ ] Passer `removeWordsIfNoResults` de `"none"` à `"lastWords"`
-- [ ] Corriger `attributesForFaceting` : ajouter `filterOnly()` sur `status` et `categorySlugs`, retirer `publishedAt`
-- [ ] Ajouter `viewCount` à `customRanking` (en premier, devant `publishedAtTime`)
-- [ ] Ajouter `viewCount` à `numericAttributesForFiltering`
-- [ ] Configurer `attributesToHighlight: ["title", "description"]` au niveau de l'index
+- [x] Corriger `searchableAttributes` : remplacer `categories.category.title` → `categoryTitles`, `categories.category.keywords` → `categoryKeywords`, ajouter `description`, retirer `categorySlugs`
+- [x] Ajouter `queryLanguages: ["fr"]`, `indexLanguages: ["fr"]`, `ignorePlurals: ["fr"]`, `removeStopWords: ["fr"]`
+- [x] Passer `removeWordsIfNoResults` de `"none"` à `"lastWords"`
+- [x] Corriger `attributesForFaceting` : ajouter `filterOnly()` sur `status` et `categorySlugs`, retirer `publishedAt`
+- [x] Ajouter `viewCount` à `customRanking` (en premier, devant `publishedAtTime`)
+- [x] Ajouter `viewCount` à `numericAttributesForFiltering`
+- [x] Configurer `attributesToHighlight: ["title", "description"]` au niveau de l'index
 - [x] Côté code : retirer `attributesToHighlight: []` de `ALGOLIA_SEARCH_PARAMS_BASE` (`src/lib/algolia.ts`) pour utiliser le setting index
 - [x] Slim `memeToAlgoliaRecord` : remplacer `...meme` spread par champs explicites — `AlgoliaMemeRecord` est un superset structurel de `MemeWithVideo` (inclut tous les champs Prisma + champs Algolia)
 - [x] Créer `AlgoliaMemeRecord = ReturnType<typeof memeToAlgoliaRecord>` pour typer les résultats de recherche
@@ -403,13 +403,27 @@ Quand le site sera bilingue : `["fr", "en"]`.
 
 #### 1.1 Activer le highlighting côté frontend
 
-- [ ] Modifier la réponse de `getMemes()` pour propager `_highlightResult` (`src/server/meme.ts`)
-- [ ] Modifier le composant d'affichage des memes pour utiliser `_highlightResult.title.value` quand disponible
-  - Sanitiser le HTML (les tags `<em>` d'Algolia sont sûrs mais vérifier l'échappement)
-  - Rendu : le terme recherché apparaît en `<em>` dans les titres — styler via CSS (`em { background: yellow; }` ou équivalent Tailwind)
-  - Afficher le highlight uniquement quand il y a une requête de recherche active
+**Décisions d'implémentation :**
+- Data flow : `getMemes()` extrait `hit._highlightResult.title.value` côté serveur → champ `highlightedTitle?: string` sur chaque meme
+- `highlightedTitle` rempli uniquement si `data.query` est truthy (pas de highlight en browse sans query)
+- `MemeListItem` reçoit prop optionnelle `highlightedTitle?: string` → rendu via `dangerouslySetInnerHTML` si présent
+- Pas de sanitisation HTML (titres contrôlés par l'admin)
+- Style : background jaune sur `<em>` tags
+- Description : pas de highlight (non affichée dans la liste)
 
-#### 1.2 Synonymes manuels (FR)
+Fichiers impactés :
+- `src/server/meme.ts` — extraire `highlightedTitle` dans le `.map()` de `getMemes()`
+- `src/lib/algolia.ts` — ajuster type si nécessaire
+- `src/components/Meme/meme-list-item.tsx` — prop `highlightedTitle` + rendu conditionnel
+- `src/components/Meme/memes-list.tsx` — propager la prop
+- CSS — styler `em { background: yellow; color: black; }`
+
+- [x] Modifier `getMemes()` pour extraire `highlightedTitle` de `_highlightResult.title.value` (`src/server/meme.ts`)
+- [x] Ajouter prop `highlightedTitle?: string` sur `MemeListItem` et rendu `dangerouslySetInnerHTML` (`src/components/Meme/meme-list-item.tsx`)
+- [x] Propager `highlightedTitle` depuis `MemesList` vers `MemeListItem` (`src/components/Meme/memes-list.tsx`)
+- [x] Styler les `<em>` avec background jaune (CSS/Tailwind)
+
+#### 1.2 Synonymes manuels (FR) — REPORTÉ
 
 - [ ] Ajouter les synonymes français dans le dashboard Algolia
   - `"mdr" <-> "lol" <-> "mort de rire"`
@@ -421,7 +435,7 @@ Quand le site sera bilingue : `["fr", "en"]`.
   - Ajouter les noms de personnalités avec variantes d'écriture
   - Impact : les synonymes single-word sont traités comme des matchs exacts grâce à `alternativesAsExact`
 
-#### 1.3 Synonymes anglais (préparation i18n)
+#### 1.3 Synonymes anglais (préparation i18n) — REPORTÉ (dépend du passage bilingue)
 
 - [ ] Ajouter les synonymes anglais quand le site sera bilingue
   - `"lmao" <-> "lol" <-> "rofl"`
@@ -432,9 +446,8 @@ Quand le site sera bilingue : `["fr", "en"]`.
 
 #### 1.4 Slimmer `memeToAlgoliaRecord`
 
-- [ ] Supprimer le `...meme` spread dans `memeToAlgoliaRecord` (`src/lib/algolia.ts`)
-  - Ne stocker que les champs nécessaires : `objectID`, `title`, `description`, `keywords`, `status`, `viewCount`, `tweetUrl`, `createdAt`, `updatedAt`, `publishedAt`, `video.bunnyId`, `video.duration`, `categoryTitles`, `categoryKeywords`, `categorySlugs`, `imageURL`, `createdAtTime`, `publishedAtTime`
-  - Supprimer tout le reste (champs Prisma internes, relations complètes)
+- [x] Supprimer le `...meme` spread dans `memeToAlgoliaRecord` (`src/lib/algolia.ts`)
+  - Champs explicites listés — le record est un superset structurel de `MemeWithVideo` (inclut `videoId`, `submittedBy`, `video.id`, `video.bunnyStatus` pour la compatibilité de types avec les composants)
   - Impact : index plus léger, moins de bande passante
 
 ### Phase 2 — Algolia Events & Insights (fondation, effort moyen)

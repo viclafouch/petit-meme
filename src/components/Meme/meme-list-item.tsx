@@ -29,6 +29,7 @@ import { Link, useRouteContext } from '@tanstack/react-router'
 
 export type MemeListItemParams = {
   meme: MemeWithVideo
+  highlightedTitle?: string
   layoutContext: string
   size: keyof typeof sizes
   onPlayClick: (meme: MemeWithVideo) => void
@@ -96,6 +97,7 @@ const FavoriteItemGuard = ({ meme }: { meme: MemeWithVideo }) => {
 export const MemeListItem = React.memo(
   ({
     meme,
+    highlightedTitle,
     onPlayClick,
     layoutContext,
     onOpenStudioClick,
@@ -139,7 +141,15 @@ export const MemeListItem = React.memo(
               title={meme.title}
               className={cn('line-clamp-1 text-primary', sizes[size].title)}
             >
-              {meme.title}
+              {highlightedTitle ? (
+                <span
+                  className="[&>em]:not-italic [&>em]:bg-yellow-200 [&>em]:text-black [&>em]:rounded-sm"
+                  // eslint-disable-next-line react/no-danger
+                  dangerouslySetInnerHTML={{ __html: highlightedTitle }}
+                />
+              ) : (
+                meme.title
+              )}
             </Link>
             <div className="flex flex-row items-center gap-1.5 text-muted-foreground">
               <span className={cn(sizes[size].views)}>

@@ -17,6 +17,7 @@ import {
   ALGOLIA_SEARCH_PARAMS_BASE,
   algoliaIndexName,
   algoliaSearchClient,
+  getHighlightedTitle,
   normalizeAlgoliaHit,
   withAlgoliaCache
 } from '@/lib/algolia'
@@ -104,7 +105,12 @@ export const getMemes = createServerFn({ method: 'GET' })
         })
 
       return {
-        memes: response.hits.map(normalizeAlgoliaHit),
+        memes: response.hits.map((hit) => {
+          return {
+            ...normalizeAlgoliaHit(hit),
+            highlightedTitle: data.query ? getHighlightedTitle(hit) : undefined
+          }
+        }),
         query: data.query,
         page: response.page,
         totalPages: response.nbPages

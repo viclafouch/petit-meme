@@ -9,8 +9,12 @@ import { OverlaySpinner } from '@/components/ui/overlay-spinner'
 import type { MemeWithVideo } from '@/constants/meme'
 import { ClientOnly } from '@tanstack/react-router'
 
+export type MemeWithHighlight = MemeWithVideo & {
+  highlightedTitle?: string
+}
+
 export type MemesListParams = {
-  memes: MemeWithVideo[]
+  memes: MemeWithHighlight[]
   layoutContext: string
   columnGridCount?: number
 }
@@ -93,6 +97,7 @@ export const MemesList = ({
               size={size}
               layoutContext={layoutContext}
               meme={meme}
+              highlightedTitle={meme.highlightedTitle}
               onOpenStudioClick={setStudioMemeSelected}
             />
           )

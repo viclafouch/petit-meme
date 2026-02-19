@@ -2,6 +2,7 @@ import type { MemeWithCategories, MemeWithVideo } from '@/constants/meme'
 import { MINUTE } from '@/constants/time'
 import { serverEnv } from '@/env/server'
 import { buildVideoImageUrl } from '@/lib/bunny'
+import type { HighlightResultOption, Hit } from '@algolia/client-search'
 import { searchClient } from '@algolia/client-search'
 
 export const algoliaIndexName = serverEnv.ALGOLIA_INDEX
@@ -122,6 +123,14 @@ export async function withAlgoliaCache<T>(
 }
 
 export type AlgoliaMemeRecord = ReturnType<typeof memeToAlgoliaRecord>
+
+export function getHighlightedTitle(hit: Hit<AlgoliaMemeRecord>) {
+  const result = hit._highlightResult?.title as
+    | HighlightResultOption
+    | undefined
+
+  return result?.matchLevel !== 'none' ? result?.value : undefined
+}
 
 export function normalizeAlgoliaHit(hit: AlgoliaMemeRecord): AlgoliaMemeRecord {
   return {

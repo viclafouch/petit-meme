@@ -51,16 +51,17 @@ export const getFavoritesMemes = createServerFn({ method: 'GET' })
 export const checkGeneration = createServerFn({ method: 'POST' })
   .middleware([authUserRequiredMiddleware])
   .handler(async ({ context }) => {
-    const { generationCount } = await prismaClient.user.findUniqueOrThrow({
-      where: {
-        id: context.user.id
-      },
-      select: {
-        generationCount: true
-      }
-    })
-
-    const activeSubscription = await findActiveSubscription(context.user.id)
+    const [{ generationCount }, activeSubscription] = await Promise.all([
+      prismaClient.user.findUniqueOrThrow({
+        where: {
+          id: context.user.id
+        },
+        select: {
+          generationCount: true
+        }
+      }),
+      findActiveSubscription(context.user.id)
+    ])
 
     if (
       generationCount >= FREE_PLAN.maxGenerationsCount &&
@@ -77,39 +78,43 @@ export const checkGeneration = createServerFn({ method: 'POST' })
 
 const toggleBookmark = createServerOnlyFn(
   async (userId: User['id'], memeId: Meme['id']) => {
-    const bookmark = await prismaClient.userBookmark.findUnique({
-      // eslint-disable-next-line camelcase
-      where: { userId_memeId: { userId, memeId } },
-      select: { id: true }
-    })
-
-    if (bookmark) {
-      await prismaClient.userBookmark.delete({
+    return prismaClient.$transaction(async (tx) => {
+      const bookmark = await tx.userBookmark.findUnique({
         // eslint-disable-next-line camelcase
-        where: { userId_memeId: { userId, memeId } }
+        where: { userId_memeId: { userId, memeId } },
+        select: { id: true }
       })
 
-      return { bookmarked: false }
-    }
+      if (bookmark) {
+        await tx.userBookmark.delete({
+          // eslint-disable-next-line camelcase
+          where: { userId_memeId: { userId, memeId } }
+        })
 
-    const totalBookmarks = await prismaClient.userBookmark.count({
-      where: { userId }
-    })
-
-    if (totalBookmarks >= FREE_PLAN.maxFavoritesCount) {
-      const activeSubscription = await findActiveSubscription(userId)
-
-      if (!activeSubscription) {
-        setResponseStatus(403)
-        throw new StudioError('premium required', { code: 'PREMIUM_REQUIRED' })
+        return { bookmarked: false }
       }
-    }
 
-    await prismaClient.userBookmark.create({
-      data: { userId, memeId }
+      const totalBookmarks = await tx.userBookmark.count({
+        where: { userId }
+      })
+
+      if (totalBookmarks >= FREE_PLAN.maxFavoritesCount) {
+        const activeSubscription = await findActiveSubscription(userId)
+
+        if (!activeSubscription) {
+          setResponseStatus(403)
+          throw new StudioError('premium required', {
+            code: 'PREMIUM_REQUIRED'
+          })
+        }
+      }
+
+      await tx.userBookmark.create({
+        data: { userId, memeId }
+      })
+
+      return { bookmarked: true }
     })
-
-    return { bookmarked: true }
   }
 )
 

@@ -12,6 +12,7 @@ export const CATEGORY_FORM_SCHEMA = z.object({
 export const getCategories = createServerFn({ method: 'GET' }).handler(
   async () => {
     const categories = await prismaClient.category.findMany({
+      take: 100,
       orderBy: {
         createdAt: 'desc'
       }

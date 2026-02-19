@@ -59,7 +59,7 @@ export function useRegisterMemeView({
     }
 
     const maybeSend = async () => {
-      if (Boolean(sentRef.current)) {
+      if (sentRef.current) {
         return
       }
 
@@ -78,9 +78,7 @@ export function useRegisterMemeView({
             watchMs: Math.round(watchMsRef.current)
           }
         })
-      } catch {
-        // option: sentRef.current = false; // si tu veux retenter
-      }
+      } catch {}
     }
 
     const onPlay = () => {
@@ -99,7 +97,7 @@ export function useRegisterMemeView({
       if (!matchIsEligible(video)) {
         lastTRef.current = video.currentTime
 
-        return () => {}
+        return
       }
 
       const prev = lastTRef.current
@@ -107,24 +105,18 @@ export function useRegisterMemeView({
       lastTRef.current = cur
 
       if (prev === null) {
-        return () => {}
+        return
       }
 
       const delta = cur - prev
 
-      if (delta <= 0) {
-        return () => {}
-      }
-
-      if (delta > 1.1) {
-        return () => {}
+      if (delta <= 0 || delta > 1.1) {
+        return
       }
 
       watchMsRef.current += delta * 1000
 
       void maybeSend()
-
-      return () => {}
     }
 
     const onVisibilityChange = () => {

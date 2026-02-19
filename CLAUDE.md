@@ -15,13 +15,14 @@ npm run build            # Production build
 npm start                # Start production server (.output/server/index.mjs)
 npm run lint             # TypeScript check + ESLint
 npm run lint:fix         # Auto-fix lint issues
-npm run prisma:migrate   # Deploy Prisma migrations
+npm run prisma:migrate   # Deploy Prisma migrations (prisma migrate deploy)
 npm run prisma:seed      # Seed database (tsx --env-file=.env prisma/seed.ts)
-npm run prisma:db-push   # Push schema to DB without migration
 npm run email:dev        # Email preview server (port 3001)
 ```
 
 After Prisma schema changes: `npx prisma generate` (also runs on `postinstall`).
+
+Database & migration workflow complet : voir `.claude/rules/database.md`.
 
 **Ne jamais démarrer le serveur de dev (`npm run dev`)** — c'est toujours l'utilisateur qui s'en occupe.
 

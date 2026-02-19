@@ -146,21 +146,13 @@ const formatSchemaDuration = (totalSeconds: number) => {
   const minutes = Math.floor((totalSeconds % 3600) / 60)
   const seconds = totalSeconds % 60
 
-  let duration = 'PT'
+  const parts = [
+    hours > 0 ? `${hours}H` : '',
+    minutes > 0 ? `${minutes}M` : '',
+    seconds > 0 || (hours === 0 && minutes === 0) ? `${seconds}S` : ''
+  ]
 
-  if (hours > 0) {
-    duration += `${hours}H`
-  }
-
-  if (minutes > 0) {
-    duration += `${minutes}M`
-  }
-
-  if (seconds > 0 || duration === 'PT') {
-    duration += `${seconds}S`
-  }
-
-  return duration
+  return `PT${parts.join('')}`
 }
 
 export const buildMemeJsonLd = (meme: MemeWithVideo, originalUrl: string) => {

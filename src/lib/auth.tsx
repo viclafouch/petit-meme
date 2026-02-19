@@ -125,7 +125,7 @@ const getAuthConfig = createServerOnlyFn(() => {
       enabled: process.env.NODE_ENV === 'production',
       window: 60,
       max: 100,
-      storage: 'memory',
+      storage: 'database',
       customRules: {
         '/sign-in/email': { window: 300, max: 10 },
         '/sign-up/email': { window: 3600, max: 3 },

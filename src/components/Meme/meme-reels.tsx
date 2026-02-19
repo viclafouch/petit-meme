@@ -13,6 +13,15 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useVirtualizer } from '@tanstack/react-virtual'
 
+type ReelProps = {
+  meme: MemeWithVideo
+  isMuted: boolean
+  isPlaying: boolean
+  isActive: boolean
+  setIsPlaying: React.Dispatch<React.SetStateAction<boolean>>
+  setIsMuted: React.Dispatch<React.SetStateAction<boolean>>
+}
+
 export const Reel = React.memo(
   ({
     meme,
@@ -21,14 +30,7 @@ export const Reel = React.memo(
     setIsPlaying,
     setIsMuted,
     isActive
-  }: {
-    meme: MemeWithVideo
-    isMuted: boolean
-    setIsPlaying: React.Dispatch<React.SetStateAction<boolean>>
-    setIsMuted: React.Dispatch<React.SetStateAction<boolean>>
-    isPlaying: boolean
-    isActive: boolean
-  }) => {
+  }: ReelProps) => {
     const videoRef = React.useRef<HTMLVideoElement>(null)
 
     React.useEffect(() => {

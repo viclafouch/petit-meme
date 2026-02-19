@@ -24,27 +24,19 @@ type MutationBody = {
 } & VideoProcessingOptions
 
 const wrapText = (text: string, maxLength: number): string => {
-  const words = text.split(' ')
-  const lines: string[] = []
-  let currentLine = ''
+  return text
+    .split(' ')
+    .reduce<string[]>((lines, word) => {
+      const lastLine = lines.at(-1) ?? ''
+      const candidate = lastLine ? `${lastLine} ${word}` : word
 
-  for (const word of words) {
-    if ((currentLine + word).length <= maxLength) {
-      currentLine += (currentLine ? ' ' : '') + word
-    } else {
-      if (currentLine) {
-        lines.push(currentLine)
+      if (candidate.length <= maxLength) {
+        return [...lines.slice(0, -1), candidate]
       }
 
-      currentLine = word
-    }
-  }
-
-  if (currentLine) {
-    lines.push(currentLine)
-  }
-
-  return lines.join('\n')
+      return [...lines, word]
+    }, [])
+    .join('\n')
 }
 
 const addTextToVideo = async (

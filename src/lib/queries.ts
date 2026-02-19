@@ -91,10 +91,8 @@ export const getCategoriesListQueryOpts = () => {
   return queryOptions({
     queryKey: [...getCategoriesListQueryOpts.all],
     queryFn: async () => {
-      return getCategories()
-    },
-    staleTime: 10 * MINUTE,
-    select: (categories) => {
+      const categories = await getCategories()
+
       return categories.toSorted((categoryA, categoryB) => {
         if (categoryA.slug === NEWS_CATEGORY_SLUG) {
           return -1
@@ -106,7 +104,8 @@ export const getCategoriesListQueryOpts = () => {
 
         return 0
       })
-    }
+    },
+    staleTime: 10 * MINUTE
   })
 }
 

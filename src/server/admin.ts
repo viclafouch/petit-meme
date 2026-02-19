@@ -35,7 +35,7 @@ export const getListUsers = createServerFn({ method: 'GET' })
 
     const listUsers = await auth.api.listUsers({
       query: {
-        limit: 100,
+        limit: 500,
         offset: 0,
         sortBy: 'createdAt'
       },
@@ -101,7 +101,8 @@ export const editMeme = createServerFn({ method: 'POST' })
         id: values.id
       },
       include: {
-        video: true
+        video: true,
+        categories: { select: { categoryId: true } }
       }
     })
 
@@ -111,6 +112,18 @@ export const editMeme = createServerFn({ method: 'POST' })
 
     const publishedAt = resolvePublishedAt(values.status, meme)
     const viewCount = resolveInitialViewCount(values.status, meme)
+
+    const currentCategoryIds = meme.categories.map((relation) => {
+      return relation.categoryId
+    })
+
+    const toAdd = values.categoryIds.filter((id) => {
+      return !currentCategoryIds.includes(id)
+    })
+
+    const toRemove = currentCategoryIds.filter((id) => {
+      return !values.categoryIds.includes(id)
+    })
 
     const memeUpdated = await prismaClient.meme.update({
       where: {
@@ -123,8 +136,9 @@ export const editMeme = createServerFn({ method: 'POST' })
         publishedAt,
         viewCount,
         categories: {
-          deleteMany: {},
-          create: values.categoryIds.map((categoryId) => {
+          deleteMany:
+            toRemove.length > 0 ? { categoryId: { in: toRemove } } : undefined,
+          create: toAdd.map((categoryId) => {
             return {
               category: {
                 connect: { id: categoryId }
@@ -244,8 +258,7 @@ export const createMemeFromTwitterUrl = createServerFn({ method: 'POST' })
       )
     }
 
-    const arrayBuffer = await media.video.blob.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
+    const buffer = Buffer.from(await media.video.blob.arrayBuffer())
 
     return createMemeWithVideo({ buffer, tweetUrl: tweet.url })
   })
@@ -264,8 +277,7 @@ export const createMemeFromFile = createServerFn({ method: 'POST' })
   })
   .middleware([adminRequiredMiddleware])
   .handler(async ({ data: values }) => {
-    const arrayBuffer = await values.video.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
+    const buffer = Buffer.from(await values.video.arrayBuffer())
 
     return createMemeWithVideo({ buffer })
   })

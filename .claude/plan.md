@@ -327,7 +327,7 @@ En dernier car nécessite une codebase stable et testée. Chaque update peut cas
 
 Bugs et observations remontés manuellement, à investiguer et corriger.
 
-- [ ] **Studio — re-render vidéo pendant la saisie de texte** : Quand on ajoute un texte sur la vidéo (overlay ffmpeg), taper dans l'input provoque un re-render visible de la vidéo. Le composant vidéo ne devrait pas se re-render à chaque keystroke dans l'input texte.
+- [x] **Studio — re-render vidéo pendant la saisie de texte** : Quand on ajoute un texte sur la vidéo (overlay ffmpeg), taper dans l'input provoque un re-render visible de la vidéo. Le composant vidéo ne devrait pas se re-render à chaque keystroke dans l'input texte.
 
 ---
 

@@ -34,6 +34,53 @@ import {
 import { buildVideoImageUrl, buildVideoStreamUrl } from '@/lib/bunny'
 import { downloadBlob, shareBlob } from '@/utils/download'
 
+const OriginalVideoPreview = React.memo(({ bunnyId }: { bunnyId: string }) => {
+  const hls = React.useRef<Hls>(null)
+
+  return (
+    <VideoPlayer className="overflow-hidden size-full max-h-full dark">
+      <VideoPlayerContent
+        crossOrigin=""
+        className="size-full"
+        enableFullscreenOnDoubleClick
+        disablePictureInPicture
+        disableRemotePlayback
+        preload="auto"
+        poster={buildVideoImageUrl(bunnyId)}
+        slot="media"
+        tabIndex={-1}
+        ref={(element) => {
+          if (!element) {
+            return
+          }
+
+          const videoSrc = buildVideoStreamUrl(bunnyId)
+
+          if (element.canPlayType('application/vnd.apple.mpegurl')) {
+            element.src = videoSrc
+          } else if (Hls.isSupported()) {
+            hls.current = new Hls()
+            hls.current.loadSource(videoSrc)
+            hls.current.attachMedia(element)
+          }
+
+          // eslint-disable-next-line consistent-return
+          return () => {
+            hls.current?.destroy()
+          }
+        }}
+      />
+      <VideoPlayerControlBar>
+        <VideoPlayerPlayButton />
+        <VideoPlayerTimeRange />
+        <VideoPlayerTimeDisplay showDuration />
+        <VideoPlayerMuteButton />
+        <VideoPlayerVolumeRange />
+      </VideoPlayerControlBar>
+    </VideoPlayer>
+  )
+})
+
 export const StudioDialog = ({
   meme,
   open,
@@ -45,7 +92,6 @@ export const StudioDialog = ({
 }) => {
   const { data: ffmpeg } = useVideoInitializer()
   const [text, setText] = React.useState('')
-  const hls = React.useRef<Hls>(null)
   const [textPosition, setTextPosition] = React.useState<'top' | 'bottom'>(
     'top'
   )
@@ -215,48 +261,7 @@ export const StudioDialog = ({
                 </VideoPlayer>
               ) : null}
               {!isLoading && !data ? (
-                <VideoPlayer className="overflow-hidden size-full max-h-full dark">
-                  <VideoPlayerContent
-                    crossOrigin=""
-                    className="size-full"
-                    enableFullscreenOnDoubleClick
-                    disablePictureInPicture
-                    disableRemotePlayback
-                    preload="auto"
-                    poster={buildVideoImageUrl(meme.video.bunnyId)}
-                    slot="media"
-                    tabIndex={-1}
-                    ref={(element) => {
-                      if (!element) {
-                        return
-                      }
-
-                      const videoSrc = buildVideoStreamUrl(meme.video.bunnyId)
-
-                      if (
-                        element.canPlayType('application/vnd.apple.mpegurl')
-                      ) {
-                        element.src = videoSrc
-                      } else if (Hls.isSupported()) {
-                        hls.current = new Hls()
-                        hls.current.loadSource(videoSrc)
-                        hls.current.attachMedia(element)
-                      }
-
-                      // eslint-disable-next-line consistent-return
-                      return () => {
-                        hls.current?.destroy()
-                      }
-                    }}
-                  />
-                  <VideoPlayerControlBar>
-                    <VideoPlayerPlayButton />
-                    <VideoPlayerTimeRange />
-                    <VideoPlayerTimeDisplay showDuration />
-                    <VideoPlayerMuteButton />
-                    <VideoPlayerVolumeRange />
-                  </VideoPlayerControlBar>
-                </VideoPlayer>
+                <OriginalVideoPreview bunnyId={meme.video.bunnyId} />
               ) : null}
             </div>
           </div>

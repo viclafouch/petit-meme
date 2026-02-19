@@ -119,7 +119,7 @@ Corriger les problèmes de perf serveur maintenant que l'infra caching est en pl
 
 ### LOW
 
-- [ ] Réduire la taille des payloads API
+- [x] Réduire la taille des payloads API
 
 ### Error Handling (audit complémentaire)
 

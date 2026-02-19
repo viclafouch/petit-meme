@@ -79,7 +79,8 @@ const toggleBookmark = createServerOnlyFn(
   async (userId: User['id'], memeId: Meme['id']) => {
     const bookmark = await prismaClient.userBookmark.findUnique({
       // eslint-disable-next-line camelcase
-      where: { userId_memeId: { userId, memeId } }
+      where: { userId_memeId: { userId, memeId } },
+      select: { id: true }
     })
 
     if (bookmark) {
@@ -121,6 +122,9 @@ export const toggleBookmarkByMemeId = createServerFn({ method: 'POST' })
     const meme = await prismaClient.meme.findUnique({
       where: {
         id: memeId
+      },
+      select: {
+        id: true
       }
     })
 

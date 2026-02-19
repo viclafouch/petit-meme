@@ -61,6 +61,9 @@ export const getVideoStatusById = createServerFn({ method: 'GET' })
     const video = await prismaClient.video.findUnique({
       where: {
         id: videoId
+      },
+      select: {
+        bunnyStatus: true
       }
     })
 
@@ -162,11 +165,13 @@ export const getRandomMeme = createServerFn({ method: 'GET' })
 
     const skip = Math.floor(Math.random() * count)
 
-    return prismaClient.meme.findFirst({
+    const meme = await prismaClient.meme.findFirst({
       where,
-      include: { video: true },
+      select: { id: true },
       skip
     })
+
+    return meme
   })
 
 export const shareMeme = createServerFn({ method: 'GET' })
@@ -178,8 +183,12 @@ export const shareMeme = createServerFn({ method: 'GET' })
       where: {
         id: memeId
       },
-      include: {
-        video: true
+      select: {
+        video: {
+          select: {
+            bunnyId: true
+          }
+        }
       }
     })
 

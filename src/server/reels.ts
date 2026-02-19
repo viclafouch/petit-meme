@@ -25,13 +25,7 @@ export const getInfiniteReels = createServerFn({ method: 'POST' })
         'id', m."id",
         'title', m."title",
         'viewCount', m."viewCount",
-        'tweetUrl', m."tweetUrl",
-        'keywords', m."keywords",
-        'publishedAt', m."publishedAt",
-        'updatedAt', m."updatedAt",
-        'status', m."status",
-        'submittedBy', m."submittedBy",
-        'video', row_to_json(v)
+        'video', json_build_object('id', v."id", 'bunnyId', v."bunnyId", 'duration', v."duration")
       ) AS meme
       FROM "Meme" m
       JOIN "Video" v ON m."videoId" = v."id"

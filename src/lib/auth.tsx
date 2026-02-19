@@ -22,6 +22,7 @@ import ResetPassword from '../../emails/reset-password'
 const getAuthConfig = createServerOnlyFn(() => {
   return betterAuth({
     appName: 'Petit Meme',
+    baseURL: clientEnv.VITE_SITE_URL,
     basePath: '/api/auth',
     secret: serverEnv.BETTER_AUTH_SECRET,
     database: prismaAdapter(prismaClient, {

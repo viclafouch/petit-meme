@@ -1,8 +1,8 @@
 import React from 'react'
 import {
-  getBestMemesQueryOpts,
   getFavoritesMemesQueryOpts,
-  getRecentCountMemesQueryOpts
+  getRecentCountMemesQueryOpts,
+  getTrendingMemesQueryOpts
 } from '@/lib/queries'
 import { buildHomeJsonLd, seo } from '@/lib/seo'
 import { Faq } from '@/routes/_public__root/-components/faq'
@@ -13,7 +13,7 @@ import { Hero } from './-components/hero'
 import { PageContainer } from './-components/page-headers'
 
 const RouteComponent = () => {
-  const { bestMemesPromise } = Route.useLoaderData()
+  const { trendingMemesPromise } = Route.useLoaderData()
 
   return (
     <PageContainer>
@@ -21,7 +21,7 @@ const RouteComponent = () => {
         <Hero />
         <div className="container lg:mt-36 mt-24">
           <React.Suspense fallback={<div />}>
-            <BestMemes bestMemesPromise={bestMemesPromise} />
+            <BestMemes trendingMemesPromise={trendingMemesPromise} />
           </React.Suspense>
           <div className="mt-16">
             <Responsive />
@@ -56,8 +56,8 @@ export const Route = createFileRoute('/_public__root/')({
   },
   loader: ({ context }) => {
     void context.queryClient.ensureQueryData(getRecentCountMemesQueryOpts())
-    const bestMemesPromise = context.queryClient.ensureQueryData(
-      getBestMemesQueryOpts()
+    const trendingMemesPromise = context.queryClient.ensureQueryData(
+      getTrendingMemesQueryOpts()
     )
 
     if (context.user) {
@@ -65,7 +65,7 @@ export const Route = createFileRoute('/_public__root/')({
     }
 
     return {
-      bestMemesPromise
+      trendingMemesPromise
     }
   }
 })

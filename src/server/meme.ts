@@ -8,7 +8,9 @@ import {
   MEME_FULL_INCLUDE,
   MEMES_FILTERS_SCHEMA,
   MEMES_PER_PAGE,
-  NEWS_CATEGORY_SLUG
+  NEWS_CATEGORY_SLUG,
+  RELATED_MEMES_COUNT,
+  TRENDING_MEMES_COUNT
 } from '@/constants/meme'
 import {
   ONE_HOUR_MS,
@@ -19,19 +21,21 @@ import { prismaClient } from '@/db'
 import { MemeStatus } from '@/db/generated/prisma/enums'
 import type { AlgoliaMemeRecord } from '@/lib/algolia'
 import {
+  ALGOLIA_RECOMMEND_CACHE_TTL,
   ALGOLIA_SEARCH_PARAMS_BASE,
+  ALGOLIA_SEARCH_RETRIEVE,
   algoliaIndexName,
+  algoliaRecommendClient,
   algoliaSearchClient,
   getHighlightedTitle,
   normalizeAlgoliaHit,
   withAlgoliaCache
 } from '@/lib/algolia'
-import { sendAlgoliaViewEvent } from '@/lib/algolia-insights.server'
 import { buildVideoOriginalUrl } from '@/lib/bunny'
 import { authUserRequiredMiddleware } from '@/server/user-auth'
 import { ensureAlgoliaUserToken } from '@/utils/tracking-cookies'
 import { notFound } from '@tanstack/react-router'
-import { createServerFn } from '@tanstack/react-start'
+import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 import { getCookie, setCookie } from '@tanstack/react-start/server'
 
 function buildMemeFilters(category: string | undefined, thirtyDaysAgo: number) {
@@ -153,22 +157,101 @@ export const getRecentCountMemes = createServerFn({ method: 'GET' }).handler(
   }
 )
 
-export const getBestMemes = createServerFn({ method: 'GET' }).handler(
-  async () => {
-    const memes = await prismaClient.meme.findMany({
-      take: 12,
-      include: {
-        video: true
-      },
-      orderBy: {
-        viewCount: 'desc'
-      },
-      where: {
-        status: MemeStatus.PUBLISHED
-      }
-    })
+const getBestMemesInternal = createServerOnlyFn(async () => {
+  return prismaClient.meme.findMany({
+    take: TRENDING_MEMES_COUNT,
+    include: {
+      video: true
+    },
+    orderBy: {
+      viewCount: 'desc'
+    },
+    where: {
+      status: MemeStatus.PUBLISHED
+    }
+  })
+})
 
-    return memes
+export const getRelatedMemes = createServerFn({ method: 'GET' })
+  .inputValidator(z.object({ memeId: z.string(), title: z.string() }))
+  .handler(async ({ data }) => {
+    return withAlgoliaCache(
+      `recommend:related:${data.memeId}`,
+      async () => {
+        try {
+          const response = await algoliaRecommendClient.getRecommendations({
+            requests: [
+              {
+                indexName: algoliaIndexName,
+                model: 'related-products',
+                objectID: data.memeId,
+                threshold: 0,
+                maxRecommendations: RELATED_MEMES_COUNT,
+                queryParameters: {
+                  filters: `status:${MemeStatus.PUBLISHED}`,
+                  attributesToRetrieve: [...ALGOLIA_SEARCH_RETRIEVE]
+                },
+                fallbackParameters: {
+                  query: data.title,
+                  filters: `status:${MemeStatus.PUBLISHED}`
+                }
+              }
+            ]
+          })
+
+          const hits = (response.results[0]?.hits ?? []) as AlgoliaMemeRecord[]
+
+          return hits.map(normalizeAlgoliaHit)
+        } catch {
+          // eslint-disable-next-line no-console
+          console.warn('[Recommend] related-products unavailable')
+
+          return []
+        }
+      },
+      ALGOLIA_RECOMMEND_CACHE_TTL
+    )
+  })
+
+export const getTrendingMemes = createServerFn({ method: 'GET' }).handler(
+  async () => {
+    const trending = await withAlgoliaCache(
+      'recommend:trending',
+      async () => {
+        try {
+          const response = await algoliaRecommendClient.getRecommendations({
+            requests: [
+              {
+                indexName: algoliaIndexName,
+                model: 'trending-items',
+                threshold: 0,
+                maxRecommendations: TRENDING_MEMES_COUNT,
+                queryParameters: {
+                  filters: `status:${MemeStatus.PUBLISHED}`,
+                  attributesToRetrieve: [...ALGOLIA_SEARCH_RETRIEVE]
+                }
+              }
+            ]
+          })
+
+          const hits = (response.results[0]?.hits ?? []) as AlgoliaMemeRecord[]
+
+          return hits.map(normalizeAlgoliaHit)
+        } catch {
+          // eslint-disable-next-line no-console
+          console.warn('[Recommend] trending-items unavailable')
+
+          return []
+        }
+      },
+      ALGOLIA_RECOMMEND_CACHE_TTL
+    )
+
+    if (trending.length === 0) {
+      return getBestMemesInternal()
+    }
+
+    return trending
   }
 )
 
@@ -286,12 +369,14 @@ export const registerMemeView = createServerFn({ method: 'POST' })
       }
     })
 
-    const promises: Promise<unknown>[] = hasConsentedToCookies
-      ? [
-          viewTransaction,
-          sendAlgoliaViewEvent({ memeId, userToken: viewerKey })
-        ]
-      : [viewTransaction]
+    const promises: Promise<unknown>[] = [viewTransaction]
+
+    if (hasConsentedToCookies) {
+      const { sendAlgoliaViewEvent } =
+        await import('@/lib/algolia-insights.server')
+
+      promises.push(sendAlgoliaViewEvent({ memeId, userToken: viewerKey }))
+    }
 
     await Promise.all(promises)
   })

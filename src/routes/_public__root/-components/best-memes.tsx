@@ -7,12 +7,12 @@ import type { MemeWithVideo } from '@/constants/meme'
 import { cn } from '@/lib/utils'
 import { Link } from '@tanstack/react-router'
 
-export const BestMemes = ({
-  bestMemesPromise
-}: {
-  bestMemesPromise: Promise<MemeWithVideo[]>
-}) => {
-  const bestMemesQuery = React.use(bestMemesPromise)
+type BestMemesParams = {
+  trendingMemesPromise: Promise<MemeWithVideo[]>
+}
+
+export const BestMemes = ({ trendingMemesPromise }: BestMemesParams) => {
+  const trendingMemes = React.use(trendingMemesPromise)
   const isReducedMotion = useReducedMotion()
 
   return (
@@ -38,7 +38,7 @@ export const BestMemes = ({
         </p>
       </div>
       <section>
-        <MemesList layoutContext="index" memes={bestMemesQuery} />
+        <MemesList layoutContext="index" memes={trendingMemes} />
       </section>
     </motion.div>
   )

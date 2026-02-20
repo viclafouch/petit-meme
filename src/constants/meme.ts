@@ -14,6 +14,8 @@ export const LEGACY_MEME_TITLE = 'Titre inconnu'
 
 export const NEWS_CATEGORY_SLUG = 'news'
 export const MEMES_PER_PAGE = 30
+export const RELATED_MEMES_COUNT = 4
+export const TRENDING_MEMES_COUNT = 12
 
 export const MemeStatusMeta = {
   PENDING: {

@@ -5,6 +5,7 @@ import { serverEnv } from '@/env/server'
 import { buildVideoImageUrl } from '@/lib/bunny'
 import type { HighlightResultOption, Hit } from '@algolia/client-search'
 import { searchClient } from '@algolia/client-search'
+import { recommendClient } from '@algolia/recommend'
 
 export const algoliaIndexName = clientEnv.VITE_ALGOLIA_INDEX
 
@@ -18,6 +19,11 @@ export const algoliaAdminClient = searchClient(
   serverEnv.ALGOLIA_ADMIN_KEY
 )
 
+export const algoliaRecommendClient = recommendClient(
+  clientEnv.VITE_ALGOLIA_APP_ID,
+  clientEnv.VITE_ALGOLIA_SEARCH_KEY
+)
+
 export async function safeAlgoliaOp<T>(promise: Promise<T>) {
   try {
     return await promise
@@ -29,7 +35,7 @@ export async function safeAlgoliaOp<T>(promise: Promise<T>) {
   }
 }
 
-const ALGOLIA_SEARCH_RETRIEVE = [
+export const ALGOLIA_SEARCH_RETRIEVE = [
   '*',
   '-categoryTitles',
   '-categoryKeywords',
@@ -56,6 +62,7 @@ export const ALGOLIA_ADMIN_SEARCH_PARAMS = {
 }
 
 const ALGOLIA_CACHE_TTL = 5 * MINUTE
+export const ALGOLIA_RECOMMEND_CACHE_TTL = 30 * MINUTE
 const ALGOLIA_CACHE_MAX_SIZE = 200
 const ALGOLIA_CACHE_SWEEP_INTERVAL = 10 * MINUTE
 
@@ -83,7 +90,8 @@ export function invalidateAlgoliaCache() {
 
 export async function withAlgoliaCache<T>(
   key: string,
-  fn: () => Promise<T>
+  fn: () => Promise<T>,
+  ttl = ALGOLIA_CACHE_TTL
 ): Promise<T> {
   const cached = algoliaResultsCache.get(key)
 
@@ -109,7 +117,7 @@ export async function withAlgoliaCache<T>(
 
       algoliaResultsCache.set(key, {
         data,
-        expiresAt: Date.now() + ALGOLIA_CACHE_TTL
+        expiresAt: Date.now() + ttl
       })
 
       return data

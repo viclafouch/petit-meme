@@ -506,7 +506,7 @@ Une fois les events en place, le dashboard Algolia Analytics devient exploitable
 
 #### 3.1 Configurer le dashboard Analytics
 
-- [ ] Vérifier que l'Analytics est activé dans les paramètres de l'index Algolia
+- [x] Vérifier que l'Analytics est activé dans les paramètres de l'index Algolia
   - Le plan Build offre 30 jours de rétention
   - Métriques disponibles : top recherches, recherches sans résultats, click-through rate, click position, taux de conversion
   - Aucun code à écrire — tout est dans le dashboard Algolia
@@ -524,39 +524,62 @@ Une fois les events en place, le dashboard Algolia Analytics devient exploitable
 
 10K requêtes Recommend/mois incluses. Nécessite ~1000 events de conversion sur 2+ items par 10+ users pour fonctionner.
 
-#### 4.1 Activer le modèle "Related Items"
+**Décisions d'architecture (deep-dive 2026-02-20) :**
+- **Package** : `@algolia/recommend` standalone (v5, même API key que search)
+- **Cache** : TTL 30 min (modèles re-entraînés quotidiennement). Paramétrer `withAlgoliaCache` avec TTL optionnel.
+- **Threshold** : 0 pour les deux modèles (maximiser les résultats tant que peu d'events)
+- **Homepage** : Trending REMPLACE BestMemes (pas en plus). Titre/sous-titre inchangés. Fallback Prisma `getBestMemes()`.
+- **Page meme** : Section "Memes similaires" en dessous de la grille vidéo+actions, pleine largeur, 4 memes. Fallback : cacher la section. `fallbackParameters` Algolia avec titre du meme comme query (résultats par similarité textuelle quand ML pas entraîné).
+- **Loading** : deferred dans les loaders (Suspense), jamais bloquant.
+
+#### 4.1 Activer le modèle "Related Items" — REPORTÉ (pas assez d'events)
 
 - [ ] Dans le dashboard Algolia → Recommend → activer "Related Items" sur l'index memes
   - Algolia entraîne le modèle ML automatiquement à partir des events (vues, clics, conversions)
   - Re-entraînement quotidien automatique
   - Prérequis : avoir accumulé suffisamment d'events (Phase 2 doit être active depuis quelques semaines)
 
-#### 4.2 Activer le modèle "Trending Items"
+#### 4.2 Activer le modèle "Trending Items" — REPORTÉ (pas assez d'events)
 
 - [ ] Activer "Trending Items" — les memes qui gagnent en popularité récemment
   - Basé sur les events de vue et de clic
   - Utilisable pour une section "Trending" sur la homepage
-  - Alternative/complément au `getBestMemes()` actuel qui ne regarde que `viewCount` (alltime)
 
 #### 4.3 Intégrer Recommend côté serveur
 
-- [ ] Installer `@algolia/recommend` (`npm install @algolia/recommend`)
-- [ ] Créer une server function `getRelatedMemes(memeId)` qui appelle l'API Recommend
-  - `model: 'related-products'`, `objectID: memeId`, `maxRecommendations: 6`
-  - Mettre en cache avec `withAlgoliaCache` (TTL 10 min, clé `recommend:${memeId}`)
-  - Chaque `objectID` dans la requête consomme 1 Recommend request (6 objectIDs = 6 requests)
-- [ ] Créer une server function `getTrendingMemes()` qui appelle l'API Recommend
-  - `model: 'trending-items'`, `maxRecommendations: 12`
-  - Mettre en cache avec `withAlgoliaCache` (TTL 10 min, clé `trending`)
+- [x] Installer `@algolia/recommend` (`npm install @algolia/recommend`)
+- [x] Ajouter `algoliaRecommendClient` dans `src/lib/algolia.ts` (server-side, search key)
+- [x] Paramétrer `withAlgoliaCache` avec TTL optionnel (défaut 5 min, 30 min pour Recommend)
+- [x] Créer `getRelatedMemes({ memeId, title })` dans `src/server/meme.ts`
+  - `model: 'related-products'`, `objectID: memeId`, `maxRecommendations: 4`, `threshold: 0`
+  - `queryParameters: { filters: 'status:PUBLISHED' }`
+  - `fallbackParameters: { query: title, filters: 'status:PUBLISHED' }` (similarité textuelle quand ML pas entraîné)
+  - Cache clé `recommend:related:${memeId}`, TTL 30 min
+  - Normaliser les hits avec `normalizeAlgoliaHit()`
+  - Retourne `AlgoliaMemeRecord[]` (vide si 0 hits → section cachée)
+- [x] Créer `getTrendingMemes()` dans `src/server/meme.ts`
+  - `model: 'trending-items'`, `maxRecommendations: 12`, `threshold: 0`
+  - `queryParameters: { filters: 'status:PUBLISHED' }`
+  - Pas de `fallbackParameters` Algolia
+  - Cache clé `recommend:trending`, TTL 30 min
+  - Si 0 hits → fallback `getBestMemesInternal()` Prisma (viewCount DESC)
+  - Retourne `AlgoliaMemeRecord[] | MemeWithVideo[]`
+- [x] Créer `getTrendingMemesQueryOpts` dans `src/lib/queries.ts` (`getRelatedMemesQueryOpts` supprimé — dead code, le loader appelle `getRelatedMemes` directement)
+- [x] Supprimer `getBestMemesQueryOpts` et `getBestMemes` (dead code après migration vers `getTrendingMemes`)
 
 #### 4.4 Intégrer Recommend côté frontend
 
-- [ ] Afficher "Memes similaires" sur la page meme (`src/routes/_public__root/_default/memes/$memeId.tsx`)
-  - Section en dessous du player : grille de 6 memes recommandés par Algolia
-  - Fallback si pas assez de données : utiliser `getRandomMeme()` existant
-- [ ] Afficher "Trending" sur la homepage
-  - Section "En ce moment" avec les memes trending
-  - Remplacer ou compléter le `getBestMemes()` actuel (qui est un simple ORDER BY viewCount)
+- [x] Page meme (`src/routes/_public__root/_default/memes/$memeId.tsx`)
+  - Loader : lancer `getRelatedMemes({ memeId, title })` en deferred (sans await, comme `getRandomMeme`)
+  - Section "Memes similaires" en dessous de la grille vidéo+actions, pleine largeur
+  - Grille de 4 memes via `MemesList` avec `layoutContext="recommend"`
+  - Wrappée dans `React.Suspense`
+  - Cachée si le tableau est vide (pas de fallback visuel)
+  - Extraction du composant `MemeInfo` pour respecter la limite `max-lines-per-function`
+- [x] Homepage (`src/routes/_public__root/index.tsx`)
+  - Remplacer `getBestMemesQueryOpts` par `getTrendingMemesQueryOpts` dans le loader
+  - Adapter le composant `BestMemes` pour recevoir `trendingMemesPromise` au lieu de `bestMemesPromise`
+  - Titre/sous-titre inchangés ("Mèmes" / "Les meilleurs mèmes du moment.")
 
 ### Phase 5 — Rules (3 gratuites par index)
 
@@ -567,11 +590,7 @@ Une fois les events en place, le dashboard Algolia Analytics devient exploitable
   - Configuration dans le dashboard, modifiable sans déploiement
   - Les Rules sont évaluées **avant** le ranking — elles overrident le tri naturel
 
-#### 5.2 Rule de bannière
-
-- [ ] Utiliser 1 rule pour afficher un `userData` contextuel (bannière/message)
-  - Exemple : recherche "nouveau" → renvoyer un `userData: { banner: "Découvre les derniers memes !" }`
-  - Le frontend lit `response.userData` et affiche le message au-dessus des résultats
+#### 5.2 Rule de bannière — ANNULÉE
 
 ### Phase 6 — Préparation i18n (FR/EN)
 

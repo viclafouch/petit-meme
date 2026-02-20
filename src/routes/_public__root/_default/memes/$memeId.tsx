@@ -11,6 +11,7 @@ import {
   Shuffle
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { MemesList } from '@/components/Meme/memes-list'
 import { StudioDialog } from '@/components/Meme/studio-dialog'
 import ToggleLikeButton from '@/components/Meme/toggle-like-button'
 import { Badge } from '@/components/ui/badge'
@@ -27,6 +28,7 @@ import {
   VideoPlayerVolumeRange
 } from '@/components/ui/kibo-ui/video-player'
 import { OverlaySpinner } from '@/components/ui/overlay-spinner'
+import type { MemeWithVideo } from '@/constants/meme'
 import { useDownloadMeme } from '@/hooks/use-download-meme'
 import { useMemeHls } from '@/hooks/use-meme-hls'
 import { useRegisterMemeView } from '@/hooks/use-register-meme-view'
@@ -41,7 +43,7 @@ import {
   buildUrl
 } from '@/lib/seo'
 import { cn } from '@/lib/utils'
-import { getRandomMeme } from '@/server/meme'
+import { getRandomMeme, getRelatedMemes } from '@/server/meme'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import {
   ClientOnly,
@@ -52,8 +54,71 @@ import {
   useRouter
 } from '@tanstack/react-router'
 
+type MemeInfoParams = {
+  meme: { description: string; publishedAt: Date | null; viewCount: number }
+  allTags: string[]
+}
+
+const MemeInfo = ({ meme, allTags }: MemeInfoParams) => {
+  return (
+    <>
+      {allTags.length > 0 ? (
+        <div className="w-full flex justify-center md:justify-start flex-wrap gap-1.5 max-w-125 mx-auto">
+          {allTags.map((tag) => {
+            return (
+              <Badge variant="secondary" key={tag}>
+                {tag.toLowerCase()}
+              </Badge>
+            )
+          })}
+        </div>
+      ) : null}
+      <div className="flex flex-col gap-y-1 text-center md:text-left">
+        {meme.description ? (
+          <>
+            <p className="text-muted-foreground text-xs">{meme.description}</p>
+            <hr className="my-2" />
+          </>
+        ) : null}
+        {meme.publishedAt ? (
+          <span className="text-muted-foreground text-xs">
+            Ajouté le {formatDate(meme.publishedAt, 'dd/MM/yyyy')}
+          </span>
+        ) : null}
+        <span className="text-muted-foreground text-xs">
+          {meme.viewCount} vues
+        </span>
+      </div>
+    </>
+  )
+}
+
+type RelatedMemesParams = {
+  relatedMemesPromise: Promise<MemeWithVideo[]>
+}
+
+const RelatedMemes = ({ relatedMemesPromise }: RelatedMemesParams) => {
+  const relatedMemes = React.use(relatedMemesPromise)
+
+  if (relatedMemes.length === 0) {
+    return null
+  }
+
+  return (
+    <div className="mt-8">
+      <h2 className="text-base font-medium mb-4">Memes similaires</h2>
+      <MemesList
+        layoutContext="recommend"
+        memes={relatedMemes}
+        columnGridCount={4}
+      />
+    </div>
+  )
+}
+
 const RouteComponent = () => {
-  const { nextRandomMeme, originalUrl } = Route.useLoaderData()
+  const { nextRandomMeme, originalUrl, relatedMemesPromise } =
+    Route.useLoaderData()
   const { user } = useRouteContext({ from: '__root__' })
   const { memeId } = Route.useParams()
   const memeQuery = useSuspenseQuery(getMemeByIdQueryOpts(memeId))
@@ -268,38 +333,13 @@ const RouteComponent = () => {
                 Aléatoire
               </Button>
             </div>
-            {allTags.length > 0 ? (
-              <div className="w-full flex justify-center md:justify-start flex-wrap gap-1.5 max-w-125 mx-auto">
-                {allTags.map((tag) => {
-                  return (
-                    <Badge variant="secondary" key={tag}>
-                      {tag.toLowerCase()}
-                    </Badge>
-                  )
-                })}
-              </div>
-            ) : null}
-            <div className="flex flex-col gap-y-1 text-center md:text-left">
-              {meme.description ? (
-                <>
-                  <p className="text-muted-foreground text-xs">
-                    {meme.description}
-                  </p>
-                  <hr className="my-2" />
-                </>
-              ) : null}
-              {meme.publishedAt ? (
-                <span className="text-muted-foreground text-xs">
-                  Ajouté le {formatDate(meme.publishedAt, 'dd/MM/yyyy')}
-                </span>
-              ) : null}
-              <span className="text-muted-foreground text-xs">
-                {meme.viewCount} vues
-              </span>
-            </div>
+            <MemeInfo meme={meme} allTags={allTags} />
           </div>
         </div>
       </div>
+      <React.Suspense fallback={null}>
+        <RelatedMemes relatedMemesPromise={relatedMemesPromise} />
+      </React.Suspense>
       <ClientOnly>
         {isStudioDialogOpened ? (
           <React.Suspense fallback={<OverlaySpinner />}>
@@ -325,11 +365,15 @@ export const Route = createFileRoute('/_public__root/_default/memes/$memeId')({
 
     const originalUrl = buildVideoOriginalUrl(meme.video.bunnyId)
     const nextRandomMeme = getRandomMeme({ data: meme.id })
+    const relatedMemesPromise = getRelatedMemes({
+      data: { memeId: meme.id, title: meme.title }
+    })
 
     return {
       meme,
       originalUrl,
-      nextRandomMeme
+      nextRandomMeme,
+      relatedMemesPromise
     }
   },
   scripts: ({ loaderData }) => {

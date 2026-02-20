@@ -6,10 +6,10 @@ import { getAdminMemeById, getAdminMemes } from '@/server/admin'
 import { getCategories } from '@/server/categories'
 import { getActiveSubscription } from '@/server/customer'
 import {
-  getBestMemes,
   getMemeById,
   getMemes,
   getRecentCountMemes,
+  getTrendingMemes,
   getVideoStatusById
 } from '@/server/meme'
 import { getInfiniteReels } from '@/server/reels'
@@ -29,17 +29,17 @@ export const getMemesListQueryOpts = (filters: MemesFilters) => {
 
 getMemesListQueryOpts.all = ['memes-list'] as const
 
-export const getBestMemesQueryOpts = () => {
+export const getTrendingMemesQueryOpts = () => {
   return queryOptions({
-    queryKey: [...getBestMemesQueryOpts.all],
+    queryKey: [...getTrendingMemesQueryOpts.all],
     queryFn: () => {
-      return getBestMemes()
+      return getTrendingMemes()
     },
-    staleTime: 5 * MINUTE
+    staleTime: 30 * MINUTE
   })
 }
 
-getBestMemesQueryOpts.all = ['best-memes'] as const
+getTrendingMemesQueryOpts.all = ['memes', 'trending'] as const
 
 export const getMemeByIdQueryOpts = (memeId: Meme['id']) => {
   return queryOptions({

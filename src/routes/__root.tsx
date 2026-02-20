@@ -13,6 +13,7 @@ import type { getAuthUser } from '@/server/user-auth'
 import { DialogProvider } from '@/stores/dialog.store'
 import { ensureAlgoliaUserToken } from '@/utils/tracking-cookies'
 import type { QueryClient } from '@tanstack/react-query'
+import type { ErrorComponentProps } from '@tanstack/react-router'
 import {
   ClientOnly,
   createRootRouteWithContext,
@@ -96,6 +97,120 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => {
         <Scripts />
       </body>
     </html>
+  )
+}
+
+const RootErrorDocument = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <html lang="fr" dir="ltr">
+      <head>
+        <HeadContent />
+      </head>
+      <body>
+        {children}
+        <Scripts />
+      </body>
+    </html>
+  )
+}
+
+const RootErrorComponent = ({ error, reset }: ErrorComponentProps) => {
+  return (
+    <RootErrorDocument>
+      <div
+        style={{
+          minHeight: '100dvh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1rem',
+          fontFamily:
+            'Bricolage Grotesque, ui-sans-serif, system-ui, sans-serif',
+          backgroundColor: 'hsl(0 0% 3.9%)',
+          color: 'hsl(0 0% 98%)'
+        }}
+      >
+        <div style={{ maxWidth: '28rem', width: '100%', textAlign: 'center' }}>
+          <h1
+            style={{
+              fontSize: '3rem',
+              fontWeight: 700,
+              letterSpacing: '-0.05em',
+              marginBottom: '0.5rem'
+            }}
+          >
+            500
+          </h1>
+          <p
+            style={{
+              color: 'hsl(0 0% 63.9%)',
+              marginBottom: '2rem'
+            }}
+          >
+            Oups ! Le site a rencontré un problème inattendu.
+          </p>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.75rem'
+            }}
+          >
+            <button
+              type="button"
+              onClick={reset}
+              style={{
+                padding: '0.625rem 1.25rem',
+                borderRadius: '0.5rem',
+                border: 'none',
+                backgroundColor: 'hsl(0 0% 98%)',
+                color: 'hsl(0 0% 3.9%)',
+                fontWeight: 600,
+                fontSize: '0.875rem',
+                cursor: 'pointer'
+              }}
+            >
+              Réessayer
+            </button>
+            <a
+              href="/"
+              style={{
+                padding: '0.625rem 1.25rem',
+                borderRadius: '0.5rem',
+                border: '1px solid hsl(0 0% 14.9%)',
+                backgroundColor: 'transparent',
+                color: 'hsl(0 0% 98%)',
+                fontWeight: 600,
+                fontSize: '0.875rem',
+                textDecoration: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              Retourner au site
+            </a>
+          </div>
+          {process.env.NODE_ENV !== 'production' ? (
+            <pre
+              style={{
+                marginTop: '2rem',
+                padding: '1rem',
+                borderRadius: '0.5rem',
+                backgroundColor: 'hsl(0 0% 9%)',
+                color: 'hsl(0 62.8% 70.6%)',
+                fontSize: '0.75rem',
+                textAlign: 'left',
+                overflow: 'auto',
+                whiteSpace: 'pre-wrap'
+              }}
+            >
+              {error.message}
+              {'\n'}
+              {error.stack}
+            </pre>
+          ) : null}
+        </div>
+      </div>
+    </RootErrorDocument>
   )
 }
 
@@ -197,5 +312,6 @@ export const Route = createRootRouteWithContext<{
       ]
     }
   },
-  component: RootComponent
+  component: RootComponent,
+  errorComponent: RootErrorComponent
 })

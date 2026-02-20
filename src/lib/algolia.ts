@@ -74,7 +74,7 @@ type AlgoliaCacheEntry = {
 const algoliaResultsCache = new Map<string, AlgoliaCacheEntry>()
 const algoliaPendingRequests = new Map<string, Promise<unknown>>()
 
-setInterval(() => {
+const sweepInterval = setInterval(() => {
   const now = Date.now()
 
   for (const [key, entry] of algoliaResultsCache) {
@@ -83,6 +83,8 @@ setInterval(() => {
     }
   }
 }, ALGOLIA_CACHE_SWEEP_INTERVAL)
+
+sweepInterval.unref()
 
 export function invalidateAlgoliaCache() {
   algoliaResultsCache.clear()

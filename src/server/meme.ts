@@ -1,8 +1,13 @@
 import { z } from 'zod'
-import { COOKIE_ANON_ID_KEY, COOKIE_CONSENT_KEY } from '@/constants/cookie'
+import {
+  COOKIE_ALGOLIA_USER_TOKEN_KEY,
+  COOKIE_ANON_ID_KEY,
+  COOKIE_CONSENT_KEY
+} from '@/constants/cookie'
 import {
   MEME_FULL_INCLUDE,
   MEMES_FILTERS_SCHEMA,
+  MEMES_PER_PAGE,
   NEWS_CATEGORY_SLUG
 } from '@/constants/meme'
 import {
@@ -21,8 +26,10 @@ import {
   normalizeAlgoliaHit,
   withAlgoliaCache
 } from '@/lib/algolia'
+import { sendAlgoliaViewEvent } from '@/lib/algolia-insights.server'
 import { buildVideoOriginalUrl } from '@/lib/bunny'
 import { authUserRequiredMiddleware } from '@/server/user-auth'
+import { ensureAlgoliaUserToken } from '@/utils/tracking-cookies'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getCookie, setCookie } from '@tanstack/react-start/server'
@@ -92,14 +99,17 @@ export const getMemes = createServerFn({ method: 'GET' })
       const thirtyDaysAgo = Date.now() - THIRTY_DAYS_MS
       const filters = buildMemeFilters(data.category, thirtyDaysAgo)
 
+      const hasQuery = Boolean(data.query)
+
       const response =
         await algoliaSearchClient.searchSingleIndex<AlgoliaMemeRecord>({
           indexName: algoliaIndexName,
           searchParams: {
             query: data.query,
             page: data.page ? data.page - 1 : 0,
-            hitsPerPage: 30,
+            hitsPerPage: MEMES_PER_PAGE,
             filters,
+            ...(hasQuery ? { clickAnalytics: true } : {}),
             ...ALGOLIA_SEARCH_PARAMS_BASE
           }
         })
@@ -108,10 +118,11 @@ export const getMemes = createServerFn({ method: 'GET' })
         memes: response.hits.map((hit) => {
           return {
             ...normalizeAlgoliaHit(hit),
-            highlightedTitle: data.query ? getHighlightedTitle(hit) : undefined
+            highlightedTitle: hasQuery ? getHighlightedTitle(hit) : undefined
           }
         }),
         query: data.query,
+        queryID: hasQuery ? response.queryID : undefined,
         page: response.page,
         totalPages: response.nbPages
       }
@@ -237,16 +248,23 @@ export const registerMemeView = createServerFn({ method: 'POST' })
 
     const hasConsentedToCookies = getCookie(COOKIE_CONSENT_KEY) === 'accepted'
     const existingViewerKey = getCookie(COOKIE_ANON_ID_KEY)
-    const viewerKey = existingViewerKey ?? crypto.randomUUID()
+    const viewerKey =
+      existingViewerKey ??
+      getCookie(COOKIE_ALGOLIA_USER_TOKEN_KEY) ??
+      crypto.randomUUID()
 
-    if (!existingViewerKey && hasConsentedToCookies) {
-      setCookie(COOKIE_ANON_ID_KEY, viewerKey, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'lax',
-        path: '/',
-        maxAge: ONE_YEAR_IN_SECONDS
-      })
+    if (hasConsentedToCookies) {
+      ensureAlgoliaUserToken(viewerKey)
+
+      if (!existingViewerKey) {
+        setCookie(COOKIE_ANON_ID_KEY, viewerKey, {
+          httpOnly: true,
+          secure: true,
+          sameSite: 'lax',
+          path: '/',
+          maxAge: ONE_YEAR_IN_SECONDS
+        })
+      }
     }
 
     const now = new Date()
@@ -254,16 +272,9 @@ export const registerMemeView = createServerFn({ method: 'POST' })
       Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
     )
 
-    await prismaClient.$transaction(async (tx) => {
+    const viewTransaction = prismaClient.$transaction(async (tx) => {
       const result = await tx.memeViewDaily.createMany({
-        data: [
-          {
-            memeId,
-            viewerKey,
-            day,
-            watchMs
-          }
-        ],
+        data: [{ memeId, viewerKey, day, watchMs }],
         skipDuplicates: true
       })
 
@@ -274,4 +285,13 @@ export const registerMemeView = createServerFn({ method: 'POST' })
         })
       }
     })
+
+    const promises: Promise<unknown>[] = hasConsentedToCookies
+      ? [
+          viewTransaction,
+          sendAlgoliaViewEvent({ memeId, userToken: viewerKey })
+        ]
+      : [viewTransaction]
+
+    await Promise.all(promises)
   })

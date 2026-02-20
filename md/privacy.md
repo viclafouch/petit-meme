@@ -41,7 +41,19 @@ Lors de la création d'un compte, nous collectons :
   (cookie, uniquement avec votre consentement)
 - Nombre de vues et temps de visionnage des mèmes
 
-### 2.4. Données analytiques (avec consentement)
+### 2.4. Données de recherche et analytics Algolia (avec consentement)
+
+Si vous acceptez les cookies, nous transmettons à Algolia :
+
+- Événements de vue (mèmes consultés)
+- Événements de clic (mèmes cliqués depuis les résultats de recherche)
+- Un identifiant anonyme (`algoliaUserToken`) permettant de relier ces
+  événements, sans lien avec votre identité personnelle
+
+Ces données sont utilisées pour améliorer la pertinence des résultats de
+recherche et générer des recommandations.
+
+### 2.5. Données analytiques (avec consentement)
 
 Si vous acceptez les cookies analytiques, nous collectons via Mixpanel :
 
@@ -49,7 +61,7 @@ Si vous acceptez les cookies analytiques, nous collectons via Mixpanel :
 - Actions effectuées (recherches, lectures de mèmes)
 - Données techniques (type de navigateur, taille d'écran)
 
-### 2.5. Données de paiement
+### 2.6. Données de paiement
 
 Les paiements sont gérés par **Stripe**. Nous ne stockons jamais vos
 informations de carte bancaire. Stripe collecte les données nécessaires au
@@ -64,6 +76,7 @@ traitement des paiements conformément à sa propre politique de confidentialit�
 | Création et gestion de compte | Exécution du contrat | Pseudo, e-mail, mot de passe |
 | Authentification et sécurité | Intérêt légitime | Données de session, IP |
 | Comptage des vues (avec cookie `anonId`) | Consentement | Identifiant anonyme |
+| Amélioration de la recherche (Algolia Insights) | Consentement | Identifiant anonyme, événements de vue et de clic |
 | Analyse du trafic (Mixpanel) | Consentement | Données de navigation |
 | Traitement des paiements | Exécution du contrat | Données transmises à Stripe |
 | Envoi d'e-mails transactionnels | Exécution du contrat | Adresse e-mail |
@@ -81,11 +94,13 @@ traitement des paiements conformément à sa propre politique de confidentialit�
 | `better-auth.session_token` | Session d'authentification | Durée de la session | Non (strictement nécessaire) |
 | `theme` | Préférence de thème (clair/sombre) | 1 an | Non (strictement nécessaire) |
 | `anonId` | Comptage des vues uniques | 1 an | Oui |
+| `algoliaUserToken` | Liaison des événements de recherche (vues, clics) pour Algolia | 1 an | Oui |
 | Cookies Mixpanel | Analyse du trafic et comportement | Variable | Oui |
 
 Vous pouvez gérer vos préférences cookies à tout moment. Si vous refusez les
-cookies analytiques, Mixpanel ne sera pas initialisé et le cookie `anonId` ne
-sera pas posé.
+cookies analytiques, Mixpanel ne sera pas initialisé et les cookies `anonId`
+et `algoliaUserToken` ne seront pas posés. Aucun événement ne sera transmis
+à Algolia.
 
 ---
 
@@ -119,6 +134,8 @@ européenne).
 | Tokens de vérification | Supprimés automatiquement 24h après leur expiration |
 | Données de vues détaillées (`MemeViewDaily`) | 90 jours, puis agrégées (compteur global) et supprimées |
 | Cookie `anonId` | 1 an (avec consentement) |
+| Cookie `algoliaUserToken` | 1 an (avec consentement) |
+| Données d'événements Algolia (vues, clics) | Selon la politique de rétention d'Algolia (30 jours par défaut) |
 | Données analytiques (Mixpanel) | Selon la politique de rétention de Mixpanel |
 | Données de paiement (Stripe) | Selon les obligations légales de Stripe |
 | E-mails transactionnels | Selon la politique de rétention de Resend |

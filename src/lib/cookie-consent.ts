@@ -1,11 +1,13 @@
-import { COOKIE_CONSENT_KEY } from '@/constants/cookie'
+import {
+  COOKIE_ALGOLIA_USER_TOKEN_KEY,
+  COOKIE_CONSENT_KEY
+} from '@/constants/cookie'
 import { ONE_YEAR_IN_SECONDS } from '@/constants/time'
-import { createIsomorphicFn } from '@tanstack/react-start'
+import { createClientCookie, readClientCookie } from '@/helpers/cookie'
+import { createClientOnlyFn, createIsomorphicFn } from '@tanstack/react-start'
 import { getCookie } from '@tanstack/react-start/server'
 
 type CookieConsentValue = 'accepted' | 'declined'
-
-const CONSENT_COOKIE_REGEX = new RegExp(`(?:^|; )${COOKIE_CONSENT_KEY}=([^;]*)`)
 
 function parseCookieConsent(
   rawValue: string | undefined | null
@@ -17,27 +19,30 @@ function parseCookieConsent(
   return null
 }
 
-function readClientCookieConsent() {
-  const match = document.cookie.match(CONSENT_COOKIE_REGEX)
-
-  return match?.[1]
-}
-
 const getCookieConsent = createIsomorphicFn()
   .server(() => {
     return parseCookieConsent(getCookie(COOKIE_CONSENT_KEY))
   })
   .client(() => {
-    return parseCookieConsent(readClientCookieConsent())
+    return parseCookieConsent(readClientCookie(COOKIE_CONSENT_KEY))
   })
 
-function setCookieConsent(value: CookieConsentValue) {
-  document.cookie = `${COOKIE_CONSENT_KEY}=${value}; path=/; max-age=${ONE_YEAR_IN_SECONDS}; SameSite=Lax`
-}
+const setCookieConsent = createClientOnlyFn((value: CookieConsentValue) => {
+  createClientCookie(COOKIE_CONSENT_KEY, value, {
+    maxAge: ONE_YEAR_IN_SECONDS
+  })
 
-function hasAcceptedCookies() {
-  return readClientCookieConsent() === 'accepted'
-}
+  if (value === 'accepted') {
+    createClientCookie(COOKIE_ALGOLIA_USER_TOKEN_KEY, crypto.randomUUID(), {
+      maxAge: ONE_YEAR_IN_SECONDS,
+      secure: true
+    })
+  }
+})
+
+const hasAcceptedCookies = createClientOnlyFn(() => {
+  return readClientCookie(COOKIE_CONSENT_KEY) === 'accepted'
+})
 
 export { getCookieConsent, hasAcceptedCookies, setCookieConsent }
 export type { CookieConsentValue }

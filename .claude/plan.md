@@ -454,54 +454,51 @@ Fichiers impactés :
 
 Les events alimentent **3 fonctionnalités** : Analytics dashboard, Recommend, et (futur) click-through rate dans le ranking.
 
-#### 2.1 Installer le client Insights
+**Décisions d'architecture (deep-dive 2026-02-20) :**
+- **Client/serveur** : View events côté serveur (`registerMemeView`), click events côté client (browser avec search key)
+- **Cache + queryID** : Le cache `withAlgoliaCache` reste tel quel. Le `queryID` est caché avec les résultats — acceptable que plusieurs users partagent le même `queryID` dans la fenêtre de 5 min (bruit mineur dans les analytics, performance prioritaire)
+- **Propagation queryID** : Props drilling (`getMemes()` → `MemesList` → `MemeListItem`)
+- **userToken** : `viewerKey` (UUID) utilisé directement (format compatible Algolia). Cookie `algoliaUserToken` (NON httpOnly, lisible par JS) créé avec le même UUID que `anonId` pour les events client-side
+- **authenticatedUserToken** : Reporté à Phase 4 (Recommend)
 
-- [ ] Utiliser `@algolia/client-search` qui expose déjà les méthodes Insights via `pushEvents`
-  - Pas besoin d'un package supplémentaire — le SDK v5 (`@algolia/client-search` ^5.49.0) inclut l'API Insights
-  - Créer un helper `sendAlgoliaEvent()` dans `src/lib/algolia.ts` qui wrape `algoliaAdminClient.pushEvents()`
+#### 2.1 Helper client + server Insights
+
+- [x] Ajouter variables d'env client : `VITE_ALGOLIA_APP_ID`, `VITE_ALGOLIA_SEARCH_KEY`, `VITE_ALGOLIA_INDEX` dans `src/env/client.ts` et `.env`/`.env.example`
+- [x] Installer `@algolia/client-insights` (package séparé de `@algolia/client-search` en v5)
+- [x] Créer `src/lib/algolia-insights.ts` (client-only) : `sendClickAfterSearch()` avec gate GDPR + lecture du cookie `algoliaUserToken`
+- [x] Créer `src/lib/algolia-insights.server.ts` (server-only) : `sendAlgoliaViewEvent()` via `insightsClient` avec admin key + `safeAlgoliaOp`
 
 #### 2.2 Activer `clickAnalytics` sur les requêtes de recherche
 
-- [ ] Ajouter `clickAnalytics: true` dans les `searchParams` de `getMemes()` (`src/server/meme.ts`)
-  - Algolia retournera un `queryID` avec chaque réponse
-  - Propager le `queryID` dans la réponse serveur vers le frontend
-  - Le `queryID` est nécessaire pour associer un clic à une recherche spécifique
-  - Attention : `clickAnalytics: true` **consomme des search requests supplémentaires** dans le compteur — surveiller la consommation
+- [x] Ajouter `clickAnalytics: true` dans `getMemes()` uniquement quand `data.query` est truthy
+- [x] Retourner `queryID` dans la réponse de `getMemes()`
+- [x] Propager `queryID` + `position` via props drilling : `search-memes.tsx` → `MemesList` → `MemeListItem`
+  - Position calculée : `page * HITS_PER_PAGE + index + 1` (1-indexed absolu)
 
 #### 2.3 Envoyer les events de vue (View)
 
-- [ ] Envoyer un event `view` à Algolia Insights depuis `registerMemeView` (`src/server/meme.ts`)
-  - L'event existe déjà côté Prisma (incrémentation `viewCount`) — ajouter l'appel Algolia Insights en parallèle
-  - Payload : `{ eventType: 'view', eventName: 'Meme Viewed', index, objectIDs: [memeId], userToken }`
-  - `userToken` : utiliser le `viewerKey` (cookie anonyme déjà en place via `COOKIE_ANON_ID_KEY`)
-  - Wraper dans `safeAlgoliaOp` pour ne pas bloquer l'UX si l'appel Insights échoue
+- [x] Envoyer `viewedObjectIDs` depuis `registerMemeView` en parallèle de la transaction Prisma
+- [x] Gate GDPR : conditionné à `hasConsentedToCookies`
+- [x] Wrappé dans `safeAlgoliaOp` (non-bloquant)
 
 #### 2.4 Envoyer les events de clic (Click)
 
-- [ ] Envoyer un event `clickedObjectIDsAfterSearch` quand un user clique sur un résultat de recherche
-  - Données nécessaires : `queryID` (de la recherche), `objectID` (du meme), `position` (dans les résultats, 1-indexed)
-  - Déclencher depuis le composant `MemeListItem` lors du clic (passer `queryID` + `position` via les props)
-  - Seuls les clics issus d'une recherche doivent envoyer cet event (pas les clics depuis la homepage, catégories, etc.)
-  - La position Algolia est **1-indexed** (le 1er résultat = position 1)
+- [x] `sendClickAfterSearch()` appelé dans `MemeListItem` sur clic Play + clic titre (Link)
+- [x] Conditionné à `queryID` truthy (uniquement clics issus d'une recherche)
+- [x] Fire-and-forget (`.catch(() => {})`)
 
-#### 2.5 Envoyer les events de conversion (Conversion)
+#### 2.5 Envoyer les events de conversion (Conversion) — REPORTÉ
 
-- [ ] Envoyer un event de conversion pour les actions à forte valeur
-  - **Bookmark/favori** : `src/hooks/use-toggle-bookmark.ts`
-  - **Partage** : `src/hooks/use-share-meme.ts`
-  - **Téléchargement** : `src/hooks/use-download-meme.ts`
-  - **Ouverture Studio** : `src/components/Meme/player-dialog.tsx`
-  - Si l'action vient d'une recherche (présence de `queryID`), envoyer `convertedObjectIDsAfterSearch`
-  - Sinon, envoyer un `convertedObjectIDs` simple (conversion non liée à une recherche)
-  - Pour Recommend, il faut au minimum ~1000 events de conversion sur 2+ items par 10+ users
+Reporté à une sous-phase ultérieure. Les conversions (bookmark, share, download, studio) nécessitent plus de réflexion sur la propagation du contexte de recherche vers le `PlayerDialog` et les hooks.
 
 #### 2.6 GDPR & userToken
 
-- [ ] Le `userToken` pour Algolia Insights doit respecter le consentement cookies
-  - Si consentement accepté : utiliser le `viewerKey` (cookie `COOKIE_ANON_ID_KEY` déjà en place)
-  - Si consentement refusé : ne pas envoyer d'events Insights
-  - Pour les users authentifiés : utiliser un hash de l'`userId` comme `authenticatedUserToken`
-  - Documenter dans la politique de confidentialité que les données de recherche sont partagées avec Algolia
+- [x] Ajouté `COOKIE_ALGOLIA_USER_TOKEN_KEY` dans `src/constants/cookie.ts`
+- [x] Cookie `algoliaUserToken` créé dans `registerMemeView` (NON httpOnly, même UUID que `anonId`, conditionné au consentement)
+- [x] Backfill : si `anonId` existe déjà mais pas `algoliaUserToken`, le cookie est créé au prochain `registerMemeView`
+- [x] Gate client : `hasAcceptedCookies()` + vérification du cookie avant envoi
+- [x] Gate serveur : `hasConsentedToCookies` avant envoi du view event
+- [ ] `authenticatedUserToken` reporté à Phase 4 (Recommend)
 
 ### Phase 3 — Analytics Dashboard (gratuit, dépend de Phase 2)
 

@@ -1,19 +1,20 @@
 import type { MemeWithCategories, MemeWithVideo } from '@/constants/meme'
 import { MINUTE } from '@/constants/time'
+import { clientEnv } from '@/env/client'
 import { serverEnv } from '@/env/server'
 import { buildVideoImageUrl } from '@/lib/bunny'
 import type { HighlightResultOption, Hit } from '@algolia/client-search'
 import { searchClient } from '@algolia/client-search'
 
-export const algoliaIndexName = serverEnv.ALGOLIA_INDEX
+export const algoliaIndexName = clientEnv.VITE_ALGOLIA_INDEX
 
 export const algoliaSearchClient = searchClient(
-  serverEnv.ALGOLIA_APP_ID,
-  serverEnv.ALGOLIA_SEARCH_KEY
+  clientEnv.VITE_ALGOLIA_APP_ID,
+  clientEnv.VITE_ALGOLIA_SEARCH_KEY
 )
 
 export const algoliaAdminClient = searchClient(
-  serverEnv.ALGOLIA_APP_ID,
+  clientEnv.VITE_ALGOLIA_APP_ID,
   serverEnv.ALGOLIA_ADMIN_KEY
 )
 

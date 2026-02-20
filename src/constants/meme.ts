@@ -13,6 +13,7 @@ export const DEFAULT_MEME_TITLE = 'Sans titre'
 export const LEGACY_MEME_TITLE = 'Titre inconnu'
 
 export const NEWS_CATEGORY_SLUG = 'news'
+export const MEMES_PER_PAGE = 30
 
 export const MemeStatusMeta = {
   PENDING: {

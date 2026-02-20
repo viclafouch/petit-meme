@@ -6,23 +6,27 @@ import { MemeListItem } from '@/components/Meme/meme-list-item'
 import { PlayerDialog } from '@/components/Meme/player-dialog'
 import { StudioDialog } from '@/components/Meme/studio-dialog'
 import { OverlaySpinner } from '@/components/ui/overlay-spinner'
-import type { MemeWithVideo } from '@/constants/meme'
+import { MEMES_PER_PAGE, type MemeWithVideo } from '@/constants/meme'
 import { ClientOnly } from '@tanstack/react-router'
 
-export type MemeWithHighlight = MemeWithVideo & {
+type MemeWithHighlight = MemeWithVideo & {
   highlightedTitle?: string
 }
 
-export type MemesListParams = {
+type MemesListParams = {
   memes: MemeWithHighlight[]
   layoutContext: string
   columnGridCount?: number
+  queryID?: string
+  page?: number
 }
 
 export const MemesList = ({
   memes,
   layoutContext,
-  columnGridCount = 4
+  columnGridCount = 4,
+  queryID,
+  page = 0
 }: MemesListParams) => {
   const [selectedId, setSelectedId] = React.useState<string | null>(null)
   const [studioMemeSelected, setStudioMemeSelected] =
@@ -89,7 +93,7 @@ export const MemesList = ({
         }
         className="grid gap-5 grid-cols-2 lg:grid-cols-(--cols)"
       >
-        {memes.map((meme) => {
+        {memes.map((meme, index) => {
           return (
             <MemeListItem
               onPlayClick={handleSelect}
@@ -99,6 +103,8 @@ export const MemesList = ({
               meme={meme}
               highlightedTitle={meme.highlightedTitle}
               onOpenStudioClick={setStudioMemeSelected}
+              queryID={queryID}
+              position={page * MEMES_PER_PAGE + index + 1}
             />
           )
         })}

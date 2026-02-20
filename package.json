@@ -29,6 +29,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@algolia/client-insights": "^5.49.0",
     "@algolia/client-search": "^5.49.0",
     "@better-auth/stripe": "^1.4.18",
     "@ffmpeg/ffmpeg": "^0.12.15",

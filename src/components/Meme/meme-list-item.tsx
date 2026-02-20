@@ -21,6 +21,7 @@ import { formatViewCount } from '@/helpers/format'
 import { useDownloadMeme } from '@/hooks/use-download-meme'
 import { useShareMeme } from '@/hooks/use-share-meme'
 import { useToggleBookmark } from '@/hooks/use-toggle-bookmark'
+import { sendClickAfterSearch } from '@/lib/algolia-insights'
 import { getFavoritesMemesQueryOpts } from '@/lib/queries'
 import { cn } from '@/lib/utils'
 import { useShowDialog } from '@/stores/dialog.store'
@@ -32,6 +33,8 @@ export type MemeListItemParams = {
   highlightedTitle?: string
   layoutContext: string
   size: keyof typeof sizes
+  queryID?: string
+  position: number
   onPlayClick: (meme: MemeWithVideo) => void
   onOpenStudioClick: (meme: MemeWithVideo) => void
 }
@@ -101,10 +104,24 @@ export const MemeListItem = React.memo(
     onPlayClick,
     layoutContext,
     onOpenStudioClick,
-    size
+    size,
+    queryID,
+    position
   }: MemeListItemParams) => {
     const shareMeme = useShareMeme()
     const downloadMutation = useDownloadMeme()
+
+    const handleTrackClick = () => {
+      if (!queryID) {
+        return
+      }
+
+      sendClickAfterSearch({
+        queryID,
+        objectID: meme.id,
+        position
+      })
+    }
 
     return (
       <motion.div
@@ -122,6 +139,7 @@ export const MemeListItem = React.memo(
               type="button"
               onClick={(event) => {
                 event.preventDefault()
+                handleTrackClick()
 
                 return onPlayClick(meme)
               }}
@@ -140,6 +158,7 @@ export const MemeListItem = React.memo(
               params={{ memeId: meme.id }}
               title={meme.title}
               className={cn('line-clamp-1 text-primary', sizes[size].title)}
+              onClick={handleTrackClick}
             >
               {highlightedTitle ? (
                 <span

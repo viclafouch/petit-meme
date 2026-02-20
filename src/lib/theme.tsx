@@ -1,5 +1,6 @@
 import React from 'react'
 import { ONE_YEAR_IN_SECONDS } from '@/constants/time'
+import { createClientCookie, readClientCookie } from '@/helpers/cookie'
 import { createIsomorphicFn } from '@tanstack/react-start'
 import { getCookie } from '@tanstack/react-start/server'
 
@@ -15,10 +16,7 @@ export const getStoredTheme = createIsomorphicFn()
     return value === 'light' || value === 'dark' ? value : DEFAULT_THEME
   })
   .client((): Theme => {
-    const match = document.cookie.match(
-      new RegExp(`(?:^|; )${THEME_COOKIE_KEY}=([^;]*)`)
-    )
-    const value = match?.[1]
+    const value = readClientCookie(THEME_COOKIE_KEY)
 
     return value === 'light' || value === 'dark' ? value : DEFAULT_THEME
   })
@@ -52,7 +50,9 @@ export const ThemeProvider = ({
   const handleSetTheme = React.useCallback(
     (newTheme: Theme) => {
       setTheme(newTheme)
-      document.cookie = `${THEME_COOKIE_KEY}=${newTheme}; path=/; max-age=${ONE_YEAR_IN_SECONDS}; SameSite=Lax`
+      createClientCookie(THEME_COOKIE_KEY, newTheme, {
+        maxAge: ONE_YEAR_IN_SECONDS
+      })
     },
     [setTheme]
   )

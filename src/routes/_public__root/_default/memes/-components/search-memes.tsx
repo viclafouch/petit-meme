@@ -89,6 +89,8 @@ const MemesListWrapper = ({ columnGridCount }: { columnGridCount: number }) => {
         columnGridCount={columnGridCount}
         layoutContext="library"
         memes={memesListQuery.data.memes}
+        queryID={memesListQuery.data.queryID}
+        page={memesListQuery.data.page}
       />
       <div className="flex justify-end z-0">
         <MemesPagination

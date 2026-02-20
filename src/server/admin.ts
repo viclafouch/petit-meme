@@ -6,6 +6,7 @@ import {
   MAX_SIZE_MEME_IN_BYTES,
   MEME_FULL_INCLUDE,
   MEMES_FILTERS_SCHEMA,
+  MEMES_PER_PAGE,
   TWEET_LINK_SCHEMA
 } from '@/constants/meme'
 import { prismaClient } from '@/db'
@@ -327,7 +328,7 @@ export const getAdminMemes = createServerFn({ method: 'GET' })
           searchParams: {
             query: data.query,
             page: data.page ? data.page - 1 : 0,
-            hitsPerPage: 30,
+            hitsPerPage: MEMES_PER_PAGE,
             filters,
             ...ALGOLIA_ADMIN_SEARCH_PARAMS
           }

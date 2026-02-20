@@ -11,6 +11,7 @@ import { getAuthUserQueryOpts } from '@/lib/queries'
 import { getStoredTheme, ThemeProvider } from '@/lib/theme'
 import type { getAuthUser } from '@/server/user-auth'
 import { DialogProvider } from '@/stores/dialog.store'
+import { ensureAlgoliaUserToken } from '@/utils/tracking-cookies'
 import type { QueryClient } from '@tanstack/react-query'
 import {
   ClientOnly,
@@ -116,9 +117,15 @@ export const Route = createRootRouteWithContext<{
     return { user }
   },
   loader: async () => {
+    const cookieConsent = getCookieConsent()
+
+    if (cookieConsent === 'accepted') {
+      ensureAlgoliaUserToken()
+    }
+
     return {
       _storedTheme: getStoredTheme(),
-      _cookieConsent: getCookieConsent()
+      _cookieConsent: cookieConsent
     }
   },
   head: () => {

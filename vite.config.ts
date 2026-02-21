@@ -1,6 +1,7 @@
 import { nitro } from 'nitro/vite'
 import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
+import { sentryTanstackStart } from '@sentry/tanstackstart-react'
 import tailwindcss from '@tailwindcss/vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import react from '@vitejs/plugin-react'
@@ -55,6 +56,11 @@ export default defineConfig({
           }
         }
       }
+    }),
+    sentryTanstackStart({
+      org: 'viclafouch',
+      project: 'petit-meme',
+      authToken: process.env.SENTRY_AUTH_TOKEN
     })
   ]
 })

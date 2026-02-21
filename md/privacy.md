@@ -72,6 +72,7 @@ traitement des paiements conformément à sa propre politique de confidentialit�
 | Traitement des paiements | Exécution du contrat | Données transmises à Stripe |
 | Envoi d'e-mails transactionnels | Exécution du contrat | Adresse e-mail |
 | Recherche de mèmes | Exécution du contrat | Requêtes de recherche |
+| Suivi des erreurs et stabilité du service | Intérêt légitime | Données techniques (URL, navigateur, traces d'erreur) |
 
 ---
 
@@ -105,6 +106,7 @@ service :
 | **Bunny CDN** | Hébergement et diffusion des vidéos | Union européenne |
 | **Algolia** | Moteur de recherche | Union européenne / États-Unis (clauses contractuelles types) |
 | **Twitter/X** | Authentification sociale (OAuth) | États-Unis (clauses contractuelles types) |
+| **Sentry** | Suivi des erreurs et monitoring de la stabilité | Allemagne (Union européenne) |
 | **Google Fonts** | Chargement des polices d'affichage (adresse IP transmise) | États-Unis (clauses contractuelles types) |
 
 Pour les transferts de données hors de l'Union européenne, des garanties

@@ -11,6 +11,7 @@ import { getStoredTheme, ThemeProvider } from '@/lib/theme'
 import type { getAuthUser } from '@/server/user-auth'
 import { DialogProvider } from '@/stores/dialog.store'
 import { ensureAlgoliaUserToken } from '@/utils/tracking-cookies'
+import * as Sentry from '@sentry/tanstackstart-react'
 import type { QueryClient } from '@tanstack/react-query'
 import type { ErrorComponentProps } from '@tanstack/react-router'
 import {
@@ -109,6 +110,10 @@ const RootErrorDocument = ({ children }: { children: React.ReactNode }) => {
 }
 
 const RootErrorComponent = ({ error, reset }: ErrorComponentProps) => {
+  React.useEffect(() => {
+    Sentry.captureException(error)
+  }, [error])
+
   return (
     <RootErrorDocument>
       <div

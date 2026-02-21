@@ -8,19 +8,24 @@ import {
 } from '@/components/ui/accordion'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import * as Sentry from '@sentry/tanstackstart-react'
 import { useQueryErrorResetBoundary } from '@tanstack/react-query'
 import { Link, useRouter } from '@tanstack/react-router'
 
 export const ErrorComponent = ({ error }: { error: Error }) => {
   const router = useRouter()
 
-  const queryClientErrorBoundary = useQueryErrorResetBoundary()
+  const queryErrorResetBoundary = useQueryErrorResetBoundary()
 
   const isDev = process.env.NODE_ENV !== 'production'
 
   React.useEffect(() => {
-    queryClientErrorBoundary.reset()
-  }, [queryClientErrorBoundary])
+    Sentry.captureException(error)
+  }, [error])
+
+  React.useEffect(() => {
+    queryErrorResetBoundary.reset()
+  }, [queryErrorResetBoundary])
 
   return (
     <div className="mt-8 flex items-center justify-center p-4">

@@ -19,7 +19,8 @@ export default [
       '**/.tanstack/**',
       '**/db/generated/**',
       '**/components/ui/**',
-      '**/components/animate-ui/**'
+      '**/components/animate-ui/**',
+      'instrument.server.mjs'
     ]
   },
   ...typescriptConfig,

@@ -15,6 +15,11 @@
       "source": "resend/resend-skills",
       "sourceType": "github",
       "computedHash": "318cfafb6bb004da64d0eac0349d99997b8b1c75e55870a4104dff9b5ff4ee3d"
+    },
+    "sentry-fix-issues": {
+      "source": "getsentry/sentry-agent-skills",
+      "sourceType": "github",
+      "computedHash": "5673b169d2a0eb6e4651a57eba4263d1c04dce10e2955c97902f1e9f80109a52"
     }
   }
 }

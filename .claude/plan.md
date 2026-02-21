@@ -802,6 +802,225 @@ Pour un site de memes, 1M records est largement suffisant. Même avec 10K memes,
 
 ---
 
+## Sentry — Error Monitoring & Performance
+
+### Contexte
+
+L'app n'a **aucun monitoring d'erreur**. Les erreurs sont loguées via Pino (stdout) mais jamais agrégées, trackées ou alertées. Pas de `process.on('uncaughtException')`, pas d'APM, pas de tracing. Sentry comble ce vide.
+
+### Stratégie de tracking — Séparation des responsabilités
+
+3 couches distinctes, zéro chevauchement :
+
+| Couche | Outil | Rôle | GDPR |
+|--------|-------|------|------|
+| **Engagement utilisateur** | Algolia Insights | Comment les users découvrent et interagissent avec le contenu (clics, vues, conversions, position search, queryID) | Consentement cookies requis |
+| **Santé applicative** | Sentry | Détecter/diagnostiquer bugs, erreurs, performance (JS errors, 5xx, slow transactions, Core Web Vitals, session replay) | Intérêt légitime Art. 6(1)(f) — **pas de consentement cookies** |
+| **Business events** | Pino (logs structurés) | Audit trail opérationnel (auth, Stripe, exports GDPR, crons, limites) | Intérêt légitime — logs serveur |
+
+**Sentry n'est PAS concerné par le consentement cookies GDPR** : c'est du monitoring technique nécessaire au fonctionnement du service (intérêt légitime), pas du tracking marketing. Le cookie banner n'impacte pas Sentry.
+
+### Angle mort actuel — erreurs silencieuses
+
+Plusieurs patterns avalent les erreurs sans visibilité en production :
+
+| Pattern | Fichier | Impact |
+|---------|---------|--------|
+| `catch {}` (vide) | `src/hooks/use-register-meme-view.ts` | Vues perdues sans diagnostic |
+| `.catch(logInsightsError)` → `console.warn` | `src/lib/algolia-insights.ts` | Events Algolia échoués invisibles |
+| `safeAlgoliaOp` → log + `return null` | `src/lib/algolia.ts` | Opérations Algolia silencieuses |
+| `catch → return null` | `src/server/customer.ts` | Lookups Stripe échoués sans alerte |
+
+Sentry comble exactement ce trou : ces erreurs remonteraient avec le contexte complet.
+
+### Intégration avec le code existant
+
+Stratégie **additive** — on ne touche pas au tracking Algolia, on ajoute Sentry dans les catch blocks :
+
+- `safeAlgoliaOp` : ajouter `Sentry.captureException(error)` avant `return null`
+- `use-register-meme-view.ts` : remplacer `catch {}` par `catch (error) { Sentry.captureException(error) }`
+- `logInsightsError` : ajouter `Sentry.captureException(error)` dans la fonction
+- `customer.ts` / `auth.tsx` : `Sentry.captureException` dans les catch blocks Stripe/auth
+- Pino reste inchangé — les logs structurés continuent en parallèle pour l'audit trail
+
+### Choix du SDK
+
+**`@sentry/tanstackstart-react`** — SDK dédié TanStack Start (alpha, maintenu par Sentry en collaboration avec TanStack). Package unique qui bundle :
+- Client React SDK avec `tanstackRouterBrowserTracingIntegration`
+- Server Node.js SDK avec OpenTelemetry
+- Vite plugin pour upload de source maps
+- Session Replay
+
+**Status : ALPHA.** Compatible TanStack Start 1.0 RC. Risque de breaking changes — **pin la version exacte** dans `package.json` (pas de `^`).
+
+**Fallback** si le SDK alpha est trop instable : installer séparément `@sentry/react` + `@sentry/node` + `@sentry/vite-plugin` (setup manuel, plus de contrôle).
+
+### Architecture d'intégration
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                      CLIENT (Browser)                    │
+│  src/router.tsx → Sentry.init()                          │
+│  - tanstackRouterBrowserTracingIntegration (navigation)  │
+│  - replayIntegration (session replay)                    │
+│  - Error boundaries (route-level)                        │
+│  - Tunnel /api/sentry-tunnel (bypass ad blockers)        │
+└─────────────────────────────────────────────────────────┘
+                            │
+┌─────────────────────────────────────────────────────────┐
+│                      SERVER (Nitro/Node.js)              │
+│  instrument.server.mjs → Sentry.init() (--import flag)   │
+│  - wrapFetchWithSentry (src/server.ts)                   │
+│  - sentryGlobalRequestMiddleware (routes)                │
+│  - sentryGlobalFunctionMiddleware (createServerFn)       │
+│  - Prisma tracing (queries dans les spans)               │
+└─────────────────────────────────────────────────────────┘
+                            │
+┌─────────────────────────────────────────────────────────┐
+│                      CRONS (vite-node)                   │
+│  @sentry/node dans chaque cron                           │
+│  - captureCheckIn (in_progress / ok / error)             │
+│  - 5 monitors : sync-algolia, verification-reminder,     │
+│    unverified-cleanup, cleanup-retention,                │
+│    update-title-bunny                                    │
+└─────────────────────────────────────────────────────────┘
+                            │
+┌─────────────────────────────────────────────────────────┐
+│                      BUILD (CI/Railway)                   │
+│  sentryTanstackStart Vite plugin (dernier plugin)        │
+│  - Upload source maps automatique                        │
+│  - Suppression des .map après upload                     │
+│  - Release tagging (git SHA)                             │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Limitations connues
+
+| Limitation | Impact | Workaround |
+|------------|--------|------------|
+| SSR rendering exceptions non capturées | Erreurs pendant le rendu server-side perdues | Logger Pino en fallback |
+| SDK alpha — breaking changes possibles | Maintenance supplémentaire | Pin version exacte, suivre issue #14990 |
+| `--import` flag obligatoire (ESM + OpenTelemetry) | Script `start` modifié | Adapter Railway start command |
+| Ad blockers bloquent les events Sentry | Perte d'events client | Tunnel `/api/sentry-tunnel` |
+
+### Pricing
+
+**Recommandation : plan Team à $29/mois.**
+
+| Plan | Prix | Erreurs | Spans (Perf) | Replays | Cron Monitors |
+|------|------|---------|--------------|---------|---------------|
+| Developer (gratuit) | $0/mois | 5K/mois | Inclus | 50/mois | 1 |
+| **Team** | **$29/mois** | **50K/mois** | **5M/mois** | **500/mois** | **Inclus** |
+| Business | $89/mois | 50K/mois | 5M/mois | 500/mois | Inclus |
+
+Le plan gratuit est trop limité (1 user, 5K erreurs, 1 seul cron monitor). Le plan Business ($89) ajoute SSO/audit — inutile pour un petit projet.
+
+### Sampling rates recommandés
+
+| Contexte | `tracesSampleRate` | `replaysSessionSampleRate` | `replaysOnErrorSampleRate` |
+|----------|-------------------|---------------------------|---------------------------|
+| Dev | 1.0 | 0.0 | 0.0 |
+| Production | 0.2 | 0.05 | 1.0 |
+
+### Variables d'environnement à ajouter
+
+```
+VITE_SENTRY_DSN=https://xxx@xxx.ingest.sentry.io/xxx    # Public (client + server)
+SENTRY_AUTH_TOKEN=sntrys_xxx                              # Build only (source maps)
+SENTRY_ORG=your-org                                       # Build only
+SENTRY_PROJECT=memes-by-lafouch                           # Build only
+```
+
+`VITE_SENTRY_DSN` est un DSN public — safe à exposer côté client.
+`SENTRY_AUTH_TOKEN` uniquement nécessaire au build (CI/Railway).
+
+### PII & filtrage de données sensibles
+
+**Règles critiques** — l'app manipule des données Stripe et auth :
+
+- `sendDefaultPii: false` partout
+- `beforeSend` : supprimer `event.user.email`, scrub les breadcrumbs `/api/stripe/*` et `/api/auth/*`
+- `beforeBreadcrumb` : filtrer les requêtes XHR auth/stripe
+- Session Replay : `maskAllText: true`, `blockAllMedia: true`, `maskAllInputs: true`
+- Replay `networkDetailDenyUrls` : `/api/stripe/`, `/api/auth/`
+- Server : supprimer headers `authorization`, `cookie`, `set-cookie`
+- Dashboard Sentry : activer server-side scrubbing pour `password`, `token`, `secret`, `apiKey`, `stripe_customer_id`
+
+### Fichiers impactés
+
+| Fichier | Action | Rôle |
+|---------|--------|------|
+| `instrument.server.mjs` | **CRÉER** (racine) | Init Sentry server-side |
+| `src/sentry.client.ts` | **CRÉER** | Config client Sentry (init + integrations) |
+| `src/router.tsx` | **MODIFIER** | Appeler `Sentry.init()` côté client + router integration |
+| `src/server.ts` | **MODIFIER** | Wrapper fetch avec `wrapFetchWithSentry` |
+| `src/routes/__root.tsx` | **MODIFIER** | Error boundary Sentry sur `RootErrorComponent` |
+| `src/components/error-component.tsx` | **MODIFIER** | `Sentry.captureException` dans l'error component |
+| `vite.config.ts` | **MODIFIER** | Ajouter `sentryTanstackStart` (dernier plugin) |
+| `package.json` | **MODIFIER** | Scripts `build`/`start` avec `--import` |
+| `src/env/client.ts` | **MODIFIER** | Validation `VITE_SENTRY_DSN` |
+| `.env` / `.env.example` | **MODIFIER** | Ajouter variables Sentry |
+| `.env.sentry-build-plugin` | **CRÉER** | Auth token pour source maps |
+| `crons/*.ts` (5 fichiers) | **MODIFIER** | Ajouter cron monitoring check-ins |
+| `.gitignore` | **MODIFIER** | Ajouter `.env.sentry-build-plugin` |
+
+---
+
+### Phase 0 — Installation & onboarding (doc officielle)
+
+- [x] Installer `@sentry/tanstackstart-react` (version exacte `10.39.0`, pas `^`)
+- [x] Créer le projet Sentry (dashboard) : org `viclafouch`, project `javascript-tanstackstart-react`
+- [x] Ajouter `VITE_SENTRY_DSN` dans `src/env/client.ts` (Zod `z.url()`), `.env.example`
+- [x] Ajouter `.env.sentry-build-plugin` au `.gitignore`
+- [x] `instrument.server.mjs` — `Sentry.init()` server avec `sendDefaultPii: false`, `enabled: production`, `tracesSampleRate: 0.2`
+- [x] `src/router.tsx` — `Sentry.init()` client avec `tanstackRouterBrowserTracingIntegration`, `replayIntegration` (masqué), `beforeSend` PII filter, `beforeBreadcrumb` scrub auth/stripe, `denyUrls` Chrome extensions
+- [x] `src/server.ts` — `wrapFetchWithSentry({ fetch })` wrapping le handler custom
+- [x] `vite.config.ts` — `sentryTanstackStart` en **dernier** plugin (après `react()` et `nitro()`)
+- [x] `package.json` scripts — `build` avec `cp instrument.server.mjs`, `dev` avec `NODE_OPTIONS='--import'`, `start` avec `--import`
+- [x] `src/components/error-component.tsx` — `Sentry.captureException(error)` dans le `useEffect`
+- [x] `src/routes/__root.tsx` — `Sentry.captureException(error)` dans `RootErrorComponent`
+- [x] `eslint.config.js` — `instrument.server.mjs` ajouté aux ignores
+- [ ] Ajouter `VITE_SENTRY_DSN` et `SENTRY_AUTH_TOKEN` dans le `.env` local
+- [ ] Ajouter `VITE_SENTRY_DSN` et `SENTRY_AUTH_TOKEN` sur Railway (env vars)
+- [ ] Mettre à jour la commande start sur Railway avec le flag `--import`
+- [ ] Vérifier que les source maps sont uploadées après un build (`npm run build`)
+- [ ] Tester une erreur manuellement et vérifier qu'elle apparaît dans Sentry
+
+### Phase 1 — Server-side avancé
+
+- [ ] Ajouter `beforeSend` server (`instrument.server.mjs`) : scrub `request.data` pour `/stripe/webhook` et `/api/auth`, supprimer headers sensibles
+- [ ] Configurer `tracesSampler` : 100% pour `/api/stripe/webhook`, 0% pour health checks, 20% reste
+
+### Phase 2 — Source maps avancé
+
+- [ ] Configurer `sourcemaps.filesToDeleteAfterUpload: ['.output/**/*.map']`
+- [ ] Configurer release tagging (git SHA via `process.env.RAILWAY_GIT_COMMIT_SHA` ou fallback)
+- [ ] Vérifier l'upload des source maps après un build de test
+
+### Phase 4 — Cron monitoring
+
+- [ ] Créer un helper `src/lib/sentry-cron.ts` avec `withCronMonitoring(monitorSlug, schedule, task)` pour factoriser le pattern check-in
+- [ ] Modifier `crons/sync-algolia.ts` : wrapper avec `withCronMonitoring`
+- [ ] Modifier `crons/verification-reminder.ts` : wrapper avec `withCronMonitoring`
+- [ ] Modifier `crons/unverified-cleanup.ts` : wrapper avec `withCronMonitoring`
+- [ ] Modifier `crons/cleanup-retention.ts` : wrapper avec `withCronMonitoring`
+- [ ] Modifier `crons/update-title-bunny.ts` : wrapper avec `withCronMonitoring`
+- [ ] Configurer les monitors dans le dashboard Sentry : schedule, timezone `Europe/Paris`, `checkinMargin: 5`, `maxRuntime: 30`
+
+### Phase 5 — Tunnel ad-blocker bypass
+
+- [ ] Créer une API route `/api/sentry-tunnel` qui proxy les events vers `https://xxx.ingest.sentry.io`
+- [ ] Configurer `tunnel: '/api/sentry-tunnel'` dans l'init client
+- [ ] Valider que les events passent même avec un ad blocker actif
+
+### Phase 6 — Prisma tracing (optionnel)
+
+- [ ] Évaluer `@prisma/instrumentation` pour tracer les queries dans les spans Sentry
+- [ ] Si pertinent : ajouter `Sentry.prismaIntegration()` dans `instrument.server.mjs`
+- [ ] Vérifier que les queries apparaissent dans les transactions Sentry
+
+---
+
 ## Futur
 
 Items non planifiés, à traiter après les corrections ci-dessus.

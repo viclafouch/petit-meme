@@ -1,4 +1,5 @@
 import { clientEnv } from '@/env/client'
+import { wrapFetchWithSentry } from '@sentry/tanstackstart-react'
 import {
   createStartHandler,
   defaultStreamHandler,
@@ -30,8 +31,12 @@ const customHandler = defineHandlerCallback(async (context) => {
   return response
 })
 
-const fetch = createStartHandler(customHandler)
+const handler = createStartHandler(customHandler)
 
-export default createServerEntry({
-  fetch
-})
+export default createServerEntry(
+  wrapFetchWithSentry({
+    fetch: (request) => {
+      return handler(request)
+    }
+  })
+)

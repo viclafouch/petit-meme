@@ -38,3 +38,9 @@ backup.json
 dist
 .output
 .nitro
+
+# Sentry auth token (source map uploads)
+.env.sentry-build-plugin
+
+# MCP config (contains auth tokens)
+.mcp.json

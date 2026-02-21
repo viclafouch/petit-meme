@@ -19,7 +19,7 @@ export const ResetPassword = ({ username, resetUrl }: ResetPasswordProps) => {
           nouveau.
         </Text>
         <Button
-          className="inline-block rounded-lg bg-brand-button px-5 py-3.5 text-center text-sm font-medium text-brand-button-foreground no-underline"
+          className="box-border inline-block rounded-lg bg-brand-button px-5 py-3.5 text-center text-sm font-medium text-brand-button-foreground no-underline"
           href={resetUrl}
         >
           Réinitialiser mon mot de passe
@@ -46,6 +46,6 @@ export const ResetPassword = ({ username, resetUrl }: ResetPasswordProps) => {
 ResetPassword.PreviewProps = {
   username: 'Alan',
   resetUrl: 'https://petit-meme.io/reset-password?token=abc123'
-} as ResetPasswordProps
+} satisfies ResetPasswordProps
 
 export default ResetPassword

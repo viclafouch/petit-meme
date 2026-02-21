@@ -20,7 +20,7 @@ export const WelcomeEmail = ({ username }: WelcomeEmailProps) => {
           favoris et partager les meilleurs avec tes amis.
         </Text>
         <Button
-          className="inline-block rounded-lg bg-brand-button px-5 py-3.5 text-center text-sm font-medium text-brand-button-foreground no-underline"
+          className="box-border inline-block rounded-lg bg-brand-button px-5 py-3.5 text-center text-sm font-medium text-brand-button-foreground no-underline"
           href={SITE_URL}
         >
           Découvrir les mèmes
@@ -38,6 +38,6 @@ export const WelcomeEmail = ({ username }: WelcomeEmailProps) => {
 
 WelcomeEmail.PreviewProps = {
   username: 'Alan'
-} as WelcomeEmailProps
+} satisfies WelcomeEmailProps
 
 export default WelcomeEmail

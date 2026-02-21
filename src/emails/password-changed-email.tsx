@@ -38,6 +38,6 @@ export const PasswordChangedEmail = ({
 PasswordChangedEmail.PreviewProps = {
   username: 'Alan',
   changedAt: '21 février 2026 à 14:30'
-} as PasswordChangedEmailProps
+} satisfies PasswordChangedEmailProps
 
 export default PasswordChangedEmail

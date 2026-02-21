@@ -21,7 +21,7 @@ export const EmailVerification = ({
           créer tes mèmes, tu dois <b>confirmer ton adresse e-mail</b>.
         </Text>
         <Button
-          className="inline-block rounded-lg bg-brand-button px-5 py-3.5 text-center text-sm font-medium text-brand-button-foreground no-underline"
+          className="box-border inline-block rounded-lg bg-brand-button px-5 py-3.5 text-center text-sm font-medium text-brand-button-foreground no-underline"
           href={verificationUrl}
         >
           Confirmer mon inscription
@@ -47,6 +47,6 @@ export const EmailVerification = ({
 EmailVerification.PreviewProps = {
   username: 'Alan',
   verificationUrl: 'https://petit-meme.io/api/auth/verify-email?token=abc123'
-} as EmailVerificationProps
+} satisfies EmailVerificationProps
 
 export default EmailVerification

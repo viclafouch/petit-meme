@@ -5,6 +5,7 @@ import {
   Head,
   Html,
   Link,
+  pixelBasedPreset,
   Preview,
   Section,
   Tailwind,
@@ -19,6 +20,7 @@ type EmailLayoutProps = {
 export const SITE_URL = 'https://petit-meme.io'
 
 const tailwindConfig = {
+  presets: [pixelBasedPreset],
   theme: {
     extend: {
       colors: {
@@ -39,11 +41,11 @@ const tailwindConfig = {
 export const EmailLayout = ({ preview, children }: EmailLayoutProps) => {
   return (
     <Html lang="fr">
-      <Head>
-        <meta name="color-scheme" content="light dark" />
-        <meta name="supported-color-schemes" content="light dark" />
-      </Head>
       <Tailwind config={tailwindConfig}>
+        <Head>
+          <meta name="color-scheme" content="light dark" />
+          <meta name="supported-color-schemes" content="light dark" />
+        </Head>
         <Body className="mx-auto my-0 bg-neutral-100 font-sans">
           <Preview>{preview}</Preview>
           <Container className="mx-auto my-10 max-w-140 rounded-lg border border-solid border-brand-border bg-white p-10">
@@ -53,7 +55,7 @@ export const EmailLayout = ({ preview, children }: EmailLayoutProps) => {
               </Text>
             </Section>
             {children}
-            <Section className="mt-8 border-t border-solid border-brand-border pt-6">
+            <Section className="mt-8 border-none border-t border-brand-border pt-6">
               <Text className="m-0 text-xs text-brand-muted">
                 <Link href={SITE_URL} className="text-brand-muted underline">
                   petit-meme.io

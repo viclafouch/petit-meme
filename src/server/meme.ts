@@ -121,6 +121,10 @@ export const getMemes = createServerFn({ method: 'GET' })
     const hasQuery = Boolean(data.query)
     const indexName = resolveIndexName(data.category, hasQuery)
     const cacheKey = `${indexName}:${data.query ?? ''}:${data.page ?? 1}:${data.category ?? ''}`
+    const hasConsentedToCookies = getCookie(COOKIE_CONSENT_KEY) === 'accepted'
+    const userToken = hasConsentedToCookies
+      ? getCookie(COOKIE_ALGOLIA_USER_TOKEN_KEY)
+      : undefined
 
     return withAlgoliaCache(cacheKey, async () => {
       const thirtyDaysAgo = Date.now() - THIRTY_DAYS_MS
@@ -134,7 +138,8 @@ export const getMemes = createServerFn({ method: 'GET' })
             page: data.page ? data.page - 1 : 0,
             hitsPerPage: MEMES_PER_PAGE,
             filters,
-            ...(hasQuery ? { clickAnalytics: true } : {}),
+            clickAnalytics: true,
+            userToken,
             ...ALGOLIA_SEARCH_PARAMS_BASE
           }
         })
@@ -147,7 +152,7 @@ export const getMemes = createServerFn({ method: 'GET' })
           }
         }),
         query: data.query,
-        queryID: hasQuery ? response.queryID : undefined,
+        queryID: response.queryID,
         page: response.page,
         totalPages: response.nbPages
       }

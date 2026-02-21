@@ -515,6 +515,8 @@ Les events alimentent **3 fonctionnalités** : Analytics dashboard, Recommend, e
 - [x] Ajouter `sendConversion()` (sans `queryID`) : conversions hors recherche (browse, homepage, recommend) trackées dans `MemeListItem` et `PlayerDialog`
 - [x] Conversions Recommend : studio, share, download, bookmark, link copy désormais trackées même sans `queryID`
 - [x] Refactoring types : `BaseEventParams` partagé, `ConversionEventName` union, suppression discriminated unions (`AfterSearchContext`/`BrowseContext`) au profit de `queryID?: string` optionnel — simplifie les consumers (`MemeListItem`, `PlayerDialog`)
+- [x] Ajouter `userToken` sur les search requests (`getMemes()` → `searchSingleIndex`) pour corréler recherches et events. Cookie lu côté serveur, pas inclus dans la clé de cache (résultats identiques pour tous). GDPR respecté (consent vérifié avant lecture du cookie).
+- [x] Activer `clickAnalytics: true` sur toutes les recherches (pas seulement les queries textuelles) + retourner `queryID` systématiquement pour tracker les clics en browse/catégories
 
 ### Phase 3 — Analytics Dashboard (gratuit, dépend de Phase 2)
 

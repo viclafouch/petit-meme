@@ -1,18 +1,24 @@
 import React from 'react'
 import { buttonVariants } from '@/components/ui/button'
+import { VIRTUAL_CATEGORIES } from '@/constants/meme'
 import { getCategoriesListQueryOpts } from '@/lib/queries'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link, useParams } from '@tanstack/react-router'
 
 export const CategoriesList = () => {
-  const categories = useSuspenseQuery(getCategoriesListQueryOpts())
+  const categoriesQuery = useSuspenseQuery(getCategoriesListQueryOpts())
 
   const { slug: activeSlug } = useParams({ strict: false })
+
+  // eslint-disable-next-line no-restricted-syntax
+  const categories = React.useMemo(() => {
+    return [...VIRTUAL_CATEGORIES, ...categoriesQuery.data]
+  }, [categoriesQuery.data])
 
   return (
     <div className="w-full overflow-x-auto no-scrollbar py-2">
       <ul className="flex items-center gap-x-2">
-        {categories.data.map((category) => {
+        {categories.map((category) => {
           const isActive = activeSlug === category.slug
 
           return (

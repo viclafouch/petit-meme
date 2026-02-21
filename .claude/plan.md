@@ -637,13 +637,15 @@ Les virtual replicas permettent un tri alternatif sans dupliquer les records (0 
 - [x] `src/server/meme.ts` — `buildMemeFilters()` : `VIRTUAL_CATEGORY_SLUGS` Set pour ne pas filtrer par `categorySlugs` sur les fausses catégories
 - [x] `src/server/meme.ts` — `getMemes()` : clé de cache préfixée par `${indexName}` au lieu de `memes`
 
-#### 7.4 Refactor futur — Virtual categories (REPORTÉ)
+#### 7.4 Refactor — Virtual categories
 
-- [ ] Migrer `news` et `popular` de catégories DB en catégories virtuelles injectées côté client
-  - Supprimer les fausses catégories de la base
-  - Injecter les onglets "Nouveautés" et "Populaires" dans `getCategoriesListQueryOpts()` côté client
-  - Adapter le loader `/memes/category/$slug` pour gérer les slugs virtuels
-  - Adapter le formulaire admin (plus besoin d'exclure)
+- [x] Migrer `news` et `popular` de catégories DB en catégories virtuelles injectées côté client
+  - [x] Créer `VIRTUAL_CATEGORIES` dans `src/constants/meme.ts` avec `id`, `title`, `slug`, `keywords`
+  - [x] `getCategoriesListQueryOpts()` : filtrer les catégories DB virtuelles + prepend `VIRTUAL_CATEGORIES`
+  - [x] Narrower le type de `buildCategoryJsonLd` (`Pick<CategoryModel, 'slug' | 'title'>`) pour accepter les virtual categories
+  - [x] Le loader `/memes/category/$slug` fonctionne sans changement (virtual categories dans la query data)
+  - [x] Le formulaire admin conserve son filtre `VIRTUAL_CATEGORY_SLUGS` (virtual categories toujours dans la liste)
+  - [x] Supprimer les catégories `news` et `popular` de la base de données (local + prod via Railway CLI)
 
 ---
 

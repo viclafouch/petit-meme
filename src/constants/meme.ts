@@ -19,6 +19,29 @@ export const VIRTUAL_CATEGORY_SLUGS = new Set([
   NEWS_CATEGORY_SLUG,
   POPULAR_CATEGORY_SLUG
 ])
+
+type VirtualCategory = {
+  id: string
+  title: string
+  slug: string
+  keywords: string[]
+}
+
+export const VIRTUAL_CATEGORIES = [
+  {
+    id: 'virtual-news',
+    title: 'Nouveautés',
+    slug: NEWS_CATEGORY_SLUG,
+    keywords: []
+  },
+  {
+    id: 'virtual-popular',
+    title: 'Populaires',
+    slug: POPULAR_CATEGORY_SLUG,
+    keywords: []
+  }
+] as const satisfies readonly VirtualCategory[]
+
 export const MEMES_PER_PAGE = 30
 export const RELATED_MEMES_COUNT = 4
 export const TRENDING_MEMES_COUNT = 12

@@ -1,4 +1,4 @@
-import { MEMES_SEARCH_SCHEMA } from '@/constants/meme'
+import { MEMES_SEARCH_SCHEMA, VIRTUAL_CATEGORIES } from '@/constants/meme'
 import { getCategoriesListQueryOpts } from '@/lib/queries'
 import { seo } from '@/lib/seo'
 import { SearchMemes } from '@/routes/_public__root/_default/memes/-components/search-memes'
@@ -12,13 +12,21 @@ export const Route = createFileRoute(
     return MEMES_SEARCH_SCHEMA.parse(search)
   },
   loader: async ({ context, params }) => {
-    const categories = await context.queryClient.ensureQueryData(
-      getCategoriesListQueryOpts()
-    )
-
     if (params.slug === 'all') {
       return { category: undefined }
     }
+
+    const virtualCategory = VIRTUAL_CATEGORIES.find((item) => {
+      return item.slug === params.slug
+    })
+
+    if (virtualCategory) {
+      return { category: virtualCategory }
+    }
+
+    const categories = await context.queryClient.ensureQueryData(
+      getCategoriesListQueryOpts()
+    )
 
     const category = categories.find((item) => {
       return item.slug === params.slug

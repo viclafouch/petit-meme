@@ -189,7 +189,7 @@ export const buildMemeJsonLd = (meme: MemeWithVideo, originalUrl: string) => {
 type SchemaGraph = Graph & { '@context': 'https://schema.org' }
 
 export const buildCategoryJsonLd = (
-  category: CategoryModel | undefined,
+  category: Pick<CategoryModel, 'slug' | 'title'> | undefined,
   { page, memes }: { page: number; memes: MemeWithVideo[] }
 ): SchemaGraph => {
   const basePath = category

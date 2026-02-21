@@ -21,11 +21,7 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  MemeStatusMeta,
-  type MemeWithCategories,
-  VIRTUAL_CATEGORY_SLUGS
-} from '@/constants/meme'
+import { MemeStatusMeta, type MemeWithCategories } from '@/constants/meme'
 import type { Meme } from '@/db/generated/prisma/client'
 import { MemeStatus } from '@/db/generated/prisma/enums'
 import { useKeywordsField } from '@/hooks/use-keywords-field'
@@ -50,16 +46,12 @@ export const MemeForm = ({ meme, onCancel, onSuccess }: MemeFormParams) => {
   // eslint-disable-next-line no-restricted-syntax
   const categoriesOptions = React.useMemo(() => {
     return (
-      categoriesListQuery.data
-        ?.filter((category) => {
-          return !VIRTUAL_CATEGORY_SLUGS.has(category.slug)
-        })
-        .map((category) => {
-          return {
-            label: category.title,
-            value: category.id
-          }
-        }) ?? []
+      categoriesListQuery.data?.map((category) => {
+        return {
+          label: category.title,
+          value: category.id
+        }
+      }) ?? []
     )
   }, [categoriesListQuery.data])
 

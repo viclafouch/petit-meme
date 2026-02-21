@@ -116,6 +116,7 @@ export const MemesList = ({
             layoutContext={layoutContext}
             onClose={handleDeselect}
             onOpenStudio={setStudioMemeSelected}
+            queryID={queryID}
           />
         ) : null}
       </AnimatePresence>

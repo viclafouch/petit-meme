@@ -19,6 +19,7 @@ import { useDownloadMeme } from '@/hooks/use-download-meme'
 import { useMemeHls } from '@/hooks/use-meme-hls'
 import { useRegisterMemeView } from '@/hooks/use-register-meme-view'
 import { useShareMeme } from '@/hooks/use-share-meme'
+import { sendConversionAfterSearch } from '@/lib/algolia-insights'
 import { buildVideoImageUrl } from '@/lib/bunny'
 import { track } from '@/lib/mixpanel'
 import { buildUrl } from '@/lib/seo'
@@ -29,13 +30,15 @@ type PlayerDialogParams = {
   layoutContext: string
   onClose: () => void
   onOpenStudio: (meme: MemeWithVideo) => void
+  queryID?: string
 }
 
 export const PlayerDialog = ({
   meme,
   layoutContext,
   onClose,
-  onOpenStudio
+  onOpenStudio,
+  queryID
 }: PlayerDialogParams) => {
   const { videoRef } = useMemeHls({
     memeId: meme.id,
@@ -63,6 +66,18 @@ export const PlayerDialog = ({
     minMs: 2500,
     maxMs: 12000
   })
+
+  const trackConversion = (eventName: string) => {
+    if (!queryID) {
+      return
+    }
+
+    sendConversionAfterSearch({
+      queryID,
+      objectID: meme.id,
+      eventName
+    })
+  }
 
   const copyMemeLink = async () => {
     const text = buildUrl(memeLink.href as string)
@@ -167,6 +182,7 @@ export const PlayerDialog = ({
               size="lg"
               variant="default"
               onClick={() => {
+                trackConversion('Meme Studio Opened')
                 videoRef.current?.pause()
 
                 return onOpenStudio(meme)
@@ -182,6 +198,8 @@ export const PlayerDialog = ({
                 disabled={shareMeme.isPending}
                 className="md:hidden w-full"
                 onClick={() => {
+                  trackConversion('Meme Shared')
+
                   return shareMeme.mutate(meme)
                 }}
               >
@@ -193,6 +211,8 @@ export const PlayerDialog = ({
                 variant="secondary"
                 className="w-full"
                 onClick={() => {
+                  trackConversion('Meme Link Copied')
+
                   return copyMemeLink()
                 }}
               >
@@ -205,6 +225,8 @@ export const PlayerDialog = ({
                 disabled={downloadMutation.isPending}
                 className="col-span-2 md:col-span-1 w-full"
                 onClick={() => {
+                  trackConversion('Meme Downloaded')
+
                   return downloadMutation.mutate(meme)
                 }}
               >

@@ -487,9 +487,13 @@ Les events alimentent **3 fonctionnalités** : Analytics dashboard, Recommend, e
 - [x] Conditionné à `queryID` truthy (uniquement clics issus d'une recherche)
 - [x] Fire-and-forget (`.catch(() => {})`)
 
-#### 2.5 Envoyer les events de conversion (Conversion) — REPORTÉ
+#### 2.5 Envoyer les events de conversion (Conversion)
 
-Reporté à une sous-phase ultérieure. Les conversions (bookmark, share, download, studio) nécessitent plus de réflexion sur la propagation du contexte de recherche vers le `PlayerDialog` et les hooks.
+- [x] `sendConversionAfterSearch()` ajoutée dans `algolia-insights.ts` (type `ConvertedObjectIDsAfterSearch`, GDPR gate, fire-and-forget)
+- [x] `queryID` passé au `PlayerDialog` via `MemesList`
+- [x] Conversions dans `PlayerDialog` : Studio Opened, Shared, Link Copied, Downloaded
+- [x] Conversions dans `MemeListItem` dropdown : Studio Opened, Shared, Downloaded, Bookmarked
+- [x] Bookmark conversion uniquement sur ajout (pas sur retrait)
 
 #### 2.6 GDPR & userToken
 

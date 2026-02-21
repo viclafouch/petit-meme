@@ -767,6 +767,10 @@ Pour un site de memes, 1M records est largement suffisant. Même avec 10K memes,
 - [x] Supprimer `emails/` (ancien dossier racine) + `emails/_utils/` + `emails/static/`
 - [x] Mettre à jour `email:dev` script → `email dev --dir src/emails --port 3001`
 - [x] Vérification DNS : DKIM verified, SPF verified — vérifier DMARC
+- [x] Créer `src/emails/subscription-confirmed-email.tsx` — email de confirmation d'abonnement premium
+- [x] Créer `src/emails/payment-failed-email.tsx` — alerte échec de paiement avec lien Stripe billing
+- [x] Créer `src/emails/account-deleted-email.tsx` — confirmation de suppression de compte
+- [x] Ajouter hooks dans `src/lib/auth.tsx` : `onSubscriptionComplete`, `onEvent` (invoice.payment_failed), `beforeDelete` (account deleted email)
 - [ ] Renommer env vars sur Railway : `RESEND_SECRET` → `RESEND_API_KEY`, `RESEND_EMAIL_TO` → `EMAIL_OVERRIDE_TO` (si utilisé)
 
 ---

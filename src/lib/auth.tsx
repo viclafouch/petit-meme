@@ -2,6 +2,7 @@ import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { admin } from 'better-auth/plugins'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
+import type Stripe from 'stripe'
 import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '@/constants/auth'
 import {
   FIVE_MINUTES_IN_SECONDS,
@@ -12,14 +13,19 @@ import {
 import { prismaClient } from '@/db'
 import { clientEnv } from '@/env/client'
 import { serverEnv } from '@/env/server'
+import { capitalize } from '@/helpers/format'
 import { maskEmail } from '@/helpers/mask-email'
+import { formatCentsToEuros } from '@/helpers/number'
 import { sendEmailAsync } from '@/lib/resend.server'
 import { stripeClient } from '@/lib/stripe'
 import { stripe } from '@better-auth/stripe'
 import { createServerOnlyFn } from '@tanstack/react-start'
+import AccountDeletedEmail from '../emails/account-deleted-email'
 import EmailVerification from '../emails/email-verification'
 import PasswordChangedEmail from '../emails/password-changed-email'
+import PaymentFailedEmail from '../emails/payment-failed-email'
 import ResetPassword from '../emails/reset-password'
+import SubscriptionConfirmedEmail from '../emails/subscription-confirmed-email'
 import WelcomeEmail from '../emails/welcome-email'
 
 const formatDate = (date: Date) => {
@@ -50,6 +56,13 @@ const getAuthConfig = createServerOnlyFn(() => {
       deleteUser: {
         enabled: true,
         beforeDelete: async (user) => {
+          sendEmailAsync({
+            to: user.email,
+            subject: 'Ton compte Petit Mème a été supprimé',
+            react: <AccountDeletedEmail username={user.name} />,
+            logMessage: 'Sending account deleted email to'
+          })
+
           const dbUser = await prismaClient.user.findUnique({
             where: { id: user.id },
             select: { stripeCustomerId: true }
@@ -183,7 +196,79 @@ const getAuthConfig = createServerOnlyFn(() => {
               name: 'premium',
               priceId: serverEnv.STRIPE_PRICE_ID
             }
-          ]
+          ],
+          onSubscriptionComplete: async ({
+            subscription,
+            stripeSubscription,
+            plan
+          }) => {
+            const user = await prismaClient.user.findUnique({
+              where: { id: subscription.referenceId },
+              select: { email: true, name: true }
+            })
+
+            if (!user) {
+              return
+            }
+
+            const priceCents =
+              stripeSubscription.items.data[0]?.price.unit_amount ?? 0
+
+            const formattedAmount = formatCentsToEuros(priceCents)
+
+            sendEmailAsync({
+              to: user.email,
+              subject: 'Ton abonnement Premium Petit Mème est activé !',
+              react: (
+                <SubscriptionConfirmedEmail
+                  username={user.name}
+                  planTitle={capitalize(plan.name)}
+                  amount={`${formattedAmount}/mois`}
+                />
+              ),
+              logMessage: 'Sending subscription confirmed email to'
+            })
+          }
+        },
+        onEvent: async (event) => {
+          if (event.type !== 'invoice.payment_failed') {
+            return
+          }
+
+          const invoice = event.data.object as Stripe.Invoice
+          const customerId = invoice.customer
+
+          if (typeof customerId !== 'string') {
+            return
+          }
+
+          const user = await prismaClient.user.findFirst({
+            where: { stripeCustomerId: customerId },
+            select: { email: true, name: true }
+          })
+
+          if (!user) {
+            return
+          }
+
+          const portalSession =
+            await stripeClient.billingPortal.sessions.create({
+              customer: customerId,
+              // eslint-disable-next-line camelcase
+              return_url: `${clientEnv.VITE_SITE_URL}/settings`
+            })
+
+          sendEmailAsync({
+            to: user.email,
+            subject: 'Échec de paiement pour ton abonnement Petit Mème',
+            react: (
+              <PaymentFailedEmail
+                username={user.name}
+                billingPortalUrl={portalSession.url}
+              />
+            ),
+            logMessage: 'Sending payment failed email to'
+          })
         }
       })
     ]

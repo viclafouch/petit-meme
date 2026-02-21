@@ -25,8 +25,10 @@ export const sendEmailAsync = ({
   react,
   logMessage
 }: SendEmailAsyncParams) => {
+  const maskedTo = maskEmail(to)
+
   // eslint-disable-next-line no-console
-  console.log(`[auth] ${logMessage} ${maskEmail(to)}`)
+  console.log(`[email] ${logMessage} ${maskedTo}`)
 
   resend.emails
     .send({
@@ -35,6 +37,20 @@ export const sendEmailAsync = ({
       subject,
       react
     })
-    // eslint-disable-next-line no-console
-    .catch(console.error)
+    .then(({ error }) => {
+      if (error) {
+        // eslint-disable-next-line no-console
+        console.error(
+          `[email] Failed to send "${subject}" to ${maskedTo}:`,
+          error
+        )
+      }
+    })
+    .catch((error: unknown) => {
+      // eslint-disable-next-line no-console
+      console.error(
+        `[email] Network error sending "${subject}" to ${maskedTo}:`,
+        error
+      )
+    })
 }

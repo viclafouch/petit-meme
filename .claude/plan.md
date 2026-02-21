@@ -775,6 +775,33 @@ Pour un site de memes, 1M records est largement suffisant. Même avec 10K memes,
 
 ---
 
+## Crons
+
+### Nettoyage comptes non vérifiés (`crons/unverified-cleanup.ts`)
+
+- [x] Supprime les users `emailVerified === false` ET `createdAt < 30 jours` sans relations (Meme, bookmarks, Subscription)
+- [x] Script npm : `crons:unverified-cleanup`
+
+### Rappel de vérification (`crons/verification-reminder.ts`)
+
+- [x] Envoie un email de rappel aux users non vérifiés dans la fenêtre 42h-54h après inscription
+- [x] Crée un token de vérification, envoie via Resend, met à jour `verificationReminderSent`
+- [x] Template dédié : `src/emails/verification-reminder-email.tsx`
+- [x] Script npm : `crons:verification-reminder`
+
+### Anonymisation RGPD (`crons/cleanup-retention.ts`)
+
+- [x] Anonymise les users inactifs depuis 3+ ans (pas de session récente)
+- [x] Remplace name, email, image par des valeurs anonymisées, met `isAnonymized = true`
+- [x] Ajouté au cron existant `cleanup-retention.ts`
+- [x] Script npm : `crons:cleanup-retention`
+
+### Migration Prisma
+
+- [ ] Appliquer la migration `add_user_cron_fields` (2 champs : `verification_reminder_sent`, `is_anonymized`)
+
+---
+
 ## Futur
 
 Items non planifiés, à traiter après les corrections ci-dessus.

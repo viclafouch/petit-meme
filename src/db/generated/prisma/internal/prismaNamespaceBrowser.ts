@@ -167,7 +167,9 @@ export const UserScalarFieldEnum = {
   banExpires: 'banExpires',
   stripeCustomerId: 'stripeCustomerId',
   termsAcceptedAt: 'termsAcceptedAt',
-  privacyAcceptedAt: 'privacyAcceptedAt'
+  privacyAcceptedAt: 'privacyAcceptedAt',
+  verificationReminderSent: 'verificationReminderSent',
+  isAnonymized: 'isAnonymized'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]

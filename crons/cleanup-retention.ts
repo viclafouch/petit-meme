@@ -1,9 +1,15 @@
 /* eslint-disable no-console */
+/* eslint-disable no-await-in-loop */
 import { prismaClient } from '@/db'
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000
 const VERIFICATION_GRACE_PERIOD_MS = MS_PER_DAY
 const VIEW_RETENTION_DAYS = 90
+const ANONYMIZATION_YEARS = 3
+
+const maskId = (id: string) => {
+  return id.slice(0, 8)
+}
 
 const task = async () => {
   const now = new Date()
@@ -56,6 +62,49 @@ const task = async () => {
   } else {
     console.log('No old MemeViewDaily records to clean up')
   }
+
+  const anonymizationCutoff = new Date(
+    now.getTime() - ANONYMIZATION_YEARS * 365 * MS_PER_DAY
+  )
+
+  const candidateUsers = await prismaClient.user.findMany({
+    where: {
+      isAnonymized: false,
+      updatedAt: { lt: anonymizationCutoff }
+    },
+    select: { id: true }
+  })
+
+  let anonymizedCount = 0
+
+  for (const user of candidateUsers) {
+    const lastSession = await prismaClient.session.findFirst({
+      where: { userId: user.id },
+      orderBy: { createdAt: 'desc' },
+      select: { createdAt: true }
+    })
+
+    if (lastSession && lastSession.createdAt > anonymizationCutoff) {
+      continue
+    }
+
+    await prismaClient.user.update({
+      where: { id: user.id },
+      data: {
+        name: 'Utilisateur supprimé',
+        email: `deleted-${user.id}@anonymized.local`,
+        image: null,
+        emailVerified: false,
+        isAnonymized: true,
+        updatedAt: now
+      }
+    })
+
+    console.log(`Anonymized user ${maskId(user.id)}`)
+    anonymizedCount += 1
+  }
+
+  console.log(`Anonymized ${String(anonymizedCount)} dormant users`)
 
   console.log('Done')
   process.exit(0)

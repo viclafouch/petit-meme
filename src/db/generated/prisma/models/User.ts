@@ -50,6 +50,8 @@ export type UserMinAggregateOutputType = {
   stripeCustomerId: string | null
   termsAcceptedAt: Date | null
   privacyAcceptedAt: Date | null
+  verificationReminderSent: boolean | null
+  isAnonymized: boolean | null
 }
 
 export type UserMaxAggregateOutputType = {
@@ -68,6 +70,8 @@ export type UserMaxAggregateOutputType = {
   stripeCustomerId: string | null
   termsAcceptedAt: Date | null
   privacyAcceptedAt: Date | null
+  verificationReminderSent: boolean | null
+  isAnonymized: boolean | null
 }
 
 export type UserCountAggregateOutputType = {
@@ -86,6 +90,8 @@ export type UserCountAggregateOutputType = {
   stripeCustomerId: number
   termsAcceptedAt: number
   privacyAcceptedAt: number
+  verificationReminderSent: number
+  isAnonymized: number
   _all: number
 }
 
@@ -114,6 +120,8 @@ export type UserMinAggregateInputType = {
   stripeCustomerId?: true
   termsAcceptedAt?: true
   privacyAcceptedAt?: true
+  verificationReminderSent?: true
+  isAnonymized?: true
 }
 
 export type UserMaxAggregateInputType = {
@@ -132,6 +140,8 @@ export type UserMaxAggregateInputType = {
   stripeCustomerId?: true
   termsAcceptedAt?: true
   privacyAcceptedAt?: true
+  verificationReminderSent?: true
+  isAnonymized?: true
 }
 
 export type UserCountAggregateInputType = {
@@ -150,6 +160,8 @@ export type UserCountAggregateInputType = {
   stripeCustomerId?: true
   termsAcceptedAt?: true
   privacyAcceptedAt?: true
+  verificationReminderSent?: true
+  isAnonymized?: true
   _all?: true
 }
 
@@ -255,6 +267,8 @@ export type UserGroupByOutputType = {
   stripeCustomerId: string | null
   termsAcceptedAt: Date | null
   privacyAcceptedAt: Date | null
+  verificationReminderSent: boolean
+  isAnonymized: boolean
   _count: UserCountAggregateOutputType | null
   _avg: UserAvgAggregateOutputType | null
   _sum: UserSumAggregateOutputType | null
@@ -296,6 +310,8 @@ export type UserWhereInput = {
   stripeCustomerId?: Prisma.StringNullableFilter<"User"> | string | null
   termsAcceptedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   privacyAcceptedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  verificationReminderSent?: Prisma.BoolFilter<"User"> | boolean
+  isAnonymized?: Prisma.BoolFilter<"User"> | boolean
   accounts?: Prisma.AccountListRelationFilter
   sessions?: Prisma.SessionListRelationFilter
   bookmarks?: Prisma.UserBookmarkListRelationFilter
@@ -318,6 +334,8 @@ export type UserOrderByWithRelationInput = {
   stripeCustomerId?: Prisma.SortOrderInput | Prisma.SortOrder
   termsAcceptedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   privacyAcceptedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  verificationReminderSent?: Prisma.SortOrder
+  isAnonymized?: Prisma.SortOrder
   accounts?: Prisma.AccountOrderByRelationAggregateInput
   sessions?: Prisma.SessionOrderByRelationAggregateInput
   bookmarks?: Prisma.UserBookmarkOrderByRelationAggregateInput
@@ -344,6 +362,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   stripeCustomerId?: Prisma.StringNullableFilter<"User"> | string | null
   termsAcceptedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   privacyAcceptedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  verificationReminderSent?: Prisma.BoolFilter<"User"> | boolean
+  isAnonymized?: Prisma.BoolFilter<"User"> | boolean
   accounts?: Prisma.AccountListRelationFilter
   sessions?: Prisma.SessionListRelationFilter
   bookmarks?: Prisma.UserBookmarkListRelationFilter
@@ -366,6 +386,8 @@ export type UserOrderByWithAggregationInput = {
   stripeCustomerId?: Prisma.SortOrderInput | Prisma.SortOrder
   termsAcceptedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   privacyAcceptedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  verificationReminderSent?: Prisma.SortOrder
+  isAnonymized?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _avg?: Prisma.UserAvgOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
@@ -392,6 +414,8 @@ export type UserScalarWhereWithAggregatesInput = {
   stripeCustomerId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   termsAcceptedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   privacyAcceptedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+  verificationReminderSent?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  isAnonymized?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
 }
 
 export type UserCreateInput = {
@@ -410,6 +434,8 @@ export type UserCreateInput = {
   stripeCustomerId?: string | null
   termsAcceptedAt?: Date | string | null
   privacyAcceptedAt?: Date | string | null
+  verificationReminderSent?: boolean
+  isAnonymized?: boolean
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   bookmarks?: Prisma.UserBookmarkCreateNestedManyWithoutUserInput
@@ -432,6 +458,8 @@ export type UserUncheckedCreateInput = {
   stripeCustomerId?: string | null
   termsAcceptedAt?: Date | string | null
   privacyAcceptedAt?: Date | string | null
+  verificationReminderSent?: boolean
+  isAnonymized?: boolean
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   bookmarks?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutUserInput
@@ -454,6 +482,8 @@ export type UserUpdateInput = {
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   privacyAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   bookmarks?: Prisma.UserBookmarkUpdateManyWithoutUserNestedInput
@@ -476,6 +506,8 @@ export type UserUncheckedUpdateInput = {
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   privacyAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   bookmarks?: Prisma.UserBookmarkUncheckedUpdateManyWithoutUserNestedInput
@@ -498,6 +530,8 @@ export type UserCreateManyInput = {
   stripeCustomerId?: string | null
   termsAcceptedAt?: Date | string | null
   privacyAcceptedAt?: Date | string | null
+  verificationReminderSent?: boolean
+  isAnonymized?: boolean
 }
 
 export type UserUpdateManyMutationInput = {
@@ -516,6 +550,8 @@ export type UserUpdateManyMutationInput = {
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   privacyAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type UserUncheckedUpdateManyInput = {
@@ -534,6 +570,8 @@ export type UserUncheckedUpdateManyInput = {
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   privacyAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type UserScalarRelationFilter = {
@@ -568,6 +606,8 @@ export type UserCountOrderByAggregateInput = {
   stripeCustomerId?: Prisma.SortOrder
   termsAcceptedAt?: Prisma.SortOrder
   privacyAcceptedAt?: Prisma.SortOrder
+  verificationReminderSent?: Prisma.SortOrder
+  isAnonymized?: Prisma.SortOrder
 }
 
 export type UserAvgOrderByAggregateInput = {
@@ -590,6 +630,8 @@ export type UserMaxOrderByAggregateInput = {
   stripeCustomerId?: Prisma.SortOrder
   termsAcceptedAt?: Prisma.SortOrder
   privacyAcceptedAt?: Prisma.SortOrder
+  verificationReminderSent?: Prisma.SortOrder
+  isAnonymized?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
@@ -608,6 +650,8 @@ export type UserMinOrderByAggregateInput = {
   stripeCustomerId?: Prisma.SortOrder
   termsAcceptedAt?: Prisma.SortOrder
   privacyAcceptedAt?: Prisma.SortOrder
+  verificationReminderSent?: Prisma.SortOrder
+  isAnonymized?: Prisma.SortOrder
 }
 
 export type UserSumOrderByAggregateInput = {
@@ -696,6 +740,8 @@ export type UserCreateWithoutBookmarksInput = {
   stripeCustomerId?: string | null
   termsAcceptedAt?: Date | string | null
   privacyAcceptedAt?: Date | string | null
+  verificationReminderSent?: boolean
+  isAnonymized?: boolean
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   Meme?: Prisma.MemeCreateNestedManyWithoutSubmitterInput
@@ -717,6 +763,8 @@ export type UserUncheckedCreateWithoutBookmarksInput = {
   stripeCustomerId?: string | null
   termsAcceptedAt?: Date | string | null
   privacyAcceptedAt?: Date | string | null
+  verificationReminderSent?: boolean
+  isAnonymized?: boolean
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   Meme?: Prisma.MemeUncheckedCreateNestedManyWithoutSubmitterInput
@@ -754,6 +802,8 @@ export type UserUpdateWithoutBookmarksInput = {
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   privacyAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   Meme?: Prisma.MemeUpdateManyWithoutSubmitterNestedInput
@@ -775,6 +825,8 @@ export type UserUncheckedUpdateWithoutBookmarksInput = {
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   privacyAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   Meme?: Prisma.MemeUncheckedUpdateManyWithoutSubmitterNestedInput
@@ -796,6 +848,8 @@ export type UserCreateWithoutMemeInput = {
   stripeCustomerId?: string | null
   termsAcceptedAt?: Date | string | null
   privacyAcceptedAt?: Date | string | null
+  verificationReminderSent?: boolean
+  isAnonymized?: boolean
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   bookmarks?: Prisma.UserBookmarkCreateNestedManyWithoutUserInput
@@ -817,6 +871,8 @@ export type UserUncheckedCreateWithoutMemeInput = {
   stripeCustomerId?: string | null
   termsAcceptedAt?: Date | string | null
   privacyAcceptedAt?: Date | string | null
+  verificationReminderSent?: boolean
+  isAnonymized?: boolean
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   bookmarks?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutUserInput
@@ -854,6 +910,8 @@ export type UserUpdateWithoutMemeInput = {
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   privacyAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   bookmarks?: Prisma.UserBookmarkUpdateManyWithoutUserNestedInput
@@ -875,6 +933,8 @@ export type UserUncheckedUpdateWithoutMemeInput = {
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   privacyAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   bookmarks?: Prisma.UserBookmarkUncheckedUpdateManyWithoutUserNestedInput
@@ -896,6 +956,8 @@ export type UserCreateWithoutSessionsInput = {
   stripeCustomerId?: string | null
   termsAcceptedAt?: Date | string | null
   privacyAcceptedAt?: Date | string | null
+  verificationReminderSent?: boolean
+  isAnonymized?: boolean
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   bookmarks?: Prisma.UserBookmarkCreateNestedManyWithoutUserInput
   Meme?: Prisma.MemeCreateNestedManyWithoutSubmitterInput
@@ -917,6 +979,8 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   stripeCustomerId?: string | null
   termsAcceptedAt?: Date | string | null
   privacyAcceptedAt?: Date | string | null
+  verificationReminderSent?: boolean
+  isAnonymized?: boolean
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   bookmarks?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutUserInput
   Meme?: Prisma.MemeUncheckedCreateNestedManyWithoutSubmitterInput
@@ -954,6 +1018,8 @@ export type UserUpdateWithoutSessionsInput = {
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   privacyAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   bookmarks?: Prisma.UserBookmarkUpdateManyWithoutUserNestedInput
   Meme?: Prisma.MemeUpdateManyWithoutSubmitterNestedInput
@@ -975,6 +1041,8 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   privacyAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   bookmarks?: Prisma.UserBookmarkUncheckedUpdateManyWithoutUserNestedInput
   Meme?: Prisma.MemeUncheckedUpdateManyWithoutSubmitterNestedInput
@@ -996,6 +1064,8 @@ export type UserCreateWithoutAccountsInput = {
   stripeCustomerId?: string | null
   termsAcceptedAt?: Date | string | null
   privacyAcceptedAt?: Date | string | null
+  verificationReminderSent?: boolean
+  isAnonymized?: boolean
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   bookmarks?: Prisma.UserBookmarkCreateNestedManyWithoutUserInput
   Meme?: Prisma.MemeCreateNestedManyWithoutSubmitterInput
@@ -1017,6 +1087,8 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   stripeCustomerId?: string | null
   termsAcceptedAt?: Date | string | null
   privacyAcceptedAt?: Date | string | null
+  verificationReminderSent?: boolean
+  isAnonymized?: boolean
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   bookmarks?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutUserInput
   Meme?: Prisma.MemeUncheckedCreateNestedManyWithoutSubmitterInput
@@ -1054,6 +1126,8 @@ export type UserUpdateWithoutAccountsInput = {
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   privacyAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   bookmarks?: Prisma.UserBookmarkUpdateManyWithoutUserNestedInput
   Meme?: Prisma.MemeUpdateManyWithoutSubmitterNestedInput
@@ -1075,6 +1149,8 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   termsAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   privacyAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   bookmarks?: Prisma.UserBookmarkUncheckedUpdateManyWithoutUserNestedInput
   Meme?: Prisma.MemeUncheckedUpdateManyWithoutSubmitterNestedInput
@@ -1154,6 +1230,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   stripeCustomerId?: boolean
   termsAcceptedAt?: boolean
   privacyAcceptedAt?: boolean
+  verificationReminderSent?: boolean
+  isAnonymized?: boolean
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   bookmarks?: boolean | Prisma.User$bookmarksArgs<ExtArgs>
@@ -1177,6 +1255,8 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   stripeCustomerId?: boolean
   termsAcceptedAt?: boolean
   privacyAcceptedAt?: boolean
+  verificationReminderSent?: boolean
+  isAnonymized?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1195,6 +1275,8 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   stripeCustomerId?: boolean
   termsAcceptedAt?: boolean
   privacyAcceptedAt?: boolean
+  verificationReminderSent?: boolean
+  isAnonymized?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectScalar = {
@@ -1213,9 +1295,11 @@ export type UserSelectScalar = {
   stripeCustomerId?: boolean
   termsAcceptedAt?: boolean
   privacyAcceptedAt?: boolean
+  verificationReminderSent?: boolean
+  isAnonymized?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "createdAt" | "updatedAt" | "generationCount" | "role" | "banned" | "banReason" | "banExpires" | "stripeCustomerId" | "termsAcceptedAt" | "privacyAcceptedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "createdAt" | "updatedAt" | "generationCount" | "role" | "banned" | "banReason" | "banExpires" | "stripeCustomerId" | "termsAcceptedAt" | "privacyAcceptedAt" | "verificationReminderSent" | "isAnonymized", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
@@ -1250,6 +1334,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     stripeCustomerId: string | null
     termsAcceptedAt: Date | null
     privacyAcceptedAt: Date | null
+    verificationReminderSent: boolean
+    isAnonymized: boolean
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -1692,6 +1778,8 @@ export interface UserFieldRefs {
   readonly stripeCustomerId: Prisma.FieldRef<"User", 'String'>
   readonly termsAcceptedAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly privacyAcceptedAt: Prisma.FieldRef<"User", 'DateTime'>
+  readonly verificationReminderSent: Prisma.FieldRef<"User", 'Boolean'>
+  readonly isAnonymized: Prisma.FieldRef<"User", 'Boolean'>
 }
     
 

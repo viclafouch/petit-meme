@@ -3,12 +3,12 @@ import { Resend } from 'resend'
 import { serverEnv } from '@/env/server'
 import { maskEmail } from '@/helpers/mask-email'
 
-const resend = new Resend(serverEnv.RESEND_API_KEY)
+export const resend = new Resend(serverEnv.RESEND_API_KEY)
 
-const EMAIL_FROM =
+export const EMAIL_FROM =
   serverEnv.EMAIL_OVERRIDE_FROM ?? 'Petit Meme <noreply@petit-meme.io>'
 
-const getEmailRecipient = (email: string) => {
+export const getEmailRecipient = (email: string) => {
   return serverEnv.EMAIL_OVERRIDE_TO ?? email
 }
 

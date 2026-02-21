@@ -117,9 +117,11 @@ model User {
   banExpires DateTime?
   Meme       Meme[]
 
-  stripeCustomerId  String?
-  termsAcceptedAt   DateTime? @map("terms_accepted_at")
-  privacyAcceptedAt DateTime? @map("privacy_accepted_at")
+  stripeCustomerId         String?
+  termsAcceptedAt          DateTime? @map("terms_accepted_at")
+  privacyAcceptedAt        DateTime? @map("privacy_accepted_at")
+  verificationReminderSent Boolean   @default(false) @map("verification_reminder_sent")
+  isAnonymized             Boolean   @default(false) @map("is_anonymized")
 
   @@map("user")
 }

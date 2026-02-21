@@ -423,9 +423,9 @@ Fichiers impactés :
 - [x] Propager `highlightedTitle` depuis `MemesList` vers `MemeListItem` (`src/components/Meme/memes-list.tsx`)
 - [x] Styler les `<em>` avec background jaune (CSS/Tailwind)
 
-#### 1.2 Synonymes manuels (FR) — REPORTÉ
+#### 1.2 Synonymes manuels (FR)
 
-- [ ] Ajouter les synonymes français dans le dashboard Algolia
+- [x] Ajouter les synonymes français dans le dashboard Algolia
   - `"mdr" <-> "lol" <-> "mort de rire"`
   - `"ptdr" <-> "pété de rire"`
   - `"bg" <-> "beau gosse"`

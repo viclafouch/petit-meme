@@ -581,16 +581,7 @@ Une fois les events en place, le dashboard Algolia Analytics devient exploitable
   - Adapter le composant `BestMemes` pour recevoir `trendingMemesPromise` au lieu de `bestMemesPromise`
   - Titre/sous-titre inchangés ("Mèmes" / "Les meilleurs mèmes du moment.")
 
-### Phase 5 — Rules (3 gratuites par index)
-
-#### 5.1 Rule de pinning contextuel
-
-- [ ] Réserver 1-2 rules pour du pinning contextuel (épingler un meme spécifique en top pour un terme de recherche)
-  - Exemple : recherche "squid game" → épingler le meme phare Squid Game en position 1
-  - Configuration dans le dashboard, modifiable sans déploiement
-  - Les Rules sont évaluées **avant** le ranking — elles overrident le tri naturel
-
-#### 5.2 Rule de bannière — ANNULÉE
+### Phase 5 — Rules — ANNULÉE
 
 ### Phase 6 — Préparation i18n (FR/EN)
 
@@ -613,17 +604,42 @@ Une fois les events en place, le dashboard Algolia Analytics devient exploitable
 
 Les virtual replicas permettent un tri alternatif sans dupliquer les records (0 coût de records supplémentaires). Chaque replica partage la config de l'index primaire (searchableAttributes, faceting, etc.) mais a son propre `ranking`/`customRanking`.
 
-#### 7.1 Replica "tri par popularité"
+**Décisions d'architecture (deep-dive 2026-02-20) :**
+- **Approche en 2 temps** : Phase 7 = catégorie `popular` en base (même pattern que `news`) + replicas. Refactor virtual categories (injectées côté client, suppression des fausses catégories DB) reporté à une phase future.
+- **Comportement avec recherche** : Si l'user tape une query alors qu'il est sur "Nouveautés" ou "Populaires", on revient à l'index principal (pertinence). Les replicas ne s'appliquent qu'en browse sans query.
+- **Noms replicas** : Dérivés de `VITE_ALGOLIA_INDEX` → `${index}_replica_popular`, `${index}_replica_recent`. Pas de nouvelles variables d'env.
+- **Cache** : Clé de cache préfixée par le nom de l'index pour éviter les collisions entre index principal et replicas.
 
-- [ ] Créer une virtual replica `memes_popular` avec `customRanking: ["desc(viewCount)"]`
-  - Utilisable pour une vue "Les plus populaires" avec un tri strict par vues (pas de relevance textuelle qui interfère)
-  - Les virtual replicas consomment des search requests sur le même quota
+#### 7.1 Créer les virtual replicas dans le dashboard Algolia
 
-#### 7.2 Replica "tri par date"
+- [x] Créer virtual replica `${VITE_ALGOLIA_INDEX}_replica_popular` avec SORT-BY `viewCount` DESC, `publishedAtTime` DESC au-dessus de TEXTUAL
+- [x] Créer virtual replica `${VITE_ALGOLIA_INDEX}_replica_recent` avec SORT-BY `publishedAtTime` DESC au-dessus de TEXTUAL
+- [x] Vérifier que les replicas héritent de `searchableAttributes`, `attributesForFaceting`, etc. de l'index primaire
 
-- [ ] Créer une virtual replica `memes_recent` avec `customRanking: ["desc(publishedAtTime)"]`
-  - Utilisable pour la catégorie "Nouveautés" — remplace le filtre actuel sur `publishedAtTime >= 30 jours`
-  - Tri strict chronologique inverse
+#### 7.2 Catégorie "Populaires" en base de données
+
+- [x] Créer la catégorie en base via Prisma Studio ou insert direct : titre "Populaires", slug `popular`
+- [x] Ajouter `POPULAR_CATEGORY_SLUG = 'popular'` dans `src/constants/meme.ts`
+- [x] `getCategoriesListQueryOpts()` (`src/lib/queries.ts`) : trier `news` en 1er, `popular` en 2e, puis le reste
+- [x] Exclure `popular` du formulaire admin (`src/routes/admin/library/-components/meme-form.tsx`) — même pattern que `news`
+
+#### 7.3 Intégrer les replicas côté serveur
+
+- [x] `src/lib/algolia.ts` : ajouter constantes `algoliaIndexPopular` et `algoliaIndexRecent` dérivées de `algoliaIndexName`
+- [x] `src/server/meme.ts` — `getMemes()` : résoudre l'index name selon la catégorie et la présence d'une query via `resolveIndexName()`
+  - `category === 'popular'` ET pas de query → `algoliaIndexPopular`
+  - `category === 'news'` ET pas de query → `algoliaIndexRecent`
+  - Sinon → `algoliaIndexName` (index principal)
+- [x] `src/server/meme.ts` — `buildMemeFilters()` : `VIRTUAL_CATEGORY_SLUGS` Set pour ne pas filtrer par `categorySlugs` sur les fausses catégories
+- [x] `src/server/meme.ts` — `getMemes()` : clé de cache préfixée par `${indexName}` au lieu de `memes`
+
+#### 7.4 Refactor futur — Virtual categories (REPORTÉ)
+
+- [ ] Migrer `news` et `popular` de catégories DB en catégories virtuelles injectées côté client
+  - Supprimer les fausses catégories de la base
+  - Injecter les onglets "Nouveautés" et "Populaires" dans `getCategoriesListQueryOpts()` côté client
+  - Adapter le loader `/memes/category/$slug` pour gérer les slugs virtuels
+  - Adapter le formulaire admin (plus besoin d'exclure)
 
 ---
 
@@ -701,9 +717,9 @@ Pour un site de memes, 1M records est largement suffisant. Même avec 10K memes,
 | 2 — Events & Insights | Moyen | Élevé (fondation) | Phase 0 |
 | 3 — Analytics Dashboard | Nul (config) | Moyen | Phase 2 |
 | 4 — Recommend | Moyen-élevé | Élevé (engagement) | Phase 2 (quelques semaines d'events) |
-| 5 — Rules | Faible | Faible-moyen | Aucune |
+| 5 — Rules — ANNULÉE | — | — | — |
 | 6 — i18n Algolia | Moyen | Élevé (futur) | Migration i18n du site |
-| 7 — Virtual Replicas | Faible | Moyen | Aucune |
+| 7 — Virtual Replicas | Faible-moyen | Moyen-élevé (UX) | Aucune |
 
 ---
 

@@ -1,5 +1,5 @@
 import type { MemesFilters } from '@/constants/meme'
-import { NEWS_CATEGORY_SLUG } from '@/constants/meme'
+import { NEWS_CATEGORY_SLUG, POPULAR_CATEGORY_SLUG } from '@/constants/meme'
 import { MINUTE } from '@/constants/time'
 import type { Meme, Video } from '@/db/generated/prisma/client'
 import { getAdminMemeById, getAdminMemes } from '@/server/admin'
@@ -88,6 +88,18 @@ export const getFavoritesMemesQueryOpts = () => {
 
 getFavoritesMemesQueryOpts.all = ['favorites-memes'] as const
 
+function getCategorySortPriority(slug: string) {
+  if (slug === NEWS_CATEGORY_SLUG) {
+    return 0
+  }
+
+  if (slug === POPULAR_CATEGORY_SLUG) {
+    return 1
+  }
+
+  return 2
+}
+
 export const getCategoriesListQueryOpts = () => {
   return queryOptions({
     queryKey: [...getCategoriesListQueryOpts.all],
@@ -95,15 +107,10 @@ export const getCategoriesListQueryOpts = () => {
       const categories = await getCategories()
 
       return categories.toSorted((categoryA, categoryB) => {
-        if (categoryA.slug === NEWS_CATEGORY_SLUG) {
-          return -1
-        }
-
-        if (categoryB.slug === NEWS_CATEGORY_SLUG) {
-          return 1
-        }
-
-        return 0
+        return (
+          getCategorySortPriority(categoryA.slug) -
+          getCategorySortPriority(categoryB.slug)
+        )
       })
     },
     staleTime: 10 * MINUTE

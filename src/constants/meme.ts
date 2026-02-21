@@ -13,6 +13,12 @@ export const DEFAULT_MEME_TITLE = 'Sans titre'
 export const LEGACY_MEME_TITLE = 'Titre inconnu'
 
 export const NEWS_CATEGORY_SLUG = 'news'
+export const POPULAR_CATEGORY_SLUG = 'popular'
+
+export const VIRTUAL_CATEGORY_SLUGS = new Set([
+  NEWS_CATEGORY_SLUG,
+  POPULAR_CATEGORY_SLUG
+])
 export const MEMES_PER_PAGE = 30
 export const RELATED_MEMES_COUNT = 4
 export const TRENDING_MEMES_COUNT = 12

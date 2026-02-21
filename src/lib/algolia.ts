@@ -8,6 +8,8 @@ import { searchClient } from '@algolia/client-search'
 import { recommendClient } from '@algolia/recommend'
 
 export const algoliaIndexName = clientEnv.VITE_ALGOLIA_INDEX
+export const algoliaIndexPopular = `${algoliaIndexName}_replica_popular`
+export const algoliaIndexRecent = `${algoliaIndexName}_replica_recent`
 
 export const algoliaSearchClient = searchClient(
   clientEnv.VITE_ALGOLIA_APP_ID,

@@ -24,7 +24,7 @@ import { Textarea } from '@/components/ui/textarea'
 import {
   MemeStatusMeta,
   type MemeWithCategories,
-  NEWS_CATEGORY_SLUG
+  VIRTUAL_CATEGORY_SLUGS
 } from '@/constants/meme'
 import type { Meme } from '@/db/generated/prisma/client'
 import { MemeStatus } from '@/db/generated/prisma/enums'
@@ -52,7 +52,7 @@ export const MemeForm = ({ meme, onCancel, onSuccess }: MemeFormParams) => {
     return (
       categoriesListQuery.data
         ?.filter((category) => {
-          return category.slug !== NEWS_CATEGORY_SLUG
+          return !VIRTUAL_CATEGORY_SLUGS.has(category.slug)
         })
         .map((category) => {
           return {

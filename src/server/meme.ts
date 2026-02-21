@@ -9,8 +9,10 @@ import {
   MEMES_FILTERS_SCHEMA,
   MEMES_PER_PAGE,
   NEWS_CATEGORY_SLUG,
+  POPULAR_CATEGORY_SLUG,
   RELATED_MEMES_COUNT,
-  TRENDING_MEMES_COUNT
+  TRENDING_MEMES_COUNT,
+  VIRTUAL_CATEGORY_SLUGS
 } from '@/constants/meme'
 import {
   ONE_HOUR_MS,
@@ -25,6 +27,8 @@ import {
   ALGOLIA_SEARCH_PARAMS_BASE,
   ALGOLIA_SEARCH_RETRIEVE,
   algoliaIndexName,
+  algoliaIndexPopular,
+  algoliaIndexRecent,
   algoliaRecommendClient,
   algoliaSearchClient,
   getHighlightedTitle,
@@ -43,11 +47,27 @@ function buildMemeFilters(category: string | undefined, thirtyDaysAgo: number) {
 
   if (category === NEWS_CATEGORY_SLUG) {
     filters.push(`publishedAtTime >= ${thirtyDaysAgo}`)
-  } else if (category) {
+  } else if (category && !VIRTUAL_CATEGORY_SLUGS.has(category)) {
     filters.push(`categorySlugs:"${category}"`)
   }
 
   return filters.join(' AND ')
+}
+
+function resolveIndexName(category: string | undefined, hasQuery: boolean) {
+  if (hasQuery) {
+    return algoliaIndexName
+  }
+
+  if (category === POPULAR_CATEGORY_SLUG) {
+    return algoliaIndexPopular
+  }
+
+  if (category === NEWS_CATEGORY_SLUG) {
+    return algoliaIndexRecent
+  }
+
+  return algoliaIndexName
 }
 
 export const getMemeById = createServerFn({ method: 'GET' })
@@ -97,17 +117,17 @@ export const getVideoStatusById = createServerFn({ method: 'GET' })
 export const getMemes = createServerFn({ method: 'GET' })
   .inputValidator(MEMES_FILTERS_SCHEMA)
   .handler(async ({ data }) => {
-    const cacheKey = `memes:${data.query ?? ''}:${data.page ?? 1}:${data.category ?? ''}`
+    const hasQuery = Boolean(data.query)
+    const indexName = resolveIndexName(data.category, hasQuery)
+    const cacheKey = `${indexName}:${data.query ?? ''}:${data.page ?? 1}:${data.category ?? ''}`
 
     return withAlgoliaCache(cacheKey, async () => {
       const thirtyDaysAgo = Date.now() - THIRTY_DAYS_MS
       const filters = buildMemeFilters(data.category, thirtyDaysAgo)
 
-      const hasQuery = Boolean(data.query)
-
       const response =
         await algoliaSearchClient.searchSingleIndex<AlgoliaMemeRecord>({
-          indexName: algoliaIndexName,
+          indexName,
           searchParams: {
             query: data.query,
             page: data.page ? data.page - 1 : 0,

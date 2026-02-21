@@ -46,6 +46,7 @@ export function getRouter() {
   if (!router.isServer) {
     Sentry.init({
       dsn: clientEnv.VITE_SENTRY_DSN,
+      tunnel: '/api/sentry-tunnel',
       environment: process.env.NODE_ENV,
       enabled: process.env.NODE_ENV === 'production',
       sendDefaultPii: false,
@@ -58,7 +59,7 @@ export function getRouter() {
         })
       ],
       tracesSampleRate: 0.2,
-      replaysSessionSampleRate: 0.05,
+      replaysSessionSampleRate: 0,
       replaysOnErrorSampleRate: 1.0,
       denyUrls: [/extensions\//i, /^chrome:\/\//i, /^chrome-extension:\/\//i],
       beforeSend(event) {

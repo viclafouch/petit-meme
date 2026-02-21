@@ -2,6 +2,7 @@ import type { User } from 'better-auth'
 import { auth } from '@/lib/auth'
 import { stripeLogger } from '@/lib/logger'
 import { getAuthUser } from '@/server/user-auth'
+import * as Sentry from '@sentry/tanstackstart-react'
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
 
@@ -35,6 +36,7 @@ export const findActiveSubscription = createServerOnlyFn(
         { err: error, userId },
         'Failed to list active subscriptions'
       )
+      Sentry.captureException(error)
 
       return null
     }

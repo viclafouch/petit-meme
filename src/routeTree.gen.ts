@@ -16,6 +16,7 @@ import { Route as HealthRouteImport } from './routes/health'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as Public__rootRouteRouteImport } from './routes/_public__root/route'
 import { Route as Public__rootIndexRouteImport } from './routes/_public__root/index'
+import { Route as ApiSentryTunnelRouteImport } from './routes/api/sentry-tunnel'
 import { Route as ApiBunnyRouteImport } from './routes/api/bunny'
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as AdminDownloaderRouteImport } from './routes/admin/downloader'
@@ -72,6 +73,11 @@ const Public__rootIndexRoute = Public__rootIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => Public__rootRouteRoute,
+} as any)
+const ApiSentryTunnelRoute = ApiSentryTunnelRouteImport.update({
+  id: '/api/sentry-tunnel',
+  path: '/api/sentry-tunnel',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiBunnyRoute = ApiBunnyRouteImport.update({
   id: '/api/bunny',
@@ -208,6 +214,7 @@ export interface FileRoutesByFullPath {
   '/admin/downloader': typeof AdminDownloaderRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/bunny': typeof ApiBunnyRoute
+  '/api/sentry-tunnel': typeof ApiSentryTunnelRoute
   '/settings': typeof Public__rootDefaultSettingsRouteRouteWithChildren
   '/favorites': typeof Public__rootDefaultFavoritesRoute
   '/mentions-legales': typeof Public__rootDefaultMentionsLegalesRoute
@@ -237,6 +244,7 @@ export interface FileRoutesByTo {
   '/admin/downloader': typeof AdminDownloaderRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/bunny': typeof ApiBunnyRoute
+  '/api/sentry-tunnel': typeof ApiSentryTunnelRoute
   '/favorites': typeof Public__rootDefaultFavoritesRoute
   '/mentions-legales': typeof Public__rootDefaultMentionsLegalesRoute
   '/pricing': typeof Public__rootDefaultPricingRoute
@@ -267,6 +275,7 @@ export interface FileRoutesById {
   '/admin/downloader': typeof AdminDownloaderRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/bunny': typeof ApiBunnyRoute
+  '/api/sentry-tunnel': typeof ApiSentryTunnelRoute
   '/_public__root/': typeof Public__rootIndexRoute
   '/_public__root/_default/settings': typeof Public__rootDefaultSettingsRouteRouteWithChildren
   '/_public__root/_default/favorites': typeof Public__rootDefaultFavoritesRoute
@@ -299,6 +308,7 @@ export interface FileRouteTypes {
     | '/admin/downloader'
     | '/admin/users'
     | '/api/bunny'
+    | '/api/sentry-tunnel'
     | '/settings'
     | '/favorites'
     | '/mentions-legales'
@@ -328,6 +338,7 @@ export interface FileRouteTypes {
     | '/admin/downloader'
     | '/admin/users'
     | '/api/bunny'
+    | '/api/sentry-tunnel'
     | '/favorites'
     | '/mentions-legales'
     | '/pricing'
@@ -357,6 +368,7 @@ export interface FileRouteTypes {
     | '/admin/downloader'
     | '/admin/users'
     | '/api/bunny'
+    | '/api/sentry-tunnel'
     | '/_public__root/'
     | '/_public__root/_default/settings'
     | '/_public__root/_default/favorites'
@@ -386,6 +398,7 @@ export interface RootRouteChildren {
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiBunnyRoute: typeof ApiBunnyRoute
+  ApiSentryTunnelRoute: typeof ApiSentryTunnelRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -439,6 +452,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof Public__rootIndexRouteImport
       parentRoute: typeof Public__rootRouteRoute
+    }
+    '/api/sentry-tunnel': {
+      id: '/api/sentry-tunnel'
+      path: '/api/sentry-tunnel'
+      fullPath: '/api/sentry-tunnel'
+      preLoaderRoute: typeof ApiSentryTunnelRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/bunny': {
       id: '/api/bunny'
@@ -697,6 +717,7 @@ const rootRouteChildren: RootRouteChildren = {
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiBunnyRoute: ApiBunnyRoute,
+  ApiSentryTunnelRoute: ApiSentryTunnelRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

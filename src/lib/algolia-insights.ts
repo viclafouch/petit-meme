@@ -11,6 +11,7 @@ import type {
   ViewedObjectIDs
 } from '@algolia/client-insights'
 import { insightsClient } from '@algolia/client-insights'
+import * as Sentry from '@sentry/tanstackstart-react'
 import { createClientOnlyFn } from '@tanstack/react-start'
 
 const algoliaInsights = insightsClient(
@@ -21,6 +22,7 @@ const algoliaInsights = insightsClient(
 function logInsightsError(error: unknown) {
   // eslint-disable-next-line no-console
   console.warn('[Algolia Insights]', error)
+  Sentry.captureException(error)
 }
 
 function getUserToken() {

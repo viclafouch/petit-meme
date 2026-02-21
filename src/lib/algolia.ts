@@ -7,6 +7,7 @@ import { algoliaLogger } from '@/lib/logger'
 import type { HighlightResultOption, Hit } from '@algolia/client-search'
 import { searchClient } from '@algolia/client-search'
 import { recommendClient } from '@algolia/recommend'
+import * as Sentry from '@sentry/tanstackstart-react'
 
 export const algoliaIndexName = clientEnv.VITE_ALGOLIA_INDEX
 export const algoliaIndexPopular = `${algoliaIndexName}_replica_popular`
@@ -32,6 +33,7 @@ export async function safeAlgoliaOp<T>(promise: Promise<T>) {
     return await promise
   } catch (error) {
     algoliaLogger.error({ err: error }, 'Algolia operation failed')
+    Sentry.captureException(error)
 
     return null
   }

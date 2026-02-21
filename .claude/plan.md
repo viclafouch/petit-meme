@@ -743,6 +743,16 @@ Pour un site de memes, 1M records est largement suffisant. Même avec 10K memes,
 
 ---
 
+## Maintenance
+
+### Update Prisma 7.4.0 → 7.4.1 (`@prisma/client` ^7.3.0 → ^7.4.1)
+
+- [x] Mettre à jour `prisma` et `@prisma/client` vers 7.4.1
+- [x] `npx prisma generate`
+- [x] `npm run lint:fix`
+
+---
+
 ## Futur
 
 Items non planifiés, à traiter après les corrections ci-dessus.

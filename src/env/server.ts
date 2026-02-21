@@ -1,4 +1,3 @@
-// See .env.example for documentation on each variable
 import { z } from 'zod'
 import { createEnv } from '@t3-oss/env-core'
 
@@ -11,8 +10,9 @@ export const serverEnv = createEnv({
     BUNNY_COLLECTION_ID: z.string(),
     ALGOLIA_ADMIN_KEY: z.string(),
     GEMINI_API_KEY: z.string(),
-    RESEND_SECRET: z.string().startsWith('re_'),
-    RESEND_EMAIL_TO: z.string().optional(),
+    RESEND_API_KEY: z.string().startsWith('re_'),
+    EMAIL_OVERRIDE_TO: z.string().optional(),
+    EMAIL_OVERRIDE_FROM: z.string().optional(),
     STRIPE_SECRET_KEY: z.string().startsWith('sk_'),
     STRIPE_WEBHOOK_SECRET: z.string().startsWith('whsec_'),
     STRIPE_PRICE_ID: z.string().startsWith('price_')

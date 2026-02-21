@@ -23,7 +23,7 @@
     "postinstall": "prisma generate",
     "lint": "npx tsc && eslint",
     "lint:fix": "npm run lint -- --fix",
-    "email:dev": "email dev --port 3001",
+    "email:dev": "email dev --dir src/emails --port 3001",
     "deps": "npx taze@latest -Ilw",
     "deps:major": "npx taze@latest major -Ilw",
     "prepare": "husky"

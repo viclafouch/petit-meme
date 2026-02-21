@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "skills": {
+    "email-best-practices": {
+      "source": "resend/email-best-practices",
+      "sourceType": "github",
+      "computedHash": "7e6c8d495e66e88a20dc45d17d24b445d6c5c9072855c78d8800fff994bc813f"
+    },
+    "react-email": {
+      "source": "resend/react-email",
+      "sourceType": "github",
+      "computedHash": "e4334584500b10b86b95d02b1fcfc39e7245b00694672607eba33082fc0265ac"
+    },
+    "resend": {
+      "source": "resend/resend-skills",
+      "sourceType": "github",
+      "computedHash": "318cfafb6bb004da64d0eac0349d99997b8b1c75e55870a4104dff9b5ff4ee3d"
+    }
+  }
+}

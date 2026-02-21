@@ -12,12 +12,22 @@ import {
 import { prismaClient } from '@/db'
 import { clientEnv } from '@/env/client'
 import { serverEnv } from '@/env/server'
-import { resendClient } from '@/lib/resend'
+import { maskEmail } from '@/helpers/mask-email'
+import { sendEmailAsync } from '@/lib/resend.server'
 import { stripeClient } from '@/lib/stripe'
 import { stripe } from '@better-auth/stripe'
 import { createServerOnlyFn } from '@tanstack/react-start'
-import EmailVerification from '../../emails/email-verification'
-import ResetPassword from '../../emails/reset-password'
+import EmailVerification from '../emails/email-verification'
+import PasswordChangedEmail from '../emails/password-changed-email'
+import ResetPassword from '../emails/reset-password'
+import WelcomeEmail from '../emails/welcome-email'
+
+const formatDate = (date: Date) => {
+  return new Intl.DateTimeFormat('fr-FR', {
+    dateStyle: 'long',
+    timeStyle: 'short'
+  }).format(date)
+}
 
 const getAuthConfig = createServerOnlyFn(() => {
   return betterAuth({
@@ -61,17 +71,25 @@ const getAuthConfig = createServerOnlyFn(() => {
       minPasswordLength: PASSWORD_MIN_LENGTH,
       maxPasswordLength: PASSWORD_MAX_LENGTH,
       sendResetPassword: async ({ user, url }) => {
-        await resendClient.emails.send({
-          from: 'Petit Meme <hello@petit-meme.io>',
-          to: serverEnv.RESEND_EMAIL_TO ?? user.email,
+        sendEmailAsync({
+          to: user.email,
           subject: 'Réinitialise ton mot de passe Petit Mème',
-          react: <ResetPassword username={user.name} resetUrl={url} />
+          react: <ResetPassword username={user.name} resetUrl={url} />,
+          logMessage: 'Sending reset password email to'
         })
-
-        if (process.env.NODE_ENV !== 'production') {
-          // eslint-disable-next-line no-console
-          console.log('Sending reset password email to:', user.email, url)
-        }
+      },
+      onPasswordReset: async ({ user }) => {
+        sendEmailAsync({
+          to: user.email,
+          subject: 'Ton mot de passe Petit Mème a été modifié',
+          react: (
+            <PasswordChangedEmail
+              username={user.name}
+              changedAt={formatDate(new Date())}
+            />
+          ),
+          logMessage: 'Password reset for'
+        })
       },
       requireEmailVerification: true,
       revokeSessionsOnPasswordReset: true
@@ -81,25 +99,22 @@ const getAuthConfig = createServerOnlyFn(() => {
       autoSignInAfterVerification: true,
       expiresIn: ONE_HOUR_IN_SECONDS,
       sendVerificationEmail: async ({ user, url }) => {
-        await resendClient.emails.send({
-          from: 'Petit Meme <hello@petit-meme.io>',
-          to: serverEnv.RESEND_EMAIL_TO ?? user.email,
+        sendEmailAsync({
+          to: user.email,
           subject: 'Confirme ton inscription à Petit Mème',
           react: (
             <EmailVerification username={user.name} verificationUrl={url} />
-          )
+          ),
+          logMessage: 'Sending verification email to'
         })
-
-        if (process.env.NODE_ENV !== 'production') {
-          // eslint-disable-next-line no-console
-          console.log('Sending verification email to:', user.email, url)
-        }
       },
       async afterEmailVerification(user) {
-        if (process.env.NODE_ENV !== 'production') {
-          // eslint-disable-next-line no-console
-          console.log(`${user.email} has been successfully verified!`)
-        }
+        sendEmailAsync({
+          to: user.email,
+          subject: 'Bienvenue sur Petit Mème !',
+          react: <WelcomeEmail username={user.name} />,
+          logMessage: 'Email verified for'
+        })
       }
     },
     socialProviders: {
@@ -113,10 +128,8 @@ const getAuthConfig = createServerOnlyFn(() => {
             image: profile.data.profile_image_url
           }
 
-          if (process.env.NODE_ENV !== 'production') {
-            // eslint-disable-next-line no-console
-            console.log("Connecting to Twitter's API with profile", user)
-          }
+          // eslint-disable-next-line no-console
+          console.log(`[auth] Twitter login for ${maskEmail(user.email ?? '')}`)
 
           return user
         }

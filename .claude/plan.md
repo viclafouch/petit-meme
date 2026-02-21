@@ -753,6 +753,24 @@ Pour un site de memes, 1M records est largement suffisant. Même avec 10K memes,
 
 ---
 
+## Audit & Refonte Email
+
+- [x] Renommer `src/lib/resend.ts` → `src/lib/resend.server.ts` avec `EMAIL_FROM`, `getEmailRecipient()`, `resend` centralisés
+- [x] Renommer env vars : `RESEND_SECRET` → `RESEND_API_KEY`, `RESEND_EMAIL_TO` → `EMAIL_OVERRIDE_TO`, ajouter `EMAIL_OVERRIDE_FROM`
+- [x] Créer `src/emails/email-layout.tsx` — layout Tailwind partagé avec header texte, color-scheme meta, footer
+- [x] Migrer `emails/email-verification.tsx` → `src/emails/email-verification.tsx` avec EmailLayout + lien fallback
+- [x] Migrer `emails/reset-password.tsx` → `src/emails/reset-password.tsx` avec EmailLayout + lien fallback + expiration 1h
+- [x] Créer `src/emails/welcome-email.tsx` — envoyé après vérification email
+- [x] Créer `src/emails/password-changed-email.tsx` — notification sécurité avec warning box rouge
+- [x] Créer `src/helpers/mask-email.ts` — helper pour audit logs
+- [x] Refondre `src/lib/auth.tsx` — envoi non-bloquant (`.catch(console.error)`), audit logs avec `maskEmail()`, hooks `onPasswordReset` et `afterEmailVerification`
+- [x] Supprimer `emails/` (ancien dossier racine) + `emails/_utils/` + `emails/static/`
+- [x] Mettre à jour `email:dev` script → `email dev --dir src/emails --port 3001`
+- [x] Vérification DNS : DKIM verified, SPF verified — vérifier DMARC
+- [ ] Renommer env vars sur Railway : `RESEND_SECRET` → `RESEND_API_KEY`, `RESEND_EMAIL_TO` → `EMAIL_OVERRIDE_TO` (si utilisé)
+
+---
+
 ## Futur
 
 Items non planifiés, à traiter après les corrections ci-dessus.

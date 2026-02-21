@@ -2,6 +2,7 @@ import React from 'react'
 import { StarsBackground } from '@/components/animate-ui/backgrounds/stars'
 import { Footer } from '@/components/footer'
 import { Navbar } from '@/components/navbar'
+import { SentryFeedbackWidget } from '@/components/sentry-feedback-widget'
 import { createFileRoute, Outlet } from '@tanstack/react-router'
 
 const RouteComponent = () => {
@@ -20,6 +21,7 @@ const RouteComponent = () => {
         </main>
         <Footer />
       </div>
+      <SentryFeedbackWidget />
     </StarsBackground>
   )
 }

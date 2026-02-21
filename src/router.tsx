@@ -3,6 +3,12 @@ import { ErrorComponent } from '@/components/error-component'
 import { NotFound } from '@/components/not-found'
 import { MINUTE, SECOND } from '@/constants/time'
 import { clientEnv } from '@/env/client'
+import {
+  FEEDBACK_OPTIONS,
+  scrubSensitiveBreadcrumbs,
+  scrubUserPii,
+  SENSITIVE_API_PATTERNS
+} from '@/lib/sentry'
 import * as Sentry from '@sentry/tanstackstart-react'
 import { QueryClient } from '@tanstack/react-query'
 import { createRouter } from '@tanstack/react-router'
@@ -55,38 +61,16 @@ export function getRouter() {
         Sentry.replayIntegration({
           maskAllText: false,
           blockAllMedia: false,
-          networkDetailDenyUrls: [/\/api\/auth\//, /\/api\/stripe\//]
-        })
+          networkDetailDenyUrls: SENSITIVE_API_PATTERNS
+        }),
+        Sentry.feedbackIntegration(FEEDBACK_OPTIONS)
       ],
       tracesSampleRate: 0.2,
       replaysSessionSampleRate: 0,
       replaysOnErrorSampleRate: 1.0,
       denyUrls: [/extensions\//i, /^chrome:\/\//i, /^chrome-extension:\/\//i],
-      beforeSend(event) {
-        if (event.user) {
-          delete event.user.email
-          delete event.user.username
-        }
-
-        return event
-      },
-      beforeBreadcrumb(breadcrumb) {
-        if (breadcrumb.category === 'xhr' || breadcrumb.category === 'fetch') {
-          const url = breadcrumb.data?.url ?? ''
-
-          if (url.includes('/api/auth/') || url.includes('/api/stripe/')) {
-            return {
-              ...breadcrumb,
-              data: {
-                url: breadcrumb.data?.url,
-                method: breadcrumb.data?.method
-              }
-            }
-          }
-        }
-
-        return breadcrumb
-      }
+      beforeSend: scrubUserPii,
+      beforeBreadcrumb: scrubSensitiveBreadcrumbs
     })
   }
 

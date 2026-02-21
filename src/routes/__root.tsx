@@ -214,6 +214,12 @@ const RootErrorComponent = ({ error, reset }: ErrorComponentProps) => {
 }
 
 const RootComponent = () => {
+  const { user } = Route.useRouteContext()
+
+  React.useEffect(() => {
+    Sentry.setUser(user ? { email: user.email } : null)
+  }, [user])
+
   return (
     <RootDocument>
       <Outlet />

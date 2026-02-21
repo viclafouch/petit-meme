@@ -35,12 +35,13 @@ import {
   normalizeAlgoliaHit,
   withAlgoliaCache
 } from '@/lib/algolia'
+import { auth } from '@/lib/auth'
 import { buildVideoOriginalUrl } from '@/lib/bunny'
 import { authUserRequiredMiddleware } from '@/server/user-auth'
 import { ensureAlgoliaUserToken } from '@/utils/tracking-cookies'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
-import { getCookie, setCookie } from '@tanstack/react-start/server'
+import { getCookie, getRequest, setCookie } from '@tanstack/react-start/server'
 
 function buildMemeFilters(category: string | undefined, thirtyDaysAgo: number) {
   const filters = [`status:${MemeStatus.PUBLISHED}`]
@@ -389,14 +390,23 @@ export const registerMemeView = createServerFn({ method: 'POST' })
       }
     })
 
-    const promises: Promise<unknown>[] = [viewTransaction]
+    const trackAlgoliaView = async () => {
+      if (!hasConsentedToCookies) {
+        return
+      }
 
-    if (hasConsentedToCookies) {
       const { sendAlgoliaViewEvent } =
         await import('@/lib/algolia-insights.server')
 
-      promises.push(sendAlgoliaViewEvent({ memeId, userToken: viewerKey }))
+      const { headers } = getRequest()
+      const session = await auth.api.getSession({ headers })
+
+      await sendAlgoliaViewEvent({
+        memeId,
+        userToken: viewerKey,
+        authenticatedUserToken: session?.user.id
+      })
     }
 
-    await Promise.all(promises)
+    await Promise.all([viewTransaction, trackAlgoliaView()])
   })

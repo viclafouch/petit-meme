@@ -7,7 +7,8 @@ import { PlayerDialog } from '@/components/Meme/player-dialog'
 import { StudioDialog } from '@/components/Meme/studio-dialog'
 import { OverlaySpinner } from '@/components/ui/overlay-spinner'
 import { MEMES_PER_PAGE, type MemeWithVideo } from '@/constants/meme'
-import { ClientOnly } from '@tanstack/react-router'
+import { sendViewEvent } from '@/lib/algolia-insights'
+import { ClientOnly, useRouteContext } from '@tanstack/react-router'
 
 type MemeWithHighlight = MemeWithVideo & {
   highlightedTitle?: string
@@ -28,9 +29,29 @@ export const MemesList = ({
   queryID,
   page = 0
 }: MemesListParams) => {
+  const { user } = useRouteContext({ from: '__root__' })
   const [selectedId, setSelectedId] = React.useState<string | null>(null)
   const [studioMemeSelected, setStudioMemeSelected] =
     React.useState<MemeWithVideo | null>(null)
+
+  const authenticatedUserToken = user?.id
+
+  const memeIds = memes.map((meme) => {
+    return meme.id
+  })
+
+  const memeIdsKey = memeIds.join(',')
+
+  React.useEffect(() => {
+    if (memeIds.length === 0) {
+      return () => {}
+    }
+
+    sendViewEvent({ objectIDs: memeIds, authenticatedUserToken })
+
+    return () => {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [memeIdsKey, authenticatedUserToken])
 
   useHotkeys(
     'escape',
@@ -105,6 +126,7 @@ export const MemesList = ({
               onOpenStudioClick={setStudioMemeSelected}
               queryID={queryID}
               position={page * MEMES_PER_PAGE + index + 1}
+              authenticatedUserToken={authenticatedUserToken}
             />
           )
         })}
@@ -117,6 +139,7 @@ export const MemesList = ({
             onClose={handleDeselect}
             onOpenStudio={setStudioMemeSelected}
             queryID={queryID}
+            authenticatedUserToken={authenticatedUserToken}
           />
         ) : null}
       </AnimatePresence>

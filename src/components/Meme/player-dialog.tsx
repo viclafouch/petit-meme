@@ -19,7 +19,8 @@ import { useDownloadMeme } from '@/hooks/use-download-meme'
 import { useMemeHls } from '@/hooks/use-meme-hls'
 import { useRegisterMemeView } from '@/hooks/use-register-meme-view'
 import { useShareMeme } from '@/hooks/use-share-meme'
-import { sendConversionAfterSearch } from '@/lib/algolia-insights'
+import type { ConversionEventName } from '@/lib/algolia-insights'
+import { sendConversionEvent } from '@/lib/algolia-insights'
 import { buildVideoImageUrl } from '@/lib/bunny'
 import { track } from '@/lib/mixpanel'
 import { buildUrl } from '@/lib/seo'
@@ -31,6 +32,7 @@ type PlayerDialogParams = {
   onClose: () => void
   onOpenStudio: (meme: MemeWithVideo) => void
   queryID?: string
+  authenticatedUserToken?: string
 }
 
 export const PlayerDialog = ({
@@ -38,7 +40,8 @@ export const PlayerDialog = ({
   layoutContext,
   onClose,
   onOpenStudio,
-  queryID
+  queryID,
+  authenticatedUserToken
 }: PlayerDialogParams) => {
   const { videoRef } = useMemeHls({
     memeId: meme.id,
@@ -67,15 +70,12 @@ export const PlayerDialog = ({
     maxMs: 12000
   })
 
-  const trackConversion = (eventName: string) => {
-    if (!queryID) {
-      return
-    }
-
-    sendConversionAfterSearch({
+  const trackConversion = (eventName: ConversionEventName) => {
+    sendConversionEvent({
       queryID,
       objectID: meme.id,
-      eventName
+      eventName,
+      authenticatedUserToken
     })
   }
 

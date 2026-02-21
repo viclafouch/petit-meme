@@ -21,10 +21,8 @@ import { formatViewCount } from '@/helpers/format'
 import { useDownloadMeme } from '@/hooks/use-download-meme'
 import { useShareMeme } from '@/hooks/use-share-meme'
 import { useToggleBookmark } from '@/hooks/use-toggle-bookmark'
-import {
-  sendClickAfterSearch,
-  sendConversionAfterSearch
-} from '@/lib/algolia-insights'
+import type { ConversionEventName } from '@/lib/algolia-insights'
+import { sendClickEvent, sendConversionEvent } from '@/lib/algolia-insights'
 import { getFavoritesMemesQueryOpts } from '@/lib/queries'
 import { cn } from '@/lib/utils'
 import { useShowDialog } from '@/stores/dialog.store'
@@ -40,6 +38,7 @@ export type MemeListItemParams = {
   onOpenStudioClick: (meme: MemeWithVideo) => void
   highlightedTitle?: string
   queryID?: string
+  authenticatedUserToken?: string
 }
 
 const sizes = {
@@ -58,9 +57,14 @@ const sizes = {
 type FavoriteItemParams = {
   meme: MemeWithVideo
   queryID?: string
+  authenticatedUserToken?: string
 }
 
-const FavoriteItem = ({ meme, queryID }: FavoriteItemParams) => {
+const FavoriteItem = ({
+  meme,
+  queryID,
+  authenticatedUserToken
+}: FavoriteItemParams) => {
   const query = useQuery(getFavoritesMemesQueryOpts())
 
   const { isMemeBookmarked, isPending, toggleBookmark } = useToggleBookmark({
@@ -71,11 +75,12 @@ const FavoriteItem = ({ meme, queryID }: FavoriteItemParams) => {
   const handleToggleFavorite = (event: React.MouseEvent<HTMLDivElement>) => {
     event.preventDefault()
 
-    if (queryID && !isMemeBookmarked) {
-      sendConversionAfterSearch({
+    if (!isMemeBookmarked) {
+      sendConversionEvent({
         queryID,
         objectID: meme.id,
-        eventName: 'Meme Bookmarked'
+        eventName: 'Meme Bookmarked',
+        authenticatedUserToken
       })
     }
 
@@ -93,7 +98,11 @@ const FavoriteItem = ({ meme, queryID }: FavoriteItemParams) => {
   )
 }
 
-const FavoriteItemGuard = ({ meme, queryID }: FavoriteItemParams) => {
+const FavoriteItemGuard = ({
+  meme,
+  queryID,
+  authenticatedUserToken
+}: FavoriteItemParams) => {
   const { user } = useRouteContext({ from: '__root__' })
   const showDialog = useShowDialog()
 
@@ -111,7 +120,13 @@ const FavoriteItemGuard = ({ meme, queryID }: FavoriteItemParams) => {
     )
   }
 
-  return <FavoriteItem meme={meme} queryID={queryID} />
+  return (
+    <FavoriteItem
+      meme={meme}
+      queryID={queryID}
+      authenticatedUserToken={authenticatedUserToken}
+    />
+  )
 }
 
 export const MemeListItem = React.memo(
@@ -123,32 +138,27 @@ export const MemeListItem = React.memo(
     onOpenStudioClick,
     size,
     queryID,
-    position
+    position,
+    authenticatedUserToken
   }: MemeListItemParams) => {
     const shareMeme = useShareMeme()
     const downloadMutation = useDownloadMeme()
 
     const handleTrackClick = () => {
-      if (!queryID) {
-        return
-      }
-
-      sendClickAfterSearch({
+      sendClickEvent({
         queryID,
         objectID: meme.id,
-        position
+        position,
+        authenticatedUserToken
       })
     }
 
-    const trackConversion = (eventName: string) => {
-      if (!queryID) {
-        return
-      }
-
-      sendConversionAfterSearch({
+    const trackConversion = (eventName: ConversionEventName) => {
+      sendConversionEvent({
         queryID,
         objectID: meme.id,
-        eventName
+        eventName,
+        authenticatedUserToken
       })
     }
 
@@ -249,7 +259,11 @@ export const MemeListItem = React.memo(
                   <Download />
                   Télécharger
                 </DropdownMenuItem>
-                <FavoriteItemGuard meme={meme} queryID={queryID} />
+                <FavoriteItemGuard
+                  meme={meme}
+                  queryID={queryID}
+                  authenticatedUserToken={authenticatedUserToken}
+                />
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

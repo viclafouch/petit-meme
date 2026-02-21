@@ -12,10 +12,15 @@ const algoliaInsightsServer = insightsClient(
 type SendAlgoliaViewEventParams = {
   memeId: string
   userToken: string
+  authenticatedUserToken?: string
 }
 
 export const sendAlgoliaViewEvent = createServerOnlyFn(
-  ({ memeId, userToken }: SendAlgoliaViewEventParams) => {
+  ({
+    memeId,
+    userToken,
+    authenticatedUserToken
+  }: SendAlgoliaViewEventParams) => {
     return safeAlgoliaOp(
       algoliaInsightsServer.pushEvents({
         events: [
@@ -24,7 +29,8 @@ export const sendAlgoliaViewEvent = createServerOnlyFn(
             eventName: 'Meme Viewed',
             index: algoliaIndexName,
             objectIDs: [memeId],
-            userToken
+            userToken,
+            authenticatedUserToken
           }
         ]
       })

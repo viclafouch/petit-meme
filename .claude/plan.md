@@ -459,7 +459,7 @@ Les events alimentent **3 fonctionnalités** : Analytics dashboard, Recommend, e
 - **Cache + queryID** : Le cache `withAlgoliaCache` reste tel quel. Le `queryID` est caché avec les résultats — acceptable que plusieurs users partagent le même `queryID` dans la fenêtre de 5 min (bruit mineur dans les analytics, performance prioritaire)
 - **Propagation queryID** : Props drilling (`getMemes()` → `MemesList` → `MemeListItem`)
 - **userToken** : `viewerKey` (UUID) utilisé directement (format compatible Algolia). Cookie `algoliaUserToken` (NON httpOnly, lisible par JS) créé avec le même UUID que `anonId` pour les events client-side
-- **authenticatedUserToken** : Reporté à Phase 4 (Recommend)
+- **authenticatedUserToken** : Implémenté Phase 2.7 (client via `user.id` du route context, serveur via `auth.api.getSession`)
 
 #### 2.1 Helper client + server Insights
 
@@ -502,7 +502,19 @@ Les events alimentent **3 fonctionnalités** : Analytics dashboard, Recommend, e
 - [x] Backfill : si `anonId` existe déjà mais pas `algoliaUserToken`, le cookie est créé au prochain `registerMemeView`
 - [x] Gate client : `hasAcceptedCookies()` + vérification du cookie avant envoi
 - [x] Gate serveur : `hasConsentedToCookies` avant envoi du view event
-- [ ] `authenticatedUserToken` reporté à Phase 4 (Recommend)
+- [x] `authenticatedUserToken` implémenté (client: `user.id` via route context, serveur: `auth.api.getSession`)
+
+#### 2.7 Audit améliorations (2026-02-21)
+
+- [x] Ajouter `<link rel="preconnect">` vers Algolia DSN (`__root.tsx`)
+- [x] Remplacer `.catch(() => {})` par `.catch(logInsightsError)` dans `algolia-insights.ts`
+- [x] Ajouter `sendViewEvent()` (client-side) : `viewedObjectIDs` envoyé quand `MemesList` mount avec des résultats
+- [x] Ajouter `sendClick()` (sans `queryID`) : clics hors recherche (browse, homepage, recommend) trackés dans `MemeListItem`
+- [x] Ajouter `authenticatedUserToken` sur tous les events (client + serveur) pour fusionner les profils anonyme/connecté
+- [x] Extraire `getUserToken()` helper pour factoriser la logique GDPR + cookie dans `algolia-insights.ts`
+- [x] Ajouter `sendConversion()` (sans `queryID`) : conversions hors recherche (browse, homepage, recommend) trackées dans `MemeListItem` et `PlayerDialog`
+- [x] Conversions Recommend : studio, share, download, bookmark, link copy désormais trackées même sans `queryID`
+- [x] Refactoring types : `BaseEventParams` partagé, `ConversionEventName` union, suppression discriminated unions (`AfterSearchContext`/`BrowseContext`) au profit de `queryID?: string` optionnel — simplifie les consumers (`MemeListItem`, `PlayerDialog`)
 
 ### Phase 3 — Analytics Dashboard (gratuit, dépend de Phase 2)
 

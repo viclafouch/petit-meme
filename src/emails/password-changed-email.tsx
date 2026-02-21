@@ -1,5 +1,5 @@
 import { Section, Text } from '@react-email/components'
-import { EmailLayout } from './email-layout'
+import { CONTACT_EMAIL, EmailLayout } from './email-layout'
 
 type PasswordChangedEmailProps = {
   username: string
@@ -13,23 +13,23 @@ export const PasswordChangedEmail = ({
   return (
     <EmailLayout preview="Ton mot de passe Petit Meme a été modifié">
       <Section>
-        <Text className="m-0 mb-4 text-base leading-7 text-neutral-700">
-          Salut {username},
+        <Text className="m-0 mb-2 text-lg font-semibold text-brand">
+          Mot de passe modifié
         </Text>
-        <Text className="m-0 mb-4 text-base leading-7 text-neutral-700">
-          Ton mot de passe <b>Petit Meme</b> a été modifié avec succès le{' '}
-          <b>{changedAt}</b>.
+        <Text className="m-0 mb-6 text-sm leading-6 text-brand-muted-dark">
+          Modification effectuée le {changedAt}.
+        </Text>
+        <Text className="m-0 mb-4 text-sm leading-6 text-neutral-600">
+          Salut {username}, ton mot de passe <b>Petit Meme</b> a été modifié
+          avec succès. Toutes les sessions actives ont été déconnectées par
+          mesure de sécurité.
         </Text>
         <Section className="rounded-lg border border-solid border-brand-danger-border bg-brand-danger-bg p-4">
-          <Text className="m-0 text-sm leading-6 text-brand-danger">
+          <Text className="m-0 text-xs leading-5 text-brand-danger">
             Si tu n'es pas à l'origine de ce changement, contacte-nous
-            immédiatement à <b>hello@petit-meme.io</b>.
+            immédiatement à <b>{CONTACT_EMAIL}</b>.
           </Text>
         </Section>
-        <Text className="m-0 mt-4 text-base leading-7 text-neutral-700">
-          Toutes les sessions actives ont été déconnectées par mesure de
-          sécurité.
-        </Text>
       </Section>
     </EmailLayout>
   )

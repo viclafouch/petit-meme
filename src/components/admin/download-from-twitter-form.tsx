@@ -1,5 +1,6 @@
 import React from 'react'
 import { ClipboardPaste } from 'lucide-react'
+import { toast } from 'sonner'
 import { z } from 'zod'
 import { IconButtonStars } from '@/components/animate-ui/buttons/icon-button-stars'
 import {
@@ -19,9 +20,9 @@ import {
 import { Input } from '@/components/ui/input'
 import { LoadingButton } from '@/components/ui/loading-button'
 import { TWEET_LINK_SCHEMA } from '@/constants/meme'
-import { getTweetMedia } from '@/lib/react-tweet'
+import { base64ToBlob } from '@/helpers/blob'
 import { getFieldErrorMessage } from '@/lib/utils'
-import { getTweetFromUrl } from '@/server/twitter'
+import { fetchTweetMedia, getTweetFromUrl } from '@/server/twitter'
 import { downloadBlob } from '@/utils/download'
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
@@ -74,8 +75,14 @@ export const DownloadFromTwitterForm = () => {
       return getTweetFromUrl({ data: body.url })
     },
     onSuccess: async (tweet) => {
-      const medias = await getTweetMedia(tweet.video.url, tweet.poster.url)
-      downloadBlob(medias.video.blob, `${tweet.id}.mp4`)
+      const media = await fetchTweetMedia({
+        data: { videoUrl: tweet.video.url, posterUrl: tweet.poster.url }
+      })
+      const videoBlob = base64ToBlob(media.video, 'video/mp4')
+      downloadBlob(videoBlob, `${tweet.id}.mp4`)
+    },
+    onError: (error) => {
+      toast.error(error.message)
     }
   })
 

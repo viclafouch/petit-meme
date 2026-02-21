@@ -22,7 +22,6 @@ import { useShareMeme } from '@/hooks/use-share-meme'
 import type { ConversionEventName } from '@/lib/algolia-insights'
 import { sendConversionEvent } from '@/lib/algolia-insights'
 import { buildVideoImageUrl } from '@/lib/bunny'
-import { track } from '@/lib/mixpanel'
 import { buildUrl } from '@/lib/seo'
 import { useLinkProps } from '@tanstack/react-router'
 
@@ -54,13 +53,6 @@ export const PlayerDialog = ({
     to: '/memes/$memeId',
     params: { memeId: meme.id }
   })
-
-  React.useEffect(() => {
-    track('View Meme Details', {
-      memeId: meme.id,
-      memeTitle: meme.title
-    })
-  }, [meme.id, meme.title])
 
   useRegisterMemeView({
     memeId: meme.id,

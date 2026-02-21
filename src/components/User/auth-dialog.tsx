@@ -11,7 +11,6 @@ import {
 import { LoginForm } from '@/components/User/login-form'
 import { SignupForm } from '@/components/User/signup-form'
 import { authClient } from '@/lib/auth-client'
-import { track } from '@/lib/mixpanel'
 
 export const AuthDialog = ({ open, onOpenChange }: WithDialog<unknown>) => {
   const [authType, setAuthType] = React.useState<'login' | 'signup'>('login')
@@ -20,10 +19,6 @@ export const AuthDialog = ({ open, onOpenChange }: WithDialog<unknown>) => {
     event: React.MouseEvent<HTMLButtonElement>
   ) => {
     event.preventDefault()
-    track('Sign In', {
-      loginMethod: 'twitter',
-      success: true
-    })
     await authClient.signIn.social({
       provider: 'twitter'
     })

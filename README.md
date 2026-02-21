@@ -35,7 +35,7 @@ Currently available in **French only**. English support is planned.
 | Styling | [Tailwind CSS 4](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/) |
 | Validation | [Zod](https://zod.dev/) |
 | State | [Zustand](https://zustand.docs.pmnd.rs/) |
-| Analytics | [Mixpanel](https://mixpanel.com/) |
+| Analytics | [Algolia Analytics](https://www.algolia.com/) |
 
 ## Infrastructure
 
@@ -47,7 +47,7 @@ Currently available in **French only**. English support is planned.
 | [Stripe](https://stripe.com/) | Payment processing and subscriptions |
 | [Algolia](https://www.algolia.com/) | Search indexing |
 | [Resend](https://resend.com/) | Transactional emails |
-| [Mixpanel](https://mixpanel.com/) | Product analytics |
+| [Algolia](https://www.algolia.com/) | Search and analytics |
 
 ## Prerequisites
 

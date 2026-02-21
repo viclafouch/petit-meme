@@ -24,7 +24,6 @@ import { Input } from '@/components/ui/input'
 import { LoadingButton } from '@/components/ui/loading-button'
 import { getAuthErrorMessage } from '@/helpers/auth-errors'
 import { authClient } from '@/lib/auth-client'
-import { deleteMixpanelUser } from '@/lib/mixpanel'
 import {
   getActiveSubscriptionQueryOpts,
   getAuthUserQueryOpts,
@@ -66,7 +65,6 @@ const DeleteAccountForm = ({ onCancel }: { onCancel: () => void }) => {
       queryClient.removeQueries(getAuthUserQueryOpts())
       queryClient.removeQueries(getActiveSubscriptionQueryOpts())
       queryClient.removeQueries(getFavoritesMemesQueryOpts())
-      deleteMixpanelUser()
       toast.success('Votre compte a bien été supprimé !')
       void router.navigate({ to: '/', from: '/' })
       await router.invalidate()

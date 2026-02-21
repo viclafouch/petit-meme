@@ -13,7 +13,6 @@ import { Input } from '@/components/ui/input'
 import { LoadingButton } from '@/components/ui/loading-button'
 import { getAuthErrorMessage } from '@/helpers/auth-errors'
 import { authClient } from '@/lib/auth-client'
-import { identify, peopleSet, track } from '@/lib/mixpanel'
 import {
   getActiveSubscriptionQueryOpts,
   getAuthUserQueryOpts
@@ -75,21 +74,6 @@ export const LoginForm = ({
       await queryClient.invalidateQueries(getAuthUserQueryOpts())
       await router.invalidate({ sync: true })
       await queryClient.invalidateQueries(getActiveSubscriptionQueryOpts())
-
-      const user = queryClient.getQueryData(getAuthUserQueryOpts().queryKey)
-
-      if (user) {
-        identify(user.id)
-        peopleSet({
-          $name: user.name,
-          $email: user.email
-        })
-        track('Sign In', {
-          userId: user.id,
-          loginMethod: 'email',
-          success: true
-        })
-      }
 
       onSuccess?.()
     }

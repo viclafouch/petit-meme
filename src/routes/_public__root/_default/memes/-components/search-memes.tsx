@@ -8,7 +8,6 @@ import { MemesList } from '@/components/Meme/memes-list'
 import { buttonVariants } from '@/components/ui/button'
 import { LoadingSpinner } from '@/components/ui/spinner'
 import { type MemesFilters, VIRTUAL_CATEGORIES } from '@/constants/meme'
-import { track } from '@/lib/mixpanel'
 import {
   getCategoriesListQueryOpts,
   getMemesListQueryOpts
@@ -55,15 +54,6 @@ const MemesListWrapper = ({ columnGridCount }: { columnGridCount: number }) => {
   }, [debouncedValue, search.page, slug])
 
   const memesListQuery = useSuspenseQuery(getMemesListQueryOpts(filters))
-
-  React.useEffect(() => {
-    if (debouncedValue) {
-      track('Search', {
-        searchQuery: debouncedValue,
-        resultsCount: memesListQuery.data.memes.length
-      })
-    }
-  }, [debouncedValue, memesListQuery.data.memes.length])
 
   const categoryJsonLd = buildCategoryJsonLd(selectedCategory, {
     page: memesListQuery.data.page || 1,

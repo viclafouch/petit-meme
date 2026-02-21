@@ -6,7 +6,6 @@ import { TailwindIndicator } from '@/components/tailwind-indicator'
 import { Toaster } from '@/components/ui/sonner'
 import { clientEnv } from '@/env/client'
 import { getCookieConsent } from '@/lib/cookie-consent'
-import { initMixpanel } from '@/lib/mixpanel'
 import { getAuthUserQueryOpts } from '@/lib/queries'
 import { getStoredTheme, ThemeProvider } from '@/lib/theme'
 import type { getAuthUser } from '@/server/user-auth'
@@ -82,12 +81,7 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => {
           <ClientOnly>
             <Toaster richColors />
           </ClientOnly>
-          <CookieConsentBanner
-            initialConsent={_cookieConsent}
-            onAccept={() => {
-              initMixpanel()
-            }}
-          />
+          <CookieConsentBanner initialConsent={_cookieConsent} />
           <React.Suspense>
             <TanStackRouterDevtools position="bottom-left" />
             <TanStackQueryDevtools buttonPosition="bottom-right" />

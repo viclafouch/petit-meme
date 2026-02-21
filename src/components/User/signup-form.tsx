@@ -13,7 +13,6 @@ import { LoadingButton } from '@/components/ui/loading-button'
 import { passwordWithConfirmationSchema } from '@/constants/auth'
 import { getAuthErrorMessage } from '@/helpers/auth-errors'
 import { authClient } from '@/lib/auth-client'
-import { track } from '@/lib/mixpanel'
 import { getFieldErrorMessage } from '@/lib/utils'
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
@@ -84,9 +83,6 @@ export const SignupForm = ({ onAuthTypeChange }: SignupFormParams) => {
       }
     },
     onSuccess: async () => {
-      track('Sign Up', {
-        signupMethod: 'email'
-      })
       form.reset()
     }
   })

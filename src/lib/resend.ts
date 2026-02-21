@@ -1,7 +1,7 @@
 import type React from 'react'
 import { Resend } from 'resend'
 import { serverEnv } from '@/env/server'
-import { maskEmail } from '@/helpers/mask-email'
+import { emailLogger } from '@/lib/logger'
 
 export const resend = new Resend(serverEnv.RESEND_API_KEY)
 
@@ -25,10 +25,7 @@ export const sendEmailAsync = ({
   react,
   logMessage
 }: SendEmailAsyncParams) => {
-  const maskedTo = maskEmail(to)
-
-  // eslint-disable-next-line no-console
-  console.log(`[email] ${logMessage} ${maskedTo}`)
+  emailLogger.info({ to, subject }, logMessage)
 
   resend.emails
     .send({
@@ -39,18 +36,13 @@ export const sendEmailAsync = ({
     })
     .then(({ error }) => {
       if (error) {
-        // eslint-disable-next-line no-console
-        console.error(
-          `[email] Failed to send "${subject}" to ${maskedTo}:`,
-          error
-        )
+        emailLogger.error({ err: error, subject, to }, 'Failed to send email')
       }
     })
     .catch((error: unknown) => {
-      // eslint-disable-next-line no-console
-      console.error(
-        `[email] Network error sending "${subject}" to ${maskedTo}:`,
-        error
+      emailLogger.error(
+        { err: error, subject, to },
+        'Network error sending email'
       )
     })
 }

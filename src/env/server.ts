@@ -15,7 +15,10 @@ export const serverEnv = createEnv({
     EMAIL_OVERRIDE_FROM: z.string().optional(),
     STRIPE_SECRET_KEY: z.string().startsWith('sk_'),
     STRIPE_WEBHOOK_SECRET: z.string().startsWith('whsec_'),
-    STRIPE_PRICE_ID: z.string().startsWith('price_')
+    STRIPE_PRICE_ID: z.string().startsWith('price_'),
+    LOG_LEVEL: z
+      .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace'])
+      .optional()
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true

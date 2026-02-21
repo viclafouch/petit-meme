@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable no-await-in-loop */
 import { prismaClient } from '@/db'
 import {
@@ -6,6 +5,9 @@ import {
   algoliaIndexName,
   memeToAlgoliaRecord
 } from '@/lib/algolia'
+import { cronLogger } from '@/lib/logger'
+
+const log = cronLogger.child({ job: 'sync-algolia' })
 
 const BATCH_SIZE = 500
 
@@ -40,7 +42,7 @@ const task = async () => {
     objects: records
   })
 
-  console.log('Done')
+  log.info({ totalRecords: records.length }, 'Sync completed')
 
   process.exit(0)
 }

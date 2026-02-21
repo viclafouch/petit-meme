@@ -74,6 +74,15 @@ Avoid over-simplification that could:
 - **Never remove curly braces** from arrow functions
 - This applies to all arrow functions: callbacks, handlers, `.map()`, `.filter()`, etc.
 
+### ESLint Disables
+
+- **NEVER disable a rule at the file level** (`/* eslint-disable rule-name */`) — only per-line (`// eslint-disable-next-line rule-name`)
+- **Exception : `no-console`** — seule règle autorisée en disable global fichier (`/* eslint-disable no-console */`)
+- Always include a description explaining why: `// eslint-disable-next-line rule-name -- reason`
+- Before disabling, ask: can the rule be satisfied by fixing the code? If yes, fix it
+- A disable is only justified when the rule conflicts with a library API, a specific pattern that cannot be avoided, or a known ESLint false positive
+- If the same rule is disabled on many lines in a file, that is a code smell — reconsider the approach
+
 ### Code Structure
 - Functions do one thing well
 - Under 30 lines when possible

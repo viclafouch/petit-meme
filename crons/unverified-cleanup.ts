@@ -1,14 +1,13 @@
-/* eslint-disable no-console */
+import { DAY } from '@/constants/time'
 import { prismaClient } from '@/db'
-import { maskEmail } from '@/helpers/mask-email'
+import { cronLogger } from '@/lib/logger'
+
+const log = cronLogger.child({ job: 'unverified-cleanup' })
 
 const UNVERIFIED_RETENTION_DAYS = 30
-const MS_PER_DAY = 24 * 60 * 60 * 1000
 
 const task = async () => {
-  const cutoffDate = new Date(
-    Date.now() - UNVERIFIED_RETENTION_DAYS * MS_PER_DAY
-  )
+  const cutoffDate = new Date(Date.now() - UNVERIFIED_RETENTION_DAYS * DAY)
 
   const unverifiedUsers = await prismaClient.user.findMany({
     where: {
@@ -21,7 +20,7 @@ const task = async () => {
   })
 
   if (unverifiedUsers.length === 0) {
-    console.log('No unverified users to clean up')
+    log.info('No unverified users to clean up')
     process.exit(0)
   }
 
@@ -45,7 +44,7 @@ const task = async () => {
   })
 
   if (deletableUsers.length === 0) {
-    console.log('No unverified users without subscriptions to clean up')
+    log.info('No unverified users without subscriptions to clean up')
     process.exit(0)
   }
 
@@ -66,20 +65,18 @@ const task = async () => {
     }
 
     if (result.status === 'fulfilled') {
-      console.log(`Deleted unverified user ${maskEmail(user.email)}`)
+      log.info({ email: user.email }, 'Deleted unverified user')
       deletedCount += 1
     } else {
-      console.error(
-        `Failed to delete user ${maskEmail(user.email)}:`,
-        result.reason
+      log.error(
+        { err: result.reason, email: user.email },
+        'Failed to delete user'
       )
       errorCount += 1
     }
   }
 
-  console.log(
-    `Done: ${String(deletedCount)} deleted, ${String(errorCount)} errors`
-  )
+  log.info({ deletedCount, errorCount }, 'Completed')
   process.exit(errorCount > 0 ? 1 : 0)
 }
 

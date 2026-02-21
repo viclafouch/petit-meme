@@ -14,9 +14,9 @@ import { prismaClient } from '@/db'
 import { clientEnv } from '@/env/client'
 import { serverEnv } from '@/env/server'
 import { capitalize } from '@/helpers/format'
-import { maskEmail } from '@/helpers/mask-email'
 import { formatCentsToEuros } from '@/helpers/number'
-import { sendEmailAsync } from '@/lib/resend.server'
+import { authLogger, stripeLogger } from '@/lib/logger'
+import { sendEmailAsync } from '@/lib/resend'
 import { stripeClient } from '@/lib/stripe'
 import { stripe } from '@better-auth/stripe'
 import { createServerOnlyFn } from '@tanstack/react-start'
@@ -56,6 +56,11 @@ const getAuthConfig = createServerOnlyFn(() => {
       deleteUser: {
         enabled: true,
         beforeDelete: async (user) => {
+          authLogger.info(
+            { userId: user.id, email: user.email },
+            'Account deletion initiated'
+          )
+
           sendEmailAsync({
             to: user.email,
             subject: 'Ton compte Petit Mème a été supprimé',
@@ -84,6 +89,7 @@ const getAuthConfig = createServerOnlyFn(() => {
       minPasswordLength: PASSWORD_MIN_LENGTH,
       maxPasswordLength: PASSWORD_MAX_LENGTH,
       sendResetPassword: async ({ user, url }) => {
+        authLogger.info({ email: user.email }, 'Password reset requested')
         sendEmailAsync({
           to: user.email,
           subject: 'Réinitialise ton mot de passe Petit Mème',
@@ -92,6 +98,7 @@ const getAuthConfig = createServerOnlyFn(() => {
         })
       },
       onPasswordReset: async ({ user }) => {
+        authLogger.info({ email: user.email }, 'Password reset completed')
         sendEmailAsync({
           to: user.email,
           subject: 'Ton mot de passe Petit Mème a été modifié',
@@ -112,6 +119,7 @@ const getAuthConfig = createServerOnlyFn(() => {
       autoSignInAfterVerification: true,
       expiresIn: ONE_HOUR_IN_SECONDS,
       sendVerificationEmail: async ({ user, url }) => {
+        authLogger.info({ email: user.email }, 'Sending verification email')
         sendEmailAsync({
           to: user.email,
           subject: 'Confirme ton inscription à Petit Mème',
@@ -122,6 +130,7 @@ const getAuthConfig = createServerOnlyFn(() => {
         })
       },
       async afterEmailVerification(user) {
+        authLogger.info({ email: user.email }, 'Email verified')
         sendEmailAsync({
           to: user.email,
           subject: 'Bienvenue sur Petit Mème !',
@@ -141,8 +150,7 @@ const getAuthConfig = createServerOnlyFn(() => {
             image: profile.data.profile_image_url
           }
 
-          // eslint-disable-next-line no-console
-          console.log(`[auth] Twitter login for ${maskEmail(user.email ?? '')}`)
+          authLogger.info({ email: user.email }, 'Twitter OAuth login')
 
           return user
         }
@@ -202,6 +210,11 @@ const getAuthConfig = createServerOnlyFn(() => {
             stripeSubscription,
             plan
           }) => {
+            stripeLogger.info(
+              { userId: subscription.referenceId, plan: plan.name },
+              'Subscription completed'
+            )
+
             const user = await prismaClient.user.findUnique({
               where: { id: subscription.referenceId },
               select: { email: true, name: true }
@@ -231,6 +244,11 @@ const getAuthConfig = createServerOnlyFn(() => {
           }
         },
         onEvent: async (event) => {
+          stripeLogger.debug(
+            { eventType: event.type, eventId: event.id },
+            'Stripe event received'
+          )
+
           if (event.type !== 'invoice.payment_failed') {
             return
           }
@@ -242,12 +260,19 @@ const getAuthConfig = createServerOnlyFn(() => {
             return
           }
 
+          stripeLogger.warn({ customerId, eventId: event.id }, 'Payment failed')
+
           const user = await prismaClient.user.findFirst({
             where: { stripeCustomerId: customerId },
             select: { email: true, name: true }
           })
 
           if (!user) {
+            stripeLogger.warn(
+              { customerId, eventId: event.id },
+              'Payment failed but user not found'
+            )
+
             return
           }
 

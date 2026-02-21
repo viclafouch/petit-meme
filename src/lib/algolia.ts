@@ -3,6 +3,7 @@ import { MINUTE } from '@/constants/time'
 import { clientEnv } from '@/env/client'
 import { serverEnv } from '@/env/server'
 import { buildVideoImageUrl } from '@/lib/bunny'
+import { algoliaLogger } from '@/lib/logger'
 import type { HighlightResultOption, Hit } from '@algolia/client-search'
 import { searchClient } from '@algolia/client-search'
 import { recommendClient } from '@algolia/recommend'
@@ -30,8 +31,7 @@ export async function safeAlgoliaOp<T>(promise: Promise<T>) {
   try {
     return await promise
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(error)
+    algoliaLogger.error({ err: error }, 'Algolia operation failed')
 
     return null
   }

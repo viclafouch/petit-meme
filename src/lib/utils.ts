@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import type { ZodType } from 'zod'
+import { logger } from '@/lib/logger'
 import type { AnyFieldApi } from '@tanstack/react-form'
 
 export function cn(...inputs: ClassValue[]) {
@@ -27,15 +28,13 @@ export async function fetchWithZod<T>(
       message = `${message}: ${error.message}`
     } catch {}
 
+    logger.error({ url: args[0], status: response.status }, message)
     throw new Error(message)
   }
 
   const result = await response.json()
 
-  if (process.env.NODE_ENV === 'development') {
-    // eslint-disable-next-line no-console
-    console.log(`Response for url : ${response.url}`, result)
-  }
+  logger.debug({ url: response.url }, 'Fetch response')
 
   return schema.parse(result, {
     reportInput: process.env.NODE_ENV === 'development'

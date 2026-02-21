@@ -1,32 +1,28 @@
-/* eslint-disable no-console */
 /* eslint-disable no-await-in-loop */
 import { randomBytes, randomUUID } from 'node:crypto'
+import { DAY, HOUR } from '@/constants/time'
 import { prismaClient } from '@/db'
 import { VerificationReminderEmail } from '@/emails/verification-reminder-email'
-import { maskEmail } from '@/helpers/mask-email'
-import { EMAIL_FROM, getEmailRecipient, resend } from '@/lib/resend.server'
+import { cronLogger } from '@/lib/logger'
+import { EMAIL_FROM, getEmailRecipient, resend } from '@/lib/resend'
 
-const MS_PER_HOUR = 60 * 60 * 1000
-const MS_PER_DAY = 24 * MS_PER_HOUR
+const log = cronLogger.child({ job: 'verification-reminder' })
+
 const REMINDER_AFTER_HOURS = 42
 const REMINDER_BEFORE_HOURS = 54
-const TOKEN_EXPIRY_MS = MS_PER_DAY
+const TOKEN_EXPIRY_MS = DAY
 
 const task = async () => {
   const siteUrl = process.env.VITE_SITE_URL
 
   if (!siteUrl) {
-    console.error('VITE_SITE_URL environment variable is required')
+    log.fatal('VITE_SITE_URL environment variable is required')
     process.exit(1)
   }
 
   const now = new Date()
-  const oldestCreatedAt = new Date(
-    now.getTime() - REMINDER_BEFORE_HOURS * MS_PER_HOUR
-  )
-  const newestCreatedAt = new Date(
-    now.getTime() - REMINDER_AFTER_HOURS * MS_PER_HOUR
-  )
+  const oldestCreatedAt = new Date(now.getTime() - REMINDER_BEFORE_HOURS * HOUR)
+  const newestCreatedAt = new Date(now.getTime() - REMINDER_AFTER_HOURS * HOUR)
 
   const users = await prismaClient.user.findMany({
     where: {
@@ -41,7 +37,7 @@ const task = async () => {
   })
 
   if (users.length === 0) {
-    console.log('No users to remind')
+    log.info('No users to remind')
     process.exit(0)
   }
 
@@ -76,10 +72,7 @@ const task = async () => {
       })
 
       if (error) {
-        console.error(
-          `Failed to send reminder to ${maskEmail(user.email)}:`,
-          error
-        )
+        log.error({ err: error, email: user.email }, 'Failed to send reminder')
         errorCount += 1
         continue
       }
@@ -89,15 +82,15 @@ const task = async () => {
         data: { verificationReminderSent: true }
       })
 
-      console.log(`Sent reminder to ${maskEmail(user.email)}`)
+      log.info({ email: user.email }, 'Sent reminder')
       sentCount += 1
     } catch (error) {
-      console.error(`Error processing user ${maskEmail(user.email)}:`, error)
+      log.error({ err: error, email: user.email }, 'Error processing user')
       errorCount += 1
     }
   }
 
-  console.log(`Done: ${String(sentCount)} sent, ${String(errorCount)} errors`)
+  log.info({ sentCount, errorCount }, 'Completed')
   process.exit(errorCount > 0 ? 1 : 0)
 }
 

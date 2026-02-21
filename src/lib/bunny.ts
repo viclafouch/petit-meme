@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { clientEnv } from '@/env/client'
 import { serverEnv } from '@/env/server'
+import { bunnyLogger } from '@/lib/logger'
 import { createServerOnlyFn } from '@tanstack/react-start'
 import { fetchWithZod } from './utils'
 
@@ -44,7 +45,7 @@ export const buildVideoStreamUrl = (videoId: string) => {
 }
 
 export const deleteVideo = createServerOnlyFn(async (videoId: string) => {
-  return fetchWithZod(
+  const result = await fetchWithZod(
     DEFAULT_RESPONSE_SCHEMA,
     `https://video.bunnycdn.com/library/${clientEnv.VITE_BUNNY_LIBRARY_ID}/videos/${videoId}`,
     {
@@ -52,6 +53,10 @@ export const deleteVideo = createServerOnlyFn(async (videoId: string) => {
       headers: getBunnyHeaders()
     }
   )
+
+  bunnyLogger.info({ videoId }, 'Video deleted')
+
+  return result
 })
 
 const VIDEO_PLAY_DATA_SCHEMA = z.object({
@@ -89,6 +94,8 @@ export const createVideo = createServerOnlyFn(async (title: string) => {
     }
   )
 
+  bunnyLogger.info({ videoId }, 'Video created')
+
   return { videoId }
 })
 
@@ -106,6 +113,11 @@ export const uploadVideo = createServerOnlyFn(
         // @ts-expect-error: fetch body type doesn't accept Buffer but it works at runtime
         body: videoBuffer
       }
+    )
+
+    bunnyLogger.info(
+      { videoId, sizeBytes: videoBuffer.length },
+      'Video uploaded'
     )
 
     return {

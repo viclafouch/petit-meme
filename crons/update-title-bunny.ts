@@ -1,10 +1,12 @@
-/* eslint-disable no-console */
 /* eslint-disable no-await-in-loop */
 import { z } from 'zod'
 import { prismaClient } from '@/db'
 import { clientEnv } from '@/env/client'
 import { getBunnyHeaders } from '@/lib/bunny'
+import { cronLogger } from '@/lib/logger'
 import { fetchWithZod } from '@/lib/utils'
+
+const log = cronLogger.child({ job: 'update-title-bunny' })
 
 export const updateVideoTitle = async (videoId: string, title: string) => {
   return fetchWithZod(
@@ -62,15 +64,15 @@ const task = async () => {
 
     await processWithConcurrency(memes, CONCURRENCY, async (meme) => {
       await updateVideoTitle(meme.video.bunnyId, meme.title)
-      console.log('Updated meme title on bunny.net', meme.title)
+      log.debug({ title: meme.title }, 'Updated meme title on Bunny')
     })
 
     totalProcessed += memes.length
-    console.log(`Processed ${totalProcessed} memes`)
+    log.info({ totalProcessed }, 'Batch processed')
     cursor = memes.at(-1)?.id
   }
 
-  console.log(`Done. Total: ${totalProcessed}`)
+  log.info({ totalProcessed }, 'Completed')
   process.exit(0)
 }
 

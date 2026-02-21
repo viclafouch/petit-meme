@@ -3,6 +3,7 @@ import zodToJsonSchema from 'zod-to-json-schema'
 import { prismaClient } from '@/db'
 import { serverEnv } from '@/env/server'
 import { buildVideoOriginalUrl } from '@/lib/bunny'
+import { adminLogger } from '@/lib/logger'
 import { adminRequiredMiddleware } from '@/server/user-auth'
 import { GoogleGenAI } from '@google/genai'
 import { createServerFn } from '@tanstack/react-start'
@@ -38,6 +39,10 @@ export const generateMemeContent = createServerFn({ method: 'POST' })
     })
 
     if (!meme) {
+      adminLogger.warn(
+        { memeId: data.memeId },
+        'Meme not found for AI generation'
+      )
       throw new Error('Meme not found')
     }
 
@@ -69,5 +74,9 @@ export const generateMemeContent = createServerFn({ method: 'POST' })
       }
     })
 
-    return videoSchema.parse(JSON.parse(result.text!))
+    const parsed = videoSchema.parse(JSON.parse(result.text!))
+
+    adminLogger.info({ memeId: data.memeId }, 'AI content generated')
+
+    return parsed
   })

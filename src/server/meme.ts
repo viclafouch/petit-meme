@@ -21,6 +21,8 @@ import {
 } from '@/constants/time'
 import { prismaClient } from '@/db'
 import { MemeStatus } from '@/db/generated/prisma/enums'
+import { clientEnv } from '@/env/client'
+import { serverEnv } from '@/env/server'
 import type { AlgoliaMemeRecord } from '@/lib/algolia'
 import {
   ALGOLIA_RECOMMEND_CACHE_TTL,
@@ -33,12 +35,15 @@ import {
   algoliaSearchClient,
   getHighlightedTitle,
   normalizeAlgoliaHit,
+  safeAlgoliaOp,
   withAlgoliaCache
 } from '@/lib/algolia'
 import { auth } from '@/lib/auth'
 import { buildVideoOriginalUrl } from '@/lib/bunny'
+import { algoliaLogger, logger } from '@/lib/logger'
 import { authUserRequiredMiddleware } from '@/server/user-auth'
 import { ensureAlgoliaUserToken } from '@/utils/tracking-cookies'
+import { insightsClient } from '@algolia/client-insights'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 import { getCookie, getRequest, setCookie } from '@tanstack/react-start/server'
@@ -229,8 +234,7 @@ export const getRelatedMemes = createServerFn({ method: 'GET' })
 
           return hits.map(normalizeAlgoliaHit)
         } catch {
-          // eslint-disable-next-line no-console
-          console.warn('[Recommend] related-products unavailable')
+          algoliaLogger.warn('Related-products recommendation unavailable')
 
           return []
         }
@@ -264,8 +268,7 @@ export const getTrendingMemes = createServerFn({ method: 'GET' }).handler(
 
           return hits.map(normalizeAlgoliaHit)
         } catch {
-          // eslint-disable-next-line no-console
-          console.warn('[Recommend] trending-items unavailable')
+          algoliaLogger.warn('Trending-items recommendation unavailable')
 
           return []
         }
@@ -332,6 +335,8 @@ export const shareMeme = createServerFn({ method: 'GET' })
     }
 
     const originalUrl = buildVideoOriginalUrl(meme.video.bunnyId)
+
+    logger.debug({ memeId }, 'Meme shared/downloaded')
 
     const response = await fetch(originalUrl)
 
@@ -400,17 +405,27 @@ export const registerMemeView = createServerFn({ method: 'POST' })
         return
       }
 
-      const { sendAlgoliaViewEvent } =
-        await import('@/lib/algolia-insights.server')
-
+      const client = insightsClient(
+        clientEnv.VITE_ALGOLIA_APP_ID,
+        serverEnv.ALGOLIA_ADMIN_KEY
+      )
       const { headers } = getRequest()
       const session = await auth.api.getSession({ headers })
 
-      await sendAlgoliaViewEvent({
-        memeId,
-        userToken: viewerKey,
-        authenticatedUserToken: session?.user.id
-      })
+      await safeAlgoliaOp(
+        client.pushEvents({
+          events: [
+            {
+              eventType: 'view',
+              eventName: 'Meme Viewed',
+              index: algoliaIndexName,
+              objectIDs: [memeId],
+              userToken: viewerKey,
+              authenticatedUserToken: session?.user.id
+            }
+          ]
+        })
+      )
     }
 
     await Promise.all([viewTransaction, trackAlgoliaView()])

@@ -4,6 +4,7 @@ import { StudioError } from '@/constants/error'
 import { FREE_PLAN } from '@/constants/plan'
 import { prismaClient } from '@/db'
 import type { Meme } from '@/db/generated/prisma/client'
+import { authLogger } from '@/lib/logger'
 import { matchIsUserAdmin } from '@/lib/role'
 import { findActiveSubscription } from '@/server/customer'
 import { authUserRequiredMiddleware } from '@/server/user-auth'
@@ -69,6 +70,10 @@ export const checkGeneration = createServerFn({ method: 'POST' })
       // @ts-expect-error: better-auth user type lacks role field but it exists at runtime
       !matchIsUserAdmin(context.user)
     ) {
+      authLogger.warn(
+        { userId: context.user.id, generationCount },
+        'Generation limit reached'
+      )
       setResponseStatus(403)
       throw new StudioError('auth', { code: 'UNAUTHORIZED' })
     }
@@ -102,6 +107,7 @@ const toggleBookmark = createServerOnlyFn(
         const activeSubscription = await findActiveSubscription(userId)
 
         if (!activeSubscription) {
+          authLogger.warn({ userId }, 'Bookmark limit reached')
           setResponseStatus(403)
           throw new StudioError('premium required', {
             code: 'PREMIUM_REQUIRED'
@@ -138,6 +144,11 @@ export const toggleBookmarkByMemeId = createServerFn({ method: 'POST' })
     }
 
     const { bookmarked } = await toggleBookmark(context.user.id, memeId)
+
+    authLogger.debug(
+      { userId: context.user.id, memeId, bookmarked },
+      'Bookmark toggled'
+    )
 
     return { bookmarked }
   })
@@ -200,6 +211,8 @@ export const exportUserData = createServerFn({ method: 'GET' })
         periodEnd: true
       }
     })
+
+    authLogger.info({ userId: context.user.id }, 'User data exported')
 
     return {
       profile: {

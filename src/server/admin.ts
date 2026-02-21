@@ -25,6 +25,7 @@ import {
 } from '@/lib/algolia'
 import { auth } from '@/lib/auth'
 import { createVideo, deleteVideo, uploadVideo } from '@/lib/bunny'
+import { adminLogger, bunnyLogger } from '@/lib/logger'
 import {
   extractTweetIdFromUrl,
   getTweetById,
@@ -134,6 +135,7 @@ export const editMeme = createServerFn({ method: 'POST' })
     })
 
     if (!meme) {
+      adminLogger.warn({ memeId: values.id }, 'Meme not found for edit')
       throw new Error('Meme not found')
     }
 
@@ -189,6 +191,11 @@ export const editMeme = createServerFn({ method: 'POST' })
 
     invalidateAlgoliaCache()
 
+    adminLogger.info(
+      { memeId: memeUpdated.id, status: values.status },
+      'Meme edited'
+    )
+
     return { id: memeUpdated.id }
   })
 
@@ -216,12 +223,16 @@ export const deleteMemeById = createServerFn({ method: 'POST' })
         })
       ),
       deleteVideo(meme.video.bunnyId).catch((error: unknown) => {
-        // eslint-disable-next-line no-console
-        console.error(error)
+        bunnyLogger.error(
+          { err: error, bunnyId: meme.video.bunnyId },
+          'Failed to delete video from Bunny CDN'
+        )
       })
     ])
 
     invalidateAlgoliaCache()
+
+    adminLogger.info({ memeId: meme.id }, 'Meme deleted')
 
     return { id: meme.id }
   })
@@ -269,6 +280,8 @@ async function createMemeWithVideo({
 
   invalidateAlgoliaCache()
 
+  adminLogger.info({ memeId: meme.id, tweetUrl }, 'Meme created')
+
   return { id: meme.id }
 }
 
@@ -284,6 +297,10 @@ export const createMemeFromTwitterUrl = createServerFn({ method: 'POST' })
     const media = await getTweetMedia(tweet.video.url, tweet.poster.url)
 
     if (media.video.blob.size > MAX_SIZE_MEME_IN_BYTES) {
+      adminLogger.warn(
+        { tweetId, size: filesize(media.video.blob.size) },
+        'Video size too big from Twitter'
+      )
       throw new Error(
         `Video size is too big: ${filesize(media.video.blob.size)}`
       )
@@ -354,6 +371,7 @@ export const removeUser = createServerFn({ method: 'POST' })
     })
 
     if (!user) {
+      adminLogger.warn({ userId }, 'User not found for removal')
       throw new Error('User not found')
     }
 
@@ -365,6 +383,8 @@ export const removeUser = createServerFn({ method: 'POST' })
       },
       headers
     })
+
+    adminLogger.info({ userId }, 'User removed by admin')
 
     return { success: true }
   })

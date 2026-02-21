@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { prismaClient } from '@/db'
+import { adminLogger } from '@/lib/logger'
 import { adminRequiredMiddleware } from '@/server/user-auth'
 import { createServerFn } from '@tanstack/react-start'
 
@@ -30,6 +31,11 @@ export const addCategory = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const category = await prismaClient.category.create({ data })
 
+    adminLogger.info(
+      { categoryId: category.id, slug: data.slug },
+      'Category created'
+    )
+
     return category
   })
 
@@ -48,6 +54,11 @@ export const editCategory = createServerFn({ method: 'POST' })
       data
     })
 
+    adminLogger.info(
+      { categoryId: category.id, slug: data.slug },
+      'Category edited'
+    )
+
     return category
   })
 
@@ -62,6 +73,8 @@ export const deleteCategory = createServerFn({ method: 'POST' })
         id: categoryId
       }
     })
+
+    adminLogger.info({ categoryId }, 'Category deleted')
 
     return category
   })

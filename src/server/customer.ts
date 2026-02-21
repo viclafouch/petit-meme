@@ -1,5 +1,6 @@
 import type { User } from 'better-auth'
 import { auth } from '@/lib/auth'
+import { stripeLogger } from '@/lib/logger'
 import { getAuthUser } from '@/server/user-auth'
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
@@ -30,8 +31,10 @@ export const findActiveSubscription = createServerOnlyFn(
 
       return rest
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error)
+      stripeLogger.error(
+        { err: error, userId },
+        'Failed to list active subscriptions'
+      )
 
       return null
     }

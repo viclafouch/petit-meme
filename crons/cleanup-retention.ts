@@ -1,9 +1,11 @@
-/* eslint-disable no-console */
 /* eslint-disable no-await-in-loop */
+import { DAY } from '@/constants/time'
 import { prismaClient } from '@/db'
+import { cronLogger } from '@/lib/logger'
 
-const MS_PER_DAY = 24 * 60 * 60 * 1000
-const VERIFICATION_GRACE_PERIOD_MS = MS_PER_DAY
+const log = cronLogger.child({ job: 'cleanup-retention' })
+
+const VERIFICATION_GRACE_PERIOD_MS = DAY
 const VIEW_RETENTION_DAYS = 90
 const ANONYMIZATION_YEARS = 3
 
@@ -20,7 +22,7 @@ const task = async () => {
     }
   })
 
-  console.log(`Deleted ${deletedSessions.count} expired sessions`)
+  log.info({ count: deletedSessions.count }, 'Deleted expired sessions')
 
   const verificationCutoff = new Date(
     now.getTime() - VERIFICATION_GRACE_PERIOD_MS
@@ -32,9 +34,12 @@ const task = async () => {
     }
   })
 
-  console.log(`Deleted ${deletedVerifications.count} expired verifications`)
+  log.info(
+    { count: deletedVerifications.count },
+    'Deleted expired verifications'
+  )
 
-  const viewCutoff = new Date(now.getTime() - VIEW_RETENTION_DAYS * MS_PER_DAY)
+  const viewCutoff = new Date(now.getTime() - VIEW_RETENTION_DAYS * DAY)
 
   const viewCountsByMeme = await prismaClient.memeViewDaily.groupBy({
     by: ['memeId'],
@@ -56,15 +61,19 @@ const task = async () => {
       where: { day: { lt: viewCutoff } }
     })
 
-    console.log(
-      `Aggregated ${viewCountsByMeme.length} memes, deleted ${deletedViews.count} old MemeViewDaily records`
+    log.info(
+      {
+        memesAggregated: viewCountsByMeme.length,
+        viewsDeleted: deletedViews.count
+      },
+      'View records aggregated and pruned'
     )
   } else {
-    console.log('No old MemeViewDaily records to clean up')
+    log.debug('No old view records to clean')
   }
 
   const anonymizationCutoff = new Date(
-    now.getTime() - ANONYMIZATION_YEARS * 365 * MS_PER_DAY
+    now.getTime() - ANONYMIZATION_YEARS * 365 * DAY
   )
 
   const candidateUsers = await prismaClient.user.findMany({
@@ -100,13 +109,12 @@ const task = async () => {
       }
     })
 
-    console.log(`Anonymized user ${maskId(user.id)}`)
+    log.info({ userId: maskId(user.id) }, 'Anonymized user')
     anonymizedCount += 1
   }
 
-  console.log(`Anonymized ${String(anonymizedCount)} dormant users`)
+  log.info({ anonymizedCount }, 'Anonymization completed')
 
-  console.log('Done')
   process.exit(0)
 }
 

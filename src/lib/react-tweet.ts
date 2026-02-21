@@ -1,4 +1,5 @@
 import { getTweet } from 'react-tweet/api'
+import { logger } from '@/lib/logger'
 
 export function extractTweetIdFromUrl(tweetUrl: string) {
   const url = new URL(tweetUrl)
@@ -30,19 +31,16 @@ export async function getTweetMedia(videoUrl: string, poster: string) {
   }
 }
 
-// If too many rates limit, maybe try fallback on this one:
-// https://pub.tweetbinder.com:51026/twitter/status/:tweetId
 export async function getTweetById(tweetId: string) {
   const tweet = await getTweet(tweetId)
 
   if (!tweet || !tweet.video || tweet.video.variants.length === 0) {
+    logger.warn({ tweetId }, 'Tweet invalid or has no video')
+
     return Promise.reject(new Error('tweet invalid'))
   }
 
-  if (process.env.NODE_ENV === 'development') {
-    // eslint-disable-next-line no-console
-    console.log(`Response for tweet : ${tweetId}`, tweet)
-  }
+  logger.debug({ tweetId }, 'Tweet fetched')
 
   const { poster } = tweet.video
   const video = tweet.video.variants.at(-1)!

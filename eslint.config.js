@@ -39,7 +39,22 @@ export default [
       'promise/prefer-await-to-then': 'off',
       'no-inline-comments': 'off',
       '@typescript-eslint/no-deprecated': 'off',
-      'id-length': ['error', { exceptions: ['R', '_'] }]
+      'id-length': ['error', { exceptions: ['R', '_'] }],
+      'id-denylist': [
+        'error',
+        'cb',
+        'arr',
+        'acc',
+        'idx',
+        'ctx',
+        'res',
+        'val',
+        'obj',
+        'el',
+        'elem',
+        'req',
+        'str'
+      ]
     }
   }
 ]

@@ -9,9 +9,9 @@ import {
   safeAlgoliaOp
 } from '@/lib/algolia'
 import { getVideoPlayData } from '@/lib/bunny'
+import { bunnyLogger } from '@/lib/logger'
 import { createFileRoute } from '@tanstack/react-router'
 
-// see https://docs.bunny.net/docs/stream-webhook
 const WEBHOOK_RESPONSE_SCHEMA = z.object({
   VideoLibraryId: z.number(),
   VideoGuid: z.string(),
@@ -56,19 +56,17 @@ export const Route = createFileRoute('/api/bunny')({
             invalidateAlgoliaCache()
           }
 
-          // eslint-disable-next-line no-console
-          console.log('Vidéo mise à jour !', {
-            videoId: result.VideoGuid,
-            status: result.Status
-          })
+          bunnyLogger.info(
+            { videoId: result.VideoGuid, status: result.Status },
+            'Video updated via webhook'
+          )
 
           return Response.json({ success: true })
         } catch {
-          // eslint-disable-next-line no-console
-          console.log('Mise à jour non effectuée', {
-            videoId: result.VideoGuid,
-            status: result.Status
-          })
+          bunnyLogger.debug(
+            { videoId: result.VideoGuid, status: result.Status },
+            'Video update skipped'
+          )
 
           return Response.json({ success: true })
         }

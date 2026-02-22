@@ -45,7 +45,7 @@
     "@algolia/client-search": "^5.49.0",
     "@algolia/recommend": "^5.49.0",
     "@better-auth/stripe": "^1.4.18",
-    "@ffmpeg/core": "0.12.9",
+    "@ffmpeg/core-mt": "0.12.9",
     "@ffmpeg/ffmpeg": "^0.12.15",
     "@ffmpeg/util": "^0.12.2",
     "@google/genai": "^1.42.0",

@@ -45,11 +45,23 @@ Refonte complète du Studio (overlay texte sur vidéo). Priorité : performance 
 
 ### Phase 2 — Multi-thread FFmpeg
 
-- [ ] Auditer toutes les ressources cross-origin (Bunny CDN, Algolia, Sentry, Stripe, fonts Google, iframes)
-- [ ] Ajouter `Cross-Origin-Embedder-Policy: credentialless` dans `server.ts` (alternative souple à `require-corp`)
-- [ ] Installer `@ffmpeg/core-mt` et passer en multi-thread (~2x speedup)
-- [ ] Tester sur mobile (Safari iOS supporte `SharedArrayBuffer` depuis iOS 15.2+)
-- [ ] Fallback single-thread si `crossOriginIsolated === false`
+**Fichiers impactés** : `server.ts`, `use-video-processor.ts`, `studio.ts`, `studio-fallbacks.tsx`, `$memeId.tsx`, `memes-list.tsx`, `copy-ffmpeg.js`, `vite.config.ts`, `package.json`
+
+- [x] Auditer les ressources cross-origin — confirmé : Bunny CDN, Algolia, Sentry, Stripe.js, Google Fonts. Pas d'iframes. Aucun blocage anticipé avec `credentialless`
+- [x] Ajouter `Cross-Origin-Embedder-Policy: credentialless` dans `server.ts` — appliqué à toutes les pages (global). COOP `same-origin` déjà en place
+- [x] Remplacer `@ffmpeg/core` par `@ffmpeg/core-mt` dans `package.json` (supprimer l'ancien)
+- [x] Mettre à jour `scripts/copy-ffmpeg.js` : source `@ffmpeg/core-mt/dist/esm`, copier aussi `ffmpeg-core.worker.js`
+- [x] Ajouter constante `FFMPEG_WORKER_URL` dans `src/constants/studio.ts`
+- [x] Mettre à jour `use-video-processor.ts` : passer `workerURL` dans `ffmpeg.load()`, check `crossOriginIsolated` au début de `useVideoInitializer` (throw si false)
+- [x] Remplacer `@ffmpeg/core` par `@ffmpeg/core-mt` dans `optimizeDeps.exclude` de `vite.config.ts`
+- [x] Pas de fallback single-thread : si `crossOriginIsolated === false`, message d'erreur UX dans le dialog via `StudioErrorFallback` avec titre + causes + actions :
+  - Titre : "Le Studio n'est pas disponible"
+  - Cause 1 : "Votre navigateur est trop ancien → Mettez-le à jour"
+  - Cause 2 : "Un bloqueur de publicités interfère → Désactivez-le sur ce site"
+  - Cause 3 : "Vous êtes en navigation privée → Essayez en mode normal"
+  - Bouton "Réessayer" (appelle `resetErrorBoundary`)
+- [x] Monitoring Sentry : ajouter `onError={captureException}` sur les `<ErrorBoundary>` Studio dans `$memeId.tsx` et `memes-list.tsx` + `Sentry.captureException` explicites dans les hooks `useVideoInitializer` et `useVideoProcessor`
+- [ ] Tester sur mobile (Safari iOS 15.2+, Chrome Android) — validation manuelle après deploy
 
 ### Phase 3 — Responsive & mobile-first
 
@@ -114,6 +126,16 @@ Remplacer Prisma par Drizzle ORM. Conventions cibles : tables en pluriel, colonn
 ## Migration vers Cloudflare
 
 Passer le domaine sur Cloudflare pour bénéficier de ses fonctionnalités natives : redirection www → apex (et supprimer le check manuel dans `server.ts`), CDN/cache, SSL, protection DDoS, Page Rules, etc.
+
+---
+
+## Sentry — Migration ErrorBoundary
+
+Remplacer `react-error-boundary` par `Sentry.ErrorBoundary` dans toute l'app. Capture automatique des erreurs sans `onError` manuel.
+
+- [ ] Remplacer tous les `<ErrorBoundary>` de `react-error-boundary` par `Sentry.ErrorBoundary`
+- [ ] Supprimer les `onError={captureException}` devenus inutiles
+- [ ] Évaluer si `react-error-boundary` peut être retiré des dépendances
 
 ---
 

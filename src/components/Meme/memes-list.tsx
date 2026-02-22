@@ -12,6 +12,7 @@ import {
 } from '@/components/Meme/studio-fallbacks'
 import { MEMES_PER_PAGE, type MemeWithVideo } from '@/constants/meme'
 import { sendViewEvent } from '@/lib/algolia-insights'
+import * as Sentry from '@sentry/tanstackstart-react'
 import { ClientOnly, useRouteContext } from '@tanstack/react-router'
 
 type MemeWithHighlight = MemeWithVideo & {
@@ -149,7 +150,14 @@ export const MemesList = ({
       </AnimatePresence>
       <ClientOnly>
         {studioMemeSelected ? (
-          <ErrorBoundary FallbackComponent={StudioErrorFallback}>
+          <ErrorBoundary
+            FallbackComponent={StudioErrorFallback}
+            onError={(error) => {
+              Sentry.captureException(error, {
+                tags: { feature: 'studio' }
+              })
+            }}
+          >
             <React.Suspense fallback={<StudioLoadingFallback />}>
               <StudioDialog
                 meme={studioMemeSelected}

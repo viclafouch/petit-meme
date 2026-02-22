@@ -48,6 +48,7 @@ import {
 } from '@/lib/seo'
 import { cn } from '@/lib/utils'
 import { getRandomMeme, getRelatedMemes } from '@/server/meme'
+import * as Sentry from '@sentry/tanstackstart-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import {
   ClientOnly,
@@ -346,7 +347,14 @@ const RouteComponent = () => {
       </React.Suspense>
       <ClientOnly>
         {isStudioDialogOpened ? (
-          <ErrorBoundary FallbackComponent={StudioErrorFallback}>
+          <ErrorBoundary
+            FallbackComponent={StudioErrorFallback}
+            onError={(error) => {
+              Sentry.captureException(error, {
+                tags: { feature: 'studio' }
+              })
+            }}
+          >
             <React.Suspense fallback={<StudioLoadingFallback />}>
               <StudioDialog
                 meme={meme}

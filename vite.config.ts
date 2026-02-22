@@ -18,10 +18,14 @@ const IMMUTABLE_CACHE = {
 
 export default defineConfig({
   server: {
-    port: 3000
+    port: 3000,
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      'Cross-Origin-Embedder-Policy': 'credentialless'
+    }
   },
   optimizeDeps: {
-    exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/util', 'hls.js']
+    exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/core-mt', '@ffmpeg/util', 'hls.js']
   },
   assetsInclude: ['**/*.md'],
   plugins: [
@@ -50,7 +54,11 @@ export default defineConfig({
           headers: { ...SECURITY_HEADERS, ...IMMUTABLE_CACHE }
         },
         '/ffmpeg/**': {
-          headers: { ...SECURITY_HEADERS, ...IMMUTABLE_CACHE }
+          headers: {
+            ...SECURITY_HEADERS,
+            ...IMMUTABLE_CACHE,
+            'Cross-Origin-Embedder-Policy': 'credentialless'
+          }
         },
         '/admin/**': {
           headers: {

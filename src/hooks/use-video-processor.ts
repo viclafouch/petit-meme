@@ -7,6 +7,7 @@ import {
   FFMPEG_FONT_FILE,
   FFMPEG_FONT_PATH,
   FFMPEG_WASM_URL,
+  FFMPEG_WORKER_URL,
   STUDIO_BASELINE_RATIO,
   STUDIO_DEFAULT_BAND_HEIGHT,
   STUDIO_DEFAULT_FONT_COLOR,
@@ -14,12 +15,13 @@ import {
   STUDIO_DEFAULT_MAX_CHARS_PER_LINE,
   STUDIO_LINE_SPACING
 } from '@/constants/studio'
-import { getVideoBlobQueryOpts } from '@/lib/queries'
+import { getAuthUserQueryOpts, getVideoBlobQueryOpts } from '@/lib/queries'
 import { incrementGenerationCount } from '@/server/user'
 import { useShowDialog } from '@/stores/dialog.store'
 import type { ProgressEvent } from '@ffmpeg/ffmpeg'
 import { FFmpeg } from '@ffmpeg/ffmpeg'
 import { fetchFile, toBlobURL } from '@ffmpeg/util'
+import * as Sentry from '@sentry/tanstackstart-react'
 import {
   useMutation,
   useQueryClient,
@@ -139,6 +141,12 @@ const addTextToVideo = async (
 export const useVideoInitializer = () => {
   const query = useSuspenseQuery({
     queryFn: async () => {
+      if (!crossOriginIsolated) {
+        throw new Error(
+          'Le Studio nécessite un navigateur compatible avec SharedArrayBuffer (crossOriginIsolated)'
+        )
+      }
+
       const ffmpeg = new FFmpeg()
 
       const [coreURL, wasmURL] = await Promise.all([
@@ -146,7 +154,7 @@ export const useVideoInitializer = () => {
         toBlobURL(FFMPEG_WASM_URL, 'application/wasm')
       ])
 
-      await ffmpeg.load({ coreURL, wasmURL })
+      await ffmpeg.load({ coreURL, wasmURL, workerURL: FFMPEG_WORKER_URL })
 
       return ffmpeg
     },
@@ -182,6 +190,10 @@ export const useVideoProcessor = (
   // eslint-disable-next-line no-restricted-syntax -- referential stability required for ffmpeg.on/off event listener pairing
   const handleProgress = React.useCallback(
     ({ progress: progressValue }: ProgressEvent) => {
+      if (progressValue < 0 || progressValue > 1) {
+        return
+      }
+
       setProgress(Math.round(progressValue * 100))
     },
     []
@@ -189,6 +201,7 @@ export const useVideoProcessor = (
 
   const mutation = useMutation({
     onMutate: () => {
+      ffmpeg.off('progress', handleProgress)
       setProgress(0)
       options?.onMutate?.()
       ffmpeg.on('progress', handleProgress)
@@ -217,7 +230,11 @@ export const useVideoProcessor = (
     },
     onSuccess: ({ blob }) => {
       options?.onSuccess?.(blob)
-      void incrementGenerationCount()
+      const user = queryClient.getQueryData(getAuthUserQueryOpts().queryKey)
+
+      if (user) {
+        void incrementGenerationCount()
+      }
     },
     onError: (error) => {
       if (error instanceof StudioError) {
@@ -234,6 +251,9 @@ export const useVideoProcessor = (
         }
       }
 
+      Sentry.captureException(error, {
+        tags: { feature: 'studio' }
+      })
       options?.onError?.(error)
     },
     onSettled: () => {

@@ -15,6 +15,7 @@ import {
   STUDIO_DEFAULT_MAX_CHARS_PER_LINE,
   STUDIO_LINE_SPACING
 } from '@/constants/studio'
+import { withTimeout } from '@/helpers/promise'
 import { getAuthUserQueryOpts, getVideoBlobQueryOpts } from '@/lib/queries'
 import { incrementGenerationCount } from '@/server/user'
 import { useShowDialog } from '@/stores/dialog.store'
@@ -154,7 +155,11 @@ export const useVideoInitializer = () => {
         toBlobURL(FFMPEG_WASM_URL, 'application/wasm')
       ])
 
-      await ffmpeg.load({ coreURL, wasmURL, workerURL: FFMPEG_WORKER_URL })
+      await withTimeout(
+        ffmpeg.load({ coreURL, wasmURL, workerURL: FFMPEG_WORKER_URL }),
+        30_000,
+        'Le chargement du moteur vidéo a pris trop de temps. Vérifiez votre connexion ou votre navigateur.'
+      )
 
       return ffmpeg
     },

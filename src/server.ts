@@ -28,6 +28,8 @@ const customHandler = defineHandlerCallback(async (context) => {
   response.headers.set('Cross-Origin-Opener-Policy', 'same-origin')
   response.headers.set('Cross-Origin-Embedder-Policy', 'credentialless')
   response.headers.set('Cross-Origin-Resource-Policy', 'cross-origin')
+  // TODO: remove after 2026-03-01 — one-time cache bust for COEP migration
+  response.headers.set('Clear-Site-Data', '"cache"')
 
   return response
 })

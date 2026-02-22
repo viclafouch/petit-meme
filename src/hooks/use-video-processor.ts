@@ -2,15 +2,31 @@ import React from 'react'
 import { toast } from 'sonner'
 import { StudioError } from '@/constants/error'
 import type { MemeWithVideo } from '@/constants/meme'
-import { shareMeme } from '@/server/meme'
+import {
+  FFMPEG_CORE_URL,
+  FFMPEG_FONT_FILE,
+  FFMPEG_FONT_PATH,
+  FFMPEG_WASM_URL,
+  STUDIO_BASELINE_RATIO,
+  STUDIO_DEFAULT_BAND_HEIGHT,
+  STUDIO_DEFAULT_FONT_COLOR,
+  STUDIO_DEFAULT_FONT_SIZE,
+  STUDIO_DEFAULT_MAX_CHARS_PER_LINE,
+  STUDIO_LINE_SPACING
+} from '@/constants/studio'
+import { getVideoBlobQueryOpts } from '@/lib/queries'
 import { incrementGenerationCount } from '@/server/user'
 import { useShowDialog } from '@/stores/dialog.store'
 import type { ProgressEvent } from '@ffmpeg/ffmpeg'
 import { FFmpeg } from '@ffmpeg/ffmpeg'
-import { fetchFile } from '@ffmpeg/util'
-import { useMutation, useSuspenseQuery } from '@tanstack/react-query'
+import { fetchFile, toBlobURL } from '@ffmpeg/util'
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery
+} from '@tanstack/react-query'
 
-type VideoProcessingOptions = {
+type VideoProcessingParams = {
   text: string
   bandHeight?: number
   textPosition?: 'top' | 'bottom'
@@ -19,19 +35,23 @@ type VideoProcessingOptions = {
   maxCharsPerLine?: number
 }
 
-type MutationBody = {
-  meme: Pick<MemeWithVideo, 'id' | 'title'>
-} & VideoProcessingOptions
+type AddTextToVideoParams = {
+  videoBlob: Blob
+} & VideoProcessingParams
 
-const wrapText = (text: string, maxLength: number): string => {
+type ProcessVideoParams = {
+  meme: Pick<MemeWithVideo, 'id' | 'title'>
+} & VideoProcessingParams
+
+const wrapText = (text: string, maxLength: number) => {
   return text
     .split(' ')
     .reduce<string[]>((lines, word) => {
       const lastLine = lines.at(-1) ?? ''
-      const candidate = lastLine ? `${lastLine} ${word}` : word
+      const currentLine = lastLine ? `${lastLine} ${word}` : word
 
-      if (candidate.length <= maxLength) {
-        return [...lines.slice(0, -1), candidate]
+      if (currentLine.length <= maxLength) {
+        return [...lines.slice(0, -1), currentLine]
       }
 
       return [...lines, word]
@@ -41,25 +61,31 @@ const wrapText = (text: string, maxLength: number): string => {
 
 const addTextToVideo = async (
   ffmpeg: FFmpeg,
-  videoBlob: Blob,
   {
+    videoBlob,
     text,
-    bandHeight = 100,
-    fontSize = 36,
+    bandHeight = STUDIO_DEFAULT_BAND_HEIGHT,
+    fontSize = STUDIO_DEFAULT_FONT_SIZE,
     textPosition = 'bottom',
-    fontColor = 'black',
-    maxCharsPerLine = 50
-  }: VideoProcessingOptions
+    fontColor = STUDIO_DEFAULT_FONT_COLOR,
+    maxCharsPerLine = STUDIO_DEFAULT_MAX_CHARS_PER_LINE
+  }: AddTextToVideoParams
 ) => {
   await ffmpeg.writeFile('input.mp4', await fetchFile(videoBlob))
-  await ffmpeg.writeFile('arial.ttf', await fetchFile('/fonts/arial.ttf'))
+
+  try {
+    await ffmpeg.readFile(FFMPEG_FONT_FILE)
+  } catch {
+    await ffmpeg.writeFile(FFMPEG_FONT_FILE, await fetchFile(FFMPEG_FONT_PATH))
+  }
+
   const wrappedText = wrapText(text, maxCharsPerLine)
   await ffmpeg.writeFile('text.txt', new TextEncoder().encode(wrappedText))
 
   const lineCount = wrappedText.split('\n').length
-  const lineSpacing = 4
-  const baselineOffset = Math.floor(fontSize * 0.2)
-  const totalTextHeight = lineCount * fontSize + (lineCount - 1) * lineSpacing
+  const baselineOffset = Math.floor(fontSize * STUDIO_BASELINE_RATIO)
+  const totalTextHeight =
+    lineCount * fontSize + (lineCount - 1) * STUDIO_LINE_SPACING
 
   const isTop = textPosition === 'top'
 
@@ -77,7 +103,7 @@ const addTextToVideo = async (
     '-vf',
     [
       padFilter,
-      `drawtext=fontfile=arial.ttf:textfile=text.txt:x=(w-text_w)/2:y=${yPosition}:fontsize=${fontSize}:fontcolor=${fontColor}:line_spacing=${lineSpacing}`
+      `drawtext=fontfile=${FFMPEG_FONT_FILE}:textfile=text.txt:x=(w-text_w)/2:y=${yPosition}:fontsize=${fontSize}:fontcolor=${fontColor}:line_spacing=${STUDIO_LINE_SPACING}`
     ].join(','),
     '-c:a',
     'copy',
@@ -97,13 +123,17 @@ const addTextToVideo = async (
 
   await Promise.all([
     ffmpeg.deleteFile('input.mp4'),
-    ffmpeg.deleteFile('arial.ttf'),
     ffmpeg.deleteFile('text.txt'),
     ffmpeg.deleteFile('output.mp4')
   ]).catch(() => {})
 
-  // @ts-expect-error: FFmpeg readFile returns FileData which includes Uint8Array at runtime
-  return new Blob([data as Uint8Array], { type: 'video/mp4' })
+  if (!(data instanceof Uint8Array)) {
+    throw new Error('Unexpected FFmpeg output format')
+  }
+
+  return new Blob([new Uint8Array(data).buffer as ArrayBuffer], {
+    type: 'video/mp4'
+  })
 }
 
 export const useVideoInitializer = () => {
@@ -111,7 +141,12 @@ export const useVideoInitializer = () => {
     queryFn: async () => {
       const ffmpeg = new FFmpeg()
 
-      await ffmpeg.load()
+      const [coreURL, wasmURL] = await Promise.all([
+        toBlobURL(FFMPEG_CORE_URL, 'text/javascript'),
+        toBlobURL(FFMPEG_WASM_URL, 'application/wasm')
+      ])
+
+      await ffmpeg.load({ coreURL, wasmURL })
 
       return ffmpeg
     },
@@ -129,37 +164,43 @@ export const useVideoInitializer = () => {
   return query
 }
 
+type UseVideoProcessorParams = {
+  onMutate?: () => void
+  onSuccess?: (blob: Blob) => void
+  onError?: (error: Error) => void
+}
+
 export const useVideoProcessor = (
   ffmpeg: FFmpeg,
-  options?: {
-    onMutate?: () => void
-    onSuccess?: (blob: Blob) => void
-    onError?: (error: Error) => void
-  }
+  options?: UseVideoProcessorParams
 ) => {
   const [progress, setProgress] = React.useState(0)
   const objectUrlRef = React.useRef<string | null>(null)
   const showDialog = useShowDialog()
+  const queryClient = useQueryClient()
 
-  // eslint-disable-next-line no-restricted-syntax
-  const progressSubscription = React.useCallback(
-    (progressEvent: ProgressEvent) => {
-      setProgress(Math.round(progressEvent.progress * 100))
+  // eslint-disable-next-line no-restricted-syntax -- referential stability required for ffmpeg.on/off event listener pairing
+  const handleProgress = React.useCallback(
+    ({ progress: progressValue }: ProgressEvent) => {
+      setProgress(Math.round(progressValue * 100))
     },
     []
   )
 
   const mutation = useMutation({
-    onMutate: async () => {
+    onMutate: () => {
       setProgress(0)
       options?.onMutate?.()
-      await ffmpeg.load()
-      ffmpeg.on('progress', progressSubscription)
+      ffmpeg.on('progress', handleProgress)
     },
-    mutationFn: async ({ meme, ...restOptions }: MutationBody) => {
-      const response = await shareMeme({ data: meme.id })
-      const videoBlob = await response.blob()
-      const blob = await addTextToVideo(ffmpeg, videoBlob, restOptions)
+    mutationFn: async ({ meme, ...processingOptions }: ProcessVideoParams) => {
+      const videoBlob = await queryClient.ensureQueryData(
+        getVideoBlobQueryOpts(meme.id)
+      )
+      const blob = await addTextToVideo(ffmpeg, {
+        videoBlob,
+        ...processingOptions
+      })
 
       if (objectUrlRef.current) {
         URL.revokeObjectURL(objectUrlRef.current)
@@ -179,22 +220,24 @@ export const useVideoProcessor = (
       void incrementGenerationCount()
     },
     onError: (error) => {
-      if (error instanceof StudioError && error.code === 'UNAUTHORIZED') {
-        showDialog('auth', {})
+      if (error instanceof StudioError) {
+        if (error.code === 'UNAUTHORIZED') {
+          showDialog('auth', {})
 
-        return
-      }
+          return
+        }
 
-      if (error instanceof StudioError && error.code === 'PREMIUM_REQUIRED') {
-        toast.error(error.message)
+        if (error.code === 'PREMIUM_REQUIRED') {
+          toast.error(error.message)
 
-        return
+          return
+        }
       }
 
       options?.onError?.(error)
     },
     onSettled: () => {
-      ffmpeg.off('progress', progressSubscription)
+      ffmpeg.off('progress', handleProgress)
     }
   })
 
@@ -210,12 +253,25 @@ export const useVideoProcessor = (
     }
   }, [ffmpeg])
 
+  const cancel = () => {
+    try {
+      ffmpeg.terminate()
+    } catch {}
+
+    mutation.reset()
+    setProgress(0)
+    void queryClient.invalidateQueries({
+      queryKey: ['video-processor-init']
+    })
+  }
+
   return {
     processVideo: mutation.mutate,
     progress,
     isLoading: mutation.isPending,
     error: mutation.error,
     data: mutation.data,
+    cancel,
     reset: () => {
       mutation.reset()
       setProgress(0)

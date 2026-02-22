@@ -43,5 +43,8 @@ dist
 # Sentry auth token (source map uploads)
 .env.sentry-build-plugin
 
+# FFmpeg WASM (copied by postinstall)
+public/ffmpeg/
+
 # MCP config (contains auth tokens)
 .mcp.json

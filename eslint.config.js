@@ -20,7 +20,8 @@ export default [
       '**/db/generated/**',
       '**/components/ui/**',
       '**/components/animate-ui/**',
-      'instrument.server.mjs'
+      'instrument.server.mjs',
+      'public/ffmpeg/**'
     ]
   },
   ...typescriptConfig,

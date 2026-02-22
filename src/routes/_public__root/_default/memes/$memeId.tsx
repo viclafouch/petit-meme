@@ -1,5 +1,6 @@
 /* eslint-disable unicorn/filename-case */
 import React from 'react'
+import { ErrorBoundary } from 'react-error-boundary'
 import { formatDate } from 'date-fns'
 import {
   ArrowLeft,
@@ -13,6 +14,10 @@ import {
 import { toast } from 'sonner'
 import { MemesList } from '@/components/Meme/memes-list'
 import { StudioDialog } from '@/components/Meme/studio-dialog'
+import {
+  StudioErrorFallback,
+  StudioLoadingFallback
+} from '@/components/Meme/studio-fallbacks'
 import ToggleLikeButton from '@/components/Meme/toggle-like-button'
 import { Badge } from '@/components/ui/badge'
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -27,7 +32,6 @@ import {
   VideoPlayerTimeRange,
   VideoPlayerVolumeRange
 } from '@/components/ui/kibo-ui/video-player'
-import { OverlaySpinner } from '@/components/ui/overlay-spinner'
 import type { MemeWithVideo } from '@/constants/meme'
 import { useDownloadMeme } from '@/hooks/use-download-meme'
 import { useMemeHls } from '@/hooks/use-meme-hls'
@@ -342,13 +346,15 @@ const RouteComponent = () => {
       </React.Suspense>
       <ClientOnly>
         {isStudioDialogOpened ? (
-          <React.Suspense fallback={<OverlaySpinner />}>
-            <StudioDialog
-              meme={meme}
-              open
-              onOpenChange={setIsStudioDialogOpened}
-            />
-          </React.Suspense>
+          <ErrorBoundary FallbackComponent={StudioErrorFallback}>
+            <React.Suspense fallback={<StudioLoadingFallback />}>
+              <StudioDialog
+                meme={meme}
+                open
+                onOpenChange={setIsStudioDialogOpened}
+              />
+            </React.Suspense>
+          </ErrorBoundary>
         ) : null}
       </ClientOnly>
     </div>

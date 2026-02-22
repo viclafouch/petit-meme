@@ -49,6 +49,9 @@ export default defineConfig({
         '/fonts/**': {
           headers: { ...SECURITY_HEADERS, ...IMMUTABLE_CACHE }
         },
+        '/ffmpeg/**': {
+          headers: { ...SECURITY_HEADERS, ...IMMUTABLE_CACHE }
+        },
         '/admin/**': {
           headers: {
             ...SECURITY_HEADERS,

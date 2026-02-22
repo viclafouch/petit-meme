@@ -1,11 +1,15 @@
 import React from 'react'
+import { ErrorBoundary } from 'react-error-boundary'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { AnimatePresence } from 'motion/react'
 import type { MemeListItemParams } from '@/components/Meme/meme-list-item'
 import { MemeListItem } from '@/components/Meme/meme-list-item'
 import { PlayerDialog } from '@/components/Meme/player-dialog'
 import { StudioDialog } from '@/components/Meme/studio-dialog'
-import { OverlaySpinner } from '@/components/ui/overlay-spinner'
+import {
+  StudioErrorFallback,
+  StudioLoadingFallback
+} from '@/components/Meme/studio-fallbacks'
 import { MEMES_PER_PAGE, type MemeWithVideo } from '@/constants/meme'
 import { sendViewEvent } from '@/lib/algolia-insights'
 import { ClientOnly, useRouteContext } from '@tanstack/react-router'
@@ -145,13 +149,15 @@ export const MemesList = ({
       </AnimatePresence>
       <ClientOnly>
         {studioMemeSelected ? (
-          <React.Suspense fallback={<OverlaySpinner />}>
-            <StudioDialog
-              meme={studioMemeSelected}
-              open
-              onOpenChange={handleCloseStudio}
-            />
-          </React.Suspense>
+          <ErrorBoundary FallbackComponent={StudioErrorFallback}>
+            <React.Suspense fallback={<StudioLoadingFallback />}>
+              <StudioDialog
+                meme={studioMemeSelected}
+                open
+                onOpenChange={handleCloseStudio}
+              />
+            </React.Suspense>
+          </ErrorBoundary>
         ) : null}
       </ClientOnly>
     </div>

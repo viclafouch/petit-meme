@@ -27,6 +27,7 @@ import { LoadingButton } from '@/components/ui/loading-button'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { MemeWithVideo } from '@/constants/meme'
+import { STUDIO_TEXT_MAX_LENGTH } from '@/constants/studio'
 import {
   useVideoInitializer,
   useVideoProcessor
@@ -92,15 +93,17 @@ export const StudioDialog = ({
   open,
   onOpenChange
 }: StudioDialogParams) => {
-  const { data: ffmpeg } = useVideoInitializer()
+  const ffmpegQuery = useVideoInitializer()
   const [text, setText] = React.useState('')
   const [textPosition, setTextPosition] = React.useState<'top' | 'bottom'>(
     'top'
   )
 
-  const { progress, processVideo, isLoading, data } = useVideoProcessor(ffmpeg)
+  const { progress, processVideo, isLoading, data, cancel } = useVideoProcessor(
+    ffmpegQuery.data
+  )
 
-  const handleInitialize = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
     if (!text.trim()) {
@@ -109,7 +112,7 @@ export const StudioDialog = ({
       return
     }
 
-    void processVideo({ meme, text, textPosition })
+    processVideo({ meme, text, textPosition })
   }
 
   return (
@@ -128,7 +131,7 @@ export const StudioDialog = ({
         </DialogHeader>
         <form
           className="w-full grid md:grid-cols-[auto_350px] gap-4"
-          onSubmit={handleInitialize}
+          onSubmit={handleSubmit}
         >
           <div className="flex flex-col gap-3 items-start">
             <div className="flex flex-col gap-y-2 w-full">
@@ -141,6 +144,7 @@ export const StudioDialog = ({
                 name="text"
                 autoComplete="off"
                 type="text"
+                maxLength={STUDIO_TEXT_MAX_LENGTH}
               />
               <div className="relative flex w-full text-muted-foreground">
                 <div className="w-full">
@@ -236,6 +240,14 @@ export const StudioDialog = ({
                   <div className="absolute flex flex-col gap-2 px-4 w-full text-center max-w-md items-center justify-center">
                     <Badge variant="outline">Traitement ({progress}%)</Badge>
                     <Progress value={progress} />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={cancel}
+                    >
+                      Annuler
+                    </Button>
                   </div>
                 </div>
               ) : null}

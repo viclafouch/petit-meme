@@ -9,7 +9,8 @@ import {
   getMemes,
   getRecentCountMemes,
   getTrendingMemes,
-  getVideoStatusById
+  getVideoStatusById,
+  shareMeme
 } from '@/server/meme'
 import { getInfiniteReels } from '@/server/reels'
 import { getFavoritesMemes } from '@/server/user'
@@ -161,3 +162,17 @@ export const getInfiniteReelsQueryOpts = (excludedIds: string[] = []) => {
 }
 
 getInfiniteReelsQueryOpts.all = ['infinite-reels'] as const
+
+export const getVideoBlobQueryOpts = (memeId: Meme['id']) => {
+  return queryOptions({
+    queryKey: [...getVideoBlobQueryOpts.all, memeId],
+    queryFn: async () => {
+      const response = await shareMeme({ data: memeId })
+
+      return response.blob()
+    },
+    staleTime: Infinity
+  })
+}
+
+getVideoBlobQueryOpts.all = ['video-blob'] as const

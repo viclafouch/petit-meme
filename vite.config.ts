@@ -9,7 +9,9 @@ import react from '@vitejs/plugin-react'
 const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'DENY',
-  'Referrer-Policy': 'strict-origin-when-cross-origin'
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Cross-Origin-Opener-Policy': 'same-origin',
+  'Cross-Origin-Embedder-Policy': 'credentialless'
 }
 
 const IMMUTABLE_CACHE = {
@@ -54,11 +56,7 @@ export default defineConfig({
           headers: { ...SECURITY_HEADERS, ...IMMUTABLE_CACHE }
         },
         '/ffmpeg/**': {
-          headers: {
-            ...SECURITY_HEADERS,
-            ...IMMUTABLE_CACHE,
-            'Cross-Origin-Embedder-Policy': 'credentialless'
-          }
+          headers: { ...SECURITY_HEADERS, ...IMMUTABLE_CACHE }
         },
         '/admin/**': {
           headers: {

@@ -25,7 +25,7 @@ L'app est en production avec des utilisateurs et des données réelles.
 #### 2. Créer la migration
 
 ```bash
-npx prisma migrate dev --name <nom_descriptif>
+pnpm exec prisma migrate dev --name <nom_descriptif>
 ```
 
 Cela :
@@ -48,7 +48,7 @@ Le push déclenche le deploy Railway automatiquement.
 Après le deploy Railway, appliquer les migrations via Railway CLI :
 
 ```bash
-railway run npx prisma migrate deploy
+railway run pnpm exec prisma migrate deploy
 ```
 
 `migrate deploy` est safe : il n'applique que les migrations non encore appliquées et ne touche jamais au schema directement.
@@ -58,9 +58,9 @@ railway run npx prisma migrate deploy
 Si la table `_prisma_migrations` n'existe pas en production (parce que `db push` était utilisé), il faut marquer les migrations existantes comme déjà appliquées :
 
 ```bash
-railway run npx prisma migrate resolve --applied 20251218085720_meme_view_daily
-railway run npx prisma migrate resolve --applied 20260219110916_sync_meme_columns_indexes
-railway run npx prisma migrate resolve --applied 20260219110917_add_user_terms_privacy
+railway run pnpm exec prisma migrate resolve --applied 20251218085720_meme_view_daily
+railway run pnpm exec prisma migrate resolve --applied 20260219110916_sync_meme_columns_indexes
+railway run pnpm exec prisma migrate resolve --applied 20260219110917_add_user_terms_privacy
 ```
 
 Cela crée la table `_prisma_migrations` et enregistre ces migrations comme appliquées sans les ré-exécuter. Ensuite `migrate deploy` ne traitera que les nouvelles.
@@ -69,11 +69,11 @@ Cela crée la table `_prisma_migrations` et enregistre ces migrations comme appl
 
 | Commande | Environnement | Usage |
 |----------|--------------|-------|
-| `npx prisma migrate dev --name <nom>` | Local | Créer + appliquer une migration |
-| `npx prisma generate` | Local | Régénérer le client (aussi dans `postinstall`) |
-| `railway run npx prisma migrate deploy` | Production | Appliquer les migrations pendantes |
-| `railway run npx prisma migrate status` | Production | Vérifier l'état des migrations |
-| `railway run npx prisma migrate resolve --applied <nom>` | Production | Marquer une migration comme déjà appliquée (baselining) |
+| `pnpm exec prisma migrate dev --name <nom>` | Local | Créer + appliquer une migration |
+| `pnpm exec prisma generate` | Local | Régénérer le client (aussi dans `postinstall`) |
+| `railway run pnpm exec prisma migrate deploy` | Production | Appliquer les migrations pendantes |
+| `railway run pnpm exec prisma migrate status` | Production | Vérifier l'état des migrations |
+| `railway run pnpm exec prisma migrate resolve --applied <nom>` | Production | Marquer une migration comme déjà appliquée (baselining) |
 
 ### Ce que Claude Code ne doit JAMAIS faire
 

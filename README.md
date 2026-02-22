@@ -52,7 +52,7 @@ Currently available in **French only**. English support is planned.
 ## Prerequisites
 
 - Node.js 24+
-- npm 11+
+- pnpm 10+
 - A PostgreSQL database
 - Stripe account (test or live)
 - Bunny CDN account with a video library
@@ -66,7 +66,7 @@ Currently available in **French only**. English support is planned.
 ```bash
 git clone <repository-url>
 cd memes-by-lafouch
-npm install
+pnpm install
 ```
 
 ### 2. Environment variables
@@ -82,13 +82,13 @@ cp .env.example .env
 Push the schema to your database:
 
 ```bash
-npx prisma migrate dev
+pnpm exec prisma migrate dev
 ```
 
 ### 4. Run the development server
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 ## Database Migrations
@@ -100,7 +100,7 @@ Prisma Migrate is used to manage schema changes safely across environments.
 After modifying `prisma/schema.prisma`:
 
 ```bash
-npx prisma migrate dev --name descriptive_name
+pnpm exec prisma migrate dev --name descriptive_name
 ```
 
 This creates a migration file, applies it to the local database, and regenerates the Prisma Client.
@@ -110,7 +110,7 @@ This creates a migration file, applies it to the local database, and regenerates
 Railway auto-deploys on push to `main`. After a deploy that includes new migrations:
 
 ```bash
-railway run npx prisma migrate deploy
+railway run pnpm exec prisma migrate deploy
 ```
 
 This applies only the pending migrations. It is safe and idempotent.
@@ -118,7 +118,7 @@ This applies only the pending migrations. It is safe and idempotent.
 ### Checking migration status
 
 ```bash
-railway run npx prisma migrate status
+railway run pnpm exec prisma migrate status
 ```
 
 ### Rules
@@ -154,14 +154,14 @@ The CLI outputs a webhook signing secret (`whsec_...`). Add it to your `.env` as
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Build for production |
-| `npm start` | Start production server |
-| `npm run lint` | TypeScript check + ESLint |
-| `npm run lint:fix` | Auto-fix lint issues |
-| `npm run prisma:migrate` | Apply pending migrations (production) |
-| `npm run prisma:seed` | Seed database |
-| `npm run email:dev` | Preview email templates on port 3001 |
+| `pnpm run dev` | Start development server |
+| `pnpm run build` | Build for production |
+| `pnpm start` | Start production server |
+| `pnpm run lint` | TypeScript check + ESLint |
+| `pnpm run lint:fix` | Auto-fix lint issues |
+| `pnpm run prisma:migrate` | Apply pending migrations (production) |
+| `pnpm run prisma:seed` | Seed database |
+| `pnpm run email:dev` | Preview email templates on port 3001 |
 
 ## Project Structure
 

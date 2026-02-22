@@ -1,5 +1,5 @@
 ---
-paths: "apps/web/**/*.{ts,tsx}"
+paths: ["src/**/*.{ts,tsx}"]
 ---
 
 ## Frontend design
@@ -17,7 +17,7 @@ paths: "apps/web/**/*.{ts,tsx}"
 
 ### Libraries
 - ALWAYS use shadcn components instead of raw HTML elements, `<Input>` instead of `<input>`,`<Textarea>` instead of `<textarea>`, etc.
-- **Never modify code** in `src/components/ui`, `src/components/kibo-ui`, or `src/components/animate-ui` folders - run `npm run lint:fix` first (auto-fixes formatting), then add `/* eslint-disable */` at the top of files to ignore remaining errors.
+- **Never modify code** in `src/components/ui`, `src/components/kibo-ui`, or `src/components/animate-ui` folders - run `pnpm run lint:fix` first (auto-fixes formatting), then add `/* eslint-disable */` at the top of files to ignore remaining errors.
 - **No margins on icons in buttons** - shadcn Button has built-in `gap` spacing
 
 ### TanStack Query

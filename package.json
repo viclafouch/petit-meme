@@ -5,30 +5,39 @@
   "private": true,
   "license": "UNLICENSED",
   "author": "Victor de la Fouchardiere",
-  "packageManager": "npm@11.10.0",
+  "packageManager": "pnpm@10.30.1",
   "engines": {
-    "node": ">=24.0.0",
-    "npm": ">=11.0.0"
+    "node": ">=24.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/engines",
+      "@sentry/cli",
+      "esbuild",
+      "prisma",
+      "protobufjs",
+      "sharp"
+    ]
   },
   "type": "module",
   "scripts": {
     "dev": "NODE_OPTIONS='--import ./instrument.server.mjs' vite dev",
     "build": "vite build && cp instrument.server.mjs .output/server",
     "start": "node --import ./.output/server/instrument.server.mjs .output/server/index.mjs",
-    "prisma:migrate": "npx prisma migrate deploy",
+    "prisma:migrate": "prisma migrate deploy",
     "prisma:seed": "tsx --env-file=.env prisma/seed.ts",
-    "prisma:reset-db": "npx prisma migrate reset",
+    "prisma:reset-db": "prisma migrate reset",
     "crons:sync-algolia": "vite-node crons/sync-algolia.ts",
     "crons:update-title-bunny": "vite-node crons/update-title-bunny.ts",
     "crons:cleanup-retention": "vite-node crons/cleanup-retention.ts",
     "crons:unverified-cleanup": "vite-node crons/unverified-cleanup.ts",
     "crons:verification-reminder": "vite-node crons/verification-reminder.ts",
     "postinstall": "prisma generate",
-    "lint": "npx tsc && eslint",
-    "lint:fix": "npm run lint -- --fix",
+    "lint": "tsc && eslint",
+    "lint:fix": "tsc && eslint --fix",
     "email:dev": "email dev --dir src/emails --port 3001",
-    "deps": "npx taze@latest -Ilw",
-    "deps:major": "npx taze@latest major -Ilw",
+    "deps": "pnpm dlx taze@latest -Ilw",
+    "deps:major": "pnpm dlx taze@latest major -Ilw",
     "prepare": "husky"
   },
   "dependencies": {

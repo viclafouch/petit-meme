@@ -11,20 +11,28 @@ The site is currently **French-only**. An English migration is planned for later
 ## Commands
 
 ```bash
-npm run build            # Production build
-npm start                # Start production server (.output/server/index.mjs)
-npm run lint             # TypeScript check + ESLint
-npm run lint:fix         # Auto-fix lint issues
-npm run prisma:migrate   # Deploy Prisma migrations (prisma migrate deploy)
-npm run prisma:seed      # Seed database (tsx --env-file=.env prisma/seed.ts)
-npm run email:dev        # Email preview server (port 3001)
+pnpm run build            # Production build (copies instrument.server.mjs to .output)
+pnpm start                # Start production server (with Sentry --import)
+pnpm run lint             # TypeScript check + ESLint
+pnpm run lint:fix         # Auto-fix lint issues
+pnpm run prisma:migrate   # Deploy Prisma migrations (prisma migrate deploy)
+pnpm run prisma:seed      # Seed database (tsx --env-file=.env prisma/seed.ts)
+pnpm run prisma:reset-db  # Reset local DB (prisma migrate reset) — NEVER in production
+pnpm run email:dev        # Email preview server (port 3001)
+
+# Crons (run via vite-node)
+pnpm run crons:sync-algolia           # Sync memes to Algolia index
+pnpm run crons:update-title-bunny     # Update video titles in Bunny CDN
+pnpm run crons:cleanup-retention      # GDPR anonymization (3+ years inactive)
+pnpm run crons:unverified-cleanup     # Remove unverified accounts (30+ days)
+pnpm run crons:verification-reminder  # Remind unverified users (42-54h window)
 ```
 
-After Prisma schema changes: `npx prisma generate` (also runs on `postinstall`).
+After Prisma schema changes: `pnpm exec prisma generate` (also runs on `postinstall`).
 
 Database & migration workflow complet : voir `.claude/rules/database.md`.
 
-**Ne jamais démarrer le serveur de dev (`npm run dev`)** — c'est toujours l'utilisateur qui s'en occupe.
+**Ne jamais démarrer le serveur de dev (`pnpm run dev`)** — c'est toujours l'utilisateur qui s'en occupe.
 
 ## Architecture
 
@@ -38,7 +46,8 @@ Database & migration workflow complet : voir `.claude/rules/database.md`.
 - **State:** TanStack Query (server state) + Zustand (client state)
 - **Forms:** TanStack Form + Zod validation
 - **Video:** Bunny CDN + HLS.js
-- **Search:** Algolia
+- **Search & Analytics:** Algolia (search, virtual replicas, Recommend, Insights events)
+- **Monitoring:** Sentry (error tracking, session replay, performance tracing)
 - **Payments:** Stripe
 - **Email:** Resend + React Email
 
@@ -49,7 +58,7 @@ Database & migration workflow complet : voir `.claude/rules/database.md`.
 - `components/ui/` — Shadcn UI components (do NOT modify — use `eslint-disable` if needed)
 - `components/animate-ui/` — Animation components (do NOT modify)
 - `components/` — App components organized by domain (Meme/, User/, categories/, admin/)
-- `lib/` — Library integrations (auth, algolia, stripe, bunny, queries, seo, theme)
+- `lib/` — Library integrations (auth, algolia, algolia-insights, sentry, stripe, bunny, queries, seo, theme)
 - `constants/` — App constants grouped by domain, env vars validated with Zod (`env.ts`)
 - `helpers/` — Pure generic utility functions
 - `utils/` — Business utilities (wrapped with `createServerOnlyFn` for server-only access)
@@ -57,15 +66,16 @@ Database & migration workflow complet : voir `.claude/rules/database.md`.
 - `stores/` — Zustand stores
 - `db/` — Prisma client + generated types (`db/generated/prisma`)
 - `i18n/` — Internationalization
+- `emails/` — React Email templates (shared layout, verification, welcome, password, billing)
 - `@types/` — TypeScript type definitions
 
-### Other Directories
+### Other Directories / Root Files
 
 - `prisma/` — Schema and migrations
-- `emails/` — React Email templates
-- `crons/` — Cron scripts (Algolia sync, Bunny updates)
+- `crons/` — Cron scripts (Algolia sync, Bunny updates, GDPR cleanup, verification reminders)
 - `scripts/` — Utility scripts
 - `public/` — Static assets
+- `instrument.server.mjs` — Sentry server-side init (loaded via `--import` flag)
 
 ## Conventions
 
@@ -99,7 +109,7 @@ Toutes les conventions de code (TypeScript, React, code style, Tailwind, SEO, Gi
 
 | Plan | Fichier |
 |------|---------|
-| **Correction des audits** | [`.claude/plan.md`](.claude/plan.md) |
+| **Features & Futur** | [`.claude/plan.md`](.claude/plan.md) |
 
 ## Workflow
 
@@ -108,6 +118,6 @@ Toutes les conventions de code (TypeScript, React, code style, Tailwind, SEO, Gi
 2. Lire le plan correspondant
 
 **Après chaque tâche (automatique, sans attendre qu'on demande)** :
-1. `npm run lint:fix`
+1. `pnpm run lint:fix`
 2. Mettre à jour le plan : cocher `[x]` les items terminés
 3. Lancer `code-refactoring` si code significatif

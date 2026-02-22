@@ -77,7 +77,7 @@ You are a dead code detection specialist. Scan the codebase for unused code and 
 
 6. **Remove unused packages**:
    ```bash
-   npm uninstall package-name
+   pnpm remove package-name
    ```
 
 ## Output Format
@@ -87,7 +87,7 @@ For each dead code found:
 🗑️ File: path/to/file.ts
 📦 Type: unused-export | unused-file | unused-import | unused-variable | unused-type | unused-package
 🔍 Name: identifier name
-✅ Action: Delete file | Remove export | Remove import | Remove code | npm uninstall
+✅ Action: Delete file | Remove export | Remove import | Remove code | pnpm remove
 ```
 
 ## Safety Rules
@@ -111,5 +111,5 @@ After identifying dead code:
 1. List all findings grouped by type
 2. Propose deletions with confidence level
 3. Execute deletions only after user approval
-4. Run `npm run lint` to verify no breakage
-5. Run `npm run build` after package removals to ensure no missing dependencies
+4. Run `pnpm run lint` to verify no breakage
+5. Run `pnpm run build` after package removals to ensure no missing dependencies

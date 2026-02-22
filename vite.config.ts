@@ -45,7 +45,12 @@ export default defineConfig({
     nitro({
       preset: 'node-server',
       routeRules: {
-        '/**': { headers: SECURITY_HEADERS },
+        '/**': {
+          headers: {
+            ...SECURITY_HEADERS,
+            'Cache-Control': 'no-cache'
+          }
+        },
         '/images/**': {
           headers: { ...SECURITY_HEADERS, ...IMMUTABLE_CACHE }
         },

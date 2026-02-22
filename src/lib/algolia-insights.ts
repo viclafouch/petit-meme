@@ -33,6 +33,8 @@ function getUserToken() {
   return readClientCookie(COOKIE_ALGOLIA_USER_TOKEN_KEY) ?? null
 }
 
+const ALGOLIA_MAX_OBJECTS_PER_EVENT = 20
+
 function pushEvent(event: EventsItems) {
   algoliaInsights.pushEvents({ events: [event] }).catch(logInsightsError)
 }
@@ -135,13 +137,22 @@ export const sendViewEvent = createClientOnlyFn(
       return
     }
 
-    pushEvent({
-      eventType: 'view',
-      eventName: 'Memes Viewed',
-      index: clientEnv.VITE_ALGOLIA_INDEX,
-      objectIDs,
-      userToken,
-      authenticatedUserToken
-    } satisfies ViewedObjectIDs)
+    for (
+      let offset = 0;
+      offset < objectIDs.length;
+      offset += ALGOLIA_MAX_OBJECTS_PER_EVENT
+    ) {
+      pushEvent({
+        eventType: 'view',
+        eventName: 'Memes Viewed',
+        index: clientEnv.VITE_ALGOLIA_INDEX,
+        objectIDs: objectIDs.slice(
+          offset,
+          offset + ALGOLIA_MAX_OBJECTS_PER_EVENT
+        ),
+        userToken,
+        authenticatedUserToken
+      } satisfies ViewedObjectIDs)
+    }
   }
 )

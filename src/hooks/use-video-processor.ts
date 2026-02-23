@@ -46,6 +46,7 @@ type VideoProcessingParams = {
 
 type AddTextToVideoParams = {
   videoBlob: Blob
+  memeId: string
 } & VideoProcessingParams
 
 type ProcessVideoParams = {
@@ -72,6 +73,25 @@ const wrapText = (text: string, maxLength: number) => {
       return [...lines, word]
     }, [])
     .join('\n')
+}
+
+const loadedVideoMap = new WeakMap<FFmpeg, string>()
+
+type EnsureVideoFileParams = {
+  videoBlob: Blob
+  memeId: string
+}
+
+const ensureVideoFile = async (
+  ffmpeg: FFmpeg,
+  { videoBlob, memeId }: EnsureVideoFileParams
+) => {
+  if (loadedVideoMap.get(ffmpeg) === memeId) {
+    return
+  }
+
+  await ffmpeg.writeFile('input.mp4', await fetchFile(videoBlob))
+  loadedVideoMap.set(ffmpeg, memeId)
 }
 
 const ensureFontFile = async (
@@ -123,11 +143,39 @@ const buildVideoFilter = ({
   ].join(',')
 }
 
+const buildFFmpegArgs = (videoFilter: string) => {
+  return [
+    '-i',
+    'input.mp4',
+    '-map',
+    '0:v:0',
+    '-map',
+    '0:a:0?',
+    '-vf',
+    videoFilter,
+    '-c:v',
+    'libx264',
+    '-c:a',
+    'copy',
+    '-preset',
+    'ultrafast',
+    '-crf',
+    '20',
+    '-pix_fmt',
+    'yuv420p',
+    '-threads',
+    '1',
+    '-map_metadata',
+    '-1',
+    '-y',
+    'output.mp4'
+  ]
+}
+
 const readFFmpegOutput = async (ffmpeg: FFmpeg) => {
   const outputData = await ffmpeg.readFile('output.mp4')
 
   await Promise.all([
-    ffmpeg.deleteFile('input.mp4'),
     ffmpeg.deleteFile('text.txt'),
     ffmpeg.deleteFile('output.mp4')
   ]).catch(() => {})
@@ -157,6 +205,7 @@ const addTextToVideo = async (
   ffmpeg: FFmpeg,
   {
     videoBlob,
+    memeId,
     text,
     bandHeight = STUDIO_DEFAULT_BAND_HEIGHT,
     fontSize = STUDIO_DEFAULT_FONT_SIZE,
@@ -169,7 +218,7 @@ const addTextToVideo = async (
 ) => {
   const font = resolveFont(fontFamily)
 
-  await ffmpeg.writeFile('input.mp4', await fetchFile(videoBlob))
+  await ensureVideoFile(ffmpeg, { videoBlob, memeId })
   await ensureFontFile(ffmpeg, font)
 
   const wrappedText = wrapText(text, maxCharsPerLine)
@@ -185,20 +234,7 @@ const addTextToVideo = async (
     lineCount: wrappedText.split('\n').length
   })
 
-  const exitCode = await ffmpeg.exec([
-    '-i',
-    'input.mp4',
-    '-vf',
-    videoFilter,
-    '-c:a',
-    'copy',
-    '-preset',
-    'ultrafast',
-    '-crf',
-    '20',
-    '-y',
-    'output.mp4'
-  ])
+  const exitCode = await ffmpeg.exec(buildFFmpegArgs(videoFilter))
 
   if (exitCode !== 0) {
     throw new Error('FFmpeg error')
@@ -237,6 +273,39 @@ export const useVideoInitializer = () => {
   }, [query.data])
 
   return query
+}
+
+export const useVideoPreloader = (ffmpeg: FFmpeg, memeId: string) => {
+  const queryClient = useQueryClient()
+  const hasTriggeredRef = React.useRef(false)
+
+  React.useEffect(() => {
+    hasTriggeredRef.current = false
+  }, [memeId])
+
+  const preloadAssets = async () => {
+    try {
+      const defaultFont = resolveFont('arial')
+
+      const [videoBlob] = await Promise.all([
+        queryClient.ensureQueryData(getVideoBlobQueryOpts(memeId)),
+        ensureFontFile(ffmpeg, defaultFont)
+      ])
+
+      await ensureVideoFile(ffmpeg, { videoBlob, memeId })
+    } catch {}
+  }
+
+  const triggerPreload = () => {
+    if (hasTriggeredRef.current) {
+      return
+    }
+
+    hasTriggeredRef.current = true
+    void preloadAssets()
+  }
+
+  return { triggerPreload }
 }
 
 type UseVideoProcessorParams = {
@@ -279,6 +348,7 @@ export const useVideoProcessor = (
       )
       const blob = await addTextToVideo(ffmpeg, {
         videoBlob,
+        memeId: meme.id,
         ...processingOptions
       })
 

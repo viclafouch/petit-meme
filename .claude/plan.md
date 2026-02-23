@@ -86,6 +86,9 @@ Simplification du player vidéo : suppression de la barre de contrôles, interac
 
 - [x] Plusieurs fonts (Impact, Arial) dans `/public/fonts/`
 - [x] Fond de bande configurable (choix de couleurs : blanc, noir, rouge, bleu — blanc par défaut)
+- [x] Optimisation des paramètres FFmpeg d'encodage (codec explicite, pix_fmt yuv420p, stream mapping, single-thread explicite, strip metadata)
+- [x] Cache `input.mp4` en WASM FS entre les générations (WeakMap par instance FFmpeg, skip writeFile si même mème)
+- [x] Preload au focus input : `useVideoPreloader` expose `triggerPreload()`, déclenché au focus des inputs texte (mobile + desktop). Prefetch blob vidéo + font Arial + write WASM FS. Pas de preload au mount, pas de re-trigger auto au changement de mème.
 
 ### Phase 5 — Accessibilité WCAG 2.1 AA (Vidéo & Studio)
 

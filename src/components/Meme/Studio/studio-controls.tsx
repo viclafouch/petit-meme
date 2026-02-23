@@ -79,13 +79,15 @@ type StudioControlsParams = {
   onSettingsChange: (updates: Partial<StudioSettings>) => void
   disabled: boolean
   hideTextInput?: boolean
+  onTextInputFocus?: () => void
 }
 
 export const StudioControls = ({
   settings,
   onSettingsChange,
   disabled,
-  hideTextInput = false
+  hideTextInput = false,
+  onTextInputFocus
 }: StudioControlsParams) => {
   const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     onSettingsChange({ text: event.target.value })
@@ -124,6 +126,7 @@ export const StudioControls = ({
             id="studio-text"
             value={settings.text}
             onChange={handleTextChange}
+            onFocus={onTextInputFocus}
             placeholder="Texte à ajouter sur la vidéo"
             autoComplete="off"
             type="text"
@@ -196,7 +199,11 @@ export const StudioControls = ({
         >
           {STUDIO_FONT_SIZES.map((size) => {
             return (
-              <ToggleGroupItem value={String(size.value)} className="flex-1">
+              <ToggleGroupItem
+                key={size.value}
+                value={String(size.value)}
+                className="flex-1"
+              >
                 {size.label}
               </ToggleGroupItem>
             )

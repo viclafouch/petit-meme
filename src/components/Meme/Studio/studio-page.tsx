@@ -22,6 +22,7 @@ import type { MemeWithVideo } from '@/constants/meme'
 import { STUDIO_TEXT_MAX_LENGTH } from '@/constants/studio'
 import {
   useVideoInitializer,
+  useVideoPreloader,
   useVideoProcessor
 } from '@/hooks/use-video-processor'
 import { useStudioStore } from '@/stores/studio.store'
@@ -60,6 +61,8 @@ type StudioPageParams = {
 
 export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
   const ffmpegQuery = useVideoInitializer()
+  const { triggerPreload } = useVideoPreloader(ffmpegQuery.data, meme.id)
+
   const settings = useStudioStore((state) => {
     return state.settings
   })
@@ -118,6 +121,7 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
           <Input
             value={settings.text}
             onChange={handleTextChange}
+            onFocus={triggerPreload}
             placeholder="Ajouter du texte..."
             autoComplete="off"
             type="text"
@@ -186,6 +190,7 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
             settings={settings}
             onSettingsChange={setSettings}
             disabled={isProcessing}
+            onTextInputFocus={triggerPreload}
           />
           <Separator />
           <StudioActions

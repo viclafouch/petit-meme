@@ -22,7 +22,7 @@ export const STUDIO_FONT_SIZES = [
 
 export type StudioFontSizeValue = (typeof STUDIO_FONT_SIZES)[number]['value']
 
-type StudioColor = {
+type StudioColorEntry = {
   id: string
   label: string
   value: string
@@ -33,7 +33,7 @@ export const STUDIO_COLORS = [
   { id: 'black', label: 'Noir', value: 'black', className: 'bg-black' },
   { id: 'red', label: 'Rouge', value: 'red', className: 'bg-red-600' },
   { id: 'blue', label: 'Bleu', value: 'blue', className: 'bg-blue-600' }
-] as const satisfies readonly StudioColor[]
+] as const satisfies readonly StudioColorEntry[]
 
 export type StudioFontColorValue = (typeof STUDIO_COLORS)[number]['value']
 
@@ -52,10 +52,26 @@ export const STUDIO_FONTS = [
     ffmpegFile: 'arial.ttf',
     fontPath: '/fonts/arial.ttf',
     cssFamily: 'Arial, sans-serif'
+  },
+  {
+    id: 'impact',
+    label: 'Impact',
+    ffmpegFile: 'impact.ttf',
+    fontPath: '/fonts/impact.ttf',
+    cssFamily: 'Impact, sans-serif'
   }
 ] as const satisfies readonly StudioFont[]
 
 export type StudioFontFamilyId = (typeof STUDIO_FONTS)[number]['id']
+
+export const STUDIO_BAND_COLORS = [
+  { id: 'white', label: 'Blanc', value: 'white', className: 'bg-white' },
+  { id: 'black', label: 'Noir', value: 'black', className: 'bg-black' },
+  { id: 'red', label: 'Rouge', value: 'red', className: 'bg-red-600' },
+  { id: 'blue', label: 'Bleu', value: 'blue', className: 'bg-blue-600' }
+] as const satisfies readonly StudioColorEntry[]
+
+export type StudioBandColorValue = (typeof STUDIO_BAND_COLORS)[number]['value']
 
 type StudioTemplate = {
   id: string
@@ -65,7 +81,7 @@ type StudioTemplate = {
   fontSize: StudioFontSizeValue
   fontColor: StudioFontColorValue
   textPosition: StudioTextPosition
-  bandColor: string
+  bandColor: StudioBandColorValue
   bandOpacity: number
 }
 
@@ -96,15 +112,13 @@ export const STUDIO_TEMPLATES = [
 
 export type StudioTemplateId = (typeof STUDIO_TEMPLATES)[number]['id']
 
-export type StudioBandColor = (typeof STUDIO_TEMPLATES)[number]['bandColor']
-
 export type StudioSettings = {
   text: string
   textPosition: StudioTextPosition
   fontSize: StudioFontSizeValue
   fontColor: StudioFontColorValue
   fontFamily: StudioFontFamilyId
-  bandColor: StudioBandColor
+  bandColor: StudioBandColorValue
   bandOpacity: number
 }
 

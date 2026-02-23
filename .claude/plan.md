@@ -84,14 +84,8 @@ Simplification du player vidéo : suppression de la barre de contrôles, interac
 
 ### Phase 4 — Features avancées
 
-- [ ] Plusieurs fonts (Impact, Arial, Comic Sans, etc.) dans `/public/fonts/`
-- [ ] Texte directement sur la vidéo sans bande (outline/shadow pour lisibilité)
-- [ ] Fond de bande configurable (couleur, transparence)
-- [ ] Copy to clipboard (`navigator.clipboard.write()`)
-- [ ] Export GIF en plus du MP4
-- [ ] Historique des 5 dernières créations (IndexedDB)
-- [ ] Texte multi-positions (N blocs de texte positionnables)
-- [ ] Crop/trim de la vidéo avant ajout de texte
+- [x] Plusieurs fonts (Impact, Arial) dans `/public/fonts/`
+- [x] Fond de bande configurable (choix de couleurs : blanc, noir, rouge, bleu — blanc par défaut)
 
 ---
 

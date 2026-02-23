@@ -1,15 +1,12 @@
 import React from 'react'
 import { toast } from 'sonner'
 import { StudioError } from '@/constants/error'
-import {
-  FFMPEG_CORE_URL,
-  FFMPEG_FONT_FILE,
-  FFMPEG_FONT_PATH,
-  FFMPEG_WASM_URL
-} from '@/constants/ffmpeg'
+import { FFMPEG_CORE_URL, FFMPEG_WASM_URL } from '@/constants/ffmpeg'
 import type { MemeWithVideo } from '@/constants/meme'
 import type {
+  StudioBandColorValue,
   StudioFontColorValue,
+  StudioFontFamilyId,
   StudioFontSizeValue,
   StudioTextPosition
 } from '@/constants/studio'
@@ -19,6 +16,7 @@ import {
   STUDIO_DEFAULT_FONT_COLOR,
   STUDIO_DEFAULT_FONT_SIZE,
   STUDIO_DEFAULT_MAX_CHARS_PER_LINE,
+  STUDIO_FONTS,
   STUDIO_LINE_SPACING
 } from '@/constants/studio'
 import { withTimeout } from '@/helpers/promise'
@@ -41,6 +39,8 @@ type VideoProcessingParams = {
   textPosition?: StudioTextPosition
   fontSize?: StudioFontSizeValue
   fontColor?: StudioFontColorValue
+  fontFamily?: StudioFontFamilyId
+  bandColor?: StudioBandColorValue
   maxCharsPerLine?: number
 }
 
@@ -74,11 +74,14 @@ const wrapText = (text: string, maxLength: number) => {
     .join('\n')
 }
 
-const ensureFontFile = async (ffmpeg: FFmpeg) => {
+const ensureFontFile = async (
+  ffmpeg: FFmpeg,
+  font: (typeof STUDIO_FONTS)[number]
+) => {
   try {
-    await ffmpeg.readFile(FFMPEG_FONT_FILE)
+    await ffmpeg.readFile(font.ffmpegFile)
   } catch {
-    await ffmpeg.writeFile(FFMPEG_FONT_FILE, await fetchFile(FFMPEG_FONT_PATH))
+    await ffmpeg.writeFile(font.ffmpegFile, await fetchFile(font.fontPath))
   }
 }
 
@@ -87,6 +90,8 @@ type BuildVideoFilterParams = {
   bandHeight: number
   fontSize: number
   fontColor: string
+  fontFile: string
+  bandColor: string
   lineCount: number
 }
 
@@ -95,6 +100,8 @@ const buildVideoFilter = ({
   bandHeight,
   fontSize,
   fontColor,
+  fontFile,
+  bandColor,
   lineCount
 }: BuildVideoFilterParams) => {
   const baselineOffset = Math.floor(fontSize * STUDIO_BASELINE_RATIO)
@@ -103,8 +110,8 @@ const buildVideoFilter = ({
   const isTopPosition = textPosition === 'top'
 
   const padFilter = isTopPosition
-    ? `pad=iw:ih+${bandHeight}:0:${bandHeight}:white`
-    : `pad=iw:ih+${bandHeight}:0:0:white`
+    ? `pad=iw:ih+${bandHeight}:0:${bandHeight}:${bandColor}`
+    : `pad=iw:ih+${bandHeight}:0:0:${bandColor}`
 
   const yPosition = isTopPosition
     ? `${Math.floor(bandHeight / 2)}-${Math.floor(totalTextHeight / 2)}+${baselineOffset}`
@@ -112,7 +119,7 @@ const buildVideoFilter = ({
 
   return [
     padFilter,
-    `drawtext=fontfile=${FFMPEG_FONT_FILE}:textfile=text.txt:x=(w-text_w)/2:y=${yPosition}:fontsize=${fontSize}:fontcolor=${fontColor}:line_spacing=${STUDIO_LINE_SPACING}`
+    `drawtext=fontfile=${fontFile}:textfile=text.txt:x=(w-text_w)/2:y=${yPosition}:fontsize=${fontSize}:fontcolor=${fontColor}:line_spacing=${STUDIO_LINE_SPACING}`
   ].join(',')
 }
 
@@ -134,6 +141,18 @@ const readFFmpegOutput = async (ffmpeg: FFmpeg) => {
   })
 }
 
+const resolveFont = (fontFamily: StudioFontFamilyId) => {
+  const font = STUDIO_FONTS.find((entry) => {
+    return entry.id === fontFamily
+  })
+
+  if (!font) {
+    throw new Error(`Unknown font family: ${fontFamily}`)
+  }
+
+  return font
+}
+
 const addTextToVideo = async (
   ffmpeg: FFmpeg,
   {
@@ -143,11 +162,15 @@ const addTextToVideo = async (
     fontSize = STUDIO_DEFAULT_FONT_SIZE,
     textPosition = 'bottom',
     fontColor = STUDIO_DEFAULT_FONT_COLOR,
+    fontFamily = 'arial',
+    bandColor = 'white',
     maxCharsPerLine = STUDIO_DEFAULT_MAX_CHARS_PER_LINE
   }: AddTextToVideoParams
 ) => {
+  const font = resolveFont(fontFamily)
+
   await ffmpeg.writeFile('input.mp4', await fetchFile(videoBlob))
-  await ensureFontFile(ffmpeg)
+  await ensureFontFile(ffmpeg, font)
 
   const wrappedText = wrapText(text, maxCharsPerLine)
   await ffmpeg.writeFile('text.txt', new TextEncoder().encode(wrappedText))
@@ -157,6 +180,8 @@ const addTextToVideo = async (
     bandHeight,
     fontSize,
     fontColor,
+    fontFile: font.ffmpegFile,
+    bandColor,
     lineCount: wrappedText.split('\n').length
   })
 

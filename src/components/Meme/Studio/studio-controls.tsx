@@ -12,6 +12,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import type {
+  StudioBandColorValue,
   StudioFontColorValue,
   StudioFontFamilyId,
   StudioFontSizeValue,
@@ -19,12 +20,53 @@ import type {
   StudioTextPosition
 } from '@/constants/studio'
 import {
+  STUDIO_BAND_COLORS,
   STUDIO_COLORS,
   STUDIO_FONT_SIZES,
   STUDIO_FONTS,
   STUDIO_TEXT_MAX_LENGTH
 } from '@/constants/studio'
 import { cn } from '@/lib/utils'
+
+type ColorSwatchesParams = {
+  colors: readonly {
+    readonly id: string
+    readonly label: string
+    readonly value: string
+    readonly className: string
+  }[]
+  activeValue: string
+  onSelect: (value: string) => void
+}
+
+const ColorSwatches = ({
+  colors,
+  activeValue,
+  onSelect
+}: ColorSwatchesParams) => {
+  return (
+    <div className="flex gap-3">
+      {colors.map((color) => {
+        return (
+          <button
+            key={color.id}
+            type="button"
+            aria-label={color.label}
+            data-active={activeValue === color.value || undefined}
+            className={cn(
+              'size-7 rounded-full border-2 border-border cursor-pointer transition-colors',
+              'data-active:ring-2 data-active:ring-primary data-active:ring-offset-2 data-active:ring-offset-background',
+              color.className
+            )}
+            onClick={() => {
+              onSelect(color.value)
+            }}
+          />
+        )
+      })}
+    </div>
+  )
+}
 
 type StudioControlsParams = {
   settings: StudioSettings
@@ -59,10 +101,12 @@ export const StudioControls = ({
     }
   }
 
-  const handleColorChange = (color: StudioFontColorValue) => {
-    return () => {
-      onSettingsChange({ fontColor: color })
-    }
+  const handleFontColorChange = (value: string) => {
+    onSettingsChange({ fontColor: value as StudioFontColorValue })
+  }
+
+  const handleBandColorChange = (value: string) => {
+    onSettingsChange({ bandColor: value as StudioBandColorValue })
   }
 
   return (
@@ -149,25 +193,20 @@ export const StudioControls = ({
         </ToggleGroup>
       </div>
       <div className="flex flex-col gap-2.5">
-        <Label>Couleur</Label>
-        <div className="flex gap-3">
-          {STUDIO_COLORS.map((color) => {
-            return (
-              <button
-                key={color.id}
-                type="button"
-                aria-label={color.label}
-                data-active={settings.fontColor === color.value || undefined}
-                className={cn(
-                  'size-7 rounded-full border-2 border-border cursor-pointer transition-colors',
-                  'data-active:ring-2 data-active:ring-primary data-active:ring-offset-2 data-active:ring-offset-background',
-                  color.className
-                )}
-                onClick={handleColorChange(color.value)}
-              />
-            )
-          })}
-        </div>
+        <Label>Couleur du texte</Label>
+        <ColorSwatches
+          colors={STUDIO_COLORS}
+          activeValue={settings.fontColor}
+          onSelect={handleFontColorChange}
+        />
+      </div>
+      <div className="flex flex-col gap-2.5">
+        <Label>Fond du texte</Label>
+        <ColorSwatches
+          colors={STUDIO_BAND_COLORS}
+          activeValue={settings.bandColor}
+          onSelect={handleBandColorChange}
+        />
       </div>
     </fieldset>
   )

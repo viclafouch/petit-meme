@@ -5,8 +5,7 @@ import {
   FFMPEG_CORE_URL,
   FFMPEG_FONT_FILE,
   FFMPEG_FONT_PATH,
-  FFMPEG_WASM_URL,
-  FFMPEG_WORKER_URL
+  FFMPEG_WASM_URL
 } from '@/constants/ffmpeg'
 import type { MemeWithVideo } from '@/constants/meme'
 import type {
@@ -186,12 +185,6 @@ const addTextToVideo = async (
 export const useVideoInitializer = () => {
   const query = useSuspenseQuery({
     queryFn: async () => {
-      if (!crossOriginIsolated) {
-        throw new Error(
-          'Le Studio nécessite un navigateur compatible avec SharedArrayBuffer (crossOriginIsolated)'
-        )
-      }
-
       const ffmpeg = new FFmpeg()
 
       const [coreURL, wasmURL] = await Promise.all([
@@ -200,7 +193,7 @@ export const useVideoInitializer = () => {
       ])
 
       await withTimeout(
-        ffmpeg.load({ coreURL, wasmURL, workerURL: FFMPEG_WORKER_URL }),
+        ffmpeg.load({ coreURL, wasmURL }),
         30_000,
         'Le chargement du moteur vidéo a pris trop de temps. Vérifiez votre connexion ou votre navigateur.'
       )

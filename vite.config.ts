@@ -9,9 +9,7 @@ import react from '@vitejs/plugin-react'
 const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'DENY',
-  'Referrer-Policy': 'strict-origin-when-cross-origin',
-  'Cross-Origin-Opener-Policy': 'same-origin',
-  'Cross-Origin-Embedder-Policy': 'credentialless'
+  'Referrer-Policy': 'strict-origin-when-cross-origin'
 }
 
 const IMMUTABLE_CACHE = {
@@ -20,14 +18,10 @@ const IMMUTABLE_CACHE = {
 
 export default defineConfig({
   server: {
-    port: 3000,
-    headers: {
-      'Cross-Origin-Opener-Policy': 'same-origin',
-      'Cross-Origin-Embedder-Policy': 'credentialless'
-    }
+    port: 3000
   },
   optimizeDeps: {
-    exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/core-mt', '@ffmpeg/util', 'hls.js']
+    exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/core', '@ffmpeg/util', 'hls.js']
   },
   assetsInclude: ['**/*.md'],
   plugins: [

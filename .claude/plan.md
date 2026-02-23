@@ -27,41 +27,22 @@
 
 Refonte complète du Studio (overlay texte sur vidéo). Priorité : performance FFmpeg, responsive mobile, et UX améliorée.
 
-**Stack actuelle** : `@ffmpeg/ffmpeg@0.12.15` + `@ffmpeg/core@0.12.9` (single-thread, WASM chargé depuis unpkg CDN ~36MB).
+**Stack actuelle** : `@ffmpeg/ffmpeg@0.12.15` + `@ffmpeg/core@0.12.9` (single-thread, WASM self-hosted dans `/public/ffmpeg/`).
 
 ### Phase 1 — Performance & stabilité
 
-**Fichiers impactés** : `use-video-processor.ts`, `studio-dialog.tsx`, `vite.config.ts`, `package.json`, `.gitignore`
+- [x] Self-host le WASM core dans `/public/ffmpeg/` (script `postinstall` + cache immutable)
+- [x] Loading state WASM avec `useSuspenseQuery` + `React.Suspense` + `ErrorBoundary`
+- [x] Cache blob vidéo source (`staleTime: Infinity`)
+- [x] Cache font FS FFmpeg (persiste tant que l'instance vit)
+- [x] Bouton Annuler (`ffmpeg.terminate()` + invalidation query)
+- [x] Limite texte `maxLength={150}`
+- [x] Timeout 30s sur `ffmpeg.load()` pour éviter spinner infini
+- [x] Monitoring Sentry sur les `ErrorBoundary` Studio + `captureException` dans les hooks
 
-**Workflow** : utiliser `/frontend-design` pour tout le travail UI (loading states, bouton annuler, layout). Utiliser les composants shadcn existants ou en installer de nouveaux si nécessaire (`pnpm dlx shadcn@latest add <component>`). Utiliser les MCP (chrome-devtools, context7) pour vérifier le rendu et consulter la doc.
+### ~~Phase 2 — Multi-thread FFmpeg~~ ANNULÉ
 
-- [x] Self-host le WASM core : installer `@ffmpeg/core@0.12.9` en dep + script `postinstall` copiant `ffmpeg-core.js`, `.wasm` vers `/public/ffmpeg/` (gitignored). Passer `coreURL`/`wasmURL` dans `ffmpeg.load()`. Ajouter route rule `/ffmpeg/**` avec headers immutable dans `vite.config.ts`
-- [x] Loading state WASM : garder `useSuspenseQuery` dans `useVideoInitializer`. Wrapper `StudioDialog` dans `React.Suspense` avec fallback skeleton + spinner + "Chargement du moteur vidéo...". Ajouter un `ErrorBoundary` avec message d'erreur + bouton Retry. Chargement déclenché à l'ouverture du dialog
-- [x] Cache blob vidéo source : créer une query TanStack `fetchVideoBlob(memeId)` avec `staleTime: Infinity`. Réutilisée entre les générations successives sans re-fetch Bunny CDN
-- [x] Cache font FS FFmpeg : retirer le `ffmpeg.load()` redondant dans `onMutate`. Ne plus `deleteFile('arial.ttf')` après chaque génération — le font persiste tant que l'instance vit
-- [x] Bouton Annuler : pendant le processing, afficher un bouton "Annuler" qui appelle `ffmpeg.terminate()` puis invalide la query `'video-processor-init'` pour recréer une instance
-- [x] Limite texte : `maxLength={150}` sur l'`<Input>` (wrap à 50 chars → max 3 lignes dans la bande)
-- [x] Fix TypeScript : remplacer le `@ts-expect-error` sur `readFile` par un type guard `if (data instanceof Uint8Array)`, sinon throw
-
-### Phase 2 — Multi-thread FFmpeg
-
-**Fichiers impactés** : `server.ts`, `use-video-processor.ts`, `studio.ts`, `studio-fallbacks.tsx`, `$memeId.tsx`, `memes-list.tsx`, `copy-ffmpeg.js`, `vite.config.ts`, `package.json`
-
-- [x] Auditer les ressources cross-origin — confirmé : Bunny CDN, Algolia, Sentry, Stripe.js, Google Fonts. Pas d'iframes. Aucun blocage anticipé avec `credentialless`
-- [x] Ajouter `Cross-Origin-Embedder-Policy: credentialless` dans `server.ts` — appliqué à toutes les pages (global). COOP `same-origin` déjà en place
-- [x] Remplacer `@ffmpeg/core` par `@ffmpeg/core-mt` dans `package.json` (supprimer l'ancien)
-- [x] Mettre à jour `scripts/copy-ffmpeg.js` : source `@ffmpeg/core-mt/dist/esm`, copier aussi `ffmpeg-core.worker.js`
-- [x] Ajouter constante `FFMPEG_WORKER_URL` dans `src/constants/studio.ts`
-- [x] Mettre à jour `use-video-processor.ts` : passer `workerURL` dans `ffmpeg.load()`, check `crossOriginIsolated` au début de `useVideoInitializer` (throw si false)
-- [x] Remplacer `@ffmpeg/core` par `@ffmpeg/core-mt` dans `optimizeDeps.exclude` de `vite.config.ts`
-- [x] Pas de fallback single-thread : si `crossOriginIsolated === false`, message d'erreur UX dans le dialog via `StudioErrorFallback` avec titre + causes + actions :
-  - Titre : "Le Studio n'est pas disponible"
-  - Cause 1 : "Votre navigateur est trop ancien → Mettez-le à jour"
-  - Cause 2 : "Un bloqueur de publicités interfère → Désactivez-le sur ce site"
-  - Cause 3 : "Vous êtes en navigation privée → Essayez en mode normal"
-  - Bouton "Réessayer" (appelle `resetErrorBoundary`)
-- [x] Monitoring Sentry : ajouter `onError={captureException}` sur les `<ErrorBoundary>` Studio dans `$memeId.tsx` et `memes-list.tsx` + `Sentry.captureException` explicites dans les hooks `useVideoInitializer` et `useVideoProcessor`
-- [ ] Tester sur mobile (Safari iOS 15.2+, Chrome Android) — validation manuelle après deploy
+Retiré : `crossOriginIsolated` / `SharedArrayBuffer` ne fonctionne pas de manière fiable sur iOS Safari (même avec COEP `credentialless`). Le single-thread reste la cible pour la compatibilité maximale. À réévaluer quand le support navigateur sera plus stable.
 
 ### Phase 3 — Page dédiée Studio + Responsive + Live Preview + Templates
 

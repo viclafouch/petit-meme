@@ -1,23 +1,22 @@
 import React from 'react'
 import { Progress } from '@/components/animate-ui/radix/progress'
+import { VideoOverlay } from '@/components/Meme/video-overlay'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
-  VideoFullScreenButton,
   VideoPlayer,
-  VideoPlayerContent,
-  VideoPlayerControlBar,
-  VideoPlayerMuteButton,
-  VideoPlayerPlayButton,
-  VideoPlayerTimeDisplay,
-  VideoPlayerTimeRange,
-  VideoPlayerVolumeRange
+  VideoPlayerContent
 } from '@/components/ui/kibo-ui/video-player'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useContainedSize } from '@/hooks/use-contained-size'
 import { useImageAspectRatio } from '@/hooks/use-image-aspect-ratio'
 import { useMemeHls } from '@/hooks/use-meme-hls'
 import { buildVideoImageUrl } from '@/lib/bunny'
+
+type ProcessedRatioState = {
+  url: string
+  ratio: number
+}
 
 type StudioPreviewParams = {
   bunnyId: string
@@ -32,7 +31,7 @@ type OriginalVideoParams = {
   bunnyId: string
 }
 
-const OriginalVideo = React.memo(({ bunnyId }: OriginalVideoParams) => {
+const OriginalVideo = ({ bunnyId }: OriginalVideoParams) => {
   const { videoRef } = useMemeHls({ bunnyId })
 
   return (
@@ -41,7 +40,7 @@ const OriginalVideo = React.memo(({ bunnyId }: OriginalVideoParams) => {
         ref={videoRef}
         crossOrigin=""
         className="size-full"
-        enableFullscreenOnDoubleClick
+        playsInline
         disablePictureInPicture
         disableRemotePlayback
         preload="auto"
@@ -49,22 +48,10 @@ const OriginalVideo = React.memo(({ bunnyId }: OriginalVideoParams) => {
         slot="media"
         tabIndex={-1}
       />
-      <VideoPlayerControlBar
-        style={{
-          display: 'flex',
-          width: '100%',
-          background: 'black'
-        }}
-      >
-        <VideoPlayerPlayButton />
-        <div style={{ flex: 1 }} />
-        <VideoPlayerMuteButton />
-        <VideoPlayerVolumeRange />
-        <VideoFullScreenButton />
-      </VideoPlayerControlBar>
+      <VideoOverlay />
     </VideoPlayer>
   )
-})
+}
 
 type ProcessedVideoParams = {
   url: string
@@ -82,28 +69,20 @@ const ProcessedVideo = ({
         className="size-full"
         src={url}
         playsInline
-        enableFullscreenOnDoubleClick
         disablePictureInPicture
         disableRemotePlayback
         preload="auto"
         slot="media"
         tabIndex={-1}
         onLoadedMetadata={(event) => {
-          const video = event.currentTarget as HTMLVideoElement
+          const { videoWidth, videoHeight } = event.currentTarget
 
-          if (video.videoWidth > 0 && video.videoHeight > 0) {
-            onAspectRatioDetected(video.videoWidth / video.videoHeight)
+          if (videoWidth > 0 && videoHeight > 0) {
+            onAspectRatioDetected(videoWidth / videoHeight)
           }
         }}
       />
-      <VideoPlayerControlBar>
-        <VideoPlayerPlayButton />
-        <VideoPlayerTimeRange />
-        <VideoPlayerTimeDisplay showDuration />
-        <VideoPlayerMuteButton />
-        <VideoPlayerVolumeRange />
-        <VideoFullScreenButton />
-      </VideoPlayerControlBar>
+      <VideoOverlay />
     </VideoPlayer>
   )
 }
@@ -119,10 +98,8 @@ export const StudioPreview = ({
   const containerRef = React.useRef<HTMLDivElement>(null)
   const posterUrl = buildVideoImageUrl(bunnyId)
   const posterRatio = useImageAspectRatio(posterUrl)
-  const [processedRatio, setProcessedRatio] = React.useState<{
-    url: string
-    ratio: number
-  } | null>(null)
+  const [processedRatio, setProcessedRatio] =
+    React.useState<ProcessedRatioState | null>(null)
 
   const effectiveRatio =
     processedRatio !== null && processedRatio.url === processedVideoUrl
@@ -130,7 +107,7 @@ export const StudioPreview = ({
       : posterRatio
   const size = useContainedSize(containerRef, effectiveRatio)
 
-  const hasDesktopSize = size.width > 0 && size.height > 0
+  const hasValidSize = size.width > 0 && size.height > 0
 
   const renderContent = () => {
     if (isProcessing) {
@@ -178,7 +155,7 @@ export const StudioPreview = ({
       <div
         className="relative overflow-hidden bg-black rounded-lg border border-white/10 md:border-border md:bg-muted/50"
         style={
-          hasDesktopSize
+          hasValidSize
             ? { width: size.width, height: size.height }
             : { width: '100%', height: '100%' }
         }

@@ -3,16 +3,11 @@ import { useHotkeys } from 'react-hotkeys-hook'
 import { Clapperboard, Clipboard, Download, Share2, X } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 import { toast } from 'sonner'
+import { VideoOverlay } from '@/components/Meme/video-overlay'
 import { Button, buttonVariants } from '@/components/ui/button'
 import {
   VideoPlayer,
-  VideoPlayerContent,
-  VideoPlayerControlBar,
-  VideoPlayerMuteButton,
-  VideoPlayerPlayButton,
-  VideoPlayerTimeDisplay,
-  VideoPlayerTimeRange,
-  VideoPlayerVolumeRange
+  VideoPlayerContent
 } from '@/components/ui/kibo-ui/video-player'
 import type { MemeWithVideo } from '@/constants/meme'
 import { useDownloadMeme } from '@/hooks/use-download-meme'
@@ -23,7 +18,6 @@ import type { ConversionEventName } from '@/lib/algolia-insights'
 import { sendConversionEvent } from '@/lib/algolia-insights'
 import { buildVideoImageUrl } from '@/lib/bunny'
 import { buildUrl } from '@/lib/seo'
-import { cn } from '@/lib/utils'
 import { Link, useLinkProps } from '@tanstack/react-router'
 
 type PlayerDialogParams = {
@@ -43,7 +37,7 @@ export const PlayerDialog = ({
 }: PlayerDialogParams) => {
   const { videoRef } = useMemeHls({ bunnyId: meme.video.bunnyId })
   const isReducedMotion = useReducedMotion()
-  const shareMeme = useShareMeme()
+  const shareMutation = useShareMeme()
   const downloadMutation = useDownloadMeme()
   const memeLink = useLinkProps({
     to: '/memes/$memeId',
@@ -107,6 +101,26 @@ export const PlayerDialog = ({
     })
   }
 
+  const handleStudioClick = () => {
+    handleTrackConversion('Meme Studio Opened')
+    videoRef.current?.pause()
+  }
+
+  const handleShareClick = () => {
+    handleTrackConversion('Meme Shared')
+    shareMutation.mutate(meme)
+  }
+
+  const handleCopyClick = () => {
+    handleTrackConversion('Meme Link Copied')
+    void handleCopyMemeLink()
+  }
+
+  const handleDownloadClick = () => {
+    handleTrackConversion('Meme Downloaded')
+    downloadMutation.mutate(meme)
+  }
+
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 overflow-hidden dark">
       <motion.div
@@ -143,20 +157,13 @@ export const PlayerDialog = ({
                 poster={buildVideoImageUrl(meme.video.bunnyId)}
                 className="size-full"
                 playsInline
-                enableFullscreenOnDoubleClick
                 disablePictureInPicture
                 disableRemotePlayback
                 preload="auto"
                 slot="media"
                 ref={videoRef}
               />
-              <VideoPlayerControlBar>
-                <VideoPlayerPlayButton />
-                <VideoPlayerTimeRange />
-                <VideoPlayerTimeDisplay showDuration />
-                <VideoPlayerMuteButton />
-                <VideoPlayerVolumeRange />
-              </VideoPlayerControlBar>
+              <VideoOverlay showRemainingTime />
             </VideoPlayer>
           </div>
           <div
@@ -168,11 +175,8 @@ export const PlayerDialog = ({
             <Link
               to="/memes/$memeId/studio"
               params={{ memeId: meme.id }}
-              className={cn(buttonVariants({ variant: 'default', size: 'lg' }))}
-              onClick={() => {
-                handleTrackConversion('Meme Studio Opened')
-                videoRef.current?.pause()
-              }}
+              className={buttonVariants({ variant: 'default', size: 'lg' })}
+              onClick={handleStudioClick}
             >
               <Clapperboard />
               Ouvrir dans Studio
@@ -181,13 +185,9 @@ export const PlayerDialog = ({
               <Button
                 size="lg"
                 variant="secondary"
-                disabled={shareMeme.isPending}
+                disabled={shareMutation.isPending}
                 className="md:hidden w-full"
-                onClick={() => {
-                  handleTrackConversion('Meme Shared')
-
-                  return shareMeme.mutate(meme)
-                }}
+                onClick={handleShareClick}
               >
                 <Share2 />
                 Partager la vidéo
@@ -196,10 +196,7 @@ export const PlayerDialog = ({
                 size="lg"
                 variant="secondary"
                 className="w-full"
-                onClick={() => {
-                  handleTrackConversion('Meme Link Copied')
-                  void handleCopyMemeLink()
-                }}
+                onClick={handleCopyClick}
               >
                 <Clipboard />
                 Copier le lien
@@ -209,11 +206,7 @@ export const PlayerDialog = ({
                 variant="secondary"
                 disabled={downloadMutation.isPending}
                 className="col-span-2 md:col-span-1 w-full"
-                onClick={() => {
-                  handleTrackConversion('Meme Downloaded')
-
-                  return downloadMutation.mutate(meme)
-                }}
+                onClick={handleDownloadClick}
               >
                 <Download />
                 Télécharger la vidéo

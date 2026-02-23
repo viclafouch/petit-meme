@@ -36,12 +36,16 @@ See current plan : `.claude/plan.md`. It must be always up to date.
 
 Code must always be clean and readable. Before writing any code, ask whether it can be reused and extracted into a helper, utility, or reusable component. **Zero tolerance for duplication** — both runtime code and types. Strict typing everywhere: no `any`, no loose types, leverage discriminated unions, `satisfies`, and inference where appropriate.
 
-## Post-Task Checklist (automatic, after every task)
+## Post-Task Checklist — MANDATORY, NO EXCEPTIONS
+
+**After EVERY task that writes or modifies code, execute ALL steps IN ORDER before reporting completion to the user.**
 
 1. Run `pnpm run lint:fix`
 2. Update the plan (`.claude/plan.md`): check off `[x]` completed items
-3. Run `code-refactoring` agent if significant code was written
+3. **ALWAYS run the `code-refactoring` agent** on every file created or modified (use the Task tool with `subagent_type: "code-refactoring"`). This is NOT optional — skip only if zero code was written (e.g. pure config/doc change).
 4. After major features or changes, proactively suggest running relevant audit agents (security, performance, dead-code, GDPR, Tailwind, React performance, etc.)
+
+**A task is NOT complete until steps 1-3 are done.** Never say "done" or summarize changes before finishing the checklist.
 
 ## Uncertainty Rule
 

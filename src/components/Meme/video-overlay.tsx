@@ -1,0 +1,129 @@
+import React from 'react'
+import { Maximize, Play, Volume2, VolumeX } from 'lucide-react'
+import {
+  MediaActionTypes,
+  useMediaDispatch,
+  useMediaSelector
+} from 'media-chrome/react/media-store'
+import { Button } from '@/components/ui/button'
+
+const OVERLAY_BUTTON_CLASS =
+  'rounded-full bg-black/50 hover:bg-black/70 text-white size-9'
+
+const formatVideoDuration = (seconds: number) => {
+  const minutes = Math.floor(seconds / 60)
+  const remainingSeconds = Math.floor(seconds % 60)
+
+  return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`
+}
+
+const RemainingTimeBadge = () => {
+  const duration = useMediaSelector((state) => {
+    return state.mediaDuration
+  })
+  const currentTime = useMediaSelector((state) => {
+    return state.mediaCurrentTime
+  })
+
+  const hasTimeData = duration !== undefined && currentTime !== undefined
+  const remainingTime = hasTimeData ? duration - currentTime : 0
+
+  if (remainingTime <= 0) {
+    // eslint-disable-next-line react/jsx-no-useless-fragment -- perf: isolated component to avoid re-rendering parent on every frame
+    return <></>
+  }
+
+  return (
+    <span className="absolute bottom-3 left-3 text-xs font-medium text-white bg-black/50 rounded-md px-2 py-1">
+      {formatVideoDuration(remainingTime)}
+    </span>
+  )
+}
+
+type VideoOverlayParams = {
+  showRemainingTime?: boolean
+}
+
+export const VideoOverlay = ({
+  showRemainingTime = false
+}: VideoOverlayParams) => {
+  const dispatch = useMediaDispatch()
+  const isPaused = useMediaSelector((state) => {
+    return state.mediaPaused
+  })
+  const isFullscreen = useMediaSelector((state) => {
+    return state.mediaIsFullscreen
+  })
+  const isMuted = useMediaSelector((state) => {
+    return state.mediaMuted
+  })
+
+  const handleOverlayClick = () => {
+    dispatch({
+      type: isPaused
+        ? MediaActionTypes.MEDIA_PLAY_REQUEST
+        : MediaActionTypes.MEDIA_PAUSE_REQUEST
+    })
+  }
+
+  const handleFullscreenClick = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.stopPropagation()
+    dispatch({
+      type: isFullscreen
+        ? MediaActionTypes.MEDIA_EXIT_FULLSCREEN_REQUEST
+        : MediaActionTypes.MEDIA_ENTER_FULLSCREEN_REQUEST
+    })
+  }
+
+  const handleMuteClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation()
+    dispatch({
+      type: isMuted
+        ? MediaActionTypes.MEDIA_UNMUTE_REQUEST
+        : MediaActionTypes.MEDIA_MUTE_REQUEST
+    })
+  }
+
+  return (
+    <div
+      className="absolute inset-0 flex items-center justify-center cursor-pointer z-10"
+      onClick={handleOverlayClick}
+      role="presentation"
+    >
+      {isPaused ? (
+        <div className="size-16 rounded-full bg-black/50 flex items-center justify-center">
+          <Play className="size-8 text-white fill-white ml-1" />
+        </div>
+      ) : null}
+      <div className="absolute bottom-3 right-3 flex flex-col gap-2">
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          className={OVERLAY_BUTTON_CLASS}
+          onClick={handleFullscreenClick}
+          aria-label={isFullscreen ? 'Quitter le plein écran' : 'Plein écran'}
+        >
+          <Maximize className="size-4" />
+        </Button>
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          className={OVERLAY_BUTTON_CLASS}
+          onClick={handleMuteClick}
+          aria-label={isMuted ? 'Activer le son' : 'Couper le son'}
+        >
+          {isMuted ? (
+            <VolumeX className="size-4" />
+          ) : (
+            <Volume2 className="size-4" />
+          )}
+        </Button>
+      </div>
+      {showRemainingTime ? <RemainingTimeBadge /> : null}
+    </div>
+  )
+}

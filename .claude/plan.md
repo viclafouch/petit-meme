@@ -68,6 +68,20 @@ Migration du Studio depuis un Dialog vers une page dédiée `/memes/:memeId/stud
 - [ ] Tester le flow complet sur iOS Safari et Chrome Android
 - [ ] Gérer le cas où `navigator.share()` n'est pas supporté (fallback download)
 
+### Phase 3.5 — Refonte video player (Studio + PlayerDialog)
+
+Simplification du player vidéo : suppression de la barre de contrôles, interactions directes sur la vidéo.
+
+- [x] Créer `src/components/Meme/video-overlay.tsx` — composant réutilisable :
+  - Clic = play/pause (via media-chrome dispatch)
+  - Bouton fullscreen en bas-droite (au-dessus du mute)
+  - Grande icône ▶ centrée quand en pause
+  - Bouton mute/unmute en bas-droite (toujours visible, style Reels)
+  - Badge temps restant en bas-gauche (PlayerDialog uniquement, isolé dans `RemainingTimeBadge` pour éviter les re-renders à chaque frame)
+- [x] `studio-preview.tsx` : supprimer `VideoPlayerControlBar` de `OriginalVideo` et `ProcessedVideo`, ajouter `VideoOverlay`, ajouter `playsInline` sur `OriginalVideo`
+- [x] `player-dialog.tsx` : supprimer `VideoPlayerControlBar`, ajouter `VideoOverlay` avec `showDuration`
+- [ ] Tester sur iOS Safari (playsInline, pas d'autoplay inline)
+
 ### Phase 4 — Features avancées
 
 - [ ] Plusieurs fonts (Impact, Arial, Comic Sans, etc.) dans `/public/fonts/`

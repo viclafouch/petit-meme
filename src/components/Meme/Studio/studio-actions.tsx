@@ -60,7 +60,7 @@ export const StudioActions = ({
   onGenerate
 }: StudioActionsParams) => {
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className="flex flex-col gap-2">
       <LoadingButton
         isLoading={isProcessing}
         onClick={onGenerate}

@@ -17,9 +17,9 @@ export const StudioTemplates = () => {
           <button
             key={template.id}
             type="button"
-            data-active={activeTemplateId === template.id}
+            data-active={activeTemplateId === template.id || undefined}
             className={cn(
-              'flex-1 rounded-lg border border-border p-3 text-left transition-colors cursor-pointer',
+              'flex-1 rounded-lg border border-border px-3 py-2 text-left transition-colors cursor-pointer',
               'data-active:border-primary data-active:bg-accent'
             )}
             onClick={() => {

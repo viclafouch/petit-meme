@@ -78,7 +78,7 @@ export const STUDIO_TEMPLATES = [
     fontFamily: 'arial',
     fontSize: 36,
     fontColor: 'black',
-    textPosition: 'bottom',
+    textPosition: 'top',
     bandColor: 'white',
     bandOpacity: 1
   },

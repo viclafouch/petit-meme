@@ -66,9 +66,9 @@ export const StudioControls = ({
   }
 
   return (
-    <fieldset disabled={disabled} className="flex flex-col gap-5">
+    <fieldset disabled={disabled} className="flex flex-col gap-4">
       {!hideTextInput ? (
-        <div className="flex flex-col gap-2.5">
+        <div className="flex flex-col gap-1.5">
           <Label htmlFor="studio-text">Texte</Label>
           <Input
             id="studio-text"
@@ -84,7 +84,12 @@ export const StudioControls = ({
           </span>
         </div>
       ) : null}
-      <div className="flex flex-col gap-2.5">
+      <div className="flex flex-col gap-1.5">
+        <Label>Templates</Label>
+        <StudioTemplates />
+      </div>
+      <Separator />
+      <div className="flex flex-col gap-1.5">
         <Label>Position</Label>
         <ToggleGroup
           type="single"
@@ -101,8 +106,7 @@ export const StudioControls = ({
           </ToggleGroupItem>
         </ToggleGroup>
       </div>
-      <Separator />
-      <div className="flex flex-col gap-2.5">
+      <div className="flex flex-col gap-1.5">
         <Label>Police</Label>
         <Select
           value={settings.fontFamily}
@@ -122,7 +126,7 @@ export const StudioControls = ({
           </SelectContent>
         </Select>
       </div>
-      <div className="flex flex-col gap-2.5">
+      <div className="flex flex-col gap-1.5">
         <Label>Taille</Label>
         <ToggleGroup
           type="single"
@@ -145,17 +149,17 @@ export const StudioControls = ({
         </ToggleGroup>
       </div>
       <div className="flex flex-col gap-2.5">
-        <Label>Couleur du texte</Label>
-        <div className="flex gap-2">
+        <Label>Couleur</Label>
+        <div className="flex gap-3">
           {STUDIO_COLORS.map((color) => {
             return (
               <button
                 key={color.id}
                 type="button"
                 aria-label={color.label}
-                data-active={settings.fontColor === color.value}
+                data-active={settings.fontColor === color.value || undefined}
                 className={cn(
-                  'size-8 rounded-full border-2 border-border cursor-pointer transition-colors',
+                  'size-7 rounded-full border-2 border-border cursor-pointer transition-colors',
                   'data-active:ring-2 data-active:ring-primary data-active:ring-offset-2 data-active:ring-offset-background',
                   color.className
                 )}
@@ -164,11 +168,6 @@ export const StudioControls = ({
             )
           })}
         </div>
-      </div>
-      <Separator />
-      <div className="flex flex-col gap-2.5">
-        <Label>Templates</Label>
-        <StudioTemplates />
       </div>
     </fieldset>
   )

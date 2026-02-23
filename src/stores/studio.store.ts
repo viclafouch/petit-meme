@@ -19,7 +19,7 @@ type StudioStore = {
 export const useStudioStore = create<StudioStore>((set) => {
   return {
     settings: STUDIO_DEFAULT_SETTINGS,
-    activeTemplateId: null,
+    activeTemplateId: 'caption',
     setSettings: (updates) => {
       const hasStyleChange = Object.keys(updates).some((key) => {
         return key !== 'text'

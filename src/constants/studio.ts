@@ -11,14 +11,13 @@ export type StudioTextPosition = 'top' | 'bottom'
 type StudioFontSize = {
   id: string
   label: string
-  accessibleLabel: string
   value: number
 }
 
 export const STUDIO_FONT_SIZES = [
-  { id: 'small', label: 'P', accessibleLabel: 'Petit', value: 24 },
-  { id: 'medium', label: 'M', accessibleLabel: 'Moyen', value: 36 },
-  { id: 'large', label: 'G', accessibleLabel: 'Grand', value: 48 }
+  { id: 'small', label: 'Petit', value: 24 },
+  { id: 'medium', label: 'Moyen', value: 36 },
+  { id: 'large', label: 'Grand', value: 48 }
 ] as const satisfies readonly StudioFontSize[]
 
 export type StudioFontSizeValue = (typeof STUDIO_FONT_SIZES)[number]['value']

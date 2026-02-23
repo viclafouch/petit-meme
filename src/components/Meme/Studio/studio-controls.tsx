@@ -11,11 +11,6 @@ import {
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger
-} from '@/components/ui/tooltip'
 import type {
   StudioBandColorValue,
   StudioFontColorValue,
@@ -65,7 +60,7 @@ const ColorSwatches = ({
             aria-label={color.label}
             data-active={isSelected || undefined}
             className={cn(
-              'size-10 rounded-full border-2 border-border cursor-pointer transition-colors',
+              'size-6 rounded-full border-2 border-border cursor-pointer transition-colors',
               'data-active:ring-2 data-active:ring-primary data-active:ring-offset-2 data-active:ring-offset-background',
               color.className
             )}
@@ -200,21 +195,10 @@ export const StudioControls = ({
           aria-labelledby="studio-size-label"
         >
           {STUDIO_FONT_SIZES.map((size) => {
-            const sizeLabel = `${size.accessibleLabel} (${size.value}px)`
-
             return (
-              <Tooltip key={size.id}>
-                <TooltipTrigger asChild>
-                  <ToggleGroupItem
-                    value={String(size.value)}
-                    className="flex-1"
-                    aria-label={sizeLabel}
-                  >
-                    {size.label}
-                  </ToggleGroupItem>
-                </TooltipTrigger>
-                <TooltipContent>{sizeLabel}</TooltipContent>
-              </Tooltip>
+              <ToggleGroupItem value={String(size.value)} className="flex-1">
+                {size.label}
+              </ToggleGroupItem>
             )
           })}
         </ToggleGroup>
@@ -229,7 +213,7 @@ export const StudioControls = ({
         />
       </div>
       <div className="flex flex-col gap-2.5">
-        <Label id="studio-band-color-label">Fond du texte</Label>
+        <Label id="studio-band-color-label">Couleur de fond</Label>
         <ColorSwatches
           colors={STUDIO_BAND_COLORS}
           activeValue={settings.bandColor}

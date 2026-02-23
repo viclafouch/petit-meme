@@ -1,4 +1,5 @@
 import type { ComponentProps, CSSProperties } from 'react'
+import 'media-chrome/dist/lang/fr.js'
 import {
   MediaProvider,
   useMediaRef
@@ -37,6 +38,7 @@ export const VideoPlayer = ({ style, ...props }: VideoPlayerProps) => {
   return (
     <MediaProvider>
       <MediaController
+        lang="fr"
         style={{
           ...variables,
           ...style

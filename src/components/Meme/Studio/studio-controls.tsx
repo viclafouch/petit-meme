@@ -37,24 +37,30 @@ type ColorSwatchesParams = {
   }[]
   activeValue: string
   onSelect: (value: string) => void
+  labelledBy: string
 }
 
 const ColorSwatches = ({
   colors,
   activeValue,
-  onSelect
+  onSelect,
+  labelledBy
 }: ColorSwatchesParams) => {
   return (
-    <div className="flex gap-3">
+    <div className="flex gap-3" role="radiogroup" aria-labelledby={labelledBy}>
       {colors.map((color) => {
+        const isSelected = activeValue === color.value
+
         return (
           <button
             key={color.id}
             type="button"
+            role="radio"
+            aria-checked={isSelected}
             aria-label={color.label}
-            data-active={activeValue === color.value || undefined}
+            data-active={isSelected || undefined}
             className={cn(
-              'size-7 rounded-full border-2 border-border cursor-pointer transition-colors',
+              'size-10 rounded-full border-2 border-border cursor-pointer transition-colors',
               'data-active:ring-2 data-active:ring-primary data-active:ring-offset-2 data-active:ring-offset-background',
               color.className
             )}
@@ -129,18 +135,21 @@ export const StudioControls = ({
         </div>
       ) : null}
       <div className="flex flex-col gap-1.5">
-        <Label>Templates</Label>
-        <StudioTemplates />
+        <Label id="studio-templates-label">Templates</Label>
+        <div role="group" aria-labelledby="studio-templates-label">
+          <StudioTemplates />
+        </div>
       </div>
       <Separator />
       <div className="flex flex-col gap-1.5">
-        <Label>Position</Label>
+        <Label id="studio-position-label">Position</Label>
         <ToggleGroup
           type="single"
           variant="outline"
           value={settings.textPosition}
           onValueChange={handlePositionChange}
           className="w-full"
+          aria-labelledby="studio-position-label"
         >
           <ToggleGroupItem value="top" className="flex-1">
             Haut
@@ -151,12 +160,12 @@ export const StudioControls = ({
         </ToggleGroup>
       </div>
       <div className="flex flex-col gap-1.5">
-        <Label>Police</Label>
+        <Label id="studio-font-label">Police</Label>
         <Select
           value={settings.fontFamily}
           onValueChange={handleFontFamilyChange}
         >
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full" aria-labelledby="studio-font-label">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -171,13 +180,14 @@ export const StudioControls = ({
         </Select>
       </div>
       <div className="flex flex-col gap-1.5">
-        <Label>Taille</Label>
+        <Label id="studio-size-label">Taille</Label>
         <ToggleGroup
           type="single"
           variant="outline"
           value={String(settings.fontSize)}
           onValueChange={handleFontSizeChange}
           className="w-full"
+          aria-labelledby="studio-size-label"
         >
           {STUDIO_FONT_SIZES.map((size) => {
             return (
@@ -185,6 +195,7 @@ export const StudioControls = ({
                 key={size.id}
                 value={String(size.value)}
                 className="flex-1"
+                aria-label={`${size.accessibleLabel} (${size.value}px)`}
               >
                 {size.label}
               </ToggleGroupItem>
@@ -193,19 +204,21 @@ export const StudioControls = ({
         </ToggleGroup>
       </div>
       <div className="flex flex-col gap-2.5">
-        <Label>Couleur du texte</Label>
+        <Label id="studio-font-color-label">Couleur du texte</Label>
         <ColorSwatches
           colors={STUDIO_COLORS}
           activeValue={settings.fontColor}
           onSelect={handleFontColorChange}
+          labelledBy="studio-font-color-label"
         />
       </div>
       <div className="flex flex-col gap-2.5">
-        <Label>Fond du texte</Label>
+        <Label id="studio-band-color-label">Fond du texte</Label>
         <ColorSwatches
           colors={STUDIO_BAND_COLORS}
           activeValue={settings.bandColor}
           onSelect={handleBandColorChange}
+          labelledBy="studio-band-color-label"
         />
       </div>
     </fieldset>

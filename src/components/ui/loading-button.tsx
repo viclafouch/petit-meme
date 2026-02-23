@@ -16,7 +16,7 @@ export const LoadingButton = ({
   const showSpinner = useSpinDelay(isLoading, { delay: 500, minDuration: 200 })
 
   return (
-    <Button {...props} disabled={disabled || isLoading}>
+    <Button {...props} disabled={disabled || isLoading} aria-busy={isLoading}>
       {showSpinner ? (
         <>
           <Loader2Icon className="animate-spin" />

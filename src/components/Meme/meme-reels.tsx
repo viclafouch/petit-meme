@@ -315,6 +315,8 @@ export const MemeReels = () => {
             position: 'relative',
             width: '100%'
           }}
+          role="feed"
+          aria-label="Fil de vidéos"
         >
           {rowVirtualizer.getVirtualItems().map((virtualRow) => {
             const item = memesWithRefs[virtualRow.index]
@@ -339,6 +341,10 @@ export const MemeReels = () => {
                 data-index={index}
                 ref={ref}
                 key={data.id}
+                role="article"
+                aria-label={data.title}
+                aria-setsize={-1}
+                aria-posinset={index + 1}
               >
                 <Reel
                   meme={data}

@@ -18,6 +18,7 @@ import type { ConversionEventName } from '@/lib/algolia-insights'
 import { sendConversionEvent } from '@/lib/algolia-insights'
 import { buildVideoImageUrl } from '@/lib/bunny'
 import { buildUrl } from '@/lib/seo'
+import { FocusScope } from '@radix-ui/react-focus-scope'
 import { Link, useLinkProps } from '@tanstack/react-router'
 
 type PlayerDialogParams = {
@@ -122,99 +123,109 @@ export const PlayerDialog = ({
   }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 overflow-hidden dark">
-      <motion.div
-        initial={isReducedMotion ? false : { opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={handleClose}
-        role="presentation"
-        className="bg-black/90 absolute inset-0"
-      />
-      <motion.div
-        className="absolute top-4 right-4"
-        animate={{ opacity: 1 }}
-        initial={isReducedMotion ? false : { opacity: 0 }}
-        exit={{ opacity: 0 }}
+    <FocusScope trapped loop>
+      <div
+        className="fixed inset-0 flex items-center justify-center z-50 overflow-hidden dark"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="player-dialog-title"
       >
-        <Button size="icon" onClick={handleClose} aria-label="Fermer">
-          <X />
-        </Button>
-      </motion.div>
-      <motion.div
-        layoutId={`${layoutContext}-item-${meme.id}`}
-        onLayoutAnimationComplete={handlePlayVideo}
-        className="relative w-200 max-w-[90vw]"
-      >
-        <div className="size-full flex flex-col items-center gap-y-4">
-          <h3 className="text-center w-full text-balance text-lg font-bold text-primary">
-            {meme.title}
-          </h3>
-          <div className="bg-muted relative aspect-video w-full overflow-hidden rounded-lg text-sm border border-white/10 z-1">
-            <VideoPlayer className="overflow-hidden size-full max-h-full">
-              <VideoPlayerContent
-                crossOrigin=""
-                poster={buildVideoImageUrl(meme.video.bunnyId)}
-                className="size-full"
-                playsInline
-                disablePictureInPicture
-                disableRemotePlayback
-                preload="auto"
-                slot="media"
-                ref={videoRef}
-              />
-              <VideoOverlay showRemainingTime />
-            </VideoPlayer>
-          </div>
-          <div
-            className="absolute bg-transparent inset-0 -z-1"
-            onClick={handleClose}
-            role="presentation"
-          />
-          <div className="w-full flex sm:justify-center gap-2 flex-col sm:max-w-sm">
-            <Link
-              to="/memes/$memeId/studio"
-              params={{ memeId: meme.id }}
-              className={buttonVariants({ variant: 'default', size: 'lg' })}
-              onClick={handleStudioClick}
+        <motion.div
+          initial={isReducedMotion ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={handleClose}
+          role="presentation"
+          className="bg-black/90 absolute inset-0"
+        />
+        <motion.div
+          className="absolute top-4 right-4"
+          animate={{ opacity: 1 }}
+          initial={isReducedMotion ? false : { opacity: 0 }}
+          exit={{ opacity: 0 }}
+        >
+          <Button size="icon" onClick={handleClose} aria-label="Fermer">
+            <X />
+          </Button>
+        </motion.div>
+        <motion.div
+          layoutId={`${layoutContext}-item-${meme.id}`}
+          onLayoutAnimationComplete={handlePlayVideo}
+          className="relative w-200 max-w-[90vw]"
+        >
+          <div className="size-full flex flex-col items-center gap-y-4">
+            <h3
+              id="player-dialog-title"
+              className="text-center w-full text-balance text-lg font-bold text-primary"
             >
-              <Clapperboard />
-              Ouvrir dans Studio
-            </Link>
-            <div className="grid gap-2 grid-cols-2">
-              <Button
-                size="lg"
-                variant="secondary"
-                disabled={shareMutation.isPending}
-                className="md:hidden w-full"
-                onClick={handleShareClick}
+              {meme.title}
+            </h3>
+            <div className="bg-muted relative aspect-video w-full overflow-hidden rounded-lg text-sm border border-white/10 z-1">
+              <VideoPlayer className="overflow-hidden size-full max-h-full">
+                <VideoPlayerContent
+                  crossOrigin=""
+                  poster={buildVideoImageUrl(meme.video.bunnyId)}
+                  className="size-full"
+                  playsInline
+                  disablePictureInPicture
+                  disableRemotePlayback
+                  preload="auto"
+                  slot="media"
+                  ref={videoRef}
+                />
+                <VideoOverlay showRemainingTime />
+              </VideoPlayer>
+            </div>
+            <div
+              className="absolute bg-transparent inset-0 -z-1"
+              onClick={handleClose}
+              role="presentation"
+            />
+            <div className="w-full flex sm:justify-center gap-2 flex-col sm:max-w-sm">
+              <Link
+                to="/memes/$memeId/studio"
+                params={{ memeId: meme.id }}
+                className={buttonVariants({ variant: 'default', size: 'lg' })}
+                onClick={handleStudioClick}
               >
-                <Share2 />
-                Partager la vidéo
-              </Button>
-              <Button
-                size="lg"
-                variant="secondary"
-                className="w-full"
-                onClick={handleCopyClick}
-              >
-                <Clipboard />
-                Copier le lien
-              </Button>
-              <Button
-                size="lg"
-                variant="secondary"
-                disabled={downloadMutation.isPending}
-                className="col-span-2 md:col-span-1 w-full"
-                onClick={handleDownloadClick}
-              >
-                <Download />
-                Télécharger la vidéo
-              </Button>
+                <Clapperboard />
+                Ouvrir dans Studio
+              </Link>
+              <div className="grid gap-2 grid-cols-2">
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  disabled={shareMutation.isPending}
+                  className="md:hidden w-full"
+                  onClick={handleShareClick}
+                >
+                  <Share2 />
+                  Partager la vidéo
+                </Button>
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="w-full"
+                  onClick={handleCopyClick}
+                >
+                  <Clipboard />
+                  Copier le lien
+                </Button>
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  disabled={downloadMutation.isPending}
+                  className="col-span-2 md:col-span-1 w-full"
+                  onClick={handleDownloadClick}
+                >
+                  <Download />
+                  Télécharger la vidéo
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      </motion.div>
-    </div>
+        </motion.div>
+      </div>
+    </FocusScope>
   )
 }

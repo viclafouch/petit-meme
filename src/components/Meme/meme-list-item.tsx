@@ -34,7 +34,7 @@ export type MemeListItemParams = {
   layoutContext: string
   size: keyof typeof sizes
   position: number
-  onPlayClick: (meme: MemeWithVideo) => void
+  onPlayClick: (meme: MemeWithVideo, trigger: HTMLButtonElement) => void
   highlightedTitle?: string
   queryID?: string
   authenticatedUserToken?: string
@@ -177,8 +177,7 @@ export const MemeListItem = React.memo(
               onClick={(event) => {
                 event.preventDefault()
                 handleTrackClick()
-
-                return onPlayClick(meme)
+                onPlayClick(meme, event.currentTarget)
               }}
             >
               <div className="sr-only">Play</div>

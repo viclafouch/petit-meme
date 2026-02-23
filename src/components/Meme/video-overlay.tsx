@@ -86,11 +86,21 @@ export const VideoOverlay = ({
     })
   }
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      handleOverlayClick()
+    }
+  }
+
   return (
     <div
       className="absolute inset-0 flex items-center justify-center cursor-pointer z-10"
       onClick={handleOverlayClick}
-      role="presentation"
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label={isPaused ? 'Lire la vidéo' : 'Mettre en pause'}
     >
       {isPaused ? (
         <div className="size-16 rounded-full bg-black/50 flex items-center justify-center">

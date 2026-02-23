@@ -115,6 +115,7 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
             type="text"
             maxLength={STUDIO_TEXT_MAX_LENGTH}
             className="flex-1 h-8"
+            aria-label="Texte à ajouter sur la vidéo"
           />
           <Button
             variant="outline"

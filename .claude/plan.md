@@ -87,6 +87,17 @@ Simplification du player vidéo : suppression de la barre de contrôles, interac
 - [x] Plusieurs fonts (Impact, Arial) dans `/public/fonts/`
 - [x] Fond de bande configurable (choix de couleurs : blanc, noir, rouge, bleu — blanc par défaut)
 
+### Phase 5 — Accessibilité WCAG 2.1 AA (Vidéo & Studio)
+
+- [x] `PlayerDialog` : `role="dialog"`, `aria-modal`, `aria-labelledby`, `FocusScope` (focus trap), body scroll lock, focus restoration via `triggerRef`
+- [x] `VideoOverlay` : `role="button"`, `tabIndex={0}`, `aria-label` dynamique (Lire/Pause), `onKeyDown` Enter/Space
+- [x] `MemeReels` : `role="feed"` + `aria-label` sur scroll container, `role="article"` + `aria-posinset`/`aria-setsize` sur items
+- [x] `StudioControls` : `id` sur Labels, `aria-labelledby` sur ToggleGroup/Select/ColorSwatches, `role="radiogroup"` + `role="radio"` + `aria-checked` sur ColorSwatches
+- [x] Color swatches : touch targets augmentés `size-7` → `size-10` (40px)
+- [x] Font sizes : `accessibleLabel` dans `STUDIO_FONT_SIZES` + `aria-label` sur ToggleGroupItem
+- [x] Studio mobile input : `aria-label="Texte à ajouter sur la vidéo"`
+- [x] `LoadingButton` : `aria-busy={isLoading}`
+
 ---
 
 ## Internationalisation (FR / EN)

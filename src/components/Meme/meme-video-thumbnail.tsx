@@ -25,10 +25,11 @@ export const MemeVideoThumbnail = ({
       />
       <img
         src={buildVideoPreviewUrl(bunnyId)}
-        alt={alt}
+        alt=""
         loading="lazy"
         decoding="async"
         className="absolute size-full inset-0 hidden duration-600 group-hover:block transition-discrete z-10 object-cover opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 group-focus-within:block"
+        aria-hidden="true"
       />
       <div className="absolute bottom-1 left-1 z-30">
         <Badge size="sm" variant="black">

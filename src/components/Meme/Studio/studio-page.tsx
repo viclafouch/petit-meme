@@ -24,9 +24,34 @@ import {
   useVideoInitializer,
   useVideoProcessor
 } from '@/hooks/use-video-processor'
-import { cn } from '@/lib/utils'
 import { useStudioStore } from '@/stores/studio.store'
 import { Link } from '@tanstack/react-router'
+
+type StudioBrandingParams = {
+  title: string
+}
+
+const StudioBranding = ({ title }: StudioBrandingParams) => {
+  return (
+    <div className="flex-1 min-w-0">
+      <div className="flex items-center gap-1.5">
+        <img
+          src="/images/logo.png"
+          alt=""
+          width={16}
+          height={16}
+          decoding="async"
+          className="size-4"
+          aria-hidden="true"
+        />
+        <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          Studio
+        </span>
+      </div>
+      <h1 className="font-bricolage text-sm font-semibold truncate">{title}</h1>
+    </div>
+  )
+}
 
 type StudioPageParams = {
   meme: MemeWithVideo
@@ -69,28 +94,10 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
           <Link
             to="/memes/$memeId"
             params={{ memeId: meme.id }}
-            className={cn(buttonVariants({ variant: 'ghost', size: 'lg' }))}
+            className={buttonVariants({ variant: 'ghost', size: 'lg' })}
           >
             <ArrowLeft className="size-5" />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5">
-                <img
-                  src="/images/logo.png"
-                  alt=""
-                  width={16}
-                  height={16}
-                  decoding="async"
-                  className="size-4"
-                  aria-hidden
-                />
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                  Studio
-                </span>
-              </div>
-              <h1 className="font-bricolage text-sm font-semibold truncate">
-                {meme.title}
-              </h1>
-            </div>
+            <StudioBranding title={meme.title} />
           </Link>
         </div>
         <div className="flex-1 min-h-0 p-3 md:p-8 md:bg-black/40">
@@ -132,7 +139,6 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
           <LoadingButton
             isLoading={isProcessing}
             onClick={handleGenerate}
-            disabled={!hasText}
             size="sm"
           >
             <Sparkles />
@@ -172,25 +178,7 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
           >
             <ArrowLeft className="size-4" />
           </Link>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5">
-              <img
-                src="/images/logo.png"
-                alt=""
-                width={16}
-                height={16}
-                decoding="async"
-                className="size-4"
-                aria-hidden
-              />
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                Studio
-              </span>
-            </div>
-            <h1 className="font-bricolage text-sm font-semibold truncate">
-              {meme.title}
-            </h1>
-          </div>
+          <StudioBranding title={meme.title} />
         </div>
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col gap-4">
           <StudioControls
@@ -202,7 +190,6 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
           <StudioActions
             isProcessing={isProcessing}
             processedData={processedData}
-            hasText={hasText}
             onGenerate={handleGenerate}
           />
           <Separator />

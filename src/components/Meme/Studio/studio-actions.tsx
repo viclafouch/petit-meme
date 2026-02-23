@@ -1,9 +1,12 @@
 import { Download, Share2, Sparkles } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { LoadingButton } from '@/components/ui/loading-button'
 import type { ProcessedData } from '@/hooks/use-video-processor'
 import { downloadBlob, shareBlob } from '@/utils/download'
+
+const GENERATE_FIRST_MESSAGE = 'Génère d’abord une vidéo'
 
 type StudioMobileActionsParams = {
   processedData: ProcessedData
@@ -49,48 +52,49 @@ export const StudioMobileActions = ({
 type StudioActionsParams = {
   isProcessing: boolean
   processedData: ProcessedData | null
-  hasText: boolean
   onGenerate: () => void
 }
 
 export const StudioActions = ({
   isProcessing,
   processedData,
-  hasText,
   onGenerate
 }: StudioActionsParams) => {
+  const handleShareClick = () => {
+    if (processedData === null) {
+      toast.error(GENERATE_FIRST_MESSAGE)
+
+      return
+    }
+
+    void shareBlob(processedData.blob, processedData.title)
+  }
+
+  const handleDownloadClick = () => {
+    if (processedData === null) {
+      toast.error(GENERATE_FIRST_MESSAGE)
+
+      return
+    }
+
+    downloadBlob(processedData.blob, `${processedData.title}.mp4`)
+  }
+
   return (
     <div className="flex flex-col gap-2">
-      <LoadingButton
-        isLoading={isProcessing}
-        onClick={onGenerate}
-        disabled={!hasText}
-      >
+      <LoadingButton isLoading={isProcessing} onClick={onGenerate}>
         <Sparkles />
         Générer la vidéo
       </LoadingButton>
       <Button
         variant="outline"
-        disabled={processedData === null}
         className="md:hidden"
-        onClick={() => {
-          if (processedData !== null) {
-            void shareBlob(processedData.blob, processedData.title)
-          }
-        }}
+        onClick={handleShareClick}
       >
         <Share2 />
         Partager la vidéo
       </Button>
-      <Button
-        variant="outline"
-        disabled={processedData === null}
-        onClick={() => {
-          if (processedData !== null) {
-            downloadBlob(processedData.blob, `${processedData.title}.mp4`)
-          }
-        }}
-      >
+      <Button variant="outline" onClick={handleDownloadClick}>
         <Download />
         Télécharger la vidéo
       </Button>

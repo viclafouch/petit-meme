@@ -21,6 +21,7 @@ export const StudioLiveOverlay = ({ settings }: StudioLiveOverlayParams) => {
         'absolute left-0 right-0 flex items-center justify-center pointer-events-none z-10 px-2',
         settings.textPosition === 'top' ? 'top-0' : 'bottom-0'
       )}
+      aria-hidden="true"
     >
       <div
         className="w-full py-3 text-center whitespace-pre-wrap wrap-break-word"

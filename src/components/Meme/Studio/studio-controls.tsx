@@ -128,8 +128,13 @@ export const StudioControls = ({
             autoComplete="off"
             type="text"
             maxLength={STUDIO_TEXT_MAX_LENGTH}
+            aria-describedby="studio-text-count"
           />
-          <span className="text-xs text-muted-foreground">
+          <span
+            id="studio-text-count"
+            className="text-xs text-muted-foreground"
+            aria-live="polite"
+          >
             {settings.text.length}/{STUDIO_TEXT_MAX_LENGTH}
           </span>
         </div>

@@ -6,9 +6,10 @@ import {
   useMediaSelector
 } from 'media-chrome/react/media-store'
 import { Button } from '@/components/ui/button'
+import { pluralize } from '@/helpers/format'
 
 const OVERLAY_BUTTON_CLASS =
-  'rounded-full bg-black/50 hover:bg-black/70 text-white size-9'
+  'rounded-full bg-black/50 hover:bg-black/70 text-white size-9 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/50'
 
 const formatVideoDuration = (seconds: number) => {
   const minutes = Math.floor(seconds / 60)
@@ -34,7 +35,10 @@ const RemainingTimeBadge = () => {
   }
 
   return (
-    <span className="absolute bottom-3 left-3 text-xs font-medium text-white bg-black/50 rounded-md px-2 py-1">
+    <span
+      className="absolute bottom-3 left-3 text-xs font-medium text-white bg-black/50 rounded-md px-2 py-1"
+      aria-label={`${Math.floor(remainingTime / 60)} ${pluralize(Math.floor(remainingTime / 60), { one: 'minute', other: 'minutes' })} ${Math.floor(remainingTime % 60)} ${pluralize(Math.floor(remainingTime % 60), { one: 'seconde', other: 'secondes' })} restantes`}
+    >
       {formatVideoDuration(remainingTime)}
     </span>
   )
@@ -95,7 +99,7 @@ export const VideoOverlay = ({
 
   return (
     <div
-      className="absolute inset-0 flex items-center justify-center cursor-pointer z-10"
+      className="absolute inset-0 flex items-center justify-center cursor-pointer z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-inset"
       onClick={handleOverlayClick}
       onKeyDown={handleKeyDown}
       role="button"

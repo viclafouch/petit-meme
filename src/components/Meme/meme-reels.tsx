@@ -94,10 +94,11 @@ export const Reel = React.memo(
         </div>
         <img
           src={buildVideoImageUrl(meme.video.bunnyId)}
-          alt={meme.title}
+          alt=""
           loading="eager"
           decoding="async"
           className="absolute size-full inset-0 object-cover blur-xl opacity-80"
+          aria-hidden="true"
         />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full flex items-center justify-center">
           <LoadingSpinner />
@@ -160,7 +161,7 @@ export const Reel = React.memo(
                 {isPlaying ? <Pause /> : <Play />}
               </Button>
               <Button
-                aria-label={isMuted ? 'Unmute' : 'Mute'}
+                aria-label={isMuted ? 'Activer le son' : 'Couper le son'}
                 onClick={() => {
                   return setIsMuted((prevState) => {
                     return !prevState

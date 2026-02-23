@@ -122,10 +122,23 @@ export const StudioPreview = ({
               decoding="async"
             />
           </Skeleton>
-          <div className="absolute flex flex-col gap-2 px-4 w-full text-center max-w-md items-center justify-center">
+          <div
+            className="absolute flex flex-col gap-2 px-4 w-full text-center max-w-md items-center justify-center"
+            role="status"
+            aria-live="polite"
+          >
             <Badge variant="outline">Traitement ({progress}%)</Badge>
-            <Progress value={progress} />
-            <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
+            <Progress
+              value={progress}
+              aria-label={`Progression du traitement : ${progress}%`}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={onCancel}
+              aria-label="Annuler le traitement"
+            >
               Annuler
             </Button>
           </div>

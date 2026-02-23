@@ -12,7 +12,9 @@ const STATIC_PAGES = [
   { pathname: '/', changefreq: 'daily', priority: '1.0' },
   { pathname: '/pricing', changefreq: 'monthly', priority: '0.7' },
   { pathname: '/reels', changefreq: 'daily', priority: '0.8' },
-  { pathname: '/terms-of-use', changefreq: 'yearly', priority: '0.3' }
+  { pathname: '/terms-of-use', changefreq: 'yearly', priority: '0.3' },
+  { pathname: '/privacy', changefreq: 'yearly', priority: '0.3' },
+  { pathname: '/mentions-legales', changefreq: 'yearly', priority: '0.3' }
 ] as const satisfies readonly StaticPage[]
 
 const formatDate = (date: Date) => {

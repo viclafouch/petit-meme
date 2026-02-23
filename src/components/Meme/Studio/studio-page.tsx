@@ -95,6 +95,7 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
             to="/memes/$memeId"
             params={{ memeId: meme.id }}
             className={buttonVariants({ variant: 'ghost', size: 'lg' })}
+            aria-label="Retour au mème"
           >
             <ArrowLeft className="size-5" />
             <StudioBranding title={meme.title} />

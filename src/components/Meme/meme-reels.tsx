@@ -1,4 +1,5 @@
 import React from 'react'
+import { useHotkeys } from 'react-hotkeys-hook'
 import Hls from 'hls.js'
 import { Pause, Play, Volume2, VolumeX } from 'lucide-react'
 import { ShareMemeButton } from '@/components/Meme/share-meme-button'
@@ -278,6 +279,18 @@ export const MemeReels = () => {
       observer.disconnect()
     }
   }, [memesWithRefs, virtualItemsKey, setActiveDebouncer, rowVirtualizer])
+
+  useHotkeys('down, pagedown', (event) => {
+    event.preventDefault()
+    const nextIndex = Math.min(currentIndex + 1, memesWithRefs.length - 1)
+    rowVirtualizer.scrollToIndex(nextIndex, { align: 'start' })
+  })
+
+  useHotkeys('up, pageup', (event) => {
+    event.preventDefault()
+    const prevIndex = Math.max(currentIndex - 1, 0)
+    rowVirtualizer.scrollToIndex(prevIndex, { align: 'start' })
+  })
 
   React.useEffect(() => {
     const items = rowVirtualizer.getVirtualItems()

@@ -6,6 +6,11 @@ import {
   useMediaSelector
 } from 'media-chrome/react/media-store'
 import { Button } from '@/components/ui/button'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger
+} from '@/components/ui/tooltip'
 import { pluralize } from '@/helpers/format'
 
 const OVERLAY_BUTTON_CLASS =
@@ -97,6 +102,11 @@ export const VideoOverlay = ({
     }
   }
 
+  const fullscreenLabel = isFullscreen
+    ? 'Quitter le plein écran'
+    : 'Plein écran'
+  const muteLabel = isMuted ? 'Activer le son' : 'Couper le son'
+
   return (
     <div
       className="absolute inset-0 flex items-center justify-center cursor-pointer z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-inset"
@@ -112,30 +122,40 @@ export const VideoOverlay = ({
         </div>
       ) : null}
       <div className="absolute bottom-3 right-3 flex flex-col gap-2">
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          className={OVERLAY_BUTTON_CLASS}
-          onClick={handleFullscreenClick}
-          aria-label={isFullscreen ? 'Quitter le plein écran' : 'Plein écran'}
-        >
-          <Maximize className="size-4" />
-        </Button>
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          className={OVERLAY_BUTTON_CLASS}
-          onClick={handleMuteClick}
-          aria-label={isMuted ? 'Activer le son' : 'Couper le son'}
-        >
-          {isMuted ? (
-            <VolumeX className="size-4" />
-          ) : (
-            <Volume2 className="size-4" />
-          )}
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              className={OVERLAY_BUTTON_CLASS}
+              onClick={handleFullscreenClick}
+              aria-label={fullscreenLabel}
+            >
+              <Maximize className="size-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="left">{fullscreenLabel}</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              className={OVERLAY_BUTTON_CLASS}
+              onClick={handleMuteClick}
+              aria-label={muteLabel}
+            >
+              {isMuted ? (
+                <VolumeX className="size-4" />
+              ) : (
+                <Volume2 className="size-4" />
+              )}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="left">{muteLabel}</TooltipContent>
+        </Tooltip>
       </div>
       {showRemainingTime ? <RemainingTimeBadge /> : null}
     </div>

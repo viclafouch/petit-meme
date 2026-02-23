@@ -11,6 +11,11 @@ import {
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger
+} from '@/components/ui/tooltip'
 import type {
   StudioBandColorValue,
   StudioFontColorValue,
@@ -195,15 +200,21 @@ export const StudioControls = ({
           aria-labelledby="studio-size-label"
         >
           {STUDIO_FONT_SIZES.map((size) => {
+            const sizeLabel = `${size.accessibleLabel} (${size.value}px)`
+
             return (
-              <ToggleGroupItem
-                key={size.id}
-                value={String(size.value)}
-                className="flex-1"
-                aria-label={`${size.accessibleLabel} (${size.value}px)`}
-              >
-                {size.label}
-              </ToggleGroupItem>
+              <Tooltip key={size.id}>
+                <TooltipTrigger asChild>
+                  <ToggleGroupItem
+                    value={String(size.value)}
+                    className="flex-1"
+                    aria-label={sizeLabel}
+                  >
+                    {size.label}
+                  </ToggleGroupItem>
+                </TooltipTrigger>
+                <TooltipContent>{sizeLabel}</TooltipContent>
+              </Tooltip>
             )
           })}
         </ToggleGroup>

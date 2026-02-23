@@ -25,7 +25,7 @@ export const StudioRelatedMemes = ({
 
   return (
     <div className="flex flex-col gap-2.5">
-      <Label>Essayer avec</Label>
+      <Label>Essayer avec un autre mème</Label>
       <div className="grid grid-cols-2 gap-2">
         {filteredMemes.map((meme) => {
           return (

@@ -78,6 +78,7 @@ type StudioControlsParams = {
   settings: StudioSettings
   onSettingsChange: (updates: Partial<StudioSettings>) => void
   disabled: boolean
+  bunnyId: string
   hideTextInput?: boolean
   onTextInputFocus?: () => void
 }
@@ -86,6 +87,7 @@ export const StudioControls = ({
   settings,
   onSettingsChange,
   disabled,
+  bunnyId,
   hideTextInput = false,
   onTextInputFocus
 }: StudioControlsParams) => {
@@ -144,9 +146,7 @@ export const StudioControls = ({
       ) : null}
       <div className="flex flex-col gap-1.5">
         <Label id="studio-templates-label">Templates</Label>
-        <div role="group" aria-labelledby="studio-templates-label">
-          <StudioTemplates />
-        </div>
+        <StudioTemplates bunnyId={bunnyId} />
       </div>
       <Separator />
       <div className="flex flex-col gap-1.5">

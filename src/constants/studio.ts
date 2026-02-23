@@ -31,6 +31,7 @@ type StudioColorEntry = {
 
 export const STUDIO_COLORS = [
   { id: 'black', label: 'Noir', value: 'black', className: 'bg-black' },
+  { id: 'white', label: 'Blanc', value: 'white', className: 'bg-white' },
   { id: 'red', label: 'Rouge', value: 'red', className: 'bg-red-600' },
   { id: 'blue', label: 'Bleu', value: 'blue', className: 'bg-blue-600' }
 ] as const satisfies readonly StudioColorEntry[]
@@ -73,7 +74,7 @@ export const STUDIO_BAND_COLORS = [
 
 export type StudioBandColorValue = (typeof STUDIO_BAND_COLORS)[number]['value']
 
-type StudioTemplate = {
+export type StudioTemplate = {
   id: string
   label: string
   description: string
@@ -100,10 +101,10 @@ export const STUDIO_TEMPLATES = [
   {
     id: 'subtitle',
     label: 'Sous-titre',
-    description: 'Fond semi-transparent, texte rouge',
-    fontFamily: 'arial',
+    description: 'Fond semi-transparent, texte blanc',
+    fontFamily: 'impact',
     fontSize: 36,
-    fontColor: 'red',
+    fontColor: 'white',
     textPosition: 'bottom',
     bandColor: 'black',
     bandOpacity: 0.6

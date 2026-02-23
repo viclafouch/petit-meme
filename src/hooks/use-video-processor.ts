@@ -41,6 +41,7 @@ type VideoProcessingParams = {
   fontColor?: StudioFontColorValue
   fontFamily?: StudioFontFamilyId
   bandColor?: StudioBandColorValue
+  bandOpacity?: number
   maxCharsPerLine?: number
 }
 
@@ -112,7 +113,34 @@ type BuildVideoFilterParams = {
   fontColor: string
   fontFile: string
   bandColor: string
+  bandOpacity: number
   lineCount: number
+}
+
+type BuildBandFilterParams = {
+  bandOpacity: number
+  bandColor: string
+  bandHeight: number
+  isTopPosition: boolean
+}
+
+const buildBandFilter = ({
+  bandOpacity,
+  bandColor,
+  bandHeight,
+  isTopPosition
+}: BuildBandFilterParams) => {
+  if (bandOpacity < 1) {
+    const boxY = isTopPosition ? '0' : `ih-${bandHeight}`
+
+    return `drawbox=x=0:y=${boxY}:w=iw:h=${bandHeight}:color=${bandColor}@${bandOpacity}:t=fill`
+  }
+
+  if (isTopPosition) {
+    return `pad=iw:ih+${bandHeight}:0:${bandHeight}:${bandColor}`
+  }
+
+  return `pad=iw:ih+${bandHeight}:0:0:${bandColor}`
 }
 
 const buildVideoFilter = ({
@@ -122,6 +150,7 @@ const buildVideoFilter = ({
   fontColor,
   fontFile,
   bandColor,
+  bandOpacity,
   lineCount
 }: BuildVideoFilterParams) => {
   const baselineOffset = Math.floor(fontSize * STUDIO_BASELINE_RATIO)
@@ -129,16 +158,19 @@ const buildVideoFilter = ({
     lineCount * fontSize + (lineCount - 1) * STUDIO_LINE_SPACING
   const isTopPosition = textPosition === 'top'
 
-  const padFilter = isTopPosition
-    ? `pad=iw:ih+${bandHeight}:0:${bandHeight}:${bandColor}`
-    : `pad=iw:ih+${bandHeight}:0:0:${bandColor}`
+  const bandFilter = buildBandFilter({
+    bandOpacity,
+    bandColor,
+    bandHeight,
+    isTopPosition
+  })
 
   const yPosition = isTopPosition
     ? `${Math.floor(bandHeight / 2)}-${Math.floor(totalTextHeight / 2)}+${baselineOffset}`
     : `h-${Math.floor(bandHeight / 2)}-${Math.floor(totalTextHeight / 2)}+${baselineOffset}`
 
   return [
-    padFilter,
+    bandFilter,
     `drawtext=fontfile=${fontFile}:textfile=text.txt:x=(w-text_w)/2:y=${yPosition}:fontsize=${fontSize}:fontcolor=${fontColor}:line_spacing=${STUDIO_LINE_SPACING}`
   ].join(',')
 }
@@ -213,6 +245,7 @@ const addTextToVideo = async (
     fontColor = STUDIO_DEFAULT_FONT_COLOR,
     fontFamily = 'arial',
     bandColor = 'white',
+    bandOpacity = 1,
     maxCharsPerLine = STUDIO_DEFAULT_MAX_CHARS_PER_LINE
   }: AddTextToVideoParams
 ) => {
@@ -231,6 +264,7 @@ const addTextToVideo = async (
     fontColor,
     fontFile: font.ffmpegFile,
     bandColor,
+    bandOpacity,
     lineCount: wrappedText.split('\n').length
   })
 

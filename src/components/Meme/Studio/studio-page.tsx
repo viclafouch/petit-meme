@@ -161,6 +161,7 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
                 onSettingsChange={setSettings}
                 disabled={isProcessing}
                 hideTextInput
+                bunnyId={meme.video.bunnyId}
               />
               <Separator />
               <React.Suspense fallback={null}>
@@ -191,6 +192,7 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
             onSettingsChange={setSettings}
             disabled={isProcessing}
             onTextInputFocus={triggerPreload}
+            bunnyId={meme.video.bunnyId}
           />
           <Separator />
           <StudioActions

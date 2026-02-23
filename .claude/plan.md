@@ -89,6 +89,7 @@ Simplification du player vidéo : suppression de la barre de contrôles, interac
 - [x] Optimisation des paramètres FFmpeg d'encodage (codec explicite, pix_fmt yuv420p, stream mapping, single-thread explicite, strip metadata)
 - [x] Cache `input.mp4` en WASM FS entre les générations (WeakMap par instance FFmpeg, skip writeFile si même mème)
 - [x] Preload au focus input : `useVideoPreloader` expose `triggerPreload()`, déclenché au focus des inputs texte (mobile + desktop). Prefetch blob vidéo + font Arial + write WASM FS. Pas de preload au mount, pas de re-trigger auto au changement de mème.
+- [x] FFmpeg : mode overlay (`drawbox` semi-transparent) quand `bandOpacity < 1`, mode caption (`pad`) quand `bandOpacity === 1`
 
 ### Phase 5 — Accessibilité WCAG 2.1 AA (Vidéo & Studio)
 
@@ -96,6 +97,7 @@ Simplification du player vidéo : suppression de la barre de contrôles, interac
 - [x] `VideoOverlay` : `role="button"`, `tabIndex={0}`, `aria-label` dynamique (Lire/Pause), `onKeyDown` Enter/Space
 - [x] `MemeReels` : `role="feed"` + `aria-label` sur scroll container, `role="article"` + `aria-posinset`/`aria-setsize` sur items
 - [x] `StudioControls` : `id` sur Labels, `aria-labelledby` sur ToggleGroup/Select/ColorSwatches, `role="radiogroup"` + `role="radio"` + `aria-checked` sur ColorSwatches
+- [x] Mini-previews visuelles pour les templates (thumbnail mème + bande colorée + texte "Abc" au lieu de cartes texte)
 - [x] Color swatches : touch targets augmentés `size-7` → `size-10` (40px)
 - [x] Font sizes : `accessibleLabel` dans `STUDIO_FONT_SIZES` + `aria-label` sur ToggleGroupItem
 - [x] Studio mobile input : `aria-label="Texte à ajouter sur la vidéo"`

@@ -171,7 +171,7 @@ export const StudioPreview = ({
       className="size-full flex items-center justify-center"
     >
       <div
-        className="relative overflow-hidden bg-black md:rounded-lg md:border md:border-border md:bg-muted/50"
+        className="relative overflow-hidden bg-black rounded-lg border border-white/10 md:border-border md:bg-muted/50"
         style={
           hasDesktopSize
             ? { width: size.width, height: size.height }

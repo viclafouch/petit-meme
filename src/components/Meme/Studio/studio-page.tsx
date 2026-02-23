@@ -3,7 +3,7 @@ import { ArrowLeft, SlidersHorizontal, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   StudioActions,
-  StudioCompactActions
+  StudioMobileActions
 } from '@/components/Meme/Studio/studio-actions'
 import { StudioControls } from '@/components/Meme/Studio/studio-controls'
 import { StudioPreview } from '@/components/Meme/Studio/studio-preview'
@@ -64,7 +64,7 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
   return (
     <div className="flex flex-col md:flex-row h-full overflow-hidden">
       <div className="flex-1 flex flex-col min-h-0">
-        <div className="flex items-center gap-3 px-4 py-2 md:hidden">
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-white/5 md:hidden">
           <Link
             to="/memes/$memeId"
             params={{ memeId: meme.id }}
@@ -73,11 +73,16 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
           >
             <ArrowLeft className="size-4" />
           </Link>
-          <h1 className="font-bricolage text-sm font-semibold truncate">
-            {meme.title}
-          </h1>
+          <div className="flex-1 min-w-0">
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+              Studio
+            </span>
+            <h1 className="font-bricolage text-sm font-semibold truncate">
+              {meme.title}
+            </h1>
+          </div>
         </div>
-        <div className="flex-1 min-h-0 md:p-8 md:bg-black/40">
+        <div className="flex-1 min-h-0 p-3 md:p-8 md:bg-black/40">
           <StudioPreview
             bunnyId={meme.video.bunnyId}
             title={meme.title}
@@ -87,6 +92,9 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
             onCancel={cancel}
           />
         </div>
+        {processedData !== null ? (
+          <StudioMobileActions processedData={processedData} />
+        ) : null}
         <div className="flex items-center gap-2 px-3 py-2.5 border-t bg-background md:hidden">
           <Input
             value={settings.text}
@@ -95,8 +103,20 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
             autoComplete="off"
             type="text"
             maxLength={STUDIO_TEXT_MAX_LENGTH}
-            className="flex-1 h-9 text-sm"
+            className="flex-1 h-8 text-sm"
           />
+          <Button
+            variant="outline"
+            size="sm"
+            className="shrink-0"
+            onClick={() => {
+              setIsDrawerOpen(true)
+            }}
+            aria-label="Ouvrir les réglages"
+          >
+            <SlidersHorizontal className="size-4" />
+            Outils
+          </Button>
           <LoadingButton
             isLoading={isProcessing}
             onClick={handleGenerate}
@@ -104,21 +124,8 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
             size="sm"
           >
             <Sparkles />
+            Générer
           </LoadingButton>
-          {processedData !== null ? (
-            <StudioCompactActions processedData={processedData} />
-          ) : null}
-          <Button
-            variant="outline"
-            size="icon"
-            className="shrink-0 size-9"
-            onClick={() => {
-              setIsDrawerOpen(true)
-            }}
-            aria-label="Ouvrir les réglages"
-          >
-            <SlidersHorizontal className="size-4" />
-          </Button>
         </div>
         <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
           <DrawerContent className="max-h-[80dvh]" aria-describedby={undefined}>

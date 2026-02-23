@@ -1,41 +1,48 @@
 import { Download, Share2, Sparkles } from 'lucide-react'
+import { motion, useReducedMotion } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import { LoadingButton } from '@/components/ui/loading-button'
 import type { ProcessedData } from '@/hooks/use-video-processor'
 import { downloadBlob, shareBlob } from '@/utils/download'
 
-type StudioCompactActionsParams = {
+type StudioMobileActionsParams = {
   processedData: ProcessedData
 }
 
-export const StudioCompactActions = ({
+export const StudioMobileActions = ({
   processedData
-}: StudioCompactActionsParams) => {
+}: StudioMobileActionsParams) => {
+  const shouldReduceMotion = useReducedMotion()
+
   return (
-    <>
+    <motion.div
+      // eslint-disable-next-line id-length -- motion API requires single-letter axis properties (y)
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
+      // eslint-disable-next-line id-length -- motion API requires single-letter axis properties (y)
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+      className="flex gap-2.5 px-3 py-3 md:hidden"
+    >
       <Button
-        variant="outline"
-        size="icon"
-        className="shrink-0 size-9"
+        className="flex-1"
         onClick={() => {
           void shareBlob(processedData.blob, processedData.title)
         }}
-        aria-label="Partager"
       >
-        <Share2 className="size-4" />
+        <Share2 />
+        Partager
       </Button>
       <Button
         variant="outline"
-        size="icon"
-        className="shrink-0 size-9"
+        className="flex-1"
         onClick={() => {
           downloadBlob(processedData.blob, `${processedData.title}.mp4`)
         }}
-        aria-label="Télécharger"
       >
-        <Download className="size-4" />
+        <Download />
+        Télécharger
       </Button>
-    </>
+    </motion.div>
   )
 }
 

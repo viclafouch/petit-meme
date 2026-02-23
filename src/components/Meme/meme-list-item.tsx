@@ -35,7 +35,6 @@ export type MemeListItemParams = {
   size: keyof typeof sizes
   position: number
   onPlayClick: (meme: MemeWithVideo) => void
-  onOpenStudioClick: (meme: MemeWithVideo) => void
   highlightedTitle?: string
   queryID?: string
   authenticatedUserToken?: string
@@ -135,7 +134,6 @@ export const MemeListItem = React.memo(
     highlightedTitle,
     onPlayClick,
     layoutContext,
-    onOpenStudioClick,
     size,
     queryID,
     position,
@@ -153,7 +151,7 @@ export const MemeListItem = React.memo(
       })
     }
 
-    const trackConversion = (eventName: ConversionEventName) => {
+    const handleTrackConversion = (eventName: ConversionEventName) => {
       sendConversionEvent({
         queryID,
         objectID: meme.id,
@@ -229,18 +227,19 @@ export const MemeListItem = React.memo(
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
+                  asChild
                   onClick={() => {
-                    trackConversion('Meme Studio Opened')
-
-                    return onOpenStudioClick(meme)
+                    handleTrackConversion('Meme Studio Opened')
                   }}
                 >
-                  <Clapperboard />
-                  Ouvrir dans Studio
+                  <Link to="/memes/$memeId/studio" params={{ memeId: meme.id }}>
+                    <Clapperboard />
+                    Ouvrir dans Studio
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
-                    trackConversion('Meme Shared')
+                    handleTrackConversion('Meme Shared')
 
                     return shareMeme.mutate(meme)
                   }}
@@ -251,7 +250,7 @@ export const MemeListItem = React.memo(
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
-                    trackConversion('Meme Downloaded')
+                    handleTrackConversion('Meme Downloaded')
 
                     return downloadMutation.mutate(meme)
                   }}

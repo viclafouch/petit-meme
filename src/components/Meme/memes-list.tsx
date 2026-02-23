@@ -1,19 +1,13 @@
 import React from 'react'
-import { ErrorBoundary } from 'react-error-boundary'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { AnimatePresence } from 'motion/react'
 import type { MemeListItemParams } from '@/components/Meme/meme-list-item'
 import { MemeListItem } from '@/components/Meme/meme-list-item'
 import { PlayerDialog } from '@/components/Meme/player-dialog'
-import { StudioDialog } from '@/components/Meme/studio-dialog'
-import {
-  StudioErrorFallback,
-  StudioLoadingFallback
-} from '@/components/Meme/studio-fallbacks'
-import { MEMES_PER_PAGE, type MemeWithVideo } from '@/constants/meme'
+import type { MemeWithVideo } from '@/constants/meme'
+import { MEMES_PER_PAGE } from '@/constants/meme'
 import { sendViewEvent } from '@/lib/algolia-insights'
-import * as Sentry from '@sentry/tanstackstart-react'
-import { ClientOnly, useRouteContext } from '@tanstack/react-router'
+import { useRouteContext } from '@tanstack/react-router'
 
 type MemeWithHighlight = MemeWithVideo & {
   highlightedTitle?: string
@@ -36,8 +30,6 @@ export const MemesList = ({
 }: MemesListParams) => {
   const { user } = useRouteContext({ from: '__root__' })
   const [selectedId, setSelectedId] = React.useState<string | null>(null)
-  const [studioMemeSelected, setStudioMemeSelected] =
-    React.useState<MemeWithVideo | null>(null)
 
   const authenticatedUserToken = user?.id
 
@@ -99,10 +91,6 @@ export const MemesList = ({
     setSelectedId(null)
   }
 
-  const handleCloseStudio = () => {
-    setStudioMemeSelected(null)
-  }
-
   const selectedMeme = memes.find((meme) => {
     return meme.id === selectedId
   })
@@ -128,7 +116,6 @@ export const MemesList = ({
               layoutContext={layoutContext}
               meme={meme}
               highlightedTitle={meme.highlightedTitle}
-              onOpenStudioClick={setStudioMemeSelected}
               queryID={queryID}
               position={page * MEMES_PER_PAGE + index + 1}
               authenticatedUserToken={authenticatedUserToken}
@@ -142,32 +129,11 @@ export const MemesList = ({
             meme={selectedMeme}
             layoutContext={layoutContext}
             onClose={handleDeselect}
-            onOpenStudio={setStudioMemeSelected}
             queryID={queryID}
             authenticatedUserToken={authenticatedUserToken}
           />
         ) : null}
       </AnimatePresence>
-      <ClientOnly>
-        {studioMemeSelected ? (
-          <ErrorBoundary
-            FallbackComponent={StudioErrorFallback}
-            onError={(error) => {
-              Sentry.captureException(error, {
-                tags: { feature: 'studio' }
-              })
-            }}
-          >
-            <React.Suspense fallback={<StudioLoadingFallback />}>
-              <StudioDialog
-                meme={studioMemeSelected}
-                open
-                onOpenChange={handleCloseStudio}
-              />
-            </React.Suspense>
-          </ErrorBoundary>
-        ) : null}
-      </ClientOnly>
     </div>
   )
 }

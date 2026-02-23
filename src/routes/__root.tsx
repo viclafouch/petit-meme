@@ -24,29 +24,6 @@ import {
 } from '@tanstack/react-router'
 import appCss from '../styles.css?url'
 
-const TanStackQueryDevtools =
-  process.env.NODE_ENV === 'production'
-    ? () => {
-        return null
-      }
-    : React.lazy(async () => {
-        const result =
-          await import('@tanstack/react-query-devtools/build/modern/production.js')
-
-        return { default: result.ReactQueryDevtools }
-      })
-
-const TanStackRouterDevtools =
-  process.env.NODE_ENV === 'production'
-    ? () => {
-        return null
-      }
-    : React.lazy(async () => {
-        const result = await import('@tanstack/react-router-devtools')
-
-        return { default: result.TanStackRouterDevtools }
-      })
-
 const RootDocument = ({ children }: { children: React.ReactNode }) => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { _storedTheme, _cookieConsent } = Route.useLoaderData()
@@ -83,10 +60,6 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => {
             <Toaster richColors />
           </ClientOnly>
           <CookieConsentBanner initialConsent={_cookieConsent} />
-          <React.Suspense>
-            <TanStackRouterDevtools position="bottom-left" />
-            <TanStackQueryDevtools buttonPosition="bottom-right" />
-          </React.Suspense>
           <TailwindIndicator />
         </ThemeProvider>
         <Scripts />

@@ -1,0 +1,5 @@
+export const FFMPEG_FONT_PATH = '/fonts/arial.ttf'
+export const FFMPEG_FONT_FILE = 'arial.ttf'
+export const FFMPEG_CORE_URL = '/ffmpeg/ffmpeg-core.js?v=mt'
+export const FFMPEG_WASM_URL = '/ffmpeg/ffmpeg-core.wasm?v=mt'
+export const FFMPEG_WORKER_URL = '/ffmpeg/ffmpeg-core.worker.js?v=mt'

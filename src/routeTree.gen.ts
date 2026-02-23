@@ -13,6 +13,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as ReelsRouteImport } from './routes/reels'
 import { Route as HealthRouteImport } from './routes/health'
+import { Route as StudioRouteImport } from './routes/_studio'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as Public__rootRouteRouteImport } from './routes/_public__root/route'
 import { Route as Public__rootIndexRouteImport } from './routes/_public__root/index'
@@ -34,6 +35,7 @@ import { Route as Public__rootDefaultSettingsRouteRouteImport } from './routes/_
 import { Route as Public__rootDefaultSettingsIndexRouteImport } from './routes/_public__root/_default/settings/index'
 import { Route as Public__rootDefaultRandomIndexRouteImport } from './routes/_public__root/_default/random/index'
 import { Route as Public__rootDefaultMemesIndexRouteImport } from './routes/_public__root/_default/memes/index'
+import { Route as StudioMemesMemeIdStudioRouteImport } from './routes/_studio/memes.$memeId.studio'
 import { Route as Public__rootDefaultPasswordResetRouteImport } from './routes/_public__root/_default/password.reset'
 import { Route as Public__rootDefaultPasswordCreateNewRouteImport } from './routes/_public__root/_default/password.create-new'
 import { Route as Public__rootDefaultMemesMemeIdRouteImport } from './routes/_public__root/_default/memes/$memeId'
@@ -58,6 +60,10 @@ const ReelsRoute = ReelsRouteImport.update({
 const HealthRoute = HealthRouteImport.update({
   id: '/health',
   path: '/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudioRoute = StudioRouteImport.update({
+  id: '/_studio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRouteRoute = AdminRouteRouteImport.update({
@@ -173,6 +179,11 @@ const Public__rootDefaultMemesIndexRoute =
     path: '/memes/',
     getParentRoute: () => Public__rootDefaultRouteRoute,
   } as any)
+const StudioMemesMemeIdStudioRoute = StudioMemesMemeIdStudioRouteImport.update({
+  id: '/memes/$memeId/studio',
+  path: '/memes/$memeId/studio',
+  getParentRoute: () => StudioRoute,
+} as any)
 const Public__rootDefaultPasswordResetRoute =
   Public__rootDefaultPasswordResetRouteImport.update({
     id: '/password/reset',
@@ -229,6 +240,7 @@ export interface FileRoutesByFullPath {
   '/memes/$memeId': typeof Public__rootDefaultMemesMemeIdRoute
   '/password/create-new': typeof Public__rootDefaultPasswordCreateNewRoute
   '/password/reset': typeof Public__rootDefaultPasswordResetRoute
+  '/memes/$memeId/studio': typeof StudioMemesMemeIdStudioRoute
   '/memes/': typeof Public__rootDefaultMemesIndexRoute
   '/random/': typeof Public__rootDefaultRandomIndexRoute
   '/settings/': typeof Public__rootDefaultSettingsIndexRoute
@@ -236,11 +248,11 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/admin': typeof AdminRouteRouteWithChildren
+  '/': typeof Public__rootIndexRoute
   '/health': typeof HealthRoute
   '/reels': typeof ReelsRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/': typeof Public__rootIndexRoute
   '/admin/downloader': typeof AdminDownloaderRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/bunny': typeof ApiBunnyRoute
@@ -258,6 +270,7 @@ export interface FileRoutesByTo {
   '/memes/$memeId': typeof Public__rootDefaultMemesMemeIdRoute
   '/password/create-new': typeof Public__rootDefaultPasswordCreateNewRoute
   '/password/reset': typeof Public__rootDefaultPasswordResetRoute
+  '/memes/$memeId/studio': typeof StudioMemesMemeIdStudioRoute
   '/memes': typeof Public__rootDefaultMemesIndexRoute
   '/random': typeof Public__rootDefaultRandomIndexRoute
   '/settings': typeof Public__rootDefaultSettingsIndexRoute
@@ -267,6 +280,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_public__root': typeof Public__rootRouteRouteWithChildren
   '/admin': typeof AdminRouteRouteWithChildren
+  '/_studio': typeof StudioRouteWithChildren
   '/health': typeof HealthRoute
   '/reels': typeof ReelsRoute
   '/robots.txt': typeof RobotsDottxtRoute
@@ -291,6 +305,7 @@ export interface FileRoutesById {
   '/_public__root/_default/memes/$memeId': typeof Public__rootDefaultMemesMemeIdRoute
   '/_public__root/_default/password/create-new': typeof Public__rootDefaultPasswordCreateNewRoute
   '/_public__root/_default/password/reset': typeof Public__rootDefaultPasswordResetRoute
+  '/_studio/memes/$memeId/studio': typeof StudioMemesMemeIdStudioRoute
   '/_public__root/_default/memes/': typeof Public__rootDefaultMemesIndexRoute
   '/_public__root/_default/random/': typeof Public__rootDefaultRandomIndexRoute
   '/_public__root/_default/settings/': typeof Public__rootDefaultSettingsIndexRoute
@@ -323,6 +338,7 @@ export interface FileRouteTypes {
     | '/memes/$memeId'
     | '/password/create-new'
     | '/password/reset'
+    | '/memes/$memeId/studio'
     | '/memes/'
     | '/random/'
     | '/settings/'
@@ -330,11 +346,11 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/admin'
+    | '/'
     | '/health'
     | '/reels'
     | '/robots.txt'
     | '/sitemap.xml'
-    | '/'
     | '/admin/downloader'
     | '/admin/users'
     | '/api/bunny'
@@ -352,6 +368,7 @@ export interface FileRouteTypes {
     | '/memes/$memeId'
     | '/password/create-new'
     | '/password/reset'
+    | '/memes/$memeId/studio'
     | '/memes'
     | '/random'
     | '/settings'
@@ -360,6 +377,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_public__root'
     | '/admin'
+    | '/_studio'
     | '/health'
     | '/reels'
     | '/robots.txt'
@@ -384,6 +402,7 @@ export interface FileRouteTypes {
     | '/_public__root/_default/memes/$memeId'
     | '/_public__root/_default/password/create-new'
     | '/_public__root/_default/password/reset'
+    | '/_studio/memes/$memeId/studio'
     | '/_public__root/_default/memes/'
     | '/_public__root/_default/random/'
     | '/_public__root/_default/settings/'
@@ -393,6 +412,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   Public__rootRouteRoute: typeof Public__rootRouteRouteWithChildren
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
+  StudioRoute: typeof StudioRouteWithChildren
   HealthRoute: typeof HealthRoute
   ReelsRoute: typeof ReelsRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
@@ -430,6 +450,13 @@ declare module '@tanstack/react-router' {
       path: '/health'
       fullPath: '/health'
       preLoaderRoute: typeof HealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_studio': {
+      id: '/_studio'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof StudioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -579,6 +606,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Public__rootDefaultMemesIndexRouteImport
       parentRoute: typeof Public__rootDefaultRouteRoute
     }
+    '/_studio/memes/$memeId/studio': {
+      id: '/_studio/memes/$memeId/studio'
+      path: '/memes/$memeId/studio'
+      fullPath: '/memes/$memeId/studio'
+      preLoaderRoute: typeof StudioMemesMemeIdStudioRouteImport
+      parentRoute: typeof StudioRoute
+    }
     '/_public__root/_default/password/reset': {
       id: '/_public__root/_default/password/reset'
       path: '/password/reset'
@@ -709,9 +743,21 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
   AdminRouteRouteChildren,
 )
 
+interface StudioRouteChildren {
+  StudioMemesMemeIdStudioRoute: typeof StudioMemesMemeIdStudioRoute
+}
+
+const StudioRouteChildren: StudioRouteChildren = {
+  StudioMemesMemeIdStudioRoute: StudioMemesMemeIdStudioRoute,
+}
+
+const StudioRouteWithChildren =
+  StudioRoute._addFileChildren(StudioRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   Public__rootRouteRoute: Public__rootRouteRouteWithChildren,
   AdminRouteRoute: AdminRouteRouteWithChildren,
+  StudioRoute: StudioRouteWithChildren,
   HealthRoute: HealthRoute,
   ReelsRoute: ReelsRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,

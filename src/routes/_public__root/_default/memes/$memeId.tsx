@@ -1,6 +1,5 @@
 /* eslint-disable unicorn/filename-case */
 import React from 'react'
-import { ErrorBoundary } from 'react-error-boundary'
 import { formatDate } from 'date-fns'
 import {
   ArrowLeft,
@@ -13,11 +12,6 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { MemesList } from '@/components/Meme/memes-list'
-import { StudioDialog } from '@/components/Meme/studio-dialog'
-import {
-  StudioErrorFallback,
-  StudioLoadingFallback
-} from '@/components/Meme/studio-fallbacks'
 import ToggleLikeButton from '@/components/Meme/toggle-like-button'
 import { Badge } from '@/components/ui/badge'
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -48,10 +42,8 @@ import {
 } from '@/lib/seo'
 import { cn } from '@/lib/utils'
 import { getRandomMeme, getRelatedMemes } from '@/server/meme'
-import * as Sentry from '@sentry/tanstackstart-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import {
-  ClientOnly,
   createFileRoute,
   Link,
   useLinkProps,
@@ -128,13 +120,9 @@ const RouteComponent = () => {
   const { memeId } = Route.useParams()
   const memeQuery = useSuspenseQuery(getMemeByIdQueryOpts(memeId))
   const meme = memeQuery.data
-  const { videoRef } = useMemeHls({
-    memeId: meme.id,
-    bunnyId: meme.video.bunnyId
-  })
+  const { videoRef } = useMemeHls({ bunnyId: meme.video.bunnyId })
   const navigate = Route.useNavigate()
   const router = useRouter()
-  const [isStudioDialogOpened, setIsStudioDialogOpened] = React.useState(false)
   const memeLink = useLinkProps({
     to: '/memes/$memeId',
     params: { memeId: meme.id }
@@ -148,7 +136,7 @@ const RouteComponent = () => {
     maxMs: 12000
   })
 
-  const copyMemeLink = async () => {
+  const handleCopyMemeLink = async () => {
     const text = buildUrl(memeLink.href as string)
 
     try {
@@ -156,7 +144,7 @@ const RouteComponent = () => {
       toast.success('Lien copié', {
         position: 'bottom-center'
       })
-    } catch (error) {
+    } catch {
       toast.error('Impossible de copier le lien')
     }
   }
@@ -177,28 +165,23 @@ const RouteComponent = () => {
   }, [meme])
 
   React.useEffect(() => {
-    async function preload() {
+    const preload = async () => {
       try {
         const nextMeme = await nextRandomMeme
 
         if (nextMeme) {
           await router.preloadRoute({
             to: '/memes/$memeId',
-            params: {
-              memeId: nextMeme.id
-            }
+            params: { memeId: nextMeme.id }
           })
         }
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.log('Failed to preload route')
-      }
+      } catch {}
     }
 
     void preload()
   }, [router, nextRandomMeme])
 
-  const goToNextRandomMeme = async () => {
+  const handleNavigateToRandomMeme = async () => {
     try {
       videoRef.current?.pause()
       const newMeme = await nextRandomMeme
@@ -208,10 +191,7 @@ const RouteComponent = () => {
       } else {
         void navigate({ to: '/memes' })
       }
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error)
-    }
+    } catch {}
   }
 
   return (
@@ -287,18 +267,14 @@ const RouteComponent = () => {
           </div>
           <div className="w-full flex flex-col gap-y-4 max-w-md md:max-w-none mx-auto items-center md:items-start">
             <div className="flex flex-col gap-y-2.5 w-full">
-              <Button
-                variant="default"
-                onClick={(event) => {
-                  event.preventDefault()
-                  videoRef.current?.pause()
-
-                  setIsStudioDialogOpened(true)
-                }}
+              <Link
+                to="/memes/$memeId/studio"
+                params={{ memeId: meme.id }}
+                className={cn(buttonVariants({ variant: 'default' }))}
               >
                 <Clapperboard />
                 Ouvrir dans Studio
-              </Button>
+              </Link>
               <div className="flex gap-2 flex-wrap">
                 <Button
                   disabled={shareMutation.isPending}
@@ -326,14 +302,12 @@ const RouteComponent = () => {
               <Button
                 variant="outline"
                 className="shrink-0 flex-1"
-                onClick={() => {
-                  return copyMemeLink()
-                }}
+                onClick={handleCopyMemeLink}
               >
                 <Clipboard />
                 Copier le lien
               </Button>
-              <Button variant="outline" onClick={goToNextRandomMeme}>
+              <Button variant="outline" onClick={handleNavigateToRandomMeme}>
                 <Shuffle />
                 Aléatoire
               </Button>
@@ -345,26 +319,6 @@ const RouteComponent = () => {
       <React.Suspense fallback={null}>
         <RelatedMemes relatedMemesPromise={relatedMemesPromise} />
       </React.Suspense>
-      <ClientOnly>
-        {isStudioDialogOpened ? (
-          <ErrorBoundary
-            FallbackComponent={StudioErrorFallback}
-            onError={(error) => {
-              Sentry.captureException(error, {
-                tags: { feature: 'studio' }
-              })
-            }}
-          >
-            <React.Suspense fallback={<StudioLoadingFallback />}>
-              <StudioDialog
-                meme={meme}
-                open
-                onOpenChange={setIsStudioDialogOpened}
-              />
-            </React.Suspense>
-          </ErrorBoundary>
-        ) : null}
-      </ClientOnly>
     </div>
   )
 }

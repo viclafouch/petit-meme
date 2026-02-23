@@ -6,10 +6,12 @@ export const StudioLoadingFallback = () => {
   return (
     <div
       aria-busy="true"
-      className="animate-in fade-in fixed inset-0 z-50 bg-black/50 flex flex-col gap-3 items-center justify-center"
+      className="animate-in fade-in h-dvh flex flex-col gap-3 items-center justify-center"
     >
       <LoadingSpinner className="size-8" />
-      <p className="text-sm text-white">Chargement du moteur vidéo…</p>
+      <p className="text-sm text-muted-foreground">
+        Chargement du moteur vidéo…
+      </p>
     </div>
   )
 }
@@ -25,9 +27,9 @@ export const StudioErrorFallback = ({
   return (
     <div
       role="alert"
-      className="animate-in fade-in fixed inset-0 z-50 bg-black/50 flex flex-col items-center justify-center px-6"
+      className="animate-in fade-in h-dvh flex flex-col items-center justify-center px-6"
     >
-      <div className="max-w-sm rounded-lg bg-background p-6 text-center shadow-lg flex flex-col gap-4">
+      <div className="max-w-sm rounded-lg bg-muted p-6 text-center shadow-lg flex flex-col gap-4">
         {matchIsCrossOriginError(error) ? (
           <>
             <p className="text-base font-semibold">

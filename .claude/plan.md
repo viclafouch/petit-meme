@@ -63,25 +63,31 @@ Refonte complète du Studio (overlay texte sur vidéo). Priorité : performance 
 - [x] Monitoring Sentry : ajouter `onError={captureException}` sur les `<ErrorBoundary>` Studio dans `$memeId.tsx` et `memes-list.tsx` + `Sentry.captureException` explicites dans les hooks `useVideoInitializer` et `useVideoProcessor`
 - [ ] Tester sur mobile (Safari iOS 15.2+, Chrome Android) — validation manuelle après deploy
 
-### Phase 3 — Responsive & mobile-first
+### Phase 3 — Page dédiée Studio + Responsive + Live Preview + Templates
 
-- [ ] Repenser le layout du dialog pour mobile (actuellement `grid-cols-[auto_350px]` → stacking vertical)
-- [ ] Vidéo preview en pleine largeur sur mobile
-- [ ] Contrôles (texte, position, boutons) en dessous de la preview sur mobile
-- [ ] Bouton "Partager" prioritaire sur mobile (au-dessus de "Télécharger")
-- [ ] Touch targets 44x44px minimum sur tous les boutons/inputs
+Migration du Studio depuis un Dialog vers une page dédiée `/memes/:memeId/studio`. Layout éditeur deux colonnes (preview + contrôles), responsive mobile-first. Inclut la Phase 4 (preview live, templates, couleurs, taille).
+
+- [x] Créer la route `/memes/$memeId/studio` sous layout `_studio` dédié (sans navbar/footer, full viewport)
+- [x] SEO : `noindex, follow` + canonical vers `/memes/:memeId` (pas de duplicata)
+- [x] Ajouter `noindex` et `canonicalPathname` à la fonction `seo()` dans `src/lib/seo.ts`
+- [x] Créer les composants Studio : `studio-page.tsx`, `studio-preview.tsx`, `studio-controls.tsx`, `studio-actions.tsx`, `studio-live-overlay.tsx`, `studio-templates.tsx`
+- [x] Layout desktop : preview (flex-1) + panneau contrôles (w-80/w-96) avec `md:flex-row`
+- [x] Layout mobile : stacking vertical (vidéo pleine largeur + contrôles en dessous)
+- [x] Bouton "Partager" prioritaire sur mobile (au-dessus de "Télécharger")
+- [x] Preview live CSS : overlay DOM texte sur la vidéo (sans FFmpeg) — `studio-live-overlay.tsx`
+- [x] Templates prédéfinis : "Légende" (Arial, bande blanche, texte noir), "Sous-titre" (fond semi-transparent noir, texte blanc)
+- [x] Choix de la couleur du texte (pastilles : noir, blanc, rouge, bleu)
+- [x] Choix de la taille du texte (presets : P/M/G → 24/36/48 px via ToggleGroup)
+- [x] Choix de la police (Select — Arial par défaut, extensible Phase 5)
+- [x] Constantes typées : `STUDIO_TEMPLATES`, `STUDIO_FONT_SIZES`, `STUDIO_COLORS`, `STUDIO_FONTS`, `StudioSettings`
+- [x] Remplacer dialog par Link dans `$memeId.tsx`, `memes-list.tsx`, `player-dialog.tsx`, `meme-list-item.tsx`
+- [x] Supprimer `studio-dialog.tsx`
+- [x] Adapter `studio-fallbacks.tsx` au contexte page (plus de `fixed inset-0`)
+- [x] Afficher 4 mèmes similaires dans le sidebar (comme la page slug) — navigation entre mèmes sans perdre les settings (texte, couleur, police, template)
 - [ ] Tester le flow complet sur iOS Safari et Chrome Android
 - [ ] Gérer le cas où `navigator.share()` n'est pas supporté (fallback download)
 
-### Phase 4 — Preview live & templates
-
-- [ ] Preview live CSS du texte (overlay DOM sur la vidéo, sans lancer FFmpeg)
-- [ ] L'utilisateur voit le résultat en temps réel avant de lancer le processing
-- [ ] Templates prédéfinis : "Classic meme" (Impact blanc, outline noir, haut+bas), "Caption" (Arial, bande blanche), "Subtitle" (blanc, fond semi-transparent, bas)
-- [ ] Choix de la couleur du texte (pastilles : noir, blanc, rouge, bleu)
-- [ ] Choix de la taille du texte (presets : petit, moyen, grand)
-
-### Phase 5 — Features avancées
+### Phase 4 — Features avancées
 
 - [ ] Plusieurs fonts (Impact, Arial, Comic Sans, etc.) dans `/public/fonts/`
 - [ ] Texte directement sur la vidéo sans bande (outline/shadow pour lisibilité)

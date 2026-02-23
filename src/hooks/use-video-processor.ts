@@ -1,13 +1,20 @@
 import React from 'react'
 import { toast } from 'sonner'
 import { StudioError } from '@/constants/error'
-import type { MemeWithVideo } from '@/constants/meme'
 import {
   FFMPEG_CORE_URL,
   FFMPEG_FONT_FILE,
   FFMPEG_FONT_PATH,
   FFMPEG_WASM_URL,
-  FFMPEG_WORKER_URL,
+  FFMPEG_WORKER_URL
+} from '@/constants/ffmpeg'
+import type { MemeWithVideo } from '@/constants/meme'
+import type {
+  StudioFontColorValue,
+  StudioFontSizeValue,
+  StudioTextPosition
+} from '@/constants/studio'
+import {
   STUDIO_BASELINE_RATIO,
   STUDIO_DEFAULT_BAND_HEIGHT,
   STUDIO_DEFAULT_FONT_COLOR,
@@ -32,9 +39,9 @@ import {
 type VideoProcessingParams = {
   text: string
   bandHeight?: number
-  textPosition?: 'top' | 'bottom'
-  fontSize?: number
-  fontColor?: string
+  textPosition?: StudioTextPosition
+  fontSize?: StudioFontSizeValue
+  fontColor?: StudioFontColorValue
   maxCharsPerLine?: number
 }
 
@@ -45,6 +52,12 @@ type AddTextToVideoParams = {
 type ProcessVideoParams = {
   meme: Pick<MemeWithVideo, 'id' | 'title'>
 } & VideoProcessingParams
+
+export type ProcessedData = {
+  blob: Blob
+  url: string
+  title: string
+}
 
 const wrapText = (text: string, maxLength: number) => {
   return text
@@ -62,6 +75,66 @@ const wrapText = (text: string, maxLength: number) => {
     .join('\n')
 }
 
+const ensureFontFile = async (ffmpeg: FFmpeg) => {
+  try {
+    await ffmpeg.readFile(FFMPEG_FONT_FILE)
+  } catch {
+    await ffmpeg.writeFile(FFMPEG_FONT_FILE, await fetchFile(FFMPEG_FONT_PATH))
+  }
+}
+
+type BuildVideoFilterParams = {
+  textPosition: StudioTextPosition
+  bandHeight: number
+  fontSize: number
+  fontColor: string
+  lineCount: number
+}
+
+const buildVideoFilter = ({
+  textPosition,
+  bandHeight,
+  fontSize,
+  fontColor,
+  lineCount
+}: BuildVideoFilterParams) => {
+  const baselineOffset = Math.floor(fontSize * STUDIO_BASELINE_RATIO)
+  const totalTextHeight =
+    lineCount * fontSize + (lineCount - 1) * STUDIO_LINE_SPACING
+  const isTopPosition = textPosition === 'top'
+
+  const padFilter = isTopPosition
+    ? `pad=iw:ih+${bandHeight}:0:${bandHeight}:white`
+    : `pad=iw:ih+${bandHeight}:0:0:white`
+
+  const yPosition = isTopPosition
+    ? `${Math.floor(bandHeight / 2)}-${Math.floor(totalTextHeight / 2)}+${baselineOffset}`
+    : `h-${Math.floor(bandHeight / 2)}-${Math.floor(totalTextHeight / 2)}+${baselineOffset}`
+
+  return [
+    padFilter,
+    `drawtext=fontfile=${FFMPEG_FONT_FILE}:textfile=text.txt:x=(w-text_w)/2:y=${yPosition}:fontsize=${fontSize}:fontcolor=${fontColor}:line_spacing=${STUDIO_LINE_SPACING}`
+  ].join(',')
+}
+
+const readFFmpegOutput = async (ffmpeg: FFmpeg) => {
+  const outputData = await ffmpeg.readFile('output.mp4')
+
+  await Promise.all([
+    ffmpeg.deleteFile('input.mp4'),
+    ffmpeg.deleteFile('text.txt'),
+    ffmpeg.deleteFile('output.mp4')
+  ]).catch(() => {})
+
+  if (!(outputData instanceof Uint8Array)) {
+    throw new Error('Unexpected FFmpeg output format')
+  }
+
+  return new Blob([new Uint8Array(outputData).buffer as ArrayBuffer], {
+    type: 'video/mp4'
+  })
+}
+
 const addTextToVideo = async (
   ffmpeg: FFmpeg,
   {
@@ -75,39 +148,24 @@ const addTextToVideo = async (
   }: AddTextToVideoParams
 ) => {
   await ffmpeg.writeFile('input.mp4', await fetchFile(videoBlob))
-
-  try {
-    await ffmpeg.readFile(FFMPEG_FONT_FILE)
-  } catch {
-    await ffmpeg.writeFile(FFMPEG_FONT_FILE, await fetchFile(FFMPEG_FONT_PATH))
-  }
+  await ensureFontFile(ffmpeg)
 
   const wrappedText = wrapText(text, maxCharsPerLine)
   await ffmpeg.writeFile('text.txt', new TextEncoder().encode(wrappedText))
 
-  const lineCount = wrappedText.split('\n').length
-  const baselineOffset = Math.floor(fontSize * STUDIO_BASELINE_RATIO)
-  const totalTextHeight =
-    lineCount * fontSize + (lineCount - 1) * STUDIO_LINE_SPACING
+  const videoFilter = buildVideoFilter({
+    textPosition,
+    bandHeight,
+    fontSize,
+    fontColor,
+    lineCount: wrappedText.split('\n').length
+  })
 
-  const isTop = textPosition === 'top'
-
-  const padFilter = isTop
-    ? `pad=iw:ih+${bandHeight}:0:${bandHeight}:white`
-    : `pad=iw:ih+${bandHeight}:0:0:white`
-
-  const yPosition = isTop
-    ? `${Math.floor(bandHeight / 2)}-${Math.floor(totalTextHeight / 2)}+${baselineOffset}`
-    : `h-${Math.floor(bandHeight / 2)}-${Math.floor(totalTextHeight / 2)}+${baselineOffset}`
-
-  const result = await ffmpeg.exec([
+  const exitCode = await ffmpeg.exec([
     '-i',
     'input.mp4',
     '-vf',
-    [
-      padFilter,
-      `drawtext=fontfile=${FFMPEG_FONT_FILE}:textfile=text.txt:x=(w-text_w)/2:y=${yPosition}:fontsize=${fontSize}:fontcolor=${fontColor}:line_spacing=${STUDIO_LINE_SPACING}`
-    ].join(','),
+    videoFilter,
     '-c:a',
     'copy',
     '-preset',
@@ -118,25 +176,11 @@ const addTextToVideo = async (
     'output.mp4'
   ])
 
-  if (result !== 0) {
+  if (exitCode !== 0) {
     throw new Error('FFmpeg error')
   }
 
-  const data = await ffmpeg.readFile('output.mp4')
-
-  await Promise.all([
-    ffmpeg.deleteFile('input.mp4'),
-    ffmpeg.deleteFile('text.txt'),
-    ffmpeg.deleteFile('output.mp4')
-  ]).catch(() => {})
-
-  if (!(data instanceof Uint8Array)) {
-    throw new Error('Unexpected FFmpeg output format')
-  }
-
-  return new Blob([new Uint8Array(data).buffer as ArrayBuffer], {
-    type: 'video/mp4'
-  })
+  return readFFmpegOutput(ffmpeg)
 }
 
 export const useVideoInitializer = () => {
@@ -290,16 +334,18 @@ export const useVideoProcessor = (
     })
   }
 
+  const reset = () => {
+    mutation.reset()
+    setProgress(0)
+  }
+
   return {
     processVideo: mutation.mutate,
     progress,
-    isLoading: mutation.isPending,
+    isProcessing: mutation.isPending,
     error: mutation.error,
-    data: mutation.data,
+    processedData: mutation.data ?? null,
     cancel,
-    reset: () => {
-      mutation.reset()
-      setProgress(0)
-    }
+    reset
   }
 }

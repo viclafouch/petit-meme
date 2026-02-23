@@ -45,6 +45,8 @@ type SeoParams = {
   keywords?: string
   isAdmin?: boolean
   pathname?: string
+  noindex?: boolean
+  canonicalPathname?: string
 }
 
 type SeoResult = {
@@ -59,13 +61,16 @@ export const seo = ({
   image,
   imageAlt,
   isAdmin = false,
-  pathname = '/'
+  pathname = '/',
+  noindex = false,
+  canonicalPathname
 }: SeoParams): SeoResult => {
   const titlePrefixed = isAdmin
     ? `Admin Petit Meme - ${title}`
     : `Petit Meme - ${title}`
 
   const url = buildUrl(pathname)
+  const canonicalUrl = canonicalPathname ? buildUrl(canonicalPathname) : url
 
   const meta = [
     { title: titlePrefixed },
@@ -80,8 +85,9 @@ export const seo = ({
     { property: 'og:site_name', content: 'Petit Meme' },
     { property: 'og:title', content: titlePrefixed },
     { property: 'og:description', content: description },
-    { property: 'og:url', content: url },
+    { property: 'og:url', content: canonicalUrl },
     { property: 'og:locale', content: 'fr_FR' },
+    ...(noindex ? [{ name: 'robots', content: 'noindex, follow' }] : []),
     ...(image
       ? [
           { name: 'twitter:image', content: image },
@@ -102,8 +108,8 @@ export const seo = ({
   const links: NonNullable<AnyRouteMatch['links']> = isAdmin
     ? []
     : [
-        { rel: 'canonical', href: url },
-        { rel: 'alternate', hrefLang: 'fr', href: url }
+        { rel: 'canonical', href: canonicalUrl },
+        { rel: 'alternate', hrefLang: 'fr', href: canonicalUrl }
       ]
 
   return { meta, links }

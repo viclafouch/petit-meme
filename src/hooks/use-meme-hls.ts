@@ -3,11 +3,10 @@ import Hls from 'hls.js'
 import { buildVideoStreamUrl } from '@/lib/bunny'
 
 type UseMemeHlsParams = {
-  memeId: string
   bunnyId: string
 }
 
-export const useMemeHls = ({ memeId, bunnyId }: UseMemeHlsParams) => {
+export const useMemeHls = ({ bunnyId }: UseMemeHlsParams) => {
   const videoRef = React.useRef<HTMLVideoElement>(null)
   const hlsRef = React.useRef<Hls>(null)
 
@@ -31,7 +30,7 @@ export const useMemeHls = ({ memeId, bunnyId }: UseMemeHlsParams) => {
     return () => {
       hlsRef.current?.destroy()
     }
-  }, [memeId, bunnyId])
+  }, [bunnyId])
 
   return { videoRef, hlsRef }
 }

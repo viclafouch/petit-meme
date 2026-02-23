@@ -3,7 +3,7 @@ import { useHotkeys } from 'react-hotkeys-hook'
 import { Clapperboard, Clipboard, Download, Share2, X } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import {
   VideoPlayer,
   VideoPlayerContent,
@@ -23,13 +23,13 @@ import type { ConversionEventName } from '@/lib/algolia-insights'
 import { sendConversionEvent } from '@/lib/algolia-insights'
 import { buildVideoImageUrl } from '@/lib/bunny'
 import { buildUrl } from '@/lib/seo'
-import { useLinkProps } from '@tanstack/react-router'
+import { cn } from '@/lib/utils'
+import { Link, useLinkProps } from '@tanstack/react-router'
 
 type PlayerDialogParams = {
   meme: MemeWithVideo
   layoutContext: string
   onClose: () => void
-  onOpenStudio: (meme: MemeWithVideo) => void
   queryID?: string
   authenticatedUserToken?: string
 }
@@ -38,14 +38,10 @@ export const PlayerDialog = ({
   meme,
   layoutContext,
   onClose,
-  onOpenStudio,
   queryID,
   authenticatedUserToken
 }: PlayerDialogParams) => {
-  const { videoRef } = useMemeHls({
-    memeId: meme.id,
-    bunnyId: meme.video.bunnyId
-  })
+  const { videoRef } = useMemeHls({ bunnyId: meme.video.bunnyId })
   const isReducedMotion = useReducedMotion()
   const shareMeme = useShareMeme()
   const downloadMutation = useDownloadMeme()
@@ -62,7 +58,7 @@ export const PlayerDialog = ({
     maxMs: 12000
   })
 
-  const trackConversion = (eventName: ConversionEventName) => {
+  const handleTrackConversion = (eventName: ConversionEventName) => {
     sendConversionEvent({
       queryID,
       objectID: meme.id,
@@ -71,7 +67,7 @@ export const PlayerDialog = ({
     })
   }
 
-  const copyMemeLink = async () => {
+  const handleCopyMemeLink = async () => {
     const text = buildUrl(memeLink.href as string)
 
     try {
@@ -84,16 +80,16 @@ export const PlayerDialog = ({
     }
   }
 
-  const close = () => {
+  const handleClose = () => {
     videoRef.current?.pause()
     onClose()
   }
 
   useHotkeys('escape', () => {
-    return close()
+    return handleClose()
   })
 
-  const playVideo = () => {
+  const handlePlayVideo = () => {
     const video = videoRef.current
 
     if (!video) {
@@ -101,14 +97,13 @@ export const PlayerDialog = ({
     }
 
     video.play().catch(() => {
-      // eslint-disable-next-line no-console
-      console.warn('Autoplay échoué (native), besoin d’interaction :')
-      video.addEventListener('canplay', () => {
-        video.play().catch(() => {
-          // eslint-disable-next-line no-console
-          console.warn('Autoplay échoué (native), besoin d’interaction :')
-        })
-      })
+      video.addEventListener(
+        'canplay',
+        () => {
+          video.play().catch(() => {})
+        },
+        { once: true }
+      )
     })
   }
 
@@ -118,7 +113,7 @@ export const PlayerDialog = ({
         initial={isReducedMotion ? false : { opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        onClick={close}
+        onClick={handleClose}
         role="presentation"
         className="bg-black/90 absolute inset-0"
       />
@@ -128,13 +123,13 @@ export const PlayerDialog = ({
         initial={isReducedMotion ? false : { opacity: 0 }}
         exit={{ opacity: 0 }}
       >
-        <Button size="icon" onClick={close} aria-label="Fermer">
+        <Button size="icon" onClick={handleClose} aria-label="Fermer">
           <X />
         </Button>
       </motion.div>
       <motion.div
         layoutId={`${layoutContext}-item-${meme.id}`}
-        onLayoutAnimationComplete={playVideo}
+        onLayoutAnimationComplete={handlePlayVideo}
         className="relative w-200 max-w-[90vw]"
       >
         <div className="size-full flex flex-col items-center gap-y-4">
@@ -166,23 +161,22 @@ export const PlayerDialog = ({
           </div>
           <div
             className="absolute bg-transparent inset-0 -z-1"
-            onClick={close}
+            onClick={handleClose}
             role="presentation"
           />
           <div className="w-full flex sm:justify-center gap-2 flex-col sm:max-w-sm">
-            <Button
-              size="lg"
-              variant="default"
+            <Link
+              to="/memes/$memeId/studio"
+              params={{ memeId: meme.id }}
+              className={cn(buttonVariants({ variant: 'default', size: 'lg' }))}
               onClick={() => {
-                trackConversion('Meme Studio Opened')
+                handleTrackConversion('Meme Studio Opened')
                 videoRef.current?.pause()
-
-                return onOpenStudio(meme)
               }}
             >
               <Clapperboard />
               Ouvrir dans Studio
-            </Button>
+            </Link>
             <div className="grid gap-2 grid-cols-2">
               <Button
                 size="lg"
@@ -190,7 +184,7 @@ export const PlayerDialog = ({
                 disabled={shareMeme.isPending}
                 className="md:hidden w-full"
                 onClick={() => {
-                  trackConversion('Meme Shared')
+                  handleTrackConversion('Meme Shared')
 
                   return shareMeme.mutate(meme)
                 }}
@@ -203,9 +197,8 @@ export const PlayerDialog = ({
                 variant="secondary"
                 className="w-full"
                 onClick={() => {
-                  trackConversion('Meme Link Copied')
-
-                  return copyMemeLink()
+                  handleTrackConversion('Meme Link Copied')
+                  void handleCopyMemeLink()
                 }}
               >
                 <Clipboard />
@@ -217,7 +210,7 @@ export const PlayerDialog = ({
                 disabled={downloadMutation.isPending}
                 className="col-span-2 md:col-span-1 w-full"
                 onClick={() => {
-                  trackConversion('Meme Downloaded')
+                  handleTrackConversion('Meme Downloaded')
 
                   return downloadMutation.mutate(meme)
                 }}

@@ -114,7 +114,7 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
             autoComplete="off"
             type="text"
             maxLength={STUDIO_TEXT_MAX_LENGTH}
-            className="flex-1 h-8 text-sm"
+            className="flex-1 h-8"
           />
           <Button
             variant="outline"

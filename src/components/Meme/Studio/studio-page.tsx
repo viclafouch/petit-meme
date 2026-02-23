@@ -24,6 +24,7 @@ import {
   useVideoInitializer,
   useVideoProcessor
 } from '@/hooks/use-video-processor'
+import { cn } from '@/lib/utils'
 import { useStudioStore } from '@/stores/studio.store'
 import { Link } from '@tanstack/react-router'
 
@@ -64,34 +65,33 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
   return (
     <div className="flex flex-col md:flex-row h-full overflow-hidden">
       <div className="flex-1 flex flex-col min-h-0">
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-white/5 md:hidden">
+        <div className="flex items-center gap-3 px-4 py-2 border-b border-white/5 md:hidden">
           <Link
             to="/memes/$memeId"
             params={{ memeId: meme.id }}
-            className={buttonVariants({ variant: 'ghost', size: 'icon' })}
-            aria-label="Retour au mème"
+            className={cn(buttonVariants({ variant: 'ghost', size: 'lg' }))}
           >
-            <ArrowLeft className="size-4" />
-          </Link>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5">
-              <img
-                src="/images/logo.png"
-                alt=""
-                width={16}
-                height={16}
-                decoding="async"
-                className="size-4"
-                aria-hidden
-              />
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                Studio
-              </span>
+            <ArrowLeft className="size-5" />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5">
+                <img
+                  src="/images/logo.png"
+                  alt=""
+                  width={16}
+                  height={16}
+                  decoding="async"
+                  className="size-4"
+                  aria-hidden
+                />
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  Studio
+                </span>
+              </div>
+              <h1 className="font-bricolage text-sm font-semibold truncate">
+                {meme.title}
+              </h1>
             </div>
-            <h1 className="font-bricolage text-sm font-semibold truncate">
-              {meme.title}
-            </h1>
-          </div>
+          </Link>
         </div>
         <div className="flex-1 min-h-0 p-3 md:p-8 md:bg-black/40">
           <StudioPreview
@@ -126,7 +126,7 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
             aria-label="Ouvrir les réglages"
           >
             <SlidersHorizontal className="size-4" />
-            Outils
+            Réglages
           </Button>
           <LoadingButton
             isLoading={isProcessing}

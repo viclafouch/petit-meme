@@ -49,10 +49,15 @@ const OriginalVideo = React.memo(({ bunnyId }: OriginalVideoParams) => {
         slot="media"
         tabIndex={-1}
       />
-      <VideoPlayerControlBar>
+      <VideoPlayerControlBar
+        style={{
+          display: 'flex',
+          width: '100%',
+          background: 'black'
+        }}
+      >
         <VideoPlayerPlayButton />
-        <VideoPlayerTimeRange />
-        <VideoPlayerTimeDisplay showDuration />
+        <div style={{ flex: 1 }} />
         <VideoPlayerMuteButton />
         <VideoPlayerVolumeRange />
         <VideoFullScreenButton />

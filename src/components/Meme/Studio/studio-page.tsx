@@ -74,9 +74,20 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
             <ArrowLeft className="size-4" />
           </Link>
           <div className="flex-1 min-w-0">
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-              Studio
-            </span>
+            <div className="flex items-center gap-1.5">
+              <img
+                src="/images/logo.png"
+                alt=""
+                width={16}
+                height={16}
+                decoding="async"
+                className="size-4"
+                aria-hidden
+              />
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                Studio
+              </span>
+            </div>
             <h1 className="font-bricolage text-sm font-semibold truncate">
               {meme.title}
             </h1>
@@ -160,9 +171,25 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
           >
             <ArrowLeft className="size-4" />
           </Link>
-          <h1 className="font-bricolage text-sm font-semibold truncate">
-            {meme.title}
-          </h1>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5">
+              <img
+                src="/images/logo.png"
+                alt=""
+                width={16}
+                height={16}
+                decoding="async"
+                className="size-4"
+                aria-hidden
+              />
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                Studio
+              </span>
+            </div>
+            <h1 className="font-bricolage text-sm font-semibold truncate">
+              {meme.title}
+            </h1>
+          </div>
         </div>
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col gap-5">
           <StudioControls

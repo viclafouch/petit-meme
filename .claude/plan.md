@@ -175,3 +175,239 @@ Remplacer `react-error-boundary` par `Sentry.ErrorBoundary` dans toute l'app. Ca
 ## Dependabot — Vulnérabilités
 
 Traiter les vulnérabilités signalées par GitHub : https://github.com/viclafouch/petit-meme/security/dependabot
+
+---
+
+## Admin — Audit & Refonte Tables, UX, Confirmations
+
+L'admin utilise TanStack Table pour users et categories, mais avec uniquement `getCoreRowModel()` — aucun tri, aucune pagination, aucun filtrage. Les actions destructives (ban, unban, delete user, delete category) n'ont aucune confirmation. La library memes garde sa grille visuelle Algolia (adaptée au contenu vidéo).
+
+**Ordre d'exécution :** Sécu & GDPR (1-2) → Perf & hardening (3-4) → UI tables (5-7) → Dashboard & UX (8-9) → Audits (10)
+
+### Phase 1 — Sécurité admin
+
+**[HIGH] SSRF dans `fetchTweetMedia`** (`src/server/twitter.ts`)
+- [ ] Ajouter un allowlist de hostnames Twitter (`video.twimg.com`, `pbs.twimg.com`) sur les URLs acceptées par `fetchTweetMedia`
+
+**[MEDIUM] Pas de `max()` sur les schemas Zod** (`src/server/admin.ts`, `src/server/categories.ts`)
+- [ ] Ajouter `.max()` sur tous les champs string et array : `title`, `keywords`, `slug`, `categoryIds`, `description` dans `MEME_FORM_SCHEMA` et `CATEGORY_FORM_SCHEMA`
+
+**[MEDIUM] Injection filtre Algolia** (`src/server/admin.ts` — `getAdminMemes`)
+- [ ] Valider `data.status` contre l'enum `MemeStatus` avant interpolation dans le filtre Algolia
+
+**[LOW] `getTweetFromUrl` accessible par tous les users authentifiés**
+- [ ] Changer le middleware de `authUserRequiredMiddleware` à `adminRequiredMiddleware` dans `src/server/twitter.ts`
+
+**[LOW] Rate limiting désactivé hors production**
+- [ ] Activer le rate limiting sur les preview deployments Vercel (variable d'env ou protection par mot de passe Vercel)
+
+### Phase 2 — GDPR
+
+**[CRITICAL] PII dans les logs**
+- [ ] Ajouter `email` et `to` à la liste `redact` de pino dans `src/lib/logger.ts`
+- [ ] Remplacer `email: user.email` par `userId: user.id` dans les logs des crons (`crons/unverified-cleanup.ts`, `crons/verification-reminder.ts`)
+
+**[HIGH] Sentry user context**
+- [ ] Passer `Sentry.setUser({ id: user.id })` au lieu de `{ email: user.email }` dans `src/routes/__root.tsx`
+
+**[HIGH] stripeCustomerId dans l'export**
+- [ ] Retirer `stripeCustomerId` du `select` dans `exportUserData` (`src/server/user.ts`)
+
+**[HIGH] viewerKey sans consentement**
+- [ ] Utiliser un sentinel `'anonymous'` comme `viewerKey` quand pas de consentement cookie dans `registerMemeView` (`src/server/meme.ts`)
+
+**[MEDIUM] Politique de confidentialité**
+- [ ] Ajouter l'adresse physique / identité légale du responsable dans `md/privacy.md`
+
+**[MEDIUM] Consentement OAuth Twitter**
+- [ ] Ajouter une mention explicite dans les CGU/privacy : "En créant un compte via Twitter/X, vous acceptez nos CGU et Politique de confidentialité"
+
+### Phase 3 — Performance backend admin
+
+**[MEDIUM] `deleteMemeById` — non transactionnel**
+- [ ] Utiliser `prismaClient.$transaction` pour delete Meme + Video atomiquement, puis `Promise.all` pour Algolia + Bunny (`src/server/admin.ts`)
+
+**[MEDIUM] `createMemeWithVideo` — orphelins Bunny**
+- [ ] Ajouter un try/catch autour de `meme.create` avec cleanup `deleteVideo(videoId)` en cas d'échec (`src/server/admin.ts`)
+
+**[MEDIUM] `editMeme` — diff catégories O(n²)**
+- [ ] Remplacer `Array.includes` par `Set.has` pour le diff `toAdd`/`toRemove` des catégories (`src/server/admin.ts`)
+
+**[LOW] Index manquants**
+- [ ] Ajouter `@@index([categoryId])` sur `MemeCategory` dans `prisma/schema.prisma`
+- [ ] Ajouter `@@index([createdAt])` sur `Category` dans `prisma/schema.prisma`
+
+**[LOW] `getCategories` sans cache**
+- [ ] Ajouter un cache TTL simple (5 min) sur `getCategories` (`src/server/categories.ts`)
+
+**[LOW] Cache key `getAdminMemes` incomplète**
+- [ ] Restreindre le schema d'input de `getAdminMemes` pour exclure `category` (non utilisé côté admin) (`src/server/admin.ts`)
+
+### Phase 4 — Hardening Better Auth (best practices)
+
+**Fichiers :** `src/lib/auth.tsx`, `src/lib/auth-client.ts`, `src/lib/role.ts`, `src/server/user-auth.ts`, `src/routes/admin/users.tsx`, `src/components/user-dropdown.tsx`, `src/components/admin/admin-nav-button.tsx`
+
+- [ ] Ajouter `session.freshAge: 3600` (1h) — forcer une ré-auth récente pour les actions admin sensibles
+- [ ] Configurer `advanced.backgroundTasks.handler` avec `waitUntil` de Vercel
+- [ ] Expliciter la config du plugin admin : `admin({ defaultRole: 'user' })`
+- [ ] Corriger l'import plugin `admin` : `from 'better-auth/plugins'` → `from 'better-auth/plugins/admin'` (tree-shaking)
+- [ ] Corriger l'import type `UserWithRole` : `from 'better-auth/plugins'` → `from 'better-auth/plugins/admin'` (6 fichiers)
+- [ ] Ajouter `session.cookieCache.version: 1`
+
+### Phase 5 — Upgrade `AdminTable` (composant générique)
+
+**Fichiers :** `src/components/admin/admin-table.tsx`
+
+- [ ] Typer proprement : remplacer `Table<any>` par `Table<TData>` (composant générique)
+- [ ] Ajouter le tri : headers cliquables avec icônes (asc/desc/none), utiliser `getSortedRowModel()` de TanStack Table
+- [ ] Ajouter la pagination : footer avec navigation (précédent/suivant + numéro de page), utiliser `getPaginationRowModel()` de TanStack Table
+- [ ] Rendre pagination/tri optionnels : props `enableSorting` et `enablePagination` avec defaults raisonnables
+
+### Phase 6 — Users table (pagination + tri + confirmations + server functions)
+
+Inclut la migration ban/unban/delete vers des server functions sécurisées, la création du modèle `AdminAuditLog`, et les confirmations UI.
+
+**Fichiers :** `src/routes/admin/users.tsx`, `src/server/admin.ts`, `prisma/schema.prisma`
+
+**Migration Prisma — `AdminAuditLog`**
+- [ ] Créer le modèle `AdminAuditLog` (action, actingAdminId, targetId, targetType, metadata Json, createdAt) — audit trail officiel en DB
+
+**Server functions ban/unban**
+- [ ] Créer `banUserById` dans `src/server/admin.ts` avec `adminRequiredMiddleware` + guard anti-self-ban (`userId === context.user.id`) + log dans `AdminAuditLog`
+- [ ] Créer `unbanUserById` dans `src/server/admin.ts` avec `adminRequiredMiddleware` + log dans `AdminAuditLog`
+- [ ] Migrer `DropdownMenuUser` pour appeler les server functions au lieu de `authClient.admin.banUser/unbanUser`
+- [ ] Permettre un choix de raison de ban (raisons prédéfinies) au lieu du hardcoded "Spamming"
+
+**Server function removeUser**
+- [ ] Ajouter guard server-side `userId === context.user.id` (auto-suppression)
+- [ ] Log dans `AdminAuditLog` avec `actingAdminId`
+- [ ] Supprimer le `findUnique` pré-vol redondant — laisser `auth.api.removeUser` gérer le not-found
+
+**TanStack Table**
+- [ ] Activer `getSortedRowModel()`, `getPaginationRowModel()` dans `useReactTable`
+- [ ] Colonnes triables : Name, Email, Role, Date de création
+- [ ] Pagination : 20 users par page (client-side)
+- [ ] Afficher le statut ban : colonne "Statut" avec badge (Banni/Actif)
+
+**Confirmations + feedback**
+- [ ] Confirmation ban : wraper avec `ConfirmAlert` (`src/components/confirm-alert.tsx`)
+- [ ] Confirmation unban : idem
+- [ ] Confirmation delete : idem
+- [ ] Toast feedback : `toast.promise()` pour ban, unban et delete
+
+### Phase 7 — Categories table (tri + confirmation delete)
+
+**Fichiers :** `src/routes/admin/categories/index.tsx`, `src/routes/admin/categories/-components/category-dropdown.tsx`
+
+- [ ] Activer le tri : ajouter `getSortedRowModel()` à `useReactTable`
+- [ ] Colonnes triables : Titre, Slug, Date de création
+- [ ] Confirmation delete : wraper "Supprimer" dans `CategoryDropdown` avec `ConfirmAlert`
+- [ ] Toast feedback : ajouter `toast.promise()` pour la suppression de catégorie
+- [ ] Log suppression catégorie dans `AdminAuditLog`
+
+### Phase 8 — Dashboard admin (`/admin`)
+
+Transformer la page d'accueil admin en un vrai dashboard avec KPIs, liens rapides et activité récente. Design via `/frontend-design`.
+
+**Prérequis**
+- [ ] Vérifier la disponibilité de l'Algolia Analytics API sur le free tier (partages, téléchargements, clics). Si indisponible → fallback compteurs DB (`shareCount`/`downloadCount` sur Meme, migration additive)
+
+**Migrations additives (Prisma)**
+- [ ] Créer le modèle `StudioGeneration` (userId, memeId, createdAt) — remplace le compteur `User.generationCount` pour un tracking par date filtrable par période. Modifier `incrementGenerationCount` pour créer un record au lieu d'incrémenter
+- [ ] Si Algolia Analytics API indisponible : ajouter `shareCount`/`downloadCount` sur `Meme` + incrémenter dans les hooks existants
+- [ ] Logger les actions admin restantes dans `AdminAuditLog` : publish meme, edit meme
+
+**Sélecteur de période**
+- [ ] Composant `PeriodSelector` réutilisable : 7j / 30j / 90j (ToggleGroup ou Select)
+- [ ] Toutes les cards KPI, graphiques et tops utilisent la période sélectionnée
+- [ ] Chaque card affiche la valeur + le delta vs période précédente (ex: "+12% vs semaine dernière") avec flèche verte/rouge
+
+**KPIs (cards) — filtrés par période sélectionnée**
+- [ ] Vues (count `MemeViewDaily` sur la période)
+- [ ] Nouveaux users (count `User.createdAt` sur la période)
+- [ ] Nouveaux memes publiés (count `Meme.publishedAt` sur la période)
+- [ ] Générations Studio (count `StudioGeneration.createdAt` sur la période)
+- [ ] Bookmarks (count `UserBookmark.createdAt` sur la période)
+- [ ] Partages (Algolia Analytics API ou `Meme.shareCount` sur la période)
+- [ ] Téléchargements (Algolia Analytics API ou `Meme.downloadCount` sur la période)
+- [ ] Abonnements premium actifs (depuis `Subscription`)
+
+**Totaux (toujours visibles, hors filtre période)**
+- [ ] Total memes par statut (publiés / en attente / brouillons)
+- [ ] Total users par statut (actifs / bannis / non vérifiés)
+
+**Liens rapides (cards cliquables)**
+- [ ] "X memes en attente" → `/admin/library?status=PENDING`
+- [ ] "X users non vérifiés" → `/admin/users` (filtré)
+- [ ] "Ajouter un meme" → `/admin/library/add`
+- [ ] "Gérer les catégories" → `/admin/categories`
+
+**Graphiques tendances — s'adaptent à la période**
+- [ ] Courbe vues (7j → par jour, 30j → par jour, 90j → par semaine) depuis `MemeViewDaily`
+- [ ] Courbe inscriptions (7j → par jour, 30j → par semaine, 90j → par semaine) depuis `User.createdAt`
+- [ ] Courbe memes publiés (même granularité) depuis `Meme.publishedAt`
+- [ ] Courbe partages + téléchargements (Algolia ou DB, même granularité)
+- [ ] Librairie légère : évaluer `recharts` vs sparklines CSS-only (coût bundle)
+
+**Top memes (classement) — filtrés par période**
+- [ ] Top 10 memes les plus vus (sum `MemeViewDaily` sur la période)
+- [ ] Top 10 memes les plus bookmarkés (count `UserBookmark.createdAt` sur la période)
+- [ ] Top 10 memes les plus partagés/téléchargés (Algolia ou DB)
+
+**Activité récente (feed)**
+- [ ] Afficher les 10 dernières entrées `AdminAuditLog` avec timestamps relatifs
+
+**Server functions**
+- [ ] `getAdminDashboardStats({ period: '7d' | '30d' | '90d' })` — tous les counts filtrés par période + delta vs période précédente
+- [ ] `getAdminRecentActivity` — dernières entrées `AdminAuditLog`
+- [ ] `getAdminChartData({ period })` — données agrégées pour les graphiques (granularité auto selon période)
+- [ ] `getAdminTopMemes({ period })` — top memes par vues/bookmarks sur la période
+- [ ] `getAdminAlgoliaStats({ period })` — partages/téléchargements (si Algolia Analytics API dispo)
+
+**État des données**
+
+| Donnée | En DB | Filtrable par période | Fallback |
+|--------|-------|----------------------|----------|
+| Vues | `MemeViewDaily` (day) | ✓ | — |
+| Inscriptions | `User.createdAt` | ✓ | — |
+| Memes publiés | `Meme.publishedAt` | ✓ | — |
+| Bookmarks | `UserBookmark.createdAt` | ✓ | — |
+| Générations | `StudioGeneration.createdAt` (nouveau) | ✓ | — |
+| Partages | Algolia `Meme Shared` | ✓ (API) | `Meme.shareCount` (migration) |
+| Téléchargements | Algolia `Meme Downloaded` | ✓ (API) | `Meme.downloadCount` (migration) |
+| Clics | Algolia `Meme Clicked` | ✓ (API) | non prioritaire |
+
+### Phase 9 — Améliorations UX admin
+
+**Search users**
+- [ ] Ajouter une barre de recherche client-side sur la table users (filtre par nom/email)
+- [ ] Intégrer dans `AdminTable` comme prop optionnelle `searchPlaceholder`
+
+**Memes en attente — badge nav**
+- [ ] Afficher un badge count "pending" sur le lien "Library" dans la nav admin
+- [ ] Server function `getPendingMemesCount` (ou inclure dans les stats dashboard)
+- [ ] Filtre par défaut "PENDING" quand on clique sur le badge
+
+**Bulk actions**
+- [ ] Ajouter la sélection multiple (checkboxes) dans `AdminTable` via `getFilteredSelectedRowModel()` de TanStack Table
+- [ ] Actions bulk sur memes : publier / supprimer la sélection
+- [ ] Actions bulk sur users : bannir / supprimer la sélection
+- [ ] Confirmation `ConfirmAlert` avec le count d'éléments sélectionnés
+
+**Export CSV**
+- [ ] Bouton export sur les tables users (avec emails — cohérent avec le rôle admin) et memes (sans emails)
+- [ ] Génération côté client (pas de server function) — `Blob` + `URL.createObjectURL`
+
+**Santé système (section dashboard ou page dédiée)**
+- [ ] Algolia : quota indexation (via Algolia API `getStatus`)
+- [ ] Bunny CDN : stockage utilisé (via Bunny API)
+- [ ] Stripe : nombre d'abonnements actifs
+- [ ] Sentry : count erreurs dernières 24h (via Sentry API, si gratuit)
+- [ ] Afficher sous forme de badges vert/orange/rouge selon les seuils
+
+### Phase 10 — Audits post-implémentation
+
+À lancer **après** toutes les phases précédentes :
+
+- [ ] **React performance** — re-renders TanStack Table, stabilité références colonnes/handlers, bulk selection
+- [ ] **Accessibility (a11y)** — `aria-sort` sur headers triables, `aria-label` pagination, focus trap confirm dialogs, touch targets mobile, graphiques (alt text ou `aria-describedby`)

@@ -15,6 +15,7 @@ import type { AlgoliaMemeRecord } from '@/lib/algolia'
 import {
   ALGOLIA_ADMIN_SEARCH_PARAMS,
   algoliaAdminClient,
+  algoliaIndexCreated,
   algoliaIndexName,
   algoliaSearchClient,
   invalidateAlgoliaCache,
@@ -339,9 +340,11 @@ export const getAdminMemes = createServerFn({ method: 'GET' })
     return withAlgoliaCache(cacheKey, async () => {
       const filters = data.status ? `status:${data.status}` : undefined
 
+      const searchIndex = data.query ? algoliaIndexName : algoliaIndexCreated
+
       const response =
         await algoliaSearchClient.searchSingleIndex<AlgoliaMemeRecord>({
-          indexName: algoliaIndexName,
+          indexName: searchIndex,
           searchParams: {
             query: data.query,
             page: data.page ? data.page - 1 : 0,

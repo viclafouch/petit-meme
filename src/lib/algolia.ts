@@ -12,6 +12,7 @@ import * as Sentry from '@sentry/tanstackstart-react'
 export const algoliaIndexName = clientEnv.VITE_ALGOLIA_INDEX
 export const algoliaIndexPopular = `${algoliaIndexName}_replica_popular`
 export const algoliaIndexRecent = `${algoliaIndexName}_replica_recent`
+export const algoliaIndexCreated = `${algoliaIndexName}_replica_created`
 
 export const algoliaSearchClient = searchClient(
   clientEnv.VITE_ALGOLIA_APP_ID,

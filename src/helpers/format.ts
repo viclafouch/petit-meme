@@ -13,6 +13,14 @@ export function formatViewCount(count: number) {
   return `${count} ${pluralize(count, { one: 'vue', other: 'vues' })}`
 }
 
+export function formatCategoryCount(count: number) {
+  if (count === 0) {
+    return 'Aucune catégorie'
+  }
+
+  return `${count} ${pluralize(count, { one: 'catégorie', other: 'catégories' })}`
+}
+
 export function capitalize(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1)
 }

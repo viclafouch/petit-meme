@@ -8,17 +8,17 @@ Memes by Lafouch — a meme management and sharing platform with video support, 
 
 The site is currently **French-only**. An English migration is planned for later.
 
-The site has very few users, giving us more freedom for breaking changes. Design is **mobile-first**, always responsive, and must work across all major browsers (Safari, Chrome, Firefox, etc.). Hosted on **Railway** (CLI available).
+The site has very few users, giving us more freedom for breaking changes. Design is **mobile-first**, always responsive, and must work across all major browsers (Safari, Chrome, Firefox, etc.). Hosted on **Vercel**.
 
 ## Cost Awareness
 
-Minimize costs on all external services (database, Algolia, Sentry, Railway, etc.). Always check what is available on free tiers before implementing. When developing, proactively suggest useful free-tier features from existing services. Always consider whether a feature or usage pattern could become expensive.
+Minimize costs on all external services (database, Algolia, Sentry, Vercel, etc.). Always check what is available on free tiers before implementing. When developing, proactively suggest useful free-tier features from existing services. Always consider whether a feature or usage pattern could become expensive.
 
 ## Commands
 
 ```bash
-pnpm run build            # Production build (copies instrument.server.mjs to .output)
-pnpm start                # Start production server (with Sentry --import)
+pnpm run build            # Production build (Vite + Nitro vercel preset)
+pnpm start                # Start production server
 pnpm run lint             # TypeScript check + ESLint
 pnpm run lint:fix         # Auto-fix lint issues
 pnpm run prisma:migrate   # Deploy Prisma migrations (prisma migrate deploy)

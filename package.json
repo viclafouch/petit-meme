@@ -21,9 +21,9 @@
   },
   "type": "module",
   "scripts": {
-    "dev": "NODE_OPTIONS='--import ./instrument.server.mjs' vite dev",
-    "build": "vite build && cp instrument.server.mjs .output/server",
-    "start": "node --import ./.output/server/instrument.server.mjs .output/server/index.mjs",
+    "dev": "vite dev",
+    "build": "vite build",
+    "start": "node .output/server/index.mjs",
     "prisma:migrate": "prisma migrate deploy",
     "prisma:seed": "tsx --env-file=.env prisma/seed.ts",
     "prisma:reset-db": "prisma migrate reset",

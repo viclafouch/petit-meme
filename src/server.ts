@@ -1,3 +1,5 @@
+// eslint-disable-next-line simple-import-sort/imports -- Sentry must init before all other modules
+import '@/instrument-server'
 import { clientEnv } from '@/env/client'
 import { wrapFetchWithSentry } from '@sentry/tanstackstart-react'
 import {

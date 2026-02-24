@@ -134,6 +134,26 @@ Remplacer Prisma par Drizzle ORM. Conventions cibles : tables en pluriel, colonn
 
 ---
 
+## Migration Railway → Vercel
+
+Migrer l'hébergement web de Railway vers Vercel. La base de données reste chez Prisma (inchangée).
+
+- [x] Changer le Nitro preset `node-server` → `vercel` dans `vite.config.ts`
+- [x] Remplacer `RAILWAY_GIT_COMMIT_SHA` → `VERCEL_GIT_COMMIT_SHA` (Sentry release)
+- [x] Intégrer Sentry server init dans le bundle (`src/instrument-server.ts` importé dans `src/server.ts`)
+- [x] Supprimer `--import` du dev script et `cp instrument.server.mjs` du build script
+- [x] Mettre à jour les source maps path (`.vercel/output/**/*.map`)
+- [x] Créer `vercel.json` (buildCommand, installCommand)
+- [x] Ajouter `.vercel` aux `.gitignore` et ESLint ignores
+- [ ] Copier les variables d'environnement dans Vercel Console
+- [ ] Tester le build/deploy sur Vercel
+- [ ] Mettre à jour les webhook URLs (Stripe, Bunny)
+- [ ] Configurer les crons (Vercel Cron Jobs ou scheduler externe)
+- [x] Supprimer `instrument.server.mjs` (devenu obsolète)
+- [ ] Basculer le DNS vers Vercel
+
+---
+
 ## Migration vers Cloudflare
 
 Passer le domaine sur Cloudflare pour bénéficier de ses fonctionnalités natives : redirection www → apex (et supprimer le check manuel dans `server.ts`), CDN/cache, SSL, protection DDoS, Page Rules, etc.

@@ -7,20 +7,18 @@ import {
   typescriptConfig
 } from '@viclafouch/eslint-config-viclafouch'
 
-/**
- * @type {import("eslint").Linter.Config}
- */
+/** @type {import("eslint").Linter.Config[]} */
 export default [
   {
     ignores: [
       '**/node_modules/**',
       '**/.output/**',
+      '**/.vercel/**',
       '**/.nitro/**',
       '**/.tanstack/**',
       '**/db/generated/**',
       '**/components/ui/**',
       '**/components/animate-ui/**',
-      'instrument.server.mjs',
       'public/ffmpeg/**'
     ]
   },

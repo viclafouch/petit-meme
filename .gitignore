@@ -38,6 +38,7 @@ backup.json
 
 dist
 .output
+.vercel
 .nitro
 
 # Sentry auth token (source map uploads)

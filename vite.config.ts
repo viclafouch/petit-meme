@@ -6,15 +6,31 @@ import tailwindcss from '@tailwindcss/vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import react from '@vitejs/plugin-react'
 
+const ONE_YEAR_IN_SECONDS = 31_536_000
+
 const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'DENY',
   'Referrer-Policy': 'strict-origin-when-cross-origin'
 }
 
-const IMMUTABLE_CACHE = {
-  'Cache-Control': 'public, max-age=31536000, immutable'
+const IMMUTABLE_ASSET_HEADERS = {
+  ...SECURITY_HEADERS,
+  'Cache-Control': `public, max-age=${ONE_YEAR_IN_SECONDS}, immutable`
 }
+
+const STATIC_ASSET_ROUTES = [
+  '/images/**',
+  '/videos/**',
+  '/fonts/**',
+  '/ffmpeg/**'
+]
+
+const staticAssetRouteRules = Object.fromEntries(
+  STATIC_ASSET_ROUTES.map((route) => {
+    return [route, { headers: IMMUTABLE_ASSET_HEADERS }]
+  })
+)
 
 export default defineConfig({
   server: {
@@ -37,7 +53,7 @@ export default defineConfig({
     }),
     react(),
     nitro({
-      preset: 'node-server',
+      preset: 'vercel',
       routeRules: {
         '/**': {
           headers: {
@@ -45,18 +61,7 @@ export default defineConfig({
             'Cache-Control': 'no-cache'
           }
         },
-        '/images/**': {
-          headers: { ...SECURITY_HEADERS, ...IMMUTABLE_CACHE }
-        },
-        '/videos/**': {
-          headers: { ...SECURITY_HEADERS, ...IMMUTABLE_CACHE }
-        },
-        '/fonts/**': {
-          headers: { ...SECURITY_HEADERS, ...IMMUTABLE_CACHE }
-        },
-        '/ffmpeg/**': {
-          headers: { ...SECURITY_HEADERS, ...IMMUTABLE_CACHE }
-        },
+        ...staticAssetRouteRules,
         '/admin/**': {
           headers: {
             ...SECURITY_HEADERS,
@@ -70,10 +75,10 @@ export default defineConfig({
       project: 'petit-meme',
       authToken: process.env.SENTRY_AUTH_TOKEN,
       release: {
-        name: process.env.RAILWAY_GIT_COMMIT_SHA
+        name: process.env.VERCEL_GIT_COMMIT_SHA
       },
       sourcemaps: {
-        filesToDeleteAfterUpload: ['.output/**/*.map']
+        filesToDeleteAfterUpload: ['.vercel/output/**/*.map']
       }
     })
   ]

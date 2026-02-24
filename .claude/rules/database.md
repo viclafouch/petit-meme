@@ -41,29 +41,17 @@ Toujours relire le fichier `migration.sql` généré pour s'assurer qu'il ne con
 
 #### 4. Commit & push
 
-Le push déclenche le deploy Railway automatiquement.
+Le push déclenche le deploy Vercel automatiquement.
 
 #### 5. Appliquer en production
 
-Après le deploy Railway, appliquer les migrations via Railway CLI :
+Après le deploy Vercel, appliquer les migrations directement contre la base Neon :
 
 ```bash
-railway run pnpm exec prisma migrate deploy
+DATABASE_URL="<production-url>" pnpm exec prisma migrate deploy
 ```
 
 `migrate deploy` est safe : il n'applique que les migrations non encore appliquées et ne touche jamais au schema directement.
-
-### Premier baselining (une seule fois)
-
-Si la table `_prisma_migrations` n'existe pas en production (parce que `db push` était utilisé), il faut marquer les migrations existantes comme déjà appliquées :
-
-```bash
-railway run pnpm exec prisma migrate resolve --applied 20251218085720_meme_view_daily
-railway run pnpm exec prisma migrate resolve --applied 20260219110916_sync_meme_columns_indexes
-railway run pnpm exec prisma migrate resolve --applied 20260219110917_add_user_terms_privacy
-```
-
-Cela crée la table `_prisma_migrations` et enregistre ces migrations comme appliquées sans les ré-exécuter. Ensuite `migrate deploy` ne traitera que les nouvelles.
 
 ### Commandes de référence
 
@@ -71,9 +59,8 @@ Cela crée la table `_prisma_migrations` et enregistre ces migrations comme appl
 |----------|--------------|-------|
 | `pnpm exec prisma migrate dev --name <nom>` | Local | Créer + appliquer une migration |
 | `pnpm exec prisma generate` | Local | Régénérer le client (aussi dans `postinstall`) |
-| `railway run pnpm exec prisma migrate deploy` | Production | Appliquer les migrations pendantes |
-| `railway run pnpm exec prisma migrate status` | Production | Vérifier l'état des migrations |
-| `railway run pnpm exec prisma migrate resolve --applied <nom>` | Production | Marquer une migration comme déjà appliquée (baselining) |
+| `DATABASE_URL="<production-url>" pnpm exec prisma migrate deploy` | Production | Appliquer les migrations pendantes |
+| `DATABASE_URL="<production-url>" pnpm exec prisma migrate status` | Production | Vérifier l'état des migrations |
 
 ### Ce que Claude Code ne doit JAMAIS faire
 

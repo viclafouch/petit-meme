@@ -28,9 +28,9 @@ Le directeur de la publication est : **Victor de la Fouchardiere**
 
 Le site est hébergé par :
 
-- **Nom** : Railway Corporation
-- **Adresse** : 548 Market St, PMB 68956, San Francisco, CA 94104, États-Unis
-- **Site web** : [https://railway.com](https://railway.com)
+- **Nom** : Vercel Inc.
+- **Adresse** : 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis
+- **Site web** : [https://vercel.com](https://vercel.com)
 
 ---
 

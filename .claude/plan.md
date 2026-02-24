@@ -140,17 +140,19 @@ Migrer l'hébergement web de Railway vers Vercel. La base de données reste chez
 
 - [x] Changer le Nitro preset `node-server` → `vercel` dans `vite.config.ts`
 - [x] Remplacer `RAILWAY_GIT_COMMIT_SHA` → `VERCEL_GIT_COMMIT_SHA` (Sentry release)
-- [x] Intégrer Sentry server init dans le bundle (`src/instrument-server.ts` importé dans `src/server.ts`)
+- [x] ~~Intégrer Sentry server init dans le bundle~~ — désactivé temporairement (ESM/CJS crash `require-in-the-middle` sur Vercel serverless)
 - [x] Supprimer `--import` du dev script et `cp instrument.server.mjs` du build script
 - [x] Mettre à jour les source maps path (`.vercel/output/**/*.map`)
 - [x] Créer `vercel.json` (buildCommand, installCommand)
 - [x] Ajouter `.vercel` aux `.gitignore` et ESLint ignores
-- [ ] Copier les variables d'environnement dans Vercel Console
-- [ ] Tester le build/deploy sur Vercel
-- [ ] Mettre à jour les webhook URLs (Stripe, Bunny)
+- [x] Copier les variables d'environnement dans Vercel Console
+- [x] Tester le build/deploy sur Vercel
+- [x] ~~Mettre à jour les webhook URLs (Stripe, Bunny)~~ — pas nécessaire, le domaine `petit-meme.io` reste identique
 - [ ] Configurer les crons (Vercel Cron Jobs ou scheduler externe)
 - [x] Supprimer `instrument.server.mjs` (devenu obsolète)
-- [ ] Basculer le DNS vers Vercel
+- [x] Basculer le DNS vers Vercel
+- [x] Mettre à jour la documentation (README, mentions légales, database rules, GDPR auditor) : remplacer Railway par Vercel/Neon
+- [ ] Réactiver Sentry server-side tracing (`instrument-server.ts` + `wrapFetchWithSentry`) — bloqué par `require-in-the-middle` incompatible ESM dans Vercel serverless. Surveiller les updates Sentry/Nitro.
 
 ---
 

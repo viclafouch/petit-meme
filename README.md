@@ -41,8 +41,8 @@ Currently available in **French only**. English support is planned.
 
 | Service | Purpose |
 |---------|---------|
-| [Railway](https://railway.com/) | Hosting (Node.js, auto-deploy from `main`) |
-| Railway PostgreSQL | Database |
+| [Vercel](https://vercel.com/) | Hosting (serverless, auto-deploy from `feat/migrate-to-vercel`) |
+| [Neon](https://neon.tech/) | PostgreSQL database |
 | [Bunny CDN](https://bunny.net/) | Video storage and HLS delivery |
 | [Stripe](https://stripe.com/) | Payment processing and subscriptions |
 | [Algolia](https://www.algolia.com/) | Search indexing |
@@ -107,10 +107,10 @@ This creates a migration file, applies it to the local database, and regenerates
 
 ### Production deployment
 
-Railway auto-deploys on push to `main`. After a deploy that includes new migrations:
+Vercel auto-deploys on push to `feat/migrate-to-vercel`. After a deploy that includes new migrations, run against the production database directly:
 
 ```bash
-railway run pnpm exec prisma migrate deploy
+DATABASE_URL="<production-url>" pnpm exec prisma migrate deploy
 ```
 
 This applies only the pending migrations. It is safe and idempotent.
@@ -118,7 +118,7 @@ This applies only the pending migrations. It is safe and idempotent.
 ### Checking migration status
 
 ```bash
-railway run pnpm exec prisma migrate status
+DATABASE_URL="<production-url>" pnpm exec prisma migrate status
 ```
 
 ### Rules
@@ -186,9 +186,9 @@ crons/             # Scheduled jobs (Algolia sync, Bunny updates)
 
 ## Deployment
 
-The app is deployed on Railway with automatic deploys from the `main` branch.
+The app is deployed on Vercel with automatic deploys from the `feat/migrate-to-vercel` branch.
 
-Railway automatically installs dependencies, builds the app, and starts the server. Database migrations must be applied separately after each deploy that includes schema changes.
+Vercel automatically installs dependencies, builds the app, and deploys serverless functions. Database migrations must be applied separately after each deploy that includes schema changes.
 
 ## License
 

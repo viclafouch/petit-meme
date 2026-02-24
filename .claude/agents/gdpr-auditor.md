@@ -38,7 +38,7 @@ Audit the codebase for GDPR compliance, identifying gaps and providing actionabl
 ### MEDIUM (Best practice)
 - **Retention Periods** - Defined and enforced data retention
 - **Anonymization** - Proper anonymization when data no longer needed
-- **Third-party Processors** - DPA with all processors (Neon, Polar, Resend, Railway)
+- **Third-party Processors** - DPA with all processors (Neon, Polar, Resend, Vercel)
 - **Records of Processing** - Documentation of processing activities
 
 ### LOW (Recommended)
@@ -168,7 +168,7 @@ This project uses:
 - **Database:** Neon Postgres (processor, needs DPA)
 - **Payments:** Polar (processor, needs DPA)
 - **Emails:** Resend (processor, needs DPA)
-- **Hosting:** Railway (processor, needs DPA)
+- **Hosting:** Vercel (processor, needs DPA)
 
 All these are data processors under GDPR. Verify:
 - DPA (Data Processing Agreement) in place with each

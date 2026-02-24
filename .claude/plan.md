@@ -187,19 +187,19 @@ L'admin utilise TanStack Table pour users et categories, mais avec uniquement `g
 ### Phase 1 — Sécurité admin
 
 **[HIGH] SSRF dans `fetchTweetMedia`** (`src/server/twitter.ts`)
-- [ ] Ajouter un allowlist de hostnames Twitter (`video.twimg.com`, `pbs.twimg.com`) sur les URLs acceptées par `fetchTweetMedia`
+- [x] Ajouter un allowlist de hostnames Twitter (`video.twimg.com`, `pbs.twimg.com`) sur les URLs acceptées par `fetchTweetMedia` — regex `/^(video|pbs)\.twimg\.com$/` dans `z.url({ hostname })` + middleware `getTweetFromUrl` migré vers `adminRequiredMiddleware`
 
 **[MEDIUM] Pas de `max()` sur les schemas Zod** (`src/server/admin.ts`, `src/server/categories.ts`)
-- [ ] Ajouter `.max()` sur tous les champs string et array : `title`, `keywords`, `slug`, `categoryIds`, `description` dans `MEME_FORM_SCHEMA` et `CATEGORY_FORM_SCHEMA`
+- [x] Ajouter `.max()` sur tous les champs string et array : `title.max(100)`, `keywords.max(20)` + `.max(50)` par string, `categoryIds.max(10)`, `slug.max(60)` dans `MEME_FORM_SCHEMA` et `CATEGORY_FORM_SCHEMA`
 
 **[MEDIUM] Injection filtre Algolia** (`src/server/admin.ts` — `getAdminMemes`)
-- [ ] Valider `data.status` contre l'enum `MemeStatus` avant interpolation dans le filtre Algolia
+- [x] ~~Valider `data.status` contre l'enum `MemeStatus`~~ — déjà validé par `z.enum(MemeStatus)` dans `MEMES_FILTERS_SCHEMA`
 
 **[LOW] `getTweetFromUrl` accessible par tous les users authentifiés**
-- [ ] Changer le middleware de `authUserRequiredMiddleware` à `adminRequiredMiddleware` dans `src/server/twitter.ts`
+- [x] Changer le middleware de `authUserRequiredMiddleware` à `adminRequiredMiddleware` dans `src/server/twitter.ts`
 
 **[LOW] Rate limiting désactivé hors production**
-- [ ] Activer le rate limiting sur les preview deployments Vercel (variable d'env ou protection par mot de passe Vercel)
+- [ ] Activer le rate limiting sur les preview deployments Vercel (variable d'env ou protection par mot de passe Vercel) — reporté (infra)
 
 ### Phase 2 — GDPR
 

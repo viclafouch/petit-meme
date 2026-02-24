@@ -62,7 +62,7 @@ export const getListUsers = createServerFn({ method: 'GET' })
   .handler(async () => {
     const { headers } = getRequest()
 
-    const listUsers = await auth.api.listUsers({
+    return auth.api.listUsers({
       query: {
         limit: 500,
         offset: 0,
@@ -70,15 +70,13 @@ export const getListUsers = createServerFn({ method: 'GET' })
       },
       headers
     })
-
-    return listUsers
   })
 
 export const MEME_FORM_SCHEMA = z.object({
-  title: z.string().min(3),
-  keywords: z.array(z.string()),
+  title: z.string().min(3).max(100),
+  keywords: z.array(z.string().max(50)).max(20),
   description: z.string().max(200),
-  categoryIds: z.array(z.string()),
+  categoryIds: z.array(z.string()).max(10),
   status: z.enum(MemeStatus),
   tweetUrl: TWEET_LINK_SCHEMA.nullable().or(
     z

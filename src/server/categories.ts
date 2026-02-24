@@ -5,21 +5,19 @@ import { adminRequiredMiddleware } from '@/server/user-auth'
 import { createServerFn } from '@tanstack/react-start'
 
 export const CATEGORY_FORM_SCHEMA = z.object({
-  title: z.string().min(3),
-  slug: z.string().min(2),
-  keywords: z.array(z.string())
+  title: z.string().min(3).max(100),
+  slug: z.string().min(2).max(60),
+  keywords: z.array(z.string().max(50)).max(20)
 })
 
 export const getCategories = createServerFn({ method: 'GET' }).handler(
   async () => {
-    const categories = await prismaClient.category.findMany({
+    return prismaClient.category.findMany({
       take: 100,
       orderBy: {
         createdAt: 'desc'
       }
     })
-
-    return categories
   }
 )
 

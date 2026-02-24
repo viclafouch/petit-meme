@@ -2,10 +2,7 @@ import { z } from 'zod'
 import { TWEET_LINK_SCHEMA } from '@/constants/meme'
 import { adminLogger } from '@/lib/logger'
 import { extractTweetIdFromUrl, getTweetById } from '@/lib/react-tweet'
-import {
-  adminRequiredMiddleware,
-  authUserRequiredMiddleware
-} from '@/server/user-auth'
+import { adminRequiredMiddleware } from '@/server/user-auth'
 import * as Sentry from '@sentry/tanstackstart-react'
 import { createServerFn } from '@tanstack/react-start'
 
@@ -13,18 +10,18 @@ export const getTweetFromUrl = createServerFn({ method: 'GET' })
   .inputValidator((url: string) => {
     return TWEET_LINK_SCHEMA.parse(url)
   })
-  .middleware([authUserRequiredMiddleware])
+  .middleware([adminRequiredMiddleware])
   .handler(async ({ data: url }) => {
     const tweetId = z.string().parse(extractTweetIdFromUrl(url))
 
-    const tweet = await getTweetById(tweetId)
-
-    return tweet
+    return getTweetById(tweetId)
   })
 
+const TWITTER_MEDIA_HOSTNAME = /^(video|pbs)\.twimg\.com$/
+
 const FETCH_TWEET_MEDIA_SCHEMA = z.object({
-  videoUrl: z.url(),
-  posterUrl: z.url()
+  videoUrl: z.url({ hostname: TWITTER_MEDIA_HOSTNAME }),
+  posterUrl: z.url({ hostname: TWITTER_MEDIA_HOSTNAME })
 })
 
 const fetchAsBase64 = async (url: string) => {

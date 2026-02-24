@@ -10,6 +10,9 @@
     "node": ">=24.0.0"
   },
   "pnpm": {
+    "overrides": {
+      "require-in-the-middle": "7.4.0"
+    },
     "onlyBuiltDependencies": [
       "@prisma/engines",
       "@sentry/cli",

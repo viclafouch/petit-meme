@@ -225,7 +225,7 @@ export const exportUserData = createServerFn({ method: 'GET' })
         updatedAt: user.updatedAt,
         role: user.role,
         generationCount: user.generationCount,
-        stripeCustomerId: user.stripeCustomerId,
+        hasStripeAccount: user.stripeCustomerId !== null,
         termsAcceptedAt: user.termsAcceptedAt,
         privacyAcceptedAt: user.privacyAcceptedAt,
         banned: user.banned,

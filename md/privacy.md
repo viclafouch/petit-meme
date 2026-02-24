@@ -17,6 +17,10 @@ Le responsable du traitement des données est :
 - Site web : [https://petit-meme.io](https://petit-meme.io)
 - Contact : [legal@petit-meme.io](mailto:legal@petit-meme.io)
 
+Lorsque vous créez un compte via Twitter/X, nous collectons votre nom, adresse
+e-mail et photo de profil. En procédant à la connexion, vous acceptez la
+présente Politique de confidentialité.
+
 ---
 
 ## 2. Données collectées

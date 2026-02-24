@@ -203,24 +203,11 @@ L'admin utilise TanStack Table pour users et categories, mais avec uniquement `g
 
 ### Phase 2 — GDPR
 
-**[CRITICAL] PII dans les logs**
-- [ ] Ajouter `email` et `to` à la liste `redact` de pino dans `src/lib/logger.ts`
-- [ ] Remplacer `email: user.email` par `userId: user.id` dans les logs des crons (`crons/unverified-cleanup.ts`, `crons/verification-reminder.ts`)
-
-**[HIGH] Sentry user context**
-- [ ] Passer `Sentry.setUser({ id: user.id })` au lieu de `{ email: user.email }` dans `src/routes/__root.tsx`
-
 **[HIGH] stripeCustomerId dans l'export**
-- [ ] Retirer `stripeCustomerId` du `select` dans `exportUserData` (`src/server/user.ts`)
-
-**[HIGH] viewerKey sans consentement**
-- [ ] Utiliser un sentinel `'anonymous'` comme `viewerKey` quand pas de consentement cookie dans `registerMemeView` (`src/server/meme.ts`)
-
-**[MEDIUM] Politique de confidentialité**
-- [ ] Ajouter l'adresse physique / identité légale du responsable dans `md/privacy.md`
+- [x] Remplacer `stripeCustomerId` par `hasStripeAccount: boolean` dans le retour de `exportUserData` (`src/server/user.ts`) — `stripeCustomerId` reste dans le select Prisma pour le calcul mais n'est plus exposé
 
 **[MEDIUM] Consentement OAuth Twitter**
-- [ ] Ajouter une mention explicite dans les CGU/privacy : "En créant un compte via Twitter/X, vous acceptez nos CGU et Politique de confidentialité"
+- [x] Ajout dans `md/privacy.md` section 1 : mention que la connexion via Twitter/X implique l'acceptation de la Politique de confidentialité (nom, e-mail, photo de profil collectés)
 
 ### Phase 3 — Performance backend admin
 

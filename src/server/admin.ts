@@ -497,13 +497,17 @@ export const createMemeFromFile = createServerFn({ method: 'POST' })
     return createMemeWithVideo({ buffer })
   })
 
+export type AdminMemeRecord = AlgoliaMemeRecord & {
+  bookmarkCount: number
+}
+
 export const getAdminMemes = createServerFn({ method: 'GET' })
   .middleware([adminRequiredMiddleware])
   .inputValidator(MEMES_SEARCH_SCHEMA)
   .handler(async ({ data }) => {
     const cacheKey = `admin-memes:${data.query ?? ''}:${data.page ?? 1}:${data.status ?? ''}`
 
-    return withAlgoliaCache(cacheKey, async () => {
+    const cached = await withAlgoliaCache(cacheKey, async () => {
       const filters = data.status ? `status:${data.status}` : undefined
 
       const searchIndex = data.query ? algoliaIndexName : algoliaIndexCreated
@@ -527,6 +531,34 @@ export const getAdminMemes = createServerFn({ method: 'GET' })
         totalPages: response.nbPages
       }
     })
+
+    const memeIds = cached.memes.map((meme) => {
+      return meme.id
+    })
+
+    const bookmarkCounts = await prismaClient.userBookmark.groupBy({
+      by: ['memeId'],
+      where: { memeId: { in: memeIds } },
+      _count: { id: true }
+    })
+
+    const bookmarkCountByMemeId = new Map(
+      bookmarkCounts.map((group) => {
+        return [group.memeId, group._count.id] as const
+      })
+    )
+
+    const memes = cached.memes.map((meme) => {
+      return {
+        ...meme,
+        bookmarkCount: bookmarkCountByMemeId.get(meme.id) ?? 0
+      } satisfies AdminMemeRecord
+    })
+
+    return {
+      ...cached,
+      memes
+    }
   })
 
 export const BAN_REASONS = [

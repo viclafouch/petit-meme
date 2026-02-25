@@ -15,7 +15,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { MemeStatusMeta } from '@/constants/meme'
-import { formatViewCount } from '@/helpers/format'
+import { formatBookmarkCount, formatViewCount } from '@/helpers/format'
 import {
   getAdminMemeByIdQueryOpts,
   getAdminMemesListQueryOpts
@@ -62,7 +62,10 @@ const RouteComponent = () => {
         description={
           <div className="flex flex-col gap-y-2">
             <span className="text-sm text-muted-foreground">
-              {formatViewCount(memeQuery.data.viewCount)} -{' Ajouté le '}
+              {formatViewCount(memeQuery.data.viewCount)}
+              {' • '}
+              {formatBookmarkCount(memeQuery.data._count.bookmarkedBy)}
+              {' - Ajouté le '}
               {formatDate(memeQuery.data.createdAt, 'dd/MM/yyyy')}
               {' - '}
               <Badge

@@ -180,10 +180,35 @@ Layout final : `Avatar+Name | Email | Role | Provider | Statut | Abo | Engagemen
 
 ### Phase 7b — Library cards (enrichissement léger)
 
-**Fichiers :** `src/routes/admin/library/index.tsx`, `src/components/admin/meme-list-item.tsx` (ou composant card équivalent)
+**Fichiers :** `src/server/admin.ts`, `src/components/admin/meme-list-item.tsx`, `src/helpers/format.ts`, `src/routes/admin/library/$memeId.tsx`, `prisma/schema.prisma`
 
-- [ ] Ajouter le **bookmark count** sur chaque card meme dans la grille Library (count `UserBookmark` par meme)
-- [ ] Adapter la query `getAdminMemes` ou ajouter un enrichissement Prisma batch pour les bookmark counts
+**Décisions deep-dive :**
+- Data source : post-fetch Prisma batch (`groupBy` sur les memeIds retournés par Algolia, 30 max/page). Count toujours frais (pas caché avec `withAlgoliaCache`).
+- Type enrichi : `AdminMemeRecord = AlgoliaMemeRecord & { bookmarkCount: number }` exporté depuis `server/admin.ts`
+- Affichage grille : même pattern que view count / category count — icône `Bookmark` (lucide) + count formaté. `0` en `text-muted-foreground`.
+- Helper : `formatBookmarkCount` dans `helpers/format.ts`. Zéro = `"0 bookmark"`, pluriel = `"X bookmarks"`.
+- Page détail : bookmark count ajouté via `_count: { select: { bookmarkedBy: true } }` dans `MEME_FULL_INCLUDE`
+- Index DB : `@@index([memeId])` sur `UserBookmark` (migration additive)
+- Scope : admin seulement, pas de changement côté public
+
+**Index DB**
+- [x] Ajouter `@@index([memeId])` sur `UserBookmark` dans `prisma/schema.prisma`
+
+**Server — enrichissement bookmark counts**
+- [x] Modifier `getAdminMemes` dans `src/server/admin.ts` : après le fetch Algolia (caché), extraire les `memeId` des hits → `prismaClient.userBookmark.groupBy({ by: ['memeId'], where: { memeId: { in: memeIds } }, _count: { id: true } })` → merger `bookmarkCount` sur chaque hit
+- [x] Exporter le type `AdminMemeRecord = AlgoliaMemeRecord & { bookmarkCount: number }` depuis `src/server/admin.ts`
+- [x] Ajouter `_count: { select: { bookmarkedBy: true } }` dans `MEME_FULL_INCLUDE` pour `getAdminMemeById`
+
+**Helpers**
+- [x] Ajouter `formatBookmarkCount` dans `src/helpers/format.ts` : `"0 bookmark"` / `"X bookmarks"`
+
+**UI — Grille Library**
+- [x] Modifier `MemeListItem` (`src/components/admin/meme-list-item.tsx`) : accepter `AdminMemeRecord` au lieu de `AlgoliaMemeRecord`, afficher stats en format compact icône + nombre (`Eye`, `Tag`, `Bookmark`) avec `title` tooltip pour le texte complet. `tabular-nums` pour alignement. Catégories = 0 en `text-destructive-foreground`.
+
+**UI — Page détail meme**
+- [x] Afficher le bookmark count sur `/admin/library/$memeId` à côté du view count, même pattern label
+
+**Migration Prisma requise :** `pnpm exec prisma migrate dev --name add_user_bookmark_meme_id_index`
 
 ### Phase 8 — Gestion d'erreurs (client + serveur + Sentry)
 

@@ -20,6 +20,7 @@ model UserBookmark {
 
   @@unique([userId, memeId])
   @@index([userId])
+  @@index([memeId])
   @@map("user_bookmark")
 }
 

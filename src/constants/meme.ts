@@ -6,7 +6,8 @@ import { MemeStatus } from '@/db/generated/prisma/enums'
 
 export const MEME_FULL_INCLUDE = {
   video: true,
-  categories: { include: { category: true } }
+  categories: { include: { category: true } },
+  _count: { select: { bookmarkedBy: true } }
 } as const satisfies Prisma.MemeInclude
 
 export const DEFAULT_MEME_TITLE = 'Sans titre'

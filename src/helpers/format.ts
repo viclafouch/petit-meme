@@ -21,6 +21,10 @@ export function formatCategoryCount(count: number) {
   return `${count} ${pluralize(count, { one: 'catégorie', other: 'catégories' })}`
 }
 
+export function formatBookmarkCount(count: number) {
+  return `${count} ${pluralize(count, { one: 'bookmark', other: 'bookmarks' })}`
+}
+
 export function capitalize(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1)
 }

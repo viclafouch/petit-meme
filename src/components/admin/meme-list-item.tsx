@@ -1,4 +1,5 @@
 import React from 'react'
+import { Bookmark, Eye, Tag } from 'lucide-react'
 import { motion } from 'motion/react'
 import { MemeVideoThumbnail } from '@/components/Meme/meme-video-thumbnail'
 import { Badge } from '@/components/ui/badge'
@@ -8,19 +9,23 @@ import {
   LEGACY_MEME_TITLE,
   MemeStatusMeta
 } from '@/constants/meme'
-import { formatCategoryCount, formatViewCount } from '@/helpers/format'
-import type { AlgoliaMemeRecord } from '@/lib/algolia'
+import {
+  formatBookmarkCount,
+  formatCategoryCount,
+  formatViewCount
+} from '@/helpers/format'
 import { getVideoStatusByIdQueryOpts } from '@/lib/queries'
 import { cn } from '@/lib/utils'
+import type { AdminMemeRecord } from '@/server/admin'
 import { matchIsVideoPlayable } from '@/utils/video'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 
-export type AdminMemeListItemParams = {
-  meme: AlgoliaMemeRecord
+export type MemeListItemProps = {
+  meme: AdminMemeRecord
 }
 
-export const MemeListItem = React.memo(({ meme }: AdminMemeListItemParams) => {
+export const MemeListItem = React.memo(({ meme }: MemeListItemProps) => {
   const isInitiallyPlayable = matchIsVideoPlayable(meme.video.bunnyStatus)
 
   const videoStatusQuery = useQuery({
@@ -58,8 +63,9 @@ export const MemeListItem = React.memo(({ meme }: AdminMemeListItemParams) => {
             >
               <Link
                 to="/admin/library/$memeId"
-                className="size-full cursor-pointer place-items-center text-white/80 outline-none transition-all delay-75 md:opacity-0 grid group-hover:opacity-100 group-focus-within:opacity-100"
+                className="size-full cursor-pointer place-items-center text-white/80 transition-all delay-75 md:opacity-0 grid group-hover:opacity-100 group-focus-within:opacity-100"
                 params={{ memeId: meme.id }}
+                aria-label={`Voir ${meme.title}`}
               />
             </MemeVideoThumbnail>
           </motion.div>
@@ -90,20 +96,30 @@ export const MemeListItem = React.memo(({ meme }: AdminMemeListItemParams) => {
           >
             {meme.title}
           </Link>
-          <div className="relative flex w-full flex-row items-center gap-1.5 text-muted-foreground">
-            <span className="text-xs leading-none">
-              {formatViewCount(meme.viewCount)}
-            </span>
-            {' • '}
+          <div className="flex items-center gap-3 text-muted-foreground">
             <span
-              className={cn(
-                'text-xs',
-                meme.categoryCount > 0
-                  ? 'text-muted-foreground'
-                  : 'text-destructive-foreground'
-              )}
+              className="flex items-center gap-1 text-xs tabular-nums"
+              title={formatViewCount(meme.viewCount)}
+              aria-label={formatViewCount(meme.viewCount)}
             >
-              {formatCategoryCount(meme.categoryCount)}
+              <Eye className="size-3.5" aria-hidden />
+              {meme.viewCount}
+            </span>
+            <span
+              className="flex items-center gap-1 text-xs tabular-nums"
+              title={formatCategoryCount(meme.categoryCount)}
+              aria-label={formatCategoryCount(meme.categoryCount)}
+            >
+              <Tag className="size-3.5" aria-hidden />
+              {meme.categoryCount}
+            </span>
+            <span
+              className="flex items-center gap-1 text-xs tabular-nums"
+              title={formatBookmarkCount(meme.bookmarkCount)}
+              aria-label={formatBookmarkCount(meme.bookmarkCount)}
+            >
+              <Bookmark className="size-3.5" aria-hidden />
+              {meme.bookmarkCount}
             </span>
           </div>
         </div>

@@ -233,12 +233,12 @@ L'admin utilise TanStack Table pour users et categories, mais avec uniquement `g
 
 **Fichiers :** `src/lib/auth.tsx`, `src/lib/auth-client.ts`, `src/lib/role.ts`, `src/server/user-auth.ts`, `src/routes/admin/users.tsx`, `src/components/user-dropdown.tsx`, `src/components/admin/admin-nav-button.tsx`
 
-- [ ] Ajouter `session.freshAge: 3600` (1h) — forcer une ré-auth récente pour les actions admin sensibles
-- [ ] Configurer `advanced.backgroundTasks.handler` avec `waitUntil` de Vercel
-- [ ] Expliciter la config du plugin admin : `admin({ defaultRole: 'user' })`
-- [ ] Corriger l'import plugin `admin` : `from 'better-auth/plugins'` → `from 'better-auth/plugins/admin'` (tree-shaking)
-- [ ] Corriger l'import type `UserWithRole` : `from 'better-auth/plugins'` → `from 'better-auth/plugins/admin'` (6 fichiers)
-- [ ] Ajouter `session.cookieCache.version: 1`
+- ~~Ajouter `session.freshAge: 3600`~~ — ignoré (décision utilisateur)
+- [x] Configurer `advanced.backgroundTasks.handler` avec `waitUntil` de Vercel (`@vercel/functions`)
+- [x] Expliciter la config du plugin admin : `admin({ defaultRole: 'user' })`
+- ~~Corriger l'import plugin `admin` vers `better-auth/plugins/admin`~~ — impossible, le barrel `better-auth/plugins` est requis pour l'inférence des types `auth.api.*`
+- ~~Corriger l'import type `UserWithRole` vers `better-auth/plugins/admin`~~ — même raison, le barrel est requis
+- [x] Ajouter `session.cookieCache.version: '1'`
 
 ### Phase 5 — Upgrade `AdminTable` (composant générique)
 

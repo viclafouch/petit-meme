@@ -21,6 +21,8 @@ import { sendEmailAsync } from '@/lib/resend'
 import { stripeClient } from '@/lib/stripe'
 import { stripe } from '@better-auth/stripe'
 import { createServerOnlyFn } from '@tanstack/react-start'
+// Vercel-specific: replace with platform equivalent if migrating (e.g. Railway)
+import { waitUntil } from '@vercel/functions'
 import AccountDeletedEmail from '../emails/account-deleted-email'
 import EmailVerification from '../emails/email-verification'
 import PasswordChangedEmail from '../emails/password-changed-email'
@@ -50,7 +52,8 @@ const getAuthConfig = createServerOnlyFn(() => {
       updateAge: ONE_DAY_IN_SECONDS,
       cookieCache: {
         enabled: true,
-        maxAge: FIVE_MINUTES_IN_SECONDS
+        maxAge: FIVE_MINUTES_IN_SECONDS,
+        version: '1'
       }
     },
     user: {
@@ -171,7 +174,13 @@ const getAuthConfig = createServerOnlyFn(() => {
       }
     },
     advanced: {
-      useSecureCookies: IS_PRODUCTION
+      useSecureCookies: IS_PRODUCTION,
+      // Vercel-specific: keeps serverless function alive after response
+      backgroundTasks: {
+        handler: (promise) => {
+          waitUntil(promise)
+        }
+      }
     },
     databaseHooks: {
       user: {
@@ -192,7 +201,7 @@ const getAuthConfig = createServerOnlyFn(() => {
     },
     trustedOrigins: [clientEnv.VITE_SITE_URL],
     plugins: [
-      admin(),
+      admin({ defaultRole: 'user' }),
       tanstackStartCookies(),
       stripe({
         stripeClient,

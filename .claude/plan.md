@@ -170,6 +170,14 @@ Layout final : `Avatar+Name | Email | Role | Provider | Statut | Abo | Engagemen
 - [x] Extraire `ConfirmAlertDialog` de `users.tsx` → `src/components/confirm-alert-dialog.tsx` (réutilisé dans Users + Categories)
 - [x] Extraire `getUserInitials` de `users.tsx` → `src/helpers/format.ts`
 
+**Audits post-implémentation**
+- [x] Security : fix mass assignment dans `editCategory` (destructuration explicite `{ id, title, slug, keywords }`)
+- [x] Security : slug format validation via `CATEGORY_SLUG_REGEX` partagé (exporté depuis `constants/meme.ts`)
+- [x] Security : `logAuditAction` wrappé dans try/catch (ne fait plus échouer la mutation)
+- [x] Dead code : suppression `src/components/confirm-alert.tsx`, migration `delete-meme-button.tsx` → `ConfirmAlertDialog`
+- [x] Tailwind : suppression `w-full` redondant dans `index.tsx`
+- [x] React perf : aucun problème détecté
+
 ### Phase 7b — Library cards (enrichissement léger)
 
 **Fichiers :** `src/routes/admin/library/index.tsx`, `src/components/admin/meme-list-item.tsx` (ou composant card équivalent)

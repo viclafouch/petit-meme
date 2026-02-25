@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { CATEGORY_SLUG_REGEX } from '@/constants/meme'
 import { prismaClient } from '@/db'
 import type { Prisma } from '@/db/generated/prisma/client'
 import { MemeStatus } from '@/db/generated/prisma/enums'
@@ -8,7 +9,7 @@ import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 
 export const CATEGORY_FORM_SCHEMA = z.object({
   title: z.string().min(3).max(100),
-  slug: z.string().min(2).max(60),
+  slug: z.string().regex(CATEGORY_SLUG_REGEX),
   keywords: z.array(z.string().max(50)).max(20)
 })
 
@@ -77,15 +78,22 @@ const logAuditAction = async ({
   targetId,
   metadata
 }: AuditActionParams) => {
-  await prismaClient.adminAuditLog.create({
-    data: {
-      action,
-      actingAdminId,
-      targetId,
-      targetType: 'category',
-      metadata
-    }
-  })
+  try {
+    await prismaClient.adminAuditLog.create({
+      data: {
+        action,
+        actingAdminId,
+        targetId,
+        targetType: 'category',
+        metadata
+      }
+    })
+  } catch (error) {
+    adminLogger.error(
+      { err: error, action, actingAdminId, targetId },
+      'Failed to write audit log'
+    )
+  }
 }
 
 export const addCategory = createServerFn({ method: 'POST' })
@@ -121,11 +129,11 @@ export const editCategory = createServerFn({ method: 'POST' })
     }).parse(data)
   })
   .handler(async ({ data, context }) => {
+    const { id, title, slug, keywords } = data
+
     const category = await prismaClient.category.update({
-      where: {
-        id: data.id
-      },
-      data
+      where: { id },
+      data: { title, slug, keywords }
     })
 
     invalidateCategoriesCache()

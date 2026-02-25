@@ -1,6 +1,6 @@
 import React from 'react'
 import { toast } from 'sonner'
-import ConfirmAlert from '@/components/confirm-alert'
+import { ConfirmAlertDialog } from '@/components/confirm-alert-dialog'
 import { Button } from '@/components/ui/button'
 import type { Meme } from '@/db/generated/prisma/client'
 import {
@@ -17,10 +17,12 @@ type DeleteMemeButtonProps = {
 
 export const DeleteMemeButton = ({
   meme,
+  children,
   ...restButtonProps
 }: DeleteMemeButtonProps) => {
   const router = useRouter()
   const queryClient = useQueryClient()
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false)
 
   const deleteMutation = useMutation({
     mutationKey: ['delete-meme'],
@@ -36,6 +38,7 @@ export const DeleteMemeButton = ({
       return promise
     },
     onSuccess: async () => {
+      setIsDialogOpen(false)
       await queryClient.invalidateQueries({
         queryKey: getAdminMemesListQueryOpts.all,
         exact: false
@@ -54,19 +57,27 @@ export const DeleteMemeButton = ({
   }
 
   return (
-    <ConfirmAlert
-      title="Supprimer le mème"
-      description="Êtes-vous sûr de vouloir supprimer ce mème ?"
-      confirmText="Supprimer"
-      onConfirm={handleConfirm}
-      trigger={
-        <Button
-          disabled={deleteMutation.isPending}
-          type="button"
-          variant="destructive"
-          {...restButtonProps}
-        />
-      }
-    />
+    <>
+      <Button
+        type="button"
+        variant="destructive"
+        onClick={() => {
+          setIsDialogOpen(true)
+        }}
+        {...restButtonProps}
+      >
+        {children}
+      </Button>
+      <ConfirmAlertDialog
+        isOpen={isDialogOpen}
+        onClose={() => {
+          setIsDialogOpen(false)
+        }}
+        title="Supprimer le mème"
+        description="Êtes-vous sûr de vouloir supprimer ce mème ?"
+        actionLabel="Supprimer"
+        onConfirm={handleConfirm}
+      />
+    </>
   )
 }

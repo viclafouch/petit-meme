@@ -75,7 +75,7 @@ export const MemeStatusMeta = {
   }
 }
 
-const CATEGORY_SLUG_REGEX = /^[\da-z-]{1,60}$/
+export const CATEGORY_SLUG_REGEX = /^[\da-z-]{1,60}$/
 
 export const MEMES_SEARCH_SCHEMA = z.object({
   // eslint-disable-next-line unicorn/no-useless-undefined

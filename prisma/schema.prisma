@@ -84,6 +84,7 @@ model Meme {
 
   @@index([status])
   @@index([status, viewCount])
+  @@index([submittedBy])
 }
 
 model MemeViewDaily {
@@ -126,7 +127,25 @@ model User {
   verificationReminderSent Boolean   @default(false) @map("verification_reminder_sent")
   isAnonymized             Boolean   @default(false) @map("is_anonymized")
 
+  adminActions AdminAuditLog[] @relation("AdminActions")
+
   @@map("user")
+}
+
+model AdminAuditLog {
+  id             String   @id @default(cuid())
+  action         String
+  actingAdminId  String   @map("acting_admin_id")
+  targetId       String   @map("target_id")
+  targetType     String   @map("target_type")
+  metadata       Json?
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  actingAdmin User @relation("AdminActions", fields: [actingAdminId], references: [id])
+
+  @@index([actingAdminId])
+  @@index([createdAt])
+  @@map("admin_audit_log")
 }
 
 model Session {
@@ -142,6 +161,7 @@ model Session {
 
   impersonatedBy String?
 
+  @@index([userId])
   @@map("session")
 }
 
@@ -159,6 +179,7 @@ model Subscription {
   trialStart          DateTime? @map("trial_start")
   trialEnd            DateTime? @map("trial_end")
 
+  @@index([referenceId, status])
   @@map("subscription")
 }
 
@@ -178,6 +199,7 @@ model Account {
   updatedAt             DateTime
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
   @@map("account")
 }
 

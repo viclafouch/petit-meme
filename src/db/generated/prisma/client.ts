@@ -75,6 +75,11 @@ export type MemeViewDaily = Prisma.MemeViewDailyModel
  */
 export type User = Prisma.UserModel
 /**
+ * Model AdminAuditLog
+ * 
+ */
+export type AdminAuditLog = Prisma.AdminAuditLogModel
+/**
  * Model Session
  * 
  */

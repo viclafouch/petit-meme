@@ -58,6 +58,7 @@ export const ModelName = {
   Meme: 'Meme',
   MemeViewDaily: 'MemeViewDaily',
   User: 'User',
+  AdminAuditLog: 'AdminAuditLog',
   Session: 'Session',
   Subscription: 'Subscription',
   Account: 'Account',
@@ -175,6 +176,19 @@ export const UserScalarFieldEnum = {
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
+export const AdminAuditLogScalarFieldEnum = {
+  id: 'id',
+  action: 'action',
+  actingAdminId: 'actingAdminId',
+  targetId: 'targetId',
+  targetType: 'targetType',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+} as const
+
+export type AdminAuditLogScalarFieldEnum = (typeof AdminAuditLogScalarFieldEnum)[keyof typeof AdminAuditLogScalarFieldEnum]
+
+
 export const SessionScalarFieldEnum = {
   id: 'id',
   expiresAt: 'expiresAt',
@@ -255,6 +269,14 @@ export const SortOrder = {
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {
@@ -339,6 +361,26 @@ export const UserOrderByRelevanceFieldEnum = {
 } as const
 
 export type UserOrderByRelevanceFieldEnum = (typeof UserOrderByRelevanceFieldEnum)[keyof typeof UserOrderByRelevanceFieldEnum]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+
+
+export const AdminAuditLogOrderByRelevanceFieldEnum = {
+  id: 'id',
+  action: 'action',
+  actingAdminId: 'actingAdminId',
+  targetId: 'targetId',
+  targetType: 'targetType'
+} as const
+
+export type AdminAuditLogOrderByRelevanceFieldEnum = (typeof AdminAuditLogOrderByRelevanceFieldEnum)[keyof typeof AdminAuditLogOrderByRelevanceFieldEnum]
 
 
 export const SessionOrderByRelevanceFieldEnum = {

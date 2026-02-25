@@ -1,9 +1,22 @@
-import type { UserWithRole } from 'better-auth/plugins'
-import { formatDate } from 'date-fns'
-import { EllipsisVertical } from 'lucide-react'
+import React from 'react'
+import { differenceInMonths, formatDate, formatDistanceToNow } from 'date-fns'
+import { fr } from 'date-fns/locale'
+import { Crown, EllipsisVertical, Mail, Minus, Twitter } from 'lucide-react'
 import { toast } from 'sonner'
 import { AdminTable, PAGE_SIZE } from '@/components/admin/admin-table'
 import { PageHeader } from '@/components/page-header'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Container } from '@/components/ui/container'
 import {
@@ -12,8 +25,28 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import { authClient } from '@/lib/auth-client'
-import { getListUsers, removeUser } from '@/server/admin'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger
+} from '@/components/ui/tooltip'
+import {
+  BAN_REASONS,
+  type BanReason,
+  banUserById,
+  type EnrichedUser,
+  getListUsers,
+  removeUser,
+  unbanUserById
+} from '@/server/admin'
+import * as Sentry from '@sentry/tanstackstart-react'
 import { useMutation } from '@tanstack/react-query'
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import {
@@ -24,148 +57,478 @@ import {
   useReactTable
 } from '@tanstack/react-table'
 
-const BAN_DURATION_SECONDS = 60 * 60 * 24 * 7
+function getUserInitials(name: string) {
+  const parts = name.trim().split(' ').filter(Boolean)
 
-const DropdownMenuUser = ({ user }: { user: UserWithRole }) => {
+  if (parts.length === 0) {
+    return '?'
+  }
+
+  return parts
+    .slice(0, 2)
+    .map((part) => {
+      return part[0]
+    })
+    .join('')
+    .toUpperCase()
+}
+
+type UserCellProps = {
+  user: EnrichedUser
+}
+
+type DialogType = 'ban' | 'unban' | 'delete'
+
+type ConfirmAlertDialogProps = {
+  isOpen: boolean
+  onClose: () => void
+  title: string
+  description: string
+  actionLabel: string
+  onConfirm: () => void
+  children?: React.ReactNode
+}
+
+const ConfirmAlertDialog = ({
+  isOpen,
+  onClose,
+  title,
+  description,
+  actionLabel,
+  onConfirm,
+  children
+}: ConfirmAlertDialogProps) => {
+  return (
+    <AlertDialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          onClose()
+        }
+      }}
+    >
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
+        </AlertDialogHeader>
+        {children}
+        <AlertDialogFooter>
+          <AlertDialogCancel>Annuler</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirm}>
+            {actionLabel}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  )
+}
+
+const UserActionsCell = ({ user }: UserCellProps) => {
+  const [activeDialog, setActiveDialog] = React.useState<DialogType | null>(
+    null
+  )
+  const [banReason, setBanReason] = React.useState<BanReason>(BAN_REASONS[0])
   const router = useRouter()
   const { user: admin } = Route.useRouteContext()
 
-  const banUserMutation = useMutation({
-    mutationFn: async () => {
-      await authClient.admin.banUser({
-        userId: user.id,
-        banReason: 'Spamming',
-        banExpiresIn: BAN_DURATION_SECONDS
-      })
-    },
-    onSuccess: () => {
-      void router.invalidate()
-    }
-  })
+  const handleCloseDialog = () => {
+    setActiveDialog(null)
+  }
 
-  const unbanUserMutation = useMutation({
-    mutationFn: async () => {
-      await authClient.admin.unbanUser({
-        userId: user.id
-      })
-    },
-    onSuccess: () => {
-      void router.invalidate()
-    }
-  })
+  const handleMutationSuccess = () => {
+    handleCloseDialog()
+    void router.invalidate()
+  }
 
-  const deleteUserMutation = useMutation({
+  const handleMutationError = (
+    error: Error,
+    feature: 'admin-user-ban' | 'admin-user-unban' | 'admin-user-delete'
+  ) => {
+    toast.error(error.message)
+    Sentry.captureException(error, { tags: { feature } })
+  }
+
+  const banMutation = useMutation({
     mutationFn: async () => {
-      const promise = removeUser({ data: user.id })
+      const promise = banUserById({
+        data: { userId: user.id, banReason }
+      })
       toast.promise(promise, {
-        loading: 'Suppression en cours...',
-        success: 'Utilisateur supprimé avec succès'
+        loading: 'Bannissement en cours...',
+        success: 'Utilisateur banni'
       })
 
       return promise
     },
-    onSuccess: () => {
-      void router.invalidate()
+    onSuccess: handleMutationSuccess,
+    onError: (error) => {
+      handleMutationError(error, 'admin-user-ban')
     }
   })
 
+  const unbanMutation = useMutation({
+    mutationFn: async () => {
+      const promise = unbanUserById({ data: user.id })
+      toast.promise(promise, {
+        loading: 'Débannissement en cours...',
+        success: 'Utilisateur débanni'
+      })
+
+      return promise
+    },
+    onSuccess: handleMutationSuccess,
+    onError: (error) => {
+      handleMutationError(error, 'admin-user-unban')
+    }
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      const promise = removeUser({ data: user.id })
+      toast.promise(promise, {
+        loading: 'Suppression en cours...',
+        success: 'Utilisateur supprimé'
+      })
+
+      return promise
+    },
+    onSuccess: handleMutationSuccess,
+    onError: (error) => {
+      handleMutationError(error, 'admin-user-delete')
+    }
+  })
+
+  const isOwnAccount = user.id === admin.id
+  const isAdmin = user.role === 'admin'
+  const hasActions = !isOwnAccount || !isAdmin
+
+  if (!hasActions) {
+    return null
+  }
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          className="data-[state=open]:bg-muted text-muted-foreground flex size-8 float-right"
-          size="icon"
-        >
-          <EllipsisVertical />
-          <span className="sr-only">Open menu</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-32">
-        {user.role !== 'admin' ? (
-          <>
-            {user.banned ? (
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={() => {
-                  unbanUserMutation.mutate()
-                }}
-              >
-                Débannir
-              </DropdownMenuItem>
-            ) : (
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={() => {
-                  banUserMutation.mutate()
-                }}
-              >
-                Bannir
-              </DropdownMenuItem>
-            )}
-          </>
-        ) : null}
-        <DropdownMenuItem
-          variant="destructive"
-          disabled={user.id === admin.id}
-          onClick={() => {
-            deleteUserMutation.mutate()
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            className="data-[state=open]:bg-muted text-muted-foreground flex size-9 ml-auto"
+            size="icon"
+          >
+            <EllipsisVertical />
+            <span className="sr-only">Actions</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-32">
+          {!isAdmin && user.banned ? (
+            <DropdownMenuItem
+              onSelect={() => {
+                setActiveDialog('unban')
+              }}
+            >
+              Débannir
+            </DropdownMenuItem>
+          ) : null}
+          {!isAdmin && !user.banned ? (
+            <DropdownMenuItem
+              variant="destructive"
+              onSelect={() => {
+                setActiveDialog('ban')
+              }}
+            >
+              Bannir
+            </DropdownMenuItem>
+          ) : null}
+          {!isOwnAccount ? (
+            <DropdownMenuItem
+              variant="destructive"
+              onSelect={() => {
+                setActiveDialog('delete')
+              }}
+            >
+              Supprimer
+            </DropdownMenuItem>
+          ) : null}
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <ConfirmAlertDialog
+        isOpen={activeDialog === 'ban'}
+        onClose={handleCloseDialog}
+        title={`Bannir ${user.name}`}
+        description="Choisissez une raison pour le bannissement."
+        actionLabel="Bannir"
+        onConfirm={() => {
+          banMutation.mutate()
+        }}
+      >
+        <Select
+          value={banReason}
+          onValueChange={(value) => {
+            setBanReason(value as BanReason)
           }}
         >
-          Supprimer
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {BAN_REASONS.map((reason) => {
+              return (
+                <SelectItem key={reason} value={reason}>
+                  {reason}
+                </SelectItem>
+              )
+            })}
+          </SelectContent>
+        </Select>
+      </ConfirmAlertDialog>
+      <ConfirmAlertDialog
+        isOpen={activeDialog === 'unban'}
+        onClose={handleCloseDialog}
+        title={`Débannir ${user.name}`}
+        description="L'utilisateur pourra de nouveau accéder à la plateforme."
+        actionLabel="Débannir"
+        onConfirm={() => {
+          unbanMutation.mutate()
+        }}
+      />
+      <ConfirmAlertDialog
+        isOpen={activeDialog === 'delete'}
+        onClose={handleCloseDialog}
+        title={`Supprimer ${user.name}`}
+        description="Cette action est irréversible. Toutes les données de l'utilisateur seront supprimées."
+        actionLabel="Supprimer"
+        onConfirm={() => {
+          deleteMutation.mutate()
+        }}
+      />
+    </>
   )
 }
 
-const columnHelper = createColumnHelper<UserWithRole>()
+const UserStatusBadges = ({ user }: UserCellProps) => {
+  const isBanned = user.banned === true
+  const isUnverified = user.emailVerified === false
+  const isActive = !isBanned && !isUnverified
+
+  return (
+    <div className="flex flex-wrap gap-1">
+      {isActive ? (
+        <Badge variant="success" size="sm">
+          Actif
+        </Badge>
+      ) : null}
+      {isBanned ? (
+        <Badge variant="destructive" size="sm">
+          Banni
+        </Badge>
+      ) : null}
+      {isUnverified ? (
+        <Badge variant="warning" size="sm">
+          Non vérifié
+        </Badge>
+      ) : null}
+    </div>
+  )
+}
+
+const columnHelper = createColumnHelper<EnrichedUser>()
 
 const columns = [
-  columnHelper.accessor('id', {
-    header: 'ID',
-    enableSorting: false
-  }),
   columnHelper.accessor('name', {
-    header: 'Name'
+    header: 'Utilisateur',
+    cell: (info) => {
+      const user = info.row.original
+      const isBanned = user.banned === true
+
+      return (
+        <div className="flex items-center gap-2">
+          <Avatar
+            className={isBanned ? 'size-8 ring-2 ring-destructive' : 'size-8'}
+          >
+            {user.image ? (
+              <AvatarImage src={user.image} alt={user.name} />
+            ) : null}
+            <AvatarFallback className="text-xs">
+              {getUserInitials(user.name)}
+            </AvatarFallback>
+          </Avatar>
+          <span className="font-medium truncate max-w-32">{user.name}</span>
+        </div>
+      )
+    }
   }),
   columnHelper.accessor('email', {
     header: 'Email'
   }),
   columnHelper.accessor('role', {
-    header: 'Role'
-  }),
-  columnHelper.accessor('createdAt', {
-    header: 'Date de création',
+    header: 'Rôle',
     cell: (info) => {
-      return formatDate(info.getValue(), 'dd/MM/yyyy')
+      const role = info.getValue()
+
+      return role === 'admin' ? (
+        <Badge variant="default" size="sm">
+          Admin
+        </Badge>
+      ) : (
+        <Badge variant="secondary" size="sm">
+          User
+        </Badge>
+      )
+    }
+  }),
+  columnHelper.accessor('provider', {
+    header: 'Provider',
+    enableSorting: false,
+    cell: (info) => {
+      const provider = info.getValue()
+
+      return provider === 'twitter' ? (
+        <Badge variant="info" size="sm">
+          <Twitter className="size-3" aria-hidden />
+          Twitter
+        </Badge>
+      ) : (
+        <Badge variant="secondary" size="sm">
+          <Mail className="size-3" aria-hidden />
+          Email
+        </Badge>
+      )
     }
   }),
   columnHelper.display({
-    id: 'Actions',
-    cell: (cell) => {
-      const user = cell.row.original
+    id: 'status',
+    header: 'Statut',
+    cell: (info) => {
+      return <UserStatusBadges user={info.row.original} />
+    }
+  }),
+  columnHelper.display({
+    id: 'subscription',
+    header: 'Abo',
+    cell: (info) => {
+      const { subscription } = info.row.original
 
-      return <DropdownMenuUser user={user} />
+      if (subscription.status === 'none') {
+        return (
+          <span className="text-muted-foreground">
+            <Minus className="size-4" aria-hidden />
+          </span>
+        )
+      }
+
+      const months = subscription.startedAt
+        ? Math.max(
+            1,
+            differenceInMonths(new Date(), new Date(subscription.startedAt))
+          )
+        : 1
+
+      const tooltipLines = [
+        `${months} mois d'abonnement`,
+        subscription.endsAt
+          ? `Fin : ${formatDate(new Date(subscription.endsAt), 'dd/MM/yyyy')}`
+          : null
+      ]
+        .filter(Boolean)
+        .join('\n')
+
+      const badge =
+        subscription.status === 'active' ? (
+          <Badge className="bg-amber-500 text-white border-amber-600" size="sm">
+            <Crown className="size-3" aria-hidden />
+            Premium
+          </Badge>
+        ) : (
+          <Badge variant="outline" size="sm">
+            <Crown className="size-3" aria-hidden />
+            Ancien
+          </Badge>
+        )
+
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="cursor-default">{badge}</span>
+          </TooltipTrigger>
+          <TooltipContent className="whitespace-pre-line">
+            {tooltipLines}
+          </TooltipContent>
+        </Tooltip>
+      )
+    }
+  }),
+  columnHelper.display({
+    id: 'engagement',
+    header: 'Engagement',
+    cell: (info) => {
+      const user = info.row.original
+
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="text-muted-foreground text-sm tabular-nums cursor-default">
+              {user.memeCount}m {user.bookmarkCount}b {user.generationCount}g
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>
+            {user.memeCount} memes · {user.bookmarkCount} bookmarks ·{' '}
+            {user.generationCount} générations
+          </TooltipContent>
+        </Tooltip>
+      )
+    }
+  }),
+  columnHelper.accessor('lastActivityAt', {
+    header: 'Dernière activité',
+    cell: (info) => {
+      const lastActivity = info.getValue()
+
+      if (!lastActivity) {
+        return <span className="text-muted-foreground text-sm">Jamais</span>
+      }
+
+      const date = new Date(lastActivity)
+
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="text-sm cursor-default">
+              {formatDistanceToNow(date, { addSuffix: true, locale: fr })}
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>
+            {formatDate(date, 'dd/MM/yyyy HH:mm')}
+          </TooltipContent>
+        </Tooltip>
+      )
+    }
+  }),
+  columnHelper.display({
+    id: 'actions',
+    cell: (info) => {
+      return <UserActionsCell user={info.row.original} />
     }
   })
 ]
+
+function getRowId(row: EnrichedUser) {
+  return row.id
+}
 
 const RouteComponent = () => {
   const data = Route.useLoaderData()
 
   // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table v8 is not compatible with React Compiler (https://github.com/TanStack/table/issues/5903)
   const table = useReactTable({
-    data: data.listUsers.users,
+    data: data.users,
     columns,
-    getRowId: (row) => {
-      return row.id.toString()
-    },
+    getRowId,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     initialState: {
-      sorting: [{ id: 'createdAt', desc: true }],
+      sorting: [{ id: 'lastActivityAt', desc: true }],
       pagination: {
         pageSize: PAGE_SIZE
       }
@@ -188,11 +551,11 @@ export const Route = createFileRoute('/admin/users')({
     return { meta: [{ title: 'Admin Petit Meme - Utilisateurs' }] }
   },
   loader: async () => {
-    const listUsers = await getListUsers()
+    const { users } = await getListUsers()
 
     return {
       crumb: 'Utilisateurs',
-      listUsers
+      users
     }
   }
 })

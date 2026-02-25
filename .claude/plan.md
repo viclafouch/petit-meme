@@ -43,9 +43,9 @@ Migration terminée (preset Vercel, DNS, env vars, docs). Reste :
 
 ## Admin — Refonte Tables, UX, Dashboard
 
-Phases 1 à 4 terminées (sécurité admin, GDPR, performance backend, hardening Better Auth).
+Phases 1 à 6 terminées (sécurité admin, GDPR, performance backend, hardening Better Auth, AdminTable upgrade, Users enrichissement + audit log).
 
-**Ordre d'exécution restant :** Tables UI (5-7) → Error handling (8) → Dashboard & UX (9-10) → Audits (11)
+**Ordre d'exécution restant :** Tables UI (7-7b) → Error handling (8) → Dashboard & UX (9-10) → Audits (11)
 
 **Item reporté Phase 1 :**
 - [ ] Activer le rate limiting sur les preview deployments Vercel — reporté (infra)
@@ -66,46 +66,90 @@ Phases 1 à 4 terminées (sécurité admin, GDPR, performance backend, hardening
 - [x] Activer tri + pagination sur `users.tsx` : colonnes triables = Name, Email, Role, Date de création (pas ID ni Actions)
 - [x] Activer tri + pagination sur `categories/index.tsx` : colonnes triables = Titre, Slug, Date de création (pas ID, Mots clés ni Actions)
 
-### Phase 6 — Users table (pagination + tri + confirmations + server functions)
+### Phase 6 — Users table (enrichissement + confirmations + server functions)
 
-Inclut la migration ban/unban/delete vers des server functions sécurisées, la création du modèle `AdminAuditLog`, et les confirmations UI.
+Inclut l'enrichissement des données affichées, la migration ban/unban/delete vers des server functions sécurisées, la création du modèle `AdminAuditLog`, et les confirmations UI.
 
 **Fichiers :** `src/routes/admin/users.tsx`, `src/server/admin.ts`, `prisma/schema.prisma`
 
 **Migration Prisma — `AdminAuditLog`**
-- [ ] Créer le modèle `AdminAuditLog` (action, actingAdminId, targetId, targetType, metadata Json, createdAt) — audit trail officiel en DB
+- [x] Créer le modèle `AdminAuditLog` (action, actingAdminId, targetId, targetType, metadata Json, createdAt) — audit trail officiel en DB
 
 **Server functions ban/unban**
-- [ ] Créer `banUserById` dans `src/server/admin.ts` avec `adminRequiredMiddleware` + guard anti-self-ban (`userId === context.user.id`) + log dans `AdminAuditLog`
-- [ ] Créer `unbanUserById` dans `src/server/admin.ts` avec `adminRequiredMiddleware` + log dans `AdminAuditLog`
-- [ ] Migrer `DropdownMenuUser` pour appeler les server functions au lieu de `authClient.admin.banUser/unbanUser`
-- [ ] Permettre un choix de raison de ban (raisons prédéfinies) au lieu du hardcoded "Spamming"
+- [x] Créer `banUserById` dans `src/server/admin.ts` avec `adminRequiredMiddleware` + guard anti-self-ban (`userId === context.user.id`) + log dans `AdminAuditLog`
+- [x] Créer `unbanUserById` dans `src/server/admin.ts` avec `adminRequiredMiddleware` + log dans `AdminAuditLog`
+- [x] Migrer `DropdownMenuUser` pour appeler les server functions au lieu de `authClient.admin.banUser/unbanUser`
+- [x] Permettre un choix de raison de ban (raisons prédéfinies) au lieu du hardcoded "Spamming"
 
 **Server function removeUser**
-- [ ] Ajouter guard server-side `userId === context.user.id` (auto-suppression)
-- [ ] Log dans `AdminAuditLog` avec `actingAdminId`
-- [ ] Supprimer le `findUnique` pré-vol redondant — laisser `auth.api.removeUser` gérer le not-found
+- [x] Ajouter guard server-side `userId === context.user.id` (auto-suppression)
+- [x] Log dans `AdminAuditLog` avec `actingAdminId`
+- [x] Supprimer le `findUnique` pré-vol redondant — laisser `auth.api.removeUser` gérer le not-found
 
-**TanStack Table**
-- [ ] Activer `getSortedRowModel()`, `getPaginationRowModel()` dans `useReactTable`
-- [ ] Colonnes triables : Name, Email, Role, Date de création
-- [ ] Pagination : 20 users par page (client-side)
-- [ ] Afficher le statut ban : colonne "Statut" avec badge (Banni/Actif)
+**Enrichissement données Users (deep-dive 2026-02-25)**
+
+Objectif : donner une vision complète de chaque user sans navigation. Colonne ID retirée. Colonnes regroupées en badges pour limiter à ~9 colonnes.
+
+Layout final : `Avatar+Name | Email | Role | Provider | Statut | Abo | Engagement | Dernière activité | Actions`
+
+*Data fetching :* query Prisma directe (bypass `auth.api.listUsers` — perf: élimine 2 queries séquentielles BA dont un COUNT inutile + récupère `generationCount` gratuitement). Enrichissement côté serveur avec queries Prisma batch `WHERE id IN (...)`. 4 index ajoutés (`account.userId`, `session.userId`, `meme.submittedBy`, `subscription(referenceId, status)`).
+
+- [x] Enrichir `getListUsers` dans `src/server/admin.ts` : query Prisma directe + queries batch pour :
+  - `Account.providerId` (provider auth : Twitter ou Email)
+  - `Subscription` via `referenceId` (statut : active / past / none + dates pour tooltip)
+  - Count `Meme` WHERE `submittedBy = userId` (memes soumis)
+  - Count `UserBookmark` WHERE `userId` (bookmarks)
+  - Max `Session.updatedAt` WHERE `userId` (dernière activité)
+  - `User.generationCount` (inclus dans la query user directe)
+- [x] Retirer la colonne ID
+- [x] Colonne **Avatar + Name** : `user.image` (avatar rond) + nom. Fallback initiales si pas d'image.
+- [x] Colonne **Provider** : badge `Twitter` / `Email` — basé sur `Account.providerId`
+- [x] Colonne **Statut** (badges multiples) :
+  - Badge vert "Actif" = vérifié, pas banni, pas premium (cas par défaut — toujours au moins 1 badge)
+  - Badge rouge "Banni" = `user.banned === true`
+  - Badge orange "Non vérifié" = `user.emailVerified === false`
+- [x] Colonne **Abo** : badge doré "Premium" (active), badge outline "Ancien" (past), tiret (none). Tooltip avec durée d'abonnement + date de fin.
+- [x] Colonne **Engagement** : format compact `Xm Xb Xg` (X memes, X bookmarks, X générations studio)
+- [x] Colonne **Dernière activité** : format relatif (`formatDistanceToNow` de date-fns, ex: "il y a 2j") + tooltip avec date exacte au hover
+- [x] Retirer la colonne **Date de création** (redondante avec Dernière activité)
+- [x] Colonnes triables : Name, Email, Role, Dernière activité
 
 **Confirmations + feedback**
-- [ ] Confirmation ban/unban/delete : wraper avec `ConfirmAlert` (`src/components/confirm-alert.tsx`)
-- [ ] Toast feedback : `toast.promise()` pour ban, unban et delete
-- [ ] `onError` avec toast + `Sentry.captureException` sur chaque mutation
+- [x] Confirmation ban/unban/delete : wraper avec `ConfirmAlert` (`src/components/confirm-alert.tsx`)
+- [x] Toast feedback : `toast.promise()` pour ban, unban et delete
+- [x] `onError` avec toast + `Sentry.captureException` sur chaque mutation
+- [x] Dropdown vide pour admin propre compte : retourne `null` au lieu d'un menu vide
 
-### Phase 7 — Categories table (tri + confirmation delete)
+**Optimisations perf (audit backend)**
+- [x] Bypass `auth.api.listUsers` → query Prisma directe (élimine 2 queries séquentielles BA + COUNT inutile)
+- [x] Suppression query `generationCount` redondante (incluse dans query user directe)
+- [x] 4 index DB ajoutés : `account(userId)`, `session(userId)`, `meme(submittedBy)`, `subscription(referenceId, status)`
+- [x] Types dérivés depuis Prisma (`UserGetPayload`, `SubscriptionGetPayload`) au lieu de types manuels
 
-**Fichiers :** `src/routes/admin/categories/index.tsx`, `src/routes/admin/categories/-components/category-dropdown.tsx`
+**Migration Prisma requise :** `pnpm exec prisma migrate dev --name add_admin_query_indexes`
 
+### Phase 7 — Categories table (enrichissement + tri + confirmation delete)
+
+**Fichiers :** `src/routes/admin/categories/index.tsx`, `src/routes/admin/categories/-components/category-dropdown.tsx`, `src/server/categories.ts`
+
+**Enrichissement données Categories (deep-dive 2026-02-25)**
+
+- [ ] Enrichir `getCategories` dans `src/server/categories.ts` : ajouter `_count` des memes publiés par catégorie (jointure `MemeCategory` WHERE `meme.status = PUBLISHED`)
+- [ ] Ajouter colonne **Memes publiés** : count numérique, triable. Permet d'identifier les catégories vides côté public.
+
+**Tri + confirmations**
 - [ ] Activer le tri : ajouter `getSortedRowModel()` à `useReactTable`
-- [ ] Colonnes triables : Titre, Slug, Date de création
+- [ ] Colonnes triables : Titre, Slug, Memes publiés, Date de création
 - [ ] Confirmation delete : wraper "Supprimer" dans `CategoryDropdown` avec `ConfirmAlert`
 - [ ] Toast feedback : ajouter `toast.promise()` pour la suppression de catégorie + `Sentry.captureException` dans `onError`
 - [ ] Log suppression catégorie dans `AdminAuditLog`
+
+### Phase 7b — Library cards (enrichissement léger)
+
+**Fichiers :** `src/routes/admin/library/index.tsx`, `src/components/admin/meme-list-item.tsx` (ou composant card équivalent)
+
+- [ ] Ajouter le **bookmark count** sur chaque card meme dans la grille Library (count `UserBookmark` par meme)
+- [ ] Adapter la query `getAdminMemes` ou ajouter un enrichissement Prisma batch pour les bookmark counts
 
 ### Phase 8 — Gestion d'erreurs (client + serveur + Sentry)
 

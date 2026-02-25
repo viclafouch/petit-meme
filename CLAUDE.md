@@ -21,16 +21,17 @@ pnpm run build            # Production build (Vite + Nitro vercel preset)
 pnpm start                # Start production server
 pnpm run lint             # TypeScript check + ESLint
 pnpm run lint:fix         # Auto-fix lint issues
-pnpm run prisma:migrate   # Deploy Prisma migrations (prisma migrate deploy)
-pnpm run prisma:seed      # Seed database (tsx --env-file=.env prisma/seed.ts)
-pnpm run prisma:reset-db  # Reset local DB (prisma migrate reset) — NEVER in production
+pnpm run prisma:migrate        # Deploy migrations locally (prisma migrate deploy)
+pnpm run prisma:migrate:prod   # Deploy migrations to production (uses .env.local from Vercel)
+pnpm run prisma:seed           # Seed database (tsx --env-file=.env prisma/seed.ts)
+pnpm run prisma:reset-db       # Reset local DB (prisma migrate reset) — NEVER in production
 pnpm run email:dev        # Email preview server (port 3001)
 ```
 **Never start the dev server (`pnpm run dev`)** — this is always done by the user.
 
 After Prisma schema changes: `pnpm exec prisma generate` (also runs on `postinstall`).
 
-See current plan : `.claude/plan.md`. It must be always up to date.
+See current plan : `.claude/plan.md`. It must be always up to date. **Update it immediately after each meaningful change** — not just at the end of a task. If you add a feature, fix a bug, change an approach, or add a dependency mid-task, update the plan right then. A desynchronized plan is a bug.
 
 ## Code Quality & Reusability
 

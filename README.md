@@ -107,19 +107,13 @@ This creates a migration file, applies it to the local database, and regenerates
 
 ### Production deployment
 
-Vercel auto-deploys on push to `feat/migrate-to-vercel`. After a deploy that includes new migrations, run against the production database directly:
+Vercel auto-deploys on push to `feat/migrate-to-vercel`. After a deploy that includes new migrations:
 
 ```bash
-DATABASE_URL="<production-url>" pnpm exec prisma migrate deploy
+pnpm run prisma:migrate:prod
 ```
 
-This applies only the pending migrations. It is safe and idempotent.
-
-### Checking migration status
-
-```bash
-DATABASE_URL="<production-url>" pnpm exec prisma migrate status
-```
+This uses `.env.local` (pulled via `vercel env pull`) which contains the production `DATABASE_URL`. It applies only pending migrations and is safe and idempotent.
 
 ### Rules
 
@@ -159,7 +153,8 @@ The CLI outputs a webhook signing secret (`whsec_...`). Add it to your `.env` as
 | `pnpm start` | Start production server |
 | `pnpm run lint` | TypeScript check + ESLint |
 | `pnpm run lint:fix` | Auto-fix lint issues |
-| `pnpm run prisma:migrate` | Apply pending migrations (production) |
+| `pnpm run prisma:migrate` | Apply pending migrations (local) |
+| `pnpm run prisma:migrate:prod` | Apply pending migrations (production via `.env.local`) |
 | `pnpm run prisma:seed` | Seed database |
 | `pnpm run email:dev` | Preview email templates on port 3001 |
 

@@ -45,13 +45,13 @@ Le push déclenche le deploy Vercel automatiquement.
 
 #### 5. Appliquer en production
 
-Après le deploy Vercel, appliquer les migrations directement contre la base Neon :
+Après le deploy Vercel, appliquer les migrations contre la base Neon :
 
 ```bash
-DATABASE_URL="<production-url>" pnpm exec prisma migrate deploy
+pnpm run prisma:migrate:prod
 ```
 
-`migrate deploy` est safe : il n'applique que les migrations non encore appliquées et ne touche jamais au schema directement.
+Ce script utilise `.env.local` (pulled via `vercel env pull`) qui contient la `DATABASE_URL` de production. `migrate deploy` est safe : il n'applique que les migrations non encore appliquées et ne touche jamais au schema directement.
 
 ### Commandes de référence
 
@@ -59,8 +59,8 @@ DATABASE_URL="<production-url>" pnpm exec prisma migrate deploy
 |----------|--------------|-------|
 | `pnpm exec prisma migrate dev --name <nom>` | Local | Créer + appliquer une migration |
 | `pnpm exec prisma generate` | Local | Régénérer le client (aussi dans `postinstall`) |
-| `DATABASE_URL="<production-url>" pnpm exec prisma migrate deploy` | Production | Appliquer les migrations pendantes |
-| `DATABASE_URL="<production-url>" pnpm exec prisma migrate status` | Production | Vérifier l'état des migrations |
+| `pnpm run prisma:migrate` | Local | Appliquer les migrations pendantes |
+| `pnpm run prisma:migrate:prod` | Production | Appliquer les migrations pendantes (via `.env.local`) |
 
 ### Ce que Claude Code ne doit JAMAIS faire
 

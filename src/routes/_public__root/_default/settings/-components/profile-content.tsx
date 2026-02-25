@@ -19,6 +19,7 @@ import { UpdatePasswordDialog } from '@/components/User/update-password-dialog'
 import { FREE_PLAN, PREMIUM_PLAN } from '@/constants/plan'
 import { formatCentsToEuros } from '@/helpers/number'
 import { useStripeCheckout } from '@/hooks/use-stripe-checkout'
+import { captureWithFeature } from '@/lib/sentry'
 import type { ActiveSubscription } from '@/server/customer'
 import { exportUserData } from '@/server/user'
 import { downloadBlob } from '@/utils/download'
@@ -49,7 +50,8 @@ export const ProfileContent = ({
     onSuccess: () => {
       toast.success('Données téléchargées')
     },
-    onError: () => {
+    onError: (error) => {
+      captureWithFeature(error, 'data-export')
       toast.error('Erreur lors du téléchargement')
     }
   })

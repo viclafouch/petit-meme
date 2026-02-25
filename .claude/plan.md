@@ -214,75 +214,88 @@ Layout final : `Avatar+Name | Email | Role | Provider | Statut | Abo | Engagemen
 
 Audit complet : zéro erreur silencieuse, remontée Sentry systématique, feedback utilisateur cohérent, logging serveur exploitable.
 
+**Décisions deep-dive :**
+- Tous les `Sentry.captureException` utilisent `captureWithFeature(error, SENTRY_FEATURES.XXX)` — helper + constantes dans `src/lib/sentry.ts`
+- Tags `feature` partout (client + serveur) pour catégoriser dans Sentry
+- Timeouts : `fetchWithZod` 15s (configurable), Sentry tunnel 10s, Bunny CDN `shareMeme` 15s
+
+**Nouveau fichier : `src/lib/sentry.ts`**
+- [x] Objet `SENTRY_FEATURES` (`as const satisfies`) : `STRIPE_CHECKOUT`, `STRIPE_PAYMENT`, `STRIPE_BILLING_PORTAL`, `BUNNY_WEBHOOK`, `BUNNY_CLEANUP`, `AI_GENERATION`, `RESEND_EMAIL`, `BOOKMARK`, `SHARE`, `DOWNLOAD`, `ADMIN_MEME_EDIT`, `DELETE_ACCOUNT`, `UPDATE_PASSWORD`, `DATA_EXPORT`, `FILE_UPLOAD`, `STUDIO`
+- [x] Helper `captureWithFeature(error: unknown, feature: SentryFeature)` → wrappe `Sentry.captureException(error, { tags: { feature } })`
+
 #### P0 — Critique (paiements, webhooks, emails)
 
-**Stripe checkout sans Sentry** (`src/hooks/use-stripe-checkout.ts`)
-- [ ] Ajouter `Sentry.captureException(error)` dans les deux blocs `catch` (billing portal + checkout premium) avec tags `{ feature: 'stripe-checkout' }`
+**Stripe checkout** (`src/hooks/use-stripe-checkout.ts`)
+- [x] Ajouter `captureWithFeature(error, SENTRY_FEATURES.STRIPE_CHECKOUT)` dans les deux catch blocks (billing portal + checkout premium)
+- [x] **Fix bug** : ajouter `return` après `showDialog` dans le check `!user` de `goToBillingPortal` (l'exécution tombe dans l'appel auth sans user)
 
-**Webhook Bunny cassé** (`src/routes/api/bunny.ts`)
-- [ ] Wrapper `request.json()` + `WEBHOOK_RESPONSE_SCHEMA.parse()` dans un try/catch — retourner `400` si JSON invalide ou validation Zod échoue
-- [ ] Déplacer `getVideoPlayData()` dans le try/catch existant (actuellement hors bloc)
-- [ ] Retourner `500` (pas `200`) dans le catch principal — Bunny doit pouvoir retry
-- [ ] Logger les erreurs en `.error()` au lieu de `.debug()`
+**Webhook Bunny** (`src/routes/api/bunny.ts`)
+- [x] Wrapper `request.json()` + `WEBHOOK_RESPONSE_SCHEMA.parse()` dans un try/catch → retourner **400** si JSON invalide ou Zod fail (pas de retry Bunny)
+- [x] Déplacer `getVideoPlayData()` dans le try/catch interne (actuellement hors bloc)
+- [x] Retourner **500** dans le catch principal (erreur DB/interne) — Bunny retry sur 5xx
+- [x] Logger les erreurs en `.error()` au lieu de `.debug()`
+- [x] `invalidateAlgoliaCache()` est synchrone (void) — pas de `.catch()` nécessaire
 
-**Appel Gemini AI non protégé** (`src/server/ai.ts`)
-- [ ] Wrapper l'appel `ai.models.generateContent()` + le parse dans un try/catch avec `Sentry.captureException` + log admin
-- [ ] Remplacer `result.text!` par un check explicite (`if (!result.text) throw`)
+**Appel Gemini AI** (`src/server/ai.ts`)
+- [x] Wrapper `ai.models.generateContent()` + parse dans un try/catch avec `captureWithFeature(error, SENTRY_FEATURES.AI_GENERATION)`
+- [x] Remplacer `result.text!` par un check explicite (`if (!result.text) throw new Error('La génération AI a échoué')`)
+- [x] Throw avec message clair — l'appelant (`generateContentMutation.onError`) gère le toast
 
-**Emails Resend fire-and-forget sans Sentry** (`src/lib/resend.ts`)
-- [ ] Ajouter `Sentry.captureException(error)` dans le `.catch()` réseau et dans le `.then({ error })`
+**Emails Resend** (`src/lib/resend.ts`)
+- [x] Ajouter `captureWithFeature(error, SENTRY_FEATURES.RESEND_EMAIL)` dans le `.catch()` réseau et dans le `.then({ error })`
 
-**Stripe payment_failed event** (`src/lib/auth.tsx`)
-- [ ] Ajouter `Sentry.captureException` quand user not found pour un payment_failed
-- [ ] Wrapper `billingPortal.sessions.create()` dans un try/catch avec Sentry
+**Stripe payment_failed** (`src/lib/auth.tsx`)
+- [x] Ajouter `captureWithFeature` (tag `STRIPE_PAYMENT`) quand user not found pour un `payment_failed`
+- [x] Wrapper `billingPortal.sessions.create()` dans try/catch + `captureWithFeature` (tag `STRIPE_BILLING_PORTAL`) + log. **Sans re-throw** (ne pas casser le hook BA)
+- [x] Extraction de `handlePaymentFailed` en fonction dédiée (250 lignes max)
 
 #### P1 — High (erreurs silencieuses côté utilisateur)
 
 **Mutations sans `onError`**
-- [ ] `src/hooks/use-toggle-bookmark.ts` — ajouter `onError` avec toast + Sentry
-- [ ] `src/components/admin/download-from-twitter-form.tsx` — ajouter `onError` sur clipboard mutation avec toast
-- [ ] `src/components/Meme/MemeForm/twitter-form.tsx` — idem clipboard mutation
+- [x] `src/hooks/use-toggle-bookmark.ts` — ajouter `onError` avec `toast.error('Erreur lors de la mise à jour du favori')` + `captureWithFeature(error, SENTRY_FEATURES.BOOKMARK)`
+- [x] `src/components/admin/download-from-twitter-form.tsx` — ajouter `onError` sur clipboard mutation avec **toast seul** (`toast.error('Impossible de lire le presse-papiers')`) — pas de Sentry (permission navigateur)
+- [x] `src/components/Meme/MemeForm/twitter-form.tsx` — idem clipboard mutation, toast seul
 
 **`shareBlob` / `downloadBlob` fire-and-forget**
-- [ ] `src/utils/download.ts` — remplacer `.catch(() => {})` dans `shareBlob` par un catch qui log + Sentry (filtrer `AbortError`/`NotAllowedError` = user cancel)
-- [ ] `src/hooks/use-share-meme.ts` — await `shareBlob` ou ajouter `.catch()` avec Sentry
-- [ ] `src/hooks/use-download-meme.ts` — idem pour `downloadBlob`
+- [x] `src/utils/download.ts` — remplacer `.catch(() => {})` dans `shareBlob` par un catch qui filtre `AbortError`/`NotAllowedError` (user cancel) et appelle `captureWithFeature(error, SENTRY_FEATURES.SHARE)` pour les vraies erreurs
+- [x] `src/hooks/use-share-meme.ts` — erreurs remontent (`await` au lieu de `void`) + `captureWithFeature` dans `onError`
+- [x] `src/hooks/use-download-meme.ts` — `captureWithFeature` dans `onError`
 
 **Timeout manquant sur fetch**
-- [ ] `src/lib/utils.ts` (`fetchWithZod`) — ajouter `AbortController` avec timeout configurable (default 15s)
-- [ ] `src/routes/api/sentry-tunnel.ts` — ajouter timeout sur le `fetch()` upstream (10s)
-- [ ] `src/server/meme.ts` (`shareMeme`) — ajouter error handling + timeout sur le fetch Bunny CDN
+- [x] `src/lib/utils.ts` (`fetchWithZod`) — ajouter `AbortController` avec timeout configurable via `FetchWithZodInit` (default **15s**)
+- [x] `src/routes/api/sentry-tunnel.ts` — ajouter timeout **10s** sur le `fetch()` upstream
+- [x] `src/server/meme.ts` (`shareMeme`) — ajouter error handling + timeout **15s** + check `response.ok`
 
-**`findActiveSubscription` retourne `null` en erreur** (`src/server/customer.ts`)
-- [ ] Distinguer "pas d'abonnement" (return `null`) de "erreur API" (throw ou type discriminé) pour éviter de bloquer les features premium silencieusement
+**`findActiveSubscription` throw en erreur API** (`src/server/customer.ts`)
+- [x] Retirer le try/catch qui retourne `null` en cas d'erreur API — l'erreur throw maintenant. `null` = uniquement "pas d'abonnement"
 
 #### P2 — Medium (robustesse, Sentry manquant, UX)
 
 **Dialogs fermés avant fin de mutation**
-- [ ] `src/components/Meme/MemeForm/file-form.tsx` — déplacer `closeDialog()` dans `onSuccess`
-- [ ] `src/components/Meme/MemeForm/twitter-form.tsx` — idem
+- [x] `src/components/Meme/MemeForm/file-form.tsx` — déplacer `closeDialog()` dans `onSuccess`
+- [x] `src/components/Meme/MemeForm/twitter-form.tsx` — idem `closeDialog()` dans `onSuccess`
 
 **Catch blocks sans Sentry**
-- [ ] `src/hooks/use-video-processor.ts` — ajouter toast générique pour les erreurs non-StudioError
-- [ ] `src/routes/admin/library/-components/meme-form.tsx` (`generateContentMutation`) — ajouter `Sentry.captureException`
-- [ ] `src/components/User/delete-account-dialog.tsx` — ajouter `onError` avec Sentry
-- [ ] `src/components/User/update-password-dialog.tsx` — idem
-- [ ] `src/routes/_public__root/_default/settings/-components/profile-content.tsx` — ajouter Sentry dans `onError` export
-- [ ] `src/components/ui/file-upload.tsx` — ajouter `Sentry.captureException` dans le catch upload
+- [x] `src/hooks/use-video-processor.ts` — toast générique pour erreurs non-StudioError + migration vers `captureWithFeature`
+- [x] `src/routes/admin/library/-components/meme-form.tsx` — `editMutation` : clé `error` dans `toast.promise` + `onError` Sentry. `generateContentMutation` : `captureWithFeature` dans `onError`
+- [x] `src/components/User/delete-account-dialog.tsx` — `onError` avec `captureWithFeature(error, SENTRY_FEATURES.DELETE_ACCOUNT)`
+- [x] `src/components/User/update-password-dialog.tsx` — idem `captureWithFeature(error, SENTRY_FEATURES.UPDATE_PASSWORD)`
+- [x] `src/routes/_public__root/_default/settings/-components/profile-content.tsx` — `captureWithFeature(error, SENTRY_FEATURES.DATA_EXPORT)` dans `onError`
+- [ ] `src/components/ui/file-upload.tsx` — **SKIPPED** (fichier protégé dans `src/components/ui/`, règle "Never modify code in ui/")
 
 **HTTP status non vérifié**
-- [ ] `src/lib/react-tweet.ts` (`getTweetMedia`) — ajouter check `response.ok` avant `.blob()`, throw si erreur HTTP
+- [x] `src/lib/react-tweet.ts` (`getTweetMedia`) — check `response.ok` dans `fetchBlob` helper
 
-**Algolia + upload partial failure** (`src/server/admin.ts:293`)
-- [ ] Revoir `createMemeWithVideo` : si `uploadVideo` échoue après Algolia save, cleanup l'entrée Algolia (appel `deleteObject`)
+**Algolia + upload partial failure** (`src/server/admin.ts`)
+- [x] `createMemeWithVideo` : rollback DB + Algolia si upload échoue, avec `captureWithFeature` et re-throw
 
 #### P3 — Low (améliorations mineures)
 
-- [ ] `src/routes/__root.tsx` — ajouter `id` dans `Sentry.setUser({ id: user.id })` pour tracer sans PII
-- [ ] `src/server/admin.ts:237` — ajouter `Sentry.captureException` sur le catch Bunny delete (orphan videos)
-- [ ] `src/lib/react-tweet.ts:40` — remplacer `Promise.reject(new Error(...))` par `throw new Error(...)`
-- [ ] Ajouter `errorComponent` sur les routes principales (admin, settings, meme detail) pour un meilleur contexte Sentry — absorbe la migration `react-error-boundary` → `Sentry.ErrorBoundary`
-- [ ] Évaluer si `react-error-boundary` peut être retiré des dépendances après migration
+- [x] `src/routes/__root.tsx` — ajouté `id: user.id` dans `Sentry.setUser()`
+- [x] `src/server/admin.ts` — `captureWithFeature(error, SENTRY_FEATURES.BUNNY_CLEANUP)` sur les catch Bunny delete
+- [x] `src/lib/react-tweet.ts` — `throw new Error(...)` au lieu de `Promise.reject(new Error(...))`
+- [x] `errorComponent: ErrorComponent` ajouté sur la route `/admin`
+- [x] `react-error-boundary` évalué : encore utilisé dans 2 fichiers Studio, ne peut pas être retiré
 
 ### Phase 9 — Dashboard admin (`/admin`)
 

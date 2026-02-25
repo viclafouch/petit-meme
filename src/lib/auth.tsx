@@ -18,6 +18,7 @@ import { capitalize } from '@/helpers/format'
 import { formatCentsToEuros } from '@/helpers/number'
 import { authLogger, stripeLogger } from '@/lib/logger'
 import { sendEmailAsync } from '@/lib/resend'
+import { captureWithFeature } from '@/lib/sentry'
 import { stripeClient } from '@/lib/stripe'
 import { stripe } from '@better-auth/stripe'
 import { createServerOnlyFn } from '@tanstack/react-start'
@@ -36,6 +37,67 @@ const formatDate = (date: Date) => {
     dateStyle: 'long',
     timeStyle: 'short'
   }).format(date)
+}
+
+const handlePaymentFailed = async (event: Stripe.Event) => {
+  const invoice = event.data.object as Stripe.Invoice
+  const customerId = invoice.customer
+
+  if (typeof customerId !== 'string') {
+    return
+  }
+
+  stripeLogger.warn({ customerId, eventId: event.id }, 'Payment failed')
+
+  const user = await prismaClient.user.findFirst({
+    where: { stripeCustomerId: customerId },
+    select: { email: true, name: true }
+  })
+
+  if (!user) {
+    stripeLogger.warn(
+      { customerId, eventId: event.id },
+      'Payment failed but user not found'
+    )
+    captureWithFeature(
+      new Error(`Payment failed but user not found for customer ${customerId}`),
+      'stripe-payment'
+    )
+
+    return
+  }
+
+  let portalSession: Awaited<
+    ReturnType<typeof stripeClient.billingPortal.sessions.create>
+  >
+
+  try {
+    portalSession = await stripeClient.billingPortal.sessions.create({
+      customer: customerId,
+      // eslint-disable-next-line camelcase -- Stripe API uses snake_case
+      return_url: `${clientEnv.VITE_SITE_URL}/settings`
+    })
+  } catch (error) {
+    captureWithFeature(error, 'stripe-billing-portal')
+    stripeLogger.error(
+      { err: error, customerId, eventId: event.id },
+      'Failed to create billing portal session'
+    )
+
+    return
+  }
+
+  sendEmailAsync({
+    to: user.email,
+    subject: 'Échec de paiement pour ton abonnement Petit Mème',
+    react: (
+      <PaymentFailedEmail
+        username={user.name}
+        billingPortalUrl={portalSession.url}
+      />
+    ),
+    logMessage: 'Sending payment failed email to'
+  })
 }
 
 const getAuthConfig = createServerOnlyFn(() => {
@@ -259,51 +321,9 @@ const getAuthConfig = createServerOnlyFn(() => {
             'Stripe event received'
           )
 
-          if (event.type !== 'invoice.payment_failed') {
-            return
+          if (event.type === 'invoice.payment_failed') {
+            await handlePaymentFailed(event)
           }
-
-          const invoice = event.data.object as Stripe.Invoice
-          const customerId = invoice.customer
-
-          if (typeof customerId !== 'string') {
-            return
-          }
-
-          stripeLogger.warn({ customerId, eventId: event.id }, 'Payment failed')
-
-          const user = await prismaClient.user.findFirst({
-            where: { stripeCustomerId: customerId },
-            select: { email: true, name: true }
-          })
-
-          if (!user) {
-            stripeLogger.warn(
-              { customerId, eventId: event.id },
-              'Payment failed but user not found'
-            )
-
-            return
-          }
-
-          const portalSession =
-            await stripeClient.billingPortal.sessions.create({
-              customer: customerId,
-              // eslint-disable-next-line camelcase
-              return_url: `${clientEnv.VITE_SITE_URL}/settings`
-            })
-
-          sendEmailAsync({
-            to: user.email,
-            subject: 'Échec de paiement pour ton abonnement Petit Mème',
-            react: (
-              <PaymentFailedEmail
-                username={user.name}
-                billingPortalUrl={portalSession.url}
-              />
-            ),
-            logMessage: 'Sending payment failed email to'
-          })
         }
       })
     ]

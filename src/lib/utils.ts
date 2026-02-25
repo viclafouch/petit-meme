@@ -14,29 +14,49 @@ export function getFieldErrorMessage({ field }: { field: AnyFieldApi }) {
     : ''
 }
 
+const DEFAULT_FETCH_TIMEOUT_MS = 15_000
+
+type FetchWithZodInit = RequestInit & {
+  timeoutMs?: number
+}
+
 export async function fetchWithZod<T>(
   schema: ZodType<T>,
-  ...args: Parameters<typeof fetch>
+  input: Parameters<typeof fetch>[0],
+  init?: FetchWithZodInit
 ): Promise<T> {
-  const response = await fetch(...args)
+  const { timeoutMs = DEFAULT_FETCH_TIMEOUT_MS, ...fetchInit } = init ?? {}
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => {
+    return controller.abort()
+  }, timeoutMs)
 
-  if (!response.ok) {
-    let message = `Fetch failed with status ${response.status}`
+  try {
+    const response = await fetch(input, {
+      ...fetchInit,
+      signal: controller.signal
+    })
 
-    try {
-      const error = await response.json()
-      message = `${message}: ${error.message}`
-    } catch {}
+    if (!response.ok) {
+      let message = `Fetch failed with status ${response.status}`
 
-    logger.error({ url: args[0], status: response.status }, message)
-    throw new Error(message)
+      try {
+        const error = await response.json()
+        message = `${message}: ${error.message}`
+      } catch {}
+
+      logger.error({ url: input, status: response.status }, message)
+      throw new Error(message)
+    }
+
+    const result = await response.json()
+
+    logger.debug({ url: response.url }, 'Fetch response')
+
+    return schema.parse(result, {
+      reportInput: process.env.NODE_ENV === 'development'
+    })
+  } finally {
+    clearTimeout(timeoutId)
   }
-
-  const result = await response.json()
-
-  logger.debug({ url: response.url }, 'Fetch response')
-
-  return schema.parse(result, {
-    reportInput: process.env.NODE_ENV === 'development'
-  })
 }

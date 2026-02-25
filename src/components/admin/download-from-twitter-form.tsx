@@ -58,10 +58,13 @@ export const DownloadFromTwitterForm = () => {
     },
     onSuccess: (text) => {
       form.setFieldValue('url', text.trim())
+    },
+    onError: () => {
+      toast.error('Impossible de lire le presse-papiers')
     }
   })
 
-  const handlePasteFromClipboard = async () => {
+  const handlePasteFromClipboard = () => {
     void clipboardMutation.mutateAsync().finally(() => {
       setTimeout(() => {
         clipboardMutation.reset()

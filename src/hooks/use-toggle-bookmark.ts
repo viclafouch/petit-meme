@@ -1,6 +1,8 @@
 import React from 'react'
+import { toast } from 'sonner'
 import type { MemeWithVideo } from '@/constants/meme'
 import { getFavoritesMemesQueryOpts, getMemeByIdQueryOpts } from '@/lib/queries'
+import { captureWithFeature } from '@/lib/sentry'
 import { toggleBookmarkByMemeId } from '@/server/user'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
@@ -54,6 +56,10 @@ export function useToggleBookmark({
           count: old.count + 1
         }
       })
+    },
+    onError: (error) => {
+      captureWithFeature(error, 'bookmark')
+      toast.error('Erreur lors de la mise à jour du favori')
     },
     onSettled: () => {
       void queryClient.invalidateQueries(getMemeByIdQueryOpts(meme.id))

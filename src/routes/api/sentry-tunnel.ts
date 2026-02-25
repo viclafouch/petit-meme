@@ -45,21 +45,33 @@ export const Route = createFileRoute('/api/sentry-tunnel')({
 
         const upstream = `https://${header.hostname}/api/${header.projectId}/envelope/`
 
-        const response = await fetch(upstream, {
-          method: 'POST',
-          body: envelopeBytes,
-          headers: {
-            'Content-Type': 'application/x-sentry-envelope'
-          }
-        })
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => {
+          return controller.abort()
+        }, 10_000)
 
-        return new Response(response.body, {
-          status: response.status,
-          headers: {
-            'Content-Type':
-              response.headers.get('Content-Type') ?? 'application/json'
-          }
-        })
+        try {
+          const response = await fetch(upstream, {
+            method: 'POST',
+            body: envelopeBytes,
+            signal: controller.signal,
+            headers: {
+              'Content-Type': 'application/x-sentry-envelope'
+            }
+          })
+
+          return new Response(response.body, {
+            status: response.status,
+            headers: {
+              'Content-Type':
+                response.headers.get('Content-Type') ?? 'application/json'
+            }
+          })
+        } catch {
+          return new Response('Upstream timeout', { status: 502 })
+        } finally {
+          clearTimeout(timeoutId)
+        }
       }
     }
   }

@@ -64,11 +64,11 @@ export const FileForm = ({ onSuccess, closeDialog }: FileFormParams) => {
         },
         error: 'Une erreur est survenue'
       })
-      closeDialog()
 
       return promise
     },
     onSuccess: (data) => {
+      closeDialog()
       onSuccess?.({ memeId: data.id })
     }
   })

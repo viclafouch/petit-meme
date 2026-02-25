@@ -1,6 +1,7 @@
 import { toast } from 'sonner'
 import { authClient } from '@/lib/auth-client'
 import { getActiveSubscriptionQueryOpts } from '@/lib/queries'
+import { captureWithFeature } from '@/lib/sentry'
 import { useShowDialog } from '@/stores/dialog.store'
 import { useQueryClient } from '@tanstack/react-query'
 import type { LinkOptions } from '@tanstack/react-router'
@@ -14,6 +15,8 @@ export const useStripeCheckout = () => {
   const goToBillingPortal = async () => {
     if (!user) {
       showDialog('auth', {})
+
+      return
     }
 
     try {
@@ -28,6 +31,7 @@ export const useStripeCheckout = () => {
         throw error
       }
     } catch (error) {
+      captureWithFeature(error, 'stripe-checkout')
       toast.error('Une erreur est survenue')
     }
   }
@@ -41,7 +45,6 @@ export const useStripeCheckout = () => {
 
     try {
       const promise = new Promise((resolve) => {
-        // We force the toast to be a promise
         setTimeout(resolve, 1)
       })
         .then(() => {
@@ -70,6 +73,7 @@ export const useStripeCheckout = () => {
 
       await promise
     } catch (error) {
+      captureWithFeature(error, 'stripe-checkout')
       toast.error('Une erreur est survenue')
     }
   }

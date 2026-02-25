@@ -10,6 +10,7 @@ import {
 } from '@/lib/algolia'
 import { getVideoPlayData } from '@/lib/bunny'
 import { bunnyLogger } from '@/lib/logger'
+import { captureWithFeature } from '@/lib/sentry'
 import { createFileRoute } from '@tanstack/react-router'
 
 const WEBHOOK_RESPONSE_SCHEMA = z.object({
@@ -22,12 +23,29 @@ export const Route = createFileRoute('/api/bunny')({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const data = await request.json()
-        const result = WEBHOOK_RESPONSE_SCHEMA.parse(data)
-
-        const videoPlayData = await getVideoPlayData(result.VideoGuid)
+        let data: unknown
 
         try {
+          data = await request.json()
+        } catch (error) {
+          bunnyLogger.error({ err: error }, 'Invalid JSON in webhook body')
+
+          return Response.json({ success: false }, { status: 400 })
+        }
+
+        let result: z.infer<typeof WEBHOOK_RESPONSE_SCHEMA>
+
+        try {
+          result = WEBHOOK_RESPONSE_SCHEMA.parse(data)
+        } catch (error) {
+          bunnyLogger.error({ err: error, data }, 'Invalid webhook payload')
+
+          return Response.json({ success: false }, { status: 400 })
+        }
+
+        try {
+          const videoPlayData = await getVideoPlayData(result.VideoGuid)
+
           const { meme } = await prismaClient.video.update({
             where: {
               bunnyId: result.VideoGuid,
@@ -62,13 +80,14 @@ export const Route = createFileRoute('/api/bunny')({
           )
 
           return Response.json({ success: true })
-        } catch {
-          bunnyLogger.debug(
-            { videoId: result.VideoGuid, status: result.Status },
-            'Video update skipped'
+        } catch (error) {
+          bunnyLogger.error(
+            { err: error, videoId: result.VideoGuid, status: result.Status },
+            'Video update failed'
           )
+          captureWithFeature(error, 'bunny-webhook')
 
-          return Response.json({ success: true })
+          return Response.json({ success: false }, { status: 500 })
         }
       }
     }

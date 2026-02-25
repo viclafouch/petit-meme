@@ -52,6 +52,9 @@ export const TwitterForm = ({ onSuccess, closeDialog }: TwitterFormParams) => {
     },
     onSuccess: (text) => {
       form.setFieldValue('url', text.trim())
+    },
+    onError: () => {
+      toast.error('Impossible de lire le presse-papiers')
     }
   })
 
@@ -73,11 +76,11 @@ export const TwitterForm = ({ onSuccess, closeDialog }: TwitterFormParams) => {
           return 'Mème créé avec succès !'
         }
       })
-      closeDialog()
 
       return promise
     },
     onSuccess: (data) => {
+      closeDialog()
       onSuccess?.({ memeId: data.id })
     },
     onError: (error) => {

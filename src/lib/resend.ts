@@ -2,6 +2,7 @@ import type React from 'react'
 import { Resend } from 'resend'
 import { serverEnv } from '@/env/server'
 import { emailLogger } from '@/lib/logger'
+import { captureWithFeature } from '@/lib/sentry'
 
 export const resend = new Resend(serverEnv.RESEND_API_KEY)
 
@@ -37,6 +38,7 @@ export const sendEmailAsync = ({
     .then(({ error }) => {
       if (error) {
         emailLogger.error({ err: error, subject, to }, 'Failed to send email')
+        captureWithFeature(error, 'resend-email')
       }
     })
     .catch((error: unknown) => {
@@ -44,5 +46,6 @@ export const sendEmailAsync = ({
         { err: error, subject, to },
         'Network error sending email'
       )
+      captureWithFeature(error, 'resend-email')
     })
 }

@@ -7,14 +7,20 @@ export function extractTweetIdFromUrl(tweetUrl: string) {
   return url.searchParams.get('post_id') ?? url.pathname.split('/').at(-1)
 }
 
+const fetchBlob = async (url: string) => {
+  const response = await fetch(url)
+
+  if (!response.ok) {
+    throw new Error(`Fetch failed for ${url} with status ${response.status}`)
+  }
+
+  return response.blob()
+}
+
 export async function getTweetMedia(videoUrl: string, poster: string) {
   const [videoBlob, posterBlob] = await Promise.all([
-    fetch(videoUrl).then((response) => {
-      return response.blob()
-    }),
-    fetch(poster).then((response) => {
-      return response.blob()
-    })
+    fetchBlob(videoUrl),
+    fetchBlob(poster)
   ])
 
   return {
@@ -37,7 +43,7 @@ export async function getTweetById(tweetId: string) {
   if (!tweet || !tweet.video || tweet.video.variants.length === 0) {
     logger.warn({ tweetId }, 'Tweet invalid or has no video')
 
-    return Promise.reject(new Error('tweet invalid'))
+    throw new Error('tweet invalid')
   }
 
   logger.debug({ tweetId }, 'Tweet fetched')

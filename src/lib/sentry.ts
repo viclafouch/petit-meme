@@ -1,5 +1,27 @@
 import type { FeedbackInternalOptions } from '@sentry/core'
-import type * as Sentry from '@sentry/tanstackstart-react'
+import * as Sentry from '@sentry/tanstackstart-react'
+
+type SentryFeature =
+  | 'stripe-checkout'
+  | 'stripe-payment'
+  | 'stripe-billing-portal'
+  | 'bunny-webhook'
+  | 'bunny-cleanup'
+  | 'ai-generation'
+  | 'resend-email'
+  | 'bookmark'
+  | 'share'
+  | 'download'
+  | 'admin-meme-edit'
+  | 'delete-account'
+  | 'update-password'
+  | 'data-export'
+  | 'file-upload'
+  | 'studio'
+
+export const captureWithFeature = (error: unknown, feature: SentryFeature) => {
+  Sentry.captureException(error, { tags: { feature } })
+}
 
 type FeedbackOptions = Partial<
   Omit<FeedbackInternalOptions, 'themeLight' | 'themeDark'>

@@ -191,7 +191,7 @@ const RootComponent = () => {
   const { user } = Route.useRouteContext()
 
   React.useEffect(() => {
-    Sentry.setUser(user ? { email: user.email } : null)
+    Sentry.setUser(user ? { id: user.id, email: user.email } : null)
   }, [user])
 
   return (

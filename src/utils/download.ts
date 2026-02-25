@@ -1,3 +1,12 @@
+import { captureWithFeature } from '@/lib/sentry'
+
+const matchIsUserCancelError = (error: unknown) => {
+  return (
+    error instanceof DOMException &&
+    (error.name === 'AbortError' || error.name === 'NotAllowedError')
+  )
+}
+
 export function downloadBlob(blob: Blob, filename: string) {
   const element = document.createElement('a')
   const url = window.URL.createObjectURL(blob)
@@ -15,5 +24,11 @@ export async function shareBlob(blob: Blob, title: string, extension = 'mp4') {
     title
   }
 
-  await navigator.share(data).catch(() => {})
+  try {
+    await navigator.share(data)
+  } catch (error) {
+    if (!matchIsUserCancelError(error)) {
+      captureWithFeature(error, 'share')
+    }
+  }
 }

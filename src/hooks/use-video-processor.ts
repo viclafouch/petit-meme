@@ -21,12 +21,12 @@ import {
 } from '@/constants/studio'
 import { withTimeout } from '@/helpers/promise'
 import { getAuthUserQueryOpts, getVideoBlobQueryOpts } from '@/lib/queries'
+import { captureWithFeature } from '@/lib/sentry'
 import { incrementGenerationCount } from '@/server/user'
 import { useShowDialog } from '@/stores/dialog.store'
 import type { ProgressEvent } from '@ffmpeg/ffmpeg'
 import { FFmpeg } from '@ffmpeg/ffmpeg'
 import { fetchFile, toBlobURL } from '@ffmpeg/util'
-import * as Sentry from '@sentry/tanstackstart-react'
 import {
   useMutation,
   useQueryClient,
@@ -422,9 +422,8 @@ export const useVideoProcessor = (
         }
       }
 
-      Sentry.captureException(error, {
-        tags: { feature: 'studio' }
-      })
+      captureWithFeature(error, 'studio')
+      toast.error('Une erreur est survenue lors de la génération')
       options?.onError?.(error)
     },
     onSettled: () => {

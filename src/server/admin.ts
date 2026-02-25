@@ -34,6 +34,7 @@ import {
   getTweetById,
   getTweetMedia
 } from '@/lib/react-tweet'
+import { captureWithFeature } from '@/lib/sentry'
 import { adminRequiredMiddleware } from '@/server/user-auth'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
@@ -380,6 +381,7 @@ export const deleteMemeById = createServerFn({ method: 'POST' })
         })
       ),
       deleteVideo(meme.video.bunnyId).catch((error: unknown) => {
+        captureWithFeature(error, 'bunny-cleanup')
         bunnyLogger.error(
           { err: error, bunnyId: meme.video.bunnyId },
           'Failed to delete video from Bunny CDN'
@@ -427,6 +429,7 @@ async function createMemeWithVideo({
     })
   } catch (error) {
     await deleteVideo(videoId).catch((cleanupError: unknown) => {
+      captureWithFeature(cleanupError, 'bunny-cleanup')
       bunnyLogger.error(
         { err: cleanupError, bunnyVideoId: videoId },
         'Failed to cleanup orphan Bunny video after DB error'
@@ -435,15 +438,42 @@ async function createMemeWithVideo({
     throw error
   }
 
-  await Promise.all([
-    safeAlgoliaOp(
-      algoliaAdminClient.saveObject({
-        indexName: algoliaIndexName,
-        body: memeToAlgoliaRecord(meme)
-      })
-    ),
-    uploadVideo(videoId, buffer)
-  ])
+  try {
+    await Promise.all([
+      safeAlgoliaOp(
+        algoliaAdminClient.saveObject({
+          indexName: algoliaIndexName,
+          body: memeToAlgoliaRecord(meme)
+        })
+      ),
+      uploadVideo(videoId, buffer)
+    ])
+  } catch (error) {
+    captureWithFeature(error, 'admin-meme-edit')
+    adminLogger.error(
+      { err: error, memeId: meme.id, bunnyVideoId: videoId },
+      'Upload/Algolia failed after DB create, rolling back'
+    )
+
+    await Promise.all([
+      prismaClient.meme
+        .delete({ where: { id: meme.id } })
+        .catch((cleanupError: unknown) => {
+          adminLogger.error(
+            { err: cleanupError, memeId: meme.id },
+            'Failed to rollback meme from DB'
+          )
+        }),
+      safeAlgoliaOp(
+        algoliaAdminClient.deleteObject({
+          indexName: algoliaIndexName,
+          objectID: meme.id
+        })
+      )
+    ])
+
+    throw error
+  }
 
   invalidateAlgoliaCache()
 

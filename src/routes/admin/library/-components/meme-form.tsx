@@ -26,6 +26,7 @@ import type { Meme } from '@/db/generated/prisma/client'
 import { MemeStatus } from '@/db/generated/prisma/enums'
 import { useKeywordsField } from '@/hooks/use-keywords-field'
 import { getCategoriesListQueryOpts } from '@/lib/queries'
+import { captureWithFeature } from '@/lib/sentry'
 import { getFieldErrorMessage } from '@/lib/utils'
 import { editMeme, MEME_FORM_SCHEMA } from '@/server/admin'
 import { generateMemeContent } from '@/server/ai'
@@ -65,12 +66,16 @@ export const MemeForm = ({ meme, onCancel, onSuccess }: MemeFormParams) => {
         loading: 'Modification...',
         success: () => {
           return 'Mème modifié avec succès !'
-        }
+        },
+        error: 'Une erreur est survenue'
       })
 
       return promise
     },
-    onSuccess
+    onSuccess,
+    onError: (error) => {
+      captureWithFeature(error, 'admin-meme-edit')
+    }
   })
 
   const form = useForm({
@@ -122,6 +127,7 @@ export const MemeForm = ({ meme, onCancel, onSuccess }: MemeFormParams) => {
       })
     },
     onError: (error) => {
+      captureWithFeature(error, 'ai-generation')
       toast.error(error.message)
     }
   })

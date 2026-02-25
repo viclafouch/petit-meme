@@ -4,6 +4,7 @@ import { prismaClient } from '@/db'
 import { serverEnv } from '@/env/server'
 import { buildVideoOriginalUrl } from '@/lib/bunny'
 import { adminLogger } from '@/lib/logger'
+import { captureWithFeature } from '@/lib/sentry'
 import { adminRequiredMiddleware } from '@/server/user-auth'
 import { GoogleGenAI } from '@google/genai'
 import { createServerFn } from '@tanstack/react-start'
@@ -65,18 +66,31 @@ export const generateMemeContent = createServerFn({ method: 'POST' })
       }
     ]
 
-    const result = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents,
-      config: {
-        responseMimeType: 'application/json',
-        responseJsonSchema: zodToJsonSchema(videoSchema)
+    try {
+      const result = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents,
+        config: {
+          responseMimeType: 'application/json',
+          responseJsonSchema: zodToJsonSchema(videoSchema)
+        }
+      })
+
+      if (!result.text) {
+        throw new Error('La génération AI a échoué : réponse vide')
       }
-    })
 
-    const parsed = videoSchema.parse(JSON.parse(result.text!))
+      const parsed = videoSchema.parse(JSON.parse(result.text))
 
-    adminLogger.info({ memeId: data.memeId }, 'AI content generated')
+      adminLogger.info({ memeId: data.memeId }, 'AI content generated')
 
-    return parsed
+      return parsed
+    } catch (error) {
+      captureWithFeature(error, 'ai-generation')
+      adminLogger.error(
+        { err: error, memeId: data.memeId },
+        'AI content generation failed'
+      )
+      throw new Error('La génération AI a échoué')
+    }
   })

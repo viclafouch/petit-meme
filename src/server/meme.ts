@@ -338,14 +338,29 @@ export const shareMeme = createServerFn({ method: 'GET' })
 
     logger.debug({ memeId }, 'Meme shared/downloaded')
 
-    const response = await fetch(originalUrl)
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => {
+      return controller.abort()
+    }, 15_000)
 
-    return new Response(response.body, {
-      headers: {
-        'Content-Type': response.headers.get('Content-Type') ?? 'video/mp4',
-        'Cache-Control': 'no-cache'
+    try {
+      const response = await fetch(originalUrl, {
+        signal: controller.signal
+      })
+
+      if (!response.ok) {
+        throw new Error(`Bunny CDN responded with status ${response.status}`)
       }
-    })
+
+      return new Response(response.body, {
+        headers: {
+          'Content-Type': response.headers.get('Content-Type') ?? 'video/mp4',
+          'Cache-Control': 'no-cache'
+        }
+      })
+    } finally {
+      clearTimeout(timeoutId)
+    }
   })
 
 export const registerMemeView = createServerFn({ method: 'POST' })

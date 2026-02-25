@@ -29,6 +29,7 @@ import {
   getAuthUserQueryOpts,
   getFavoritesMemesQueryOpts
 } from '@/lib/queries'
+import { captureWithFeature } from '@/lib/sentry'
 import { getFieldErrorMessage } from '@/lib/utils'
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -60,6 +61,9 @@ const DeleteAccountForm = ({ onCancel }: { onCancel: () => void }) => {
       if (error) {
         throw new Error(error.code)
       }
+    },
+    onError: (error) => {
+      captureWithFeature(error, 'delete-account')
     },
     onSuccess: async () => {
       queryClient.removeQueries(getAuthUserQueryOpts())

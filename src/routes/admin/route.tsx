@@ -1,6 +1,7 @@
 import React from 'react'
 import { AdminNavButton } from '@/components/admin/admin-nav-button'
 import { AdminSidebar } from '@/components/admin/admin-sidebar'
+import { ErrorComponent } from '@/components/error-component'
 import { PathBreadcrumbs } from '@/components/path-breadcrumbs'
 import { Container } from '@/components/ui/container'
 import {
@@ -51,6 +52,7 @@ const RouteComponent = () => {
 
 export const Route = createFileRoute('/admin')({
   component: RouteComponent,
+  errorComponent: ErrorComponent,
   beforeLoad: async ({ location, context }) => {
     if (!context.user || context.user.role !== 'admin') {
       throw redirect({ to: '/' })

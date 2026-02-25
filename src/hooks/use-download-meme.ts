@@ -1,5 +1,6 @@
 import { toast } from 'sonner'
 import type { MemeWithVideo } from '@/constants/meme'
+import { captureWithFeature } from '@/lib/sentry'
 import { shareMeme } from '@/server/meme'
 import { downloadBlob } from '@/utils/download'
 import { useMutation } from '@tanstack/react-query'
@@ -17,8 +18,9 @@ export const useDownloadMeme = () => {
 
       downloadBlob(blob, meme.title)
     },
-    onError: () => {
-      toast.error('Une erreur s’est produite pendant le téléchargement')
+    onError: (error) => {
+      captureWithFeature(error, 'download')
+      toast.error("Une erreur s'est produite pendant le téléchargement")
     }
   })
 }

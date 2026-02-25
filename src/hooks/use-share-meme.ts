@@ -1,5 +1,6 @@
 import { toast } from 'sonner'
 import type { MemeWithVideo } from '@/constants/meme'
+import { captureWithFeature } from '@/lib/sentry'
 import { shareMeme } from '@/server/meme'
 import { shareBlob } from '@/utils/download'
 import { useMutation } from '@tanstack/react-query'
@@ -15,10 +16,11 @@ export const useShareMeme = () => {
 
       const blob = await blobPromise
 
-      void shareBlob(blob, meme.title)
+      await shareBlob(blob, meme.title)
     },
-    onError: () => {
-      toast.error('Une erreur s’est produite pendant le partage')
+    onError: (error) => {
+      captureWithFeature(error, 'share')
+      toast.error("Une erreur s'est produite pendant le partage")
     }
   })
 }

@@ -2,7 +2,7 @@ import type { UserWithRole } from 'better-auth/plugins'
 import { formatDate } from 'date-fns'
 import { EllipsisVertical } from 'lucide-react'
 import { toast } from 'sonner'
-import { AdminTable } from '@/components/admin/admin-table'
+import { AdminTable, PAGE_SIZE } from '@/components/admin/admin-table'
 import { PageHeader } from '@/components/page-header'
 import { Button } from '@/components/ui/button'
 import { Container } from '@/components/ui/container'
@@ -19,8 +19,12 @@ import { createFileRoute, useRouter } from '@tanstack/react-router'
 import {
   createColumnHelper,
   getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
   useReactTable
 } from '@tanstack/react-table'
+
+const BAN_DURATION_SECONDS = 60 * 60 * 24 * 7
 
 const DropdownMenuUser = ({ user }: { user: UserWithRole }) => {
   const router = useRouter()
@@ -31,7 +35,7 @@ const DropdownMenuUser = ({ user }: { user: UserWithRole }) => {
       await authClient.admin.banUser({
         userId: user.id,
         banReason: 'Spamming',
-        banExpiresIn: 60 * 60 * 24 * 7
+        banExpiresIn: BAN_DURATION_SECONDS
       })
     },
     onSuccess: () => {
@@ -120,30 +124,19 @@ const columnHelper = createColumnHelper<UserWithRole>()
 const columns = [
   columnHelper.accessor('id', {
     header: 'ID',
-    cell: (info) => {
-      return info.getValue()
-    }
+    enableSorting: false
   }),
   columnHelper.accessor('name', {
-    header: 'Name',
-    cell: (info) => {
-      return info.getValue()
-    }
+    header: 'Name'
   }),
   columnHelper.accessor('email', {
-    header: 'Email',
-    cell: (info) => {
-      return info.getValue()
-    }
+    header: 'Email'
   }),
   columnHelper.accessor('role', {
-    header: 'Role',
-    cell: (info) => {
-      return info.getValue()
-    }
+    header: 'Role'
   }),
   columnHelper.accessor('createdAt', {
-    header: `Date de création`,
+    header: 'Date de création',
     cell: (info) => {
       return formatDate(info.getValue(), 'dd/MM/yyyy')
     }
@@ -161,14 +154,22 @@ const columns = [
 const RouteComponent = () => {
   const data = Route.useLoaderData()
 
-  // eslint-disable-next-line react-hooks/incompatible-library
+  // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table v8 is not compatible with React Compiler (https://github.com/TanStack/table/issues/5903)
   const table = useReactTable({
     data: data.listUsers.users,
     columns,
     getRowId: (row) => {
       return row.id.toString()
     },
-    getCoreRowModel: getCoreRowModel()
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      sorting: [{ id: 'createdAt', desc: true }],
+      pagination: {
+        pageSize: PAGE_SIZE
+      }
+    }
   })
 
   return (

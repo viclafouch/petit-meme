@@ -230,7 +230,7 @@ export const MemeReels = () => {
     )
   }, [infiniteReels.data])
 
-  // eslint-disable-next-line react-hooks/incompatible-library
+  // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Virtual is not compatible with React Compiler (https://github.com/TanStack/virtual/issues/736)
   const rowVirtualizer = useVirtualizer({
     count: memesWithRefs.length,
     getScrollElement: () => {

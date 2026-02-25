@@ -1,6 +1,6 @@
 import { formatDate } from 'date-fns'
 import { Plus } from 'lucide-react'
-import { AdminTable } from '@/components/admin/admin-table'
+import { AdminTable, PAGE_SIZE } from '@/components/admin/admin-table'
 import { PageHeader } from '@/components/page-header'
 import { Badge } from '@/components/ui/badge'
 import { Container } from '@/components/ui/container'
@@ -12,6 +12,8 @@ import { createFileRoute } from '@tanstack/react-router'
 import {
   createColumnHelper,
   getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
   useReactTable
 } from '@tanstack/react-table'
 
@@ -20,6 +22,7 @@ const columnHelper = createColumnHelper<Category>()
 const columns = [
   columnHelper.accessor('id', {
     header: 'ID',
+    enableSorting: false,
     cell: (info) => {
       return info.getValue()
     }
@@ -38,6 +41,7 @@ const columns = [
   }),
   columnHelper.accessor('keywords', {
     header: 'Mots clés',
+    enableSorting: false,
     cell: (info) => {
       return (
         <div className="flex flex-wrap gap-1">
@@ -69,14 +73,22 @@ const columns = [
 const RouteComponent = () => {
   const { categories } = Route.useLoaderData()
 
-  // eslint-disable-next-line react-hooks/incompatible-library
+  // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table v8 is not compatible with React Compiler (https://github.com/TanStack/table/issues/5903)
   const table = useReactTable({
     data: categories,
     columns,
     getRowId: (row) => {
       return row.id.toString()
     },
-    getCoreRowModel: getCoreRowModel()
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      sorting: [{ id: 'createdAt', desc: true }],
+      pagination: {
+        pageSize: PAGE_SIZE
+      }
+    }
   })
 
   return (

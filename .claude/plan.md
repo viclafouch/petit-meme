@@ -23,231 +23,48 @@
 
 ---
 
-## Studio — Refonte performance & UX
+## Studio — Items restants
 
-Refonte complète du Studio (overlay texte sur vidéo). Priorité : performance FFmpeg, responsive mobile, et UX améliorée.
+Phases 1 à 5 terminées (page dédiée, live preview, templates, fonts, accessibilité WCAG 2.1 AA, refonte video player).
 
-**Stack actuelle** : `@ffmpeg/ffmpeg@0.12.15` + `@ffmpeg/core@0.12.9` (single-thread, WASM self-hosted dans `/public/ffmpeg/`).
-
-### Phase 1 — Performance & stabilité
-
-- [x] Self-host le WASM core dans `/public/ffmpeg/` (script `postinstall` + cache immutable)
-- [x] Loading state WASM avec `useSuspenseQuery` + `React.Suspense` + `ErrorBoundary`
-- [x] Cache blob vidéo source (`staleTime: Infinity`)
-- [x] Cache font FS FFmpeg (persiste tant que l'instance vit)
-- [x] Bouton Annuler (`ffmpeg.terminate()` + invalidation query)
-- [x] Limite texte `maxLength={150}`
-- [x] Timeout 30s sur `ffmpeg.load()` pour éviter spinner infini
-- [x] Monitoring Sentry sur les `ErrorBoundary` Studio + `captureException` dans les hooks
-
-### ~~Phase 2 — Multi-thread FFmpeg~~ ANNULÉ
-
-Retiré : `crossOriginIsolated` / `SharedArrayBuffer` ne fonctionne pas de manière fiable sur iOS Safari (même avec COEP `credentialless`). Le single-thread reste la cible pour la compatibilité maximale. À réévaluer quand le support navigateur sera plus stable.
-
-### Phase 3 — Page dédiée Studio + Responsive + Live Preview + Templates
-
-Migration du Studio depuis un Dialog vers une page dédiée `/memes/:memeId/studio`. Layout éditeur deux colonnes (preview + contrôles), responsive mobile-first. Inclut la Phase 4 (preview live, templates, couleurs, taille).
-
-- [x] Créer la route `/memes/$memeId/studio` sous layout `_studio` dédié (sans navbar/footer, full viewport)
-- [x] SEO : `noindex, follow` + canonical vers `/memes/:memeId` (pas de duplicata)
-- [x] Ajouter `noindex` et `canonicalPathname` à la fonction `seo()` dans `src/lib/seo.ts`
-- [x] Créer les composants Studio : `studio-page.tsx`, `studio-preview.tsx`, `studio-controls.tsx`, `studio-actions.tsx`, `studio-live-overlay.tsx`, `studio-templates.tsx`
-- [x] Layout desktop : preview (flex-1) + panneau contrôles (w-80/w-96) avec `md:flex-row`
-- [x] Layout mobile : stacking vertical (vidéo pleine largeur + contrôles en dessous)
-- [x] Bouton "Partager" prioritaire sur mobile (au-dessus de "Télécharger")
-- [x] Preview live CSS : overlay DOM texte sur la vidéo (sans FFmpeg) — `studio-live-overlay.tsx`
-- [x] Templates prédéfinis : "Légende" (Arial, bande blanche, texte noir), "Sous-titre" (fond semi-transparent noir, texte blanc)
-- [x] Choix de la couleur du texte (pastilles : noir, blanc, rouge, bleu)
-- [x] Choix de la taille du texte (presets : P/M/G → 24/36/48 px via ToggleGroup)
-- [x] Choix de la police (Select — Arial par défaut, extensible Phase 5)
-- [x] Constantes typées : `STUDIO_TEMPLATES`, `STUDIO_FONT_SIZES`, `STUDIO_COLORS`, `STUDIO_FONTS`, `StudioSettings`
-- [x] Remplacer dialog par Link dans `$memeId.tsx`, `memes-list.tsx`, `player-dialog.tsx`, `meme-list-item.tsx`
-- [x] Supprimer `studio-dialog.tsx`
-- [x] Adapter `studio-fallbacks.tsx` au contexte page (plus de `fixed inset-0`)
-- [x] Afficher 4 mèmes similaires dans le sidebar (comme la page slug) — navigation entre mèmes sans perdre les settings (texte, couleur, police, template)
-- [ ] Tester le flow complet sur iOS Safari et Chrome Android
+- [ ] Tester le flow complet sur iOS Safari et Chrome Android (Studio + PlayerDialog `playsInline`)
 - [ ] Gérer le cas où `navigator.share()` n'est pas supporté (fallback download)
 
-### Phase 3.5 — Refonte video player (Studio + PlayerDialog)
-
-Simplification du player vidéo : suppression de la barre de contrôles, interactions directes sur la vidéo.
-
-- [x] Créer `src/components/Meme/video-overlay.tsx` — composant réutilisable :
-  - Clic = play/pause (via media-chrome dispatch)
-  - Bouton fullscreen en bas-droite (au-dessus du mute)
-  - Grande icône ▶ centrée quand en pause
-  - Bouton mute/unmute en bas-droite (toujours visible, style Reels)
-  - Badge temps restant en bas-gauche (PlayerDialog uniquement, isolé dans `RemainingTimeBadge` pour éviter les re-renders à chaque frame)
-- [x] `studio-preview.tsx` : supprimer `VideoPlayerControlBar` de `OriginalVideo` et `ProcessedVideo`, ajouter `VideoOverlay`, ajouter `playsInline` sur `OriginalVideo`
-- [x] `player-dialog.tsx` : supprimer `VideoPlayerControlBar`, ajouter `VideoOverlay` avec `showDuration`
-- [ ] Tester sur iOS Safari (playsInline, pas d'autoplay inline)
-
-### Phase 4 — Features avancées
-
-- [x] Plusieurs fonts (Impact, Arial) dans `/public/fonts/`
-- [x] Fond de bande configurable (choix de couleurs : blanc, noir, rouge, bleu — blanc par défaut)
-- [x] Optimisation des paramètres FFmpeg d'encodage (codec explicite, pix_fmt yuv420p, stream mapping, single-thread explicite, strip metadata)
-- [x] Cache `input.mp4` en WASM FS entre les générations (WeakMap par instance FFmpeg, skip writeFile si même mème)
-- [x] Preload au focus input : `useVideoPreloader` expose `triggerPreload()`, déclenché au focus des inputs texte (mobile + desktop). Prefetch blob vidéo + font Arial + write WASM FS. Pas de preload au mount, pas de re-trigger auto au changement de mème.
-- [x] FFmpeg : mode overlay (`drawbox` semi-transparent) quand `bandOpacity < 1`, mode caption (`pad`) quand `bandOpacity === 1`
-
-### Phase 5 — Accessibilité WCAG 2.1 AA (Vidéo & Studio)
-
-- [x] `PlayerDialog` : `role="dialog"`, `aria-modal`, `aria-labelledby`, `FocusScope` (focus trap), body scroll lock, focus restoration via `triggerRef`
-- [x] `VideoOverlay` : `role="button"`, `tabIndex={0}`, `aria-label` dynamique (Lire/Pause), `onKeyDown` Enter/Space
-- [x] `MemeReels` : `role="feed"` + `aria-label` sur scroll container, `role="article"` + `aria-posinset`/`aria-setsize` sur items
-- [x] `StudioControls` : `id` sur Labels, `aria-labelledby` sur ToggleGroup/Select/ColorSwatches, `role="radiogroup"` + `role="radio"` + `aria-checked` sur ColorSwatches
-- [x] Mini-previews visuelles pour les templates (thumbnail mème + bande colorée + texte "Abc" au lieu de cartes texte)
-- [x] Color swatches : touch targets augmentés `size-7` → `size-10` (40px)
-- [x] Font sizes : `accessibleLabel` dans `STUDIO_FONT_SIZES` + `aria-label` sur ToggleGroupItem
-- [x] Studio mobile input : `aria-label="Texte à ajouter sur la vidéo"`
-- [x] `LoadingButton` : `aria-busy={isLoading}`
-
 ---
 
-## Internationalisation (FR / EN)
+## Migration Railway → Vercel — Items restants
 
-Passer le site en bilingue français / anglais. Étudier la meilleure approche avec TanStack Start (routing i18n, détection de langue, etc.).
+Migration terminée (preset Vercel, DNS, env vars, docs). Reste :
 
-Inclut la stratégie d'index Algolia bilingue (index unique avec champ `lang` vs deux index séparés).
-
----
-
-## Migration Prisma → Drizzle
-
-Remplacer Prisma par Drizzle ORM. Conventions cibles : tables en pluriel, colonnes en `snake_case`, timestamps `_at`, booleans `is_*`, prix en centimes (integer), UUIDs partout, `ON DELETE CASCADE` pour auth, `is_anonymized` pour GDPR.
-
----
-
-## Stripe — Payment Elements
-
-Évaluer la migration vers Payment Elements (au lieu de Checkout redirect). Pattern : `PaymentIntent` → `confirmPayment` avec `redirect: 'if_required'` → polling post-paiement.
-
----
-
-## ~~Migration npm → pnpm~~ FAIT
-
-- [x] `packageManager: pnpm@10.30.1` + corepack
-- [x] `pnpm-lock.yaml` généré, `package-lock.json` et `.npmrc` supprimés
-- [x] Scripts, hooks, docs et rules mis à jour
-- [x] Note : mettre à jour la commande d'install sur Railway (`pnpm install` au lieu de `npm install`)
-
----
-
-## Migration Railway → Vercel
-
-Migrer l'hébergement web de Railway vers Vercel. La base de données reste chez Prisma (inchangée).
-
-- [x] Changer le Nitro preset `node-server` → `vercel` dans `vite.config.ts`
-- [x] Remplacer `RAILWAY_GIT_COMMIT_SHA` → `VERCEL_GIT_COMMIT_SHA` (Sentry release)
-- [x] ~~Intégrer Sentry server init dans le bundle~~ — désactivé temporairement (ESM/CJS crash `require-in-the-middle` sur Vercel serverless)
-- [x] Supprimer `--import` du dev script et `cp instrument.server.mjs` du build script
-- [x] Mettre à jour les source maps path (`.vercel/output/**/*.map`)
-- [x] Créer `vercel.json` (buildCommand, installCommand)
-- [x] Ajouter `.vercel` aux `.gitignore` et ESLint ignores
-- [x] Copier les variables d'environnement dans Vercel Console
-- [x] Tester le build/deploy sur Vercel
-- [x] ~~Mettre à jour les webhook URLs (Stripe, Bunny)~~ — pas nécessaire, le domaine `petit-meme.io` reste identique
 - [ ] Configurer les crons (Vercel Cron Jobs ou scheduler externe)
-- [x] Supprimer `instrument.server.mjs` (devenu obsolète)
-- [x] Basculer le DNS vers Vercel
-- [x] Mettre à jour la documentation (README, mentions légales, database rules, GDPR auditor) : remplacer Railway par Vercel/Neon
 - [ ] Réactiver Sentry server-side tracing (`instrument-server.ts` + `wrapFetchWithSentry`) — bloqué par `require-in-the-middle` incompatible ESM dans Vercel serverless. Surveiller les updates Sentry/Nitro.
 
 ---
 
-## Migration vers Cloudflare
+## Admin — Refonte Tables, UX, Dashboard
 
-Passer le domaine sur Cloudflare pour bénéficier de ses fonctionnalités natives : redirection www → apex (et supprimer le check manuel dans `server.ts`), CDN/cache, SSL, protection DDoS, Page Rules, etc.
+Phases 1 à 4 terminées (sécurité admin, GDPR, performance backend, hardening Better Auth).
 
----
+**Ordre d'exécution restant :** Tables UI (5-7) → Error handling (8) → Dashboard & UX (9-10) → Audits (11)
 
-## Sentry — Migration ErrorBoundary
-
-Remplacer `react-error-boundary` par `Sentry.ErrorBoundary` dans toute l'app. Capture automatique des erreurs sans `onError` manuel.
-
-- [ ] Remplacer tous les `<ErrorBoundary>` de `react-error-boundary` par `Sentry.ErrorBoundary`
-- [ ] Supprimer les `onError={captureException}` devenus inutiles
-- [ ] Évaluer si `react-error-boundary` peut être retiré des dépendances
-
----
-
-## Dependabot — Vulnérabilités
-
-Traiter les vulnérabilités signalées par GitHub : https://github.com/viclafouch/petit-meme/security/dependabot
-
----
-
-## Admin — Audit & Refonte Tables, UX, Confirmations
-
-L'admin utilise TanStack Table pour users et categories, mais avec uniquement `getCoreRowModel()` — aucun tri, aucune pagination, aucun filtrage. Les actions destructives (ban, unban, delete user, delete category) n'ont aucune confirmation. La library memes garde sa grille visuelle Algolia (adaptée au contenu vidéo).
-
-**Ordre d'exécution :** Sécu & GDPR (1-2) → Perf & hardening (3-4) → UI tables (5-7) → Dashboard & UX (8-9) → Audits (10)
-
-### Phase 1 — Sécurité admin
-
-**[HIGH] SSRF dans `fetchTweetMedia`** (`src/server/twitter.ts`)
-- [x] Ajouter un allowlist de hostnames Twitter (`video.twimg.com`, `pbs.twimg.com`) sur les URLs acceptées par `fetchTweetMedia` — regex `/^(video|pbs)\.twimg\.com$/` dans `z.url({ hostname })` + middleware `getTweetFromUrl` migré vers `adminRequiredMiddleware`
-
-**[MEDIUM] Pas de `max()` sur les schemas Zod** (`src/server/admin.ts`, `src/server/categories.ts`)
-- [x] Ajouter `.max()` sur tous les champs string et array : `title.max(100)`, `keywords.max(20)` + `.max(50)` par string, `categoryIds.max(10)`, `slug.max(60)` dans `MEME_FORM_SCHEMA` et `CATEGORY_FORM_SCHEMA`
-
-**[MEDIUM] Injection filtre Algolia** (`src/server/admin.ts` — `getAdminMemes`)
-- [x] ~~Valider `data.status` contre l'enum `MemeStatus`~~ — déjà validé par `z.enum(MemeStatus)` dans `MEMES_FILTERS_SCHEMA`
-
-**[LOW] `getTweetFromUrl` accessible par tous les users authentifiés**
-- [x] Changer le middleware de `authUserRequiredMiddleware` à `adminRequiredMiddleware` dans `src/server/twitter.ts`
-
-**[LOW] Rate limiting désactivé hors production**
-- [ ] Activer le rate limiting sur les preview deployments Vercel (variable d'env ou protection par mot de passe Vercel) — reporté (infra)
-
-### Phase 2 — GDPR
-
-**[HIGH] stripeCustomerId dans l'export**
-- [x] Remplacer `stripeCustomerId` par `hasStripeAccount: boolean` dans le retour de `exportUserData` (`src/server/user.ts`) — `stripeCustomerId` reste dans le select Prisma pour le calcul mais n'est plus exposé
-
-**[MEDIUM] Consentement OAuth Twitter**
-- [x] Ajout dans `md/privacy.md` section 1 : mention que la connexion via Twitter/X implique l'acceptation de la Politique de confidentialité (nom, e-mail, photo de profil collectés)
-
-### Phase 3 — Performance backend admin
-
-**[MEDIUM] `deleteMemeById` — non transactionnel**
-- [x] `findUnique` pour récupérer infos (bunnyId, videoId), puis `$transaction([meme.delete, video.delete])`, puis `Promise.all([algolia.delete, bunny.delete])` hors transaction (best-effort) (`src/server/admin.ts`)
-
-**[MEDIUM] `createMemeWithVideo` — orphelins Bunny**
-- [x] try/catch autour de `meme.create` : dans le catch, `deleteVideo(videoId).catch(log)` puis rethrow erreur originale (`src/server/admin.ts`)
-
-**[MEDIUM] `editMeme` — diff catégories O(n²)**
-- [x] `new Set(currentCategoryIds)` + `new Set(values.categoryIds)`, utiliser `.has()` pour le diff (`src/server/admin.ts`)
-
-**[LOW] Index manquants**
-- [x] `@@index([categoryId])` sur `MemeCategory` + `@@index([createdAt])` sur `Category` (`prisma/schema.prisma`) — user lance `prisma migrate dev` après
-
-**[LOW] `getCategories` sans cache**
-- [x] Cache server-side in-memory (Map + TTL 5 min), exporter `invalidateCategoriesCache()`, appeler dans add/edit/delete (`src/server/categories.ts`)
-
-**[LOW] Cache key `getAdminMemes` incomplète**
-- [x] Remplacer `MEMES_FILTERS_SCHEMA` par `MEMES_SEARCH_SCHEMA` dans `getAdminMemes` (`src/server/admin.ts`)
-
-### Phase 4 — Hardening Better Auth (best practices)
-
-**Fichiers :** `src/lib/auth.tsx`, `src/lib/auth-client.ts`, `src/lib/role.ts`, `src/server/user-auth.ts`, `src/routes/admin/users.tsx`, `src/components/user-dropdown.tsx`, `src/components/admin/admin-nav-button.tsx`
-
-- ~~Ajouter `session.freshAge: 3600`~~ — ignoré (décision utilisateur)
-- [x] Configurer `advanced.backgroundTasks.handler` avec `waitUntil` de Vercel (`@vercel/functions`)
-- [x] Expliciter la config du plugin admin : `admin({ defaultRole: 'user' })`
-- ~~Corriger l'import plugin `admin` vers `better-auth/plugins/admin`~~ — impossible, le barrel `better-auth/plugins` est requis pour l'inférence des types `auth.api.*`
-- ~~Corriger l'import type `UserWithRole` vers `better-auth/plugins/admin`~~ — même raison, le barrel est requis
-- [x] Ajouter `session.cookieCache.version: '1'`
+**Item reporté Phase 1 :**
+- [ ] Activer le rate limiting sur les preview deployments Vercel — reporté (infra)
 
 ### Phase 5 — Upgrade `AdminTable` (composant générique)
 
-**Fichiers :** `src/components/admin/admin-table.tsx`
+**Fichiers :** `src/components/admin/admin-table.tsx`, `src/routes/admin/users.tsx`, `src/routes/admin/categories/index.tsx`
 
-- [ ] Typer proprement : remplacer `Table<any>` par `Table<TData>` (composant générique)
-- [ ] Ajouter le tri : headers cliquables avec icônes (asc/desc/none), utiliser `getSortedRowModel()` de TanStack Table
-- [ ] Ajouter la pagination : footer avec navigation (précédent/suivant + numéro de page), utiliser `getPaginationRowModel()` de TanStack Table
-- [ ] Rendre pagination/tri optionnels : props `enableSorting` et `enablePagination` avec defaults raisonnables
+**Décisions deep-dive :**
+- `useReactTable` reste dans les pages consommatrices — AdminTable reçoit l'instance `table` en prop
+- AdminTable détecte les features activées via l'API TanStack Table (pas de props `enableSorting`/`enablePagination`)
+- Footer pagination toujours visible (même si 1 seule page, boutons disabled)
+- Pas de composant Pagination séparé — boutons `<Button>` shadcn directement dans AdminTable
+
+- [x] Typer proprement : remplacer `Table<any>` par `Table<TData>` (composant générique)
+- [x] Ajouter le tri : headers cliquables avec icônes `ArrowUpDown` (neutre) → `ArrowUp` (asc) / `ArrowDown` (desc). Contrôle par colonne via `enableSorting: false` dans la column definition. `getSortedRowModel()` dans les pages.
+- [x] Ajouter la pagination : footer minimal "Page X sur Y" + boutons Précédent/Suivant (`<Button>` shadcn). 20 items/page fixe. `getPaginationRowModel()` dans les pages. Footer toujours affiché.
+- [x] Activer tri + pagination sur `users.tsx` : colonnes triables = Name, Email, Role, Date de création (pas ID ni Actions)
+- [x] Activer tri + pagination sur `categories/index.tsx` : colonnes triables = Titre, Slug, Date de création (pas ID, Mots clés ni Actions)
 
 ### Phase 6 — Users table (pagination + tri + confirmations + server functions)
 
@@ -276,10 +93,9 @@ Inclut la migration ban/unban/delete vers des server functions sécurisées, la 
 - [ ] Afficher le statut ban : colonne "Statut" avec badge (Banni/Actif)
 
 **Confirmations + feedback**
-- [ ] Confirmation ban : wraper avec `ConfirmAlert` (`src/components/confirm-alert.tsx`)
-- [ ] Confirmation unban : idem
-- [ ] Confirmation delete : idem
+- [ ] Confirmation ban/unban/delete : wraper avec `ConfirmAlert` (`src/components/confirm-alert.tsx`)
 - [ ] Toast feedback : `toast.promise()` pour ban, unban et delete
+- [ ] `onError` avec toast + `Sentry.captureException` sur chaque mutation
 
 ### Phase 7 — Categories table (tri + confirmation delete)
 
@@ -288,10 +104,84 @@ Inclut la migration ban/unban/delete vers des server functions sécurisées, la 
 - [ ] Activer le tri : ajouter `getSortedRowModel()` à `useReactTable`
 - [ ] Colonnes triables : Titre, Slug, Date de création
 - [ ] Confirmation delete : wraper "Supprimer" dans `CategoryDropdown` avec `ConfirmAlert`
-- [ ] Toast feedback : ajouter `toast.promise()` pour la suppression de catégorie
+- [ ] Toast feedback : ajouter `toast.promise()` pour la suppression de catégorie + `Sentry.captureException` dans `onError`
 - [ ] Log suppression catégorie dans `AdminAuditLog`
 
-### Phase 8 — Dashboard admin (`/admin`)
+### Phase 8 — Gestion d'erreurs (client + serveur + Sentry)
+
+Audit complet : zéro erreur silencieuse, remontée Sentry systématique, feedback utilisateur cohérent, logging serveur exploitable.
+
+#### P0 — Critique (paiements, webhooks, emails)
+
+**Stripe checkout sans Sentry** (`src/hooks/use-stripe-checkout.ts`)
+- [ ] Ajouter `Sentry.captureException(error)` dans les deux blocs `catch` (billing portal + checkout premium) avec tags `{ feature: 'stripe-checkout' }`
+
+**Webhook Bunny cassé** (`src/routes/api/bunny.ts`)
+- [ ] Wrapper `request.json()` + `WEBHOOK_RESPONSE_SCHEMA.parse()` dans un try/catch — retourner `400` si JSON invalide ou validation Zod échoue
+- [ ] Déplacer `getVideoPlayData()` dans le try/catch existant (actuellement hors bloc)
+- [ ] Retourner `500` (pas `200`) dans le catch principal — Bunny doit pouvoir retry
+- [ ] Logger les erreurs en `.error()` au lieu de `.debug()`
+
+**Appel Gemini AI non protégé** (`src/server/ai.ts`)
+- [ ] Wrapper l'appel `ai.models.generateContent()` + le parse dans un try/catch avec `Sentry.captureException` + log admin
+- [ ] Remplacer `result.text!` par un check explicite (`if (!result.text) throw`)
+
+**Emails Resend fire-and-forget sans Sentry** (`src/lib/resend.ts`)
+- [ ] Ajouter `Sentry.captureException(error)` dans le `.catch()` réseau et dans le `.then({ error })`
+
+**Stripe payment_failed event** (`src/lib/auth.tsx`)
+- [ ] Ajouter `Sentry.captureException` quand user not found pour un payment_failed
+- [ ] Wrapper `billingPortal.sessions.create()` dans un try/catch avec Sentry
+
+#### P1 — High (erreurs silencieuses côté utilisateur)
+
+**Mutations sans `onError`**
+- [ ] `src/hooks/use-toggle-bookmark.ts` — ajouter `onError` avec toast + Sentry
+- [ ] `src/components/admin/download-from-twitter-form.tsx` — ajouter `onError` sur clipboard mutation avec toast
+- [ ] `src/components/Meme/MemeForm/twitter-form.tsx` — idem clipboard mutation
+
+**`shareBlob` / `downloadBlob` fire-and-forget**
+- [ ] `src/utils/download.ts` — remplacer `.catch(() => {})` dans `shareBlob` par un catch qui log + Sentry (filtrer `AbortError`/`NotAllowedError` = user cancel)
+- [ ] `src/hooks/use-share-meme.ts` — await `shareBlob` ou ajouter `.catch()` avec Sentry
+- [ ] `src/hooks/use-download-meme.ts` — idem pour `downloadBlob`
+
+**Timeout manquant sur fetch**
+- [ ] `src/lib/utils.ts` (`fetchWithZod`) — ajouter `AbortController` avec timeout configurable (default 15s)
+- [ ] `src/routes/api/sentry-tunnel.ts` — ajouter timeout sur le `fetch()` upstream (10s)
+- [ ] `src/server/meme.ts` (`shareMeme`) — ajouter error handling + timeout sur le fetch Bunny CDN
+
+**`findActiveSubscription` retourne `null` en erreur** (`src/server/customer.ts`)
+- [ ] Distinguer "pas d'abonnement" (return `null`) de "erreur API" (throw ou type discriminé) pour éviter de bloquer les features premium silencieusement
+
+#### P2 — Medium (robustesse, Sentry manquant, UX)
+
+**Dialogs fermés avant fin de mutation**
+- [ ] `src/components/Meme/MemeForm/file-form.tsx` — déplacer `closeDialog()` dans `onSuccess`
+- [ ] `src/components/Meme/MemeForm/twitter-form.tsx` — idem
+
+**Catch blocks sans Sentry**
+- [ ] `src/hooks/use-video-processor.ts` — ajouter toast générique pour les erreurs non-StudioError
+- [ ] `src/routes/admin/library/-components/meme-form.tsx` (`generateContentMutation`) — ajouter `Sentry.captureException`
+- [ ] `src/components/User/delete-account-dialog.tsx` — ajouter `onError` avec Sentry
+- [ ] `src/components/User/update-password-dialog.tsx` — idem
+- [ ] `src/routes/_public__root/_default/settings/-components/profile-content.tsx` — ajouter Sentry dans `onError` export
+- [ ] `src/components/ui/file-upload.tsx` — ajouter `Sentry.captureException` dans le catch upload
+
+**HTTP status non vérifié**
+- [ ] `src/lib/react-tweet.ts` (`getTweetMedia`) — ajouter check `response.ok` avant `.blob()`, throw si erreur HTTP
+
+**Algolia + upload partial failure** (`src/server/admin.ts:293`)
+- [ ] Revoir `createMemeWithVideo` : si `uploadVideo` échoue après Algolia save, cleanup l'entrée Algolia (appel `deleteObject`)
+
+#### P3 — Low (améliorations mineures)
+
+- [ ] `src/routes/__root.tsx` — ajouter `id` dans `Sentry.setUser({ id: user.id })` pour tracer sans PII
+- [ ] `src/server/admin.ts:237` — ajouter `Sentry.captureException` sur le catch Bunny delete (orphan videos)
+- [ ] `src/lib/react-tweet.ts:40` — remplacer `Promise.reject(new Error(...))` par `throw new Error(...)`
+- [ ] Ajouter `errorComponent` sur les routes principales (admin, settings, meme detail) pour un meilleur contexte Sentry — absorbe la migration `react-error-boundary` → `Sentry.ErrorBoundary`
+- [ ] Évaluer si `react-error-boundary` peut être retiré des dépendances après migration
+
+### Phase 9 — Dashboard admin (`/admin`)
 
 Transformer la page d'accueil admin en un vrai dashboard avec KPIs, liens rapides et activité récente. Design via `/frontend-design`.
 
@@ -299,8 +189,8 @@ Transformer la page d'accueil admin en un vrai dashboard avec KPIs, liens rapide
 - [ ] Vérifier la disponibilité de l'Algolia Analytics API sur le free tier (partages, téléchargements, clics). Si indisponible → fallback compteurs DB (`shareCount`/`downloadCount` sur Meme, migration additive)
 
 **Migrations additives (Prisma)**
-- [ ] Créer le modèle `StudioGeneration` (userId, memeId, createdAt) — remplace le compteur `User.generationCount` pour un tracking par date filtrable par période. Modifier `incrementGenerationCount` pour créer un record au lieu d'incrémenter
-- [ ] Si Algolia Analytics API indisponible : ajouter `shareCount`/`downloadCount` sur `Meme` + incrémenter dans les hooks existants
+- [ ] Créer le modèle `StudioGeneration` (userId, memeId, createdAt) — remplace le compteur `User.generationCount` pour un tracking par date filtrable par période
+- [ ] Si Algolia Analytics API indisponible : ajouter `shareCount`/`downloadCount` sur `Meme`
 - [ ] Logger les actions admin restantes dans `AdminAuditLog` : publish meme, edit meme
 
 **Sélecteur de période**
@@ -363,7 +253,7 @@ Transformer la page d'accueil admin en un vrai dashboard avec KPIs, liens rapide
 | Téléchargements | Algolia `Meme Downloaded` | ✓ (API) | `Meme.downloadCount` (migration) |
 | Clics | Algolia `Meme Clicked` | ✓ (API) | non prioritaire |
 
-### Phase 9 — Améliorations UX admin
+### Phase 10 — Améliorations UX admin
 
 **Search users**
 - [ ] Ajouter une barre de recherche client-side sur la table users (filtre par nom/email)
@@ -391,9 +281,33 @@ Transformer la page d'accueil admin en un vrai dashboard avec KPIs, liens rapide
 - [ ] Sentry : count erreurs dernières 24h (via Sentry API, si gratuit)
 - [ ] Afficher sous forme de badges vert/orange/rouge selon les seuils
 
-### Phase 10 — Audits post-implémentation
+### Phase 11 — Audits post-implémentation
 
 À lancer **après** toutes les phases précédentes :
 
 - [ ] **React performance** — re-renders TanStack Table, stabilité références colonnes/handlers, bulk selection
 - [ ] **Accessibility (a11y)** — `aria-sort` sur headers triables, `aria-label` pagination, focus trap confirm dialogs, touch targets mobile, graphiques (alt text ou `aria-describedby`)
+
+---
+
+## Backlog — Futures évolutions
+
+### Internationalisation (FR / EN)
+
+Passer le site en bilingue français / anglais. Étudier la meilleure approche avec TanStack Start (routing i18n, détection de langue, etc.). Inclut la stratégie d'index Algolia bilingue (index unique avec champ `lang` vs deux index séparés).
+
+### Migration Prisma → Drizzle
+
+Remplacer Prisma par Drizzle ORM. Conventions cibles : tables en pluriel, colonnes en `snake_case`, timestamps `_at`, booleans `is_*`, prix en centimes (integer), UUIDs partout, `ON DELETE CASCADE` pour auth, `is_anonymized` pour GDPR.
+
+### Stripe — Payment Elements
+
+Évaluer la migration vers Payment Elements (au lieu de Checkout redirect). Pattern : `PaymentIntent` → `confirmPayment` avec `redirect: 'if_required'` → polling post-paiement.
+
+### Migration vers Cloudflare
+
+Passer le domaine sur Cloudflare pour bénéficier de ses fonctionnalités natives : redirection www → apex (et supprimer le check manuel dans `server.ts`), CDN/cache, SSL, protection DDoS, Page Rules, etc.
+
+### Dependabot — Vulnérabilités
+
+Traiter les vulnérabilités signalées par GitHub : https://github.com/viclafouch/petit-meme/security/dependabot

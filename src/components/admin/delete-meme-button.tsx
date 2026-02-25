@@ -7,7 +7,7 @@ import {
   getAdminMemeByIdQueryOpts,
   getAdminMemesListQueryOpts
 } from '@/lib/queries'
-import { deleteMemeById } from '@/server/admin'
+import { deleteMemeById } from '@/server/admin/memes'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 

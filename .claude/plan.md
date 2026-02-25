@@ -297,77 +297,150 @@ Audit complet : zéro erreur silencieuse, remontée Sentry systématique, feedba
 - [x] `errorComponent: ErrorComponent` ajouté sur la route `/admin`
 - [x] `react-error-boundary` évalué : encore utilisé dans 2 fichiers Studio, ne peut pas être retiré
 
-### Phase 9 — Dashboard admin (`/admin`)
+### Phase 9a-pre — Split `src/server/admin.ts` → `src/server/admin/`
 
-Transformer la page d'accueil admin en un vrai dashboard avec KPIs, liens rapides et activité récente. Design via `/frontend-design`.
+Restructuration du fichier monolithique `admin.ts` (~710 lignes) en un dossier avec des fichiers par domaine. **Commit séparé** avant Phase 9a.
 
-**Prérequis**
-- [ ] Vérifier la disponibilité de l'Algolia Analytics API sur le free tier (partages, téléchargements, clics). Si indisponible → fallback compteurs DB (`shareCount`/`downloadCount` sur Meme, migration additive)
+**Structure cible :**
+- `src/server/admin/index.ts` — re-exports (barrel file, tous les exports publics)
+- `src/server/admin/users.ts` — getListUsers, banUserById, unbanUserById, removeUser
+- `src/server/admin/memes.ts` — getAdminMemes, getAdminMemeById, editMeme, deleteMemeById, createMemeFromTwitterUrl, createMemeFromFile, createMemeWithVideo
+- `src/server/admin/audit.ts` — logAuditAction + types (`AuditAction`, `AuditTargetType`, `AuditActionParams`). Partagé par `memes.ts`, `users.ts` et `src/server/categories.ts`
+- `src/server/admin/dashboard.ts` — (vide pour l'instant, prêt pour Phase 9a)
+
+**Imports :** tous les consommateurs importent depuis `~/server/admin` (transparent via `index.ts`). `categories.ts` importe `logAuditAction` depuis `~/server/admin/audit`.
+
+- [x] Créer `src/server/admin/audit.ts` — extraire `logAuditAction` de `categories.ts`, typer `AuditAction` et `AuditTargetType`
+- [x] Créer `src/server/admin/users.ts` — déplacer getListUsers, ban/unban/remove + types associés (+ migration vers `logAuditAction` partagé)
+- [x] Créer `src/server/admin/memes.ts` — déplacer tout le CRUD memes + types associés
+- [x] Créer `src/server/admin/dashboard.ts` — fichier vide exportant rien (placeholder)
+- [x] Créer `src/server/admin/index.ts` — re-exports de tous les modules
+- [x] Supprimer `src/server/admin.ts`
+- [x] Mettre à jour `src/server/categories.ts` — importer `logAuditAction` depuis `~/server/admin/audit`, ajouter `targetType: 'category'` aux 3 appels
+- [x] Imports consommateurs transparents via barrel `index.ts` (aucun changement nécessaire)
+- [x] `pnpm run lint:fix` — compilé sans erreur
+
+### Phase 9a — Dashboard fondations (KPIs + totaux + liens + feed)
+
+Transformer la page d'accueil admin (actuellement redirect vers `/admin/library`) en un vrai dashboard. Design via `/frontend-design`.
+
+**Décisions deep-dive :**
+- Algolia Analytics API : **indisponible sur free tier** (nécessite Premium/Elevate) → compteurs DB
+- Partages/téléchargements : `shareCount`/`downloadCount` sur Meme (migration additive, historique = 0, affichés dès le début)
+- StudioGeneration : nouveau modèle Prisma pour l'analytics (filtrage par date). `User.generationCount` **conservé** pour le rate limiting (O(1) vs COUNT scan). Écriture atomique via `$transaction` (increment counter + create record). Dual source justifiée par l'audit perf.
+- Période : URL search param `?period=7d|30d|90d`, default `30d`, validé Zod via TanStack Router
+- Deltas : % variation vs période précédente (flèche verte/rouge). Masqué si previous=0. Badge "Nouveau" si current>0 et previous=0. Sinon afficher le % normalement.
+- Data loading : client-side `useSuspenseQuery` + Suspense boundaries + skeleton cards
+- Server functions : 2 fonctions (stats + feed séparés car le feed est indépendant de la période)
+- **Queries** : Prisma client classique + `Promise.all` (type-safe, ~22 queries en parallèle). Pas de `$queryRaw`. Dashboard admin-only (1 utilisateur), perf suffisante avec des COUNT indexés.
+- Tracking share/download : server function fire-and-forget, **ouvert à tous** (anonymes inclus) pour capturer 100% des events. Pas de vérification d'existence du meme (fire-and-forget pur — si memeId invalide, Prisma update échoue silencieusement, Sentry capture). **Pas de protection anti-spam** (reporté)
+- Audit log : `logAuditAction` importé depuis `~/server/admin/audit` (partagé). Tous les appels en **fire-and-forget** (`void logAuditAction(...)`) — non bloquant, erreurs déjà catchées. Pattern rétroactif sur les categories existantes.
+- Audit log memes : CRUD complet (create, edit, status_change, delete). Logger chaque appel editMeme. status_change : détection via `findUnique({ select: { status: true } })` avant l'update, metadata `{ from, to }`
+- Feed : 10 entrées, format compact "verbe passé + target" (ex: "Catégorie créée : Animaux", "Utilisateur banni : john@..."). Icônes déléguées à `/frontend-design`, cohérence dans tout l'admin.
+- Composant UI du sélecteur de période : choix délégué à `/frontend-design`
+
+**Ordre d'implémentation : couche par couche**
+1. Migrations Prisma
+2. Server functions (tracking, audit, dashboard stats, feed)
+3. Hooks (share/download tracking)
+4. Page + composants UI (via `/frontend-design`)
+
+**Fichiers :** `src/routes/admin/index.tsx`, `src/routes/admin/-components/dashboard/` (kpi-card, kpi-grid, totals-section, quick-links, activity-feed), `src/server/admin/dashboard.ts`, `src/server/admin/memes.ts`, `src/server/admin/audit.ts`, `src/server/user.ts`, `src/server/meme.ts`, `prisma/schema.prisma`, `src/hooks/use-share-meme.ts`, `src/hooks/use-download-meme.ts`, `src/routes/admin/route.tsx`, `src/components/admin/admin-sidebar.tsx`, `src/lib/sentry.ts`
 
 **Migrations additives (Prisma)**
-- [ ] Créer le modèle `StudioGeneration` (userId, memeId, createdAt) — remplace le compteur `User.generationCount` pour un tracking par date filtrable par période
-- [ ] Si Algolia Analytics API indisponible : ajouter `shareCount`/`downloadCount` sur `Meme`
-- [ ] Logger les actions admin restantes dans `AdminAuditLog` : publish meme, edit meme
+- [ ] Créer le modèle `StudioGeneration` (id, userId, createdAt) — relation User, indexes : `@@index([createdAt])` + `@@index([userId, createdAt])` (le composite couvre les queries par userId seul, pas besoin d'un index `userId` standalone)
+- [ ] Ajouter `shareCount Int @default(0)` et `downloadCount Int @default(0)` sur `Meme`
+- [ ] Ajouter `@@index([day])` sur `MemeViewDaily` — queries globales date-range KPI (sans filtre memeId)
+- [ ] Ajouter `@@index([createdAt])` sur `UserBookmark` — bookmarks KPI date-range
+- [ ] Ajouter `@@index([createdAt])` sur `User` — nouveaux users KPI date-range
+- [ ] Ajouter `@@index([status, publishedAt])` sur `Meme` — nouveaux memes publiés KPI
+- [ ] Ajouter `@@index([status])` sur `Subscription` — count global actifs (le composite `(referenceId, status)` existant ne couvre pas un filtre global par status)
 
-**Sélecteur de période**
-- [ ] Composant `PeriodSelector` réutilisable : 7j / 30j / 90j (ToggleGroup ou Select)
-- [ ] Toutes les cards KPI, graphiques et tops utilisent la période sélectionnée
-- [ ] Chaque card affiche la valeur + le delta vs période précédente (ex: "+12% vs semaine dernière") avec flèche verte/rouge
+**StudioGeneration + generationCount (dual write)**
+- [ ] Modifier `incrementGenerationCount` dans `src/server/user.ts` : écriture atomique via `$transaction` — `user.update({ generationCount: { increment: 1 } })` + `studioGeneration.create({ userId })`. Le rate limiting continue de lire `generationCount` (O(1), pas de régression perf)
+- [ ] Modifier `src/server/admin/users.ts` (`getListUsers`) : remplacer `generationCount` dans `USER_LIST_SELECT` par un `studioGeneration.groupBy({ by: ['userId'], where: { userId: { in: userIds } }, _count: { id: true } })` dans le `Promise.all` batch existant (cohérent avec le pattern memeCounts/bookmarkCounts)
+- [ ] Modifier `src/routes/admin/users.tsx` : adapter l'affichage engagement (Xg) pour utiliser le nouveau champ du batch
 
-**KPIs (cards) — filtrés par période sélectionnée**
-- [ ] Vues (count `MemeViewDaily` sur la période)
-- [ ] Nouveaux users (count `User.createdAt` sur la période)
-- [ ] Nouveaux memes publiés (count `Meme.publishedAt` sur la période)
-- [ ] Générations Studio (count `StudioGeneration.createdAt` sur la période)
-- [ ] Bookmarks (count `UserBookmark.createdAt` sur la période)
-- [ ] Partages (Algolia Analytics API ou `Meme.shareCount` sur la période)
-- [ ] Téléchargements (Algolia Analytics API ou `Meme.downloadCount` sur la période)
-- [ ] Abonnements premium actifs (depuis `Subscription`)
+**Tracking share/download**
+- [ ] Créer `trackMemeAction` server function dans `src/server/meme.ts` **sans auth** (ouvert à tous, anonymes inclus) : `({ memeId, action: 'share' | 'download' })` → `prisma.meme.update({ where: { id: memeId }, data: { [field]: { increment: 1 } } })`. Fire-and-forget pur, pas de check d'existence.
+- [ ] Appeler `trackMemeAction` fire-and-forget dans `src/hooks/use-share-meme.ts` après share réussi
+- [ ] Appeler `trackMemeAction` fire-and-forget dans `src/hooks/use-download-meme.ts` après download réussi
+- [ ] **Reporté :** rate limiting dédié sur le tracking (dédoublonnage par user/meme)
 
-**Totaux (toujours visibles, hors filtre période)**
-- [ ] Total memes par statut (publiés / en attente / brouillons)
-- [ ] Total users par statut (actifs / bannis / non vérifiés)
-
-**Liens rapides (cards cliquables)**
-- [ ] "X memes en attente" → `/admin/library?status=PENDING`
-- [ ] "X users non vérifiés" → `/admin/users` (filtré)
-- [ ] "Ajouter un meme" → `/admin/library/add`
-- [ ] "Gérer les catégories" → `/admin/categories`
-
-**Graphiques tendances — s'adaptent à la période**
-- [ ] Courbe vues (7j → par jour, 30j → par jour, 90j → par semaine) depuis `MemeViewDaily`
-- [ ] Courbe inscriptions (7j → par jour, 30j → par semaine, 90j → par semaine) depuis `User.createdAt`
-- [ ] Courbe memes publiés (même granularité) depuis `Meme.publishedAt`
-- [ ] Courbe partages + téléchargements (Algolia ou DB, même granularité)
-- [ ] Librairie légère : évaluer `recharts` vs sparklines CSS-only (coût bundle)
-
-**Top memes (classement) — filtrés par période**
-- [ ] Top 10 memes les plus vus (sum `MemeViewDaily` sur la période)
-- [ ] Top 10 memes les plus bookmarkés (count `UserBookmark.createdAt` sur la période)
-- [ ] Top 10 memes les plus partagés/téléchargés (Algolia ou DB)
-
-**Activité récente (feed)**
-- [ ] Afficher les 10 dernières entrées `AdminAuditLog` avec timestamps relatifs
+**Audit log memes (5 actions, fire-and-forget)**
+- [ ] `createMemeFromTwitterUrl` : `void logAuditAction({ action: 'create', targetType: 'meme', metadata: { title, source: 'twitter' } })`
+- [ ] `createMemeFromFile` : `void logAuditAction({ action: 'create', targetType: 'meme', metadata: { title, source: 'upload' } })`
+- [ ] `editMeme` : `findUnique({ select: { status: true } })` avant l'update pour détecter le changement de status. `void logAuditAction({ action: 'edit', targetType: 'meme', metadata: { title } })` — logger chaque appel (pas de diff)
+- [ ] `editMeme` (status change) : `void logAuditAction({ action: 'status_change', targetType: 'meme', metadata: { title, from, to } })` — quand le status change (comparaison old vs new)
+- [ ] `deleteMemeById` : `void logAuditAction({ action: 'delete', targetType: 'meme', metadata: { title } })`
+- [ ] **Rétroactif** : migrer les `await logAuditAction(...)` existants (categories) vers `void logAuditAction(...)` pour cohérence (-10-30ms par CRUD)
 
 **Server functions**
-- [ ] `getAdminDashboardStats({ period: '7d' | '30d' | '90d' })` — tous les counts filtrés par période + delta vs période précédente
-- [ ] `getAdminRecentActivity` — dernières entrées `AdminAuditLog`
-- [ ] `getAdminChartData({ period })` — données agrégées pour les graphiques (granularité auto selon période)
-- [ ] `getAdminTopMemes({ period })` — top memes par vues/bookmarks sur la période
-- [ ] `getAdminAlgoliaStats({ period })` — partages/téléchargements (si Algolia Analytics API dispo)
+- [ ] `getAdminDashboardStats({ period: '7d' | '30d' | '90d' })` dans `src/server/admin/dashboard.ts` — retourne :
+  - 7 KPIs filtrés par période + deltas (vues, nouveaux users, nouveaux memes publiés, générations Studio, bookmarks, partages, téléchargements)
+  - 4 totaux hors période (memes publiés, memes en attente, total users, abonnements premium actifs)
+  - 4 liens rapides avec counts dynamiques
+  - **Queries** : Prisma client classique + `Promise.all`. ~22 queries parallèles type-safe (2 par KPI : current + previous period). Dates calculées une seule fois en haut du handler.
+- [ ] `getAdminRecentActivity()` dans `src/server/admin/dashboard.ts` — 10 dernières entrées `AdminAuditLog` (indépendant de la période). L'index `@@index([createdAt])` existant suffit (DESC scan + LIMIT 10)
 
-**État des données**
+**Page dashboard (`src/routes/admin/index.tsx`)**
+- [ ] Retirer le redirect vers `/admin/library` dans `src/routes/admin/route.tsx`
+- [ ] Créer `src/routes/admin/index.tsx` — route `/admin`, titre "Dashboard", search params validés Zod (`period: z.enum(['7d', '30d', '90d']).catch('30d')`)
+- [ ] Ajouter "Dashboard" dans la sidebar (`src/components/admin/admin-sidebar.tsx`) : premier lien, au-dessus de "Librairie", icône `LayoutDashboard` (lucide), lien vers `/admin`
+- [ ] `useSuspenseQuery` pour `getAdminDashboardStats` et `getAdminRecentActivity` — `refetchInterval: 60_000` (polling 60s), `refetchOnMount: 'always'` (refetch à chaque navigation vers le dashboard — pas de couplage avec les mutations admin)
+- [ ] Suspense + error boundary **par section** (KPIs, totaux, liens rapides, feed) — si une section plante, les autres restent visibles
+- [ ] Fallback erreur : encadré "Impossible de charger les données" + bouton "Réessayer" (reset error boundary)
+- [ ] Skeleton cards dans chaque Suspense fallback
+- [ ] `captureWithFeature` : ajouter `ADMIN_DASHBOARD` dans `SENTRY_FEATURES`. `trackMemeAction` : `captureWithFeature` dans le catch côté serveur (fire-and-forget sinon silencieux)
 
-| Donnée | En DB | Filtrable par période | Fallback |
-|--------|-------|----------------------|----------|
-| Vues | `MemeViewDaily` (day) | ✓ | — |
-| Inscriptions | `User.createdAt` | ✓ | — |
-| Memes publiés | `Meme.publishedAt` | ✓ | — |
-| Bookmarks | `UserBookmark.createdAt` | ✓ | — |
-| Générations | `StudioGeneration.createdAt` (nouveau) | ✓ | — |
-| Partages | Algolia `Meme Shared` | ✓ (API) | `Meme.shareCount` (migration) |
-| Téléchargements | Algolia `Meme Downloaded` | ✓ (API) | `Meme.downloadCount` (migration) |
-| Clics | Algolia `Meme Clicked` | ✓ (API) | non prioritaire |
+**Composants dashboard (`src/routes/admin/-components/dashboard/`)**
+- [ ] `kpi-card.tsx` — card avec valeur, label, delta (% + flèche verte/rouge). Delta masqué si previous=0. Badge "Nouveau" si current>0 et previous=0.
+- [ ] `kpi-grid.tsx` — grid responsive des 7 KPIs
+- [ ] `totals-section.tsx` — 4 totaux hors période (memes publiés, en attente, total users, abos premium)
+- [ ] `quick-links.tsx` — 4 liens avec counts dynamiques ("X memes en attente" → `/admin/library?status=PENDING`, "X utilisateurs" → `/admin/users`, "Ajouter un meme" → `/admin/library/add`, "Catégories" → `/admin/categories`)
+- [ ] `activity-feed.tsx` — liste des 10 dernières actions. Format "verbe passé + target" (ex: "Catégorie créée : Animaux"). Icônes par action type (cohérence admin-wide, choix délégué à `/frontend-design`)
+
+**Design — délégué à `/frontend-design`**
+- [ ] Layout responsive (mobile-first)
+- [ ] Composant sélecteur de période
+- [ ] Style des cards KPI, totaux, liens rapides, feed
+- [ ] Icônes par action type (feed + cohérence admin-wide)
+
+**Migration Prisma requise :** `pnpm exec prisma migrate dev --name add_studio_generation_and_meme_counters`
+
+### Phase 9b — Graphiques tendances
+
+Ajouter des courbes de tendance au dashboard. Dépend de 9a.
+
+- [ ] Évaluer librairie charts légère : `recharts` vs sparklines CSS-only (coût bundle)
+- [ ] Courbe vues (7j → par jour, 30j → par jour, 90j → par semaine) depuis `MemeViewDaily`
+- [ ] Courbe inscriptions (même granularité) depuis `User.createdAt`
+- [ ] Courbe memes publiés (même granularité) depuis `Meme.publishedAt`
+- [ ] Courbe partages + téléchargements (même granularité) depuis `Meme.shareCount`/`downloadCount`
+- [ ] Server function `getAdminChartData({ period })` — données agrégées avec granularité auto selon période
+
+### Phase 9c — Top memes (classements)
+
+Ajouter les classements de memes au dashboard. Dépend de 9a.
+
+- [ ] Top 10 memes les plus vus (sum `MemeViewDaily` sur la période)
+- [ ] Top 10 memes les plus bookmarkés (count `UserBookmark.createdAt` sur la période)
+- [ ] Top 10 memes les plus partagés (sum `Meme.shareCount` — pas filtrable par période, compteur global)
+- [ ] Top 10 memes les plus téléchargés (sum `Meme.downloadCount` — idem)
+- [ ] Server function `getAdminTopMemes({ period })` — top memes par vues/bookmarks sur la période
+
+### Phase 9d — Audits dashboard
+
+Audits post-implémentation du dashboard (après 9a-9c). Lancer les agents/skills disponibles sur tous les fichiers créés ou modifiés.
+
+- [ ] **Backend performance** (`backend-performance` agent) — queries Prisma N+1, Promise.all, indexes manquants, temps de réponse server functions
+- [ ] **React performance** (`react-performance` agent) — re-renders inutiles, stabilité des refs (query options, callbacks), Suspense boundaries, useSuspenseQuery
+- [ ] **Security** (`security-auditor` agent) — server functions admin protégées, validation inputs, injection, exposition de données sensibles
+- [ ] **Tailwind** (`tailwind-audit` agent) — classes redondantes, valeurs hardcodées, patterns verbeux
+- [ ] **Dead code** (`dead-code` agent) — exports/imports inutilisés après refacto StudioGeneration/generationCount
+- [ ] **GDPR** (`gdpr-auditor` agent) — tracking share/download ouvert à tous, données personnelles dans l'AuditLog
+- [ ] **Code refactoring** (`code-refactoring` agent) — clarté, cohérence, extractions manquées
+- [ ] **Web design guidelines** (`web-design-guidelines` skill) — accessibilité, UX, responsive
 
 ### Phase 10 — Améliorations UX admin
 

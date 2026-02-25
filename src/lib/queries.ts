@@ -1,7 +1,7 @@
 import type { MemesFilters } from '@/constants/meme'
 import { MINUTE } from '@/constants/time'
 import type { Meme, Video } from '@/db/generated/prisma/client'
-import { getAdminMemeById, getAdminMemes } from '@/server/admin'
+import { getAdminMemeById, getAdminMemes } from '@/server/admin/memes'
 import { getCategories } from '@/server/categories'
 import { getActiveSubscription } from '@/server/customer'
 import {

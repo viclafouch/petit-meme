@@ -37,7 +37,7 @@ import {
   getListUsers,
   removeUser,
   unbanUserById
-} from '@/server/admin'
+} from '@/server/admin/users'
 import * as Sentry from '@sentry/tanstackstart-react'
 import { useMutation } from '@tanstack/react-query'
 import { createFileRoute, useRouter } from '@tanstack/react-router'

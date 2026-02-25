@@ -19,7 +19,7 @@ import { getFieldErrorMessage } from '@/lib/utils'
 import {
   CREATE_MEME_FROM_FILE_SCHEMA,
   createMemeFromFile
-} from '@/server/admin'
+} from '@/server/admin/memes'
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 

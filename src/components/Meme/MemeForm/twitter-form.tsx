@@ -12,7 +12,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { TWEET_LINK_SCHEMA } from '@/constants/meme'
 import { getFieldErrorMessage } from '@/lib/utils'
-import { createMemeFromTwitterUrl } from '@/server/admin'
+import { createMemeFromTwitterUrl } from '@/server/admin/memes'
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 

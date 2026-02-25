@@ -4,6 +4,7 @@ import { prismaClient } from '@/db'
 import type { Prisma } from '@/db/generated/prisma/client'
 import { MemeStatus } from '@/db/generated/prisma/enums'
 import { adminLogger } from '@/lib/logger'
+import { logAuditAction } from '@/server/admin/audit'
 import { adminRequiredMiddleware } from '@/server/user-auth'
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 
@@ -65,37 +66,6 @@ export const getCategories = createServerFn({ method: 'GET' }).handler(
   }
 )
 
-type AuditActionParams = {
-  action: 'create' | 'edit' | 'delete'
-  actingAdminId: string
-  targetId: string
-  metadata: { title: string; slug: string }
-}
-
-const logAuditAction = async ({
-  action,
-  actingAdminId,
-  targetId,
-  metadata
-}: AuditActionParams) => {
-  try {
-    await prismaClient.adminAuditLog.create({
-      data: {
-        action,
-        actingAdminId,
-        targetId,
-        targetType: 'category',
-        metadata
-      }
-    })
-  } catch (error) {
-    adminLogger.error(
-      { err: error, action, actingAdminId, targetId },
-      'Failed to write audit log'
-    )
-  }
-}
-
 export const addCategory = createServerFn({ method: 'POST' })
   .middleware([adminRequiredMiddleware])
   .inputValidator((data) => {
@@ -110,6 +80,7 @@ export const addCategory = createServerFn({ method: 'POST' })
       action: 'create',
       actingAdminId: context.user.id,
       targetId: category.id,
+      targetType: 'category',
       metadata: { title: data.title, slug: data.slug }
     })
 
@@ -142,6 +113,7 @@ export const editCategory = createServerFn({ method: 'POST' })
       action: 'edit',
       actingAdminId: context.user.id,
       targetId: category.id,
+      targetType: 'category',
       metadata: { title: data.title, slug: data.slug }
     })
 
@@ -171,6 +143,7 @@ export const deleteCategory = createServerFn({ method: 'POST' })
       action: 'delete',
       actingAdminId: context.user.id,
       targetId: categoryId,
+      targetType: 'category',
       metadata: { title: category.title, slug: category.slug }
     })
 

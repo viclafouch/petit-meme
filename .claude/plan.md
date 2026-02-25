@@ -132,17 +132,43 @@ Layout final : `Avatar+Name | Email | Role | Provider | Statut | Abo | Engagemen
 
 **Fichiers :** `src/routes/admin/categories/index.tsx`, `src/routes/admin/categories/-components/category-dropdown.tsx`, `src/server/categories.ts`
 
-**Enrichissement données Categories (deep-dive 2026-02-25)**
+**Décisions deep-dive :**
+- Layout colonnes : `Titre | Slug | Memes publiés | Mots clés | Date de création | Actions` (colonne ID retirée, cohérent avec Users)
+- Colonne Slug préfixée avec `/` (ex: `/animaux`)
+- Colonne Memes publiés : nombre brut, "0" en `text-muted-foreground`
+- Count filtré `PUBLISHED` uniquement (via `_count` Prisma avec `where meme.status = PUBLISHED`)
+- Confirmation delete : pattern contrôlé comme Users (`isDeleteDialogOpen` + `AlertDialog` contrôlé, pas `ConfirmAlert` trigger)
+- DropdownMenuItem : migrer `onClick` → `onSelect` (cohérence Users)
+- Toast : `toast.promise()` pattern Users ("Suppression en cours..." / "Catégorie supprimée")
+- Sentry : `captureException` dans `onError` avec tag `{ feature: 'admin-category-delete' }`
+- Invalidation : `router.invalidate()` + `queryClient.invalidateQueries(getCategoriesListQueryOpts.all)` après suppression
+- Audit log : sur les 3 actions (add, edit, delete), `targetType: 'category'`, `metadata: { title, slug }`
 
-- [ ] Enrichir `getCategories` dans `src/server/categories.ts` : ajouter `_count` des memes publiés par catégorie (jointure `MemeCategory` WHERE `meme.status = PUBLISHED`)
-- [ ] Ajouter colonne **Memes publiés** : count numérique, triable. Permet d'identifier les catégories vides côté public.
+**Enrichissement données Categories**
 
-**Tri + confirmations**
-- [ ] Activer le tri : ajouter `getSortedRowModel()` à `useReactTable`
-- [ ] Colonnes triables : Titre, Slug, Memes publiés, Date de création
-- [ ] Confirmation delete : wraper "Supprimer" dans `CategoryDropdown` avec `ConfirmAlert`
-- [ ] Toast feedback : ajouter `toast.promise()` pour la suppression de catégorie + `Sentry.captureException` dans `onError`
-- [ ] Log suppression catégorie dans `AdminAuditLog`
+- [x] Enrichir `fetchCategories` dans `src/server/categories.ts` : ajouter `include: { _count: { select: { memes: { where: { meme: { status: 'PUBLISHED' } } } } } }` — type retourné change (Category + `_count`). Type exporté `EnrichedCategory` dérivé de `ReturnType<typeof fetchCategories>[number]`
+- [x] Retirer la colonne ID de la table
+- [x] Ajouter colonne **Memes publiés** après Slug : nombre brut triable, "0" en `text-muted-foreground`
+- [x] Colonne **Slug** : afficher avec `/` devant (ex: `/animaux`) en `font-mono text-sm text-muted-foreground`
+- [x] Adapter le type générique `createColumnHelper` pour `EnrichedCategory`
+
+**Tri**
+- [x] Colonnes triables : Titre, Slug, Memes publiés, Date de création (tri déjà configuré via `getSortedRowModel()`)
+
+**Refonte `CategoryDropdown` (pattern Users)**
+- [x] Migrer vers dialog contrôlé (`isDeleteDialogOpen` state + `AlertDialog` contrôlé open/onOpenChange)
+- [x] Migrer `DropdownMenuItem` de `onClick` vers `onSelect`
+- [x] `toast.promise()` dans `mutationFn` + `handleMutationSuccess` (close dialog + `router.invalidate()` + `queryClient.invalidateQueries`)
+- [x] `Sentry.captureException(error, { tags: { feature: 'admin-category-delete' } })` dans `onError`
+
+**Audit log (3 actions)**
+- [x] `deleteCategory` : ajouter `context` au handler + `AdminAuditLog.create({ action: 'delete', targetType: 'category', metadata: { title, slug } })`
+- [x] `addCategory` : ajouter `context` au handler + `AdminAuditLog.create({ action: 'create', targetType: 'category', metadata: { title, slug } })`
+- [x] `editCategory` : ajouter `context` au handler + `AdminAuditLog.create({ action: 'edit', targetType: 'category', metadata: { title, slug } })`
+
+**Extractions réutilisables (post-phase)**
+- [x] Extraire `ConfirmAlertDialog` de `users.tsx` → `src/components/confirm-alert-dialog.tsx` (réutilisé dans Users + Categories)
+- [x] Extraire `getUserInitials` de `users.tsx` → `src/helpers/format.ts`
 
 ### Phase 7b — Library cards (enrichissement léger)
 
@@ -313,6 +339,11 @@ Transformer la page d'accueil admin en un vrai dashboard avec KPIs, liens rapide
 - [ ] Actions bulk sur memes : publier / supprimer la sélection
 - [ ] Actions bulk sur users : bannir / supprimer la sélection
 - [ ] Confirmation `ConfirmAlert` avec le count d'éléments sélectionnés
+
+**Total éléments dans les tables**
+- [ ] Ajouter une prop optionnelle `totalLabel` à `AdminTable` (ex: `"memes"`, `"utilisateurs"`, `"catégories"`)
+- [ ] Afficher `{count} {label} · Page X sur Y` dans le footer pagination (via `table.getRowCount()`, style `text-muted-foreground text-sm tabular-nums`)
+- [ ] Passer `totalLabel="utilisateurs"` dans Users, `totalLabel="catégories"` dans Categories, `totalLabel="memes"` dans Library
 
 **Export CSV**
 - [ ] Bouton export sur les tables users (avec emails — cohérent avec le rôle admin) et memes (sans emails)

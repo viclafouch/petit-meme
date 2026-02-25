@@ -1,6 +1,7 @@
 import React from 'react'
 import { EllipsisVertical } from 'lucide-react'
 import { toast } from 'sonner'
+import { ConfirmAlertDialog } from '@/components/confirm-alert-dialog'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -15,37 +16,58 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import type { Category } from '@/db/generated/prisma/client'
 import { getCategoriesListQueryOpts } from '@/lib/queries'
 import { CategoryForm } from '@/routes/admin/categories/-components/category-form'
-import { deleteCategory } from '@/server/categories'
+import { deleteCategory, type EnrichedCategory } from '@/server/categories'
+import * as Sentry from '@sentry/tanstackstart-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 
-export const CategoryDropdown = ({ category }: { category: Category }) => {
+type CategoryDropdownProps = {
+  category: EnrichedCategory
+}
+
+export const CategoryDropdown = ({ category }: CategoryDropdownProps) => {
   const router = useRouter()
   const queryClient = useQueryClient()
   const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false)
 
-  const deleteMutation = useMutation({
-    mutationFn: async () => {
-      await deleteCategory({ data: category.id })
-    },
-    onError: (error) => {
-      toast.error(error.message)
-    },
-    onSuccess: () => {
-      void router.invalidate()
-    }
-  })
-
-  const handleEditSuccess = () => {
-    setIsEditDialogOpen(false)
+  const invalidateData = () => {
     void queryClient.invalidateQueries({
       queryKey: getCategoriesListQueryOpts.all
     })
     void router.invalidate()
   }
+
+  const handleDeleteSuccess = () => {
+    setIsDeleteDialogOpen(false)
+    invalidateData()
+  }
+
+  const handleEditSuccess = () => {
+    setIsEditDialogOpen(false)
+    invalidateData()
+  }
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      const promise = deleteCategory({ data: category.id })
+      toast.promise(promise, {
+        loading: 'Suppression en cours...',
+        success: 'Catégorie supprimée'
+      })
+
+      return promise
+    },
+    onSuccess: handleDeleteSuccess,
+    onError: (error) => {
+      toast.error(error.message)
+      Sentry.captureException(error, {
+        tags: { feature: 'admin-category-delete' }
+      })
+    }
+  })
 
   return (
     <>
@@ -57,12 +79,12 @@ export const CategoryDropdown = ({ category }: { category: Category }) => {
             size="icon"
           >
             <EllipsisVertical />
-            <span className="sr-only">Open menu</span>
+            <span className="sr-only">Actions</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-32">
           <DropdownMenuItem
-            onClick={() => {
+            onSelect={() => {
               setIsEditDialogOpen(true)
             }}
           >
@@ -70,14 +92,26 @@ export const CategoryDropdown = ({ category }: { category: Category }) => {
           </DropdownMenuItem>
           <DropdownMenuItem
             variant="destructive"
-            onClick={() => {
-              deleteMutation.mutate()
+            onSelect={() => {
+              setIsDeleteDialogOpen(true)
             }}
           >
             Supprimer
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      <ConfirmAlertDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => {
+          setIsDeleteDialogOpen(false)
+        }}
+        title="Supprimer cette catégorie ?"
+        description="Cette action est irréversible."
+        actionLabel="Supprimer"
+        onConfirm={() => {
+          deleteMutation.mutate()
+        }}
+      />
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>

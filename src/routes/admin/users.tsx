@@ -4,17 +4,8 @@ import { fr } from 'date-fns/locale'
 import { Crown, EllipsisVertical, Mail, Minus, Twitter } from 'lucide-react'
 import { toast } from 'sonner'
 import { AdminTable, PAGE_SIZE } from '@/components/admin/admin-table'
+import { ConfirmAlertDialog } from '@/components/confirm-alert-dialog'
 import { PageHeader } from '@/components/page-header'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle
-} from '@/components/ui/alert-dialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -37,6 +28,7 @@ import {
   TooltipContent,
   TooltipTrigger
 } from '@/components/ui/tooltip'
+import { getUserInitials } from '@/helpers/format'
 import {
   BAN_REASONS,
   type BanReason,
@@ -57,72 +49,11 @@ import {
   useReactTable
 } from '@tanstack/react-table'
 
-function getUserInitials(name: string) {
-  const parts = name.trim().split(' ').filter(Boolean)
-
-  if (parts.length === 0) {
-    return '?'
-  }
-
-  return parts
-    .slice(0, 2)
-    .map((part) => {
-      return part[0]
-    })
-    .join('')
-    .toUpperCase()
-}
-
 type UserCellProps = {
   user: EnrichedUser
 }
 
 type DialogType = 'ban' | 'unban' | 'delete'
-
-type ConfirmAlertDialogProps = {
-  isOpen: boolean
-  onClose: () => void
-  title: string
-  description: string
-  actionLabel: string
-  onConfirm: () => void
-  children?: React.ReactNode
-}
-
-const ConfirmAlertDialog = ({
-  isOpen,
-  onClose,
-  title,
-  description,
-  actionLabel,
-  onConfirm,
-  children
-}: ConfirmAlertDialogProps) => {
-  return (
-    <AlertDialog
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (!open) {
-          onClose()
-        }
-      }}
-    >
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
-        </AlertDialogHeader>
-        {children}
-        <AlertDialogFooter>
-          <AlertDialogCancel>Annuler</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm}>
-            {actionLabel}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  )
-}
 
 const UserActionsCell = ({ user }: UserCellProps) => {
   const [activeDialog, setActiveDialog] = React.useState<DialogType | null>(

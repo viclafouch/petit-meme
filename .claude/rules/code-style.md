@@ -114,6 +114,26 @@ Always use native modern APIs (Intl, URLSearchParams, structuredClone, etc.) ins
 
 Before creating a constant or helper, search if it already exists.
 
+### Extract & Reuse (CRITICAL)
+
+Before writing ANY function, component, type, or constant inside a feature file, ask: **"Could this be reused elsewhere?"** If yes (or even maybe), extract it immediately — not later.
+
+**What to extract:**
+- **Pure functions** (formatting, validation, string manipulation) → shared helpers
+- **Generic UI components** (dialogs, confirm modals, badges, cards) → shared components. Never define a reusable UI pattern inline in a page/feature file.
+- **Custom hooks** (state logic, effects, mutations) → dedicated hook files
+- **Types shared across files** → co-locate with the source or in shared type files
+
+**When writing new code:**
+- Scan existing helpers, components, and hooks FIRST — the function you need may already exist
+- If you define something locally and realize it's generic, extract it in the same task — don't leave it for later
+- If a sub-component is defined locally in a file, ask whether another file could benefit from it
+
+**Red flags (things that should NOT live in feature/page files):**
+- Pure functions with no dependency on local state or props
+- UI components that receive generic props (title, description, onConfirm, etc.)
+- Logic that appears in 2+ files in slightly different forms
+
 ### Helpers vs Utils
 
 All utilities live in `src/`:

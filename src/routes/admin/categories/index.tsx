@@ -4,10 +4,9 @@ import { AdminTable, PAGE_SIZE } from '@/components/admin/admin-table'
 import { PageHeader } from '@/components/page-header'
 import { Badge } from '@/components/ui/badge'
 import { Container } from '@/components/ui/container'
-import type { Category } from '@/db/generated/prisma/client'
 import { AddCategoryButton } from '@/routes/admin/categories/-components/add-category-button'
 import { CategoryDropdown } from '@/routes/admin/categories/-components/category-dropdown'
-import { getCategories } from '@/server/categories'
+import { type EnrichedCategory, getCategories } from '@/server/categories'
 import { createFileRoute } from '@tanstack/react-router'
 import {
   createColumnHelper,
@@ -17,16 +16,9 @@ import {
   useReactTable
 } from '@tanstack/react-table'
 
-const columnHelper = createColumnHelper<Category>()
+const columnHelper = createColumnHelper<EnrichedCategory>()
 
 const columns = [
-  columnHelper.accessor('id', {
-    header: 'ID',
-    enableSorting: false,
-    cell: (info) => {
-      return info.getValue()
-    }
-  }),
   columnHelper.accessor('title', {
     header: 'Titre',
     cell: (info) => {
@@ -36,9 +28,31 @@ const columns = [
   columnHelper.accessor('slug', {
     header: 'Slug',
     cell: (info) => {
-      return info.getValue()
+      return (
+        <span className="text-muted-foreground font-mono text-sm">
+          /{info.getValue()}
+        </span>
+      )
     }
   }),
+  columnHelper.accessor(
+    (row) => {
+      return row._count.memes
+    },
+    {
+      id: 'publishedMemes',
+      header: 'Memes publiés',
+      cell: (info) => {
+        const count = info.getValue()
+
+        return count === 0 ? (
+          <span className="text-muted-foreground tabular-nums">0</span>
+        ) : (
+          <span className="tabular-nums">{count}</span>
+        )
+      }
+    }
+  ),
   columnHelper.accessor('keywords', {
     header: 'Mots clés',
     enableSorting: false,
@@ -63,12 +77,16 @@ const columns = [
     }
   }),
   columnHelper.display({
-    id: 'Actions',
-    cell: (cell) => {
-      return <CategoryDropdown category={cell.row.original} />
+    id: 'actions',
+    cell: (info) => {
+      return <CategoryDropdown category={info.row.original} />
     }
   })
 ]
+
+function getRowId(row: EnrichedCategory) {
+  return row.id
+}
 
 const RouteComponent = () => {
   const { categories } = Route.useLoaderData()
@@ -77,9 +95,7 @@ const RouteComponent = () => {
   const table = useReactTable({
     data: categories,
     columns,
-    getRowId: (row) => {
-      return row.id.toString()
-    },
+    getRowId,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),

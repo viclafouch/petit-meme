@@ -1,12 +1,13 @@
 import { filesize } from 'filesize'
 import { z } from 'zod'
 import { BUNNY_STATUS } from '@/constants/bunny'
+import { IS_PRODUCTION } from '@/constants/env'
 import {
   DEFAULT_MEME_TITLE,
   MAX_SIZE_MEME_IN_BYTES,
   MEME_FULL_INCLUDE,
-  MEMES_FILTERS_SCHEMA,
   MEMES_PER_PAGE,
+  MEMES_SEARCH_SCHEMA,
   TWEET_LINK_SCHEMA
 } from '@/constants/meme'
 import { prismaClient } from '@/db'
@@ -103,6 +104,9 @@ function resolvePublishedAt(
   return meme.publishedAt
 }
 
+const INITIAL_VIEW_COUNT_MIN = 30
+const INITIAL_VIEW_COUNT_MAX = 120
+
 function resolveInitialViewCount(
   newStatus: string,
   meme: { status: string; viewCount: number }
@@ -111,7 +115,9 @@ function resolveInitialViewCount(
     newStatus === 'PUBLISHED' && meme.status !== 'PUBLISHED'
 
   if (isFirstPublish && meme.viewCount === 0) {
-    return Math.floor(Math.random() * (120 - 30 + 1)) + 30
+    const range = INITIAL_VIEW_COUNT_MAX - INITIAL_VIEW_COUNT_MIN + 1
+
+    return Math.floor(Math.random() * range) + INITIAL_VIEW_COUNT_MIN
   }
 
   return meme.viewCount
@@ -144,11 +150,13 @@ export const editMeme = createServerFn({ method: 'POST' })
     const currentCategoryIds = meme.categories.map(({ categoryId }) => {
       return categoryId
     })
+    const currentSet = new Set(currentCategoryIds)
+    const newSet = new Set(values.categoryIds)
     const toAdd = values.categoryIds.filter((categoryId) => {
-      return !currentCategoryIds.includes(categoryId)
+      return !currentSet.has(categoryId)
     })
     const toRemove = currentCategoryIds.filter((categoryId) => {
-      return !values.categoryIds.includes(categoryId)
+      return !newSet.has(categoryId)
     })
 
     const memeUpdated = await prismaClient.meme.update({
@@ -204,17 +212,22 @@ export const deleteMemeById = createServerFn({ method: 'POST' })
   })
   .middleware([adminRequiredMiddleware])
   .handler(async ({ data: memeId }) => {
-    const meme = await prismaClient.meme.delete({
-      where: {
-        id: memeId
-      },
-      include: {
-        video: true
-      }
+    const meme = await prismaClient.meme.findUnique({
+      where: { id: memeId },
+      include: { video: true }
     })
 
+    if (!meme) {
+      adminLogger.warn({ memeId }, 'Meme not found for deletion')
+      throw new Error('Meme not found')
+    }
+
+    await prismaClient.$transaction([
+      prismaClient.meme.delete({ where: { id: memeId } }),
+      prismaClient.video.delete({ where: { id: meme.videoId } })
+    ])
+
     await Promise.all([
-      prismaClient.video.delete({ where: { id: meme.videoId } }),
       safeAlgoliaOp(
         algoliaAdminClient.deleteObject({
           indexName: algoliaIndexName,
@@ -247,25 +260,35 @@ async function createMemeWithVideo({
 }: CreateMemeWithVideoParams) {
   const title = DEFAULT_MEME_TITLE
   const { videoId } = await createVideo(title)
+  let meme
 
-  const meme = await prismaClient.meme.create({
-    data: {
-      title,
-      tweetUrl,
-      status: 'PENDING',
-      video: {
-        create: {
-          duration: 0,
-          bunnyStatus:
-            process.env.NODE_ENV !== 'production'
+  try {
+    meme = await prismaClient.meme.create({
+      data: {
+        title,
+        tweetUrl,
+        status: 'PENDING',
+        video: {
+          create: {
+            duration: 0,
+            bunnyStatus: !IS_PRODUCTION
               ? BUNNY_STATUS.RESOLUTION_FINISHED
               : undefined,
-          bunnyId: videoId
+            bunnyId: videoId
+          }
         }
-      }
-    },
-    include: MEME_FULL_INCLUDE
-  })
+      },
+      include: MEME_FULL_INCLUDE
+    })
+  } catch (error) {
+    await deleteVideo(videoId).catch((cleanupError: unknown) => {
+      bunnyLogger.error(
+        { err: cleanupError, bunnyVideoId: videoId },
+        'Failed to cleanup orphan Bunny video after DB error'
+      )
+    })
+    throw error
+  }
 
   await Promise.all([
     safeAlgoliaOp(
@@ -331,7 +354,7 @@ export const createMemeFromFile = createServerFn({ method: 'POST' })
 
 export const getAdminMemes = createServerFn({ method: 'GET' })
   .middleware([adminRequiredMiddleware])
-  .inputValidator(MEMES_FILTERS_SCHEMA)
+  .inputValidator(MEMES_SEARCH_SCHEMA)
   .handler(async ({ data }) => {
     const cacheKey = `admin-memes:${data.query ?? ''}:${data.page ?? 1}:${data.status ?? ''}`
 

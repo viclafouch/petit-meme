@@ -1,3 +1,4 @@
+import { IS_PRODUCTION } from '@/constants/env'
 import * as Sentry from '@sentry/tanstackstart-react'
 
 const FULL_SAMPLE_RATE = 1.0
@@ -9,7 +10,7 @@ const SENSITIVE_HEADERS = ['authorization', 'cookie', 'set-cookie']
 Sentry.init({
   dsn: process.env.VITE_SENTRY_DSN,
   environment: process.env.NODE_ENV || 'production',
-  enabled: process.env.NODE_ENV === 'production',
+  enabled: IS_PRODUCTION,
   sendDefaultPii: false,
   tracesSampler: (samplingContext) => {
     const url = String(samplingContext.attributes?.['http.url'] ?? '')

@@ -1,3 +1,4 @@
+import { IS_PRODUCTION } from '@/constants/env'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from './generated/prisma/client'
 
@@ -18,6 +19,6 @@ declare const globalThis: {
 
 export const prismaClient = globalThis.prismaGlobal ?? prismaClientSingleton()
 
-if (process.env.NODE_ENV !== 'production') {
+if (!IS_PRODUCTION) {
   globalThis.prismaGlobal = prismaClient
 }

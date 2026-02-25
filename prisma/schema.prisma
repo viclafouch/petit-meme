@@ -32,6 +32,8 @@ model Category {
   updatedAt DateTime @updatedAt
 
   memes MemeCategory[]
+
+  @@index([createdAt])
 }
 
 model MemeCategory {
@@ -43,6 +45,7 @@ model MemeCategory {
   category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@id([memeId, categoryId])
+  @@index([categoryId])
 }
 
 model Video {

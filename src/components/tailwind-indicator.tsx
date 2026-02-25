@@ -1,7 +1,8 @@
 import React from 'react'
+import { IS_PRODUCTION } from '@/constants/env'
 
 export const TailwindIndicator = () => {
-  if (process.env.NODE_ENV === 'production') {
+  if (IS_PRODUCTION) {
     return null
   }
 

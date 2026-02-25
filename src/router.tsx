@@ -1,6 +1,7 @@
 import { DefaultLoading } from '@/components/default-loading'
 import { ErrorComponent } from '@/components/error-component'
 import { NotFound } from '@/components/not-found'
+import { IS_PRODUCTION } from '@/constants/env'
 import { MINUTE, SECOND } from '@/constants/time'
 import { clientEnv } from '@/env/client'
 import {
@@ -21,7 +22,7 @@ export function getRouter() {
       queries: {
         staleTime: 30 * SECOND,
         gcTime: 5 * MINUTE,
-        refetchOnWindowFocus: process.env.NODE_ENV === 'production',
+        refetchOnWindowFocus: IS_PRODUCTION,
         retry: false
       },
       mutations: {
@@ -54,7 +55,7 @@ export function getRouter() {
       dsn: clientEnv.VITE_SENTRY_DSN,
       tunnel: '/api/sentry-tunnel',
       environment: process.env.NODE_ENV,
-      enabled: process.env.NODE_ENV === 'production',
+      enabled: IS_PRODUCTION,
       sendDefaultPii: false,
       integrations: [
         Sentry.tanstackRouterBrowserTracingIntegration(router),

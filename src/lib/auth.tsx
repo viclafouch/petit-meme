@@ -4,6 +4,7 @@ import { admin } from 'better-auth/plugins'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import type Stripe from 'stripe'
 import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '@/constants/auth'
+import { IS_PRODUCTION } from '@/constants/env'
 import {
   FIVE_MINUTES_IN_SECONDS,
   ONE_DAY_IN_SECONDS,
@@ -157,7 +158,7 @@ const getAuthConfig = createServerOnlyFn(() => {
       }
     },
     rateLimit: {
-      enabled: process.env.NODE_ENV === 'production',
+      enabled: IS_PRODUCTION,
       window: 60,
       max: 100,
       storage: 'database',
@@ -170,7 +171,7 @@ const getAuthConfig = createServerOnlyFn(() => {
       }
     },
     advanced: {
-      useSecureCookies: process.env.NODE_ENV === 'production'
+      useSecureCookies: IS_PRODUCTION
     },
     databaseHooks: {
       user: {

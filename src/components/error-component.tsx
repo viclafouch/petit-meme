@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/accordion'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { IS_PRODUCTION } from '@/constants/env'
 import * as Sentry from '@sentry/tanstackstart-react'
 import { useQueryErrorResetBoundary } from '@tanstack/react-query'
 import { Link, useRouter } from '@tanstack/react-router'
@@ -16,8 +17,6 @@ export const ErrorComponent = ({ error }: { error: Error }) => {
   const router = useRouter()
 
   const queryErrorResetBoundary = useQueryErrorResetBoundary()
-
-  const isDev = process.env.NODE_ENV !== 'production'
 
   React.useEffect(() => {
     Sentry.captureException(error)
@@ -50,7 +49,7 @@ export const ErrorComponent = ({ error }: { error: Error }) => {
           <Button asChild className="w-full" variant="outline">
             <Link to="/">Retourner au site</Link>
           </Button>
-          {isDev ? (
+          {!IS_PRODUCTION ? (
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="error-details">
                 <AccordionTrigger>View error details</AccordionTrigger>

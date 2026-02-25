@@ -212,23 +212,22 @@ L'admin utilise TanStack Table pour users et categories, mais avec uniquement `g
 ### Phase 3 — Performance backend admin
 
 **[MEDIUM] `deleteMemeById` — non transactionnel**
-- [ ] Utiliser `prismaClient.$transaction` pour delete Meme + Video atomiquement, puis `Promise.all` pour Algolia + Bunny (`src/server/admin.ts`)
+- [x] `findUnique` pour récupérer infos (bunnyId, videoId), puis `$transaction([meme.delete, video.delete])`, puis `Promise.all([algolia.delete, bunny.delete])` hors transaction (best-effort) (`src/server/admin.ts`)
 
 **[MEDIUM] `createMemeWithVideo` — orphelins Bunny**
-- [ ] Ajouter un try/catch autour de `meme.create` avec cleanup `deleteVideo(videoId)` en cas d'échec (`src/server/admin.ts`)
+- [x] try/catch autour de `meme.create` : dans le catch, `deleteVideo(videoId).catch(log)` puis rethrow erreur originale (`src/server/admin.ts`)
 
 **[MEDIUM] `editMeme` — diff catégories O(n²)**
-- [ ] Remplacer `Array.includes` par `Set.has` pour le diff `toAdd`/`toRemove` des catégories (`src/server/admin.ts`)
+- [x] `new Set(currentCategoryIds)` + `new Set(values.categoryIds)`, utiliser `.has()` pour le diff (`src/server/admin.ts`)
 
 **[LOW] Index manquants**
-- [ ] Ajouter `@@index([categoryId])` sur `MemeCategory` dans `prisma/schema.prisma`
-- [ ] Ajouter `@@index([createdAt])` sur `Category` dans `prisma/schema.prisma`
+- [x] `@@index([categoryId])` sur `MemeCategory` + `@@index([createdAt])` sur `Category` (`prisma/schema.prisma`) — user lance `prisma migrate dev` après
 
 **[LOW] `getCategories` sans cache**
-- [ ] Ajouter un cache TTL simple (5 min) sur `getCategories` (`src/server/categories.ts`)
+- [x] Cache server-side in-memory (Map + TTL 5 min), exporter `invalidateCategoriesCache()`, appeler dans add/edit/delete (`src/server/categories.ts`)
 
 **[LOW] Cache key `getAdminMemes` incomplète**
-- [ ] Restreindre le schema d'input de `getAdminMemes` pour exclure `category` (non utilisé côté admin) (`src/server/admin.ts`)
+- [x] Remplacer `MEMES_FILTERS_SCHEMA` par `MEMES_SEARCH_SCHEMA` dans `getAdminMemes` (`src/server/admin.ts`)
 
 ### Phase 4 — Hardening Better Auth (best practices)
 

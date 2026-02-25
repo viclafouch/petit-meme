@@ -4,6 +4,7 @@ import { CookieConsentBanner } from '@/components/blocks/cookie-consent'
 import { OnlyPortrait } from '@/components/only-portrait'
 import { TailwindIndicator } from '@/components/tailwind-indicator'
 import { Toaster } from '@/components/ui/sonner'
+import { IS_PRODUCTION } from '@/constants/env'
 import { clientEnv } from '@/env/client'
 import { getCookieConsent } from '@/lib/cookie-consent'
 import { getAuthUserQueryOpts } from '@/lib/queries'
@@ -161,7 +162,7 @@ const RootErrorComponent = ({ error, reset }: ErrorComponentProps) => {
               Retourner au site
             </a>
           </div>
-          {process.env.NODE_ENV !== 'production' ? (
+          {!IS_PRODUCTION ? (
             <pre
               style={{
                 marginTop: '2rem',

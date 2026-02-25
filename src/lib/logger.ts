@@ -1,8 +1,7 @@
 import pino from 'pino'
+import { IS_PRODUCTION } from '@/constants/env'
 
-const isDev = process.env.NODE_ENV !== 'production'
-
-const level = process.env.LOG_LEVEL ?? (isDev ? 'debug' : 'info')
+const level = process.env.LOG_LEVEL ?? (!IS_PRODUCTION ? 'debug' : 'info')
 
 export const logger = pino({
   level,
@@ -20,7 +19,7 @@ export const logger = pino({
     'req.headers.authorization',
     'req.headers.cookie'
   ],
-  ...(isDev
+  ...(!IS_PRODUCTION
     ? {
         transport: {
           target: 'pino-pretty',

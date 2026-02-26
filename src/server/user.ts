@@ -265,15 +265,27 @@ export const exportUserData = createServerFn({ method: 'GET' })
   })
 
 export const incrementGenerationCount = createServerFn({ method: 'POST' })
+  .inputValidator((data) => {
+    return z.object({ memeId: z.string() }).parse(data)
+  })
   .middleware([authUserRequiredMiddleware])
-  .handler(async ({ context }) => {
+  .handler(async ({ data, context }) => {
+    const meme = await prismaClient.meme.findUnique({
+      where: { id: data.memeId, status: 'PUBLISHED' },
+      select: { id: true }
+    })
+
+    if (!meme) {
+      throw notFound()
+    }
+
     await prismaClient.$transaction([
       prismaClient.user.update({
         where: { id: context.user.id },
         data: { generationCount: { increment: 1 } }
       }),
       prismaClient.studioGeneration.create({
-        data: { userId: context.user.id }
+        data: { userId: context.user.id, memeId: data.memeId }
       })
     ])
 

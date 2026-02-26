@@ -27,18 +27,21 @@ export type AggregateStudioGeneration = {
 export type StudioGenerationMinAggregateOutputType = {
   id: string | null
   userId: string | null
+  memeId: string | null
   createdAt: Date | null
 }
 
 export type StudioGenerationMaxAggregateOutputType = {
   id: string | null
   userId: string | null
+  memeId: string | null
   createdAt: Date | null
 }
 
 export type StudioGenerationCountAggregateOutputType = {
   id: number
   userId: number
+  memeId: number
   createdAt: number
   _all: number
 }
@@ -47,18 +50,21 @@ export type StudioGenerationCountAggregateOutputType = {
 export type StudioGenerationMinAggregateInputType = {
   id?: true
   userId?: true
+  memeId?: true
   createdAt?: true
 }
 
 export type StudioGenerationMaxAggregateInputType = {
   id?: true
   userId?: true
+  memeId?: true
   createdAt?: true
 }
 
 export type StudioGenerationCountAggregateInputType = {
   id?: true
   userId?: true
+  memeId?: true
   createdAt?: true
   _all?: true
 }
@@ -138,6 +144,7 @@ export type StudioGenerationGroupByArgs<ExtArgs extends runtime.Types.Extensions
 export type StudioGenerationGroupByOutputType = {
   id: string
   userId: string
+  memeId: string | null
   createdAt: Date
   _count: StudioGenerationCountAggregateOutputType | null
   _min: StudioGenerationMinAggregateOutputType | null
@@ -165,15 +172,19 @@ export type StudioGenerationWhereInput = {
   NOT?: Prisma.StudioGenerationWhereInput | Prisma.StudioGenerationWhereInput[]
   id?: Prisma.StringFilter<"StudioGeneration"> | string
   userId?: Prisma.StringFilter<"StudioGeneration"> | string
+  memeId?: Prisma.StringNullableFilter<"StudioGeneration"> | string | null
   createdAt?: Prisma.DateTimeFilter<"StudioGeneration"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  meme?: Prisma.XOR<Prisma.MemeNullableScalarRelationFilter, Prisma.MemeWhereInput> | null
 }
 
 export type StudioGenerationOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  memeId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
+  meme?: Prisma.MemeOrderByWithRelationInput
   _relevance?: Prisma.StudioGenerationOrderByRelevanceInput
 }
 
@@ -183,13 +194,16 @@ export type StudioGenerationWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.StudioGenerationWhereInput[]
   NOT?: Prisma.StudioGenerationWhereInput | Prisma.StudioGenerationWhereInput[]
   userId?: Prisma.StringFilter<"StudioGeneration"> | string
+  memeId?: Prisma.StringNullableFilter<"StudioGeneration"> | string | null
   createdAt?: Prisma.DateTimeFilter<"StudioGeneration"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  meme?: Prisma.XOR<Prisma.MemeNullableScalarRelationFilter, Prisma.MemeWhereInput> | null
 }, "id">
 
 export type StudioGenerationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  memeId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.StudioGenerationCountOrderByAggregateInput
   _max?: Prisma.StudioGenerationMaxOrderByAggregateInput
@@ -202,6 +216,7 @@ export type StudioGenerationScalarWhereWithAggregatesInput = {
   NOT?: Prisma.StudioGenerationScalarWhereWithAggregatesInput | Prisma.StudioGenerationScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"StudioGeneration"> | string
   userId?: Prisma.StringWithAggregatesFilter<"StudioGeneration"> | string
+  memeId?: Prisma.StringNullableWithAggregatesFilter<"StudioGeneration"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"StudioGeneration"> | Date | string
 }
 
@@ -209,11 +224,13 @@ export type StudioGenerationCreateInput = {
   id?: string
   createdAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutStudioGenerationsInput
+  meme?: Prisma.MemeCreateNestedOneWithoutStudioGenerationsInput
 }
 
 export type StudioGenerationUncheckedCreateInput = {
   id?: string
   userId: string
+  memeId?: string | null
   createdAt?: Date | string
 }
 
@@ -221,17 +238,20 @@ export type StudioGenerationUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutStudioGenerationsNestedInput
+  meme?: Prisma.MemeUpdateOneWithoutStudioGenerationsNestedInput
 }
 
 export type StudioGenerationUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  memeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type StudioGenerationCreateManyInput = {
   id?: string
   userId: string
+  memeId?: string | null
   createdAt?: Date | string
 }
 
@@ -243,6 +263,7 @@ export type StudioGenerationUpdateManyMutationInput = {
 export type StudioGenerationUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  memeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -265,19 +286,64 @@ export type StudioGenerationOrderByRelevanceInput = {
 export type StudioGenerationCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  memeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type StudioGenerationMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  memeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type StudioGenerationMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  memeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+}
+
+export type StudioGenerationCreateNestedManyWithoutMemeInput = {
+  create?: Prisma.XOR<Prisma.StudioGenerationCreateWithoutMemeInput, Prisma.StudioGenerationUncheckedCreateWithoutMemeInput> | Prisma.StudioGenerationCreateWithoutMemeInput[] | Prisma.StudioGenerationUncheckedCreateWithoutMemeInput[]
+  connectOrCreate?: Prisma.StudioGenerationCreateOrConnectWithoutMemeInput | Prisma.StudioGenerationCreateOrConnectWithoutMemeInput[]
+  createMany?: Prisma.StudioGenerationCreateManyMemeInputEnvelope
+  connect?: Prisma.StudioGenerationWhereUniqueInput | Prisma.StudioGenerationWhereUniqueInput[]
+}
+
+export type StudioGenerationUncheckedCreateNestedManyWithoutMemeInput = {
+  create?: Prisma.XOR<Prisma.StudioGenerationCreateWithoutMemeInput, Prisma.StudioGenerationUncheckedCreateWithoutMemeInput> | Prisma.StudioGenerationCreateWithoutMemeInput[] | Prisma.StudioGenerationUncheckedCreateWithoutMemeInput[]
+  connectOrCreate?: Prisma.StudioGenerationCreateOrConnectWithoutMemeInput | Prisma.StudioGenerationCreateOrConnectWithoutMemeInput[]
+  createMany?: Prisma.StudioGenerationCreateManyMemeInputEnvelope
+  connect?: Prisma.StudioGenerationWhereUniqueInput | Prisma.StudioGenerationWhereUniqueInput[]
+}
+
+export type StudioGenerationUpdateManyWithoutMemeNestedInput = {
+  create?: Prisma.XOR<Prisma.StudioGenerationCreateWithoutMemeInput, Prisma.StudioGenerationUncheckedCreateWithoutMemeInput> | Prisma.StudioGenerationCreateWithoutMemeInput[] | Prisma.StudioGenerationUncheckedCreateWithoutMemeInput[]
+  connectOrCreate?: Prisma.StudioGenerationCreateOrConnectWithoutMemeInput | Prisma.StudioGenerationCreateOrConnectWithoutMemeInput[]
+  upsert?: Prisma.StudioGenerationUpsertWithWhereUniqueWithoutMemeInput | Prisma.StudioGenerationUpsertWithWhereUniqueWithoutMemeInput[]
+  createMany?: Prisma.StudioGenerationCreateManyMemeInputEnvelope
+  set?: Prisma.StudioGenerationWhereUniqueInput | Prisma.StudioGenerationWhereUniqueInput[]
+  disconnect?: Prisma.StudioGenerationWhereUniqueInput | Prisma.StudioGenerationWhereUniqueInput[]
+  delete?: Prisma.StudioGenerationWhereUniqueInput | Prisma.StudioGenerationWhereUniqueInput[]
+  connect?: Prisma.StudioGenerationWhereUniqueInput | Prisma.StudioGenerationWhereUniqueInput[]
+  update?: Prisma.StudioGenerationUpdateWithWhereUniqueWithoutMemeInput | Prisma.StudioGenerationUpdateWithWhereUniqueWithoutMemeInput[]
+  updateMany?: Prisma.StudioGenerationUpdateManyWithWhereWithoutMemeInput | Prisma.StudioGenerationUpdateManyWithWhereWithoutMemeInput[]
+  deleteMany?: Prisma.StudioGenerationScalarWhereInput | Prisma.StudioGenerationScalarWhereInput[]
+}
+
+export type StudioGenerationUncheckedUpdateManyWithoutMemeNestedInput = {
+  create?: Prisma.XOR<Prisma.StudioGenerationCreateWithoutMemeInput, Prisma.StudioGenerationUncheckedCreateWithoutMemeInput> | Prisma.StudioGenerationCreateWithoutMemeInput[] | Prisma.StudioGenerationUncheckedCreateWithoutMemeInput[]
+  connectOrCreate?: Prisma.StudioGenerationCreateOrConnectWithoutMemeInput | Prisma.StudioGenerationCreateOrConnectWithoutMemeInput[]
+  upsert?: Prisma.StudioGenerationUpsertWithWhereUniqueWithoutMemeInput | Prisma.StudioGenerationUpsertWithWhereUniqueWithoutMemeInput[]
+  createMany?: Prisma.StudioGenerationCreateManyMemeInputEnvelope
+  set?: Prisma.StudioGenerationWhereUniqueInput | Prisma.StudioGenerationWhereUniqueInput[]
+  disconnect?: Prisma.StudioGenerationWhereUniqueInput | Prisma.StudioGenerationWhereUniqueInput[]
+  delete?: Prisma.StudioGenerationWhereUniqueInput | Prisma.StudioGenerationWhereUniqueInput[]
+  connect?: Prisma.StudioGenerationWhereUniqueInput | Prisma.StudioGenerationWhereUniqueInput[]
+  update?: Prisma.StudioGenerationUpdateWithWhereUniqueWithoutMemeInput | Prisma.StudioGenerationUpdateWithWhereUniqueWithoutMemeInput[]
+  updateMany?: Prisma.StudioGenerationUpdateManyWithWhereWithoutMemeInput | Prisma.StudioGenerationUpdateManyWithWhereWithoutMemeInput[]
+  deleteMany?: Prisma.StudioGenerationScalarWhereInput | Prisma.StudioGenerationScalarWhereInput[]
 }
 
 export type StudioGenerationCreateNestedManyWithoutUserInput = {
@@ -322,13 +388,63 @@ export type StudioGenerationUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.StudioGenerationScalarWhereInput | Prisma.StudioGenerationScalarWhereInput[]
 }
 
+export type StudioGenerationCreateWithoutMemeInput = {
+  id?: string
+  createdAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutStudioGenerationsInput
+}
+
+export type StudioGenerationUncheckedCreateWithoutMemeInput = {
+  id?: string
+  userId: string
+  createdAt?: Date | string
+}
+
+export type StudioGenerationCreateOrConnectWithoutMemeInput = {
+  where: Prisma.StudioGenerationWhereUniqueInput
+  create: Prisma.XOR<Prisma.StudioGenerationCreateWithoutMemeInput, Prisma.StudioGenerationUncheckedCreateWithoutMemeInput>
+}
+
+export type StudioGenerationCreateManyMemeInputEnvelope = {
+  data: Prisma.StudioGenerationCreateManyMemeInput | Prisma.StudioGenerationCreateManyMemeInput[]
+  skipDuplicates?: boolean
+}
+
+export type StudioGenerationUpsertWithWhereUniqueWithoutMemeInput = {
+  where: Prisma.StudioGenerationWhereUniqueInput
+  update: Prisma.XOR<Prisma.StudioGenerationUpdateWithoutMemeInput, Prisma.StudioGenerationUncheckedUpdateWithoutMemeInput>
+  create: Prisma.XOR<Prisma.StudioGenerationCreateWithoutMemeInput, Prisma.StudioGenerationUncheckedCreateWithoutMemeInput>
+}
+
+export type StudioGenerationUpdateWithWhereUniqueWithoutMemeInput = {
+  where: Prisma.StudioGenerationWhereUniqueInput
+  data: Prisma.XOR<Prisma.StudioGenerationUpdateWithoutMemeInput, Prisma.StudioGenerationUncheckedUpdateWithoutMemeInput>
+}
+
+export type StudioGenerationUpdateManyWithWhereWithoutMemeInput = {
+  where: Prisma.StudioGenerationScalarWhereInput
+  data: Prisma.XOR<Prisma.StudioGenerationUpdateManyMutationInput, Prisma.StudioGenerationUncheckedUpdateManyWithoutMemeInput>
+}
+
+export type StudioGenerationScalarWhereInput = {
+  AND?: Prisma.StudioGenerationScalarWhereInput | Prisma.StudioGenerationScalarWhereInput[]
+  OR?: Prisma.StudioGenerationScalarWhereInput[]
+  NOT?: Prisma.StudioGenerationScalarWhereInput | Prisma.StudioGenerationScalarWhereInput[]
+  id?: Prisma.StringFilter<"StudioGeneration"> | string
+  userId?: Prisma.StringFilter<"StudioGeneration"> | string
+  memeId?: Prisma.StringNullableFilter<"StudioGeneration"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"StudioGeneration"> | Date | string
+}
+
 export type StudioGenerationCreateWithoutUserInput = {
   id?: string
   createdAt?: Date | string
+  meme?: Prisma.MemeCreateNestedOneWithoutStudioGenerationsInput
 }
 
 export type StudioGenerationUncheckedCreateWithoutUserInput = {
   id?: string
+  memeId?: string | null
   createdAt?: Date | string
 }
 
@@ -358,32 +474,51 @@ export type StudioGenerationUpdateManyWithWhereWithoutUserInput = {
   data: Prisma.XOR<Prisma.StudioGenerationUpdateManyMutationInput, Prisma.StudioGenerationUncheckedUpdateManyWithoutUserInput>
 }
 
-export type StudioGenerationScalarWhereInput = {
-  AND?: Prisma.StudioGenerationScalarWhereInput | Prisma.StudioGenerationScalarWhereInput[]
-  OR?: Prisma.StudioGenerationScalarWhereInput[]
-  NOT?: Prisma.StudioGenerationScalarWhereInput | Prisma.StudioGenerationScalarWhereInput[]
-  id?: Prisma.StringFilter<"StudioGeneration"> | string
-  userId?: Prisma.StringFilter<"StudioGeneration"> | string
-  createdAt?: Prisma.DateTimeFilter<"StudioGeneration"> | Date | string
+export type StudioGenerationCreateManyMemeInput = {
+  id?: string
+  userId: string
+  createdAt?: Date | string
+}
+
+export type StudioGenerationUpdateWithoutMemeInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutStudioGenerationsNestedInput
+}
+
+export type StudioGenerationUncheckedUpdateWithoutMemeInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type StudioGenerationUncheckedUpdateManyWithoutMemeInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type StudioGenerationCreateManyUserInput = {
   id?: string
+  memeId?: string | null
   createdAt?: Date | string
 }
 
 export type StudioGenerationUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  meme?: Prisma.MemeUpdateOneWithoutStudioGenerationsNestedInput
 }
 
 export type StudioGenerationUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  memeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type StudioGenerationUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  memeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -392,49 +527,61 @@ export type StudioGenerationUncheckedUpdateManyWithoutUserInput = {
 export type StudioGenerationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
+  memeId?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  meme?: boolean | Prisma.StudioGeneration$memeArgs<ExtArgs>
 }, ExtArgs["result"]["studioGeneration"]>
 
 export type StudioGenerationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
+  memeId?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  meme?: boolean | Prisma.StudioGeneration$memeArgs<ExtArgs>
 }, ExtArgs["result"]["studioGeneration"]>
 
 export type StudioGenerationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
+  memeId?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  meme?: boolean | Prisma.StudioGeneration$memeArgs<ExtArgs>
 }, ExtArgs["result"]["studioGeneration"]>
 
 export type StudioGenerationSelectScalar = {
   id?: boolean
   userId?: boolean
+  memeId?: boolean
   createdAt?: boolean
 }
 
-export type StudioGenerationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "createdAt", ExtArgs["result"]["studioGeneration"]>
+export type StudioGenerationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "memeId" | "createdAt", ExtArgs["result"]["studioGeneration"]>
 export type StudioGenerationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  meme?: boolean | Prisma.StudioGeneration$memeArgs<ExtArgs>
 }
 export type StudioGenerationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  meme?: boolean | Prisma.StudioGeneration$memeArgs<ExtArgs>
 }
 export type StudioGenerationIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  meme?: boolean | Prisma.StudioGeneration$memeArgs<ExtArgs>
 }
 
 export type $StudioGenerationPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "StudioGeneration"
   objects: {
     user: Prisma.$UserPayload<ExtArgs>
+    meme: Prisma.$MemePayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     userId: string
+    memeId: string | null
     createdAt: Date
   }, ExtArgs["result"]["studioGeneration"]>
   composites: {}
@@ -831,6 +978,7 @@ readonly fields: StudioGenerationFieldRefs;
 export interface Prisma__StudioGenerationClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  meme<T extends Prisma.StudioGeneration$memeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StudioGeneration$memeArgs<ExtArgs>>): Prisma.Prisma__MemeClient<runtime.Types.Result.GetResult<Prisma.$MemePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -862,6 +1010,7 @@ export interface Prisma__StudioGenerationClient<T, Null = never, ExtArgs extends
 export interface StudioGenerationFieldRefs {
   readonly id: Prisma.FieldRef<"StudioGeneration", 'String'>
   readonly userId: Prisma.FieldRef<"StudioGeneration", 'String'>
+  readonly memeId: Prisma.FieldRef<"StudioGeneration", 'String'>
   readonly createdAt: Prisma.FieldRef<"StudioGeneration", 'DateTime'>
 }
     
@@ -1256,6 +1405,25 @@ export type StudioGenerationDeleteManyArgs<ExtArgs extends runtime.Types.Extensi
    * Limit how many StudioGenerations to delete.
    */
   limit?: number
+}
+
+/**
+ * StudioGeneration.meme
+ */
+export type StudioGeneration$memeArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Meme
+   */
+  select?: Prisma.MemeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Meme
+   */
+  omit?: Prisma.MemeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MemeInclude<ExtArgs> | null
+  where?: Prisma.MemeWhereInput
 }
 
 /**

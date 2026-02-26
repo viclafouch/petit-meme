@@ -453,15 +453,69 @@ LineChart full-width au dashboard admin avec 4 courbes de tendance + 4 summary c
 
 **Migrations Prisma appliquées :** `add_meme_action_daily`, `add_covering_index_meme_action_daily`
 
-### Phase 9c — Top memes (classements)
+### Phase 9c — Memes tendances
 
-Ajouter les classements de memes au dashboard. Dépend de 9a.
+Top 10 memes les plus tendances des 7 derniers jours. Algo de scoring multi-signaux. Toujours 7 jours (indépendant du sélecteur de période).
 
-- [ ] Top 10 memes les plus vus (sum `MemeViewDaily` sur la période)
-- [ ] Top 10 memes les plus bookmarkés (count `UserBookmark.createdAt` sur la période)
-- [ ] Top 10 memes les plus partagés (sum `Meme.shareCount` — pas filtrable par période, compteur global)
-- [ ] Top 10 memes les plus téléchargés (sum `Meme.downloadCount` — idem)
-- [ ] Server function `getAdminTopMemes({ period })` — top memes par vues/bookmarks sur la période
+**Algo de scoring :**
+- `score = (vues × 1) + (bookmarks × 2) + (downloads × 3) + (generations × 4) + (shares × 5)`
+- Poids en constante privée `TRENDING_WEIGHTS` (objet `as const satisfies`) dans `src/server/admin/dashboard.ts`
+
+**Décisions deep-dive :**
+- Query : une seule `$queryRaw` avec sous-queries pour les 5 signaux + `INNER JOIN "Video"` pour titre/thumbnail — **single round-trip** (pas de `findMany` séparé). Scoring en SQL, `LIMIT 10`.
+- Server function : `getAdminTrendingMemes()` dans `src/server/admin/dashboard.ts`, protégée par `adminRequiredMiddleware`. Pas de paramètre période (toujours 7j).
+- Données affichées : thumbnail Bunny, titre, détail des 5 signaux, médaille or/argent/bronze (top 3) ou rang (4-10). Score total calculé mais non affiché (utilisé uniquement pour le tri SQL).
+- État vide : message "Aucune tendance cette semaine" avec icône `TrendingUp`. Section visible mais vide.
+- Refresh : `staleTime: 5 * MINUTE` + `refetchInterval: 5 * MINUTE` + `refetchOnMount: 'always'` au call site.
+- Design : itéré via `/frontend-design`.
+
+**Layout dashboard refondu :**
+- Chart tendances (full width) — inchangé
+- Totaux (full width) — inchangé
+- **2 colonnes 60/40** : Trending memes (gauche) | Feed activité (droite). Stack sur mobile.
+- **Supprimer** `QuickLinks` (`quick-links.tsx`) — redondant avec la sidebar
+
+**Migration Prisma additive**
+- [x] Ajouter `memeId String?` sur `StudioGeneration` + relation `Meme` + `@@index([memeId, createdAt])`
+
+**Server — `incrementGenerationCount` avec memeId**
+- [x] Modifier `incrementGenerationCount` dans `src/server/user.ts` : accepter un `memeId` optionnel → `studioGeneration.create({ data: { userId, memeId } })`
+- [x] Modifier `src/hooks/use-video-processor.ts` : passer le `memeId` à `incrementGenerationCount` (disponible via le `meme` objet dans `studio-page.tsx`)
+
+**Server function trending**
+- [x] Créer `getAdminTrendingMemes()` dans `src/server/admin/dashboard.ts` :
+  - `$queryRaw` : 5 sous-queries (MemeViewDaily COUNT, UserBookmark COUNT, MemeActionDaily SUM shares, MemeActionDaily SUM downloads, StudioGeneration COUNT) joinées sur memeId, WHERE day/createdAt >= 7j, scoring pondéré, ORDER BY score DESC LIMIT 10
+  - 2ème query : `prisma.meme.findMany({ where: { id: { in: memeIds } }, select: TRENDING_MEME_SELECT })` pour titre + video (thumbnail Bunny)
+  - Retourne `TrendingMeme[]` : `{ meme (titre, video.bunnyId, video.duration), score, views, bookmarks, downloads, shares, generations, rank }`
+
+**Refonte layout dashboard**
+- [x] Modifier `src/routes/admin/index.tsx` : supprimer `QuickLinks`, layout 2 colonnes 3/5 + 2/5 sous les totaux (trending gauche, feed droite), stack mobile
+- [x] Supprimer `src/routes/admin/-components/dashboard/quick-links.tsx`
+
+**Composant UI trending**
+- [x] Créer `src/routes/admin/-components/dashboard/trending-memes.tsx` — design `/frontend-design` : divided list, rank badge, thumbnail, title, score, 5 signal icons
+- [x] `useSuspenseQuery` + `getAdminTrendingMemesQueryOpts` (pas de polling, `refetchOnMount: 'always'`)
+- [x] Suspense boundary séparée + skeleton fallback
+- [x] Liens cliquables vers `/admin/library/$memeId`
+
+**Query options**
+- [x] Ajouter `getAdminTrendingMemesQueryOpts` dans `src/lib/queries.ts`
+
+**Fichiers impactés :**
+- `prisma/schema.prisma` — migration StudioGeneration
+- `src/server/user.ts` — `incrementGenerationCount` + memeId
+- `src/hooks/use-video-processor.ts` — passer memeId
+- `src/server/admin/dashboard.ts` — `getAdminTrendingMemes` + `TRENDING_WEIGHTS`
+- `src/routes/admin/index.tsx` — refonte layout
+- `src/routes/admin/-components/dashboard/trending-memes.tsx` — nouveau
+- `src/routes/admin/-components/dashboard/quick-links.tsx` — supprimé
+- `src/lib/queries.ts` — query opts
+
+**Hors scope (reporté) :**
+- Mise à jour des charts existants avec le memeId des générations
+- Rate limiting sur le tracking share/download
+
+**Migration Prisma requise :** `pnpm exec prisma migrate dev --name add_meme_id_to_studio_generation`
 
 ### Phase 9d — Audits dashboard
 

@@ -1754,6 +1754,7 @@ export type VerificationScalarFieldEnum = (typeof VerificationScalarFieldEnum)[k
 export const StudioGenerationScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
+  memeId: 'memeId',
   createdAt: 'createdAt'
 } as const
 
@@ -1949,7 +1950,8 @@ export type VerificationOrderByRelevanceFieldEnum = (typeof VerificationOrderByR
 
 export const StudioGenerationOrderByRelevanceFieldEnum = {
   id: 'id',
-  userId: 'userId'
+  userId: 'userId',
+  memeId: 'memeId'
 } as const
 
 export type StudioGenerationOrderByRelevanceFieldEnum = (typeof StudioGenerationOrderByRelevanceFieldEnum)[keyof typeof StudioGenerationOrderByRelevanceFieldEnum]

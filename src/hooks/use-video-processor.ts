@@ -399,12 +399,12 @@ export const useVideoProcessor = (
         title: meme.title
       }
     },
-    onSuccess: ({ blob }) => {
+    onSuccess: ({ blob }, { meme }) => {
       options?.onSuccess?.(blob)
       const user = queryClient.getQueryData(getAuthUserQueryOpts().queryKey)
 
       if (user) {
-        void incrementGenerationCount()
+        void incrementGenerationCount({ data: { memeId: meme.id } })
       }
     },
     onError: (error) => {

@@ -17,6 +17,16 @@ import type {
 import { adminRequiredMiddleware } from '@/server/user-auth'
 import { createServerFn } from '@tanstack/react-start'
 
+const TRENDING_WEIGHTS = {
+  views: 1,
+  bookmarks: 2,
+  downloads: 3,
+  generations: 4,
+  shares: 5
+} as const satisfies Record<string, number>
+
+const TRENDING_DAYS = 7
+
 export const PERIOD_SCHEMA = z.enum(['7d', '30d', '90d', 'all'])
 
 export type DashboardPeriod = z.infer<typeof PERIOD_SCHEMA>
@@ -209,4 +219,121 @@ export const getAdminRecentActivity = createServerFn({ method: 'GET' })
   .middleware([adminRequiredMiddleware])
   .handler(() => {
     return fetchRecentActivity()
+  })
+
+type RawTrendingRow = {
+  memeId: string
+  title: string
+  bunnyId: string
+  duration: number
+  views: bigint
+  bookmarks: bigint
+  downloads: bigint
+  generations: bigint
+  shares: bigint
+  score: bigint
+}
+
+export type TrendingMeme = {
+  meme: {
+    id: string
+    title: string
+    video: { bunnyId: string; duration: number }
+  }
+  rank: number
+  score: number
+  views: number
+  bookmarks: number
+  downloads: number
+  generations: number
+  shares: number
+}
+
+async function fetchTrendingMemes(): Promise<TrendingMeme[]> {
+  const since = new Date(Date.now() - TRENDING_DAYS * DAY)
+
+  const rows = await prismaClient.$queryRaw<RawTrendingRow[]>`
+    SELECT
+      m.id AS "memeId",
+      m.title AS title,
+      vid."bunnyId" AS "bunnyId",
+      vid.duration AS duration,
+      COALESCE(v.views, 0) AS views,
+      COALESCE(b.bookmarks, 0) AS bookmarks,
+      COALESCE(d.downloads, 0) AS downloads,
+      COALESCE(g.generations, 0) AS generations,
+      COALESCE(s.shares, 0) AS shares,
+      (
+        COALESCE(v.views, 0) * ${TRENDING_WEIGHTS.views}
+        + COALESCE(b.bookmarks, 0) * ${TRENDING_WEIGHTS.bookmarks}
+        + COALESCE(d.downloads, 0) * ${TRENDING_WEIGHTS.downloads}
+        + COALESCE(g.generations, 0) * ${TRENDING_WEIGHTS.generations}
+        + COALESCE(s.shares, 0) * ${TRENDING_WEIGHTS.shares}
+      ) AS score
+    FROM "Meme" m
+    INNER JOIN "Video" vid ON vid.id = m."videoId"
+    LEFT JOIN (
+      SELECT "memeId", COUNT(*)::bigint AS views
+      FROM "MemeViewDaily"
+      WHERE day >= ${since}
+      GROUP BY "memeId"
+    ) v ON v."memeId" = m.id
+    LEFT JOIN (
+      SELECT "memeId", COUNT(*)::bigint AS bookmarks
+      FROM user_bookmark
+      WHERE "createdAt" >= ${since}
+      GROUP BY "memeId"
+    ) b ON b."memeId" = m.id
+    LEFT JOIN (
+      SELECT "memeId", SUM(count)::bigint AS downloads
+      FROM meme_action_daily
+      WHERE day >= ${since} AND action = 'download'
+      GROUP BY "memeId"
+    ) d ON d."memeId" = m.id
+    LEFT JOIN (
+      SELECT "memeId", COUNT(*)::bigint AS generations
+      FROM studio_generation
+      WHERE "createdAt" >= ${since} AND "memeId" IS NOT NULL
+      GROUP BY "memeId"
+    ) g ON g."memeId" = m.id
+    LEFT JOIN (
+      SELECT "memeId", SUM(count)::bigint AS shares
+      FROM meme_action_daily
+      WHERE day >= ${since} AND action = 'share'
+      GROUP BY "memeId"
+    ) s ON s."memeId" = m.id
+    WHERE m.status = ${MemeStatus.PUBLISHED}
+    AND (
+      COALESCE(v.views, 0)
+      + COALESCE(b.bookmarks, 0)
+      + COALESCE(d.downloads, 0)
+      + COALESCE(g.generations, 0)
+      + COALESCE(s.shares, 0)
+    ) > 0
+    ORDER BY score DESC
+    LIMIT 10
+  `
+
+  return rows.map((row, index) => {
+    return {
+      meme: {
+        id: row.memeId,
+        title: row.title,
+        video: { bunnyId: row.bunnyId, duration: row.duration }
+      },
+      rank: index + 1,
+      score: Number(row.score),
+      views: Number(row.views),
+      bookmarks: Number(row.bookmarks),
+      downloads: Number(row.downloads),
+      generations: Number(row.generations),
+      shares: Number(row.shares)
+    }
+  })
+}
+
+export const getAdminTrendingMemes = createServerFn({ method: 'GET' })
+  .middleware([adminRequiredMiddleware])
+  .handler(() => {
+    return fetchTrendingMemes()
   })

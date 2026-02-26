@@ -6,10 +6,12 @@ import { PageHeader } from '@/components/page-header'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { MINUTE } from '@/constants/time'
 import {
   getAdminChartDataQueryOpts,
   getAdminDashboardTotalsQueryOpts,
-  getAdminRecentActivityQueryOpts
+  getAdminRecentActivityQueryOpts,
+  getAdminTrendingMemesQueryOpts
 } from '@/lib/queries'
 import { captureWithFeature } from '@/lib/sentry'
 import { type DashboardPeriod, PERIOD_SCHEMA } from '@/server/admin/dashboard'
@@ -17,8 +19,8 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { ActivityFeed } from './-components/dashboard/activity-feed'
 import { PeriodSelector } from './-components/dashboard/period-selector'
-import { QuickLinks } from './-components/dashboard/quick-links'
 import { TotalsSection } from './-components/dashboard/totals-section'
+import { TrendingMemes } from './-components/dashboard/trending-memes'
 import { TrendsChart } from './-components/dashboard/trends-chart'
 
 const dashboardSearchSchema = z.object({
@@ -88,17 +90,18 @@ const TotalsSkeleton = () => {
   )
 }
 
-const QuickLinksSkeleton = () => {
+const TrendingSkeleton = () => {
   return (
-    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-      {Array.from({ length: 4 }).map((_, index) => {
+    <div className="flex flex-col gap-3">
+      {Array.from({ length: 5 }).map((_, index) => {
         return (
-          <div
-            key={index}
-            className="flex items-center gap-3 rounded-xl border bg-card p-4"
-          >
-            <Skeleton className="size-4" />
-            <Skeleton className="h-4 w-32" />
+          <div key={index} className="flex items-center gap-3">
+            <Skeleton className="size-6 rounded-full" />
+            <Skeleton className="size-10 rounded-md" />
+            <div className="flex flex-1 flex-col gap-1">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-3 w-48" />
+            </div>
           </div>
         )
       })}
@@ -163,16 +166,16 @@ const TotalsContent = () => {
     refetchOnMount: 'always'
   })
 
-  return (
-    <>
-      <section aria-label="Totaux">
-        <TotalsSection totals={totalsQuery.data} />
-      </section>
-      <section aria-label="Liens rapides">
-        <QuickLinks totals={totalsQuery.data} />
-      </section>
-    </>
-  )
+  return <TotalsSection totals={totalsQuery.data} />
+}
+
+const TrendingContent = () => {
+  const trendingQuery = useSuspenseQuery({
+    ...getAdminTrendingMemesQueryOpts(),
+    staleTime: 5 * MINUTE
+  })
+
+  return <TrendingMemes entries={trendingQuery.data} />
 }
 
 const FeedContent = () => {
@@ -216,32 +219,42 @@ const RouteComponent = () => {
         FallbackComponent={SectionErrorFallback}
         onError={handleSectionError}
       >
-        <React.Suspense
-          fallback={
-            <div className="flex flex-col gap-6">
-              <TotalsSkeleton />
-              <QuickLinksSkeleton />
-            </div>
-          }
-        >
+        <React.Suspense fallback={<TotalsSkeleton />}>
           <TotalsContent />
         </React.Suspense>
       </ErrorBoundary>
-      <section aria-label="Activité récente">
-        <h2 className="mb-3 text-sm font-medium text-muted-foreground uppercase tracking-wider">
-          Activité récente
-        </h2>
-        <div className="rounded-xl border bg-card p-4">
-          <ErrorBoundary
-            FallbackComponent={SectionErrorFallback}
-            onError={handleSectionError}
-          >
-            <React.Suspense fallback={<FeedSkeleton />}>
-              <FeedContent />
-            </React.Suspense>
-          </ErrorBoundary>
-        </div>
-      </section>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+        <section className="lg:col-span-3" aria-label="Memes tendances">
+          <h2 className="mb-3 text-sm font-medium text-muted-foreground uppercase tracking-wider">
+            Tendances — 7 derniers jours
+          </h2>
+          <div className="rounded-xl border bg-card p-4">
+            <ErrorBoundary
+              FallbackComponent={SectionErrorFallback}
+              onError={handleSectionError}
+            >
+              <React.Suspense fallback={<TrendingSkeleton />}>
+                <TrendingContent />
+              </React.Suspense>
+            </ErrorBoundary>
+          </div>
+        </section>
+        <section className="lg:col-span-2" aria-label="Activité récente">
+          <h2 className="mb-3 text-sm font-medium text-muted-foreground uppercase tracking-wider">
+            Activité récente
+          </h2>
+          <div className="rounded-xl border bg-card p-4">
+            <ErrorBoundary
+              FallbackComponent={SectionErrorFallback}
+              onError={handleSectionError}
+            >
+              <React.Suspense fallback={<FeedSkeleton />}>
+                <FeedContent />
+              </React.Suspense>
+            </ErrorBoundary>
+          </div>
+        </section>
+      </div>
     </div>
   )
 }

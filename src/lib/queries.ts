@@ -5,7 +5,8 @@ import type { DashboardPeriod } from '@/server/admin/dashboard'
 import {
   getAdminChartData,
   getAdminDashboardTotals,
-  getAdminRecentActivity
+  getAdminRecentActivity,
+  getAdminTrendingMemes
 } from '@/server/admin/dashboard'
 import { getAdminMemeById, getAdminMemes } from '@/server/admin/memes'
 import { getCategories } from '@/server/categories'
@@ -177,6 +178,17 @@ export const getAdminRecentActivityQueryOpts = () => {
 }
 
 getAdminRecentActivityQueryOpts.all = ['admin-recent-activity'] as const
+
+export const getAdminTrendingMemesQueryOpts = () => {
+  return queryOptions({
+    queryKey: [...getAdminTrendingMemesQueryOpts.all],
+    queryFn: () => {
+      return getAdminTrendingMemes()
+    }
+  })
+}
+
+getAdminTrendingMemesQueryOpts.all = ['admin-trending-memes'] as const
 
 export const getActiveSubscriptionQueryOpts = () => {
   return queryOptions({

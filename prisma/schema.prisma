@@ -84,8 +84,9 @@ model Meme {
   status       MemeStatus     @default(PUBLISHED)
   submittedBy  String?
   submitter    User?          @relation(fields: [submittedBy], references: [id])
-  viewsDaily    MemeViewDaily[]
-  actionsDaily  MemeActionDaily[]
+  viewsDaily          MemeViewDaily[]
+  actionsDaily        MemeActionDaily[]
+  studioGenerations   StudioGeneration[]
 
   @@index([status])
   @@index([status, viewCount])
@@ -241,12 +242,15 @@ model Verification {
 model StudioGeneration {
   id        String   @id @default(cuid())
   userId    String
+  memeId    String?
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meme Meme? @relation(fields: [memeId], references: [id], onDelete: SetNull)
 
   @@index([createdAt])
   @@index([userId, createdAt])
+  @@index([memeId, createdAt])
   @@map("studio_generation")
 }
 

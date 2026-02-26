@@ -41,7 +41,7 @@ import {
   buildUrl
 } from '@/lib/seo'
 import { cn } from '@/lib/utils'
-import { getRandomMeme, getRelatedMemes } from '@/server/meme'
+import { getRandomMeme, getRelatedMemes, trackMemeAction } from '@/server/meme'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import {
   createFileRoute,
@@ -141,6 +141,7 @@ const RouteComponent = () => {
 
     try {
       await navigator.clipboard.writeText(text)
+      void trackMemeAction({ data: { memeId: meme.id, action: 'share' } })
       toast.success('Lien copié', {
         position: 'bottom-center'
       })

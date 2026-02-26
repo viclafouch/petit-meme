@@ -18,6 +18,7 @@ import type { ConversionEventName } from '@/lib/algolia-insights'
 import { sendConversionEvent } from '@/lib/algolia-insights'
 import { buildVideoImageUrl } from '@/lib/bunny'
 import { buildUrl } from '@/lib/seo'
+import { trackMemeAction } from '@/server/meme'
 import { FocusScope } from '@radix-ui/react-focus-scope'
 import { Link, useLinkProps } from '@tanstack/react-router'
 
@@ -67,6 +68,7 @@ export const PlayerDialog = ({
 
     try {
       await navigator.clipboard.writeText(text)
+      void trackMemeAction({ data: { memeId: meme.id, action: 'share' } })
       toast.success('Lien copié', {
         position: 'bottom-center'
       })

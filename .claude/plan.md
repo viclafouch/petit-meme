@@ -365,6 +365,7 @@ Transformer la page d'accueil admin (actuellement redirect vers `/admin/library`
 - [x] Créer `trackMemeAction` server function dans `src/server/meme.ts` **sans auth** (ouvert à tous, anonymes inclus) : `({ memeId, action: 'share' | 'download' })` → `prisma.meme.update({ where: { id: memeId }, data: { [field]: { increment: 1 } } })`. Fire-and-forget pur, pas de check d'existence.
 - [x] Appeler `trackMemeAction` fire-and-forget dans `src/hooks/use-share-meme.ts` après share réussi
 - [x] Appeler `trackMemeAction` fire-and-forget dans `src/hooks/use-download-meme.ts` après download réussi
+- [x] Appeler `trackMemeAction` fire-and-forget (action `'share'`) après "Copier le lien" réussi dans `src/routes/_public__root/_default/memes/$memeId.tsx` et `src/components/Meme/player-dialog.tsx`
 - [ ] **Reporté :** rate limiting dédié sur le tracking (dédoublonnage par user/meme)
 
 **Audit log memes (5 actions, fire-and-forget)**

@@ -14,7 +14,8 @@ export const getInfiniteReels = createServerFn({ method: 'POST' })
       .parse(data)
   })
   .handler(async ({ data }) => {
-    const { excludedIds } = data
+    const MAX_EXCLUDED_IDS = 100
+    const excludedIds = data.excludedIds.slice(-MAX_EXCLUDED_IDS)
 
     const excludeClause = excludedIds.length
       ? Prisma.sql`AND m."id" NOT IN (${Prisma.join(excludedIds)})`

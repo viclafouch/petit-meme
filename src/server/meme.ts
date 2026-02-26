@@ -20,7 +20,6 @@ import {
   THIRTY_DAYS_MS
 } from '@/constants/time'
 import { prismaClient } from '@/db'
-import { Prisma } from '@/db/generated/prisma/client'
 import { MemeStatus } from '@/db/generated/prisma/enums'
 import { clientEnv } from '@/env/client'
 import { serverEnv } from '@/env/server'
@@ -296,18 +295,26 @@ export const getRandomMeme = createServerFn({ method: 'GET' })
     return z.string().optional().parse(data)
   })
   .handler(async ({ data: exceptId }) => {
-    const whereClause = exceptId
-      ? Prisma.sql`WHERE "status" = ${MemeStatus.PUBLISHED} AND "id" != ${exceptId}`
-      : Prisma.sql`WHERE "status" = ${MemeStatus.PUBLISHED}`
+    const whereCondition = exceptId
+      ? { status: MemeStatus.PUBLISHED, id: { not: exceptId } }
+      : { status: MemeStatus.PUBLISHED }
 
-    const results = await prismaClient.$queryRaw<{ id: string }[]>`
-      SELECT "id" FROM "Meme"
-      ${whereClause}
-      ORDER BY RANDOM()
-      LIMIT 1
-    `
+    const count = await prismaClient.meme.count({ where: whereCondition })
 
-    return results[0] ?? null
+    if (count === 0) {
+      return null
+    }
+
+    const randomOffset = Math.floor(Math.random() * count)
+
+    const [meme] = await prismaClient.meme.findMany({
+      where: whereCondition,
+      select: { id: true },
+      skip: randomOffset,
+      take: 1
+    })
+
+    return meme ?? null
   })
 
 export const shareMeme = createServerFn({ method: 'GET' })
@@ -375,22 +382,24 @@ export const trackMemeAction = createServerFn({ method: 'POST' })
     const countField = data.action === 'share' ? 'shareCount' : 'downloadCount'
     const day = truncateToUtcDay(new Date())
 
-    const updated = await prismaClient.meme.updateMany({
-      where: { id: data.memeId, status: MemeStatus.PUBLISHED },
-      data: { [countField]: { increment: 1 } }
-    })
+    await prismaClient.$transaction(async (tx) => {
+      const updated = await tx.meme.updateMany({
+        where: { id: data.memeId, status: MemeStatus.PUBLISHED },
+        data: { [countField]: { increment: 1 } }
+      })
 
-    if (updated.count === 0) {
-      return
-    }
+      if (updated.count === 0) {
+        return
+      }
 
-    await prismaClient.memeActionDaily.upsert({
-      where: {
-        // eslint-disable-next-line camelcase -- Prisma compound unique key
-        memeId_day_action: { memeId: data.memeId, day, action: data.action }
-      },
-      create: { memeId: data.memeId, day, action: data.action, count: 1 },
-      update: { count: { increment: 1 } }
+      await tx.memeActionDaily.upsert({
+        where: {
+          // eslint-disable-next-line camelcase -- Prisma compound unique key
+          memeId_day_action: { memeId: data.memeId, day, action: data.action }
+        },
+        create: { memeId: data.memeId, day, action: data.action, count: 1 },
+        update: { count: { increment: 1 } }
+      })
     })
   })
 
@@ -427,10 +436,7 @@ export const registerMemeView = createServerFn({ method: 'POST' })
       }
     }
 
-    const now = new Date()
-    const day = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
-    )
+    const day = truncateToUtcDay(new Date())
 
     const viewTransaction = prismaClient.$transaction(async (tx) => {
       const result = await tx.memeViewDaily.createMany({

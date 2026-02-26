@@ -117,7 +117,7 @@ model MemeActionDaily {
   meme Meme @relation(fields: [memeId], references: [id], onDelete: Cascade)
 
   @@unique([memeId, day, action])
-  @@index([day, action, count])
+  @@index([day, action, memeId])
   @@map("meme_action_daily")
 }
 

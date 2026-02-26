@@ -82,7 +82,10 @@ export const getListUsers = createServerFn({ method: 'GET' })
       }),
       prismaClient.session.groupBy({
         by: ['userId'],
-        where: { userId: { in: userIds } },
+        where: {
+          userId: { in: userIds },
+          expiresAt: { gte: new Date() }
+        },
         _max: { updatedAt: true }
       }),
       prismaClient.studioGeneration.groupBy({

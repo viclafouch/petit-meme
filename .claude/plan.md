@@ -640,35 +640,19 @@ src/routes/admin/
 
 #### Backend performance (hors admin — medium)
 
-- [ ] `src/server/meme.ts:373-389` — `trackMemeAction` 2 queries séquentielles → wraper dans `$transaction` (un seul round-trip réseau)
-- [ ] `src/server/meme.ts:298-305` — `ORDER BY RANDOM()` full table scan dans `getRandomMeme` → count + offset aléatoire (`skip: Math.floor(Math.random() * count)`)
-- [ ] `src/server/reels.ts:34` — `ORDER BY RANDOM()` + `NOT IN (...)` unbounded dans `getInfiniteReels` → plafonner la liste d'exclusion (ex: 100 IDs max)
-- [ ] `src/routes/admin/-server/users.ts:90-94` — `session.groupBy` inclut les sessions expirées → filtrer `expiresAt: { gte: new Date() }` ou `updatedAt` récent
-- [ ] `prisma/schema.prisma` — index manquant `@@index([day, action, memeId])` sur `MemeActionDaily` pour la query trending (GROUP BY memeId). L'index existant `@@index([day, action, count])` peut être remplacé
-- [ ] `src/helpers/date.ts:80-103` — `generateDateSeries` mutate un objet `Date` dans le while loop → utiliser arithmetic `Date.UTC` immutable
-
-#### Security
-
-**HIGH**
-- [ ] `src/routes/api/bunny.ts:22-95` — webhook Bunny CDN sans authentification. Vérifier le header token/secret Bunny sur chaque requête entrante. Ajouter `BUNNY_WEBHOOK_SECRET` dans `src/env/server.ts`. Rejeter avec 401 si invalide
-- [ ] `src/components/Meme/meme-list-item.tsx:199-207` — Stored XSS via `dangerouslySetInnerHTML` sur `hit._highlightResult?.title.value` (Algolia highlight). Sanitizer avec DOMPurify (`ALLOWED_TAGS: ['em']`) dans `getHighlightedTitle()` (`src/lib/algolia.ts:143-149`)
-
-**MEDIUM**
-- [ ] `src/server/meme.ts:449-451` — Algolia Admin Key utilisée dans un endpoint public (`registerMemeView`). Utiliser la search key pour les Insights events (principe du moindre privilège)
-- [ ] `src/server/meme.ts:53-63` — injection filtre Algolia via category slug interpolé dans un string. Actuellement mitigé par `CATEGORY_SLUG_REGEX`, mais fragile. Ajouter une re-validation explicite au point d'utilisation
-
-**LOW**
-- [ ] `src/server/meme.ts` — pas de rate limiting sur `trackMemeAction` et `registerMemeView` (endpoints publics sans auth). Inflation artificielle des compteurs. Évaluer Vercel Edge rate limiting ou Upstash Redis
+- [x] `src/server/meme.ts:373-389` — `trackMemeAction` 2 queries séquentielles → wraper dans `$transaction` (un seul round-trip réseau)
+- [x] `src/server/meme.ts:298-305` — `ORDER BY RANDOM()` full table scan dans `getRandomMeme` → count + offset aléatoire (`skip: Math.floor(Math.random() * count)`)
+- [x] `src/server/reels.ts:34` — `ORDER BY RANDOM()` + `NOT IN (...)` unbounded dans `getInfiniteReels` → plafonner la liste d'exclusion (ex: 100 IDs max)
+- [x] `src/routes/admin/-server/users.ts:90-94` — `session.groupBy` inclut les sessions expirées → filtrer `expiresAt: { gte: new Date() }` ou `updatedAt` récent
+- [x] `prisma/schema.prisma` — index manquant `@@index([day, action, memeId])` sur `MemeActionDaily` pour la query trending (GROUP BY memeId). L'index existant `@@index([day, action, count])` peut être remplacé
+- [x] `src/helpers/date.ts:80-103` — `generateDateSeries` mutate un objet `Date` dans le while loop → utiliser arithmetic `Date.UTC` immutable
 
 #### GDPR
 
 **CRITICAL**
 - [ ] `AdminAuditLog` retient `targetId` (userId) indéfiniment sans pathway de suppression. Sur suppression user : anonymiser `targetId` → `'[deleted]'` via `updateMany` dans le hook `beforeDelete` (`src/lib/auth.tsx`). Ajouter rétention 2 ans dans `crons/cleanup-retention.ts`
-- [x] ~~`removeUser` (admin) ne nulle pas `Meme.submittedBy` avant suppression~~ — résolu par suppression du champ `submittedBy` (Schema Cleanup)
-- [ ] Crons (`unverified-cleanup.ts`, `verification-reminder.ts`) et auth (`src/lib/auth.tsx`) loggent les emails en clair. Masquer avec `maskEmail()` helper ou ajouter `'email'` à la liste `redact` de pino (`src/lib/logger.ts`)
 
 **HIGH**
-- [x] ~~`src/lib/algolia.ts:183` — `submittedBy` (userId) indexé dans Algolia~~ — résolu par suppression du champ `submittedBy` (Schema Cleanup). Re-indexer Algolia pour nettoyer les records existants
 - [ ] `prisma/schema.prisma:168` — `AdminAuditLog.actingAdminId` FK sans `onDelete` clause (default `Restrict`) → bloque la suppression d'un compte admin. Migrer vers `onDelete: SetNull` + rendre nullable
 - [ ] Crons pas schedulés dans `vercel.json` → les promesses de rétention de la privacy notice ne sont pas automatiquement honorées. Ajouter les définitions `crons` dans `vercel.json`
 - [ ] `src/lib/auth.tsx:219` — Twitter OAuth login logge le full email à `info` level → masquer ou logger `emailDomain` uniquement

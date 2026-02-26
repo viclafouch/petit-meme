@@ -72,34 +72,49 @@ type GenerateDateSeriesParams = {
   granularity: ChartGranularity
 }
 
+function advanceDate(timestamp: number, granularity: ChartGranularity) {
+  const date = new Date(timestamp)
+
+  switch (granularity) {
+    case 'day': {
+      return Date.UTC(
+        date.getUTCFullYear(),
+        date.getUTCMonth(),
+        date.getUTCDate() + 1
+      )
+    }
+
+    case 'week': {
+      return Date.UTC(
+        date.getUTCFullYear(),
+        date.getUTCMonth(),
+        date.getUTCDate() + 7
+      )
+    }
+
+    default: {
+      return Date.UTC(
+        date.getUTCFullYear(),
+        date.getUTCMonth() + 1,
+        date.getUTCDate()
+      )
+    }
+  }
+}
+
 export function generateDateSeries({
   start,
   end,
   granularity
 }: GenerateDateSeriesParams) {
   const series: string[] = []
-  const current = new Date(truncateToGranularity(start, granularity))
   const endKey = truncateToGranularity(end, granularity)
+  let currentMs = new Date(truncateToGranularity(start, granularity)).getTime()
+  const endMs = new Date(endKey).getTime()
 
-  while (current.toISOString() <= endKey) {
-    series.push(current.toISOString())
-
-    switch (granularity) {
-      case 'day': {
-        current.setUTCDate(current.getUTCDate() + 1)
-        break
-      }
-
-      case 'week': {
-        current.setUTCDate(current.getUTCDate() + 7)
-        break
-      }
-
-      default: {
-        current.setUTCMonth(current.getUTCMonth() + 1)
-        break
-      }
-    }
+  while (currentMs <= endMs) {
+    series.push(new Date(currentMs).toISOString())
+    currentMs = advanceDate(currentMs, granularity)
   }
 
   return series

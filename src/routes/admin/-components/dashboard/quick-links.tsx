@@ -1,8 +1,8 @@
 import { ArrowRight, Clock, SquareLibrary, Users, Video } from 'lucide-react'
-import type { DashboardStats } from '@/server/admin/dashboard'
+import type { DashboardTotals } from '@/server/admin/dashboard'
 import { Link, linkOptions } from '@tanstack/react-router'
 
-function buildQuickLinks(totals: DashboardStats['totals']) {
+function buildQuickLinks(totals: DashboardTotals) {
   return linkOptions([
     {
       to: '/admin/library',
@@ -29,7 +29,7 @@ function buildQuickLinks(totals: DashboardStats['totals']) {
 }
 
 type QuickLinksParams = {
-  totals: DashboardStats['totals']
+  totals: DashboardTotals
 }
 
 export const QuickLinks = ({ totals }: QuickLinksParams) => {
@@ -42,7 +42,7 @@ export const QuickLinks = ({ totals }: QuickLinksParams) => {
           <Link
             {...link}
             key={link.label}
-            className="group flex items-center justify-between rounded-xl border bg-card p-4 hover:bg-accent"
+            className="flex items-center justify-between rounded-xl border bg-card p-4 hover:bg-accent"
           >
             <div className="flex items-center gap-3">
               <span className="text-muted-foreground">{link.icon}</span>

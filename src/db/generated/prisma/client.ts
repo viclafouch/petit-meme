@@ -70,6 +70,11 @@ export type Meme = Prisma.MemeModel
  */
 export type MemeViewDaily = Prisma.MemeViewDailyModel
 /**
+ * Model MemeActionDaily
+ * 
+ */
+export type MemeActionDaily = Prisma.MemeActionDailyModel
+/**
  * Model User
  * 
  */

@@ -390,6 +390,7 @@ export const ModelName = {
   Video: 'Video',
   Meme: 'Meme',
   MemeViewDaily: 'MemeViewDaily',
+  MemeActionDaily: 'MemeActionDaily',
   User: 'User',
   AdminAuditLog: 'AdminAuditLog',
   Session: 'Session',
@@ -413,7 +414,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "userBookmark" | "category" | "memeCategory" | "video" | "meme" | "memeViewDaily" | "user" | "adminAuditLog" | "session" | "subscription" | "account" | "verification" | "studioGeneration" | "rateLimit"
+    modelProps: "userBookmark" | "category" | "memeCategory" | "video" | "meme" | "memeViewDaily" | "memeActionDaily" | "user" | "adminAuditLog" | "session" | "subscription" | "account" | "verification" | "studioGeneration" | "rateLimit"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -858,6 +859,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.MemeViewDailyCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.MemeViewDailyCountAggregateOutputType> | number
+        }
+      }
+    }
+    MemeActionDaily: {
+      payload: Prisma.$MemeActionDailyPayload<ExtArgs>
+      fields: Prisma.MemeActionDailyFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MemeActionDailyFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeActionDailyPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MemeActionDailyFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeActionDailyPayload>
+        }
+        findFirst: {
+          args: Prisma.MemeActionDailyFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeActionDailyPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MemeActionDailyFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeActionDailyPayload>
+        }
+        findMany: {
+          args: Prisma.MemeActionDailyFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeActionDailyPayload>[]
+        }
+        create: {
+          args: Prisma.MemeActionDailyCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeActionDailyPayload>
+        }
+        createMany: {
+          args: Prisma.MemeActionDailyCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MemeActionDailyCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeActionDailyPayload>[]
+        }
+        delete: {
+          args: Prisma.MemeActionDailyDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeActionDailyPayload>
+        }
+        update: {
+          args: Prisma.MemeActionDailyUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeActionDailyPayload>
+        }
+        deleteMany: {
+          args: Prisma.MemeActionDailyDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MemeActionDailyUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MemeActionDailyUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeActionDailyPayload>[]
+        }
+        upsert: {
+          args: Prisma.MemeActionDailyUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeActionDailyPayload>
+        }
+        aggregate: {
+          args: Prisma.MemeActionDailyAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMemeActionDaily>
+        }
+        groupBy: {
+          args: Prisma.MemeActionDailyGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MemeActionDailyGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MemeActionDailyCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MemeActionDailyCountAggregateOutputType> | number
         }
       }
     }
@@ -1565,6 +1640,17 @@ export const MemeViewDailyScalarFieldEnum = {
 export type MemeViewDailyScalarFieldEnum = (typeof MemeViewDailyScalarFieldEnum)[keyof typeof MemeViewDailyScalarFieldEnum]
 
 
+export const MemeActionDailyScalarFieldEnum = {
+  id: 'id',
+  memeId: 'memeId',
+  day: 'day',
+  action: 'action',
+  count: 'count'
+} as const
+
+export type MemeActionDailyScalarFieldEnum = (typeof MemeActionDailyScalarFieldEnum)[keyof typeof MemeActionDailyScalarFieldEnum]
+
+
 export const UserScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -1769,6 +1855,15 @@ export const MemeViewDailyOrderByRelevanceFieldEnum = {
 } as const
 
 export type MemeViewDailyOrderByRelevanceFieldEnum = (typeof MemeViewDailyOrderByRelevanceFieldEnum)[keyof typeof MemeViewDailyOrderByRelevanceFieldEnum]
+
+
+export const MemeActionDailyOrderByRelevanceFieldEnum = {
+  id: 'id',
+  memeId: 'memeId',
+  action: 'action'
+} as const
+
+export type MemeActionDailyOrderByRelevanceFieldEnum = (typeof MemeActionDailyOrderByRelevanceFieldEnum)[keyof typeof MemeActionDailyOrderByRelevanceFieldEnum]
 
 
 export const UserOrderByRelevanceFieldEnum = {
@@ -2079,6 +2174,7 @@ export type GlobalOmitConfig = {
   video?: Prisma.VideoOmit
   meme?: Prisma.MemeOmit
   memeViewDaily?: Prisma.MemeViewDailyOmit
+  memeActionDaily?: Prisma.MemeActionDailyOmit
   user?: Prisma.UserOmit
   adminAuditLog?: Prisma.AdminAuditLogOmit
   session?: Prisma.SessionOmit

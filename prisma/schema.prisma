@@ -84,7 +84,8 @@ model Meme {
   status       MemeStatus     @default(PUBLISHED)
   submittedBy  String?
   submitter    User?          @relation(fields: [submittedBy], references: [id])
-  viewsDaily   MemeViewDaily[]
+  viewsDaily    MemeViewDaily[]
+  actionsDaily  MemeActionDaily[]
 
   @@index([status])
   @@index([status, viewCount])
@@ -106,6 +107,20 @@ model MemeViewDaily {
   @@index([memeId, day])
   @@index([viewerKey, day])
   @@index([day])
+}
+
+model MemeActionDaily {
+  id     String   @id @default(cuid())
+  memeId String
+  day    DateTime
+  action String
+  count  Int      @default(0)
+
+  meme Meme @relation(fields: [memeId], references: [id], onDelete: Cascade)
+
+  @@unique([memeId, day, action])
+  @@index([day, action, count])
+  @@map("meme_action_daily")
 }
 
 model User {

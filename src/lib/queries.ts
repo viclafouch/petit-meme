@@ -3,7 +3,8 @@ import { MINUTE } from '@/constants/time'
 import type { Meme, Video } from '@/db/generated/prisma/client'
 import type { DashboardPeriod } from '@/server/admin/dashboard'
 import {
-  getAdminDashboardStats,
+  getAdminChartData,
+  getAdminDashboardTotals,
   getAdminRecentActivity
 } from '@/server/admin/dashboard'
 import { getAdminMemeById, getAdminMemes } from '@/server/admin/memes'
@@ -141,17 +142,29 @@ export const getAdminMemesListQueryOpts = (filters: MemesFilters) => {
 
 getAdminMemesListQueryOpts.all = ['admin-memes-list'] as const
 
-export const getAdminDashboardStatsQueryOpts = (period: DashboardPeriod) => {
+export const getAdminDashboardTotalsQueryOpts = () => {
   return queryOptions({
-    queryKey: [...getAdminDashboardStatsQueryOpts.all, period],
+    queryKey: [...getAdminDashboardTotalsQueryOpts.all],
     queryFn: () => {
-      return getAdminDashboardStats({ data: period })
+      return getAdminDashboardTotals()
     },
     refetchInterval: MINUTE
   })
 }
 
-getAdminDashboardStatsQueryOpts.all = ['admin-dashboard-stats'] as const
+getAdminDashboardTotalsQueryOpts.all = ['admin-dashboard-totals'] as const
+
+export const getAdminChartDataQueryOpts = (period: DashboardPeriod) => {
+  return queryOptions({
+    queryKey: [...getAdminChartDataQueryOpts.all, period],
+    queryFn: () => {
+      return getAdminChartData({ data: period })
+    },
+    refetchInterval: MINUTE
+  })
+}
+
+getAdminChartDataQueryOpts.all = ['admin-chart-data'] as const
 
 export const getAdminRecentActivityQueryOpts = () => {
   return queryOptions({

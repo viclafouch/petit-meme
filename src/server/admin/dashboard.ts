@@ -1,8 +1,14 @@
 import { z } from 'zod'
+import { DAY } from '@/constants/time'
 import { prismaClient } from '@/db'
 import type { Prisma } from '@/db/generated/prisma/client'
 import { MemeStatus } from '@/db/generated/prisma/enums'
-import { computeDateRanges, truncateToUtcDay } from '@/helpers/date'
+import {
+  type ChartGranularity,
+  generateDateSeries,
+  getChartGranularity,
+  truncateToGranularity
+} from '@/helpers/date'
 import type {
   AuditAction,
   AuditMetadata,
@@ -22,27 +28,11 @@ const PERIOD_DAYS = {
   all: null
 } as const satisfies Record<DashboardPeriod, number | null>
 
-export type KpiData = {
-  current: number
-  previous: number
-}
-
-export type DashboardStats = {
-  kpis: {
-    views: KpiData
-    newUsers: KpiData
-    newMemes: KpiData
-    studioGenerations: KpiData
-    bookmarks: KpiData
-    shares: KpiData
-    downloads: KpiData
-  }
-  totals: {
-    publishedMemes: number
-    pendingMemes: number
-    totalUsers: number
-    activePremium: number
-  }
+export type DashboardTotals = {
+  publishedMemes: number
+  pendingMemes: number
+  totalUsers: number
+  activePremium: number
 }
 
 async function fetchTotals() {
@@ -57,156 +47,127 @@ async function fetchTotals() {
   return { publishedMemes, pendingMemes, totalUsers, activePremium }
 }
 
-async function fetchAllTimeStats() {
-  const [
-    views,
-    newUsers,
-    newMemes,
-    studioGenerations,
-    bookmarks,
-    shares,
-    downloads,
-    totals
-  ] = await Promise.all([
-    prismaClient.memeViewDaily.count(),
-    prismaClient.user.count(),
-    prismaClient.meme.count({ where: { status: MemeStatus.PUBLISHED } }),
-    prismaClient.studioGeneration.count(),
-    prismaClient.userBookmark.count(),
-    prismaClient.meme.aggregate({
-      where: { status: MemeStatus.PUBLISHED },
-      _sum: { shareCount: true }
-    }),
-    prismaClient.meme.aggregate({
-      where: { status: MemeStatus.PUBLISHED },
-      _sum: { downloadCount: true }
-    }),
-    fetchTotals()
-  ])
+export const getAdminDashboardTotals = createServerFn({ method: 'GET' })
+  .middleware([adminRequiredMiddleware])
+  .handler(() => {
+    return fetchTotals()
+  })
 
-  return {
-    kpis: {
-      views: { current: views, previous: 0 },
-      newUsers: { current: newUsers, previous: 0 },
-      newMemes: { current: newMemes, previous: 0 },
-      studioGenerations: { current: studioGenerations, previous: 0 },
-      bookmarks: { current: bookmarks, previous: 0 },
-      shares: { current: shares._sum.shareCount ?? 0, previous: 0 },
-      downloads: { current: downloads._sum.downloadCount ?? 0, previous: 0 }
-    },
-    totals
-  }
+const PLATFORM_LAUNCH_DATE = new Date('2025-01-01T00:00:00.000Z')
+
+export type ChartDataPoint = {
+  date: string
+  views: number
+  studioGenerations: number
+  shares: number
+  downloads: number
 }
 
-async function fetchPeriodStats(days: number) {
-  const { now, currentStart, previousStart } = computeDateRanges(days)
-  const currentStartDay = truncateToUtcDay(currentStart)
-  const previousStartDay = truncateToUtcDay(previousStart)
+function aggregateRowsByGranularity(
+  rows: { day: Date; count: number }[],
+  granularity: ChartGranularity
+) {
+  const map = new Map<string, number>()
 
-  const publishedCurrent = {
-    status: MemeStatus.PUBLISHED,
-    publishedAt: { gte: currentStart, lte: now }
-  } as const satisfies Prisma.MemeWhereInput
-
-  const publishedPrevious = {
-    status: MemeStatus.PUBLISHED,
-    publishedAt: { gte: previousStart, lt: currentStart }
-  } as const satisfies Prisma.MemeWhereInput
-
-  const [
-    viewsCurrent,
-    viewsPrevious,
-    newUsersCurrent,
-    newUsersPrevious,
-    newMemesCurrent,
-    newMemesPrevious,
-    studioGenerationsCurrent,
-    studioGenerationsPrevious,
-    bookmarksCurrent,
-    bookmarksPrevious,
-    sharesCurrent,
-    sharesPrevious,
-    downloadsCurrent,
-    downloadsPrevious,
-    totals
-  ] = await Promise.all([
-    prismaClient.memeViewDaily.count({
-      where: { day: { gte: currentStartDay, lte: now } }
-    }),
-    prismaClient.memeViewDaily.count({
-      where: { day: { gte: previousStartDay, lt: currentStartDay } }
-    }),
-    prismaClient.user.count({
-      where: { createdAt: { gte: currentStart, lte: now } }
-    }),
-    prismaClient.user.count({
-      where: { createdAt: { gte: previousStart, lt: currentStart } }
-    }),
-    prismaClient.meme.count({ where: publishedCurrent }),
-    prismaClient.meme.count({ where: publishedPrevious }),
-    prismaClient.studioGeneration.count({
-      where: { createdAt: { gte: currentStart, lte: now } }
-    }),
-    prismaClient.studioGeneration.count({
-      where: { createdAt: { gte: previousStart, lt: currentStart } }
-    }),
-    prismaClient.userBookmark.count({
-      where: { createdAt: { gte: currentStart, lte: now } }
-    }),
-    prismaClient.userBookmark.count({
-      where: { createdAt: { gte: previousStart, lt: currentStart } }
-    }),
-    prismaClient.meme.aggregate({
-      where: publishedCurrent,
-      _sum: { shareCount: true }
-    }),
-    prismaClient.meme.aggregate({
-      where: publishedPrevious,
-      _sum: { shareCount: true }
-    }),
-    prismaClient.meme.aggregate({
-      where: publishedCurrent,
-      _sum: { downloadCount: true }
-    }),
-    prismaClient.meme.aggregate({
-      where: publishedPrevious,
-      _sum: { downloadCount: true }
-    }),
-    fetchTotals()
-  ])
-
-  return {
-    kpis: {
-      views: { current: viewsCurrent, previous: viewsPrevious },
-      newUsers: { current: newUsersCurrent, previous: newUsersPrevious },
-      newMemes: { current: newMemesCurrent, previous: newMemesPrevious },
-      studioGenerations: {
-        current: studioGenerationsCurrent,
-        previous: studioGenerationsPrevious
-      },
-      bookmarks: { current: bookmarksCurrent, previous: bookmarksPrevious },
-      shares: {
-        current: sharesCurrent._sum.shareCount ?? 0,
-        previous: sharesPrevious._sum.shareCount ?? 0
-      },
-      downloads: {
-        current: downloadsCurrent._sum.downloadCount ?? 0,
-        previous: downloadsPrevious._sum.downloadCount ?? 0
-      }
-    },
-    totals
+  for (const row of rows) {
+    const key = truncateToGranularity(row.day, granularity)
+    map.set(key, (map.get(key) ?? 0) + row.count)
   }
+
+  return map
 }
 
-export const getAdminDashboardStats = createServerFn({ method: 'GET' })
+function aggregateActionsByGranularity(
+  rows: { day: Date; action: string; _sum: { count: number | null } }[],
+  granularity: ChartGranularity
+) {
+  const shares = new Map<string, number>()
+  const downloads = new Map<string, number>()
+
+  for (const row of rows) {
+    const key = truncateToGranularity(row.day, granularity)
+    const target = row.action === 'share' ? shares : downloads
+    target.set(key, (target.get(key) ?? 0) + (row._sum.count ?? 0))
+  }
+
+  return { shares, downloads }
+}
+
+type FetchChartDataParams = {
+  start: Date
+  end: Date
+  granularity: ChartGranularity
+}
+
+async function fetchChartData({
+  start,
+  end,
+  granularity
+}: FetchChartDataParams) {
+  const dateRange = { gte: start, lte: end }
+
+  const [viewRows, generationRows, actionRows] = await Promise.all([
+    prismaClient.memeViewDaily.groupBy({
+      by: ['day'],
+      where: { day: dateRange },
+      _count: { id: true }
+    }),
+    prismaClient.$queryRaw<{ day: Date; count: bigint }[]>`
+      SELECT date_trunc('day', "createdAt") AS day, COUNT(*) AS count
+      FROM studio_generation
+      WHERE "createdAt" >= ${start} AND "createdAt" <= ${end}
+      GROUP BY 1
+    `,
+    prismaClient.memeActionDaily.groupBy({
+      by: ['day', 'action'],
+      where: { day: dateRange },
+      _sum: { count: true }
+    })
+  ])
+
+  const viewsMap = aggregateRowsByGranularity(
+    viewRows.map((row) => {
+      return { day: row.day, count: row._count.id }
+    }),
+    granularity
+  )
+  const generationsMap = aggregateRowsByGranularity(
+    generationRows.map((row) => {
+      return { day: row.day, count: Number(row.count) }
+    }),
+    granularity
+  )
+  const { shares: sharesMap, downloads: downloadsMap } =
+    aggregateActionsByGranularity(actionRows, granularity)
+
+  const series = generateDateSeries({ start, end, granularity })
+
+  return series.map((dateKey) => {
+    return {
+      date: dateKey,
+      views: viewsMap.get(dateKey) ?? 0,
+      studioGenerations: generationsMap.get(dateKey) ?? 0,
+      shares: sharesMap.get(dateKey) ?? 0,
+      downloads: downloadsMap.get(dateKey) ?? 0
+    }
+  })
+}
+
+export const getAdminChartData = createServerFn({ method: 'GET' })
   .inputValidator((data) => {
     return PERIOD_SCHEMA.parse(data)
   })
   .middleware([adminRequiredMiddleware])
   .handler(async ({ data: period }) => {
     const days = PERIOD_DAYS[period]
+    const granularity = getChartGranularity(days)
+    const now = new Date()
+    const start =
+      days === null
+        ? PLATFORM_LAUNCH_DATE
+        : new Date(now.getTime() - days * DAY)
 
-    return days === null ? fetchAllTimeStats() : fetchPeriodStats(days)
+    return fetchChartData({ start, end: now, granularity })
   })
 
 const RECENT_ACTIVITY_SELECT = {

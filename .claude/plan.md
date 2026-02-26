@@ -420,16 +420,37 @@ Transformer la page d'accueil admin (actuellement redirect vers `/admin/library`
 
 **Migration Prisma requise :** `pnpm exec prisma migrate dev --name add_studio_generation_and_meme_counters`
 
-### Phase 9b — Graphiques tendances
+### Phase 9b — Graphiques tendances ✅
 
-Ajouter des courbes de tendance au dashboard. Dépend de 9a.
+LineChart full-width au dashboard admin avec 4 courbes de tendance + 4 summary cards. Remplace les anciens 7 KPI cards.
 
-- [ ] Évaluer librairie charts légère : `recharts` vs sparklines CSS-only (coût bundle)
-- [ ] Courbe vues (7j → par jour, 30j → par jour, 90j → par semaine) depuis `MemeViewDaily`
-- [ ] Courbe inscriptions (même granularité) depuis `User.createdAt`
-- [ ] Courbe memes publiés (même granularité) depuis `Meme.publishedAt`
-- [ ] Courbe partages + téléchargements (même granularité) depuis `Meme.shareCount`/`downloadCount`
-- [ ] Server function `getAdminChartData({ period })` — données agrégées avec granularité auto selon période
+**Architecture :**
+- 4 métriques : vues, générations IA, partages, téléchargements
+- Chart + 4 summary cards alimentés par une seule query (`getAdminChartData`)
+- Totaux (memes publiés, en attente, users, premium) = query séparée `getAdminDashboardTotals` (sans période)
+- Ancien `DashboardStats` + 7 KPI cards supprimés → simplifié en `DashboardTotals` + `ChartDataPoint`
+
+**Fichiers modifiés/créés :**
+- `prisma/schema.prisma` — `MemeActionDaily` + covering index `@@index([day, action, count])`
+- `src/server/meme.ts` — dual write `trackMemeAction` (updateMany + upsert, vérifie `status: PUBLISHED`), `getRandomMeme` optimisé (`ORDER BY RANDOM() LIMIT 1`)
+- `src/server/admin/dashboard.ts` — `getAdminChartData` (3 queries parallèles, `$queryRaw` pour générations), `getAdminDashboardTotals`
+- `src/helpers/date.ts` — `ChartGranularity`, `getChartGranularity`, `truncateToGranularity` (optimisé sans allocation Date), `generateDateSeries`, `formatUtcDateKey`
+- `src/lib/queries.ts` — `getAdminChartDataQueryOpts`, `getAdminDashboardTotalsQueryOpts`
+- `src/routes/admin/-components/dashboard/trends-chart.tsx` — LineChart Recharts + 4 summary cards, légende cliquable
+- `src/routes/admin/index.tsx` — intégration chart + totaux en Suspense boundaries séparées
+- `src/styles.css` — `--chart-6`
+- `src/components/ui/chart.tsx` — généré par shadcn (Recharts)
+
+**Fichiers supprimés :** `kpi-card.tsx`, `kpi-grid.tsx`
+
+**Audits appliqués :**
+- [x] Backend perf : `studioGeneration.findMany` → `$queryRaw` avec `date_trunc`, `getRandomMeme` → single query, covering index, `truncateToGranularity` sans Date alloc
+- [x] Tailwind : `ChartSkeleton` → `<Card>`, classe `group` morte, réordonnancement classes
+- [x] Security : `trackMemeAction` vérifie `status: PUBLISHED` avant write
+- [x] Dead code : aucun dead code détecté
+- [x] React perf : rien de critique (React Compiler gère)
+
+**Migrations Prisma appliquées :** `add_meme_action_daily`, `add_covering_index_meme_action_daily`
 
 ### Phase 9c — Top memes (classements)
 

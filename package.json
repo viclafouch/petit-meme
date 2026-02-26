@@ -104,6 +104,7 @@
     "react-hotkeys-hook": "^5.2.4",
     "react-markdown": "^10.1.0",
     "react-tweet": "^3.3.0",
+    "recharts": "2.15.4",
     "remark-gfm": "^4.0.1",
     "remeda": "^2.33.6",
     "resend": "^6.9.2",

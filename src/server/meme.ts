@@ -45,10 +45,15 @@ import { buildVideoOriginalUrl } from '@/lib/bunny'
 import { algoliaLogger, logger } from '@/lib/logger'
 import { authUserRequiredMiddleware } from '@/server/user-auth'
 import { ensureAlgoliaUserToken } from '@/utils/tracking-cookies'
-import { insightsClient } from '@algolia/client-insights'
+import { insightsClient as createInsightsClient } from '@algolia/client-insights'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 import { getCookie, getRequest, setCookie } from '@tanstack/react-start/server'
+
+const serverInsightsClient = createInsightsClient(
+  clientEnv.VITE_ALGOLIA_APP_ID,
+  serverEnv.ALGOLIA_ADMIN_KEY
+)
 
 function buildMemeFilters(category: string | undefined, thirtyDaysAgo: number) {
   const filters = [`status:${MemeStatus.PUBLISHED}`]
@@ -446,15 +451,11 @@ export const registerMemeView = createServerFn({ method: 'POST' })
         return
       }
 
-      const client = insightsClient(
-        clientEnv.VITE_ALGOLIA_APP_ID,
-        serverEnv.ALGOLIA_ADMIN_KEY
-      )
       const { headers } = getRequest()
       const session = await auth.api.getSession({ headers })
 
       await safeAlgoliaOp(
-        client.pushEvents({
+        serverInsightsClient.pushEvents({
           events: [
             {
               eventType: 'view',
@@ -469,5 +470,6 @@ export const registerMemeView = createServerFn({ method: 'POST' })
       )
     }
 
-    await Promise.all([viewTransaction, trackAlgoliaView()])
+    void trackAlgoliaView()
+    await viewTransaction
   })

@@ -117,7 +117,7 @@ const RouteComponent = () => {
           </AddCategoryButton>
         }
       />
-      <div className="mx-auto py-10">
+      <div className="py-10">
         <AdminTable table={table} />
       </div>
     </Container>

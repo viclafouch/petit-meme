@@ -260,7 +260,7 @@ const RouteComponent = () => {
   return (
     <Container>
       <PageHeader title="Utilisateurs" />
-      <div className="w-full mx-auto py-10">
+      <div className="py-10">
         <AdminTable table={table} />
       </div>
     </Container>

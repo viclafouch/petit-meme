@@ -59,18 +59,18 @@ const METRIC_SUMMARIES = [
   icon: React.ReactNode
 }[]
 
-function computeMetricTotals(
-  data: ChartDataPoint[]
-): Record<MetricKey, number> {
-  const totals = { views: 0, studioGenerations: 0, shares: 0, downloads: 0 }
-
-  for (const point of data) {
-    for (const key of METRIC_KEYS) {
-      totals[key] += point[key]
-    }
-  }
-
-  return totals
+function computeMetricTotals(data: ChartDataPoint[]) {
+  return METRIC_KEYS.reduce(
+    (result, key) => {
+      return {
+        ...result,
+        [key]: data.reduce((sum, point) => {
+          return sum + point[key]
+        }, 0)
+      }
+    },
+    {} as Record<MetricKey, number>
+  )
 }
 
 const PERIOD_DESCRIPTIONS = {

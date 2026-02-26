@@ -21,11 +21,11 @@ import type { AdminMemeRecord } from '@admin/-server/memes'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 
-export type MemeListItemProps = {
+type MemeListItemParams = {
   meme: AdminMemeRecord
 }
 
-export const MemeListItem = React.memo(({ meme }: MemeListItemProps) => {
+export const MemeListItem = React.memo(({ meme }: MemeListItemParams) => {
   const isInitiallyPlayable = matchIsVideoPlayable(meme.video.bunnyStatus)
 
   const videoStatusQuery = useQuery({

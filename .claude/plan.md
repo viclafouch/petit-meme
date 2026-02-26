@@ -609,15 +609,106 @@ src/routes/admin/
 
 ### Phase 10b — Audits post-colocation
 
-Audits post-implémentation (après Phase 10). Inclut les audits dashboard reportés (ex Phase 9d).
+7 audits exécutés (2026-02-26). Tailwind appliqué automatiquement (8 fixes). Résultats ci-dessous par priorité.
 
-- [ ] **Dead code** (`dead-code` agent) — imports orphelins après les déplacements massifs
-- [ ] **Backend performance** (`backend-performance` agent) — queries Prisma N+1, Promise.all, indexes manquants
-- [ ] **React performance** (`react-performance` agent) — re-renders inutiles, stabilité des refs
-- [ ] **Security** (`security-auditor` agent) — server functions admin protégées, validation inputs
-- [ ] **Tailwind** (`tailwind-audit` agent) — classes redondantes, valeurs hardcodées
-- [ ] **GDPR** (`gdpr-auditor` agent) — tracking share/download, données personnelles AuditLog
-- [ ] **Code refactoring** (`code-refactoring` agent) — clarté, cohérence, extractions manquées
+#### Tailwind ✅
+
+- [x] 8 simplifications appliquées : classes mortes `w-full` (×3), `mx-auto` (×2), `gap-y` → `gap` (×3) dans `users/index.tsx`, `categories/index.tsx`, `library/index.tsx`, `library/$memeId.tsx`, `library/-components/meme-form.tsx`
+
+#### Fixes rapides (code admin)
+
+**Dead code**
+- [x] Retirer `export` sur `getAuditTargetLabel` et `getAuditActionVerb` dans `src/routes/admin/-helpers/audit.tsx` (utilisées uniquement en interne par `formatAuditEntry`)
+
+**React performance**
+- [x] Retirer `useMemo` + `eslint-disable no-restricted-syntax` dans `src/routes/admin/library/index.tsx:27-33` (filters object — React Compiler gère)
+- [x] Retirer `useMemo` + `eslint-disable no-restricted-syntax` dans `src/routes/admin/library/-components/meme-form.tsx:48-57` (categoriesOptions — mapping 10-50 items)
+
+**Refactoring — mutations → immutable**
+- [x] `src/routes/admin/-server/users.ts:110-141` — subscription aggregation loop mutate `current` object → utiliser `Map.set()` avec un nouvel objet spread
+- [x] `src/routes/admin/-components/dashboard/trends-chart.tsx:62-74` — `computeMetricTotals` mutate `totals` objet → utiliser `reduce` immutable
+
+**Refactoring — style**
+- [x] `src/routes/admin/-components/dashboard/trending-memes.tsx:107,119` — template string className → `cn()`
+- [x] `src/routes/admin/-components/meme-list-item.tsx:24` — `MemeListItemProps` → `MemeListItemParams` (cohérence admin)
+- [x] `src/routes/admin/-server/dashboard.ts:252` — retirer le return type explicite `Promise<TrendingMeme[]>` sur `fetchTrendingMemes` (seule fonction admin avec un type explicite)
+
+**Backend performance**
+- [x] `src/routes/admin/-server/dashboard.ts:288-303` — double scan `meme_action_daily` dans trending → conditional aggregation SQL (`SUM(CASE WHEN action = 'download' ...)`) pour une seule passe
+- [x] `src/server/meme.ts:449-452` — `insightsClient` re-instancié par requête dans `registerMemeView` → extrait en singleton module-level
+- [x] `src/server/meme.ts:472` — `trackAlgoliaView()` dans `Promise.all` bloque la réponse → `void trackAlgoliaView()` fire-and-forget (analytics non-critique, -50-200ms par vue)
+- [x] `src/routes/admin/-server/memes.ts:450-468` — `userBookmark.groupBy` exécuté même sur cache hit Algolia → mergé dans le closure `withAlgoliaCache` pour cacher le tout ensemble
+
+#### Backend performance (hors admin — medium)
+
+- [ ] `src/server/meme.ts:373-389` — `trackMemeAction` 2 queries séquentielles → wraper dans `$transaction` (un seul round-trip réseau)
+- [ ] `src/server/meme.ts:298-305` — `ORDER BY RANDOM()` full table scan dans `getRandomMeme` → count + offset aléatoire (`skip: Math.floor(Math.random() * count)`)
+- [ ] `src/server/reels.ts:34` — `ORDER BY RANDOM()` + `NOT IN (...)` unbounded dans `getInfiniteReels` → plafonner la liste d'exclusion (ex: 100 IDs max)
+- [ ] `src/routes/admin/-server/users.ts:90-94` — `session.groupBy` inclut les sessions expirées → filtrer `expiresAt: { gte: new Date() }` ou `updatedAt` récent
+- [ ] `prisma/schema.prisma` — index manquant `@@index([day, action, memeId])` sur `MemeActionDaily` pour la query trending (GROUP BY memeId). L'index existant `@@index([day, action, count])` peut être remplacé
+- [ ] `src/helpers/date.ts:80-103` — `generateDateSeries` mutate un objet `Date` dans le while loop → utiliser arithmetic `Date.UTC` immutable
+
+#### Security
+
+**HIGH**
+- [ ] `src/routes/api/bunny.ts:22-95` — webhook Bunny CDN sans authentification. Vérifier le header token/secret Bunny sur chaque requête entrante. Ajouter `BUNNY_WEBHOOK_SECRET` dans `src/env/server.ts`. Rejeter avec 401 si invalide
+- [ ] `src/components/Meme/meme-list-item.tsx:199-207` — Stored XSS via `dangerouslySetInnerHTML` sur `hit._highlightResult?.title.value` (Algolia highlight). Sanitizer avec DOMPurify (`ALLOWED_TAGS: ['em']`) dans `getHighlightedTitle()` (`src/lib/algolia.ts:143-149`)
+
+**MEDIUM**
+- [ ] `src/server/meme.ts:449-451` — Algolia Admin Key utilisée dans un endpoint public (`registerMemeView`). Utiliser la search key pour les Insights events (principe du moindre privilège)
+- [ ] `src/server/meme.ts:53-63` — injection filtre Algolia via category slug interpolé dans un string. Actuellement mitigé par `CATEGORY_SLUG_REGEX`, mais fragile. Ajouter une re-validation explicite au point d'utilisation
+
+**LOW**
+- [ ] `src/server/meme.ts` — pas de rate limiting sur `trackMemeAction` et `registerMemeView` (endpoints publics sans auth). Inflation artificielle des compteurs. Évaluer Vercel Edge rate limiting ou Upstash Redis
+
+#### GDPR
+
+**CRITICAL**
+- [ ] `AdminAuditLog` retient `targetId` (userId) indéfiniment sans pathway de suppression. Sur suppression user : anonymiser `targetId` → `'[deleted]'` via `updateMany` dans le hook `beforeDelete` (`src/lib/auth.tsx`). Ajouter rétention 2 ans dans `crons/cleanup-retention.ts`
+- [ ] `removeUser` (admin) ne nulle pas `Meme.submittedBy` avant suppression → risque de FK constraint failure silencieuse (default `Restrict`). Ajouter `meme.updateMany({ where: { submittedBy: userId }, data: { submittedBy: null } })` dans `beforeDelete`
+- [ ] Crons (`unverified-cleanup.ts`, `verification-reminder.ts`) et auth (`src/lib/auth.tsx`) loggent les emails en clair. Masquer avec `maskEmail()` helper ou ajouter `'email'` à la liste `redact` de pino (`src/lib/logger.ts`)
+
+**HIGH**
+- [ ] `src/lib/algolia.ts:183` — `submittedBy` (userId) indexé dans Algolia (processeur externe US). Pas nécessaire côté frontend. Retirer de `memeToAlgoliaRecord()` ou nettoyer les records Algolia à la suppression user
+- [ ] `prisma/schema.prisma:168` — `AdminAuditLog.actingAdminId` FK sans `onDelete` clause (default `Restrict`) → bloque la suppression d'un compte admin. Migrer vers `onDelete: SetNull` + rendre nullable
+- [ ] Crons pas schedulés dans `vercel.json` → les promesses de rétention de la privacy notice ne sont pas automatiquement honorées. Ajouter les définitions `crons` dans `vercel.json`
+- [ ] `src/lib/auth.tsx:219` — Twitter OAuth login logge le full email à `info` level → masquer ou logger `emailDomain` uniquement
+- [ ] `src/lib/cookie-consent.ts:31` — cookie `cookieConsent` sans flag `secure` ni `sameSite`. Ajouter `secure` (prod) + `sameSite: 'lax'`
+- [ ] `src/server/user.ts` — `exportUserData` n'inclut pas `StudioGeneration` (historique générations = donnée personnelle Art. 15). Ajouter au export
+
+**MEDIUM**
+- [ ] `StudioGeneration` — pas de rétention enforced (accumulation indéfinie pour les users actifs). Ajouter cleanup 365 jours dans `crons/cleanup-retention.ts`
+- [ ] `MemeActionDaily` — pas de rétention explicite. Ajouter cleanup 365 jours (pas de userId direct, mais bonne hygiène)
+- [ ] `crons/cleanup-retention.ts` — l'email anonymisé contient le userId raw (`deleted-{userId}@anonymized.local`). Remplacer par un hash SHA-256 tronqué
+- [ ] Privacy notice (`md/privacy.md`) — ne mentionne pas `StudioGeneration` comme activité de traitement. Ajouter section 2.6
+- [ ] Pas de DPA signés avec Neon, Vercel, Resend, Polar (Art. 28). Action externe
+- [ ] Pas de page update profil (nom/email) → violation Art. 16 droit de rectification. Feature à planifier
+
+**LOW**
+- [ ] Pas de procédure de notification de breach documentée (Art. 33 — règle des 72h). Créer `BREACH_RESPONSE.md`
+
+#### Refactoring (medium — futur)
+
+**Fonctions trop longues**
+- [ ] `src/routes/admin/-server/users.ts:53-186` — `getListUsers` ~133 lignes → extraire `buildUserLookupMaps` + `enrichUsers`
+- [ ] `src/routes/admin/-server/memes.ts:111-212` — `editMeme` ~100 lignes → extraire `computeCategoryDiff` + simplifier le dual audit logging
+- [ ] `src/routes/admin/-server/memes.ts:272-359` — `createMemeWithVideo` ~88 lignes → extraire `rollbackMemeCreation`
+- [ ] `src/routes/admin/library/-components/meme-form.tsx:44-335` — `MemeForm` ~290 lignes → extraire sub-composants par champ (retirer le `eslint-disable max-lines-per-function`)
+
+**Patterns dupliqués**
+- [ ] `src/routes/admin/index.tsx` — pattern `ErrorBoundary + Suspense` dupliqué 4× → extraire `DashboardSection` wrapper
+- [ ] `src/routes/admin/index.tsx:51-128` — 4 skeleton components avec `Array.from` inline → extraire `SkeletonList` avec count + render prop, ou constantes hors composant
+- [ ] `getRowId` dupliqué dans `users/index.tsx:237` et `categories/index.tsx:87` → extraire helper partagé
+- [ ] Table pages (users + categories) — boilerplate `useReactTable` identique → évaluer extraction `useAdminTable` hook
+- [ ] `user-actions-cell.tsx:63-111` — 3 mutations `toast.promise` identiques → évaluer factory `createAdminMutation`
+- [ ] Types `{ key, label, icon }` dans `trends-chart.tsx`, `trending-memes.tsx`, `totals-section.tsx` → partager un type commun `IconConfig<K>`
+
+**Divers**
+- [ ] `src/routes/admin/users/-components/user-actions-cell.tsx:118` — child component retourne `null` → déplacer la condition dans le parent (column cell renderer)
+- [ ] `src/routes/admin/-components/admin-table.tsx:88,99` — `disabled` sur boutons pagination → évaluer si cohérent avec la convention UX projet
+- [ ] `src/server/audit.ts:29` — `metadata` typé `Prisma.InputJsonObject` → utiliser `AuditMetadata` et caster au call site DB uniquement
+- [ ] `src/routes/admin/-components/dashboard/trending-memes.tsx:80` — `as keyof typeof PODIUM_CONFIGS` → type guard `in` pour éviter le cast
+- [ ] `src/routes/admin/-components/meme-list-item.tsx:28` — `React.memo` sans `eslint-disable no-restricted-syntax` (convention projet)
 
 ### Phase 11 — Améliorations UX admin (ex Phase 10)
 

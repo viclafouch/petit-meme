@@ -121,23 +121,21 @@ export const getListUsers = createServerFn({ method: 'GET' })
         continue
       }
 
-      if (current.status !== 'active' && subStatus === 'active') {
-        current.status = 'active'
-      }
-
-      if (
-        sub.periodStart &&
-        (!current.startedAt || sub.periodStart < current.startedAt)
-      ) {
-        current.startedAt = sub.periodStart
-      }
-
-      if (
-        sub.periodEnd &&
-        (!current.endsAt || sub.periodEnd > current.endsAt)
-      ) {
-        current.endsAt = sub.periodEnd
-      }
+      subscriptionByUserId.set(sub.referenceId, {
+        status:
+          current.status !== 'active' && subStatus === 'active'
+            ? 'active'
+            : current.status,
+        startedAt:
+          sub.periodStart &&
+          (!current.startedAt || sub.periodStart < current.startedAt)
+            ? sub.periodStart
+            : current.startedAt,
+        endsAt:
+          sub.periodEnd && (!current.endsAt || sub.periodEnd > current.endsAt)
+            ? sub.periodEnd
+            : current.endsAt
+      })
     }
 
     const memeCountByUserId = new Map(

@@ -418,7 +418,7 @@ export const getAdminMemes = createServerFn({ method: 'GET' })
   .handler(async ({ data }) => {
     const cacheKey = `admin-memes:${data.query ?? ''}:${data.page ?? 1}:${data.status ?? ''}`
 
-    const cached = await withAlgoliaCache(cacheKey, async () => {
+    return withAlgoliaCache(cacheKey, async () => {
       const filters = data.status ? `status:${data.status}` : undefined
 
       const searchIndex = data.query ? algoliaIndexName : algoliaIndexCreated
@@ -435,39 +435,33 @@ export const getAdminMemes = createServerFn({ method: 'GET' })
           }
         })
 
+      const hits = response.hits.map(normalizeAlgoliaHit)
+      const memeIds = hits.map((hit) => {
+        return hit.id
+      })
+
+      const bookmarkCounts = await prismaClient.userBookmark.groupBy({
+        by: ['memeId'],
+        where: { memeId: { in: memeIds } },
+        _count: { id: true }
+      })
+
+      const bookmarkCountByMemeId = new Map(
+        bookmarkCounts.map((group) => {
+          return [group.memeId, group._count.id] as const
+        })
+      )
+
       return {
-        memes: response.hits.map(normalizeAlgoliaHit),
+        memes: hits.map((hit) => {
+          return {
+            ...hit,
+            bookmarkCount: bookmarkCountByMemeId.get(hit.id) ?? 0
+          } satisfies AdminMemeRecord
+        }),
         query: data.query,
         page: response.page,
         totalPages: response.nbPages
       }
     })
-
-    const memeIds = cached.memes.map((meme) => {
-      return meme.id
-    })
-
-    const bookmarkCounts = await prismaClient.userBookmark.groupBy({
-      by: ['memeId'],
-      where: { memeId: { in: memeIds } },
-      _count: { id: true }
-    })
-
-    const bookmarkCountByMemeId = new Map(
-      bookmarkCounts.map((group) => {
-        return [group.memeId, group._count.id] as const
-      })
-    )
-
-    const memes = cached.memes.map((meme) => {
-      return {
-        ...meme,
-        bookmarkCount: bookmarkCountByMemeId.get(meme.id) ?? 0
-      } satisfies AdminMemeRecord
-    })
-
-    return {
-      ...cached,
-      memes
-    }
   })

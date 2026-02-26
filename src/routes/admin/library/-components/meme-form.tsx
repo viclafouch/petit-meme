@@ -1,4 +1,3 @@
-import React from 'react'
 import { Stars } from 'lucide-react'
 import { toast } from 'sonner'
 import type { z } from 'zod'
@@ -44,17 +43,13 @@ type MemeFormParams = {
 export const MemeForm = ({ meme, onCancel, onSuccess }: MemeFormParams) => {
   const categoriesListQuery = useQuery(getCategoriesListQueryOpts())
 
-  // eslint-disable-next-line no-restricted-syntax
-  const categoriesOptions = React.useMemo(() => {
-    return (
-      categoriesListQuery.data?.map((category) => {
-        return {
-          label: category.title,
-          value: category.id
-        }
-      }) ?? []
-    )
-  }, [categoriesListQuery.data])
+  const categoriesOptions =
+    categoriesListQuery.data?.map((category) => {
+      return {
+        label: category.title,
+        value: category.id
+      }
+    }) ?? []
 
   const editMutation = useMutation({
     mutationKey: ['edit-meme'],
@@ -136,14 +131,14 @@ export const MemeForm = ({ meme, onCancel, onSuccess }: MemeFormParams) => {
     <form
       id="edit-meme-form"
       noValidate
-      className="w-full flex flex-col gap-y-6"
+      className="flex flex-col gap-6"
       onSubmit={(event) => {
         event.preventDefault()
         keywordsField.handleAddKeyword()
         void form.handleSubmit()
       }}
     >
-      <div className="flex flex-col gap-y-6">
+      <div className="flex flex-col gap-6">
         <form.Field
           name="title"
           children={(field) => {

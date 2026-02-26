@@ -23,19 +23,16 @@ const MemesListWrapper = () => {
     leading: false
   })
 
-  // eslint-disable-next-line no-restricted-syntax
-  const filters = React.useMemo(() => {
-    return {
-      query: debouncedValue,
-      page: search.page,
-      status: search.status
-    }
-  }, [debouncedValue, search.page, search.status])
+  const filters = {
+    query: debouncedValue,
+    page: search.page,
+    status: search.status
+  }
 
   const memesListQuery = useSuspenseQuery(getAdminMemesListQueryOpts(filters))
 
   return (
-    <div className="w-full flex flex-col gap-12">
+    <div className="flex flex-col gap-12">
       <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {memesListQuery.data.memes.map((meme) => {
           return <MemeListItem key={meme.id} meme={meme} />
@@ -108,8 +105,8 @@ const RouteComponent = () => {
           </NewMemeButton>
         }
       />
-      <div className="w-full mx-auto py-10">
-        <div className="flex flex-col gap-y-4">
+      <div className="py-10">
+        <div className="flex flex-col gap-4">
           <div className="border-b border-muted pb-4 flex justify-between gap-x-3">
             <MemesQuery
               query={search.query ?? ''}

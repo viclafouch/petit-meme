@@ -8,6 +8,7 @@ import {
   TrendingUp
 } from 'lucide-react'
 import { buildVideoImageUrl } from '@/lib/bunny'
+import { cn } from '@/lib/utils'
 import type { TrendingMeme } from '@admin/-server/dashboard'
 import { Link } from '@tanstack/react-router'
 
@@ -104,7 +105,12 @@ export const TrendingMemes = ({ entries }: TrendingMemesParams) => {
                   return (
                     <span
                       key={signal.key}
-                      className={`flex items-center gap-1 text-xs tabular-nums ${value > 0 ? 'text-foreground/70' : 'text-muted-foreground/50'}`}
+                      className={cn(
+                        'flex items-center gap-1 text-xs tabular-nums',
+                        value > 0
+                          ? 'text-foreground/70'
+                          : 'text-muted-foreground/50'
+                      )}
                       title={`${value} ${signal.label}`}
                     >
                       {signal.icon}
@@ -116,7 +122,7 @@ export const TrendingMemes = ({ entries }: TrendingMemesParams) => {
             </div>
             {podium ? (
               <Medal
-                className={`size-5 shrink-0 ${podium.className}`}
+                className={cn('size-5 shrink-0', podium.className)}
                 aria-label={podium.label}
               />
             ) : (

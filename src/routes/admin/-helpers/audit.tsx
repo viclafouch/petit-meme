@@ -4,7 +4,7 @@ import type {
   AuditTargetType
 } from '@/server/audit'
 
-export function getAuditTargetLabel(targetType: AuditTargetType) {
+function getAuditTargetLabel(targetType: AuditTargetType) {
   switch (targetType) {
     case 'category': {
       return 'Catégorie'
@@ -24,10 +24,7 @@ export function getAuditTargetLabel(targetType: AuditTargetType) {
   }
 }
 
-export function getAuditActionVerb(
-  action: AuditAction,
-  targetType: AuditTargetType
-) {
+function getAuditActionVerb(action: AuditAction, targetType: AuditTargetType) {
   const label = getAuditTargetLabel(targetType)
 
   switch (action) {

@@ -249,7 +249,7 @@ export type TrendingMeme = {
   shares: number
 }
 
-async function fetchTrendingMemes(): Promise<TrendingMeme[]> {
+async function fetchTrendingMemes() {
   const since = new Date(Date.now() - TRENDING_DAYS * DAY)
 
   const rows = await prismaClient.$queryRaw<RawTrendingRow[]>`
@@ -260,15 +260,15 @@ async function fetchTrendingMemes(): Promise<TrendingMeme[]> {
       vid.duration AS duration,
       COALESCE(v.views, 0) AS views,
       COALESCE(b.bookmarks, 0) AS bookmarks,
-      COALESCE(d.downloads, 0) AS downloads,
+      COALESCE(ds.downloads, 0) AS downloads,
       COALESCE(g.generations, 0) AS generations,
-      COALESCE(s.shares, 0) AS shares,
+      COALESCE(ds.shares, 0) AS shares,
       (
         COALESCE(v.views, 0) * ${TRENDING_WEIGHTS.views}
         + COALESCE(b.bookmarks, 0) * ${TRENDING_WEIGHTS.bookmarks}
-        + COALESCE(d.downloads, 0) * ${TRENDING_WEIGHTS.downloads}
+        + COALESCE(ds.downloads, 0) * ${TRENDING_WEIGHTS.downloads}
         + COALESCE(g.generations, 0) * ${TRENDING_WEIGHTS.generations}
-        + COALESCE(s.shares, 0) * ${TRENDING_WEIGHTS.shares}
+        + COALESCE(ds.shares, 0) * ${TRENDING_WEIGHTS.shares}
       ) AS score
     FROM "Meme" m
     INNER JOIN "Video" vid ON vid.id = m."videoId"
@@ -285,30 +285,27 @@ async function fetchTrendingMemes(): Promise<TrendingMeme[]> {
       GROUP BY "memeId"
     ) b ON b."memeId" = m.id
     LEFT JOIN (
-      SELECT "memeId", SUM(count)::bigint AS downloads
+      SELECT
+        "memeId",
+        SUM(CASE WHEN action = 'download' THEN count ELSE 0 END)::bigint AS downloads,
+        SUM(CASE WHEN action = 'share' THEN count ELSE 0 END)::bigint AS shares
       FROM meme_action_daily
-      WHERE day >= ${since} AND action = 'download'
+      WHERE day >= ${since} AND action IN ('download', 'share')
       GROUP BY "memeId"
-    ) d ON d."memeId" = m.id
+    ) ds ON ds."memeId" = m.id
     LEFT JOIN (
       SELECT "memeId", COUNT(*)::bigint AS generations
       FROM studio_generation
       WHERE "createdAt" >= ${since} AND "memeId" IS NOT NULL
       GROUP BY "memeId"
     ) g ON g."memeId" = m.id
-    LEFT JOIN (
-      SELECT "memeId", SUM(count)::bigint AS shares
-      FROM meme_action_daily
-      WHERE day >= ${since} AND action = 'share'
-      GROUP BY "memeId"
-    ) s ON s."memeId" = m.id
     WHERE m.status = ${MemeStatus.PUBLISHED}
     AND (
       COALESCE(v.views, 0)
       + COALESCE(b.bookmarks, 0)
-      + COALESCE(d.downloads, 0)
+      + COALESCE(ds.downloads, 0)
       + COALESCE(g.generations, 0)
-      + COALESCE(s.shares, 0)
+      + COALESCE(ds.shares, 0)
     ) > 0
     ORDER BY score DESC
     LIMIT 10

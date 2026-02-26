@@ -60,7 +60,7 @@ const RouteComponent = () => {
           </>
         }
         description={
-          <div className="flex flex-col gap-y-2">
+          <div className="flex flex-col gap-2">
             <span className="text-sm text-muted-foreground">
               {formatViewCount(memeQuery.data.viewCount)}
               {' • '}

@@ -53,7 +53,6 @@ export type MemeMinAggregateOutputType = {
   updatedAt: Date | null
   publishedAt: Date | null
   status: $Enums.MemeStatus | null
-  submittedBy: string | null
 }
 
 export type MemeMaxAggregateOutputType = {
@@ -69,7 +68,6 @@ export type MemeMaxAggregateOutputType = {
   updatedAt: Date | null
   publishedAt: Date | null
   status: $Enums.MemeStatus | null
-  submittedBy: string | null
 }
 
 export type MemeCountAggregateOutputType = {
@@ -86,7 +84,6 @@ export type MemeCountAggregateOutputType = {
   updatedAt: number
   publishedAt: number
   status: number
-  submittedBy: number
   _all: number
 }
 
@@ -118,7 +115,6 @@ export type MemeMinAggregateInputType = {
   updatedAt?: true
   publishedAt?: true
   status?: true
-  submittedBy?: true
 }
 
 export type MemeMaxAggregateInputType = {
@@ -134,7 +130,6 @@ export type MemeMaxAggregateInputType = {
   updatedAt?: true
   publishedAt?: true
   status?: true
-  submittedBy?: true
 }
 
 export type MemeCountAggregateInputType = {
@@ -151,7 +146,6 @@ export type MemeCountAggregateInputType = {
   updatedAt?: true
   publishedAt?: true
   status?: true
-  submittedBy?: true
   _all?: true
 }
 
@@ -255,7 +249,6 @@ export type MemeGroupByOutputType = {
   updatedAt: Date
   publishedAt: Date | null
   status: $Enums.MemeStatus
-  submittedBy: string | null
   _count: MemeCountAggregateOutputType | null
   _avg: MemeAvgAggregateOutputType | null
   _sum: MemeSumAggregateOutputType | null
@@ -295,11 +288,9 @@ export type MemeWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Meme"> | Date | string
   publishedAt?: Prisma.DateTimeNullableFilter<"Meme"> | Date | string | null
   status?: Prisma.EnumMemeStatusFilter<"Meme"> | $Enums.MemeStatus
-  submittedBy?: Prisma.StringNullableFilter<"Meme"> | string | null
   video?: Prisma.XOR<Prisma.VideoScalarRelationFilter, Prisma.VideoWhereInput>
   bookmarkedBy?: Prisma.UserBookmarkListRelationFilter
   categories?: Prisma.MemeCategoryListRelationFilter
-  submitter?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   viewsDaily?: Prisma.MemeViewDailyListRelationFilter
   actionsDaily?: Prisma.MemeActionDailyListRelationFilter
   studioGenerations?: Prisma.StudioGenerationListRelationFilter
@@ -319,11 +310,9 @@ export type MemeOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
-  submittedBy?: Prisma.SortOrderInput | Prisma.SortOrder
   video?: Prisma.VideoOrderByWithRelationInput
   bookmarkedBy?: Prisma.UserBookmarkOrderByRelationAggregateInput
   categories?: Prisma.MemeCategoryOrderByRelationAggregateInput
-  submitter?: Prisma.UserOrderByWithRelationInput
   viewsDaily?: Prisma.MemeViewDailyOrderByRelationAggregateInput
   actionsDaily?: Prisma.MemeActionDailyOrderByRelationAggregateInput
   studioGenerations?: Prisma.StudioGenerationOrderByRelationAggregateInput
@@ -347,11 +336,9 @@ export type MemeWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Meme"> | Date | string
   publishedAt?: Prisma.DateTimeNullableFilter<"Meme"> | Date | string | null
   status?: Prisma.EnumMemeStatusFilter<"Meme"> | $Enums.MemeStatus
-  submittedBy?: Prisma.StringNullableFilter<"Meme"> | string | null
   video?: Prisma.XOR<Prisma.VideoScalarRelationFilter, Prisma.VideoWhereInput>
   bookmarkedBy?: Prisma.UserBookmarkListRelationFilter
   categories?: Prisma.MemeCategoryListRelationFilter
-  submitter?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   viewsDaily?: Prisma.MemeViewDailyListRelationFilter
   actionsDaily?: Prisma.MemeActionDailyListRelationFilter
   studioGenerations?: Prisma.StudioGenerationListRelationFilter
@@ -371,7 +358,6 @@ export type MemeOrderByWithAggregationInput = {
   updatedAt?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
-  submittedBy?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.MemeCountOrderByAggregateInput
   _avg?: Prisma.MemeAvgOrderByAggregateInput
   _max?: Prisma.MemeMaxOrderByAggregateInput
@@ -396,7 +382,6 @@ export type MemeScalarWhereWithAggregatesInput = {
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Meme"> | Date | string
   publishedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Meme"> | Date | string | null
   status?: Prisma.EnumMemeStatusWithAggregatesFilter<"Meme"> | $Enums.MemeStatus
-  submittedBy?: Prisma.StringNullableWithAggregatesFilter<"Meme"> | string | null
 }
 
 export type MemeCreateInput = {
@@ -415,7 +400,6 @@ export type MemeCreateInput = {
   video: Prisma.VideoCreateNestedOneWithoutMemeInput
   bookmarkedBy?: Prisma.UserBookmarkCreateNestedManyWithoutMemeInput
   categories?: Prisma.MemeCategoryCreateNestedManyWithoutMemeInput
-  submitter?: Prisma.UserCreateNestedOneWithoutMemeInput
   viewsDaily?: Prisma.MemeViewDailyCreateNestedManyWithoutMemeInput
   actionsDaily?: Prisma.MemeActionDailyCreateNestedManyWithoutMemeInput
   studioGenerations?: Prisma.StudioGenerationCreateNestedManyWithoutMemeInput
@@ -435,7 +419,6 @@ export type MemeUncheckedCreateInput = {
   updatedAt?: Date | string
   publishedAt?: Date | string | null
   status?: $Enums.MemeStatus
-  submittedBy?: string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutMemeInput
   categories?: Prisma.MemeCategoryUncheckedCreateNestedManyWithoutMemeInput
   viewsDaily?: Prisma.MemeViewDailyUncheckedCreateNestedManyWithoutMemeInput
@@ -459,7 +442,6 @@ export type MemeUpdateInput = {
   video?: Prisma.VideoUpdateOneRequiredWithoutMemeNestedInput
   bookmarkedBy?: Prisma.UserBookmarkUpdateManyWithoutMemeNestedInput
   categories?: Prisma.MemeCategoryUpdateManyWithoutMemeNestedInput
-  submitter?: Prisma.UserUpdateOneWithoutMemeNestedInput
   viewsDaily?: Prisma.MemeViewDailyUpdateManyWithoutMemeNestedInput
   actionsDaily?: Prisma.MemeActionDailyUpdateManyWithoutMemeNestedInput
   studioGenerations?: Prisma.StudioGenerationUpdateManyWithoutMemeNestedInput
@@ -479,7 +461,6 @@ export type MemeUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumMemeStatusFieldUpdateOperationsInput | $Enums.MemeStatus
-  submittedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedUpdateManyWithoutMemeNestedInput
   categories?: Prisma.MemeCategoryUncheckedUpdateManyWithoutMemeNestedInput
   viewsDaily?: Prisma.MemeViewDailyUncheckedUpdateManyWithoutMemeNestedInput
@@ -501,7 +482,6 @@ export type MemeCreateManyInput = {
   updatedAt?: Date | string
   publishedAt?: Date | string | null
   status?: $Enums.MemeStatus
-  submittedBy?: string | null
 }
 
 export type MemeUpdateManyMutationInput = {
@@ -533,7 +513,6 @@ export type MemeUncheckedUpdateManyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumMemeStatusFieldUpdateOperationsInput | $Enums.MemeStatus
-  submittedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type MemeScalarRelationFilter = {
@@ -566,7 +545,6 @@ export type MemeCountOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  submittedBy?: Prisma.SortOrder
 }
 
 export type MemeAvgOrderByAggregateInput = {
@@ -589,7 +567,6 @@ export type MemeMaxOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  submittedBy?: Prisma.SortOrder
 }
 
 export type MemeMinOrderByAggregateInput = {
@@ -605,7 +582,6 @@ export type MemeMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  submittedBy?: Prisma.SortOrder
 }
 
 export type MemeSumOrderByAggregateInput = {
@@ -613,16 +589,6 @@ export type MemeSumOrderByAggregateInput = {
   viewCount?: Prisma.SortOrder
   shareCount?: Prisma.SortOrder
   downloadCount?: Prisma.SortOrder
-}
-
-export type MemeListRelationFilter = {
-  every?: Prisma.MemeWhereInput
-  some?: Prisma.MemeWhereInput
-  none?: Prisma.MemeWhereInput
-}
-
-export type MemeOrderByRelationAggregateInput = {
-  _count?: Prisma.SortOrder
 }
 
 export type MemeCreateNestedOneWithoutBookmarkedByInput = {
@@ -734,48 +700,6 @@ export type MemeUpdateOneRequiredWithoutActionsDailyNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.MemeUpdateToOneWithWhereWithoutActionsDailyInput, Prisma.MemeUpdateWithoutActionsDailyInput>, Prisma.MemeUncheckedUpdateWithoutActionsDailyInput>
 }
 
-export type MemeCreateNestedManyWithoutSubmitterInput = {
-  create?: Prisma.XOR<Prisma.MemeCreateWithoutSubmitterInput, Prisma.MemeUncheckedCreateWithoutSubmitterInput> | Prisma.MemeCreateWithoutSubmitterInput[] | Prisma.MemeUncheckedCreateWithoutSubmitterInput[]
-  connectOrCreate?: Prisma.MemeCreateOrConnectWithoutSubmitterInput | Prisma.MemeCreateOrConnectWithoutSubmitterInput[]
-  createMany?: Prisma.MemeCreateManySubmitterInputEnvelope
-  connect?: Prisma.MemeWhereUniqueInput | Prisma.MemeWhereUniqueInput[]
-}
-
-export type MemeUncheckedCreateNestedManyWithoutSubmitterInput = {
-  create?: Prisma.XOR<Prisma.MemeCreateWithoutSubmitterInput, Prisma.MemeUncheckedCreateWithoutSubmitterInput> | Prisma.MemeCreateWithoutSubmitterInput[] | Prisma.MemeUncheckedCreateWithoutSubmitterInput[]
-  connectOrCreate?: Prisma.MemeCreateOrConnectWithoutSubmitterInput | Prisma.MemeCreateOrConnectWithoutSubmitterInput[]
-  createMany?: Prisma.MemeCreateManySubmitterInputEnvelope
-  connect?: Prisma.MemeWhereUniqueInput | Prisma.MemeWhereUniqueInput[]
-}
-
-export type MemeUpdateManyWithoutSubmitterNestedInput = {
-  create?: Prisma.XOR<Prisma.MemeCreateWithoutSubmitterInput, Prisma.MemeUncheckedCreateWithoutSubmitterInput> | Prisma.MemeCreateWithoutSubmitterInput[] | Prisma.MemeUncheckedCreateWithoutSubmitterInput[]
-  connectOrCreate?: Prisma.MemeCreateOrConnectWithoutSubmitterInput | Prisma.MemeCreateOrConnectWithoutSubmitterInput[]
-  upsert?: Prisma.MemeUpsertWithWhereUniqueWithoutSubmitterInput | Prisma.MemeUpsertWithWhereUniqueWithoutSubmitterInput[]
-  createMany?: Prisma.MemeCreateManySubmitterInputEnvelope
-  set?: Prisma.MemeWhereUniqueInput | Prisma.MemeWhereUniqueInput[]
-  disconnect?: Prisma.MemeWhereUniqueInput | Prisma.MemeWhereUniqueInput[]
-  delete?: Prisma.MemeWhereUniqueInput | Prisma.MemeWhereUniqueInput[]
-  connect?: Prisma.MemeWhereUniqueInput | Prisma.MemeWhereUniqueInput[]
-  update?: Prisma.MemeUpdateWithWhereUniqueWithoutSubmitterInput | Prisma.MemeUpdateWithWhereUniqueWithoutSubmitterInput[]
-  updateMany?: Prisma.MemeUpdateManyWithWhereWithoutSubmitterInput | Prisma.MemeUpdateManyWithWhereWithoutSubmitterInput[]
-  deleteMany?: Prisma.MemeScalarWhereInput | Prisma.MemeScalarWhereInput[]
-}
-
-export type MemeUncheckedUpdateManyWithoutSubmitterNestedInput = {
-  create?: Prisma.XOR<Prisma.MemeCreateWithoutSubmitterInput, Prisma.MemeUncheckedCreateWithoutSubmitterInput> | Prisma.MemeCreateWithoutSubmitterInput[] | Prisma.MemeUncheckedCreateWithoutSubmitterInput[]
-  connectOrCreate?: Prisma.MemeCreateOrConnectWithoutSubmitterInput | Prisma.MemeCreateOrConnectWithoutSubmitterInput[]
-  upsert?: Prisma.MemeUpsertWithWhereUniqueWithoutSubmitterInput | Prisma.MemeUpsertWithWhereUniqueWithoutSubmitterInput[]
-  createMany?: Prisma.MemeCreateManySubmitterInputEnvelope
-  set?: Prisma.MemeWhereUniqueInput | Prisma.MemeWhereUniqueInput[]
-  disconnect?: Prisma.MemeWhereUniqueInput | Prisma.MemeWhereUniqueInput[]
-  delete?: Prisma.MemeWhereUniqueInput | Prisma.MemeWhereUniqueInput[]
-  connect?: Prisma.MemeWhereUniqueInput | Prisma.MemeWhereUniqueInput[]
-  update?: Prisma.MemeUpdateWithWhereUniqueWithoutSubmitterInput | Prisma.MemeUpdateWithWhereUniqueWithoutSubmitterInput[]
-  updateMany?: Prisma.MemeUpdateManyWithWhereWithoutSubmitterInput | Prisma.MemeUpdateManyWithWhereWithoutSubmitterInput[]
-  deleteMany?: Prisma.MemeScalarWhereInput | Prisma.MemeScalarWhereInput[]
-}
-
 export type MemeCreateNestedOneWithoutStudioGenerationsInput = {
   create?: Prisma.XOR<Prisma.MemeCreateWithoutStudioGenerationsInput, Prisma.MemeUncheckedCreateWithoutStudioGenerationsInput>
   connectOrCreate?: Prisma.MemeCreateOrConnectWithoutStudioGenerationsInput
@@ -807,7 +731,6 @@ export type MemeCreateWithoutBookmarkedByInput = {
   status?: $Enums.MemeStatus
   video: Prisma.VideoCreateNestedOneWithoutMemeInput
   categories?: Prisma.MemeCategoryCreateNestedManyWithoutMemeInput
-  submitter?: Prisma.UserCreateNestedOneWithoutMemeInput
   viewsDaily?: Prisma.MemeViewDailyCreateNestedManyWithoutMemeInput
   actionsDaily?: Prisma.MemeActionDailyCreateNestedManyWithoutMemeInput
   studioGenerations?: Prisma.StudioGenerationCreateNestedManyWithoutMemeInput
@@ -827,7 +750,6 @@ export type MemeUncheckedCreateWithoutBookmarkedByInput = {
   updatedAt?: Date | string
   publishedAt?: Date | string | null
   status?: $Enums.MemeStatus
-  submittedBy?: string | null
   categories?: Prisma.MemeCategoryUncheckedCreateNestedManyWithoutMemeInput
   viewsDaily?: Prisma.MemeViewDailyUncheckedCreateNestedManyWithoutMemeInput
   actionsDaily?: Prisma.MemeActionDailyUncheckedCreateNestedManyWithoutMemeInput
@@ -865,7 +787,6 @@ export type MemeUpdateWithoutBookmarkedByInput = {
   status?: Prisma.EnumMemeStatusFieldUpdateOperationsInput | $Enums.MemeStatus
   video?: Prisma.VideoUpdateOneRequiredWithoutMemeNestedInput
   categories?: Prisma.MemeCategoryUpdateManyWithoutMemeNestedInput
-  submitter?: Prisma.UserUpdateOneWithoutMemeNestedInput
   viewsDaily?: Prisma.MemeViewDailyUpdateManyWithoutMemeNestedInput
   actionsDaily?: Prisma.MemeActionDailyUpdateManyWithoutMemeNestedInput
   studioGenerations?: Prisma.StudioGenerationUpdateManyWithoutMemeNestedInput
@@ -885,7 +806,6 @@ export type MemeUncheckedUpdateWithoutBookmarkedByInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumMemeStatusFieldUpdateOperationsInput | $Enums.MemeStatus
-  submittedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categories?: Prisma.MemeCategoryUncheckedUpdateManyWithoutMemeNestedInput
   viewsDaily?: Prisma.MemeViewDailyUncheckedUpdateManyWithoutMemeNestedInput
   actionsDaily?: Prisma.MemeActionDailyUncheckedUpdateManyWithoutMemeNestedInput
@@ -907,7 +827,6 @@ export type MemeCreateWithoutCategoriesInput = {
   status?: $Enums.MemeStatus
   video: Prisma.VideoCreateNestedOneWithoutMemeInput
   bookmarkedBy?: Prisma.UserBookmarkCreateNestedManyWithoutMemeInput
-  submitter?: Prisma.UserCreateNestedOneWithoutMemeInput
   viewsDaily?: Prisma.MemeViewDailyCreateNestedManyWithoutMemeInput
   actionsDaily?: Prisma.MemeActionDailyCreateNestedManyWithoutMemeInput
   studioGenerations?: Prisma.StudioGenerationCreateNestedManyWithoutMemeInput
@@ -927,7 +846,6 @@ export type MemeUncheckedCreateWithoutCategoriesInput = {
   updatedAt?: Date | string
   publishedAt?: Date | string | null
   status?: $Enums.MemeStatus
-  submittedBy?: string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutMemeInput
   viewsDaily?: Prisma.MemeViewDailyUncheckedCreateNestedManyWithoutMemeInput
   actionsDaily?: Prisma.MemeActionDailyUncheckedCreateNestedManyWithoutMemeInput
@@ -965,7 +883,6 @@ export type MemeUpdateWithoutCategoriesInput = {
   status?: Prisma.EnumMemeStatusFieldUpdateOperationsInput | $Enums.MemeStatus
   video?: Prisma.VideoUpdateOneRequiredWithoutMemeNestedInput
   bookmarkedBy?: Prisma.UserBookmarkUpdateManyWithoutMemeNestedInput
-  submitter?: Prisma.UserUpdateOneWithoutMemeNestedInput
   viewsDaily?: Prisma.MemeViewDailyUpdateManyWithoutMemeNestedInput
   actionsDaily?: Prisma.MemeActionDailyUpdateManyWithoutMemeNestedInput
   studioGenerations?: Prisma.StudioGenerationUpdateManyWithoutMemeNestedInput
@@ -985,7 +902,6 @@ export type MemeUncheckedUpdateWithoutCategoriesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumMemeStatusFieldUpdateOperationsInput | $Enums.MemeStatus
-  submittedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedUpdateManyWithoutMemeNestedInput
   viewsDaily?: Prisma.MemeViewDailyUncheckedUpdateManyWithoutMemeNestedInput
   actionsDaily?: Prisma.MemeActionDailyUncheckedUpdateManyWithoutMemeNestedInput
@@ -1007,7 +923,6 @@ export type MemeCreateWithoutVideoInput = {
   status?: $Enums.MemeStatus
   bookmarkedBy?: Prisma.UserBookmarkCreateNestedManyWithoutMemeInput
   categories?: Prisma.MemeCategoryCreateNestedManyWithoutMemeInput
-  submitter?: Prisma.UserCreateNestedOneWithoutMemeInput
   viewsDaily?: Prisma.MemeViewDailyCreateNestedManyWithoutMemeInput
   actionsDaily?: Prisma.MemeActionDailyCreateNestedManyWithoutMemeInput
   studioGenerations?: Prisma.StudioGenerationCreateNestedManyWithoutMemeInput
@@ -1026,7 +941,6 @@ export type MemeUncheckedCreateWithoutVideoInput = {
   updatedAt?: Date | string
   publishedAt?: Date | string | null
   status?: $Enums.MemeStatus
-  submittedBy?: string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutMemeInput
   categories?: Prisma.MemeCategoryUncheckedCreateNestedManyWithoutMemeInput
   viewsDaily?: Prisma.MemeViewDailyUncheckedCreateNestedManyWithoutMemeInput
@@ -1065,7 +979,6 @@ export type MemeUpdateWithoutVideoInput = {
   status?: Prisma.EnumMemeStatusFieldUpdateOperationsInput | $Enums.MemeStatus
   bookmarkedBy?: Prisma.UserBookmarkUpdateManyWithoutMemeNestedInput
   categories?: Prisma.MemeCategoryUpdateManyWithoutMemeNestedInput
-  submitter?: Prisma.UserUpdateOneWithoutMemeNestedInput
   viewsDaily?: Prisma.MemeViewDailyUpdateManyWithoutMemeNestedInput
   actionsDaily?: Prisma.MemeActionDailyUpdateManyWithoutMemeNestedInput
   studioGenerations?: Prisma.StudioGenerationUpdateManyWithoutMemeNestedInput
@@ -1084,7 +997,6 @@ export type MemeUncheckedUpdateWithoutVideoInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumMemeStatusFieldUpdateOperationsInput | $Enums.MemeStatus
-  submittedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedUpdateManyWithoutMemeNestedInput
   categories?: Prisma.MemeCategoryUncheckedUpdateManyWithoutMemeNestedInput
   viewsDaily?: Prisma.MemeViewDailyUncheckedUpdateManyWithoutMemeNestedInput
@@ -1108,7 +1020,6 @@ export type MemeCreateWithoutViewsDailyInput = {
   video: Prisma.VideoCreateNestedOneWithoutMemeInput
   bookmarkedBy?: Prisma.UserBookmarkCreateNestedManyWithoutMemeInput
   categories?: Prisma.MemeCategoryCreateNestedManyWithoutMemeInput
-  submitter?: Prisma.UserCreateNestedOneWithoutMemeInput
   actionsDaily?: Prisma.MemeActionDailyCreateNestedManyWithoutMemeInput
   studioGenerations?: Prisma.StudioGenerationCreateNestedManyWithoutMemeInput
 }
@@ -1127,7 +1038,6 @@ export type MemeUncheckedCreateWithoutViewsDailyInput = {
   updatedAt?: Date | string
   publishedAt?: Date | string | null
   status?: $Enums.MemeStatus
-  submittedBy?: string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutMemeInput
   categories?: Prisma.MemeCategoryUncheckedCreateNestedManyWithoutMemeInput
   actionsDaily?: Prisma.MemeActionDailyUncheckedCreateNestedManyWithoutMemeInput
@@ -1166,7 +1076,6 @@ export type MemeUpdateWithoutViewsDailyInput = {
   video?: Prisma.VideoUpdateOneRequiredWithoutMemeNestedInput
   bookmarkedBy?: Prisma.UserBookmarkUpdateManyWithoutMemeNestedInput
   categories?: Prisma.MemeCategoryUpdateManyWithoutMemeNestedInput
-  submitter?: Prisma.UserUpdateOneWithoutMemeNestedInput
   actionsDaily?: Prisma.MemeActionDailyUpdateManyWithoutMemeNestedInput
   studioGenerations?: Prisma.StudioGenerationUpdateManyWithoutMemeNestedInput
 }
@@ -1185,7 +1094,6 @@ export type MemeUncheckedUpdateWithoutViewsDailyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumMemeStatusFieldUpdateOperationsInput | $Enums.MemeStatus
-  submittedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedUpdateManyWithoutMemeNestedInput
   categories?: Prisma.MemeCategoryUncheckedUpdateManyWithoutMemeNestedInput
   actionsDaily?: Prisma.MemeActionDailyUncheckedUpdateManyWithoutMemeNestedInput
@@ -1208,7 +1116,6 @@ export type MemeCreateWithoutActionsDailyInput = {
   video: Prisma.VideoCreateNestedOneWithoutMemeInput
   bookmarkedBy?: Prisma.UserBookmarkCreateNestedManyWithoutMemeInput
   categories?: Prisma.MemeCategoryCreateNestedManyWithoutMemeInput
-  submitter?: Prisma.UserCreateNestedOneWithoutMemeInput
   viewsDaily?: Prisma.MemeViewDailyCreateNestedManyWithoutMemeInput
   studioGenerations?: Prisma.StudioGenerationCreateNestedManyWithoutMemeInput
 }
@@ -1227,7 +1134,6 @@ export type MemeUncheckedCreateWithoutActionsDailyInput = {
   updatedAt?: Date | string
   publishedAt?: Date | string | null
   status?: $Enums.MemeStatus
-  submittedBy?: string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutMemeInput
   categories?: Prisma.MemeCategoryUncheckedCreateNestedManyWithoutMemeInput
   viewsDaily?: Prisma.MemeViewDailyUncheckedCreateNestedManyWithoutMemeInput
@@ -1266,7 +1172,6 @@ export type MemeUpdateWithoutActionsDailyInput = {
   video?: Prisma.VideoUpdateOneRequiredWithoutMemeNestedInput
   bookmarkedBy?: Prisma.UserBookmarkUpdateManyWithoutMemeNestedInput
   categories?: Prisma.MemeCategoryUpdateManyWithoutMemeNestedInput
-  submitter?: Prisma.UserUpdateOneWithoutMemeNestedInput
   viewsDaily?: Prisma.MemeViewDailyUpdateManyWithoutMemeNestedInput
   studioGenerations?: Prisma.StudioGenerationUpdateManyWithoutMemeNestedInput
 }
@@ -1285,99 +1190,10 @@ export type MemeUncheckedUpdateWithoutActionsDailyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumMemeStatusFieldUpdateOperationsInput | $Enums.MemeStatus
-  submittedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedUpdateManyWithoutMemeNestedInput
   categories?: Prisma.MemeCategoryUncheckedUpdateManyWithoutMemeNestedInput
   viewsDaily?: Prisma.MemeViewDailyUncheckedUpdateManyWithoutMemeNestedInput
   studioGenerations?: Prisma.StudioGenerationUncheckedUpdateManyWithoutMemeNestedInput
-}
-
-export type MemeCreateWithoutSubmitterInput = {
-  id?: string
-  title: string
-  viewCount?: number
-  shareCount?: number
-  downloadCount?: number
-  tweetUrl?: string | null
-  description?: string
-  keywords?: Prisma.MemeCreatekeywordsInput | string[]
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  publishedAt?: Date | string | null
-  status?: $Enums.MemeStatus
-  video: Prisma.VideoCreateNestedOneWithoutMemeInput
-  bookmarkedBy?: Prisma.UserBookmarkCreateNestedManyWithoutMemeInput
-  categories?: Prisma.MemeCategoryCreateNestedManyWithoutMemeInput
-  viewsDaily?: Prisma.MemeViewDailyCreateNestedManyWithoutMemeInput
-  actionsDaily?: Prisma.MemeActionDailyCreateNestedManyWithoutMemeInput
-  studioGenerations?: Prisma.StudioGenerationCreateNestedManyWithoutMemeInput
-}
-
-export type MemeUncheckedCreateWithoutSubmitterInput = {
-  id?: string
-  title: string
-  videoId: number
-  viewCount?: number
-  shareCount?: number
-  downloadCount?: number
-  tweetUrl?: string | null
-  description?: string
-  keywords?: Prisma.MemeCreatekeywordsInput | string[]
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  publishedAt?: Date | string | null
-  status?: $Enums.MemeStatus
-  bookmarkedBy?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutMemeInput
-  categories?: Prisma.MemeCategoryUncheckedCreateNestedManyWithoutMemeInput
-  viewsDaily?: Prisma.MemeViewDailyUncheckedCreateNestedManyWithoutMemeInput
-  actionsDaily?: Prisma.MemeActionDailyUncheckedCreateNestedManyWithoutMemeInput
-  studioGenerations?: Prisma.StudioGenerationUncheckedCreateNestedManyWithoutMemeInput
-}
-
-export type MemeCreateOrConnectWithoutSubmitterInput = {
-  where: Prisma.MemeWhereUniqueInput
-  create: Prisma.XOR<Prisma.MemeCreateWithoutSubmitterInput, Prisma.MemeUncheckedCreateWithoutSubmitterInput>
-}
-
-export type MemeCreateManySubmitterInputEnvelope = {
-  data: Prisma.MemeCreateManySubmitterInput | Prisma.MemeCreateManySubmitterInput[]
-  skipDuplicates?: boolean
-}
-
-export type MemeUpsertWithWhereUniqueWithoutSubmitterInput = {
-  where: Prisma.MemeWhereUniqueInput
-  update: Prisma.XOR<Prisma.MemeUpdateWithoutSubmitterInput, Prisma.MemeUncheckedUpdateWithoutSubmitterInput>
-  create: Prisma.XOR<Prisma.MemeCreateWithoutSubmitterInput, Prisma.MemeUncheckedCreateWithoutSubmitterInput>
-}
-
-export type MemeUpdateWithWhereUniqueWithoutSubmitterInput = {
-  where: Prisma.MemeWhereUniqueInput
-  data: Prisma.XOR<Prisma.MemeUpdateWithoutSubmitterInput, Prisma.MemeUncheckedUpdateWithoutSubmitterInput>
-}
-
-export type MemeUpdateManyWithWhereWithoutSubmitterInput = {
-  where: Prisma.MemeScalarWhereInput
-  data: Prisma.XOR<Prisma.MemeUpdateManyMutationInput, Prisma.MemeUncheckedUpdateManyWithoutSubmitterInput>
-}
-
-export type MemeScalarWhereInput = {
-  AND?: Prisma.MemeScalarWhereInput | Prisma.MemeScalarWhereInput[]
-  OR?: Prisma.MemeScalarWhereInput[]
-  NOT?: Prisma.MemeScalarWhereInput | Prisma.MemeScalarWhereInput[]
-  id?: Prisma.StringFilter<"Meme"> | string
-  title?: Prisma.StringFilter<"Meme"> | string
-  videoId?: Prisma.IntFilter<"Meme"> | number
-  viewCount?: Prisma.IntFilter<"Meme"> | number
-  shareCount?: Prisma.IntFilter<"Meme"> | number
-  downloadCount?: Prisma.IntFilter<"Meme"> | number
-  tweetUrl?: Prisma.StringNullableFilter<"Meme"> | string | null
-  description?: Prisma.StringFilter<"Meme"> | string
-  keywords?: Prisma.StringNullableListFilter<"Meme">
-  createdAt?: Prisma.DateTimeFilter<"Meme"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"Meme"> | Date | string
-  publishedAt?: Prisma.DateTimeNullableFilter<"Meme"> | Date | string | null
-  status?: Prisma.EnumMemeStatusFilter<"Meme"> | $Enums.MemeStatus
-  submittedBy?: Prisma.StringNullableFilter<"Meme"> | string | null
 }
 
 export type MemeCreateWithoutStudioGenerationsInput = {
@@ -1396,7 +1212,6 @@ export type MemeCreateWithoutStudioGenerationsInput = {
   video: Prisma.VideoCreateNestedOneWithoutMemeInput
   bookmarkedBy?: Prisma.UserBookmarkCreateNestedManyWithoutMemeInput
   categories?: Prisma.MemeCategoryCreateNestedManyWithoutMemeInput
-  submitter?: Prisma.UserCreateNestedOneWithoutMemeInput
   viewsDaily?: Prisma.MemeViewDailyCreateNestedManyWithoutMemeInput
   actionsDaily?: Prisma.MemeActionDailyCreateNestedManyWithoutMemeInput
 }
@@ -1415,7 +1230,6 @@ export type MemeUncheckedCreateWithoutStudioGenerationsInput = {
   updatedAt?: Date | string
   publishedAt?: Date | string | null
   status?: $Enums.MemeStatus
-  submittedBy?: string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutMemeInput
   categories?: Prisma.MemeCategoryUncheckedCreateNestedManyWithoutMemeInput
   viewsDaily?: Prisma.MemeViewDailyUncheckedCreateNestedManyWithoutMemeInput
@@ -1454,7 +1268,6 @@ export type MemeUpdateWithoutStudioGenerationsInput = {
   video?: Prisma.VideoUpdateOneRequiredWithoutMemeNestedInput
   bookmarkedBy?: Prisma.UserBookmarkUpdateManyWithoutMemeNestedInput
   categories?: Prisma.MemeCategoryUpdateManyWithoutMemeNestedInput
-  submitter?: Prisma.UserUpdateOneWithoutMemeNestedInput
   viewsDaily?: Prisma.MemeViewDailyUpdateManyWithoutMemeNestedInput
   actionsDaily?: Prisma.MemeActionDailyUpdateManyWithoutMemeNestedInput
 }
@@ -1473,85 +1286,10 @@ export type MemeUncheckedUpdateWithoutStudioGenerationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumMemeStatusFieldUpdateOperationsInput | $Enums.MemeStatus
-  submittedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedUpdateManyWithoutMemeNestedInput
   categories?: Prisma.MemeCategoryUncheckedUpdateManyWithoutMemeNestedInput
   viewsDaily?: Prisma.MemeViewDailyUncheckedUpdateManyWithoutMemeNestedInput
   actionsDaily?: Prisma.MemeActionDailyUncheckedUpdateManyWithoutMemeNestedInput
-}
-
-export type MemeCreateManySubmitterInput = {
-  id?: string
-  title: string
-  videoId: number
-  viewCount?: number
-  shareCount?: number
-  downloadCount?: number
-  tweetUrl?: string | null
-  description?: string
-  keywords?: Prisma.MemeCreatekeywordsInput | string[]
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  publishedAt?: Date | string | null
-  status?: $Enums.MemeStatus
-}
-
-export type MemeUpdateWithoutSubmitterInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  viewCount?: Prisma.IntFieldUpdateOperationsInput | number
-  shareCount?: Prisma.IntFieldUpdateOperationsInput | number
-  downloadCount?: Prisma.IntFieldUpdateOperationsInput | number
-  tweetUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  description?: Prisma.StringFieldUpdateOperationsInput | string
-  keywords?: Prisma.MemeUpdatekeywordsInput | string[]
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  status?: Prisma.EnumMemeStatusFieldUpdateOperationsInput | $Enums.MemeStatus
-  video?: Prisma.VideoUpdateOneRequiredWithoutMemeNestedInput
-  bookmarkedBy?: Prisma.UserBookmarkUpdateManyWithoutMemeNestedInput
-  categories?: Prisma.MemeCategoryUpdateManyWithoutMemeNestedInput
-  viewsDaily?: Prisma.MemeViewDailyUpdateManyWithoutMemeNestedInput
-  actionsDaily?: Prisma.MemeActionDailyUpdateManyWithoutMemeNestedInput
-  studioGenerations?: Prisma.StudioGenerationUpdateManyWithoutMemeNestedInput
-}
-
-export type MemeUncheckedUpdateWithoutSubmitterInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  videoId?: Prisma.IntFieldUpdateOperationsInput | number
-  viewCount?: Prisma.IntFieldUpdateOperationsInput | number
-  shareCount?: Prisma.IntFieldUpdateOperationsInput | number
-  downloadCount?: Prisma.IntFieldUpdateOperationsInput | number
-  tweetUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  description?: Prisma.StringFieldUpdateOperationsInput | string
-  keywords?: Prisma.MemeUpdatekeywordsInput | string[]
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  status?: Prisma.EnumMemeStatusFieldUpdateOperationsInput | $Enums.MemeStatus
-  bookmarkedBy?: Prisma.UserBookmarkUncheckedUpdateManyWithoutMemeNestedInput
-  categories?: Prisma.MemeCategoryUncheckedUpdateManyWithoutMemeNestedInput
-  viewsDaily?: Prisma.MemeViewDailyUncheckedUpdateManyWithoutMemeNestedInput
-  actionsDaily?: Prisma.MemeActionDailyUncheckedUpdateManyWithoutMemeNestedInput
-  studioGenerations?: Prisma.StudioGenerationUncheckedUpdateManyWithoutMemeNestedInput
-}
-
-export type MemeUncheckedUpdateManyWithoutSubmitterInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  videoId?: Prisma.IntFieldUpdateOperationsInput | number
-  viewCount?: Prisma.IntFieldUpdateOperationsInput | number
-  shareCount?: Prisma.IntFieldUpdateOperationsInput | number
-  downloadCount?: Prisma.IntFieldUpdateOperationsInput | number
-  tweetUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  description?: Prisma.StringFieldUpdateOperationsInput | string
-  keywords?: Prisma.MemeUpdatekeywordsInput | string[]
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  status?: Prisma.EnumMemeStatusFieldUpdateOperationsInput | $Enums.MemeStatus
 }
 
 
@@ -1635,11 +1373,9 @@ export type MemeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   updatedAt?: boolean
   publishedAt?: boolean
   status?: boolean
-  submittedBy?: boolean
   video?: boolean | Prisma.VideoDefaultArgs<ExtArgs>
   bookmarkedBy?: boolean | Prisma.Meme$bookmarkedByArgs<ExtArgs>
   categories?: boolean | Prisma.Meme$categoriesArgs<ExtArgs>
-  submitter?: boolean | Prisma.Meme$submitterArgs<ExtArgs>
   viewsDaily?: boolean | Prisma.Meme$viewsDailyArgs<ExtArgs>
   actionsDaily?: boolean | Prisma.Meme$actionsDailyArgs<ExtArgs>
   studioGenerations?: boolean | Prisma.Meme$studioGenerationsArgs<ExtArgs>
@@ -1660,9 +1396,7 @@ export type MemeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   updatedAt?: boolean
   publishedAt?: boolean
   status?: boolean
-  submittedBy?: boolean
   video?: boolean | Prisma.VideoDefaultArgs<ExtArgs>
-  submitter?: boolean | Prisma.Meme$submitterArgs<ExtArgs>
 }, ExtArgs["result"]["meme"]>
 
 export type MemeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1679,9 +1413,7 @@ export type MemeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   updatedAt?: boolean
   publishedAt?: boolean
   status?: boolean
-  submittedBy?: boolean
   video?: boolean | Prisma.VideoDefaultArgs<ExtArgs>
-  submitter?: boolean | Prisma.Meme$submitterArgs<ExtArgs>
 }, ExtArgs["result"]["meme"]>
 
 export type MemeSelectScalar = {
@@ -1698,15 +1430,13 @@ export type MemeSelectScalar = {
   updatedAt?: boolean
   publishedAt?: boolean
   status?: boolean
-  submittedBy?: boolean
 }
 
-export type MemeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "videoId" | "viewCount" | "shareCount" | "downloadCount" | "tweetUrl" | "description" | "keywords" | "createdAt" | "updatedAt" | "publishedAt" | "status" | "submittedBy", ExtArgs["result"]["meme"]>
+export type MemeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "videoId" | "viewCount" | "shareCount" | "downloadCount" | "tweetUrl" | "description" | "keywords" | "createdAt" | "updatedAt" | "publishedAt" | "status", ExtArgs["result"]["meme"]>
 export type MemeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   video?: boolean | Prisma.VideoDefaultArgs<ExtArgs>
   bookmarkedBy?: boolean | Prisma.Meme$bookmarkedByArgs<ExtArgs>
   categories?: boolean | Prisma.Meme$categoriesArgs<ExtArgs>
-  submitter?: boolean | Prisma.Meme$submitterArgs<ExtArgs>
   viewsDaily?: boolean | Prisma.Meme$viewsDailyArgs<ExtArgs>
   actionsDaily?: boolean | Prisma.Meme$actionsDailyArgs<ExtArgs>
   studioGenerations?: boolean | Prisma.Meme$studioGenerationsArgs<ExtArgs>
@@ -1714,11 +1444,9 @@ export type MemeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
 }
 export type MemeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   video?: boolean | Prisma.VideoDefaultArgs<ExtArgs>
-  submitter?: boolean | Prisma.Meme$submitterArgs<ExtArgs>
 }
 export type MemeIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   video?: boolean | Prisma.VideoDefaultArgs<ExtArgs>
-  submitter?: boolean | Prisma.Meme$submitterArgs<ExtArgs>
 }
 
 export type $MemePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1727,7 +1455,6 @@ export type $MemePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     video: Prisma.$VideoPayload<ExtArgs>
     bookmarkedBy: Prisma.$UserBookmarkPayload<ExtArgs>[]
     categories: Prisma.$MemeCategoryPayload<ExtArgs>[]
-    submitter: Prisma.$UserPayload<ExtArgs> | null
     viewsDaily: Prisma.$MemeViewDailyPayload<ExtArgs>[]
     actionsDaily: Prisma.$MemeActionDailyPayload<ExtArgs>[]
     studioGenerations: Prisma.$StudioGenerationPayload<ExtArgs>[]
@@ -1746,7 +1473,6 @@ export type $MemePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     updatedAt: Date
     publishedAt: Date | null
     status: $Enums.MemeStatus
-    submittedBy: string | null
   }, ExtArgs["result"]["meme"]>
   composites: {}
 }
@@ -2144,7 +1870,6 @@ export interface Prisma__MemeClient<T, Null = never, ExtArgs extends runtime.Typ
   video<T extends Prisma.VideoDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.VideoDefaultArgs<ExtArgs>>): Prisma.Prisma__VideoClient<runtime.Types.Result.GetResult<Prisma.$VideoPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   bookmarkedBy<T extends Prisma.Meme$bookmarkedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Meme$bookmarkedByArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserBookmarkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   categories<T extends Prisma.Meme$categoriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Meme$categoriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MemeCategoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  submitter<T extends Prisma.Meme$submitterArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Meme$submitterArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   viewsDaily<T extends Prisma.Meme$viewsDailyArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Meme$viewsDailyArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MemeViewDailyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   actionsDaily<T extends Prisma.Meme$actionsDailyArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Meme$actionsDailyArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MemeActionDailyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   studioGenerations<T extends Prisma.Meme$studioGenerationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Meme$studioGenerationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StudioGenerationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -2190,7 +1915,6 @@ export interface MemeFieldRefs {
   readonly updatedAt: Prisma.FieldRef<"Meme", 'DateTime'>
   readonly publishedAt: Prisma.FieldRef<"Meme", 'DateTime'>
   readonly status: Prisma.FieldRef<"Meme", 'MemeStatus'>
-  readonly submittedBy: Prisma.FieldRef<"Meme", 'String'>
 }
     
 
@@ -2632,25 +2356,6 @@ export type Meme$categoriesArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.MemeCategoryScalarFieldEnum | Prisma.MemeCategoryScalarFieldEnum[]
-}
-
-/**
- * Meme.submitter
- */
-export type Meme$submitterArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the User
-   */
-  select?: Prisma.UserSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the User
-   */
-  omit?: Prisma.UserOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.UserInclude<ExtArgs> | null
-  where?: Prisma.UserWhereInput
 }
 
 /**

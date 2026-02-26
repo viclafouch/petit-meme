@@ -92,12 +92,11 @@ Objectif : donner une vision complète de chaque user sans navigation. Colonne I
 
 Layout final : `Avatar+Name | Email | Role | Provider | Statut | Abo | Engagement | Dernière activité | Actions`
 
-*Data fetching :* query Prisma directe (bypass `auth.api.listUsers` — perf: élimine 2 queries séquentielles BA dont un COUNT inutile + récupère `generationCount` gratuitement). Enrichissement côté serveur avec queries Prisma batch `WHERE id IN (...)`. 4 index ajoutés (`account.userId`, `session.userId`, `meme.submittedBy`, `subscription(referenceId, status)`).
+*Data fetching :* query Prisma directe (bypass `auth.api.listUsers` — perf: élimine 2 queries séquentielles BA dont un COUNT inutile + récupère `generationCount` gratuitement). Enrichissement côté serveur avec queries Prisma batch `WHERE id IN (...)`. 3 index ajoutés (`account.userId`, `session.userId`, `subscription(referenceId, status)`).
 
 - [x] Enrichir `getListUsers` dans `src/server/admin.ts` : query Prisma directe + queries batch pour :
   - `Account.providerId` (provider auth : Twitter ou Email)
   - `Subscription` via `referenceId` (statut : active / past / none + dates pour tooltip)
-  - Count `Meme` WHERE `submittedBy = userId` (memes soumis)
   - Count `UserBookmark` WHERE `userId` (bookmarks)
   - Max `Session.updatedAt` WHERE `userId` (dernière activité)
   - `User.generationCount` (inclus dans la query user directe)
@@ -109,7 +108,7 @@ Layout final : `Avatar+Name | Email | Role | Provider | Statut | Abo | Engagemen
   - Badge rouge "Banni" = `user.banned === true`
   - Badge orange "Non vérifié" = `user.emailVerified === false`
 - [x] Colonne **Abo** : badge doré "Premium" (active), badge outline "Ancien" (past), tiret (none). Tooltip avec durée d'abonnement + date de fin.
-- [x] Colonne **Engagement** : format compact `Xm Xb Xg` (X memes, X bookmarks, X générations studio)
+- [x] Colonne **Engagement** : format compact `Xb Xg` (X bookmarks, X générations studio)
 - [x] Colonne **Dernière activité** : format relatif (`formatDistanceToNow` de date-fns, ex: "il y a 2j") + tooltip avec date exacte au hover
 - [x] Retirer la colonne **Date de création** (redondante avec Dernière activité)
 - [x] Colonnes triables : Name, Email, Role, Dernière activité
@@ -123,7 +122,7 @@ Layout final : `Avatar+Name | Email | Role | Provider | Statut | Abo | Engagemen
 **Optimisations perf (audit backend)**
 - [x] Bypass `auth.api.listUsers` → query Prisma directe (élimine 2 queries séquentielles BA + COUNT inutile)
 - [x] Suppression query `generationCount` redondante (incluse dans query user directe)
-- [x] 4 index DB ajoutés : `account(userId)`, `session(userId)`, `meme(submittedBy)`, `subscription(referenceId, status)`
+- [x] 3 index DB ajoutés : `account(userId)`, `session(userId)`, `subscription(referenceId, status)` (`meme(submittedBy)` supprimé avec le champ)
 - [x] Types dérivés depuis Prisma (`UserGetPayload`, `SubscriptionGetPayload`) au lieu de types manuels
 
 **Migration Prisma requise :** `pnpm exec prisma migrate dev --name add_admin_query_indexes`
@@ -665,11 +664,11 @@ src/routes/admin/
 
 **CRITICAL**
 - [ ] `AdminAuditLog` retient `targetId` (userId) indéfiniment sans pathway de suppression. Sur suppression user : anonymiser `targetId` → `'[deleted]'` via `updateMany` dans le hook `beforeDelete` (`src/lib/auth.tsx`). Ajouter rétention 2 ans dans `crons/cleanup-retention.ts`
-- [ ] `removeUser` (admin) ne nulle pas `Meme.submittedBy` avant suppression → risque de FK constraint failure silencieuse (default `Restrict`). Ajouter `meme.updateMany({ where: { submittedBy: userId }, data: { submittedBy: null } })` dans `beforeDelete`
+- [x] ~~`removeUser` (admin) ne nulle pas `Meme.submittedBy` avant suppression~~ — résolu par suppression du champ `submittedBy` (Schema Cleanup)
 - [ ] Crons (`unverified-cleanup.ts`, `verification-reminder.ts`) et auth (`src/lib/auth.tsx`) loggent les emails en clair. Masquer avec `maskEmail()` helper ou ajouter `'email'` à la liste `redact` de pino (`src/lib/logger.ts`)
 
 **HIGH**
-- [ ] `src/lib/algolia.ts:183` — `submittedBy` (userId) indexé dans Algolia (processeur externe US). Pas nécessaire côté frontend. Retirer de `memeToAlgoliaRecord()` ou nettoyer les records Algolia à la suppression user
+- [x] ~~`src/lib/algolia.ts:183` — `submittedBy` (userId) indexé dans Algolia~~ — résolu par suppression du champ `submittedBy` (Schema Cleanup). Re-indexer Algolia pour nettoyer les records existants
 - [ ] `prisma/schema.prisma:168` — `AdminAuditLog.actingAdminId` FK sans `onDelete` clause (default `Restrict`) → bloque la suppression d'un compte admin. Migrer vers `onDelete: SetNull` + rendre nullable
 - [ ] Crons pas schedulés dans `vercel.json` → les promesses de rétention de la privacy notice ne sont pas automatiquement honorées. Ajouter les définitions `crons` dans `vercel.json`
 - [ ] `src/lib/auth.tsx:219` — Twitter OAuth login logge le full email à `info` level → masquer ou logger `emailDomain` uniquement
@@ -686,6 +685,18 @@ src/routes/admin/
 
 **LOW**
 - [ ] Pas de procédure de notification de breach documentée (Art. 33 — règle des 72h). Créer `BREACH_RESPONSE.md`
+
+#### Schema Cleanup
+
+- [x] Supprimer `Meme.submittedBy` + relation `submitter` — champ inutilisé (seul l'admin ajoute des memes). Migration destructive assumée (peu d'utilisateurs). **Aucun meme ne doit être supprimé** — la migration ne fait que dropper la colonne. Fait :
+  - [x] Retiré `submittedBy`, `submitter` et `@@index([submittedBy])` du schema Prisma
+  - [x] Retiré `Meme Meme[]` de `User` (inverse relation)
+  - [x] **User runs** `pnpm exec prisma migrate dev --name remove_meme_submitted_by` — vérifier que le SQL ne contient que `DROP COLUMN` + `DROP INDEX`
+  - [x] Supprimé `submittedBy` de `memeToAlgoliaRecord()` (`src/lib/algolia.ts`)
+  - [x] Supprimé le `groupBy submittedBy` + `memeCount` dans `src/routes/admin/-server/users.ts` et l'affichage dans `src/routes/admin/users/index.tsx`
+  - [x] Nettoyé `crons/unverified-cleanup.ts` (filtre `Meme: { none: {} }` retiré)
+  - [x] Tickets GDPR associés marqués résolus
+  - [x] **User runs** re-indexer Algolia pour retirer `submittedBy` des records existants
 
 #### Refactoring (medium — futur)
 

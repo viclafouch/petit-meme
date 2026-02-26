@@ -138,8 +138,7 @@ export const MemeScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   publishedAt: 'publishedAt',
-  status: 'status',
-  submittedBy: 'submittedBy'
+  status: 'status'
 } as const
 
 export type MemeScalarFieldEnum = (typeof MemeScalarFieldEnum)[keyof typeof MemeScalarFieldEnum]
@@ -359,8 +358,7 @@ export const MemeOrderByRelevanceFieldEnum = {
   title: 'title',
   tweetUrl: 'tweetUrl',
   description: 'description',
-  keywords: 'keywords',
-  submittedBy: 'submittedBy'
+  keywords: 'keywords'
 } as const
 
 export type MemeOrderByRelevanceFieldEnum = (typeof MemeOrderByRelevanceFieldEnum)[keyof typeof MemeOrderByRelevanceFieldEnum]

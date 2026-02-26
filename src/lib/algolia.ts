@@ -180,7 +180,6 @@ export function memeToAlgoliaRecord(meme: MemeWithVideo & MemeWithCategories) {
     downloadCount: meme.downloadCount,
     tweetUrl: meme.tweetUrl,
     videoId: meme.videoId,
-    submittedBy: meme.submittedBy,
     createdAt: meme.createdAt,
     updatedAt: meme.updatedAt,
     publishedAt: meme.publishedAt,

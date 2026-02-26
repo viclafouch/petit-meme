@@ -82,8 +82,6 @@ model Meme {
   bookmarkedBy UserBookmark[]
   categories   MemeCategory[]
   status       MemeStatus     @default(PUBLISHED)
-  submittedBy  String?
-  submitter    User?          @relation(fields: [submittedBy], references: [id])
   viewsDaily          MemeViewDaily[]
   actionsDaily        MemeActionDaily[]
   studioGenerations   StudioGeneration[]
@@ -91,7 +89,6 @@ model Meme {
   @@index([status])
   @@index([status, viewCount])
   @@index([status, publishedAt])
-  @@index([submittedBy])
 }
 
 model MemeViewDaily {
@@ -141,7 +138,6 @@ model User {
   banned     Boolean?
   banReason  String?
   banExpires DateTime?
-  Meme       Meme[]
 
   stripeCustomerId         String?
   termsAcceptedAt          DateTime? @map("terms_accepted_at")

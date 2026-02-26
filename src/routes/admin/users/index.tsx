@@ -190,12 +190,11 @@ const columns = [
         <Tooltip>
           <TooltipTrigger asChild>
             <span className="text-muted-foreground text-sm tabular-nums cursor-default">
-              {user.memeCount}m {user.bookmarkCount}b {user.generationCount}g
+              {user.bookmarkCount}b {user.generationCount}g
             </span>
           </TooltipTrigger>
           <TooltipContent>
-            {user.memeCount} memes · {user.bookmarkCount} bookmarks ·{' '}
-            {user.generationCount} générations
+            {user.bookmarkCount} bookmarks · {user.generationCount} générations
           </TooltipContent>
         </Tooltip>
       )

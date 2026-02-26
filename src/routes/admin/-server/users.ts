@@ -42,7 +42,6 @@ export type EnrichedUser = Prisma.UserGetPayload<{
 }> & {
   provider: 'twitter' | 'credential'
   subscription: SubscriptionInfo
-  memeCount: number
   bookmarkCount: number
   generationCount: number
   lastActivityAt: Date | null
@@ -64,7 +63,6 @@ export const getListUsers = createServerFn({ method: 'GET' })
     const [
       accounts,
       subscriptions,
-      memeCounts,
       bookmarkCounts,
       lastSessions,
       generationCounts
@@ -76,11 +74,6 @@ export const getListUsers = createServerFn({ method: 'GET' })
       prismaClient.subscription.findMany({
         where: { referenceId: { in: userIds } },
         select: SUBSCRIPTION_LIST_SELECT
-      }),
-      prismaClient.meme.groupBy({
-        by: ['submittedBy'],
-        where: { submittedBy: { in: userIds } },
-        _count: { id: true }
       }),
       prismaClient.userBookmark.groupBy({
         by: ['userId'],
@@ -138,12 +131,6 @@ export const getListUsers = createServerFn({ method: 'GET' })
       })
     }
 
-    const memeCountByUserId = new Map(
-      memeCounts.map((group) => {
-        return [group.submittedBy, group._count.id] as const
-      })
-    )
-
     const bookmarkCountByUserId = new Map(
       bookmarkCounts.map((group) => {
         return [group.userId, group._count.id] as const
@@ -173,7 +160,6 @@ export const getListUsers = createServerFn({ method: 'GET' })
           startedAt: null,
           endsAt: null
         },
-        memeCount: memeCountByUserId.get(user.id) ?? 0,
         bookmarkCount: bookmarkCountByUserId.get(user.id) ?? 0,
         generationCount: generationCountByUserId.get(user.id) ?? 0,
         lastActivityAt: lastActivityByUserId.get(user.id) ?? null

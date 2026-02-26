@@ -13,7 +13,6 @@ const task = async () => {
     where: {
       emailVerified: false,
       createdAt: { lt: cutoffDate },
-      Meme: { none: {} },
       bookmarks: { none: {} }
     },
     select: { id: true, email: true }

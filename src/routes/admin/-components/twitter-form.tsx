@@ -1,8 +1,8 @@
 import { ClipboardPaste } from 'lucide-react'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import { FormFooter } from '@/components/admin/form-footer'
 import { IconButtonStars } from '@/components/animate-ui/buttons/icon-button-stars'
+import { FormFooter } from '@/components/form-footer'
 import {
   FormControl,
   FormItem,
@@ -12,7 +12,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { TWEET_LINK_SCHEMA } from '@/constants/meme'
 import { getFieldErrorMessage } from '@/lib/utils'
-import { createMemeFromTwitterUrl } from '@/server/admin/memes'
+import { createMemeFromTwitterUrl } from '@admin/-server/memes'
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 

@@ -13,7 +13,7 @@ import type {
   AuditAction,
   AuditMetadata,
   AuditTargetType
-} from '@/server/admin/audit'
+} from '@/server/audit'
 import { adminRequiredMiddleware } from '@/server/user-auth'
 import { createServerFn } from '@tanstack/react-start'
 

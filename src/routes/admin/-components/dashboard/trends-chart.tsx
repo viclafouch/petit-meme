@@ -14,7 +14,7 @@ import {
   ChartTooltip,
   ChartTooltipContent
 } from '@/components/ui/chart'
-import type { ChartDataPoint, DashboardPeriod } from '@/server/admin/dashboard'
+import type { ChartDataPoint, DashboardPeriod } from '@admin/-server/dashboard'
 
 type MetricKey = keyof Omit<ChartDataPoint, 'date'>
 

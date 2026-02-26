@@ -1,8 +1,7 @@
 import React from 'react'
 import { toast } from 'sonner'
 import type { z } from 'zod'
-import { FormFooter } from '@/components/admin/form-footer'
-import { KeywordsField } from '@/components/admin/keywords-field'
+import { FormFooter } from '@/components/form-footer'
 import {
   FormControl,
   FormItem,
@@ -18,6 +17,7 @@ import {
   CATEGORY_FORM_SCHEMA,
   editCategory
 } from '@/server/categories'
+import { KeywordsField } from '@admin/-components/keywords-field'
 import { useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 

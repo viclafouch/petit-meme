@@ -1,6 +1,4 @@
 import React from 'react'
-import { AdminNavButton } from '@/components/admin/admin-nav-button'
-import { AdminSidebar } from '@/components/admin/admin-sidebar'
 import { ErrorComponent } from '@/components/error-component'
 import { PathBreadcrumbs } from '@/components/path-breadcrumbs'
 import { Container } from '@/components/ui/container'
@@ -10,6 +8,8 @@ import {
   SidebarTrigger
 } from '@/components/ui/sidebar'
 import { useTheme } from '@/lib/theme'
+import { AdminNavButton } from '@admin/-components/admin-nav-button'
+import { AdminSidebar } from '@admin/-components/admin-sidebar'
 import { Separator } from '@radix-ui/react-separator'
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 

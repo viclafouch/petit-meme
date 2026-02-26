@@ -1,10 +1,10 @@
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { getActionIcon } from '@/helpers/action-icon'
-import { formatAuditEntry } from '@/helpers/audit'
 import { getUserInitials } from '@/helpers/format'
-import type { AuditLogEntry } from '@/server/admin/dashboard'
+import { getActionIcon } from '@admin/-helpers/action-icon'
+import { formatAuditEntry } from '@admin/-helpers/audit'
+import type { AuditLogEntry } from '@admin/-server/dashboard'
 
 type ActivityFeedParams = {
   entries: AuditLogEntry[]

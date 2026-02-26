@@ -7,14 +7,14 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { MINUTE } from '@/constants/time'
+import { captureWithFeature } from '@/lib/sentry'
 import {
   getAdminChartDataQueryOpts,
   getAdminDashboardTotalsQueryOpts,
   getAdminRecentActivityQueryOpts,
   getAdminTrendingMemesQueryOpts
-} from '@/lib/queries'
-import { captureWithFeature } from '@/lib/sentry'
-import { type DashboardPeriod, PERIOD_SCHEMA } from '@/server/admin/dashboard'
+} from '@admin/-lib/queries'
+import { type DashboardPeriod, PERIOD_SCHEMA } from '@admin/-server/dashboard'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { ActivityFeed } from './-components/dashboard/activity-feed'

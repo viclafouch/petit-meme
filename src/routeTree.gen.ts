@@ -20,9 +20,9 @@ import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as Public__rootIndexRouteImport } from './routes/_public__root/index'
 import { Route as ApiSentryTunnelRouteImport } from './routes/api/sentry-tunnel'
 import { Route as ApiBunnyRouteImport } from './routes/api/bunny'
-import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as AdminDownloaderRouteImport } from './routes/admin/downloader'
 import { Route as Public__rootDefaultRouteRouteImport } from './routes/_public__root/_default/route'
+import { Route as AdminUsersIndexRouteImport } from './routes/admin/users/index'
 import { Route as AdminLibraryIndexRouteImport } from './routes/admin/library/index'
 import { Route as AdminCategoriesIndexRouteImport } from './routes/admin/categories/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
@@ -96,11 +96,6 @@ const ApiBunnyRoute = ApiBunnyRouteImport.update({
   path: '/api/bunny',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminUsersRoute = AdminUsersRouteImport.update({
-  id: '/users',
-  path: '/users',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
 const AdminDownloaderRoute = AdminDownloaderRouteImport.update({
   id: '/downloader',
   path: '/downloader',
@@ -111,6 +106,11 @@ const Public__rootDefaultRouteRoute =
     id: '/_default',
     getParentRoute: () => Public__rootRouteRoute,
   } as any)
+const AdminUsersIndexRoute = AdminUsersIndexRouteImport.update({
+  id: '/users/',
+  path: '/users/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminLibraryIndexRoute = AdminLibraryIndexRouteImport.update({
   id: '/library/',
   path: '/library/',
@@ -229,7 +229,6 @@ export interface FileRoutesByFullPath {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/downloader': typeof AdminDownloaderRoute
-  '/admin/users': typeof AdminUsersRoute
   '/api/bunny': typeof ApiBunnyRoute
   '/api/sentry-tunnel': typeof ApiSentryTunnelRoute
   '/admin/': typeof AdminIndexRoute
@@ -243,6 +242,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/categories/': typeof AdminCategoriesIndexRoute
   '/admin/library/': typeof AdminLibraryIndexRoute
+  '/admin/users/': typeof AdminUsersIndexRoute
   '/checkout/success': typeof Public__rootDefaultCheckoutSuccessRoute
   '/memes/$memeId': typeof Public__rootDefaultMemesMemeIdRoute
   '/password/create-new': typeof Public__rootDefaultPasswordCreateNewRoute
@@ -260,7 +260,6 @@ export interface FileRoutesByTo {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/downloader': typeof AdminDownloaderRoute
-  '/admin/users': typeof AdminUsersRoute
   '/api/bunny': typeof ApiBunnyRoute
   '/api/sentry-tunnel': typeof ApiSentryTunnelRoute
   '/admin': typeof AdminIndexRoute
@@ -273,6 +272,7 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/categories': typeof AdminCategoriesIndexRoute
   '/admin/library': typeof AdminLibraryIndexRoute
+  '/admin/users': typeof AdminUsersIndexRoute
   '/checkout/success': typeof Public__rootDefaultCheckoutSuccessRoute
   '/memes/$memeId': typeof Public__rootDefaultMemesMemeIdRoute
   '/password/create-new': typeof Public__rootDefaultPasswordCreateNewRoute
@@ -294,7 +294,6 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_public__root/_default': typeof Public__rootDefaultRouteRouteWithChildren
   '/admin/downloader': typeof AdminDownloaderRoute
-  '/admin/users': typeof AdminUsersRoute
   '/api/bunny': typeof ApiBunnyRoute
   '/api/sentry-tunnel': typeof ApiSentryTunnelRoute
   '/_public__root/': typeof Public__rootIndexRoute
@@ -309,6 +308,7 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/categories/': typeof AdminCategoriesIndexRoute
   '/admin/library/': typeof AdminLibraryIndexRoute
+  '/admin/users/': typeof AdminUsersIndexRoute
   '/_public__root/_default/checkout/success': typeof Public__rootDefaultCheckoutSuccessRoute
   '/_public__root/_default/memes/$memeId': typeof Public__rootDefaultMemesMemeIdRoute
   '/_public__root/_default/password/create-new': typeof Public__rootDefaultPasswordCreateNewRoute
@@ -329,7 +329,6 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/admin/downloader'
-    | '/admin/users'
     | '/api/bunny'
     | '/api/sentry-tunnel'
     | '/admin/'
@@ -343,6 +342,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/admin/categories/'
     | '/admin/library/'
+    | '/admin/users/'
     | '/checkout/success'
     | '/memes/$memeId'
     | '/password/create-new'
@@ -360,7 +360,6 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/admin/downloader'
-    | '/admin/users'
     | '/api/bunny'
     | '/api/sentry-tunnel'
     | '/admin'
@@ -373,6 +372,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/admin/categories'
     | '/admin/library'
+    | '/admin/users'
     | '/checkout/success'
     | '/memes/$memeId'
     | '/password/create-new'
@@ -393,7 +393,6 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/_public__root/_default'
     | '/admin/downloader'
-    | '/admin/users'
     | '/api/bunny'
     | '/api/sentry-tunnel'
     | '/_public__root/'
@@ -408,6 +407,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/admin/categories/'
     | '/admin/library/'
+    | '/admin/users/'
     | '/_public__root/_default/checkout/success'
     | '/_public__root/_default/memes/$memeId'
     | '/_public__root/_default/password/create-new'
@@ -511,13 +511,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiBunnyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/users': {
-      id: '/admin/users'
-      path: '/users'
-      fullPath: '/admin/users'
-      preLoaderRoute: typeof AdminUsersRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
     '/admin/downloader': {
       id: '/admin/downloader'
       path: '/downloader'
@@ -531,6 +524,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof Public__rootDefaultRouteRouteImport
       parentRoute: typeof Public__rootRouteRoute
+    }
+    '/admin/users/': {
+      id: '/admin/users/'
+      path: '/users'
+      fullPath: '/admin/users/'
+      preLoaderRoute: typeof AdminUsersIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/admin/library/': {
       id: '/admin/library/'
@@ -742,20 +742,20 @@ const Public__rootRouteRouteWithChildren =
 
 interface AdminRouteRouteChildren {
   AdminDownloaderRoute: typeof AdminDownloaderRoute
-  AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminLibraryMemeIdRoute: typeof AdminLibraryMemeIdRoute
   AdminCategoriesIndexRoute: typeof AdminCategoriesIndexRoute
   AdminLibraryIndexRoute: typeof AdminLibraryIndexRoute
+  AdminUsersIndexRoute: typeof AdminUsersIndexRoute
 }
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminDownloaderRoute: AdminDownloaderRoute,
-  AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminLibraryMemeIdRoute: AdminLibraryMemeIdRoute,
   AdminCategoriesIndexRoute: AdminCategoriesIndexRoute,
   AdminLibraryIndexRoute: AdminLibraryIndexRoute,
+  AdminUsersIndexRoute: AdminUsersIndexRoute,
 }
 
 const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(

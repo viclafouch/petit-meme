@@ -1,5 +1,5 @@
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import type { DashboardPeriod } from '@/server/admin/dashboard'
+import type { DashboardPeriod } from '@admin/-server/dashboard'
 import { useNavigate } from '@tanstack/react-router'
 
 const PERIOD_OPTIONS = [

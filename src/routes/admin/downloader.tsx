@@ -1,5 +1,5 @@
-import { DownloadFromTwitterForm } from '@/components/admin/download-from-twitter-form'
 import { PageHeader } from '@/components/page-header'
+import { DownloadFromTwitterForm } from '@admin/-components/download-from-twitter-form'
 import { createFileRoute } from '@tanstack/react-router'
 
 const RouteComponent = () => {

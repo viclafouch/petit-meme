@@ -33,7 +33,7 @@ import {
   getTweetMedia
 } from '@/lib/react-tweet'
 import { captureWithFeature } from '@/lib/sentry'
-import { logAuditAction } from '@/server/admin/audit'
+import { logAuditAction } from '@/server/audit'
 import { adminRequiredMiddleware } from '@/server/user-auth'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'

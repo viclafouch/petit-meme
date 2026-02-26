@@ -6,8 +6,8 @@ import type { Meme } from '@/db/generated/prisma/client'
 import {
   getAdminMemeByIdQueryOpts,
   getAdminMemesListQueryOpts
-} from '@/lib/queries'
-import { deleteMemeById } from '@/server/admin/memes'
+} from '@admin/-lib/queries'
+import { deleteMemeById } from '@admin/-server/memes'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 

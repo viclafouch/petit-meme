@@ -2,8 +2,7 @@ import React from 'react'
 import { Stars } from 'lucide-react'
 import { toast } from 'sonner'
 import type { z } from 'zod'
-import { FormFooter } from '@/components/admin/form-footer'
-import { KeywordsField } from '@/components/admin/keywords-field'
+import { FormFooter } from '@/components/form-footer'
 import {
   FormControl,
   FormItem,
@@ -28,9 +27,10 @@ import { useKeywordsField } from '@/hooks/use-keywords-field'
 import { getCategoriesListQueryOpts } from '@/lib/queries'
 import { captureWithFeature } from '@/lib/sentry'
 import { getFieldErrorMessage } from '@/lib/utils'
-import { editMeme, MEME_FORM_SCHEMA } from '@/server/admin/memes'
 import { generateMemeContent } from '@/server/ai'
 import { removeDuplicates } from '@/utils/array'
+import { KeywordsField } from '@admin/-components/keywords-field'
+import { editMeme, MEME_FORM_SCHEMA } from '@admin/-server/memes'
 import { useForm } from '@tanstack/react-form'
 import { useMutation, useQuery } from '@tanstack/react-query'
 

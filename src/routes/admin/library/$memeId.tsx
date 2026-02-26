@@ -2,7 +2,6 @@
 import React from 'react'
 import { formatDate } from 'date-fns'
 import { ExternalLink, Pen, Trash } from 'lucide-react'
-import { DeleteMemeButton } from '@/components/admin/delete-meme-button'
 import { Dialog } from '@/components/animate-ui/radix/dialog'
 import { PageHeader } from '@/components/page-header'
 import { Badge } from '@/components/ui/badge'
@@ -16,12 +15,13 @@ import {
 } from '@/components/ui/dialog'
 import { MemeStatusMeta } from '@/constants/meme'
 import { formatBookmarkCount, formatViewCount } from '@/helpers/format'
+import { buildMemeSeo } from '@/lib/seo'
+import { MemeForm } from '@/routes/admin/library/-components/meme-form'
+import { DeleteMemeButton } from '@admin/-components/delete-meme-button'
 import {
   getAdminMemeByIdQueryOpts,
   getAdminMemesListQueryOpts
-} from '@/lib/queries'
-import { buildMemeSeo } from '@/lib/seo'
-import { MemeForm } from '@/routes/admin/library/-components/meme-form'
+} from '@admin/-lib/queries'
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
 

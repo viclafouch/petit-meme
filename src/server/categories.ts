@@ -4,7 +4,7 @@ import { prismaClient } from '@/db'
 import type { Prisma } from '@/db/generated/prisma/client'
 import { MemeStatus } from '@/db/generated/prisma/enums'
 import { adminLogger } from '@/lib/logger'
-import { logAuditAction } from '@/server/admin/audit'
+import { logAuditAction } from '@/server/audit'
 import { adminRequiredMiddleware } from '@/server/user-auth'
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 

@@ -498,39 +498,128 @@ Top 10 memes les plus tendances des 7 derniers jours. Algo de scoring multi-sign
 - [x] Suspense boundary séparée + skeleton fallback
 - [x] Liens cliquables vers `/admin/library/$memeId`
 
-**Query options**
-- [x] Ajouter `getAdminTrendingMemesQueryOpts` dans `src/lib/queries.ts`
+### Phase 10 — Colocation du code admin dans `src/routes/admin/`
 
-**Fichiers impactés :**
-- `prisma/schema.prisma` — migration StudioGeneration
-- `src/server/user.ts` — `incrementGenerationCount` + memeId
-- `src/hooks/use-video-processor.ts` — passer memeId
-- `src/server/admin/dashboard.ts` — `getAdminTrendingMemes` + `TRENDING_WEIGHTS`
-- `src/routes/admin/index.tsx` — refonte layout
-- `src/routes/admin/-components/dashboard/trending-memes.tsx` — nouveau
-- `src/routes/admin/-components/dashboard/quick-links.tsx` — supprimé
-- `src/lib/queries.ts` — query opts
+**Objectif :** Séparer clairement le code admin du code général. Tout ce qui est strictement admin vit dans `src/routes/admin/` (sous-dossiers préfixés `-`). Le code partagé (admin + public) reste à sa place dans `src/`. **Zéro breaking change** — que des déplacements de fichiers + mise à jour d'imports. Aucune modification de logique, styles, design ou comportement.
+
+**Décisions deep-dive :**
+- Structure **par type** : `-components/`, `-helpers/`, `-server/`, `-lib/` (mêmes noms que `src/`)
+- Alias **`@admin/*`** → `./src/routes/admin/*` (tsconfig + vite). Utilisé partout où on importe du code admin
+- **Pas de barrel files** — imports directs vers chaque fichier (`@admin/-server/memes`, `@admin/-components/admin-table`)
+- **Règle** : si c'est admin-only → dans admin. Si partagé → reste dans `src/`
+
+**Structure cible :**
+```
+src/routes/admin/
+├── -components/                     # Composants admin-only
+│   ├── dashboard/                   # Inchangé (déjà colocalisé)
+│   │   ├── activity-feed.tsx
+│   │   ├── period-selector.tsx
+│   │   ├── totals-section.tsx
+│   │   ├── trends-chart.tsx
+│   │   └── trending-memes.tsx
+│   ├── admin-sidebar.tsx            ← ex src/components/admin/
+│   ├── admin-nav-button.tsx         ← ex src/components/admin/
+│   ├── admin-table.tsx              ← ex src/components/admin/
+│   ├── meme-list-item.tsx           ← ex src/components/admin/
+│   ├── new-meme-button.tsx          ← ex src/components/admin/
+│   ├── delete-meme-button.tsx       ← ex src/components/admin/
+│   ├── download-from-twitter-form.tsx ← ex src/components/admin/
+│   ├── keywords-field.tsx           ← ex src/components/admin/
+│   ├── twitter-form.tsx             ← ex src/components/Meme/MemeForm/
+│   └── file-form.tsx                ← ex src/components/Meme/MemeForm/
+├── -helpers/                        # Helpers admin-only
+│   ├── audit.tsx                    ← ex src/helpers/audit.tsx
+│   └── action-icon.tsx              ← ex src/helpers/action-icon.tsx
+├── -server/                         # Server functions admin-only
+│   ├── dashboard.ts                 ← ex src/server/admin/dashboard.ts
+│   ├── memes.ts                     ← ex src/server/admin/memes.ts
+│   └── users.ts                     ← ex src/server/admin/users.ts
+├── -lib/                            # Query opts admin
+│   └── queries.ts                   ← extraites de src/lib/queries.ts (6 query opts)
+├── categories/                      # Inchangé
+│   ├── index.tsx
+│   └── -components/
+├── library/                         # Inchangé
+│   ├── index.tsx
+│   ├── $memeId.tsx
+│   └── -components/
+├── users/                           # Nouveau (ex users.tsx)
+│   ├── index.tsx                    # Route + table + columns + UserStatusBadges
+│   └── -components/
+│       └── user-actions-cell.tsx    # Dropdown + mutations + dialogs (~180 lignes)
+├── route.tsx
+├── index.tsx
+└── downloader.tsx
+```
+
+**Fichiers partagés (restent en place) :**
+- `src/server/audit.ts` — `logAuditAction` + types (ex `src/server/admin/audit.ts`, utilisé par `categories.ts` + helpers)
+- `src/components/form-footer.tsx` — `FormFooter` (ex `src/components/admin/form-footer.tsx`, utilisé par MemeForm + admin)
+- `src/lib/queries.ts` — garde uniquement les 11 query opts publiques
+
+**Dossiers supprimés :**
+- `src/components/admin/` — entier (9 fichiers → `-components/` + `src/components/form-footer.tsx`)
+- `src/server/admin/` — entier (audit → `src/server/audit.ts`, reste → `-server/`)
+- `src/components/Meme/MemeForm/` — entier (2 fichiers → `-components/`)
+
+#### Étape 1 — Config alias `@admin/*`
+
+- [x] Ajouter `"@admin/*": ["./src/routes/admin/*"]` dans `tsconfig.json` paths
+- [x] ~~Ajouter `resolve.alias` pour `@admin` dans `vite.config.ts`~~ — `vite-tsconfig-paths` lit automatiquement les paths de tsconfig
+
+#### Étape 2 — Extraire les fichiers partagés
+
+- [x] Déplacer `src/server/admin/audit.ts` → `src/server/audit.ts` (partagé admin + categories)
+- [x] Déplacer `src/components/admin/form-footer.tsx` → `src/components/form-footer.tsx` (partagé admin + MemeForm)
+- [x] Mettre à jour les imports : `src/server/categories.ts`, `src/helpers/audit.tsx`, `src/helpers/action-icon.tsx`, `src/components/Meme/MemeForm/*.tsx`
+
+#### Étape 3 — Créer les sous-dossiers admin
+
+- [x] Créer `src/routes/admin/-server/` — déplacer `dashboard.ts`, `memes.ts`, `users.ts` depuis `src/server/admin/`
+- [x] Créer `src/routes/admin/-helpers/` — déplacer `audit.tsx`, `action-icon.tsx` depuis `src/helpers/`
+- [x] Créer `src/routes/admin/-lib/queries.ts` — extraire les 6 query opts admin de `src/lib/queries.ts`
+- [x] Déplacer les 8 composants de `src/components/admin/` vers `src/routes/admin/-components/` (sauf `form-footer.tsx` déjà extrait)
+- [x] Déplacer `twitter-form.tsx` + `file-form.tsx` de `src/components/Meme/MemeForm/` vers `src/routes/admin/-components/`
+
+#### Étape 4 — Transformer `users.tsx` en dossier
+
+- [x] Créer `src/routes/admin/users/index.tsx` — route + RouteComponent + columns + UserStatusBadges
+- [x] Créer `src/routes/admin/users/-components/user-actions-cell.tsx` — extraction de `UserActionsCell` (~180 lignes)
+- [x] Supprimer `src/routes/admin/users.tsx`
+
+#### Étape 5 — Mise à jour des imports
+
+- [x] Remplacer tous les imports `@/components/admin/*` → `@admin/-components/*`
+- [x] Remplacer tous les imports `@/server/admin/*` → `@admin/-server/*` (sauf audit → `@/server/audit`)
+- [x] Remplacer les imports des query opts admin → `@admin/-lib/queries`
+- [x] Remplacer les imports `@/helpers/audit` et `@/helpers/action-icon` → `@admin/-helpers/*`
+
+#### Étape 6 — Nettoyage
+
+- [x] Supprimer `src/components/admin/` (dossier entier)
+- [x] Supprimer `src/server/admin/` (dossier entier, y compris `index.ts` barrel)
+- [x] Supprimer `src/components/Meme/MemeForm/` (dossier entier)
+- [x] Nettoyer `src/lib/queries.ts` — retirer les imports/exports admin
+- [x] `pnpm run lint:fix`
 
 **Hors scope (reporté) :**
-- Mise à jour des charts existants avec le memeId des générations
-- Rate limiting sur le tracking share/download
+- Extraction de sous-composants de `categories/`, `library/`, `downloader.tsx`
+- Refacto de la logique métier (aucune modification de code)
 
-**Migration Prisma requise :** `pnpm exec prisma migrate dev --name add_meme_id_to_studio_generation`
+### Phase 10b — Audits post-colocation
 
-### Phase 9d — Audits dashboard
+Audits post-implémentation (après Phase 10). Inclut les audits dashboard reportés (ex Phase 9d).
 
-Audits post-implémentation du dashboard (après 9a-9c). Lancer les agents/skills disponibles sur tous les fichiers créés ou modifiés.
-
-- [ ] **Backend performance** (`backend-performance` agent) — queries Prisma N+1, Promise.all, indexes manquants, temps de réponse server functions
-- [ ] **React performance** (`react-performance` agent) — re-renders inutiles, stabilité des refs (query options, callbacks), Suspense boundaries, useSuspenseQuery
-- [ ] **Security** (`security-auditor` agent) — server functions admin protégées, validation inputs, injection, exposition de données sensibles
-- [ ] **Tailwind** (`tailwind-audit` agent) — classes redondantes, valeurs hardcodées, patterns verbeux
-- [ ] **Dead code** (`dead-code` agent) — exports/imports inutilisés après refacto StudioGeneration/generationCount
-- [ ] **GDPR** (`gdpr-auditor` agent) — tracking share/download ouvert à tous, données personnelles dans l'AuditLog
+- [ ] **Dead code** (`dead-code` agent) — imports orphelins après les déplacements massifs
+- [ ] **Backend performance** (`backend-performance` agent) — queries Prisma N+1, Promise.all, indexes manquants
+- [ ] **React performance** (`react-performance` agent) — re-renders inutiles, stabilité des refs
+- [ ] **Security** (`security-auditor` agent) — server functions admin protégées, validation inputs
+- [ ] **Tailwind** (`tailwind-audit` agent) — classes redondantes, valeurs hardcodées
+- [ ] **GDPR** (`gdpr-auditor` agent) — tracking share/download, données personnelles AuditLog
 - [ ] **Code refactoring** (`code-refactoring` agent) — clarté, cohérence, extractions manquées
-- [ ] **Web design guidelines** (`web-design-guidelines` skill) — accessibilité, UX, responsive
 
-### Phase 10 — Améliorations UX admin
+### Phase 11 — Améliorations UX admin (ex Phase 10)
 
 **Search users**
 - [ ] Ajouter une barre de recherche client-side sur la table users (filtre par nom/email)
@@ -563,7 +652,7 @@ Audits post-implémentation du dashboard (après 9a-9c). Lancer les agents/skill
 - [ ] Sentry : count erreurs dernières 24h (via Sentry API, si gratuit)
 - [ ] Afficher sous forme de badges vert/orange/rouge selon les seuils
 
-### Phase 11 — Audits post-implémentation
+### Phase 12 — Audits post-implémentation
 
 À lancer **après** toutes les phases précédentes :
 

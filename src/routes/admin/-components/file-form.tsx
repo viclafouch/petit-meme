@@ -2,7 +2,7 @@ import React from 'react'
 import { Upload, X } from 'lucide-react'
 import { toast } from 'sonner'
 import type { z } from 'zod'
-import { FormFooter } from '@/components/admin/form-footer'
+import { FormFooter } from '@/components/form-footer'
 import { Button } from '@/components/ui/button'
 import {
   FileUpload,
@@ -19,7 +19,7 @@ import { getFieldErrorMessage } from '@/lib/utils'
 import {
   CREATE_MEME_FROM_FILE_SCHEMA,
   createMemeFromFile
-} from '@/server/admin/memes'
+} from '@admin/-server/memes'
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 

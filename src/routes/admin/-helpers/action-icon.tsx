@@ -1,5 +1,5 @@
 import { Ban, Edit, FilePlus, RefreshCw, ShieldOff, Trash2 } from 'lucide-react'
-import type { AuditAction } from '@/server/admin/audit'
+import type { AuditAction } from '@/server/audit'
 
 export function getActionIcon(action: AuditAction) {
   switch (action) {

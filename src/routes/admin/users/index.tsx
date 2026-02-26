@@ -1,46 +1,20 @@
-import React from 'react'
 import { differenceInMonths, formatDate, formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
-import { Crown, EllipsisVertical, Mail, Minus, Twitter } from 'lucide-react'
-import { toast } from 'sonner'
-import { AdminTable, PAGE_SIZE } from '@/components/admin/admin-table'
-import { ConfirmAlertDialog } from '@/components/confirm-alert-dialog'
+import { Crown, Mail, Minus, Twitter } from 'lucide-react'
 import { PageHeader } from '@/components/page-header'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Container } from '@/components/ui/container'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select'
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger
 } from '@/components/ui/tooltip'
 import { getUserInitials } from '@/helpers/format'
-import {
-  BAN_REASONS,
-  type BanReason,
-  banUserById,
-  type EnrichedUser,
-  getListUsers,
-  removeUser,
-  unbanUserById
-} from '@/server/admin/users'
-import * as Sentry from '@sentry/tanstackstart-react'
-import { useMutation } from '@tanstack/react-query'
-import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { AdminTable, PAGE_SIZE } from '@admin/-components/admin-table'
+import type { EnrichedUser } from '@admin/-server/users'
+import { getListUsers } from '@admin/-server/users'
+import { createFileRoute } from '@tanstack/react-router'
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -48,196 +22,13 @@ import {
   getSortedRowModel,
   useReactTable
 } from '@tanstack/react-table'
+import { UserActionsCell } from './-components/user-actions-cell'
 
-type UserCellProps = {
+type UserCellParams = {
   user: EnrichedUser
 }
 
-type DialogType = 'ban' | 'unban' | 'delete'
-
-const UserActionsCell = ({ user }: UserCellProps) => {
-  const [activeDialog, setActiveDialog] = React.useState<DialogType | null>(
-    null
-  )
-  const [banReason, setBanReason] = React.useState<BanReason>(BAN_REASONS[0])
-  const router = useRouter()
-  const { user: admin } = Route.useRouteContext()
-
-  const handleCloseDialog = () => {
-    setActiveDialog(null)
-  }
-
-  const handleMutationSuccess = () => {
-    handleCloseDialog()
-    void router.invalidate()
-  }
-
-  const handleMutationError = (
-    error: Error,
-    feature: 'admin-user-ban' | 'admin-user-unban' | 'admin-user-delete'
-  ) => {
-    toast.error(error.message)
-    Sentry.captureException(error, { tags: { feature } })
-  }
-
-  const banMutation = useMutation({
-    mutationFn: async () => {
-      const promise = banUserById({
-        data: { userId: user.id, banReason }
-      })
-      toast.promise(promise, {
-        loading: 'Bannissement en cours...',
-        success: 'Utilisateur banni'
-      })
-
-      return promise
-    },
-    onSuccess: handleMutationSuccess,
-    onError: (error) => {
-      handleMutationError(error, 'admin-user-ban')
-    }
-  })
-
-  const unbanMutation = useMutation({
-    mutationFn: async () => {
-      const promise = unbanUserById({ data: user.id })
-      toast.promise(promise, {
-        loading: 'Débannissement en cours...',
-        success: 'Utilisateur débanni'
-      })
-
-      return promise
-    },
-    onSuccess: handleMutationSuccess,
-    onError: (error) => {
-      handleMutationError(error, 'admin-user-unban')
-    }
-  })
-
-  const deleteMutation = useMutation({
-    mutationFn: async () => {
-      const promise = removeUser({ data: user.id })
-      toast.promise(promise, {
-        loading: 'Suppression en cours...',
-        success: 'Utilisateur supprimé'
-      })
-
-      return promise
-    },
-    onSuccess: handleMutationSuccess,
-    onError: (error) => {
-      handleMutationError(error, 'admin-user-delete')
-    }
-  })
-
-  const isOwnAccount = user.id === admin.id
-  const isAdmin = user.role === 'admin'
-  const hasActions = !isOwnAccount || !isAdmin
-
-  if (!hasActions) {
-    return null
-  }
-
-  return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="data-[state=open]:bg-muted text-muted-foreground flex size-9 ml-auto"
-            size="icon"
-          >
-            <EllipsisVertical />
-            <span className="sr-only">Actions</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-32">
-          {!isAdmin && user.banned ? (
-            <DropdownMenuItem
-              onSelect={() => {
-                setActiveDialog('unban')
-              }}
-            >
-              Débannir
-            </DropdownMenuItem>
-          ) : null}
-          {!isAdmin && !user.banned ? (
-            <DropdownMenuItem
-              variant="destructive"
-              onSelect={() => {
-                setActiveDialog('ban')
-              }}
-            >
-              Bannir
-            </DropdownMenuItem>
-          ) : null}
-          {!isOwnAccount ? (
-            <DropdownMenuItem
-              variant="destructive"
-              onSelect={() => {
-                setActiveDialog('delete')
-              }}
-            >
-              Supprimer
-            </DropdownMenuItem>
-          ) : null}
-        </DropdownMenuContent>
-      </DropdownMenu>
-      <ConfirmAlertDialog
-        isOpen={activeDialog === 'ban'}
-        onClose={handleCloseDialog}
-        title={`Bannir ${user.name}`}
-        description="Choisissez une raison pour le bannissement."
-        actionLabel="Bannir"
-        onConfirm={() => {
-          banMutation.mutate()
-        }}
-      >
-        <Select
-          value={banReason}
-          onValueChange={(value) => {
-            setBanReason(value as BanReason)
-          }}
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {BAN_REASONS.map((reason) => {
-              return (
-                <SelectItem key={reason} value={reason}>
-                  {reason}
-                </SelectItem>
-              )
-            })}
-          </SelectContent>
-        </Select>
-      </ConfirmAlertDialog>
-      <ConfirmAlertDialog
-        isOpen={activeDialog === 'unban'}
-        onClose={handleCloseDialog}
-        title={`Débannir ${user.name}`}
-        description="L'utilisateur pourra de nouveau accéder à la plateforme."
-        actionLabel="Débannir"
-        onConfirm={() => {
-          unbanMutation.mutate()
-        }}
-      />
-      <ConfirmAlertDialog
-        isOpen={activeDialog === 'delete'}
-        onClose={handleCloseDialog}
-        title={`Supprimer ${user.name}`}
-        description="Cette action est irréversible. Toutes les données de l'utilisateur seront supprimées."
-        actionLabel="Supprimer"
-        onConfirm={() => {
-          deleteMutation.mutate()
-        }}
-      />
-    </>
-  )
-}
-
-const UserStatusBadges = ({ user }: UserCellProps) => {
+const UserStatusBadges = ({ user }: UserCellParams) => {
   const isBanned = user.banned === true
   const isUnverified = user.emailVerified === false
   const isActive = !isBanned && !isUnverified
@@ -476,7 +267,7 @@ const RouteComponent = () => {
   )
 }
 
-export const Route = createFileRoute('/admin/users')({
+export const Route = createFileRoute('/admin/users/')({
   component: RouteComponent,
   head: () => {
     return { meta: [{ title: 'Admin Petit Meme - Utilisateurs' }] }

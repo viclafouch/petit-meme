@@ -16,8 +16,8 @@ import {
 } from '@/helpers/format'
 import { getVideoStatusByIdQueryOpts } from '@/lib/queries'
 import { cn } from '@/lib/utils'
-import type { AdminMemeRecord } from '@/server/admin/memes'
 import { matchIsVideoPlayable } from '@/utils/video'
+import type { AdminMemeRecord } from '@admin/-server/memes'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 

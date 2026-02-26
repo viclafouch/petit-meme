@@ -8,7 +8,7 @@ import {
   TrendingUp
 } from 'lucide-react'
 import { buildVideoImageUrl } from '@/lib/bunny'
-import type { TrendingMeme } from '@/server/admin/dashboard'
+import type { TrendingMeme } from '@admin/-server/dashboard'
 import { Link } from '@tanstack/react-router'
 
 type SignalKey = keyof Omit<TrendingMeme, 'meme' | 'rank' | 'score'>

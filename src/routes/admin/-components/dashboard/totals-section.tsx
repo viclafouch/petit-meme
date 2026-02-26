@@ -1,5 +1,5 @@
 import { Clock, Crown, FileVideo, Users } from 'lucide-react'
-import type { DashboardTotals } from '@/server/admin/dashboard'
+import type { DashboardTotals } from '@admin/-server/dashboard'
 
 const TOTAL_CONFIGS = [
   {

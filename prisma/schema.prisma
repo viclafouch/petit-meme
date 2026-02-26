@@ -21,6 +21,7 @@ model UserBookmark {
   @@unique([userId, memeId])
   @@index([userId])
   @@index([memeId])
+  @@index([createdAt])
   @@map("user_bookmark")
 }
 
@@ -68,8 +69,10 @@ model Meme {
   id           String         @id @default(cuid())
   title        String
   videoId      Int            @unique
-  viewCount    Int            @default(0)
-  tweetUrl     String?        @unique
+  viewCount      Int            @default(0)
+  shareCount     Int            @default(0)
+  downloadCount  Int            @default(0)
+  tweetUrl       String?        @unique
   description  String         @default("")
   keywords     String[]       @default([])
   createdAt    DateTime       @default(now())
@@ -85,6 +88,7 @@ model Meme {
 
   @@index([status])
   @@index([status, viewCount])
+  @@index([status, publishedAt])
   @@index([submittedBy])
 }
 
@@ -101,6 +105,7 @@ model MemeViewDaily {
   @@unique([memeId, viewerKey, day])
   @@index([memeId, day])
   @@index([viewerKey, day])
+  @@index([day])
 }
 
 model User {
@@ -128,8 +133,10 @@ model User {
   verificationReminderSent Boolean   @default(false) @map("verification_reminder_sent")
   isAnonymized             Boolean   @default(false) @map("is_anonymized")
 
-  adminActions AdminAuditLog[] @relation("AdminActions")
+  studioGenerations StudioGeneration[]
+  adminActions      AdminAuditLog[]    @relation("AdminActions")
 
+  @@index([createdAt])
   @@map("user")
 }
 
@@ -181,6 +188,7 @@ model Subscription {
   trialEnd            DateTime? @map("trial_end")
 
   @@index([referenceId, status])
+  @@index([status])
   @@map("subscription")
 }
 
@@ -213,6 +221,18 @@ model Verification {
   updatedAt  DateTime?
 
   @@map("verification")
+}
+
+model StudioGeneration {
+  id        String   @id @default(cuid())
+  userId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([userId, createdAt])
+  @@map("studio_generation")
 }
 
 model RateLimit {

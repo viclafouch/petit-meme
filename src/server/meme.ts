@@ -363,6 +363,24 @@ export const shareMeme = createServerFn({ method: 'GET' })
     }
   })
 
+const TRACK_MEME_ACTION_SCHEMA = z.object({
+  memeId: z.string(),
+  action: z.enum(['share', 'download'])
+})
+
+export const trackMemeAction = createServerFn({ method: 'POST' })
+  .inputValidator((data) => {
+    return TRACK_MEME_ACTION_SCHEMA.parse(data)
+  })
+  .handler(async ({ data }) => {
+    const field = data.action === 'share' ? 'shareCount' : 'downloadCount'
+
+    await prismaClient.meme.update({
+      where: { id: data.memeId },
+      data: { [field]: { increment: 1 } }
+    })
+  })
+
 export const registerMemeView = createServerFn({ method: 'POST' })
   .inputValidator((data) => {
     return z

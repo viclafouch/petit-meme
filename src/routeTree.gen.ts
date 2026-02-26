@@ -16,6 +16,7 @@ import { Route as HealthRouteImport } from './routes/health'
 import { Route as StudioRouteImport } from './routes/_studio'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as Public__rootRouteRouteImport } from './routes/_public__root/route'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as Public__rootIndexRouteImport } from './routes/_public__root/index'
 import { Route as ApiSentryTunnelRouteImport } from './routes/api/sentry-tunnel'
 import { Route as ApiBunnyRouteImport } from './routes/api/bunny'
@@ -74,6 +75,11 @@ const AdminRouteRoute = AdminRouteRouteImport.update({
 const Public__rootRouteRoute = Public__rootRouteRouteImport.update({
   id: '/_public__root',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
 const Public__rootIndexRoute = Public__rootIndexRouteImport.update({
   id: '/',
@@ -226,6 +232,7 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AdminUsersRoute
   '/api/bunny': typeof ApiBunnyRoute
   '/api/sentry-tunnel': typeof ApiSentryTunnelRoute
+  '/admin/': typeof AdminIndexRoute
   '/settings': typeof Public__rootDefaultSettingsRouteRouteWithChildren
   '/favorites': typeof Public__rootDefaultFavoritesRoute
   '/mentions-legales': typeof Public__rootDefaultMentionsLegalesRoute
@@ -247,7 +254,6 @@ export interface FileRoutesByFullPath {
   '/memes/category/$slug': typeof Public__rootDefaultMemesCategorySlugRoute
 }
 export interface FileRoutesByTo {
-  '/admin': typeof AdminRouteRouteWithChildren
   '/': typeof Public__rootIndexRoute
   '/health': typeof HealthRoute
   '/reels': typeof ReelsRoute
@@ -257,6 +263,7 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AdminUsersRoute
   '/api/bunny': typeof ApiBunnyRoute
   '/api/sentry-tunnel': typeof ApiSentryTunnelRoute
+  '/admin': typeof AdminIndexRoute
   '/favorites': typeof Public__rootDefaultFavoritesRoute
   '/mentions-legales': typeof Public__rootDefaultMentionsLegalesRoute
   '/pricing': typeof Public__rootDefaultPricingRoute
@@ -291,6 +298,7 @@ export interface FileRoutesById {
   '/api/bunny': typeof ApiBunnyRoute
   '/api/sentry-tunnel': typeof ApiSentryTunnelRoute
   '/_public__root/': typeof Public__rootIndexRoute
+  '/admin/': typeof AdminIndexRoute
   '/_public__root/_default/settings': typeof Public__rootDefaultSettingsRouteRouteWithChildren
   '/_public__root/_default/favorites': typeof Public__rootDefaultFavoritesRoute
   '/_public__root/_default/mentions-legales': typeof Public__rootDefaultMentionsLegalesRoute
@@ -324,6 +332,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/api/bunny'
     | '/api/sentry-tunnel'
+    | '/admin/'
     | '/settings'
     | '/favorites'
     | '/mentions-legales'
@@ -345,7 +354,6 @@ export interface FileRouteTypes {
     | '/memes/category/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/admin'
     | '/'
     | '/health'
     | '/reels'
@@ -355,6 +363,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/api/bunny'
     | '/api/sentry-tunnel'
+    | '/admin'
     | '/favorites'
     | '/mentions-legales'
     | '/pricing'
@@ -388,6 +397,7 @@ export interface FileRouteTypes {
     | '/api/bunny'
     | '/api/sentry-tunnel'
     | '/_public__root/'
+    | '/admin/'
     | '/_public__root/_default/settings'
     | '/_public__root/_default/favorites'
     | '/_public__root/_default/mentions-legales'
@@ -472,6 +482,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof Public__rootRouteRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/_public__root/': {
       id: '/_public__root/'
@@ -726,6 +743,7 @@ const Public__rootRouteRouteWithChildren =
 interface AdminRouteRouteChildren {
   AdminDownloaderRoute: typeof AdminDownloaderRoute
   AdminUsersRoute: typeof AdminUsersRoute
+  AdminIndexRoute: typeof AdminIndexRoute
   AdminLibraryMemeIdRoute: typeof AdminLibraryMemeIdRoute
   AdminCategoriesIndexRoute: typeof AdminCategoriesIndexRoute
   AdminLibraryIndexRoute: typeof AdminLibraryIndexRoute
@@ -734,6 +752,7 @@ interface AdminRouteRouteChildren {
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminDownloaderRoute: AdminDownloaderRoute,
   AdminUsersRoute: AdminUsersRoute,
+  AdminIndexRoute: AdminIndexRoute,
   AdminLibraryMemeIdRoute: AdminLibraryMemeIdRoute,
   AdminCategoriesIndexRoute: AdminCategoriesIndexRoute,
   AdminLibraryIndexRoute: AdminLibraryIndexRoute,

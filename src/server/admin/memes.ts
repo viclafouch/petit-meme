@@ -33,6 +33,7 @@ import {
   getTweetMedia
 } from '@/lib/react-tweet'
 import { captureWithFeature } from '@/lib/sentry'
+import { logAuditAction } from '@/server/admin/audit'
 import { adminRequiredMiddleware } from '@/server/user-auth'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
@@ -112,7 +113,7 @@ export const editMeme = createServerFn({ method: 'POST' })
     return MEME_FORM_SCHEMA.extend({ id: z.string() }).parse(data)
   })
   .middleware([adminRequiredMiddleware])
-  .handler(async ({ data: values }) => {
+  .handler(async ({ data: values, context }) => {
     const meme = await prismaClient.meme.findUnique({
       where: {
         id: values.id
@@ -182,6 +183,26 @@ export const editMeme = createServerFn({ method: 'POST' })
 
     invalidateAlgoliaCache()
 
+    const hasStatusChanged = meme.status !== values.status
+
+    void logAuditAction({
+      action: 'edit',
+      actingAdminId: context.user.id,
+      targetId: memeUpdated.id,
+      targetType: 'meme',
+      metadata: { title: values.title }
+    })
+
+    if (hasStatusChanged) {
+      void logAuditAction({
+        action: 'status_change',
+        actingAdminId: context.user.id,
+        targetId: memeUpdated.id,
+        targetType: 'meme',
+        metadata: { title: values.title, from: meme.status, to: values.status }
+      })
+    }
+
     adminLogger.info(
       { memeId: memeUpdated.id, status: values.status },
       'Meme edited'
@@ -195,7 +216,7 @@ export const deleteMemeById = createServerFn({ method: 'POST' })
     return z.string().parse(data)
   })
   .middleware([adminRequiredMiddleware])
-  .handler(async ({ data: memeId }) => {
+  .handler(async ({ data: memeId, context }) => {
     const meme = await prismaClient.meme.findUnique({
       where: { id: memeId },
       include: { video: true }
@@ -229,6 +250,14 @@ export const deleteMemeById = createServerFn({ method: 'POST' })
 
     invalidateAlgoliaCache()
 
+    void logAuditAction({
+      action: 'delete',
+      actingAdminId: context.user.id,
+      targetId: meme.id,
+      targetType: 'meme',
+      metadata: { title: meme.title }
+    })
+
     adminLogger.info({ memeId: meme.id }, 'Meme deleted')
 
     return { id: meme.id }
@@ -237,11 +266,13 @@ export const deleteMemeById = createServerFn({ method: 'POST' })
 type CreateMemeWithVideoParams = {
   buffer: Buffer
   tweetUrl?: string
+  adminId: string
 }
 
 async function createMemeWithVideo({
   buffer,
-  tweetUrl
+  tweetUrl,
+  adminId
 }: CreateMemeWithVideoParams) {
   const title = DEFAULT_MEME_TITLE
   const { videoId } = await createVideo(title)
@@ -315,6 +346,14 @@ async function createMemeWithVideo({
 
   invalidateAlgoliaCache()
 
+  void logAuditAction({
+    action: 'create',
+    actingAdminId: adminId,
+    targetId: meme.id,
+    targetType: 'meme',
+    metadata: { title, source: tweetUrl ? 'twitter' : 'upload' }
+  })
+
   adminLogger.info({ memeId: meme.id, tweetUrl }, 'Meme created')
 
   return { id: meme.id }
@@ -325,7 +364,7 @@ export const createMemeFromTwitterUrl = createServerFn({ method: 'POST' })
     return TWEET_LINK_SCHEMA.parse(url)
   })
   .middleware([adminRequiredMiddleware])
-  .handler(async ({ data: url }) => {
+  .handler(async ({ data: url, context }) => {
     const tweetId = z.string().parse(extractTweetIdFromUrl(url))
 
     const tweet = await getTweetById(tweetId)
@@ -343,7 +382,11 @@ export const createMemeFromTwitterUrl = createServerFn({ method: 'POST' })
 
     const buffer = Buffer.from(await media.video.blob.arrayBuffer())
 
-    return createMemeWithVideo({ buffer, tweetUrl: tweet.url })
+    return createMemeWithVideo({
+      buffer,
+      tweetUrl: tweet.url,
+      adminId: context.user.id
+    })
   })
 
 export const CREATE_MEME_FROM_FILE_SCHEMA = z.object({
@@ -359,10 +402,10 @@ export const createMemeFromFile = createServerFn({ method: 'POST' })
     })
   })
   .middleware([adminRequiredMiddleware])
-  .handler(async ({ data: values }) => {
+  .handler(async ({ data: values, context }) => {
     const buffer = Buffer.from(await values.video.arrayBuffer())
 
-    return createMemeWithVideo({ buffer })
+    return createMemeWithVideo({ buffer, adminId: context.user.id })
   })
 
 export type AdminMemeRecord = AlgoliaMemeRecord & {

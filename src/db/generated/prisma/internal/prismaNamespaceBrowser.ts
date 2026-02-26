@@ -63,6 +63,7 @@ export const ModelName = {
   Subscription: 'Subscription',
   Account: 'Account',
   Verification: 'Verification',
+  StudioGeneration: 'StudioGeneration',
   RateLimit: 'RateLimit'
 } as const
 
@@ -128,6 +129,8 @@ export const MemeScalarFieldEnum = {
   title: 'title',
   videoId: 'videoId',
   viewCount: 'viewCount',
+  shareCount: 'shareCount',
+  downloadCount: 'downloadCount',
   tweetUrl: 'tweetUrl',
   description: 'description',
   keywords: 'keywords',
@@ -251,6 +254,15 @@ export const VerificationScalarFieldEnum = {
 } as const
 
 export type VerificationScalarFieldEnum = (typeof VerificationScalarFieldEnum)[keyof typeof VerificationScalarFieldEnum]
+
+
+export const StudioGenerationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  createdAt: 'createdAt'
+} as const
+
+export type StudioGenerationScalarFieldEnum = (typeof StudioGenerationScalarFieldEnum)[keyof typeof StudioGenerationScalarFieldEnum]
 
 
 export const RateLimitScalarFieldEnum = {
@@ -429,6 +441,14 @@ export const VerificationOrderByRelevanceFieldEnum = {
 } as const
 
 export type VerificationOrderByRelevanceFieldEnum = (typeof VerificationOrderByRelevanceFieldEnum)[keyof typeof VerificationOrderByRelevanceFieldEnum]
+
+
+export const StudioGenerationOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId'
+} as const
+
+export type StudioGenerationOrderByRelevanceFieldEnum = (typeof StudioGenerationOrderByRelevanceFieldEnum)[keyof typeof StudioGenerationOrderByRelevanceFieldEnum]
 
 
 export const RateLimitOrderByRelevanceFieldEnum = {

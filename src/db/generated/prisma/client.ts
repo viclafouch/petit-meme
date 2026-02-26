@@ -100,6 +100,11 @@ export type Account = Prisma.AccountModel
  */
 export type Verification = Prisma.VerificationModel
 /**
+ * Model StudioGeneration
+ * 
+ */
+export type StudioGeneration = Prisma.StudioGenerationModel
+/**
  * Model RateLimit
  * 
  */

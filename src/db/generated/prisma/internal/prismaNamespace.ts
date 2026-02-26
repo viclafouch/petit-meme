@@ -396,6 +396,7 @@ export const ModelName = {
   Subscription: 'Subscription',
   Account: 'Account',
   Verification: 'Verification',
+  StudioGeneration: 'StudioGeneration',
   RateLimit: 'RateLimit'
 } as const
 
@@ -412,7 +413,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "userBookmark" | "category" | "memeCategory" | "video" | "meme" | "memeViewDaily" | "user" | "adminAuditLog" | "session" | "subscription" | "account" | "verification" | "rateLimit"
+    modelProps: "userBookmark" | "category" | "memeCategory" | "video" | "meme" | "memeViewDaily" | "user" | "adminAuditLog" | "session" | "subscription" | "account" | "verification" | "studioGeneration" | "rateLimit"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1304,6 +1305,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    StudioGeneration: {
+      payload: Prisma.$StudioGenerationPayload<ExtArgs>
+      fields: Prisma.StudioGenerationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.StudioGenerationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudioGenerationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.StudioGenerationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudioGenerationPayload>
+        }
+        findFirst: {
+          args: Prisma.StudioGenerationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudioGenerationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.StudioGenerationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudioGenerationPayload>
+        }
+        findMany: {
+          args: Prisma.StudioGenerationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudioGenerationPayload>[]
+        }
+        create: {
+          args: Prisma.StudioGenerationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudioGenerationPayload>
+        }
+        createMany: {
+          args: Prisma.StudioGenerationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.StudioGenerationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudioGenerationPayload>[]
+        }
+        delete: {
+          args: Prisma.StudioGenerationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudioGenerationPayload>
+        }
+        update: {
+          args: Prisma.StudioGenerationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudioGenerationPayload>
+        }
+        deleteMany: {
+          args: Prisma.StudioGenerationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.StudioGenerationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.StudioGenerationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudioGenerationPayload>[]
+        }
+        upsert: {
+          args: Prisma.StudioGenerationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudioGenerationPayload>
+        }
+        aggregate: {
+          args: Prisma.StudioGenerationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateStudioGeneration>
+        }
+        groupBy: {
+          args: Prisma.StudioGenerationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StudioGenerationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.StudioGenerationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StudioGenerationCountAggregateOutputType> | number
+        }
+      }
+    }
     RateLimit: {
       payload: Prisma.$RateLimitPayload<ExtArgs>
       fields: Prisma.RateLimitFieldRefs
@@ -1463,6 +1538,8 @@ export const MemeScalarFieldEnum = {
   title: 'title',
   videoId: 'videoId',
   viewCount: 'viewCount',
+  shareCount: 'shareCount',
+  downloadCount: 'downloadCount',
   tweetUrl: 'tweetUrl',
   description: 'description',
   keywords: 'keywords',
@@ -1586,6 +1663,15 @@ export const VerificationScalarFieldEnum = {
 } as const
 
 export type VerificationScalarFieldEnum = (typeof VerificationScalarFieldEnum)[keyof typeof VerificationScalarFieldEnum]
+
+
+export const StudioGenerationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  createdAt: 'createdAt'
+} as const
+
+export type StudioGenerationScalarFieldEnum = (typeof StudioGenerationScalarFieldEnum)[keyof typeof StudioGenerationScalarFieldEnum]
 
 
 export const RateLimitScalarFieldEnum = {
@@ -1764,6 +1850,14 @@ export const VerificationOrderByRelevanceFieldEnum = {
 } as const
 
 export type VerificationOrderByRelevanceFieldEnum = (typeof VerificationOrderByRelevanceFieldEnum)[keyof typeof VerificationOrderByRelevanceFieldEnum]
+
+
+export const StudioGenerationOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId'
+} as const
+
+export type StudioGenerationOrderByRelevanceFieldEnum = (typeof StudioGenerationOrderByRelevanceFieldEnum)[keyof typeof StudioGenerationOrderByRelevanceFieldEnum]
 
 
 export const RateLimitOrderByRelevanceFieldEnum = {
@@ -1991,6 +2085,7 @@ export type GlobalOmitConfig = {
   subscription?: Prisma.SubscriptionOmit
   account?: Prisma.AccountOmit
   verification?: Prisma.VerificationOmit
+  studioGeneration?: Prisma.StudioGenerationOmit
   rateLimit?: Prisma.RateLimitOmit
 }
 

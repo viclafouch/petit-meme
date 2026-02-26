@@ -328,7 +328,7 @@ Transformer la page d'accueil admin (actuellement redirect vers `/admin/library`
 - Algolia Analytics API : **indisponible sur free tier** (nécessite Premium/Elevate) → compteurs DB
 - Partages/téléchargements : `shareCount`/`downloadCount` sur Meme (migration additive, historique = 0, affichés dès le début)
 - StudioGeneration : nouveau modèle Prisma pour l'analytics (filtrage par date). `User.generationCount` **conservé** pour le rate limiting (O(1) vs COUNT scan). Écriture atomique via `$transaction` (increment counter + create record). Dual source justifiée par l'audit perf.
-- Période : URL search param `?period=7d|30d|90d`, default `30d`, validé Zod via TanStack Router
+- Période : URL search param `?period=7d|30d|90d|all`, default `30d`, validé Zod via TanStack Router. Param optionnel (liens vers `/admin` sans search). `PERIOD_SCHEMA` exporté depuis `dashboard.ts` comme single source of truth.
 - Deltas : % variation vs période précédente (flèche verte/rouge). Masqué si previous=0. Badge "Nouveau" si current>0 et previous=0. Sinon afficher le % normalement.
 - Data loading : client-side `useSuspenseQuery` + Suspense boundaries + skeleton cards
 - Server functions : 2 fonctions (stats + feed séparés car le feed est indépendant de la période)
@@ -348,63 +348,75 @@ Transformer la page d'accueil admin (actuellement redirect vers `/admin/library`
 **Fichiers :** `src/routes/admin/index.tsx`, `src/routes/admin/-components/dashboard/` (kpi-card, kpi-grid, totals-section, quick-links, activity-feed), `src/server/admin/dashboard.ts`, `src/server/admin/memes.ts`, `src/server/admin/audit.ts`, `src/server/user.ts`, `src/server/meme.ts`, `prisma/schema.prisma`, `src/hooks/use-share-meme.ts`, `src/hooks/use-download-meme.ts`, `src/routes/admin/route.tsx`, `src/components/admin/admin-sidebar.tsx`, `src/lib/sentry.ts`
 
 **Migrations additives (Prisma)**
-- [ ] Créer le modèle `StudioGeneration` (id, userId, createdAt) — relation User, indexes : `@@index([createdAt])` + `@@index([userId, createdAt])` (le composite couvre les queries par userId seul, pas besoin d'un index `userId` standalone)
-- [ ] Ajouter `shareCount Int @default(0)` et `downloadCount Int @default(0)` sur `Meme`
-- [ ] Ajouter `@@index([day])` sur `MemeViewDaily` — queries globales date-range KPI (sans filtre memeId)
-- [ ] Ajouter `@@index([createdAt])` sur `UserBookmark` — bookmarks KPI date-range
-- [ ] Ajouter `@@index([createdAt])` sur `User` — nouveaux users KPI date-range
-- [ ] Ajouter `@@index([status, publishedAt])` sur `Meme` — nouveaux memes publiés KPI
-- [ ] Ajouter `@@index([status])` sur `Subscription` — count global actifs (le composite `(referenceId, status)` existant ne couvre pas un filtre global par status)
+- [x] Créer le modèle `StudioGeneration` (id, userId, createdAt) — relation User, indexes : `@@index([createdAt])` + `@@index([userId, createdAt])` (le composite couvre les queries par userId seul, pas besoin d'un index `userId` standalone)
+- [x] Ajouter `shareCount Int @default(0)` et `downloadCount Int @default(0)` sur `Meme`
+- [x] Ajouter `@@index([day])` sur `MemeViewDaily` — queries globales date-range KPI (sans filtre memeId)
+- [x] Ajouter `@@index([createdAt])` sur `UserBookmark` — bookmarks KPI date-range
+- [x] Ajouter `@@index([createdAt])` sur `User` — nouveaux users KPI date-range
+- [x] Ajouter `@@index([status, publishedAt])` sur `Meme` — nouveaux memes publiés KPI
+- [x] Ajouter `@@index([status])` sur `Subscription` — count global actifs (le composite `(referenceId, status)` existant ne couvre pas un filtre global par status)
 
 **StudioGeneration + generationCount (dual write)**
-- [ ] Modifier `incrementGenerationCount` dans `src/server/user.ts` : écriture atomique via `$transaction` — `user.update({ generationCount: { increment: 1 } })` + `studioGeneration.create({ userId })`. Le rate limiting continue de lire `generationCount` (O(1), pas de régression perf)
-- [ ] Modifier `src/server/admin/users.ts` (`getListUsers`) : remplacer `generationCount` dans `USER_LIST_SELECT` par un `studioGeneration.groupBy({ by: ['userId'], where: { userId: { in: userIds } }, _count: { id: true } })` dans le `Promise.all` batch existant (cohérent avec le pattern memeCounts/bookmarkCounts)
-- [ ] Modifier `src/routes/admin/users.tsx` : adapter l'affichage engagement (Xg) pour utiliser le nouveau champ du batch
+- [x] Modifier `incrementGenerationCount` dans `src/server/user.ts` : écriture atomique via `$transaction` — `user.update({ generationCount: { increment: 1 } })` + `studioGeneration.create({ userId })`. Le rate limiting continue de lire `generationCount` (O(1), pas de régression perf)
+- [x] Modifier `src/server/admin/users.ts` (`getListUsers`) : remplacer `generationCount` dans `USER_LIST_SELECT` par un `studioGeneration.groupBy({ by: ['userId'], where: { userId: { in: userIds } }, _count: { id: true } })` dans le `Promise.all` batch existant (cohérent avec le pattern memeCounts/bookmarkCounts)
+- [x] Modifier `src/routes/admin/users.tsx` : adapter l'affichage engagement (Xg) pour utiliser le nouveau champ du batch — `EnrichedUser.generationCount` désormais calculé côté serveur, aucun changement côté UI nécessaire
 
 **Tracking share/download**
-- [ ] Créer `trackMemeAction` server function dans `src/server/meme.ts` **sans auth** (ouvert à tous, anonymes inclus) : `({ memeId, action: 'share' | 'download' })` → `prisma.meme.update({ where: { id: memeId }, data: { [field]: { increment: 1 } } })`. Fire-and-forget pur, pas de check d'existence.
-- [ ] Appeler `trackMemeAction` fire-and-forget dans `src/hooks/use-share-meme.ts` après share réussi
-- [ ] Appeler `trackMemeAction` fire-and-forget dans `src/hooks/use-download-meme.ts` après download réussi
+- [x] Créer `trackMemeAction` server function dans `src/server/meme.ts` **sans auth** (ouvert à tous, anonymes inclus) : `({ memeId, action: 'share' | 'download' })` → `prisma.meme.update({ where: { id: memeId }, data: { [field]: { increment: 1 } } })`. Fire-and-forget pur, pas de check d'existence.
+- [x] Appeler `trackMemeAction` fire-and-forget dans `src/hooks/use-share-meme.ts` après share réussi
+- [x] Appeler `trackMemeAction` fire-and-forget dans `src/hooks/use-download-meme.ts` après download réussi
 - [ ] **Reporté :** rate limiting dédié sur le tracking (dédoublonnage par user/meme)
 
 **Audit log memes (5 actions, fire-and-forget)**
-- [ ] `createMemeFromTwitterUrl` : `void logAuditAction({ action: 'create', targetType: 'meme', metadata: { title, source: 'twitter' } })`
-- [ ] `createMemeFromFile` : `void logAuditAction({ action: 'create', targetType: 'meme', metadata: { title, source: 'upload' } })`
-- [ ] `editMeme` : `findUnique({ select: { status: true } })` avant l'update pour détecter le changement de status. `void logAuditAction({ action: 'edit', targetType: 'meme', metadata: { title } })` — logger chaque appel (pas de diff)
-- [ ] `editMeme` (status change) : `void logAuditAction({ action: 'status_change', targetType: 'meme', metadata: { title, from, to } })` — quand le status change (comparaison old vs new)
-- [ ] `deleteMemeById` : `void logAuditAction({ action: 'delete', targetType: 'meme', metadata: { title } })`
-- [ ] **Rétroactif** : migrer les `await logAuditAction(...)` existants (categories) vers `void logAuditAction(...)` pour cohérence (-10-30ms par CRUD)
+- [x] `createMemeFromTwitterUrl` : `void logAuditAction({ action: 'create', targetType: 'meme', metadata: { title, source: 'twitter' } })`
+- [x] `createMemeFromFile` : `void logAuditAction({ action: 'create', targetType: 'meme', metadata: { title, source: 'upload' } })`
+- [x] `editMeme` : `findUnique({ select: { status: true } })` avant l'update pour détecter le changement de status. `void logAuditAction({ action: 'edit', targetType: 'meme', metadata: { title } })` — logger chaque appel (pas de diff)
+- [x] `editMeme` (status change) : `void logAuditAction({ action: 'status_change', targetType: 'meme', metadata: { title, from, to } })` — quand le status change (comparaison old vs new)
+- [x] `deleteMemeById` : `void logAuditAction({ action: 'delete', targetType: 'meme', metadata: { title } })`
+- [x] **Rétroactif** : migrer les `await logAuditAction(...)` existants (categories + users) vers `void logAuditAction(...)` pour cohérence (-10-30ms par CRUD)
 
 **Server functions**
-- [ ] `getAdminDashboardStats({ period: '7d' | '30d' | '90d' })` dans `src/server/admin/dashboard.ts` — retourne :
+- [x] `getAdminDashboardStats({ period: '7d' | '30d' | '90d' | 'all' })` dans `src/server/admin/dashboard.ts` — retourne :
   - 7 KPIs filtrés par période + deltas (vues, nouveaux users, nouveaux memes publiés, générations Studio, bookmarks, partages, téléchargements)
   - 4 totaux hors période (memes publiés, memes en attente, total users, abonnements premium actifs)
-  - 4 liens rapides avec counts dynamiques
-  - **Queries** : Prisma client classique + `Promise.all`. ~22 queries parallèles type-safe (2 par KPI : current + previous period). Dates calculées une seule fois en haut du handler.
-- [ ] `getAdminRecentActivity()` dans `src/server/admin/dashboard.ts` — 10 dernières entrées `AdminAuditLog` (indépendant de la période). L'index `@@index([createdAt])` existant suffit (DESC scan + LIMIT 10)
+  - **Queries** : Prisma client classique + `Promise.all`. ~18 queries parallèles type-safe (2 par KPI : current + previous period). Dates calculées via `computeDateRanges` (extrait dans `helpers/date.ts`).
+  - **Architecture** : 3 fonctions — `fetchTotals()` (partagé), `fetchAllTimeStats()` (period=all, previous=0), `fetchPeriodStats(days)` (comparaison N jours)
+- [x] `getAdminRecentActivity()` dans `src/server/admin/dashboard.ts` — 10 dernières entrées `AdminAuditLog` (indépendant de la période). L'index `@@index([createdAt])` existant suffit (DESC scan + LIMIT 10). Type `AuditLogEntry` dérivé de Prisma via `Omit<RawAuditLogEntry, 'action' | 'targetType' | 'metadata'> & { action: AuditAction; targetType: AuditTargetType; metadata: AuditMetadata | null }` — single `as` cast au server boundary.
 
 **Page dashboard (`src/routes/admin/index.tsx`)**
-- [ ] Retirer le redirect vers `/admin/library` dans `src/routes/admin/route.tsx`
-- [ ] Créer `src/routes/admin/index.tsx` — route `/admin`, titre "Dashboard", search params validés Zod (`period: z.enum(['7d', '30d', '90d']).catch('30d')`)
-- [ ] Ajouter "Dashboard" dans la sidebar (`src/components/admin/admin-sidebar.tsx`) : premier lien, au-dessus de "Librairie", icône `LayoutDashboard` (lucide), lien vers `/admin`
-- [ ] `useSuspenseQuery` pour `getAdminDashboardStats` et `getAdminRecentActivity` — `refetchInterval: 60_000` (polling 60s), `refetchOnMount: 'always'` (refetch à chaque navigation vers le dashboard — pas de couplage avec les mutations admin)
-- [ ] Suspense + error boundary **par section** (KPIs, totaux, liens rapides, feed) — si une section plante, les autres restent visibles
-- [ ] Fallback erreur : encadré "Impossible de charger les données" + bouton "Réessayer" (reset error boundary)
-- [ ] Skeleton cards dans chaque Suspense fallback
-- [ ] `captureWithFeature` : ajouter `ADMIN_DASHBOARD` dans `SENTRY_FEATURES`. `trackMemeAction` : `captureWithFeature` dans le catch côté serveur (fire-and-forget sinon silencieux)
+- [x] Retirer le redirect vers `/admin/library` dans `src/routes/admin/route.tsx`
+- [x] Créer `src/routes/admin/index.tsx` — route `/admin`, titre "Dashboard", search params validés Zod (`period: PERIOD_SCHEMA.optional().default('30d').catch('30d')`) — param optionnel, default 30j
+- [x] Ajouter "Dashboard" dans la sidebar (`src/components/admin/admin-sidebar.tsx`) : premier lien, au-dessus de "Librairie", icône `LayoutDashboard` (lucide), lien vers `/admin`
+- [x] `useSuspenseQuery` pour `getAdminDashboardStats` et `getAdminRecentActivity` — `refetchInterval: MINUTE` (polling 60s), `refetchOnMount: 'always'` (au call site, pas dans la factory query opts)
+- [x] Suspense + error boundary **par section** (KPIs/totaux/liens rapides groupés, feed séparé) — si une section plante, les autres restent visibles
+- [x] Fallback erreur : encadré "Impossible de charger les données" + bouton "Réessayer" (reset error boundary)
+- [x] Skeleton cards dans chaque Suspense fallback
+- [x] `captureWithFeature` : ajouté `admin-dashboard` dans `SentryFeature`
 
 **Composants dashboard (`src/routes/admin/-components/dashboard/`)**
-- [ ] `kpi-card.tsx` — card avec valeur, label, delta (% + flèche verte/rouge). Delta masqué si previous=0. Badge "Nouveau" si current>0 et previous=0.
-- [ ] `kpi-grid.tsx` — grid responsive des 7 KPIs
-- [ ] `totals-section.tsx` — 4 totaux hors période (memes publiés, en attente, total users, abos premium)
-- [ ] `quick-links.tsx` — 4 liens avec counts dynamiques ("X memes en attente" → `/admin/library?status=PENDING`, "X utilisateurs" → `/admin/users`, "Ajouter un meme" → `/admin/library/add`, "Catégories" → `/admin/categories`)
-- [ ] `activity-feed.tsx` — liste des 10 dernières actions. Format "verbe passé + target" (ex: "Catégorie créée : Animaux"). Icônes par action type (cohérence admin-wide, choix délégué à `/frontend-design`)
+- [x] `kpi-card.tsx` — card avec valeur, label, delta (% + flèche verte/rouge). Delta masqué si previous=0. Badge "Nouveau" si current>0 et previous=0. `KpiDelta` sous-composant extrait.
+- [x] `kpi-grid.tsx` — grid responsive des 7 KPIs (config data-driven)
+- [x] `totals-section.tsx` — 4 totaux hors période (memes publiés, en attente, total users, abos premium)
+- [x] `quick-links.tsx` — 4 liens avec counts dynamiques. Data-driven via `buildQuickLinks(totals)` avec `linkOptions([...])` de TanStack Router (type-safe). "Ajouter un meme" remplacé par "Librairie" (l'ajout est un dialog, pas une route)
+- [x] `activity-feed.tsx` — liste des 10 dernières actions. Logique extraite dans `helpers/audit.tsx` (`formatAuditEntry`) et `helpers/action-icon.tsx` (`getActionIcon`). Zéro `as` cast (types flow depuis `AuditLogEntry` typé). Avatar + nom admin. Temps relatif via date-fns.
+- [x] `period-selector.tsx` — ToggleGroup shadcn (7j/30j/90j/Tout), met à jour le search param via `useNavigate`
 
 **Design — délégué à `/frontend-design`**
-- [ ] Layout responsive (mobile-first)
-- [ ] Composant sélecteur de période
-- [ ] Style des cards KPI, totaux, liens rapides, feed
-- [ ] Icônes par action type (feed + cohérence admin-wide)
+- [x] Layout responsive (mobile-first)
+- [x] Composant sélecteur de période
+- [x] Style des cards KPI, totaux, liens rapides, feed
+- [x] Icônes par action type (feed + cohérence admin-wide)
+
+**Helpers extraits (réutilisables hors admin) :**
+- `src/helpers/action-icon.tsx` — `getActionIcon(action)` : mapping action → icône lucide (generic, réutilisable dans library/users/categories)
+- `src/helpers/audit.tsx` — `getAuditTargetLabel`, `getAuditActionVerb`, `formatAuditEntry` : logique audit-specific (FR, accords genre)
+- `src/helpers/date.ts` — `truncateToUtcDay`, `computeDateRanges(days)` : utilitaires date extraits de `dashboard.ts`
+- `src/helpers/number.ts` — `computePercentChange(current, previous)` : calcul delta % (extrait de `kpi-card.tsx`)
+
+**Fichiers additionnels modifiés :**
+- `src/lib/algolia.ts` — ajouté `shareCount`/`downloadCount` dans `memeToAlgoliaRecord` (compatibilité type `MemeWithVideo`)
+- `src/components/path-breadcrumbs.tsx` — lien `/admin` sans search params (period optionnel)
+- `src/components/user-dropdown.tsx` — idem + extrait `UserDropdownParams` type + remplacé initiales inline par `getUserInitials`
 
 **Migration Prisma requise :** `pnpm exec prisma migrate dev --name add_studio_generation_and_meme_counters`
 

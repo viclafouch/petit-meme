@@ -31,6 +31,14 @@ function formatEuros(euros: number, options?: NumberFormatOptionsWithLocale) {
   })
 }
 
+export function computePercentChange(current: number, previous: number) {
+  if (previous === 0) {
+    return null
+  }
+
+  return Math.round(((current - previous) / previous) * 100)
+}
+
 export function convertCentsToEuros(cents: number) {
   return cents / 100
 }

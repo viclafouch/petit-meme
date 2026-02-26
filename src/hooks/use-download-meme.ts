@@ -1,7 +1,7 @@
 import { toast } from 'sonner'
 import type { MemeWithVideo } from '@/constants/meme'
 import { captureWithFeature } from '@/lib/sentry'
-import { shareMeme } from '@/server/meme'
+import { shareMeme, trackMemeAction } from '@/server/meme'
 import { downloadBlob } from '@/utils/download'
 import { useMutation } from '@tanstack/react-query'
 
@@ -17,6 +17,8 @@ export const useDownloadMeme = () => {
       const blob = await blobPromise
 
       downloadBlob(blob, meme.title)
+
+      void trackMemeAction({ data: { memeId: meme.id, action: 'download' } })
     },
     onError: (error) => {
       captureWithFeature(error, 'download')

@@ -76,7 +76,7 @@ export const addCategory = createServerFn({ method: 'POST' })
 
     invalidateCategoriesCache()
 
-    await logAuditAction({
+    void logAuditAction({
       action: 'create',
       actingAdminId: context.user.id,
       targetId: category.id,
@@ -109,7 +109,7 @@ export const editCategory = createServerFn({ method: 'POST' })
 
     invalidateCategoriesCache()
 
-    await logAuditAction({
+    void logAuditAction({
       action: 'edit',
       actingAdminId: context.user.id,
       targetId: category.id,
@@ -139,7 +139,7 @@ export const deleteCategory = createServerFn({ method: 'POST' })
 
     invalidateCategoriesCache()
 
-    await logAuditAction({
+    void logAuditAction({
       action: 'delete',
       actingAdminId: context.user.id,
       targetId: categoryId,

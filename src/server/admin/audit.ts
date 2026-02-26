@@ -2,7 +2,7 @@ import { prismaClient } from '@/db'
 import type { Prisma } from '@/db/generated/prisma/client'
 import { adminLogger } from '@/lib/logger'
 
-type AuditAction =
+export type AuditAction =
   | 'create'
   | 'edit'
   | 'delete'
@@ -10,7 +10,16 @@ type AuditAction =
   | 'unban'
   | 'status_change'
 
-type AuditTargetType = 'category' | 'meme' | 'user'
+export type AuditTargetType = 'category' | 'meme' | 'user'
+
+export type AuditMetadata = {
+  title?: string
+  slug?: string
+  banReason?: string
+  from?: string
+  to?: string
+  source?: string
+}
 
 type LogAuditActionParams = {
   action: AuditAction

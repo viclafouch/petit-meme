@@ -1,6 +1,11 @@
 import type { MemesFilters } from '@/constants/meme'
 import { MINUTE } from '@/constants/time'
 import type { Meme, Video } from '@/db/generated/prisma/client'
+import type { DashboardPeriod } from '@/server/admin/dashboard'
+import {
+  getAdminDashboardStats,
+  getAdminRecentActivity
+} from '@/server/admin/dashboard'
 import { getAdminMemeById, getAdminMemes } from '@/server/admin/memes'
 import { getCategories } from '@/server/categories'
 import { getActiveSubscription } from '@/server/customer'
@@ -135,6 +140,30 @@ export const getAdminMemesListQueryOpts = (filters: MemesFilters) => {
 }
 
 getAdminMemesListQueryOpts.all = ['admin-memes-list'] as const
+
+export const getAdminDashboardStatsQueryOpts = (period: DashboardPeriod) => {
+  return queryOptions({
+    queryKey: [...getAdminDashboardStatsQueryOpts.all, period],
+    queryFn: () => {
+      return getAdminDashboardStats({ data: period })
+    },
+    refetchInterval: MINUTE
+  })
+}
+
+getAdminDashboardStatsQueryOpts.all = ['admin-dashboard-stats'] as const
+
+export const getAdminRecentActivityQueryOpts = () => {
+  return queryOptions({
+    queryKey: [...getAdminRecentActivityQueryOpts.all],
+    queryFn: () => {
+      return getAdminRecentActivity()
+    },
+    refetchInterval: MINUTE
+  })
+}
+
+getAdminRecentActivityQueryOpts.all = ['admin-recent-activity'] as const
 
 export const getActiveSubscriptionQueryOpts = () => {
   return queryOptions({

@@ -176,6 +176,8 @@ export function memeToAlgoliaRecord(meme: MemeWithVideo & MemeWithCategories) {
     keywords: meme.keywords,
     status: meme.status,
     viewCount: meme.viewCount,
+    shareCount: meme.shareCount,
+    downloadCount: meme.downloadCount,
     tweetUrl: meme.tweetUrl,
     videoId: meme.videoId,
     submittedBy: meme.submittedBy,

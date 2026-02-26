@@ -15,8 +15,7 @@ const USER_LIST_SELECT = {
   emailVerified: true,
   image: true,
   role: true,
-  banned: true,
-  generationCount: true
+  banned: true
 } as const satisfies Prisma.UserSelect
 
 export type SubscriptionStatus = 'active' | 'past' | 'none'
@@ -45,6 +44,7 @@ export type EnrichedUser = Prisma.UserGetPayload<{
   subscription: SubscriptionInfo
   memeCount: number
   bookmarkCount: number
+  generationCount: number
   lastActivityAt: Date | null
 }
 
@@ -61,32 +61,43 @@ export const getListUsers = createServerFn({ method: 'GET' })
       return user.id
     })
 
-    const [accounts, subscriptions, memeCounts, bookmarkCounts, lastSessions] =
-      await Promise.all([
-        prismaClient.account.findMany({
-          where: { userId: { in: userIds } },
-          select: { userId: true, providerId: true }
-        }),
-        prismaClient.subscription.findMany({
-          where: { referenceId: { in: userIds } },
-          select: SUBSCRIPTION_LIST_SELECT
-        }),
-        prismaClient.meme.groupBy({
-          by: ['submittedBy'],
-          where: { submittedBy: { in: userIds } },
-          _count: { id: true }
-        }),
-        prismaClient.userBookmark.groupBy({
-          by: ['userId'],
-          where: { userId: { in: userIds } },
-          _count: { id: true }
-        }),
-        prismaClient.session.groupBy({
-          by: ['userId'],
-          where: { userId: { in: userIds } },
-          _max: { updatedAt: true }
-        })
-      ])
+    const [
+      accounts,
+      subscriptions,
+      memeCounts,
+      bookmarkCounts,
+      lastSessions,
+      generationCounts
+    ] = await Promise.all([
+      prismaClient.account.findMany({
+        where: { userId: { in: userIds } },
+        select: { userId: true, providerId: true }
+      }),
+      prismaClient.subscription.findMany({
+        where: { referenceId: { in: userIds } },
+        select: SUBSCRIPTION_LIST_SELECT
+      }),
+      prismaClient.meme.groupBy({
+        by: ['submittedBy'],
+        where: { submittedBy: { in: userIds } },
+        _count: { id: true }
+      }),
+      prismaClient.userBookmark.groupBy({
+        by: ['userId'],
+        where: { userId: { in: userIds } },
+        _count: { id: true }
+      }),
+      prismaClient.session.groupBy({
+        by: ['userId'],
+        where: { userId: { in: userIds } },
+        _max: { updatedAt: true }
+      }),
+      prismaClient.studioGeneration.groupBy({
+        by: ['userId'],
+        where: { userId: { in: userIds } },
+        _count: { id: true }
+      })
+    ])
 
     const providerByUserId = new Map(
       accounts.map((account) => {
@@ -147,6 +158,12 @@ export const getListUsers = createServerFn({ method: 'GET' })
       })
     )
 
+    const generationCountByUserId = new Map(
+      generationCounts.map((group) => {
+        return [group.userId, group._count.id] as const
+      })
+    )
+
     const enrichedUsers = users.map((user) => {
       const provider = providerByUserId.get(user.id)
 
@@ -160,6 +177,7 @@ export const getListUsers = createServerFn({ method: 'GET' })
         },
         memeCount: memeCountByUserId.get(user.id) ?? 0,
         bookmarkCount: bookmarkCountByUserId.get(user.id) ?? 0,
+        generationCount: generationCountByUserId.get(user.id) ?? 0,
         lastActivityAt: lastActivityByUserId.get(user.id) ?? null
       } satisfies EnrichedUser
     })
@@ -202,7 +220,7 @@ export const banUserById = createServerFn({ method: 'POST' })
       headers
     })
 
-    await logAuditAction({
+    void logAuditAction({
       action: 'ban',
       actingAdminId: context.user.id,
       targetId: data.userId,
@@ -233,7 +251,7 @@ export const unbanUserById = createServerFn({ method: 'POST' })
       headers
     })
 
-    await logAuditAction({
+    void logAuditAction({
       action: 'unban',
       actingAdminId: context.user.id,
       targetId: userId,
@@ -263,7 +281,7 @@ export const removeUser = createServerFn({ method: 'POST' })
       headers
     })
 
-    await logAuditAction({
+    void logAuditAction({
       action: 'delete',
       actingAdminId: context.user.id,
       targetId: userId,

@@ -1,4 +1,11 @@
-import { ArrowLeft, SquareLibrary, Twitter, Users2, Video } from 'lucide-react'
+import {
+  ArrowLeft,
+  LayoutDashboard,
+  SquareLibrary,
+  Twitter,
+  Users2,
+  Video
+} from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
@@ -36,23 +43,37 @@ export const AdminSidebar = ({
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
+                  <Link to="/admin">
+                    <LayoutDashboard />
+                    <span>Dashboard</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
                   <Link to="/admin/library">
                     <Video />
                     <span>Librairie</span>
                   </Link>
                 </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <Link to="/admin/categories">
                     <SquareLibrary />
                     <span>Catégories</span>
                   </Link>
                 </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <Link to="/admin/users">
                     <Users2 />
                     <span>Utilisateurs</span>
                   </Link>
                 </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <Link to="/admin/downloader">
                     <Twitter />

@@ -20,6 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
+import { getUserInitials } from '@/helpers/format'
 import { useStripeCheckout } from '@/hooks/use-stripe-checkout'
 import { authClient } from '@/lib/auth-client'
 import {
@@ -31,7 +32,11 @@ import { matchIsUserAdmin } from '@/lib/role'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useRouter } from '@tanstack/react-router'
 
-export const UserDropdown = ({ user }: { user: UserWithRole }) => {
+type UserDropdownParams = {
+  user: UserWithRole
+}
+
+export const UserDropdown = ({ user }: UserDropdownParams) => {
   const [isOpen, setIsOpen] = React.useState(false)
   const queryClient = useQueryClient()
   const router = useRouter()
@@ -48,8 +53,6 @@ export const UserDropdown = ({ user }: { user: UserWithRole }) => {
     await router.invalidate()
   }
 
-  const subscription = activeSubscriptionQuery.data
-
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
@@ -60,7 +63,7 @@ export const UserDropdown = ({ user }: { user: UserWithRole }) => {
               alt="Avatar"
             />
             <AvatarFallback className="rounded-lg">
-              {(user.name[0]! + user.name[1]!).toUpperCase()}
+              {getUserInitials(user.name)}
             </AvatarFallback>
           </Avatar>
           <div className="truncate">{user.name}</div>
@@ -79,7 +82,7 @@ export const UserDropdown = ({ user }: { user: UserWithRole }) => {
                 alt="Avatar"
               />
               <AvatarFallback className="rounded-lg">
-                {(user.name[0]! + user.name[1]!).toUpperCase()}
+                {getUserInitials(user.name)}
               </AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
@@ -92,7 +95,7 @@ export const UserDropdown = ({ user }: { user: UserWithRole }) => {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          {!subscription ? (
+          {!activeSubscriptionQuery.data ? (
             <DropdownMenuItem
               onClick={() => {
                 void checkoutPremium()

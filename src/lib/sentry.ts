@@ -13,6 +13,7 @@ type SentryFeature =
   | 'share'
   | 'download'
   | 'admin-meme-edit'
+  | 'admin-dashboard'
   | 'delete-account'
   | 'update-password'
   | 'data-export'

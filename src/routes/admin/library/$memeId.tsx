@@ -54,8 +54,9 @@ const RouteComponent = () => {
               className={buttonVariants({ size: 'icon', variant: 'ghost' })}
               to="/memes/$memeId"
               params={{ memeId: memeQuery.data.id }}
+              aria-label={`Voir ${memeQuery.data.title} sur le site`}
             >
-              <ExternalLink className="inline" />
+              <ExternalLink className="inline" aria-hidden />
             </Link>
           </>
         }
@@ -115,7 +116,9 @@ const RouteComponent = () => {
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Modifier le mème</DialogTitle>
-                  <DialogDescription />
+                  <DialogDescription className="sr-only">
+                    Modifier les informations du mème
+                  </DialogDescription>
                 </DialogHeader>
                 <MemeForm
                   meme={memeQuery.data}

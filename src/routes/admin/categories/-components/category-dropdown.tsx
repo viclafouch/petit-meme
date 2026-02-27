@@ -75,7 +75,7 @@ export const CategoryDropdown = ({ category }: CategoryDropdownProps) => {
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="data-[state=open]:bg-muted text-muted-foreground flex size-8 float-right"
+            className="data-[state=open]:bg-muted text-muted-foreground flex size-9 float-right"
             size="icon"
           >
             <EllipsisVertical />
@@ -116,7 +116,9 @@ export const CategoryDropdown = ({ category }: CategoryDropdownProps) => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Modifier une catégorie</DialogTitle>
-            <DialogDescription />
+            <DialogDescription className="sr-only">
+              Modifier le titre, slug et mots-clés de la catégorie
+            </DialogDescription>
           </DialogHeader>
           <CategoryForm
             type="edit"

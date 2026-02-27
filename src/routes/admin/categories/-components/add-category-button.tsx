@@ -34,7 +34,9 @@ export const AddCategoryButton = ({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Ajouter une catégorie</DialogTitle>
-          <DialogDescription />
+          <DialogDescription className="sr-only">
+            Renseigner le titre, slug et mots-clés de la catégorie
+          </DialogDescription>
         </DialogHeader>
         <CategoryForm type="add" onSuccess={handleSuccess} />
       </DialogContent>

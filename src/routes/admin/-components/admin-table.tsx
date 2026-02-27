@@ -40,6 +40,18 @@ const SORT_ARIA_MAP = {
   desc: 'descending'
 } as const satisfies Record<SortDirection, string>
 
+function getAriaSortValue<TData extends RowData>(
+  header: Header<TData, unknown>
+): 'ascending' | 'descending' | 'none' | undefined {
+  const sortDirection = header.column.getIsSorted()
+
+  if (sortDirection) {
+    return SORT_ARIA_MAP[sortDirection]
+  }
+
+  return header.column.getCanSort() ? 'none' : undefined
+}
+
 type SortableHeaderParams<TData extends RowData> = {
   header: Header<TData, unknown>
 }
@@ -58,7 +70,7 @@ const SortableHeader = <TData extends RowData>({
   return (
     <button
       type="button"
-      className="flex items-center gap-1 hover:text-foreground transition-colors"
+      className="flex min-h-11 items-center gap-1 py-2 hover:text-foreground transition-colors"
       onClick={header.column.getToggleSortingHandler()}
       aria-label={`Trier par ${typeof header.column.columnDef.header === 'string' ? header.column.columnDef.header : header.column.id}`}
     >
@@ -83,10 +95,14 @@ const PaginationFooter = <TData extends RowData>({
       <TableRow>
         <TableCell colSpan={table.getAllColumns().length}>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">
+            <span
+              className="text-sm text-muted-foreground"
+              aria-live="polite"
+              aria-atomic="true"
+            >
               Page {currentPage} sur {totalPages}
             </span>
-            <div className="flex gap-2">
+            <nav aria-label="Pagination de la table" className="flex gap-2">
               <Button
                 variant="outline"
                 size="sm"
@@ -109,7 +125,7 @@ const PaginationFooter = <TData extends RowData>({
               >
                 Suivant
               </Button>
-            </div>
+            </nav>
           </div>
         </TableCell>
       </TableRow>
@@ -119,30 +135,28 @@ const PaginationFooter = <TData extends RowData>({
 
 type AdminTableParams<TData extends RowData> = {
   table: TableType<TData>
+  caption?: string
 }
 
 export const AdminTable = <TData extends RowData>({
-  table
+  table,
+  caption
 }: AdminTableParams<TData>) => {
   const hasPagination = table.getPageCount() > 0
 
   return (
     <div className="w-full overflow-hidden rounded-lg border">
-      <Table>
+      <Table aria-label={caption}>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => {
             return (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
-                  const sortDirection = header.column.getIsSorted()
-
                   return (
                     <TableHead
                       key={header.id}
                       colSpan={header.colSpan}
-                      aria-sort={
-                        sortDirection ? SORT_ARIA_MAP[sortDirection] : undefined
-                      }
+                      aria-sort={getAriaSortValue(header)}
                     >
                       {header.isPlaceholder ? null : (
                         <SortableHeader header={header} />

@@ -136,6 +136,7 @@ export const DownloadFromTwitterForm = () => {
                         onClick={handlePasteFromClipboard}
                         type="button"
                         onlyStars
+                        aria-label="Coller depuis le presse-papiers"
                       >
                         <ClipboardPaste />
                       </IconButtonStars>

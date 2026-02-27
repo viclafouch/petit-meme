@@ -43,7 +43,9 @@ export const NewMemeButton = ({ ...restButtonProps }: NewMemeButtonProps) => {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Ajouter un mème</DialogTitle>
-          <DialogDescription />
+          <DialogDescription className="sr-only">
+            Ajouter un mème depuis Twitter ou un fichier local
+          </DialogDescription>
         </DialogHeader>
         <Tabs defaultValue="twitter" className="w-full gap-4">
           <TabsList>

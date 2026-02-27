@@ -20,10 +20,7 @@ const columnHelper = createColumnHelper<EnrichedCategory>()
 
 const columns = [
   columnHelper.accessor('title', {
-    header: 'Titre',
-    cell: (info) => {
-      return info.getValue()
-    }
+    header: 'Titre'
   }),
   columnHelper.accessor('slug', {
     header: 'Slug',
@@ -114,7 +111,7 @@ const RouteComponent = () => {
         }
       />
       <div className="py-10">
-        <AdminTable table={table} />
+        <AdminTable table={table} caption="Liste des catégories" />
       </div>
     </Container>
   )

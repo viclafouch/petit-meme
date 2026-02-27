@@ -10,6 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
+import { getUserInitials } from '@/helpers/format'
 import { authClient } from '@/lib/auth-client'
 import { getAuthUserQueryOpts } from '@/lib/queries'
 import { useQueryClient } from '@tanstack/react-query'
@@ -28,15 +29,15 @@ export const AdminNavButton = ({ user }: { user: UserWithRole }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative size-8 rounded-full">
-          <Avatar className="size-8">
+        <Button variant="ghost" className="relative size-9 rounded-full">
+          <Avatar className="size-9">
             <AvatarImage
-              src={user.image || ''}
+              src={user.image ?? undefined}
               alt={user.name}
               referrerPolicy="no-referrer"
             />
             <AvatarFallback className="rounded-lg">
-              {(user.name[0]! + user.name[1]!).toUpperCase()}
+              {getUserInitials(user.name)}
             </AvatarFallback>
           </Avatar>
         </Button>

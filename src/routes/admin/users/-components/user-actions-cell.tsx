@@ -179,7 +179,7 @@ export const UserActionsCell = ({ user }: UserActionsCellParams) => {
             setBanReason(value as BanReason)
           }}
         >
-          <SelectTrigger>
+          <SelectTrigger aria-label="Raison du bannissement">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

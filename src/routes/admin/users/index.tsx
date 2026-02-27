@@ -135,6 +135,7 @@ const columns = [
         return (
           <span className="text-muted-foreground">
             <Minus className="size-4" aria-hidden />
+            <span className="sr-only">Aucun abonnement</span>
           </span>
         )
       }
@@ -189,7 +190,10 @@ const columns = [
       return (
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="text-muted-foreground text-sm tabular-nums cursor-default">
+            <span
+              className="text-muted-foreground text-sm tabular-nums cursor-default"
+              aria-label={`${user.bookmarkCount} bookmarks, ${user.generationCount} générations`}
+            >
               {user.bookmarkCount}b {user.generationCount}g
             </span>
           </TooltipTrigger>
@@ -256,7 +260,7 @@ const RouteComponent = () => {
     <Container>
       <PageHeader title="Utilisateurs" />
       <div className="py-10">
-        <AdminTable table={table} />
+        <AdminTable table={table} caption="Liste des utilisateurs" />
       </div>
     </Container>
   )

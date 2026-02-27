@@ -110,7 +110,7 @@ export const TrendingMemes = ({ entries }: TrendingMemesParams) => {
                         'flex items-center gap-1 text-xs tabular-nums',
                         value > 0
                           ? 'text-foreground/70'
-                          : 'text-muted-foreground/50'
+                          : 'text-muted-foreground'
                       )}
                       title={`${value} ${signal.label}`}
                     >

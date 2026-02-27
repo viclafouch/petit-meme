@@ -133,7 +133,7 @@ export const FileForm = ({ onSuccess, closeDialog }: FileFormParams) => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="size-7"
+                          className="size-9"
                           aria-label="Supprimer le fichier"
                         >
                           <X />

@@ -23,15 +23,6 @@
 
 ---
 
-## Studio — Items restants
-
-Phases 1 à 5 terminées (page dédiée, live preview, templates, fonts, accessibilité WCAG 2.1 AA, refonte video player).
-
-- [ ] Tester le flow complet sur iOS Safari et Chrome Android (Studio + PlayerDialog `playsInline`)
-- [ ] Gérer le cas où `navigator.share()` n'est pas supporté (fallback download)
-
----
-
 ## Migration Railway → Vercel — Items restants
 
 Migration terminée (preset Vercel, DNS, env vars, docs). Reste :
@@ -291,8 +282,6 @@ Audit complet : zéro erreur silencieuse, remontée Sentry systématique, feedba
 - [x] `src/components/User/delete-account-dialog.tsx` — `onError` avec `captureWithFeature(error, SENTRY_FEATURES.DELETE_ACCOUNT)`
 - [x] `src/components/User/update-password-dialog.tsx` — idem `captureWithFeature(error, SENTRY_FEATURES.UPDATE_PASSWORD)`
 - [x] `src/routes/_public__root/_default/settings/-components/profile-content.tsx` — `captureWithFeature(error, SENTRY_FEATURES.DATA_EXPORT)` dans `onError`
-- [ ] `src/components/ui/file-upload.tsx` — **SKIPPED** (fichier protégé dans `src/components/ui/`, règle "Never modify code in ui/")
-
 **HTTP status non vérifié**
 - [x] `src/lib/react-tweet.ts` (`getTweetMedia`) — check `response.ok` dans `fetchBlob` helper
 
@@ -711,45 +700,28 @@ src/routes/admin/
 - [x] `trending-memes.tsx` — type guard `matchIsPodiumRank` remplace le cast `as keyof typeof`
 - [x] `meme-list-item.tsx` — `React.memo` vérifié : pas restreint par la config ESLint actuelle, aucun disable nécessaire
 
-### Phase 11 — Améliorations UX admin (ex Phase 10)
+### Phase 11 — Audits post-implémentation
 
-**Search users**
-- [ ] Ajouter une barre de recherche client-side sur la table users (filtre par nom/email)
-- [ ] Intégrer dans `AdminTable` comme prop optionnelle `searchPlaceholder`
-
-**Memes en attente — badge nav**
-- [ ] Afficher un badge count "pending" sur le lien "Library" dans la nav admin
-- [ ] Server function `getPendingMemesCount` (ou inclure dans les stats dashboard)
-- [ ] Filtre par défaut "PENDING" quand on clique sur le badge
-
-**Bulk actions**
-- [ ] Ajouter la sélection multiple (checkboxes) dans `AdminTable` via `getFilteredSelectedRowModel()` de TanStack Table
-- [ ] Actions bulk sur memes : publier / supprimer la sélection
-- [ ] Actions bulk sur users : bannir / supprimer la sélection
-- [ ] Confirmation `ConfirmAlert` avec le count d'éléments sélectionnés
-
-**Total éléments dans les tables**
-- [ ] Ajouter une prop optionnelle `totalLabel` à `AdminTable` (ex: `"memes"`, `"utilisateurs"`, `"catégories"`)
-- [ ] Afficher `{count} {label} · Page X sur Y` dans le footer pagination (via `table.getRowCount()`, style `text-muted-foreground text-sm tabular-nums`)
-- [ ] Passer `totalLabel="utilisateurs"` dans Users, `totalLabel="catégories"` dans Categories, `totalLabel="memes"` dans Library
-
-**Export CSV**
-- [ ] Bouton export sur les tables users (avec emails — cohérent avec le rôle admin) et memes (sans emails)
-- [ ] Génération côté client (pas de server function) — `Blob` + `URL.createObjectURL`
-
-**Santé système (section dashboard ou page dédiée)**
-- [ ] Algolia : quota indexation (via Algolia API `getStatus`)
-- [ ] Bunny CDN : stockage utilisé (via Bunny API)
-- [ ] Stripe : nombre d'abonnements actifs
-- [ ] Sentry : count erreurs dernières 24h (via Sentry API, si gratuit)
-- [ ] Afficher sous forme de badges vert/orange/rouge selon les seuils
-
-### Phase 12 — Audits post-implémentation
-
-À lancer **après** toutes les phases précédentes :
-
-- [ ] **React performance** — re-renders TanStack Table, stabilité références colonnes/handlers, bulk selection
-- [ ] **Accessibility (a11y)** — `aria-sort` sur headers triables, `aria-label` pagination, focus trap confirm dialogs, touch targets mobile, graphiques (alt text ou `aria-describedby`)
+- [x] **React performance** — audité : aucun problème high/critical. 1 medium (SortableHeader) jugé acceptable (React Compiler gère). Set initializer simplifié dans `trends-chart.tsx`.
+- [x] **Accessibility (a11y)** — audit complet + fixes appliqués :
+  - `aria-sort="none"` sur colonnes triables non triées (via `getAriaSortValue` helper)
+  - `aria-label` sur `<Table>` via prop `caption` (`AdminTable`)
+  - `aria-live="polite"` sur pagination page info
+  - `<nav>` wrapper sur les boutons de pagination
+  - Touch targets agrandis : sort buttons (`min-h-11`), keyword delete (`p-1.5`), category dropdown (`size-9`), admin avatar (`size-9`), file delete (`size-9`)
+  - `aria-label` spécifique par mot-clé sur boutons delete (`keywords-field.tsx`)
+  - `role="img"` + `aria-label` + `sr-only` summary sur le chart (`trends-chart.tsx`)
+  - `role="group"` + `aria-label` sur la légende du chart
+  - `aria-label` sur les boutons coller (`twitter-form.tsx`, `download-from-twitter-form.tsx`)
+  - `aria-label` sur le lien externe meme (`library/$memeId.tsx`)
+  - `aria-label` sur les liens services (`service-card.tsx`) avec indication "nouvel onglet"
+  - `aria-label` sur le texte engagement abrégé (`users/index.tsx`)
+  - `sr-only` texte pour "Aucun abonnement" (`users/index.tsx`)
+  - `alt` sur les avatars dans le feed activité (`activity-feed.tsx`)
+  - Contraste amélioré : retiré `/50` sur signaux trending zéro (`trending-memes.tsx`)
+  - `DialogDescription` : descriptions réelles en `sr-only` (4 dialogs admin)
+  - `aria-label` sur `SelectTrigger` ban reason (`user-actions-cell.tsx`)
+  - **Skipped (ui/ protégé)** : `FormMessage` `role="alert"`, pagination.tsx aria-labels FR
 
 ---
 

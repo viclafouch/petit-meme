@@ -91,6 +91,7 @@ export const ServiceCard = ({ service }: ServiceCardParams) => {
       target="_blank"
       rel="noopener noreferrer"
       className="group flex items-center gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:bg-accent/50"
+      aria-label={`${service.label} (ouvre dans un nouvel onglet)`}
     >
       <div
         className={cn(

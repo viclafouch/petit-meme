@@ -63,9 +63,9 @@ export const KeywordsField = ({
                     event.stopPropagation()
                     handleRemoveKeyword(index)
                   }}
-                  aria-label="Supprimer"
+                  aria-label={`Supprimer le mot-clé "${keyword}"`}
                   type="button"
-                  className="flex cursor-pointer items-center p-0 hover:bg-muted"
+                  className="flex cursor-pointer items-center rounded p-1.5 -m-1 hover:bg-muted"
                 >
                   <X className="size-3" />
                 </button>

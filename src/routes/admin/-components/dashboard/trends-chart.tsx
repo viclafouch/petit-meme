@@ -117,9 +117,7 @@ type TrendsChartParams = {
 
 export const TrendsChart = ({ data, period }: TrendsChartParams) => {
   const [hiddenMetrics, setHiddenMetrics] = React.useState<Set<MetricKey>>(
-    () => {
-      return new Set()
-    }
+    new Set()
   )
 
   const totals = computeMetricTotals(data)
@@ -146,7 +144,11 @@ export const TrendsChart = ({ data, period }: TrendsChartParams) => {
           <CardDescription>{PERIOD_DESCRIPTIONS[period]}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pb-4">
+          <div
+            className="flex flex-wrap items-center gap-x-4 gap-y-2 pb-4"
+            role="group"
+            aria-label="Filtres de métriques du graphique"
+          >
             {METRIC_KEYS.map((key) => {
               const isHidden = hiddenMetrics.has(key)
 
@@ -157,7 +159,7 @@ export const TrendsChart = ({ data, period }: TrendsChartParams) => {
                   className="flex items-center gap-1.5 text-xs transition-opacity"
                   style={{ opacity: isHidden ? 0.35 : 1 }}
                   onClick={() => {
-                    return handleLegendClick(key)
+                    handleLegendClick(key)
                   }}
                   aria-label={`${isHidden ? 'Afficher' : 'Masquer'} ${CHART_CONFIG[key].label}`}
                   aria-pressed={!isHidden}
@@ -174,6 +176,8 @@ export const TrendsChart = ({ data, period }: TrendsChartParams) => {
           <ChartContainer
             config={CHART_CONFIG}
             className="aspect-auto h-62.5 w-full"
+            role="img"
+            aria-label={`Graphique des tendances — ${PERIOD_DESCRIPTIONS[period]}`}
           >
             <LineChart
               data={data}
@@ -216,6 +220,12 @@ export const TrendsChart = ({ data, period }: TrendsChartParams) => {
               })}
             </LineChart>
           </ChartContainer>
+          <p className="sr-only">
+            {PERIOD_DESCRIPTIONS[period]} :{' '}
+            {METRIC_SUMMARIES.map((metric) => {
+              return `${metric.label} : ${totals[metric.key].toLocaleString('fr-FR')}`
+            }).join(', ')}
+          </p>
         </CardContent>
       </Card>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">

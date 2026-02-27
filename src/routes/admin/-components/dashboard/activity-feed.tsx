@@ -38,7 +38,10 @@ export const ActivityFeed = ({ entries }: ActivityFeedParams) => {
               </p>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Avatar className="size-4">
-                  <AvatarImage src={entry.actingAdmin.image ?? undefined} />
+                  <AvatarImage
+                    src={entry.actingAdmin.image ?? undefined}
+                    alt={entry.actingAdmin.name}
+                  />
                   <AvatarFallback className="text-[8px]">
                     {getUserInitials(entry.actingAdmin.name)}
                   </AvatarFallback>

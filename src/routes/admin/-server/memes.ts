@@ -108,6 +108,20 @@ function resolveInitialViewCount(
   return meme.viewCount
 }
 
+function computeCategoryDiff(currentIds: string[], newIds: string[]) {
+  const currentSet = new Set(currentIds)
+  const newSet = new Set(newIds)
+
+  return {
+    toAdd: newIds.filter((id) => {
+      return !currentSet.has(id)
+    }),
+    toRemove: currentIds.filter((id) => {
+      return !newSet.has(id)
+    })
+  }
+}
+
 export const editMeme = createServerFn({ method: 'POST' })
   .inputValidator((data) => {
     return MEME_FORM_SCHEMA.extend({ id: z.string() }).parse(data)
@@ -135,14 +149,10 @@ export const editMeme = createServerFn({ method: 'POST' })
     const currentCategoryIds = meme.categories.map(({ categoryId }) => {
       return categoryId
     })
-    const currentSet = new Set(currentCategoryIds)
-    const newSet = new Set(values.categoryIds)
-    const toAdd = values.categoryIds.filter((categoryId) => {
-      return !currentSet.has(categoryId)
-    })
-    const toRemove = currentCategoryIds.filter((categoryId) => {
-      return !newSet.has(categoryId)
-    })
+    const { toAdd, toRemove } = computeCategoryDiff(
+      currentCategoryIds,
+      values.categoryIds
+    )
 
     const memeUpdated = await prismaClient.meme.update({
       where: {
@@ -269,6 +279,25 @@ type CreateMemeWithVideoParams = {
   adminId: string
 }
 
+async function rollbackMemeCreation(memeId: string) {
+  await Promise.all([
+    prismaClient.meme
+      .delete({ where: { id: memeId } })
+      .catch((cleanupError: unknown) => {
+        adminLogger.error(
+          { err: cleanupError, memeId },
+          'Failed to rollback meme from DB'
+        )
+      }),
+    safeAlgoliaOp(
+      algoliaAdminClient.deleteObject({
+        indexName: algoliaIndexName,
+        objectID: memeId
+      })
+    )
+  ])
+}
+
 async function createMemeWithVideo({
   buffer,
   tweetUrl,
@@ -323,24 +352,7 @@ async function createMemeWithVideo({
       { err: error, memeId: meme.id, bunnyVideoId: videoId },
       'Upload/Algolia failed after DB create, rolling back'
     )
-
-    await Promise.all([
-      prismaClient.meme
-        .delete({ where: { id: meme.id } })
-        .catch((cleanupError: unknown) => {
-          adminLogger.error(
-            { err: cleanupError, memeId: meme.id },
-            'Failed to rollback meme from DB'
-          )
-        }),
-      safeAlgoliaOp(
-        algoliaAdminClient.deleteObject({
-          indexName: algoliaIndexName,
-          objectID: meme.id
-        })
-      )
-    ])
-
+    await rollbackMemeCreation(meme.id)
     throw error
   }
 

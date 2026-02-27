@@ -26,7 +26,7 @@ type LogAuditActionParams = {
   actingAdminId: string
   targetId: string
   targetType: AuditTargetType
-  metadata?: Prisma.InputJsonObject
+  metadata?: AuditMetadata
 }
 
 export const logAuditAction = async ({
@@ -43,7 +43,7 @@ export const logAuditAction = async ({
         actingAdminId,
         targetId,
         targetType,
-        metadata: metadata ?? {}
+        metadata: (metadata ?? {}) as Prisma.InputJsonObject
       }
     })
   } catch (error) {

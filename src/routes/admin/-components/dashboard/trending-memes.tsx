@@ -11,14 +11,9 @@ import { buildVideoImageUrl } from '@/lib/bunny'
 import { cn } from '@/lib/utils'
 import type { TrendingMeme } from '@admin/-server/dashboard'
 import { Link } from '@tanstack/react-router'
+import type { IconConfig } from './types'
 
 type SignalKey = keyof Omit<TrendingMeme, 'meme' | 'rank' | 'score'>
-
-type SignalConfig = {
-  key: SignalKey
-  icon: React.ReactNode
-  label: string
-}
 
 const SIGNAL_CONFIGS = [
   {
@@ -46,7 +41,7 @@ const SIGNAL_CONFIGS = [
     icon: <Share2 className="size-3" aria-hidden />,
     label: 'partages'
   }
-] as const satisfies readonly SignalConfig[]
+] as const satisfies readonly IconConfig<SignalKey>[]
 
 type PodiumConfig = {
   className: string
@@ -58,6 +53,10 @@ const PODIUM_CONFIGS = {
   2: { className: 'text-zinc-400', label: '2e' },
   3: { className: 'text-orange-500', label: '3e' }
 } as const satisfies Record<number, PodiumConfig>
+
+function matchIsPodiumRank(rank: number): rank is keyof typeof PODIUM_CONFIGS {
+  return rank in PODIUM_CONFIGS
+}
 
 type TrendingMemesParams = {
   entries: TrendingMeme[]
@@ -78,7 +77,9 @@ export const TrendingMemes = ({ entries }: TrendingMemesParams) => {
   return (
     <div className="flex flex-col divide-y divide-border">
       {entries.map((entry) => {
-        const podium = PODIUM_CONFIGS[entry.rank as keyof typeof PODIUM_CONFIGS]
+        const podium = matchIsPodiumRank(entry.rank)
+          ? PODIUM_CONFIGS[entry.rank]
+          : null
 
         return (
           <Link

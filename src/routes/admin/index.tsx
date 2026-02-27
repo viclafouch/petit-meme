@@ -191,6 +191,22 @@ const handleSectionError = (error: unknown) => {
   captureWithFeature(error, 'admin-dashboard')
 }
 
+type DashboardSectionParams = {
+  fallback: React.ReactNode
+  children: React.ReactNode
+}
+
+const DashboardSection = ({ fallback, children }: DashboardSectionParams) => {
+  return (
+    <ErrorBoundary
+      FallbackComponent={SectionErrorFallback}
+      onError={handleSectionError}
+    >
+      <React.Suspense fallback={fallback}>{children}</React.Suspense>
+    </ErrorBoundary>
+  )
+}
+
 const RouteComponent = () => {
   const { period } = Route.useSearch()
 
@@ -200,43 +216,28 @@ const RouteComponent = () => {
         title="Dashboard"
         action={<PeriodSelector period={period} />}
       />
-      <ErrorBoundary
-        FallbackComponent={SectionErrorFallback}
-        onError={handleSectionError}
+      <DashboardSection
+        fallback={
+          <div className="flex flex-col gap-6">
+            <ChartSkeleton />
+            <SummarySkeleton />
+          </div>
+        }
       >
-        <React.Suspense
-          fallback={
-            <div className="flex flex-col gap-6">
-              <ChartSkeleton />
-              <SummarySkeleton />
-            </div>
-          }
-        >
-          <ChartContent period={period} />
-        </React.Suspense>
-      </ErrorBoundary>
-      <ErrorBoundary
-        FallbackComponent={SectionErrorFallback}
-        onError={handleSectionError}
-      >
-        <React.Suspense fallback={<TotalsSkeleton />}>
-          <TotalsContent />
-        </React.Suspense>
-      </ErrorBoundary>
+        <ChartContent period={period} />
+      </DashboardSection>
+      <DashboardSection fallback={<TotalsSkeleton />}>
+        <TotalsContent />
+      </DashboardSection>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
         <section className="lg:col-span-3" aria-label="Memes tendances">
           <h2 className="mb-3 text-sm font-medium text-muted-foreground uppercase tracking-wider">
             Tendances — 7 derniers jours
           </h2>
           <div className="rounded-xl border bg-card p-4">
-            <ErrorBoundary
-              FallbackComponent={SectionErrorFallback}
-              onError={handleSectionError}
-            >
-              <React.Suspense fallback={<TrendingSkeleton />}>
-                <TrendingContent />
-              </React.Suspense>
-            </ErrorBoundary>
+            <DashboardSection fallback={<TrendingSkeleton />}>
+              <TrendingContent />
+            </DashboardSection>
           </div>
         </section>
         <section className="lg:col-span-2" aria-label="Activité récente">
@@ -244,14 +245,9 @@ const RouteComponent = () => {
             Activité récente
           </h2>
           <div className="rounded-xl border bg-card p-4">
-            <ErrorBoundary
-              FallbackComponent={SectionErrorFallback}
-              onError={handleSectionError}
-            >
-              <React.Suspense fallback={<FeedSkeleton />}>
-                <FeedContent />
-              </React.Suspense>
-            </ErrorBoundary>
+            <DashboardSection fallback={<FeedSkeleton />}>
+              <FeedContent />
+            </DashboardSection>
           </div>
         </section>
       </div>

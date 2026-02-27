@@ -47,6 +47,140 @@ export type EnrichedUser = Prisma.UserGetPayload<{
   lastActivityAt: Date | null
 }
 
+type UserRelatedData = Awaited<ReturnType<typeof fetchUserRelatedData>>
+
+async function fetchUserRelatedData(userIds: string[]) {
+  const [
+    accounts,
+    subscriptions,
+    bookmarkCounts,
+    lastSessions,
+    generationCounts
+  ] = await Promise.all([
+    prismaClient.account.findMany({
+      where: { userId: { in: userIds } },
+      select: { userId: true, providerId: true }
+    }),
+    prismaClient.subscription.findMany({
+      where: { referenceId: { in: userIds } },
+      select: SUBSCRIPTION_LIST_SELECT
+    }),
+    prismaClient.userBookmark.groupBy({
+      by: ['userId'],
+      where: { userId: { in: userIds } },
+      _count: { id: true }
+    }),
+    prismaClient.session.groupBy({
+      by: ['userId'],
+      where: {
+        userId: { in: userIds },
+        expiresAt: { gte: new Date() }
+      },
+      _max: { updatedAt: true }
+    }),
+    prismaClient.studioGeneration.groupBy({
+      by: ['userId'],
+      where: { userId: { in: userIds } },
+      _count: { id: true }
+    })
+  ])
+
+  return {
+    accounts,
+    subscriptions,
+    bookmarkCounts,
+    lastSessions,
+    generationCounts
+  }
+}
+
+function buildSubscriptionMap(subscriptions: UserRelatedData['subscriptions']) {
+  const subscriptionByUserId = new Map<string, SubscriptionInfo>()
+
+  for (const sub of subscriptions) {
+    const current = subscriptionByUserId.get(sub.referenceId)
+    const subStatus: SubscriptionStatus =
+      sub.status === 'active' ? 'active' : 'past'
+
+    if (!current) {
+      subscriptionByUserId.set(sub.referenceId, {
+        status: subStatus,
+        startedAt: sub.periodStart,
+        endsAt: sub.periodEnd
+      })
+      continue
+    }
+
+    subscriptionByUserId.set(sub.referenceId, {
+      status:
+        current.status !== 'active' && subStatus === 'active'
+          ? 'active'
+          : current.status,
+      startedAt:
+        sub.periodStart &&
+        (!current.startedAt || sub.periodStart < current.startedAt)
+          ? sub.periodStart
+          : current.startedAt,
+      endsAt:
+        sub.periodEnd && (!current.endsAt || sub.periodEnd > current.endsAt)
+          ? sub.periodEnd
+          : current.endsAt
+    })
+  }
+
+  return subscriptionByUserId
+}
+
+function buildUserLookupMaps(data: UserRelatedData) {
+  return {
+    providerByUserId: new Map(
+      data.accounts.map((account) => {
+        return [account.userId, account.providerId] as const
+      })
+    ),
+    subscriptionByUserId: buildSubscriptionMap(data.subscriptions),
+    bookmarkCountByUserId: new Map(
+      data.bookmarkCounts.map((group) => {
+        return [group.userId, group._count.id] as const
+      })
+    ),
+    lastActivityByUserId: new Map(
+      data.lastSessions.map((group) => {
+        return [group.userId, group._max.updatedAt] as const
+      })
+    ),
+    generationCountByUserId: new Map(
+      data.generationCounts.map((group) => {
+        return [group.userId, group._count.id] as const
+      })
+    )
+  }
+}
+
+type UserRow = Prisma.UserGetPayload<{ select: typeof USER_LIST_SELECT }>
+
+function enrichUsers(
+  users: UserRow[],
+  maps: ReturnType<typeof buildUserLookupMaps>
+) {
+  return users.map((user) => {
+    const provider = maps.providerByUserId.get(user.id)
+
+    return {
+      ...user,
+      provider: provider === 'twitter' ? 'twitter' : 'credential',
+      subscription: maps.subscriptionByUserId.get(user.id) ?? {
+        status: 'none',
+        startedAt: null,
+        endsAt: null
+      },
+      bookmarkCount: maps.bookmarkCountByUserId.get(user.id) ?? 0,
+      generationCount: maps.generationCountByUserId.get(user.id) ?? 0,
+      lastActivityAt: maps.lastActivityByUserId.get(user.id) ?? null
+    } satisfies EnrichedUser
+  })
+}
+
 export const getListUsers = createServerFn({ method: 'GET' })
   .middleware([adminRequiredMiddleware])
   .handler(async () => {
@@ -60,116 +194,10 @@ export const getListUsers = createServerFn({ method: 'GET' })
       return user.id
     })
 
-    const [
-      accounts,
-      subscriptions,
-      bookmarkCounts,
-      lastSessions,
-      generationCounts
-    ] = await Promise.all([
-      prismaClient.account.findMany({
-        where: { userId: { in: userIds } },
-        select: { userId: true, providerId: true }
-      }),
-      prismaClient.subscription.findMany({
-        where: { referenceId: { in: userIds } },
-        select: SUBSCRIPTION_LIST_SELECT
-      }),
-      prismaClient.userBookmark.groupBy({
-        by: ['userId'],
-        where: { userId: { in: userIds } },
-        _count: { id: true }
-      }),
-      prismaClient.session.groupBy({
-        by: ['userId'],
-        where: {
-          userId: { in: userIds },
-          expiresAt: { gte: new Date() }
-        },
-        _max: { updatedAt: true }
-      }),
-      prismaClient.studioGeneration.groupBy({
-        by: ['userId'],
-        where: { userId: { in: userIds } },
-        _count: { id: true }
-      })
-    ])
+    const relatedData = await fetchUserRelatedData(userIds)
+    const maps = buildUserLookupMaps(relatedData)
 
-    const providerByUserId = new Map(
-      accounts.map((account) => {
-        return [account.userId, account.providerId] as const
-      })
-    )
-
-    const subscriptionByUserId = new Map<string, SubscriptionInfo>()
-
-    for (const sub of subscriptions) {
-      const current = subscriptionByUserId.get(sub.referenceId)
-      const subStatus: SubscriptionStatus =
-        sub.status === 'active' ? 'active' : 'past'
-
-      if (!current) {
-        subscriptionByUserId.set(sub.referenceId, {
-          status: subStatus,
-          startedAt: sub.periodStart,
-          endsAt: sub.periodEnd
-        })
-        continue
-      }
-
-      subscriptionByUserId.set(sub.referenceId, {
-        status:
-          current.status !== 'active' && subStatus === 'active'
-            ? 'active'
-            : current.status,
-        startedAt:
-          sub.periodStart &&
-          (!current.startedAt || sub.periodStart < current.startedAt)
-            ? sub.periodStart
-            : current.startedAt,
-        endsAt:
-          sub.periodEnd && (!current.endsAt || sub.periodEnd > current.endsAt)
-            ? sub.periodEnd
-            : current.endsAt
-      })
-    }
-
-    const bookmarkCountByUserId = new Map(
-      bookmarkCounts.map((group) => {
-        return [group.userId, group._count.id] as const
-      })
-    )
-
-    const lastActivityByUserId = new Map(
-      lastSessions.map((group) => {
-        return [group.userId, group._max.updatedAt] as const
-      })
-    )
-
-    const generationCountByUserId = new Map(
-      generationCounts.map((group) => {
-        return [group.userId, group._count.id] as const
-      })
-    )
-
-    const enrichedUsers = users.map((user) => {
-      const provider = providerByUserId.get(user.id)
-
-      return {
-        ...user,
-        provider: provider === 'twitter' ? 'twitter' : 'credential',
-        subscription: subscriptionByUserId.get(user.id) ?? {
-          status: 'none',
-          startedAt: null,
-          endsAt: null
-        },
-        bookmarkCount: bookmarkCountByUserId.get(user.id) ?? 0,
-        generationCount: generationCountByUserId.get(user.id) ?? 0,
-        lastActivityAt: lastActivityByUserId.get(user.id) ?? null
-      } satisfies EnrichedUser
-    })
-
-    return { users: enrichedUsers }
+    return { users: enrichUsers(users, maps) }
   })
 
 export const BAN_REASONS = [

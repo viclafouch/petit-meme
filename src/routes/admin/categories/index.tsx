@@ -6,7 +6,7 @@ import { Container } from '@/components/ui/container'
 import { AddCategoryButton } from '@/routes/admin/categories/-components/add-category-button'
 import { CategoryDropdown } from '@/routes/admin/categories/-components/category-dropdown'
 import { type EnrichedCategory, getCategories } from '@/server/categories'
-import { AdminTable, PAGE_SIZE } from '@admin/-components/admin-table'
+import { AdminTable, getRowId, PAGE_SIZE } from '@admin/-components/admin-table'
 import { createFileRoute } from '@tanstack/react-router'
 import {
   createColumnHelper,
@@ -83,10 +83,6 @@ const columns = [
     }
   })
 ]
-
-function getRowId(row: EnrichedCategory) {
-  return row.id
-}
 
 const RouteComponent = () => {
   const { categories } = Route.useLoaderData()

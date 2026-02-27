@@ -19,7 +19,11 @@ import { flexRender } from '@tanstack/react-table'
 
 const PAGE_SIZE = 20
 
-const SortIcon = ({ direction }: { direction: SortDirection | false }) => {
+type SortIconParams = {
+  direction: SortDirection | false
+}
+
+const SortIcon = ({ direction }: SortIconParams) => {
   if (direction === 'asc') {
     return <ArrowUp className="size-4" aria-hidden />
   }
@@ -36,11 +40,13 @@ const SORT_ARIA_MAP = {
   desc: 'descending'
 } as const satisfies Record<SortDirection, string>
 
+type SortableHeaderParams<TData extends RowData> = {
+  header: Header<TData, unknown>
+}
+
 const SortableHeader = <TData extends RowData>({
   header
-}: {
-  header: Header<TData, unknown>
-}) => {
+}: SortableHeaderParams<TData>) => {
   const canSort = header.column.getCanSort()
 
   if (!canSort) {
@@ -62,11 +68,13 @@ const SortableHeader = <TData extends RowData>({
   )
 }
 
+type PaginationFooterParams<TData extends RowData> = {
+  table: TableType<TData>
+}
+
 const PaginationFooter = <TData extends RowData>({
   table
-}: {
-  table: TableType<TData>
-}) => {
+}: PaginationFooterParams<TData>) => {
   const currentPage = table.getState().pagination.pageIndex + 1
   const totalPages = table.getPageCount()
 
@@ -109,11 +117,13 @@ const PaginationFooter = <TData extends RowData>({
   )
 }
 
+type AdminTableParams<TData extends RowData> = {
+  table: TableType<TData>
+}
+
 export const AdminTable = <TData extends RowData>({
   table
-}: {
-  table: TableType<TData>
-}) => {
+}: AdminTableParams<TData>) => {
   const hasPagination = table.getPageCount() > 0
 
   return (
@@ -179,4 +189,8 @@ export const AdminTable = <TData extends RowData>({
   )
 }
 
-export { PAGE_SIZE }
+function getRowId(row: { id: string }) {
+  return row.id
+}
+
+export { getRowId, PAGE_SIZE }

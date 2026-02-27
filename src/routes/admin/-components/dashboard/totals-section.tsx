@@ -1,5 +1,6 @@
 import { Clock, Crown, FileVideo, Users } from 'lucide-react'
 import type { DashboardTotals } from '@admin/-server/dashboard'
+import type { IconConfig } from './types'
 
 const TOTAL_CONFIGS = [
   {
@@ -22,11 +23,7 @@ const TOTAL_CONFIGS = [
     label: 'Premium actifs',
     icon: <Crown className="size-4" aria-hidden />
   }
-] as const satisfies readonly {
-  key: keyof DashboardTotals
-  label: string
-  icon: React.ReactNode
-}[]
+] as const satisfies readonly IconConfig<keyof DashboardTotals>[]
 
 type TotalsSectionParams = {
   totals: DashboardTotals

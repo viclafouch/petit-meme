@@ -15,6 +15,7 @@ import {
   ChartTooltipContent
 } from '@/components/ui/chart'
 import type { ChartDataPoint, DashboardPeriod } from '@admin/-server/dashboard'
+import type { IconConfig } from './types'
 
 type MetricKey = keyof Omit<ChartDataPoint, 'date'>
 
@@ -53,11 +54,7 @@ const METRIC_SUMMARIES = [
     label: 'Téléchargements',
     icon: <Download className="size-4" aria-hidden />
   }
-] as const satisfies readonly {
-  key: MetricKey
-  label: string
-  icon: React.ReactNode
-}[]
+] as const satisfies readonly IconConfig<MetricKey>[]
 
 function computeMetricTotals(data: ChartDataPoint[]) {
   return METRIC_KEYS.reduce(

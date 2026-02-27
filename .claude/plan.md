@@ -696,25 +696,25 @@ src/routes/admin/
 #### Refactoring (medium — futur)
 
 **Fonctions trop longues**
-- [ ] `src/routes/admin/-server/users.ts:53-186` — `getListUsers` ~133 lignes → extraire `buildUserLookupMaps` + `enrichUsers`
-- [ ] `src/routes/admin/-server/memes.ts:111-212` — `editMeme` ~100 lignes → extraire `computeCategoryDiff` + simplifier le dual audit logging
-- [ ] `src/routes/admin/-server/memes.ts:272-359` — `createMemeWithVideo` ~88 lignes → extraire `rollbackMemeCreation`
-- [ ] `src/routes/admin/library/-components/meme-form.tsx:44-335` — `MemeForm` ~290 lignes → extraire sub-composants par champ (retirer le `eslint-disable max-lines-per-function`)
+- [x] `src/routes/admin/-server/users.ts` — `getListUsers` → extrait `fetchUserRelatedData` + `buildUserLookupMaps` + `buildSubscriptionMap` + `enrichUsers`
+- [x] `src/routes/admin/-server/memes.ts` — `editMeme` → extrait `computeCategoryDiff`
+- [x] `src/routes/admin/-server/memes.ts` — `createMemeWithVideo` → extrait `rollbackMemeCreation`
+- [x] `src/routes/admin/library/-components/meme-form.tsx` — `MemeForm` → extrait `useMemeForm` hook + `MemeFormDescriptionField` composant (eslint-disable retiré)
 
 **Patterns dupliqués**
-- [ ] `src/routes/admin/index.tsx` — pattern `ErrorBoundary + Suspense` dupliqué 4× → extraire `DashboardSection` wrapper
-- [ ] `src/routes/admin/index.tsx:51-128` — 4 skeleton components avec `Array.from` inline → extraire `SkeletonList` avec count + render prop, ou constantes hors composant
-- [ ] `getRowId` dupliqué dans `users/index.tsx:237` et `categories/index.tsx:87` → extraire helper partagé
-- [ ] Table pages (users + categories) — boilerplate `useReactTable` identique → évaluer extraction `useAdminTable` hook
-- [ ] `user-actions-cell.tsx:63-111` — 3 mutations `toast.promise` identiques → évaluer factory `createAdminMutation`
-- [ ] Types `{ key, label, icon }` dans `trends-chart.tsx`, `trending-memes.tsx`, `totals-section.tsx` → partager un type commun `IconConfig<K>`
+- [x] `src/routes/admin/index.tsx` — `DashboardSection` wrapper extrait (ErrorBoundary + Suspense)
+- [x] `getRowId` → exporté depuis `admin-table.tsx`, importé dans users + categories
+- [x] Types `{ key, label, icon }` → type partagé `IconConfig<TKey>` dans `dashboard/types.ts`
+- [~] `admin/index.tsx` — 5 skeleton components avec `Array.from` inline : évalué, chaque skeleton a une structure unique — `SkeletonList` n'apporterait pas de simplification significative
+- [~] Table pages `useReactTable` boilerplate → évalué : 2 usages seulement, abstraction prématurée (chaque table a des options différentes : sorting, colonnes)
+- [~] `user-actions-cell.tsx` — 3 mutations `toast.promise` → évalué : duplication locale dans un seul composant, factory ajouterait de la complexité pour peu de gain
 
 **Divers**
-- [ ] `src/routes/admin/users/-components/user-actions-cell.tsx:118` — child component retourne `null` → déplacer la condition dans le parent (column cell renderer)
-- [ ] `src/routes/admin/-components/admin-table.tsx:88,99` — `disabled` sur boutons pagination → évaluer si cohérent avec la convention UX projet
-- [ ] `src/server/audit.ts:29` — `metadata` typé `Prisma.InputJsonObject` → utiliser `AuditMetadata` et caster au call site DB uniquement
-- [ ] `src/routes/admin/-components/dashboard/trending-memes.tsx:80` — `as keyof typeof PODIUM_CONFIGS` → type guard `in` pour éviter le cast
-- [ ] `src/routes/admin/-components/meme-list-item.tsx:28` — `React.memo` sans `eslint-disable no-restricted-syntax` (convention projet)
+- [~] `user-actions-cell.tsx:118` — child `return null` → évalué : le `admin` context vient de `Route.useRouteContext()` accessible uniquement dans un composant React, pas dans la définition de colonne (module-level). Pattern actuel est le plus pratique pour TanStack Table
+- [~] `admin-table.tsx` — `disabled` sur pagination → évalué : exception justifiée à la règle "never disable buttons" — la pagination désactivée est un pattern UX universel et sans ambiguïté
+- [x] `audit.ts` — `metadata` → `AuditMetadata` avec cast `as Prisma.InputJsonObject` au call site DB
+- [x] `trending-memes.tsx` — type guard `matchIsPodiumRank` remplace le cast `as keyof typeof`
+- [x] `meme-list-item.tsx` — `React.memo` vérifié : pas restreint par la config ESLint actuelle, aucun disable nécessaire
 
 ### Phase 11 — Améliorations UX admin (ex Phase 10)
 

@@ -1,6 +1,3 @@
-import { Stars } from 'lucide-react'
-import { toast } from 'sonner'
-import type { z } from 'zod'
 import { FormFooter } from '@/components/form-footer'
 import {
   FormControl,
@@ -9,7 +6,6 @@ import {
   FormMessage
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { LoadingButton } from '@/components/ui/loading-button'
 import { MultiAsyncSelect } from '@/components/ui/multi-select'
 import {
   Select,
@@ -18,20 +14,12 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
 import { MemeStatusMeta, type MemeWithCategories } from '@/constants/meme'
-import type { Meme } from '@/db/generated/prisma/client'
 import { MemeStatus } from '@/db/generated/prisma/enums'
-import { useKeywordsField } from '@/hooks/use-keywords-field'
-import { getCategoriesListQueryOpts } from '@/lib/queries'
-import { captureWithFeature } from '@/lib/sentry'
 import { getFieldErrorMessage } from '@/lib/utils'
-import { generateMemeContent } from '@/server/ai'
-import { removeDuplicates } from '@/utils/array'
 import { KeywordsField } from '@admin/-components/keywords-field'
-import { editMeme, MEME_FORM_SCHEMA } from '@admin/-server/memes'
-import { useForm } from '@tanstack/react-form'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { MemeFormDescriptionField } from './meme-form-description-field'
+import { useMemeForm } from './use-meme-form'
 
 type MemeFormParams = {
   meme: MemeWithCategories
@@ -39,93 +27,14 @@ type MemeFormParams = {
   onSuccess?: () => void
 }
 
-// eslint-disable-next-line max-lines-per-function
 export const MemeForm = ({ meme, onCancel, onSuccess }: MemeFormParams) => {
-  const categoriesListQuery = useQuery(getCategoriesListQueryOpts())
-
-  const categoriesOptions =
-    categoriesListQuery.data?.map((category) => {
-      return {
-        label: category.title,
-        value: category.id
-      }
-    }) ?? []
-
-  const editMutation = useMutation({
-    mutationKey: ['edit-meme'],
-    mutationFn: async (
-      body: z.infer<typeof MEME_FORM_SCHEMA> & { id: Meme['id'] }
-    ) => {
-      const promise = editMeme({ data: body })
-      toast.promise(promise, {
-        loading: 'Modification...',
-        success: () => {
-          return 'Mème modifié avec succès !'
-        },
-        error: 'Une erreur est survenue'
-      })
-
-      return promise
-    },
-    onSuccess,
-    onError: (error) => {
-      captureWithFeature(error, 'admin-meme-edit')
-    }
-  })
-
-  const form = useForm({
-    defaultValues: {
-      keywords: meme.keywords,
-      tweetUrl: meme.tweetUrl,
-      title: meme.title,
-      description: meme.description,
-      status: meme.status,
-      categoryIds: meme.categories.map((category) => {
-        return category.categoryId
-      })
-    },
-    validators: {
-      onChange: MEME_FORM_SCHEMA
-    },
-    onSubmit: async ({ value }) => {
-      if (editMutation.isPending) {
-        return
-      }
-
-      await editMutation.mutateAsync({
-        title: value.title,
-        keywords: value.keywords,
-        tweetUrl: value.tweetUrl,
-        description: value.description,
-        status: value.status,
-        id: meme.id,
-        categoryIds: value.categoryIds
-      })
-    }
-  })
-
-  const keywordsField = useKeywordsField({
-    setKeywordsValue: (updater) => {
-      return form.setFieldValue('keywords', updater)
-    }
-  })
-
-  const generateContentMutation = useMutation({
-    mutationKey: ['generate-content'],
-    mutationFn: () => {
-      return generateMemeContent({ data: { memeId: meme.id } })
-    },
-    onSuccess: (result) => {
-      form.setFieldValue('description', result.description)
-      form.setFieldValue('keywords', (prevValue) => {
-        return removeDuplicates([...prevValue, ...result.keywords])
-      })
-    },
-    onError: (error) => {
-      captureWithFeature(error, 'ai-generation')
-      toast.error(error.message)
-    }
-  })
+  const {
+    form,
+    keywordsField,
+    categoriesListQuery,
+    categoriesOptions,
+    generateContentMutation
+  } = useMemeForm({ meme, onSuccess })
 
   return (
     <form
@@ -167,42 +76,11 @@ export const MemeForm = ({ meme, onCancel, onSuccess }: MemeFormParams) => {
         <form.Field
           name="description"
           children={(field) => {
-            const errorMessage = getFieldErrorMessage({ field })
-
             return (
-              <FormItem error={errorMessage}>
-                <FormLabel>Description</FormLabel>
-                <FormControl>
-                  <Textarea
-                    required
-                    name={field.name}
-                    onBlur={field.handleBlur}
-                    value={field.state.value}
-                    onChange={(event) => {
-                      return field.handleChange(event.target.value)
-                    }}
-                  />
-                </FormControl>
-                <div className="flex justify-end gap-2 items-center">
-                  <span className="text-xs text-muted-foreground">
-                    {field.state.value.length}/200 caractères
-                  </span>
-                  <LoadingButton
-                    isLoading={generateContentMutation.isPending}
-                    loadingText="Génération en cours..."
-                    size="sm"
-                    type="button"
-                    variant="default"
-                    onClick={() => {
-                      return generateContentMutation.mutate()
-                    }}
-                  >
-                    <Stars />
-                    Générer une description
-                  </LoadingButton>
-                </div>
-                <FormMessage />
-              </FormItem>
+              <MemeFormDescriptionField
+                field={field}
+                generateContentMutation={generateContentMutation}
+              />
             )
           }}
         />

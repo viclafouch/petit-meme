@@ -127,3 +127,5 @@ export const MemeListItem = React.memo(({ meme }: MemeListItemParams) => {
     </motion.div>
   )
 })
+
+MemeListItem.displayName = 'MemeListItem'

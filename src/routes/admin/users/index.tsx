@@ -11,7 +11,7 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip'
 import { getUserInitials } from '@/helpers/format'
-import { AdminTable, PAGE_SIZE } from '@admin/-components/admin-table'
+import { AdminTable, getRowId, PAGE_SIZE } from '@admin/-components/admin-table'
 import type { EnrichedUser } from '@admin/-server/users'
 import { getListUsers } from '@admin/-server/users'
 import { createFileRoute } from '@tanstack/react-router'
@@ -233,16 +233,12 @@ const columns = [
   })
 ]
 
-function getRowId(row: EnrichedUser) {
-  return row.id
-}
-
 const RouteComponent = () => {
-  const data = Route.useLoaderData()
+  const { users } = Route.useLoaderData()
 
   // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table v8 is not compatible with React Compiler (https://github.com/TanStack/table/issues/5903)
   const table = useReactTable({
-    data: data.users,
+    data: users,
     columns,
     getRowId,
     getCoreRowModel: getCoreRowModel(),

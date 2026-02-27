@@ -37,7 +37,7 @@ Phases 1 à 5 terminées (page dédiée, live preview, templates, fonts, accessi
 Migration terminée (preset Vercel, DNS, env vars, docs). Reste :
 
 - [ ] Configurer les crons (Vercel Cron Jobs ou scheduler externe)
-- [ ] Réactiver Sentry server-side tracing (`instrument-server.ts` + `wrapFetchWithSentry`) — bloqué par `require-in-the-middle` incompatible ESM dans Vercel serverless. Surveiller les updates Sentry/Nitro.
+- [x] Réactiver Sentry server-side tracing (`instrument-server.ts` + `wrapFetchWithSentry`) — réactivé avec `@sentry/tanstackstart-react` v10.40.0 (import path Vite plugin changé vers `/vite`)
 
 ---
 

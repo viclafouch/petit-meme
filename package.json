@@ -73,7 +73,7 @@
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@react-email/components": "^1.0.8",
-    "@sentry/tanstackstart-react": "10.39.0",
+    "@sentry/tanstackstart-react": "10.40.0",
     "@t3-oss/env-core": "^0.13.10",
     "@tanstack/react-form": "^1.28.3",
     "@tanstack/react-pacer": "^0.19.4",

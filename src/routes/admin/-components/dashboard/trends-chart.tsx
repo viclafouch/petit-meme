@@ -178,7 +178,10 @@ export const TrendsChart = ({ data, period }: TrendsChartParams) => {
             config={CHART_CONFIG}
             className="aspect-auto h-62.5 w-full"
           >
-            <LineChart data={data} margin={{ left: 12, right: 12 }}>
+            <LineChart
+              data={data}
+              margin={{ top: 0, right: 12, bottom: 0, left: 12 }}
+            >
               <CartesianGrid vertical={false} />
               <XAxis
                 dataKey="date"
@@ -194,8 +197,8 @@ export const TrendsChart = ({ data, period }: TrendsChartParams) => {
                 content={
                   <ChartTooltipContent
                     className="min-w-48"
-                    labelFormatter={(value: string) => {
-                      return formatTooltipDate(value)
+                    labelFormatter={(value) => {
+                      return formatTooltipDate(String(value))
                     }}
                     indicator="dot"
                   />

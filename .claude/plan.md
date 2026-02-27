@@ -36,7 +36,7 @@ Phases 1 à 5 terminées (page dédiée, live preview, templates, fonts, accessi
 
 Migration terminée (preset Vercel, DNS, env vars, docs). Reste :
 
-- [ ] Configurer les crons (Vercel Cron Jobs ou scheduler externe)
+- [ ] Configurer les crons (Vercel Cron Jobs ou scheduler externe) — inclut le scheduling des crons GDPR (`cleanup-retention.ts`, `unverified-cleanup.ts`, `verification-reminder.ts`)
 - [ ] Réactiver Sentry server-side tracing (`instrument-server.ts` + `wrapFetchWithSentry`) — bloqué par `require-in-the-middle` incompatible ESM dans Vercel serverless. Bug connu : [sentry-javascript#18859](https://github.com/getsentry/sentry-javascript/issues/18859). Surveiller les updates Sentry/OpenTelemetry.
 
 ---
@@ -661,25 +661,20 @@ src/routes/admin/
 #### GDPR
 
 **CRITICAL**
-- [ ] `AdminAuditLog` retient `targetId` (userId) indéfiniment sans pathway de suppression. Sur suppression user : anonymiser `targetId` → `'[deleted]'` via `updateMany` dans le hook `beforeDelete` (`src/lib/auth.tsx`). Ajouter rétention 2 ans dans `crons/cleanup-retention.ts`
+- [x] `AdminAuditLog` retient `targetId` (userId) indéfiniment sans pathway de suppression. Sur suppression user : anonymiser `targetId` → `'[deleted]'` via `updateMany` dans le hook `beforeDelete` (`src/lib/auth.tsx`). Ajouter rétention 2 ans dans `crons/cleanup-retention.ts`
 
 **HIGH**
-- [ ] `prisma/schema.prisma:168` — `AdminAuditLog.actingAdminId` FK sans `onDelete` clause (default `Restrict`) → bloque la suppression d'un compte admin. Migrer vers `onDelete: SetNull` + rendre nullable
-- [ ] Crons pas schedulés dans `vercel.json` → les promesses de rétention de la privacy notice ne sont pas automatiquement honorées. Ajouter les définitions `crons` dans `vercel.json`
-- [ ] `src/lib/auth.tsx:219` — Twitter OAuth login logge le full email à `info` level → masquer ou logger `emailDomain` uniquement
-- [ ] `src/lib/cookie-consent.ts:31` — cookie `cookieConsent` sans flag `secure` ni `sameSite`. Ajouter `secure` (prod) + `sameSite: 'lax'`
-- [ ] `src/server/user.ts` — `exportUserData` n'inclut pas `StudioGeneration` (historique générations = donnée personnelle Art. 15). Ajouter au export
+- [x] `src/lib/cookie-consent.ts:31` — cookie `cookieConsent` sans flag `secure` ni `sameSite`. Ajouter `secure` (prod) + `sameSite: 'lax'`
+- [x] `src/server/user.ts` — `exportUserData` n'inclut pas `StudioGeneration` (historique générations = donnée personnelle Art. 15). Ajouter au export
 
 **MEDIUM**
-- [ ] `StudioGeneration` — pas de rétention enforced (accumulation indéfinie pour les users actifs). Ajouter cleanup 365 jours dans `crons/cleanup-retention.ts`
-- [ ] `MemeActionDaily` — pas de rétention explicite. Ajouter cleanup 365 jours (pas de userId direct, mais bonne hygiène)
-- [ ] `crons/cleanup-retention.ts` — l'email anonymisé contient le userId raw (`deleted-{userId}@anonymized.local`). Remplacer par un hash SHA-256 tronqué
-- [ ] Privacy notice (`md/privacy.md`) — ne mentionne pas `StudioGeneration` comme activité de traitement. Ajouter section 2.6
-- [ ] Pas de DPA signés avec Neon, Vercel, Resend, Polar (Art. 28). Action externe
-- [ ] Pas de page update profil (nom/email) → violation Art. 16 droit de rectification. Feature à planifier
+- [x] `StudioGeneration` — pas de rétention enforced (accumulation indéfinie pour les users actifs). Ajouter cleanup 365 jours dans `crons/cleanup-retention.ts`
+- [x] `MemeActionDaily` — pas de rétention explicite. Ajouter cleanup 365 jours (pas de userId direct, mais bonne hygiène)
+- [x] `crons/cleanup-retention.ts` — l'email anonymisé contient le userId raw (`deleted-{userId}@anonymized.local`). Remplacer par un hash SHA-256 tronqué
+- [x] Privacy notice (`md/privacy.md`) — ne mentionne pas `StudioGeneration` comme activité de traitement. Ajouter section 2.5
 
-**LOW**
-- [ ] Pas de procédure de notification de breach documentée (Art. 33 — règle des 72h). Créer `BREACH_RESPONSE.md`
+**Hors GDPR — Guard admin**
+- [x] Interdire la suppression et le bannissement d'un admin depuis le dashboard (guard dans `removeUser` + `banUserById`)
 
 #### Schema Cleanup
 

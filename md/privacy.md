@@ -57,7 +57,20 @@ Si vous acceptez les cookies, nous transmettons à Algolia :
 Ces données sont utilisées pour améliorer la pertinence des résultats de
 recherche et générer des recommandations.
 
-### 2.5. Données de paiement
+### 2.5. Données de génération Studio
+
+Lorsque vous utilisez la fonctionnalité Studio (génération d'images à partir de
+mèmes), nous enregistrons :
+
+- La date et l'heure de chaque génération
+- L'identifiant du mème utilisé
+
+Ces données sont utilisées pour le contrôle d'utilisation (limitation du nombre
+de générations gratuites) et l'amélioration du service (statistiques d'usage
+agrégées). Elles sont conservées pendant **365 jours**, puis supprimées
+automatiquement.
+
+### 2.6. Données de paiement
 
 Les paiements sont gérés par **Stripe**. Nous ne stockons jamais vos
 informations de carte bancaire. Stripe collecte les données nécessaires au
@@ -76,6 +89,7 @@ traitement des paiements conformément à sa propre politique de confidentialit�
 | Traitement des paiements | Exécution du contrat | Données transmises à Stripe |
 | Envoi d'e-mails transactionnels | Exécution du contrat | Adresse e-mail |
 | Recherche de mèmes | Exécution du contrat | Requêtes de recherche |
+| Contrôle d'utilisation et analytics Studio | Intérêt légitime | Date de génération, identifiant du mème |
 | Suivi des erreurs et stabilité du service | Intérêt légitime | Données techniques (URL, navigateur, traces d'erreur) |
 
 ---
@@ -130,6 +144,8 @@ européenne).
 | Cookie `anonId` | 1 an (avec consentement) |
 | Cookie `algoliaUserToken` | 1 an (avec consentement) |
 | Données d'événements Algolia (vues, clics) | Selon la politique de rétention d'Algolia (30 jours par défaut) |
+| Données de génération Studio | 365 jours, puis supprimées automatiquement |
+| Données du journal d'audit administratif | 2 ans, puis supprimées automatiquement |
 | Données de paiement (Stripe) | Selon les obligations légales de Stripe |
 | E-mails transactionnels | Selon la politique de rétention de Resend |
 

@@ -1,4 +1,5 @@
 /* eslint-disable no-await-in-loop */
+import { createHash } from 'node:crypto'
 import { DAY } from '@/constants/time'
 import { prismaClient } from '@/db'
 import { cronLogger } from '@/lib/logger'
@@ -7,10 +8,16 @@ const log = cronLogger.child({ job: 'cleanup-retention' })
 
 const VERIFICATION_GRACE_PERIOD_MS = DAY
 const VIEW_RETENTION_DAYS = 90
+const ANALYTICS_RETENTION_DAYS = 365
+const AUDIT_LOG_RETENTION_YEARS = 2
 const ANONYMIZATION_YEARS = 3
 
 const maskId = (id: string) => {
   return id.slice(0, 8)
+}
+
+const hashId = (id: string) => {
+  return createHash('sha256').update(id).digest('hex').slice(0, 8)
 }
 
 const task = async () => {
@@ -72,6 +79,38 @@ const task = async () => {
     log.debug('No old view records to clean')
   }
 
+  const analyticsCutoff = new Date(
+    now.getTime() - ANALYTICS_RETENTION_DAYS * DAY
+  )
+
+  const deletedGenerations = await prismaClient.studioGeneration.deleteMany({
+    where: { createdAt: { lt: analyticsCutoff } }
+  })
+
+  log.info(
+    { count: deletedGenerations.count },
+    'Deleted old studio generations (365d)'
+  )
+
+  const deletedActions = await prismaClient.memeActionDaily.deleteMany({
+    where: { day: { lt: analyticsCutoff } }
+  })
+
+  log.info(
+    { count: deletedActions.count },
+    'Deleted old meme action daily records (365d)'
+  )
+
+  const auditLogCutoff = new Date(
+    now.getTime() - AUDIT_LOG_RETENTION_YEARS * 365 * DAY
+  )
+
+  const deletedAuditLogs = await prismaClient.adminAuditLog.deleteMany({
+    where: { createdAt: { lt: auditLogCutoff } }
+  })
+
+  log.info({ count: deletedAuditLogs.count }, 'Deleted old audit logs (2y)')
+
   const anonymizationCutoff = new Date(
     now.getTime() - ANONYMIZATION_YEARS * 365 * DAY
   )
@@ -101,7 +140,7 @@ const task = async () => {
       where: { id: user.id },
       data: {
         name: 'Utilisateur supprimé',
-        email: `deleted-${user.id}@anonymized.local`,
+        email: `deleted-${hashId(user.id)}@anonymized.local`,
         image: null,
         emailVerified: false,
         isAnonymized: true,

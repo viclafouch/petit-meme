@@ -210,6 +210,35 @@ export const BAN_REASONS = [
 
 export type BanReason = (typeof BAN_REASONS)[number]
 
+type AdminAction = 'bannir' | 'supprimer'
+
+const assertCanActOnUser = async (
+  adminId: string,
+  targetUserId: string,
+  action: AdminAction
+) => {
+  if (targetUserId === adminId) {
+    throw new Error(
+      action === 'bannir'
+        ? 'Impossible de vous bannir vous-même'
+        : 'Impossible de supprimer votre propre compte'
+    )
+  }
+
+  const targetUser = await prismaClient.user.findUnique({
+    where: { id: targetUserId },
+    select: { role: true }
+  })
+
+  if (targetUser?.role === 'admin') {
+    throw new Error(
+      action === 'bannir'
+        ? 'Impossible de bannir un administrateur'
+        : 'Impossible de supprimer un administrateur'
+    )
+  }
+}
+
 const BAN_USER_SCHEMA = z.object({
   userId: z.string(),
   banReason: z.enum(BAN_REASONS)
@@ -221,9 +250,7 @@ export const banUserById = createServerFn({ method: 'POST' })
     return BAN_USER_SCHEMA.parse(data)
   })
   .handler(async ({ data, context }) => {
-    if (data.userId === context.user.id) {
-      throw new Error('Impossible de vous bannir vous-même')
-    }
+    await assertCanActOnUser(context.user.id, data.userId, 'bannir')
 
     const { headers } = getRequest()
 
@@ -285,9 +312,7 @@ export const removeUser = createServerFn({ method: 'POST' })
   .middleware([adminRequiredMiddleware])
   .inputValidator(z.string())
   .handler(async ({ data: userId, context }) => {
-    if (userId === context.user.id) {
-      throw new Error('Impossible de supprimer votre propre compte')
-    }
+    await assertCanActOnUser(context.user.id, userId, 'supprimer')
 
     const { headers } = getRequest()
 

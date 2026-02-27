@@ -146,6 +146,11 @@ const getAuthConfig = createServerOnlyFn(() => {
           await prismaClient.subscription.deleteMany({
             where: { referenceId: user.id }
           })
+
+          await prismaClient.adminAuditLog.updateMany({
+            where: { targetId: user.id },
+            data: { targetId: '[deleted]' }
+          })
         }
       }
     },

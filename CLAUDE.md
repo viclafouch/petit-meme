@@ -43,7 +43,7 @@ Code must always be clean and readable. Before writing any code, ask whether it 
 
 1. Run `pnpm run lint:fix`
 2. Update the plan (`.claude/plan.md`): check off `[x]` completed items
-3. **ALWAYS run the `code-refactoring` agent** on every file created or modified (use the Task tool with `subagent_type: "code-refactoring"`). This is NOT optional — skip only if zero code was written (e.g. pure config/doc change).
+3. **ALWAYS run the `code-refactoring` agent** on every file created or modified (use the Task tool with `subagent_type: "code-refactoring"`). This is NOT optional — skip only if zero code was written (e.g. pure config/doc change). If the plan has changed with the refactoring, update the plan again.
 4. After major features or changes, proactively suggest running relevant audit agents (security, performance, dead-code, GDPR, Tailwind, React performance, etc.)
 
 **A task is NOT complete until steps 1-3 are done.** Never say "done" or summarize changes before finishing the checklist.

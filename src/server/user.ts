@@ -202,15 +202,25 @@ export const exportUserData = createServerFn({ method: 'GET' })
       }
     })
 
-    const subscriptions = await prismaClient.subscription.findMany({
-      where: { referenceId: context.user.id },
-      select: {
-        plan: true,
-        status: true,
-        periodStart: true,
-        periodEnd: true
-      }
-    })
+    const [subscriptions, studioGenerations] = await Promise.all([
+      prismaClient.subscription.findMany({
+        where: { referenceId: context.user.id },
+        select: {
+          plan: true,
+          status: true,
+          periodStart: true,
+          periodEnd: true
+        }
+      }),
+      prismaClient.studioGeneration.findMany({
+        where: { userId: context.user.id },
+        select: {
+          createdAt: true,
+          memeId: true
+        },
+        orderBy: { createdAt: 'desc' }
+      })
+    ])
 
     authLogger.info({ userId: context.user.id }, 'User data exported')
 
@@ -259,6 +269,12 @@ export const exportUserData = createServerFn({ method: 'GET' })
           status: subscription.status,
           periodStart: subscription.periodStart,
           periodEnd: subscription.periodEnd
+        }
+      }),
+      studioGenerations: studioGenerations.map((generation) => {
+        return {
+          createdAt: generation.createdAt,
+          memeId: generation.memeId
         }
       })
     }

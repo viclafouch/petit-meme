@@ -1,7 +1,3 @@
-// eslint-disable-next-line simple-import-sort/imports -- Sentry must init before any other import
-import '@/instrument-server'
-
-import { wrapFetchWithSentry } from '@sentry/tanstackstart-react'
 import {
   createStartHandler,
   defaultStreamHandler,
@@ -20,10 +16,8 @@ const customHandler = defineHandlerCallback(async (context) => {
 
 const handler = createStartHandler(customHandler)
 
-export default createServerEntry(
-  wrapFetchWithSentry({
-    fetch: (request) => {
-      return handler(request)
-    }
-  })
-)
+export default createServerEntry({
+  fetch: (request) => {
+    return handler(request)
+  }
+})

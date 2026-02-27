@@ -691,7 +691,7 @@ src/routes/admin/
 #### Refactoring (medium — futur)
 
 **Fonctions trop longues**
-- [x] `src/routes/admin/-server/users.ts` — `getListUsers` → extrait `fetchUserRelatedData` + `buildUserLookupMaps` + `buildSubscriptionMap` + `enrichUsers`
+- [ ] `src/routes/admin/-server/users.ts` — `getListUsers` extraction reverted: module-level functions using `prismaClient` break Vite client bundle (TanStack Start only strips `.handler()` body). All DB calls must stay inside `.handler()`. Same constraint applies to `assertCanActOnUser` (inlined back into ban/remove handlers).
 - [x] `src/routes/admin/-server/memes.ts` — `editMeme` → extrait `computeCategoryDiff`
 - [x] `src/routes/admin/-server/memes.ts` — `createMemeWithVideo` → extrait `rollbackMemeCreation`
 - [x] `src/routes/admin/library/-components/meme-form.tsx` — `MemeForm` → extrait `useMemeForm` hook + `MemeFormDescriptionField` composant (eslint-disable retiré)

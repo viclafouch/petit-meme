@@ -732,6 +732,18 @@ src/routes/admin/
 
 Passer le site en bilingue français / anglais. Étudier la meilleure approche avec TanStack Start (routing i18n, détection de langue, etc.). Inclut la stratégie d'index Algolia bilingue (index unique avec champ `lang` vs deux index séparés).
 
+### Standardiser le naming SQL en snake_case
+
+Standardisation des noms SQL via `@@map`/`@map` dans le schema Prisma. Les noms de modèles Prisma ne changent pas → zéro impact sur le code applicatif.
+
+- [x] Tables : `@@map` ajouté sur `Category`, `MemeCategory`, `Video`, `Meme`, `MemeViewDaily` ; corrigé sur `RateLimit` (`"rateLimit"` → `"rate_limit"`)
+- [x] Enum : `@@map("meme_status")` ajouté sur `MemeStatus`
+- [x] Colonnes : `@map` ajouté sur ~50 champs camelCase (tous modèles)
+- [x] Raw SQL mis à jour (`src/server/reels.ts`, `src/routes/admin/-server/dashboard.ts`)
+- [ ] Générer et appliquer la migration (`pnpm exec prisma migrate dev --name standardize_snake_case_naming`)
+- [ ] Vérifier le SQL généré (uniquement `RENAME TABLE`, `RENAME COLUMN`, `RENAME TYPE`)
+- [ ] Appliquer en production (`pnpm run prisma:migrate:prod`)
+
 ### Migration Prisma → Drizzle
 
 Remplacer Prisma par Drizzle ORM. Conventions cibles : tables en pluriel, colonnes en `snake_case`, timestamps `_at`, booleans `is_*`, prix en centimes (integer), UUIDs partout, `ON DELETE CASCADE` pour auth, `is_anonymized` pour GDPR.

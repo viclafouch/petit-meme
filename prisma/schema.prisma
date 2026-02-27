@@ -11,9 +11,9 @@ datasource db {
 
 model UserBookmark {
   id        String   @id @default(cuid())
-  userId    String
-  memeId    String
-  createdAt DateTime @default(now())
+  userId    String   @map("user_id")
+  memeId    String   @map("meme_id")
+  createdAt DateTime @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   meme Meme @relation(fields: [memeId], references: [id], onDelete: Cascade)
@@ -30,32 +30,36 @@ model Category {
   title     String
   slug      String   @unique
   keywords  String[] @default([])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   memes MemeCategory[]
 
   @@index([createdAt])
+  @@map("category")
 }
 
 model MemeCategory {
-  memeId     String
-  categoryId String
-  createdAt  DateTime @default(now())
+  memeId     String   @map("meme_id")
+  categoryId String   @map("category_id")
+  createdAt  DateTime @default(now()) @map("created_at")
 
   meme     Meme     @relation(fields: [memeId], references: [id], onDelete: Cascade)
   category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@id([memeId, categoryId])
   @@index([categoryId])
+  @@map("meme_category")
 }
 
 model Video {
   id          Int    @id @default(autoincrement())
   meme        Meme?
-  bunnyId     String @unique
+  bunnyId     String @unique @map("bunny_id")
   duration    Int
-  bunnyStatus Int    @default(0)
+  bunnyStatus Int    @default(0) @map("bunny_status")
+
+  @@map("video")
 }
 
 enum MemeStatus {
@@ -63,25 +67,27 @@ enum MemeStatus {
   PUBLISHED
   REJECTED
   ARCHIVED
+
+  @@map("meme_status")
 }
 
 model Meme {
-  id           String         @id @default(cuid())
-  title        String
-  videoId      Int            @unique
-  viewCount      Int            @default(0)
-  shareCount     Int            @default(0)
-  downloadCount  Int            @default(0)
-  tweetUrl       String?        @unique
-  description  String         @default("")
-  keywords     String[]       @default([])
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  publishedAt  DateTime?
-  video        Video          @relation(fields: [videoId], references: [id], onDelete: Cascade)
-  bookmarkedBy UserBookmark[]
-  categories   MemeCategory[]
-  status       MemeStatus     @default(PUBLISHED)
+  id            String         @id @default(cuid())
+  title         String
+  videoId       Int            @unique @map("video_id")
+  viewCount     Int            @default(0) @map("view_count")
+  shareCount    Int            @default(0) @map("share_count")
+  downloadCount Int            @default(0) @map("download_count")
+  tweetUrl      String?        @unique @map("tweet_url")
+  description   String         @default("")
+  keywords      String[]       @default([])
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  publishedAt   DateTime?      @map("published_at")
+  video         Video          @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  bookmarkedBy  UserBookmark[]
+  categories    MemeCategory[]
+  status        MemeStatus     @default(PUBLISHED)
   viewsDaily          MemeViewDaily[]
   actionsDaily        MemeActionDaily[]
   studioGenerations   StudioGeneration[]
@@ -89,15 +95,16 @@ model Meme {
   @@index([status])
   @@index([status, viewCount])
   @@index([status, publishedAt])
+  @@map("meme")
 }
 
 model MemeViewDaily {
   id        String   @id @default(cuid())
-  memeId    String
-  viewerKey String
+  memeId    String   @map("meme_id")
+  viewerKey String   @map("viewer_key")
   day       DateTime
-  watchMs   Int      @default(0)
-  createdAt DateTime @default(now())
+  watchMs   Int      @default(0) @map("watch_ms")
+  createdAt DateTime @default(now()) @map("created_at")
 
   meme Meme @relation(fields: [memeId], references: [id], onDelete: Cascade)
 
@@ -105,11 +112,12 @@ model MemeViewDaily {
   @@index([memeId, day])
   @@index([viewerKey, day])
   @@index([day])
+  @@map("meme_view_daily")
 }
 
 model MemeActionDaily {
   id     String   @id @default(cuid())
-  memeId String
+  memeId String   @map("meme_id")
   day    DateTime
   action String
   count  Int      @default(0)
@@ -125,21 +133,21 @@ model User {
   id              String         @id
   name            String
   email           String         @unique
-  emailVerified   Boolean
+  emailVerified   Boolean        @map("email_verified")
   image           String?
-  createdAt       DateTime
-  updatedAt       DateTime
+  createdAt       DateTime       @map("created_at")
+  updatedAt       DateTime       @map("updated_at")
   accounts        Account[]
   sessions        Session[]
   bookmarks       UserBookmark[]
-  generationCount Int            @default(0)
+  generationCount Int            @default(0) @map("generation_count")
 
   role       String?
   banned     Boolean?
-  banReason  String?
-  banExpires DateTime?
+  banReason  String?   @map("ban_reason")
+  banExpires DateTime? @map("ban_expires")
 
-  stripeCustomerId         String?
+  stripeCustomerId         String?   @map("stripe_customer_id")
   termsAcceptedAt          DateTime? @map("terms_accepted_at")
   privacyAcceptedAt        DateTime? @map("privacy_accepted_at")
   verificationReminderSent Boolean   @default(false) @map("verification_reminder_sent")
@@ -170,16 +178,16 @@ model AdminAuditLog {
 
 model Session {
   id        String   @id
-  expiresAt DateTime
+  expiresAt DateTime @map("expires_at")
   token     String   @unique
-  createdAt DateTime
-  updatedAt DateTime
-  ipAddress String?
-  userAgent String?
-  userId    String
+  createdAt DateTime @map("created_at")
+  updatedAt DateTime @map("updated_at")
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  userId    String   @map("user_id")
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  impersonatedBy String?
+  impersonatedBy String? @map("impersonated_by")
 
   @@index([userId])
   @@map("session")
@@ -206,18 +214,18 @@ model Subscription {
 
 model Account {
   id                    String    @id
-  accountId             String
-  providerId            String
-  userId                String
-  accessToken           String?
-  refreshToken          String?
-  idToken               String?
-  accessTokenExpiresAt  DateTime?
-  refreshTokenExpiresAt DateTime?
+  accountId             String    @map("account_id")
+  providerId            String    @map("provider_id")
+  userId                String    @map("user_id")
+  accessToken           String?   @map("access_token")
+  refreshToken          String?   @map("refresh_token")
+  idToken               String?   @map("id_token")
+  accessTokenExpiresAt  DateTime? @map("access_token_expires_at")
+  refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at")
   scope                 String?
   password              String?
-  createdAt             DateTime
-  updatedAt             DateTime
+  createdAt             DateTime  @map("created_at")
+  updatedAt             DateTime  @map("updated_at")
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -228,18 +236,18 @@ model Verification {
   id         String    @id
   identifier String
   value      String
-  expiresAt  DateTime
-  createdAt  DateTime?
-  updatedAt  DateTime?
+  expiresAt  DateTime  @map("expires_at")
+  createdAt  DateTime? @map("created_at")
+  updatedAt  DateTime? @map("updated_at")
 
   @@map("verification")
 }
 
 model StudioGeneration {
   id        String   @id @default(cuid())
-  userId    String
-  memeId    String?
-  createdAt DateTime @default(now())
+  userId    String   @map("user_id")
+  memeId    String?  @map("meme_id")
+  createdAt DateTime @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   meme Meme? @relation(fields: [memeId], references: [id], onDelete: SetNull)
@@ -254,7 +262,7 @@ model RateLimit {
   id          String @id @default(cuid())
   key         String @unique
   count       Int
-  lastRequest BigInt
+  lastRequest BigInt @map("last_request")
 
-  @@map("rateLimit")
+  @@map("rate_limit")
 }

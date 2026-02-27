@@ -25,11 +25,11 @@ export const getInfiniteReels = createServerFn({ method: 'POST' })
       SELECT json_build_object(
         'id', m."id",
         'title', m."title",
-        'viewCount', m."viewCount",
-        'video', json_build_object('id', v."id", 'bunnyId', v."bunnyId", 'duration', v."duration")
+        'viewCount', m."view_count",
+        'video', json_build_object('id', v."id", 'bunnyId', v."bunny_id", 'duration', v."duration")
       ) AS meme
-      FROM "Meme" m
-      JOIN "Video" v ON m."videoId" = v."id"
+      FROM "meme" m
+      JOIN "video" v ON m."video_id" = v."id"
       WHERE m."status" = 'PUBLISHED'
       ${excludeClause}
       ORDER BY RANDOM()

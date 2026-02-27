@@ -126,9 +126,9 @@ async function fetchChartData({
       _count: { id: true }
     }),
     prismaClient.$queryRaw<DailyCountRow[]>`
-        SELECT date_trunc('day', "createdAt") AS day, COUNT(*) AS count
-        FROM studio_generation
-        WHERE "createdAt" >= ${start} AND "createdAt" <= ${end}
+        SELECT date_trunc('day', "created_at") AS day, COUNT(*) AS count
+        FROM "studio_generation"
+        WHERE "created_at" >= ${start} AND "created_at" <= ${end}
         GROUP BY 1
       `,
     prismaClient.memeActionDaily.groupBy({
@@ -137,9 +137,9 @@ async function fetchChartData({
       _sum: { count: true }
     }),
     prismaClient.$queryRaw<DailyCountRow[]>`
-        SELECT date_trunc('day', "createdAt") AS day, COUNT(*) AS count
+        SELECT date_trunc('day', "created_at") AS day, COUNT(*) AS count
         FROM "user"
-        WHERE "createdAt" >= ${start} AND "createdAt" <= ${end}
+        WHERE "created_at" >= ${start} AND "created_at" <= ${end}
         GROUP BY 1
       `
   ])
@@ -272,7 +272,7 @@ async function fetchTrendingMemes() {
     SELECT
       m.id AS "memeId",
       m.title AS title,
-      vid."bunnyId" AS "bunnyId",
+      vid."bunny_id" AS "bunnyId",
       vid.duration AS duration,
       COALESCE(v.views, 0) AS views,
       COALESCE(b.bookmarks, 0) AS bookmarks,
@@ -286,35 +286,35 @@ async function fetchTrendingMemes() {
         + COALESCE(g.generations, 0) * ${TRENDING_WEIGHTS.generations}
         + COALESCE(ds.shares, 0) * ${TRENDING_WEIGHTS.shares}
       ) AS score
-    FROM "Meme" m
-    INNER JOIN "Video" vid ON vid.id = m."videoId"
+    FROM "meme" m
+    INNER JOIN "video" vid ON vid.id = m."video_id"
     LEFT JOIN (
-      SELECT "memeId", COUNT(*)::bigint AS views
-      FROM "MemeViewDaily"
+      SELECT "meme_id", COUNT(*)::bigint AS views
+      FROM "meme_view_daily"
       WHERE day >= ${since}
-      GROUP BY "memeId"
-    ) v ON v."memeId" = m.id
+      GROUP BY "meme_id"
+    ) v ON v."meme_id" = m.id
     LEFT JOIN (
-      SELECT "memeId", COUNT(*)::bigint AS bookmarks
-      FROM user_bookmark
-      WHERE "createdAt" >= ${since}
-      GROUP BY "memeId"
-    ) b ON b."memeId" = m.id
+      SELECT "meme_id", COUNT(*)::bigint AS bookmarks
+      FROM "user_bookmark"
+      WHERE "created_at" >= ${since}
+      GROUP BY "meme_id"
+    ) b ON b."meme_id" = m.id
     LEFT JOIN (
       SELECT
-        "memeId",
+        "meme_id",
         SUM(CASE WHEN action = 'download' THEN count ELSE 0 END)::bigint AS downloads,
         SUM(CASE WHEN action = 'share' THEN count ELSE 0 END)::bigint AS shares
-      FROM meme_action_daily
+      FROM "meme_action_daily"
       WHERE day >= ${since} AND action IN ('download', 'share')
-      GROUP BY "memeId"
-    ) ds ON ds."memeId" = m.id
+      GROUP BY "meme_id"
+    ) ds ON ds."meme_id" = m.id
     LEFT JOIN (
-      SELECT "memeId", COUNT(*)::bigint AS generations
-      FROM studio_generation
-      WHERE "createdAt" >= ${since} AND "memeId" IS NOT NULL
-      GROUP BY "memeId"
-    ) g ON g."memeId" = m.id
+      SELECT "meme_id", COUNT(*)::bigint AS generations
+      FROM "studio_generation"
+      WHERE "created_at" >= ${since} AND "meme_id" IS NOT NULL
+      GROUP BY "meme_id"
+    ) g ON g."meme_id" = m.id
     WHERE m.status = ${MemeStatus.PUBLISHED}
     AND (
       COALESCE(v.views, 0)

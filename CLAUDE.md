@@ -48,6 +48,10 @@ Code must always be clean and readable. Before writing any code, ask whether it 
 
 **A task is NOT complete until steps 1-3 are done.** Never say "done" or summarize changes before finishing the checklist.
 
+## Design Rule
+
+For any UI/design task, **always use `/frontend-design`** before writing code.
+
 ## Uncertainty Rule
 
 Whenever there is any uncertainty (even a single one), use the **deep-dive** skill before writing code. Never proceed with unresolved unknowns.

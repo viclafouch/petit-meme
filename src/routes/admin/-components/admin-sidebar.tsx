@@ -1,5 +1,6 @@
 import {
   ArrowLeft,
+  Blocks,
   LayoutDashboard,
   SquareLibrary,
   Twitter,
@@ -78,6 +79,14 @@ export const AdminSidebar = ({
                   <Link to="/admin/downloader">
                     <Twitter />
                     <span>Téléchargeur Twitter</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/admin/services">
+                    <Blocks />
+                    <span>Services</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

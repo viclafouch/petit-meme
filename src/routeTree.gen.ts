@@ -20,6 +20,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as Public__rootIndexRouteImport } from './routes/_public__root/index'
 import { Route as ApiSentryTunnelRouteImport } from './routes/api/sentry-tunnel'
 import { Route as ApiBunnyRouteImport } from './routes/api/bunny'
+import { Route as AdminServicesRouteImport } from './routes/admin/services'
 import { Route as AdminDownloaderRouteImport } from './routes/admin/downloader'
 import { Route as Public__rootDefaultRouteRouteImport } from './routes/_public__root/_default/route'
 import { Route as AdminUsersIndexRouteImport } from './routes/admin/users/index'
@@ -95,6 +96,11 @@ const ApiBunnyRoute = ApiBunnyRouteImport.update({
   id: '/api/bunny',
   path: '/api/bunny',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminServicesRoute = AdminServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminDownloaderRoute = AdminDownloaderRouteImport.update({
   id: '/downloader',
@@ -229,6 +235,7 @@ export interface FileRoutesByFullPath {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/downloader': typeof AdminDownloaderRoute
+  '/admin/services': typeof AdminServicesRoute
   '/api/bunny': typeof ApiBunnyRoute
   '/api/sentry-tunnel': typeof ApiSentryTunnelRoute
   '/admin/': typeof AdminIndexRoute
@@ -260,6 +267,7 @@ export interface FileRoutesByTo {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/downloader': typeof AdminDownloaderRoute
+  '/admin/services': typeof AdminServicesRoute
   '/api/bunny': typeof ApiBunnyRoute
   '/api/sentry-tunnel': typeof ApiSentryTunnelRoute
   '/admin': typeof AdminIndexRoute
@@ -294,6 +302,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_public__root/_default': typeof Public__rootDefaultRouteRouteWithChildren
   '/admin/downloader': typeof AdminDownloaderRoute
+  '/admin/services': typeof AdminServicesRoute
   '/api/bunny': typeof ApiBunnyRoute
   '/api/sentry-tunnel': typeof ApiSentryTunnelRoute
   '/_public__root/': typeof Public__rootIndexRoute
@@ -329,6 +338,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/admin/downloader'
+    | '/admin/services'
     | '/api/bunny'
     | '/api/sentry-tunnel'
     | '/admin/'
@@ -360,6 +370,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/admin/downloader'
+    | '/admin/services'
     | '/api/bunny'
     | '/api/sentry-tunnel'
     | '/admin'
@@ -393,6 +404,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/_public__root/_default'
     | '/admin/downloader'
+    | '/admin/services'
     | '/api/bunny'
     | '/api/sentry-tunnel'
     | '/_public__root/'
@@ -510,6 +522,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/bunny'
       preLoaderRoute: typeof ApiBunnyRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/services': {
+      id: '/admin/services'
+      path: '/services'
+      fullPath: '/admin/services'
+      preLoaderRoute: typeof AdminServicesRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/admin/downloader': {
       id: '/admin/downloader'
@@ -742,6 +761,7 @@ const Public__rootRouteRouteWithChildren =
 
 interface AdminRouteRouteChildren {
   AdminDownloaderRoute: typeof AdminDownloaderRoute
+  AdminServicesRoute: typeof AdminServicesRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminLibraryMemeIdRoute: typeof AdminLibraryMemeIdRoute
   AdminCategoriesIndexRoute: typeof AdminCategoriesIndexRoute
@@ -751,6 +771,7 @@ interface AdminRouteRouteChildren {
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminDownloaderRoute: AdminDownloaderRoute,
+  AdminServicesRoute: AdminServicesRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminLibraryMemeIdRoute: AdminLibraryMemeIdRoute,
   AdminCategoriesIndexRoute: AdminCategoriesIndexRoute,

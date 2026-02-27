@@ -41,6 +41,17 @@ Migration terminée (preset Vercel, DNS, env vars, docs). Reste :
 
 ---
 
+## Admin — Page Services
+
+Page `/admin/services` — page statique avec liens vers les dashboards des 8 services (Algolia, Bunny, Stripe, Resend, Database, Sentry, Vercel, Gemini). Aucun appel serveur, données purement statiques.
+
+- [x] Composant `ServiceCard` — icône, titre, lien dashboard (carte cliquable)
+- [x] Composant `ServicesGrid` — grid statique
+- [x] Page route `/admin/services`
+- [x] Lien sidebar "Services" avec icône `Blocks`
+
+---
+
 ## Admin — Refonte Tables, UX, Dashboard
 
 Phases 1 à 6 terminées (sécurité admin, GDPR, performance backend, hardening Better Auth, AdminTable upgrade, Users enrichissement + audit log).

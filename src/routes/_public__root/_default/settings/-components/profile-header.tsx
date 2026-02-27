@@ -3,6 +3,7 @@ import { Calendar, Mail } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
+import { DEFAULT_AVATAR_URL } from '@/constants/avatar'
 import type { ActiveSubscription } from '@/server/customer'
 
 export const ProfileHeader = ({
@@ -19,7 +20,7 @@ export const ProfileHeader = ({
           <div className="relative">
             <Avatar className="size-24">
               <AvatarImage
-                src={user.image ?? '/images/avatar.png'}
+                src={user.image ?? DEFAULT_AVATAR_URL}
                 alt={user.name}
               />
               <AvatarFallback className="rounded-lg">

@@ -20,6 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
+import { DEFAULT_AVATAR_URL } from '@/constants/avatar'
 import { getUserInitials } from '@/helpers/format'
 import { useStripeCheckout } from '@/hooks/use-stripe-checkout'
 import { authClient } from '@/lib/auth-client'
@@ -58,10 +59,7 @@ export const UserDropdown = ({ user }: UserDropdownParams) => {
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="gap-2 px-2">
           <Avatar className="size-6 rounded-lg">
-            <AvatarImage
-              src={user.image ?? '/images/avatar.png'}
-              alt="Avatar"
-            />
+            <AvatarImage src={user.image ?? DEFAULT_AVATAR_URL} alt="Avatar" />
             <AvatarFallback className="rounded-lg">
               {getUserInitials(user.name)}
             </AvatarFallback>
@@ -78,7 +76,7 @@ export const UserDropdown = ({ user }: UserDropdownParams) => {
           <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
             <Avatar className="size-8 rounded-lg">
               <AvatarImage
-                src={user.image ?? '/images/avatar.png'}
+                src={user.image ?? DEFAULT_AVATAR_URL}
                 alt="Avatar"
               />
               <AvatarFallback className="rounded-lg">

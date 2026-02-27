@@ -1,6 +1,7 @@
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { DEFAULT_AVATAR_URL } from '@/constants/avatar'
 import { getUserInitials } from '@/helpers/format'
 import { getActionIcon } from '@admin/-helpers/action-icon'
 import { formatAuditEntry } from '@admin/-helpers/audit'
@@ -39,7 +40,7 @@ export const ActivityFeed = ({ entries }: ActivityFeedParams) => {
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Avatar className="size-4">
                   <AvatarImage
-                    src={entry.actingAdmin.image ?? undefined}
+                    src={entry.actingAdmin.image ?? DEFAULT_AVATAR_URL}
                     alt={entry.actingAdmin.name}
                   />
                   <AvatarFallback className="text-[8px]">

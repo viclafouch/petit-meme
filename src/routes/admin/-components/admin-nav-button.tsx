@@ -10,6 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
+import { DEFAULT_AVATAR_URL } from '@/constants/avatar'
 import { getUserInitials } from '@/helpers/format'
 import { authClient } from '@/lib/auth-client'
 import { getAuthUserQueryOpts } from '@/lib/queries'
@@ -32,7 +33,7 @@ export const AdminNavButton = ({ user }: { user: UserWithRole }) => {
         <Button variant="ghost" className="relative size-9 rounded-full">
           <Avatar className="size-9">
             <AvatarImage
-              src={user.image ?? undefined}
+              src={user.image ?? DEFAULT_AVATAR_URL}
               alt={user.name}
               referrerPolicy="no-referrer"
             />

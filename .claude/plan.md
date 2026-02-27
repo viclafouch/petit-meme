@@ -422,10 +422,11 @@ Transformer la page d'accueil admin (actuellement redirect vers `/admin/library`
 
 ### Phase 9b — Graphiques tendances ✅
 
-LineChart full-width au dashboard admin avec 4 courbes de tendance + 4 summary cards. Remplace les anciens 7 KPI cards.
+LineChart full-width au dashboard admin avec 5 courbes de tendance + 4 summary cards. Remplace les anciens 7 KPI cards.
 
 **Architecture :**
-- 4 métriques : vues, générations IA, partages, téléchargements
+- 5 métriques : vues, générations IA, partages, téléchargements, nouveaux utilisateurs (signups)
+- Signups : `$queryRaw` sur `User.createdAt` (indexé), agrégé par granularité. Courbe uniquement (pas de summary card — le total users est déjà dans `TotalsSection`). Couleur `--chart-2`, label "Nouveaux utilisateurs".
 - Chart + 4 summary cards alimentés par une seule query (`getAdminChartData`)
 - Totaux (memes publiés, en attente, users, premium) = query séparée `getAdminDashboardTotals` (sans période)
 - Ancien `DashboardStats` + 7 KPI cards supprimés → simplifié en `DashboardTotals` + `ChartDataPoint`

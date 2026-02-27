@@ -71,6 +71,7 @@ export type ChartDataPoint = {
   studioGenerations: number
   shares: number
   downloads: number
+  signups: number
 }
 
 function aggregateRowsByGranularity(
@@ -103,6 +104,8 @@ function aggregateActionsByGranularity(
   return { shares, downloads }
 }
 
+type DailyCountRow = { day: Date; count: bigint }
+
 type FetchChartDataParams = {
   start: Date
   end: Date
@@ -116,23 +119,29 @@ async function fetchChartData({
 }: FetchChartDataParams) {
   const dateRange = { gte: start, lte: end }
 
-  const [viewRows, generationRows, actionRows] = await Promise.all([
+  const [viewRows, generationRows, actionRows, signupRows] = await Promise.all([
     prismaClient.memeViewDaily.groupBy({
       by: ['day'],
       where: { day: dateRange },
       _count: { id: true }
     }),
-    prismaClient.$queryRaw<{ day: Date; count: bigint }[]>`
-      SELECT date_trunc('day', "createdAt") AS day, COUNT(*) AS count
-      FROM studio_generation
-      WHERE "createdAt" >= ${start} AND "createdAt" <= ${end}
-      GROUP BY 1
-    `,
+    prismaClient.$queryRaw<DailyCountRow[]>`
+        SELECT date_trunc('day', "createdAt") AS day, COUNT(*) AS count
+        FROM studio_generation
+        WHERE "createdAt" >= ${start} AND "createdAt" <= ${end}
+        GROUP BY 1
+      `,
     prismaClient.memeActionDaily.groupBy({
       by: ['day', 'action'],
       where: { day: dateRange },
       _sum: { count: true }
-    })
+    }),
+    prismaClient.$queryRaw<DailyCountRow[]>`
+        SELECT date_trunc('day', "createdAt") AS day, COUNT(*) AS count
+        FROM "user"
+        WHERE "createdAt" >= ${start} AND "createdAt" <= ${end}
+        GROUP BY 1
+      `
   ])
 
   const viewsMap = aggregateRowsByGranularity(
@@ -149,6 +158,12 @@ async function fetchChartData({
   )
   const { shares: sharesMap, downloads: downloadsMap } =
     aggregateActionsByGranularity(actionRows, granularity)
+  const signupsMap = aggregateRowsByGranularity(
+    signupRows.map((row) => {
+      return { day: row.day, count: Number(row.count) }
+    }),
+    granularity
+  )
 
   const series = generateDateSeries({ start, end, granularity })
 
@@ -158,7 +173,8 @@ async function fetchChartData({
       views: viewsMap.get(dateKey) ?? 0,
       studioGenerations: generationsMap.get(dateKey) ?? 0,
       shares: sharesMap.get(dateKey) ?? 0,
-      downloads: downloadsMap.get(dateKey) ?? 0
+      downloads: downloadsMap.get(dateKey) ?? 0,
+      signups: signupsMap.get(dateKey) ?? 0
     }
   })
 }

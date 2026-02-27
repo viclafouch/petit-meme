@@ -23,14 +23,16 @@ const METRIC_KEYS = [
   'views',
   'studioGenerations',
   'shares',
-  'downloads'
+  'downloads',
+  'signups'
 ] as const satisfies readonly MetricKey[]
 
 const CHART_CONFIG = {
   views: { label: 'Vues', color: 'var(--chart-1)' },
   studioGenerations: { label: 'Générations', color: 'var(--chart-3)' },
   shares: { label: 'Partages', color: 'var(--chart-5)' },
-  downloads: { label: 'Téléchargements', color: 'var(--chart-6)' }
+  downloads: { label: 'Téléchargements', color: 'var(--chart-6)' },
+  signups: { label: 'Nouveaux utilisateurs', color: 'var(--chart-2)' }
 } as const satisfies ChartConfig
 
 const METRIC_SUMMARIES = [

@@ -1,5 +1,3 @@
-/* eslint-disable id-length */
-import React from 'react'
 import type { Variants } from 'motion/react'
 import { motion, useReducedMotion } from 'motion/react'
 import { buttonVariants } from '@/components/ui/button'
@@ -28,12 +26,14 @@ const h1Transition = {
 const variants = {
   hidden: {
     opacity: 0,
+    // eslint-disable-next-line id-length -- Framer Motion axis property
     y: 20,
     filter: 'blur(15px)'
   },
   visible: (custom: { delay?: number; duration?: number }) => {
     return {
       opacity: 1,
+      // eslint-disable-next-line id-length -- Framer Motion axis property
       y: 0,
       filter: 'blur(0px)',
       transition: {
@@ -66,16 +66,14 @@ export const Hero = () => {
 
   return (
     <PageHeader as="div">
-      <React.Suspense fallback={<div />}>
-        <motion.div
-          variants={variants}
-          initial={isReducedMotion ? false : 'hidden'}
-          animate="visible"
-          custom={{ delay: 0.5 }}
-        >
-          <AnnouncementQuery />
-        </motion.div>
-      </React.Suspense>
+      <motion.div
+        variants={variants}
+        initial={isReducedMotion ? false : 'hidden'}
+        animate="visible"
+        custom={{ delay: 0.5 }}
+      >
+        <AnnouncementQuery />
+      </motion.div>
       <PageHeading className="text-foreground/70">
         <TextEffect
           as="span"

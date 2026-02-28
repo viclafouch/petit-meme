@@ -1,4 +1,4 @@
-import React from 'react'
+import { MINUTE } from '@/constants/time'
 import {
   getFavoritesMemesQueryOpts,
   getRecentCountMemesQueryOpts,
@@ -13,16 +13,12 @@ import { Hero } from './-components/hero'
 import { PageContainer } from './-components/page-headers'
 
 const RouteComponent = () => {
-  const { trendingMemesPromise } = Route.useLoaderData()
-
   return (
     <PageContainer>
       <section className="flex w-full flex-col py-30 pb-10 sm:pt-42">
         <Hero />
         <div className="container lg:mt-36 mt-24">
-          <React.Suspense fallback={<div />}>
-            <BestMemes trendingMemesPromise={trendingMemesPromise} />
-          </React.Suspense>
+          <BestMemes />
           <div className="mt-16">
             <Responsive />
           </div>
@@ -38,6 +34,7 @@ const RouteComponent = () => {
 export const Route = createFileRoute('/_public__root/')({
   component: RouteComponent,
   pendingMs: 3000,
+  staleTime: 10 * MINUTE,
   head: () => {
     return seo({
       title: 'Ta banque de mèmes vidéo, prête à faire rire Internet',
@@ -54,18 +51,13 @@ export const Route = createFileRoute('/_public__root/')({
       }
     ]
   },
-  loader: ({ context }) => {
-    void context.queryClient.ensureQueryData(getRecentCountMemesQueryOpts())
-    const trendingMemesPromise = context.queryClient.ensureQueryData(
-      getTrendingMemesQueryOpts()
-    )
-
-    if (context.user) {
-      void context.queryClient.ensureQueryData(getFavoritesMemesQueryOpts())
-    }
-
-    return {
-      trendingMemesPromise
-    }
+  loader: async ({ context }) => {
+    await Promise.all([
+      context.queryClient.ensureQueryData(getTrendingMemesQueryOpts()),
+      context.queryClient.ensureQueryData(getRecentCountMemesQueryOpts()),
+      context.user
+        ? context.queryClient.ensureQueryData(getFavoritesMemesQueryOpts())
+        : undefined
+    ])
   }
 })

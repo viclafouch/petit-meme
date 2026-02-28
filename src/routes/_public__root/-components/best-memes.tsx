@@ -1,18 +1,14 @@
-import React from 'react'
 import { ChevronRight } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 import { MemesList } from '@/components/Meme/memes-list'
 import { buttonVariants } from '@/components/ui/button'
-import type { MemeWithVideo } from '@/constants/meme'
+import { getTrendingMemesQueryOpts } from '@/lib/queries'
 import { cn } from '@/lib/utils'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 
-type BestMemesParams = {
-  trendingMemesPromise: Promise<MemeWithVideo[]>
-}
-
-export const BestMemes = ({ trendingMemesPromise }: BestMemesParams) => {
-  const trendingMemes = React.use(trendingMemesPromise)
+export const BestMemes = () => {
+  const trendingMemesQuery = useSuspenseQuery(getTrendingMemesQueryOpts())
   const isReducedMotion = useReducedMotion()
 
   return (
@@ -38,7 +34,7 @@ export const BestMemes = ({ trendingMemesPromise }: BestMemesParams) => {
         </p>
       </div>
       <section>
-        <MemesList layoutContext="index" memes={trendingMemes} />
+        <MemesList layoutContext="index" memes={trendingMemesQuery.data} />
       </section>
     </motion.div>
   )

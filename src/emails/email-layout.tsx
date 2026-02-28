@@ -85,9 +85,7 @@ export const EmailLayout = ({ preview, children }: EmailLayoutProps) => {
                 Petit Meme
               </Text>
             </Section>
-            <Section className="rounded-2xl bg-white px-10 py-10">
-              {children}
-            </Section>
+            <Section className="bg-white px-10 py-10">{children}</Section>
             <Section className="mt-8 text-center">
               <Text className="m-0 text-xs leading-6 text-brand-muted">
                 <Link

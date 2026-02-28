@@ -19,11 +19,11 @@ import { authLogger, stripeLogger } from '@/lib/logger'
 import { sendEmailAsync } from '@/lib/resend'
 import { captureWithFeature } from '@/lib/sentry'
 import { stripeClient } from '@/lib/stripe'
+import { cleanupUserData } from '@/utils/user-cleanup'
 import { stripe } from '@better-auth/stripe'
 import { createServerOnlyFn } from '@tanstack/react-start'
 // Vercel-specific: replace with platform equivalent if migrating (e.g. Railway)
 import { waitUntil } from '@vercel/functions'
-import AccountDeletedEmail from '../emails/account-deleted-email'
 import EmailVerification from '../emails/email-verification'
 import PasswordChangedEmail from '../emails/password-changed-email'
 import PaymentFailedEmail from '../emails/payment-failed-email'
@@ -177,34 +177,10 @@ const getAuthConfig = createServerOnlyFn(() => {
       deleteUser: {
         enabled: true,
         beforeDelete: async (user) => {
-          authLogger.info(
-            { userId: user.id, email: user.email },
-            'Account deletion initiated'
-          )
-
-          sendEmailAsync({
-            to: user.email,
-            subject: 'Ton compte Petit Mème a été supprimé',
-            react: <AccountDeletedEmail username={user.name} />,
-            logMessage: 'Sending account deleted email to'
-          })
-
-          const dbUser = await prismaClient.user.findUnique({
-            where: { id: user.id },
-            select: { stripeCustomerId: true }
-          })
-
-          if (dbUser?.stripeCustomerId) {
-            await stripeClient.customers.del(dbUser.stripeCustomerId)
-          }
-
-          await prismaClient.subscription.deleteMany({
-            where: { referenceId: user.id }
-          })
-
-          await prismaClient.adminAuditLog.updateMany({
-            where: { targetId: user.id },
-            data: { targetId: '[deleted]' }
+          await cleanupUserData({
+            userId: user.id,
+            email: user.email,
+            name: user.name
           })
         }
       }

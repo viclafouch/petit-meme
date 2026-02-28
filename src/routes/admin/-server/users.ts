@@ -5,6 +5,7 @@ import { auth } from '@/lib/auth'
 import { adminLogger } from '@/lib/logger'
 import { logAuditAction } from '@/server/audit'
 import { adminRequiredMiddleware } from '@/server/user-auth'
+import { cleanupUserData } from '@/utils/user-cleanup'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
 
@@ -269,12 +270,22 @@ export const removeUser = createServerFn({ method: 'POST' })
 
     const targetUser = await prismaClient.user.findUnique({
       where: { id: userId },
-      select: { role: true }
+      select: { role: true, email: true, name: true }
     })
 
-    if (targetUser?.role === 'admin') {
+    if (!targetUser) {
+      throw new Error('Utilisateur introuvable')
+    }
+
+    if (targetUser.role === 'admin') {
       throw new Error('Impossible de supprimer un administrateur')
     }
+
+    await cleanupUserData({
+      userId,
+      email: targetUser.email,
+      name: targetUser.name
+    })
 
     const { headers } = getRequest()
 

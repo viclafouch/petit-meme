@@ -239,6 +239,7 @@ Inclut l'enrichissement des données affichées, la migration ban/unban/delete v
 - [x] Ajouter guard server-side `userId === context.user.id` (auto-suppression)
 - [x] Log dans `AdminAuditLog` avec `actingAdminId`
 - [x] Supprimer le `findUnique` pré-vol redondant — laisser `auth.api.removeUser` gérer le not-found
+- [x] Fix : `auth.api.removeUser` (admin) ne déclenche PAS le hook `beforeDelete` de better-auth → cleanup Stripe/subscriptions/audit logs manquant. Extraction de `cleanupUserData` dans `src/utils/user-cleanup.tsx`, appelé par les deux flux (self-deletion via `beforeDelete` + admin via `removeUser` handler)
 
 **Enrichissement données Users (deep-dive 2026-02-25)**
 

@@ -31,18 +31,26 @@ const RemainingTimeBadge = () => {
     return state.mediaCurrentTime
   })
 
-  const hasTimeData = duration !== undefined && currentTime !== undefined
-  const remainingTime = hasTimeData ? duration - currentTime : 0
+  const hasFiniteTimeData =
+    duration !== undefined &&
+    currentTime !== undefined &&
+    Number.isFinite(duration) &&
+    Number.isFinite(currentTime)
+  const remainingTime = hasFiniteTimeData ? duration - currentTime : 0
 
   if (remainingTime <= 0) {
     // eslint-disable-next-line react/jsx-no-useless-fragment -- perf: isolated component to avoid re-rendering parent on every frame
     return <></>
   }
 
+  const remainingMinutes = Math.floor(remainingTime / 60)
+  const remainingSeconds = Math.floor(remainingTime % 60)
+  const ariaLabel = `${remainingMinutes} ${pluralize(remainingMinutes, { one: 'minute', other: 'minutes' })} ${remainingSeconds} ${pluralize(remainingSeconds, { one: 'seconde', other: 'secondes' })} restantes`
+
   return (
     <span
       className="absolute bottom-3 left-3 text-xs font-medium text-white bg-black/50 rounded-md px-2 py-1"
-      aria-label={`${Math.floor(remainingTime / 60)} ${pluralize(Math.floor(remainingTime / 60), { one: 'minute', other: 'minutes' })} ${Math.floor(remainingTime % 60)} ${pluralize(Math.floor(remainingTime % 60), { one: 'seconde', other: 'secondes' })} restantes`}
+      aria-label={ariaLabel}
     >
       {formatVideoDuration(remainingTime)}
     </span>

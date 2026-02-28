@@ -1,16 +1,12 @@
 import type React from 'react'
 import { Lock, MousePointerClick, ShieldCheck } from 'lucide-react'
-
-type FaqItem = {
-  question: string
-  answer: string
-}
+import type { FaqItem } from '@/components/faq-section'
 
 export const PRICING_FAQ_ITEMS = [
   {
     question: 'Puis-je annuler à tout moment ?',
     answer:
-      'Oui, tu peux annuler ton abonnement en un clic depuis tes paramètres. Tu conserves l\u2019accès Premium jusqu\u2019à la fin de la période payée, sans frais cachés.'
+      'Oui, tu peux annuler ton abonnement en un clic depuis tes paramètres. Tu conserves l’accès Premium jusqu’à la fin de la période payée, sans frais cachés.'
   },
   {
     question: 'Comment fonctionne la génération de vidéos ?',

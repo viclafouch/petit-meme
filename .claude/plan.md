@@ -133,6 +133,10 @@ Objectif : maximiser la conversion free → paid. Refonte complète de `/pricing
 - [x] **S-3** (Major) : FAQPage JSON-LD structuré ajouté au graph pricing
 - [x] **S-5** (Minor) : Meta keywords ajoutés sur la page pricing
 - [x] **S-6** (Minor) : `hreflang="x-default"` ajouté en fallback
+- [x] **S-7** (Major) : Fix Google structured data FAQ — suppression microdata (incompatible avec accordion Radix), migration vers JSON-LD uniquement (format recommandé par Google)
+- [x] **S-8** (Minor) : Composant `FaqSection` partagé entre home et pricing (suppression duplication)
+- [x] **S-9** (Minor) : Helper `buildFaqPageJsonLd` partagé dans `seo.ts` — même source de vérité pour le DOM et le JSON-LD
+- [x] **S-10** (Minor) : Ajout FAQPage JSON-LD sur la home page (manquant, seule pricing l'avait)
 
 #### Code quality (agents)
 - [x] Code refactoring : `import type React`, booleans extraits, attribute-driven styling, `amber-badge` utility

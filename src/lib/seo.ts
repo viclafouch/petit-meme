@@ -15,6 +15,7 @@ import type {
   WebSite,
   WithContext
 } from 'schema-dts'
+import type { FaqItem } from '@/components/faq-section'
 import type { MemeWithCategories, MemeWithVideo } from '@/constants/meme'
 import type { Plan } from '@/constants/plan'
 import type { CategoryModel } from '@/db/generated/prisma/models'
@@ -259,7 +260,38 @@ type QueryAction = SearchAction & {
   'query-input': string
 }
 
-export const buildHomeJsonLd = (): SchemaGraph => {
+type BuildFaqPageJsonLdParams = {
+  faqItems: readonly FaqItem[]
+  pageUrl: string
+}
+
+const buildFaqPageJsonLd = ({
+  faqItems,
+  pageUrl
+}: BuildFaqPageJsonLdParams): FAQPage => {
+  return {
+    '@type': 'FAQPage',
+    '@id': `${pageUrl}#faq`,
+    mainEntity: faqItems.map((item) => {
+      return {
+        '@type': 'Question',
+        name: item.question,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: item.answer
+        }
+      }
+    })
+  } satisfies FAQPage
+}
+
+type BuildHomeJsonLdParams = {
+  faqItems: readonly FaqItem[]
+}
+
+export const buildHomeJsonLd = ({
+  faqItems
+}: BuildHomeJsonLdParams): SchemaGraph => {
   return {
     '@context': 'https://schema.org',
     '@graph': [
@@ -296,7 +328,8 @@ export const buildHomeJsonLd = (): SchemaGraph => {
         about: { '@id': `${websiteOrigin}/#organization` },
         description:
           'Découvre Petit Meme, la plateforme où tu peux parcourir, créer et partager des mèmes gratuitement. Explore notre bibliothèque de vidéos et images humoristiques, sauvegarde tes favoris et amuse-toi avec des contenus toujours à jour.'
-      } satisfies WebPage
+      } satisfies WebPage,
+      buildFaqPageJsonLd({ faqItems, pageUrl: websiteOrigin })
     ]
   }
 }
@@ -357,13 +390,8 @@ const buildPlanOffer = ({
         value: 1,
         unitCode
       }
-    } as PriceSpecification
+    } satisfies PriceSpecification
   }
-}
-
-type FaqItem = {
-  question: string
-  answer: string
 }
 
 type BuildPricingJsonLdParams = {
@@ -394,7 +422,7 @@ export const buildPricingJsonLd = ({
         name: title,
         description,
         isPartOf: { '@id': websiteId }
-      } as WebPage,
+      } satisfies WebPage,
       {
         '@type': 'Product',
         '@id': `${pricingUrl}#product`,
@@ -433,21 +461,8 @@ export const buildPricingJsonLd = ({
             return [monthlyOffer, annualOffer]
           })
         }
-      } as Product,
-      {
-        '@type': 'FAQPage',
-        '@id': `${pricingUrl}#faq`,
-        mainEntity: faqItems.map((item) => {
-          return {
-            '@type': 'Question',
-            name: item.question,
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: item.answer
-            }
-          }
-        })
-      } as FAQPage
+      } satisfies Product,
+      buildFaqPageJsonLd({ faqItems, pageUrl: pricingUrl })
     ]
   }
 }

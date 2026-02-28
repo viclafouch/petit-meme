@@ -954,6 +954,7 @@ src/routes/admin/
 - [x] Try/catch + Sentry sur `cancelActiveSubscription` (Stripe failure n'annule pas le ban)
 - [x] Early exit si user déjà banni (idempotence)
 - [x] `admin-ban` ajouté dans `SentryFeature` (`src/lib/sentry.ts`)
+- [x] Fix : `cleanupUserData` — try/catch sur `stripeClient.customers.del()` (crash si customer Stripe déjà supprimé → bloquait toute la suppression user). `admin-user-delete` ajouté dans `SentryFeature`
 
 ### Hors scope (reporté)
 

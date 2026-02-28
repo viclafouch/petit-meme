@@ -269,7 +269,8 @@ export const banUserById = createServerFn({ method: 'POST' })
         headers
       }),
       auth.api.revokeUserSessions({
-        body: { userId: data.userId }
+        body: { userId: data.userId },
+        headers
       })
     ])
 

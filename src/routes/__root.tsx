@@ -1,7 +1,6 @@
 /// <reference types="vite/client" />
 import React from 'react'
 import { CookieConsentBanner } from '@/components/blocks/cookie-consent'
-import { OnlyPortrait } from '@/components/only-portrait'
 import { TailwindIndicator } from '@/components/tailwind-indicator'
 import { Toaster } from '@/components/ui/sonner'
 import { IS_PRODUCTION } from '@/constants/env'
@@ -54,9 +53,7 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => {
           {`document.documentElement.className = ${JSON.stringify(_storedTheme)};`}
         </ScriptOnce>
         <ThemeProvider initialTheme={_storedTheme}>
-          <OnlyPortrait>
-            <DialogProvider>{children}</DialogProvider>
-          </OnlyPortrait>
+          <DialogProvider>{children}</DialogProvider>
           <ClientOnly>
             <Toaster richColors />
           </ClientOnly>

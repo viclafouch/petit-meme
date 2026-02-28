@@ -1,4 +1,26 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "regions": ["cdg1"],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), browsing-topics=()"
+        },
+        {
+          "key": "X-DNS-Prefetch-Control",
+          "value": "on"
+        }
+      ]
+    }
+  ],
+  "functions": {
+    "api/cron/**": {
+      "maxDuration": 60
+    }
+  },
   "crons": [
     { "path": "/api/cron/cleanup", "schedule": "0 2 * * *" },
     { "path": "/api/cron/verification-reminder", "schedule": "0 8 * * *" },

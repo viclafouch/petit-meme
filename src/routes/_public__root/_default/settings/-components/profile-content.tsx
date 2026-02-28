@@ -28,6 +28,10 @@ import type { ActiveSubscription } from '@/server/customer'
 import { exportUserData } from '@/server/user'
 import { downloadBlob } from '@/utils/download'
 import { useMutation } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
+
+const SETTINGS_ROW_CLASS_NAME =
+  'flex md:items-center justify-between gap-6 flex-col md:flex-row'
 
 type ProfileContentParams = {
   user: User
@@ -43,7 +47,7 @@ export const ProfileContent = ({
   const [isDeleteAccountOpened, setIsDeleteAccountOpened] =
     React.useState(false)
 
-  const { goToBillingPortal, checkoutPremium } = useStripeCheckout()
+  const { goToBillingPortal } = useStripeCheckout()
 
   const exportMutation = useMutation({
     mutationFn: async () => {
@@ -63,7 +67,7 @@ export const ProfileContent = ({
   })
 
   return (
-    <div>
+    <>
       <UpdatePasswordDialog
         open={isUpdatePasswordOpened}
         onOpenChange={setIsUpdatePasswordOpened}
@@ -83,7 +87,7 @@ export const ProfileContent = ({
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="flex md:items-center justify-between gap-6 flex-col md:flex-row">
+            <div className={SETTINGS_ROW_CLASS_NAME}>
               <div className="space-y-1">
                 <Label className="text-base">Abonnement en cours</Label>
                 {activeSubscription ? (
@@ -120,19 +124,18 @@ export const ProfileContent = ({
                 </Button>
               ) : (
                 <Button
-                  variant="info"
-                  onClick={(event) => {
-                    event.preventDefault()
-                    void checkoutPremium('monthly')
-                  }}
+                  asChild
+                  className="border-amber-400/30 bg-amber-400/15 text-amber-400 hover:bg-amber-400/25"
                 >
-                  <Stars />
-                  Passer à Premium
+                  <Link to="/pricing">
+                    <Stars />
+                    Passer à Premium
+                  </Link>
                 </Button>
               )}
             </div>
             <Separator />
-            <div className="flex md:items-center justify-between gap-6 flex-col md:flex-row">
+            <div className={SETTINGS_ROW_CLASS_NAME}>
               <div className="space-y-1">
                 <Label className="text-base">Mot de passe</Label>
                 <p className="text-muted-foreground text-sm">
@@ -150,7 +153,7 @@ export const ProfileContent = ({
               </Button>
             </div>
             <Separator />
-            <div className="flex md:items-center justify-between gap-6 flex-col md:flex-row">
+            <div className={SETTINGS_ROW_CLASS_NAME}>
               <div className="space-y-1">
                 <Label className="text-base">Mes données personnelles</Label>
                 <p className="text-muted-foreground text-sm">
@@ -178,7 +181,7 @@ export const ProfileContent = ({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex md:items-center justify-between gap-6 flex-col md:flex-row">
+            <div className={SETTINGS_ROW_CLASS_NAME}>
               <div className="space-y-1">
                 <Label className="text-base">Supprimer mon compte</Label>
                 <p className="text-muted-foreground text-sm">
@@ -207,6 +210,6 @@ export const ProfileContent = ({
           </CardContent>
         </Card>
       </div>
-    </div>
+    </>
   )
 }

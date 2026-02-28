@@ -135,7 +135,7 @@ export const PricingCard = ({
                   locales="fr"
                   className="text-4xl font-bold"
                 />
-                <AnimatePresence mode="popLayout">
+                <AnimatePresence mode="popLayout" initial={false}>
                   <motion.span
                     key={billingPeriod}
                     initial={{ opacity: 0 }}
@@ -150,7 +150,7 @@ export const PricingCard = ({
               </>
             )}
           </div>
-          <AnimatePresence>
+          <AnimatePresence initial={false}>
             {hasYearlyBreakdown ? (
               <motion.p
                 initial={{ opacity: 0, translateX: -8 }}

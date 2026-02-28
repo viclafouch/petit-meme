@@ -1,3 +1,4 @@
+import React from 'react'
 import { LayoutGroup, motion, useReducedMotion } from 'motion/react'
 import { ANNUAL_DISCOUNT_PERCENT, type BillingPeriod } from '@/constants/plan'
 import { cn } from '@/lib/utils'
@@ -22,6 +23,7 @@ export const BillingToggle = ({
   onBillingPeriodChange
 }: BillingToggleParams) => {
   const prefersReducedMotion = useReducedMotion()
+  const [hasInteracted, setHasInteracted] = React.useState(false)
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (
@@ -31,6 +33,7 @@ export const BillingToggle = ({
       event.key === 'ArrowUp'
     ) {
       event.preventDefault()
+      setHasInteracted(true)
       onBillingPeriodChange(OPPOSITE_PERIOD[billingPeriod])
     }
   }
@@ -54,6 +57,7 @@ export const BillingToggle = ({
               aria-checked={isSelected}
               tabIndex={isSelected ? 0 : -1}
               onClick={() => {
+                setHasInteracted(true)
                 onBillingPeriodChange(option.value)
               }}
               onKeyDown={handleKeyDown}
@@ -82,7 +86,9 @@ export const BillingToggle = ({
                     className="amber-badge px-2 py-0.5"
                     animate={{
                       scale:
-                        isSelected && !prefersReducedMotion ? [1, 1.1, 1] : 1
+                        isSelected && !prefersReducedMotion && hasInteracted
+                          ? [1, 1.1, 1]
+                          : 1
                     }}
                     transition={{
                       duration: prefersReducedMotion ? 0 : 0.3,

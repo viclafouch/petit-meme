@@ -64,8 +64,8 @@ Currently available in **French only**. English support is planned.
 ### 1. Clone and install
 
 ```bash
-git clone <repository-url>
-cd memes-by-lafouch
+git clone https://github.com/viclafouch/petit-meme
+cd petit-meme
 pnpm install
 ```
 

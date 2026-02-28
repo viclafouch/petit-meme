@@ -16,6 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
+import { getErrorMessage } from '@/helpers/error'
 import { getCategoriesListQueryOpts } from '@/lib/queries'
 import { CategoryForm } from '@/routes/admin/categories/-components/category-form'
 import { deleteCategory, type EnrichedCategory } from '@/server/categories'
@@ -55,14 +56,14 @@ export const CategoryDropdown = ({ category }: CategoryDropdownProps) => {
       const promise = deleteCategory({ data: category.id })
       toast.promise(promise, {
         loading: 'Suppression en cours...',
-        success: 'Catégorie supprimée'
+        success: 'Catégorie supprimée',
+        error: getErrorMessage
       })
 
       return promise
     },
     onSuccess: handleDeleteSuccess,
     onError: (error) => {
-      toast.error(error.message)
       Sentry.captureException(error, {
         tags: { feature: 'admin-category-delete' }
       })

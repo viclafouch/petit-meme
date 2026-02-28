@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { TWEET_LINK_SCHEMA } from '@/constants/meme'
+import { getErrorMessage } from '@/helpers/error'
 import { getFieldErrorMessage } from '@/lib/utils'
 import { createMemeFromTwitterUrl } from '@admin/-server/memes'
 import { formOptions, useForm } from '@tanstack/react-form'
@@ -74,7 +75,8 @@ export const TwitterForm = ({ onSuccess, closeDialog }: TwitterFormParams) => {
         loading: 'Ajout en cours...',
         success: () => {
           return 'Mème créé avec succès !'
-        }
+        },
+        error: getErrorMessage
       })
 
       return promise
@@ -82,9 +84,6 @@ export const TwitterForm = ({ onSuccess, closeDialog }: TwitterFormParams) => {
     onSuccess: (data) => {
       closeDialog()
       onSuccess?.({ memeId: data.id })
-    },
-    onError: (error) => {
-      toast.error(error.message)
     }
   })
 

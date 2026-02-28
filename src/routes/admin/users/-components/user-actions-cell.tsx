@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
+import { getErrorMessage } from '@/helpers/error'
 import {
   BAN_REASONS,
   type BanReason,
@@ -56,7 +57,6 @@ export const UserActionsCell = ({ user }: UserActionsCellParams) => {
     error: Error,
     feature: 'admin-user-ban' | 'admin-user-unban' | 'admin-user-delete'
   ) => {
-    toast.error(error.message)
     Sentry.captureException(error, { tags: { feature } })
   }
 
@@ -67,7 +67,8 @@ export const UserActionsCell = ({ user }: UserActionsCellParams) => {
       })
       toast.promise(promise, {
         loading: 'Bannissement en cours...',
-        success: 'Utilisateur banni'
+        success: 'Utilisateur banni',
+        error: getErrorMessage
       })
 
       return promise
@@ -83,7 +84,8 @@ export const UserActionsCell = ({ user }: UserActionsCellParams) => {
       const promise = unbanUserById({ data: user.id })
       toast.promise(promise, {
         loading: 'Débannissement en cours...',
-        success: 'Utilisateur débanni'
+        success: 'Utilisateur débanni',
+        error: getErrorMessage
       })
 
       return promise
@@ -99,7 +101,8 @@ export const UserActionsCell = ({ user }: UserActionsCellParams) => {
       const promise = removeUser({ data: user.id })
       toast.promise(promise, {
         loading: 'Suppression en cours...',
-        success: 'Utilisateur supprimé'
+        success: 'Utilisateur supprimé',
+        error: getErrorMessage
       })
 
       return promise

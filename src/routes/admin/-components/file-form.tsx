@@ -15,6 +15,7 @@ import {
   FileUploadTrigger
 } from '@/components/ui/file-upload'
 import { FormItem, FormMessage } from '@/components/ui/form'
+import { getErrorMessage } from '@/helpers/error'
 import { getFieldErrorMessage } from '@/lib/utils'
 import {
   CREATE_MEME_FROM_FILE_SCHEMA,
@@ -62,7 +63,7 @@ export const FileForm = ({ onSuccess, closeDialog }: FileFormParams) => {
         success: () => {
           return 'Mème créé avec succès !'
         },
-        error: 'Une erreur est survenue'
+        error: getErrorMessage
       })
 
       return promise

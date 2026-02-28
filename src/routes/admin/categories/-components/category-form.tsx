@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import type { Category } from '@/db/generated/prisma/client'
+import { getErrorMessage } from '@/helpers/error'
 import { useKeywordsField } from '@/hooks/use-keywords-field'
 import { getFieldErrorMessage } from '@/lib/utils'
 import {
@@ -54,7 +55,8 @@ export const CategoryForm = ({
           loading: 'Modification en cours...',
           success: () => {
             return 'Catégorie modifiée avec succès !'
-          }
+          },
+          error: getErrorMessage
         })
 
         return promise
@@ -65,7 +67,8 @@ export const CategoryForm = ({
         loading: 'Ajout en cours...',
         success: () => {
           return 'Catégorie ajoutée avec succès !'
-        }
+        },
+        error: getErrorMessage
       })
 
       return promise

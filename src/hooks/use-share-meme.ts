@@ -1,5 +1,6 @@
 import { toast } from 'sonner'
 import type { MemeWithVideo } from '@/constants/meme'
+import { getErrorMessage } from '@/helpers/error'
 import { captureWithFeature } from '@/lib/sentry'
 import { shareMeme, trackMemeAction } from '@/server/meme'
 import { shareBlob } from '@/utils/download'
@@ -12,7 +13,10 @@ export const useShareMeme = () => {
         return response.blob()
       })
 
-      toast.promise(blobPromise, { loading: 'Chargement...' })
+      toast.promise(blobPromise, {
+        loading: 'Chargement...',
+        error: getErrorMessage
+      })
 
       const blob = await blobPromise
 
@@ -22,7 +26,6 @@ export const useShareMeme = () => {
     },
     onError: (error) => {
       captureWithFeature(error, 'share')
-      toast.error("Une erreur s'est produite pendant le partage")
     }
   })
 }

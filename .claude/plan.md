@@ -955,6 +955,8 @@ src/routes/admin/
 - [x] Early exit si user déjà banni (idempotence)
 - [x] `admin-ban` ajouté dans `SentryFeature` (`src/lib/sentry.ts`)
 - [x] Fix : `cleanupUserData` — try/catch sur `stripeClient.customers.del()` (crash si customer Stripe déjà supprimé → bloquait toute la suppression user). `admin-user-delete` ajouté dans `SentryFeature`
+- [x] Fix : `revokeUserSessions` manquait `headers` dans `banUserById` → erreur silencieuse côté client
+- [x] Fix : audit complet `toast.promise` — ajout `error: getErrorMessage` sur les 14 usages (9 manquants, 2 strings statiques migrées). Suppression des `toast.error` en doublon dans `onError`/catch. Helper `getErrorMessage` extrait dans `src/helpers/error.ts`
 
 ### Hors scope (reporté)
 

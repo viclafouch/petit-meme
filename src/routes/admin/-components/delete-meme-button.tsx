@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import { ConfirmAlertDialog } from '@/components/confirm-alert-dialog'
 import { Button } from '@/components/ui/button'
 import type { Meme } from '@/db/generated/prisma/client'
+import { getErrorMessage } from '@/helpers/error'
 import {
   getAdminMemeByIdQueryOpts,
   getAdminMemesListQueryOpts
@@ -32,7 +33,8 @@ export const DeleteMemeButton = ({
         loading: 'Suppression...',
         success: () => {
           return 'Mème supprimé avec succès !'
-        }
+        },
+        error: getErrorMessage
       })
 
       return promise

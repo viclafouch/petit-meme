@@ -1,5 +1,6 @@
 import { toast } from 'sonner'
 import { type BillingPeriod, PREMIUM_PLAN } from '@/constants/plan'
+import { getErrorMessage } from '@/helpers/error'
 import { authClient } from '@/lib/auth-client'
 import { getActiveSubscriptionQueryOpts } from '@/lib/queries'
 import { captureWithFeature } from '@/lib/sentry'
@@ -24,7 +25,10 @@ export const useStripeCheckout = () => {
         locale: 'fr',
         returnUrl: '/settings' as LinkOptions['to']
       })
-      toast.promise(promise, { loading: 'Chargement...' })
+      toast.promise(promise, {
+        loading: 'Chargement...',
+        error: getErrorMessage
+      })
       const { error } = await promise
 
       if (error) {
@@ -32,7 +36,6 @@ export const useStripeCheckout = () => {
       }
     } catch (error) {
       captureWithFeature(error, 'stripe-checkout')
-      toast.error('Une erreur est survenue')
     }
   }
 
@@ -71,12 +74,14 @@ export const useStripeCheckout = () => {
         }
       })
 
-      toast.promise(promise, { loading: 'Chargement...' })
+      toast.promise(promise, {
+        loading: 'Chargement...',
+        error: getErrorMessage
+      })
 
       await promise
     } catch (error) {
       captureWithFeature(error, 'stripe-checkout')
-      toast.error('Une erreur est survenue')
     }
   }
 

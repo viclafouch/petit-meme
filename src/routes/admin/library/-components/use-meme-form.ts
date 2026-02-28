@@ -2,6 +2,7 @@ import { toast } from 'sonner'
 import type { z } from 'zod'
 import type { MemeWithCategories } from '@/constants/meme'
 import type { Meme } from '@/db/generated/prisma/client'
+import { getErrorMessage } from '@/helpers/error'
 import { useKeywordsField } from '@/hooks/use-keywords-field'
 import { getCategoriesListQueryOpts } from '@/lib/queries'
 import { captureWithFeature } from '@/lib/sentry'
@@ -38,7 +39,7 @@ export function useMemeForm({ meme, onSuccess }: UseMemeFormParams) {
         success: () => {
           return 'Mème modifié avec succès !'
         },
-        error: 'Une erreur est survenue'
+        error: getErrorMessage
       })
 
       return promise

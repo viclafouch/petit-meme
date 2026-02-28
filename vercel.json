@@ -16,11 +16,6 @@
       ]
     }
   ],
-  "functions": {
-    "api/cron/**": {
-      "maxDuration": 60
-    }
-  },
   "crons": [
     { "path": "/api/cron/cleanup", "schedule": "0 2 * * *" },
     { "path": "/api/cron/verification-reminder", "schedule": "0 8 * * *" },

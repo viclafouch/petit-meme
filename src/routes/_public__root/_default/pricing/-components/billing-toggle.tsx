@@ -1,3 +1,4 @@
+import { LayoutGroup, motion, useReducedMotion } from 'motion/react'
 import { ANNUAL_DISCOUNT_PERCENT, type BillingPeriod } from '@/constants/plan'
 import { cn } from '@/lib/utils'
 
@@ -6,18 +7,22 @@ type BillingToggleParams = {
   onBillingPeriodChange: (period: BillingPeriod) => void
 }
 
-const TOGGLE_BUTTON_CLASS =
-  'min-h-11 rounded-full px-5 py-2.5 text-sm font-medium transition-colors text-muted-foreground aria-checked:bg-background aria-checked:text-foreground aria-checked:shadow-sm'
-
 const OPPOSITE_PERIOD = {
   monthly: 'yearly',
   yearly: 'monthly'
 } as const satisfies Record<BillingPeriod, BillingPeriod>
 
+const TOGGLE_OPTIONS = [
+  { value: 'monthly', label: 'Mensuel' },
+  { value: 'yearly', label: 'Annuel' }
+] as const satisfies readonly { value: BillingPeriod; label: string }[]
+
 export const BillingToggle = ({
   billingPeriod,
   onBillingPeriodChange
 }: BillingToggleParams) => {
+  const prefersReducedMotion = useReducedMotion()
+
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (
       event.key === 'ArrowRight' ||
@@ -31,40 +36,67 @@ export const BillingToggle = ({
   }
 
   return (
-    <div
-      className="flex rounded-full bg-muted p-1"
-      role="radiogroup"
-      aria-label="Période de facturation"
-    >
-      <button
-        type="button"
-        role="radio"
-        aria-checked={billingPeriod === 'monthly'}
-        tabIndex={billingPeriod === 'monthly' ? 0 : -1}
-        onClick={() => {
-          onBillingPeriodChange('monthly')
-        }}
-        onKeyDown={handleKeyDown}
-        className={TOGGLE_BUTTON_CLASS}
+    <LayoutGroup>
+      <div
+        className="relative flex rounded-full bg-muted p-1"
+        role="radiogroup"
+        aria-label="Période de facturation"
       >
-        Mensuel
-      </button>
-      <button
-        type="button"
-        role="radio"
-        aria-checked={billingPeriod === 'yearly'}
-        tabIndex={billingPeriod === 'yearly' ? 0 : -1}
-        onClick={() => {
-          onBillingPeriodChange('yearly')
-        }}
-        onKeyDown={handleKeyDown}
-        className={cn(TOGGLE_BUTTON_CLASS, 'flex items-center gap-2')}
-      >
-        Annuel
-        <span className="amber-badge px-2 py-0.5">
-          -{ANNUAL_DISCOUNT_PERCENT}%
-        </span>
-      </button>
-    </div>
+        {TOGGLE_OPTIONS.map((option) => {
+          const isSelected = billingPeriod === option.value
+          const isYearly = option.value === 'yearly'
+
+          return (
+            <button
+              key={option.value}
+              type="button"
+              role="radio"
+              aria-checked={isSelected}
+              tabIndex={isSelected ? 0 : -1}
+              onClick={() => {
+                onBillingPeriodChange(option.value)
+              }}
+              onKeyDown={handleKeyDown}
+              className={cn(
+                'relative z-10 min-h-11 cursor-pointer rounded-full px-5 py-2.5 text-sm font-medium outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-muted',
+                isSelected
+                  ? 'text-foreground'
+                  : 'text-muted-foreground hover:text-foreground/70'
+              )}
+            >
+              {isSelected ? (
+                <motion.span
+                  layoutId="billing-pill"
+                  className="absolute inset-0 rounded-full bg-background shadow-sm"
+                  transition={
+                    prefersReducedMotion
+                      ? { duration: 0 }
+                      : { type: 'spring', stiffness: 400, damping: 30 }
+                  }
+                />
+              ) : null}
+              <span className="relative flex items-center gap-2">
+                {option.label}
+                {isYearly ? (
+                  <motion.span
+                    className="amber-badge px-2 py-0.5"
+                    animate={{
+                      scale:
+                        isSelected && !prefersReducedMotion ? [1, 1.1, 1] : 1
+                    }}
+                    transition={{
+                      duration: prefersReducedMotion ? 0 : 0.3,
+                      delay: prefersReducedMotion ? 0 : 0.15
+                    }}
+                  >
+                    -{ANNUAL_DISCOUNT_PERCENT}%
+                  </motion.span>
+                ) : null}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+    </LayoutGroup>
   )
 }

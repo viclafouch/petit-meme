@@ -87,6 +87,11 @@ Objectif : maximiser la conversion free → paid. Refonte complète de `/pricing
 - [x] Tailwind audit : utility `amber-badge` extraite dans `styles.css`
 - [x] React performance : aucun problème détecté
 
+### Phase 6 — Animations pricing
+
+- [x] `@number-flow/react` installé pour animation fluide du prix lors du changement mensuel/annuel
+- [x] Animation fade sur le label de période (`/mois` ↔ `/an`) via Framer Motion `AnimatePresence`
+
 ### Hors scope (reporté)
 - Tableau comparatif des features
 - Témoignages / avis utilisateurs

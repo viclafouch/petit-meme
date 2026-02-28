@@ -1,5 +1,6 @@
 import type React from 'react'
 import { CheckCircle2, MinusCircle, XCircle } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -14,8 +15,9 @@ import {
   type BillingPeriod,
   type Plan
 } from '@/constants/plan'
-import { formatCentsToEuros } from '@/helpers/number'
+import { convertCentsToEuros, formatCentsToEuros } from '@/helpers/number'
 import { cn } from '@/lib/utils'
+import NumberFlow from '@number-flow/react'
 
 const STATUS_ICON_BY_FEATURE_STATUS = {
   included: {
@@ -38,6 +40,15 @@ const STATUS_ICON_BY_FEATURE_STATUS = {
   Plan['features'][number]['status'],
   { icon: React.ElementType; className: string; srLabel: string }
 >
+
+const MONTHS_IN_YEAR = 12
+
+const EURO_FORMAT_OPTIONS = {
+  style: 'currency',
+  currency: 'EUR',
+  minimumFractionDigits: 0,
+  trailingZeroDisplay: 'stripIfInteger'
+} as const satisfies Intl.NumberFormatOptions
 
 type FeatureItemParams = {
   feature: Plan['features'][number]
@@ -113,29 +124,54 @@ export const PricingCard = ({
               </span>
             ) : null}
           </div>
-          <div className="flex items-baseline gap-1">
-            <p className="text-4xl font-bold">
-              {isFree
-                ? 'Gratuit'
-                : formatCentsToEuros(currentPricing.priceInCents)}
-            </p>
-            {isFree ? null : (
-              <span className="text-muted-foreground">{periodLabel}</span>
+          <div className="flex items-baseline gap-1" aria-live="polite">
+            {isFree ? (
+              <p className="text-4xl font-bold">Gratuit</p>
+            ) : (
+              <>
+                <NumberFlow
+                  value={convertCentsToEuros(currentPricing.priceInCents)}
+                  format={EURO_FORMAT_OPTIONS}
+                  locales="fr"
+                  className="text-4xl font-bold"
+                />
+                <AnimatePresence mode="popLayout">
+                  <motion.span
+                    key={billingPeriod}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="text-muted-foreground"
+                  >
+                    {periodLabel}
+                  </motion.span>
+                </AnimatePresence>
+              </>
             )}
           </div>
-          <p
-            className={cn('text-sm', {
-              'text-amber-400/80': hasYearlyBreakdown,
-              invisible: !hasYearlyBreakdown
-            })}
-            aria-hidden={!hasYearlyBreakdown}
-          >
-            soit ~
-            {formatCentsToEuros(Math.round(currentPricing.priceInCents / 12), {
-              minimumFractionDigits: 2
-            })}
-            /mois
-          </p>
+          <AnimatePresence>
+            {hasYearlyBreakdown ? (
+              <motion.p
+                initial={{ opacity: 0, translateX: -8 }}
+                animate={{ opacity: 1, translateX: 0 }}
+                exit={{ opacity: 0, translateX: -8 }}
+                transition={{ duration: 0.2 }}
+                className="text-sm text-amber-400/80"
+              >
+                soit ~
+                {formatCentsToEuros(
+                  Math.round(currentPricing.priceInCents / MONTHS_IN_YEAR),
+                  { minimumFractionDigits: 2 }
+                )}
+                /mois
+              </motion.p>
+            ) : (
+              <p className="invisible text-sm" aria-hidden>
+                &nbsp;
+              </p>
+            )}
+          </AnimatePresence>
           <CardDescription className="pt-2 text-base leading-relaxed">
             {description}
           </CardDescription>
@@ -156,6 +192,14 @@ export const PricingCard = ({
             variant="outline"
             aria-label="Plan actuellement actif"
             aria-disabled
+            onClick={(event) => {
+              event.preventDefault()
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+              }
+            }}
           >
             Actif
           </Button>

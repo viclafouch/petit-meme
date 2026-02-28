@@ -1,5 +1,5 @@
-import { Button, Link, Section, Text } from '@react-email/components'
-import { BUTTON_CLASS, EmailLayout } from './email-layout'
+import { Button, Section, Text } from '@react-email/components'
+import { BUTTON_CLASS, EmailFallbackLink, EmailLayout } from './email-layout'
 
 type ResetPasswordProps = {
   username: string
@@ -25,14 +25,7 @@ export const ResetPassword = ({ username, resetUrl }: ResetPasswordProps) => {
             Réinitialiser mon mot de passe
           </Button>
         </Section>
-        <Text className="m-0 text-xs leading-5 text-brand-muted">
-          Si le bouton ne fonctionne pas, copie ce lien dans ton navigateur :
-        </Text>
-        <Text className="m-0 text-xs leading-5">
-          <Link href={resetUrl} className="text-brand-muted underline">
-            {resetUrl}
-          </Link>
-        </Text>
+        <EmailFallbackLink href={resetUrl} />
         <Section className="mt-6 rounded-lg border border-solid border-brand-border bg-neutral-50 p-4">
           <Text className="m-0 text-xs leading-5 text-brand-muted-dark">
             Ce lien expire dans <b>1 heure</b> et ne peut être utilisé qu'une

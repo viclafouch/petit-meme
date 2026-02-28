@@ -1,4 +1,5 @@
 import React from 'react'
+import { toast } from 'sonner'
 import type { WithDialog } from '@/@types/dialog'
 import {
   Dialog,
@@ -10,7 +11,9 @@ import {
 } from '@/components/animate-ui/radix/dialog'
 import { LoginForm } from '@/components/User/login-form'
 import { SignupForm } from '@/components/User/signup-form'
+import { getAuthErrorMessage } from '@/helpers/auth-errors'
 import { authClient } from '@/lib/auth-client'
+import { captureWithFeature } from '@/lib/sentry'
 
 export const AuthDialog = ({ open, onOpenChange }: WithDialog<unknown>) => {
   const [authType, setAuthType] = React.useState<'login' | 'signup'>('login')
@@ -19,9 +22,19 @@ export const AuthDialog = ({ open, onOpenChange }: WithDialog<unknown>) => {
     event: React.MouseEvent<HTMLButtonElement>
   ) => {
     event.preventDefault()
-    await authClient.signIn.social({
-      provider: 'twitter'
-    })
+
+    try {
+      await authClient.signIn.social({
+        provider: 'twitter'
+      })
+    } catch (error) {
+      captureWithFeature(error, 'sign-in-twitter')
+      toast.error(
+        error instanceof Error
+          ? getAuthErrorMessage(error.message)
+          : 'Une erreur est survenue lors de la connexion avec Twitter'
+      )
+    }
   }
 
   return (

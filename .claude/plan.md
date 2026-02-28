@@ -448,6 +448,21 @@ Audit complet : zéro erreur silencieuse, remontée Sentry systématique, feedba
 - [x] `errorComponent: ErrorComponent` ajouté sur la route `/admin`
 - [x] `react-error-boundary` évalué : encore utilisé dans 2 fichiers Studio, ne peut pas être retiré
 
+#### Audit auth client-side error handling (2026-02-28)
+
+- [x] Fix `PASSWORD_TOO_SHORT` message : affichait "12 caractères" au lieu de `PASSWORD_MIN_LENGTH` (8)
+- [x] Fix `CHANGE_PASSWORD_ERRORS_FR.PASSWORD_TOO_SHORT` : idem
+- [x] Ajout `USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL` dans `AUTH_ERRORS_FR`
+- [x] Ajout `TOO_MANY_REQUESTS` via `EXTRA_ERRORS_FR` (rate limit 429, pas dans `AuthErrorCode`)
+- [x] Ajout `extractAuthErrorCode()` helper pour gérer les erreurs sans `code` (rate limit 429)
+- [x] Migration de tous les `throw new Error(error.code)` → `throw new Error(extractAuthErrorCode(error))`
+- [x] `reset-password-form.tsx` : migration vers `useMutation` + alert destructive + Sentry
+- [x] `auth-dialog.tsx` : try/catch sur OAuth Twitter + toast.error + Sentry
+- [x] `user-dropdown.tsx` : try/catch sur signOut + toast.error + Sentry (queries non supprimées si échec)
+- [x] `admin-nav-button.tsx` : idem logout
+- [x] Ajout `captureWithFeature` sur login, signup, create-new-password mutations
+- [x] Ajout features Sentry : `sign-in`, `sign-in-twitter`, `sign-up`, `sign-out`, `reset-password`, `request-password-reset`
+
 ### Phase 9a-pre — Split `src/server/admin.ts` → `src/server/admin/`
 
 Restructuration du fichier monolithique `admin.ts` (~710 lignes) en un dossier avec des fichiers par domaine. **Commit séparé** avant Phase 9a.

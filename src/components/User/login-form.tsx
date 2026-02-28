@@ -11,12 +11,16 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { LoadingButton } from '@/components/ui/loading-button'
-import { getAuthErrorMessage } from '@/helpers/auth-errors'
+import {
+  extractAuthErrorCode,
+  getAuthErrorMessage
+} from '@/helpers/auth-errors'
 import { authClient } from '@/lib/auth-client'
 import {
   getActiveSubscriptionQueryOpts,
   getAuthUserQueryOpts
 } from '@/lib/queries'
+import { captureWithFeature } from '@/lib/sentry'
 import { getFieldErrorMessage } from '@/lib/utils'
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -67,8 +71,11 @@ export const LoginForm = ({
       })
 
       if (error) {
-        throw new Error(error.code)
+        throw new Error(extractAuthErrorCode(error))
       }
+    },
+    onError: (error) => {
+      captureWithFeature(error, 'sign-in')
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries(getAuthUserQueryOpts())

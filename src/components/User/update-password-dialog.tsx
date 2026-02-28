@@ -20,7 +20,10 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { LoadingButton } from '@/components/ui/loading-button'
-import { getChangePasswordErrorMessage } from '@/helpers/auth-errors'
+import {
+  extractAuthErrorCode,
+  getChangePasswordErrorMessage
+} from '@/helpers/auth-errors'
 import { authClient } from '@/lib/auth-client'
 import { captureWithFeature } from '@/lib/sentry'
 import { getFieldErrorMessage } from '@/lib/utils'
@@ -69,7 +72,7 @@ const UpdatePasswordForm = () => {
       })
 
       if (error) {
-        throw new Error(error.code)
+        throw new Error(extractAuthErrorCode(error))
       }
     },
     onError: (error) => {

@@ -22,7 +22,10 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { LoadingButton } from '@/components/ui/loading-button'
-import { getAuthErrorMessage } from '@/helpers/auth-errors'
+import {
+  extractAuthErrorCode,
+  getAuthErrorMessage
+} from '@/helpers/auth-errors'
 import { authClient } from '@/lib/auth-client'
 import {
   getActiveSubscriptionQueryOpts,
@@ -35,7 +38,7 @@ import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 
-const deleteAccountDialog = z.object({
+const deleteAccountSchema = z.object({
   currentPassword: z.string().nonempty()
 })
 
@@ -44,7 +47,7 @@ const deleteAccountFormOpts = formOptions({
     currentPassword: ''
   },
   validators: {
-    onChange: deleteAccountDialog
+    onChange: deleteAccountSchema
   }
 })
 
@@ -59,7 +62,7 @@ const DeleteAccountForm = ({ onCancel }: { onCancel: () => void }) => {
       })
 
       if (error) {
-        throw new Error(error.code)
+        throw new Error(extractAuthErrorCode(error))
       }
     },
     onError: (error) => {

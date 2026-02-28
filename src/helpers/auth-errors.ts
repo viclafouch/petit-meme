@@ -1,3 +1,4 @@
+import { PASSWORD_MIN_LENGTH } from '@/constants/auth'
 import type { authClient } from '@/lib/auth-client'
 
 type AuthErrorCode = keyof typeof authClient.$ERROR_CODES
@@ -18,9 +19,11 @@ const AUTH_ERRORS_FR = {
   FAILED_TO_GET_USER_INFO: 'Impossible de récupérer les informations',
   USER_EMAIL_NOT_FOUND: 'Email introuvable',
   EMAIL_NOT_VERIFIED: 'Veuillez vérifier votre email avant de vous connecter',
-  PASSWORD_TOO_SHORT: 'Mot de passe trop court (12 caractères minimum)',
+  PASSWORD_TOO_SHORT: `Mot de passe trop court (${String(PASSWORD_MIN_LENGTH)} caractères minimum)`,
   PASSWORD_TOO_LONG: 'Mot de passe trop long',
   USER_ALREADY_EXISTS: 'Cette adresse email est déjà utilisée',
+  USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL:
+    'Cette adresse email est déjà utilisée. Veuillez en utiliser une autre.',
   EMAIL_CAN_NOT_BE_UPDATED: "L'email ne peut pas être modifié",
   CREDENTIAL_ACCOUNT_NOT_FOUND: 'Compte introuvable',
   SESSION_EXPIRED: 'Session expirée, veuillez vous reconnecter',
@@ -29,8 +32,15 @@ const AUTH_ERRORS_FR = {
   USER_ALREADY_HAS_PASSWORD: 'Vous avez déjà un mot de passe'
 } as const satisfies Partial<Record<AuthErrorCode, string>>
 
+const EXTRA_ERRORS_FR = {
+  TOO_MANY_REQUESTS:
+    'Trop de tentatives, veuillez réessayer dans quelques minutes'
+} as const satisfies Record<string, string>
+
 export function getAuthErrorMessage(code: string) {
-  const message = AUTH_ERRORS_FR[code as keyof typeof AUTH_ERRORS_FR]
+  const message =
+    AUTH_ERRORS_FR[code as keyof typeof AUTH_ERRORS_FR] ??
+    EXTRA_ERRORS_FR[code as keyof typeof EXTRA_ERRORS_FR]
 
   if (message) {
     return message
@@ -44,9 +54,26 @@ export function getAuthErrorMessage(code: string) {
   return 'Une erreur inattendue est survenue'
 }
 
+type AuthErrorResponse = {
+  code?: string
+  status?: number
+  message?: string
+}
+
+export function extractAuthErrorCode(error: AuthErrorResponse): string {
+  if (error.code) {
+    return error.code
+  }
+
+  if (error.status === 429) {
+    return 'TOO_MANY_REQUESTS'
+  }
+
+  return error.message ?? 'UNKNOWN'
+}
+
 const CHANGE_PASSWORD_ERRORS_FR = {
-  PASSWORD_TOO_SHORT:
-    'Le nouveau mot de passe est trop court (12 caractères minimum)',
+  PASSWORD_TOO_SHORT: `Le nouveau mot de passe est trop court (${String(PASSWORD_MIN_LENGTH)} caractères minimum)`,
   PASSWORD_TOO_LONG: 'Le nouveau mot de passe est trop long'
 } as const satisfies Partial<Record<AuthErrorCode, string>>
 

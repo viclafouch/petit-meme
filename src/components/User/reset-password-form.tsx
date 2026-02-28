@@ -1,4 +1,3 @@
-import React from 'react'
 import { CircleAlert } from 'lucide-react'
 import { z } from 'zod'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -10,15 +9,21 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { LoadingButton } from '@/components/ui/loading-button'
+import {
+  extractAuthErrorCode,
+  getAuthErrorMessage
+} from '@/helpers/auth-errors'
 import { authClient } from '@/lib/auth-client'
+import { captureWithFeature } from '@/lib/sentry'
 import { getFieldErrorMessage } from '@/lib/utils'
 import { formOptions, useForm } from '@tanstack/react-form'
+import { useMutation } from '@tanstack/react-query'
 
 const resetPasswordSchema = z.object({
   email: z.email()
 })
 
-const loginFormOpts = formOptions({
+const resetPasswordFormOpts = formOptions({
   defaultValues: {
     email: ''
   },
@@ -28,14 +33,29 @@ const loginFormOpts = formOptions({
 })
 
 export const ResetPasswordForm = () => {
-  const form = useForm({
-    ...loginFormOpts,
-    onSubmit: async ({ value }) => {
-      await authClient.requestPasswordReset({
-        email: value.email,
+  const resetPasswordMutation = useMutation({
+    mutationFn: async ({ email }: { email: string }) => {
+      const { error } = await authClient.requestPasswordReset({
+        email,
         redirectTo: '/password/create-new'
       })
+
+      if (error) {
+        throw new Error(extractAuthErrorCode(error))
+      }
+    },
+    onError: (error) => {
+      captureWithFeature(error, 'request-password-reset')
+    },
+    onSuccess: () => {
       form.reset()
+    }
+  })
+
+  const form = useForm({
+    ...resetPasswordFormOpts,
+    onSubmit: async ({ value }) => {
+      return resetPasswordMutation.mutateAsync({ email: value.email })
     }
   })
 
@@ -95,24 +115,25 @@ export const ResetPasswordForm = () => {
             )
           }}
         />
-        <form.Subscribe
-          selector={(state) => {
-            return state.isSubmitted
-          }}
-          children={(isSubmitted) => {
-            return isSubmitted ? (
-              <Alert variant="success" className="mt-4">
-                <CircleAlert />
-                <AlertTitle>Vérifiez votre email !</AlertTitle>
-                <AlertDescription>
-                  C’est tout bon ! Si nous trouvons un compte associé à cette
-                  adresse e-mail, vous recevrez d’ici quelques minutes un lien
-                  pour réinitialiser votre mot de passe.
-                </AlertDescription>
-              </Alert>
-            ) : null
-          }}
-        />
+        {resetPasswordMutation.error ? (
+          <Alert variant="destructive">
+            <CircleAlert />
+            <AlertDescription>
+              {getAuthErrorMessage(resetPasswordMutation.error.message)}
+            </AlertDescription>
+          </Alert>
+        ) : null}
+        {resetPasswordMutation.isSuccess ? (
+          <Alert variant="success" className="mt-4">
+            <CircleAlert />
+            <AlertTitle>Vérifiez votre email !</AlertTitle>
+            <AlertDescription>
+              C'est tout bon ! Si nous trouvons un compte associé à cette
+              adresse e-mail, vous recevrez d'ici quelques minutes un lien pour
+              réinitialiser votre mot de passe.
+            </AlertDescription>
+          </Alert>
+        ) : null}
       </div>
     </form>
   )

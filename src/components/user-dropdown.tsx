@@ -21,17 +21,16 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { DEFAULT_AVATAR_URL } from '@/constants/avatar'
 import { getUserInitials } from '@/helpers/format'
+import { useSignOut } from '@/hooks/use-sign-out'
 import { useStripeCheckout } from '@/hooks/use-stripe-checkout'
-import { authClient } from '@/lib/auth-client'
 import {
   getActiveSubscriptionQueryOpts,
-  getAuthUserQueryOpts,
   getFavoritesMemesQueryOpts
 } from '@/lib/queries'
 import type { SessionUser } from '@/lib/role'
 import { matchIsUserAdmin } from '@/lib/role'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link, useRouter } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
 
 type UserDropdownParams = {
   user: SessionUser
@@ -39,20 +38,11 @@ type UserDropdownParams = {
 
 export const UserDropdown = ({ user }: UserDropdownParams) => {
   const [isOpen, setIsOpen] = React.useState(false)
-  const queryClient = useQueryClient()
-  const router = useRouter()
   const { goToBillingPortal } = useStripeCheckout()
+  const { signOut } = useSignOut()
 
   const favoritesMemesCountQuery = useQuery(getFavoritesMemesQueryOpts())
   const activeSubscriptionQuery = useQuery(getActiveSubscriptionQueryOpts())
-
-  const handleLogout = async () => {
-    await authClient.signOut()
-    queryClient.removeQueries(getAuthUserQueryOpts())
-    queryClient.removeQueries(getActiveSubscriptionQueryOpts())
-    queryClient.removeQueries(getFavoritesMemesQueryOpts())
-    await router.invalidate()
-  }
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -138,7 +128,7 @@ export const UserDropdown = ({ user }: UserDropdownParams) => {
           ) : null}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout} className="text-red-600!">
+        <DropdownMenuItem onClick={signOut} className="text-red-600!">
           <LogOutIcon className="text-red-600!" />
           Se déconnecter
         </DropdownMenuItem>

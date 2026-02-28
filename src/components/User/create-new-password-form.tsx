@@ -1,4 +1,3 @@
-import React from 'react'
 import { CircleAlert } from 'lucide-react'
 import { toast } from 'sonner'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -11,8 +10,12 @@ import {
 import { Input } from '@/components/ui/input'
 import { LoadingButton } from '@/components/ui/loading-button'
 import { passwordWithConfirmationSchema } from '@/constants/auth'
-import { getAuthErrorMessage } from '@/helpers/auth-errors'
+import {
+  extractAuthErrorCode,
+  getAuthErrorMessage
+} from '@/helpers/auth-errors'
 import { authClient } from '@/lib/auth-client'
+import { captureWithFeature } from '@/lib/sentry'
 import { getFieldErrorMessage } from '@/lib/utils'
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
@@ -39,8 +42,11 @@ export const CreateNewPasswordForm = ({ token }: { token: string }) => {
       })
 
       if (error) {
-        throw new Error(error.code)
+        throw new Error(extractAuthErrorCode(error))
       }
+    },
+    onError: (error) => {
+      captureWithFeature(error, 'reset-password')
     },
     onSuccess: () => {
       toast.success('Votre mot de passe a bien été modifié !')

@@ -1,5 +1,5 @@
-import { Button, Link, Section, Text } from '@react-email/components'
-import { BUTTON_CLASS, EmailLayout } from './email-layout'
+import { Button, Section, Text } from '@react-email/components'
+import { BUTTON_CLASS, EmailFallbackLink, EmailLayout } from './email-layout'
 
 type VerificationReminderEmailProps = {
   username: string
@@ -33,14 +33,7 @@ export const VerificationReminderEmail = ({
             Confirmer mon adresse e-mail
           </Button>
         </Section>
-        <Text className="m-0 text-xs leading-5 text-brand-muted">
-          Si le bouton ne fonctionne pas, copie ce lien dans ton navigateur :
-        </Text>
-        <Text className="m-0 text-xs leading-5">
-          <Link href={verificationUrl} className="text-brand-muted underline">
-            {verificationUrl}
-          </Link>
-        </Text>
+        <EmailFallbackLink href={verificationUrl} />
         <Text className="m-0 mt-6 text-xs leading-5 text-brand-muted">
           Si tu n'as pas créé de compte sur Petit Meme, ignore ce message.
         </Text>

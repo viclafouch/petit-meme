@@ -1,6 +1,7 @@
 import React from 'react'
 import {
   Body,
+  Column,
   Container,
   Head,
   Hr,
@@ -9,6 +10,7 @@ import {
   Link,
   pixelBasedPreset,
   Preview,
+  Row,
   Section,
   Tailwind,
   Text
@@ -47,6 +49,37 @@ const tailwindConfig = {
       }
     }
   }
+}
+
+type EmailFallbackLinkProps = {
+  href: string
+}
+
+export const EmailFallbackLink = ({ href }: EmailFallbackLinkProps) => {
+  return (
+    <>
+      <Text className="m-0 text-xs leading-5 text-brand-muted">
+        Si le bouton ne fonctionne pas, copie ce lien dans ton navigateur :
+      </Text>
+      <Row>
+        <Column
+          style={{
+            tableLayout: 'fixed',
+            width: '100%',
+            maxWidth: '1px',
+            wordBreak: 'break-all',
+            overflowWrap: 'break-word'
+          }}
+        >
+          <Text className="m-0 text-xs leading-5">
+            <Link href={href} className="text-brand-muted underline">
+              {href}
+            </Link>
+          </Text>
+        </Column>
+      </Row>
+    </>
+  )
 }
 
 export const EmailLayout = ({ preview, children }: EmailLayoutProps) => {

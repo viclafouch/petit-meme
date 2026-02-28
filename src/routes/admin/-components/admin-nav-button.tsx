@@ -11,25 +11,16 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { DEFAULT_AVATAR_URL } from '@/constants/avatar'
 import { getUserInitials } from '@/helpers/format'
-import { authClient } from '@/lib/auth-client'
-import { getAuthUserQueryOpts } from '@/lib/queries'
+import { useSignOut } from '@/hooks/use-sign-out'
 import type { SessionUser } from '@/lib/role'
-import { useQueryClient } from '@tanstack/react-query'
-import { Link, useRouter } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 
 type AdminNavButtonParams = {
   user: SessionUser
 }
 
 export const AdminNavButton = ({ user }: AdminNavButtonParams) => {
-  const router = useRouter()
-  const queryClient = useQueryClient()
-
-  const handleLogout = async () => {
-    await authClient.signOut()
-    queryClient.removeQueries(getAuthUserQueryOpts())
-    await router.invalidate()
-  }
+  const { signOut } = useSignOut()
 
   return (
     <DropdownMenu>
@@ -63,9 +54,7 @@ export const AdminNavButton = ({ user }: AdminNavButtonParams) => {
             Retour au site
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleLogout}>
-          Se déconnecter
-        </DropdownMenuItem>
+        <DropdownMenuItem onClick={signOut}>Se déconnecter</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

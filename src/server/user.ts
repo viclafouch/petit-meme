@@ -28,7 +28,6 @@ export const getFavoritesMemes = createServerFn({ method: 'GET' })
         createdAt: 'desc'
       },
       take:
-        // @ts-expect-error: better-auth user type lacks role field but it exists at runtime
         activeSubscription || matchIsUserAdmin(context.user)
           ? undefined
           : FREE_PLAN.maxFavoritesCount,
@@ -67,7 +66,6 @@ export const checkGeneration = createServerFn({ method: 'POST' })
     if (
       generationCount >= FREE_PLAN.maxGenerationsCount &&
       !activeSubscription &&
-      // @ts-expect-error: better-auth user type lacks role field but it exists at runtime
       !matchIsUserAdmin(context.user)
     ) {
       authLogger.warn(
@@ -81,8 +79,14 @@ export const checkGeneration = createServerFn({ method: 'POST' })
     return { result: 'ok' } as const
   })
 
+type ToggleBookmarkParams = {
+  userId: User['id']
+  memeId: Meme['id']
+  isAdmin: boolean
+}
+
 const toggleBookmark = createServerOnlyFn(
-  async (userId: User['id'], memeId: Meme['id']) => {
+  async ({ userId, memeId, isAdmin }: ToggleBookmarkParams) => {
     return prismaClient.$transaction(async (tx) => {
       const bookmark = await tx.userBookmark.findUnique({
         // eslint-disable-next-line camelcase
@@ -99,19 +103,21 @@ const toggleBookmark = createServerOnlyFn(
         return { bookmarked: false }
       }
 
-      const totalBookmarks = await tx.userBookmark.count({
-        where: { userId }
-      })
+      if (!isAdmin) {
+        const totalBookmarks = await tx.userBookmark.count({
+          where: { userId }
+        })
 
-      if (totalBookmarks >= FREE_PLAN.maxFavoritesCount) {
-        const activeSubscription = await findActiveSubscription(userId)
+        if (totalBookmarks >= FREE_PLAN.maxFavoritesCount) {
+          const activeSubscription = await findActiveSubscription(userId)
 
-        if (!activeSubscription) {
-          authLogger.warn({ userId }, 'Bookmark limit reached')
-          setResponseStatus(403)
-          throw new StudioError('premium required', {
-            code: 'PREMIUM_REQUIRED'
-          })
+          if (!activeSubscription) {
+            authLogger.warn({ userId }, 'Bookmark limit reached')
+            setResponseStatus(403)
+            throw new StudioError('Limite de favoris atteinte', {
+              code: 'PREMIUM_REQUIRED'
+            })
+          }
         }
       }
 
@@ -143,7 +149,11 @@ export const toggleBookmarkByMemeId = createServerFn({ method: 'POST' })
       throw notFound()
     }
 
-    const { bookmarked } = await toggleBookmark(context.user.id, memeId)
+    const { bookmarked } = await toggleBookmark({
+      userId: context.user.id,
+      memeId,
+      isAdmin: matchIsUserAdmin(context.user)
+    })
 
     authLogger.debug(
       { userId: context.user.id, memeId, bookmarked },

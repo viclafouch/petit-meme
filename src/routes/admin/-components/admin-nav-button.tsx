@@ -1,4 +1,3 @@
-import type { UserWithRole } from 'better-auth/plugins'
 import { ArrowLeft } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -14,10 +13,15 @@ import { DEFAULT_AVATAR_URL } from '@/constants/avatar'
 import { getUserInitials } from '@/helpers/format'
 import { authClient } from '@/lib/auth-client'
 import { getAuthUserQueryOpts } from '@/lib/queries'
+import type { SessionUser } from '@/lib/role'
 import { useQueryClient } from '@tanstack/react-query'
 import { Link, useRouter } from '@tanstack/react-router'
 
-export const AdminNavButton = ({ user }: { user: UserWithRole }) => {
+type AdminNavButtonParams = {
+  user: SessionUser
+}
+
+export const AdminNavButton = ({ user }: AdminNavButtonParams) => {
   const router = useRouter()
   const queryClient = useQueryClient()
 

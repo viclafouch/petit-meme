@@ -4,6 +4,58 @@
 
 ---
 
+## Better Auth — Incohérence de type `UserWithRole` vs `InferUser`
+
+### Problème
+
+Better Auth expose deux types différents pour le user authentifié :
+
+- **`UserWithRole`** (interface manuelle dans `better-auth/plugins`) : `role?: string | undefined` (pas de `null`)
+- **`typeof auth.$Infer.Session['user']`** (type inféré, approche recommandée par la doc) : `role?: string | undefined | null` (avec `null`)
+
+Le schema du plugin admin définit `role: { type: "string", required: false }`, ce qui produit via `InferFieldsOutput` (dans `better-auth/dist/db/field.d.mts`) un type `string | undefined | null`. Mais l'interface `UserWithRole` exportée par le même plugin (`better-auth/dist/plugins/admin/types.d.mts`) omet le `null`. C'est une incohérence interne à Better Auth.
+
+**Vérifié :** même en utilisant `typeof auth.$Infer.Session['user']` (approche documentée), le type de `role` reste `string | null | undefined` et n'est pas assignable à `UserWithRole`. Il n'existe aucune solution officielle.
+
+**Conséquence :** `session.user.role` (type inféré) n'est pas assignable à `UserWithRole` (interface manuelle). Impossible de passer `context.user` directement à des fonctions qui attendent `UserWithRole` sans `@ts-expect-error` ou cast.
+
+### Issues GitHub liées
+
+- [#2596 — useSession doesn't infer types for session data when using admin plugin](https://github.com/better-auth/better-auth/issues/2596) (closed) : un commentaire de @depsimon confirme exactement notre problème — `role?: string | null | undefined` vs `UserWithRole` qui n'a pas `null`. Issue fermée car le reporter avait un problème d'import différent, le bug de type sous-jacent n'a pas été adressé.
+- [#3033 — Username & admin plugin type issues](https://github.com/better-auth/better-auth/issues/3033) (closed) : `UserWithRole` n'inclut pas les champs ajoutés par d'autres plugins. Workaround : extend `UserWithRole` manuellement. Même pattern de type incomplet.
+- [#7452 — listUsers() doesn't include additional fields in the returned users type](https://github.com/better-auth/better-auth/issues/7452) (open) : problème connexe — les types retournés par l'API admin ne reflètent pas les champs additionnels.
+
+### Documentation officielle & workarounds testés
+
+- La doc recommande `typeof auth.$Infer.Session` pour inférer les types côté serveur — mais ça ne résout pas l'incompatibilité avec `UserWithRole`.
+- La doc recommande `customSession` + `customSessionClient` pour étendre le type de session — sert à ajouter des champs custom, ne résout pas le mismatch `null` sur `role`.
+- Aucune mention du problème `UserWithRole` vs type inféré dans la doc.
+- **`declare module` testé et rejeté** ([suggestion #7452](https://github.com/better-auth/better-auth/issues/7452#issuecomment-3969661396)) :
+  - `type UserWithRole = ...` dans `declare module` → `TS2300: Duplicate identifier`
+  - `interface UserWithRole` merge → conflit sur `role` (`string | undefined` vs `string | null | undefined`)
+  - Ne fonctionne pas dans notre setup avec le plugin admin.
+
+### Fix appliqué
+
+- [x] Créé le type `SessionUser` dans `src/lib/role.ts` dérivé de `typeof auth.$Infer.Session['user']` — c'est le vrai type runtime
+- [x] `matchIsUserAdmin` accepte `SessionUser` au lieu de `UserWithRole`
+- [x] Supprimé tous les `@ts-expect-error: better-auth user type lacks role field` (3 occurrences dans `src/server/user.ts`)
+- [x] Supprimé le cast `as UserWithRole` dans `getAuthUser` (`src/server/user-auth.ts`)
+- [x] Remplacé `UserWithRole` par `SessionUser` dans tous les consumers (`user-dropdown.tsx`, `admin-nav-button.tsx`)
+- [x] Plus aucune référence à `UserWithRole` dans le codebase — 0 import `better-auth/plugins` pour ce type
+- [ ] Ouvrir une issue upstream sur Better Auth pour aligner `UserWithRole.role` avec le type inféré (bug confirmé)
+
+### Issues à surveiller
+
+Vérifier périodiquement si Better Auth corrige ce problème. Si fixé upstream, on pourra revenir à `UserWithRole` et supprimer notre type custom.
+
+- [#2596](https://github.com/better-auth/better-auth/issues/2596) (closed, non résolu) — mismatch `role` type confirmé par @depsimon
+- [#3033](https://github.com/better-auth/better-auth/issues/3033) (closed) — `UserWithRole` n'inclut pas les champs d'autres plugins
+- [#7452](https://github.com/better-auth/better-auth/issues/7452) (open) — `listUsers()` types incomplets
+- **À créer** : issue dédiée au mismatch `null` sur `UserWithRole.role` vs `InferFieldsOutput`
+
+---
+
 ## Refonte page Pricing — Conversion & Plan annuel
 
 Objectif : maximiser la conversion free → paid. Refonte complète de `/pricing` avec plan annuel, sections de persuasion, et fix du composant Card shadcn.

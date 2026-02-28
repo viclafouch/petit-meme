@@ -1,4 +1,3 @@
-import type { UserWithRole } from 'better-auth/plugins'
 import { StudioError } from '@/constants/error'
 import { auth } from '@/lib/auth'
 import { authLogger } from '@/lib/logger'
@@ -10,7 +9,7 @@ export const getAuthUser = createServerFn({ method: 'GET' }).handler(
     const { headers } = getRequest()
     const session = await auth.api.getSession({ headers })
 
-    return (session?.user as UserWithRole | undefined) || null
+    return session?.user ?? null
   }
 )
 

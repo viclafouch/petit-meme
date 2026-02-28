@@ -1,5 +1,4 @@
 import React from 'react'
-import type { UserWithRole } from 'better-auth/plugins'
 import {
   ChevronDown,
   CreditCard,
@@ -29,12 +28,13 @@ import {
   getAuthUserQueryOpts,
   getFavoritesMemesQueryOpts
 } from '@/lib/queries'
+import type { SessionUser } from '@/lib/role'
 import { matchIsUserAdmin } from '@/lib/role'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useRouter } from '@tanstack/react-router'
 
 type UserDropdownParams = {
-  user: UserWithRole
+  user: SessionUser
 }
 
 export const UserDropdown = ({ user }: UserDropdownParams) => {

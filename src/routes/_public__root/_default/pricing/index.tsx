@@ -34,7 +34,7 @@ const RouteComponent = () => {
 
   return (
     <div className="container flex flex-col items-center gap-8 pb-16">
-      <div className="flex flex-col items-center gap-4">
+      <div className="flex flex-col items-center gap-2">
         <PageHeading>Plans</PageHeading>
         <PageDescription>
           Choisissez l'offre qui correspond à vos besoins, du gratuit à
@@ -47,7 +47,7 @@ const RouteComponent = () => {
       />
       <section
         aria-label="Comparaison des plans"
-        className="mx-auto flex w-full max-w-3xl flex-col-reverse justify-center gap-8 sm:flex-row sm:flex-wrap"
+        className="mx-auto grid w-full max-w-3xl grid-cols-1 gap-8 sm:grid-cols-2"
       >
         <PricingCard
           {...FREE_PLAN}
@@ -56,6 +56,7 @@ const RouteComponent = () => {
             void goToBillingPortal()
           }}
           isActive={isOnFreePlan}
+          className="order-last sm:order-0"
         />
         <PricingCard
           {...PREMIUM_PLAN}

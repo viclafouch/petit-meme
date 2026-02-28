@@ -122,12 +122,14 @@ export const SearchMemes = () => {
 
   return (
     <div>
-      <PageHeading>
-        {currentCategory ? currentCategory.title : 'Tous les mèmes'}
-      </PageHeading>
-      <PageDescription>
-        Tape, clique, rigole : découvre tous les mèmes en un seul endroit.
-      </PageDescription>
+      <div className="flex flex-col items-center gap-2">
+        <PageHeading>
+          {currentCategory ? currentCategory.title : 'Tous les mèmes'}
+        </PageHeading>
+        <PageDescription>
+          Tape, clique, rigole : découvre tous les mèmes en un seul endroit.
+        </PageDescription>
+      </div>
       <div className="w-full mx-auto py-12">
         <div className="flex flex-col gap-y-4">
           <div className="flex justify-between flex-col sm:flex-row gap-2">

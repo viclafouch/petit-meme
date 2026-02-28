@@ -26,6 +26,12 @@ export const authUserRequiredMiddleware = createMiddleware({
     throw new StudioError('unauthorized', { code: 'UNAUTHORIZED' })
   }
 
+  if (session.user.banned === true) {
+    authLogger.warn({ userId: session.user.id }, 'Banned user access attempt')
+    setResponseStatus(403)
+    throw new StudioError('banned', { code: 'BANNED_USER' })
+  }
+
   return next({ context: { user: session.user } })
 })
 

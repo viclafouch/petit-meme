@@ -126,7 +126,7 @@ export const SignupForm = ({ onAuthTypeChange }: SignupFormParams) => {
                 <Input
                   required
                   type="text"
-                  autoComplete="username"
+                  autoComplete="name"
                   placeholder="Jean"
                   name="name"
                   value={field.state.value}

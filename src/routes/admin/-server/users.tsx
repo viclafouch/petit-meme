@@ -1,8 +1,13 @@
 import { z } from 'zod'
 import { prismaClient } from '@/db'
 import type { Prisma } from '@/db/generated/prisma/client'
+import { AccountBannedEmail } from '@/emails/account-banned-email'
+import { AccountUnbannedEmail } from '@/emails/account-unbanned-email'
 import { auth } from '@/lib/auth'
 import { adminLogger } from '@/lib/logger'
+import { sendEmailAsync } from '@/lib/resend'
+import { captureWithFeature } from '@/lib/sentry'
+import { stripeClient } from '@/lib/stripe'
 import { logAuditAction } from '@/server/audit'
 import { adminRequiredMiddleware } from '@/server/user-auth'
 import { cleanupUserData } from '@/utils/user-cleanup'
@@ -187,6 +192,41 @@ const BAN_USER_SCHEMA = z.object({
   banReason: z.enum(BAN_REASONS)
 })
 
+const cancelActiveSubscription = async (stripeCustomerId: string | null) => {
+  if (!stripeCustomerId) {
+    return false
+  }
+
+  try {
+    const subscriptions = await stripeClient.subscriptions.list({
+      customer: stripeCustomerId,
+      status: 'active',
+      limit: 1
+    })
+
+    const activeSubscription = subscriptions.data[0]
+
+    if (!activeSubscription) {
+      return false
+    }
+
+    await stripeClient.subscriptions.update(activeSubscription.id, {
+      // eslint-disable-next-line camelcase -- Stripe API property
+      cancel_at_period_end: true
+    })
+
+    return true
+  } catch (error) {
+    captureWithFeature(error, 'admin-ban')
+    adminLogger.error(
+      { err: error, stripeCustomerId },
+      'Failed to cancel Stripe subscription on ban'
+    )
+
+    return false
+  }
+}
+
 export const banUserById = createServerFn({ method: 'POST' })
   .middleware([adminRequiredMiddleware])
   .inputValidator(BAN_USER_SCHEMA)
@@ -197,22 +237,58 @@ export const banUserById = createServerFn({ method: 'POST' })
 
     const targetUser = await prismaClient.user.findUnique({
       where: { id: data.userId },
-      select: { role: true }
+      select: {
+        role: true,
+        email: true,
+        name: true,
+        stripeCustomerId: true,
+        banned: true
+      }
     })
 
-    if (targetUser?.role === 'admin') {
+    if (!targetUser) {
+      throw new Error('Utilisateur introuvable')
+    }
+
+    if (targetUser.banned === true) {
+      throw new Error('Cet utilisateur est déjà banni')
+    }
+
+    if (targetUser.role === 'admin') {
       throw new Error('Impossible de bannir un administrateur')
     }
 
     const { headers } = getRequest()
 
-    await auth.api.banUser({
-      body: {
-        userId: data.userId,
-        banReason: data.banReason
-      },
-      headers
-    })
+    await Promise.all([
+      auth.api.banUser({
+        body: {
+          userId: data.userId,
+          banReason: data.banReason
+        },
+        headers
+      }),
+      auth.api.revokeUserSessions({
+        body: { userId: data.userId }
+      })
+    ])
+
+    void cancelActiveSubscription(targetUser.stripeCustomerId).then(
+      (hasActiveSubscription) => {
+        sendEmailAsync({
+          to: targetUser.email,
+          subject: 'Ton compte Petit Meme a été suspendu',
+          react: (
+            <AccountBannedEmail
+              username={targetUser.name}
+              banReason={data.banReason}
+              hasActiveSubscription={hasActiveSubscription}
+            />
+          ),
+          logMessage: 'Sending ban notification email'
+        })
+      }
+    )
 
     void logAuditAction({
       action: 'ban',
@@ -238,11 +314,27 @@ export const unbanUserById = createServerFn({ method: 'POST' })
   .middleware([adminRequiredMiddleware])
   .inputValidator(z.string())
   .handler(async ({ data: userId, context }) => {
+    const targetUser = await prismaClient.user.findUnique({
+      where: { id: userId },
+      select: { email: true, name: true }
+    })
+
+    if (!targetUser) {
+      throw new Error('Utilisateur introuvable')
+    }
+
     const { headers } = getRequest()
 
     await auth.api.unbanUser({
       body: { userId },
       headers
+    })
+
+    sendEmailAsync({
+      to: targetUser.email,
+      subject: 'Ton compte Petit Meme a été réactivé',
+      react: <AccountUnbannedEmail username={targetUser.name} />,
+      logMessage: 'Sending unban notification email'
     })
 
     void logAuditAction({

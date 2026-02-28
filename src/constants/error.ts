@@ -1,6 +1,9 @@
 import { createSerializationAdapter } from '@tanstack/react-router'
 
-export type StudioErrorCode = 'PREMIUM_REQUIRED' | 'UNAUTHORIZED'
+export type StudioErrorCode =
+  | 'PREMIUM_REQUIRED'
+  | 'UNAUTHORIZED'
+  | 'BANNED_USER'
 
 export class StudioError extends Error {
   public code: StudioErrorCode

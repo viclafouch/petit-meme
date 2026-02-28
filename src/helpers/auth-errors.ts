@@ -34,7 +34,9 @@ const AUTH_ERRORS_FR = {
 
 const EXTRA_ERRORS_FR = {
   TOO_MANY_REQUESTS:
-    'Trop de tentatives, veuillez réessayer dans quelques minutes'
+    'Trop de tentatives, veuillez réessayer dans quelques minutes',
+  BANNED_USER:
+    "Votre compte a été suspendu. Contactez hello@petit-meme.io pour plus d'informations."
 } as const satisfies Record<string, string>
 
 export function getAuthErrorMessage(code: string) {

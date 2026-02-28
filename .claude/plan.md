@@ -894,6 +894,75 @@ src/routes/admin/
 
 ---
 
+## Refonte système de bannissement
+
+**Constat** : Le ban est cosmétique — le flag `banned=true` est écrit en base et affiché dans l'admin, mais rien n'est enforced. Un user banni continue d'utiliser le site normalement.
+
+### Décisions prises (deep-dive)
+
+- **Login bloqué** : Un user banni ne peut plus se connecter. Better-auth gère nativement ce blocage (plugin admin retourne erreur `BANNED_USER`).
+- **Effet immédiat** : Au ban, toutes les sessions sont révoquées via `auth.api.revokeUserSessions()`. Déconnexion instantanée sur tous les appareils.
+- **Middleware serveur** : Check `banned === true` dans `authUserRequiredMiddleware` en défense-in-depth (cookie cache conservé, pas de query DB supplémentaire).
+- **Code d'erreur unique** : `BANNED_USER` partout (better-auth + middleware) — un seul mapping dans `auth-errors.ts`.
+- **Abonnement Stripe au ban** : Annulation automatique en mode "cancel at period end" (fire-and-forget, try/catch + Sentry). Le user finit sa période, pas de remboursement.
+- **Abonnement Stripe au unban** : L'abo reste annulé. Le user devra se réabonner lui-même.
+- **Email de ban** : Template avec raison du ban + info annulation abo (si applicable) + contact support. Envoyé en fire-and-forget chaîné après le résultat Stripe.
+- **Email de débannissement** : Template informant de la réactivation + lien de connexion.
+- **Message d'erreur client** : Générique sans raison — "Votre compte a été suspendu. Contactez hello@petit-meme.io pour plus d'informations."
+- **Bans temporaires** : Reportés. `banExpires` existe mais non exploité pour l'instant.
+
+### Phase 1 — Enforcement serveur
+
+- [x] Modifier `authUserRequiredMiddleware` (`src/server/user-auth.ts`) : check `session.user.banned === true`, retourne 403 `BANNED_USER`
+- [x] Cookie cache conservé (pas de `disableCookieCache`) — la révocation de sessions est le mécanisme principal
+- [x] Ajouter `BANNED_USER` dans `StudioErrorCode` (`src/constants/error.ts`)
+- [x] Ajouter le code `BANNED_USER` dans `src/helpers/auth-errors.ts` avec message FR générique
+- [x] L'affichage dans `login-form.tsx` fonctionne déjà via `getAuthErrorMessage()` — pas de changement nécessaire
+
+### Phase 2 — Actions au ban (serveur admin)
+
+- [x] `banUserById()` (`src/routes/admin/-server/users.tsx`) : après `auth.api.banUser()` :
+  - `Promise.all` : `banUser` + `revokeUserSessions` en parallèle
+  - Early exit si user déjà banni (`banned === true`)
+  - Stripe : annulation `cancel_at_period_end` via `cancelActiveSubscription` (try/catch + Sentry, fire-and-forget)
+  - Email de ban chaîné après Stripe (fire-and-forget `.then()`)
+  - Fichier renommé `.ts` → `.tsx` pour support JSX
+
+### Phase 3 — Actions au unban (serveur admin)
+
+- [x] `unbanUserById()` (`src/routes/admin/-server/users.tsx`) : après `auth.api.unbanUser()` :
+  - Envoi email de débannissement async via `sendEmailAsync()` avec template `AccountUnbannedEmail`
+  - L'abonnement reste annulé — pas de réactivation
+
+### Phase 4 — Templates email
+
+- [x] `src/emails/account-banned-email.tsx` — raison du ban, info annulation abo (conditionnel), contact support
+- [x] `src/emails/account-unbanned-email.tsx` — réactivation du compte, bouton de connexion
+
+### Phase 5 — UX client
+
+- [x] Code unique `BANNED_USER` (better-auth + middleware) mappé dans `auth-errors.ts`
+- [x] Login form : affichage via `getAuthErrorMessage()` existant (Alert destructive)
+- [x] Twitter OAuth : `auth-dialog.tsx` gère les erreurs via `toast.error(getAuthErrorMessage(...))` — le code `BANNED_USER` sera correctement traduit
+
+### Phase 6 — Audits sécurité & performance (appliqués)
+
+- [x] Check explicite `=== true` (défense contre `null` ambiguë)
+- [x] `revokeUserSessions` retiré du middleware (redondant avec `banUserById`)
+- [x] `banUser` + `revokeUserSessions` parallélisés via `Promise.all`
+- [x] Stripe + email en fire-and-forget (non-bloquant pour l'admin)
+- [x] Try/catch + Sentry sur `cancelActiveSubscription` (Stripe failure n'annule pas le ban)
+- [x] Early exit si user déjà banni (idempotence)
+- [x] `admin-ban` ajouté dans `SentryFeature` (`src/lib/sentry.ts`)
+
+### Hors scope (reporté)
+
+- Bans temporaires (`banExpires`)
+- Réactivation automatique d'abonnement au débannissement
+- Page dédiée "compte banni" (le user est bloqué au login, pas besoin)
+
+---
+
 ## Backlog — Futures évolutions
 
 ### Internationalisation (FR / EN)

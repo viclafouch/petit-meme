@@ -14,6 +14,7 @@ type SentryFeature =
   | 'download'
   | 'admin-meme-edit'
   | 'admin-dashboard'
+  | 'admin-ban'
   | 'sign-in'
   | 'sign-in-twitter'
   | 'sign-up'

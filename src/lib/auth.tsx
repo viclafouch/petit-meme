@@ -14,7 +14,6 @@ import {
 import { prismaClient } from '@/db'
 import { clientEnv } from '@/env/client'
 import { serverEnv } from '@/env/server'
-import { capitalize } from '@/helpers/format'
 import { formatCentsToEuros } from '@/helpers/number'
 import { authLogger, stripeLogger } from '@/lib/logger'
 import { sendEmailAsync } from '@/lib/resend'
@@ -279,7 +278,11 @@ const getAuthConfig = createServerOnlyFn(() => {
           plans: [
             {
               name: 'premium',
-              priceId: serverEnv.STRIPE_PRICE_ID
+              priceId: serverEnv.STRIPE_MONTHLY_PRICE_ID
+            },
+            {
+              name: 'premium-annual',
+              priceId: serverEnv.STRIPE_ANNUAL_PRICE_ID
             }
           ],
           onSubscriptionComplete: async ({
@@ -301,10 +304,12 @@ const getAuthConfig = createServerOnlyFn(() => {
               return
             }
 
-            const priceCents =
-              stripeSubscription.items.data[0]?.price.unit_amount ?? 0
+            const stripePrice = stripeSubscription.items.data[0]?.price
+            const priceCents = stripePrice?.unit_amount ?? 0
+            const isAnnual = stripePrice?.recurring?.interval === 'year'
 
             const formattedAmount = formatCentsToEuros(priceCents)
+            const periodSuffix = isAnnual ? '/an' : '/mois'
 
             sendEmailAsync({
               to: user.email,
@@ -312,8 +317,8 @@ const getAuthConfig = createServerOnlyFn(() => {
               react: (
                 <SubscriptionConfirmedEmail
                   username={user.name}
-                  planTitle={capitalize(plan.name)}
-                  amount={`${formattedAmount}/mois`}
+                  planTitle="Premium"
+                  amount={`${formattedAmount}${periodSuffix}`}
                 />
               ),
               logMessage: 'Sending subscription confirmed email to'

@@ -213,3 +213,6 @@
 @utility no-scrollbar {
   @apply [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
 }
+@utility amber-badge {
+  @apply rounded-full bg-amber-400/15 text-xs font-semibold text-amber-400;
+}

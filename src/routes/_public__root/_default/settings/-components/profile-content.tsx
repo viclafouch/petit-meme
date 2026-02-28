@@ -16,8 +16,12 @@ import { LoadingButton } from '@/components/ui/loading-button'
 import { Separator } from '@/components/ui/separator'
 import { DeleteAccountDialog } from '@/components/User/delete-account-dialog'
 import { UpdatePasswordDialog } from '@/components/User/update-password-dialog'
-import { FREE_PLAN, PREMIUM_PLAN } from '@/constants/plan'
-import { formatCentsToEuros } from '@/helpers/number'
+import {
+  type BetterAuthPlanName,
+  FREE_PLAN,
+  PREMIUM_PLAN
+} from '@/constants/plan'
+import { getSubscriptionDisplayInfo } from '@/helpers/subscription'
 import { useStripeCheckout } from '@/hooks/use-stripe-checkout'
 import { captureWithFeature } from '@/lib/sentry'
 import type { ActiveSubscription } from '@/server/customer'
@@ -25,13 +29,15 @@ import { exportUserData } from '@/server/user'
 import { downloadBlob } from '@/utils/download'
 import { useMutation } from '@tanstack/react-query'
 
+type ProfileContentParams = {
+  user: User
+  activeSubscription: ActiveSubscription | null
+}
+
 export const ProfileContent = ({
   user,
   activeSubscription
-}: {
-  user: User
-  activeSubscription: ActiveSubscription | null
-}) => {
+}: ProfileContentParams) => {
   const [isUpdatePasswordOpened, setIsUpdatePasswordOpened] =
     React.useState(false)
   const [isDeleteAccountOpened, setIsDeleteAccountOpened] =
@@ -82,7 +88,13 @@ export const ProfileContent = ({
                 <Label className="text-base">Abonnement en cours</Label>
                 {activeSubscription ? (
                   <p className="text-muted-foreground text-sm">
-                    {PREMIUM_PLAN.title} - {formatCentsToEuros(399)}/mois -{' '}
+                    {PREMIUM_PLAN.title} -{' '}
+                    {
+                      getSubscriptionDisplayInfo(
+                        activeSubscription.plan as BetterAuthPlanName
+                      ).displayPrice
+                    }{' '}
+                    -{' '}
                     <span className="text-info">
                       {activeSubscription.cancelAtPeriodEnd
                         ? `Fin le ${formatDate(activeSubscription.periodEnd!, 'dd/MM/yyyy')}`
@@ -111,7 +123,7 @@ export const ProfileContent = ({
                   variant="info"
                   onClick={(event) => {
                     event.preventDefault()
-                    void checkoutPremium()
+                    void checkoutPremium('monthly')
                   }}
                 >
                   <Stars />

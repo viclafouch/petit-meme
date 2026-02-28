@@ -41,7 +41,7 @@ export const UserDropdown = ({ user }: UserDropdownParams) => {
   const [isOpen, setIsOpen] = React.useState(false)
   const queryClient = useQueryClient()
   const router = useRouter()
-  const { goToBillingPortal, checkoutPremium } = useStripeCheckout()
+  const { goToBillingPortal } = useStripeCheckout()
 
   const favoritesMemesCountQuery = useQuery(getFavoritesMemesQueryOpts())
   const activeSubscriptionQuery = useQuery(getActiveSubscriptionQueryOpts())
@@ -94,13 +94,11 @@ export const UserDropdown = ({ user }: UserDropdownParams) => {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           {!activeSubscriptionQuery.data ? (
-            <DropdownMenuItem
-              onClick={() => {
-                void checkoutPremium()
-              }}
-            >
-              <SparklesIcon />
-              Passer à Premium
+            <DropdownMenuItem asChild>
+              <Link to="/pricing">
+                <SparklesIcon />
+                Passer à Premium
+              </Link>
             </DropdownMenuItem>
           ) : (
             <DropdownMenuItem

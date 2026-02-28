@@ -30,12 +30,12 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as AdminLibraryMemeIdRouteImport } from './routes/admin/library/$memeId'
 import { Route as Public__rootDefaultTermsOfUseRouteImport } from './routes/_public__root/_default/terms-of-use'
 import { Route as Public__rootDefaultPrivacyRouteImport } from './routes/_public__root/_default/privacy'
-import { Route as Public__rootDefaultPricingRouteImport } from './routes/_public__root/_default/pricing'
 import { Route as Public__rootDefaultMentionsLegalesRouteImport } from './routes/_public__root/_default/mentions-legales'
 import { Route as Public__rootDefaultFavoritesRouteImport } from './routes/_public__root/_default/favorites'
 import { Route as Public__rootDefaultSettingsRouteRouteImport } from './routes/_public__root/_default/settings/route'
 import { Route as Public__rootDefaultSettingsIndexRouteImport } from './routes/_public__root/_default/settings/index'
 import { Route as Public__rootDefaultRandomIndexRouteImport } from './routes/_public__root/_default/random/index'
+import { Route as Public__rootDefaultPricingIndexRouteImport } from './routes/_public__root/_default/pricing/index'
 import { Route as Public__rootDefaultMemesIndexRouteImport } from './routes/_public__root/_default/memes/index'
 import { Route as StudioMemesMemeIdStudioRouteImport } from './routes/_studio/memes.$memeId.studio'
 import { Route as Public__rootDefaultPasswordResetRouteImport } from './routes/_public__root/_default/password.reset'
@@ -149,12 +149,6 @@ const Public__rootDefaultPrivacyRoute =
     path: '/privacy',
     getParentRoute: () => Public__rootDefaultRouteRoute,
   } as any)
-const Public__rootDefaultPricingRoute =
-  Public__rootDefaultPricingRouteImport.update({
-    id: '/pricing',
-    path: '/pricing',
-    getParentRoute: () => Public__rootDefaultRouteRoute,
-  } as any)
 const Public__rootDefaultMentionsLegalesRoute =
   Public__rootDefaultMentionsLegalesRouteImport.update({
     id: '/mentions-legales',
@@ -183,6 +177,12 @@ const Public__rootDefaultRandomIndexRoute =
   Public__rootDefaultRandomIndexRouteImport.update({
     id: '/random/',
     path: '/random/',
+    getParentRoute: () => Public__rootDefaultRouteRoute,
+  } as any)
+const Public__rootDefaultPricingIndexRoute =
+  Public__rootDefaultPricingIndexRouteImport.update({
+    id: '/pricing/',
+    path: '/pricing/',
     getParentRoute: () => Public__rootDefaultRouteRoute,
   } as any)
 const Public__rootDefaultMemesIndexRoute =
@@ -242,7 +242,6 @@ export interface FileRoutesByFullPath {
   '/settings': typeof Public__rootDefaultSettingsRouteRouteWithChildren
   '/favorites': typeof Public__rootDefaultFavoritesRoute
   '/mentions-legales': typeof Public__rootDefaultMentionsLegalesRoute
-  '/pricing': typeof Public__rootDefaultPricingRoute
   '/privacy': typeof Public__rootDefaultPrivacyRoute
   '/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
@@ -256,6 +255,7 @@ export interface FileRoutesByFullPath {
   '/password/reset': typeof Public__rootDefaultPasswordResetRoute
   '/memes/$memeId/studio': typeof StudioMemesMemeIdStudioRoute
   '/memes/': typeof Public__rootDefaultMemesIndexRoute
+  '/pricing/': typeof Public__rootDefaultPricingIndexRoute
   '/random/': typeof Public__rootDefaultRandomIndexRoute
   '/settings/': typeof Public__rootDefaultSettingsIndexRoute
   '/memes/category/$slug': typeof Public__rootDefaultMemesCategorySlugRoute
@@ -273,7 +273,6 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/favorites': typeof Public__rootDefaultFavoritesRoute
   '/mentions-legales': typeof Public__rootDefaultMentionsLegalesRoute
-  '/pricing': typeof Public__rootDefaultPricingRoute
   '/privacy': typeof Public__rootDefaultPrivacyRoute
   '/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
@@ -287,6 +286,7 @@ export interface FileRoutesByTo {
   '/password/reset': typeof Public__rootDefaultPasswordResetRoute
   '/memes/$memeId/studio': typeof StudioMemesMemeIdStudioRoute
   '/memes': typeof Public__rootDefaultMemesIndexRoute
+  '/pricing': typeof Public__rootDefaultPricingIndexRoute
   '/random': typeof Public__rootDefaultRandomIndexRoute
   '/settings': typeof Public__rootDefaultSettingsIndexRoute
   '/memes/category/$slug': typeof Public__rootDefaultMemesCategorySlugRoute
@@ -310,7 +310,6 @@ export interface FileRoutesById {
   '/_public__root/_default/settings': typeof Public__rootDefaultSettingsRouteRouteWithChildren
   '/_public__root/_default/favorites': typeof Public__rootDefaultFavoritesRoute
   '/_public__root/_default/mentions-legales': typeof Public__rootDefaultMentionsLegalesRoute
-  '/_public__root/_default/pricing': typeof Public__rootDefaultPricingRoute
   '/_public__root/_default/privacy': typeof Public__rootDefaultPrivacyRoute
   '/_public__root/_default/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
@@ -324,6 +323,7 @@ export interface FileRoutesById {
   '/_public__root/_default/password/reset': typeof Public__rootDefaultPasswordResetRoute
   '/_studio/memes/$memeId/studio': typeof StudioMemesMemeIdStudioRoute
   '/_public__root/_default/memes/': typeof Public__rootDefaultMemesIndexRoute
+  '/_public__root/_default/pricing/': typeof Public__rootDefaultPricingIndexRoute
   '/_public__root/_default/random/': typeof Public__rootDefaultRandomIndexRoute
   '/_public__root/_default/settings/': typeof Public__rootDefaultSettingsIndexRoute
   '/_public__root/_default/memes/category/$slug': typeof Public__rootDefaultMemesCategorySlugRoute
@@ -345,7 +345,6 @@ export interface FileRouteTypes {
     | '/settings'
     | '/favorites'
     | '/mentions-legales'
-    | '/pricing'
     | '/privacy'
     | '/terms-of-use'
     | '/admin/library/$memeId'
@@ -359,6 +358,7 @@ export interface FileRouteTypes {
     | '/password/reset'
     | '/memes/$memeId/studio'
     | '/memes/'
+    | '/pricing/'
     | '/random/'
     | '/settings/'
     | '/memes/category/$slug'
@@ -376,7 +376,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/favorites'
     | '/mentions-legales'
-    | '/pricing'
     | '/privacy'
     | '/terms-of-use'
     | '/admin/library/$memeId'
@@ -390,6 +389,7 @@ export interface FileRouteTypes {
     | '/password/reset'
     | '/memes/$memeId/studio'
     | '/memes'
+    | '/pricing'
     | '/random'
     | '/settings'
     | '/memes/category/$slug'
@@ -412,7 +412,6 @@ export interface FileRouteTypes {
     | '/_public__root/_default/settings'
     | '/_public__root/_default/favorites'
     | '/_public__root/_default/mentions-legales'
-    | '/_public__root/_default/pricing'
     | '/_public__root/_default/privacy'
     | '/_public__root/_default/terms-of-use'
     | '/admin/library/$memeId'
@@ -426,6 +425,7 @@ export interface FileRouteTypes {
     | '/_public__root/_default/password/reset'
     | '/_studio/memes/$memeId/studio'
     | '/_public__root/_default/memes/'
+    | '/_public__root/_default/pricing/'
     | '/_public__root/_default/random/'
     | '/_public__root/_default/settings/'
     | '/_public__root/_default/memes/category/$slug'
@@ -593,13 +593,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Public__rootDefaultPrivacyRouteImport
       parentRoute: typeof Public__rootDefaultRouteRoute
     }
-    '/_public__root/_default/pricing': {
-      id: '/_public__root/_default/pricing'
-      path: '/pricing'
-      fullPath: '/pricing'
-      preLoaderRoute: typeof Public__rootDefaultPricingRouteImport
-      parentRoute: typeof Public__rootDefaultRouteRoute
-    }
     '/_public__root/_default/mentions-legales': {
       id: '/_public__root/_default/mentions-legales'
       path: '/mentions-legales'
@@ -633,6 +626,13 @@ declare module '@tanstack/react-router' {
       path: '/random'
       fullPath: '/random/'
       preLoaderRoute: typeof Public__rootDefaultRandomIndexRouteImport
+      parentRoute: typeof Public__rootDefaultRouteRoute
+    }
+    '/_public__root/_default/pricing/': {
+      id: '/_public__root/_default/pricing/'
+      path: '/pricing'
+      fullPath: '/pricing/'
+      preLoaderRoute: typeof Public__rootDefaultPricingIndexRouteImport
       parentRoute: typeof Public__rootDefaultRouteRoute
     }
     '/_public__root/_default/memes/': {
@@ -706,7 +706,6 @@ interface Public__rootDefaultRouteRouteChildren {
   Public__rootDefaultSettingsRouteRoute: typeof Public__rootDefaultSettingsRouteRouteWithChildren
   Public__rootDefaultFavoritesRoute: typeof Public__rootDefaultFavoritesRoute
   Public__rootDefaultMentionsLegalesRoute: typeof Public__rootDefaultMentionsLegalesRoute
-  Public__rootDefaultPricingRoute: typeof Public__rootDefaultPricingRoute
   Public__rootDefaultPrivacyRoute: typeof Public__rootDefaultPrivacyRoute
   Public__rootDefaultTermsOfUseRoute: typeof Public__rootDefaultTermsOfUseRoute
   Public__rootDefaultCheckoutSuccessRoute: typeof Public__rootDefaultCheckoutSuccessRoute
@@ -714,6 +713,7 @@ interface Public__rootDefaultRouteRouteChildren {
   Public__rootDefaultPasswordCreateNewRoute: typeof Public__rootDefaultPasswordCreateNewRoute
   Public__rootDefaultPasswordResetRoute: typeof Public__rootDefaultPasswordResetRoute
   Public__rootDefaultMemesIndexRoute: typeof Public__rootDefaultMemesIndexRoute
+  Public__rootDefaultPricingIndexRoute: typeof Public__rootDefaultPricingIndexRoute
   Public__rootDefaultRandomIndexRoute: typeof Public__rootDefaultRandomIndexRoute
   Public__rootDefaultMemesCategorySlugRoute: typeof Public__rootDefaultMemesCategorySlugRoute
 }
@@ -725,7 +725,6 @@ const Public__rootDefaultRouteRouteChildren: Public__rootDefaultRouteRouteChildr
     Public__rootDefaultFavoritesRoute: Public__rootDefaultFavoritesRoute,
     Public__rootDefaultMentionsLegalesRoute:
       Public__rootDefaultMentionsLegalesRoute,
-    Public__rootDefaultPricingRoute: Public__rootDefaultPricingRoute,
     Public__rootDefaultPrivacyRoute: Public__rootDefaultPrivacyRoute,
     Public__rootDefaultTermsOfUseRoute: Public__rootDefaultTermsOfUseRoute,
     Public__rootDefaultCheckoutSuccessRoute:
@@ -736,6 +735,7 @@ const Public__rootDefaultRouteRouteChildren: Public__rootDefaultRouteRouteChildr
     Public__rootDefaultPasswordResetRoute:
       Public__rootDefaultPasswordResetRoute,
     Public__rootDefaultMemesIndexRoute: Public__rootDefaultMemesIndexRoute,
+    Public__rootDefaultPricingIndexRoute: Public__rootDefaultPricingIndexRoute,
     Public__rootDefaultRandomIndexRoute: Public__rootDefaultRandomIndexRoute,
     Public__rootDefaultMemesCategorySlugRoute:
       Public__rootDefaultMemesCategorySlugRoute,

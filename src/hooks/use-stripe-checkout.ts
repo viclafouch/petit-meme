@@ -1,11 +1,11 @@
 import { toast } from 'sonner'
+import { type BillingPeriod, PREMIUM_PLAN } from '@/constants/plan'
 import { authClient } from '@/lib/auth-client'
 import { getActiveSubscriptionQueryOpts } from '@/lib/queries'
 import { captureWithFeature } from '@/lib/sentry'
 import { useShowDialog } from '@/stores/dialog.store'
 import { useQueryClient } from '@tanstack/react-query'
-import type { LinkOptions } from '@tanstack/react-router'
-import { useRouteContext } from '@tanstack/react-router'
+import { type LinkOptions, useRouteContext } from '@tanstack/react-router'
 
 export const useStripeCheckout = () => {
   const { user } = useRouteContext({ from: '__root__' })
@@ -36,7 +36,7 @@ export const useStripeCheckout = () => {
     }
   }
 
-  const checkoutPremium = async () => {
+  const checkoutPremium = async (billingPeriod: BillingPeriod) => {
     if (!user) {
       showDialog('auth', {})
 
@@ -46,28 +46,30 @@ export const useStripeCheckout = () => {
     try {
       const promise = new Promise((resolve) => {
         setTimeout(resolve, 1)
+      }).then(async () => {
+        const activeSubscription = await queryClient.fetchQuery(
+          getActiveSubscriptionQueryOpts()
+        )
+
+        if (activeSubscription) {
+          toast.success('Vous avez déjà un abonnement en cours !')
+
+          return
+        }
+
+        const planName = PREMIUM_PLAN.pricing[billingPeriod].betterAuthPlanName
+
+        const { error } = await authClient.subscription.upgrade({
+          plan: planName,
+          successUrl: '/checkout/success' satisfies LinkOptions['to'],
+          cancelUrl: '/pricing' satisfies LinkOptions['to'],
+          returnUrl: '/settings' as LinkOptions['to']
+        })
+
+        if (error) {
+          throw error
+        }
       })
-        .then(() => {
-          return queryClient.fetchQuery(getActiveSubscriptionQueryOpts())
-        })
-        .then(async (activeSubscription) => {
-          if (!activeSubscription) {
-            const { error } = await authClient.subscription.upgrade({
-              plan: 'premium',
-              successUrl: '/checkout/success' satisfies LinkOptions['to'],
-              cancelUrl: '/pricing' satisfies LinkOptions['to'],
-              returnUrl: '/settings' as LinkOptions['to']
-            })
-
-            if (error) {
-              return Promise.reject(error)
-            }
-          }
-
-          return Promise.resolve(
-            toast.success('Vous avez déjà un abonnement en cours !')
-          )
-        })
 
       toast.promise(promise, { loading: 'Chargement...' })
 

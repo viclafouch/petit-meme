@@ -4,6 +4,96 @@
 
 ---
 
+## Refonte page Pricing — Conversion & Plan annuel
+
+Objectif : maximiser la conversion free → paid. Refonte complète de `/pricing` avec plan annuel, sections de persuasion, et fix du composant Card shadcn.
+
+### Phase 0 — Prérequis manuels (user)
+
+- [ ] Créer le Price ID annuel (29,99 €/an, récurrent yearly) dans Stripe Dashboard
+- [ ] Ajouter `STRIPE_ANNUAL_PRICE_ID` dans les env vars Vercel + `.env`
+
+### Phase 1 — Fix composant Card shadcn
+
+- [x] Réinstaller la Card via `pnpm dlx shadcn@latest add card` — vérifié identique à l'original
+- [x] Styling adapté dans `pricing.tsx` — supprimé le `py-1` override, utilise le padding Card par défaut
+
+### Phase 2 — Plan annuel (Stripe + Better Auth)
+
+- [x] Refacto `src/constants/plan.ts` : type `Plan` avec `pricing: Record<BillingPeriod, PlanPricing>`, `BillingPeriod`, `BILLING_PERIOD_LABELS`, `ANNUAL_DISCOUNT_PERCENT`
+- [x] Ajouté plan `premium-annual` dans la config Stripe Better Auth (`src/lib/auth.tsx`)
+- [x] Nouvelle env var `STRIPE_ANNUAL_PRICE_ID` dans `src/env/server.ts`
+- [x] `src/hooks/use-stripe-checkout.ts` : `checkoutPremium(billingPeriod)` route vers le bon plan
+- [x] Email confirmation : période dynamique (mensuel/annuel) via `stripePrice.recurring.interval`
+- [x] `src/helpers/subscription.ts` : nouveau helper `getSubscriptionDisplayInfo()` pour affichage dynamique
+- [x] Settings page : affiche le bon prix/période via `getSubscriptionDisplayInfo()`
+
+### Phase 3 — Redesign page Pricing
+
+#### Toggle mensuel/annuel
+- [x] Toggle pill `BillingToggle` au-dessus des pricing cards avec `role="radiogroup"`
+- [x] **Annuel sélectionné par défaut** (`useState('yearly')`)
+- [x] Badge "−37%" à côté du toggle en amber
+- [x] Prix dynamiques dans les cards selon le toggle + mention "soit ~X/mois" pour l'annuel
+
+#### Section social proof (stats fictives)
+- [x] 3 compteurs hardcodés en constante `STAT_ITEMS` : "500+ mèmes", "10 000+ vidéos", "1 000+ utilisateurs"
+- [x] Section `StatsSection` avec dividers horizontaux sur desktop
+
+#### Section garantie / rassurance
+- [x] Bandeau `GuaranteeBanner` avec 3 icônes Lucide : Lock, MousePointerClick, ShieldCheck
+- [x] Positionné juste sous les pricing cards
+
+#### Section FAQ
+- [x] 4 questions en Accordion dans `PricingFaq` (annulation, génération, sécurité, plan annuel)
+- [x] Positionnée en bas de page
+
+### Phase 4 — SEO & finitions
+
+- [x] JSON-LD pricing mis à jour avec `flatMap` pour inclure les offres annuelles (unitCode `ANN`)
+- [x] Meta tags vérifiés (titre, description inchangés)
+- [x] Design responsive mobile-first vérifié
+- [x] `/frontend-design` utilisé pour le design
+- [x] Ajout classe `container` sur la page pricing (cohérence avec les autres pages)
+- [x] Cards max-width élargi à `max-w-3xl`
+- [x] Plan gratuit affiche "Gratuit" au lieu de "0 €"
+- [x] Équivalent mensuel annuel formaté avec `minimumFractionDigits: 2` (~2,50 €/mois)
+- [x] Renommé `STRIPE_PRICE_ID` → `STRIPE_MONTHLY_PRICE_ID` (env, server config, auth)
+- [x] `.env.example` mis à jour avec les deux price IDs
+
+### Phase 5 — Audit accessibilité, performance, SEO
+
+#### Accessibilité (WCAG 2.1 AA)
+- [x] **A-1** (Critical) : Keyboard navigation radio group — arrow keys toggle billing period, `tabIndex` management
+- [x] **A-2** (Critical) : Icône distincte pour features limitées — `MinusCircle` (jaune) vs `CheckCircle2` (vert)
+- [x] **A-3** (Critical) : Status feature communiqué aux screen readers — `sr-only` label (Inclus/Limité/Non inclus)
+- [x] **A-4** (Major) : Card titles rendus en `<h2>` pour hiérarchie de headings
+- [x] **A-5/A-6** (Major) : Stats et guarantee wrappés en `<section>` avec `aria-label`
+- [x] **A-7** (Major) : Feature list rendu en `<ul>`/`<li>` sémantique avec `aria-label`
+- [x] **A-8** (Minor) : Badge "Populaire" avec contexte sr-only "Plan recommandé"
+- [x] **A-10** (Major) : Bouton "Actif" — `disabled` → `aria-disabled` (respecte la règle UX)
+- [x] **A-11** (Major) : Touch targets toggle ≥ 44px (`min-h-11`, `py-2.5`)
+- [x] **A-12** (Minor) : Bouton free plan "Plan actuel" → "Choisir ce plan" (plus clair)
+- [x] **A-13** (Minor) : `aria-label="Comparaison des plans"` sur la section pricing cards
+
+#### SEO
+- [x] **S-1** (Major) : `twitter:card: 'summary'` fallback quand pas d'image
+- [x] **S-3** (Major) : FAQPage JSON-LD structuré ajouté au graph pricing
+- [x] **S-5** (Minor) : Meta keywords ajoutés sur la page pricing
+- [x] **S-6** (Minor) : `hreflang="x-default"` ajouté en fallback
+
+#### Code quality (agents)
+- [x] Code refactoring : `import type React`, booleans extraits, attribute-driven styling, `amber-badge` utility
+- [x] Tailwind audit : utility `amber-badge` extraite dans `styles.css`
+- [x] React performance : aucun problème détecté
+
+### Hors scope (reporté)
+- Tableau comparatif des features
+- Témoignages / avis utilisateurs
+- A/B testing du pricing
+
+---
+
 ## Algolia — Items reportés
 
 ### Activer les modèles Recommend (quand suffisamment d'events)
@@ -740,9 +830,9 @@ Standardisation des noms SQL via `@@map`/`@map` dans le schema Prisma. Les noms 
 - [x] Enum : `@@map("meme_status")` ajouté sur `MemeStatus`
 - [x] Colonnes : `@map` ajouté sur ~50 champs camelCase (tous modèles)
 - [x] Raw SQL mis à jour (`src/server/reels.ts`, `src/routes/admin/-server/dashboard.ts`)
-- [ ] Générer et appliquer la migration (`pnpm exec prisma migrate dev --name standardize_snake_case_naming`)
-- [ ] Vérifier le SQL généré (uniquement `RENAME TABLE`, `RENAME COLUMN`, `RENAME TYPE`)
-- [ ] Appliquer en production (`pnpm run prisma:migrate:prod`)
+- [x] Générer et appliquer la migration (`pnpm exec prisma migrate dev --name standardize_snake_case_naming`) — 2 migrations : tables/colonnes/enum + contraintes/FK/indexes (idempotent)
+- [x] Vérifier le SQL généré (uniquement `RENAME TABLE`, `RENAME COLUMN`, `RENAME TYPE`, `RENAME CONSTRAINT`, `RENAME INDEX` + 2 `CREATE INDEX IF NOT EXISTS`)
+- [x] Appliquer en production (`pnpm run prisma:migrate:prod`) — 16 migrations appliquées, aucune pendante
 
 ### Migration Prisma → Drizzle
 
@@ -756,6 +846,3 @@ Remplacer Prisma par Drizzle ORM. Conventions cibles : tables en pluriel, colonn
 
 Passer le domaine sur Cloudflare pour bénéficier de ses fonctionnalités natives : redirection www → apex (et supprimer le check manuel dans `server.ts`), CDN/cache, SSL, protection DDoS, Page Rules, etc.
 
-### Dependabot — Vulnérabilités
-
-Traiter les vulnérabilités signalées par GitHub : https://github.com/viclafouch/petit-meme/security/dependabot

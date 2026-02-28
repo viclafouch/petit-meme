@@ -1,6 +1,7 @@
 import type {
   BreadcrumbList,
   CollectionPage,
+  FAQPage,
   Graph,
   ItemList,
   ListItem,
@@ -88,10 +89,13 @@ export const seo = ({
     { property: 'og:url', content: canonicalUrl },
     { property: 'og:locale', content: 'fr_FR' },
     ...(noindex ? [{ name: 'robots', content: 'noindex, follow' }] : []),
+    {
+      name: 'twitter:card',
+      content: image ? 'summary_large_image' : 'summary'
+    },
     ...(image
       ? [
           { name: 'twitter:image', content: image },
-          { name: 'twitter:card', content: 'summary_large_image' },
           { property: 'og:image', content: image },
           { property: 'og:image:width', content: '1200' },
           { property: 'og:image:height', content: '630' },
@@ -109,7 +113,8 @@ export const seo = ({
     ? []
     : [
         { rel: 'canonical', href: canonicalUrl },
-        { rel: 'alternate', hrefLang: 'fr', href: canonicalUrl }
+        { rel: 'alternate', hrefLang: 'fr', href: canonicalUrl },
+        { rel: 'alternate', hrefLang: 'x-default', href: canonicalUrl }
       ]
 
   return { meta, links }
@@ -318,11 +323,66 @@ export const buildBreadcrumbJsonLd = (
   }
 }
 
-export const buildPricingJsonLd = (plans: Plan[]): SchemaGraph => {
+type BuildPlanOfferParams = {
+  plan: Plan
+  priceInCents: number
+  nameSuffix: string
+  unitCode: string
+  offerUrl: string
+}
+
+const buildPlanOffer = ({
+  plan,
+  priceInCents,
+  nameSuffix,
+  unitCode,
+  offerUrl
+}: BuildPlanOfferParams): Offer => {
+  const priceEuros = convertCentsToEuros(priceInCents).toFixed(2)
+
+  return {
+    '@type': 'Offer',
+    name: `${plan.title}${nameSuffix}`,
+    description: plan.description,
+    price: priceEuros,
+    priceCurrency: 'EUR',
+    url: offerUrl,
+    availability: 'https://schema.org/InStock',
+    priceSpecification: {
+      '@type': 'UnitPriceSpecification',
+      price: priceEuros,
+      priceCurrency: 'EUR',
+      referenceQuantity: {
+        '@type': 'QuantitativeValue',
+        value: 1,
+        unitCode
+      }
+    } as PriceSpecification
+  }
+}
+
+type FaqItem = {
+  question: string
+  answer: string
+}
+
+type BuildPricingJsonLdParams = {
+  plans: Plan[]
+  faqItems: readonly FaqItem[]
+}
+
+export const buildPricingJsonLd = ({
+  plans,
+  faqItems
+}: BuildPricingJsonLdParams): SchemaGraph => {
   const pricingUrl = `${websiteOrigin}/pricing`
   const title = 'Plans et Tarifs'
   const description =
     'Découvre les plans de Petit Meme : gratuit ou Premium avec accès illimité aux mèmes, favoris et générations de vidéos. Choisis le plan qui te permet de créer et partager des mèmes sans limites !'
+
+  const monthlyPrices = plans.map((plan) => {
+    return convertCentsToEuros(plan.pricing.monthly.priceInCents)
+  })
 
   return {
     '@context': 'https://schema.org',
@@ -345,39 +405,49 @@ export const buildPricingJsonLd = (plans: Plan[]): SchemaGraph => {
           '@type': 'AggregateOffer',
           priceCurrency: 'EUR',
           offerCount: plans.length,
-          lowPrice: Math.min(
-            ...plans.map((plan) => {
-              return convertCentsToEuros(plan.monthlyPriceInCents)
+          lowPrice: Math.min(...monthlyPrices).toFixed(2),
+          highPrice: Math.max(...monthlyPrices).toFixed(2),
+          offers: plans.flatMap((plan): Offer[] => {
+            const monthlyOffer = buildPlanOffer({
+              plan,
+              priceInCents: plan.pricing.monthly.priceInCents,
+              nameSuffix: '',
+              unitCode: 'MON',
+              offerUrl: pricingUrl
             })
-          ).toFixed(2),
-          highPrice: Math.max(
-            ...plans.map((plan) => {
-              return convertCentsToEuros(plan.monthlyPriceInCents)
-            })
-          ).toFixed(2),
-          offers: plans.map((plan): Offer => {
-            return {
-              '@type': 'Offer',
-              name: plan.title,
-              description: plan.description,
-              price: convertCentsToEuros(plan.monthlyPriceInCents).toFixed(2),
-              priceCurrency: 'EUR',
-              url: pricingUrl,
-              availability: 'https://schema.org/InStock',
-              priceSpecification: {
-                '@type': 'UnitPriceSpecification',
-                price: convertCentsToEuros(plan.monthlyPriceInCents).toFixed(2),
-                priceCurrency: 'EUR',
-                referenceQuantity: {
-                  '@type': 'QuantitativeValue',
-                  value: 1,
-                  unitCode: 'MON'
-                }
-              } as PriceSpecification
+
+            const hasAnnualPrice = plan.pricing.yearly.priceInCents > 0
+
+            if (!hasAnnualPrice) {
+              return [monthlyOffer]
             }
+
+            const annualOffer = buildPlanOffer({
+              plan,
+              priceInCents: plan.pricing.yearly.priceInCents,
+              nameSuffix: ' (Annuel)',
+              unitCode: 'ANN',
+              offerUrl: pricingUrl
+            })
+
+            return [monthlyOffer, annualOffer]
           })
         }
-      } as Product
+      } as Product,
+      {
+        '@type': 'FAQPage',
+        '@id': `${pricingUrl}#faq`,
+        mainEntity: faqItems.map((item) => {
+          return {
+            '@type': 'Question',
+            name: item.question,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: item.answer
+            }
+          }
+        })
+      } as FAQPage
     ]
   }
 }

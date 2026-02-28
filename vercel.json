@@ -1,0 +1,8 @@
+{
+  "crons": [
+    { "path": "/api/cron/cleanup", "schedule": "0 2 * * *" },
+    { "path": "/api/cron/verification-reminder", "schedule": "0 8 * * *" },
+    { "path": "/api/cron/sync-algolia", "schedule": "0 3 * * *" },
+    { "path": "/api/cron/sync-bunny-titles", "schedule": "0 4 * * *" }
+  ]
+}

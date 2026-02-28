@@ -117,7 +117,7 @@ Objectif : maximiser la conversion free → paid. Refonte complète de `/pricing
 
 Migration terminée (preset Vercel, DNS, env vars, docs). Reste :
 
-- [ ] Configurer les crons (Vercel Cron Jobs ou scheduler externe) — inclut le scheduling des crons GDPR (`cleanup-retention.ts`, `unverified-cleanup.ts`, `verification-reminder.ts`)
+- [x] Configurer les crons (Vercel Cron Jobs) — 4 endpoints API (`/api/cron/cleanup`, `/api/cron/verification-reminder`, `/api/cron/sync-algolia`, `/api/cron/sync-bunny-titles`) avec `vercel.json` scheduling. Ancien dossier `crons/` supprimé. Auth via `CRON_SECRET` (env var à ajouter dans Vercel Dashboard).
 - [ ] Réactiver Sentry server-side tracing (`instrument-server.ts` + `wrapFetchWithSentry`) — bloqué par `require-in-the-middle` incompatible ESM dans Vercel serverless. Bug connu : [sentry-javascript#18859](https://github.com/getsentry/sentry-javascript/issues/18859). Surveiller les updates Sentry/OpenTelemetry.
 
 ---

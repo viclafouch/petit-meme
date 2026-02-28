@@ -17,6 +17,7 @@ export const serverEnv = createEnv({
     STRIPE_WEBHOOK_SECRET: z.string().startsWith('whsec_'),
     STRIPE_MONTHLY_PRICE_ID: z.string().startsWith('price_'),
     STRIPE_ANNUAL_PRICE_ID: z.string().startsWith('price_'),
+    CRON_SECRET: z.string().min(16).optional(),
     LOG_LEVEL: z
       .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace'])
       .optional()

@@ -26,6 +26,10 @@ import { Route as Public__rootDefaultRouteRouteImport } from './routes/_public__
 import { Route as AdminUsersIndexRouteImport } from './routes/admin/users/index'
 import { Route as AdminLibraryIndexRouteImport } from './routes/admin/library/index'
 import { Route as AdminCategoriesIndexRouteImport } from './routes/admin/categories/index'
+import { Route as ApiCronVerificationReminderRouteImport } from './routes/api/cron/verification-reminder'
+import { Route as ApiCronSyncBunnyTitlesRouteImport } from './routes/api/cron/sync-bunny-titles'
+import { Route as ApiCronSyncAlgoliaRouteImport } from './routes/api/cron/sync-algolia'
+import { Route as ApiCronCleanupRouteImport } from './routes/api/cron/cleanup'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as AdminLibraryMemeIdRouteImport } from './routes/admin/library/$memeId'
 import { Route as Public__rootDefaultTermsOfUseRouteImport } from './routes/_public__root/_default/terms-of-use'
@@ -126,6 +130,27 @@ const AdminCategoriesIndexRoute = AdminCategoriesIndexRouteImport.update({
   id: '/categories/',
   path: '/categories/',
   getParentRoute: () => AdminRouteRoute,
+} as any)
+const ApiCronVerificationReminderRoute =
+  ApiCronVerificationReminderRouteImport.update({
+    id: '/api/cron/verification-reminder',
+    path: '/api/cron/verification-reminder',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiCronSyncBunnyTitlesRoute = ApiCronSyncBunnyTitlesRouteImport.update({
+  id: '/api/cron/sync-bunny-titles',
+  path: '/api/cron/sync-bunny-titles',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCronSyncAlgoliaRoute = ApiCronSyncAlgoliaRouteImport.update({
+  id: '/api/cron/sync-algolia',
+  path: '/api/cron/sync-algolia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCronCleanupRoute = ApiCronCleanupRouteImport.update({
+  id: '/api/cron/cleanup',
+  path: '/api/cron/cleanup',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
@@ -246,6 +271,10 @@ export interface FileRoutesByFullPath {
   '/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/cron/cleanup': typeof ApiCronCleanupRoute
+  '/api/cron/sync-algolia': typeof ApiCronSyncAlgoliaRoute
+  '/api/cron/sync-bunny-titles': typeof ApiCronSyncBunnyTitlesRoute
+  '/api/cron/verification-reminder': typeof ApiCronVerificationReminderRoute
   '/admin/categories/': typeof AdminCategoriesIndexRoute
   '/admin/library/': typeof AdminLibraryIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
@@ -277,6 +306,10 @@ export interface FileRoutesByTo {
   '/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/cron/cleanup': typeof ApiCronCleanupRoute
+  '/api/cron/sync-algolia': typeof ApiCronSyncAlgoliaRoute
+  '/api/cron/sync-bunny-titles': typeof ApiCronSyncBunnyTitlesRoute
+  '/api/cron/verification-reminder': typeof ApiCronVerificationReminderRoute
   '/admin/categories': typeof AdminCategoriesIndexRoute
   '/admin/library': typeof AdminLibraryIndexRoute
   '/admin/users': typeof AdminUsersIndexRoute
@@ -314,6 +347,10 @@ export interface FileRoutesById {
   '/_public__root/_default/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/cron/cleanup': typeof ApiCronCleanupRoute
+  '/api/cron/sync-algolia': typeof ApiCronSyncAlgoliaRoute
+  '/api/cron/sync-bunny-titles': typeof ApiCronSyncBunnyTitlesRoute
+  '/api/cron/verification-reminder': typeof ApiCronVerificationReminderRoute
   '/admin/categories/': typeof AdminCategoriesIndexRoute
   '/admin/library/': typeof AdminLibraryIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
@@ -349,6 +386,10 @@ export interface FileRouteTypes {
     | '/terms-of-use'
     | '/admin/library/$memeId'
     | '/api/auth/$'
+    | '/api/cron/cleanup'
+    | '/api/cron/sync-algolia'
+    | '/api/cron/sync-bunny-titles'
+    | '/api/cron/verification-reminder'
     | '/admin/categories/'
     | '/admin/library/'
     | '/admin/users/'
@@ -380,6 +421,10 @@ export interface FileRouteTypes {
     | '/terms-of-use'
     | '/admin/library/$memeId'
     | '/api/auth/$'
+    | '/api/cron/cleanup'
+    | '/api/cron/sync-algolia'
+    | '/api/cron/sync-bunny-titles'
+    | '/api/cron/verification-reminder'
     | '/admin/categories'
     | '/admin/library'
     | '/admin/users'
@@ -416,6 +461,10 @@ export interface FileRouteTypes {
     | '/_public__root/_default/terms-of-use'
     | '/admin/library/$memeId'
     | '/api/auth/$'
+    | '/api/cron/cleanup'
+    | '/api/cron/sync-algolia'
+    | '/api/cron/sync-bunny-titles'
+    | '/api/cron/verification-reminder'
     | '/admin/categories/'
     | '/admin/library/'
     | '/admin/users/'
@@ -442,6 +491,10 @@ export interface RootRouteChildren {
   ApiBunnyRoute: typeof ApiBunnyRoute
   ApiSentryTunnelRoute: typeof ApiSentryTunnelRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiCronCleanupRoute: typeof ApiCronCleanupRoute
+  ApiCronSyncAlgoliaRoute: typeof ApiCronSyncAlgoliaRoute
+  ApiCronSyncBunnyTitlesRoute: typeof ApiCronSyncBunnyTitlesRoute
+  ApiCronVerificationReminderRoute: typeof ApiCronVerificationReminderRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -564,6 +617,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/categories/'
       preLoaderRoute: typeof AdminCategoriesIndexRouteImport
       parentRoute: typeof AdminRouteRoute
+    }
+    '/api/cron/verification-reminder': {
+      id: '/api/cron/verification-reminder'
+      path: '/api/cron/verification-reminder'
+      fullPath: '/api/cron/verification-reminder'
+      preLoaderRoute: typeof ApiCronVerificationReminderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/sync-bunny-titles': {
+      id: '/api/cron/sync-bunny-titles'
+      path: '/api/cron/sync-bunny-titles'
+      fullPath: '/api/cron/sync-bunny-titles'
+      preLoaderRoute: typeof ApiCronSyncBunnyTitlesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/sync-algolia': {
+      id: '/api/cron/sync-algolia'
+      path: '/api/cron/sync-algolia'
+      fullPath: '/api/cron/sync-algolia'
+      preLoaderRoute: typeof ApiCronSyncAlgoliaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/cleanup': {
+      id: '/api/cron/cleanup'
+      path: '/api/cron/cleanup'
+      fullPath: '/api/cron/cleanup'
+      preLoaderRoute: typeof ApiCronCleanupRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -805,6 +886,10 @@ const rootRouteChildren: RootRouteChildren = {
   ApiBunnyRoute: ApiBunnyRoute,
   ApiSentryTunnelRoute: ApiSentryTunnelRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiCronCleanupRoute: ApiCronCleanupRoute,
+  ApiCronSyncAlgoliaRoute: ApiCronSyncAlgoliaRoute,
+  ApiCronSyncBunnyTitlesRoute: ApiCronSyncBunnyTitlesRoute,
+  ApiCronVerificationReminderRoute: ApiCronVerificationReminderRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

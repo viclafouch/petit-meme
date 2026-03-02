@@ -252,7 +252,7 @@ const getAuthConfig = createServerOnlyFn(() => {
       enabled: IS_PRODUCTION,
       window: 60,
       max: 100,
-      storage: 'database',
+      storage: 'memory',
       customRules: {
         '/sign-in/email': { window: 300, max: 10 },
         '/sign-up/email': { window: 3600, max: 3 },

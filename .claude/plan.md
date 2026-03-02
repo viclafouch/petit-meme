@@ -1006,12 +1006,12 @@ Passer le domaine sur Cloudflare pour bénéficier de ses fonctionnalités nativ
 - [x] Custom Rule — Challenge bots (UA regex) dans Vercel Firewall dashboard
 - [x] Rate Limiting Rule — 30 req/60s/IP sur `/_server` dans Vercel Firewall dashboard
 
-### Phase 1 — Rate Limiting serveur (DB-backed)
+### Phase 1 — Rate Limiting serveur (in-memory)
 
 - [x] `src/constants/rate-limit.ts` : constantes de config (download 10/5min, track 30/5min, listing 60/1min, reels 30/1min, view 60/1min)
-- [x] `src/server/rate-limit.ts` : middleware `createRateLimitMiddleware` avec upsert atomique sur `rate_limit`
+- [x] `src/server/rate-limit.ts` : middleware `createRateLimitMiddleware` — in-memory Map (plus de DB writes)
 - [x] Appliqué sur `shareMeme`, `trackMemeAction`, `getMemes`, `getInfiniteReels`, `registerMemeView`
-- [x] Cleanup des rate limits expirés dans `src/routes/api/cron/cleanup.ts`
+- [x] ~~Cleanup des rate limits expirés~~ — supprimé (plus de table DB, auto-pruning in-memory)
 - [x] Logging enrichi sur `shareMeme` (IP, user-agent, niveau `info`)
 
 ### Phase 1b — Hardening post-audit
@@ -1038,4 +1038,50 @@ Passer le domaine sur Cloudflare pour bénéficier de ses fonctionnalités nativ
 
 - [x] `scraping-detection` ajouté au type `SentryFeature`
 - [x] Alerte Sentry dans le rate limit middleware (IP, user-agent, count)
+
+---
+
+## Optimisation Coûts Neon (mars 2026)
+
+Facture février : **$39.59** (394.9 compute hours x $0.10/h). Cause : DB jamais en auto-suspend.
+
+### Changements appliqués
+
+- [x] **Admin dashboard polling supprimé** : `refetchInterval: MINUTE` → `staleTime: 10 * MINUTE` sur les 4 queries dashboard (totals, chart, activity, trending)
+- [x] **Video status polling réduit** : 3s → 30s dans `meme-list-item.tsx`
+- [x] **Connection pool réduit** : `max: 20` → `5`, `idleTimeoutMillis: 30_000` → `10_000` dans `src/db/index.ts`
+- [x] **Rate limiting migré en in-memory** : `Map<string, RateLimitEntry>` au lieu de DB writes (élimine ~100% des writes rate_limit)
+- [x] **Cleanup rate_limit supprimé** du cron cleanup (plus nécessaire)
+- [x] **N+1 anonymisation fixé** : boucle `findFirst` + `update` par user → single SQL query avec `LEFT JOIN LATERAL` + batch `UPDATE`
+- [x] **Better Auth rate limiting** : `storage: 'database'` → `storage: 'memory'` dans `src/lib/auth.tsx`
+- [x] **Admin `refetchOnMount: 'always'` supprimé** : 4 queries dashboard respectent maintenant le `staleTime`
+- [x] **staleTime ajouté** aux queries manquantes : `getVideoStatusById` (1min), `getInfiniteReels` (5min)
+
+### Migration Neon hors Vercel Marketplace — À FAIRE
+
+**Urgence : haute.** Sur Vercel Hobby, aucun spend alert ni hard cap. Un bug de polling ou un bot peut générer des centaines de dollars facturés silencieusement. La seule protection est de sortir Neon du Marketplace.
+
+**Contexte facturation :**
+- Facture février 2026 (Vercel Invoice 89B95CC0-0039, 2 mars 2026) : **$39.59**
+  - Compute : 394.9 heures x $0.10/h = $39.49
+  - Data Transfer : 1 GB = $0.10
+- Cause : la DB ne dormait jamais (polling admin toutes les 60s, rate limiting en DB sur chaque requête, pool de 20 connexions avec 30s idle)
+- Config Neon : 1 CU, autosuspend 5 min — mais le polling empêchait l'autosuspend de se déclencher
+- Le site a très peu d'utilisateurs, ce coût est 100% dû au code, pas au trafic
+
+**Pourquoi migrer :** Neon en direct (neon.tech) offre un **free tier de 191.9 compute hours/mois**. Avec les optimisations appliquées (mars 2026), on devrait rester dans le free tier = **$0/mois**. Et si on dépasse, Neon bloque au lieu de facturer silencieusement.
+
+**Comment :**
+1. Créer un compte/projet sur [neon.tech](https://neon.tech) (région `eu-central-1` pour rester à Paris)
+2. Exporter la DB actuelle : `pg_dump` depuis l'URL Neon Marketplace
+3. Importer dans le nouveau projet : `psql` vers la nouvelle URL
+4. Mettre à jour `DATABASE_URL` dans Vercel env vars (+ `.env.local`)
+5. Vérifier que `pnpm run prisma:migrate:prod` passe (migrations déjà appliquées, `migrate deploy` est idempotent)
+6. Tester le site en prod
+7. Supprimer l'add-on Neon du Vercel Marketplace pour arrêter la facturation
+
+- [ ] Créer le projet Neon direct
+- [ ] Migrer les données
+- [ ] Basculer `DATABASE_URL`
+- [ ] Supprimer l'add-on Marketplace
 

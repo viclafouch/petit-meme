@@ -8,11 +8,12 @@ Memes by Lafouch — a meme management and sharing platform with video support, 
 
 The site is currently **French-only**. An English migration is planned for later.
 
-The site has very few users, giving us more freedom for breaking changes. Design is **mobile-first**, always responsive, and must work across all major browsers (Safari, Chrome, Firefox, etc.). Hosted on **Vercel**.
+The site has very few users, giving us more freedom for breaking changes. Design is **mobile-first**, always responsive, and must work across all major browsers (Safari, Chrome, Firefox, etc.). Hosted on **Vercel (Hobby plan)**.
+
 
 ## Cost Awareness
 
-Minimize costs on all external services (database, Algolia, Sentry, Vercel, etc.). Always check what is available on free tiers before implementing. When developing, proactively suggest useful free-tier features from existing services. Always consider whether a feature or usage pattern could become expensive.
+Minimize costs on all external services (database, Algolia, Sentry, Vercel, etc.). Always check what is available on free tiers before implementing. When developing, proactively suggest useful free-tier features from existing services. Always consider whether a feature or usage pattern could become expensive. Evaluate DB compute impact before adding any cron or polling
 
 ## Commands
 

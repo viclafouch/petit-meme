@@ -1,5 +1,3 @@
-/* eslint-disable no-await-in-loop */
-import { createHash } from 'node:crypto'
 import { DAY } from '@/constants/time'
 import { prismaClient } from '@/db'
 import { cronLogger } from '@/lib/logger'
@@ -17,10 +15,6 @@ const UNVERIFIED_RETENTION_DAYS = 30
 
 const maskId = (id: string) => {
   return id.slice(0, 8)
-}
-
-const hashId = (id: string) => {
-  return createHash('sha256').update(id).digest('hex').slice(0, 8)
 }
 
 const runRetentionCleanup = async () => {
@@ -114,53 +108,44 @@ const runRetentionCleanup = async () => {
     now.getTime() - ANONYMIZATION_YEARS * 365 * DAY
   )
 
-  const candidateUsers = await prismaClient.user.findMany({
-    where: {
-      isAnonymized: false,
-      updatedAt: { lt: anonymizationCutoff }
-    },
-    select: { id: true }
-  })
+  const usersToAnonymize = await prismaClient.$queryRaw<{ id: string }[]>`
+    SELECT u."id"
+    FROM "user" u
+    LEFT JOIN LATERAL (
+      SELECT s."created_at"
+      FROM "session" s
+      WHERE s."user_id" = u."id"
+      ORDER BY s."created_at" DESC
+      LIMIT 1
+    ) latest_session ON true
+    WHERE u."is_anonymized" = false
+      AND u."updated_at" < ${anonymizationCutoff}
+      AND (latest_session."created_at" IS NULL OR latest_session."created_at" < ${anonymizationCutoff})`
 
   let anonymizedCount = 0
 
-  for (const user of candidateUsers) {
-    const lastSession = await prismaClient.session.findFirst({
-      where: { userId: user.id },
-      orderBy: { createdAt: 'desc' },
-      select: { createdAt: true }
+  if (usersToAnonymize.length > 0) {
+    const userIds = usersToAnonymize.map((user) => {
+      return user.id
     })
 
-    if (lastSession && lastSession.createdAt > anonymizationCutoff) {
-      continue
+    anonymizedCount = await prismaClient.$executeRaw`
+      UPDATE "user"
+      SET
+        "name" = 'Utilisateur supprimé',
+        "email" = 'deleted-' || LEFT(encode(sha256(CAST("id" AS bytea)), 'hex'), 8) || '@anonymized.local',
+        "image" = NULL,
+        "email_verified" = false,
+        "is_anonymized" = true,
+        "updated_at" = ${now}
+      WHERE "id" = ANY(${userIds}::text[])`
+
+    for (const user of usersToAnonymize) {
+      log.info({ userId: maskId(user.id) }, 'Anonymized user')
     }
-
-    await prismaClient.user.update({
-      where: { id: user.id },
-      data: {
-        name: 'Utilisateur supprimé',
-        email: `deleted-${hashId(user.id)}@anonymized.local`,
-        image: null,
-        emailVerified: false,
-        isAnonymized: true,
-        updatedAt: now
-      }
-    })
-
-    log.info({ userId: maskId(user.id) }, 'Anonymized user')
-    anonymizedCount += 1
   }
 
   log.info({ anonymizedCount }, 'Anonymization completed')
-
-  const deletedRateLimits = await prismaClient.rateLimit.deleteMany({
-    where: { lastRequest: { lt: BigInt(Date.now() - DAY) } }
-  })
-
-  log.info(
-    { count: deletedRateLimits.count },
-    'Deleted expired rate limit entries'
-  )
 
   return {
     deletedSessions: deletedSessions.count,
@@ -169,8 +154,7 @@ const runRetentionCleanup = async () => {
     deletedGenerations: deletedGenerations.count,
     deletedActions: deletedActions.count,
     deletedAuditLogs: deletedAuditLogs.count,
-    anonymizedCount,
-    deletedRateLimits: deletedRateLimits.count
+    anonymizedCount
   }
 }
 

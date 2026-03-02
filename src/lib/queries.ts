@@ -57,7 +57,8 @@ export const getVideoStatusByIdQueryOpts = (videoId: Video['id']) => {
     queryKey: [...getVideoStatusByIdQueryOpts.all, videoId],
     queryFn: () => {
       return getVideoStatusById({ data: videoId })
-    }
+    },
+    staleTime: MINUTE
   })
 }
 
@@ -132,7 +133,8 @@ export const getInfiniteReelsQueryOpts = (excludedIds: string[] = []) => {
     initialPageParam: excludedIds,
     getNextPageParam: (lastPage) => {
       return lastPage.excludedIds
-    }
+    },
+    staleTime: 5 * MINUTE
   })
 }
 

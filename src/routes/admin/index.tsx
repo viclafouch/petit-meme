@@ -6,7 +6,6 @@ import { PageHeader } from '@/components/page-header'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { MINUTE } from '@/constants/time'
 import { captureWithFeature } from '@/lib/sentry'
 import {
   getAdminChartDataQueryOpts,
@@ -152,37 +151,25 @@ type PeriodContentParams = {
 }
 
 const ChartContent = ({ period }: PeriodContentParams) => {
-  const chartQuery = useSuspenseQuery({
-    ...getAdminChartDataQueryOpts(period),
-    refetchOnMount: 'always'
-  })
+  const chartQuery = useSuspenseQuery(getAdminChartDataQueryOpts(period))
 
   return <TrendsChart data={chartQuery.data} period={period} />
 }
 
 const TotalsContent = () => {
-  const totalsQuery = useSuspenseQuery({
-    ...getAdminDashboardTotalsQueryOpts(),
-    refetchOnMount: 'always'
-  })
+  const totalsQuery = useSuspenseQuery(getAdminDashboardTotalsQueryOpts())
 
   return <TotalsSection totals={totalsQuery.data} />
 }
 
 const TrendingContent = () => {
-  const trendingQuery = useSuspenseQuery({
-    ...getAdminTrendingMemesQueryOpts(),
-    staleTime: 5 * MINUTE
-  })
+  const trendingQuery = useSuspenseQuery(getAdminTrendingMemesQueryOpts())
 
   return <TrendingMemes entries={trendingQuery.data} />
 }
 
 const FeedContent = () => {
-  const feedQuery = useSuspenseQuery({
-    ...getAdminRecentActivityQueryOpts(),
-    refetchOnMount: 'always'
-  })
+  const feedQuery = useSuspenseQuery(getAdminRecentActivityQueryOpts())
 
   return <ActivityFeed entries={feedQuery.data} />
 }

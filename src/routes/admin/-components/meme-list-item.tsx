@@ -36,7 +36,7 @@ export const MemeListItem = React.memo(({ meme }: MemeListItemParams) => {
         return false
       }
 
-      return 3000
+      return 30_000
     }
   })
 

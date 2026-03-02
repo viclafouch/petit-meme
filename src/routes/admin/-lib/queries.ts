@@ -41,7 +41,7 @@ export const getAdminDashboardTotalsQueryOpts = () => {
     queryFn: () => {
       return getAdminDashboardTotals()
     },
-    refetchInterval: MINUTE
+    staleTime: 10 * MINUTE
   })
 }
 
@@ -53,7 +53,7 @@ export const getAdminChartDataQueryOpts = (period: DashboardPeriod) => {
     queryFn: () => {
       return getAdminChartData({ data: period })
     },
-    refetchInterval: MINUTE
+    staleTime: 10 * MINUTE
   })
 }
 
@@ -65,7 +65,7 @@ export const getAdminRecentActivityQueryOpts = () => {
     queryFn: () => {
       return getAdminRecentActivity()
     },
-    refetchInterval: MINUTE
+    staleTime: 10 * MINUTE
   })
 }
 
@@ -76,7 +76,8 @@ export const getAdminTrendingMemesQueryOpts = () => {
     queryKey: [...getAdminTrendingMemesQueryOpts.all],
     queryFn: () => {
       return getAdminTrendingMemes()
-    }
+    },
+    staleTime: 10 * MINUTE
   })
 }
 

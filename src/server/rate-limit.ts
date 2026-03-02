@@ -1,12 +1,32 @@
 import type { RateLimitConfig } from '@/constants/rate-limit'
 import { SECOND } from '@/constants/time'
-import { prismaClient } from '@/db'
 import { logger } from '@/lib/logger'
 import { captureWithFeature } from '@/lib/sentry'
 import { createMiddleware } from '@tanstack/react-start'
 import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
 
 const rateLimitLogger = logger.child({ module: 'rate-limit' })
+
+type RateLimitEntry = {
+  count: number
+  windowStart: number
+}
+
+const MAX_STORE_SIZE = 10_000
+
+const store = new Map<string, RateLimitEntry>()
+
+const pruneStore = () => {
+  if (store.size <= MAX_STORE_SIZE) {
+    return
+  }
+
+  const keysToDelete = [...store.keys()].slice(0, store.size - MAX_STORE_SIZE)
+
+  for (const key of keysToDelete) {
+    store.delete(key)
+  }
+}
 
 export const extractClientIp = (request: Request) => {
   const realIp = request.headers.get('x-real-ip')
@@ -31,43 +51,35 @@ export const createRateLimitMiddleware = (config: RateLimitConfig) => {
     const request = getRequest()
     const ip = extractClientIp(request)
     const key = `${config.action}:${ip}`
-    const now = BigInt(Date.now())
-    const windowCutoff = now - BigInt(config.windowMs)
+    const now = Date.now()
 
-    const [result] = await prismaClient.$queryRaw<
-      { count: number; window_start: bigint }[]
-    >`INSERT INTO "rate_limit" ("id", "key", "count", "last_request", "window_start")
-      VALUES (gen_random_uuid(), ${key}, 1, ${now}, ${now})
-      ON CONFLICT ("key") DO UPDATE SET
-        "count" = CASE
-          WHEN "rate_limit"."window_start" < ${windowCutoff} THEN 1
-          ELSE "rate_limit"."count" + 1
-        END,
-        "window_start" = CASE
-          WHEN "rate_limit"."window_start" < ${windowCutoff} THEN ${now}
-          ELSE "rate_limit"."window_start"
-        END,
-        "last_request" = ${now}
-      RETURNING "count", "window_start"`
+    const existing = store.get(key)
 
-    const count = result?.count ?? 0
+    const isWindowExpired =
+      !existing || existing.windowStart < now - config.windowMs
+    const entry: RateLimitEntry = isWindowExpired
+      ? { count: 1, windowStart: now }
+      : { count: existing.count + 1, windowStart: existing.windowStart }
 
-    if (count > config.maxRequests) {
-      const windowEndMs = Number(result?.window_start ?? now) + config.windowMs
+    store.set(key, entry)
+    pruneStore()
+
+    if (entry.count > config.maxRequests) {
+      const windowEndMs = entry.windowStart + config.windowMs
       const retryAfterSeconds = Math.max(
         1,
-        Math.ceil((windowEndMs - Date.now()) / SECOND)
+        Math.ceil((windowEndMs - now) / SECOND)
       )
       const userAgent = request.headers.get('user-agent') ?? 'unknown'
 
       rateLimitLogger.warn(
-        { ip, action: config.action, count, userAgent },
+        { ip, action: config.action, count: entry.count, userAgent },
         'Rate limit exceeded'
       )
 
       captureWithFeature(
         new Error(
-          `Rate limit exceeded: ${config.action} (${count}/${config.maxRequests})`
+          `Rate limit exceeded: ${config.action} (${entry.count}/${config.maxRequests})`
         ),
         'scraping-detection'
       )

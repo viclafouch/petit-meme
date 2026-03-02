@@ -15,6 +15,12 @@ import {
   VIRTUAL_CATEGORY_SLUGS
 } from '@/constants/meme'
 import {
+  RATE_LIMIT_DOWNLOAD,
+  RATE_LIMIT_LISTING,
+  RATE_LIMIT_TRACK,
+  RATE_LIMIT_VIEW
+} from '@/constants/rate-limit'
+import {
   ONE_HOUR_MS,
   ONE_YEAR_IN_SECONDS,
   THIRTY_DAYS_MS
@@ -40,8 +46,9 @@ import {
   withAlgoliaCache
 } from '@/lib/algolia'
 import { auth } from '@/lib/auth'
-import { buildVideoOriginalUrl } from '@/lib/bunny'
+import { buildSignedOriginalUrl } from '@/lib/bunny'
 import { algoliaLogger, logger } from '@/lib/logger'
+import { createRateLimitMiddleware, extractClientIp } from '@/server/rate-limit'
 import { authUserRequiredMiddleware } from '@/server/user-auth'
 import { ensureAlgoliaUserToken } from '@/utils/tracking-cookies'
 import { insightsClient as createInsightsClient } from '@algolia/client-insights'
@@ -128,6 +135,7 @@ export const getVideoStatusById = createServerFn({ method: 'GET' })
 
 export const getMemes = createServerFn({ method: 'GET' })
   .inputValidator(MEMES_FILTERS_SCHEMA)
+  .middleware([createRateLimitMiddleware(RATE_LIMIT_LISTING)])
   .handler(async ({ data }) => {
     const hasQuery = Boolean(data.query)
     const indexName = resolveIndexName(data.category, hasQuery)
@@ -321,6 +329,7 @@ export const shareMeme = createServerFn({ method: 'GET' })
   .inputValidator((data) => {
     return z.string().parse(data)
   })
+  .middleware([createRateLimitMiddleware(RATE_LIMIT_DOWNLOAD)])
   .handler(async ({ data: memeId }) => {
     const meme = await prismaClient.meme.findUnique({
       where: {
@@ -340,9 +349,13 @@ export const shareMeme = createServerFn({ method: 'GET' })
       throw notFound()
     }
 
-    const originalUrl = buildVideoOriginalUrl(meme.video.bunnyId)
+    const originalUrl = buildSignedOriginalUrl(meme.video.bunnyId)
 
-    logger.debug({ memeId }, 'Meme shared/downloaded')
+    const request = getRequest()
+    const ip = extractClientIp(request)
+    const userAgent = request.headers.get('user-agent') ?? 'unknown'
+
+    logger.info({ memeId, ip, userAgent }, 'Meme shared/downloaded')
 
     const controller = new AbortController()
     const timeoutId = setTimeout(() => {
@@ -378,6 +391,7 @@ export const trackMemeAction = createServerFn({ method: 'POST' })
   .inputValidator((data) => {
     return TRACK_MEME_ACTION_SCHEMA.parse(data)
   })
+  .middleware([createRateLimitMiddleware(RATE_LIMIT_TRACK)])
   .handler(async ({ data }) => {
     const countField = data.action === 'share' ? 'shareCount' : 'downloadCount'
     const day = truncateToUtcDay(new Date())
@@ -412,6 +426,7 @@ export const registerMemeView = createServerFn({ method: 'POST' })
       })
       .parse(data)
   })
+  .middleware([createRateLimitMiddleware(RATE_LIMIT_VIEW)])
   .handler(async ({ data }) => {
     const { memeId, watchMs } = data
 

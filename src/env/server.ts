@@ -8,6 +8,7 @@ export const serverEnv = createEnv({
     BETTER_AUTH_SECRET: z.string().min(32),
     BUNNY_ACCESS_KEY: z.string(),
     BUNNY_COLLECTION_ID: z.string(),
+    BUNNY_TOKEN_AUTH_KEY: z.string().min(16),
     ALGOLIA_ADMIN_KEY: z.string(),
     GEMINI_API_KEY: z.string(),
     RESEND_API_KEY: z.string().startsWith('re_'),

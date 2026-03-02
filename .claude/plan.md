@@ -996,3 +996,46 @@ Remplacer Prisma par Drizzle ORM. Conventions cibles : tables en pluriel, colonn
 
 Passer le domaine sur Cloudflare pour bénéficier de ses fonctionnalités natives : redirection www → apex (et supprimer le check manuel dans `server.ts`), CDN/cache, SSL, protection DDoS, Page Rules, etc.
 
+---
+
+## Anti-Scraping — Protection multi-couches
+
+### Phase 0 — Vercel WAF (dashboard)
+
+- [x] Headers de sécurité dans `vercel.json` (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Strict-Transport-Security`)
+- [x] Custom Rule — Challenge bots (UA regex) dans Vercel Firewall dashboard
+- [x] Rate Limiting Rule — 30 req/60s/IP sur `/_server` dans Vercel Firewall dashboard
+
+### Phase 1 — Rate Limiting serveur (DB-backed)
+
+- [x] `src/constants/rate-limit.ts` : constantes de config (download 10/5min, track 30/5min, listing 60/1min, reels 30/1min, view 60/1min)
+- [x] `src/server/rate-limit.ts` : middleware `createRateLimitMiddleware` avec upsert atomique sur `rate_limit`
+- [x] Appliqué sur `shareMeme`, `trackMemeAction`, `getMemes`, `getInfiniteReels`, `registerMemeView`
+- [x] Cleanup des rate limits expirés dans `src/routes/api/cron/cleanup.ts`
+- [x] Logging enrichi sur `shareMeme` (IP, user-agent, niveau `info`)
+
+### Phase 1b — Hardening post-audit
+
+- [x] `extractClientIp` : utilise `x-real-ip` en priorité (non-spoofable sur Vercel)
+- [x] Rate limit `registerMemeView` ajouté (RATE_LIMIT_VIEW 60/1min)
+- [x] HSTS header ajouté dans `vercel.json`
+- [x] True sliding window : colonne `window_start` ajoutée au modèle `RateLimit`
+- [x] `@@index([lastRequest])` ajouté pour optimiser le cleanup
+- [x] `Retry-After` retourne le temps restant réel (pas la fenêtre complète)
+- [ ] Migration Prisma à exécuter : `pnpm exec prisma migrate dev --name add_rate_limit_window_start`
+
+### Phase 2 — Bunny CDN Token Auth (simplifié)
+
+- [x] `src/lib/bunny-token.ts` : utilitaire `signBunnyUrl` (SHA-256 + base64url) — conforme à la spec Bunny
+- [x] `src/lib/bunny.ts` : `buildSignedOriginalUrl` (server-only, 5min expiry)
+- [x] `src/env/server.ts` : ajout `BUNNY_TOKEN_AUTH_KEY`
+- [x] `shareMeme` et `ai.ts` utilisent des URLs signées pour fetch `/original`
+- [x] `BUNNY_TOKEN_AUTH_KEY` ajouté dans `.env`, `.env.example`, `.env.local`
+- CDN Token Auth non activé dans Bunny dashboard — casserait HLS streaming non signé
+- HLS streaming (`playlist.m3u8`) non signé — protégé par le rate limiting
+
+### Phase 3 — Logging Sentry
+
+- [x] `scraping-detection` ajouté au type `SentryFeature`
+- [x] Alerte Sentry dans le rate limit middleware (IP, user-agent, count)
+

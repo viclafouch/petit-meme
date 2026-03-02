@@ -263,6 +263,8 @@ model RateLimit {
   key         String @unique
   count       Int
   lastRequest BigInt @map("last_request")
+  windowStart BigInt @map("window_start")
 
+  @@index([lastRequest])
   @@map("rate_limit")
 }

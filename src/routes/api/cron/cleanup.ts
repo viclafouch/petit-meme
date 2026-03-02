@@ -153,6 +153,15 @@ const runRetentionCleanup = async () => {
 
   log.info({ anonymizedCount }, 'Anonymization completed')
 
+  const deletedRateLimits = await prismaClient.rateLimit.deleteMany({
+    where: { lastRequest: { lt: BigInt(Date.now() - DAY) } }
+  })
+
+  log.info(
+    { count: deletedRateLimits.count },
+    'Deleted expired rate limit entries'
+  )
+
   return {
     deletedSessions: deletedSessions.count,
     deletedVerifications: deletedVerifications.count,
@@ -160,7 +169,8 @@ const runRetentionCleanup = async () => {
     deletedGenerations: deletedGenerations.count,
     deletedActions: deletedActions.count,
     deletedAuditLogs: deletedAuditLogs.count,
-    anonymizedCount
+    anonymizedCount,
+    deletedRateLimits: deletedRateLimits.count
   }
 }
 

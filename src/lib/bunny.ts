@@ -1,6 +1,8 @@
 import { z } from 'zod'
+import { FIVE_MINUTES_IN_SECONDS } from '@/constants/time'
 import { clientEnv } from '@/env/client'
 import { serverEnv } from '@/env/server'
+import { signBunnyUrl } from '@/lib/bunny-token'
 import { bunnyLogger } from '@/lib/logger'
 import { createServerOnlyFn } from '@tanstack/react-start'
 import { fetchWithZod } from './utils'
@@ -43,6 +45,14 @@ export const buildVideoPreviewUrl = (videoId: string) => {
 export const buildVideoStreamUrl = (videoId: string) => {
   return buildBunnyUrl(`/${videoId}/playlist.m3u8`)
 }
+
+export const buildSignedOriginalUrl = createServerOnlyFn((videoId: string) => {
+  return signBunnyUrl({
+    url: buildVideoOriginalUrl(videoId),
+    securityKey: serverEnv.BUNNY_TOKEN_AUTH_KEY,
+    expirationSeconds: FIVE_MINUTES_IN_SECONDS
+  })
+})
 
 export const deleteVideo = createServerOnlyFn(async (videoId: string) => {
   const result = await fetchWithZod(

@@ -27,6 +27,7 @@ type SentryFeature =
   | 'data-export'
   | 'file-upload'
   | 'studio'
+  | 'scraping-detection'
 
 export const captureWithFeature = (error: unknown, feature: SentryFeature) => {
   Sentry.captureException(error, { tags: { feature } })

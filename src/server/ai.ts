@@ -2,7 +2,7 @@ import { z } from 'zod/v3'
 import zodToJsonSchema from 'zod-to-json-schema'
 import { prismaClient } from '@/db'
 import { serverEnv } from '@/env/server'
-import { buildVideoOriginalUrl } from '@/lib/bunny'
+import { buildSignedOriginalUrl } from '@/lib/bunny'
 import { adminLogger } from '@/lib/logger'
 import { captureWithFeature } from '@/lib/sentry'
 import { adminRequiredMiddleware } from '@/server/user-auth'
@@ -47,7 +47,7 @@ export const generateMemeContent = createServerFn({ method: 'POST' })
       throw new Error('Meme not found')
     }
 
-    const originalUrl = buildVideoOriginalUrl(meme.video.bunnyId)
+    const originalUrl = buildSignedOriginalUrl(meme.video.bunnyId)
 
     const contents = [
       {

@@ -51,7 +51,7 @@ Après le deploy Vercel, appliquer les migrations contre la base Neon :
 pnpm run prisma:migrate:prod
 ```
 
-Ce script utilise `.env.local` (pulled via `vercel env pull`) qui contient la `DATABASE_URL` de production. `migrate deploy` est safe : il n'applique que les migrations non encore appliquées et ne touche jamais au schema directement.
+Ce script utilise `.env.production` (pulled via `vercel env pull .env.production`) qui contient la `DATABASE_URL` de production. `migrate deploy` est safe : il n'applique que les migrations non encore appliquées et ne touche jamais au schema directement.
 
 ### Commandes de référence
 
@@ -59,8 +59,8 @@ Ce script utilise `.env.local` (pulled via `vercel env pull`) qui contient la `D
 |----------|--------------|-------|
 | `pnpm exec prisma migrate dev --name <nom>` | Local | Créer + appliquer une migration |
 | `pnpm exec prisma generate` | Local | Régénérer le client (aussi dans `postinstall`) |
-| `pnpm run prisma:migrate` | Local | Appliquer les migrations pendantes |
-| `pnpm run prisma:migrate:prod` | Production | Appliquer les migrations pendantes (via `.env.local`) |
+| `pnpm run prisma:migrate:dev` | Local | Appliquer les migrations pendantes (via `.env.development`) |
+| `pnpm run prisma:migrate:prod` | Production | Appliquer les migrations pendantes (via `.env.production`) |
 
 ### Ce que Claude Code ne doit JAMAIS faire
 

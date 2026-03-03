@@ -1057,7 +1057,7 @@ Facture février : **$39.59** (394.9 compute hours x $0.10/h). Cause : DB jamais
 - [x] **Admin `refetchOnMount: 'always'` supprimé** : 4 queries dashboard respectent maintenant le `staleTime`
 - [x] **staleTime ajouté** aux queries manquantes : `getVideoStatusById` (1min), `getInfiniteReels` (5min)
 
-### Migration Neon hors Vercel Marketplace — À FAIRE
+### Migration Neon hors Vercel Marketplace — EN COURS
 
 **Urgence : haute.** Sur Vercel Hobby, aucun spend alert ni hard cap. Un bug de polling ou un bot peut générer des centaines de dollars facturés silencieusement. La seule protection est de sortir Neon du Marketplace.
 
@@ -1071,17 +1071,36 @@ Facture février : **$39.59** (394.9 compute hours x $0.10/h). Cause : DB jamais
 
 **Pourquoi migrer :** Neon en direct (neon.tech) offre un **free tier de 191.9 compute hours/mois**. Avec les optimisations appliquées (mars 2026), on devrait rester dans le free tier = **$0/mois**. Et si on dépasse, Neon bloque au lieu de facturer silencieusement.
 
-**Comment :**
-1. Créer un compte/projet sur [neon.tech](https://neon.tech) (région `eu-central-1` pour rester à Paris)
-2. Exporter la DB actuelle : `pg_dump` depuis l'URL Neon Marketplace
-3. Importer dans le nouveau projet : `psql` vers la nouvelle URL
-4. Mettre à jour `DATABASE_URL` dans Vercel env vars (+ `.env.local`)
-5. Vérifier que `pnpm run prisma:migrate:prod` passe (migrations déjà appliquées, `migrate deploy` est idempotent)
-6. Tester le site en prod
-7. Supprimer l'add-on Neon du Vercel Marketplace pour arrêter la facturation
+**Nouveau projet Neon :**
+- Projet : `petit-meme` sur neon.tech (compte existant, réutilisé)
+- Région : `eu-central-1` (Frankfurt), Postgres 17, AWS
+- Branche `main` : production (0.25 CU, auto-suspend 5 min)
+- Branche `dev` : développement local (0.25 CU fixe, auto-suspend 5 min, snapshot de prod au 2026-03-03)
+- Backups locaux : `backup.sql` (pg_dump complet 1.3 MB) + `backup.json` (script custom)
 
-- [ ] Créer le projet Neon direct
-- [ ] Migrer les données
-- [ ] Basculer `DATABASE_URL`
-- [ ] Supprimer l'add-on Marketplace
+**Étapes :**
+- [x] Backup local : `pg_dump` de l'ancienne DB prod → `backup.sql`
+- [x] Script `export-json.ts` enrichi (categories, videos, memes, memeCategories, userBookmarks)
+- [x] Créer le projet Neon direct (`petit-meme`, eu-central-1, Postgres 17)
+- [x] Importer les données : `psql < backup.sql` → succès (512 memes, 24 categories, 7236 views, etc.)
+- [x] Basculer `DATABASE_URL` prod dans Vercel env vars (URL pooler du nouveau projet)
+- [x] Tester le site en prod — fonctionnel
+- [x] Créer la branche `dev` (copie de prod, 0.25 CU, scale to zero 5 min)
+- [x] Mettre à jour `DATABASE_URL` dev dans `.env` (URL pooler branche `dev`)
+- [x] Reset branche `dev` (`prisma migrate reset`)
+- [x] Seed mis à jour (toutes les tables, guard `ENVIRONMENT=dev`)
+- [x] Protection env dev/prod : `.env` → `.env.development`, `.env.local` → `.env.production`. Scripts `:dev`/`:prod` explicites. `dotenv -e` partout (y compris `dev`). Guard `scripts/lib/env-guard.ts` (log site URL, DB host, Algolia index, Bunny library). Seed crée un admin test (`admin@petit-meme.dev / admin1234`). Docs mis à jour (CLAUDE.md, README.md, database.md, .gitignore, .env.example).
+- [x] Vérifier le dev server local
+- [ ] Supprimer l'ancien compte/projet Prisma Data Platform (ancienne DB dev)
+- [ ] Dissocier l'add-on Neon du Vercel Marketplace
+- [ ] Supprimer l'ancien projet Neon Marketplace (après confirmation que tout fonctionne)
+
+**Incident seed prod (2026-03-03) :**
+`vite-node --dotenv .env` charge quand même `.env.local` en priorité (comportement Vite). Le seed a vidé la DB prod + supprimé 35 vidéos Bunny prod. DB restaurée depuis `backup.sql`. 31/35 vidéos restaurées via `scripts/restore-videos.ts` (fetch depuis Twitter + re-upload Bunny + update DB). Algolia reindexé.
+
+**4 vidéos Bunny encore manquantes** (re-upload manuel nécessaire) :
+- [ ] **Toi tu vis toi tu crèves - Malcom** (`14ed6562...`) — pas de tweet URL
+- [ ] **David Attenborough qui regarde un orang-outan...** (`48dbf485...`) — pas de tweet URL
+- [ ] **Gifle extrême** (`e9c9855a...`) — tweet supprimé/indisponible
+- [ ] **Fans spotting K-pop** (`860c1b27...`) — tweet supprimé/indisponible
 

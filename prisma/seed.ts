@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-/* eslint-disable no-await-in-loop */
+import { hashPassword } from 'better-auth/crypto'
 import { z } from 'zod'
 import { prismaClient } from '@/db'
 import { clientEnv } from '@/env/client'
@@ -21,27 +21,16 @@ import {
 } from '@/lib/react-tweet'
 import { stripeClient } from '@/lib/stripe'
 import { fetchWithZod } from '@/lib/utils'
-import mocks from './seed-mock.json' assert { type: 'json' }
+import { logEnvironmentInfo } from '../scripts/lib/env-guard'
+import mocks from './seed-mock.json' with { type: 'json' }
 
-const getListVideos = async () => {
-  return fetchWithZod(
-    z.object({ items: z.array(z.object({ guid: z.string() })) }),
-    `https://video.bunnycdn.com/library/${clientEnv.VITE_BUNNY_LIBRARY_ID}/videos`,
-    {
-      method: 'GET',
-      headers: getBunnyHeaders()
-    }
-  )
-}
-
-const createMemeFromTwitterUrl = async (url: string, title: string) => {
-  const tweetId = z.string().parse(extractTweetIdFromUrl(url))
+const createMemeFromTwitterUrl = async (tweetUrl: string, title: string) => {
+  const tweetId = z.string().parse(extractTweetIdFromUrl(tweetUrl))
 
   const tweet = await getTweetById(tweetId)
   const media = await getTweetMedia(tweet.video.url, tweet.poster.url)
 
-  const arrayBuffer = await media.video.blob.arrayBuffer()
-  const buffer = Buffer.from(arrayBuffer)
+  const buffer = Buffer.from(await media.video.blob.arrayBuffer())
 
   const { videoId } = await createVideo(title)
 
@@ -79,43 +68,78 @@ const createMemeFromTwitterUrl = async (url: string, title: string) => {
   await uploadVideo(videoId, buffer)
 }
 
-const seed = async () => {
-  console.log(
-    'Deleting data from tables: meme, category, subscription, video, user...'
-  )
-  await prismaClient.meme.deleteMany({})
-  await prismaClient.video.deleteMany({})
-  await prismaClient.subscription.deleteMany({})
-  await prismaClient.category.deleteMany({})
-  await prismaClient.user.deleteMany({})
+const clearDatabase = async () => {
+  console.log('Clearing all database tables...')
+  await prismaClient.memeActionDaily.deleteMany()
+  await prismaClient.memeViewDaily.deleteMany()
+  await prismaClient.studioGeneration.deleteMany()
+  await prismaClient.adminAuditLog.deleteMany()
+  await prismaClient.userBookmark.deleteMany()
+  await prismaClient.memeCategory.deleteMany()
+  await prismaClient.meme.deleteMany()
+  await prismaClient.video.deleteMany()
+  await prismaClient.subscription.deleteMany()
+  await prismaClient.category.deleteMany()
+  await prismaClient.rateLimit.deleteMany()
+  await prismaClient.session.deleteMany()
+  await prismaClient.account.deleteMany()
+  await prismaClient.verification.deleteMany()
+  await prismaClient.user.deleteMany()
+  console.log('  Database cleared')
+}
 
-  console.log('Deleting all objects from Algolia index...')
+const clearAlgolia = async () => {
+  console.log('Clearing Algolia index...')
   await algoliaAdminClient.replaceAllObjects({
     indexName: algoliaIndexName,
     objects: []
   })
+  console.log('  Algolia cleared')
+}
 
-  console.log('Getting all customers from Stripe...')
+const clearStripe = async () => {
+  console.log('Clearing Stripe test customers...')
   const customers = await stripeClient.customers.list()
 
-  console.log(`Deleting ${customers.data.length} customers from Stripe...`)
-
   for (const customer of customers.data) {
+    // eslint-disable-next-line no-await-in-loop -- sequential deletion required by Stripe API
     await stripeClient.customers.del(customer.id)
   }
 
-  console.log('Getting list of videos from Bunny CDN...')
-  const listVideos = await getListVideos()
+  console.log(`  ${customers.data.length} customers deleted`)
+}
 
-  console.log(`Deleting ${listVideos.items.length} videos from Bunny CDN...`)
+const clearBunny = async () => {
+  console.log('Clearing Bunny CDN videos...')
+  const { items } = await fetchWithZod(
+    z.object({ items: z.array(z.object({ guid: z.string() })) }),
+    `https://video.bunnycdn.com/library/${clientEnv.VITE_BUNNY_LIBRARY_ID}/videos`,
+    {
+      method: 'GET',
+      headers: getBunnyHeaders()
+    }
+  )
 
-  for (const bunnyVideo of listVideos.items) {
+  for (const bunnyVideo of items) {
+    // eslint-disable-next-line no-await-in-loop -- sequential deletion required by Bunny API
     await deleteVideo(bunnyVideo.guid)
   }
 
-  console.log(`Creating ${mocks.categories.length} categories... into database`)
+  console.log(`  ${items.length} videos deleted`)
+}
+
+const seed = async () => {
+  logEnvironmentInfo()
+
+  await clearDatabase()
+  await clearAlgolia()
+  await clearStripe()
+  await clearBunny()
+
+  console.log(`Creating ${mocks.categories.length} categories...`)
 
   for (const category of mocks.categories) {
+    // eslint-disable-next-line no-await-in-loop -- sequential creation to preserve ordering
     await prismaClient.category.create({
       data: category
     })
@@ -124,8 +148,50 @@ const seed = async () => {
   console.log(`Creating and uploading ${mocks.memes.length} memes...`)
 
   for (const meme of mocks.memes) {
+    // eslint-disable-next-line no-await-in-loop -- sequential upload to avoid rate limiting
     await createMemeFromTwitterUrl(meme.tweetUrl, meme.title)
   }
+
+  const adminEmail = 'admin@petit-meme.dev'
+  const adminPassword = 'admin1234'
+
+  console.log('Creating admin user...')
+  const hashedPassword = await hashPassword(adminPassword)
+  const now = new Date()
+  const adminId = 'seed-admin-user'
+
+  await prismaClient.user.create({
+    data: {
+      id: adminId,
+      name: 'Admin',
+      email: adminEmail,
+      emailVerified: true,
+      role: 'admin',
+      createdAt: now,
+      updatedAt: now,
+      termsAcceptedAt: now,
+      privacyAcceptedAt: now
+    }
+  })
+
+  await prismaClient.account.create({
+    data: {
+      id: 'seed-admin-account',
+      accountId: adminId,
+      providerId: 'credential',
+      userId: adminId,
+      password: hashedPassword,
+      createdAt: now,
+      updatedAt: now
+    }
+  })
+
+  console.log(`\nSeed complete`)
+  console.log(`  Admin: ${adminEmail} / ${adminPassword}`)
+  process.exit(0)
 }
 
-void seed()
+seed().catch((error) => {
+  console.error('Seed failed:', error)
+  process.exit(1)
+})

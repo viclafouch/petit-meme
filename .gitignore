@@ -23,18 +23,17 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
-.env*.local
+.env.development
+.env.production
 
 # typescript
 *.tsbuildinfo
 
 .vscode
-
-.env
 certificates
 .tanstack
 
-backup.json
+backup.*
 
 dist
 .output

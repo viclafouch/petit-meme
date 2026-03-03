@@ -74,7 +74,7 @@ pnpm install
 Copy the example file and fill in your values:
 
 ```bash
-cp .env.example .env
+cp .env.example .env.development
 ```
 
 ### 3. Database setup
@@ -113,7 +113,7 @@ Vercel auto-deploys on push to `feat/migrate-to-vercel`. After a deploy that inc
 pnpm run prisma:migrate:prod
 ```
 
-This uses `.env.local` (pulled via `vercel env pull`) which contains the production `DATABASE_URL`. It applies only pending migrations and is safe and idempotent.
+This uses `.env.production` (pulled via `vercel env pull .env.production`) which contains the production `DATABASE_URL`. It applies only pending migrations and is safe and idempotent.
 
 ### Rules
 
@@ -135,7 +135,7 @@ Use the Stripe CLI to forward events to your local server:
 stripe listen --forward-to localhost:3000/api/auth/stripe/webhook
 ```
 
-The CLI outputs a webhook signing secret (`whsec_...`). Add it to your `.env` as `STRIPE_WEBHOOK_SECRET`.
+The CLI outputs a webhook signing secret (`whsec_...`). Add it to your `.env.development` as `STRIPE_WEBHOOK_SECRET`.
 
 ### Production
 
@@ -153,9 +153,9 @@ The CLI outputs a webhook signing secret (`whsec_...`). Add it to your `.env` as
 | `pnpm start` | Start production server |
 | `pnpm run lint` | TypeScript check + ESLint |
 | `pnpm run lint:fix` | Auto-fix lint issues |
-| `pnpm run prisma:migrate` | Apply pending migrations (local) |
-| `pnpm run prisma:migrate:prod` | Apply pending migrations (production via `.env.local`) |
-| `pnpm run prisma:seed` | Seed database |
+| `pnpm run prisma:migrate:dev` | Apply pending migrations (via `.env.development`) |
+| `pnpm run prisma:migrate:prod` | Apply pending migrations (via `.env.production`) |
+| `pnpm run prisma:seed:dev` | Seed database (via `.env.development`) |
 | `pnpm run email:dev` | Preview email templates on port 3001 |
 
 ## Project Structure

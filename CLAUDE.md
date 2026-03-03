@@ -22,10 +22,10 @@ pnpm run build            # Production build (Vite + Nitro vercel preset)
 pnpm start                # Start production server
 pnpm run lint             # TypeScript check + ESLint
 pnpm run lint:fix         # Auto-fix lint issues
-pnpm run prisma:migrate        # Deploy migrations locally (prisma migrate deploy)
-pnpm run prisma:migrate:prod   # Deploy migrations to production (uses .env.local from Vercel)
-pnpm run prisma:seed           # Seed database (tsx --env-file=.env prisma/seed.ts)
-pnpm run prisma:reset-db       # Reset local DB (prisma migrate reset) — NEVER in production
+pnpm run prisma:migrate:dev    # Deploy migrations (uses .env.development)
+pnpm run prisma:migrate:prod   # Deploy migrations (uses .env.production)
+pnpm run prisma:seed:dev       # Seed database (uses .env.development)
+pnpm run prisma:reset-db:dev   # Reset DB (uses .env.development) — NEVER in production
 pnpm run email:dev        # Email preview server (port 3001)
 ```
 **Never start the dev server (`pnpm run dev`)** — this is always done by the user.

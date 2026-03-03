@@ -5,8 +5,11 @@ import {
   algoliaIndexName,
   memeToAlgoliaRecord
 } from '@/lib/algolia'
+import { logEnvironmentInfo } from './lib/env-guard'
 
-async function reindexMemes() {
+const reindexMemes = async () => {
+  logEnvironmentInfo()
+
   const memes = await prismaClient.meme.findMany({
     include: {
       video: true,
@@ -24,5 +27,4 @@ async function reindexMemes() {
   console.log(response)
 }
 
-// npx vite-node scripts/reindex-memes.ts
 void reindexMemes()

@@ -25,6 +25,8 @@ const reindexMemes = async () => {
   })
 
   console.log(response)
+
+  process.exit(0)
 }
 
 void reindexMemes()

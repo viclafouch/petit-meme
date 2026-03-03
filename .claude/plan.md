@@ -1041,66 +1041,9 @@ Passer le domaine sur Cloudflare pour bénéficier de ses fonctionnalités nativ
 
 ---
 
-## Optimisation Coûts Neon (mars 2026)
+## Optimisation Coûts Neon (mars 2026) ✅
 
-Facture février : **$39.59** (394.9 compute hours x $0.10/h). Cause : DB jamais en auto-suspend.
+Migration Neon terminée. DB sur neon.tech (free tier 191.9h/mois) au lieu du Vercel Marketplace ($39.59/mois).
 
-### Changements appliqués
-
-- [x] **Admin dashboard polling supprimé** : `refetchInterval: MINUTE` → `staleTime: 10 * MINUTE` sur les 4 queries dashboard (totals, chart, activity, trending)
-- [x] **Video status polling réduit** : 3s → 30s dans `meme-list-item.tsx`
-- [x] **Connection pool réduit** : `max: 20` → `5`, `idleTimeoutMillis: 30_000` → `10_000` dans `src/db/index.ts`
-- [x] **Rate limiting migré en in-memory** : `Map<string, RateLimitEntry>` au lieu de DB writes (élimine ~100% des writes rate_limit)
-- [x] **Cleanup rate_limit supprimé** du cron cleanup (plus nécessaire)
-- [x] **N+1 anonymisation fixé** : boucle `findFirst` + `update` par user → single SQL query avec `LEFT JOIN LATERAL` + batch `UPDATE`
-- [x] **Better Auth rate limiting** : `storage: 'database'` → `storage: 'memory'` dans `src/lib/auth.tsx`
-- [x] **Admin `refetchOnMount: 'always'` supprimé** : 4 queries dashboard respectent maintenant le `staleTime`
-- [x] **staleTime ajouté** aux queries manquantes : `getVideoStatusById` (1min), `getInfiniteReels` (5min)
-
-### Migration Neon hors Vercel Marketplace — EN COURS
-
-**Urgence : haute.** Sur Vercel Hobby, aucun spend alert ni hard cap. Un bug de polling ou un bot peut générer des centaines de dollars facturés silencieusement. La seule protection est de sortir Neon du Marketplace.
-
-**Contexte facturation :**
-- Facture février 2026 (Vercel Invoice 89B95CC0-0039, 2 mars 2026) : **$39.59**
-  - Compute : 394.9 heures x $0.10/h = $39.49
-  - Data Transfer : 1 GB = $0.10
-- Cause : la DB ne dormait jamais (polling admin toutes les 60s, rate limiting en DB sur chaque requête, pool de 20 connexions avec 30s idle)
-- Config Neon : 1 CU, autosuspend 5 min — mais le polling empêchait l'autosuspend de se déclencher
-- Le site a très peu d'utilisateurs, ce coût est 100% dû au code, pas au trafic
-
-**Pourquoi migrer :** Neon en direct (neon.tech) offre un **free tier de 191.9 compute hours/mois**. Avec les optimisations appliquées (mars 2026), on devrait rester dans le free tier = **$0/mois**. Et si on dépasse, Neon bloque au lieu de facturer silencieusement.
-
-**Nouveau projet Neon :**
-- Projet : `petit-meme` sur neon.tech (compte existant, réutilisé)
-- Région : `eu-central-1` (Frankfurt), Postgres 17, AWS
-- Branche `main` : production (0.25 CU, auto-suspend 5 min)
-- Branche `dev` : développement local (0.25 CU fixe, auto-suspend 5 min, snapshot de prod au 2026-03-03)
-- Backups locaux : `backup.sql` (pg_dump complet 1.3 MB) + `backup.json` (script custom)
-
-**Étapes :**
-- [x] Backup local : `pg_dump` de l'ancienne DB prod → `backup.sql`
-- [x] Script `export-json.ts` enrichi (categories, videos, memes, memeCategories, userBookmarks)
-- [x] Créer le projet Neon direct (`petit-meme`, eu-central-1, Postgres 17)
-- [x] Importer les données : `psql < backup.sql` → succès (512 memes, 24 categories, 7236 views, etc.)
-- [x] Basculer `DATABASE_URL` prod dans Vercel env vars (URL pooler du nouveau projet)
-- [x] Tester le site en prod — fonctionnel
-- [x] Créer la branche `dev` (copie de prod, 0.25 CU, scale to zero 5 min)
-- [x] Mettre à jour `DATABASE_URL` dev dans `.env` (URL pooler branche `dev`)
-- [x] Reset branche `dev` (`prisma migrate reset`)
-- [x] Seed mis à jour (toutes les tables, guard `ENVIRONMENT=dev`)
-- [x] Protection env dev/prod : `.env` → `.env.development`, `.env.local` → `.env.production`. Scripts `:dev`/`:prod` explicites. `dotenv -e` partout (y compris `dev`). Guard `scripts/lib/env-guard.ts` (log site URL, DB host, Algolia index, Bunny library). Seed crée un admin test (`admin@petit-meme.dev / admin1234`). Docs mis à jour (CLAUDE.md, README.md, database.md, .gitignore, .env.example).
-- [x] Vérifier le dev server local
-- [ ] Supprimer l'ancien compte/projet Prisma Data Platform (ancienne DB dev)
-- [ ] Dissocier l'add-on Neon du Vercel Marketplace
-- [ ] Supprimer l'ancien projet Neon Marketplace (après confirmation que tout fonctionne)
-
-**Incident seed prod (2026-03-03) :**
-`vite-node --dotenv .env` charge quand même `.env.local` en priorité (comportement Vite). Le seed a vidé la DB prod + supprimé 35 vidéos Bunny prod. DB restaurée depuis `backup.sql`. 31/35 vidéos restaurées via `scripts/restore-videos.ts` (fetch depuis Twitter + re-upload Bunny + update DB). Algolia reindexé.
-
-**4 vidéos Bunny encore manquantes** (re-upload manuel nécessaire) :
-- [ ] **Toi tu vis toi tu crèves - Malcom** (`14ed6562...`) — pas de tweet URL
-- [ ] **David Attenborough qui regarde un orang-outan...** (`48dbf485...`) — pas de tweet URL
-- [ ] **Gifle extrême** (`e9c9855a...`) — tweet supprimé/indisponible
-- [ ] **Fans spotting K-pop** (`860c1b27...`) — tweet supprimé/indisponible
+**Config actuelle :** Projet `petit-meme`, `eu-central-1` (Frankfurt), Postgres 17. Branche `main` (prod) + branche `dev` (local). 0.25 CU, auto-suspend 5 min. Séparation env strict `.env.development` / `.env.production`.
 

@@ -4,14 +4,15 @@
 
 ---
 
-## Better Auth — Incohérence de type `UserWithRole` vs `InferUser`
+## Better Auth (v1.5.3)
 
-Bug interne Better Auth : `UserWithRole.role` est `string | undefined` mais le type inféré (`auth.$Infer.Session['user']`) retourne `string | null | undefined`. Aucune solution officielle.
+Mis à jour de v1.4.19 → v1.5.3 (mars 2026). Breaking change appliqué : import Prisma adapter migré vers `@better-auth/prisma-adapter`.
 
-**Fix appliqué :** type `SessionUser` custom dans `src/lib/role.ts` dérivé du type inféré. Plus aucune référence à `UserWithRole` dans le codebase.
+**Type `UserWithRole` vs `InferUser` :** Bug interne où `UserWithRole.role` est `string | undefined` mais le type inféré retourne `string | null | undefined`. Fix appliqué : type `SessionUser` custom dans `src/lib/role.ts`.
 
 **Reste à faire :**
 - [ ] Ouvrir une issue upstream sur Better Auth pour aligner `UserWithRole.role` avec le type inféré
+- [ ] Évaluer le plugin i18n (v1.5) pour les messages d'erreur FR
 
 **Issues à surveiller :** [#2596](https://github.com/better-auth/better-auth/issues/2596), [#3033](https://github.com/better-auth/better-auth/issues/3033), [#7452](https://github.com/better-auth/better-auth/issues/7452)
 
@@ -58,6 +59,15 @@ Refonte complète livrée (plan annuel, toggle, social proof, FAQ, animations, S
 Phases 0-3 livrées (WAF Vercel, rate limiting in-memory, Bunny CDN Token Auth, logging Sentry). Migration Prisma appliquée.
 
 - [x] Migration Prisma : `add_rate_limit_window_start`
+
+---
+
+## Bugs à corriger
+
+### Login Twitter cassé
+
+- [ ] Diagnostiquer pourquoi le login Twitter (OAuth) ne fonctionne plus
+- [ ] Corriger le problème et vérifier le flow complet (login → callback → session)
 
 ---
 

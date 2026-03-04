@@ -1,5 +1,4 @@
 import { betterAuth } from 'better-auth'
-import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { admin } from 'better-auth/plugins'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import type Stripe from 'stripe'
@@ -20,6 +19,7 @@ import { sendEmailAsync } from '@/lib/resend'
 import { captureWithFeature } from '@/lib/sentry'
 import { stripeClient } from '@/lib/stripe'
 import { cleanupUserData } from '@/utils/user-cleanup'
+import { prismaAdapter } from '@better-auth/prisma-adapter'
 import { stripe } from '@better-auth/stripe'
 import { createServerOnlyFn } from '@tanstack/react-start'
 // Vercel-specific: replace with platform equivalent if migrating (e.g. Railway)
@@ -231,7 +231,7 @@ const getAuthConfig = createServerOnlyFn(() => {
           logMessage: 'Sending verification email to'
         })
       },
-      async afterEmailVerification(user) {
+      afterEmailVerification: async (user) => {
         authLogger.info({ email: user.email }, 'Email verified')
         sendEmailAsync({
           to: user.email,

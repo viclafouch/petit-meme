@@ -8,7 +8,8 @@ import {
   Mail,
   Rabbit,
   Search,
-  Sparkles
+  Sparkles,
+  Twitter
 } from 'lucide-react'
 import { clientEnv } from '@/env/client'
 import { cn } from '@/lib/utils'
@@ -75,6 +76,12 @@ export const SERVICES = [
     dashboardUrl: 'https://aistudio.google.com/',
     accentClass:
       'bg-amber-500/15 text-amber-500 dark:bg-amber-400/15 dark:text-amber-400'
+  },
+  {
+    label: 'X (Twitter)',
+    icon: Twitter,
+    dashboardUrl: 'https://console.x.com/',
+    accentClass: 'bg-foreground/10 text-foreground'
   }
 ] as const satisfies readonly ServiceConfig[]
 

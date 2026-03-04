@@ -99,62 +99,6 @@ const handlePaymentFailed = async (event: Stripe.Event) => {
   })
 }
 
-const TWITTER_API_BASE = 'https://api.x.com/2/users/me'
-
-const fetchTwitterApi = async (fields: string, accessToken: string) => {
-  const response = await fetch(`${TWITTER_API_BASE}?user.fields=${fields}`, {
-    headers: { Authorization: `Bearer ${accessToken}` }
-  })
-  const body = await response.json()
-
-  return { response, body }
-}
-
-const getTwitterUserInfo = async (token: { accessToken?: string }) => {
-  if (!token.accessToken) {
-    authLogger.error('Twitter OAuth: no access token received')
-
-    return null
-  }
-
-  const { response: profileResponse, body: profileBody } =
-    await fetchTwitterApi('profile_image_url', token.accessToken)
-
-  if (!profileResponse.ok) {
-    authLogger.error(
-      { status: profileResponse.status, body: profileBody },
-      'Twitter /users/me failed'
-    )
-
-    return null
-  }
-
-  const { response: emailResponse, body: emailBody } = await fetchTwitterApi(
-    'confirmed_email',
-    token.accessToken
-  )
-
-  const isEmailVerified =
-    emailResponse.ok && Boolean(emailBody?.data?.confirmed_email)
-  const confirmedEmail = isEmailVerified ? emailBody.data.confirmed_email : null
-
-  authLogger.info(
-    { userId: profileBody.data.id, email: confirmedEmail },
-    'Twitter OAuth login'
-  )
-
-  return {
-    user: {
-      id: profileBody.data.id,
-      name: profileBody.data.username,
-      email: confirmedEmail || profileBody.data.username || null,
-      image: profileBody.data.profile_image_url,
-      emailVerified: isEmailVerified
-    },
-    data: profileBody
-  }
-}
-
 const getAuthConfig = createServerOnlyFn(() => {
   return betterAuth({
     appName: 'Petit Meme',
@@ -244,8 +188,7 @@ const getAuthConfig = createServerOnlyFn(() => {
     socialProviders: {
       twitter: {
         clientId: serverEnv.AUTH_TWITTER_ID,
-        clientSecret: serverEnv.AUTH_TWITTER_SECRET,
-        getUserInfo: getTwitterUserInfo
+        clientSecret: serverEnv.AUTH_TWITTER_SECRET
       }
     },
     rateLimit: {

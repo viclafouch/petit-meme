@@ -66,8 +66,11 @@ Phases 0-3 livrées (WAF Vercel, rate limiting in-memory, Bunny CDN Token Auth, 
 
 ### Login Twitter cassé
 
-- [ ] Diagnostiquer pourquoi le login Twitter (OAuth) ne fonctionne plus
-- [ ] Corriger le problème et vérifier le flow complet (login → callback → session)
+- [x] Diagnostiquer pourquoi le login Twitter (OAuth) ne fonctionne plus
+  - Cause : API X v2 renvoyait 503 depuis le 28/02 — Free plan déprécié par X
+  - Fix : migration vers Pay-Per-Use ($5 crédit) + régénération Client Secret OAuth 2.0
+- [x] Corriger le problème et vérifier le flow complet (login → callback → session)
+- [x] Supprimer la custom `getUserInfo` (doublon du provider par défaut Better Auth)
 
 ---
 

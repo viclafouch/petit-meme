@@ -6,26 +6,13 @@
 
 ## Better Auth (v1.5.3)
 
-Mis à jour de v1.4.19 → v1.5.3 (mars 2026). Breaking change appliqué : import Prisma adapter migré vers `@better-auth/prisma-adapter`.
-
 **Type `UserWithRole` vs `InferUser` :** Bug interne où `UserWithRole.role` est `string | undefined` mais le type inféré retourne `string | null | undefined`. Fix appliqué : type `SessionUser` custom dans `src/lib/role.ts`.
 
 **Reste à faire :**
 - [ ] Ouvrir une issue upstream sur Better Auth pour aligner `UserWithRole.role` avec le type inféré
-- [ ] Évaluer le plugin i18n (v1.5) pour les messages d'erreur FR
+- [x] Évaluer le plugin i18n (v1.5) pour les messages d'erreur FR → décision : adopter `@better-auth/i18n` (voir section Internationalisation Phase 1, étape 4)
 
 **Issues à surveiller :** [#2596](https://github.com/better-auth/better-auth/issues/2596), [#3033](https://github.com/better-auth/better-auth/issues/3033), [#7452](https://github.com/better-auth/better-auth/issues/7452)
-
----
-
-## Refonte page Pricing ✅
-
-Refonte complète livrée (plan annuel, toggle, social proof, FAQ, animations, SEO, a11y). Price ID annuel configuré dans Stripe + env vars.
-
-- [x] Créer le Price ID annuel dans Stripe Dashboard
-- [x] Ajouter `STRIPE_ANNUAL_PRICE_ID` dans les env vars Vercel + `.env`
-
-**Hors scope (reporté) :** tableau comparatif features, témoignages, A/B testing
 
 ---
 
@@ -54,26 +41,6 @@ Refonte complète livrée (plan annuel, toggle, social proof, FAQ, animations, S
 
 ---
 
-## Anti-Scraping ✅
-
-Phases 0-3 livrées (WAF Vercel, rate limiting in-memory, Bunny CDN Token Auth, logging Sentry). Migration Prisma appliquée.
-
-- [x] Migration Prisma : `add_rate_limit_window_start`
-
----
-
-## Bugs à corriger
-
-### Login Twitter cassé
-
-- [x] Diagnostiquer pourquoi le login Twitter (OAuth) ne fonctionne plus
-  - Cause : API X v2 renvoyait 503 depuis le 28/02 — Free plan déprécié par X
-  - Fix : migration vers Pay-Per-Use ($5 crédit) + régénération Client Secret OAuth 2.0
-- [x] Corriger le problème et vérifier le flow complet (login → callback → session)
-- [x] Supprimer la custom `getUserInfo` (doublon du provider par défaut Better Auth)
-
----
-
 ## Backlog — Futures évolutions
 
 ### Admin — Items reportés
@@ -86,7 +53,9 @@ Phases 0-3 livrées (WAF Vercel, rate limiting in-memory, Bunny CDN Token Auth, 
 
 ### Internationalisation (FR / EN)
 
-Passer le site en bilingue français / anglais. Étudier la meilleure approche avec TanStack Start (routing i18n, détection de langue, etc.). Inclut la stratégie d'index Algolia bilingue (index unique avec champ `lang` vs deux index séparés).
+Plan détaillé dans **`.claude/plan-i18n.md`** (fichier dédié, auto-suffisant).
+
+Phases : 0 (quick wins sur `main`) → 1 (feature branch `feat/i18n`) → 1.5 (emails) → 2 (contenu mèmes + Algolia)
 
 ### Migration Prisma → Drizzle
 

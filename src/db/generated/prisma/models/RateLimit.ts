@@ -29,11 +29,13 @@ export type AggregateRateLimit = {
 export type RateLimitAvgAggregateOutputType = {
   count: number | null
   lastRequest: number | null
+  windowStart: number | null
 }
 
 export type RateLimitSumAggregateOutputType = {
   count: number | null
   lastRequest: bigint | null
+  windowStart: bigint | null
 }
 
 export type RateLimitMinAggregateOutputType = {
@@ -41,6 +43,7 @@ export type RateLimitMinAggregateOutputType = {
   key: string | null
   count: number | null
   lastRequest: bigint | null
+  windowStart: bigint | null
 }
 
 export type RateLimitMaxAggregateOutputType = {
@@ -48,6 +51,7 @@ export type RateLimitMaxAggregateOutputType = {
   key: string | null
   count: number | null
   lastRequest: bigint | null
+  windowStart: bigint | null
 }
 
 export type RateLimitCountAggregateOutputType = {
@@ -55,6 +59,7 @@ export type RateLimitCountAggregateOutputType = {
   key: number
   count: number
   lastRequest: number
+  windowStart: number
   _all: number
 }
 
@@ -62,11 +67,13 @@ export type RateLimitCountAggregateOutputType = {
 export type RateLimitAvgAggregateInputType = {
   count?: true
   lastRequest?: true
+  windowStart?: true
 }
 
 export type RateLimitSumAggregateInputType = {
   count?: true
   lastRequest?: true
+  windowStart?: true
 }
 
 export type RateLimitMinAggregateInputType = {
@@ -74,6 +81,7 @@ export type RateLimitMinAggregateInputType = {
   key?: true
   count?: true
   lastRequest?: true
+  windowStart?: true
 }
 
 export type RateLimitMaxAggregateInputType = {
@@ -81,6 +89,7 @@ export type RateLimitMaxAggregateInputType = {
   key?: true
   count?: true
   lastRequest?: true
+  windowStart?: true
 }
 
 export type RateLimitCountAggregateInputType = {
@@ -88,6 +97,7 @@ export type RateLimitCountAggregateInputType = {
   key?: true
   count?: true
   lastRequest?: true
+  windowStart?: true
   _all?: true
 }
 
@@ -182,6 +192,7 @@ export type RateLimitGroupByOutputType = {
   key: string
   count: number
   lastRequest: bigint
+  windowStart: bigint
   _count: RateLimitCountAggregateOutputType | null
   _avg: RateLimitAvgAggregateOutputType | null
   _sum: RateLimitSumAggregateOutputType | null
@@ -212,6 +223,7 @@ export type RateLimitWhereInput = {
   key?: Prisma.StringFilter<"RateLimit"> | string
   count?: Prisma.IntFilter<"RateLimit"> | number
   lastRequest?: Prisma.BigIntFilter<"RateLimit"> | bigint | number
+  windowStart?: Prisma.BigIntFilter<"RateLimit"> | bigint | number
 }
 
 export type RateLimitOrderByWithRelationInput = {
@@ -219,6 +231,7 @@ export type RateLimitOrderByWithRelationInput = {
   key?: Prisma.SortOrder
   count?: Prisma.SortOrder
   lastRequest?: Prisma.SortOrder
+  windowStart?: Prisma.SortOrder
   _relevance?: Prisma.RateLimitOrderByRelevanceInput
 }
 
@@ -230,6 +243,7 @@ export type RateLimitWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.RateLimitWhereInput | Prisma.RateLimitWhereInput[]
   count?: Prisma.IntFilter<"RateLimit"> | number
   lastRequest?: Prisma.BigIntFilter<"RateLimit"> | bigint | number
+  windowStart?: Prisma.BigIntFilter<"RateLimit"> | bigint | number
 }, "id" | "key">
 
 export type RateLimitOrderByWithAggregationInput = {
@@ -237,6 +251,7 @@ export type RateLimitOrderByWithAggregationInput = {
   key?: Prisma.SortOrder
   count?: Prisma.SortOrder
   lastRequest?: Prisma.SortOrder
+  windowStart?: Prisma.SortOrder
   _count?: Prisma.RateLimitCountOrderByAggregateInput
   _avg?: Prisma.RateLimitAvgOrderByAggregateInput
   _max?: Prisma.RateLimitMaxOrderByAggregateInput
@@ -252,6 +267,7 @@ export type RateLimitScalarWhereWithAggregatesInput = {
   key?: Prisma.StringWithAggregatesFilter<"RateLimit"> | string
   count?: Prisma.IntWithAggregatesFilter<"RateLimit"> | number
   lastRequest?: Prisma.BigIntWithAggregatesFilter<"RateLimit"> | bigint | number
+  windowStart?: Prisma.BigIntWithAggregatesFilter<"RateLimit"> | bigint | number
 }
 
 export type RateLimitCreateInput = {
@@ -259,6 +275,7 @@ export type RateLimitCreateInput = {
   key: string
   count: number
   lastRequest: bigint | number
+  windowStart: bigint | number
 }
 
 export type RateLimitUncheckedCreateInput = {
@@ -266,6 +283,7 @@ export type RateLimitUncheckedCreateInput = {
   key: string
   count: number
   lastRequest: bigint | number
+  windowStart: bigint | number
 }
 
 export type RateLimitUpdateInput = {
@@ -273,6 +291,7 @@ export type RateLimitUpdateInput = {
   key?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
   lastRequest?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  windowStart?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
 }
 
 export type RateLimitUncheckedUpdateInput = {
@@ -280,6 +299,7 @@ export type RateLimitUncheckedUpdateInput = {
   key?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
   lastRequest?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  windowStart?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
 }
 
 export type RateLimitCreateManyInput = {
@@ -287,6 +307,7 @@ export type RateLimitCreateManyInput = {
   key: string
   count: number
   lastRequest: bigint | number
+  windowStart: bigint | number
 }
 
 export type RateLimitUpdateManyMutationInput = {
@@ -294,6 +315,7 @@ export type RateLimitUpdateManyMutationInput = {
   key?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
   lastRequest?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  windowStart?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
 }
 
 export type RateLimitUncheckedUpdateManyInput = {
@@ -301,6 +323,7 @@ export type RateLimitUncheckedUpdateManyInput = {
   key?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
   lastRequest?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  windowStart?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
 }
 
 export type RateLimitOrderByRelevanceInput = {
@@ -314,11 +337,13 @@ export type RateLimitCountOrderByAggregateInput = {
   key?: Prisma.SortOrder
   count?: Prisma.SortOrder
   lastRequest?: Prisma.SortOrder
+  windowStart?: Prisma.SortOrder
 }
 
 export type RateLimitAvgOrderByAggregateInput = {
   count?: Prisma.SortOrder
   lastRequest?: Prisma.SortOrder
+  windowStart?: Prisma.SortOrder
 }
 
 export type RateLimitMaxOrderByAggregateInput = {
@@ -326,6 +351,7 @@ export type RateLimitMaxOrderByAggregateInput = {
   key?: Prisma.SortOrder
   count?: Prisma.SortOrder
   lastRequest?: Prisma.SortOrder
+  windowStart?: Prisma.SortOrder
 }
 
 export type RateLimitMinOrderByAggregateInput = {
@@ -333,11 +359,13 @@ export type RateLimitMinOrderByAggregateInput = {
   key?: Prisma.SortOrder
   count?: Prisma.SortOrder
   lastRequest?: Prisma.SortOrder
+  windowStart?: Prisma.SortOrder
 }
 
 export type RateLimitSumOrderByAggregateInput = {
   count?: Prisma.SortOrder
   lastRequest?: Prisma.SortOrder
+  windowStart?: Prisma.SortOrder
 }
 
 export type BigIntFieldUpdateOperationsInput = {
@@ -355,6 +383,7 @@ export type RateLimitSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   key?: boolean
   count?: boolean
   lastRequest?: boolean
+  windowStart?: boolean
 }, ExtArgs["result"]["rateLimit"]>
 
 export type RateLimitSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -362,6 +391,7 @@ export type RateLimitSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   key?: boolean
   count?: boolean
   lastRequest?: boolean
+  windowStart?: boolean
 }, ExtArgs["result"]["rateLimit"]>
 
 export type RateLimitSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -369,6 +399,7 @@ export type RateLimitSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   key?: boolean
   count?: boolean
   lastRequest?: boolean
+  windowStart?: boolean
 }, ExtArgs["result"]["rateLimit"]>
 
 export type RateLimitSelectScalar = {
@@ -376,9 +407,10 @@ export type RateLimitSelectScalar = {
   key?: boolean
   count?: boolean
   lastRequest?: boolean
+  windowStart?: boolean
 }
 
-export type RateLimitOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "key" | "count" | "lastRequest", ExtArgs["result"]["rateLimit"]>
+export type RateLimitOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "key" | "count" | "lastRequest" | "windowStart", ExtArgs["result"]["rateLimit"]>
 
 export type $RateLimitPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "RateLimit"
@@ -388,6 +420,7 @@ export type $RateLimitPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     key: string
     count: number
     lastRequest: bigint
+    windowStart: bigint
   }, ExtArgs["result"]["rateLimit"]>
   composites: {}
 }
@@ -815,6 +848,7 @@ export interface RateLimitFieldRefs {
   readonly key: Prisma.FieldRef<"RateLimit", 'String'>
   readonly count: Prisma.FieldRef<"RateLimit", 'Int'>
   readonly lastRequest: Prisma.FieldRef<"RateLimit", 'BigInt'>
+  readonly windowStart: Prisma.FieldRef<"RateLimit", 'BigInt'>
 }
     
 

@@ -281,7 +281,8 @@ export const RateLimitScalarFieldEnum = {
   id: 'id',
   key: 'key',
   count: 'count',
-  lastRequest: 'lastRequest'
+  lastRequest: 'lastRequest',
+  windowStart: 'windowStart'
 } as const
 
 export type RateLimitScalarFieldEnum = (typeof RateLimitScalarFieldEnum)[keyof typeof RateLimitScalarFieldEnum]

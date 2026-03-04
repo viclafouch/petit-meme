@@ -17,12 +17,12 @@ Bug interne Better Auth : `UserWithRole.role` est `string | undefined` mais le t
 
 ---
 
-## Refonte page Pricing — Items restants
+## Refonte page Pricing ✅
 
-Refonte complète livrée (plan annuel, toggle, social proof, FAQ, animations, SEO, a11y). Reste :
+Refonte complète livrée (plan annuel, toggle, social proof, FAQ, animations, SEO, a11y). Price ID annuel configuré dans Stripe + env vars.
 
-- [ ] Créer le Price ID annuel (29,99 €/an, récurrent yearly) dans Stripe Dashboard
-- [ ] Ajouter `STRIPE_ANNUAL_PRICE_ID` dans les env vars Vercel + `.env`
+- [x] Créer le Price ID annuel dans Stripe Dashboard
+- [x] Ajouter `STRIPE_ANNUAL_PRICE_ID` dans les env vars Vercel + `.env`
 
 **Hors scope (reporté) :** tableau comparatif features, témoignages, A/B testing
 
@@ -53,11 +53,11 @@ Refonte complète livrée (plan annuel, toggle, social proof, FAQ, animations, S
 
 ---
 
-## Anti-Scraping — Item restant
+## Anti-Scraping ✅
 
-Phases 0-3 livrées (WAF Vercel, rate limiting in-memory, Bunny CDN Token Auth, logging Sentry). Reste :
+Phases 0-3 livrées (WAF Vercel, rate limiting in-memory, Bunny CDN Token Auth, logging Sentry). Migration Prisma appliquée.
 
-- [ ] Migration Prisma à exécuter : `pnpm exec prisma migrate dev --name add_rate_limit_window_start`
+- [x] Migration Prisma : `add_rate_limit_window_start`
 
 ---
 

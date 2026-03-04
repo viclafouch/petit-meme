@@ -91,9 +91,9 @@ export const Responsive = () => {
 
   React.useEffect(() => {
     if (isInView) {
-      void tabletVideoRef.current?.play()
-      void mobileVideoRef.current?.play()
-      void desktopVideoRef.current?.play()
+      tabletVideoRef.current?.play().catch(() => {})
+      mobileVideoRef.current?.play().catch(() => {})
+      desktopVideoRef.current?.play().catch(() => {})
     }
   }, [isInView])
 
@@ -117,7 +117,6 @@ export const Responsive = () => {
       >
         <motion.div
           data-slot="card"
-          data-card
           className="bg-card text-card-foreground flex flex-col gap-0 rounded-xl pt-6 overflow-hidden border-2 shadow-2xl"
           variants={desktopVariants}
         >
@@ -128,7 +127,7 @@ export const Responsive = () => {
               <div className="rounded-full bg-green-500" />
             </div>
           </div>
-          <div className="bg-muted aspect-[16/9] relative">
+          <div className="bg-muted aspect-video relative">
             <VideoPlayer className="overflow-hidden size-full max-h-full dark relative">
               <VideoPlayerContent
                 crossOrigin=""
@@ -156,7 +155,7 @@ export const Responsive = () => {
           <div className="bg-muted items-center justify-center border-b py-1 md:py-2 flex">
             <div className="bg-muted-foreground/20 h-1 md:h-2 w-10 md:w-16 rounded-full" />
           </div>
-          <div className="bg-muted aspect-[9/16]">
+          <div className="bg-muted aspect-video">
             <VideoPlayer className="overflow-hidden size-full max-h-full dark">
               <VideoPlayerContent
                 crossOrigin=""
@@ -184,7 +183,7 @@ export const Responsive = () => {
           <div className="bg-card items-center justify-center border-b py-3 hidden lg:flex">
             <div className="bg-muted-foreground/20 size-2 rounded-full" />
           </div>
-          <div className="bg-muted aspect-[4/3]">
+          <div className="bg-muted aspect-4/3">
             <VideoPlayer className="overflow-hidden size-full max-h-full dark">
               <VideoPlayerContent
                 crossOrigin=""
@@ -218,7 +217,7 @@ export const Responsive = () => {
               </div>
               <p className="font-medium text-sm md:text-md">Responsive</p>
             </div>
-            <p className="text-muted-foreground text-xs md:text-sm max-w-[180px]">
+            <p className="text-muted-foreground text-xs md:text-sm max-w-45">
               S&apos;adapte parfaitement à toutes les tailles d&apos;écran
             </p>
           </div>

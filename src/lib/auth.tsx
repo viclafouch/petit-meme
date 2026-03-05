@@ -273,7 +273,9 @@ const getAuthConfig = createServerOnlyFn(() => {
             const priceCents = stripePrice?.unit_amount ?? 0
             const isAnnual = stripePrice?.recurring?.interval === 'year'
 
-            const formattedAmount = formatCentsToEuros(priceCents)
+            const formattedAmount = formatCentsToEuros(priceCents, {
+              locale: 'fr'
+            })
             const periodSuffix = isAnnual ? '/an' : '/mois'
 
             sendEmailAsync({

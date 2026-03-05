@@ -1,6 +1,7 @@
 import { nitro } from 'nitro/vite'
 import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
+import { paraglideVitePlugin } from '@inlang/paraglide-js'
 import { sentryTanstackStart } from '@sentry/tanstackstart-react/vite'
 import tailwindcss from '@tailwindcss/vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
@@ -41,6 +42,127 @@ export default defineConfig({
   },
   assetsInclude: ['**/*.md'],
   plugins: [
+    paraglideVitePlugin({
+      project: './project.inlang',
+      outdir: './src/paraglide',
+      outputStructure: 'message-modules',
+      cookieName: 'PARAGLIDE_LOCALE',
+      strategy: ['url', 'cookie', 'baseLocale'],
+      urlPatterns: [
+        {
+          pattern: '/',
+          localized: [
+            ['fr', '/'],
+            ['en', '/en']
+          ]
+        },
+        {
+          pattern: '/memes',
+          localized: [
+            ['fr', '/memes'],
+            ['en', '/en/memes']
+          ]
+        },
+        {
+          pattern: '/memes/:memeId',
+          localized: [
+            ['fr', '/memes/:memeId'],
+            ['en', '/en/memes/:memeId']
+          ]
+        },
+        {
+          pattern: '/memes/category/:slug',
+          localized: [
+            ['fr', '/memes/category/:slug'],
+            ['en', '/en/memes/category/:slug']
+          ]
+        },
+        {
+          pattern: '/memes/:memeId/studio',
+          localized: [
+            ['fr', '/memes/:memeId/studio'],
+            ['en', '/en/memes/:memeId/studio']
+          ]
+        },
+        {
+          pattern: '/random',
+          localized: [
+            ['fr', '/random'],
+            ['en', '/en/random']
+          ]
+        },
+        {
+          pattern: '/favorites',
+          localized: [
+            ['fr', '/favorites'],
+            ['en', '/en/favorites']
+          ]
+        },
+        {
+          pattern: '/pricing',
+          localized: [
+            ['fr', '/pricing'],
+            ['en', '/en/pricing']
+          ]
+        },
+        {
+          pattern: '/settings',
+          localized: [
+            ['fr', '/settings'],
+            ['en', '/en/settings']
+          ]
+        },
+        {
+          pattern: '/checkout/success',
+          localized: [
+            ['fr', '/checkout/success'],
+            ['en', '/en/checkout/success']
+          ]
+        },
+        {
+          pattern: '/password/reset',
+          localized: [
+            ['fr', '/password/reset'],
+            ['en', '/en/password/reset']
+          ]
+        },
+        {
+          pattern: '/password/create-new',
+          localized: [
+            ['fr', '/password/create-new'],
+            ['en', '/en/password/create-new']
+          ]
+        },
+        {
+          pattern: '/terms-of-use',
+          localized: [
+            ['fr', '/terms-of-use'],
+            ['en', '/en/terms-of-use']
+          ]
+        },
+        {
+          pattern: '/privacy',
+          localized: [
+            ['fr', '/privacy'],
+            ['en', '/en/privacy']
+          ]
+        },
+        {
+          pattern: '/mentions-legales',
+          localized: [
+            ['fr', '/mentions-legales'],
+            ['en', '/en/mentions-legales']
+          ]
+        },
+        {
+          pattern: '/reels',
+          localized: [
+            ['fr', '/reels'],
+            ['en', '/en/reels']
+          ]
+        }
+      ]
+    }),
     tailwindcss(),
     tsconfigPaths({
       projects: ['./tsconfig.json']

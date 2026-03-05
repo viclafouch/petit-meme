@@ -4,6 +4,7 @@ import {
   defineHandlerCallback
 } from '@tanstack/react-start/server'
 import { createServerEntry } from '@tanstack/react-start/server-entry'
+import { paraglideMiddleware } from './paraglide/server.js'
 
 const customHandler = defineHandlerCallback(async (context) => {
   const response = await defaultStreamHandler(context)
@@ -18,6 +19,8 @@ const handler = createStartHandler(customHandler)
 
 export default createServerEntry({
   fetch: (request) => {
-    return handler(request)
+    return paraglideMiddleware(request, () => {
+      return handler(request)
+    })
   }
 })

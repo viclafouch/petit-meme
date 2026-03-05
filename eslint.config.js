@@ -19,7 +19,8 @@ export default [
       '**/db/generated/**',
       '**/components/ui/**',
       '**/components/animate-ui/**',
-      'public/ffmpeg/**'
+      'public/ffmpeg/**',
+      '**/paraglide/**'
     ]
   },
   ...typescriptConfig,

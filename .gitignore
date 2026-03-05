@@ -33,6 +33,9 @@ yarn-error.log*
 certificates
 .tanstack
 
+# Paraglide JS (generated at build time)
+src/paraglide/
+
 backup.*
 
 dist

@@ -24,6 +24,7 @@ import {
 import { getSubscriptionDisplayInfo } from '@/helpers/subscription'
 import { useStripeCheckout } from '@/hooks/use-stripe-checkout'
 import { captureWithFeature } from '@/lib/sentry'
+import { getLocale } from '@/paraglide/runtime'
 import type { ActiveSubscription } from '@/server/customer'
 import { exportUserData } from '@/server/user'
 import { downloadBlob } from '@/utils/download'
@@ -94,9 +95,10 @@ export const ProfileContent = ({
                   <p className="text-muted-foreground text-sm">
                     {PREMIUM_PLAN.title} -{' '}
                     {
-                      getSubscriptionDisplayInfo(
-                        activeSubscription.plan as BetterAuthPlanName
-                      ).displayPrice
+                      getSubscriptionDisplayInfo({
+                        planName: activeSubscription.plan as BetterAuthPlanName,
+                        locale: getLocale()
+                      }).displayPrice
                     }{' '}
                     -{' '}
                     <span className="text-info">

@@ -17,6 +17,7 @@ import {
 } from '@/constants/plan'
 import { convertCentsToEuros, formatCentsToEuros } from '@/helpers/number'
 import { cn } from '@/lib/utils'
+import { getLocale } from '@/paraglide/runtime'
 import NumberFlow from '@number-flow/react'
 
 type FeatureStatusConfig = {
@@ -170,7 +171,7 @@ export const PricingCard = ({
               soit ~
               {formatCentsToEuros(
                 Math.round(currentPricing.priceInCents / MONTHS_IN_YEAR),
-                { minimumFractionDigits: 2 }
+                { locale: getLocale(), minimumFractionDigits: 2 }
               )}
               /mois
             </motion.p>

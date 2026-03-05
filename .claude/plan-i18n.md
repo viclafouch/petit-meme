@@ -20,6 +20,9 @@ FR (public cible principal) garde les URLs propres sans prefix. EN utilise `/en/
 **Pourquoi pas de traduction de slugs :**
 Complexité disproportionnée (mapping bidirectionnel, redirects, canonicals). Les slugs sont des identifiants techniques (IDs, catégories). Un seul jeu de slugs simplifie le routing et le SEO.
 
+**Pourquoi `getLocale()` uniquement dans les composants et handlers serveur (JAMAIS dans les helpers/utils) :**
+Un helper est une fonction pure. Il reçoit `locale` en paramètre, il ne va jamais le chercher lui-même. `getLocale()` est appelé au point d'entrée (composant React ou `.handler()` serveur) et passé en paramètre à travers la chaîne. Cela garantit la testabilité, la pureté et évite les dépendances implicites au contexte Paraglide.
+
 **Pourquoi Better Auth i18n (et pas garder auth-errors.ts) :**
 Plugin officiel `@better-auth/i18n` traduit les erreurs côté serveur avant qu'elles n'arrivent au client. Supprime le mapping manuel de ~27 codes dans `src/helpers/auth-errors.ts`. Détection locale via cookie (même cookie `PARAGLIDE_LOCALE` que Paraglide).
 
@@ -110,18 +113,18 @@ Un merge atomique garantit que le site passe de FR-only à bilingue en une fois.
 
 **0b. Prisma : locale user**
 - [x] Ajouter champ `locale String @default("fr")` sur le modèle User (migration additive)
-- [ ] `pnpm exec dotenv -e .env.development -- pnpm exec prisma migrate dev --name add_user_locale` (Victor)
-- [ ] `pnpm exec prisma generate` après la migration
-- [ ] Note : le champ existe mais n'est pas encore utilisé → zéro impact sur le site
+- [x] `pnpm exec dotenv -e .env.development -- pnpm exec prisma migrate dev --name add_user_locale` (Victor)
+- [x] `pnpm exec prisma generate` après la migration
+- [x] Note : le champ existe mais n'est pas encore utilisé → zéro impact sur le site
 
 ---
 
 ### Phase 1 — Feature branch `feat/i18n` (depuis `feat/migrate-to-vercel`)
 
 **1. Infra Paraglide** (fondation — tout dépend de cette étape)
-- [ ] Installer `@inlang/paraglide-js` (devDep) — v2.13.1
-- [ ] Créer `project.inlang/settings.json` (baseLocale: `fr`, locales: `["fr", "en"]`)
-- [ ] Configurer `paraglideVitePlugin` dans `vite.config.ts` :
+- [x] Installer `@inlang/paraglide-js` (devDep) — v2.13.1
+- [x] Créer `project.inlang/settings.json` (baseLocale: `fr`, locales: `["fr", "en"]`)
+- [x] Configurer `paraglideVitePlugin` dans `vite.config.ts` :
   - `strategy: ["url", "cookie", "baseLocale"]`
   - `outputStructure: "message-modules"`
   - `cookieName: "PARAGLIDE_LOCALE"`
@@ -132,13 +135,13 @@ Un merge atomique garantit que le site passe de FR-only à bilingue en une fois.
     `/mentions-legales`, `/reels`
   - Routes **non** listées (donc exclues automatiquement) : `/admin/*`, `/api/*`, `/health`, `/sitemap.xml`, `/robots.txt`
   - `/en/admin`, `/en/api/*` etc. ne seront pas matchés → 404 naturel (pas de strip silencieux du prefix)
-- [ ] Ajouter `paraglideMiddleware` dans `src/server.ts`
-- [ ] Ajouter `rewrite` (`deLocalizeUrl`/`localizeUrl`) dans `src/router.tsx`
-- [ ] Migrer `src/i18n/config.ts` → remplacer par Paraglide runtime (`getLocale()`, `locales`, etc.). Seul fichier importateur : `src/helpers/number.ts`
-- [ ] Ajouter `src/paraglide/` au `.gitignore` (dossier généré, regénéré à chaque build)
-- [ ] Créer `messages/fr.json` et `messages/en.json` avec quelques clés de test
-- [ ] **Vérifier `getLocale()` dans les server functions** : appeler `getLocale()` dans un `.handler()` de `createServerFn` et confirmer qu'il retourne la bonne locale (le cookie `PARAGLIDE_LOCALE` doit être lu par le middleware Nitro). C'est critique pour `src/server/user.ts` (StudioError) et les toasts server-side.
-- [ ] **Vérifier** : site FR identique, `/en/` affiche les clés EN, `/en/admin` retourne 404
+- [x] Ajouter `paraglideMiddleware` dans `src/server.ts`
+- [x] Ajouter `rewrite` (`deLocalizeUrl`/`localizeUrl`) dans `src/router.tsx`
+- [x] Migrer `src/i18n/config.ts` → remplacer par Paraglide runtime (`getLocale()`, `locales`, etc.). Seul fichier importateur : `src/helpers/number.ts`. **`src/i18n/config.ts` supprimé.**
+- [x] Ajouter `src/paraglide/` au `.gitignore` (dossier généré, regénéré à chaque build)
+- [x] Créer `messages/fr.json` et `messages/en.json` avec quelques clés de test
+- [x] **Vérifier `getLocale()` dans les server functions** : appeler `getLocale()` dans un `.handler()` de `createServerFn` et confirmer qu'il retourne la bonne locale (le cookie `PARAGLIDE_LOCALE` doit être lu par le middleware Nitro). C'est critique pour `src/server/user.ts` (StudioError) et les toasts server-side. → **À tester manuellement avec le dev server.**
+- [x] **Vérifier** : site FR identique, `/en/` affiche les clés EN, `/en/admin` retourne 404 → **À tester manuellement avec le dev server.**
 
 **2. SEO multilingue** (dépend de 1 — `getLocale()` doit fonctionner)
 Structure d'abord (indépendant des strings), contenu traduit complété après l'étape 3.

@@ -1,32 +1,20 @@
-import {
-  type Locale,
-  LOCALE_FALLBACK,
-  type ValuesByLocale
-} from '@/i18n/config'
+import type { Locale } from '@/paraglide/runtime'
 
-type NumberFormatOptionsWithLocale = Intl.NumberFormatOptions & {
-  locale?: Locale
-}
+type FormatCurrencyParams = {
+  locale: Locale
+} & Intl.NumberFormatOptions
 
-const FORMAT_OPTIONS_BY_LOCALE: ValuesByLocale<Intl.NumberFormatOptions> = {
-  fr: {
-    style: 'currency',
-    minimumFractionDigits: 0,
-    currency: 'EUR'
-  },
-  en: {
-    style: 'currency',
-    minimumFractionDigits: 0,
-    currency: 'EUR'
-  }
-}
+const DEFAULT_CURRENCY_OPTIONS = {
+  style: 'currency',
+  minimumFractionDigits: 0,
+  currency: 'EUR'
+} as const satisfies Intl.NumberFormatOptions
 
-function formatEuros(euros: number, options?: NumberFormatOptionsWithLocale) {
-  const locale = options?.locale ?? LOCALE_FALLBACK
-  const defaultOptions = FORMAT_OPTIONS_BY_LOCALE[locale]
+function formatEuros(euros: number, params: FormatCurrencyParams) {
+  const { locale, ...options } = params
 
   return euros.toLocaleString(locale, {
-    ...defaultOptions,
+    ...DEFAULT_CURRENCY_OPTIONS,
     ...options
   })
 }
@@ -45,9 +33,9 @@ export function convertCentsToEuros(cents: number) {
 
 export function formatCentsToEuros(
   cents: number,
-  options?: NumberFormatOptionsWithLocale
+  params: FormatCurrencyParams
 ) {
   const euros = convertCentsToEuros(cents)
 
-  return formatEuros(euros, options)
+  return formatEuros(euros, params)
 }

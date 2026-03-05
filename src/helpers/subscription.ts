@@ -5,6 +5,7 @@ import {
   PREMIUM_PLAN
 } from '@/constants/plan'
 import { formatCentsToEuros } from '@/helpers/number'
+import type { Locale } from '@/paraglide/runtime'
 
 export const getBillingPeriodFromPlan = (
   planName: BetterAuthPlanName
@@ -16,10 +17,18 @@ export const getBillingPeriodFromPlan = (
   return 'monthly'
 }
 
-export const getSubscriptionDisplayInfo = (planName: BetterAuthPlanName) => {
+type SubscriptionDisplayInfoParams = {
+  planName: BetterAuthPlanName
+  locale: Locale
+}
+
+export const getSubscriptionDisplayInfo = ({
+  planName,
+  locale
+}: SubscriptionDisplayInfoParams) => {
   const billingPeriod = getBillingPeriodFromPlan(planName)
   const pricing = PREMIUM_PLAN.pricing[billingPeriod]
-  const formattedPrice = formatCentsToEuros(pricing.priceInCents)
+  const formattedPrice = formatCentsToEuros(pricing.priceInCents, { locale })
   const periodLabel = BILLING_PERIOD_LABELS[billingPeriod]
 
   return {

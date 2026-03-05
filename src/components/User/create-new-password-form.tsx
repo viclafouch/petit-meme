@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { LoadingButton } from '@/components/ui/loading-button'
-import { passwordWithConfirmationSchema } from '@/constants/auth'
+import { getPasswordWithConfirmationSchema } from '@/constants/auth'
 import {
   extractAuthErrorCode,
   getAuthErrorMessage
@@ -22,15 +22,17 @@ import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 
-const createNewPasswordFormOpts = formOptions({
-  defaultValues: {
-    password: '',
-    confirmPassword: ''
-  },
-  validators: {
-    onChange: passwordWithConfirmationSchema
-  }
-})
+const getCreateNewPasswordFormOpts = () => {
+  return formOptions({
+    defaultValues: {
+      password: '',
+      confirmPassword: ''
+    },
+    validators: {
+      onChange: getPasswordWithConfirmationSchema()
+    }
+  })
+}
 
 export const CreateNewPasswordForm = ({ token }: { token: string }) => {
   const router = useRouter()
@@ -56,7 +58,7 @@ export const CreateNewPasswordForm = ({ token }: { token: string }) => {
   })
 
   const form = useForm({
-    ...createNewPasswordFormOpts,
+    ...getCreateNewPasswordFormOpts(),
     onSubmit: async ({ value }) => {
       return resetPasswordMutation.mutateAsync({
         newPassword: value.password

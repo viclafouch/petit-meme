@@ -30,32 +30,36 @@ import { m } from '@/paraglide/messages.js'
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 
-const updatePasswordSchema = z
-  .object({
-    currentPassword: z.string().nonempty(),
-    newPassword: z.string().min(4),
-    confirmPassword: z.string().min(4)
-  })
-  .refine(
-    (data) => {
-      return data.newPassword === data.confirmPassword
-    },
-    {
-      message: 'Les mots de passe ne correspondent pas',
-      path: ['confirmPassword']
-    }
-  )
+const getUpdatePasswordSchema = () => {
+  return z
+    .object({
+      currentPassword: z.string().nonempty(),
+      newPassword: z.string().min(4),
+      confirmPassword: z.string().min(4)
+    })
+    .refine(
+      (data) => {
+        return data.newPassword === data.confirmPassword
+      },
+      {
+        message: m.validation_passwords_dont_match(),
+        path: ['confirmPassword']
+      }
+    )
+}
 
-const updatePasswordFormOpts = formOptions({
-  defaultValues: {
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  },
-  validators: {
-    onChange: updatePasswordSchema
-  }
-})
+const getUpdatePasswordFormOpts = () => {
+  return formOptions({
+    defaultValues: {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    },
+    validators: {
+      onChange: getUpdatePasswordSchema()
+    }
+  })
+}
 
 const UpdatePasswordForm = () => {
   const updatePasswordMutation = useMutation({
@@ -84,7 +88,7 @@ const UpdatePasswordForm = () => {
   })
 
   const form = useForm({
-    ...updatePasswordFormOpts,
+    ...getUpdatePasswordFormOpts(),
     onSubmit: async ({ value }) => {
       return updatePasswordMutation.mutateAsync({
         currentPassword: value.currentPassword,

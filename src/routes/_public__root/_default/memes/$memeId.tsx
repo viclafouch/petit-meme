@@ -1,6 +1,5 @@
 /* eslint-disable unicorn/filename-case */
 import React from 'react'
-import { formatDate } from 'date-fns'
 import {
   ArrowLeft,
   Clapperboard,
@@ -42,7 +41,7 @@ import {
 } from '@/lib/seo'
 import { cn } from '@/lib/utils'
 import { m } from '@/paraglide/messages.js'
-import { getLocale } from '@/paraglide/runtime.js'
+import { getLocale } from '@/paraglide/runtime'
 import { getRandomMeme, getRelatedMemes, trackMemeAction } from '@/server/meme'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import {
@@ -82,7 +81,7 @@ const MemeInfo = ({ meme, allTags }: MemeInfoParams) => {
         {meme.publishedAt ? (
           <span className="text-muted-foreground text-xs">
             {m.meme_added_on({
-              date: formatDate(meme.publishedAt, 'dd/MM/yyyy')
+              date: new Date(meme.publishedAt).toLocaleDateString(getLocale())
             })}
           </span>
         ) : null}

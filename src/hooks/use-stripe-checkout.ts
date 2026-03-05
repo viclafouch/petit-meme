@@ -5,6 +5,7 @@ import { authClient } from '@/lib/auth-client'
 import { getActiveSubscriptionQueryOpts } from '@/lib/queries'
 import { captureWithFeature } from '@/lib/sentry'
 import { m } from '@/paraglide/messages.js'
+import { getLocale } from '@/paraglide/runtime'
 import { useShowDialog } from '@/stores/dialog.store'
 import { useQueryClient } from '@tanstack/react-query'
 import { type LinkOptions, useRouteContext } from '@tanstack/react-router'
@@ -23,7 +24,7 @@ export const useStripeCheckout = () => {
 
     try {
       const promise = authClient.subscription.billingPortal({
-        locale: 'fr',
+        locale: getLocale(),
         returnUrl: '/settings' as LinkOptions['to']
       })
       toast.promise(promise, {

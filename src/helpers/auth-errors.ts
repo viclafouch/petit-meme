@@ -1,59 +1,96 @@
 import { PASSWORD_MIN_LENGTH } from '@/constants/auth'
 import type { authClient } from '@/lib/auth-client'
+import { m } from '@/paraglide/messages.js'
 
 type AuthErrorCode = keyof typeof authClient.$ERROR_CODES
 
-const AUTH_ERRORS_FR = {
-  USER_NOT_FOUND: 'Utilisateur introuvable',
-  FAILED_TO_CREATE_USER: 'Impossible de créer le compte',
-  FAILED_TO_CREATE_SESSION: 'Impossible de créer la session',
-  FAILED_TO_UPDATE_USER: 'Impossible de mettre à jour le compte',
-  FAILED_TO_GET_SESSION: 'Impossible de récupérer la session',
-  INVALID_PASSWORD: 'Le mot de passe est incorrect',
-  INVALID_EMAIL: 'Email invalide',
-  INVALID_EMAIL_OR_PASSWORD: 'Email ou mot de passe invalide',
-  SOCIAL_ACCOUNT_ALREADY_LINKED: 'Ce compte social est déjà lié',
-  PROVIDER_NOT_FOUND: 'Fournisseur introuvable',
-  INVALID_TOKEN: 'Lien expiré ou invalide',
-  ID_TOKEN_NOT_SUPPORTED: 'Token non supporté',
-  FAILED_TO_GET_USER_INFO: 'Impossible de récupérer les informations',
-  USER_EMAIL_NOT_FOUND: 'Email introuvable',
-  EMAIL_NOT_VERIFIED: 'Veuillez vérifier votre email avant de vous connecter',
-  PASSWORD_TOO_SHORT: `Mot de passe trop court (${String(PASSWORD_MIN_LENGTH)} caractères minimum)`,
-  PASSWORD_TOO_LONG: 'Mot de passe trop long',
-  USER_ALREADY_EXISTS: 'Cette adresse email est déjà utilisée',
-  USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL:
-    'Cette adresse email est déjà utilisée. Veuillez en utiliser une autre.',
-  EMAIL_CAN_NOT_BE_UPDATED: "L'email ne peut pas être modifié",
-  CREDENTIAL_ACCOUNT_NOT_FOUND: 'Compte introuvable',
-  SESSION_EXPIRED: 'Session expirée, veuillez vous reconnecter',
-  FAILED_TO_UNLINK_LAST_ACCOUNT: 'Impossible de dissocier votre dernier compte',
-  ACCOUNT_NOT_FOUND: 'Compte introuvable',
-  USER_ALREADY_HAS_PASSWORD: 'Vous avez déjà un mot de passe'
-} as const satisfies Partial<Record<AuthErrorCode, string>>
-
-const EXTRA_ERRORS_FR = {
-  TOO_MANY_REQUESTS:
-    'Trop de tentatives, veuillez réessayer dans quelques minutes',
-  BANNED_USER:
-    "Votre compte a été suspendu. Contactez hello@petit-meme.io pour plus d'informations."
-} as const satisfies Record<string, string>
-
-export function getAuthErrorMessage(code: string) {
-  const message =
-    AUTH_ERRORS_FR[code as keyof typeof AUTH_ERRORS_FR] ??
-    EXTRA_ERRORS_FR[code as keyof typeof EXTRA_ERRORS_FR]
-
-  if (message) {
-    return message
+const AUTH_ERROR_MESSAGES: Partial<Record<AuthErrorCode, () => string>> = {
+  USER_NOT_FOUND: () => {
+    return m.auth_error_user_not_found()
+  },
+  FAILED_TO_CREATE_USER: () => {
+    return m.auth_error_failed_to_create_user()
+  },
+  FAILED_TO_CREATE_SESSION: () => {
+    return m.auth_error_failed_to_create_session()
+  },
+  FAILED_TO_UPDATE_USER: () => {
+    return m.auth_error_failed_to_update_user()
+  },
+  FAILED_TO_GET_SESSION: () => {
+    return m.auth_error_failed_to_get_session()
+  },
+  INVALID_PASSWORD: () => {
+    return m.auth_error_invalid_password()
+  },
+  INVALID_EMAIL: () => {
+    return m.auth_error_invalid_email()
+  },
+  INVALID_EMAIL_OR_PASSWORD: () => {
+    return m.auth_error_invalid_email_or_password()
+  },
+  SOCIAL_ACCOUNT_ALREADY_LINKED: () => {
+    return m.auth_error_social_account_already_linked()
+  },
+  PROVIDER_NOT_FOUND: () => {
+    return m.auth_error_provider_not_found()
+  },
+  INVALID_TOKEN: () => {
+    return m.auth_error_invalid_token()
+  },
+  ID_TOKEN_NOT_SUPPORTED: () => {
+    return m.auth_error_id_token_not_supported()
+  },
+  FAILED_TO_GET_USER_INFO: () => {
+    return m.auth_error_failed_to_get_user_info()
+  },
+  USER_EMAIL_NOT_FOUND: () => {
+    return m.auth_error_user_email_not_found()
+  },
+  EMAIL_NOT_VERIFIED: () => {
+    return m.auth_error_email_not_verified()
+  },
+  PASSWORD_TOO_SHORT: () => {
+    return m.auth_error_password_too_short({
+      minLength: String(PASSWORD_MIN_LENGTH)
+    })
+  },
+  PASSWORD_TOO_LONG: () => {
+    return m.auth_error_password_too_long()
+  },
+  USER_ALREADY_EXISTS: () => {
+    return m.auth_error_user_already_exists()
+  },
+  USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: () => {
+    return m.auth_error_user_already_exists_use_another()
+  },
+  EMAIL_CAN_NOT_BE_UPDATED: () => {
+    return m.auth_error_email_cannot_be_updated()
+  },
+  CREDENTIAL_ACCOUNT_NOT_FOUND: () => {
+    return m.auth_error_credential_account_not_found()
+  },
+  SESSION_EXPIRED: () => {
+    return m.auth_error_session_expired()
+  },
+  FAILED_TO_UNLINK_LAST_ACCOUNT: () => {
+    return m.auth_error_failed_to_unlink_last_account()
+  },
+  ACCOUNT_NOT_FOUND: () => {
+    return m.auth_error_account_not_found()
+  },
+  USER_ALREADY_HAS_PASSWORD: () => {
+    return m.auth_error_user_already_has_password()
   }
+}
 
-  if (import.meta.env.DEV) {
-    // eslint-disable-next-line no-console
-    console.warn(`[auth-errors] Code non traduit: ${code}`)
+const EXTRA_ERROR_MESSAGES: Record<string, () => string> = {
+  TOO_MANY_REQUESTS: () => {
+    return m.auth_error_too_many_requests()
+  },
+  BANNED_USER: () => {
+    return m.auth_error_banned_user()
   }
-
-  return 'Une erreur inattendue est survenue'
 }
 
 type AuthErrorResponse = {
@@ -74,17 +111,40 @@ export function extractAuthErrorCode(error: AuthErrorResponse): string {
   return error.message ?? 'UNKNOWN'
 }
 
-const CHANGE_PASSWORD_ERRORS_FR = {
-  PASSWORD_TOO_SHORT: `Le nouveau mot de passe est trop court (${String(PASSWORD_MIN_LENGTH)} caractères minimum)`,
-  PASSWORD_TOO_LONG: 'Le nouveau mot de passe est trop long'
-} as const satisfies Partial<Record<AuthErrorCode, string>>
+export function getAuthErrorMessage(code: string): string {
+  const getMessage =
+    AUTH_ERROR_MESSAGES[code as AuthErrorCode] ?? EXTRA_ERROR_MESSAGES[code]
 
-export function getChangePasswordErrorMessage(code: string) {
-  const contextMessage =
-    CHANGE_PASSWORD_ERRORS_FR[code as keyof typeof CHANGE_PASSWORD_ERRORS_FR]
+  if (getMessage) {
+    return getMessage()
+  }
 
-  if (contextMessage) {
-    return contextMessage
+  if (import.meta.env.DEV) {
+    // eslint-disable-next-line no-console
+    console.warn(`[auth-errors] Untranslated code: ${code}`)
+  }
+
+  return m.auth_error_unknown()
+}
+
+const CHANGE_PASSWORD_ERROR_MESSAGES: Partial<
+  Record<AuthErrorCode, () => string>
+> = {
+  PASSWORD_TOO_SHORT: () => {
+    return m.auth_error_change_password_too_short({
+      minLength: String(PASSWORD_MIN_LENGTH)
+    })
+  },
+  PASSWORD_TOO_LONG: () => {
+    return m.auth_error_change_password_too_long()
+  }
+}
+
+export function getChangePasswordErrorMessage(code: string): string {
+  const getMessage = CHANGE_PASSWORD_ERROR_MESSAGES[code as AuthErrorCode]
+
+  if (getMessage) {
+    return getMessage()
   }
 
   return getAuthErrorMessage(code)

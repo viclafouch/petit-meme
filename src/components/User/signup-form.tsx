@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { LoadingButton } from '@/components/ui/loading-button'
-import { passwordWithConfirmationSchema } from '@/constants/auth'
+import { getPasswordWithConfirmationSchema } from '@/constants/auth'
 import {
   extractAuthErrorCode,
   getAuthErrorMessage
@@ -28,28 +28,32 @@ type SignupFormParams = {
   onAuthTypeChange: (authType: 'login' | 'signup') => void
 }
 
-const signupSchema = z
-  .object({
-    name: z.string(),
-    email: z.email(),
-    acceptTerms: z.literal(true, {
-      message: 'Vous devez accepter les conditions pour continuer'
+const getSignupSchema = () => {
+  return z
+    .object({
+      name: z.string(),
+      email: z.email(),
+      acceptTerms: z.literal(true, {
+        message: m.validation_accept_terms()
+      })
     })
-  })
-  .and(passwordWithConfirmationSchema)
+    .and(getPasswordWithConfirmationSchema())
+}
 
-const signupFormOpts = formOptions({
-  defaultValues: {
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    acceptTerms: false as boolean
-  },
-  validators: {
-    onChange: signupSchema
-  }
-})
+const getSignupFormOpts = () => {
+  return formOptions({
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      acceptTerms: false as boolean
+    },
+    validators: {
+      onChange: getSignupSchema()
+    }
+  })
+}
 
 const SignupSuccessAlert = () => {
   return (
@@ -92,7 +96,7 @@ export const SignupForm = ({ onAuthTypeChange }: SignupFormParams) => {
   })
 
   const form = useForm({
-    ...signupFormOpts,
+    ...getSignupFormOpts(),
     onSubmit: async ({ value }) => {
       return signupMutation.mutateAsync({
         email: value.email,

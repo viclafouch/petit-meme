@@ -258,14 +258,22 @@ Préfixes de clés par domaine : `nav_`, `home_`, `pricing_`, `meme_`, `studio_`
 - [x] Compléter étape 2 : title/description/keywords/JSON-LD/og:image:alt traduits (sous-section "Après étape 3")
 
 **4. Intégrations tierces** (dépend de 1, parallélisable avec 3)
-- [ ] **Better Auth i18n** : installer `@better-auth/i18n`, configurer le plugin dans `src/lib/auth.tsx` avec les traductions FR (reprendre les ~27 codes de `src/helpers/auth-errors.ts`), détection via cookie `PARAGLIDE_LOCALE`. Puis supprimer `src/helpers/auth-errors.ts` et ses imports dans `src/components/User/auth-dialog.tsx`.
-- [ ] **Zod** : remplacer les messages custom FR dans les schémas par `m.validation_xxx()`.
-  Fichiers : `src/components/User/signup-form.tsx`, `src/components/User/delete-account-dialog.tsx`, `src/components/User/update-password-dialog.tsx`
-- [ ] **Date-fns & Intl** : passer la locale explicitement dans les appels publics. Admin reste FR fixe.
-  Fichier public : `src/routes/_public__root/_default/settings/-components/profile-header.tsx` (`toLocaleDateString('fr-FR')` ligne 48)
-  Fichiers admin (pas de changement) : `src/routes/admin/-components/dashboard/trends-chart.tsx`, `src/routes/admin/-components/dashboard/activity-feed.tsx`, `src/routes/admin/users/index.tsx`
-- [ ] **Number formatting** : dans `src/helpers/number.ts`, remplacer `import { LOCALE_FALLBACK } from '@/i18n/config'` par `import { getLocale } from '@/paraglide/runtime'`
-- [ ] **Stripe** : dans `src/hooks/use-stripe-checkout.ts`, remplacer `locale: 'fr'` par `locale: getLocale()` pour Checkout et Billing Portal
+- [x] **Auth errors i18n** : `auth-errors.ts` rewritten to use Paraglide messages (`m.auth_error_*()`) instead of hardcoded French strings.
+  ~30 new `auth_error_*` keys. Pattern: Record of getter functions → called at render time, never at module level.
+  Decision: **skipped `@better-auth/i18n` plugin** — no new dependency needed, consistent with Paraglide approach, same pattern as rest of codebase. Auth errors are handled client-side via error codes (unchanged pattern).
+- [x] **Zod** : replaced custom FR messages with `m.validation_xxx()`.
+  `passwordWithConfirmationSchema` → `getPasswordWithConfirmationSchema()` (getter to avoid module-level `m.xxx()` calls).
+  `signupSchema` → `getSignupSchema()`, `updatePasswordSchema` → `getUpdatePasswordSchema()`.
+  `formOptions` → getter functions too (`getSignupFormOpts()`, etc.).
+  Consumers updated: `signup-form.tsx`, `create-new-password-form.tsx`, `update-password-dialog.tsx`.
+  2 new keys: `validation_accept_terms`, `validation_passwords_dont_match`.
+- [x] **Date-fns & Intl** : `memes/$memeId.tsx` — replaced `formatDate(date, 'dd/MM/yyyy')` (date-fns) with `toLocaleDateString(getLocale())`.
+  `profile-header.tsx` and `profile-content.tsx` already use `getLocale()` (done in Batch D).
+  Admin files stay FR-fixed (no change).
+  `auth.tsx` `formatDate` stays `'fr-FR'` (server-side, emails = Phase 1.5).
+- [x] **Number formatting** : already done — `src/helpers/number.ts` takes `locale: Locale` parameter (migrated in Step 1).
+- [x] **Stripe** : `use-stripe-checkout.ts` — replaced `locale: 'fr'` with `locale: getLocale()` for Billing Portal.
+  `auth.tsx:277` `locale: 'fr'` in `onSubscriptionComplete` stays (server-side email, Phase 1.5).
 
 **5. UI i18n** (dépend de 1, parallélisable avec 3 et 4)
 - [ ] Language switcher dans `src/components/navbar.tsx` : bouton compact FR/EN. Au clic : set cookie `PARAGLIDE_LOCALE` + naviguer vers l'URL localisée via `localizeUrl()`/`deLocalizeUrl()`. Design via `/frontend-design`.

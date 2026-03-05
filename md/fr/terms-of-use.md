@@ -72,7 +72,7 @@ de non-respect de ces conditions.
 -   Certains services (ex. suppression du watermark, fonctionnalités
     avancées) sont proposés via **Stripe**.
 -   Les prix et conditions sont indiqués sur la page
-    [Tarifs](https://petit-meme.io/pricing).
+    [Tarifs](/pricing).
 -   Toute souscription est **personnelle et non transférable**.
 -   Vous pouvez gérer ou annuler votre abonnement via le portail de
     facturation.
@@ -94,7 +94,7 @@ de non-respect de ces conditions.
 
 Nous respectons votre vie privée.
 Pour plus de détails, consultez notre [Politique de
-confidentialité](https://petit-meme.io/privacy).
+confidentialité](/privacy).
 
 ------------------------------------------------------------------------
 

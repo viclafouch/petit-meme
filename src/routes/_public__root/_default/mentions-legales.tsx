@@ -2,10 +2,24 @@ import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { BASE_MARKDOWN_COMPONENTS } from '@/constants/markdown'
 import { seo } from '@/lib/seo'
-import md from '~/md/mentions-legales.md?raw'
+import { m } from '@/paraglide/messages'
+import type { Locale } from '@/paraglide/runtime'
+import { getLocale } from '@/paraglide/runtime'
 import { createFileRoute } from '@tanstack/react-router'
+import { createServerFn } from '@tanstack/react-start'
+
+const loadMarkdown = createServerFn({ method: 'GET' }).handler(async () => {
+  const modules = {
+    fr: (await import('~/md/fr/mentions-legales.md?raw')).default,
+    en: (await import('~/md/en/mentions-legales.md?raw')).default
+  } satisfies Record<Locale, string>
+
+  return modules[getLocale()]
+})
 
 const RouteComponent = () => {
+  const md = Route.useLoaderData()
+
   return (
     <div>
       <Markdown
@@ -23,12 +37,14 @@ export const Route = createFileRoute(
 )({
   component: RouteComponent,
   staleTime: Infinity,
+  loader: () => {
+    return loadMarkdown()
+  },
   head: () => {
     return seo({
-      title: 'Mentions légales',
+      title: m.legal_mentions_title(),
       pathname: '/mentions-legales',
-      description:
-        'Mentions légales du site Petit Meme. Informations sur l’éditeur, l’hébergeur et la propriété intellectuelle.'
+      description: m.legal_mentions_description()
     })
   }
 })

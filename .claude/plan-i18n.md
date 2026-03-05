@@ -243,11 +243,14 @@ Préfixes de clés par domaine : `nav_`, `home_`, `pricing_`, `meme_`, `studio_`
   StudioError messages translated on client side using error codes (not `error.message`).
   `server/user.ts` not modified — server messages kept as identifiers, client handles display.
 
-- [ ] **Batch F — Pages légales** :
-  Créer `md/en/mentions-legales.md`, `md/en/privacy.md`, `md/en/terms-of-use.md`.
-  Modifier le chargement dans `src/routes/_public__root/_default/mentions-legales.tsx`,
-  `src/routes/_public__root/_default/privacy.tsx`, `src/routes/_public__root/_default/terms-of-use.tsx`
-  pour charger le fichier selon `getLocale()`.
+- [x] **Batch F — Pages légales** :
+  Structure `md/{locale}/` : `md/fr/` et `md/en/` avec les 3 fichiers chacun (anciens fichiers racine supprimés).
+  Chargement via `createServerFn` + dynamic `import()` dans le `.handler()` avec
+  `satisfies Record<Locale, string>` → TypeScript casse si une locale est oubliée.
+  `Route.useLoaderData()` dans le composant, `staleTime: Infinity` pour cache.
+  ~6 new keys (`legal_*` prefix pour title/description SEO).
+  Ajouté `localizeUrl()` dans `src/constants/markdown.tsx` pour les liens internes des pages markdown.
+  Liens externes gardent `target="_blank" rel="noopener noreferrer"`.
 
 - [ ] Compléter étape 2 : title/description/keywords/JSON-LD/og:image:alt traduits (sous-section "Après étape 3")
 

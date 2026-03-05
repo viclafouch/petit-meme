@@ -3,6 +3,7 @@
 /* eslint-disable jsx-a11y/heading-has-content */
 import type { Components } from 'react-markdown'
 import { Separator } from '@/components/ui/separator'
+import { localizeUrl } from '@/paraglide/runtime'
 
 export const BASE_MARKDOWN_COMPONENTS = {
   h1: (props) => {
@@ -52,7 +53,25 @@ export const BASE_MARKDOWN_COMPONENTS = {
   hr: () => {
     return <Separator className="my-4" />
   },
-  a: (props) => {
-    return <a className="text-info underline" target="_blank" {...props} />
+  a: ({ href, ...props }) => {
+    if (href?.startsWith('/')) {
+      return (
+        <a
+          className="text-info underline"
+          href={localizeUrl(href).pathname}
+          {...props}
+        />
+      )
+    }
+
+    return (
+      <a
+        className="text-info underline"
+        target="_blank"
+        rel="noopener noreferrer"
+        href={href}
+        {...props}
+      />
+    )
   }
 } as const satisfies Components

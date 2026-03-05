@@ -14,8 +14,8 @@ import {
 } from '@/components/ui/dialog'
 import { MemeStatusMeta } from '@/constants/meme'
 import { formatDate } from '@/helpers/date'
-import { formatBookmarkCount, formatViewCount } from '@/helpers/format'
 import { buildMemeSeo } from '@/lib/seo'
+import { m } from '@/paraglide/messages'
 import { getLocale } from '@/paraglide/runtime'
 import { MemeForm } from '@/routes/admin/library/-components/meme-form'
 import { DeleteMemeButton } from '@admin/-components/delete-meme-button'
@@ -30,6 +30,7 @@ const RouteComponent = () => {
   const { memeId } = Route.useParams()
   const queryClient = useQueryClient()
   const router = useRouter()
+  const locale = getLocale()
   const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false)
   const memeQuery = useSuspenseQuery(getAdminMemeByIdQueryOpts(memeId))
 
@@ -64,14 +65,11 @@ const RouteComponent = () => {
         description={
           <div className="flex flex-col gap-2">
             <span className="text-sm text-muted-foreground">
-              {formatViewCount(memeQuery.data.viewCount)}
+              {m.meme_views({ count: memeQuery.data.viewCount })}
               {' • '}
-              {formatBookmarkCount(memeQuery.data._count.bookmarkedBy)}
+              {m.meme_bookmarks({ count: memeQuery.data._count.bookmarkedBy })}
               {' - Ajouté le '}
-              {formatDate({
-                date: memeQuery.data.createdAt,
-                locale: getLocale()
-              })}
+              {formatDate(memeQuery.data.createdAt, locale)}
               {' - '}
               <Badge
                 variant={MemeStatusMeta[memeQuery.data.status].badgeVariant}

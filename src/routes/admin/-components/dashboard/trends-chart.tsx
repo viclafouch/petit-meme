@@ -14,6 +14,9 @@ import {
   ChartTooltip,
   ChartTooltipContent
 } from '@/components/ui/chart'
+import { formatDate } from '@/helpers/date'
+import type { Locale } from '@/paraglide/runtime'
+import { getLocale } from '@/paraglide/runtime'
 import type { ChartDataPoint, DashboardPeriod } from '@admin/-server/dashboard'
 import type { IconConfig } from './types'
 
@@ -79,37 +82,37 @@ const PERIOD_DESCRIPTIONS = {
   all: 'Depuis le lancement'
 } as const satisfies Record<DashboardPeriod, string>
 
-const DAY_MONTH_FORMATTER = new Intl.DateTimeFormat('fr-FR', {
+const DAY_MONTH_OPTIONS: Intl.DateTimeFormatOptions = {
   day: 'numeric',
   month: 'short',
   timeZone: 'UTC'
-})
+}
 
-const MONTH_YEAR_FORMATTER = new Intl.DateTimeFormat('fr-FR', {
+const MONTH_YEAR_OPTIONS: Intl.DateTimeFormatOptions = {
   month: 'short',
   year: 'numeric',
   timeZone: 'UTC'
-})
+}
 
-const TOOLTIP_FORMATTER = new Intl.DateTimeFormat('fr-FR', {
+const DATE_LONG_OPTIONS: Intl.DateTimeFormatOptions = {
   day: 'numeric',
   month: 'long',
   year: 'numeric',
   timeZone: 'UTC'
-})
+}
 
-function formatXAxisDate(value: string, period: DashboardPeriod) {
+function formatXAxisDate(
+  value: string,
+  period: DashboardPeriod,
+  locale: Locale
+) {
   const date = new Date(value)
 
   if (period === 'all') {
-    return MONTH_YEAR_FORMATTER.format(date)
+    return formatDate(date, locale, MONTH_YEAR_OPTIONS)
   }
 
-  return DAY_MONTH_FORMATTER.format(date)
-}
-
-function formatTooltipDate(value: string) {
-  return TOOLTIP_FORMATTER.format(new Date(value))
+  return formatDate(date, locale, DAY_MONTH_OPTIONS)
 }
 
 type TrendsChartParams = {
@@ -118,6 +121,7 @@ type TrendsChartParams = {
 }
 
 export const TrendsChart = ({ data, period }: TrendsChartParams) => {
+  const locale = getLocale()
   const [hiddenMetrics, setHiddenMetrics] = React.useState<Set<MetricKey>>(
     new Set()
   )
@@ -193,7 +197,7 @@ export const TrendsChart = ({ data, period }: TrendsChartParams) => {
                 tickMargin={8}
                 minTickGap={32}
                 tickFormatter={(value: string) => {
-                  return formatXAxisDate(value, period)
+                  return formatXAxisDate(value, period, locale)
                 }}
               />
               <ChartTooltip
@@ -201,7 +205,11 @@ export const TrendsChart = ({ data, period }: TrendsChartParams) => {
                   <ChartTooltipContent
                     className="min-w-48"
                     labelFormatter={(value) => {
-                      return formatTooltipDate(String(value))
+                      return formatDate(
+                        new Date(String(value)),
+                        locale,
+                        DATE_LONG_OPTIONS
+                      )
                     }}
                     indicator="dot"
                   />
@@ -225,7 +233,7 @@ export const TrendsChart = ({ data, period }: TrendsChartParams) => {
           <p className="sr-only">
             {PERIOD_DESCRIPTIONS[period]} :{' '}
             {METRIC_SUMMARIES.map((metric) => {
-              return `${metric.label} : ${totals[metric.key].toLocaleString('fr-FR')}`
+              return `${metric.label} : ${totals[metric.key].toLocaleString(locale)}`
             }).join(', ')}
           </p>
         </CardContent>
@@ -244,7 +252,7 @@ export const TrendsChart = ({ data, period }: TrendsChartParams) => {
                 <span className="text-muted-foreground">{metric.icon}</span>
               </div>
               <span className="text-2xl font-bold tabular-nums tracking-tight">
-                {totals[metric.key].toLocaleString('fr-FR')}
+                {totals[metric.key].toLocaleString(locale)}
               </span>
             </div>
           )

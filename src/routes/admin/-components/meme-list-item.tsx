@@ -9,13 +9,9 @@ import {
   LEGACY_MEME_TITLE,
   MemeStatusMeta
 } from '@/constants/meme'
-import {
-  formatBookmarkCount,
-  formatCategoryCount,
-  formatViewCount
-} from '@/helpers/format'
 import { getVideoStatusByIdQueryOpts } from '@/lib/queries'
 import { cn } from '@/lib/utils'
+import { m } from '@/paraglide/messages'
 import { matchIsVideoPlayable } from '@/utils/video'
 import type { AdminMemeRecord } from '@admin/-server/memes'
 import { useQuery } from '@tanstack/react-query'
@@ -45,6 +41,10 @@ export const MemeListItem = React.memo(({ meme }: MemeListItemParams) => {
   const statusMeta = MemeStatusMeta[meme.status]
   const hasPlaceholderTitle =
     meme.title === LEGACY_MEME_TITLE || meme.title === DEFAULT_MEME_TITLE
+  const categoryLabel =
+    meme.categoryCount === 0
+      ? m.meme_categories_none()
+      : m.meme_categories({ count: meme.categoryCount })
 
   return (
     <motion.div className="group relative flex w-full flex-col gap-2 text-sm sm:min-w-0">
@@ -99,24 +99,24 @@ export const MemeListItem = React.memo(({ meme }: MemeListItemParams) => {
           <div className="flex items-center gap-3 text-muted-foreground">
             <span
               className="flex items-center gap-1 text-xs tabular-nums"
-              title={formatViewCount(meme.viewCount)}
-              aria-label={formatViewCount(meme.viewCount)}
+              title={m.meme_views({ count: meme.viewCount })}
+              aria-label={m.meme_views({ count: meme.viewCount })}
             >
               <Eye className="size-3.5" aria-hidden />
               {meme.viewCount}
             </span>
             <span
               className="flex items-center gap-1 text-xs tabular-nums"
-              title={formatCategoryCount(meme.categoryCount)}
-              aria-label={formatCategoryCount(meme.categoryCount)}
+              title={categoryLabel}
+              aria-label={categoryLabel}
             >
               <Tag className="size-3.5" aria-hidden />
               {meme.categoryCount}
             </span>
             <span
               className="flex items-center gap-1 text-xs tabular-nums"
-              title={formatBookmarkCount(meme.bookmarkCount)}
-              aria-label={formatBookmarkCount(meme.bookmarkCount)}
+              title={m.meme_bookmarks({ count: meme.bookmarkCount })}
+              aria-label={m.meme_bookmarks({ count: meme.bookmarkCount })}
             >
               <Bookmark className="size-3.5" aria-hidden />
               {meme.bookmarkCount}

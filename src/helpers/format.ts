@@ -1,30 +1,3 @@
-const pluralRules = new Intl.PluralRules('fr')
-
-type PluralFormsParams = {
-  one: string
-  other: string
-}
-
-function pluralize(count: number, { one, other }: PluralFormsParams) {
-  return pluralRules.select(count) === 'one' ? one : other
-}
-
-export function formatViewCount(count: number) {
-  return `${count} ${pluralize(count, { one: 'vue', other: 'vues' })}`
-}
-
-export function formatCategoryCount(count: number) {
-  if (count === 0) {
-    return 'Aucune catégorie'
-  }
-
-  return `${count} ${pluralize(count, { one: 'catégorie', other: 'catégories' })}`
-}
-
-export function formatBookmarkCount(count: number) {
-  return `${count} ${pluralize(count, { one: 'bookmark', other: 'bookmarks' })}`
-}
-
 export function capitalize(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1)
 }

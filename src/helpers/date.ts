@@ -3,21 +3,21 @@ import type { Locale } from '@/paraglide/runtime'
 
 export type ChartGranularity = 'day' | 'week' | 'month'
 
-type FormatDateParams = {
-  date: Date
-  locale: Locale
-  includeTime?: boolean
+const DEFAULT_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric'
 }
 
-export function formatDate({ date, locale, includeTime }: FormatDateParams) {
-  const options: Intl.DateTimeFormatOptions = {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    ...(includeTime ? { hour: '2-digit', minute: '2-digit' } : {})
-  }
-
-  return new Intl.DateTimeFormat(locale, options).format(date)
+export function formatDate(
+  date: Date,
+  locale: Locale,
+  options?: Intl.DateTimeFormatOptions
+) {
+  return new Intl.DateTimeFormat(
+    locale,
+    options ?? DEFAULT_FORMAT_OPTIONS
+  ).format(date)
 }
 
 const RELATIVE_TIME_THRESHOLDS = [
@@ -42,7 +42,7 @@ export function formatRelativeTime(date: Date, locale: Locale) {
   })
 
   if (!threshold) {
-    return formatDate({ date, locale })
+    return formatDate(date, locale)
   }
 
   const value = Math.round(elapsed / threshold.divisor)

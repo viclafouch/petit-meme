@@ -71,7 +71,7 @@ const columns = [
   columnHelper.accessor('createdAt', {
     header: 'Date de création',
     cell: (info) => {
-      return formatDate({ date: info.getValue(), locale: getLocale() })
+      return formatDate(info.getValue(), getLocale())
     }
   }),
   columnHelper.display({

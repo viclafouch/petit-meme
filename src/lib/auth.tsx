@@ -13,12 +13,14 @@ import {
 import { prismaClient } from '@/db'
 import { clientEnv } from '@/env/client'
 import { serverEnv } from '@/env/server'
+import { formatDate } from '@/helpers/date'
 import { formatCentsToEuros } from '@/helpers/number'
 import { authLogger, stripeLogger } from '@/lib/logger'
 import { sendEmailAsync } from '@/lib/resend'
 import { captureWithFeature } from '@/lib/sentry'
 import { stripeClient } from '@/lib/stripe'
-import { getLocale } from '@/paraglide/runtime'
+import type { Locale } from '@/paraglide/runtime'
+import { baseLocale, getLocale } from '@/paraglide/runtime'
 import { cleanupUserData } from '@/utils/user-cleanup'
 import { prismaAdapter } from '@better-auth/prisma-adapter'
 import { stripe } from '@better-auth/stripe'
@@ -32,11 +34,9 @@ import ResetPassword from '../emails/reset-password'
 import SubscriptionConfirmedEmail from '../emails/subscription-confirmed-email'
 import WelcomeEmail from '../emails/welcome-email'
 
-const formatDate = (date: Date) => {
-  return new Intl.DateTimeFormat('fr-FR', {
-    dateStyle: 'long',
-    timeStyle: 'short'
-  }).format(date)
+const PASSWORD_CHANGED_DATE_OPTIONS: Intl.DateTimeFormatOptions = {
+  dateStyle: 'long',
+  timeStyle: 'short'
 }
 
 const handlePaymentFailed = async (event: Stripe.Event) => {
@@ -152,7 +152,11 @@ const getAuthConfig = createServerOnlyFn(() => {
           react: (
             <PasswordChangedEmail
               username={user.name}
-              changedAt={formatDate(new Date())}
+              changedAt={formatDate(
+                new Date(),
+                getLocale(),
+                PASSWORD_CHANGED_DATE_OPTIONS
+              )}
             />
           ),
           logMessage: 'Password reset for'
@@ -264,7 +268,7 @@ const getAuthConfig = createServerOnlyFn(() => {
 
             const user = await prismaClient.user.findUnique({
               where: { id: subscription.referenceId },
-              select: { email: true, name: true }
+              select: { email: true, name: true, locale: true }
             })
 
             if (!user) {
@@ -275,8 +279,9 @@ const getAuthConfig = createServerOnlyFn(() => {
             const priceCents = stripePrice?.unit_amount ?? 0
             const isAnnual = stripePrice?.recurring?.interval === 'year'
 
+            const userLocale = (user.locale as Locale) ?? baseLocale
             const formattedAmount = formatCentsToEuros(priceCents, {
-              locale: 'fr'
+              locale: userLocale
             })
             const periodSuffix = isAnnual ? '/an' : '/mois'
 

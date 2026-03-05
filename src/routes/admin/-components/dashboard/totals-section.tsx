@@ -1,4 +1,5 @@
 import { Clock, Crown, FileVideo, Users } from 'lucide-react'
+import { getLocale } from '@/paraglide/runtime'
 import type { DashboardTotals } from '@admin/-server/dashboard'
 import type { IconConfig } from './types'
 
@@ -30,6 +31,8 @@ type TotalsSectionParams = {
 }
 
 export const TotalsSection = ({ totals }: TotalsSectionParams) => {
+  const locale = getLocale()
+
   return (
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
       {TOTAL_CONFIGS.map((config) => {
@@ -43,7 +46,7 @@ export const TotalsSection = ({ totals }: TotalsSectionParams) => {
             </div>
             <div className="flex flex-col">
               <span className="text-lg font-bold tabular-nums">
-                {totals[config.key].toLocaleString('fr-FR')}
+                {totals[config.key].toLocaleString(locale)}
               </span>
               <span className="text-xs text-muted-foreground">
                 {config.label}

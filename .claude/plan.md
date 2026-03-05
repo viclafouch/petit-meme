@@ -171,7 +171,7 @@ autofill:shadow-[inset_0_0_0px_1000px_var(--color-background)]
 
 ## date-fns supprimé (mars 2026) ✅
 
-Dépendance `date-fns` entièrement remplacée par des helpers natifs (`Intl.DateTimeFormat`, `Intl.RelativeTimeFormat`, arithmétique de dates) dans `src/helpers/date.ts`. Helpers créés : `formatDate()`, `formatRelativeTime()`, `differenceInMonths()`. Utilisés dans les 4 fichiers admin qui importaient date-fns.
+Dépendance `date-fns` supprimée. API de date centralisée dans `src/helpers/date.ts` : une seule `formatDate(date, locale, options?)` avec override `Intl.DateTimeFormatOptions`, plus `formatRelativeTime()` et `differenceInMonths()`. Toutes les locales hardcodées migrées vers `getLocale()`. Helpers format (`formatViewCount`, etc.) remplacés par messages Paraglide (`meme_views`, `meme_bookmarks`, `meme_categories`, `meme_categories_none`).
 
 ---
 

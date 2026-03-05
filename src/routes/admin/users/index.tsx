@@ -28,6 +28,14 @@ import {
 } from '@tanstack/react-table'
 import { UserActionsCell } from './-components/user-actions-cell'
 
+const DATE_WITH_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit'
+}
+
 type UserCellParams = {
   user: EnrichedUser
 }
@@ -154,7 +162,7 @@ const columns = [
       const tooltipLines = [
         `${months} mois d'abonnement`,
         subscription.endsAt
-          ? `Fin : ${formatDate({ date: new Date(subscription.endsAt), locale: getLocale() })}`
+          ? `Fin : ${formatDate(new Date(subscription.endsAt), getLocale())}`
           : null
       ]
         .filter(Boolean)
@@ -227,7 +235,7 @@ const columns = [
             </span>
           </TooltipTrigger>
           <TooltipContent>
-            {formatDate({ date, locale: getLocale(), includeTime: true })}
+            {formatDate(date, getLocale(), DATE_WITH_TIME_OPTIONS)}
           </TooltipContent>
         </Tooltip>
       )

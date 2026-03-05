@@ -9,7 +9,7 @@ import { getCookieConsent } from '@/lib/cookie-consent'
 import { getAuthUserQueryOpts } from '@/lib/queries'
 import { getStoredTheme, ThemeProvider } from '@/lib/theme'
 import { m } from '@/paraglide/messages.js'
-import { getLocale, localizeHref } from '@/paraglide/runtime'
+import { getLocale, getTextDirection, localizeHref } from '@/paraglide/runtime'
 import type { getAuthUser } from '@/server/user-auth'
 import { DialogProvider } from '@/stores/dialog.store'
 import { ensureAlgoliaUserToken } from '@/utils/tracking-cookies'
@@ -31,7 +31,7 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => {
   const { _storedTheme, _cookieConsent } = Route.useLoaderData()
 
   return (
-    <html lang={getLocale()} suppressHydrationWarning dir="ltr">
+    <html lang={getLocale()} suppressHydrationWarning dir={getTextDirection()}>
       <head>
         <meta name="algolia-site-verification" content="57C07DF31C29F6D0" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -70,7 +70,7 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => {
 
 const RootErrorDocument = ({ children }: { children: React.ReactNode }) => {
   return (
-    <html lang={getLocale()} dir="ltr">
+    <html lang={getLocale()} dir={getTextDirection()}>
       <head>
         <HeadContent />
       </head>

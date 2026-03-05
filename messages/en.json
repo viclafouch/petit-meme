@@ -297,6 +297,7 @@
   "settings_danger_zone": "Danger zone",
   "settings_data_description": "Download a copy of your data in JSON format (GDPR)",
   "settings_data_export_error": "Download failed",
+  "settings_data_export_filename": "my-data-petit-meme",
   "settings_data_exported": "Data downloaded",
   "settings_data_label": "My personal data",
   "settings_delete_account": "Delete my account",

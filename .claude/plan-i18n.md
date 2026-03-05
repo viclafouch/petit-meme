@@ -437,15 +437,27 @@ Les mèmes restent en FR (phase 2). Seule l'interface est traduite. Les titres/d
 - Algolia bilingue (queryLanguages, synonymes EN) → Phase 2
 - Traduction des mèmes (titres, descriptions, catégories) → Phase 2
 - Gemini AI prompt (génération descriptions) → Phase 2
-- Admin panel → FR fixe
+- Admin panel → FR fixe (toutes les routes `/admin/*` sont exclues de l'i18n, y compris les sujets d'emails admin dans `src/routes/admin/-server/users.tsx`)
 
 ### Phase 1.5 — Emails i18n
 
-- [ ] Traduire les 11 templates React-Email en EN
-- [ ] Traduire les sujets d'emails dans Better Auth config (`src/lib/auth.tsx`) : 6 sujets FR
-- [ ] Traduire les sujets d'emails custom hors Better Auth : cron verification-reminder, user-cleanup
+- [ ] `src/emails/email-layout.tsx` : `<Html lang="fr">` → passer `locale` en prop, dynamique selon la langue du destinataire
+- [ ] `src/emails/email-layout.tsx` : textes FR hardcodés (footer "Tous droits réservés", fallback link "Si le bouton ne fonctionne pas...")
+- [ ] Traduire les 11 templates React-Email en EN (contenu des emails)
+- [ ] Traduire les sujets d'emails dans Better Auth config (`src/lib/auth.tsx`) : 6 sujets FR hardcodés
+  - `'Échec de paiement pour ton abonnement Petit Mème'`
+  - `'Réinitialise ton mot de passe Petit Mème'`
+  - `'Ton mot de passe Petit Mème a été modifié'`
+  - `'Confirme ton inscription à Petit Mème'`
+  - `'Bienvenue sur Petit Mème !'`
+  - `'Ton abonnement Premium Petit Mème est activé !'`
+- [ ] `src/lib/auth.tsx:286` : `periodSuffix` hardcodé (`'/an'` / `'/mois'`) → clé message
+- [ ] Traduire les sujets d'emails custom hors Better Auth :
+  - `src/routes/api/cron/verification-reminder.ts:40` : `'Rappel : confirme ton email Petit Mème'`
+  - `src/utils/user-cleanup.tsx:21` : `'Ton compte Petit Mème a été supprimé'`
 - [ ] Envoyer les emails dans la langue du user (champ `locale` en DB)
-- [ ] AI errors admin (`src/server/ai.ts`) : optionnel, admin-only
+- [ ] `src/emails/subscription-confirmed-email.tsx:49` : preview default `'3,99 €/mois'` → dynamique
+- [ ] AI errors admin (`src/server/ai.ts`) : optionnel, admin-only → hors scope
 
 ### Phase 2 — Contenu (mèmes) + Algolia bilingue
 

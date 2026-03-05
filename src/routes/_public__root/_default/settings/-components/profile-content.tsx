@@ -56,10 +56,7 @@ export const ProfileContent = ({
       const blob = new Blob([JSON.stringify(data, null, 2)], {
         type: 'application/json'
       })
-      const filename =
-        getLocale() === 'fr'
-          ? 'mes-donnees-petit-meme.json'
-          : 'my-data-petit-meme.json'
+      const filename = `${m.settings_data_export_filename()}.json`
       downloadBlob(blob, filename)
     },
     onSuccess: () => {

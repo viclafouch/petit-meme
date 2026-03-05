@@ -297,6 +297,7 @@
   "settings_danger_zone": "Zone de danger",
   "settings_data_description": "Télécharger une copie de vos données au format JSON (RGPD)",
   "settings_data_export_error": "Erreur lors du téléchargement",
+  "settings_data_export_filename": "mes-donnees-petit-meme",
   "settings_data_exported": "Données téléchargées",
   "settings_data_label": "Mes données personnelles",
   "settings_delete_account": "Supprimer mon compte",

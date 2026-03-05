@@ -68,7 +68,7 @@ const AUTH_ERROR_MESSAGES: Partial<Record<AuthErrorCode, () => string>> = {
     return m.auth_error_email_cannot_be_updated()
   },
   CREDENTIAL_ACCOUNT_NOT_FOUND: () => {
-    return m.auth_error_credential_account_not_found()
+    return m.auth_error_account_not_found()
   },
   SESSION_EXPIRED: () => {
     return m.auth_error_session_expired()

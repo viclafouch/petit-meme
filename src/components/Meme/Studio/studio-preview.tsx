@@ -144,7 +144,7 @@ export const StudioPreview = ({
               onClick={onCancel}
               aria-label={m.studio_cancel_processing()}
             >
-              {m.studio_cancel()}
+              {m.common_cancel()}
             </Button>
           </div>
         </div>

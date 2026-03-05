@@ -1,3 +1,5 @@
+import { m } from '@/paraglide/messages.js'
+
 export const STUDIO_DEFAULT_BAND_HEIGHT = 100
 export const STUDIO_DEFAULT_FONT_SIZE = 36
 export const STUDIO_DEFAULT_FONT_COLOR = 'black'
@@ -11,32 +13,56 @@ export type StudioTextPosition = 'top' | 'bottom'
 type StudioFontSize = {
   id: string
   label: string
-  value: number
+  value: StudioFontSizeValue
 }
 
-export const STUDIO_FONT_SIZES = [
-  { id: 'small', label: 'Petit', value: 24 },
-  { id: 'medium', label: 'Moyen', value: 36 },
-  { id: 'large', label: 'Grand', value: 48 }
-] as const satisfies readonly StudioFontSize[]
+export type StudioFontSizeValue = 24 | 36 | 48
 
-export type StudioFontSizeValue = (typeof STUDIO_FONT_SIZES)[number]['value']
+export const getStudioFontSizes = (): StudioFontSize[] => {
+  return [
+    { id: 'small', label: m.studio_size_small(), value: 24 },
+    { id: 'medium', label: m.studio_size_medium(), value: 36 },
+    { id: 'large', label: m.studio_size_large(), value: 48 }
+  ]
+}
 
-type StudioColorEntry = {
+export type StudioColorEntry = {
   id: string
   label: string
   value: string
   className: string
 }
 
-export const STUDIO_COLORS = [
-  { id: 'black', label: 'Noir', value: 'black', className: 'bg-black' },
-  { id: 'white', label: 'Blanc', value: 'white', className: 'bg-white' },
-  { id: 'red', label: 'Rouge', value: 'red', className: 'bg-red-600' },
-  { id: 'blue', label: 'Bleu', value: 'blue', className: 'bg-blue-600' }
-] as const satisfies readonly StudioColorEntry[]
+export type StudioFontColorValue = 'black' | 'white' | 'red' | 'blue'
 
-export type StudioFontColorValue = (typeof STUDIO_COLORS)[number]['value']
+export const getStudioColors = (): StudioColorEntry[] => {
+  return [
+    {
+      id: 'black',
+      label: m.studio_color_black(),
+      value: 'black',
+      className: 'bg-black'
+    },
+    {
+      id: 'white',
+      label: m.studio_color_white(),
+      value: 'white',
+      className: 'bg-white'
+    },
+    {
+      id: 'red',
+      label: m.studio_color_red(),
+      value: 'red',
+      className: 'bg-red-600'
+    },
+    {
+      id: 'blue',
+      label: m.studio_color_blue(),
+      value: 'blue',
+      className: 'bg-blue-600'
+    }
+  ]
+}
 
 type StudioFont = {
   id: string
@@ -65,19 +91,27 @@ export const STUDIO_FONTS = [
 
 export type StudioFontFamilyId = (typeof STUDIO_FONTS)[number]['id']
 
-export const STUDIO_BAND_COLORS = [
-  { id: 'white', label: 'Blanc', value: 'white', className: 'bg-white' },
-  { id: 'black', label: 'Noir', value: 'black', className: 'bg-black' },
-  { id: 'red', label: 'Rouge', value: 'red', className: 'bg-red-600' },
-  { id: 'blue', label: 'Bleu', value: 'blue', className: 'bg-blue-600' }
-] as const satisfies readonly StudioColorEntry[]
+export type StudioBandColorValue = 'white' | 'black' | 'red' | 'blue'
 
-export type StudioBandColorValue = (typeof STUDIO_BAND_COLORS)[number]['value']
+const BAND_COLOR_ORDER: StudioBandColorValue[] = [
+  'white',
+  'black',
+  'red',
+  'blue'
+]
 
-export type StudioTemplate = {
-  id: string
-  label: string
-  description: string
+export const getStudioBandColors = (): StudioColorEntry[] => {
+  const allColors = getStudioColors()
+
+  return BAND_COLOR_ORDER.map((id) => {
+    return allColors.find((color) => {
+      return color.id === id
+    })!
+  })
+}
+
+type StudioTemplateStyle = {
+  id: StudioTemplateId
   fontFamily: StudioFontFamilyId
   fontSize: StudioFontSizeValue
   fontColor: StudioFontColorValue
@@ -86,11 +120,16 @@ export type StudioTemplate = {
   bandOpacity: number
 }
 
-export const STUDIO_TEMPLATES = [
+export type StudioTemplate = StudioTemplateStyle & {
+  label: string
+  description: string
+}
+
+export type StudioTemplateId = 'caption' | 'subtitle'
+
+export const STUDIO_TEMPLATE_STYLES = [
   {
     id: 'caption',
-    label: 'Légende',
-    description: 'Bande blanche, texte noir',
     fontFamily: 'arial',
     fontSize: 36,
     fontColor: 'black',
@@ -100,8 +139,6 @@ export const STUDIO_TEMPLATES = [
   },
   {
     id: 'subtitle',
-    label: 'Sous-titre',
-    description: 'Fond semi-transparent, texte blanc',
     fontFamily: 'impact',
     fontSize: 36,
     fontColor: 'white',
@@ -109,9 +146,27 @@ export const STUDIO_TEMPLATES = [
     bandColor: 'black',
     bandOpacity: 0.6
   }
-] as const satisfies readonly StudioTemplate[]
+] as const satisfies readonly StudioTemplateStyle[]
 
-export type StudioTemplateId = (typeof STUDIO_TEMPLATES)[number]['id']
+export const getStudioTemplates = (): StudioTemplate[] => {
+  const labels: Record<
+    StudioTemplateId,
+    { label: string; description: string }
+  > = {
+    caption: {
+      label: m.studio_template_caption(),
+      description: m.studio_template_caption_desc()
+    },
+    subtitle: {
+      label: m.studio_template_subtitle(),
+      description: m.studio_template_subtitle_desc()
+    }
+  }
+
+  return STUDIO_TEMPLATE_STYLES.map((style) => {
+    return { ...style, ...labels[style.id] }
+  })
+}
 
 export type StudioSettings = {
   text: string

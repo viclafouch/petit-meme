@@ -1,9 +1,12 @@
 import { create } from 'zustand'
 import type { StudioSettings, StudioTemplateId } from '@/constants/studio'
-import { STUDIO_DEFAULT_SETTINGS, STUDIO_TEMPLATES } from '@/constants/studio'
+import {
+  STUDIO_DEFAULT_SETTINGS,
+  STUDIO_TEMPLATE_STYLES
+} from '@/constants/studio'
 
 const STUDIO_TEMPLATES_BY_ID = new Map(
-  STUDIO_TEMPLATES.map((template) => {
+  STUDIO_TEMPLATE_STYLES.map((template) => {
     return [template.id, template]
   })
 )
@@ -39,7 +42,7 @@ export const useStudioStore = create<StudioStore>((set) => {
         return
       }
 
-      const { id, label, description, ...style } = template
+      const { id, ...style } = template
 
       set((prev) => {
         return {

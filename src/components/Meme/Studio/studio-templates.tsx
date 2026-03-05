@@ -1,7 +1,8 @@
 import type { StudioTemplate } from '@/constants/studio'
-import { STUDIO_FONTS, STUDIO_TEMPLATES } from '@/constants/studio'
+import { getStudioTemplates, STUDIO_FONTS } from '@/constants/studio'
 import { buildVideoImageUrl } from '@/lib/bunny'
 import { cn } from '@/lib/utils'
+import { m } from '@/paraglide/messages.js'
 import { useStudioStore } from '@/stores/studio.store'
 
 const PREVIEW_FONT_SIZE = 14
@@ -136,24 +137,37 @@ export const StudioTemplates = ({ bunnyId }: StudioTemplatesParams) => {
   })
 
   const thumbnailUrl = buildVideoImageUrl(bunnyId)
+  const templates = getStudioTemplates()
 
   return (
-    <div className="flex gap-2" role="radiogroup" aria-label="Templates">
-      {STUDIO_TEMPLATES.map((template) => {
+    <div
+      className="flex gap-2"
+      role="radiogroup"
+      aria-label={m.studio_templates()}
+    >
+      {templates.map((template) => {
         const isSelected = activeTemplateId === template.id
-        const cardParams = {
-          template,
-          thumbnailUrl,
-          isSelected,
-          onSelect: () => {
-            applyTemplate(template.id)
-          }
-        } as const
+
+        const handleSelect = () => {
+          applyTemplate(template.id)
+        }
 
         return template.bandOpacity < 1 ? (
-          <OverlayTemplateCard key={template.id} {...cardParams} />
+          <OverlayTemplateCard
+            key={template.id}
+            template={template}
+            thumbnailUrl={thumbnailUrl}
+            isSelected={isSelected}
+            onSelect={handleSelect}
+          />
         ) : (
-          <CaptionTemplateCard key={template.id} {...cardParams} />
+          <CaptionTemplateCard
+            key={template.id}
+            template={template}
+            thumbnailUrl={thumbnailUrl}
+            isSelected={isSelected}
+            onSelect={handleSelect}
+          />
         )
       })}
     </div>

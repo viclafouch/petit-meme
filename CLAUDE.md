@@ -49,6 +49,8 @@ pnpm run prisma:reset-db:dev   # Reset DB (uses .env.development) — NEVER in p
 
 See current plan : `.claude/plan.md`. It must be always up to date. **Update it immediately after each meaningful change** — not just at the end of a task. If you add a feature, fix a bug, change an approach, or add a dependency mid-task, update the plan right then. A desynchronized plan is a bug.
 
+See i18n plan : `.claude/plan-i18n.md`. Same rules as above — always up to date.
+
 ## Code Quality & Reusability
 
 Code must always be clean and readable. Before writing any code, ask whether it can be reused and extracted into a helper, utility, or reusable component. **Zero tolerance for duplication** — both runtime code and types. Strict typing everywhere: no `any`, no loose types, leverage discriminated unions, `satisfies`, and inference where appropriate.
@@ -71,3 +73,11 @@ For any UI/design task, **always use `/frontend-design`** before writing code.
 ## Uncertainty Rule
 
 Whenever there is any uncertainty (even a single one), use the **deep-dive** skill before writing code. Never proceed with unresolved unknowns.
+
+## i18n Workflow — String Extraction Batches
+
+For any i18n string extraction task (Batches D, E, F, etc.), follow this workflow:
+
+1. **Always use `/i18n-extract <batch>`** before writing code — the skill contains all conventions, pitfalls, and patterns learned from Batches A–C
+2. Follow the standard Post-Task Checklist (lint, plan update, refactoring agent)
+3. Update `.claude/plan-i18n.md` — mark batch as `[x]` with implementation notes

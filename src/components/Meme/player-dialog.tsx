@@ -18,6 +18,7 @@ import type { ConversionEventName } from '@/lib/algolia-insights'
 import { sendConversionEvent } from '@/lib/algolia-insights'
 import { buildVideoImageUrl } from '@/lib/bunny'
 import { buildUrl } from '@/lib/seo'
+import { m } from '@/paraglide/messages.js'
 import { trackMemeAction } from '@/server/meme'
 import { FocusScope } from '@radix-ui/react-focus-scope'
 import { Link, useLinkProps } from '@tanstack/react-router'
@@ -69,11 +70,11 @@ export const PlayerDialog = ({
     try {
       await navigator.clipboard.writeText(text)
       void trackMemeAction({ data: { memeId: meme.id, action: 'share' } })
-      toast.success('Lien copié', {
+      toast.success(m.meme_link_copied(), {
         position: 'bottom-center'
       })
     } catch {
-      toast.error('Impossible de copier le lien')
+      toast.error(m.meme_link_copy_error())
     }
   }
 
@@ -146,7 +147,11 @@ export const PlayerDialog = ({
           initial={isReducedMotion ? false : { opacity: 0 }}
           exit={{ opacity: 0 }}
         >
-          <Button size="icon" onClick={handleClose} aria-label="Fermer">
+          <Button
+            size="icon"
+            onClick={handleClose}
+            aria-label={m.common_close()}
+          >
             <X />
           </Button>
         </motion.div>
@@ -191,7 +196,7 @@ export const PlayerDialog = ({
                 onClick={handleStudioClick}
               >
                 <Clapperboard />
-                Ouvrir dans Studio
+                {m.meme_open_studio()}
               </Link>
               <div className="grid gap-2 grid-cols-2">
                 <Button
@@ -202,7 +207,7 @@ export const PlayerDialog = ({
                   onClick={handleShareClick}
                 >
                   <Share2 />
-                  Partager la vidéo
+                  {m.meme_share_video()}
                 </Button>
                 <Button
                   size="lg"
@@ -211,7 +216,7 @@ export const PlayerDialog = ({
                   onClick={handleCopyClick}
                 >
                   <Clipboard />
-                  Copier le lien
+                  {m.meme_copy_link()}
                 </Button>
                 <Button
                   size="lg"
@@ -221,7 +226,7 @@ export const PlayerDialog = ({
                   onClick={handleDownloadClick}
                 >
                   <Download />
-                  Télécharger la vidéo
+                  {m.meme_download_video()}
                 </Button>
               </div>
             </div>

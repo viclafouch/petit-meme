@@ -13,6 +13,7 @@ import { Separator } from '@/components/ui/separator'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import type {
   StudioBandColorValue,
+  StudioColorEntry,
   StudioFontColorValue,
   StudioFontFamilyId,
   StudioFontSizeValue,
@@ -20,21 +21,17 @@ import type {
   StudioTextPosition
 } from '@/constants/studio'
 import {
-  STUDIO_BAND_COLORS,
-  STUDIO_COLORS,
-  STUDIO_FONT_SIZES,
+  getStudioBandColors,
+  getStudioColors,
+  getStudioFontSizes,
   STUDIO_FONTS,
   STUDIO_TEXT_MAX_LENGTH
 } from '@/constants/studio'
 import { cn } from '@/lib/utils'
+import { m } from '@/paraglide/messages.js'
 
 type ColorSwatchesParams = {
-  colors: readonly {
-    readonly id: string
-    readonly label: string
-    readonly value: string
-    readonly className: string
-  }[]
+  colors: StudioColorEntry[]
   activeValue: string
   onSelect: (value: string) => void
   labelledBy: string
@@ -119,17 +116,21 @@ export const StudioControls = ({
     onSettingsChange({ bandColor: value as StudioBandColorValue })
   }
 
+  const fontSizes = getStudioFontSizes()
+  const colors = getStudioColors()
+  const bandColors = getStudioBandColors()
+
   return (
     <fieldset disabled={disabled} className="flex flex-col gap-4">
       {!hideTextInput ? (
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="studio-text">Texte</Label>
+          <Label htmlFor="studio-text">{m.studio_text_label()}</Label>
           <Input
             id="studio-text"
             value={settings.text}
             onChange={handleTextChange}
             onFocus={onTextInputFocus}
-            placeholder="Texte à ajouter sur la vidéo"
+            placeholder={m.studio_text_aria()}
             autoComplete="off"
             type="text"
             maxLength={STUDIO_TEXT_MAX_LENGTH}
@@ -145,12 +146,12 @@ export const StudioControls = ({
         </div>
       ) : null}
       <div className="flex flex-col gap-1.5">
-        <Label id="studio-templates-label">Templates</Label>
+        <Label id="studio-templates-label">{m.studio_templates()}</Label>
         <StudioTemplates bunnyId={bunnyId} />
       </div>
       <Separator />
       <div className="flex flex-col gap-1.5">
-        <Label id="studio-position-label">Position</Label>
+        <Label id="studio-position-label">{m.studio_position()}</Label>
         <ToggleGroup
           type="single"
           variant="outline"
@@ -160,15 +161,15 @@ export const StudioControls = ({
           aria-labelledby="studio-position-label"
         >
           <ToggleGroupItem value="top" className="flex-1">
-            Haut
+            {m.studio_position_top()}
           </ToggleGroupItem>
           <ToggleGroupItem value="bottom" className="flex-1">
-            Bas
+            {m.studio_position_bottom()}
           </ToggleGroupItem>
         </ToggleGroup>
       </div>
       <div className="flex flex-col gap-1.5">
-        <Label id="studio-font-label">Police</Label>
+        <Label id="studio-font-label">{m.studio_font()}</Label>
         <Select
           value={settings.fontFamily}
           onValueChange={handleFontFamilyChange}
@@ -188,7 +189,7 @@ export const StudioControls = ({
         </Select>
       </div>
       <div className="flex flex-col gap-1.5">
-        <Label id="studio-size-label">Taille</Label>
+        <Label id="studio-size-label">{m.studio_size()}</Label>
         <ToggleGroup
           type="single"
           variant="outline"
@@ -197,7 +198,7 @@ export const StudioControls = ({
           className="w-full"
           aria-labelledby="studio-size-label"
         >
-          {STUDIO_FONT_SIZES.map((size) => {
+          {fontSizes.map((size) => {
             return (
               <ToggleGroupItem
                 key={size.value}
@@ -211,18 +212,18 @@ export const StudioControls = ({
         </ToggleGroup>
       </div>
       <div className="flex flex-col gap-2.5">
-        <Label id="studio-font-color-label">Couleur du texte</Label>
+        <Label id="studio-font-color-label">{m.studio_font_color()}</Label>
         <ColorSwatches
-          colors={STUDIO_COLORS}
+          colors={colors}
           activeValue={settings.fontColor}
           onSelect={handleFontColorChange}
           labelledBy="studio-font-color-label"
         />
       </div>
       <div className="flex flex-col gap-2.5">
-        <Label id="studio-band-color-label">Couleur de fond</Label>
+        <Label id="studio-band-color-label">{m.studio_band_color()}</Label>
         <ColorSwatches
-          colors={STUDIO_BAND_COLORS}
+          colors={bandColors}
           activeValue={settings.bandColor}
           onSelect={handleBandColorChange}
           labelledBy="studio-band-color-label"

@@ -9,6 +9,7 @@ import { LoadingSpinner } from '@/components/ui/spinner'
 import type { MemeWithVideo } from '@/constants/meme'
 import { buildVideoImageUrl, buildVideoStreamUrl } from '@/lib/bunny'
 import { getInfiniteReelsQueryOpts } from '@/lib/queries'
+import { m } from '@/paraglide/messages.js'
 import { useDebouncer } from '@tanstack/react-pacer'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
@@ -139,7 +140,7 @@ export const Reel = React.memo(
                   decoding="async"
                   className="w-5"
                 />
-                Retour au site
+                {m.meme_back_to_site()}
               </Link>
             </div>
             <div className="flex flex-col gap-1">
@@ -150,7 +151,9 @@ export const Reel = React.memo(
               />
               <ToggleLikeButton meme={meme} size="iconLg" />
               <Button
-                aria-label={isPlaying ? 'Mettre en pause' : 'Lire la vidéo'}
+                aria-label={
+                  isPlaying ? m.meme_pause_video() : m.meme_play_video()
+                }
                 onClick={() => {
                   return setIsPlaying((prevState) => {
                     return !prevState
@@ -162,7 +165,7 @@ export const Reel = React.memo(
                 {isPlaying ? <Pause /> : <Play />}
               </Button>
               <Button
-                aria-label={isMuted ? 'Activer le son' : 'Couper le son'}
+                aria-label={isMuted ? m.meme_unmute() : m.meme_mute()}
                 onClick={() => {
                   return setIsMuted((prevState) => {
                     return !prevState
@@ -330,7 +333,7 @@ export const MemeReels = () => {
             width: '100%'
           }}
           role="feed"
-          aria-label="Fil de vidéos"
+          aria-label={m.meme_video_feed()}
         >
           {rowVirtualizer.getVirtualItems().map((virtualRow) => {
             const item = memesWithRefs[virtualRow.index]

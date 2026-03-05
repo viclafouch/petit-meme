@@ -1,6 +1,7 @@
 import { MEMES_SEARCH_SCHEMA, VIRTUAL_CATEGORIES } from '@/constants/meme'
 import { getCategoriesListQueryOpts } from '@/lib/queries'
 import { seo } from '@/lib/seo'
+import { m } from '@/paraglide/messages.js'
 import { SearchMemes } from '@/routes/_public__root/_default/memes/-components/search-memes'
 import { createFileRoute, notFound } from '@tanstack/react-router'
 
@@ -43,17 +44,16 @@ export const Route = createFileRoute(
 
     if (!category) {
       return seo({
-        title: 'Bibliothèque de mèmes en ligne',
+        title: m.meme_seo_library_title(),
         pathname: '/memes/category/all',
-        description:
-          'Découvre la plus grande bibliothèque de mèmes : crée, explore et partage des mèmes légendaires sur Petit Meme. Gratuit et accessible à tous !'
+        description: m.meme_seo_library_description()
       })
     }
 
     return seo({
-      title: `Mèmes ${category.title}`,
+      title: m.meme_seo_category_title({ title: category.title }),
       pathname: `/memes/category/${category.slug}`,
-      description: `Découvrez les mèmes de ${category.title}. Gratuit et accessible à tous !`,
+      description: m.meme_seo_category_description({ title: category.title }),
       keywords: category.keywords.join(', ')
     })
   }

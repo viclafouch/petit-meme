@@ -190,7 +190,7 @@ Préfixes de clés par domaine : `nav_`, `home_`, `pricing_`, `meme_`, `studio_`
   `src/routes/_public__root/_default/checkout.success.tsx`
   Aussi mis à jour : `src/helpers/subscription.ts`, `src/server/user.ts`, `src/hooks/use-stripe-checkout.ts`, `src/routes/_public__root/_default/settings/-components/profile-content.tsx` (consommateurs de plan.ts)
 
-- [ ] **Batch C — Memes & Studio** :
+- [x] **Batch C — Memes & Studio** :
   `src/routes/_public__root/_default/memes/$memeId.tsx`,
   `src/routes/_public__root/_default/memes/category/$slug.tsx`,
   `src/routes/_public__root/_default/memes/-components/search-memes.tsx`,
@@ -199,8 +199,11 @@ Préfixes de clés par domaine : `nav_`, `home_`, `pricing_`, `meme_`, `studio_`
   `src/components/Meme/video-overlay.tsx`, `src/components/Meme/meme-reels.tsx`,
   `src/components/Meme/Studio/studio-page.tsx`, `src/components/Meme/Studio/studio-controls.tsx`,
   `src/components/Meme/Studio/studio-actions.tsx`, `src/components/Meme/studio-fallbacks.tsx`,
-  `src/constants/studio.ts` (STUDIO_FONT_SIZES, STUDIO_COLORS, STUDIO_TEMPLATES),
-  `src/helpers/format.ts` (pluralize FR : vues/catégories)
+  `src/components/Meme/Studio/studio-templates.tsx`,
+  `src/constants/studio.ts` (STUDIO_FONT_SIZES → `getStudioFontSizes()`, STUDIO_COLORS → `getStudioColors()`, STUDIO_BAND_COLORS → `getStudioBandColors()`, STUDIO_TEMPLATES → `getStudioTemplates()` + `STUDIO_TEMPLATE_STYLES` structural const),
+  `src/stores/studio.store.ts` (updated to use `STUDIO_TEMPLATE_STYLES`),
+  `src/helpers/format.ts` (`pluralize` unexported, admin-only usage remains),
+  Note : Paraglide v2 ne supporte pas ICU MessageFormat plurals. Pluralisation via `Intl.PluralRules(getLocale())` + messages séparés `*_one`/`*_other`.
 
 - [ ] **Batch D — Auth & Settings** (inclut les callback URLs locale-aware) :
   **Callback URLs à rendre dynamiques** (sinon le user sur `/en/` atterrit sur `/` après auth) :
@@ -446,7 +449,10 @@ Tous les audits doivent passer **avant** le merge de `feat/i18n` → `feat/migra
 | **Better Auth** | **NON** | Config du plugin `@better-auth/i18n` est dans le code. Aucune action dashboard. |
 | **Inlang (Paraglide)** | **NON** | Tout est en local (`project.inlang/`, `messages/*.json`). Pas de service cloud à configurer. |
 
-### Suppression du plan
+### Suppression du plan & cleanup
 
 - [ ] Après release en production, QA validée, audits passés, Google Search Console vérifié, 1 semaine de monitoring Sentry sans régression :
-  **Supprimer `.claude/plan-i18n.md`** et mettre à jour le renvoi dans `.claude/plan.md` → remplacer par une ligne "Internationalisation FR/EN : ✅ Terminé (phase 1)".
+  1. **Supprimer `.claude/plan-i18n.md`**
+  2. **Supprimer `.claude/skills/i18n-extract/`** (skill plus nécessaire)
+  3. **Nettoyer `CLAUDE.md`** : supprimer la section "i18n Workflow — String Extraction Batches" et la ligne `See i18n plan : .claude/plan-i18n.md.`
+  4. **Mettre à jour `.claude/plan.md`** → remplacer le renvoi par une ligne "Internationalisation FR/EN : ✅ Terminé (phase 1)"

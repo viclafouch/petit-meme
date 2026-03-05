@@ -1,14 +1,14 @@
 import React from 'react'
 import { Input } from '@/components/ui/input'
+import { m } from '@/paraglide/messages.js'
+
+type MemesQueryParams = {
+  query: string
+  onQueryChange: (query: string) => void
+}
 
 export const MemesQuery = React.memo(
-  ({
-    query,
-    onQueryChange
-  }: {
-    query: string
-    onQueryChange: (query: string) => void
-  }) => {
+  ({ query, onQueryChange }: MemesQueryParams) => {
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       onQueryChange(event.target.value)
     }
@@ -19,9 +19,11 @@ export const MemesQuery = React.memo(
           value={query}
           onChange={handleChange}
           type="search"
-          placeholder="Rechercher par mots-clés, tags..."
+          placeholder={m.meme_search_placeholder()}
         />
       </div>
     )
   }
 )
+
+MemesQuery.displayName = 'MemesQuery'

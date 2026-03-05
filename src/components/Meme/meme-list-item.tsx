@@ -17,7 +17,6 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import type { MemeWithVideo } from '@/constants/meme'
-import { formatViewCount } from '@/helpers/format'
 import { useDownloadMeme } from '@/hooks/use-download-meme'
 import { useShareMeme } from '@/hooks/use-share-meme'
 import { useToggleBookmark } from '@/hooks/use-toggle-bookmark'
@@ -25,6 +24,8 @@ import type { ConversionEventName } from '@/lib/algolia-insights'
 import { sendClickEvent, sendConversionEvent } from '@/lib/algolia-insights'
 import { getFavoritesMemesQueryOpts } from '@/lib/queries'
 import { cn } from '@/lib/utils'
+import { m } from '@/paraglide/messages.js'
+import { getLocale } from '@/paraglide/runtime.js'
 import { useShowDialog } from '@/stores/dialog.store'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useRouteContext } from '@tanstack/react-router'
@@ -92,7 +93,7 @@ const FavoriteItem = ({
         data-active={isMemeBookmarked}
         className="data-[active=true]:fill-muted-foreground"
       />
-      {isMemeBookmarked ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+      {isMemeBookmarked ? m.meme_remove_favorite() : m.meme_add_favorite()}
     </DropdownMenuItem>
   )
 }
@@ -114,7 +115,7 @@ const FavoriteItemGuard = ({
         }}
       >
         <Star />
-        Ajouter aux favoris
+        {m.meme_add_favorite()}
       </DropdownMenuItem>
     )
   }
@@ -208,7 +209,10 @@ export const MemeListItem = React.memo(
             </Link>
             <div className="flex flex-row items-center gap-1.5 text-muted-foreground">
               <span className={cn(sizes[size].views)}>
-                {formatViewCount(meme.viewCount)}
+                {new Intl.PluralRules(getLocale()).select(meme.viewCount) ===
+                'one'
+                  ? m.meme_view_one({ count: meme.viewCount })
+                  : m.meme_view_other({ count: meme.viewCount })}
               </span>
             </div>
           </div>
@@ -222,7 +226,7 @@ export const MemeListItem = React.memo(
                 <DropdownMenuItem asChild>
                   <Link to="/memes/$memeId" params={{ memeId: meme.id }}>
                     <ArrowRight />
-                    Détails
+                    {m.meme_details()}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
@@ -233,7 +237,7 @@ export const MemeListItem = React.memo(
                 >
                   <Link to="/memes/$memeId/studio" params={{ memeId: meme.id }}>
                     <Clapperboard />
-                    Ouvrir dans Studio
+                    {m.meme_open_studio()}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
@@ -245,7 +249,7 @@ export const MemeListItem = React.memo(
                   className="md:hidden"
                 >
                   <Share2 />
-                  Partager
+                  {m.meme_share()}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
@@ -255,7 +259,7 @@ export const MemeListItem = React.memo(
                   }}
                 >
                   <Download />
-                  Télécharger
+                  {m.meme_download()}
                 </DropdownMenuItem>
                 <FavoriteItemGuard
                   meme={meme}

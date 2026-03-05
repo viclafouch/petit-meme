@@ -41,6 +41,8 @@ import {
   buildUrl
 } from '@/lib/seo'
 import { cn } from '@/lib/utils'
+import { m } from '@/paraglide/messages.js'
+import { getLocale } from '@/paraglide/runtime.js'
 import { getRandomMeme, getRelatedMemes, trackMemeAction } from '@/server/meme'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import {
@@ -79,11 +81,15 @@ const MemeInfo = ({ meme, allTags }: MemeInfoParams) => {
         ) : null}
         {meme.publishedAt ? (
           <span className="text-muted-foreground text-xs">
-            Ajouté le {formatDate(meme.publishedAt, 'dd/MM/yyyy')}
+            {m.meme_added_on({
+              date: formatDate(meme.publishedAt, 'dd/MM/yyyy')
+            })}
           </span>
         ) : null}
         <span className="text-muted-foreground text-xs">
-          {meme.viewCount} vues
+          {new Intl.PluralRules(getLocale()).select(meme.viewCount) === 'one'
+            ? m.meme_view_one({ count: meme.viewCount })
+            : m.meme_view_other({ count: meme.viewCount })}
         </span>
       </div>
     </>
@@ -103,7 +109,7 @@ const RelatedMemes = ({ relatedMemesPromise }: RelatedMemesParams) => {
 
   return (
     <div className="mt-8">
-      <h2 className="text-base font-medium mb-4">Memes similaires</h2>
+      <h2 className="text-base font-medium mb-4">{m.meme_related()}</h2>
       <MemesList
         layoutContext="recommend"
         memes={relatedMemes}
@@ -142,11 +148,11 @@ const RouteComponent = () => {
     try {
       await navigator.clipboard.writeText(text)
       void trackMemeAction({ data: { memeId: meme.id, action: 'share' } })
-      toast.success('Lien copié', {
+      toast.success(m.meme_link_copied(), {
         position: 'bottom-center'
       })
     } catch {
-      toast.error('Impossible de copier le lien')
+      toast.error(m.meme_link_copy_error())
     }
   }
 
@@ -203,7 +209,7 @@ const RouteComponent = () => {
           className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}
         >
           <ArrowLeft className="size-5" />
-          <span>Retour aux memes</span>
+          <span>{m.meme_back_to_memes()}</span>
         </Link>
         <div className="w-full grid md:grid-cols-[auto_300px] gap-x-2.5 gap-y-4">
           <div className="w-full flex flex-col gap-y-2 md:gap-y-2 items-center md:items-start">
@@ -258,7 +264,7 @@ const RouteComponent = () => {
                     })}
                     to="/admin/library/$memeId"
                     params={{ memeId: meme.id }}
-                    aria-label="Modifier le mème"
+                    aria-label={m.meme_edit_aria()}
                   >
                     <Pencil />
                   </Link>
@@ -274,7 +280,7 @@ const RouteComponent = () => {
                 className={cn(buttonVariants({ variant: 'default' }))}
               >
                 <Clapperboard />
-                Ouvrir dans Studio
+                {m.meme_open_studio()}
               </Link>
               <div className="flex gap-2 flex-wrap">
                 <Button
@@ -286,7 +292,7 @@ const RouteComponent = () => {
                   }}
                 >
                   <Share2 />
-                  Partager la vidéo
+                  {m.meme_share_video()}
                 </Button>
                 <Button
                   disabled={downloadMutation.isPending}
@@ -297,7 +303,7 @@ const RouteComponent = () => {
                   }}
                 >
                   <Download />
-                  Télécharger la vidéo
+                  {m.meme_download_video()}
                 </Button>
               </div>
               <Button
@@ -306,11 +312,11 @@ const RouteComponent = () => {
                 onClick={handleCopyMemeLink}
               >
                 <Clipboard />
-                Copier le lien
+                {m.meme_copy_link()}
               </Button>
               <Button variant="outline" onClick={handleNavigateToRandomMeme}>
                 <Shuffle />
-                Aléatoire
+                {m.meme_random()}
               </Button>
             </div>
             <MemeInfo meme={meme} allTags={allTags} />
@@ -348,7 +354,8 @@ export const Route = createFileRoute('/_public__root/_default/memes/$memeId')({
   scripts: ({ loaderData }) => {
     if (loaderData) {
       const { meme } = loaderData
-      const categoryName = meme.categories[0]?.category.title ?? 'Mèmes'
+      const categoryName =
+        meme.categories[0]?.category.title ?? m.meme_breadcrumb_fallback()
       const categorySlug = meme.categories[0]?.category.slug ?? 'all'
 
       return [
@@ -362,7 +369,7 @@ export const Route = createFileRoute('/_public__root/_default/memes/$memeId')({
           type: 'application/ld+json',
           children: JSON.stringify(
             buildBreadcrumbJsonLd([
-              { name: 'Accueil', pathname: '/' },
+              { name: m.meme_breadcrumb_home(), pathname: '/' },
               {
                 name: categoryName,
                 pathname: `/memes/category/${categorySlug}`

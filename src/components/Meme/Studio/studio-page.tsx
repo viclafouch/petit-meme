@@ -25,6 +25,7 @@ import {
   useVideoPreloader,
   useVideoProcessor
 } from '@/hooks/use-video-processor'
+import { m } from '@/paraglide/messages.js'
 import { useStudioStore } from '@/stores/studio.store'
 import { Link } from '@tanstack/react-router'
 
@@ -78,7 +79,7 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
 
   const handleGenerate = () => {
     if (!hasText) {
-      toast.error('Veuillez saisir du texte')
+      toast.error(m.studio_enter_text())
 
       return
     }
@@ -98,7 +99,7 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
             to="/memes/$memeId"
             params={{ memeId: meme.id }}
             className={buttonVariants({ variant: 'ghost', size: 'lg' })}
-            aria-label="Retour au mème"
+            aria-label={m.studio_back_to_meme()}
           >
             <ArrowLeft className="size-5" />
             <StudioBranding title={meme.title} />
@@ -122,12 +123,12 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
             value={settings.text}
             onChange={handleTextChange}
             onFocus={triggerPreload}
-            placeholder="Ajouter du texte..."
+            placeholder={m.studio_add_text_placeholder()}
             autoComplete="off"
             type="text"
             maxLength={STUDIO_TEXT_MAX_LENGTH}
             className="flex-1 h-8"
-            aria-label="Texte à ajouter sur la vidéo"
+            aria-label={m.studio_text_aria()}
           />
           <Button
             variant="outline"
@@ -136,10 +137,10 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
             onClick={() => {
               setIsDrawerOpen(true)
             }}
-            aria-label="Ouvrir les réglages"
+            aria-label={m.studio_open_settings()}
           >
             <SlidersHorizontal className="size-4" />
-            Réglages
+            {m.studio_settings()}
           </Button>
           <LoadingButton
             isLoading={isProcessing}
@@ -147,13 +148,13 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
             size="sm"
           >
             <Sparkles />
-            Générer
+            {m.studio_generate()}
           </LoadingButton>
         </div>
         <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
           <DrawerContent className="max-h-[80dvh]" aria-describedby={undefined}>
             <DrawerHeader>
-              <DrawerTitle>Réglages</DrawerTitle>
+              <DrawerTitle>{m.studio_settings()}</DrawerTitle>
             </DrawerHeader>
             <div className="flex flex-col gap-4 overflow-y-auto px-4 pb-6">
               <StudioControls
@@ -180,7 +181,7 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
             to="/memes/$memeId"
             params={{ memeId: meme.id }}
             className={buttonVariants({ variant: 'ghost', size: 'icon' })}
-            aria-label="Retour au mème"
+            aria-label={m.studio_back_to_meme()}
           >
             <ArrowLeft className="size-4" />
           </Link>

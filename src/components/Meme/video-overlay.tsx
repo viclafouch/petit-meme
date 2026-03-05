@@ -11,7 +11,8 @@ import {
   TooltipContent,
   TooltipTrigger
 } from '@/components/ui/tooltip'
-import { pluralize } from '@/helpers/format'
+import { m } from '@/paraglide/messages.js'
+import { getLocale } from '@/paraglide/runtime.js'
 
 const OVERLAY_BUTTON_CLASS =
   'rounded-full bg-black/50 hover:bg-black/70 text-white size-9 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/50'
@@ -45,7 +46,21 @@ const RemainingTimeBadge = () => {
 
   const remainingMinutes = Math.floor(remainingTime / 60)
   const remainingSeconds = Math.floor(remainingTime % 60)
-  const ariaLabel = `${remainingMinutes} ${pluralize(remainingMinutes, { one: 'minute', other: 'minutes' })} ${remainingSeconds} ${pluralize(remainingSeconds, { one: 'seconde', other: 'secondes' })} restantes`
+  const rules = new Intl.PluralRules(getLocale())
+  const minuteUnit =
+    rules.select(remainingMinutes) === 'one'
+      ? m.meme_minute_one()
+      : m.meme_minute_other()
+  const secondUnit =
+    rules.select(remainingSeconds) === 'one'
+      ? m.meme_second_one()
+      : m.meme_second_other()
+  const ariaLabel = m.meme_time_remaining({
+    minutes: remainingMinutes,
+    minuteUnit,
+    seconds: remainingSeconds,
+    secondUnit
+  })
 
   return (
     <span
@@ -111,9 +126,9 @@ export const VideoOverlay = ({
   }
 
   const fullscreenLabel = isFullscreen
-    ? 'Quitter le plein écran'
-    : 'Plein écran'
-  const muteLabel = isMuted ? 'Activer le son' : 'Couper le son'
+    ? m.meme_exit_fullscreen()
+    : m.meme_fullscreen()
+  const muteLabel = isMuted ? m.meme_unmute() : m.meme_mute()
 
   return (
     <div
@@ -122,7 +137,7 @@ export const VideoOverlay = ({
       onKeyDown={handleKeyDown}
       role="button"
       tabIndex={0}
-      aria-label={isPaused ? 'Lire la vidéo' : 'Mettre en pause'}
+      aria-label={isPaused ? m.meme_play_video() : m.meme_pause_video()}
     >
       {isPaused ? (
         <div className="size-16 rounded-full bg-black/50 flex items-center justify-center">

@@ -14,6 +14,7 @@ import {
 } from '@/lib/queries'
 import { buildBreadcrumbJsonLd, buildCategoryJsonLd } from '@/lib/seo'
 import { cn } from '@/lib/utils'
+import { m } from '@/paraglide/messages.js'
 import {
   PageDescription,
   PageHeading
@@ -60,10 +61,10 @@ const MemesListWrapper = ({ columnGridCount }: { columnGridCount: number }) => {
     memes: memesListQuery.data.memes
   })
 
-  const categoryName = selectedCategory?.title ?? 'Tous les mèmes'
+  const categoryName = selectedCategory?.title ?? m.meme_all_memes()
   const categoryPath = `/memes/category/${slug}`
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
-    { name: 'Accueil', pathname: '/' },
+    { name: m.meme_breadcrumb_home(), pathname: '/' },
     { name: categoryName, pathname: categoryPath }
   ])
 
@@ -124,11 +125,9 @@ export const SearchMemes = () => {
     <div>
       <div className="flex flex-col items-center gap-2">
         <PageHeading>
-          {currentCategory ? currentCategory.title : 'Tous les mèmes'}
+          {currentCategory ? currentCategory.title : m.meme_all_memes()}
         </PageHeading>
-        <PageDescription>
-          Tape, clique, rigole : découvre tous les mèmes en un seul endroit.
-        </PageDescription>
+        <PageDescription>{m.meme_search_description()}</PageDescription>
       </div>
       <div className="w-full mx-auto py-12">
         <div className="flex flex-col gap-y-4">
@@ -149,14 +148,14 @@ export const SearchMemes = () => {
                 className={cn('flex-1', buttonVariants({ variant: 'outline' }))}
               >
                 <Shuffle />
-                Aléatoire
+                {m.meme_random()}
               </Link>
               <Link
                 to="/reels"
                 className={cn('flex-1', buttonVariants({ variant: 'outline' }))}
               >
                 <Smartphone />
-                Mode Reels
+                {m.meme_reels_mode()}
               </Link>
             </div>
           </div>

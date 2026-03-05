@@ -4,9 +4,8 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { LoadingButton } from '@/components/ui/loading-button'
 import type { ProcessedData } from '@/hooks/use-video-processor'
+import { m } from '@/paraglide/messages.js'
 import { downloadBlob, shareBlob } from '@/utils/download'
-
-const GENERATE_FIRST_MESSAGE = 'Génère d’abord une vidéo'
 
 type StudioMobileActionsParams = {
   processedData: ProcessedData
@@ -31,7 +30,7 @@ export const StudioMobileActions = ({
         }}
       >
         <Share2 />
-        Partager
+        {m.meme_share()}
       </Button>
       <Button
         variant="outline"
@@ -41,7 +40,7 @@ export const StudioMobileActions = ({
         }}
       >
         <Download />
-        Télécharger
+        {m.meme_download()}
       </Button>
     </motion.div>
   )
@@ -60,7 +59,7 @@ export const StudioActions = ({
 }: StudioActionsParams) => {
   const handleShareClick = () => {
     if (processedData === null) {
-      toast.error(GENERATE_FIRST_MESSAGE)
+      toast.error(m.studio_generate_first())
 
       return
     }
@@ -70,7 +69,7 @@ export const StudioActions = ({
 
   const handleDownloadClick = () => {
     if (processedData === null) {
-      toast.error(GENERATE_FIRST_MESSAGE)
+      toast.error(m.studio_generate_first())
 
       return
     }
@@ -82,7 +81,7 @@ export const StudioActions = ({
     <div className="flex flex-col gap-2">
       <LoadingButton isLoading={isProcessing} onClick={onGenerate}>
         <Sparkles />
-        Générer la vidéo
+        {m.studio_generate_video()}
       </LoadingButton>
       <Button
         variant="outline"
@@ -90,15 +89,14 @@ export const StudioActions = ({
         onClick={handleShareClick}
       >
         <Share2 />
-        Partager la vidéo
+        {m.meme_share_video()}
       </Button>
       <Button variant="outline" onClick={handleDownloadClick}>
         <Download />
-        Télécharger la vidéo
+        {m.meme_download_video()}
       </Button>
       <p className="text-muted-foreground text-xs">
-        Tout se fait directement sur ton appareil. Rien n'est envoyé ni stocké
-        sur nos serveurs — tes fichiers restent privés.
+        {m.studio_privacy_notice()}
       </p>
     </div>
   )

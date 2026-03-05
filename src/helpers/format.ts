@@ -5,7 +5,7 @@ type PluralFormsParams = {
   other: string
 }
 
-export function pluralize(count: number, { one, other }: PluralFormsParams) {
+function pluralize(count: number, { one, other }: PluralFormsParams) {
   return pluralRules.select(count) === 'one' ? one : other
 }
 

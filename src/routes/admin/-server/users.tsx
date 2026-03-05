@@ -3,6 +3,7 @@ import { prismaClient } from '@/db'
 import type { Prisma } from '@/db/generated/prisma/client'
 import { AccountBannedEmail } from '@/emails/account-banned-email'
 import { AccountUnbannedEmail } from '@/emails/account-unbanned-email'
+import { emailSubjects } from '@/emails/subjects'
 import { auth } from '@/lib/auth'
 import { adminLogger } from '@/lib/logger'
 import { sendEmailAsync } from '@/lib/resend'
@@ -241,6 +242,7 @@ export const banUserById = createServerFn({ method: 'POST' })
         role: true,
         email: true,
         name: true,
+        locale: true,
         stripeCustomerId: true,
         banned: true
       }
@@ -278,12 +280,13 @@ export const banUserById = createServerFn({ method: 'POST' })
       (hasActiveSubscription) => {
         sendEmailAsync({
           to: targetUser.email,
-          subject: 'Ton compte Petit Meme a été suspendu',
+          subject: emailSubjects[targetUser.locale].accountBanned,
           react: (
             <AccountBannedEmail
               username={targetUser.name}
               banReason={data.banReason}
               hasActiveSubscription={hasActiveSubscription}
+              locale={targetUser.locale}
             />
           ),
           logMessage: 'Sending ban notification email'
@@ -317,7 +320,7 @@ export const unbanUserById = createServerFn({ method: 'POST' })
   .handler(async ({ data: userId, context }) => {
     const targetUser = await prismaClient.user.findUnique({
       where: { id: userId },
-      select: { email: true, name: true }
+      select: { email: true, name: true, locale: true }
     })
 
     if (!targetUser) {
@@ -333,8 +336,13 @@ export const unbanUserById = createServerFn({ method: 'POST' })
 
     sendEmailAsync({
       to: targetUser.email,
-      subject: 'Ton compte Petit Meme a été réactivé',
-      react: <AccountUnbannedEmail username={targetUser.name} />,
+      subject: emailSubjects[targetUser.locale].accountUnbanned,
+      react: (
+        <AccountUnbannedEmail
+          username={targetUser.name}
+          locale={targetUser.locale}
+        />
+      ),
       logMessage: 'Sending unban notification email'
     })
 
@@ -363,7 +371,7 @@ export const removeUser = createServerFn({ method: 'POST' })
 
     const targetUser = await prismaClient.user.findUnique({
       where: { id: userId },
-      select: { role: true, email: true, name: true }
+      select: { role: true, email: true, name: true, locale: true }
     })
 
     if (!targetUser) {
@@ -377,7 +385,8 @@ export const removeUser = createServerFn({ method: 'POST' })
     await cleanupUserData({
       userId,
       email: targetUser.email,
-      name: targetUser.name
+      name: targetUser.name,
+      locale: targetUser.locale
     })
 
     const { headers } = getRequest()

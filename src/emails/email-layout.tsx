@@ -1,4 +1,5 @@
 import React from 'react'
+import type { Locale } from '@/paraglide/runtime'
 import {
   Body,
   Column,
@@ -22,22 +23,51 @@ import {
   TAILWIND_CONFIG
 } from './constants'
 
+const layoutTranslations = {
+  fr: {
+    fallbackLink:
+      'Si le bouton ne fonctionne pas, copie ce lien dans ton navigateur :',
+    allRightsReserved: 'Tous droits réservés.'
+  },
+  en: {
+    fallbackLink:
+      'If the button doesn’t work, copy this link into your browser:',
+    allRightsReserved: 'All rights reserved.'
+  }
+} as const satisfies Record<Locale, Record<string, string>>
+
 type EmailLayoutProps = {
   preview: string
+  locale: Locale
   children: React.ReactNode
 }
 
 export { BUTTON_CLASS, CONTACT_EMAIL, LOGO_URL, SITE_URL }
 
-type EmailFallbackLinkProps = {
-  href: string
+export const BoldText = ({ text }: { text: string }) => {
+  const parts = text.split('**')
+
+  return (
+    <>
+      {parts.map((part, index) => {
+        return index % 2 === 1 ? <b key={index}>{part}</b> : part
+      })}
+    </>
+  )
 }
 
-export const EmailFallbackLink = ({ href }: EmailFallbackLinkProps) => {
+type EmailFallbackLinkProps = {
+  href: string
+  locale: Locale
+}
+
+export const EmailFallbackLink = ({ href, locale }: EmailFallbackLinkProps) => {
+  const tr = layoutTranslations[locale]
+
   return (
     <>
       <Text className="m-0 text-xs leading-5 text-brand-muted">
-        Si le bouton ne fonctionne pas, copie ce lien dans ton navigateur :
+        {tr.fallbackLink}
       </Text>
       <Row>
         <Column
@@ -60,9 +90,15 @@ export const EmailFallbackLink = ({ href }: EmailFallbackLinkProps) => {
   )
 }
 
-export const EmailLayout = ({ preview, children }: EmailLayoutProps) => {
+export const EmailLayout = ({
+  preview,
+  locale,
+  children
+}: EmailLayoutProps) => {
+  const tr = layoutTranslations[locale]
+
   return (
-    <Html lang="fr">
+    <Html lang={locale}>
       <Tailwind config={TAILWIND_CONFIG}>
         <Head>
           <meta name="color-scheme" content="light dark" />
@@ -104,7 +140,7 @@ export const EmailLayout = ({ preview, children }: EmailLayoutProps) => {
               </Text>
               <Hr className="mx-auto my-4 w-10 border-brand-border" />
               <Text className="m-0 text-xs leading-5 text-brand-muted">
-                © {new Date().getFullYear()} Petit Meme. Tous droits réservés.
+                © {new Date().getFullYear()} Petit Meme. {tr.allRightsReserved}
               </Text>
             </Section>
           </Container>

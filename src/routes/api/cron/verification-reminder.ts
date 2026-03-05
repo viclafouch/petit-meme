@@ -2,6 +2,8 @@
 import { randomBytes, randomUUID } from 'node:crypto'
 import { DAY, HOUR } from '@/constants/time'
 import { prismaClient } from '@/db'
+import type { UserLocale } from '@/db/generated/prisma/client'
+import { emailSubjects } from '@/emails/subjects'
 import { VerificationReminderEmail } from '@/emails/verification-reminder-email'
 import { clientEnv } from '@/env/client'
 import { cronLogger } from '@/lib/logger'
@@ -16,7 +18,12 @@ const REMINDER_BEFORE_HOURS = 54
 const TOKEN_EXPIRY_MS = DAY
 
 const sendReminderToUser = async (
-  user: { id: string; email: string; name: string | null },
+  user: {
+    id: string
+    email: string
+    name: string | null
+    locale: UserLocale
+  },
   now: Date
 ) => {
   const token = randomBytes(32).toString('hex')
@@ -33,14 +40,16 @@ const sendReminderToUser = async (
   })
 
   const verificationUrl = `${clientEnv.VITE_SITE_URL}/api/auth/verify-email?token=${token}&callbackURL=${encodeURIComponent('/')}`
+  const { locale } = user
 
   const { error } = await resend.emails.send({
     from: EMAIL_FROM,
     to: getEmailRecipient(user.email),
-    subject: 'Rappel : confirme ton email Petit Mème',
+    subject: emailSubjects[locale].verificationReminder,
     react: VerificationReminderEmail({
       username: user.name ?? 'there',
-      verificationUrl
+      verificationUrl,
+      locale
     })
   })
 
@@ -74,7 +83,7 @@ const runVerificationReminders = async () => {
         lte: newestCreatedAt
       }
     },
-    select: { id: true, email: true, name: true }
+    select: { id: true, email: true, name: true, locale: true }
   })
 
   if (users.length === 0) {

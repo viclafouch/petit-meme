@@ -11,6 +11,7 @@ import {
   SEVEN_DAYS_IN_SECONDS
 } from '@/constants/time'
 import { prismaClient } from '@/db'
+import { emailSubjects } from '@/emails/subjects'
 import { clientEnv } from '@/env/client'
 import { serverEnv } from '@/env/server'
 import { formatDate } from '@/helpers/date'
@@ -19,8 +20,7 @@ import { authLogger, stripeLogger } from '@/lib/logger'
 import { sendEmailAsync } from '@/lib/resend'
 import { captureWithFeature } from '@/lib/sentry'
 import { stripeClient } from '@/lib/stripe'
-import type { Locale } from '@/paraglide/runtime'
-import { baseLocale, getLocale } from '@/paraglide/runtime'
+import { getLocale } from '@/paraglide/runtime'
 import { cleanupUserData } from '@/utils/user-cleanup'
 import { prismaAdapter } from '@better-auth/prisma-adapter'
 import { stripe } from '@better-auth/stripe'
@@ -51,7 +51,7 @@ const handlePaymentFailed = async (event: Stripe.Event) => {
 
   const user = await prismaClient.user.findFirst({
     where: { stripeCustomerId: customerId },
-    select: { email: true, name: true }
+    select: { email: true, name: true, locale: true }
   })
 
   if (!user) {
@@ -89,11 +89,12 @@ const handlePaymentFailed = async (event: Stripe.Event) => {
 
   sendEmailAsync({
     to: user.email,
-    subject: 'Échec de paiement pour ton abonnement Petit Mème',
+    subject: emailSubjects[user.locale].paymentFailed,
     react: (
       <PaymentFailedEmail
         username={user.name}
         billingPortalUrl={portalSession.url}
+        locale={user.locale}
       />
     ),
     logMessage: 'Sending payment failed email to'
@@ -122,10 +123,16 @@ const getAuthConfig = createServerOnlyFn(() => {
       deleteUser: {
         enabled: true,
         beforeDelete: async (user) => {
+          const dbUser = await prismaClient.user.findUniqueOrThrow({
+            where: { id: user.id },
+            select: { locale: true }
+          })
+
           await cleanupUserData({
             userId: user.id,
             email: user.email,
-            name: user.name
+            name: user.name,
+            locale: dbUser.locale
           })
         }
       }
@@ -136,27 +143,36 @@ const getAuthConfig = createServerOnlyFn(() => {
       minPasswordLength: PASSWORD_MIN_LENGTH,
       maxPasswordLength: PASSWORD_MAX_LENGTH,
       sendResetPassword: async ({ user, url }) => {
+        const locale = getLocale()
         authLogger.info({ email: user.email }, 'Password reset requested')
         sendEmailAsync({
           to: user.email,
-          subject: 'Réinitialise ton mot de passe Petit Mème',
-          react: <ResetPassword username={user.name} resetUrl={url} />,
+          subject: emailSubjects[locale].resetPassword,
+          react: (
+            <ResetPassword
+              username={user.name}
+              resetUrl={url}
+              locale={locale}
+            />
+          ),
           logMessage: 'Sending reset password email to'
         })
       },
       onPasswordReset: async ({ user }) => {
+        const locale = getLocale()
         authLogger.info({ email: user.email }, 'Password reset completed')
         sendEmailAsync({
           to: user.email,
-          subject: 'Ton mot de passe Petit Mème a été modifié',
+          subject: emailSubjects[locale].passwordChanged,
           react: (
             <PasswordChangedEmail
               username={user.name}
               changedAt={formatDate(
                 new Date(),
-                getLocale(),
+                locale,
                 PASSWORD_CHANGED_DATE_OPTIONS
               )}
+              locale={locale}
             />
           ),
           logMessage: 'Password reset for'
@@ -170,22 +186,28 @@ const getAuthConfig = createServerOnlyFn(() => {
       autoSignInAfterVerification: true,
       expiresIn: ONE_HOUR_IN_SECONDS,
       sendVerificationEmail: async ({ user, url }) => {
+        const locale = getLocale()
         authLogger.info({ email: user.email }, 'Sending verification email')
         sendEmailAsync({
           to: user.email,
-          subject: 'Confirme ton inscription à Petit Mème',
+          subject: emailSubjects[locale].verifyEmail,
           react: (
-            <EmailVerification username={user.name} verificationUrl={url} />
+            <EmailVerification
+              username={user.name}
+              verificationUrl={url}
+              locale={locale}
+            />
           ),
           logMessage: 'Sending verification email to'
         })
       },
       afterEmailVerification: async (user) => {
+        const locale = getLocale()
         authLogger.info({ email: user.email }, 'Email verified')
         sendEmailAsync({
           to: user.email,
-          subject: 'Bienvenue sur Petit Mème !',
-          react: <WelcomeEmail username={user.name} />,
+          subject: emailSubjects[locale].welcome,
+          react: <WelcomeEmail username={user.name} locale={locale} />,
           logMessage: 'Email verified for'
         })
       }
@@ -279,20 +301,21 @@ const getAuthConfig = createServerOnlyFn(() => {
             const priceCents = stripePrice?.unit_amount ?? 0
             const isAnnual = stripePrice?.recurring?.interval === 'year'
 
-            const userLocale = (user.locale as Locale) ?? baseLocale
+            const { locale } = user
             const formattedAmount = formatCentsToEuros(priceCents, {
-              locale: userLocale
+              locale
             })
-            const periodSuffix = isAnnual ? '/an' : '/mois'
 
             sendEmailAsync({
               to: user.email,
-              subject: 'Ton abonnement Premium Petit Mème est activé !',
+              subject: emailSubjects[locale].subscriptionConfirmed,
               react: (
                 <SubscriptionConfirmedEmail
                   username={user.name}
                   planTitle="Premium"
-                  amount={`${formattedAmount}${periodSuffix}`}
+                  amount={formattedAmount}
+                  isAnnual={isAnnual}
+                  locale={locale}
                 />
               ),
               logMessage: 'Sending subscription confirmed email to'

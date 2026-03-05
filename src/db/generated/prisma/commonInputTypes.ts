@@ -193,6 +193,13 @@ export type BoolNullableFilter<$PrismaModel = never> = {
   not?: Prisma.NestedBoolNullableFilter<$PrismaModel> | boolean | null
 }
 
+export type EnumUserLocaleFilter<$PrismaModel = never> = {
+  equals?: $Enums.UserLocale | Prisma.EnumUserLocaleFieldRefInput<$PrismaModel>
+  in?: $Enums.UserLocale[] | Prisma.ListEnumUserLocaleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.UserLocale[] | Prisma.ListEnumUserLocaleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumUserLocaleFilter<$PrismaModel> | $Enums.UserLocale
+}
+
 export type BoolWithAggregatesFilter<$PrismaModel = never> = {
   equals?: boolean | Prisma.BooleanFieldRefInput<$PrismaModel>
   not?: Prisma.NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
@@ -207,6 +214,16 @@ export type BoolNullableWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedBoolNullableFilter<$PrismaModel>
   _max?: Prisma.NestedBoolNullableFilter<$PrismaModel>
+}
+
+export type EnumUserLocaleWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.UserLocale | Prisma.EnumUserLocaleFieldRefInput<$PrismaModel>
+  in?: $Enums.UserLocale[] | Prisma.ListEnumUserLocaleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.UserLocale[] | Prisma.ListEnumUserLocaleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumUserLocaleWithAggregatesFilter<$PrismaModel> | $Enums.UserLocale
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumUserLocaleFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumUserLocaleFilter<$PrismaModel>
 }
 
 export type JsonNullableFilter<$PrismaModel = never> =
@@ -506,6 +523,13 @@ export type NestedBoolNullableFilter<$PrismaModel = never> = {
   not?: Prisma.NestedBoolNullableFilter<$PrismaModel> | boolean | null
 }
 
+export type NestedEnumUserLocaleFilter<$PrismaModel = never> = {
+  equals?: $Enums.UserLocale | Prisma.EnumUserLocaleFieldRefInput<$PrismaModel>
+  in?: $Enums.UserLocale[] | Prisma.ListEnumUserLocaleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.UserLocale[] | Prisma.ListEnumUserLocaleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumUserLocaleFilter<$PrismaModel> | $Enums.UserLocale
+}
+
 export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
   equals?: boolean | Prisma.BooleanFieldRefInput<$PrismaModel>
   not?: Prisma.NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
@@ -520,6 +544,16 @@ export type NestedBoolNullableWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedBoolNullableFilter<$PrismaModel>
   _max?: Prisma.NestedBoolNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumUserLocaleWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.UserLocale | Prisma.EnumUserLocaleFieldRefInput<$PrismaModel>
+  in?: $Enums.UserLocale[] | Prisma.ListEnumUserLocaleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.UserLocale[] | Prisma.ListEnumUserLocaleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumUserLocaleWithAggregatesFilter<$PrismaModel> | $Enums.UserLocale
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumUserLocaleFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumUserLocaleFilter<$PrismaModel>
 }
 
 export type NestedJsonNullableFilter<$PrismaModel = never> =

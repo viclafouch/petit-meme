@@ -9,6 +9,11 @@ datasource db {
   provider  = "postgresql"
 }
 
+enum UserLocale {
+  fr
+  en
+}
+
 model UserBookmark {
   id        String   @id @default(cuid())
   userId    String   @map("user_id")
@@ -152,7 +157,7 @@ model User {
   privacyAcceptedAt        DateTime? @map("privacy_accepted_at")
   verificationReminderSent Boolean   @default(false) @map("verification_reminder_sent")
   isAnonymized             Boolean   @default(false) @map("is_anonymized")
-  locale                   String    @default("fr")
+  locale                   UserLocale @default(fr)
 
   studioGenerations StudioGeneration[]
   adminActions      AdminAuditLog[]    @relation("AdminActions")

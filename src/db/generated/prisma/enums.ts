@@ -9,6 +9,14 @@
 * 🟢 You can import this file directly.
 */
 
+export const UserLocale = {
+  fr: 'fr',
+  en: 'en'
+} as const
+
+export type UserLocale = (typeof UserLocale)[keyof typeof UserLocale]
+
+
 export const MemeStatus = {
   PENDING: 'PENDING',
   PUBLISHED: 'PUBLISHED',

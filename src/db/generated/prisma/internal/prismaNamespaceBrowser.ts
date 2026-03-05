@@ -391,8 +391,7 @@ export const UserOrderByRelevanceFieldEnum = {
   image: 'image',
   role: 'role',
   banReason: 'banReason',
-  stripeCustomerId: 'stripeCustomerId',
-  locale: 'locale'
+  stripeCustomerId: 'stripeCustomerId'
 } as const
 
 export type UserOrderByRelevanceFieldEnum = (typeof UserOrderByRelevanceFieldEnum)[keyof typeof UserOrderByRelevanceFieldEnum]

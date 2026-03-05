@@ -1874,8 +1874,7 @@ export const UserOrderByRelevanceFieldEnum = {
   image: 'image',
   role: 'role',
   banReason: 'banReason',
-  stripeCustomerId: 'stripeCustomerId',
-  locale: 'locale'
+  stripeCustomerId: 'stripeCustomerId'
 } as const
 
 export type UserOrderByRelevanceFieldEnum = (typeof UserOrderByRelevanceFieldEnum)[keyof typeof UserOrderByRelevanceFieldEnum]
@@ -2032,6 +2031,20 @@ export type ListEnumMemeStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$P
  * Reference to a field of type 'Boolean'
  */
 export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
+ * Reference to a field of type 'UserLocale'
+ */
+export type EnumUserLocaleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserLocale'>
+    
+
+
+/**
+ * Reference to a field of type 'UserLocale[]'
+ */
+export type ListEnumUserLocaleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserLocale[]'>
     
 
 

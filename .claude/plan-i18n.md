@@ -116,6 +116,7 @@ Un merge atomique garantit que le site passe de FR-only à bilingue en une fois.
 - [x] `pnpm exec dotenv -e .env.development -- pnpm exec prisma migrate dev --name add_user_locale` (Victor)
 - [x] `pnpm exec prisma generate` après la migration
 - [x] Note : le champ existe mais n'est pas encore utilisé → zéro impact sur le site
+- [x] **Migration String → enum** : `locale` changé de `String @default("fr")` → `UserLocale @default(fr)` (enum Prisma `UserLocale { fr en }`). Pas nullable, default `fr`. Élimine tous les `as Locale` casts. `parseUserLocale()` supprimé (identité — `UserLocale` et `Locale` sont structurellement identiques). Migration SQL éditée manuellement (DROP DEFAULT → TYPE USING → SET DEFAULT) pour éviter le DROP/ADD COLUMN de Prisma. Appliquée en dev + prod.
 
 ---
 
@@ -301,20 +302,20 @@ Préfixes de clés par domaine : `nav_`, `home_`, `pricing_`, `meme_`, `studio_`
 - [x] Full audit: all other alt/title/aria-label in src/ are either already translated, decorative (`alt=""`), admin-only, or technical ID-based
 
 **6. QA & validation** (dépend de tout)
-- [ ] `pnpm run build` — vérifier que le build passe
-- [ ] Tester sur le preview deploy Vercel :
-  - [ ] Navigation FR complète (toutes les pages, tous les flows)
-  - [ ] Navigation EN complète (`/en/...`)
-  - [ ] Switch FR ↔ EN (cookie persist, URLs correctes)
-  - [ ] SEO : vérifier hreflang, og:locale, canonical, sitemap via view-source
-  - [ ] JSON-LD : vérifier avec Google Rich Results Test
-  - [ ] Auth flow EN : signup, login, reset password, social login
-  - [ ] Studio flow EN
-  - [ ] Share/download flow EN (URL copiée avec /en/ prefix)
-  - [ ] Stripe checkout en EN (locale correcte)
-  - [ ] Error pages EN (404, 500)
-  - [ ] Cookie consent EN
-  - [ ] Mobile responsive EN
+- [x] `pnpm run build` — vérifier que le build passe
+- [x] Tester sur le preview deploy Vercel :
+  - [x] Navigation FR complète (toutes les pages, tous les flows)
+  - [x] Navigation EN complète (`/en/...`)
+  - [x] Switch FR ↔ EN (cookie persist, URLs correctes)
+  - [x] SEO : vérifier hreflang, og:locale, canonical, sitemap via view-source
+  - [x] JSON-LD : vérifier avec Google Rich Results Test
+  - [x] Auth flow EN : signup, login, reset password, social login
+  - [x] Studio flow EN
+  - [x] Share/download flow EN (URL copiée avec /en/ prefix)
+  - [x] Stripe checkout en EN (locale correcte)
+  - [x] Error pages EN (404, 500)
+  - [x] Cookie consent EN
+  - [x] Mobile responsive EN
 - [ ] Merge `feat/i18n` → `feat/migrate-to-vercel`
 
 **7. Tests manuels QA** (Victor — sur le preview deploy Vercel, avant merge)
@@ -441,23 +442,46 @@ Les mèmes restent en FR (phase 2). Seule l'interface est traduite. Les titres/d
 
 ### Phase 1.5 — Emails i18n
 
-- [ ] `src/emails/email-layout.tsx` : `<Html lang="fr">` → passer `locale` en prop, dynamique selon la langue du destinataire
-- [ ] `src/emails/email-layout.tsx` : textes FR hardcodés (footer "Tous droits réservés", fallback link "Si le bouton ne fonctionne pas...")
-- [ ] Traduire les 11 templates React-Email en EN (contenu des emails)
-- [ ] Traduire les sujets d'emails dans Better Auth config (`src/lib/auth.tsx`) : 6 sujets FR hardcodés
-  - `'Échec de paiement pour ton abonnement Petit Mème'`
-  - `'Réinitialise ton mot de passe Petit Mème'`
-  - `'Ton mot de passe Petit Mème a été modifié'`
-  - `'Confirme ton inscription à Petit Mème'`
-  - `'Bienvenue sur Petit Mème !'`
-  - `'Ton abonnement Premium Petit Mème est activé !'`
-- [ ] `src/lib/auth.tsx:286` : `periodSuffix` hardcodé (`'/an'` / `'/mois'`) → clé message
-- [ ] Traduire les sujets d'emails custom hors Better Auth :
-  - `src/routes/api/cron/verification-reminder.ts:40` : `'Rappel : confirme ton email Petit Mème'`
-  - `src/utils/user-cleanup.tsx:21` : `'Ton compte Petit Mème a été supprimé'`
-- [ ] Envoyer les emails dans la langue du user (champ `locale` en DB)
-- [ ] `src/emails/subscription-confirmed-email.tsx:49` : preview default `'3,99 €/mois'` → dynamique
-- [ ] AI errors admin (`src/server/ai.ts`) : optionnel, admin-only → hors scope
+**Décisions d'architecture :**
+- **Pas de Paraglide dans les emails** — chaque template reçoit `locale: Locale` en prop. Traductions colocalisées (objet local par template).
+- **Récupération locale — callbacks HTTP** (Better Auth : reset password, verification, welcome) : `getLocale()` (middleware Paraglide actif).
+- **Récupération locale — webhooks/crons** (Stripe, cron reminder, cleanup) : `user.locale` en DB (`locale: true` dans les selects Prisma). Fallback `baseLocale` si absent.
+- **Preview dev** : 2 exports par template (FR + EN) pour `pnpm run email:dev`.
+- **Emails admin** (banned/unbanned) : traduits dans la langue du user ciblé (lecture locale en DB).
+
+**1. Layout email** (`src/emails/email-layout.tsx`)
+- [x] Ajouter prop `locale: Locale`, `<Html lang={locale}>` dynamique
+- [x] Traduire footer ("Tous droits réservés" / "All rights reserved")
+- [x] Traduire fallback link ("Si le bouton ne fonctionne pas..." / "If the button doesn't work...")
+
+**2. Templates — traduire le contenu FR → EN** (11 templates, traductions colocalisées par fichier)
+- [x] `welcome-email.tsx` — prop `locale`, objet traductions local, 2 exports preview (FR + EN)
+- [x] `email-verification.tsx` — idem
+- [x] `reset-password.tsx` — idem
+- [x] `password-changed-email.tsx` — idem
+- [x] `subscription-confirmed-email.tsx` — prop `locale` + `isAnnual: boolean`, traductions locales (inclut periodSuffix), 2 exports preview
+- [x] `payment-failed-email.tsx` — prop `locale`, traductions locales, 2 exports preview
+- [x] `account-deleted-email.tsx` — prop `locale`, traductions locales, 2 exports preview
+- [x] `account-banned-email.tsx` — prop `locale`, traductions locales, 2 exports preview (locale user en DB)
+- [x] `account-unbanned-email.tsx` — idem
+- [x] `verification-reminder-email.tsx` — prop `locale`, traductions locales, 2 exports preview
+  Note: sujets centralisés dans `src/emails/subjects.ts` (objet `emailSubjects[locale].key`).
+  Bold text dans les traductions via `**text**` split pattern (pas de dépendance externe).
+  Apostrophes typographiques (U+2019) dans les strings FR pour éviter les conflits JS.
+
+**3. Sujets d'emails traduits**
+- [x] `src/lib/auth.tsx` — 6 sujets Better Auth via `emailSubjects[locale]`. `getLocale()` pour callbacks HTTP, `user.locale` DB pour webhook Stripe.
+- [x] `src/routes/api/cron/verification-reminder.ts` — sujet via `emailSubjects[locale]`, `locale: true` ajouté au select
+- [x] `src/utils/user-cleanup.tsx` — sujet via `emailSubjects[locale]`, locale reçue en paramètre
+- [x] `src/routes/admin/-server/users.tsx` — ban/unban : `locale: true` ajouté aux selects, sujets via `emailSubjects[locale]`
+
+**4. Refactoring auth.tsx**
+- [x] `periodSuffix` supprimé — le template `subscription-confirmed` reçoit `isAnnual` + `locale` et gère le suffixe
+- [x] `onSubscriptionComplete` : passe `locale` + `isAnnual` au template, `amount` = montant formaté seul (sans suffixe)
+- [x] `handlePaymentFailed` : `locale: true` ajouté au select, locale passée au template
+- [x] `beforeDelete` : query DB pour récupérer `user.locale`, passée à `cleanupUserData`
+
+**Hors scope :** AI errors admin (`src/server/ai.ts`) — admin-only, FR fixe
 
 ### Phase 2 — Contenu (mèmes) + Algolia bilingue
 

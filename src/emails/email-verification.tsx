@@ -1,37 +1,69 @@
+import type { Locale } from '@/paraglide/runtime'
 import { Button, Section, Text } from '@react-email/components'
-import { BUTTON_CLASS, EmailFallbackLink, EmailLayout } from './email-layout'
+import {
+  BoldText,
+  BUTTON_CLASS,
+  EmailFallbackLink,
+  EmailLayout
+} from './email-layout'
+
+const translations = {
+  fr: {
+    preview: 'Confirme ton inscription à Petit Meme',
+    title: 'Confirme ton adresse e-mail',
+    subtitle: 'Plus qu’une étape pour rejoindre Petit Meme.',
+    body: (username: string) => {
+      return `Salut ${username}, bienvenue sur **Petit Meme** ! Clique sur le bouton ci-dessous pour confirmer ton adresse e-mail et commencer à explorer les mèmes.`
+    },
+    cta: 'Confirmer mon inscription',
+    ignore: 'Si tu n’as pas créé de compte sur Petit Meme, ignore ce message.'
+  },
+  en: {
+    preview: 'Confirm your Petit Meme registration',
+    title: 'Confirm your email address',
+    subtitle: 'One more step to join Petit Meme.',
+    body: (username: string) => {
+      return `Hi ${username}, welcome to **Petit Meme**! Click the button below to confirm your email address and start exploring memes.`
+    },
+    cta: 'Confirm my registration',
+    ignore:
+      'If you didn’t create an account on Petit Meme, ignore this message.'
+  }
+} as const satisfies Record<Locale, Record<string, unknown>>
 
 type EmailVerificationProps = {
   username: string
   verificationUrl: string
+  locale: Locale
 }
 
 export const EmailVerification = ({
   username,
-  verificationUrl
+  verificationUrl,
+  locale
 }: EmailVerificationProps) => {
+  const tr = translations[locale]
+
   return (
-    <EmailLayout preview="Confirme ton inscription à Petit Meme">
+    <EmailLayout preview={tr.preview} locale={locale}>
       <Section>
         <Text className="m-0 mb-2 text-lg font-semibold text-brand">
-          Confirme ton adresse e-mail
+          {tr.title}
         </Text>
         <Text className="m-0 mb-6 text-sm leading-6 text-brand-muted-dark">
-          Plus qu'une étape pour rejoindre Petit Meme.
+          {tr.subtitle}
         </Text>
         <Text className="m-0 mb-4 text-sm leading-6 text-neutral-600">
-          Salut {username}, bienvenue sur <b>Petit Meme</b> ! Clique sur le
-          bouton ci-dessous pour confirmer ton adresse e-mail et commencer à
-          explorer les mèmes.
+          <BoldText text={tr.body(username)} />
         </Text>
         <Section className="mb-6 mt-2">
           <Button className={BUTTON_CLASS} href={verificationUrl}>
-            Confirmer mon inscription
+            {tr.cta}
           </Button>
         </Section>
-        <EmailFallbackLink href={verificationUrl} />
+        <EmailFallbackLink href={verificationUrl} locale={locale} />
         <Text className="m-0 mt-6 text-xs leading-5 text-brand-muted">
-          Si tu n'as pas créé de compte sur Petit Meme, ignore ce message.
+          {tr.ignore}
         </Text>
       </Section>
     </EmailLayout>
@@ -40,7 +72,19 @@ export const EmailVerification = ({
 
 EmailVerification.PreviewProps = {
   username: 'Alan',
-  verificationUrl: 'https://petit-meme.io/api/auth/verify-email?token=abc123'
+  verificationUrl: 'https://petit-meme.io/api/auth/verify-email?token=abc123',
+  locale: 'fr'
 } satisfies EmailVerificationProps
+
+export const EmailVerificationEN = (
+  props: Omit<EmailVerificationProps, 'locale'>
+) => {
+  return <EmailVerification {...props} locale="en" />
+}
+
+EmailVerificationEN.PreviewProps = {
+  username: 'Alan',
+  verificationUrl: 'https://petit-meme.io/api/auth/verify-email?token=abc123'
+} satisfies Omit<EmailVerificationProps, 'locale'>
 
 export default EmailVerification

@@ -12,6 +12,7 @@ import { useContainedSize } from '@/hooks/use-contained-size'
 import { useImageAspectRatio } from '@/hooks/use-image-aspect-ratio'
 import { useMemeHls } from '@/hooks/use-meme-hls'
 import { buildVideoImageUrl } from '@/lib/bunny'
+import { m } from '@/paraglide/messages.js'
 
 type ProcessedRatioState = {
   url: string
@@ -127,19 +128,23 @@ export const StudioPreview = ({
             role="status"
             aria-live="polite"
           >
-            <Badge variant="outline">Traitement ({progress}%)</Badge>
+            <Badge variant="outline">
+              {m.studio_processing({ progress: String(progress) })}
+            </Badge>
             <Progress
               value={progress}
-              aria-label={`Progression du traitement : ${progress}%`}
+              aria-label={m.studio_processing_progress({
+                progress: String(progress)
+              })}
             />
             <Button
               type="button"
               variant="ghost"
               size="sm"
               onClick={onCancel}
-              aria-label="Annuler le traitement"
+              aria-label={m.studio_cancel_processing()}
             >
-              Annuler
+              {m.studio_cancel()}
             </Button>
           </div>
         </div>

@@ -180,5 +180,9 @@
   "studio_template_caption": "Caption",
   "studio_template_caption_desc": "White band, black text",
   "studio_template_subtitle": "Subtitle",
-  "studio_template_subtitle_desc": "Semi-transparent background, white text"
+  "studio_template_subtitle_desc": "Semi-transparent background, white text",
+  "studio_processing": "Processing ({progress}%)",
+  "studio_processing_progress": "Processing progress: {progress}%",
+  "studio_cancel": "Cancel",
+  "studio_cancel_processing": "Cancel processing"
 }

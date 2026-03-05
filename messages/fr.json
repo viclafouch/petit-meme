@@ -180,5 +180,9 @@
   "studio_template_caption": "Légende",
   "studio_template_caption_desc": "Bande blanche, texte noir",
   "studio_template_subtitle": "Sous-titre",
-  "studio_template_subtitle_desc": "Fond semi-transparent, texte blanc"
+  "studio_template_subtitle_desc": "Fond semi-transparent, texte blanc",
+  "studio_processing": "Traitement ({progress}%)",
+  "studio_processing_progress": "Progression du traitement : {progress}%",
+  "studio_cancel": "Annuler",
+  "studio_cancel_processing": "Annuler le traitement"
 }

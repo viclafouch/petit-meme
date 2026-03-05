@@ -35,7 +35,7 @@ Un merge atomique garantit que le site passe de FR-only à bilingue en une fois.
 
 **Stratégie d'URL :** prefix sauf langue par défaut. FR = `/pricing`. EN = `/en/pricing`. Pas de traduction de slugs.
 
-**Détection locale :** URL > Cookie (`PARAGLIDE_LOCALE`) > Base locale (FR). Pas de redirect auto Accept-Language.
+**Détection locale :** URL > Cookie (`PARAGLIDE_LOCALE`) > Preferred Language (Accept-Language / navigator.languages) > Base locale (FR).
 
 **Routes i18n :** toutes les routes publiques (home, pricing, memes, favorites, settings, legal, password, checkout, reels, random, studio).
 **Routes exclues :** `/admin/*` (FR fixe), `/api/*`, `/sitemap.xml`, `/robots.txt`, `/health`.
@@ -72,7 +72,7 @@ Un merge atomique garantit que le site passe de FR-only à bilingue en une fois.
 **Template de fichiers Paraglide (pattern de référence) :**
 - `project.inlang/settings.json` — `{ "baseLocale": "fr", "locales": ["fr", "en"] }`
 - `messages/fr.json` / `messages/en.json` — clés préfixées par domaine (`nav_`, `auth_`, `pricing_`, etc.)
-- `vite.config.ts` — `paraglideVitePlugin({ project: './project.inlang', outdir: './src/paraglide', outputStructure: 'message-modules', cookieName: 'PARAGLIDE_LOCALE', strategy: ['url', 'cookie', 'baseLocale'], urlPatterns: [...] })`
+- `vite.config.ts` — `paraglideVitePlugin({ project: './project.inlang', outdir: './src/paraglide', outputStructure: 'message-modules', cookieName: 'PARAGLIDE_LOCALE', strategy: ['url', 'cookie', 'preferredLanguage', 'baseLocale'], urlPatterns: [{ pattern: '/:path(.*)?', localized: [['en', '/en/:path(.*)?']] }] })`
 - `src/server.ts` — `paraglideMiddleware(req, () => handler.fetch(req))`
 - `src/router.tsx` — `rewrite: { input: deLocalizeUrl, output: localizeUrl }`
 
@@ -125,16 +125,11 @@ Un merge atomique garantit que le site passe de FR-only à bilingue en une fois.
 - [x] Installer `@inlang/paraglide-js` (devDep) — v2.13.1
 - [x] Créer `project.inlang/settings.json` (baseLocale: `fr`, locales: `["fr", "en"]`)
 - [x] Configurer `paraglideVitePlugin` dans `vite.config.ts` :
-  - `strategy: ["url", "cookie", "baseLocale"]`
+  - `strategy: ["url", "cookie", "preferredLanguage", "baseLocale"]`
   - `outputStructure: "message-modules"`
   - `cookieName: "PARAGLIDE_LOCALE"`
-  - `urlPatterns` — routes publiques localisées :
-    `/`, `/memes`, `/memes/:memeId`, `/memes/category/:slug`, `/memes/:memeId/studio`,
-    `/random`, `/favorites`, `/pricing`, `/settings`, `/checkout/success`,
-    `/password/reset`, `/password/create-new`, `/terms-of-use`, `/privacy`,
-    `/mentions-legales`, `/reels`
-  - Routes **non** listées (donc exclues automatiquement) : `/admin/*`, `/api/*`, `/health`, `/sitemap.xml`, `/robots.txt`
-  - `/en/admin`, `/en/api/*` etc. ne seront pas matchés → 404 naturel (pas de strip silencieux du prefix)
+  - `urlPatterns` — wildcard unique `/:path(.*)?` (comportement par défaut Paraglide : base locale sans préfixe, EN avec `/en/`). Pas besoin de lister chaque route explicitement.
+  - Routes admin/API non localisées naturellement (pas de pattern match → 404)
 - [x] Ajouter `paraglideMiddleware` dans `src/server.ts`
 - [x] Ajouter `rewrite` (`deLocalizeUrl`/`localizeUrl`) dans `src/router.tsx`
 - [x] Migrer `src/i18n/config.ts` → remplacer par Paraglide runtime (`getLocale()`, `locales`, etc.). Seul fichier importateur : `src/helpers/number.ts`. **`src/i18n/config.ts` supprimé.**
@@ -206,7 +201,7 @@ Préfixes de clés par domaine : `nav_`, `home_`, `pricing_`, `meme_`, `studio_`
   `src/constants/studio.ts` (STUDIO_FONT_SIZES → `getStudioFontSizes()`, STUDIO_COLORS → `getStudioColors()`, STUDIO_BAND_COLORS → `getStudioBandColors()`, STUDIO_TEMPLATES → `getStudioTemplates()` + `STUDIO_TEMPLATE_STYLES` structural const),
   `src/stores/studio.store.ts` (updated to use `STUDIO_TEMPLATE_STYLES`),
   `src/helpers/format.ts` (`pluralize` unexported, admin-only usage remains),
-  Note : Paraglide v2 ne supporte pas ICU MessageFormat plurals. Pluralisation via `Intl.PluralRules(getLocale())` + messages séparés `*_one`/`*_other`.
+  Note : Pluralisation via la syntaxe déclarative inlang (`declarations`/`selectors`/`match` avec `count: plural`). Clés uniques (`meme_views`, `meme_minutes`, `meme_seconds`) au lieu de paires `*_one`/`*_other`.
 
 - [x] **Batch D — Auth & Settings** (inclut les callback URLs locale-aware) :
   **Callback URLs à rendre dynamiques** (sinon le user sur `/en/` atterrit sur `/` après auth) :

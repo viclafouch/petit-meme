@@ -24,7 +24,7 @@ export const StudioErrorFallback = ({ resetErrorBoundary }: FallbackProps) => {
       <div className="max-w-sm rounded-lg bg-muted p-6 text-center shadow-lg flex flex-col gap-4">
         <p className="text-sm">{m.studio_error()}</p>
         <Button variant="secondary" size="sm" onClick={resetErrorBoundary}>
-          {m.studio_retry()}
+          {m.common_retry()}
         </Button>
       </div>
     </div>

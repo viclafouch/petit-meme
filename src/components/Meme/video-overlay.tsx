@@ -12,7 +12,6 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip'
 import { m } from '@/paraglide/messages.js'
-import { getLocale } from '@/paraglide/runtime.js'
 
 const OVERLAY_BUTTON_CLASS =
   'rounded-full bg-black/50 hover:bg-black/70 text-white size-9 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/50'
@@ -46,20 +45,11 @@ const RemainingTimeBadge = () => {
 
   const remainingMinutes = Math.floor(remainingTime / 60)
   const remainingSeconds = Math.floor(remainingTime % 60)
-  const rules = new Intl.PluralRules(getLocale())
-  const minuteUnit =
-    rules.select(remainingMinutes) === 'one'
-      ? m.meme_minute_one()
-      : m.meme_minute_other()
-  const secondUnit =
-    rules.select(remainingSeconds) === 'one'
-      ? m.meme_second_one()
-      : m.meme_second_other()
   const ariaLabel = m.meme_time_remaining({
     minutes: remainingMinutes,
-    minuteUnit,
+    minuteUnit: m.meme_minutes({ count: remainingMinutes }),
     seconds: remainingSeconds,
-    secondUnit
+    secondUnit: m.meme_seconds({ count: remainingSeconds })
   })
 
   return (

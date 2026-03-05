@@ -86,9 +86,7 @@ const MemeInfo = ({ meme, allTags }: MemeInfoParams) => {
           </span>
         ) : null}
         <span className="text-muted-foreground text-xs">
-          {new Intl.PluralRules(getLocale()).select(meme.viewCount) === 'one'
-            ? m.meme_view_one({ count: meme.viewCount })
-            : m.meme_view_other({ count: meme.viewCount })}
+          {m.meme_views({ count: meme.viewCount })}
         </span>
       </div>
     </>

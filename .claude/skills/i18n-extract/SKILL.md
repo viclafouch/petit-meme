@@ -32,7 +32,7 @@ For each file, list every hardcoded French string found:
 Classify each string:
 - **Simple**: static text → `m.prefix_key()`
 - **Parameterized**: contains dynamic values → `m.prefix_key({ variable })`
-- **Plural**: count-dependent → separate `_one`/`_other` keys + `Intl.PluralRules`
+- **Plural**: count-dependent → single key with declarative inlang plural syntax (`declarations`/`selectors`/`match`)
 - **Reusable**: appears in 2+ places → use `common_` prefix
 
 ## Step 3 — Generate Message Keys
@@ -68,38 +68,66 @@ Keys use `snake_case` with a domain prefix:
 
 ### Plural Handling (CRITICAL)
 
-**Paraglide v2 does NOT support ICU MessageFormat plurals.** The `{count, plural, one {…} other {…}}` syntax is NOT parsed — it becomes literal text.
+**The inlang message format uses a declarative JSON syntax for plurals.** It does NOT support ICU MessageFormat (`{count, plural, one {…} other {…}}`) — that syntax is treated as a literal variable name.
 
-**Pattern: separate keys + `Intl.PluralRules`**
+**Pattern: single key with declarative syntax**
 
 In `messages/fr.json`:
 ```json
 {
-  "meme_view_one": "{count} vue",
-  "meme_view_other": "{count} vues"
+  "meme_views": [{ "declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": { "countPlural=one": "{count} vue", "countPlural=other": "{count} vues" } }]
 }
 ```
 
 In `messages/en.json`:
 ```json
 {
-  "meme_view_one": "{count} view",
-  "meme_view_other": "{count} views"
+  "meme_views": [{ "declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": { "countPlural=one": "{count} view", "countPlural=other": "{count} views" } }]
 }
 ```
 
 In component:
 ```tsx
 import { m } from '@/paraglide/messages.js'
-import { getLocale } from '@/paraglide/runtime.js'
 
-const rules = new Intl.PluralRules(getLocale())
-const viewLabel = rules.select(count) === 'one'
-  ? m.meme_view_one({ count })
-  : m.meme_view_other({ count })
+const viewLabel = m.meme_views({ count })
 ```
 
+Paraglide compiles this into `Intl.PluralRules` calls with the correct locale automatically — no manual plural logic needed in components.
+
+**Anatomy of a plural message:**
+- `"declarations"` — declare `input count` (the parameter) and `local countPlural = count: plural` (applies `Intl.PluralRules`)
+- `"selectors"` — which local variable to match on (`["countPlural"]`)
+- `"match"` — `countPlural=one` for singular, `countPlural=other` for plural. Use `{count}` to interpolate the number.
+
 **When to use plurals:** view counts, bookmark counts, item counts, time units (minute/second), any `{n} {noun}` pattern.
+
+**For unit-only plurals** (no number in output, e.g., "minute" vs "minutes"):
+```json
+{
+  "meme_minutes": [{ "declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": { "countPlural=one": "minute", "countPlural=other": "minutes" } }]
+}
+```
+
+### Built-in Formatters (number, datetime)
+
+The inlang message format also supports `number` and `datetime` formatters using the same declarative syntax. These use `Intl.NumberFormat` and `Intl.DateTimeFormat` under the hood.
+
+**Number formatting:**
+```json
+{
+  "balance": [{ "declarations": ["input amount", "local formattedAmount = amount: number style=currency currency=EUR"], "match": { "amount=*": "Solde : {formattedAmount}" } }]
+}
+```
+
+**Date formatting:**
+```json
+{
+  "purchase_date": [{ "declarations": ["input date", "local formattedDate = date: datetime dateStyle=long"], "match": { "date=*": "Achat : {formattedDate}" } }]
+}
+```
+
+These are optional — using `Intl` APIs directly in code (e.g., `toLocaleDateString(getLocale())`) is also valid and sometimes simpler.
 
 ## Step 4 — Constants with Labels
 
@@ -150,8 +178,8 @@ export const getItems = (): Item[] => {
 
 ### Import rules
 
-- `m` from `@/paraglide/messages.js` — message functions
-- `getLocale` from `@/paraglide/runtime.js` — current locale (only in components/handlers, NEVER in helpers/utils)
+- `m` from `@/paraglide/messages.js` — message functions (includes plurals — no extra import needed)
+- `getLocale` from `@/paraglide/runtime.js` — current locale (only for `toLocaleDateString(getLocale())`, `Intl.NumberFormat`, etc. — NOT needed for plurals, Paraglide handles that internally). Only in components/handlers, NEVER in helpers/utils.
 - `localizeUrl` / `deLocalizeUrl` from `@/paraglide/runtime.js` — URL localization
 
 ### Zero breaking changes
@@ -182,13 +210,17 @@ After all strings are extracted:
 3. **Run `code-refactoring` agent** on all modified files
 4. **Verify no orphan imports** — `Grep` for removed constants/functions that might still be imported elsewhere
 
-## Common Pitfalls (learned from Batches A–C)
+## Common Pitfalls (learned from Batches A–F)
 
 1. **`getLocale()` in helpers** — NEVER. Pass `locale` as parameter. `getLocale()` only in components and server handlers.
 2. **Module-level `m.xxx()` calls** — NEVER in constants files. Use getter functions called at render time.
-3. **ICU plural syntax** — NOT supported. Always use separate `_one`/`_other` keys.
-4. **`pluralize()` from format.ts** — do NOT use in public components. Use `Intl.PluralRules` + Paraglide messages directly. `pluralize()` is kept only for admin (FR-only).
+3. **ICU plural syntax `{count, plural, ...}`** — NOT parsed by inlang message format plugin. It becomes a literal variable name. Always use the declarative JSON syntax with `declarations`/`selectors`/`match` (see Plural Handling section).
+4. **`pluralize()` from format.ts** — do NOT use in public components. Use Paraglide declarative plurals (single key, no manual `Intl.PluralRules`). `pluralize()` is kept only for admin (FR-only).
 5. **Paraglide compile** — after adding new message keys, run `pnpm exec paraglide-js compile --project ./project.inlang` if the dev server is not running. The Vite plugin does this automatically during dev.
 6. **Unicode escapes** — write `"Début"` not `"D\u00e9but"`. Paraglide and JSON handle UTF-8 natively.
 7. **`as const satisfies` on structural consts** — always keep `satisfies Type` for type validation, not just `as const`.
 8. **Store imports** — stores (`*.store.ts`) must import structural consts, never getter functions with `m.xxx()`.
+9. **urlPatterns** — use a single wildcard `/:path(.*)?` catchall. No need to list every route explicitly (Paraglide defaults: base locale unprefixed, other locales prefixed with `/{locale}/`).
+10. **Strategy order** — `["url", "cookie", "preferredLanguage", "baseLocale"]`. `preferredLanguage` detects `Accept-Language` / `navigator.languages` for new visitors without a cookie.
+11. **Middleware (TanStack Start)** — pass the ORIGINAL request to the framework handler: `paraglideMiddleware(req, () => handler.fetch(req))`. Passing the callback's modified request causes redirect loops.
+12. **Plural key naming** — use the plural noun form as key name (`meme_views`, `meme_minutes`, `meme_seconds`), not `_one`/`_other` suffixes. One key per concept.

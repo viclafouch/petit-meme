@@ -25,7 +25,6 @@ import { sendClickEvent, sendConversionEvent } from '@/lib/algolia-insights'
 import { getFavoritesMemesQueryOpts } from '@/lib/queries'
 import { cn } from '@/lib/utils'
 import { m } from '@/paraglide/messages.js'
-import { getLocale } from '@/paraglide/runtime.js'
 import { useShowDialog } from '@/stores/dialog.store'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useRouteContext } from '@tanstack/react-router'
@@ -209,10 +208,7 @@ export const MemeListItem = React.memo(
             </Link>
             <div className="flex flex-row items-center gap-1.5 text-muted-foreground">
               <span className={cn(sizes[size].views)}>
-                {new Intl.PluralRules(getLocale()).select(meme.viewCount) ===
-                'one'
-                  ? m.meme_view_one({ count: meme.viewCount })
-                  : m.meme_view_other({ count: meme.viewCount })}
+                {m.meme_views({ count: meme.viewCount })}
               </span>
             </div>
           </div>

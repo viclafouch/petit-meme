@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Memes by Lafouch — a meme management and sharing platform with video support, user authentication, bookmarking, and premium subscriptions. Built with TanStack Start (React 19 full-stack framework) on Vite + Nitro.
 
-The site is currently **French-only**. An English migration is planned for later.
+The site is **bilingual FR/EN** (Paraglide JS). French is the base locale (no URL prefix), English uses `/en/` prefix.
 
 The site has very few users, giving us more freedom for breaking changes. Design is **mobile-first**, always responsive, and must work across all major browsers (Safari, Chrome, Firefox, etc.). Hosted on **Vercel (Hobby plan)**.
 
@@ -49,7 +49,6 @@ pnpm run prisma:reset-db:dev   # Reset DB (uses .env.development) — NEVER in p
 
 See current plan : `.claude/plan.md`. It must be always up to date. **Update it immediately after each meaningful change** — not just at the end of a task. If you add a feature, fix a bug, change an approach, or add a dependency mid-task, update the plan right then. A desynchronized plan is a bug.
 
-See i18n plan : `.claude/plan-i18n.md`. Same rules as above — always up to date.
 
 ## Code Quality & Reusability
 
@@ -74,10 +73,3 @@ For any UI/design task, **always use `/frontend-design`** before writing code.
 
 Whenever there is any uncertainty (even a single one), use the **deep-dive** skill before writing code. Never proceed with unresolved unknowns.
 
-## i18n Workflow — String Extraction Batches
-
-For any i18n string extraction task (Batches D, E, F, etc.), follow this workflow:
-
-1. **Always use `/i18n-extract <batch>`** before writing code — the skill contains all conventions, pitfalls, and patterns learned from Batches A–C
-2. Follow the standard Post-Task Checklist (lint, plan update, refactoring agent)
-3. Update `.claude/plan-i18n.md` — mark batch as `[x]` with implementation notes

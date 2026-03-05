@@ -8,9 +8,7 @@
 
 **Type `UserWithRole` vs `InferUser` :** Bug interne où `UserWithRole.role` est `string | undefined` mais le type inféré retourne `string | null | undefined`. Fix appliqué : type `SessionUser` custom dans `src/lib/role.ts`.
 
-**Reste à faire :**
 - [ ] Ouvrir une issue upstream sur Better Auth pour aligner `UserWithRole.role` avec le type inféré
-- [x] Évaluer le plugin i18n (v1.5) pour les messages d'erreur FR → décision : adopter `@better-auth/i18n` (voir section Internationalisation Phase 1, étape 4)
 
 **Issues à surveiller :** [#2596](https://github.com/better-auth/better-auth/issues/2596), [#3033](https://github.com/better-auth/better-auth/issues/3033), [#7452](https://github.com/better-auth/better-auth/issues/7452)
 
@@ -23,11 +21,6 @@
 - [ ] Activer "Related Items" dans le dashboard Algolia → Recommend
 - [ ] Activer "Trending Items" dans le dashboard Algolia → Recommend
 - [ ] Vérifier que les fallbacks (Prisma + `fallbackParameters`) se désactivent naturellement quand les modèles ML fonctionnent
-
-### Synonymes anglais (dépend du passage bilingue)
-
-- [ ] Ajouter les synonymes anglais (`"lmao" <-> "lol" <-> "rofl"`, `"bruh" <-> "bro"`, etc.)
-- [ ] Mettre à jour `queryLanguages`, `indexLanguages`, `ignorePlurals`, `removeStopWords` à `["fr", "en"]`
 
 ### Boucle d'amélioration continue
 
@@ -144,8 +137,8 @@ Ne pas oublier le namespace `xmlns:image="http://www.google.com/schemas/sitemap-
 
 **Fichiers :** `src/components/navbar.tsx`, composants utilisant `<AvatarImage>`
 
-- [ ] Changer alt du logo → "Memes by Lafouch"
-- [ ] Changer alt des avatars → inclure le nom d'utilisateur quand disponible
+- [x] Changer alt du logo → "Memes by Lafouch"
+- [x] Changer alt des avatars → inclure le nom d'utilisateur quand disponible
 
 ### Non retenu pour l'instant
 
@@ -178,12 +171,6 @@ La page pricing utilise `useSuspenseQuery(getActiveSubscriptionQueryOpts())` pou
 
 ---
 
-## date-fns supprimé (mars 2026) ✅
-
-Dépendance `date-fns` supprimée. API de date centralisée dans `src/helpers/date.ts` : une seule `formatDate(date, locale, options?)` avec override `Intl.DateTimeFormatOptions`, plus `formatRelativeTime()` et `differenceInMonths()`. Toutes les locales hardcodées migrées vers `getLocale()`. Helpers format (`formatViewCount`, etc.) remplacés par messages Paraglide (`meme_views`, `meme_bookmarks`, `meme_categories`, `meme_categories_none`).
-
----
-
 ## Backlog — Futures évolutions
 
 ### Admin — Items reportés
@@ -196,9 +183,13 @@ Dépendance `date-fns` supprimée. API de date centralisée dans `src/helpers/da
 
 ### Internationalisation (FR / EN)
 
-Plan détaillé dans **`.claude/plan-i18n.md`** (fichier dédié, auto-suffisant).
+Phases 0, 1, 1.5 terminées. Interface bilingue FR/EN + 11 email templates traduits.
 
-Phases : 0 (quick wins sur `feat/migrate-to-vercel`) → 1 (feature branch `feat/i18n` depuis `feat/migrate-to-vercel`) → 1.5 (emails) → 2 (contenu mèmes + Algolia)
+**Phase 2 — Contenu mèmes + Algolia bilingue :**
+- [ ] Stratégie de traduction des mèmes (champ `lang` par mème, titres/descriptions traduits)
+- [ ] Ciblage de langue par mème (certains mèmes FR-only, certains EN-only, certains universels)
+- [ ] Algolia : `queryLanguages: ["fr", "en"]`, `indexLanguages`, `ignorePlurals`, `removeStopWords` bilingue
+- [ ] Algolia : synonymes anglais (`"lmao" <-> "lol" <-> "rofl"`, `"bruh" <-> "bro"`, etc.)
 
 ### Migration Prisma → Drizzle
 
@@ -210,12 +201,5 @@ Remplacer Prisma par Drizzle ORM. Conventions cibles : tables en pluriel, colonn
 
 ### Migration vers Cloudflare
 
-Passer le domaine sur Cloudflare pour bénéficier de ses fonctionnalités natives : redirection www → apex (et supprimer le check manuel dans `server.ts`), CDN/cache, SSL, protection DDoS, Page Rules, etc.
+Passer le domaine sur Cloudflare pour bénéficier de ses fonctionnalités natives : CDN/cache, SSL, protection DDoS, Page Rules, etc.
 
----
-
-## Optimisation Coûts Neon (mars 2026) ✅
-
-Migration Neon terminée. DB sur neon.tech (free tier 191.9h/mois) au lieu du Vercel Marketplace ($39.59/mois).
-
-**Config actuelle :** Projet `petit-meme`, `eu-central-1` (Frankfurt), Postgres 17. Branche `main` (prod) + branche `dev` (local). 0.25 CU, auto-suspend 5 min. Séparation env strict `.env.development` / `.env.production`.

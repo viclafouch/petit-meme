@@ -1,7 +1,10 @@
 import type { User } from 'better-auth'
 import { z } from 'zod'
 import { StudioError } from '@/constants/error'
-import { FREE_PLAN } from '@/constants/plan'
+import {
+  FREE_PLAN_MAX_FAVORITES,
+  FREE_PLAN_MAX_GENERATIONS
+} from '@/constants/plan'
 import { prismaClient } from '@/db'
 import type { Meme } from '@/db/generated/prisma/client'
 import { authLogger } from '@/lib/logger'
@@ -30,7 +33,7 @@ export const getFavoritesMemes = createServerFn({ method: 'GET' })
       take:
         activeSubscription || matchIsUserAdmin(context.user)
           ? undefined
-          : FREE_PLAN.maxFavoritesCount,
+          : FREE_PLAN_MAX_FAVORITES,
       include: {
         meme: {
           include: {
@@ -64,7 +67,7 @@ export const checkGeneration = createServerFn({ method: 'POST' })
     ])
 
     if (
-      generationCount >= FREE_PLAN.maxGenerationsCount &&
+      generationCount >= FREE_PLAN_MAX_GENERATIONS &&
       !activeSubscription &&
       !matchIsUserAdmin(context.user)
     ) {
@@ -108,7 +111,7 @@ const toggleBookmark = createServerOnlyFn(
           where: { userId }
         })
 
-        if (totalBookmarks >= FREE_PLAN.maxFavoritesCount) {
+        if (totalBookmarks >= FREE_PLAN_MAX_FAVORITES) {
           const activeSubscription = await findActiveSubscription(userId)
 
           if (!activeSubscription) {

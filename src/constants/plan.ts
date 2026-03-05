@@ -1,3 +1,5 @@
+import { m } from '@/paraglide/messages.js'
+
 export type BillingPeriod = 'monthly' | 'yearly'
 
 export type PlanFeature = {
@@ -24,55 +26,79 @@ export type Plan = {
   pricing: Record<BillingPeriod, PlanPricing>
 }
 
-export const FREE_PLAN = {
-  title: 'Testeur',
-  maxGenerationsCount: 3,
-  maxFavoritesCount: 20,
-  productId: 'free',
-  isExclusive: false,
-  description:
-    'Testez gratuitement et sans limite de temps. Découvrez les mèmes, créez vos premiers contenus et enregistrez vos favoris sans sortir la carte bleue.',
-  features: [
-    { label: 'Accès aux mèmes publics', status: 'included' },
-    { label: 'Favoris enregistrés', status: 'limited', note: '20 max' },
-    {
-      label: 'Générations de vidéos',
-      status: 'limited',
-      note: '3 max'
-    }
-  ],
-  pricing: {
-    monthly: { priceInCents: 0, betterAuthPlanName: 'free' },
-    yearly: { priceInCents: 0, betterAuthPlanName: 'free' }
-  }
-} as const satisfies Plan
+export const FREE_PLAN_MAX_GENERATIONS = 3
+export const FREE_PLAN_MAX_FAVORITES = 20
 
-export const PREMIUM_PLAN = {
-  title: 'Premium',
-  maxGenerationsCount: Number.MAX_SAFE_INTEGER,
-  maxFavoritesCount: Number.MAX_SAFE_INTEGER,
-  productId: 'f9395cde-98ed-4d06-9631-b9b9f0a64566',
-  isExclusive: true,
-  description:
-    "Passez en mode illimité. Créez autant de vidéos que vous voulez, sauvegardez tous vos favoris et profitez d'une expérience sans aucune restriction.",
-  features: [
-    { label: 'Accès aux mèmes publics', status: 'included' },
-    { label: 'Favoris enregistrés', status: 'included', note: 'illimité' },
-    {
-      label: 'Générations de vidéos',
-      status: 'included',
-      note: 'illimité'
-    }
-  ],
-  pricing: {
-    monthly: { priceInCents: 399, betterAuthPlanName: 'premium' },
-    yearly: { priceInCents: 2999, betterAuthPlanName: 'premium-annual' }
-  }
-} as const satisfies Plan
+const FREE_PLAN_PRICING = {
+  monthly: { priceInCents: 0, betterAuthPlanName: 'free' },
+  yearly: { priceInCents: 0, betterAuthPlanName: 'free' }
+} as const satisfies Record<BillingPeriod, PlanPricing>
 
-export const BILLING_PERIOD_LABELS = {
-  monthly: '/mois',
-  yearly: '/an'
-} as const satisfies Record<BillingPeriod, string>
+const PREMIUM_PLAN_PRICING = {
+  monthly: { priceInCents: 399, betterAuthPlanName: 'premium' },
+  yearly: { priceInCents: 2999, betterAuthPlanName: 'premium-annual' }
+} as const satisfies Record<BillingPeriod, PlanPricing>
+
+export const PREMIUM_PLAN_PRODUCT_ID = 'f9395cde-98ed-4d06-9631-b9b9f0a64566'
+
+export { PREMIUM_PLAN_PRICING }
+
+export const getFreePlan = (): Plan => {
+  return {
+    title: m.plan_free_title(),
+    maxGenerationsCount: FREE_PLAN_MAX_GENERATIONS,
+    maxFavoritesCount: FREE_PLAN_MAX_FAVORITES,
+    productId: 'free',
+    isExclusive: false,
+    description: m.plan_free_description(),
+    features: [
+      { label: m.plan_feature_public_memes(), status: 'included' },
+      {
+        label: m.plan_feature_favorites(),
+        status: 'limited',
+        note: m.plan_note_20_max()
+      },
+      {
+        label: m.plan_feature_generations(),
+        status: 'limited',
+        note: m.plan_note_3_max()
+      }
+    ],
+    pricing: FREE_PLAN_PRICING
+  }
+}
+
+export const getPremiumPlan = (): Plan => {
+  return {
+    title: m.plan_premium_title(),
+    maxGenerationsCount: Number.MAX_SAFE_INTEGER,
+    maxFavoritesCount: Number.MAX_SAFE_INTEGER,
+    productId: PREMIUM_PLAN_PRODUCT_ID,
+    isExclusive: true,
+    description: m.plan_premium_description(),
+    features: [
+      { label: m.plan_feature_public_memes(), status: 'included' },
+      {
+        label: m.plan_feature_favorites(),
+        status: 'included',
+        note: m.plan_note_unlimited()
+      },
+      {
+        label: m.plan_feature_generations(),
+        status: 'included',
+        note: m.plan_note_unlimited()
+      }
+    ],
+    pricing: PREMIUM_PLAN_PRICING
+  }
+}
+
+export const getBillingPeriodLabel = (period: BillingPeriod) => {
+  if (period === 'monthly') {
+    return m.pricing_per_month()
+  }
+
+  return m.pricing_per_year()
+}
 
 export const ANNUAL_DISCOUNT_PERCENT = 37

@@ -5,7 +5,7 @@ import {
   getTrendingMemesQueryOpts
 } from '@/lib/queries'
 import { buildHomeJsonLd, seo } from '@/lib/seo'
-import { Faq, HOME_FAQ_ITEMS } from '@/routes/_public__root/-components/faq'
+import { Faq, getHomeFaqItems } from '@/routes/_public__root/-components/faq'
 import { Responsive } from '@/routes/_public__root/-components/responsive'
 import { createFileRoute } from '@tanstack/react-router'
 import { BestMemes } from './-components/best-memes'
@@ -47,7 +47,9 @@ export const Route = createFileRoute('/_public__root/')({
     return [
       {
         type: 'application/ld+json',
-        children: JSON.stringify(buildHomeJsonLd({ faqItems: HOME_FAQ_ITEMS }))
+        children: JSON.stringify(
+          buildHomeJsonLd({ faqItems: getHomeFaqItems() })
+        )
       }
     ]
   },

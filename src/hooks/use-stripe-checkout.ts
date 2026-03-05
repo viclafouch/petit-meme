@@ -1,5 +1,5 @@
 import { toast } from 'sonner'
-import { type BillingPeriod, PREMIUM_PLAN } from '@/constants/plan'
+import { type BillingPeriod, PREMIUM_PLAN_PRICING } from '@/constants/plan'
 import { getErrorMessage } from '@/helpers/error'
 import { authClient } from '@/lib/auth-client'
 import { getActiveSubscriptionQueryOpts } from '@/lib/queries'
@@ -60,7 +60,7 @@ export const useStripeCheckout = () => {
           return
         }
 
-        const planName = PREMIUM_PLAN.pricing[billingPeriod].betterAuthPlanName
+        const planName = PREMIUM_PLAN_PRICING[billingPeriod].betterAuthPlanName
 
         const { error } = await authClient.subscription.upgrade({
           plan: planName,

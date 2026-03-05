@@ -6,6 +6,7 @@ import { NEWS_CATEGORY_SLUG } from '@/constants/meme'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { getRecentCountMemesQueryOpts } from '@/lib/queries'
 import { cn } from '@/lib/utils'
+import { m } from '@/paraglide/messages.js'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { FloatingLogos } from './floating-logo'
@@ -53,7 +54,9 @@ const AnnouncementQuery = () => {
         to: '/memes/category/$slug',
         params: { slug: NEWS_CATEGORY_SLUG }
       }}
-      text={`${recentMemesCountQuery.data} nouveaux mèmes ajoutés récemment !`}
+      text={m.home_hero_announcement({
+        count: String(recentMemesCountQuery.data)
+      })}
     />
   ) : null
 }
@@ -80,9 +83,11 @@ export const Hero = () => {
           speedSegment={h1Transition.speedSegment}
           delay={h1Transition.delay}
         >
-          <span className="text-foreground">Ta</span> banque de mèmes vidéo,{' '}
-          <span className="text-foreground">prête à faire</span> rire{' '}
-          <span className="text-foreground">Internet</span>
+          <span className="text-foreground">{m.home_hero_h1_1()}</span>
+          {m.home_hero_h1_2()}
+          <span className="text-foreground">{m.home_hero_h1_3()}</span>
+          {m.home_hero_h1_4()}
+          <span className="text-foreground">{m.home_hero_h1_5()}</span>
         </TextEffect>
       </PageHeading>
       <PageDescriptionMotion
@@ -91,14 +96,7 @@ export const Hero = () => {
         animate="visible"
         custom={{ delay: 0.8 }}
       >
-        <span className="text-foreground font-bold">Explorez</span> la{' '}
-        <span className="text-foreground font-bold">plus grande</span>{' '}
-        collection de{' '}
-        <span className="text-foreground font-bold">mèmes vidéo</span> et
-        partagez-les en{' '}
-        <span className="text-foreground font-bold">1 clic</span>. Ajoutez{' '}
-        <span className="text-foreground font-bold">du texte</span> pour les
-        rendre <span className="text-foreground font-bold">uniques</span>.
+        {m.home_hero_description()}
       </PageDescriptionMotion>
       <PageActions className="w-full max-w-sm md:max-w-none justify-center">
         <motion.div
@@ -119,8 +117,8 @@ export const Hero = () => {
             )}
             to="/memes"
           >
-            Découvrir —{' '}
-            <span className="font-normal italic">c&apos;est gratuit</span>
+            {m.home_hero_cta_discover()}{' '}
+            <span className="font-normal italic">{m.home_hero_cta_free()}</span>
           </Link>
           <Link
             viewTransition
@@ -133,7 +131,7 @@ export const Hero = () => {
             )}
             to="/pricing"
           >
-            Mode premium{' '}
+            {m.home_hero_cta_premium()}{' '}
             <span aria-hidden="true" className="text-[16px]">
               🎉
             </span>

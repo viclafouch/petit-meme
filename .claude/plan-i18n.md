@@ -174,16 +174,21 @@ Préfixes de clés par domaine : `nav_`, `home_`, `pricing_`, `meme_`, `studio_`
   Aussi : fix `project.inlang/settings.json` (ajout `modules` + `plugin.inlang.messageFormat` pour que `paraglide-js compile` CLI fonctionne),
   fix `<a href="/privacy">` → `<Link to="/privacy">` dans cookie-consent, fix alt logo → "Memes by Lafouch", fix alt avatar → paramétré avec username
 
-- [ ] **Batch B — Pages principales** :
+- [x] **Batch B — Pages principales** :
   `src/routes/_public__root/index.tsx`, `src/routes/_public__root/-components/hero.tsx`,
   `src/routes/_public__root/-components/best-memes.tsx`, `src/routes/_public__root/-components/faq.tsx`,
-  `src/components/faq-section.tsx` (heading par défaut "Questions fréquentes"),
+  `src/routes/_public__root/-components/responsive.tsx`,
+  `src/components/faq-section.tsx` (heading rendu required, plus de défaut),
   `src/routes/_public__root/_default/pricing/index.tsx`,
   `src/routes/_public__root/_default/pricing/-components/pricing-card.tsx`,
   `src/routes/_public__root/_default/pricing/-components/billing-toggle.tsx`,
-  `src/routes/_public__root/_default/pricing/-components/constants.ts` (FAQ, stats, garanties),
-  `src/constants/plan.ts` (FREE_PLAN, PREMIUM_PLAN, BILLING_PERIOD_LABELS),
+  `src/routes/_public__root/_default/pricing/-components/constants.ts` (FAQ, stats, garanties → fonctions getter),
+  `src/routes/_public__root/_default/pricing/-components/guarantee-banner.tsx`,
+  `src/routes/_public__root/_default/pricing/-components/stats-section.tsx`,
+  `src/routes/_public__root/_default/pricing/-components/pricing-faq.tsx`,
+  `src/constants/plan.ts` (FREE_PLAN/PREMIUM_PLAN → `getFreePlan()`/`getPremiumPlan()`, BILLING_PERIOD_LABELS → `getBillingPeriodLabel()`, constantes structurelles exportées séparément),
   `src/routes/_public__root/_default/checkout.success.tsx`
+  Aussi mis à jour : `src/helpers/subscription.ts`, `src/server/user.ts`, `src/hooks/use-stripe-checkout.ts`, `src/routes/_public__root/_default/settings/-components/profile-content.tsx` (consommateurs de plan.ts)
 
 - [ ] **Batch C — Memes & Studio** :
   `src/routes/_public__root/_default/memes/$memeId.tsx`,

@@ -1,6 +1,7 @@
 import React from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 import { buttonVariants } from '@/components/ui/button'
+import { m } from '@/paraglide/messages.js'
 import {
   PageDescription,
   PageHeading
@@ -43,12 +44,8 @@ const RouteComponent = () => {
       animate={{ opacity: 1 }}
       className="flex flex-col gap-6 items-center pt-20"
     >
-      <PageHeading>Félicitations !</PageHeading>
-      <PageDescription>
-        Merci pour ton soutien 🙏 <br />
-        Ton achat est validé et ton compte a été mis à jour. Tu peux dès
-        maintenant profiter de toutes tes fonctionnalités premium.
-      </PageDescription>
+      <PageHeading>{m.checkout_success_heading()}</PageHeading>
+      <PageDescription>{m.checkout_success_description()}</PageDescription>
       <Link
         className={buttonVariants({
           variant: 'defaultWithOutline',
@@ -56,7 +53,7 @@ const RouteComponent = () => {
         })}
         to="/"
       >
-        Retour à la page d&apos;accueil
+        {m.checkout_success_back()}
       </Link>
       <canvas ref={canvasRef} className="fixed size-full inset-0 -z-10" />
     </motion.div>
@@ -70,7 +67,7 @@ export const Route = createFileRoute(
   head: () => {
     return {
       meta: [
-        { title: 'Petit Meme - Paiement réussi' },
+        { title: m.checkout_success_title() },
         { name: 'robots', content: 'noindex,nofollow' }
       ]
     }

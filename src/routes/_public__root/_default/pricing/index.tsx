@@ -1,8 +1,13 @@
 import React from 'react'
-import { type BillingPeriod, FREE_PLAN, PREMIUM_PLAN } from '@/constants/plan'
+import {
+  type BillingPeriod,
+  getFreePlan,
+  getPremiumPlan
+} from '@/constants/plan'
 import { useStripeCheckout } from '@/hooks/use-stripe-checkout'
 import { getActiveSubscriptionQueryOpts } from '@/lib/queries'
 import { buildPricingJsonLd, seo } from '@/lib/seo'
+import { m } from '@/paraglide/messages.js'
 import {
   PageDescription,
   PageHeading
@@ -10,7 +15,7 @@ import {
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, useRouteContext } from '@tanstack/react-router'
 import { BillingToggle } from './-components/billing-toggle'
-import { PRICING_FAQ_ITEMS } from './-components/constants'
+import { getPricingFaqItems } from './-components/constants'
 import { GuaranteeBanner } from './-components/guarantee-banner'
 import { PricingCard } from './-components/pricing-card'
 import { PricingFaq } from './-components/pricing-faq'
@@ -35,22 +40,19 @@ const RouteComponent = () => {
   return (
     <div className="container flex flex-col items-center gap-8 pb-16">
       <div className="flex flex-col items-center gap-2">
-        <PageHeading>Plans</PageHeading>
-        <PageDescription>
-          Choisissez l'offre qui correspond à vos besoins, du gratuit à
-          l'illimité.
-        </PageDescription>
+        <PageHeading>{m.pricing_heading()}</PageHeading>
+        <PageDescription>{m.pricing_description()}</PageDescription>
       </div>
       <BillingToggle
         billingPeriod={billingPeriod}
         onBillingPeriodChange={setBillingPeriod}
       />
       <section
-        aria-label="Comparaison des plans"
+        aria-label={m.pricing_plans_comparison()}
         className="mx-auto grid w-full max-w-3xl grid-cols-1 gap-8 sm:grid-cols-2"
       >
         <PricingCard
-          {...FREE_PLAN}
+          {...getFreePlan()}
           billingPeriod={billingPeriod}
           onChangePlan={() => {
             void goToBillingPortal()
@@ -59,7 +61,7 @@ const RouteComponent = () => {
           className="order-last sm:order-0"
         />
         <PricingCard
-          {...PREMIUM_PLAN}
+          {...getPremiumPlan()}
           billingPeriod={billingPeriod}
           onChangePlan={() => {
             void checkoutPremium(billingPeriod)
@@ -84,8 +86,8 @@ export const Route = createFileRoute('/_public__root/_default/pricing/')({
         type: 'application/ld+json',
         children: JSON.stringify(
           buildPricingJsonLd({
-            plans: [FREE_PLAN, PREMIUM_PLAN],
-            faqItems: PRICING_FAQ_ITEMS
+            plans: [getFreePlan(), getPremiumPlan()],
+            faqItems: getPricingFaqItems()
           })
         )
       }

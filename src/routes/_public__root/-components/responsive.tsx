@@ -7,6 +7,7 @@ import {
   VideoPlayer,
   VideoPlayerContent
 } from '@/components/ui/kibo-ui/video-player'
+import { m } from '@/paraglide/messages.js'
 import { PageHeading2 } from '@/routes/_public__root/-components/page-headers'
 
 const tabletVariants: Variants = {
@@ -99,13 +100,12 @@ export const Responsive = () => {
   return (
     <div className="relative dark" ref={containerRef}>
       <div className="mx-auto mb-10 max-w-3xl text-center">
-        <Badge variant="secondary">Application multiplateforme</Badge>
+        <Badge variant="secondary">{m.home_responsive_badge()}</Badge>
         <PageHeading2 className="mb-4 mt-2 scroll-m-20">
-          Ton application, partout
+          {m.home_responsive_heading()}
         </PageHeading2>
         <p className="text-muted-foreground mb-8 text-xl">
-          Petit Mème s’adapte à toi : une expérience fluide et réactive sur
-          mobile, tablette et ordinateur, sans rien installer.
+          {m.home_responsive_description()}
         </p>
       </div>
       <motion.div
@@ -214,10 +214,12 @@ export const Responsive = () => {
               <div className="bg-primary/10 flex size-8 items-center justify-center rounded-full">
                 <MonitorSmartphone size={14} />
               </div>
-              <p className="font-medium text-sm md:text-md">Responsive</p>
+              <p className="font-medium text-sm md:text-md">
+                {m.home_responsive_label()}
+              </p>
             </div>
             <p className="text-muted-foreground text-xs md:text-sm max-w-45">
-              S&apos;adapte parfaitement à toutes les tailles d&apos;écran
+              {m.home_responsive_card_text()}
             </p>
           </div>
         </motion.div>

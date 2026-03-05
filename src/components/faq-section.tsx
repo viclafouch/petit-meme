@@ -12,14 +12,14 @@ export type FaqItem = {
 
 type FaqSectionParams = {
   items: readonly FaqItem[]
-  heading?: string
+  heading: string
   headingClassName?: string
   className?: string
 }
 
 export const FaqSection = ({
   items,
-  heading = 'Questions fréquentes',
+  heading,
   headingClassName = 'mb-4 text-3xl font-semibold md:mb-11 md:text-4xl',
   className
 }: FaqSectionParams) => {

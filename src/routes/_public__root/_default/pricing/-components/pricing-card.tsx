@@ -11,42 +11,44 @@ import {
   CardTitle
 } from '@/components/ui/card'
 import {
-  BILLING_PERIOD_LABELS,
   type BillingPeriod,
+  getBillingPeriodLabel,
   type Plan
 } from '@/constants/plan'
 import { convertCentsToEuros, formatCentsToEuros } from '@/helpers/number'
 import { cn } from '@/lib/utils'
+import { m } from '@/paraglide/messages.js'
 import { getLocale } from '@/paraglide/runtime'
 import NumberFlow from '@number-flow/react'
 
-type FeatureStatusConfig = {
+type FeatureStatusStaticConfig = {
   icon: React.ElementType
   className: string
-  srLabel: string
 }
 
-const FEATURE_STATUS_CONFIG = {
-  included: {
-    icon: CheckCircle2,
-    className: 'text-green-400',
-    srLabel: 'Inclus'
-  },
-  limited: {
-    icon: MinusCircle,
-    className: 'text-yellow-400',
-    srLabel: 'Limité'
-  },
+const FEATURE_STATUS_STATIC_CONFIG = {
+  included: { icon: CheckCircle2, className: 'text-green-400' },
+  limited: { icon: MinusCircle, className: 'text-yellow-400' },
   // eslint-disable-next-line camelcase -- maps to PlanFeature status value
-  not_included: {
-    icon: XCircle,
-    className: 'text-red-400',
-    srLabel: 'Non inclus'
-  }
+  not_included: { icon: XCircle, className: 'text-red-400' }
 } as const satisfies Record<
   Plan['features'][number]['status'],
-  FeatureStatusConfig
+  FeatureStatusStaticConfig
 >
+
+const getFeatureStatusSrLabel = (
+  status: Plan['features'][number]['status']
+) => {
+  if (status === 'included') {
+    return m.pricing_sr_included()
+  }
+
+  if (status === 'limited') {
+    return m.pricing_sr_limited()
+  }
+
+  return m.pricing_sr_not_included()
+}
 
 const MONTHS_IN_YEAR = 12
 
@@ -62,11 +64,7 @@ type FeatureItemParams = {
 }
 
 const FeatureItem = ({ feature }: FeatureItemParams) => {
-  const {
-    icon: Icon,
-    className,
-    srLabel
-  } = FEATURE_STATUS_CONFIG[feature.status]
+  const { icon: Icon, className } = FEATURE_STATUS_STATIC_CONFIG[feature.status]
 
   return (
     <li className="flex gap-3">
@@ -75,7 +73,9 @@ const FeatureItem = ({ feature }: FeatureItemParams) => {
         className={cn('my-auto shrink-0', className)}
         aria-hidden
       />
-      <span className="sr-only">{srLabel} :</span>
+      <span className="sr-only">
+        {getFeatureStatusSrLabel(feature.status)} :
+      </span>
       <p className="pt-0.5 text-foreground">
         {feature.label}{' '}
         {feature.note ? (
@@ -107,7 +107,7 @@ export const PricingCard = ({
   className
 }: PricingCardParams) => {
   const currentPricing = pricing[billingPeriod]
-  const periodLabel = BILLING_PERIOD_LABELS[billingPeriod]
+  const periodLabel = getBillingPeriodLabel(billingPeriod)
   const isFree = currentPricing.priceInCents === 0
   const isHighlighted = isExclusive && !isActive
   const hasYearlyBreakdown = isExclusive && billingPeriod === 'yearly'
@@ -128,20 +128,20 @@ export const PricingCard = ({
           </CardTitle>
           {isHighlighted ? (
             <span className="amber-badge px-3 py-1">
-              <span className="sr-only">Plan recommandé : </span>
-              Populaire
+              <span className="sr-only">{m.pricing_popular_sr()}</span>
+              {m.pricing_popular()}
             </span>
           ) : null}
         </div>
         <div className="flex items-baseline gap-1" aria-live="polite">
           {isFree ? (
-            <p className="text-4xl font-bold">Gratuit</p>
+            <p className="text-4xl font-bold">{m.pricing_free_label()}</p>
           ) : (
             <>
               <NumberFlow
                 value={convertCentsToEuros(currentPricing.priceInCents)}
                 format={EURO_FORMAT_OPTIONS}
-                locales="fr"
+                locales={getLocale()}
                 className="text-4xl font-bold"
               />
               <AnimatePresence mode="popLayout" initial={false}>
@@ -168,12 +168,12 @@ export const PricingCard = ({
               transition={{ duration: 0.2 }}
               className="text-sm text-amber-400/80"
             >
-              soit ~
-              {formatCentsToEuros(
-                Math.round(currentPricing.priceInCents / MONTHS_IN_YEAR),
-                { locale: getLocale(), minimumFractionDigits: 2 }
-              )}
-              /mois
+              {m.pricing_yearly_breakdown({
+                price: formatCentsToEuros(
+                  Math.round(currentPricing.priceInCents / MONTHS_IN_YEAR),
+                  { locale: getLocale(), minimumFractionDigits: 2 }
+                )
+              })}
             </motion.p>
           ) : (
             <p className="invisible text-sm" aria-hidden>
@@ -186,7 +186,10 @@ export const PricingCard = ({
         {description}
       </CardDescription>
       <CardContent>
-        <ul className="flex flex-col gap-3.5" aria-label="Fonctionnalités">
+        <ul
+          className="flex flex-col gap-3.5"
+          aria-label={m.pricing_features_label()}
+        >
           {features.map((feature) => {
             return <FeatureItem key={feature.label} feature={feature} />
           })}
@@ -198,7 +201,7 @@ export const PricingCard = ({
             className="w-full text-green-500 aria-disabled:pointer-events-none aria-disabled:opacity-50"
             size="xl"
             variant="outline"
-            aria-label="Plan actuellement actif"
+            aria-label={m.pricing_active_plan_sr()}
             aria-disabled
             onClick={(event) => {
               event.preventDefault()
@@ -209,7 +212,7 @@ export const PricingCard = ({
               }
             }}
           >
-            Actif
+            {m.pricing_active()}
           </Button>
         ) : (
           <Button
@@ -221,7 +224,7 @@ export const PricingCard = ({
             className="w-full"
             variant={isExclusive ? 'default' : 'secondary'}
           >
-            {isExclusive ? 'Passer à Premium' : 'Choisir ce plan'}
+            {isExclusive ? m.nav_upgrade_premium() : m.pricing_choose_plan()}
           </Button>
         )}
       </CardFooter>

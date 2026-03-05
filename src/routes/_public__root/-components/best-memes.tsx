@@ -4,6 +4,7 @@ import { MemesList } from '@/components/Meme/memes-list'
 import { buttonVariants } from '@/components/ui/button'
 import { getTrendingMemesQueryOpts } from '@/lib/queries'
 import { cn } from '@/lib/utils'
+import { m } from '@/paraglide/messages.js'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 
@@ -20,17 +21,19 @@ export const BestMemes = () => {
     >
       <div className="flex flex-col gap-1">
         <div className="flex items-center justify-between">
-          <div className="text-left text-base font-medium">Mèmes</div>
+          <div className="text-left text-base font-medium">
+            {m.home_best_title()}
+          </div>
           <Link
             className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}
             to="/memes"
           >
-            <span>Tout parcourir</span>
+            <span>{m.home_best_browse_all()}</span>
             <ChevronRight size={16} />
           </Link>
         </div>
         <p className="text-sm text-muted-foreground">
-          Les meilleurs mèmes du moment.
+          {m.home_best_subtitle()}
         </p>
       </div>
       <section>

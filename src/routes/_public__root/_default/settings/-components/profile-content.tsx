@@ -18,12 +18,13 @@ import { DeleteAccountDialog } from '@/components/User/delete-account-dialog'
 import { UpdatePasswordDialog } from '@/components/User/update-password-dialog'
 import {
   type BetterAuthPlanName,
-  FREE_PLAN,
-  PREMIUM_PLAN
+  getFreePlan,
+  getPremiumPlan
 } from '@/constants/plan'
 import { getSubscriptionDisplayInfo } from '@/helpers/subscription'
 import { useStripeCheckout } from '@/hooks/use-stripe-checkout'
 import { captureWithFeature } from '@/lib/sentry'
+import { m } from '@/paraglide/messages.js'
 import { getLocale } from '@/paraglide/runtime'
 import type { ActiveSubscription } from '@/server/customer'
 import { exportUserData } from '@/server/user'
@@ -93,7 +94,7 @@ export const ProfileContent = ({
                 <Label className="text-base">Abonnement en cours</Label>
                 {activeSubscription ? (
                   <p className="text-muted-foreground text-sm">
-                    {PREMIUM_PLAN.title} -{' '}
+                    {getPremiumPlan().title} -{' '}
                     {
                       getSubscriptionDisplayInfo({
                         planName: activeSubscription.plan as BetterAuthPlanName,
@@ -109,7 +110,7 @@ export const ProfileContent = ({
                   </p>
                 ) : (
                   <p className="text-muted-foreground text-sm">
-                    {FREE_PLAN.title} - Gratuit
+                    {getFreePlan().title} - {m.pricing_free_label()}
                   </p>
                 )}
               </div>

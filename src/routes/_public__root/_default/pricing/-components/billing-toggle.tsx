@@ -2,6 +2,7 @@ import React from 'react'
 import { LayoutGroup, motion, useReducedMotion } from 'motion/react'
 import { ANNUAL_DISCOUNT_PERCENT, type BillingPeriod } from '@/constants/plan'
 import { cn } from '@/lib/utils'
+import { m } from '@/paraglide/messages.js'
 
 type BillingToggleParams = {
   billingPeriod: BillingPeriod
@@ -13,10 +14,17 @@ const OPPOSITE_PERIOD = {
   yearly: 'monthly'
 } as const satisfies Record<BillingPeriod, BillingPeriod>
 
-const TOGGLE_OPTIONS = [
-  { value: 'monthly', label: 'Mensuel' },
-  { value: 'yearly', label: 'Annuel' }
-] as const satisfies readonly { value: BillingPeriod; label: string }[]
+type ToggleOption = {
+  value: BillingPeriod
+  label: string
+}
+
+const getToggleOptions = (): ToggleOption[] => {
+  return [
+    { value: 'monthly', label: m.pricing_monthly() },
+    { value: 'yearly', label: m.pricing_yearly() }
+  ]
+}
 
 export const BillingToggle = ({
   billingPeriod,
@@ -43,9 +51,9 @@ export const BillingToggle = ({
       <div
         className="relative flex rounded-full bg-muted p-1"
         role="radiogroup"
-        aria-label="Période de facturation"
+        aria-label={m.pricing_billing_period()}
       >
-        {TOGGLE_OPTIONS.map((option) => {
+        {getToggleOptions().map((option) => {
           const isSelected = billingPeriod === option.value
           const isYearly = option.value === 'yearly'
 

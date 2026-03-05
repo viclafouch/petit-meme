@@ -152,6 +152,7 @@ model User {
   privacyAcceptedAt        DateTime? @map("privacy_accepted_at")
   verificationReminderSent Boolean   @default(false) @map("verification_reminder_sent")
   isAnonymized             Boolean   @default(false) @map("is_anonymized")
+  locale                   String    @default("fr")
 
   studioGenerations StudioGeneration[]
   adminActions      AdminAuditLog[]    @relation("AdminActions")

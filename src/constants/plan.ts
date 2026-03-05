@@ -54,7 +54,7 @@ export const PREMIUM_PLAN = {
   productId: 'f9395cde-98ed-4d06-9631-b9b9f0a64566',
   isExclusive: true,
   description:
-    'Passez en mode illimité. Créez autant de vidéos que vous voulez, sauvegardez tous vos favoris et profitez d\u2019une expérience sans aucune restriction.',
+    "Passez en mode illimité. Créez autant de vidéos que vous voulez, sauvegardez tous vos favoris et profitez d'une expérience sans aucune restriction.",
   features: [
     { label: 'Accès aux mèmes publics', status: 'included' },
     { label: 'Favoris enregistrés', status: 'included', note: 'illimité' },

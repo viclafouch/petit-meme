@@ -150,7 +150,7 @@ export const Reel = React.memo(
               />
               <ToggleLikeButton meme={meme} size="iconLg" />
               <Button
-                aria-label={isPlaying ? 'Pause' : 'Play'}
+                aria-label={isPlaying ? 'Mettre en pause' : 'Lire la vidéo'}
                 onClick={() => {
                   return setIsPlaying((prevState) => {
                     return !prevState

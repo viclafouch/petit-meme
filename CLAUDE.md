@@ -22,15 +22,30 @@ pnpm run build            # Production build (Vite + Nitro vercel preset)
 pnpm start                # Start production server
 pnpm run lint             # TypeScript check + ESLint
 pnpm run lint:fix         # Auto-fix lint issues
-pnpm run prisma:migrate:dev    # Deploy migrations (uses .env.development)
-pnpm run prisma:migrate:prod   # Deploy migrations (uses .env.production)
-pnpm run prisma:seed:dev       # Seed database (uses .env.development)
-pnpm run prisma:reset-db:dev   # Reset DB (uses .env.development) — NEVER in production
 pnpm run email:dev        # Email preview server (port 3001)
 ```
 **Never start the dev server (`pnpm run dev`)** — this is always done by the user.
 
-After Prisma schema changes: `pnpm exec prisma generate` (also runs on `postinstall`).
+### Prisma
+
+Prisma requires `DATABASE_URL` injected via `dotenv -e` (not loaded automatically).
+
+```bash
+# Create a new migration (dev)
+pnpm exec dotenv -e .env.development -- pnpm exec prisma migrate dev --name <name>
+
+# Apply pending migrations (dev)
+pnpm run prisma:migrate:dev    # uses .env.development
+
+# Apply pending migrations (prod) — pull env first
+vercel env pull .env.production
+pnpm run prisma:migrate:prod   # uses .env.production
+
+# Other
+pnpm exec dotenv -e .env.development -- pnpm exec prisma generate  # Regenerate client (also runs on postinstall)
+pnpm run prisma:seed:dev       # Seed database (uses .env.development)
+pnpm run prisma:reset-db:dev   # Reset DB (uses .env.development) — NEVER in production
+```
 
 See current plan : `.claude/plan.md`. It must be always up to date. **Update it immediately after each meaningful change** — not just at the end of a task. If you add a feature, fix a bug, change an approach, or add a dependency mid-task, update the plan right then. A desynchronized plan is a bug.
 

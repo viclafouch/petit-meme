@@ -24,7 +24,7 @@ Complexité disproportionnée (mapping bidirectionnel, redirects, canonicals). L
 Plugin officiel `@better-auth/i18n` traduit les erreurs côté serveur avant qu'elles n'arrivent au client. Supprime le mapping manuel de ~27 codes dans `src/helpers/auth-errors.ts`. Détection locale via cookie (même cookie `PARAGLIDE_LOCALE` que Paraglide).
 
 **Pourquoi feature branch unique :**
-Un merge atomique garantit que le site passe de FR-only à bilingue en une fois. Les preview deploys Vercel permettent de tester `/en/` avant le merge. Les quick wins (phase 0) sont mergeables sur `main` indépendamment car non-breaking.
+Un merge atomique garantit que le site passe de FR-only à bilingue en une fois. Les preview deploys Vercel permettent de tester `/en/` avant le merge.
 
 ---
 
@@ -83,41 +83,40 @@ Un merge atomique garantit que le site passe de FR-only à bilingue en une fois.
 
 ---
 
-## Stratégie de release
+## Stratégie de branches & release
 
-**Feature branch** : `feat/i18n` depuis `main`. Tout le travail i18n vit sur cette branche.
+**Branche de production** : `feat/migrate-to-vercel` (déployée sur Vercel). C'est la branche de référence, pas `main`.
+
+**Phase 0** : quick wins directement sur `feat/migrate-to-vercel`.
+
+**Feature branch** : `feat/i18n` tirée depuis `feat/migrate-to-vercel`. Tout le travail i18n Phase 1+ vit sur cette branche.
 
 **Preview deploys** : Vercel déploie automatiquement la branche en preview → tester /en/ sur l'URL preview avant merge.
 
 **Invariant** : le site FR doit fonctionner **identiquement** avant et après. Aucune régression FR.
 
-**Commits mergeables sur main en amont** (non-breaking, indépendants) :
-- Bug fixes (unicode `d\u2019`, incohérences FR/EN)
-- Migration Prisma `locale` (additive, `@default("fr")`)
-
-**Rebase** : si phase 0 est mergée sur `main` avant la fin de `feat/i18n`, rebaser la feature branch sur `main` pour intégrer les fixes.
-
-**Merge final** : un seul merge de `feat/i18n` → `main` quand tout est testé sur le preview deploy.
+**Merge final** : un seul merge de `feat/i18n` → `feat/migrate-to-vercel` quand tout est testé sur le preview deploy.
 
 ---
 
 ## Étapes (ordre optimisé par dépendances)
 
-### Phase 0 — Quick wins (sur `main`, avant la feature branch)
+### Phase 0 — Quick wins (sur `feat/migrate-to-vercel`)
 
-**0a. Bug fixes** (non-breaking, mergeables immédiatement)
-- [ ] Fixer unicode escape `d\u2019` dans `src/constants/plan.ts:57` → `d'`
-- [ ] Fixer incohérence EN dans `src/components/error-component.tsx:55` ("View error details" → FR)
-- [ ] Fixer incohérence FR/EN dans `src/components/Meme/meme-reels.tsx` (aria-label "Pause"/"Play" → i18n-ready)
+**0a. Bug fixes**
+- [x] Fixer unicode escape `d\u2019` dans `src/constants/plan.ts:57` → double quotes pour garder l'apostrophe UTF-8
+- [x] Fixer incohérence EN dans `src/components/error-component.tsx:55` ("View error details" → FR)
+- [x] Fixer incohérence FR/EN dans `src/components/Meme/meme-reels.tsx` (aria-label "Pause"/"Play" → FR)
 
-**0b. Prisma : locale user** (non-breaking, mergeable sur `main`)
-- [ ] Ajouter champ `locale String @default("fr")` optionnel sur le modèle User (migration additive)
+**0b. Prisma : locale user**
+- [x] Ajouter champ `locale String @default("fr")` sur le modèle User (migration additive)
+- [ ] `pnpm exec dotenv -e .env.development -- pnpm exec prisma migrate dev --name add_user_locale` (Victor)
 - [ ] `pnpm exec prisma generate` après la migration
 - [ ] Note : le champ existe mais n'est pas encore utilisé → zéro impact sur le site
 
 ---
 
-### Phase 1 — Feature branch `feat/i18n`
+### Phase 1 — Feature branch `feat/i18n` (depuis `feat/migrate-to-vercel`)
 
 **1. Infra Paraglide** (fondation — tout dépend de cette étape)
 - [ ] Installer `@inlang/paraglide-js` (devDep) — v2.13.1
@@ -260,7 +259,7 @@ Préfixes de clés par domaine : `nav_`, `home_`, `pricing_`, `meme_`, `studio_`
   - [ ] Error pages EN (404, 500)
   - [ ] Cookie consent EN
   - [ ] Mobile responsive EN
-- [ ] Merge `feat/i18n` → `main`
+- [ ] Merge `feat/i18n` → `feat/migrate-to-vercel`
 
 **7. Tests manuels QA** (Victor — sur le preview deploy Vercel, avant merge)
 
@@ -402,7 +401,7 @@ Les mèmes restent en FR (phase 2). Seule l'interface est traduite. Les titres/d
 
 ## Audits finaux (après QA, avant merge final)
 
-Tous les audits doivent passer **avant** le merge de `feat/i18n` → `main`.
+Tous les audits doivent passer **avant** le merge de `feat/i18n` → `feat/migrate-to-vercel`.
 
 ### Audits agents Claude Code
 

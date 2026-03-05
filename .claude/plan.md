@@ -163,7 +163,7 @@ autofill:shadow-[inset_0_0_0px_1000px_var(--color-background)]
 
 Plan détaillé dans **`.claude/plan-i18n.md`** (fichier dédié, auto-suffisant).
 
-Phases : 0 (quick wins sur `main`) → 1 (feature branch `feat/i18n`) → 1.5 (emails) → 2 (contenu mèmes + Algolia)
+Phases : 0 (quick wins sur `feat/migrate-to-vercel`) → 1 (feature branch `feat/i18n` depuis `feat/migrate-to-vercel`) → 1.5 (emails) → 2 (contenu mèmes + Algolia)
 
 ### Migration Prisma → Drizzle
 

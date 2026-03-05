@@ -17,7 +17,7 @@ import { authClient } from '@/lib/auth-client'
 import { captureWithFeature } from '@/lib/sentry'
 import { getFieldErrorMessage } from '@/lib/utils'
 import { m } from '@/paraglide/messages.js'
-import { localizeUrl } from '@/paraglide/runtime'
+import { localizeHref } from '@/paraglide/runtime'
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 
@@ -39,7 +39,7 @@ export const ResetPasswordForm = () => {
     mutationFn: async ({ email }: { email: string }) => {
       const { error } = await authClient.requestPasswordReset({
         email,
-        redirectTo: localizeUrl('/password/create-new').toString()
+        redirectTo: localizeHref('/password/create-new')
       })
 
       if (error) {

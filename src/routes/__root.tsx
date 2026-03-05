@@ -9,7 +9,7 @@ import { getCookieConsent } from '@/lib/cookie-consent'
 import { getAuthUserQueryOpts } from '@/lib/queries'
 import { getStoredTheme, ThemeProvider } from '@/lib/theme'
 import { m } from '@/paraglide/messages.js'
-import { getLocale, localizeUrl } from '@/paraglide/runtime'
+import { getLocale, localizeHref } from '@/paraglide/runtime'
 import type { getAuthUser } from '@/server/user-auth'
 import { DialogProvider } from '@/stores/dialog.store'
 import { ensureAlgoliaUserToken } from '@/utils/tracking-cookies'
@@ -145,7 +145,7 @@ const RootErrorComponent = ({ error, reset }: ErrorComponentProps) => {
               {m.common_retry()}
             </button>
             <a
-              href={localizeUrl('/').pathname}
+              href={localizeHref('/')}
               style={{
                 padding: '0.625rem 1.25rem',
                 borderRadius: '0.5rem',

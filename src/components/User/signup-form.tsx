@@ -19,7 +19,7 @@ import { authClient } from '@/lib/auth-client'
 import { captureWithFeature } from '@/lib/sentry'
 import { getFieldErrorMessage } from '@/lib/utils'
 import { m } from '@/paraglide/messages.js'
-import { localizeUrl } from '@/paraglide/runtime'
+import { localizeHref } from '@/paraglide/runtime'
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
@@ -80,7 +80,7 @@ export const SignupForm = ({ onAuthTypeChange }: SignupFormParams) => {
         email,
         password,
         name,
-        callbackURL: localizeUrl('/').toString()
+        callbackURL: localizeHref('/')
       })
 
       if (error) {

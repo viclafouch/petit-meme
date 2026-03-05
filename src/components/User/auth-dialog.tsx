@@ -15,7 +15,7 @@ import { getAuthErrorMessage } from '@/helpers/auth-errors'
 import { authClient } from '@/lib/auth-client'
 import { captureWithFeature } from '@/lib/sentry'
 import { m } from '@/paraglide/messages.js'
-import { localizeUrl } from '@/paraglide/runtime'
+import { localizeHref } from '@/paraglide/runtime'
 
 export const AuthDialog = ({ open, onOpenChange }: WithDialog<unknown>) => {
   const [authType, setAuthType] = React.useState<'login' | 'signup'>('login')
@@ -28,7 +28,7 @@ export const AuthDialog = ({ open, onOpenChange }: WithDialog<unknown>) => {
     try {
       await authClient.signIn.social({
         provider: 'twitter',
-        callbackURL: localizeUrl('/').toString()
+        callbackURL: localizeHref('/')
       })
     } catch (error) {
       captureWithFeature(error, 'sign-in-twitter')

@@ -18,6 +18,7 @@ import { authLogger, stripeLogger } from '@/lib/logger'
 import { sendEmailAsync } from '@/lib/resend'
 import { captureWithFeature } from '@/lib/sentry'
 import { stripeClient } from '@/lib/stripe'
+import { getLocale } from '@/paraglide/runtime'
 import { cleanupUserData } from '@/utils/user-cleanup'
 import { prismaAdapter } from '@better-auth/prisma-adapter'
 import { stripe } from '@better-auth/stripe'
@@ -223,7 +224,8 @@ const getAuthConfig = createServerOnlyFn(() => {
               data: {
                 ...user,
                 termsAcceptedAt: now,
-                privacyAcceptedAt: now
+                privacyAcceptedAt: now,
+                locale: getLocale()
               }
             }
           }

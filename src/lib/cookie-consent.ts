@@ -2,7 +2,6 @@ import {
   COOKIE_ALGOLIA_USER_TOKEN_KEY,
   COOKIE_CONSENT_KEY
 } from '@/constants/cookie'
-import { IS_PRODUCTION } from '@/constants/env'
 import { ONE_YEAR_IN_SECONDS } from '@/constants/time'
 import { createClientCookie, readClientCookie } from '@/helpers/cookie'
 import { createClientOnlyFn, createIsomorphicFn } from '@tanstack/react-start'
@@ -30,14 +29,12 @@ const getCookieConsent = createIsomorphicFn()
 
 const setCookieConsent = createClientOnlyFn((value: CookieConsentValue) => {
   createClientCookie(COOKIE_CONSENT_KEY, value, {
-    maxAge: ONE_YEAR_IN_SECONDS,
-    secure: IS_PRODUCTION
+    maxAge: ONE_YEAR_IN_SECONDS
   })
 
   if (value === 'accepted') {
     createClientCookie(COOKIE_ALGOLIA_USER_TOKEN_KEY, crypto.randomUUID(), {
-      maxAge: ONE_YEAR_IN_SECONDS,
-      secure: true
+      maxAge: ONE_YEAR_IN_SECONDS
     })
   }
 })

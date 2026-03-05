@@ -1,6 +1,7 @@
 import React from 'react'
 import { User } from 'lucide-react'
 import { ThemeSwitcher } from '@/components/animate-ui/theme-switcher'
+import { LanguageSwitcher } from '@/components/language-switcher'
 import { Button, buttonVariants } from '@/components/ui/button'
 import {
   NavigationMenu,
@@ -84,6 +85,7 @@ export const Navbar = () => {
         </NavigationMenuList>
       </NavigationMenu>
       <div className="flex flex-1 items-center justify-end gap-3">
+        <LanguageSwitcher />
         <ThemeSwitcher />
         {user ? (
           <UserDropdown user={user} />

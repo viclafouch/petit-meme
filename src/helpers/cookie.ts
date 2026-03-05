@@ -9,7 +9,6 @@ export const readClientCookie = createClientOnlyFn((name: string) => {
 type WriteClientCookieOptions = {
   maxAge: number
   sameSite?: 'Lax' | 'Strict' | 'None'
-  secure?: boolean
   path?: string
 }
 
@@ -19,12 +18,9 @@ export const createClientCookie = createClientOnlyFn(
       `${name}=${value}`,
       `path=${options.path ?? '/'}`,
       `max-age=${options.maxAge}`,
-      `SameSite=${options.sameSite ?? 'Lax'}`
+      `SameSite=${options.sameSite ?? 'Lax'}`,
+      'Secure'
     ]
-
-    if (options.secure) {
-      parts.push('Secure')
-    }
 
     document.cookie = parts.join('; ')
   }

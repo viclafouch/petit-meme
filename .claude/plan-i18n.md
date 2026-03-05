@@ -276,10 +276,26 @@ Préfixes de clés par domaine : `nav_`, `home_`, `pricing_`, `meme_`, `studio_`
   `auth.tsx:277` `locale: 'fr'` in `onSubscriptionComplete` stays (server-side email, Phase 1.5).
 
 **5. UI i18n** (dépend de 1, parallélisable avec 3 et 4)
-- [ ] Language switcher dans `src/components/navbar.tsx` : bouton compact FR/EN. Au clic : set cookie `PARAGLIDE_LOCALE` + naviguer vers l'URL localisée via `localizeUrl()`/`deLocalizeUrl()`. Design via `/frontend-design`.
-- [ ] Banner suggestion EN : composant top discret dans `src/routes/__root.tsx` (ou layout public). Détecte `navigator.language` côté client, dismiss via cookie `LOCALE_BANNER_DISMISSED`. Affiché uniquement si locale courante = FR et Accept-Language contient `en`.
-- [ ] Manifest dynamique : créer `src/routes/manifest[.]json.ts` (route serveur). Contenu localisé (`lang`, `description`, `categories`). Supprimer `public/manifest.json`. Mettre à jour le `<link rel="manifest">` dans `src/routes/__root.tsx`.
-- [ ] Remplir `locale` sur le modèle User au signup ou au premier changement de langue (dans `src/lib/auth.tsx` pour le signup, dans le handler du language switcher pour le changement)
+- [x] Language switcher dans `src/components/navbar.tsx` : `DropdownMenu` avec flags emoji + noms natifs (`Record<Locale, string>`).
+  Supports N locales. `DropdownMenuItem` avec `Check` sur la locale active. `getLocaleFlag()` + `getLocaleDisplayName()` dans `src/helpers/locale.ts`.
+  Fire-and-forget `updateUserLocale` + `dismissLocaleBanner()` sur switch (empêche la banner de réapparaître).
+  ~1 new key: `nav_switch_language`.
+- [x] Banner suggestion locale : `src/components/locale-banner.tsx` — generic pour N locales, scoped au layout `_public__root`.
+  Placée dans `src/routes/_public__root/route.tsx` (pas `__root.tsx`) → invisible sur admin/studio.
+  `getLocaleBannerDismissed()` isomorphic fn lit le cookie dismiss dans le loader du layout public.
+  `getSuggestedLocale()` (`src/helpers/locale.ts`) : retourne `null` si la langue primaire du navigateur = locale courante (pas de faux positifs).
+  Design : `AnimatedBanner` (gradient animé color-dodge/difference) + flag emoji + bouton pill.
+  Framer Motion `AnimatePresence` + `useReducedMotion()`. WCAG : `role="status"`, touch targets 44px, `aria-hidden` sur icônes.
+  Cookie management dans `src/lib/locale-banner.ts` (isomorphic read + client-only dismiss). Cookie key dans `src/constants/cookie.ts`.
+  ~2 new keys: `locale_banner_available`, `locale_banner_switch` (parameterized with `{language}`).
+- [x] Manifest dynamique : `src/routes/manifest[.]json.ts` (server route, returns `application/manifest+json`).
+  `public/manifest.json` deleted. `<link rel="manifest">` updated with `crossOrigin="use-credentials"` for cookie-based locale.
+  `start_url` and `scope` via `getLocalizedPathname()` helper (pas `localizeUrl()` qui crash en server handler sans origin).
+  ~7 new keys: `manifest_description`, `manifest_category_*`.
+- [x] User locale persistence : `getLocale()` set in `auth.tsx` `databaseHooks.user.create.before` (signup).
+  `src/server/user-locale.ts` with `updateUserLocale` server function (POST, optional auth — no-op if not logged in) for language switcher.
+- [x] Security hardening : `Secure` flag always-on sur tous les cookies client (`createClientCookie`), `matchIsSafeNavigationUrl()` scheme allowlist avant `window.location.href` assignment.
+- [x] Locale helpers : `src/helpers/locale.ts` — `getLocaleDisplayName()`, `getLocaleFlag()`, `getSuggestedLocale()`, `matchIsSafeNavigationUrl()`.
 
 **6. QA & validation** (dépend de tout)
 - [ ] `pnpm run build` — vérifier que le build passe

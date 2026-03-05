@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as ReelsRouteImport } from './routes/reels'
+import { Route as ManifestDotjsonRouteImport } from './routes/manifest[.]json'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as StudioRouteImport } from './routes/_studio'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
@@ -61,6 +62,11 @@ const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
 const ReelsRoute = ReelsRouteImport.update({
   id: '/reels',
   path: '/reels',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ManifestDotjsonRoute = ManifestDotjsonRouteImport.update({
+  id: '/manifest.json',
+  path: '/manifest.json',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HealthRoute = HealthRouteImport.update({
@@ -256,6 +262,7 @@ export interface FileRoutesByFullPath {
   '/': typeof Public__rootIndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
   '/health': typeof HealthRoute
+  '/manifest.json': typeof ManifestDotjsonRoute
   '/reels': typeof ReelsRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -292,6 +299,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof Public__rootIndexRoute
   '/health': typeof HealthRoute
+  '/manifest.json': typeof ManifestDotjsonRoute
   '/reels': typeof ReelsRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -330,6 +338,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteRouteWithChildren
   '/_studio': typeof StudioRouteWithChildren
   '/health': typeof HealthRoute
+  '/manifest.json': typeof ManifestDotjsonRoute
   '/reels': typeof ReelsRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -371,6 +380,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/health'
+    | '/manifest.json'
     | '/reels'
     | '/robots.txt'
     | '/sitemap.xml'
@@ -407,6 +417,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/health'
+    | '/manifest.json'
     | '/reels'
     | '/robots.txt'
     | '/sitemap.xml'
@@ -444,6 +455,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/_studio'
     | '/health'
+    | '/manifest.json'
     | '/reels'
     | '/robots.txt'
     | '/sitemap.xml'
@@ -485,6 +497,7 @@ export interface RootRouteChildren {
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
   StudioRoute: typeof StudioRouteWithChildren
   HealthRoute: typeof HealthRoute
+  ManifestDotjsonRoute: typeof ManifestDotjsonRoute
   ReelsRoute: typeof ReelsRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -518,6 +531,13 @@ declare module '@tanstack/react-router' {
       path: '/reels'
       fullPath: '/reels'
       preLoaderRoute: typeof ReelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/manifest.json': {
+      id: '/manifest.json'
+      path: '/manifest.json'
+      fullPath: '/manifest.json'
+      preLoaderRoute: typeof ManifestDotjsonRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/health': {
@@ -880,6 +900,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRouteRoute: AdminRouteRouteWithChildren,
   StudioRoute: StudioRouteWithChildren,
   HealthRoute: HealthRoute,
+  ManifestDotjsonRoute: ManifestDotjsonRoute,
   ReelsRoute: ReelsRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,

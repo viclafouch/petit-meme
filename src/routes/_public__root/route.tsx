@@ -1,11 +1,16 @@
 import React from 'react'
 import { StarsBackground } from '@/components/animate-ui/backgrounds/stars'
 import { Footer } from '@/components/footer'
+import { LocaleBanner } from '@/components/locale-banner'
 import { Navbar } from '@/components/navbar'
 import { SentryFeedbackWidget } from '@/components/sentry-feedback-widget'
+import { getLocaleBannerDismissed } from '@/lib/locale-banner'
 import { createFileRoute, Outlet } from '@tanstack/react-router'
 
 const RouteComponent = () => {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { _localeBannerDismissed } = Route.useLoaderData()
+
   return (
     <StarsBackground>
       <div className="z-10 relative min-h-dvh flex flex-col">
@@ -15,6 +20,7 @@ const RouteComponent = () => {
         >
           Aller au contenu principal
         </a>
+        <LocaleBanner isInitiallyDismissed={_localeBannerDismissed} />
         <Navbar />
         <main id="main-content" className="flex flex-1 flex-col">
           <Outlet />
@@ -27,5 +33,10 @@ const RouteComponent = () => {
 }
 
 export const Route = createFileRoute('/_public__root')({
+  loader: () => {
+    return {
+      _localeBannerDismissed: getLocaleBannerDismissed()
+    }
+  },
   component: RouteComponent
 })

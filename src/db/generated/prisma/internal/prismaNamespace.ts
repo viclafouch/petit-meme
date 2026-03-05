@@ -1667,7 +1667,8 @@ export const UserScalarFieldEnum = {
   termsAcceptedAt: 'termsAcceptedAt',
   privacyAcceptedAt: 'privacyAcceptedAt',
   verificationReminderSent: 'verificationReminderSent',
-  isAnonymized: 'isAnonymized'
+  isAnonymized: 'isAnonymized',
+  locale: 'locale'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -1873,7 +1874,8 @@ export const UserOrderByRelevanceFieldEnum = {
   image: 'image',
   role: 'role',
   banReason: 'banReason',
-  stripeCustomerId: 'stripeCustomerId'
+  stripeCustomerId: 'stripeCustomerId',
+  locale: 'locale'
 } as const
 
 export type UserOrderByRelevanceFieldEnum = (typeof UserOrderByRelevanceFieldEnum)[keyof typeof UserOrderByRelevanceFieldEnum]

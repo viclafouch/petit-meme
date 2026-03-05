@@ -286,7 +286,11 @@ export const Route = createRootRouteWithContext<{
           sizes: '512x512',
           type: 'image/png'
         },
-        { rel: 'manifest', href: '/manifest.json' }
+        {
+          rel: 'manifest',
+          href: '/manifest.json',
+          crossOrigin: 'use-credentials'
+        }
       ]
     }
   },

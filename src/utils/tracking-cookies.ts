@@ -35,7 +35,6 @@ export const ensureAlgoliaUserToken = createIsomorphicFn()
       crypto.randomUUID()
 
     createClientCookie(COOKIE_ALGOLIA_USER_TOKEN_KEY, value, {
-      maxAge: ONE_YEAR_IN_SECONDS,
-      secure: true
+      maxAge: ONE_YEAR_IN_SECONDS
     })
   })

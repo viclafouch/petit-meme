@@ -41,6 +41,114 @@
 
 ---
 
+## Google Images SEO (audit mars 2026)
+
+Audit basé sur les recommandations Google Images mises à jour le 2 mars 2026 (https://developers.google.com/search/docs/appearance/google-images).
+
+### Contexte
+
+Le site est un catalogue de mèmes vidéo. Chaque mème a un thumbnail JPG et un preview WebP servis par Bunny CDN. Les images statiques (logo, avatars, templates) sont en PNG/WebP dans `/public/images/`. Le JSON-LD utilise déjà `VideoObject` avec `thumbnailUrl`. L'OG image est bien configuré avec dimensions. Le lazy loading et le `fetchPriority="high"` sont en place.
+
+### Priorité 1 — `primaryImageOfPage` dans le JSON-LD
+
+**Quoi :** Ajouter la propriété Schema.org `primaryImageOfPage` dans le JSON-LD des pages meme (`/memes/:id`). C'est le signal le plus fort que Google utilise pour choisir quelle image afficher dans Google Images.
+
+**Pourquoi :** Actuellement le JSON-LD contient un `VideoObject` avec `thumbnailUrl`, mais rien n'indique explicitement que cette image est LA représentation visuelle de la page. Google peut alors choisir n'importe quelle image de la page (le logo, un avatar, etc.). Avec `primaryImageOfPage`, on contrôle exactement ce qui apparaît.
+
+**Comment :** Dans `src/lib/seo.ts`, fonction `buildMemeJsonLd()`, ajouter un `WebPage` wrapper ou enrichir le JSON-LD existant avec `primaryImageOfPage` pointant vers le thumbnail Bunny CDN. Pattern :
+```json
+{
+  "@type": "WebPage",
+  "primaryImageOfPage": {
+    "@type": "ImageObject",
+    "contentUrl": "https://vz-xxx.b-cdn.net/{videoId}/thumbnail.jpg"
+  },
+  "mainEntity": { "@type": "VideoObject", ... }
+}
+```
+
+**Fichier :** `src/lib/seo.ts`
+
+- [ ] Ajouter `primaryImageOfPage` (ImageObject) dans le JSON-LD des pages meme
+- [ ] Vérifier avec le Rich Results Test de Google après déploiement
+
+### Priorité 2 — Images dans le sitemap
+
+**Quoi :** Ajouter les balises `<image:image>` dans le sitemap XML existant pour les pages meme.
+
+**Pourquoi :** Les thumbnails sont hébergées sur un domaine Bunny CDN différent du site. Google peut ne pas les découvrir automatiquement. Le sitemap image est le moyen recommandé pour signaler des images sur des domaines externes (CDN). Un sitemap vidéo existe déjà mais ne contient pas les métadonnées image.
+
+**Comment :** Dans `src/routes/sitemap[.]xml.ts`, pour chaque entrée de page meme, ajouter :
+```xml
+<url>
+  <loc>https://petit-meme.com/memes/{slug}</loc>
+  <image:image>
+    <image:loc>https://vz-xxx.b-cdn.net/{videoId}/thumbnail.jpg</image:loc>
+    <image:title>{meme.title}</image:title>
+  </image:image>
+</url>
+```
+Ne pas oublier le namespace `xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"` dans la balise `<urlset>`.
+
+**Fichier :** `src/routes/sitemap[.]xml.ts`
+
+- [ ] Ajouter le namespace image dans le sitemap
+- [ ] Ajouter `<image:image>` avec `<image:loc>` et `<image:title>` pour chaque page meme
+
+### Priorité 3 — Responsive images (`srcset`) sur les thumbnails
+
+**Quoi :** Utiliser `srcset` et `sizes` sur les `<img>` de thumbnails pour servir des images adaptées à la taille de l'écran.
+
+**Pourquoi :** Actuellement chaque thumbnail est servie en résolution unique quelle que soit la taille d'écran. Sur mobile, on télécharge une image trop grande. Cela impacte les Core Web Vitals (LCP) et donc le ranking Google. Bunny CDN supporte la transformation d'images via query params (`?width=X&height=Y`).
+
+**Comment :** Dans `src/lib/bunny.ts`, enrichir `buildVideoImageUrl()` pour accepter des dimensions optionnelles. Puis dans `src/components/Meme/meme-video-thumbnail.tsx` et `src/routes/_public__root/_default/memes/$memeId.tsx`, ajouter `srcset` avec 2-3 tailles (ex: 480w, 768w, 1280w) et un attribut `sizes` correspondant à la grille CSS.
+
+**Pré-requis :** Vérifier que Bunny CDN supporte les query params de redimensionnement sur les thumbnails vidéo (pas seulement sur le CDN image). Si non supporté, cette tâche est annulée.
+
+**Fichiers :** `src/lib/bunny.ts`, `src/components/Meme/meme-video-thumbnail.tsx`, `src/routes/_public__root/_default/memes/$memeId.tsx`
+
+- [ ] Vérifier le support query params resize sur Bunny CDN video thumbnails
+- [ ] Si supporté : enrichir `buildVideoImageUrl()` avec des paramètres de dimensions
+- [ ] Ajouter `srcset` + `sizes` sur les thumbnails dans `meme-video-thumbnail.tsx`
+- [ ] Ajouter `srcset` + `sizes` sur le poster dans `$memeId.tsx`
+
+### Priorité 4 — Alt text plus descriptifs (quick fixes)
+
+**Quoi :** Améliorer les alt text trop vagues sur le logo et les avatars.
+
+**Pourquoi :** Google extrait le contexte des images via l'alt text. "Logo" et "Avatar" n'apportent aucune information. Les guidelines recommandent un alt descriptif et pertinent (ex: `alt="Dalmatian puppy playing fetch"` plutôt que `alt="puppy"`).
+
+**Détails :**
+- Logo `alt="Logo"` → `alt="Memes by Lafouch"` dans `src/components/navbar.tsx`
+- Avatars `alt="Avatar"` → `alt="Photo de profil de {username}"` (ou `alt={username}` si le nom est disponible) dans les composants qui utilisent `<AvatarImage>`
+
+**Fichiers :** `src/components/navbar.tsx`, composants utilisant `<AvatarImage>`
+
+- [ ] Changer alt du logo → "Memes by Lafouch"
+- [ ] Changer alt des avatars → inclure le nom d'utilisateur quand disponible
+
+### Non retenu pour l'instant
+
+- **AVIF** : Google l'indexe mais Bunny CDN ne le supporte pas en transformation automatique sur les thumbnails vidéo. Pas de gain sans pipeline de conversion côté serveur, et le coût Vercel Hobby ne le permet pas.
+- **URLs d'images inconsistantes** : Vérifié — `buildVideoImageUrl()` retourne toujours la même URL déterministe sans token ni timestamp. Pas d'action nécessaire.
+
+---
+
+## CSS — Quick wins
+
+### Fix autofill ugly background (dark mode)
+
+Le style natif `autofill` des navigateurs applique un fond bleu/jaune qui casse le design, surtout en dark mode.
+
+**Fix :** Utiliser un inset shadow hack en Tailwind pour forcer la couleur de fond :
+```
+autofill:shadow-[inset_0_0_0px_1000px_var(--color-background)]
+```
+
+- [ ] Appliquer le fix autofill sur tous les `<input>` concernés (login, signup, etc.)
+
+---
+
 ## Backlog — Futures évolutions
 
 ### Admin — Items reportés

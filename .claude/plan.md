@@ -167,6 +167,15 @@ autofill:shadow-[inset_0_0_0px_1000px_var(--color-background)]
 
 - [ ] Appliquer le fix autofill sur tous les `<input>` concernés (login, signup, etc.)
 
+### Supprimer le spinner de loading sur la page pricing
+
+La page pricing utilise `useSuspenseQuery(getActiveSubscriptionQueryOpts())` pour vérifier l'abonnement actif. Quand les données ne sont pas encore en cache (premier accès, utilisateur non connecté), cela déclenche le `defaultPendingComponent` (spinner global `DefaultLoading`) pendant le chargement. La page devrait s'afficher immédiatement sans spinner — l'état d'abonnement peut être résolu sans bloquer le rendu.
+
+**Fichier :** `src/routes/_public__root/_default/pricing/index.tsx`
+
+- [ ] Remplacer `useSuspenseQuery` par `useQuery` pour `getActiveSubscriptionQueryOpts()` afin que la page s'affiche immédiatement sans suspense/spinner
+- [ ] Adapter la logique `hasActiveSubscription` / `isOnFreePlan` pour gérer l'état `isPending` (afficher le plan free par défaut pendant le chargement, ou masquer le badge "actif" tant que la requête n'est pas terminée)
+
 ---
 
 ## date-fns supprimé (mars 2026) ✅

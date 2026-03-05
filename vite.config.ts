@@ -53,6 +53,13 @@ export default defineConfig({
           pattern: '/:path(.*)?',
           localized: [['en', '/en/:path(.*)?']]
         }
+      ],
+      routeStrategies: [
+        { match: '/api/:path(.*)?', exclude: true },
+        { match: '/admin/:path(.*)?', exclude: true },
+        { match: '/health', exclude: true },
+        { match: '/sitemap.xml', exclude: true },
+        { match: '/robots.txt', exclude: true }
       ]
     }),
     tailwindcss(),

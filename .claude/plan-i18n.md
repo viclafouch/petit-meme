@@ -132,6 +132,7 @@ Un merge atomique garantit que le site passe de FR-only à bilingue en une fois.
   - `urlPatterns` — wildcard unique `/:path(.*)?` (comportement par défaut Paraglide : base locale sans préfixe, EN avec `/en/`). Pas besoin de lister chaque route explicitement.
   - Routes admin/API non localisées naturellement (pas de pattern match → 404)
 - [x] Ajouter `paraglideMiddleware` dans `src/server.ts`
+  - **Middleware exclusion** : `paraglideMiddleware` bypassé pour `/api/`, `/admin/`, `/health`, `/sitemap.xml`, `/robots.txt` (URLPattern ne supporte pas le negative lookahead — recommandation officielle Paraglide : filtrer dans le request handler avant d'appeler le middleware). Helper `matchIsExcludedFromI18n()` dans `server.ts`.
 - [x] Ajouter `rewrite` (`deLocalizeUrl`/`localizeUrl`) dans `src/router.tsx`
 - [x] Migrer `src/i18n/config.ts` → remplacer par Paraglide runtime (`getLocale()`, `locales`, etc.). Seul fichier importateur : `src/helpers/number.ts`. **`src/i18n/config.ts` supprimé.**
 - [x] Ajouter `src/paraglide/` au `.gitignore` (dossier généré, regénéré à chaque build)

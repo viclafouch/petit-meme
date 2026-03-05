@@ -26,6 +26,7 @@ import {
   buildVideoImageUrl,
   buildVideoOriginalUrl
 } from '@/lib/bunny'
+import { m } from '@/paraglide/messages.js'
 import type { Locale } from '@/paraglide/runtime'
 import {
   baseLocale,
@@ -166,7 +167,7 @@ const buildDescription = (meme: MemeWithVideo & MemeWithCategories) => {
     return meme.description
   }
 
-  return `Découvrez, téléchargez et partagez ce mème de "${meme.title}" avec tous vos proches. Télécharger le mème vidéo gratuitement.`
+  return m.seo_meme_fallback_description({ title: meme.title })
 }
 
 export const buildMemeSeo = (
@@ -183,7 +184,7 @@ export const buildMemeSeo = (
     title: meme.title,
     keywords: [...meme.keywords, ...categoryKeywords].join(', '),
     image: buildVideoImageUrl(meme.video.bunnyId),
-    imageAlt: `Mème vidéo : ${meme.title}`,
+    imageAlt: m.seo_meme_image_alt({ title: meme.title }),
     description,
     ...overrideOptions
   })
@@ -248,10 +249,10 @@ export const buildCategoryJsonLd = (
     ? `/memes/category/${category.slug}`
     : '/memes/category/all'
   const categoryUrl = `${websiteOrigin}${basePath}${page > 1 ? `?page=${page}` : ''}`
-  const title = category ? category.title : 'Tous les mèmes'
+  const title = category ? category.title : m.meme_all_memes()
   const description = category
-    ? `Découvrez la page ${page} des meilleurs mèmes vidéo de la catégorie ${title}.`
-    : `Découvrez la page ${page} de notre collection complète de mèmes vidéo.`
+    ? m.seo_category_page_description({ page: String(page), title })
+    : m.seo_category_all_description({ page: String(page) })
 
   return {
     '@context': 'https://schema.org',
@@ -260,7 +261,7 @@ export const buildCategoryJsonLd = (
         '@type': 'CollectionPage',
         '@id': `${categoryUrl}#webpage`,
         url: categoryUrl,
-        name: `${title} - Page ${page}`,
+        name: m.seo_category_page_name({ title, page: String(page) }),
         description,
         isPartOf: { '@id': websiteId },
         mainEntity: { '@id': `${categoryUrl}#itemlist` }
@@ -356,18 +357,16 @@ export const buildHomeJsonLd = ({
         name: 'Petit Meme',
         url: websiteOrigin,
         logo: `${websiteOrigin}/images/logo.png`,
-        description:
-          'Découvre Petit Meme, la plateforme où tu peux parcourir, créer et partager des mèmes gratuitement. Explore notre bibliothèque de vidéos et images humoristiques, sauvegarde tes favoris et amuse-toi avec des contenus toujours à jour.'
+        description: m.seo_home_description()
       } satisfies Organization,
       {
         '@type': 'WebPage',
         '@id': `${websiteOrigin}/#webpage`,
         url: websiteOrigin,
-        name: 'Petit Meme - Les meilleurs mèmes vidéo',
+        name: m.seo_home_page_name(),
         isPartOf: { '@id': websiteId },
         about: { '@id': `${websiteOrigin}/#organization` },
-        description:
-          'Découvre Petit Meme, la plateforme où tu peux parcourir, créer et partager des mèmes gratuitement. Explore notre bibliothèque de vidéos et images humoristiques, sauvegarde tes favoris et amuse-toi avec des contenus toujours à jour.'
+        description: m.seo_home_description()
       } satisfies WebPage,
       buildFaqPageJsonLd({ faqItems, pageUrl: websiteOrigin })
     ]
@@ -444,9 +443,8 @@ export const buildPricingJsonLd = ({
   faqItems
 }: BuildPricingJsonLdParams): SchemaGraph => {
   const pricingUrl = `${websiteOrigin}/pricing`
-  const title = 'Plans et Tarifs'
-  const description =
-    'Découvre les plans de Petit Meme : gratuit ou Premium avec accès illimité aux mèmes, favoris et générations de vidéos. Choisis le plan qui te permet de créer et partager des mèmes sans limites !'
+  const title = m.seo_pricing_title()
+  const description = m.seo_pricing_description()
 
   const monthlyPrices = plans.map((plan) => {
     return convertCentsToEuros(plan.pricing.monthly.priceInCents)
@@ -466,7 +464,7 @@ export const buildPricingJsonLd = ({
       {
         '@type': 'Product',
         '@id': `${pricingUrl}#product`,
-        name: 'Abonnement Petit Meme',
+        name: m.seo_pricing_subscription_name(),
         image: `${websiteOrigin}/images/logo.png`,
         description,
         offers: {
@@ -493,7 +491,7 @@ export const buildPricingJsonLd = ({
             const annualOffer = buildPlanOffer({
               plan,
               priceInCents: plan.pricing.yearly.priceInCents,
-              nameSuffix: ' (Annuel)',
+              nameSuffix: m.seo_pricing_annual_suffix(),
               unitCode: 'ANN',
               offerUrl: pricingUrl
             })

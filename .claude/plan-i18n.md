@@ -155,12 +155,15 @@ Structure d'abord (indépendant des strings), contenu traduit complété après 
   - [x] Canonical localisé (prefix `/en/` pour les pages EN)
 - [x] `buildUrl()` dans `src/lib/seo.ts` : paramètre `locale` optionnel ajouté, utilise `localizeUrl()` de Paraglide
 - [x] Sitemap enrichi dans `src/routes/sitemap[.]xml.ts` : `<xhtml:link rel="alternate" hreflang="...">` pour chaque URL avec namespace `xmlns:xhtml`. Pages noindex déjà exclues du sitemap.
-- [ ] Après étape 3 — compléter le contenu traduit dans `src/lib/seo.ts` :
-  - [ ] `og:image:alt` traduit (thumbnails Bunny = images sans texte, pas de variante EN)
-  - [ ] Title/description traduits via Paraglide dans `seo()`
-  - [ ] Keywords SEO traduits par locale dans chaque `head()` de chaque route
-  - [ ] JSON-LD traduits (`buildHomeJsonLd`, `buildMemeJsonLd`, `buildPricingJsonLd`, `buildCategoryJsonLd`, `buildBreadcrumbJsonLd`) :
-    breadcrumbs, SearchAction URL, category descriptions, pricing labels, `@id` URIs avec locale
+- [x] Après étape 3 — compléter le contenu traduit dans `src/lib/seo.ts` :
+  - [x] `og:image:alt` traduit via `seo_meme_image_alt` dans `buildMemeSeo()`
+  - [x] Title/description traduits via Paraglide dans `seo()` : home, pricing, reels routes
+  - [x] Keywords SEO traduits par locale : home (`seo_home_keywords`), pricing (`seo_pricing_keywords`)
+  - [x] JSON-LD traduits (`buildHomeJsonLd`, `buildPricingJsonLd`, `buildCategoryJsonLd`) :
+    org description, webpage name, pricing title/description/subscription name/annual suffix,
+    category page names/descriptions. `buildMemeJsonLd` uses meme content (FR phase 2).
+    `buildBreadcrumbJsonLd` already uses translated names passed from caller.
+  - ~16 new `seo_*` keys. Reused `meme_all_memes`, `meme_seo_library_description`.
 
 **3. Extraction strings** — ~250+ strings (dépend de 1 — `m.xxx()` doit fonctionner)
 Découper en sous-batches commitables sur la feature branch. Chaque batch ajoute ses clés dans `messages/fr.json` et `messages/en.json` progressivement.
@@ -252,7 +255,7 @@ Préfixes de clés par domaine : `nav_`, `home_`, `pricing_`, `meme_`, `studio_`
   Ajouté `localizeUrl()` dans `src/constants/markdown.tsx` pour les liens internes des pages markdown.
   Liens externes gardent `target="_blank" rel="noopener noreferrer"`.
 
-- [ ] Compléter étape 2 : title/description/keywords/JSON-LD/og:image:alt traduits (sous-section "Après étape 3")
+- [x] Compléter étape 2 : title/description/keywords/JSON-LD/og:image:alt traduits (sous-section "Après étape 3")
 
 **4. Intégrations tierces** (dépend de 1, parallélisable avec 3)
 - [ ] **Better Auth i18n** : installer `@better-auth/i18n`, configurer le plugin dans `src/lib/auth.tsx` avec les traductions FR (reprendre les ~27 codes de `src/helpers/auth-errors.ts`), détection via cookie `PARAGLIDE_LOCALE`. Puis supprimer `src/helpers/auth-errors.ts` et ses imports dans `src/components/User/auth-dialog.tsx`.

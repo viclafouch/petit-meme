@@ -5,6 +5,7 @@ import {
   getTrendingMemesQueryOpts
 } from '@/lib/queries'
 import { buildHomeJsonLd, seo } from '@/lib/seo'
+import { m } from '@/paraglide/messages.js'
 import { Faq, getHomeFaqItems } from '@/routes/_public__root/-components/faq'
 import { Responsive } from '@/routes/_public__root/-components/responsive'
 import { createFileRoute } from '@tanstack/react-router'
@@ -37,10 +38,9 @@ export const Route = createFileRoute('/_public__root/')({
   staleTime: 10 * MINUTE,
   head: () => {
     return seo({
-      title: 'Ta banque de mèmes vidéo, prête à faire rire Internet',
-      keywords: ['banque', 'memes', 'gratuit', 'francais'].join(','),
-      description:
-        'Découvre Petit Meme, la plateforme où tu peux parcourir, créer et partager des mèmes gratuitement. Explore notre bibliothèque de vidéos et images humoristiques, sauvegarde tes favoris et amuse-toi avec des contenus toujours à jour.'
+      title: m.seo_home_title(),
+      keywords: m.seo_home_keywords(),
+      description: m.seo_home_description()
     })
   },
   scripts: () => {

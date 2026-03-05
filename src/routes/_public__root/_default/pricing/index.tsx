@@ -95,12 +95,10 @@ export const Route = createFileRoute('/_public__root/_default/pricing/')({
   },
   head: () => {
     return seo({
-      title: 'Plans et Tarifs',
+      title: m.seo_pricing_title(),
       pathname: '/pricing',
-      description:
-        'Découvre les plans de Petit Meme : gratuit ou Premium avec accès illimité aux mèmes, favoris et générations de vidéos. Choisis le plan qui te permet de créer et partager des mèmes sans limites !',
-      keywords:
-        'tarifs memes, abonnement memes video, prix petit meme, plan gratuit memes, premium memes, générateur vidéo memes'
+      description: m.seo_pricing_description(),
+      keywords: m.seo_pricing_keywords()
     })
   }
 })

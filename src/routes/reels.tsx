@@ -1,8 +1,8 @@
-import React from 'react'
 import { DefaultLoading } from '@/components/default-loading'
 import { MemeReels } from '@/components/Meme/meme-reels'
 import { getInfiniteReelsQueryOpts } from '@/lib/queries'
 import { seo } from '@/lib/seo'
+import { m } from '@/paraglide/messages.js'
 import { createFileRoute } from '@tanstack/react-router'
 
 const RouteComponent = () => {
@@ -21,10 +21,9 @@ export const Route = createFileRoute('/reels')({
   },
   head: () => {
     return seo({
-      title: 'Mode reels',
+      title: m.seo_reels_title(),
       pathname: '/reels',
-      description:
-        'Découvre la plus grande bibliothèque de mèmes : crée, explore et partage des mèmes légendaires sur Petit Meme. Gratuit et accessible à tous !'
+      description: m.meme_seo_library_description()
     })
   },
   loader: async ({ context }) => {

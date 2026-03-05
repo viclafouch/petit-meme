@@ -1,6 +1,5 @@
 /* eslint-disable unicorn/filename-case */
 import React from 'react'
-import { formatDate } from 'date-fns'
 import { ExternalLink, Pen, Trash } from 'lucide-react'
 import { Dialog } from '@/components/animate-ui/radix/dialog'
 import { PageHeader } from '@/components/page-header'
@@ -14,8 +13,10 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { MemeStatusMeta } from '@/constants/meme'
+import { formatDate } from '@/helpers/date'
 import { formatBookmarkCount, formatViewCount } from '@/helpers/format'
 import { buildMemeSeo } from '@/lib/seo'
+import { getLocale } from '@/paraglide/runtime'
 import { MemeForm } from '@/routes/admin/library/-components/meme-form'
 import { DeleteMemeButton } from '@admin/-components/delete-meme-button'
 import {
@@ -67,7 +68,10 @@ const RouteComponent = () => {
               {' • '}
               {formatBookmarkCount(memeQuery.data._count.bookmarkedBy)}
               {' - Ajouté le '}
-              {formatDate(memeQuery.data.createdAt, 'dd/MM/yyyy')}
+              {formatDate({
+                date: memeQuery.data.createdAt,
+                locale: getLocale()
+              })}
               {' - '}
               <Badge
                 variant={MemeStatusMeta[memeQuery.data.status].badgeVariant}

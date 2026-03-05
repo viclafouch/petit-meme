@@ -1,8 +1,8 @@
-import { formatDistanceToNow } from 'date-fns'
-import { fr } from 'date-fns/locale'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { DEFAULT_AVATAR_URL } from '@/constants/avatar'
+import { formatRelativeTime } from '@/helpers/date'
 import { getUserInitials } from '@/helpers/format'
+import { getLocale } from '@/paraglide/runtime'
 import { getActionIcon } from '@admin/-helpers/action-icon'
 import { formatAuditEntry } from '@admin/-helpers/audit'
 import type { AuditLogEntry } from '@admin/-server/dashboard'
@@ -50,10 +50,7 @@ export const ActivityFeed = ({ entries }: ActivityFeedParams) => {
                 <span className="truncate">{entry.actingAdmin.name}</span>
                 <span aria-hidden>·</span>
                 <time dateTime={createdAtDate.toISOString()}>
-                  {formatDistanceToNow(createdAtDate, {
-                    addSuffix: true,
-                    locale: fr
-                  })}
+                  {formatRelativeTime(createdAtDate, getLocale())}
                 </time>
               </div>
             </div>

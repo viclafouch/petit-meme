@@ -1,8 +1,9 @@
-import { formatDate } from 'date-fns'
 import { Plus } from 'lucide-react'
 import { PageHeader } from '@/components/page-header'
 import { Badge } from '@/components/ui/badge'
 import { Container } from '@/components/ui/container'
+import { formatDate } from '@/helpers/date'
+import { getLocale } from '@/paraglide/runtime'
 import { AddCategoryButton } from '@/routes/admin/categories/-components/add-category-button'
 import { CategoryDropdown } from '@/routes/admin/categories/-components/category-dropdown'
 import { type EnrichedCategory, getCategories } from '@/server/categories'
@@ -70,7 +71,7 @@ const columns = [
   columnHelper.accessor('createdAt', {
     header: 'Date de création',
     cell: (info) => {
-      return formatDate(info.getValue(), 'dd/MM/yyyy')
+      return formatDate({ date: info.getValue(), locale: getLocale() })
     }
   }),
   columnHelper.display({

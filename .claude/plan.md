@@ -169,6 +169,12 @@ autofill:shadow-[inset_0_0_0px_1000px_var(--color-background)]
 
 ---
 
+## date-fns supprimé (mars 2026) ✅
+
+Dépendance `date-fns` entièrement remplacée par des helpers natifs (`Intl.DateTimeFormat`, `Intl.RelativeTimeFormat`, arithmétique de dates) dans `src/helpers/date.ts`. Helpers créés : `formatDate()`, `formatRelativeTime()`, `differenceInMonths()`. Utilisés dans les 4 fichiers admin qui importaient date-fns.
+
+---
+
 ## Backlog — Futures évolutions
 
 ### Admin — Items reportés

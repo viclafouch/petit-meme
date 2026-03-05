@@ -1,5 +1,3 @@
-import { differenceInMonths, formatDate, formatDistanceToNow } from 'date-fns'
-import { fr } from 'date-fns/locale'
 import { Crown, Mail, Minus, Twitter } from 'lucide-react'
 import { PageHeader } from '@/components/page-header'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -10,7 +8,13 @@ import {
   TooltipContent,
   TooltipTrigger
 } from '@/components/ui/tooltip'
+import {
+  differenceInMonths,
+  formatDate,
+  formatRelativeTime
+} from '@/helpers/date'
 import { getUserInitials } from '@/helpers/format'
+import { getLocale } from '@/paraglide/runtime'
 import { AdminTable, getRowId, PAGE_SIZE } from '@admin/-components/admin-table'
 import type { EnrichedUser } from '@admin/-server/users'
 import { getListUsers } from '@admin/-server/users'
@@ -150,7 +154,7 @@ const columns = [
       const tooltipLines = [
         `${months} mois d'abonnement`,
         subscription.endsAt
-          ? `Fin : ${formatDate(new Date(subscription.endsAt), 'dd/MM/yyyy')}`
+          ? `Fin : ${formatDate({ date: new Date(subscription.endsAt), locale: getLocale() })}`
           : null
       ]
         .filter(Boolean)
@@ -219,11 +223,11 @@ const columns = [
         <Tooltip>
           <TooltipTrigger asChild>
             <span className="text-sm cursor-default">
-              {formatDistanceToNow(date, { addSuffix: true, locale: fr })}
+              {formatRelativeTime(date, getLocale())}
             </span>
           </TooltipTrigger>
           <TooltipContent>
-            {formatDate(date, 'dd/MM/yyyy HH:mm')}
+            {formatDate({ date, locale: getLocale(), includeTime: true })}
           </TooltipContent>
         </Tooltip>
       )

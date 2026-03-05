@@ -27,10 +27,10 @@ type FeatureStatusStaticConfig = {
 }
 
 const FEATURE_STATUS_STATIC_CONFIG = {
-  included: { icon: CheckCircle2, className: 'text-green-400' },
-  limited: { icon: MinusCircle, className: 'text-yellow-400' },
+  included: { icon: CheckCircle2, className: 'text-success-foreground' },
+  limited: { icon: MinusCircle, className: 'text-warning-foreground' },
   // eslint-disable-next-line camelcase -- maps to PlanFeature status value
-  not_included: { icon: XCircle, className: 'text-red-400' }
+  not_included: { icon: XCircle, className: 'text-destructive' }
 } as const satisfies Record<
   Plan['features'][number]['status'],
   FeatureStatusStaticConfig
@@ -198,7 +198,7 @@ export const PricingCard = ({
       <CardFooter className="items-end">
         {isActive ? (
           <Button
-            className="w-full text-green-500 aria-disabled:pointer-events-none aria-disabled:opacity-50"
+            className="w-full text-success-foreground aria-disabled:pointer-events-none aria-disabled:opacity-50"
             size="xl"
             variant="outline"
             aria-label={m.pricing_active_plan_sr()}

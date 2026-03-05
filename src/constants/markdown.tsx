@@ -3,7 +3,7 @@
 /* eslint-disable jsx-a11y/heading-has-content */
 import type { Components } from 'react-markdown'
 import { Separator } from '@/components/ui/separator'
-import { localizeUrl } from '@/paraglide/runtime'
+import { baseLocale, getLocale } from '@/paraglide/runtime'
 
 export const BASE_MARKDOWN_COMPONENTS = {
   h1: (props) => {
@@ -55,12 +55,11 @@ export const BASE_MARKDOWN_COMPONENTS = {
   },
   a: ({ href, ...props }) => {
     if (href?.startsWith('/')) {
+      const locale = getLocale()
+      const localizedHref = locale === baseLocale ? href : `/${locale}${href}`
+
       return (
-        <a
-          className="text-info underline"
-          href={localizeUrl(href).pathname}
-          {...props}
-        />
+        <a className="text-info underline" href={localizedHref} {...props} />
       )
     }
 

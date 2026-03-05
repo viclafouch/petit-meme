@@ -21,7 +21,7 @@ export const StudioMobileActions = ({
       initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-      className="flex gap-2.5 px-3 py-3 md:hidden"
+      className="flex gap-2.5 p-3 md:hidden"
     >
       <Button
         className="flex-1"

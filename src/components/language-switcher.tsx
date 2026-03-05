@@ -52,7 +52,7 @@ export const LanguageSwitcher = () => {
           aria-label={m.nav_switch_language()}
           className="gap-1.5 px-2 text-xs font-medium"
         >
-          <span className="text-sm leading-none" aria-hidden="true">
+          <span className="text-sm" aria-hidden="true">
             {getLocaleFlag(currentLocale)}
           </span>
           {currentLocale.toUpperCase()}
@@ -71,7 +71,7 @@ export const LanguageSwitcher = () => {
               className="justify-between gap-3"
             >
               <span className="flex items-center gap-2.5">
-                <span className="text-base leading-none" aria-hidden="true">
+                <span className="text-base" aria-hidden="true">
                   {getLocaleFlag(locale)}
                 </span>
                 <span className="capitalize">

@@ -132,7 +132,7 @@ export const Hero = () => {
             to="/pricing"
           >
             {m.home_hero_cta_premium()}{' '}
-            <span aria-hidden="true" className="text-[16px]">
+            <span aria-hidden="true" className="text-base">
               🎉
             </span>
           </Link>

@@ -100,7 +100,7 @@ const LocaleBannerContent = ({ isInitiallyDismissed }: LocaleBannerProps) => {
         >
           <AnimatedBanner>
             <div className="flex w-full items-center justify-center gap-2 px-10 text-foreground sm:gap-3">
-              <span className="text-base leading-none" aria-hidden="true">
+              <span className="text-base" aria-hidden="true">
                 {getLocaleFlag(suggestedLocale)}
               </span>
               <span className="text-xs sm:text-sm">

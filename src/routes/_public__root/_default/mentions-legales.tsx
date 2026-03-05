@@ -8,13 +8,17 @@ import { getLocale } from '@/paraglide/runtime'
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 
-const loadMarkdown = createServerFn({ method: 'GET' }).handler(async () => {
-  const modules = {
-    fr: (await import('~/md/fr/mentions-legales.md?raw')).default,
-    en: (await import('~/md/en/mentions-legales.md?raw')).default
-  } satisfies Record<Locale, string>
+const MARKDOWN_LOADERS = {
+  fr: () => {
+    return import('~/md/fr/mentions-legales.md?raw')
+  },
+  en: () => {
+    return import('~/md/en/mentions-legales.md?raw')
+  }
+} satisfies Record<Locale, () => Promise<{ default: string }>>
 
-  return modules[getLocale()]
+const loadMarkdown = createServerFn({ method: 'GET' }).handler(async () => {
+  return (await MARKDOWN_LOADERS[getLocale()]()).default
 })
 
 const RouteComponent = () => {

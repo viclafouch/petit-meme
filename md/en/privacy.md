@@ -100,6 +100,8 @@ accordance with its own privacy policy.
 | `cookieConsent` | Remember your consent choice | 1 year | No (strictly necessary) |
 | `better-auth.session_token` | Authentication session | Session duration | No (strictly necessary) |
 | `theme` | Theme preference (light/dark) | 1 year | No (strictly necessary) |
+| `PARAGLIDE_LOCALE` | Remember the chosen language (fr/en) | 1 year | No (strictly necessary) |
+| `localeBannerDismissed` | Remember dismissal of the language suggestion banner | 1 year | No (strictly necessary) |
 | `anonId` | Unique view counting | 1 year | Yes |
 | `algoliaUserToken` | Linking search events (views, clicks) for Algolia | 1 year | Yes |
 
@@ -122,6 +124,8 @@ We use the following sub-processors for the operation of the service:
 | **Twitter/X** | Social authentication (OAuth) | United States (standard contractual clauses) |
 | **Sentry** | Error tracking and stability monitoring | Germany (European Union) |
 | **Google Fonts** | Loading display fonts (IP address transmitted) | United States (standard contractual clauses) |
+| **Neon** | Database hosting | United States (standard contractual clauses) |
+| **Vercel** | Application hosting and execution | United States (standard contractual clauses) |
 
 For data transfers outside the European Union, appropriate safeguards are in
 place (European Commission standard contractual clauses).

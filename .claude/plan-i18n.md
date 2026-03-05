@@ -458,13 +458,13 @@ Tous les audits doivent passer **avant** le merge de `feat/i18n` → `feat/migra
 
 ### Audits agents Claude Code
 
-- [ ] **`dead-code`** — Vérifier suppression complète de : `src/i18n/config.ts`, `src/helpers/auth-errors.ts`, `public/manifest.json`. Détecter imports orphelins, exports inutilisés, fichiers morts post-migration.
-- [ ] **`security-auditor`** — Cookie `PARAGLIDE_LOCALE` (pas de données sensibles, HttpOnly non requis car lu côté client, SameSite=Lax). Pas d'injection via les clés i18n (Paraglide compile au build, pas de `dangerouslySetInnerHTML`). Vérifier que les pages légales EN ne sont pas injectables. Vérifier que `buildUrl()` avec le paramètre `locale` n'ouvre pas de redirect open.
-- [ ] **`react-performance`** — Vérifier que le changement de locale ne cause pas de re-renders en cascade. Paraglide est compilé (pas de Context provider), mais le language switcher déclenche une navigation complète → vérifier que c'est bien un full page navigation et pas un re-render client lourd.
-- [ ] **`tailwind-audit`** — Vérifier que les strings EN plus longues/courtes ne cassent pas les layouts (boutons, badges, cards). Attention aux textes pricing, hero, FAQ.
-- [ ] **`backend-performance`** — Overhead du `paraglideMiddleware` dans `src/server.ts` (doit être négligeable, juste un cookie read + URL parse). Vérifier pas de régression sur les temps de réponse.
-- [ ] **`gdpr-auditor`** — Cookie `PARAGLIDE_LOCALE` = préférence fonctionnelle (pas de consentement requis, exempt ePrivacy). Cookie `LOCALE_BANNER_DISMISSED` = même catégorie. Vérifier que le cookie consent EN fonctionne et que les pages privacy/terms EN sont complètes.
-- [ ] **`code-refactoring`** — Passe finale sur tous les fichiers modifiés (obligatoire par le post-task checklist, mais refaire une passe globale à la fin).
+- [x] **`dead-code`** — Aucun import orphelin. 1 clé message inutilisée supprimée (`common_back_to_home`). 2 composants orphelins supprimés (`studio-live-overlay.tsx`, `motion-highlight.tsx`).
+- [x] **`security-auditor`** — Pas d'injection i18n (Paraglide compile au build). Pages légales safe (imports statiques + react-markdown). Auth callbacks safe (paths hardcodés). `matchIsSafeNavigationUrl` : accepte tout https:// (à améliorer, non exploitable actuellement). Cookie `PARAGLIDE_LOCALE` sans SameSite/Secure (limitation Paraglide runtime, impact faible). Finding hors scope i18n : Algolia highlight XSS via `dangerouslySetInnerHTML` (à traiter séparément).
+- [x] **`react-performance`** — Locale switch = full page navigation (correct, pas de re-render cascade). Getter functions créent des refs à chaque render (acceptable per project rules). Pas de régression perf.
+- [x] **`tailwind-audit`** — Fixés : `bg-fd-background` → `bg-background`, `h-12` → `min-h-12 py-2`, `flex-row` redundant, `leading-none` sur emojis, `cursor-pointer` sur button, `px-3 py-3` → `p-3`, `text-[16px]` → `text-base`, couleurs hardcodées pricing → tokens thème, 16 variables CSS sidebar dupliquées supprimées.
+- [x] **`backend-performance`** — Middleware negligeable. Sitemap : ajouté `Cache-Control: public, max-age=3600`. Pages légales : conditionalisé les imports (1 seule locale chargée par requête).
+- [x] **`gdpr-auditor`** — Cookies fonctionnels (pas de consentement requis, correct). Ajouté `PARAGLIDE_LOCALE` + `localeBannerDismissed` aux tables cookies des privacy policies. Ajouté Neon + Vercel aux tables sous-traitants. Ajouté `locale` à `exportUserData` (Art. 15/20).
+- [x] **`code-refactoring`** — Passe finale sur tous les fichiers modifiés. 1 `leading-none` manqué corrigé.
 
 ### Audits web manuels
 

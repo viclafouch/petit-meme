@@ -57,7 +57,7 @@ const ColorSwatches = ({
             aria-label={color.label}
             data-active={isSelected || undefined}
             className={cn(
-              'size-6 rounded-full border-2 border-border cursor-pointer transition-colors',
+              'size-6 rounded-full border-2 border-border transition-colors',
               'data-active:ring-2 data-active:ring-primary data-active:ring-offset-2 data-active:ring-offset-background',
               color.className
             )}

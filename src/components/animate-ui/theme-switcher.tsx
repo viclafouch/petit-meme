@@ -5,7 +5,6 @@ import { motion } from 'motion/react'
 import { Switch } from 'radix-ui'
 import { useTheme } from '@/lib/theme'
 import { cn } from '@/lib/utils'
-import { ClientOnly } from '@tanstack/react-router'
 
 const SPRING_NO_BOUNCE = {
   type: 'spring',
@@ -42,6 +41,9 @@ export const ThemeSwitcher = ({ className }: { className?: string }) => {
         onTapStart={() => {
           return setIsTapped(true)
         }}
+
+
+
         onTapCancel={() => {
           return setIsTapped(false)
         }}
@@ -58,6 +60,11 @@ export const ThemeSwitcher = ({ className }: { className?: string }) => {
           transition={SPRING_NO_BOUNCE}
           className='absolute [&_svg]:size-3 left-1 top-1/2 -translate-y-1/2 dark:text-neutral-500 text-neutral-400'
         >
+
+
+
+
+
           <Sun />
         </motion.div>
         <motion.div

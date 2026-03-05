@@ -1,4 +1,3 @@
-import React from 'react'
 import type { User } from 'better-auth'
 import { CircleAlert } from 'lucide-react'
 import { z } from 'zod'
@@ -27,6 +26,7 @@ import {
 import { authClient } from '@/lib/auth-client'
 import { captureWithFeature } from '@/lib/sentry'
 import { getFieldErrorMessage } from '@/lib/utils'
+import { m } from '@/paraglide/messages.js'
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 
@@ -110,7 +110,7 @@ const UpdatePasswordForm = () => {
 
             return (
               <FormItem error={errorMessage}>
-                <FormLabel>Votre mot de passe</FormLabel>
+                <FormLabel>{m.auth_current_password()}</FormLabel>
                 <FormControl>
                   <Input
                     required
@@ -137,7 +137,7 @@ const UpdatePasswordForm = () => {
 
             return (
               <FormItem error={errorMessage}>
-                <FormLabel>Votre nouveau mot de passe</FormLabel>
+                <FormLabel>{m.auth_new_password()}</FormLabel>
                 <FormControl>
                   <Input
                     required
@@ -164,7 +164,7 @@ const UpdatePasswordForm = () => {
 
             return (
               <FormItem error={errorMessage}>
-                <FormLabel>Confirmer le mot de passe</FormLabel>
+                <FormLabel>{m.auth_confirm_password()}</FormLabel>
                 <FormControl>
                   <Input
                     required
@@ -195,7 +195,7 @@ const UpdatePasswordForm = () => {
                 type="submit"
                 className="w-full"
               >
-                Modifier
+                {m.auth_update()}
               </LoadingButton>
             )
           }}
@@ -218,11 +218,9 @@ const UpdatePasswordForm = () => {
             return isSubmitted && updatePasswordMutation.isSuccess ? (
               <Alert variant="success" className="mt-4">
                 <CircleAlert />
-                <AlertTitle>Votre mot de passe a bien été modifié !</AlertTitle>
+                <AlertTitle>{m.auth_password_updated_title()}</AlertTitle>
                 <AlertDescription>
-                  Parfait ! Votre mot de passe a bien été mis à jour. Vous
-                  pouvez dès maintenant vous connecter avec vos nouveaux
-                  identifiants.
+                  {m.auth_password_updated_description()}
                 </AlertDescription>
               </Alert>
             ) : null
@@ -241,7 +239,7 @@ export const UpdatePasswordDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Modifier mon mot de passe</DialogTitle>
+          <DialogTitle>{m.settings_change_password()}</DialogTitle>
           <DialogDescription />
         </DialogHeader>
         <div>

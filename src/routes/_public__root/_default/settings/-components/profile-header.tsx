@@ -4,6 +4,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { DEFAULT_AVATAR_URL } from '@/constants/avatar'
+import { m } from '@/paraglide/messages.js'
+import { getLocale } from '@/paraglide/runtime'
 import type { ActiveSubscription } from '@/server/customer'
 
 export const ProfileHeader = ({
@@ -32,9 +34,9 @@ export const ProfileHeader = ({
             <div className="flex flex-col gap-2 md:flex-row md:items-center">
               <h1 className="text-2xl font-bold">{user.name}</h1>
               {!activeSubscription ? (
-                <Badge variant="secondary">Utilisateur Testeur</Badge>
+                <Badge variant="secondary">{m.settings_badge_tester()}</Badge>
               ) : (
-                <Badge variant="default">Utilisateur Premium</Badge>
+                <Badge variant="default">{m.settings_badge_premium()}</Badge>
               )}
             </div>
             <div className="text-muted-foreground flex flex-wrap gap-4 text-sm">
@@ -44,8 +46,9 @@ export const ProfileHeader = ({
               </div>
               <div className="flex items-center gap-1">
                 <Calendar className="size-4" />
-                Membre depuis le{' '}
-                {new Date(user.createdAt).toLocaleDateString('fr-FR')}
+                {m.settings_member_since({
+                  date: new Date(user.createdAt).toLocaleDateString(getLocale())
+                })}
               </div>
             </div>
           </div>

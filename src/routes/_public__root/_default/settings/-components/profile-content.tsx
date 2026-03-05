@@ -1,6 +1,5 @@
 import React from 'react'
 import type { User } from 'better-auth'
-import { formatDate } from 'date-fns'
 import { CreditCard, Download, Key, Stars, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -57,14 +56,18 @@ export const ProfileContent = ({
       const blob = new Blob([JSON.stringify(data, null, 2)], {
         type: 'application/json'
       })
-      downloadBlob(blob, 'mes-donnees-petit-meme.json')
+      const filename =
+        getLocale() === 'fr'
+          ? 'mes-donnees-petit-meme.json'
+          : 'my-data-petit-meme.json'
+      downloadBlob(blob, filename)
     },
     onSuccess: () => {
-      toast.success('Données téléchargées')
+      toast.success(m.settings_data_exported())
     },
     onError: (error) => {
       captureWithFeature(error, 'data-export')
-      toast.error('Erreur lors du téléchargement')
+      toast.error(m.settings_data_export_error())
     }
   })
 
@@ -83,15 +86,17 @@ export const ProfileContent = ({
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Compte et abonnement</CardTitle>
+            <CardTitle>{m.settings_account_title()}</CardTitle>
             <CardDescription>
-              Gérez les préférences de votre compte et votre abonnement.
+              {m.settings_account_description()}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className={SETTINGS_ROW_CLASS_NAME}>
               <div className="space-y-1">
-                <Label className="text-base">Abonnement en cours</Label>
+                <Label className="text-base">
+                  {m.settings_current_subscription()}
+                </Label>
                 {activeSubscription ? (
                   <p className="text-muted-foreground text-sm">
                     {getPremiumPlan().title} -{' '}
@@ -104,8 +109,16 @@ export const ProfileContent = ({
                     -{' '}
                     <span className="text-info">
                       {activeSubscription.cancelAtPeriodEnd
-                        ? `Fin le ${formatDate(activeSubscription.periodEnd!, 'dd/MM/yyyy')}`
-                        : `Renouvellement le ${formatDate(activeSubscription.periodEnd!, 'dd/MM/yyyy')}`}
+                        ? m.settings_subscription_ends({
+                            date: new Date(
+                              activeSubscription.periodEnd!
+                            ).toLocaleDateString(getLocale())
+                          })
+                        : m.settings_subscription_renews({
+                            date: new Date(
+                              activeSubscription.periodEnd!
+                            ).toLocaleDateString(getLocale())
+                          })}
                     </span>
                   </p>
                 ) : (
@@ -123,7 +136,7 @@ export const ProfileContent = ({
                   }}
                 >
                   <CreditCard />
-                  Gérer mon abonnement
+                  {m.nav_manage_subscription()}
                 </Button>
               ) : (
                 <Button
@@ -132,7 +145,7 @@ export const ProfileContent = ({
                 >
                   <Link to="/pricing">
                     <Stars />
-                    Passer à Premium
+                    {m.nav_upgrade_premium()}
                   </Link>
                 </Button>
               )}
@@ -140,9 +153,9 @@ export const ProfileContent = ({
             <Separator />
             <div className={SETTINGS_ROW_CLASS_NAME}>
               <div className="space-y-1">
-                <Label className="text-base">Mot de passe</Label>
+                <Label className="text-base">{m.common_password()}</Label>
                 <p className="text-muted-foreground text-sm">
-                  Modifier votre mot de passe
+                  {m.settings_password_description()}
                 </p>
               </div>
               <Button
@@ -152,15 +165,15 @@ export const ProfileContent = ({
                 }}
               >
                 <Key />
-                Modifier mon mot de passe
+                {m.settings_change_password()}
               </Button>
             </div>
             <Separator />
             <div className={SETTINGS_ROW_CLASS_NAME}>
               <div className="space-y-1">
-                <Label className="text-base">Mes données personnelles</Label>
+                <Label className="text-base">{m.settings_data_label()}</Label>
                 <p className="text-muted-foreground text-sm">
-                  Télécharger une copie de vos données au format JSON (RGPD)
+                  {m.settings_data_description()}
                 </p>
               </div>
               <LoadingButton
@@ -171,24 +184,26 @@ export const ProfileContent = ({
                 }}
               >
                 <Download />
-                Télécharger mes données
+                {m.settings_download_data()}
               </LoadingButton>
             </div>
           </CardContent>
         </Card>
         <Card className="border-destructive/50">
           <CardHeader>
-            <CardTitle className="text-destructive">Zone de danger</CardTitle>
-            <CardDescription>
-              Actions irréversibles et destructrices
-            </CardDescription>
+            <CardTitle className="text-destructive">
+              {m.settings_danger_zone()}
+            </CardTitle>
+            <CardDescription>{m.settings_danger_description()}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className={SETTINGS_ROW_CLASS_NAME}>
               <div className="space-y-1">
-                <Label className="text-base">Supprimer mon compte</Label>
+                <Label className="text-base">
+                  {m.settings_delete_account()}
+                </Label>
                 <p className="text-muted-foreground text-sm">
-                  Supprimer définitivement votre compte et toutes vos données
+                  {m.settings_delete_account_description()}
                 </p>
               </div>
               <Button
@@ -198,7 +213,7 @@ export const ProfileContent = ({
                     activeSubscription &&
                     !activeSubscription.cancelAtPeriodEnd
                   ) {
-                    toast.error("Vous devez d'abord annuler votre abonnement")
+                    toast.error(m.settings_cancel_subscription_first())
 
                     return
                   }
@@ -207,7 +222,7 @@ export const ProfileContent = ({
                 }}
               >
                 <Trash2 />
-                Supprimer mon compte
+                {m.settings_delete_account()}
               </Button>
             </div>
           </CardContent>

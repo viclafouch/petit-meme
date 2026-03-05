@@ -205,7 +205,7 @@ Préfixes de clés par domaine : `nav_`, `home_`, `pricing_`, `meme_`, `studio_`
   `src/helpers/format.ts` (`pluralize` unexported, admin-only usage remains),
   Note : Paraglide v2 ne supporte pas ICU MessageFormat plurals. Pluralisation via `Intl.PluralRules(getLocale())` + messages séparés `*_one`/`*_other`.
 
-- [ ] **Batch D — Auth & Settings** (inclut les callback URLs locale-aware) :
+- [x] **Batch D — Auth & Settings** (inclut les callback URLs locale-aware) :
   **Callback URLs à rendre dynamiques** (sinon le user sur `/en/` atterrit sur `/` après auth) :
   `src/components/User/signup-form.tsx:82` (`callbackURL: '/'` → locale-aware),
   `src/components/User/auth-dialog.tsx` (`signIn.social` → passer `callbackURL` avec locale),
@@ -221,6 +221,12 @@ Préfixes de clés par domaine : `nav_`, `home_`, `pricing_`, `meme_`, `studio_`
   `src/routes/_public__root/_default/favorites.tsx`,
   `src/routes/_public__root/_default/password.reset.tsx`,
   `src/routes/_public__root/_default/password.create-new.tsx`
+  ~55 new keys (`auth_*`, `settings_*`, `common_cancel`, `common_confirm`, `common_email`, `common_password`).
+  Callback URLs locale-aware via `localizeUrl().toString()` in signup, reset-password, and Twitter OAuth.
+  Date formatting switched from `toLocaleDateString('fr-FR')` / `formatDate('dd/MM/yyyy')` to `toLocaleDateString(getLocale())`.
+  Reused existing keys: `nav_sign_in`, `nav_upgrade_premium`, `nav_manage_subscription`, `pricing_free_label`.
+  Zod validation messages left as-is (deferred to Step 4).
+  `auth-errors.ts` mapping left as-is (deferred to Step 4 — Better Auth i18n).
 
 - [ ] **Batch E — Transversal** :
   `src/components/not-found.tsx`, `src/components/error-component.tsx`,

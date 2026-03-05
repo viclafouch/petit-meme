@@ -2,6 +2,7 @@ import { Ban } from 'lucide-react'
 import { z } from 'zod'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { CreateNewPasswordForm } from '@/components/User/create-new-password-form'
+import { m } from '@/paraglide/messages.js'
 import { createFileRoute, Link, Navigate } from '@tanstack/react-router'
 
 const RouteComponent = () => {
@@ -12,14 +13,13 @@ const RouteComponent = () => {
       <div className="max-w-lg mx-auto">
         <Alert variant="destructive">
           <Ban />
-          <AlertTitle>Il semblerait que votre lien soit invalide !</AlertTitle>
+          <AlertTitle>{m.auth_invalid_link_title()}</AlertTitle>
           <AlertDescription>
-            Le lien de réinitialisation de mot de passe n’est plus valide ou est
-            incorrect.
+            {m.auth_invalid_link_description()}
             <br />
             <br />
             <Link to="/password/reset" className="underline">
-              Demander un nouveau lien de réinitialisation
+              {m.auth_request_new_link()}
             </Link>
           </AlertDescription>
         </Alert>
@@ -57,7 +57,7 @@ export const Route = createFileRoute(
   head: () => {
     return {
       meta: [
-        { title: 'Petit Meme - Nouveau mot de passe' },
+        { title: m.auth_new_password_page_title() },
         { name: 'robots', content: 'noindex,nofollow' }
       ]
     }

@@ -22,6 +22,7 @@ import {
 } from '@/lib/queries'
 import { captureWithFeature } from '@/lib/sentry'
 import { getFieldErrorMessage } from '@/lib/utils'
+import { m } from '@/paraglide/messages.js'
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link, useRouter } from '@tanstack/react-router'
@@ -115,13 +116,13 @@ export const LoginForm = ({
 
           return (
             <FormItem error={errorMessage}>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>{m.common_email()}</FormLabel>
               <FormControl>
                 <Input
                   required
                   type="email"
                   autoComplete="email"
-                  placeholder="jean@dupont.fr"
+                  placeholder={m.auth_email_placeholder()}
                   name="email"
                   value={field.state.value}
                   onBlur={field.handleBlur}
@@ -142,7 +143,7 @@ export const LoginForm = ({
 
           return (
             <FormItem error={errorMessage}>
-              <FormLabel>Mot de passe</FormLabel>
+              <FormLabel>{m.common_password()}</FormLabel>
               <FormControl>
                 <Input
                   required
@@ -173,7 +174,7 @@ export const LoginForm = ({
               type="submit"
               className="w-full"
             >
-              Se connecter
+              {m.nav_sign_in()}
             </LoadingButton>
           )
         }}
@@ -188,12 +189,12 @@ export const LoginForm = ({
       ) : null}
       <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t w-full">
         <span className="bg-background text-muted-foreground relative z-10 px-2">
-          Ou continuer avec
+          {m.auth_or_continue_with()}
         </span>
       </div>
       <Button variant="outline" className="w-full" onClick={onTwitterSignIn}>
         <Twitter />
-        Connexion avec Twitter
+        {m.auth_twitter_sign_in()}
       </Button>
       <div className="w-full flex flex-col gap-1 justify-center items-center">
         <Link
@@ -203,10 +204,10 @@ export const LoginForm = ({
             return onOpenChange?.(false)
           }}
         >
-          Mot de passe oublié ?
+          {m.auth_forgot_password()}
         </Link>
         <div className="text-center text-sm gap-x-1 inline-flex justify-center w-full text-primary">
-          Pas de compte ?
+          {m.auth_no_account()}
           <button
             onClick={(event) => {
               event.preventDefault()
@@ -215,18 +216,16 @@ export const LoginForm = ({
             type="button"
             className="underline underline-offset-4 cursor-pointer"
           >
-            S&apos;inscrire
+            {m.auth_sign_up()}
           </button>
         </div>
       </div>
       {matchIsEmailNotVerified ? (
         <Alert variant="destructive" className="mt-4">
           <CircleAlert />
-          <AlertTitle>Vous devez vérifier votre email !</AlertTitle>
+          <AlertTitle>{m.auth_email_not_verified_title()}</AlertTitle>
           <AlertDescription>
-            Votre compte n&apos;est pas activé. Veuillez l&apos;activer avant
-            d&apos;essayer de vous connecter. Si vous avez besoin d&apos;aide,
-            contactez-nous.
+            {m.auth_email_not_verified_description()}
           </AlertDescription>
         </Alert>
       ) : null}

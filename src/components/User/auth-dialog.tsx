@@ -14,6 +14,8 @@ import { SignupForm } from '@/components/User/signup-form'
 import { getAuthErrorMessage } from '@/helpers/auth-errors'
 import { authClient } from '@/lib/auth-client'
 import { captureWithFeature } from '@/lib/sentry'
+import { m } from '@/paraglide/messages.js'
+import { localizeUrl } from '@/paraglide/runtime'
 
 export const AuthDialog = ({ open, onOpenChange }: WithDialog<unknown>) => {
   const [authType, setAuthType] = React.useState<'login' | 'signup'>('login')
@@ -25,14 +27,15 @@ export const AuthDialog = ({ open, onOpenChange }: WithDialog<unknown>) => {
 
     try {
       await authClient.signIn.social({
-        provider: 'twitter'
+        provider: 'twitter',
+        callbackURL: localizeUrl('/').toString()
       })
     } catch (error) {
       captureWithFeature(error, 'sign-in-twitter')
       toast.error(
         error instanceof Error
           ? getAuthErrorMessage(error.message)
-          : 'Une erreur est survenue lors de la connexion avec Twitter'
+          : m.auth_twitter_error()
       )
     }
   }
@@ -51,7 +54,9 @@ export const AuthDialog = ({ open, onOpenChange }: WithDialog<unknown>) => {
         </DialogHeader>
         <div className="flex flex-col items-center gap-y-6 w-full">
           <h1 className="text-xl font-semibold text-center text-balance max-w-sm mx-center">
-            {authType === 'login' ? 'Connexion' : 'Inscription'}
+            {authType === 'login'
+              ? m.auth_login_title()
+              : m.auth_signup_title()}
           </h1>
           {authType === 'login' ? (
             <LoginForm

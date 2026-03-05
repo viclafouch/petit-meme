@@ -17,6 +17,7 @@ import {
 import { authClient } from '@/lib/auth-client'
 import { captureWithFeature } from '@/lib/sentry'
 import { getFieldErrorMessage } from '@/lib/utils'
+import { m } from '@/paraglide/messages.js'
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
@@ -49,7 +50,7 @@ export const CreateNewPasswordForm = ({ token }: { token: string }) => {
       captureWithFeature(error, 'reset-password')
     },
     onSuccess: () => {
-      toast.success('Votre mot de passe a bien été modifié !')
+      toast.success(m.auth_password_changed_toast())
       void router.navigate({ to: '/' })
     }
   })
@@ -73,7 +74,7 @@ export const CreateNewPasswordForm = ({ token }: { token: string }) => {
       className="flex flex-col items-center gap-y-4 w-full"
     >
       <h1 className="text-xl font-semibold text-center text-balance">
-        Créer un nouveau mot de passe
+        {m.auth_create_new_password_heading()}
       </h1>
       <form.Field
         name="password"
@@ -82,7 +83,7 @@ export const CreateNewPasswordForm = ({ token }: { token: string }) => {
 
           return (
             <FormItem error={errorMessage}>
-              <FormLabel>Mot de passe</FormLabel>
+              <FormLabel>{m.common_password()}</FormLabel>
               <FormControl>
                 <Input
                   required
@@ -109,7 +110,7 @@ export const CreateNewPasswordForm = ({ token }: { token: string }) => {
 
           return (
             <FormItem error={errorMessage}>
-              <FormLabel>Confirmer le mot de passe</FormLabel>
+              <FormLabel>{m.auth_confirm_password()}</FormLabel>
               <FormControl>
                 <Input
                   required
@@ -140,7 +141,7 @@ export const CreateNewPasswordForm = ({ token }: { token: string }) => {
               type="submit"
               className="w-full"
             >
-              Confirmer
+              {m.common_confirm()}
             </LoadingButton>
           )
         }}

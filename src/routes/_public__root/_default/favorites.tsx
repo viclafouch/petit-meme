@@ -1,5 +1,6 @@
 import { MemesList } from '@/components/Meme/memes-list'
 import { getFavoritesMemesQueryOpts } from '@/lib/queries'
+import { m } from '@/paraglide/messages.js'
 import {
   PageDescription,
   PageHeading
@@ -12,10 +13,8 @@ const RouteComponent = () => {
 
   return (
     <div>
-      <PageHeading>Favoris</PageHeading>
-      <PageDescription>
-        Tes mèmes préférés, toujours sous la main : retrouve-les ici.
-      </PageDescription>
+      <PageHeading>{m.settings_favorites_heading()}</PageHeading>
+      <PageDescription>{m.settings_favorites_description()}</PageDescription>
       <div className="w-full mx-auto py-12">
         <MemesList
           layoutContext="favorites"
@@ -31,7 +30,7 @@ export const Route = createFileRoute('/_public__root/_default/favorites')({
   head: () => {
     return {
       meta: [
-        { title: 'Petit Meme - Favoris' },
+        { title: m.settings_favorites_title() },
         { name: 'robots', content: 'noindex,nofollow' }
       ]
     }

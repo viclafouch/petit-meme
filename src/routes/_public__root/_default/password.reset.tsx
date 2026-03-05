@@ -1,4 +1,5 @@
 import { ResetPasswordForm } from '@/components/User/reset-password-form'
+import { m } from '@/paraglide/messages.js'
 import { createFileRoute } from '@tanstack/react-router'
 
 const RouteComponent = () => {
@@ -16,7 +17,7 @@ export const Route = createFileRoute('/_public__root/_default/password/reset')({
   head: () => {
     return {
       meta: [
-        { title: 'Petit Meme - Réinitialiser le mot de passe' },
+        { title: m.auth_reset_password_page_title() },
         { name: 'robots', content: 'noindex,nofollow' }
       ]
     }

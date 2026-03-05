@@ -1,4 +1,3 @@
-import React from 'react'
 import type { User } from 'better-auth'
 import { CircleAlert, MessageCircleWarning } from 'lucide-react'
 import { toast } from 'sonner'
@@ -34,6 +33,7 @@ import {
 } from '@/lib/queries'
 import { captureWithFeature } from '@/lib/sentry'
 import { getFieldErrorMessage } from '@/lib/utils'
+import { m } from '@/paraglide/messages.js'
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
@@ -72,7 +72,7 @@ const DeleteAccountForm = ({ onCancel }: { onCancel: () => void }) => {
       queryClient.removeQueries(getAuthUserQueryOpts())
       queryClient.removeQueries(getActiveSubscriptionQueryOpts())
       queryClient.removeQueries(getFavoritesMemesQueryOpts())
-      toast.success('Votre compte a bien été supprimé !')
+      toast.success(m.auth_account_deleted_toast())
       void router.navigate({ to: '/', from: '/' })
       await router.invalidate()
     }
@@ -100,10 +100,7 @@ const DeleteAccountForm = ({ onCancel }: { onCancel: () => void }) => {
                 <Alert variant="default">
                   <MessageCircleWarning />
                   <AlertDescription>
-                    Êtes-vous sûr de vouloir supprimer votre compte ? Cette
-                    action est irréversible : toutes vos données (comme vos
-                    favoris) seront définitivement effacés, sans possibilité de
-                    récupération.
+                    {m.auth_delete_confirm_warning()}
                   </AlertDescription>
                 </Alert>
                 <LoadingButton
@@ -118,7 +115,7 @@ const DeleteAccountForm = ({ onCancel }: { onCancel: () => void }) => {
                     deleteAccountMutation.mutate({ currentPassword })
                   }}
                 >
-                  Je confirme la suppression
+                  {m.auth_confirm_deletion()}
                 </LoadingButton>
                 <Button
                   variant="default"
@@ -128,7 +125,7 @@ const DeleteAccountForm = ({ onCancel }: { onCancel: () => void }) => {
                     onCancel()
                   }}
                 >
-                  Annuler
+                  {m.common_cancel()}
                 </Button>
                 {deleteAccountMutation.error ? (
                   <Alert variant="destructive">
@@ -148,7 +145,7 @@ const DeleteAccountForm = ({ onCancel }: { onCancel: () => void }) => {
 
                     return (
                       <FormItem error={errorMessage}>
-                        <FormLabel>Votre mot de passe</FormLabel>
+                        <FormLabel>{m.auth_current_password()}</FormLabel>
                         <FormControl>
                           <Input
                             required
@@ -169,7 +166,7 @@ const DeleteAccountForm = ({ onCancel }: { onCancel: () => void }) => {
                   }}
                 />
                 <Button type="submit" variant="destructive" className="w-full">
-                  Supprimer
+                  {m.auth_delete()}
                 </Button>
               </div>
             )
@@ -188,7 +185,7 @@ export const DeleteAccountDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Supprimer mon compte</DialogTitle>
+          <DialogTitle>{m.settings_delete_account()}</DialogTitle>
           <DialogDescription />
         </DialogHeader>
         <div>

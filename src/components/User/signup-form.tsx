@@ -18,6 +18,8 @@ import {
 import { authClient } from '@/lib/auth-client'
 import { captureWithFeature } from '@/lib/sentry'
 import { getFieldErrorMessage } from '@/lib/utils'
+import { m } from '@/paraglide/messages.js'
+import { localizeUrl } from '@/paraglide/runtime'
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
@@ -53,13 +55,8 @@ const SignupSuccessAlert = () => {
   return (
     <Alert variant="success" className="mt-4">
       <CheckCircle />
-      <AlertTitle>Parfait, plus qu&apos;à valider ton email !</AlertTitle>
-      <AlertDescription>
-        Votre compte a été créé avec succès, mais il doit être activé avant que
-        vous puissiez vous connecter. Nous venons de vous envoyer un e-mail pour
-        l&apos;activer. Si vous ne le recevez pas dans quelques minutes,
-        veuillez vérifier votre dossier spam ou contactez-nous.
-      </AlertDescription>
+      <AlertTitle>{m.auth_signup_success_title()}</AlertTitle>
+      <AlertDescription>{m.auth_signup_success_description()}</AlertDescription>
     </Alert>
   )
 }
@@ -79,7 +76,7 @@ export const SignupForm = ({ onAuthTypeChange }: SignupFormParams) => {
         email,
         password,
         name,
-        callbackURL: '/'
+        callbackURL: localizeUrl('/').toString()
       })
 
       if (error) {
@@ -121,13 +118,13 @@ export const SignupForm = ({ onAuthTypeChange }: SignupFormParams) => {
 
           return (
             <FormItem error={errorMessage}>
-              <FormLabel>Pseudo</FormLabel>
+              <FormLabel>{m.auth_username()}</FormLabel>
               <FormControl>
                 <Input
                   required
                   type="text"
                   autoComplete="name"
-                  placeholder="Jean"
+                  placeholder={m.auth_name_placeholder()}
                   name="name"
                   value={field.state.value}
                   onBlur={field.handleBlur}
@@ -148,13 +145,13 @@ export const SignupForm = ({ onAuthTypeChange }: SignupFormParams) => {
 
           return (
             <FormItem error={errorMessage}>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>{m.common_email()}</FormLabel>
               <FormControl>
                 <Input
                   required
                   type="email"
                   autoComplete="email"
-                  placeholder="jean@dupont.fr"
+                  placeholder={m.auth_email_placeholder()}
                   name="email"
                   value={field.state.value}
                   onBlur={field.handleBlur}
@@ -175,7 +172,7 @@ export const SignupForm = ({ onAuthTypeChange }: SignupFormParams) => {
 
           return (
             <FormItem error={errorMessage}>
-              <FormLabel>Mot de passe</FormLabel>
+              <FormLabel>{m.common_password()}</FormLabel>
               <FormControl>
                 <Input
                   required
@@ -202,7 +199,7 @@ export const SignupForm = ({ onAuthTypeChange }: SignupFormParams) => {
 
           return (
             <FormItem error={errorMessage}>
-              <FormLabel>Confirmer le mot de passe</FormLabel>
+              <FormLabel>{m.auth_confirm_password()}</FormLabel>
               <FormControl>
                 <Input
                   required
@@ -242,21 +239,21 @@ export const SignupForm = ({ onAuthTypeChange }: SignupFormParams) => {
                   htmlFor="acceptTerms"
                   className="text-xs text-muted-foreground leading-snug"
                 >
-                  J&apos;accepte les{' '}
+                  {m.auth_accept_terms_prefix()}
                   <Link
                     to="/terms-of-use"
                     className="text-info underline"
                     target="_blank"
                   >
-                    Conditions Générales d&apos;Utilisation
-                  </Link>{' '}
-                  et la{' '}
+                    {m.auth_terms_link_text()}
+                  </Link>
+                  {m.auth_accept_terms_and()}
                   <Link
                     to="/privacy"
                     className="text-info underline"
                     target="_blank"
                   >
-                    Politique de confidentialité
+                    {m.auth_privacy_link_text()}
                   </Link>
                 </label>
               </div>
@@ -276,7 +273,7 @@ export const SignupForm = ({ onAuthTypeChange }: SignupFormParams) => {
               type="submit"
               className="w-full"
             >
-              Créer un compte
+              {m.auth_create_account()}
             </LoadingButton>
           )
         }}
@@ -300,7 +297,7 @@ export const SignupForm = ({ onAuthTypeChange }: SignupFormParams) => {
         }}
       />
       <div className="text-center text-sm gap-x-1 inline-flex justify-center w-full text-primary">
-        Déjà un compte ?
+        {m.auth_already_have_account()}
         <button
           onClick={(event) => {
             event.preventDefault()
@@ -309,7 +306,7 @@ export const SignupForm = ({ onAuthTypeChange }: SignupFormParams) => {
           type="button"
           className="underline underline-offset-4 cursor-pointer"
         >
-          Se connecter
+          {m.nav_sign_in()}
         </button>
       </div>
     </form>

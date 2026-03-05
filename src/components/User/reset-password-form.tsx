@@ -16,6 +16,8 @@ import {
 import { authClient } from '@/lib/auth-client'
 import { captureWithFeature } from '@/lib/sentry'
 import { getFieldErrorMessage } from '@/lib/utils'
+import { m } from '@/paraglide/messages.js'
+import { localizeUrl } from '@/paraglide/runtime'
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 
@@ -37,7 +39,7 @@ export const ResetPasswordForm = () => {
     mutationFn: async ({ email }: { email: string }) => {
       const { error } = await authClient.requestPasswordReset({
         email,
-        redirectTo: '/password/create-new'
+        redirectTo: localizeUrl('/password/create-new').toString()
       })
 
       if (error) {
@@ -69,7 +71,7 @@ export const ResetPasswordForm = () => {
       className="flex flex-col items-center gap-y-6 w-full"
     >
       <h1 className="text-xl font-semibold text-center text-balance max-w-sm mx-center">
-        Demande de réinitialisation de mot de passe
+        {m.auth_reset_password_heading()}
       </h1>
       <div className="flex flex-col items-center gap-y-4 w-full">
         <form.Field
@@ -79,13 +81,13 @@ export const ResetPasswordForm = () => {
 
             return (
               <FormItem error={errorMessage}>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>{m.common_email()}</FormLabel>
                 <FormControl>
                   <Input
                     required
                     type="email"
                     autoComplete="email"
-                    placeholder="jean@dupont.fr"
+                    placeholder={m.auth_email_placeholder()}
                     name="email"
                     value={field.state.value}
                     onBlur={field.handleBlur}
@@ -110,7 +112,7 @@ export const ResetPasswordForm = () => {
                 type="submit"
                 className="w-full"
               >
-                Confirmer
+                {m.common_confirm()}
               </LoadingButton>
             )
           }}
@@ -126,11 +128,9 @@ export const ResetPasswordForm = () => {
         {resetPasswordMutation.isSuccess ? (
           <Alert variant="success" className="mt-4">
             <CircleAlert />
-            <AlertTitle>Vérifiez votre email !</AlertTitle>
+            <AlertTitle>{m.auth_reset_email_sent_title()}</AlertTitle>
             <AlertDescription>
-              C'est tout bon ! Si nous trouvons un compte associé à cette
-              adresse e-mail, vous recevrez d'ici quelques minutes un lien pour
-              réinitialiser votre mot de passe.
+              {m.auth_reset_email_sent_description()}
             </AlertDescription>
           </Alert>
         ) : null}

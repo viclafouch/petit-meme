@@ -5,6 +5,7 @@ import { IconButtonStars } from '@/components/animate-ui/buttons/icon-button-sta
 import type { MemeWithVideo } from '@/constants/meme'
 import { useToggleBookmark } from '@/hooks/use-toggle-bookmark'
 import { getFavoritesMemesQueryOpts } from '@/lib/queries'
+import { m } from '@/paraglide/messages.js'
 import { useShowDialog } from '@/stores/dialog.store'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { useRouteContext } from '@tanstack/react-router'
@@ -38,7 +39,7 @@ const AuthBookmarkButton = ({
       active={isMemeBookmarked}
       onClick={handleToggleLike}
       aria-label={
-        isMemeBookmarked ? 'Retirer des favoris' : 'Ajouter aux favoris'
+        isMemeBookmarked ? m.meme_remove_favorite() : m.meme_add_favorite()
       }
     >
       <Star />
@@ -59,7 +60,7 @@ const ToggleLikeButton = ({ meme, ...restProps }: ToggleLikeButtonProps) => {
           event.preventDefault()
           showDialog('auth', {})
         }}
-        aria-label="Ajouter aux favoris"
+        aria-label={m.meme_add_favorite()}
       >
         <Star />
       </IconButtonStars>

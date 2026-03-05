@@ -297,6 +297,14 @@ Préfixes de clés par domaine : `nav_`, `home_`, `pricing_`, `meme_`, `studio_`
 - [x] Security hardening : `Secure` flag always-on sur tous les cookies client (`createClientCookie`), `matchIsSafeNavigationUrl()` scheme allowlist avant `window.location.href` assignment.
 - [x] Locale helpers : `src/helpers/locale.ts` — `getLocaleDisplayName()`, `getLocaleFlag()`, `getSuggestedLocale()`, `matchIsSafeNavigationUrl()`.
 
+**5b. Accessibility audit — alt/title/aria-label i18n** (dépend de 3)
+- [x] `studio-related-memes.tsx` — "Essayer avec un autre mème" → `m.studio_try_another_meme()` (1 new key)
+- [x] `toggle-like-button.tsx` — aria-label "Retirer des favoris"/"Ajouter aux favoris" → `m.meme_remove_favorite()`/`m.meme_add_favorite()` (existing keys)
+- [x] `share-meme-button.tsx` — aria-label "Partager" → `m.meme_share()` (existing key)
+- [x] `meme-reels.tsx` — `alt="Logo"` → `m.common_logo_alt()` (existing key)
+- [x] `pagination.tsx` — "Précédent"/"Suivant", aria-labels EN, sr-only "More pages" → 7 new `common_*` keys
+- [x] Full audit: all other alt/title/aria-label in src/ are either already translated, decorative (`alt=""`), admin-only, or technical ID-based
+
 **6. QA & validation** (dépend de tout)
 - [ ] `pnpm run build` — vérifier que le build passe
 - [ ] Tester sur le preview deploy Vercel :

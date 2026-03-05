@@ -134,7 +134,7 @@ export const Reel = React.memo(
               >
                 <img
                   src="/images/logo.png"
-                  alt="Logo"
+                  alt={m.common_logo_alt()}
                   width={20}
                   height={20}
                   decoding="async"

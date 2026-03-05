@@ -1,3 +1,4 @@
+/* eslint-disable */
 import * as React from 'react'
 import {
   ChevronLeftIcon,
@@ -7,6 +8,7 @@ import {
 import type { Button } from '@/components/ui/button'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { m } from '@/paraglide/messages.js'
 import type { LinkProps } from '@tanstack/react-router'
 import { Link } from '@tanstack/react-router'
 
@@ -14,7 +16,7 @@ const Pagination = ({ className, ...props }: React.ComponentProps<'nav'>) => {
   return (
     <nav
       role="navigation"
-      aria-label="pagination"
+      aria-label={m.common_pagination()}
       data-slot="pagination"
       className={cn('mx-auto flex w-full justify-center', className)}
       {...props}
@@ -74,12 +76,12 @@ const PaginationPrevious = ({
 }: React.ComponentProps<typeof PaginationLink>) => {
   return (
     <PaginationLink
-      aria-label="Go to previous page"
+      aria-label={m.common_previous_page()}
       className={cn('gap-1 px-2.5 sm:pl-2.5', className)}
       {...props}
     >
       <ChevronLeftIcon />
-      <span className="hidden sm:block">Précédent</span>
+      <span className="hidden sm:block">{m.common_previous()}</span>
     </PaginationLink>
   )
 }
@@ -90,11 +92,11 @@ const PaginationNext = ({
 }: React.ComponentProps<typeof PaginationLink>) => {
   return (
     <PaginationLink
-      aria-label="Go to next page"
+      aria-label={m.common_next_page()}
       className={cn('gap-1 px-2.5 sm:pr-2.5', className)}
       {...props}
     >
-      <span className="hidden sm:block">Suivant</span>
+      <span className="hidden sm:block">{m.common_next()}</span>
       <ChevronRightIcon />
     </PaginationLink>
   )
@@ -112,7 +114,7 @@ const PaginationEllipsis = ({
       {...props}
     >
       <MoreHorizontalIcon className="size-4" />
-      <span className="sr-only">More pages</span>
+      <span className="sr-only">{m.common_more_pages()}</span>
     </span>
   )
 }

@@ -2,6 +2,7 @@ import React from 'react'
 import { Label } from '@/components/ui/label'
 import type { MemeWithVideo } from '@/constants/meme'
 import { buildVideoImageUrl } from '@/lib/bunny'
+import { m } from '@/paraglide/messages.js'
 import { Link } from '@tanstack/react-router'
 
 type StudioRelatedMemesParams = {
@@ -25,7 +26,7 @@ export const StudioRelatedMemes = ({
 
   return (
     <div className="flex flex-col gap-2.5">
-      <Label>Essayer avec un autre mème</Label>
+      <Label>{m.studio_try_another_meme()}</Label>
       <div className="grid grid-cols-2 gap-2">
         {filteredMemes.map((meme) => {
           return (

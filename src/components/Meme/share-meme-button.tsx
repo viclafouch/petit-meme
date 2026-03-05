@@ -4,6 +4,7 @@ import { IconButtonStars } from '@/components/animate-ui/buttons/icon-button-sta
 import { OverlaySpinner } from '@/components/ui/overlay-spinner'
 import type { MemeWithVideo } from '@/constants/meme'
 import { useShareMeme } from '@/hooks/use-share-meme'
+import { m } from '@/paraglide/messages.js'
 
 type ShareMemeButtonProps = {
   meme: MemeWithVideo
@@ -29,7 +30,7 @@ export const ShareMemeButton = ({
       <IconButtonStars
         active={shareMutation.isPending}
         onClick={handleShare}
-        aria-label="Partager"
+        aria-label={m.meme_share()}
         {...restProps}
       >
         <Share2 />

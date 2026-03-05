@@ -176,6 +176,11 @@ export default defineConfig({
     react(),
     nitro({
       preset: 'vercel',
+      vercel: {
+        functions: {
+          runtime: 'nodejs24.x'
+        }
+      },
       routeRules: {
         '/**': {
           headers: {

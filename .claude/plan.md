@@ -35,9 +35,29 @@
 
 ---
 
-## Migration Railway → Vercel — Item restant
+## Migration Railway → Vercel — Items restants
 
 - [ ] Réactiver Sentry server-side tracing (`instrument-server.ts` + `wrapFetchWithSentry`) — bloqué par `require-in-the-middle` incompatible ESM dans Vercel serverless. Bug connu : [sentry-javascript#18859](https://github.com/getsentry/sentry-javascript/issues/18859). Surveiller les updates Sentry/OpenTelemetry.
+
+## Nitro — Override runtime Node.js 24
+
+**Problème :** Nitro `3.0.1-alpha.2` ne supporte pas Node.js 24 dans sa liste `SUPPORTED_NODE_VERSIONS` ([nitrojs/nitro#3965](https://github.com/nitrojs/nitro/issues/3965)). Il fallback sur `nodejs22.x`, ce qui casse Paraglide (utilise `URLPattern`, disponible nativement à partir de Node 23+).
+
+**Fix temporaire :** Override manuel dans `vite.config.ts` :
+```ts
+nitro({
+  preset: 'vercel',
+  vercel: {
+    functions: {
+      runtime: 'nodejs24.x'
+    }
+  },
+})
+```
+
+**Fix upstream :** PR [nitrojs/nitro#3967](https://github.com/nitrojs/nitro/pull/3967) mergée mais pas encore publiée sur npm (dernière version : `3.0.1-alpha.2`).
+
+- [ ] Surveiller les releases Nitro (`npm view nitro versions`). Quand une version ≥ `3.0.1` inclut le support Node 24, supprimer le bloc `vercel.functions.runtime` de `vite.config.ts`.
 
 ---
 

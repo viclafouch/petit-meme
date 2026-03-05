@@ -35,7 +35,7 @@ Un merge atomique garantit que le site passe de FR-only à bilingue en une fois.
 
 **Stratégie d'URL :** prefix sauf langue par défaut. FR = `/pricing`. EN = `/en/pricing`. Pas de traduction de slugs.
 
-**Détection locale :** URL > Cookie (`PARAGLIDE_LOCALE`) > Preferred Language (Accept-Language / navigator.languages) > Base locale (FR).
+**Détection locale :** Cookie (`PARAGLIDE_LOCALE`) > URL > Preferred Language (Accept-Language / navigator.languages) > Base locale (FR). Le cookie a priorité sur l'URL : si un utilisateur a un cookie `fr` et visite `/en/memes`, le middleware Paraglide redirige 307 vers `/fr/memes`.
 
 **Routes i18n :** toutes les routes publiques (home, pricing, memes, favorites, settings, legal, password, checkout, reels, random, studio).
 **Routes exclues :** `/admin/*` (FR fixe), `/api/*`, `/sitemap.xml`, `/robots.txt`, `/health`.
@@ -72,8 +72,8 @@ Un merge atomique garantit que le site passe de FR-only à bilingue en une fois.
 **Template de fichiers Paraglide (pattern de référence) :**
 - `project.inlang/settings.json` — `{ "baseLocale": "fr", "locales": ["fr", "en"] }`
 - `messages/fr.json` / `messages/en.json` — clés préfixées par domaine (`nav_`, `auth_`, `pricing_`, etc.)
-- `vite.config.ts` — `paraglideVitePlugin({ project: './project.inlang', outdir: './src/paraglide', outputStructure: 'message-modules', cookieName: 'PARAGLIDE_LOCALE', strategy: ['url', 'cookie', 'preferredLanguage', 'baseLocale'], urlPatterns: [{ pattern: '/:path(.*)?', localized: [['en', '/en/:path(.*)?']] }] })`
-- `src/server.ts` — `paraglideMiddleware(req, () => handler.fetch(req))`
+- `vite.config.ts` — `paraglideVitePlugin({ ..., strategy: ['cookie', 'url', 'preferredLanguage', 'baseLocale'], ... })`
+- `src/server.ts` — `paraglideMiddleware(req, () => handler(req))`
 - `src/router.tsx` — `rewrite: { input: deLocalizeUrl, output: localizeUrl }`
 
 **Outils de validation QA :**
@@ -126,7 +126,7 @@ Un merge atomique garantit que le site passe de FR-only à bilingue en une fois.
 - [x] Installer `@inlang/paraglide-js` (devDep) — v2.13.1
 - [x] Créer `project.inlang/settings.json` (baseLocale: `fr`, locales: `["fr", "en"]`)
 - [x] Configurer `paraglideVitePlugin` dans `vite.config.ts` :
-  - `strategy: ["url", "cookie", "preferredLanguage", "baseLocale"]`
+  - `strategy: ["cookie", "url", "preferredLanguage", "baseLocale"]` (cookie-first pour respecter la préférence utilisateur)
   - `outputStructure: "message-modules"`
   - `cookieName: "PARAGLIDE_LOCALE"`
   - `urlPatterns` — wildcard unique `/:path(.*)?` (comportement par défaut Paraglide : base locale sans préfixe, EN avec `/en/`). Pas besoin de lister chaque route explicitement.
@@ -290,8 +290,11 @@ Préfixes de clés par domaine : `nav_`, `home_`, `pricing_`, `meme_`, `studio_`
   ~7 new keys: `manifest_description`, `manifest_category_*`.
 - [x] User locale persistence : `getLocale()` set in `auth.tsx` `databaseHooks.user.create.before` (signup).
   `src/server/user-locale.ts` with `updateUserLocale` server function (POST, optional auth — no-op if not logged in) for language switcher.
-- [x] Security hardening : `Secure` flag always-on sur tous les cookies client (`createClientCookie`), `matchIsSafeNavigationUrl()` scheme allowlist avant `window.location.href` assignment.
-- [x] Locale helpers : `src/helpers/locale.ts` — `getLocaleDisplayName()`, `getLocaleFlag()`, `getSuggestedLocale()`, `matchIsSafeNavigationUrl()`.
+  `src/server/user-auth.ts` : `getAuthUser` sync silencieux DB ← locale courante via `waitUntil` + `updateMany` conditionnel (0 write si locale identique). Couvre login email, OAuth, auto sign-in, retour sur le site.
+- [x] Security hardening : `Secure` flag always-on sur tous les cookies client (`createClientCookie`).
+- [x] Locale helpers : `src/helpers/locale.ts` — `getLocaleDisplayName()`, `getLocaleFlag()`, `getSuggestedLocale()`.
+- [x] **Strategy cookie-first** : `vite.config.ts` — `['cookie', 'url', 'preferredLanguage', 'baseLocale']`. Le cookie a priorité sur l'URL. Paraglide middleware redirige automatiquement si cookie ≠ URL.
+- [x] **LanguageSwitcher + LocaleBanner** : utilisent `setLocale()` de Paraglide (set cookie + navigation) au lieu de `window.location.href` manuel. `matchIsSafeNavigationUrl()` supprimé (dead code).
 
 **5b. Accessibility audit — alt/title/aria-label i18n** (dépend de 3)
 - [x] `studio-related-memes.tsx` — "Essayer avec un autre mème" → `m.studio_try_another_meme()` (1 new key)

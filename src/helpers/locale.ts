@@ -1,9 +1,9 @@
 import type { Locale } from '@/paraglide/runtime'
 
-const LOCALE_FLAGS: Record<Locale, string> = {
+const LOCALE_FLAGS = {
   fr: '🇫🇷',
   en: '🇬🇧'
-}
+} as const satisfies Record<Locale, string>
 
 export const getLocaleFlag = (locale: Locale) => {
   return LOCALE_FLAGS[locale]
@@ -40,16 +40,4 @@ export const getSuggestedLocale = ({
   }
 
   return null
-}
-
-const SAFE_URL_PREFIXES = [
-  'https://',
-  'http://',
-  '/'
-] as const satisfies readonly string[]
-
-export const matchIsSafeNavigationUrl = (url: string) => {
-  return SAFE_URL_PREFIXES.some((prefix) => {
-    return url.startsWith(prefix)
-  })
 }

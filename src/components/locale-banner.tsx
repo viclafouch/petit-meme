@@ -6,17 +6,11 @@ import { Button } from '@/components/ui/button'
 import {
   getLocaleDisplayName,
   getLocaleFlag,
-  getSuggestedLocale,
-  matchIsSafeNavigationUrl
+  getSuggestedLocale
 } from '@/helpers/locale'
 import { dismissLocaleBanner } from '@/lib/locale-banner'
 import { m } from '@/paraglide/messages.js'
-import {
-  deLocalizeUrl,
-  getLocale,
-  locales,
-  localizeUrl
-} from '@/paraglide/runtime'
+import { getLocale, locales, setLocale } from '@/paraglide/runtime'
 import { updateUserLocale } from '@/server/user-locale'
 import { ClientOnly } from '@tanstack/react-router'
 
@@ -47,17 +41,8 @@ const LocaleBannerContent = ({ isInitiallyDismissed }: LocaleBannerProps) => {
     }
 
     void updateUserLocale({ data: { locale: suggestedLocale } })
-    const delocalized = deLocalizeUrl(window.location.href)
-    const href = localizeUrl(delocalized, {
-      locale: suggestedLocale
-    }).toString()
-
-    if (!matchIsSafeNavigationUrl(href)) {
-      return
-    }
-
-    // eslint-disable-next-line react-hooks/immutability -- full page navigation required for locale switch
-    window.location.href = href
+    dismissLocaleBanner()
+    void setLocale(suggestedLocale)
   }
 
   const displayName = suggestedLocale

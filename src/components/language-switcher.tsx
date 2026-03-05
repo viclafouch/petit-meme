@@ -6,20 +6,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import {
-  getLocaleDisplayName,
-  getLocaleFlag,
-  matchIsSafeNavigationUrl
-} from '@/helpers/locale'
+import { getLocaleDisplayName, getLocaleFlag } from '@/helpers/locale'
 import { dismissLocaleBanner } from '@/lib/locale-banner'
 import { m } from '@/paraglide/messages.js'
 import type { Locale } from '@/paraglide/runtime'
-import {
-  deLocalizeUrl,
-  getLocale,
-  locales,
-  localizeUrl
-} from '@/paraglide/runtime'
+import { getLocale, locales, setLocale } from '@/paraglide/runtime'
 import { updateUserLocale } from '@/server/user-locale'
 
 export const LanguageSwitcher = () => {
@@ -32,15 +23,7 @@ export const LanguageSwitcher = () => {
 
     void updateUserLocale({ data: { locale } })
     dismissLocaleBanner()
-    const delocalized = deLocalizeUrl(window.location.href)
-    const href = localizeUrl(delocalized, { locale }).toString()
-
-    if (!matchIsSafeNavigationUrl(href)) {
-      return
-    }
-
-    // eslint-disable-next-line react-hooks/immutability -- full page navigation required for locale switch
-    window.location.href = href
+    void setLocale(locale)
   }
 
   return (

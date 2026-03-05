@@ -1,3 +1,4 @@
+import { m } from '@/paraglide/messages.js'
 import { Link } from '@tanstack/react-router'
 
 export const Footer = () => {
@@ -9,19 +10,19 @@ export const Footer = () => {
             to="/privacy"
             className="text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
-            Confidentialité
+            {m.footer_privacy()}
           </Link>
           <Link
             to="/terms-of-use"
             className="text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
-            Conditions
+            {m.footer_terms()}
           </Link>
           <Link
             to="/mentions-legales"
             className="text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
-            Mentions légales
+            {m.footer_legal()}
           </Link>
         </div>
       </div>

@@ -1,4 +1,26 @@
 {
   "common_loading": "Chargement…",
-  "common_back_to_home": "Retour à l'accueil"
+  "common_back_to_home": "Retour à l'accueil",
+  "common_logo_alt": "Memes by Lafouch",
+  "common_avatar_alt": "Photo de profil de {name}",
+  "nav_menu": "Menu",
+  "nav_memes": "Mèmes",
+  "nav_plans": "Plans",
+  "nav_reels": "Reels",
+  "nav_sign_in": "Se connecter",
+  "nav_toggle_menu": "Ouvrir le menu",
+  "nav_upgrade_premium": "Passer à Premium",
+  "nav_manage_subscription": "Gérer mon abonnement",
+  "nav_favorites": "Favoris ({count})",
+  "nav_my_account": "Mon compte",
+  "nav_admin": "Administration",
+  "nav_sign_out": "Se déconnecter",
+  "footer_privacy": "Confidentialité",
+  "footer_terms": "Conditions",
+  "footer_legal": "Mentions légales",
+  "cookie_title": "Cookies",
+  "cookie_description": "Nous utilisons des cookies analytiques pour améliorer votre expérience et analyser le trafic.",
+  "cookie_learn_more": "En savoir plus",
+  "cookie_decline": "Refuser",
+  "cookie_accept": "Accepter"
 }

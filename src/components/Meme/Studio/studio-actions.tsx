@@ -19,9 +19,7 @@ export const StudioMobileActions = ({
 
   return (
     <motion.div
-      // eslint-disable-next-line id-length -- motion API requires single-letter axis properties (y)
       initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
-      // eslint-disable-next-line id-length -- motion API requires single-letter axis properties (y)
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
       className="flex gap-2.5 px-3 py-3 md:hidden"

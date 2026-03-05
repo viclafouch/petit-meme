@@ -1,4 +1,3 @@
-/* eslint-disable id-length */
 import React from 'react'
 import type { Variants } from 'motion/react'
 import { motion, useReducedMotion } from 'motion/react'

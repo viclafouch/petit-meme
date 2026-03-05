@@ -10,44 +10,41 @@ import {
 } from '@/components/ui/navigation-menu'
 import { UserDropdown } from '@/components/user-dropdown'
 import { cn } from '@/lib/utils'
+import { m } from '@/paraglide/messages.js'
 import { useShowDialog } from '@/stores/dialog.store'
 import type { LinkOptions } from '@tanstack/react-router'
 import { Link, useRouteContext } from '@tanstack/react-router'
 import { MobileNav } from './mobile-nav'
 
-const NAVIGATIONS_LINKS = [
-  {
-    name: 'Menu',
-    items: [
-      { to: '/memes', label: 'Mèmes', preload: 'viewport' },
-      { to: '/pricing', label: 'Plans', preload: 'viewport' },
-      {
-        to: '/reels',
-        label: 'Reels',
-        className: 'md:hidden',
-        preload: 'intent'
-      }
-    ]
-  }
-] as const satisfies {
-  name: string
-  items: {
-    to: LinkOptions['to']
-    label: string
-    active?: boolean
-    className?: string
-    preload: LinkOptions['preload']
-  }[]
-}[]
+export type NavigationLink = {
+  to: LinkOptions['to']
+  label: string
+  className?: string
+  preload: LinkOptions['preload']
+}
+
+const getNavigationLinks = (): NavigationLink[] => {
+  return [
+    { to: '/memes', label: m.nav_memes(), preload: 'viewport' },
+    { to: '/pricing', label: m.nav_plans(), preload: 'viewport' },
+    {
+      to: '/reels',
+      label: m.nav_reels(),
+      className: 'md:hidden',
+      preload: 'intent'
+    }
+  ]
+}
 
 export const Navbar = () => {
   const { user } = useRouteContext({ from: '__root__' })
   const showDialog = useShowDialog()
+  const navigationLinks = getNavigationLinks()
 
   return (
     <header className="container flex h-14 items-center justify-between gap-4">
       <div className="flex flex-1 items-center justify-start gap-2">
-        <MobileNav nav={NAVIGATIONS_LINKS} />
+        <MobileNav links={navigationLinks} />
         <Link
           to="/"
           className={cn(
@@ -57,7 +54,7 @@ export const Navbar = () => {
         >
           <img
             src="/images/logo.png"
-            alt="Logo"
+            alt={m.common_logo_alt()}
             width={28}
             height={28}
             decoding="async"
@@ -66,7 +63,7 @@ export const Navbar = () => {
       </div>
       <NavigationMenu className="max-md:hidden">
         <NavigationMenuList>
-          {NAVIGATIONS_LINKS[0].items.map((link, index) => {
+          {navigationLinks.map((link, index) => {
             return (
               <NavigationMenuItem key={index}>
                 <NavigationMenuLink
@@ -74,7 +71,7 @@ export const Navbar = () => {
                   data-active={false}
                   className={cn(
                     'rounded-md px-3 py-1.5 font-medium',
-                    'className' in link && link.className
+                    link.className
                   )}
                 >
                   <Link to={link.to} preload={link.preload}>
@@ -100,7 +97,7 @@ export const Navbar = () => {
             size="lg"
           >
             <User />
-            Se connecter
+            {m.nav_sign_in()}
           </Button>
         )}
       </div>

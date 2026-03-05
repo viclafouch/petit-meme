@@ -1,9 +1,10 @@
-/* eslint-disable id-length */
 import React from 'react'
 import { Cookie } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import type { CookieConsentValue } from '@/lib/cookie-consent'
 import { setCookieConsent } from '@/lib/cookie-consent'
+import { m } from '@/paraglide/messages.js'
+import { Link } from '@tanstack/react-router'
 
 const APPEAR_DELAY_S = 2
 
@@ -62,17 +63,18 @@ export const CookieConsentBanner = ({
                 <div className="flex size-7 items-center justify-center rounded-lg bg-muted/80">
                   <Cookie className="size-3.5 text-muted-foreground" />
                 </div>
-                <p className="text-sm font-semibold tracking-tight">Cookies</p>
+                <p className="text-sm font-semibold tracking-tight">
+                  {m.cookie_title()}
+                </p>
               </div>
               <p className="text-xs text-balance leading-relaxed text-muted-foreground">
-                Nous utilisons des cookies analytiques pour améliorer votre
-                expérience et analyser le trafic.{' '}
-                <a
-                  href="/privacy"
+                {m.cookie_description()}{' '}
+                <Link
+                  to="/privacy"
                   className="text-foreground/60 underline decoration-foreground/20 underline-offset-2 transition-colors hover:text-foreground hover:decoration-foreground/40"
                 >
-                  En savoir plus
-                </a>
+                  {m.cookie_learn_more()}
+                </Link>
               </p>
             </div>
             <div className="flex border-t border-border/40">
@@ -83,7 +85,7 @@ export const CookieConsentBanner = ({
                 type="button"
                 className="flex-1 py-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
               >
-                Refuser
+                {m.cookie_decline()}
               </button>
               <div className="w-px bg-border/40" />
               <button
@@ -93,7 +95,7 @@ export const CookieConsentBanner = ({
                 type="button"
                 className="flex-1 py-2.5 text-xs font-medium text-foreground transition-colors hover:bg-muted/60"
               >
-                Accepter
+                {m.cookie_accept()}
               </button>
             </div>
           </div>

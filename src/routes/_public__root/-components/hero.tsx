@@ -26,14 +26,12 @@ const h1Transition = {
 const variants = {
   hidden: {
     opacity: 0,
-    // eslint-disable-next-line id-length -- Framer Motion axis property
     y: 20,
     filter: 'blur(15px)'
   },
   visible: (custom: { delay?: number; duration?: number }) => {
     return {
       opacity: 1,
-      // eslint-disable-next-line id-length -- Framer Motion axis property
       y: 0,
       filter: 'blur(0px)',
       transition: {

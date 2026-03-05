@@ -168,9 +168,11 @@ Préfixes de clés par domaine : `nav_`, `home_`, `pricing_`, `meme_`, `studio_`
 **Pluralisation** : remplacer le `pluralize()` custom de `src/helpers/format.ts` par la syntaxe ICU de Paraglide (`{count, plural, one {# vue} other {# vues}}`) dans les messages.
 **Liens internes** : vérifier à chaque batch que tous les `<a href="/...">` sont remplacés par `<Link>` de TanStack Router (sinon le `localizeUrl()` est bypassé). Cas connu : `src/components/not-found.tsx:18`.
 
-- [ ] **Batch A — Navigation & layout** :
+- [x] **Batch A — Navigation & layout** :
   `src/components/navbar.tsx`, `src/components/footer.tsx`, `src/components/user-dropdown.tsx`,
-  `src/components/blocks/cookie-consent.tsx`
+  `src/components/blocks/cookie-consent.tsx`, `src/components/mobile-nav.tsx`
+  Aussi : fix `project.inlang/settings.json` (ajout `modules` + `plugin.inlang.messageFormat` pour que `paraglide-js compile` CLI fonctionne),
+  fix `<a href="/privacy">` → `<Link to="/privacy">` dans cookie-consent, fix alt logo → "Memes by Lafouch", fix alt avatar → paramétré avec username
 
 - [ ] **Batch B — Pages principales** :
   `src/routes/_public__root/index.tsx`, `src/routes/_public__root/-components/hero.tsx`,

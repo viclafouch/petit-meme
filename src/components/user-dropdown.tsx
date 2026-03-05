@@ -29,6 +29,7 @@ import {
 } from '@/lib/queries'
 import type { SessionUser } from '@/lib/role'
 import { matchIsUserAdmin } from '@/lib/role'
+import { m } from '@/paraglide/messages.js'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 
@@ -49,7 +50,10 @@ export const UserDropdown = ({ user }: UserDropdownParams) => {
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="gap-2 px-2">
           <Avatar className="size-6 rounded-lg">
-            <AvatarImage src={user.image ?? DEFAULT_AVATAR_URL} alt="Avatar" />
+            <AvatarImage
+              src={user.image ?? DEFAULT_AVATAR_URL}
+              alt={m.common_avatar_alt({ name: user.name })}
+            />
             <AvatarFallback className="rounded-lg">
               {getUserInitials(user.name)}
             </AvatarFallback>
@@ -67,7 +71,7 @@ export const UserDropdown = ({ user }: UserDropdownParams) => {
             <Avatar className="size-8 rounded-lg">
               <AvatarImage
                 src={user.image ?? DEFAULT_AVATAR_URL}
-                alt="Avatar"
+                alt={m.common_avatar_alt({ name: user.name })}
               />
               <AvatarFallback className="rounded-lg">
                 {getUserInitials(user.name)}
@@ -87,7 +91,7 @@ export const UserDropdown = ({ user }: UserDropdownParams) => {
             <DropdownMenuItem asChild>
               <Link to="/pricing">
                 <SparklesIcon />
-                Passer à Premium
+                {m.nav_upgrade_premium()}
               </Link>
             </DropdownMenuItem>
           ) : (
@@ -99,7 +103,9 @@ export const UserDropdown = ({ user }: UserDropdownParams) => {
             >
               <div className="flex gap-2 items-start">
                 <CreditCard className="mt-0.5" />
-                <div className="flex flex-col">Gérer mon abonnement</div>
+                <div className="flex flex-col">
+                  {m.nav_manage_subscription()}
+                </div>
               </div>
             </DropdownMenuItem>
           )}
@@ -109,20 +115,22 @@ export const UserDropdown = ({ user }: UserDropdownParams) => {
           <DropdownMenuItem asChild>
             <Link to="/favorites">
               <Star />
-              Favoris ({favoritesMemesCountQuery.data?.count ?? 0})
+              {m.nav_favorites({
+                count: String(favoritesMemesCountQuery.data?.count ?? 0)
+              })}
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link to="/settings">
               <User />
-              Mon compte
+              {m.nav_my_account()}
             </Link>
           </DropdownMenuItem>
           {matchIsUserAdmin(user) ? (
             <DropdownMenuItem asChild>
               <Link to="/admin">
                 <Shield />
-                Administration
+                {m.nav_admin()}
               </Link>
             </DropdownMenuItem>
           ) : null}
@@ -130,7 +138,7 @@ export const UserDropdown = ({ user }: UserDropdownParams) => {
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={signOut} className="text-red-600!">
           <LogOutIcon className="text-red-600!" />
-          Se déconnecter
+          {m.nav_sign_out()}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

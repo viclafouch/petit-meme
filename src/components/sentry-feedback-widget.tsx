@@ -6,11 +6,9 @@ import { ClientOnly } from '@tanstack/react-router'
 
 const APPEAR_DELAY_SECONDS = 3
 
-// eslint-disable-next-line id-length -- motion API requires single-letter axis properties (y)
 const INITIAL_ANIMATION = { y: 20, opacity: 0 }
 
 const APPEAR_ANIMATION = {
-  // eslint-disable-next-line id-length -- motion API requires single-letter axis properties (y)
   y: 0,
   opacity: 1,
   transition: {

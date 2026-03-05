@@ -1,4 +1,26 @@
 {
   "common_loading": "Loading…",
-  "common_back_to_home": "Back to home"
+  "common_back_to_home": "Back to home",
+  "common_logo_alt": "Memes by Lafouch",
+  "common_avatar_alt": "Profile picture of {name}",
+  "nav_menu": "Menu",
+  "nav_memes": "Memes",
+  "nav_plans": "Plans",
+  "nav_reels": "Reels",
+  "nav_sign_in": "Sign in",
+  "nav_toggle_menu": "Toggle menu",
+  "nav_upgrade_premium": "Upgrade to Premium",
+  "nav_manage_subscription": "Manage subscription",
+  "nav_favorites": "Favorites ({count})",
+  "nav_my_account": "My account",
+  "nav_admin": "Administration",
+  "nav_sign_out": "Sign out",
+  "footer_privacy": "Privacy",
+  "footer_terms": "Terms",
+  "footer_legal": "Legal notice",
+  "cookie_title": "Cookies",
+  "cookie_description": "We use analytics cookies to improve your experience and analyze traffic.",
+  "cookie_learn_more": "Learn more",
+  "cookie_decline": "Decline",
+  "cookie_accept": "Accept"
 }

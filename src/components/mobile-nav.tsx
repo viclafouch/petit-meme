@@ -1,4 +1,5 @@
 import React from 'react'
+import type { NavigationLink } from '@/components/navbar'
 import { Button } from '@/components/ui/button'
 import {
   Popover,
@@ -6,22 +7,14 @@ import {
   PopoverTrigger
 } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
-import type { LinkOptions } from '@tanstack/react-router'
+import { m } from '@/paraglide/messages.js'
 import { Link } from '@tanstack/react-router'
 
 type MobileNavProps = {
-  nav: {
-    name: string
-    items: {
-      label: string
-      to: LinkOptions['to']
-      className?: string
-      preload: LinkOptions['preload']
-    }[]
-  }[]
+  links: NavigationLink[]
 }
 
-export const MobileNav = ({ nav }: MobileNavProps) => {
+export const MobileNav = ({ links }: MobileNavProps) => {
   const [isOpen, setIsOpen] = React.useState(false)
 
   return (
@@ -49,7 +42,7 @@ export const MobileNav = ({ nav }: MobileNavProps) => {
                 )}
               />
             </div>
-            <span className="sr-only">Toggle Menu</span>
+            <span className="sr-only">{m.nav_toggle_menu()}</span>
           </div>
         </Button>
       </PopoverTrigger>
@@ -59,32 +52,28 @@ export const MobileNav = ({ nav }: MobileNavProps) => {
         side="bottom"
       >
         <div className="flex flex-col gap-12 overflow-auto p-6">
-          {nav.map((category, index) => {
-            return (
-              <div className="flex flex-col gap-4" key={index}>
-                <p className="text-muted-foreground text-sm font-medium">
-                  {category.name}
-                </p>
-                <div className="flex flex-col gap-3">
-                  {category.items.map((item, itemIndex) => {
-                    return (
-                      <Link
-                        key={itemIndex}
-                        to={item.to}
-                        preload={item.preload}
-                        className={cn('text-2xl font-medium', item.className)}
-                        onClick={() => {
-                          setIsOpen(false)
-                        }}
-                      >
-                        {item.label}
-                      </Link>
-                    )
-                  })}
-                </div>
-              </div>
-            )
-          })}
+          <div className="flex flex-col gap-4">
+            <p className="text-muted-foreground text-sm font-medium">
+              {m.nav_menu()}
+            </p>
+            <div className="flex flex-col gap-3">
+              {links.map((link, index) => {
+                return (
+                  <Link
+                    key={index}
+                    to={link.to}
+                    preload={link.preload}
+                    className={cn('text-2xl font-medium', link.className)}
+                    onClick={() => {
+                      setIsOpen(false)
+                    }}
+                  >
+                    {link.label}
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
         </div>
       </PopoverContent>
     </Popover>

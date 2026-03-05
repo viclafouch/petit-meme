@@ -228,16 +228,20 @@ Préfixes de clés par domaine : `nav_`, `home_`, `pricing_`, `meme_`, `studio_`
   Zod validation messages left as-is (deferred to Step 4).
   `auth-errors.ts` mapping left as-is (deferred to Step 4 — Better Auth i18n).
 
-- [ ] **Batch E — Transversal** :
+- [x] **Batch E — Transversal** :
   `src/components/not-found.tsx`, `src/components/error-component.tsx`,
   `src/routes/__root.tsx` (messages erreur root),
-  `src/lib/sentry.ts` (FEEDBACK_OPTIONS : ~12 labels widget feedback),
+  `src/lib/sentry.ts` (FEEDBACK_OPTIONS → `getFeedbackOptions()` getter),
   `src/components/sentry-feedback-widget.tsx`,
-  `src/server/user.ts` (StudioError messages),
-  Toasts FR dans les hooks publics :
   `src/hooks/use-share-meme.ts`, `src/hooks/use-download-meme.ts`,
   `src/hooks/use-stripe-checkout.ts`, `src/hooks/use-sign-out.ts`,
   `src/hooks/use-toggle-bookmark.ts`, `src/hooks/use-video-processor.ts`
+  ~28 new keys (`error_*`, `sentry_*`, `common_retry`).
+  Reused `common_cancel`, `common_confirm`, `common_loading`.
+  `not-found.tsx`: `<a href="/">` → `<Link to="/">` (localization fix).
+  `__root.tsx`: `<a href="/">` → `localizeUrl('/').pathname`.
+  StudioError messages translated on client side using error codes (not `error.message`).
+  `server/user.ts` not modified — server messages kept as identifiers, client handles display.
 
 - [ ] **Batch F — Pages légales** :
   Créer `md/en/mentions-legales.md`, `md/en/privacy.md`, `md/en/terms-of-use.md`.

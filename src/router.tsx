@@ -5,7 +5,7 @@ import { IS_PRODUCTION } from '@/constants/env'
 import { MINUTE, SECOND } from '@/constants/time'
 import { clientEnv } from '@/env/client'
 import {
-  FEEDBACK_OPTIONS,
+  getFeedbackOptions,
   scrubSensitiveBreadcrumbs,
   scrubUserPii,
   SENSITIVE_API_PATTERNS
@@ -73,7 +73,7 @@ export function getRouter() {
           blockAllMedia: false,
           networkDetailDenyUrls: SENSITIVE_API_PATTERNS
         }),
-        Sentry.feedbackIntegration(FEEDBACK_OPTIONS)
+        Sentry.feedbackIntegration(getFeedbackOptions())
       ],
       tracesSampleRate: 0.2,
       replaysSessionSampleRate: 0,

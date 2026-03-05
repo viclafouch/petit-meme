@@ -6,6 +6,7 @@ import {
   getFavoritesMemesQueryOpts
 } from '@/lib/queries'
 import { captureWithFeature } from '@/lib/sentry'
+import { m } from '@/paraglide/messages.js'
 import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 
@@ -22,7 +23,7 @@ export const useSignOut = () => {
       await router.invalidate()
     } catch (error) {
       captureWithFeature(error, 'sign-out')
-      toast.error('Une erreur est survenue lors de la déconnexion')
+      toast.error(m.error_sign_out())
     }
   }
 

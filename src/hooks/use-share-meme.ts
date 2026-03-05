@@ -2,6 +2,7 @@ import { toast } from 'sonner'
 import type { MemeWithVideo } from '@/constants/meme'
 import { getErrorMessage } from '@/helpers/error'
 import { captureWithFeature } from '@/lib/sentry'
+import { m } from '@/paraglide/messages.js'
 import { shareMeme, trackMemeAction } from '@/server/meme'
 import { shareBlob } from '@/utils/download'
 import { useMutation } from '@tanstack/react-query'
@@ -14,7 +15,7 @@ export const useShareMeme = () => {
       })
 
       toast.promise(blobPromise, {
-        loading: 'Chargement...',
+        loading: m.common_loading(),
         error: getErrorMessage
       })
 

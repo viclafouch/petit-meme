@@ -4,6 +4,7 @@ import { StudioError } from '@/constants/error'
 import type { MemeWithVideo } from '@/constants/meme'
 import { getFavoritesMemesQueryOpts, getMemeByIdQueryOpts } from '@/lib/queries'
 import { captureWithFeature } from '@/lib/sentry'
+import { m } from '@/paraglide/messages.js'
 import { toggleBookmarkByMemeId } from '@/server/user'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
@@ -60,13 +61,13 @@ export function useToggleBookmark({
     },
     onError: (error) => {
       if (error instanceof StudioError && error.code === 'PREMIUM_REQUIRED') {
-        toast.error(error.message)
+        toast.error(m.error_bookmark_limit())
 
         return
       }
 
       captureWithFeature(error, 'bookmark')
-      toast.error('Erreur lors de la mise à jour du favori')
+      toast.error(m.error_bookmark_update())
     },
     onSettled: () => {
       void queryClient.invalidateQueries(getMemeByIdQueryOpts(meme.id))

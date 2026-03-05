@@ -4,6 +4,7 @@ import { getErrorMessage } from '@/helpers/error'
 import { authClient } from '@/lib/auth-client'
 import { getActiveSubscriptionQueryOpts } from '@/lib/queries'
 import { captureWithFeature } from '@/lib/sentry'
+import { m } from '@/paraglide/messages.js'
 import { useShowDialog } from '@/stores/dialog.store'
 import { useQueryClient } from '@tanstack/react-query'
 import { type LinkOptions, useRouteContext } from '@tanstack/react-router'
@@ -26,7 +27,7 @@ export const useStripeCheckout = () => {
         returnUrl: '/settings' as LinkOptions['to']
       })
       toast.promise(promise, {
-        loading: 'Chargement...',
+        loading: m.common_loading(),
         error: getErrorMessage
       })
       const { error } = await promise
@@ -55,7 +56,7 @@ export const useStripeCheckout = () => {
         )
 
         if (activeSubscription) {
-          toast.success('Vous avez déjà un abonnement en cours !')
+          toast.success(m.error_already_subscribed())
 
           return
         }
@@ -75,7 +76,7 @@ export const useStripeCheckout = () => {
       })
 
       toast.promise(promise, {
-        loading: 'Chargement...',
+        loading: m.common_loading(),
         error: getErrorMessage
       })
 

@@ -22,6 +22,7 @@ import {
 import { withTimeout } from '@/helpers/promise'
 import { getAuthUserQueryOpts, getVideoBlobQueryOpts } from '@/lib/queries'
 import { captureWithFeature } from '@/lib/sentry'
+import { m } from '@/paraglide/messages.js'
 import { incrementGenerationCount } from '@/server/user'
 import { useShowDialog } from '@/stores/dialog.store'
 import type { ProgressEvent } from '@ffmpeg/ffmpeg'
@@ -290,7 +291,7 @@ export const useVideoInitializer = () => {
       await withTimeout(
         ffmpeg.load({ coreURL, wasmURL }),
         30_000,
-        'Le chargement du moteur vidéo a pris trop de temps. Vérifiez votre connexion ou votre navigateur.'
+        m.error_video_timeout()
       )
 
       return ffmpeg
@@ -416,14 +417,14 @@ export const useVideoProcessor = (
         }
 
         if (error.code === 'PREMIUM_REQUIRED') {
-          toast.error(error.message)
+          toast.error(m.error_bookmark_limit())
 
           return
         }
       }
 
       captureWithFeature(error, 'studio')
-      toast.error('Une erreur est survenue lors de la génération')
+      toast.error(m.error_generation())
       options?.onError?.(error)
     },
     onSettled: () => {

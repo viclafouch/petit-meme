@@ -1,9 +1,11 @@
 import { buttonVariants } from '@/components/ui/button'
+import { m } from '@/paraglide/messages.js'
+import { Link } from '@tanstack/react-router'
 
 export const NotFound = () => {
   return (
     <div className="flex items-center px-4 py-12 sm:px-6 md:px-8 lg:px-12 xl:px-16">
-      <title>Petit Meme - Page introuvable</title>
+      <title>{m.error_not_found_title()}</title>
       <meta name="robots" content="noindex,nofollow" />
       <div className="w-full space-y-6 text-center">
         <div className="space-y-3">
@@ -11,13 +13,12 @@ export const NotFound = () => {
             404
           </h1>
           <p className="text-muted-foreground">
-            On dirait que vous vous êtes aventuré dans le domaine inconnu du
-            numérique.
+            {m.error_not_found_description()}
           </p>
         </div>
-        <a href="/" className={buttonVariants({ variant: 'default' })}>
-          Retourner au site web
-        </a>
+        <Link to="/" className={buttonVariants({ variant: 'default' })}>
+          {m.error_back_to_site()}
+        </Link>
       </div>
     </div>
   )

@@ -8,7 +8,8 @@ import { clientEnv } from '@/env/client'
 import { getCookieConsent } from '@/lib/cookie-consent'
 import { getAuthUserQueryOpts } from '@/lib/queries'
 import { getStoredTheme, ThemeProvider } from '@/lib/theme'
-import { getLocale } from '@/paraglide/runtime'
+import { m } from '@/paraglide/messages.js'
+import { getLocale, localizeUrl } from '@/paraglide/runtime'
 import type { getAuthUser } from '@/server/user-auth'
 import { DialogProvider } from '@/stores/dialog.store'
 import { ensureAlgoliaUserToken } from '@/utils/tracking-cookies'
@@ -118,7 +119,7 @@ const RootErrorComponent = ({ error, reset }: ErrorComponentProps) => {
               marginBottom: '2rem'
             }}
           >
-            Oups ! Le site a rencontré un problème inattendu.
+            {m.error_root_description()}
           </p>
           <div
             style={{
@@ -141,10 +142,10 @@ const RootErrorComponent = ({ error, reset }: ErrorComponentProps) => {
                 cursor: 'pointer'
               }}
             >
-              Réessayer
+              {m.common_retry()}
             </button>
             <a
-              href="/"
+              href={localizeUrl('/').pathname}
               style={{
                 padding: '0.625rem 1.25rem',
                 borderRadius: '0.5rem',
@@ -157,7 +158,7 @@ const RootErrorComponent = ({ error, reset }: ErrorComponentProps) => {
                 cursor: 'pointer'
               }}
             >
-              Retourner au site
+              {m.error_back_to_site()}
             </a>
           </div>
           {!IS_PRODUCTION ? (

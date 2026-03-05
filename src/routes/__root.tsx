@@ -8,6 +8,7 @@ import { clientEnv } from '@/env/client'
 import { getCookieConsent } from '@/lib/cookie-consent'
 import { getAuthUserQueryOpts } from '@/lib/queries'
 import { getStoredTheme, ThemeProvider } from '@/lib/theme'
+import { getLocale } from '@/paraglide/runtime'
 import type { getAuthUser } from '@/server/user-auth'
 import { DialogProvider } from '@/stores/dialog.store'
 import { ensureAlgoliaUserToken } from '@/utils/tracking-cookies'
@@ -29,7 +30,7 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => {
   const { _storedTheme, _cookieConsent } = Route.useLoaderData()
 
   return (
-    <html lang="fr" suppressHydrationWarning dir="ltr">
+    <html lang={getLocale()} suppressHydrationWarning dir="ltr">
       <head>
         <meta name="algolia-site-verification" content="57C07DF31C29F6D0" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -68,7 +69,7 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => {
 
 const RootErrorDocument = ({ children }: { children: React.ReactNode }) => {
   return (
-    <html lang="fr" dir="ltr">
+    <html lang={getLocale()} dir="ltr">
       <head>
         <HeadContent />
       </head>
@@ -237,7 +238,7 @@ export const Route = createRootRouteWithContext<{
         },
         {
           httpEquiv: 'Content-Language',
-          content: 'fr'
+          content: getLocale()
         },
         {
           httpEquiv: 'X-Robots-Tag',

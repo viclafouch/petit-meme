@@ -146,15 +146,15 @@ Un merge atomique garantit que le site passe de FR-only à bilingue en une fois.
 **2. SEO multilingue** (dépend de 1 — `getLocale()` doit fonctionner)
 Structure d'abord (indépendant des strings), contenu traduit complété après l'étape 3.
 **Fichiers impactés :** `src/routes/__root.tsx`, `src/lib/seo.ts`, `src/routes/sitemap[.]xml.ts`
-- [ ] `<html lang={getLocale()}>` dynamique dans `src/routes/__root.tsx` (lignes 32, 71 — aussi `RootErrorDocument`)
-- [ ] `Content-Language` meta dynamique dans `src/routes/__root.tsx:239`
-- [ ] Enrichir `src/lib/seo.ts` — partie structurelle :
-  - [ ] `og:locale` dynamique (`fr_FR` / `en_US`) — actuellement hardcodé ligne 91
-  - [ ] `og:locale:alternate` pour l'autre langue
-  - [ ] hreflang FR+EN bidirectionnels + `x-default` → FR — actuellement FR seul lignes 117-118
-  - [ ] Canonical localisé (prefix `/en/` pour les pages EN)
-- [ ] `buildUrl()` dans `src/lib/seo.ts` : ajouter paramètre `locale` explicite (utilisé pour canonicals, copy-link dans `src/utils/download.ts`, JSON-LD `@id`)
-- [ ] Sitemap enrichi dans `src/routes/sitemap[.]xml.ts` : `<xhtml:link rel="alternate" hreflang="...">` pour chaque URL. **Exclure les pages `noindex`** du sitemap (settings, favorites, checkout success, password reset/create-new, studio) — pas d'entrée hreflang pour elles.
+- [x] `<html lang={getLocale()}>` dynamique dans `src/routes/__root.tsx` (lignes 32, 71 — aussi `RootErrorDocument`)
+- [x] `Content-Language` meta dynamique dans `src/routes/__root.tsx:239`
+- [x] Enrichir `src/lib/seo.ts` — partie structurelle :
+  - [x] `og:locale` dynamique (`fr_FR` / `en_US`) — via `OG_LOCALE_MAP`
+  - [x] `og:locale:alternate` pour l'autre langue
+  - [x] hreflang FR+EN bidirectionnels + `x-default` → FR
+  - [x] Canonical localisé (prefix `/en/` pour les pages EN)
+- [x] `buildUrl()` dans `src/lib/seo.ts` : paramètre `locale` optionnel ajouté, utilise `localizeUrl()` de Paraglide
+- [x] Sitemap enrichi dans `src/routes/sitemap[.]xml.ts` : `<xhtml:link rel="alternate" hreflang="...">` pour chaque URL avec namespace `xmlns:xhtml`. Pages noindex déjà exclues du sitemap.
 - [ ] Après étape 3 — compléter le contenu traduit dans `src/lib/seo.ts` :
   - [ ] `og:image:alt` traduit (thumbnails Bunny = images sans texte, pas de variante EN)
   - [ ] Title/description traduits via Paraglide dans `seo()`

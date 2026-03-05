@@ -26,14 +26,34 @@ import {
   buildVideoImageUrl,
   buildVideoOriginalUrl
 } from '@/lib/bunny'
+import type { Locale } from '@/paraglide/runtime'
+import {
+  baseLocale,
+  getLocale,
+  locales,
+  localizeUrl
+} from '@/paraglide/runtime'
 import type { AnyRouteMatch } from '@tanstack/react-router'
 
 export const websiteOrigin = clientEnv.VITE_SITE_URL
 const websiteId = `${websiteOrigin}/#website`
 
-export const buildUrl = (pathname: string) => {
+const OG_LOCALE_MAP = {
+  fr: 'fr_FR',
+  en: 'en_US'
+} as const satisfies Record<Locale, string>
+
+export const buildUrl = (pathname: string, locale?: Locale): string => {
   try {
-    return new URL(pathname, websiteOrigin).href
+    const baseUrl = new URL(pathname, websiteOrigin).href
+
+    if (!locale || locale === baseLocale) {
+      return baseUrl
+    }
+
+    const localized = localizeUrl(baseUrl, { locale })
+
+    return localized instanceof URL ? localized.href : localized
   } catch {
     return websiteOrigin
   }
@@ -67,12 +87,16 @@ export const seo = ({
   noindex = false,
   canonicalPathname
 }: SeoParams): SeoResult => {
+  const locale = getLocale()
   const titlePrefixed = isAdmin
     ? `Admin Petit Meme - ${title}`
     : `Petit Meme - ${title}`
 
-  const url = buildUrl(pathname)
-  const canonicalUrl = canonicalPathname ? buildUrl(canonicalPathname) : url
+  const canonicalBase = canonicalPathname ?? pathname
+  const canonicalUrl = buildUrl(canonicalBase, locale)
+  const alternateLocales = locales.filter((loc) => {
+    return loc !== locale
+  })
 
   const meta = [
     { title: titlePrefixed },
@@ -88,7 +112,13 @@ export const seo = ({
     { property: 'og:title', content: titlePrefixed },
     { property: 'og:description', content: description },
     { property: 'og:url', content: canonicalUrl },
-    { property: 'og:locale', content: 'fr_FR' },
+    { property: 'og:locale', content: OG_LOCALE_MAP[locale] },
+    ...alternateLocales.map((alternateLocale) => {
+      return {
+        property: 'og:locale:alternate',
+        content: OG_LOCALE_MAP[alternateLocale]
+      }
+    }),
     ...(noindex ? [{ name: 'robots', content: 'noindex, follow' }] : []),
     {
       name: 'twitter:card',
@@ -114,8 +144,18 @@ export const seo = ({
     ? []
     : [
         { rel: 'canonical', href: canonicalUrl },
-        { rel: 'alternate', hrefLang: 'fr', href: canonicalUrl },
-        { rel: 'alternate', hrefLang: 'x-default', href: canonicalUrl }
+        ...locales.map((hreflangLocale) => {
+          return {
+            rel: 'alternate',
+            hrefLang: hreflangLocale,
+            href: buildUrl(canonicalBase, hreflangLocale)
+          }
+        }),
+        {
+          rel: 'alternate',
+          hrefLang: 'x-default',
+          href: buildUrl(canonicalBase, baseLocale)
+        }
       ]
 
   return { meta, links }

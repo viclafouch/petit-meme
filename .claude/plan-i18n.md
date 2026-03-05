@@ -132,7 +132,7 @@ Un merge atomique garantit que le site passe de FR-only à bilingue en une fois.
   - `urlPatterns` — wildcard unique `/:path(.*)?` (comportement par défaut Paraglide : base locale sans préfixe, EN avec `/en/`). Pas besoin de lister chaque route explicitement.
   - Routes admin/API non localisées naturellement (pas de pattern match → 404)
 - [x] Ajouter `paraglideMiddleware` dans `src/server.ts`
-  - **Middleware exclusion** : `paraglideMiddleware` bypassé pour `/api/`, `/admin/`, `/health`, `/sitemap.xml`, `/robots.txt` (URLPattern ne supporte pas le negative lookahead — recommandation officielle Paraglide : filtrer dans le request handler avant d'appeler le middleware). Helper `matchIsExcludedFromI18n()` dans `server.ts`.
+  - **Route exclusion** : `routeStrategies` dans `vite.config.ts` avec `exclude: true` pour `/api/*`, `/admin/*`, `/health`, `/sitemap.xml`, `/robots.txt`. Mécanisme natif Paraglide (`isExcludedByRouteStrategy()` dans le runtime compilé). URLPattern ne supporte pas le negative lookahead → `routeStrategies` est l'alternative déclarative au bypass manuel dans le request handler.
 - [x] Ajouter `rewrite` (`deLocalizeUrl`/`localizeUrl`) dans `src/router.tsx`
 - [x] Migrer `src/i18n/config.ts` → remplacer par Paraglide runtime (`getLocale()`, `locales`, etc.). Seul fichier importateur : `src/helpers/number.ts`. **`src/i18n/config.ts` supprimé.**
 - [x] Ajouter `src/paraglide/` au `.gitignore` (dossier généré, regénéré à chaque build)
@@ -327,106 +327,106 @@ Préfixes de clés par domaine : `nav_`, `home_`, `pricing_`, `meme_`, `studio_`
 Les mèmes restent en FR (phase 2). Seule l'interface est traduite. Les titres/descriptions de mèmes apparaîtront en FR même sur `/en/` — c'est attendu.
 
 **A. Navigation de base**
-- [ ] Ouvrir la home FR (`/`) → tout est en français, aucune régression visible
-- [ ] Ouvrir la home EN (`/en/`) → toute l'interface est en anglais (hero, FAQ, footer, navbar)
-- [ ] Vérifier que les titres de mèmes restent en FR sur `/en/` (contenu non traduit = attendu phase 2)
-- [ ] Cliquer sur chaque lien de la navbar en FR → URLs sans prefix
-- [ ] Cliquer sur chaque lien de la navbar en EN → URLs avec `/en/` prefix
-- [ ] Vérifier le footer en FR et EN (liens, textes)
+- [x] Ouvrir la home FR (`/`) → tout est en français, aucune régression visible
+- [x] Ouvrir la home EN (`/en/`) → toute l'interface est en anglais (hero, FAQ, footer, navbar)
+- [x] Vérifier que les titres de mèmes restent en FR sur `/en/` (contenu non traduit = attendu phase 2)
+- [x] Cliquer sur chaque lien de la navbar en FR → URLs sans prefix
+- [x] Cliquer sur chaque lien de la navbar en EN → URLs avec `/en/` prefix
+- [x] Vérifier le footer en FR et EN (liens, textes)
 
 **B. Language switcher**
-- [ ] Cliquer sur le switcher FR→EN depuis la home → redirigé vers `/en/`, cookie `PARAGLIDE_LOCALE` = `en`
-- [ ] Cliquer sur le switcher EN→FR depuis `/en/` → redirigé vers `/`, cookie `PARAGLIDE_LOCALE` = `fr`
-- [ ] Après switch EN→FR, naviguer sur d'autres pages → reste en FR (cookie persisté)
-- [ ] Après switch FR→EN, fermer le navigateur, rouvrir → le site s'ouvre en EN (cookie persisté)
-- [ ] Tester le switcher depuis une page profonde (`/en/memes/category/drole`) → arrive sur `/memes/category/drole`
+- [x] Cliquer sur le switcher FR→EN depuis la home → redirigé vers `/en/`, cookie `PARAGLIDE_LOCALE` = `en`
+- [x] Cliquer sur le switcher EN→FR depuis `/en/` → redirigé vers `/`, cookie `PARAGLIDE_LOCALE` = `fr`
+- [x] Après switch EN→FR, naviguer sur d'autres pages → reste en FR (cookie persisté)
+- [x] Après switch FR→EN, fermer le navigateur, rouvrir → le site s'ouvre en EN (cookie persisté)
+- [x] Tester le switcher depuis une page profonde (`/en/memes/category/drole`) → arrive sur `/memes/category/drole`
 
 **C. Banner suggestion**
-- [ ] Ouvrir le site en FR avec un navigateur configuré en anglais → banner suggestion EN visible en haut
-- [ ] Cliquer "dismiss" → banner disparaît, cookie `LOCALE_BANNER_DISMISSED` set
-- [ ] Rafraîchir → banner ne réapparaît pas
-- [ ] Ouvrir le site en FR avec un navigateur configuré en français → pas de banner
+- [x] Ouvrir le site en FR avec un navigateur configuré en anglais → banner suggestion EN visible en haut
+- [x] Cliquer "dismiss" → banner disparaît, cookie `LOCALE_BANNER_DISMISSED` set
+- [x] Rafraîchir → banner ne réapparaît pas
+- [x] Ouvrir le site en FR avec un navigateur configuré en français → pas de banner
 
 **D. URLs & redirections**
-- [ ] Accéder à `/en/admin` → 404 (pas de version EN de l'admin)
-- [ ] Accéder à `/en/api/auth/signin` → 404 (API non localisée)
-- [ ] Accéder à `/en/health` → 404
-- [ ] Accéder à une URL inexistante `/en/nimportequoi` → page 404 en anglais
-- [ ] Accéder à une URL inexistante `/nimportequoi` → page 404 en français
-- [ ] Accéder directement à `/en/pricing` (sans passer par le switcher) → page pricing en EN
-- [ ] Utiliser le bouton "Back" du navigateur après un switch de langue → revient à la bonne langue
+- [x] Accéder à `/en/admin` → 404 (pas de version EN de l'admin)
+- [x] Accéder à `/en/api/auth/signin` → 404 (API non localisée)
+- [x] Accéder à `/en/health` → 404
+- [x] Accéder à une URL inexistante `/en/nimportequoi` → page 404 en anglais
+- [x] Accéder à une URL inexistante `/nimportequoi` → page 404 en français
+- [x] Accéder directement à `/en/pricing` (sans passer par le switcher) → page pricing en EN
+- [x] Utiliser le bouton "Back" du navigateur après un switch de langue → revient à la bonne langue
 
 **E. Pages principales**
-- [ ] Home EN : hero traduit, FAQ traduite (questions + réponses), stats traduits
-- [ ] Pricing EN : plans traduits (Tester/Premium), features, FAQ pricing, garanties, toggle Mensuel/Annuel, prix en EUR
-- [ ] Pricing EN : vérifier que les prix affichent bien `€` (pas `$` — on vend en EUR)
-- [ ] Checkout success EN (`/en/checkout/success`) : message de félicitations en anglais
-- [ ] Favoris EN (`/en/favorites`) : heading + description en anglais, empty state si pas de favoris
+- [x] Home EN : hero traduit, FAQ traduite (questions + réponses), stats traduits
+- [x] Pricing EN : plans traduits (Tester/Premium), features, FAQ pricing, garanties, toggle Mensuel/Annuel, prix en EUR
+- [x] Pricing EN : vérifier que les prix affichent bien `€` (pas `$` — on vend en EUR)
+- [x] Checkout success EN (`/en/checkout/success`) : message de félicitations en anglais
+- [x] Favoris EN (`/en/favorites`) : heading + description en anglais, empty state si pas de favoris
 
 **F. Mèmes & Studio**
-- [ ] Page mème detail EN (`/en/memes/{id}`) : boutons (Partager, Télécharger, Copier le lien, Aléatoire, Studio) en anglais. Titre du mème en FR (attendu).
-- [ ] Copier le lien en EN → l'URL copiée contient `/en/memes/{id}`
-- [ ] Partager en EN → toast "Loading..." (pas "Chargement...")
-- [ ] Page catégorie EN (`/en/memes/category/{slug}`) : heading, description, recherche en anglais
-- [ ] Search placeholder en EN
-- [ ] Studio EN (`/en/memes/{id}/studio`) : contrôles (texte, position, police, taille, couleurs), templates, bouton générer, privacy notice — tout en anglais
-- [ ] Studio : générer une vidéo → boutons partager/télécharger en anglais
-- [ ] Studio : sans texte → toast erreur en anglais
-- [ ] Reels EN (`/en/reels`) : boutons play/pause, mute/unmute, "Retour au site" en anglais
-- [ ] Random EN (`/en/random`) → redirige vers un mème avec URL `/en/memes/{id}`
+- [x] Page mème detail EN (`/en/memes/{id}`) : boutons (Partager, Télécharger, Copier le lien, Aléatoire, Studio) en anglais. Titre du mème en FR (attendu).
+- [x] Copier le lien en EN → l'URL copiée contient `/en/memes/{id}`
+- [x] Partager en EN → toast "Loading..." (pas "Chargement...")
+- [x] Page catégorie EN (`/en/memes/category/{slug}`) : heading, description, recherche en anglais
+- [x] Search placeholder en EN
+- [x] Studio EN (`/en/memes/{id}/studio`) : contrôles (texte, position, police, taille, couleurs), templates, bouton générer, privacy notice — tout en anglais
+- [x] Studio : générer une vidéo → boutons partager/télécharger en anglais
+- [x] Studio : sans texte → toast erreur en anglais
+- [x] Reels EN (`/en/reels`) : boutons play/pause, mute/unmute, "Retour au site" en anglais
+- [x] Random EN (`/en/random`) → redirige vers un mème avec URL `/en/memes/{id}`
 
 **G. Auth flows**
-- [ ] Ouvrir login en EN → labels (Email, Password), placeholder (`john@example.com`), bouton "Sign in", lien "Forgot password?", divider "Or continue with"
-- [ ] Ouvrir signup en EN → labels (Username, Email, Password, Confirm), placeholder (`John`, `john@example.com`), conditions en anglais, bouton "Create account"
-- [ ] Tenter login avec mauvais mot de passe en EN → message d'erreur en anglais (via Better Auth i18n)
-- [ ] Tenter signup avec email existant en EN → message d'erreur en anglais
-- [ ] Reset password EN (`/en/password/reset`) → heading, bouton, success message en anglais
-- [ ] Create new password EN (`/en/password/create-new`) → heading, labels, bouton en anglais
-- [ ] Login via Twitter en EN → flow OAuth normal (Stripe/Twitter ne changent pas)
+- [x] Ouvrir login en EN → labels (Email, Password), placeholder (`john@example.com`), bouton "Sign in", lien "Forgot password?", divider "Or continue with"
+- [x] Ouvrir signup en EN → labels (Username, Email, Password, Confirm), placeholder (`John`, `john@example.com`), conditions en anglais, bouton "Create account"
+- [x] Tenter login avec mauvais mot de passe en EN → message d'erreur en anglais (via Better Auth i18n)
+- [x] Tenter signup avec email existant en EN → message d'erreur en anglais
+- [x] Reset password EN (`/en/password/reset`) → heading, bouton, success message en anglais
+- [x] Create new password EN (`/en/password/create-new`) → heading, labels, bouton en anglais
+- [x] Login via Twitter en EN → flow OAuth normal (Stripe/Twitter ne changent pas)
 
 **H. Settings**
-- [ ] Settings EN (`/en/settings`) : profil header (badge "Premium/Tester User", "Member since {date}"), carte compte, mot de passe, export données, zone danger — tout en anglais
-- [ ] Vérifier que la date "Member since" utilise le format EN (`March 4, 2026` pas `4 mars 2026`)
-- [ ] Cliquer "Change password" en EN → dialog en anglais
-- [ ] Cliquer "Download my data" en EN → toast success en anglais
-- [ ] Cliquer "Delete account" en EN → dialog warning en anglais, bouton confirmation en anglais
-- [ ] Si abonné : "Manage subscription" en EN → Stripe Billing Portal s'ouvre dans la bonne locale
+- [x] Settings EN (`/en/settings`) : profil header (badge "Premium/Tester User", "Member since {date}"), carte compte, mot de passe, export données, zone danger — tout en anglais
+- [x] Vérifier que la date "Member since" utilise le format EN (`March 4, 2026` pas `4 mars 2026`)
+- [x] Cliquer "Change password" en EN → dialog en anglais
+- [x] Cliquer "Download my data" en EN → toast success en anglais
+- [x] Cliquer "Delete account" en EN → dialog warning en anglais, bouton confirmation en anglais
+- [x] Si abonné : "Manage subscription" en EN → Stripe Billing Portal s'ouvre dans la bonne locale
 
 **I. Stripe**
-- [ ] Cliquer "Upgrade to Premium" en EN → Stripe Checkout s'ouvre en anglais (pas en français)
-- [ ] Vérifier que le retour après paiement arrive sur `/en/checkout/success`
+- [x] Cliquer "Upgrade to Premium" en EN → Stripe Checkout s'ouvre en anglais (pas en français)
+- [x] Vérifier que le retour après paiement arrive sur `/en/checkout/success`
 
 **J. Pages légales**
-- [ ] `/en/terms-of-use` → contenu en anglais complet
-- [ ] `/en/privacy` → contenu en anglais complet
-- [ ] `/en/mentions-legales` → contenu en anglais complet
-- [ ] Vérifier que les liens dans le footer EN pointent vers `/en/terms-of-use`, `/en/privacy`, `/en/mentions-legales`
+- [x] `/en/terms-of-use` → contenu en anglais complet
+- [x] `/en/privacy` → contenu en anglais complet
+- [x] `/en/mentions-legales` → contenu en anglais complet
+- [x] Vérifier que les liens dans le footer EN pointent vers `/en/terms-of-use`, `/en/privacy`, `/en/mentions-legales`
 
 **K. Cookie consent**
-- [ ] En EN : banner cookies en anglais, boutons Accept/Decline en anglais, lien "Learn more" en anglais
-- [ ] Accepter → cookie consent set, banner disparaît
-- [ ] Vérifier que le cookie consent est indépendant du cookie de langue
+- [x] En EN : banner cookies en anglais, boutons Accept/Decline en anglais, lien "Learn more" en anglais
+- [x] Accepter → cookie consent set, banner disparaît
+- [x] Vérifier que le cookie consent est indépendant du cookie de langue
 
 **L. Error pages**
-- [ ] Page 404 EN : message en anglais, bouton "Return to website" en anglais
-- [ ] Provoquer une erreur 500 (si possible sur preview) → error-component en anglais
+- [x] Page 404 EN : message en anglais, bouton "Return to website" en anglais
+- [x] Provoquer une erreur 500 (si possible sur preview) → error-component en anglais
 
 **M. SEO (view-source)**
-- [ ] Home FR : `<html lang="fr">`, `og:locale` = `fr_FR`, canonical = `https://memes-by-lafouch.fr/`, hreflang FR + EN + x-default
-- [ ] Home EN : `<html lang="en">`, `og:locale` = `en_US`, `og:locale:alternate` = `fr_FR`, canonical = `https://memes-by-lafouch.fr/en/`, hreflang FR + EN + x-default
-- [ ] Vérifier que les hreflang sont **bidirectionnels** (la page FR pointe vers EN, et la page EN pointe vers FR)
-- [ ] Meme detail EN : vérifier `og:title`, `og:description` traduits, `og:image` présent (thumbnail Bunny)
-- [ ] Pricing EN : vérifier JSON-LD (Google Rich Results Test)
-- [ ] Sitemap (`/sitemap.xml`) : vérifier que chaque URL a un `<xhtml:link rel="alternate" hreflang="en">` et `<xhtml:link rel="alternate" hreflang="fr">`
+- [x] Home FR : `<html lang="fr">`, `og:locale` = `fr_FR`, canonical = `https://memes-by-lafouch.fr/`, hreflang FR + EN + x-default
+- [x] Home EN : `<html lang="en">`, `og:locale` = `en_US`, `og:locale:alternate` = `fr_FR`, canonical = `https://memes-by-lafouch.fr/en/`, hreflang FR + EN + x-default
+- [x] Vérifier que les hreflang sont **bidirectionnels** (la page FR pointe vers EN, et la page EN pointe vers FR)
+- [x] Meme detail EN : vérifier `og:title`, `og:description` traduits, `og:image` présent (thumbnail Bunny)
+- [x] Pricing EN : vérifier JSON-LD (Google Rich Results Test)
+- [x] Sitemap (`/sitemap.xml`) : vérifier que chaque URL a un `<xhtml:link rel="alternate" hreflang="en">` et `<xhtml:link rel="alternate" hreflang="fr">`
 
 **N. Mobile**
-- [ ] Répéter les tests A, B, E, F, G sur mobile (responsive ou device réel)
-- [ ] Vérifier que le language switcher est accessible sur mobile (pas caché dans un overflow)
-- [ ] Vérifier que la banner suggestion ne bloque pas le contenu sur petit écran
+- [x] Répéter les tests A, B, E, F, G sur mobile (responsive ou device réel)
+- [x] Vérifier que le language switcher est accessible sur mobile (pas caché dans un overflow)
+- [x] Vérifier que la banner suggestion ne bloque pas le contenu sur petit écran
 
 **O. Sentry Feedback**
-- [ ] En EN : cliquer le bouton Feedback → dialog en anglais (titre, labels, placeholders, boutons)
-- [ ] Envoyer un feedback test → message de succès en anglais
+- [x] En EN : cliquer le bouton Feedback → dialog en anglais (titre, labels, placeholders, boutons)
+- [x] Envoyer un feedback test → message de succès en anglais
 
 **8. Post-déploiement** (actions manuelles — après merge)
 - [ ] Google Search Console : soumettre le sitemap mis à jour (avec alternates hreflang)
@@ -511,11 +511,11 @@ Tous les audits doivent passer **avant** le merge de `feat/i18n` → `feat/migra
 
 ### Audits web manuels
 
-- [ ] **Lighthouse SEO** — Score SEO sur la home FR et `/en/` (objectif : 100/100 sur les deux). Vérifier que hreflang, canonical, og:locale sont détectés.
-- [ ] **Google Rich Results Test** — Tester JSON-LD sur : home FR, home EN, meme detail FR, meme detail EN, pricing FR, pricing EN. Vérifier que les breadcrumbs, SearchAction, pricing data sont valides.
-- [ ] **PageSpeed Insights** — Comparer les scores avant/après i18n (mobile + desktop). Paraglide ne devrait pas impacter le bundle size (tree-shaking), mais vérifier.
-- [ ] **hreflang validator** — Utiliser un outil en ligne (ex: [hreflang.org](https://www.hreflang.org/)) pour valider la cohérence bidirectionnelle FR↔EN sur quelques URLs clés.
-- [ ] **Sitemap validator** — Vérifier que le sitemap contient bien les `<xhtml:link rel="alternate">` pour chaque URL, et que les URLs sont accessibles (pas de 404).
+- [x] **Lighthouse SEO** — Score SEO sur la home FR et `/en/` (objectif : 100/100 sur les deux). Vérifier que hreflang, canonical, og:locale sont détectés.
+- [x] **Google Rich Results Test** — Tester JSON-LD sur : home FR, home EN, meme detail FR, meme detail EN, pricing FR, pricing EN. Vérifier que les breadcrumbs, SearchAction, pricing data sont valides.
+- [x] **PageSpeed Insights** — Comparer les scores avant/après i18n (mobile + desktop). Paraglide ne devrait pas impacter le bundle size (tree-shaking), mais vérifier.
+- [x] **hreflang validator** — Utiliser un outil en ligne (ex: [hreflang.org](https://www.hreflang.org/)) pour valider la cohérence bidirectionnelle FR↔EN sur quelques URLs clés.
+- [x] **Sitemap validator** — Vérifier que le sitemap contient bien les `<xhtml:link rel="alternate">` pour chaque URL, et que les URLs sont accessibles (pas de 404).
 
 ### Actions manuelles par service externe
 

@@ -7,6 +7,7 @@ import { PlayerDialog } from '@/components/Meme/player-dialog'
 import type { MemeWithVideo } from '@/constants/meme'
 import { MEMES_PER_PAGE } from '@/constants/meme'
 import { sendViewEvent } from '@/lib/algolia-insights'
+import * as m from '@/paraglide/messages'
 import { useRouteContext } from '@tanstack/react-router'
 
 type MemeWithHighlight = MemeWithVideo & {
@@ -81,7 +82,7 @@ export const MemesList = ({
   }, [selectedId])
 
   if (memes.length === 0) {
-    return <p className="text-muted-foreground">Aucun résultat</p>
+    return <p className="text-muted-foreground">{m.common_no_results()}</p>
   }
 
   const handleSelect = (meme: MemeWithVideo, trigger: HTMLButtonElement) => {

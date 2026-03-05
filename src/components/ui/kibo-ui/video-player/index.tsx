@@ -1,4 +1,5 @@
 import type { ComponentProps, CSSProperties } from 'react'
+import { getLocale } from '@/paraglide/runtime'
 import 'media-chrome/dist/lang/fr.js'
 import {
   MediaProvider,
@@ -38,7 +39,7 @@ export const VideoPlayer = ({ style, ...props }: VideoPlayerProps) => {
   return (
     <MediaProvider>
       <MediaController
-        lang="fr"
+        lang={getLocale()}
         style={{
           ...variables,
           ...style

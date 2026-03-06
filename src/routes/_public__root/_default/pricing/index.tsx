@@ -80,6 +80,9 @@ const RouteComponent = () => {
 
 export const Route = createFileRoute('/_public__root/_default/pricing/')({
   component: RouteComponent,
+  loader: async ({ context }) => {
+    await context.queryClient.ensureQueryData(getActiveSubscriptionQueryOpts())
+  },
   scripts: () => {
     return [
       {

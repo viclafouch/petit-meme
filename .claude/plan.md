@@ -158,7 +158,7 @@ Le style natif `autofill` des navigateurs applique un fond bleu/jaune qui casse 
 autofill:shadow-[inset_0_0_0px_1000px_var(--color-background)]
 ```
 
-- [ ] Appliquer le fix autofill sur tous les `<input>` concernés (login, signup, etc.)
+- [x] Appliquer le fix autofill sur tous les `<input>` concernés (login, signup, etc.)
 
 ### Supprimer le spinner de loading sur la page pricing
 
@@ -166,8 +166,8 @@ La page pricing utilise `useSuspenseQuery(getActiveSubscriptionQueryOpts())` pou
 
 **Fichier :** `src/routes/_public__root/_default/pricing/index.tsx`
 
-- [ ] Remplacer `useSuspenseQuery` par `useQuery` pour `getActiveSubscriptionQueryOpts()` afin que la page s'affiche immédiatement sans suspense/spinner
-- [ ] Adapter la logique `hasActiveSubscription` / `isOnFreePlan` pour gérer l'état `isPending` (afficher le plan free par défaut pendant le chargement, ou masquer le badge "actif" tant que la requête n'est pas terminée)
+- [x] Remplacer `useSuspenseQuery` par `useQuery` pour `getActiveSubscriptionQueryOpts()` afin que la page s'affiche immédiatement sans suspense/spinner
+- [x] Adapter la logique `hasActiveSubscription` / `isOnFreePlan` pour gérer l'état `isPending` (afficher le plan free par défaut pendant le chargement, ou masquer le badge "actif" tant que la requête n'est pas terminée)
 
 ---
 

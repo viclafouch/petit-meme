@@ -117,7 +117,7 @@ export const PricingCard = ({
       data-highlighted={isHighlighted || undefined}
       className={cn(
         'grid row-span-4 grid-rows-subgrid py-8',
-        'data-highlighted:animate-background-shine data-highlighted:border-amber-400/20 data-highlighted:bg-background data-highlighted:bg-size-[200%_100%] data-highlighted:transition-colors dark:data-highlighted:bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)]',
+        'data-highlighted:animate-background-shine data-highlighted:border-amber-700/25 data-highlighted:bg-[linear-gradient(110deg,#fff,45%,#fffbeb,55%,#fff)] data-highlighted:bg-size-[200%_100%] data-highlighted:transition-colors dark:data-highlighted:border-amber-400/20 dark:data-highlighted:bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)]',
         className
       )}
     >
@@ -166,7 +166,7 @@ export const PricingCard = ({
               animate={{ opacity: 1, translateX: 0 }}
               exit={{ opacity: 0, translateX: -8 }}
               transition={{ duration: 0.2 }}
-              className="text-sm text-amber-400/80"
+              className="text-sm text-amber-700 dark:text-amber-400/80"
             >
               {m.pricing_yearly_breakdown({
                 price: formatCentsToEuros(

@@ -197,5 +197,16 @@
   @apply [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
 }
 @utility amber-badge {
-  @apply rounded-full bg-amber-400/15 text-xs font-semibold text-amber-400;
+  @apply rounded-full bg-amber-700/10 text-xs font-semibold text-amber-700 dark:bg-amber-400/15 dark:text-amber-400;
+}
+
+@layer base {
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0px 1000px var(--background) inset;
+    -webkit-text-fill-color: var(--foreground);
+    caret-color: var(--foreground);
+    transition: background-color 5000s ease-in-out 0s;
+  }
 }

@@ -14,12 +14,7 @@ import {
   TRENDING_MEMES_COUNT,
   VIRTUAL_CATEGORY_SLUGS
 } from '@/constants/meme'
-import {
-  RATE_LIMIT_DOWNLOAD,
-  RATE_LIMIT_LISTING,
-  RATE_LIMIT_TRACK,
-  RATE_LIMIT_VIEW
-} from '@/constants/rate-limit'
+import { RATE_LIMIT_DOWNLOAD, RATE_LIMIT_TRACK } from '@/constants/rate-limit'
 import {
   ONE_HOUR_MS,
   ONE_YEAR_IN_SECONDS,
@@ -135,7 +130,6 @@ export const getVideoStatusById = createServerFn({ method: 'GET' })
 
 export const getMemes = createServerFn({ method: 'GET' })
   .inputValidator(MEMES_FILTERS_SCHEMA)
-  .middleware([createRateLimitMiddleware(RATE_LIMIT_LISTING)])
   .handler(async ({ data }) => {
     const hasQuery = Boolean(data.query)
     const indexName = resolveIndexName(data.category, hasQuery)
@@ -426,7 +420,6 @@ export const registerMemeView = createServerFn({ method: 'POST' })
       })
       .parse(data)
   })
-  .middleware([createRateLimitMiddleware(RATE_LIMIT_VIEW)])
   .handler(async ({ data }) => {
     const { memeId, watchMs } = data
 

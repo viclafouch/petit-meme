@@ -1,10 +1,8 @@
 import * as R from 'remeda'
 import { z } from 'zod'
 import type { MemeWithVideo } from '@/constants/meme'
-import { RATE_LIMIT_REELS } from '@/constants/rate-limit'
 import { prismaClient } from '@/db'
 import { Prisma } from '@/db/generated/prisma/client'
-import { createRateLimitMiddleware } from '@/server/rate-limit'
 import { createServerFn } from '@tanstack/react-start'
 
 export const getInfiniteReels = createServerFn({ method: 'POST' })
@@ -15,7 +13,6 @@ export const getInfiniteReels = createServerFn({ method: 'POST' })
       })
       .parse(data)
   })
-  .middleware([createRateLimitMiddleware(RATE_LIMIT_REELS)])
   .handler(async ({ data }) => {
     const MAX_EXCLUDED_IDS = 100
     const excludedIds = data.excludedIds.slice(-MAX_EXCLUDED_IDS)

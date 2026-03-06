@@ -1,5 +1,5 @@
 import { prismaClient } from '@/db'
-import { buildUrl, websiteOrigin } from '@/lib/seo'
+import { buildUrl } from '@/lib/seo'
 import { baseLocale, locales } from '@/paraglide/runtime'
 import { createFileRoute } from '@tanstack/react-router'
 
@@ -31,12 +31,12 @@ const buildHreflangLinks = (pathname: string) => {
   ].join('\n')
 }
 
-type UrlEntry = {
-  loc: string
-  pathname: string
+type SitemapPage = StaticPage & {
   lastmod?: string
-  changefreq: string
-  priority: string
+}
+
+type UrlEntryParams = SitemapPage & {
+  loc: string
 }
 
 const buildUrlEntry = ({
@@ -45,7 +45,7 @@ const buildUrlEntry = ({
   lastmod,
   changefreq,
   priority
-}: UrlEntry) => {
+}: UrlEntryParams) => {
   const lastmodTag = lastmod ? `\n    <lastmod>${lastmod}</lastmod>` : ''
 
   return [
@@ -73,40 +73,41 @@ export const Route = createFileRoute('/sitemap.xml')({
           })
         ])
 
-        const entries = [
-          ...STATIC_PAGES.map((page) => {
-            return buildUrlEntry({
-              loc: `${websiteOrigin}${page.pathname}`,
-              pathname: page.pathname,
-              changefreq: page.changefreq,
-              priority: page.priority
-            })
-          }),
-          buildUrlEntry({
-            loc: `${websiteOrigin}/memes/category/all`,
+        const allPages: SitemapPage[] = [
+          ...STATIC_PAGES,
+          {
             pathname: '/memes/category/all',
             changefreq: 'daily',
             priority: '0.9'
-          }),
+          },
           ...categories.map((category) => {
-            return buildUrlEntry({
-              loc: `${websiteOrigin}/memes/category/${category.slug}`,
+            return {
               pathname: `/memes/category/${category.slug}`,
               lastmod: formatDate(category.updatedAt),
               changefreq: 'daily',
               priority: '0.8'
-            })
+            }
           }),
           ...memes.map((meme) => {
-            return buildUrlEntry({
-              loc: `${websiteOrigin}/memes/${meme.id}`,
+            return {
               pathname: `/memes/${meme.id}`,
               lastmod: formatDate(meme.updatedAt),
               changefreq: 'weekly',
               priority: '0.6'
+            }
+          })
+        ]
+
+        const entries = allPages
+          .flatMap((page) => {
+            return locales.map((locale) => {
+              return buildUrlEntry({
+                ...page,
+                loc: buildUrl(page.pathname, locale)
+              })
             })
           })
-        ].join('\n')
+          .join('\n')
 
         const sitemap = [
           '<?xml version="1.0" encoding="UTF-8"?>',

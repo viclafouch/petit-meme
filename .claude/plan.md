@@ -30,7 +30,7 @@
 
 ## Migration Railway → Vercel — Items restants
 
-- [ ] Réactiver Sentry server-side tracing (`instrument-server.ts` + `wrapFetchWithSentry`) — bloqué par `require-in-the-middle` incompatible ESM dans Vercel serverless. Bug connu : [sentry-javascript#18859](https://github.com/getsentry/sentry-javascript/issues/18859). Surveiller les updates Sentry/OpenTelemetry.
+- [ ] Réactiver Sentry server-side tracing complet (`instrument-server.ts` + `wrapFetchWithSentry`) — l'instrumentation complète (Prisma, third-party HTTP) reste bloquée par `require-in-the-middle` incompatible ESM dans Vercel serverless. Bug connu : [sentry-javascript#18859](https://github.com/getsentry/sentry-javascript/issues/18859). **Note (10.42.0)** : le flush serverless fonctionne maintenant (PR #19513) — les erreurs et le tracing basique sont capturés sur Vercel. Seule l'instrumentation ORM/third-party reste limitée sans `--import`.
 
 ## Nitro — Override runtime Node.js 24
 

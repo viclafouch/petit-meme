@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Memes by Lafouch — a meme management and sharing platform with video support, user authentication, bookmarking, and premium subscriptions. Built with TanStack Start (React 19 full-stack framework) on Vite + Nitro.
+Petit Meme — a meme management and sharing platform with video support, user authentication, bookmarking, and premium subscriptions. Built with TanStack Start (React 19 full-stack framework) on Vite + Nitro.
 
 The site is **bilingual FR/EN** (Paraglide JS). French is the base locale (no URL prefix), English uses `/en/` prefix.
 

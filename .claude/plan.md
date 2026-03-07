@@ -129,12 +129,12 @@ Ne pas oublier le namespace `xmlns:image="http://www.google.com/schemas/sitemap-
 **Pourquoi :** Google extrait le contexte des images via l'alt text. "Logo" et "Avatar" n'apportent aucune information. Les guidelines recommandent un alt descriptif et pertinent (ex: `alt="Dalmatian puppy playing fetch"` plutôt que `alt="puppy"`).
 
 **Détails :**
-- Logo `alt="Logo"` → `alt="Memes by Lafouch"` dans `src/components/navbar.tsx`
+- Logo `alt="Logo"` → `alt="Petit Meme"` dans `src/components/navbar.tsx`
 - Avatars `alt="Avatar"` → `alt="Photo de profil de {username}"` (ou `alt={username}` si le nom est disponible) dans les composants qui utilisent `<AvatarImage>`
 
 **Fichiers :** `src/components/navbar.tsx`, composants utilisant `<AvatarImage>`
 
-- [x] Changer alt du logo → "Memes by Lafouch"
+- [x] Changer alt du logo → "Petit Meme"
 - [x] Changer alt des avatars → inclure le nom d'utilisateur quand disponible
 
 ### Non retenu pour l'instant
@@ -163,7 +163,7 @@ Audit basé sur les recommandations Google Video SEO (https://developers.google.
 - [ ] Stocker `width`/`height` dans le modèle `Video` (migration additive) — permet des `og:video:width/height` corrects par meme au lieu du 1280x720 hardcodé. Utile si des memes verticaux/carrés sont ajoutés
 - [ ] Ajouter `<video:family_friendly>yes</video:family_friendly>` dans le video sitemap — signal SafeSearch explicite
 - [ ] Ajouter `name` et `description` uniques sur les pages catégorie en JSON-LD `CollectionPage` — Google recommande titre/description uniques pour chaque page contenant des vidéos
-- [ ] Noms de fichiers descriptifs pour les images statiques — renommer `logo.png` en `memes-by-lafouch-logo.png` (Google recommande des noms descriptifs type `my-new-black-kitten.jpg` vs `IMG00023.JPG`)
+- [ ] Noms de fichiers descriptifs pour les images statiques — renommer `logo.png` en `petit-meme-logo.png` (Google recommande des noms descriptifs type `my-new-black-kitten.jpg` vs `IMG00023.JPG`)
 
 ---
 

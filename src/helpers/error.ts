@@ -7,3 +7,7 @@ export const getErrorMessage = (error: unknown) => {
 
   return DEFAULT_ERROR_MESSAGE
 }
+
+export const matchIsRateLimitError = (error: unknown) => {
+  return error instanceof Error && error.message.includes('Too Many Requests')
+}

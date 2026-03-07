@@ -4,6 +4,7 @@ import { NotFound } from '@/components/not-found'
 import { IS_PRODUCTION } from '@/constants/env'
 import { MINUTE, SECOND } from '@/constants/time'
 import { clientEnv } from '@/env/client'
+import { matchIsRateLimitError } from '@/helpers/error'
 import {
   getFeedbackOptions,
   scrubSensitiveBreadcrumbs,
@@ -24,7 +25,15 @@ export function getRouter() {
         staleTime: 30 * SECOND,
         gcTime: 5 * MINUTE,
         refetchOnWindowFocus: IS_PRODUCTION,
-        retry: false
+        retry: (failureCount, error) => {
+          return matchIsRateLimitError(error) && failureCount < 3
+        },
+        retryDelay: (attemptIndex) => {
+          return Math.min(
+            SECOND * 2 ** attemptIndex + Math.random() * SECOND,
+            10 * SECOND
+          )
+        }
       },
       mutations: {
         retry: false,

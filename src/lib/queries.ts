@@ -7,6 +7,7 @@ import {
   getMemeById,
   getMemes,
   getRecentCountMemes,
+  getRelatedMemes,
   getTrendingMemes,
   getVideoStatusById,
   shareMeme
@@ -139,6 +140,26 @@ export const getInfiniteReelsQueryOpts = (excludedIds: string[] = []) => {
 }
 
 getInfiniteReelsQueryOpts.all = ['infinite-reels'] as const
+
+type GetRelatedMemesQueryOptsParams = {
+  memeId: Meme['id']
+  title: string
+}
+
+export const getRelatedMemesQueryOpts = ({
+  memeId,
+  title
+}: GetRelatedMemesQueryOptsParams) => {
+  return queryOptions({
+    queryKey: [...getRelatedMemesQueryOpts.all, memeId],
+    queryFn: () => {
+      return getRelatedMemes({ data: { memeId, title } })
+    },
+    staleTime: 10 * MINUTE
+  })
+}
+
+getRelatedMemesQueryOpts.all = ['related-memes'] as const
 
 export const getVideoBlobQueryOpts = (memeId: Meme['id']) => {
   return queryOptions({

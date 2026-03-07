@@ -25,13 +25,12 @@ import {
   VideoPlayerTimeRange,
   VideoPlayerVolumeRange
 } from '@/components/ui/kibo-ui/video-player'
-import type { MemeWithVideo } from '@/constants/meme'
 import { useDownloadMeme } from '@/hooks/use-download-meme'
 import { useMemeHls } from '@/hooks/use-meme-hls'
 import { useRegisterMemeView } from '@/hooks/use-register-meme-view'
 import { useShareMeme } from '@/hooks/use-share-meme'
 import { buildVideoImageUrl, buildVideoOriginalUrl } from '@/lib/bunny'
-import { getMemeByIdQueryOpts } from '@/lib/queries'
+import { getMemeByIdQueryOpts, getRelatedMemesQueryOpts } from '@/lib/queries'
 import { matchIsUserAdmin } from '@/lib/role'
 import {
   buildBreadcrumbJsonLd,
@@ -42,14 +41,13 @@ import {
 import { cn } from '@/lib/utils'
 import { m } from '@/paraglide/messages.js'
 import { getLocale } from '@/paraglide/runtime'
-import { getRandomMeme, getRelatedMemes, trackMemeAction } from '@/server/meme'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { getRandomMeme, trackMemeAction } from '@/server/meme'
+import { useMutation, useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import {
   createFileRoute,
   Link,
   useLinkProps,
-  useRouteContext,
-  useRouter
+  useRouteContext
 } from '@tanstack/react-router'
 
 type MemeInfoParams = {
@@ -94,13 +92,16 @@ const MemeInfo = ({ meme, allTags }: MemeInfoParams) => {
 }
 
 type RelatedMemesParams = {
-  relatedMemesPromise: Promise<MemeWithVideo[]>
+  memeId: string
+  title: string
 }
 
-const RelatedMemes = ({ relatedMemesPromise }: RelatedMemesParams) => {
-  const relatedMemes = React.use(relatedMemesPromise)
+const RelatedMemes = ({ memeId, title }: RelatedMemesParams) => {
+  const relatedMemesQuery = useQuery(
+    getRelatedMemesQueryOpts({ memeId, title })
+  )
 
-  if (relatedMemes.length === 0) {
+  if (!relatedMemesQuery.data || relatedMemesQuery.data.length === 0) {
     return null
   }
 
@@ -109,7 +110,7 @@ const RelatedMemes = ({ relatedMemesPromise }: RelatedMemesParams) => {
       <h2 className="text-base font-medium mb-4">{m.meme_related()}</h2>
       <MemesList
         layoutContext="recommend"
-        memes={relatedMemes}
+        memes={relatedMemesQuery.data}
         columnGridCount={4}
       />
     </div>
@@ -117,15 +118,13 @@ const RelatedMemes = ({ relatedMemesPromise }: RelatedMemesParams) => {
 }
 
 const RouteComponent = () => {
-  const { nextRandomMeme, originalUrl, relatedMemesPromise } =
-    Route.useLoaderData()
+  const { originalUrl } = Route.useLoaderData()
   const { user } = useRouteContext({ from: '__root__' })
   const { memeId } = Route.useParams()
   const memeQuery = useSuspenseQuery(getMemeByIdQueryOpts(memeId))
   const meme = memeQuery.data
   const { videoRef } = useMemeHls({ bunnyId: meme.video.bunnyId })
   const navigate = Route.useNavigate()
-  const router = useRouter()
   const memeLink = useLinkProps({
     to: '/memes/$memeId',
     params: { memeId: meme.id }
@@ -155,6 +154,11 @@ const RouteComponent = () => {
 
   const shareMutation = useShareMeme()
   const downloadMutation = useDownloadMeme()
+  const randomMemeMutation = useMutation({
+    mutationFn: () => {
+      return getRandomMeme({ data: meme.id })
+    }
+  })
 
   // eslint-disable-next-line no-restricted-syntax
   const allTags = React.useMemo(() => {
@@ -168,34 +172,20 @@ const RouteComponent = () => {
     ]
   }, [meme])
 
-  React.useEffect(() => {
-    const preload = async () => {
-      try {
-        const nextMeme = await nextRandomMeme
-
-        if (nextMeme) {
-          await router.preloadRoute({
+  const handleNavigateToRandomMeme = () => {
+    videoRef.current?.pause()
+    randomMemeMutation.mutate(undefined, {
+      onSuccess: (randomMeme) => {
+        if (randomMeme) {
+          void navigate({
             to: '/memes/$memeId',
-            params: { memeId: nextMeme.id }
+            params: { memeId: randomMeme.id }
           })
+        } else {
+          void navigate({ to: '/memes' })
         }
-      } catch {}
-    }
-
-    void preload()
-  }, [router, nextRandomMeme])
-
-  const handleNavigateToRandomMeme = async () => {
-    try {
-      videoRef.current?.pause()
-      const newMeme = await nextRandomMeme
-
-      if (newMeme) {
-        void navigate({ to: '/memes/$memeId', params: { memeId: newMeme.id } })
-      } else {
-        void navigate({ to: '/memes' })
       }
-    } catch {}
+    })
   }
 
   return (
@@ -311,7 +301,11 @@ const RouteComponent = () => {
                 <Clipboard />
                 {m.meme_copy_link()}
               </Button>
-              <Button variant="outline" onClick={handleNavigateToRandomMeme}>
+              <Button
+                variant="outline"
+                disabled={randomMemeMutation.isPending}
+                onClick={handleNavigateToRandomMeme}
+              >
                 <Shuffle />
                 {m.meme_random()}
               </Button>
@@ -320,9 +314,7 @@ const RouteComponent = () => {
           </div>
         </div>
       </div>
-      <React.Suspense fallback={null}>
-        <RelatedMemes relatedMemesPromise={relatedMemesPromise} />
-      </React.Suspense>
+      <RelatedMemes memeId={meme.id} title={meme.title} />
     </div>
   )
 }
@@ -336,16 +328,10 @@ export const Route = createFileRoute('/_public__root/_default/memes/$memeId')({
     )
 
     const originalUrl = buildVideoOriginalUrl(meme.video.bunnyId)
-    const nextRandomMeme = getRandomMeme({ data: meme.id })
-    const relatedMemesPromise = getRelatedMemes({
-      data: { memeId: meme.id, title: meme.title }
-    })
 
     return {
       meme,
-      originalUrl,
-      nextRandomMeme,
-      relatedMemesPromise
+      originalUrl
     }
   },
   scripts: ({ loaderData }) => {

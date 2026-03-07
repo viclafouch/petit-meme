@@ -191,6 +191,26 @@ La page pricing utilise `useSuspenseQuery(getActiveSubscriptionQueryOpts())` pou
 
 ---
 
+## Rate Limiting & Server Call Optimization (mars 2026)
+
+**Contexte :** Vercel Firewall rate limit rule (`/_server`, 30 req/60s/IP) déclenchait des 429 "Too Many Requests" lors de navigations rapides entre mèmes. Chaque page mème faisait 6 server calls (3 loader + 3 preload).
+
+### Changements appliqués
+
+- [x] Suppression du preload du prochain mème aléatoire (`useEffect` qui appelait `router.preloadRoute`) — économise 3 server calls par page
+- [x] `getRelatedMemes` déplacé du loader vers un `useQuery` client-side dans `RelatedMemes` — déféré, ne bloque plus le rendu
+- [x] `getRandomMeme` déplacé du loader vers un `useQuery` client-side — déféré, ne bloque plus le rendu
+- [x] Ajout retry avec backoff exponentiel sur les erreurs 429 dans le `QueryClient` (max 3 retries, délai 2s/4s/8s)
+- [x] Helper `matchIsRateLimitError` dans `src/helpers/error.ts`
+
+**Résultat :** Loader réduit à 1 server call (`getMemeById`), le reste est déféré. ~3x moins de calls par navigation.
+
+### Items restants
+
+- [x] Envisager d'augmenter la limite Vercel Firewall (30 → 60+ req/60s) si les 429 persistent après fix code
+
+---
+
 ## Backlog — Futures évolutions
 
 ### Admin — Items reportés

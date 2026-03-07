@@ -2,6 +2,7 @@ import { StudioError } from '@/constants/error'
 import { prismaClient } from '@/db'
 import { auth } from '@/lib/auth'
 import { authLogger } from '@/lib/logger'
+import { wrapMiddlewareWithSentry } from '@/lib/sentry'
 import { getLocale } from '@/paraglide/runtime'
 import { createMiddleware, createServerFn } from '@tanstack/react-start'
 import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
@@ -29,7 +30,7 @@ export const getAuthUser = createServerFn({ method: 'GET' }).handler(
   }
 )
 
-export const authUserRequiredMiddleware = createMiddleware({
+const rawAuthUserRequiredMiddleware = createMiddleware({
   type: 'function'
 }).server(async ({ next }) => {
   const { headers } = getRequest()
@@ -51,7 +52,12 @@ export const authUserRequiredMiddleware = createMiddleware({
   return next({ context: { user: session.user } })
 })
 
-export const adminRequiredMiddleware = createMiddleware({
+export const authUserRequiredMiddleware = wrapMiddlewareWithSentry(
+  'authUserRequired',
+  rawAuthUserRequiredMiddleware
+)
+
+const rawAdminRequiredMiddleware = createMiddleware({
   type: 'function'
 })
   .middleware([authUserRequiredMiddleware])
@@ -66,3 +72,8 @@ export const adminRequiredMiddleware = createMiddleware({
 
     return next({ context: { user } })
   })
+
+export const adminRequiredMiddleware = wrapMiddlewareWithSentry(
+  'adminRequired',
+  rawAdminRequiredMiddleware
+)

@@ -1,7 +1,7 @@
 import type { RateLimitConfig } from '@/constants/rate-limit'
 import { SECOND } from '@/constants/time'
 import { logger } from '@/lib/logger'
-import { captureWithFeature } from '@/lib/sentry'
+import { captureWithFeature, wrapMiddlewareWithSentry } from '@/lib/sentry'
 import { createMiddleware } from '@tanstack/react-start'
 import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
 
@@ -47,50 +47,54 @@ export const extractClientIp = (request: Request) => {
 }
 
 export const createRateLimitMiddleware = (config: RateLimitConfig) => {
-  return createMiddleware({ type: 'function' }).server(async ({ next }) => {
-    const request = getRequest()
-    const ip = extractClientIp(request)
-    const key = `${config.action}:${ip}`
-    const now = Date.now()
+  const middleware = createMiddleware({ type: 'function' }).server(
+    async ({ next }) => {
+      const request = getRequest()
+      const ip = extractClientIp(request)
+      const key = `${config.action}:${ip}`
+      const now = Date.now()
 
-    const existing = store.get(key)
+      const existing = store.get(key)
 
-    const isWindowExpired =
-      !existing || existing.windowStart < now - config.windowMs
-    const entry: RateLimitEntry = isWindowExpired
-      ? { count: 1, windowStart: now }
-      : { count: existing.count + 1, windowStart: existing.windowStart }
+      const isWindowExpired =
+        !existing || existing.windowStart < now - config.windowMs
+      const entry: RateLimitEntry = isWindowExpired
+        ? { count: 1, windowStart: now }
+        : { count: existing.count + 1, windowStart: existing.windowStart }
 
-    store.set(key, entry)
-    pruneStore()
+      store.set(key, entry)
+      pruneStore()
 
-    if (entry.count > config.maxRequests) {
-      const windowEndMs = entry.windowStart + config.windowMs
-      const retryAfterSeconds = Math.max(
-        1,
-        Math.ceil((windowEndMs - now) / SECOND)
-      )
-      const userAgent = request.headers.get('user-agent') ?? 'unknown'
+      if (entry.count > config.maxRequests) {
+        const windowEndMs = entry.windowStart + config.windowMs
+        const retryAfterSeconds = Math.max(
+          1,
+          Math.ceil((windowEndMs - now) / SECOND)
+        )
+        const userAgent = request.headers.get('user-agent') ?? 'unknown'
 
-      rateLimitLogger.warn(
-        { ip, action: config.action, count: entry.count, userAgent },
-        'Rate limit exceeded'
-      )
+        rateLimitLogger.warn(
+          { ip, action: config.action, count: entry.count, userAgent },
+          'Rate limit exceeded'
+        )
 
-      captureWithFeature(
-        new Error(
-          `Rate limit exceeded: ${config.action} (${entry.count}/${config.maxRequests})`
-        ),
-        'scraping-detection'
-      )
+        captureWithFeature(
+          new Error(
+            `Rate limit exceeded: ${config.action} (${entry.count}/${config.maxRequests})`
+          ),
+          'scraping-detection'
+        )
 
-      setResponseStatus(429)
-      throw new Response('Too Many Requests', {
-        status: 429,
-        headers: { 'Retry-After': String(retryAfterSeconds) }
-      })
+        setResponseStatus(429)
+        throw new Response('Too Many Requests', {
+          status: 429,
+          headers: { 'Retry-After': String(retryAfterSeconds) }
+        })
+      }
+
+      return next()
     }
+  )
 
-    return next()
-  })
+  return wrapMiddlewareWithSentry(config.action, middleware)
 }

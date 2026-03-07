@@ -1,6 +1,7 @@
 import { m } from '@/paraglide/messages.js'
 import type { FeedbackInternalOptions } from '@sentry/core'
 import * as Sentry from '@sentry/tanstackstart-react'
+import { wrapMiddlewaresWithSentry } from '@sentry/tanstackstart-react'
 
 type SentryFeature =
   | 'stripe-checkout'
@@ -32,6 +33,15 @@ type SentryFeature =
 
 export const captureWithFeature = (error: unknown, feature: SentryFeature) => {
   Sentry.captureException(error, { tags: { feature } })
+}
+
+type SentryMiddleware = Parameters<typeof wrapMiddlewaresWithSentry>[0][string]
+
+export const wrapMiddlewareWithSentry = <T extends SentryMiddleware>(
+  name: string,
+  middleware: T
+): T => {
+  return wrapMiddlewaresWithSentry({ [name]: middleware })[0]!
 }
 
 type FeedbackOptions = Partial<

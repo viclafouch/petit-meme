@@ -1,3 +1,4 @@
+import { wrapFetchWithSentry } from '@sentry/tanstackstart-react'
 import {
   createStartHandler,
   defaultStreamHandler,
@@ -17,10 +18,12 @@ const customHandler = defineHandlerCallback(async (context) => {
 
 const handler = createStartHandler(customHandler)
 
-export default createServerEntry({
-  fetch: (request) => {
-    return paraglideMiddleware(request, () => {
-      return handler(request)
-    })
-  }
-})
+export default createServerEntry(
+  wrapFetchWithSentry({
+    fetch: (request) => {
+      return paraglideMiddleware(request, () => {
+        return handler(request)
+      })
+    }
+  })
+)

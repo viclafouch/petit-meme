@@ -1,7 +1,8 @@
+import { LOGO_PATH } from '@/constants/branding'
 import { pixelBasedPreset } from '@react-email/components'
 
 export const SITE_URL = 'https://www.petit-meme.io'
-export const LOGO_URL = `${SITE_URL}/images/logo.png`
+export const LOGO_URL = `${SITE_URL}${LOGO_PATH}`
 export const CONTACT_EMAIL = 'hello@petit-meme.io'
 
 export const BUTTON_CLASS =

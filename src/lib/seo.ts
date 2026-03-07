@@ -17,6 +17,7 @@ import type {
   WithContext
 } from 'schema-dts'
 import type { FaqItem } from '@/components/faq-section'
+import { LOGO_PATH } from '@/constants/branding'
 import type { MemeWithCategories, MemeWithVideo } from '@/constants/meme'
 import type { Plan } from '@/constants/plan'
 import type { CategoryModel } from '@/db/generated/prisma/models'
@@ -387,7 +388,7 @@ export const buildHomeJsonLd = ({
         '@id': `${websiteOrigin}/#organization`,
         name: 'Petit Meme',
         url: websiteOrigin,
-        logo: `${websiteOrigin}/images/logo.png`,
+        logo: `${websiteOrigin}${LOGO_PATH}`,
         description: m.seo_home_description()
       } satisfies Organization,
       {
@@ -496,7 +497,7 @@ export const buildPricingJsonLd = ({
         '@type': 'Product',
         '@id': `${pricingUrl}#product`,
         name: m.seo_pricing_subscription_name(),
-        image: `${websiteOrigin}/images/logo.png`,
+        image: `${websiteOrigin}${LOGO_PATH}`,
         description,
         offers: {
           '@type': 'AggregateOffer',

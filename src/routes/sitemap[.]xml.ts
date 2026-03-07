@@ -106,6 +106,7 @@ const buildVideoTag = ({
     `      <video:player_loc>${playerLoc}</video:player_loc>`,
     `      <video:duration>${duration}</video:duration>`,
     `      <video:publication_date>${publicationDate}</video:publication_date>`,
+    '      <video:family_friendly>yes</video:family_friendly>',
     '    </video:video>'
   ].join('\n')
 }

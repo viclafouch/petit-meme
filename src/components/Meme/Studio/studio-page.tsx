@@ -18,6 +18,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { LoadingButton } from '@/components/ui/loading-button'
 import { Separator } from '@/components/ui/separator'
+import { LOGO_PATH } from '@/constants/branding'
 import type { MemeWithVideo } from '@/constants/meme'
 import { STUDIO_TEXT_MAX_LENGTH } from '@/constants/studio'
 import {
@@ -38,7 +39,7 @@ const StudioBranding = ({ title }: StudioBrandingParams) => {
     <div className="flex-1 min-w-0">
       <div className="flex items-center gap-1.5">
         <img
-          src="/images/logo.png"
+          src={LOGO_PATH}
           alt=""
           width={16}
           height={16}

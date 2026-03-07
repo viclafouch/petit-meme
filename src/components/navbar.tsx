@@ -10,6 +10,7 @@ import {
   NavigationMenuList
 } from '@/components/ui/navigation-menu'
 import { UserDropdown } from '@/components/user-dropdown'
+import { LOGO_PATH } from '@/constants/branding'
 import { cn } from '@/lib/utils'
 import { m } from '@/paraglide/messages.js'
 import { useShowDialog } from '@/stores/dialog.store'
@@ -54,7 +55,7 @@ export const Navbar = () => {
           )}
         >
           <img
-            src="/images/logo.png"
+            src={LOGO_PATH}
             alt={m.common_logo_alt()}
             width={28}
             height={28}

@@ -83,7 +83,7 @@ Le site est un catalogue de mèmes vidéo. Chaque mème a un thumbnail JPG et un
 **Fichier :** `src/lib/seo.ts`
 
 - [x] Ajouter `primaryImageOfPage` (ImageObject) dans le JSON-LD des pages meme
-- [ ] Vérifier avec le Rich Results Test de Google après déploiement
+- [x] Vérifier avec le Rich Results Test de Google après déploiement
 
 ### Priorité 2 — Images dans le sitemap
 
@@ -157,13 +157,13 @@ Audit basé sur les recommandations Google Video SEO (https://developers.google.
 
 ### Items restants
 
-- [ ] Vérifier avec le Rich Results Test de Google après déploiement (images + vidéo)
+- [x] Vérifier avec le Rich Results Test de Google après déploiement (images + vidéo)
 - [ ] Surveiller le Video Indexing Report dans Search Console après déploiement
-- [ ] `max-image-preview:large` dans le robots meta — autorise Google à afficher de grandes vignettes d'images dans les SERP (actuellement non spécifié, Google utilise la valeur par défaut qui peut limiter la taille)
+- [x] `max-image-preview:large` dans le robots meta — autorise Google à afficher de grandes vignettes d'images dans les SERP
 - [ ] Stocker `width`/`height` dans le modèle `Video` (migration additive) — permet des `og:video:width/height` corrects par meme au lieu du 1280x720 hardcodé. Utile si des memes verticaux/carrés sont ajoutés
-- [ ] Ajouter `<video:family_friendly>yes</video:family_friendly>` dans le video sitemap — signal SafeSearch explicite
-- [ ] Ajouter `name` et `description` uniques sur les pages catégorie en JSON-LD `CollectionPage` — Google recommande titre/description uniques pour chaque page contenant des vidéos
-- [ ] Noms de fichiers descriptifs pour les images statiques — renommer `logo.png` en `petit-meme-logo.png` (Google recommande des noms descriptifs type `my-new-black-kitten.jpg` vs `IMG00023.JPG`)
+- [x] Ajouter `<video:family_friendly>yes</video:family_friendly>` dans le video sitemap — signal SafeSearch explicite
+- [x] Ajouter `name` et `description` uniques sur les pages catégorie en JSON-LD `CollectionPage` — déjà implémenté dans `buildCategoryJsonLd`
+- [x] Noms de fichiers descriptifs pour les images statiques — `logo.png` renommé en `petit-meme-logo.png`
 
 ---
 

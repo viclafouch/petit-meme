@@ -6,6 +6,7 @@ import { ShareMemeButton } from '@/components/Meme/share-meme-button'
 import ToggleLikeButton from '@/components/Meme/toggle-like-button'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { LoadingSpinner } from '@/components/ui/spinner'
+import { LOGO_PATH } from '@/constants/branding'
 import type { MemeWithVideo } from '@/constants/meme'
 import { buildVideoImageUrl, buildVideoStreamUrl } from '@/lib/bunny'
 import { getInfiniteReelsQueryOpts } from '@/lib/queries'
@@ -133,7 +134,7 @@ export const Reel = React.memo(
                 className={buttonVariants({ variant: 'outline', size: 'sm' })}
               >
                 <img
-                  src="/images/logo.png"
+                  src={LOGO_PATH}
                   alt={m.common_logo_alt()}
                   width={20}
                   height={20}

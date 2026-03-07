@@ -46,7 +46,7 @@ export const Navbar = () => {
   return (
     <header className="container flex h-14 items-center justify-between gap-4">
       <div className="flex flex-1 items-center justify-start gap-2">
-        <MobileNav links={navigationLinks} />
+        <MobileNav links={navigationLinks} user={user} />
         <Link
           to="/"
           className={cn(
@@ -65,9 +65,9 @@ export const Navbar = () => {
       </div>
       <NavigationMenu className="max-md:hidden">
         <NavigationMenuList>
-          {navigationLinks.map((link, index) => {
+          {navigationLinks.map((link) => {
             return (
-              <NavigationMenuItem key={index}>
+              <NavigationMenuItem key={link.to}>
                 <NavigationMenuLink
                   asChild
                   data-active={false}
@@ -86,8 +86,8 @@ export const Navbar = () => {
         </NavigationMenuList>
       </NavigationMenu>
       <div className="flex flex-1 items-center justify-end gap-3">
-        <LanguageSwitcher />
-        <ThemeSwitcher />
+        <LanguageSwitcher className="max-md:hidden" />
+        <ThemeSwitcher className="max-md:hidden" />
         {user ? (
           <UserDropdown user={user} />
         ) : (

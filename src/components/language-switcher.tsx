@@ -8,12 +8,17 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { getLocaleDisplayName, getLocaleFlag } from '@/helpers/locale'
 import { dismissLocaleBanner } from '@/lib/locale-banner'
+import { cn } from '@/lib/utils'
 import { m } from '@/paraglide/messages.js'
 import type { Locale } from '@/paraglide/runtime'
 import { getLocale, locales, setLocale } from '@/paraglide/runtime'
 import { updateUserLocale } from '@/server/user-locale'
 
-export const LanguageSwitcher = () => {
+type LanguageSwitcherParams = {
+  className?: string
+}
+
+export const LanguageSwitcher = ({ className }: LanguageSwitcherParams) => {
   const currentLocale = getLocale()
 
   const handleLocaleChange = (locale: Locale) => {
@@ -33,7 +38,7 @@ export const LanguageSwitcher = () => {
           variant="ghost"
           size="sm"
           aria-label={m.nav_switch_language()}
-          className="gap-1.5 px-2 text-xs font-medium"
+          className={cn('gap-1.5 px-2 text-xs font-medium', className)}
         >
           <span className="text-sm" aria-hidden="true">
             {getLocaleFlag(currentLocale)}

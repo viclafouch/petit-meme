@@ -58,8 +58,8 @@ export const UserDropdown = ({ user }: UserDropdownParams) => {
               {getUserInitials(user.name)}
             </AvatarFallback>
           </Avatar>
-          <div className="truncate">{user.name}</div>
-          <ChevronDown />
+          <div className="truncate max-md:hidden">{user.name}</div>
+          <ChevronDown className="max-md:hidden" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -101,11 +101,9 @@ export const UserDropdown = ({ user }: UserDropdownParams) => {
               }}
               className="flex-col items-start gap-0.5"
             >
-              <div className="flex gap-2 items-start">
+              <div className="flex items-start gap-2">
                 <CreditCard className="mt-0.5" />
-                <div className="flex flex-col">
-                  {m.nav_manage_subscription()}
-                </div>
+                {m.nav_manage_subscription()}
               </div>
             </DropdownMenuItem>
           )}

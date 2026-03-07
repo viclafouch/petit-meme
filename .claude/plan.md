@@ -82,7 +82,7 @@ Le site est un catalogue de mèmes vidéo. Chaque mème a un thumbnail JPG et un
 
 **Fichier :** `src/lib/seo.ts`
 
-- [ ] Ajouter `primaryImageOfPage` (ImageObject) dans le JSON-LD des pages meme
+- [x] Ajouter `primaryImageOfPage` (ImageObject) dans le JSON-LD des pages meme
 - [ ] Vérifier avec le Rich Results Test de Google après déploiement
 
 ### Priorité 2 — Images dans le sitemap
@@ -105,8 +105,8 @@ Ne pas oublier le namespace `xmlns:image="http://www.google.com/schemas/sitemap-
 
 **Fichier :** `src/routes/sitemap[.]xml.ts`
 
-- [ ] Ajouter le namespace image dans le sitemap
-- [ ] Ajouter `<image:image>` avec `<image:loc>` et `<image:title>` pour chaque page meme
+- [x] Ajouter le namespace image dans le sitemap
+- [x] Ajouter `<image:image>` avec `<image:loc>` et `<image:title>` pour chaque page meme
 
 ### Priorité 3 — Responsive images (`srcset`) sur les thumbnails
 
@@ -120,10 +120,7 @@ Ne pas oublier le namespace `xmlns:image="http://www.google.com/schemas/sitemap-
 
 **Fichiers :** `src/lib/bunny.ts`, `src/components/Meme/meme-video-thumbnail.tsx`, `src/routes/_public__root/_default/memes/$memeId.tsx`
 
-- [ ] Vérifier le support query params resize sur Bunny CDN video thumbnails
-- [ ] Si supporté : enrichir `buildVideoImageUrl()` avec des paramètres de dimensions
-- [ ] Ajouter `srcset` + `sizes` sur les thumbnails dans `meme-video-thumbnail.tsx`
-- [ ] Ajouter `srcset` + `sizes` sur le poster dans `$memeId.tsx`
+- ~~Annulé : Bunny CDN ne supporte pas les query params de resize sur les thumbnails vidéo~~
 
 ### Priorité 4 — Alt text plus descriptifs (quick fixes)
 
@@ -144,6 +141,29 @@ Ne pas oublier le namespace `xmlns:image="http://www.google.com/schemas/sitemap-
 
 - **AVIF** : Google l'indexe mais Bunny CDN ne le supporte pas en transformation automatique sur les thumbnails vidéo. Pas de gain sans pipeline de conversion côté serveur, et le coût Vercel Hobby ne le permet pas.
 - **URLs d'images inconsistantes** : Vérifié — `buildVideoImageUrl()` retourne toujours la même URL déterministe sans token ni timestamp. Pas d'action nécessaire.
+
+---
+
+## Google Video SEO (audit mars 2026)
+
+Audit basé sur les recommandations Google Video SEO (https://developers.google.com/search/docs/appearance/video).
+
+### Changements appliqués
+
+- [x] `max-video-preview:-1` dans le robots meta global (`__root.tsx`) — autorise Google à générer des aperçus vidéo sans limite de durée
+- [x] `og:type: video.other` + meta OG vidéo (`og:video`, `og:video:secure_url`, `og:video:type`, `og:video:width`, `og:video:height`) sur les pages meme — signale aux plateformes que la page contient une vidéo
+- [x] Video sitemap (`<video:video>` avec `thumbnail_loc`, `title`, `description`, `content_loc`, `player_loc`, `duration`, `publication_date`) — aide Google à découvrir et indexer les vidéos
+- [x] Suppression du `aggregateRating` fictif (4.8/5, 85 reviews) — données structurées fabricated = risque de pénalité Google
+
+### Items restants
+
+- [ ] Vérifier avec le Rich Results Test de Google après déploiement (images + vidéo)
+- [ ] Surveiller le Video Indexing Report dans Search Console après déploiement
+- [ ] `max-image-preview:large` dans le robots meta — autorise Google à afficher de grandes vignettes d'images dans les SERP (actuellement non spécifié, Google utilise la valeur par défaut qui peut limiter la taille)
+- [ ] Stocker `width`/`height` dans le modèle `Video` (migration additive) — permet des `og:video:width/height` corrects par meme au lieu du 1280x720 hardcodé. Utile si des memes verticaux/carrés sont ajoutés
+- [ ] Ajouter `<video:family_friendly>yes</video:family_friendly>` dans le video sitemap — signal SafeSearch explicite
+- [ ] Ajouter `name` et `description` uniques sur les pages catégorie en JSON-LD `CollectionPage` — Google recommande titre/description uniques pour chaque page contenant des vidéos
+- [ ] Noms de fichiers descriptifs pour les images statiques — renommer `logo.png` en `memes-by-lafouch-logo.png` (Google recommande des noms descriptifs type `my-new-black-kitten.jpg` vs `IMG00023.JPG`)
 
 ---
 

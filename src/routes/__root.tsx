@@ -235,7 +235,7 @@ export const Route = createRootRouteWithContext<{
         },
         {
           name: 'robots',
-          content: 'index,follow,noai,noimageai'
+          content: 'index,follow,max-video-preview:-1,noai,noimageai'
         },
         {
           httpEquiv: 'Content-Language',

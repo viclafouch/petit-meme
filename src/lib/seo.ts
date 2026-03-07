@@ -3,6 +3,7 @@ import type {
   CollectionPage,
   FAQPage,
   Graph,
+  ImageObject,
   ItemList,
   ListItem,
   Offer,
@@ -70,6 +71,7 @@ type SeoParams = {
   pathname?: string
   noindex?: boolean
   canonicalPathname?: string
+  ogType?: 'website' | 'video.other'
 }
 
 type SeoResult = {
@@ -86,7 +88,8 @@ export const seo = ({
   isAdmin = false,
   pathname = '/',
   noindex = false,
-  canonicalPathname
+  canonicalPathname,
+  ogType = 'website'
 }: SeoParams): SeoResult => {
   const locale = getLocale()
   const titlePrefixed = isAdmin
@@ -108,7 +111,7 @@ export const seo = ({
     { name: 'twitter:description', content: description },
     { name: 'twitter:creator', content: '@TrustedSheriff' },
     { name: 'twitter:site', content: '@TrustedSheriff' },
-    { property: 'og:type', content: 'website' },
+    { property: 'og:type', content: ogType },
     { property: 'og:site_name', content: 'Petit Meme' },
     { property: 'og:title', content: titlePrefixed },
     { property: 'og:description', content: description },
@@ -172,22 +175,36 @@ const buildDescription = (meme: MemeWithVideo & MemeWithCategories) => {
 
 export const buildMemeSeo = (
   meme: MemeWithVideo & MemeWithCategories,
-  overrideOptions: Partial<SeoParams> = {}
+  overrideOptions: Partial<Omit<SeoParams, 'ogType'>> = {}
 ): SeoResult => {
   const categoryKeywords = meme.categories.flatMap((category) => {
     return category.category.keywords
   })
 
   const description = buildDescription(meme)
+  const embedUrl = buildIframeVideoUrl(meme.video.bunnyId)
 
-  return seo({
+  const result = seo({
     title: meme.title,
     keywords: [...meme.keywords, ...categoryKeywords].join(', '),
     image: buildVideoImageUrl(meme.video.bunnyId),
     imageAlt: m.seo_meme_image_alt({ title: meme.title }),
     description,
+    ogType: 'video.other',
     ...overrideOptions
   })
+
+  return {
+    ...result,
+    meta: [
+      ...result.meta,
+      { property: 'og:video', content: embedUrl },
+      { property: 'og:video:secure_url', content: embedUrl },
+      { property: 'og:video:type', content: 'text/html' },
+      { property: 'og:video:width', content: '1280' },
+      { property: 'og:video:height', content: '720' }
+    ]
+  }
 }
 
 const formatSchemaDuration = (totalSeconds: number) => {
@@ -208,38 +225,52 @@ const formatSchemaDuration = (totalSeconds: number) => {
   return `PT${parts.join('')}`
 }
 
-export const buildMemeJsonLd = (meme: MemeWithVideo, originalUrl: string) => {
+type SchemaGraph = Graph & { '@context': 'https://schema.org' }
+
+export const buildMemeJsonLd = (
+  meme: MemeWithVideo,
+  originalUrl: string
+): SchemaGraph => {
+  const memeUrl = `${websiteOrigin}/memes/${meme.id}`
+  const thumbnailUrl = buildVideoImageUrl(meme.video.bunnyId)
+
   return {
     '@context': 'https://schema.org',
-    '@type': 'VideoObject',
-    name: meme.title,
-    '@id': `${websiteOrigin}/memes/${meme.id}#video`,
-    description: meme.description,
-    thumbnailUrl: buildVideoImageUrl(meme.video.bunnyId),
-    uploadDate: meme.createdAt.toISOString(),
-    embedUrl: buildIframeVideoUrl(meme.video.bunnyId),
-    duration: formatSchemaDuration(meme.video.duration),
-    requiresSubscription: false,
-    videoQuality: 'HD',
-    keywords: meme.keywords.join(', '),
-    contentUrl: originalUrl,
-    encodingFormat: 'video/mp4',
-    interactionStatistic: {
-      '@type': 'InteractionCounter',
-      interactionType: { '@type': 'WatchAction' },
-      userInteractionCount: meme.viewCount
-    },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.8',
-      bestRating: '5',
-      worstRating: '1',
-      ratingCount: '85'
-    }
-  } satisfies WithContext<VideoObject>
+    '@graph': [
+      {
+        '@type': 'WebPage',
+        '@id': `${memeUrl}#webpage`,
+        url: memeUrl,
+        isPartOf: { '@id': websiteId },
+        primaryImageOfPage: {
+          '@type': 'ImageObject',
+          contentUrl: thumbnailUrl
+        } satisfies ImageObject,
+        mainEntity: { '@id': `${memeUrl}#video` }
+      } satisfies WebPage,
+      {
+        '@type': 'VideoObject',
+        '@id': `${memeUrl}#video`,
+        name: meme.title,
+        description: meme.description,
+        thumbnailUrl,
+        uploadDate: meme.createdAt.toISOString(),
+        embedUrl: buildIframeVideoUrl(meme.video.bunnyId),
+        duration: formatSchemaDuration(meme.video.duration),
+        requiresSubscription: false,
+        videoQuality: 'HD',
+        keywords: meme.keywords.join(', '),
+        contentUrl: originalUrl,
+        encodingFormat: 'video/mp4',
+        interactionStatistic: {
+          '@type': 'InteractionCounter',
+          interactionType: { '@type': 'WatchAction' },
+          userInteractionCount: meme.viewCount
+        }
+      } satisfies VideoObject
+    ]
+  }
 }
-
-type SchemaGraph = Graph & { '@context': 'https://schema.org' }
 
 export const buildCategoryJsonLd = (
   category: Pick<CategoryModel, 'slug' | 'title'> | undefined,

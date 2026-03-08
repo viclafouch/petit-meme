@@ -187,6 +187,7 @@ export type CategoryWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Category"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Category"> | Date | string
   memes?: Prisma.MemeCategoryListRelationFilter
+  translations?: Prisma.CategoryTranslationListRelationFilter
 }
 
 export type CategoryOrderByWithRelationInput = {
@@ -197,6 +198,7 @@ export type CategoryOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   memes?: Prisma.MemeCategoryOrderByRelationAggregateInput
+  translations?: Prisma.CategoryTranslationOrderByRelationAggregateInput
   _relevance?: Prisma.CategoryOrderByRelevanceInput
 }
 
@@ -211,6 +213,7 @@ export type CategoryWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Category"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Category"> | Date | string
   memes?: Prisma.MemeCategoryListRelationFilter
+  translations?: Prisma.CategoryTranslationListRelationFilter
 }, "id" | "slug">
 
 export type CategoryOrderByWithAggregationInput = {
@@ -245,6 +248,7 @@ export type CategoryCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   memes?: Prisma.MemeCategoryCreateNestedManyWithoutCategoryInput
+  translations?: Prisma.CategoryTranslationCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryUncheckedCreateInput = {
@@ -255,6 +259,7 @@ export type CategoryUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   memes?: Prisma.MemeCategoryUncheckedCreateNestedManyWithoutCategoryInput
+  translations?: Prisma.CategoryTranslationUncheckedCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryUpdateInput = {
@@ -265,6 +270,7 @@ export type CategoryUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memes?: Prisma.MemeCategoryUpdateManyWithoutCategoryNestedInput
+  translations?: Prisma.CategoryTranslationUpdateManyWithoutCategoryNestedInput
 }
 
 export type CategoryUncheckedUpdateInput = {
@@ -275,6 +281,7 @@ export type CategoryUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memes?: Prisma.MemeCategoryUncheckedUpdateManyWithoutCategoryNestedInput
+  translations?: Prisma.CategoryTranslationUncheckedUpdateManyWithoutCategoryNestedInput
 }
 
 export type CategoryCreateManyInput = {
@@ -371,6 +378,20 @@ export type CategoryUpdateOneRequiredWithoutMemesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CategoryUpdateToOneWithWhereWithoutMemesInput, Prisma.CategoryUpdateWithoutMemesInput>, Prisma.CategoryUncheckedUpdateWithoutMemesInput>
 }
 
+export type CategoryCreateNestedOneWithoutTranslationsInput = {
+  create?: Prisma.XOR<Prisma.CategoryCreateWithoutTranslationsInput, Prisma.CategoryUncheckedCreateWithoutTranslationsInput>
+  connectOrCreate?: Prisma.CategoryCreateOrConnectWithoutTranslationsInput
+  connect?: Prisma.CategoryWhereUniqueInput
+}
+
+export type CategoryUpdateOneRequiredWithoutTranslationsNestedInput = {
+  create?: Prisma.XOR<Prisma.CategoryCreateWithoutTranslationsInput, Prisma.CategoryUncheckedCreateWithoutTranslationsInput>
+  connectOrCreate?: Prisma.CategoryCreateOrConnectWithoutTranslationsInput
+  upsert?: Prisma.CategoryUpsertWithoutTranslationsInput
+  connect?: Prisma.CategoryWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CategoryUpdateToOneWithWhereWithoutTranslationsInput, Prisma.CategoryUpdateWithoutTranslationsInput>, Prisma.CategoryUncheckedUpdateWithoutTranslationsInput>
+}
+
 export type CategoryCreateWithoutMemesInput = {
   id?: string
   title: string
@@ -378,6 +399,7 @@ export type CategoryCreateWithoutMemesInput = {
   keywords?: Prisma.CategoryCreatekeywordsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
+  translations?: Prisma.CategoryTranslationCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryUncheckedCreateWithoutMemesInput = {
@@ -387,6 +409,7 @@ export type CategoryUncheckedCreateWithoutMemesInput = {
   keywords?: Prisma.CategoryCreatekeywordsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
+  translations?: Prisma.CategoryTranslationUncheckedCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryCreateOrConnectWithoutMemesInput = {
@@ -412,6 +435,7 @@ export type CategoryUpdateWithoutMemesInput = {
   keywords?: Prisma.CategoryUpdatekeywordsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  translations?: Prisma.CategoryTranslationUpdateManyWithoutCategoryNestedInput
 }
 
 export type CategoryUncheckedUpdateWithoutMemesInput = {
@@ -421,6 +445,63 @@ export type CategoryUncheckedUpdateWithoutMemesInput = {
   keywords?: Prisma.CategoryUpdatekeywordsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  translations?: Prisma.CategoryTranslationUncheckedUpdateManyWithoutCategoryNestedInput
+}
+
+export type CategoryCreateWithoutTranslationsInput = {
+  id?: string
+  title: string
+  slug: string
+  keywords?: Prisma.CategoryCreatekeywordsInput | string[]
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memes?: Prisma.MemeCategoryCreateNestedManyWithoutCategoryInput
+}
+
+export type CategoryUncheckedCreateWithoutTranslationsInput = {
+  id?: string
+  title: string
+  slug: string
+  keywords?: Prisma.CategoryCreatekeywordsInput | string[]
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memes?: Prisma.MemeCategoryUncheckedCreateNestedManyWithoutCategoryInput
+}
+
+export type CategoryCreateOrConnectWithoutTranslationsInput = {
+  where: Prisma.CategoryWhereUniqueInput
+  create: Prisma.XOR<Prisma.CategoryCreateWithoutTranslationsInput, Prisma.CategoryUncheckedCreateWithoutTranslationsInput>
+}
+
+export type CategoryUpsertWithoutTranslationsInput = {
+  update: Prisma.XOR<Prisma.CategoryUpdateWithoutTranslationsInput, Prisma.CategoryUncheckedUpdateWithoutTranslationsInput>
+  create: Prisma.XOR<Prisma.CategoryCreateWithoutTranslationsInput, Prisma.CategoryUncheckedCreateWithoutTranslationsInput>
+  where?: Prisma.CategoryWhereInput
+}
+
+export type CategoryUpdateToOneWithWhereWithoutTranslationsInput = {
+  where?: Prisma.CategoryWhereInput
+  data: Prisma.XOR<Prisma.CategoryUpdateWithoutTranslationsInput, Prisma.CategoryUncheckedUpdateWithoutTranslationsInput>
+}
+
+export type CategoryUpdateWithoutTranslationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  keywords?: Prisma.CategoryUpdatekeywordsInput | string[]
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memes?: Prisma.MemeCategoryUpdateManyWithoutCategoryNestedInput
+}
+
+export type CategoryUncheckedUpdateWithoutTranslationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  keywords?: Prisma.CategoryUpdatekeywordsInput | string[]
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memes?: Prisma.MemeCategoryUncheckedUpdateManyWithoutCategoryNestedInput
 }
 
 
@@ -430,10 +511,12 @@ export type CategoryUncheckedUpdateWithoutMemesInput = {
 
 export type CategoryCountOutputType = {
   memes: number
+  translations: number
 }
 
 export type CategoryCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   memes?: boolean | CategoryCountOutputTypeCountMemesArgs
+  translations?: boolean | CategoryCountOutputTypeCountTranslationsArgs
 }
 
 /**
@@ -453,6 +536,13 @@ export type CategoryCountOutputTypeCountMemesArgs<ExtArgs extends runtime.Types.
   where?: Prisma.MemeCategoryWhereInput
 }
 
+/**
+ * CategoryCountOutputType without action
+ */
+export type CategoryCountOutputTypeCountTranslationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CategoryTranslationWhereInput
+}
+
 
 export type CategorySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -462,6 +552,7 @@ export type CategorySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   createdAt?: boolean
   updatedAt?: boolean
   memes?: boolean | Prisma.Category$memesArgs<ExtArgs>
+  translations?: boolean | Prisma.Category$translationsArgs<ExtArgs>
   _count?: boolean | Prisma.CategoryCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["category"]>
 
@@ -495,6 +586,7 @@ export type CategorySelectScalar = {
 export type CategoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "slug" | "keywords" | "createdAt" | "updatedAt", ExtArgs["result"]["category"]>
 export type CategoryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   memes?: boolean | Prisma.Category$memesArgs<ExtArgs>
+  translations?: boolean | Prisma.Category$translationsArgs<ExtArgs>
   _count?: boolean | Prisma.CategoryCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type CategoryIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -504,6 +596,7 @@ export type $CategoryPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   name: "Category"
   objects: {
     memes: Prisma.$MemeCategoryPayload<ExtArgs>[]
+    translations: Prisma.$CategoryTranslationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -907,6 +1000,7 @@ readonly fields: CategoryFieldRefs;
 export interface Prisma__CategoryClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   memes<T extends Prisma.Category$memesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Category$memesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MemeCategoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  translations<T extends Prisma.Category$translationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Category$translationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CategoryTranslationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1351,6 +1445,30 @@ export type Category$memesArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.MemeCategoryScalarFieldEnum | Prisma.MemeCategoryScalarFieldEnum[]
+}
+
+/**
+ * Category.translations
+ */
+export type Category$translationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CategoryTranslation
+   */
+  select?: Prisma.CategoryTranslationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CategoryTranslation
+   */
+  omit?: Prisma.CategoryTranslationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CategoryTranslationInclude<ExtArgs> | null
+  where?: Prisma.CategoryTranslationWhereInput
+  orderBy?: Prisma.CategoryTranslationOrderByWithRelationInput | Prisma.CategoryTranslationOrderByWithRelationInput[]
+  cursor?: Prisma.CategoryTranslationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CategoryTranslationScalarFieldEnum | Prisma.CategoryTranslationScalarFieldEnum[]
 }
 
 /**

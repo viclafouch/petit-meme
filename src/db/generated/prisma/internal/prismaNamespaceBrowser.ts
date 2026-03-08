@@ -65,7 +65,9 @@ export const ModelName = {
   Account: 'Account',
   Verification: 'Verification',
   StudioGeneration: 'StudioGeneration',
-  RateLimit: 'RateLimit'
+  RateLimit: 'RateLimit',
+  MemeTranslation: 'MemeTranslation',
+  CategoryTranslation: 'CategoryTranslation'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -135,6 +137,7 @@ export const MemeScalarFieldEnum = {
   tweetUrl: 'tweetUrl',
   description: 'description',
   keywords: 'keywords',
+  contentLocale: 'contentLocale',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   publishedAt: 'publishedAt',
@@ -287,6 +290,33 @@ export const RateLimitScalarFieldEnum = {
 } as const
 
 export type RateLimitScalarFieldEnum = (typeof RateLimitScalarFieldEnum)[keyof typeof RateLimitScalarFieldEnum]
+
+
+export const MemeTranslationScalarFieldEnum = {
+  id: 'id',
+  memeId: 'memeId',
+  locale: 'locale',
+  title: 'title',
+  description: 'description',
+  keywords: 'keywords',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MemeTranslationScalarFieldEnum = (typeof MemeTranslationScalarFieldEnum)[keyof typeof MemeTranslationScalarFieldEnum]
+
+
+export const CategoryTranslationScalarFieldEnum = {
+  id: 'id',
+  categoryId: 'categoryId',
+  locale: 'locale',
+  title: 'title',
+  keywords: 'keywords',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CategoryTranslationScalarFieldEnum = (typeof CategoryTranslationScalarFieldEnum)[keyof typeof CategoryTranslationScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -480,4 +510,27 @@ export const RateLimitOrderByRelevanceFieldEnum = {
 } as const
 
 export type RateLimitOrderByRelevanceFieldEnum = (typeof RateLimitOrderByRelevanceFieldEnum)[keyof typeof RateLimitOrderByRelevanceFieldEnum]
+
+
+export const MemeTranslationOrderByRelevanceFieldEnum = {
+  id: 'id',
+  memeId: 'memeId',
+  locale: 'locale',
+  title: 'title',
+  description: 'description',
+  keywords: 'keywords'
+} as const
+
+export type MemeTranslationOrderByRelevanceFieldEnum = (typeof MemeTranslationOrderByRelevanceFieldEnum)[keyof typeof MemeTranslationOrderByRelevanceFieldEnum]
+
+
+export const CategoryTranslationOrderByRelevanceFieldEnum = {
+  id: 'id',
+  categoryId: 'categoryId',
+  locale: 'locale',
+  title: 'title',
+  keywords: 'keywords'
+} as const
+
+export type CategoryTranslationOrderByRelevanceFieldEnum = (typeof CategoryTranslationOrderByRelevanceFieldEnum)[keyof typeof CategoryTranslationOrderByRelevanceFieldEnum]
 

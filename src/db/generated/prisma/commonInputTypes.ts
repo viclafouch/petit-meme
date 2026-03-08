@@ -117,6 +117,13 @@ export type StringNullableFilter<$PrismaModel = never> = {
   not?: Prisma.NestedStringNullableFilter<$PrismaModel> | string | null
 }
 
+export type EnumMemeContentLocaleFilter<$PrismaModel = never> = {
+  equals?: $Enums.MemeContentLocale | Prisma.EnumMemeContentLocaleFieldRefInput<$PrismaModel>
+  in?: $Enums.MemeContentLocale[] | Prisma.ListEnumMemeContentLocaleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MemeContentLocale[] | Prisma.ListEnumMemeContentLocaleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMemeContentLocaleFilter<$PrismaModel> | $Enums.MemeContentLocale
+}
+
 export type DateTimeNullableFilter<$PrismaModel = never> = {
   equals?: Date | string | Prisma.DateTimeFieldRefInput<$PrismaModel> | null
   in?: Date[] | string[] | Prisma.ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -157,6 +164,16 @@ export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedStringNullableFilter<$PrismaModel>
   _max?: Prisma.NestedStringNullableFilter<$PrismaModel>
+}
+
+export type EnumMemeContentLocaleWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.MemeContentLocale | Prisma.EnumMemeContentLocaleFieldRefInput<$PrismaModel>
+  in?: $Enums.MemeContentLocale[] | Prisma.ListEnumMemeContentLocaleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MemeContentLocale[] | Prisma.ListEnumMemeContentLocaleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMemeContentLocaleWithAggregatesFilter<$PrismaModel> | $Enums.MemeContentLocale
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumMemeContentLocaleFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumMemeContentLocaleFilter<$PrismaModel>
 }
 
 export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -442,6 +459,13 @@ export type NestedStringNullableFilter<$PrismaModel = never> = {
   not?: Prisma.NestedStringNullableFilter<$PrismaModel> | string | null
 }
 
+export type NestedEnumMemeContentLocaleFilter<$PrismaModel = never> = {
+  equals?: $Enums.MemeContentLocale | Prisma.EnumMemeContentLocaleFieldRefInput<$PrismaModel>
+  in?: $Enums.MemeContentLocale[] | Prisma.ListEnumMemeContentLocaleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MemeContentLocale[] | Prisma.ListEnumMemeContentLocaleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMemeContentLocaleFilter<$PrismaModel> | $Enums.MemeContentLocale
+}
+
 export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
   equals?: Date | string | Prisma.DateTimeFieldRefInput<$PrismaModel> | null
   in?: Date[] | string[] | Prisma.ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -487,6 +511,16 @@ export type NestedIntNullableFilter<$PrismaModel = never> = {
   gt?: number | Prisma.IntFieldRefInput<$PrismaModel>
   gte?: number | Prisma.IntFieldRefInput<$PrismaModel>
   not?: Prisma.NestedIntNullableFilter<$PrismaModel> | number | null
+}
+
+export type NestedEnumMemeContentLocaleWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.MemeContentLocale | Prisma.EnumMemeContentLocaleFieldRefInput<$PrismaModel>
+  in?: $Enums.MemeContentLocale[] | Prisma.ListEnumMemeContentLocaleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MemeContentLocale[] | Prisma.ListEnumMemeContentLocaleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMemeContentLocaleWithAggregatesFilter<$PrismaModel> | $Enums.MemeContentLocale
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumMemeContentLocaleFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumMemeContentLocaleFilter<$PrismaModel>
 }
 
 export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {

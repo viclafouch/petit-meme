@@ -25,3 +25,12 @@ export const MemeStatus = {
 } as const
 
 export type MemeStatus = (typeof MemeStatus)[keyof typeof MemeStatus]
+
+
+export const MemeContentLocale = {
+  FR: 'FR',
+  EN: 'EN',
+  UNIVERSAL: 'UNIVERSAL'
+} as const
+
+export type MemeContentLocale = (typeof MemeContentLocale)[keyof typeof MemeContentLocale]

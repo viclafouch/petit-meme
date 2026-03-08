@@ -1,5 +1,6 @@
 import type { MemeWithCategories, MemeWithVideo } from '@/constants/meme'
 import { MINUTE } from '@/constants/time'
+import { MemeContentLocale } from '@/db/generated/prisma/enums'
 import { clientEnv } from '@/env/client'
 import { serverEnv } from '@/env/server'
 import { buildVideoImageUrl } from '@/lib/bunny'
@@ -151,6 +152,7 @@ export function getHighlightedTitle(hit: Hit<AlgoliaMemeRecord>) {
 export function normalizeAlgoliaHit(hit: AlgoliaMemeRecord): AlgoliaMemeRecord {
   return {
     ...hit,
+    contentLocale: hit.contentLocale ?? MemeContentLocale.FR,
     createdAt: new Date(hit.createdAt),
     updatedAt: new Date(hit.updatedAt),
     publishedAt: hit.publishedAt ? new Date(hit.publishedAt) : null
@@ -158,15 +160,9 @@ export function normalizeAlgoliaHit(hit: AlgoliaMemeRecord): AlgoliaMemeRecord {
 }
 
 export function memeToAlgoliaRecord(meme: MemeWithVideo & MemeWithCategories) {
-  const categoryTitles: string[] = []
-  const categoryKeywords: string[][] = []
-  const categorySlugs: string[] = []
-
-  for (const { category } of meme.categories) {
-    categoryTitles.push(category.title)
-    categoryKeywords.push(category.keywords)
-    categorySlugs.push(category.slug)
-  }
+  const categories = meme.categories.map(({ category }) => {
+    return category
+  })
 
   return {
     objectID: meme.id,
@@ -174,6 +170,7 @@ export function memeToAlgoliaRecord(meme: MemeWithVideo & MemeWithCategories) {
     title: meme.title,
     description: meme.description,
     keywords: meme.keywords,
+    contentLocale: meme.contentLocale,
     status: meme.status,
     viewCount: meme.viewCount,
     shareCount: meme.shareCount,
@@ -189,9 +186,15 @@ export function memeToAlgoliaRecord(meme: MemeWithVideo & MemeWithCategories) {
       duration: meme.video.duration,
       bunnyStatus: meme.video.bunnyStatus
     },
-    categoryTitles,
-    categoryKeywords,
-    categorySlugs,
+    categoryTitles: categories.map((category) => {
+      return category.title
+    }),
+    categoryKeywords: categories.map((category) => {
+      return category.keywords
+    }),
+    categorySlugs: categories.map((category) => {
+      return category.slug
+    }),
     categoryCount: meme.categories.length,
     imageURL: buildVideoImageUrl(meme.video.bunnyId),
     createdAtTime: meme.createdAt.getTime(),

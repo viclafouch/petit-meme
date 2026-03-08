@@ -25,6 +25,11 @@ import { MemeStatus } from '@/db/generated/prisma/enums'
 import { clientEnv } from '@/env/client'
 import { serverEnv } from '@/env/server'
 import { truncateToUtcDay } from '@/helpers/date'
+import {
+  resolveCategoryTranslation,
+  resolveMemeTranslation,
+  VISIBLE_CONTENT_LOCALES
+} from '@/helpers/i18n-content'
 import type { AlgoliaMemeRecord } from '@/lib/algolia'
 import {
   ALGOLIA_RECOMMEND_CACHE_TTL,
@@ -43,6 +48,7 @@ import {
 import { auth } from '@/lib/auth'
 import { buildSignedOriginalUrl } from '@/lib/bunny'
 import { algoliaLogger, logger } from '@/lib/logger'
+import { getLocale } from '@/paraglide/runtime'
 import { createRateLimitMiddleware, extractClientIp } from '@/server/rate-limit'
 import { authUserRequiredMiddleware } from '@/server/user-auth'
 import { ensureAlgoliaUserToken } from '@/utils/tracking-cookies'
@@ -101,7 +107,36 @@ export const getMemeById = createServerFn({ method: 'GET' })
       throw notFound()
     }
 
-    return meme
+    const locale = getLocale()
+    const resolved = resolveMemeTranslation({
+      translations: meme.translations,
+      contentLocale: meme.contentLocale,
+      requestedLocale: locale,
+      fallback: meme
+    })
+
+    return {
+      ...meme,
+      title: resolved.title,
+      description: resolved.description,
+      keywords: resolved.keywords,
+      categories: meme.categories.map((memeCategory) => {
+        const resolvedCategory = resolveCategoryTranslation({
+          translations: memeCategory.category.translations,
+          requestedLocale: locale,
+          fallback: memeCategory.category
+        })
+
+        return {
+          ...memeCategory,
+          category: {
+            ...memeCategory.category,
+            title: resolvedCategory.title,
+            keywords: resolvedCategory.keywords
+          }
+        }
+      })
+    }
   })
 
 export const getVideoStatusById = createServerFn({ method: 'GET' })
@@ -197,6 +232,8 @@ export const getRecentCountMemes = createServerFn({ method: 'GET' }).handler(
 )
 
 const getBestMemesInternal = createServerOnlyFn(async () => {
+  const locale = getLocale()
+
   return prismaClient.meme.findMany({
     take: TRENDING_MEMES_COUNT,
     include: {
@@ -206,7 +243,8 @@ const getBestMemesInternal = createServerOnlyFn(async () => {
       viewCount: 'desc'
     },
     where: {
-      status: MemeStatus.PUBLISHED
+      status: MemeStatus.PUBLISHED,
+      contentLocale: { in: VISIBLE_CONTENT_LOCALES[locale] }
     }
   })
 })
@@ -297,9 +335,13 @@ export const getRandomMeme = createServerFn({ method: 'GET' })
     return z.string().optional().parse(data)
   })
   .handler(async ({ data: exceptId }) => {
-    const whereCondition = exceptId
-      ? { status: MemeStatus.PUBLISHED, id: { not: exceptId } }
-      : { status: MemeStatus.PUBLISHED }
+    const locale = getLocale()
+
+    const whereCondition = {
+      status: MemeStatus.PUBLISHED,
+      contentLocale: { in: VISIBLE_CONTENT_LOCALES[locale] },
+      ...(exceptId ? { id: { not: exceptId } } : {})
+    }
 
     const count = await prismaClient.meme.count({ where: whereCondition })
 

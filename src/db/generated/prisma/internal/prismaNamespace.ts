@@ -398,7 +398,9 @@ export const ModelName = {
   Account: 'Account',
   Verification: 'Verification',
   StudioGeneration: 'StudioGeneration',
-  RateLimit: 'RateLimit'
+  RateLimit: 'RateLimit',
+  MemeTranslation: 'MemeTranslation',
+  CategoryTranslation: 'CategoryTranslation'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -414,7 +416,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "userBookmark" | "category" | "memeCategory" | "video" | "meme" | "memeViewDaily" | "memeActionDaily" | "user" | "adminAuditLog" | "session" | "subscription" | "account" | "verification" | "studioGeneration" | "rateLimit"
+    modelProps: "userBookmark" | "category" | "memeCategory" | "video" | "meme" | "memeViewDaily" | "memeActionDaily" | "user" | "adminAuditLog" | "session" | "subscription" | "account" | "verification" | "studioGeneration" | "rateLimit" | "memeTranslation" | "categoryTranslation"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1528,6 +1530,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    MemeTranslation: {
+      payload: Prisma.$MemeTranslationPayload<ExtArgs>
+      fields: Prisma.MemeTranslationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MemeTranslationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeTranslationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MemeTranslationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeTranslationPayload>
+        }
+        findFirst: {
+          args: Prisma.MemeTranslationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeTranslationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MemeTranslationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeTranslationPayload>
+        }
+        findMany: {
+          args: Prisma.MemeTranslationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeTranslationPayload>[]
+        }
+        create: {
+          args: Prisma.MemeTranslationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeTranslationPayload>
+        }
+        createMany: {
+          args: Prisma.MemeTranslationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MemeTranslationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeTranslationPayload>[]
+        }
+        delete: {
+          args: Prisma.MemeTranslationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeTranslationPayload>
+        }
+        update: {
+          args: Prisma.MemeTranslationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeTranslationPayload>
+        }
+        deleteMany: {
+          args: Prisma.MemeTranslationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MemeTranslationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MemeTranslationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeTranslationPayload>[]
+        }
+        upsert: {
+          args: Prisma.MemeTranslationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeTranslationPayload>
+        }
+        aggregate: {
+          args: Prisma.MemeTranslationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMemeTranslation>
+        }
+        groupBy: {
+          args: Prisma.MemeTranslationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MemeTranslationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MemeTranslationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MemeTranslationCountAggregateOutputType> | number
+        }
+      }
+    }
+    CategoryTranslation: {
+      payload: Prisma.$CategoryTranslationPayload<ExtArgs>
+      fields: Prisma.CategoryTranslationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CategoryTranslationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryTranslationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CategoryTranslationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryTranslationPayload>
+        }
+        findFirst: {
+          args: Prisma.CategoryTranslationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryTranslationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CategoryTranslationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryTranslationPayload>
+        }
+        findMany: {
+          args: Prisma.CategoryTranslationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryTranslationPayload>[]
+        }
+        create: {
+          args: Prisma.CategoryTranslationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryTranslationPayload>
+        }
+        createMany: {
+          args: Prisma.CategoryTranslationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CategoryTranslationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryTranslationPayload>[]
+        }
+        delete: {
+          args: Prisma.CategoryTranslationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryTranslationPayload>
+        }
+        update: {
+          args: Prisma.CategoryTranslationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryTranslationPayload>
+        }
+        deleteMany: {
+          args: Prisma.CategoryTranslationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CategoryTranslationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CategoryTranslationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryTranslationPayload>[]
+        }
+        upsert: {
+          args: Prisma.CategoryTranslationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryTranslationPayload>
+        }
+        aggregate: {
+          args: Prisma.CategoryTranslationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCategoryTranslation>
+        }
+        groupBy: {
+          args: Prisma.CategoryTranslationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CategoryTranslationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CategoryTranslationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CategoryTranslationCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1618,6 +1768,7 @@ export const MemeScalarFieldEnum = {
   tweetUrl: 'tweetUrl',
   description: 'description',
   keywords: 'keywords',
+  contentLocale: 'contentLocale',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   publishedAt: 'publishedAt',
@@ -1770,6 +1921,33 @@ export const RateLimitScalarFieldEnum = {
 } as const
 
 export type RateLimitScalarFieldEnum = (typeof RateLimitScalarFieldEnum)[keyof typeof RateLimitScalarFieldEnum]
+
+
+export const MemeTranslationScalarFieldEnum = {
+  id: 'id',
+  memeId: 'memeId',
+  locale: 'locale',
+  title: 'title',
+  description: 'description',
+  keywords: 'keywords',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MemeTranslationScalarFieldEnum = (typeof MemeTranslationScalarFieldEnum)[keyof typeof MemeTranslationScalarFieldEnum]
+
+
+export const CategoryTranslationScalarFieldEnum = {
+  id: 'id',
+  categoryId: 'categoryId',
+  locale: 'locale',
+  title: 'title',
+  keywords: 'keywords',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CategoryTranslationScalarFieldEnum = (typeof CategoryTranslationScalarFieldEnum)[keyof typeof CategoryTranslationScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1965,6 +2143,29 @@ export const RateLimitOrderByRelevanceFieldEnum = {
 export type RateLimitOrderByRelevanceFieldEnum = (typeof RateLimitOrderByRelevanceFieldEnum)[keyof typeof RateLimitOrderByRelevanceFieldEnum]
 
 
+export const MemeTranslationOrderByRelevanceFieldEnum = {
+  id: 'id',
+  memeId: 'memeId',
+  locale: 'locale',
+  title: 'title',
+  description: 'description',
+  keywords: 'keywords'
+} as const
+
+export type MemeTranslationOrderByRelevanceFieldEnum = (typeof MemeTranslationOrderByRelevanceFieldEnum)[keyof typeof MemeTranslationOrderByRelevanceFieldEnum]
+
+
+export const CategoryTranslationOrderByRelevanceFieldEnum = {
+  id: 'id',
+  categoryId: 'categoryId',
+  locale: 'locale',
+  title: 'title',
+  keywords: 'keywords'
+} as const
+
+export type CategoryTranslationOrderByRelevanceFieldEnum = (typeof CategoryTranslationOrderByRelevanceFieldEnum)[keyof typeof CategoryTranslationOrderByRelevanceFieldEnum]
+
+
 
 /**
  * Field references
@@ -2010,6 +2211,20 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
  * Reference to a field of type 'Int[]'
  */
 export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
+ * Reference to a field of type 'MemeContentLocale'
+ */
+export type EnumMemeContentLocaleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MemeContentLocale'>
+    
+
+
+/**
+ * Reference to a field of type 'MemeContentLocale[]'
+ */
+export type ListEnumMemeContentLocaleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MemeContentLocale[]'>
     
 
 
@@ -2199,6 +2414,8 @@ export type GlobalOmitConfig = {
   verification?: Prisma.VerificationOmit
   studioGeneration?: Prisma.StudioGenerationOmit
   rateLimit?: Prisma.RateLimitOmit
+  memeTranslation?: Prisma.MemeTranslationOmit
+  categoryTranslation?: Prisma.CategoryTranslationOmit
 }
 
 /* Types for Logging */

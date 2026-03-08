@@ -38,7 +38,8 @@ model Category {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  memes MemeCategory[]
+  memes        MemeCategory[]
+  translations CategoryTranslation[]
 
   @@index([createdAt])
   @@map("category")
@@ -76,6 +77,14 @@ enum MemeStatus {
   @@map("meme_status")
 }
 
+enum MemeContentLocale {
+  FR
+  EN
+  UNIVERSAL
+
+  @@map("meme_content_locale")
+}
+
 model Meme {
   id            String         @id @default(cuid())
   title         String
@@ -86,12 +95,14 @@ model Meme {
   tweetUrl      String?        @unique @map("tweet_url")
   description   String         @default("")
   keywords      String[]       @default([])
+  contentLocale MemeContentLocale @default(FR) @map("content_locale")
   createdAt     DateTime       @default(now()) @map("created_at")
   updatedAt     DateTime       @updatedAt @map("updated_at")
   publishedAt   DateTime?      @map("published_at")
   video         Video          @relation(fields: [videoId], references: [id], onDelete: Cascade)
   bookmarkedBy  UserBookmark[]
   categories    MemeCategory[]
+  translations  MemeTranslation[]
   status        MemeStatus     @default(PUBLISHED)
   viewsDaily          MemeViewDaily[]
   actionsDaily        MemeActionDaily[]
@@ -100,6 +111,7 @@ model Meme {
   @@index([status])
   @@index([status, viewCount])
   @@index([status, publishedAt])
+  @@index([status, contentLocale])
   @@map("meme")
 }
 
@@ -273,4 +285,35 @@ model RateLimit {
 
   @@index([lastRequest])
   @@map("rate_limit")
+}
+
+model MemeTranslation {
+  id          String   @id @default(cuid())
+  memeId      String   @map("meme_id")
+  locale      String
+  title       String
+  description String   @default("")
+  keywords    String[] @default([])
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  meme Meme @relation(fields: [memeId], references: [id], onDelete: Cascade)
+
+  @@unique([memeId, locale])
+  @@map("meme_translation")
+}
+
+model CategoryTranslation {
+  id         String   @id @default(cuid())
+  categoryId String   @map("category_id")
+  locale     String
+  title      String
+  keywords   String[] @default([])
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, locale])
+  @@map("category_translation")
 }

@@ -3,7 +3,9 @@ import { CATEGORY_SLUG_REGEX } from '@/constants/meme'
 import { prismaClient } from '@/db'
 import type { Prisma } from '@/db/generated/prisma/client'
 import { MemeStatus } from '@/db/generated/prisma/enums'
+import { resolveCategoryTranslation } from '@/helpers/i18n-content'
 import { adminLogger } from '@/lib/logger'
+import { getLocale, type Locale } from '@/paraglide/runtime'
 import { logAuditAction } from '@/server/audit'
 import { adminRequiredMiddleware } from '@/server/user-auth'
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
@@ -17,6 +19,7 @@ export const CATEGORY_FORM_SCHEMA = z.object({
 const CATEGORIES_CACHE_TTL_MS = 24 * 60 * 60 * 1000
 
 const CATEGORIES_INCLUDE = {
+  translations: true,
   _count: {
     select: {
       memes: {
@@ -49,10 +52,33 @@ export const invalidateCategoriesCache = createServerOnlyFn(() => {
   categoriesCache = null
 })
 
+type ResolveCategoriesParams = {
+  categories: Awaited<ReturnType<typeof fetchCategories>>
+  locale: Locale
+}
+
+const resolveCategories = ({ categories, locale }: ResolveCategoriesParams) => {
+  return categories.map((category) => {
+    const resolved = resolveCategoryTranslation({
+      translations: category.translations,
+      requestedLocale: locale,
+      fallback: category
+    })
+
+    return {
+      ...category,
+      title: resolved.title,
+      keywords: resolved.keywords
+    }
+  })
+}
+
 export const getCategories = createServerFn({ method: 'GET' }).handler(
   async () => {
+    const locale = getLocale()
+
     if (categoriesCache && categoriesCache.expiresAt > Date.now()) {
-      return categoriesCache.data
+      return resolveCategories({ categories: categoriesCache.data, locale })
     }
 
     const data = await fetchCategories()
@@ -62,7 +88,7 @@ export const getCategories = createServerFn({ method: 'GET' }).handler(
       expiresAt: Date.now() + CATEGORIES_CACHE_TTL_MS
     }
 
-    return data
+    return resolveCategories({ categories: data, locale })
   }
 )
 

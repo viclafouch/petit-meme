@@ -1,12 +1,13 @@
 /* eslint-disable no-console */
 import { hashPassword } from 'better-auth/crypto'
 import { z } from 'zod'
+import { MEME_ALGOLIA_INCLUDE } from '@/constants/meme'
 import { prismaClient } from '@/db'
 import { clientEnv } from '@/env/client'
 import {
   algoliaAdminClient,
-  algoliaIndexName,
-  memeToAlgoliaRecord
+  resolveAlgoliaIndexName,
+  syncMemeToAllIndices
 } from '@/lib/algolia'
 import {
   createVideo,
@@ -21,6 +22,7 @@ import {
 } from '@/lib/react-tweet'
 import { stripeClient } from '@/lib/stripe'
 import { fetchWithZod } from '@/lib/utils'
+import { locales } from '@/paraglide/runtime'
 import { logEnvironmentInfo } from '../scripts/lib/env-guard'
 import mocks from './seed-mock.json' with { type: 'json' }
 
@@ -46,24 +48,22 @@ const createMemeFromTwitterUrl = async (tweetUrl: string, title: string) => {
           bunnyStatus: 4,
           bunnyId: videoId
         }
+      },
+      translations: {
+        create: {
+          locale: 'fr',
+          title,
+          description: '',
+          keywords: []
+        }
       }
     },
-    include: {
-      video: true,
-      categories: {
-        include: { category: true }
-      }
-    }
+    include: MEME_ALGOLIA_INCLUDE
   })
 
-  await algoliaAdminClient
-    .saveObject({
-      indexName: algoliaIndexName,
-      body: memeToAlgoliaRecord(meme)
-    })
-    .catch((error) => {
-      console.error(error)
-    })
+  await syncMemeToAllIndices(meme).catch((error) => {
+    console.error(error)
+  })
 
   await uploadVideo(videoId, buffer)
 }
@@ -89,11 +89,15 @@ const clearDatabase = async () => {
 }
 
 const clearAlgolia = async () => {
-  console.log('Clearing Algolia index...')
-  await algoliaAdminClient.replaceAllObjects({
-    indexName: algoliaIndexName,
-    objects: []
-  })
+  console.log('Clearing Algolia indices...')
+  await Promise.all(
+    locales.map((locale) => {
+      return algoliaAdminClient.replaceAllObjects({
+        indexName: resolveAlgoliaIndexName(locale),
+        objects: []
+      })
+    })
+  )
   console.log('  Algolia cleared')
 }
 

@@ -13,7 +13,8 @@ export const MEME_FULL_INCLUDE = {
 
 export const MEME_ALGOLIA_INCLUDE = {
   video: true,
-  categories: { include: { category: true } }
+  translations: true,
+  categories: { include: { category: { include: { translations: true } } } }
 } as const satisfies Prisma.MemeInclude
 
 export const DEFAULT_MEME_TITLE = 'Sans titre'

@@ -1,12 +1,10 @@
 import { z } from 'zod'
-import { MEME_FULL_INCLUDE } from '@/constants/meme'
+import { MEME_ALGOLIA_INCLUDE } from '@/constants/meme'
 import { prismaClient } from '@/db'
 import {
-  algoliaAdminClient,
-  algoliaIndexName,
   invalidateAlgoliaCache,
-  memeToAlgoliaRecord,
-  safeAlgoliaOp
+  safeAlgoliaOp,
+  syncMemeToAllIndices
 } from '@/lib/algolia'
 import { getVideoPlayData } from '@/lib/bunny'
 import { bunnyLogger } from '@/lib/logger'
@@ -57,20 +55,13 @@ export const Route = createFileRoute('/api/bunny')({
             },
             include: {
               meme: {
-                include: MEME_FULL_INCLUDE
+                include: MEME_ALGOLIA_INCLUDE
               }
             }
           })
 
           if (meme) {
-            await safeAlgoliaOp(
-              algoliaAdminClient.partialUpdateObject({
-                indexName: algoliaIndexName,
-                objectID: meme.id,
-                attributesToUpdate: memeToAlgoliaRecord(meme)
-              })
-            )
-
+            await safeAlgoliaOp(syncMemeToAllIndices(meme))
             invalidateAlgoliaCache()
           }
 

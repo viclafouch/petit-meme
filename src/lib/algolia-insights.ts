@@ -2,6 +2,7 @@ import { COOKIE_ALGOLIA_USER_TOKEN_KEY } from '@/constants/cookie'
 import { clientEnv } from '@/env/client'
 import { readClientCookie } from '@/helpers/cookie'
 import { hasAcceptedCookies } from '@/lib/cookie-consent'
+import { getLocale } from '@/paraglide/runtime'
 import type {
   ClickedObjectIDs,
   ClickedObjectIDsAfterSearch,
@@ -34,6 +35,10 @@ function getUserToken() {
 }
 
 const ALGOLIA_MAX_OBJECTS_PER_EVENT = 20
+
+function getInsightsIndex() {
+  return `${clientEnv.VITE_ALGOLIA_INDEX}_${getLocale()}`
+}
 
 function pushEvent(event: EventsItems) {
   algoliaInsights.pushEvents({ events: [event] }).catch(logInsightsError)
@@ -72,7 +77,7 @@ export const sendClickEvent = createClientOnlyFn(
     const base = {
       eventType: 'click' as const,
       eventName: 'Meme Clicked',
-      index: clientEnv.VITE_ALGOLIA_INDEX,
+      index: getInsightsIndex(),
       objectIDs: [objectID],
       userToken,
       authenticatedUserToken
@@ -110,7 +115,7 @@ export const sendConversionEvent = createClientOnlyFn(
     const base = {
       eventType: 'conversion' as const,
       eventName,
-      index: clientEnv.VITE_ALGOLIA_INDEX,
+      index: getInsightsIndex(),
       objectIDs: [objectID],
       userToken,
       authenticatedUserToken
@@ -145,7 +150,7 @@ export const sendViewEvent = createClientOnlyFn(
       pushEvent({
         eventType: 'view',
         eventName: 'Memes Viewed',
-        index: clientEnv.VITE_ALGOLIA_INDEX,
+        index: getInsightsIndex(),
         objectIDs: objectIDs.slice(
           offset,
           offset + ALGOLIA_MAX_OBJECTS_PER_EVENT

@@ -1,4 +1,7 @@
-import type { MemeContentLocale } from '@/db/generated/prisma/enums'
+import {
+  type MemeContentLocale,
+  MemeContentLocale as MemeContentLocaleEnum
+} from '@/db/generated/prisma/enums'
 import type { CategoryTranslationModel } from '@/db/generated/prisma/models/CategoryTranslation'
 import type { MemeTranslationModel } from '@/db/generated/prisma/models/MemeTranslation'
 import { type Locale, locales } from '@/paraglide/runtime'
@@ -40,10 +43,22 @@ export const REQUIRED_TRANSLATION_LOCALES = {
   UNIVERSAL: ['fr', 'en']
 } as const satisfies Record<MemeContentLocale, readonly Locale[]>
 
-export const VISIBLE_CONTENT_LOCALES = {
+export const VISIBLE_CONTENT_LOCALES: Record<Locale, MemeContentLocale[]> = {
   fr: ['FR', 'EN', 'UNIVERSAL'],
   en: ['EN', 'UNIVERSAL']
-} satisfies Record<Locale, MemeContentLocale[]>
+}
+
+export const ALGOLIA_TARGET_LOCALES: Record<MemeContentLocale, Locale[]> =
+  Object.fromEntries(
+    Object.values(MemeContentLocaleEnum).map((contentLocale) => {
+      return [
+        contentLocale,
+        locales.filter((locale) => {
+          return VISIBLE_CONTENT_LOCALES[locale].includes(contentLocale)
+        })
+      ]
+    })
+  ) as Record<MemeContentLocale, Locale[]>
 
 export const buildLocaleRecord = <T>(factory: (locale: Locale) => T) => {
   return Object.fromEntries(

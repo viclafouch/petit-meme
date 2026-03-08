@@ -1,10 +1,7 @@
 /* eslint-disable no-await-in-loop */
+import { MEME_ALGOLIA_INCLUDE, type MemeAlgoliaData } from '@/constants/meme'
 import { prismaClient } from '@/db'
-import {
-  algoliaAdminClient,
-  algoliaIndexName,
-  memeToAlgoliaRecord
-} from '@/lib/algolia'
+import { replaceAllIndicesWithMemes } from '@/lib/algolia'
 import { cronLogger } from '@/lib/logger'
 import { verifyCronSecret } from '@/utils/cron-auth'
 import { createFileRoute } from '@tanstack/react-router'
@@ -24,7 +21,7 @@ export const Route = createFileRoute('/api/cron/sync-algolia')({
         }
 
         try {
-          const records = []
+          const allMemes: MemeAlgoliaData[] = []
           let cursor: string | undefined
 
           while (true) {
@@ -32,33 +29,35 @@ export const Route = createFileRoute('/api/cron/sync-algolia')({
               take: BATCH_SIZE,
               ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
               orderBy: { id: 'asc' },
-              include: {
-                video: true,
-                categories: {
-                  include: { category: true }
-                }
-              }
+              include: MEME_ALGOLIA_INCLUDE
             })
 
             if (memes.length === 0) {
               break
             }
 
-            records.push(...memes.map(memeToAlgoliaRecord))
+            allMemes.push(...memes)
 
             cursor = memes.at(-1)?.id
           }
 
-          await algoliaAdminClient.replaceAllObjects({
-            indexName: algoliaIndexName,
-            objects: records
-          })
+          const results = await replaceAllIndicesWithMemes(allMemes)
 
-          log.info({ totalRecords: records.length }, 'Sync completed')
+          const summary = Object.fromEntries(
+            results.map(({ locale, count }) => {
+              return [locale, count]
+            })
+          )
+
+          log.info(
+            { totalMemes: allMemes.length, indices: summary },
+            'Sync completed'
+          )
 
           return Response.json({
             success: true,
-            totalRecords: records.length
+            totalMemes: allMemes.length,
+            indices: summary
           })
         } catch (error) {
           log.error({ err: error }, 'Algolia sync cron failed')

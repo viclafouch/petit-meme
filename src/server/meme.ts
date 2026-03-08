@@ -35,20 +35,20 @@ import {
   ALGOLIA_RECOMMEND_CACHE_TTL,
   ALGOLIA_SEARCH_PARAMS_BASE,
   ALGOLIA_SEARCH_RETRIEVE,
-  algoliaIndexName,
-  algoliaIndexPopular,
-  algoliaIndexRecent,
   algoliaRecommendClient,
   algoliaSearchClient,
   getHighlightedTitle,
   normalizeAlgoliaHit,
+  resolveAlgoliaIndexName,
+  resolveAlgoliaReplicaPopular,
+  resolveAlgoliaReplicaRecent,
   safeAlgoliaOp,
   withAlgoliaCache
 } from '@/lib/algolia'
 import { auth } from '@/lib/auth'
 import { buildSignedOriginalUrl } from '@/lib/bunny'
 import { algoliaLogger, logger } from '@/lib/logger'
-import { getLocale } from '@/paraglide/runtime'
+import { getLocale, type Locale } from '@/paraglide/runtime'
 import { createRateLimitMiddleware, extractClientIp } from '@/server/rate-limit'
 import { authUserRequiredMiddleware } from '@/server/user-auth'
 import { ensureAlgoliaUserToken } from '@/utils/tracking-cookies'
@@ -74,20 +74,24 @@ function buildMemeFilters(category: string | undefined, thirtyDaysAgo: number) {
   return filters.join(' AND ')
 }
 
-function resolveIndexName(category: string | undefined, hasQuery: boolean) {
+function resolveSearchIndex(
+  category: string | undefined,
+  hasQuery: boolean,
+  locale: Locale
+) {
   if (hasQuery) {
-    return algoliaIndexName
+    return resolveAlgoliaIndexName(locale)
   }
 
   if (category === POPULAR_CATEGORY_SLUG) {
-    return algoliaIndexPopular
+    return resolveAlgoliaReplicaPopular(locale)
   }
 
   if (category === NEWS_CATEGORY_SLUG) {
-    return algoliaIndexRecent
+    return resolveAlgoliaReplicaRecent(locale)
   }
 
-  return algoliaIndexName
+  return resolveAlgoliaIndexName(locale)
 }
 
 export const getMemeById = createServerFn({ method: 'GET' })
@@ -166,8 +170,9 @@ export const getVideoStatusById = createServerFn({ method: 'GET' })
 export const getMemes = createServerFn({ method: 'GET' })
   .inputValidator(MEMES_FILTERS_SCHEMA)
   .handler(async ({ data }) => {
+    const locale = getLocale()
     const hasQuery = Boolean(data.query)
-    const indexName = resolveIndexName(data.category, hasQuery)
+    const indexName = resolveSearchIndex(data.category, hasQuery, locale)
     const cacheKey = `${indexName}:${data.query ?? ''}:${data.page ?? 1}:${data.category ?? ''}`
     const hasConsentedToCookies = getCookie(COOKIE_CONSENT_KEY) === 'accepted'
     const userToken = hasConsentedToCookies
@@ -209,11 +214,13 @@ export const getMemes = createServerFn({ method: 'GET' })
 
 export const getRecentCountMemes = createServerFn({ method: 'GET' }).handler(
   async () => {
-    return withAlgoliaCache('recent-count', async () => {
+    const locale = getLocale()
+
+    return withAlgoliaCache(`recent-count:${locale}`, async () => {
       const thirtyDaysAgo = Date.now() - THIRTY_DAYS_MS
 
       const countResult = await algoliaSearchClient.searchSingleIndex({
-        indexName: algoliaIndexName,
+        indexName: resolveAlgoliaIndexName(locale),
         searchParams: {
           filters: [
             `status:${MemeStatus.PUBLISHED}`,
@@ -252,14 +259,16 @@ const getBestMemesInternal = createServerOnlyFn(async () => {
 export const getRelatedMemes = createServerFn({ method: 'GET' })
   .inputValidator(z.object({ memeId: z.string(), title: z.string() }))
   .handler(async ({ data }) => {
+    const locale = getLocale()
+
     return withAlgoliaCache(
-      `recommend:related:${data.memeId}`,
+      `recommend:related:${locale}:${data.memeId}`,
       async () => {
         try {
           const response = await algoliaRecommendClient.getRecommendations({
             requests: [
               {
-                indexName: algoliaIndexName,
+                indexName: resolveAlgoliaIndexName(locale),
                 model: 'related-products',
                 objectID: data.memeId,
                 threshold: 0,
@@ -291,14 +300,15 @@ export const getRelatedMemes = createServerFn({ method: 'GET' })
 
 export const getTrendingMemes = createServerFn({ method: 'GET' }).handler(
   async () => {
+    const locale = getLocale()
     const trending = await withAlgoliaCache(
-      'recommend:trending',
+      `recommend:trending:${locale}`,
       async () => {
         try {
           const response = await algoliaRecommendClient.getRecommendations({
             requests: [
               {
-                indexName: algoliaIndexName,
+                indexName: resolveAlgoliaIndexName(locale),
                 model: 'trending-items',
                 threshold: 0,
                 maxRecommendations: TRENDING_MEMES_COUNT,
@@ -507,6 +517,7 @@ export const registerMemeView = createServerFn({ method: 'POST' })
         return
       }
 
+      const locale = getLocale()
       const { headers } = getRequest()
       const session = await auth.api.getSession({ headers })
 
@@ -516,7 +527,7 @@ export const registerMemeView = createServerFn({ method: 'POST' })
             {
               eventType: 'view',
               eventName: 'Meme Viewed',
-              index: algoliaIndexName,
+              index: resolveAlgoliaIndexName(locale),
               objectIDs: [memeId],
               userToken: viewerKey,
               authenticatedUserToken: session?.user.id

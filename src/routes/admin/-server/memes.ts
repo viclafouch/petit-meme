@@ -21,14 +21,14 @@ import {
 import type { AlgoliaMemeRecord } from '@/lib/algolia'
 import {
   ALGOLIA_ADMIN_SEARCH_PARAMS,
-  algoliaAdminClient,
-  algoliaIndexCreated,
-  algoliaIndexName,
   algoliaSearchClient,
+  deleteMemeFromAllIndices,
   invalidateAlgoliaCache,
-  memeToAlgoliaRecord,
   normalizeAlgoliaHit,
+  resolveAlgoliaIndexName,
+  resolveAlgoliaReplicaCreated,
   safeAlgoliaOp,
+  syncMemeToAllIndices,
   withAlgoliaCache
 } from '@/lib/algolia'
 import { createVideo, deleteVideo, uploadVideo } from '@/lib/bunny'
@@ -298,13 +298,7 @@ export const editMeme = createServerFn({ method: 'POST' })
       include: MEME_ALGOLIA_INCLUDE
     })
 
-    await safeAlgoliaOp(
-      algoliaAdminClient.partialUpdateObject({
-        indexName: algoliaIndexName,
-        objectID: values.id,
-        attributesToUpdate: memeToAlgoliaRecord(memeUpdated)
-      })
-    )
+    await safeAlgoliaOp(syncMemeToAllIndices(memeUpdated))
 
     invalidateAlgoliaCache()
 
@@ -362,12 +356,7 @@ export const deleteMemeById = createServerFn({ method: 'POST' })
     ])
 
     await Promise.all([
-      safeAlgoliaOp(
-        algoliaAdminClient.deleteObject({
-          indexName: algoliaIndexName,
-          objectID: meme.id
-        })
-      ),
+      safeAlgoliaOp(deleteMemeFromAllIndices(meme.id)),
       deleteVideo(meme.video.bunnyId).catch((error: unknown) => {
         captureWithFeature(error, 'bunny-cleanup')
         bunnyLogger.error(
@@ -408,12 +397,7 @@ async function rollbackMemeCreation(memeId: string) {
           'Failed to rollback meme from DB'
         )
       }),
-    safeAlgoliaOp(
-      algoliaAdminClient.deleteObject({
-        indexName: algoliaIndexName,
-        objectID: memeId
-      })
-    )
+    safeAlgoliaOp(deleteMemeFromAllIndices(memeId))
   ])
 }
 
@@ -466,12 +450,7 @@ async function createMemeWithVideo({
 
   try {
     await Promise.all([
-      safeAlgoliaOp(
-        algoliaAdminClient.saveObject({
-          indexName: algoliaIndexName,
-          body: memeToAlgoliaRecord(meme)
-        })
-      ),
+      safeAlgoliaOp(syncMemeToAllIndices(meme)),
       uploadVideo(videoId, buffer)
     ])
   } catch (error) {
@@ -563,7 +542,9 @@ export const getAdminMemes = createServerFn({ method: 'GET' })
         ? ALGOLIA_STATUS_FILTERS[data.status]
         : undefined
 
-      const searchIndex = data.query ? algoliaIndexName : algoliaIndexCreated
+      const searchIndex = data.query
+        ? resolveAlgoliaIndexName(baseLocale)
+        : resolveAlgoliaReplicaCreated(baseLocale)
 
       const response =
         await algoliaSearchClient.searchSingleIndex<AlgoliaMemeRecord>({

@@ -230,7 +230,8 @@ Phases 0, 1, 1.5 terminées. Interface bilingue FR/EN + 11 email templates tradu
 - [x] Phase 2.0 — Schema DB (enum `MemeContentLocale`, tables `MemeTranslation`/`CategoryTranslation`)
 - [x] Phase 2.1 — Admin (formulaire mème inline avec contentLocale + sections traduction, catégories FR/EN)
 - [x] Phase 2.2 — Couche serveur (résolution locale, filtrage contentLocale, SEO, cache locale-aware)
-- [ ] Phase 2.3 — Algolia (index par locale, migration index existant, sync multi-index, Insights locale-aware)
+- [x] Phase 2.3 — Algolia (code multi-index: sync, search, admin writes, insights — tous locale-aware)
+- [ ] Phase 2.3 ops — Créer les index `_fr`/`_en` + replicas via dashboard, configurer `queryLanguages`, lancer cron sync, supprimer ancien index
 - [ ] Phase 2.4 — Frontend & SEO (sitemap hreflang filtré, badge langue, catégories virtuelles Paraglide)
 
 ### Migration Prisma → Drizzle

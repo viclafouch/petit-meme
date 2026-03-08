@@ -1,9 +1,9 @@
 /* eslint-disable no-console */
+import { MEME_ALGOLIA_INCLUDE } from '@/constants/meme'
 import { prismaClient } from '@/db'
 import {
-  algoliaAdminClient,
-  algoliaIndexName,
-  memeToAlgoliaRecord
+  replaceAllIndicesWithMemes,
+  resolveAlgoliaIndexName
 } from '@/lib/algolia'
 import { logEnvironmentInfo } from './lib/env-guard'
 
@@ -11,20 +11,14 @@ const reindexMemes = async () => {
   logEnvironmentInfo()
 
   const memes = await prismaClient.meme.findMany({
-    include: {
-      video: true,
-      categories: {
-        include: { category: true }
-      }
-    }
+    include: MEME_ALGOLIA_INCLUDE
   })
 
-  const response = await algoliaAdminClient.replaceAllObjects({
-    indexName: algoliaIndexName,
-    objects: memes.map(memeToAlgoliaRecord)
-  })
+  const results = await replaceAllIndicesWithMemes(memes)
 
-  console.log(response)
+  for (const { locale, count } of results) {
+    console.log(`Index ${resolveAlgoliaIndexName(locale)}: ${count} records`)
+  }
 
   process.exit(0)
 }

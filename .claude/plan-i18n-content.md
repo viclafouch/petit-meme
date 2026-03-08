@@ -221,11 +221,11 @@ UNIVERSAL + user EN → translation(en) ✓
 
 ### Migration index existant (zero-downtime)
 
-- [ ] Étape 1 : créer les nouveaux index `${prefix}_fr` et `${prefix}_en` et leurs replicas virtuelles
-- [ ] Étape 2 : déployer le code qui lit/écrit les nouveaux index (le code tombe en fallback si l'index est vide)
+- [ ] Étape 1 : créer les nouveaux index `${prefix}_fr` et `${prefix}_en` et leurs replicas virtuelles via dashboard Algolia
+- [x] Étape 2 : code qui lit/écrit les nouveaux index (le code tombe en fallback si l'index est vide)
 - [ ] Étape 3 : lancer le cron sync pour peupler les nouveaux index
 - [ ] Étape 4 : supprimer l'ancien index et ses replicas (libère le quota)
-- [ ] Garder `VITE_ALGOLIA_INDEX` comme préfixe (le code ajoute `_fr`/`_en` selon la locale — pas de changement d'env var nécessaire)
+- [x] Garder `VITE_ALGOLIA_INDEX` comme préfixe (le code ajoute `_fr`/`_en` selon la locale — pas de changement d'env var nécessaire)
 
 ### Configuration par index
 
@@ -234,30 +234,34 @@ UNIVERSAL + user EN → translation(en) ✓
 
 ### Sync cron (`src/routes/api/cron/sync-algolia.ts`)
 
-- [ ] Le cron génère deux sets de records, titres résolus depuis `MemeTranslation` :
+- [x] Le cron génère deux sets de records, titres résolus depuis `MemeTranslation` :
   - `memes_fr` : tous les mèmes (FR+EN+UNIVERSAL), titres résolus pour locale "fr" (FR→translation(fr), EN→translation(en) fallback, UNIVERSAL→translation(fr))
   - `memes_en` : mèmes EN+UNIVERSAL, titres résolus pour locale "en"
-- [ ] `memeToAlgoliaRecord()` (`src/lib/algolia.ts`) : accepte un paramètre `locale` pour résoudre le bon titre depuis `translations`
-- [ ] `categoryTitles[]` dans les records : localisés depuis `CategoryTranslation`
-- [ ] Inclure `translations` dans la query du cron (un seul fetch avec `include: { translations: true }`)
+- [x] `memeToAlgoliaRecord()` (`src/lib/algolia.ts`) : accepte un paramètre `locale` pour résoudre le bon titre depuis `translations`
+- [x] `categoryTitles[]` dans les records : localisés depuis `CategoryTranslation`
+- [x] Inclure `translations` dans la query du cron (un seul fetch avec `include: { translations: true }`)
 
 ### Admin Algolia writes
 
-- [ ] `editMeme` (`src/routes/admin/-server/memes.ts`) : `partialUpdateObject`/`saveObject` sur **les deux** index (ou uniquement les pertinents selon `contentLocale`)
-- [ ] `createMemeWithVideo` : `saveObject` sur les deux index
-- [ ] `deleteMemeById` : `deleteObject` sur les deux index
-- [ ] Script `scripts/reindex-memes.ts` : mettre à jour pour les deux index
+- [x] `editMeme` (`src/routes/admin/-server/memes.ts`) : `syncMemeToAllIndices()` — save aux index cibles, delete des non-cibles
+- [x] `createMemeWithVideo` : `syncMemeToAllIndices()` sur les index cibles
+- [x] `deleteMemeById` : `deleteMemeFromAllIndices()` sur tous les index
+- [x] Script `scripts/reindex-memes.ts` : mis à jour pour les deux index
+- [x] Bunny webhook (`src/routes/api/bunny.ts`) : `syncMemeToAllIndices()` au lieu de `partialUpdateObject`
 
 ### Search
 
-- [ ] `getMemes()` (`src/server/meme.ts`) : utiliser l'index de la locale courante. Mettre à jour `resolveIndexName()` pour dériver le nom d'index depuis la locale.
-- [ ] `getRelatedMemes()` : utiliser l'index Algolia de la locale courante (requiert les nouveaux index)
+- [x] `getMemes()` (`src/server/meme.ts`) : `resolveSearchIndex(category, hasQuery, locale)` — index de la locale courante
+- [x] `getRelatedMemes()` : index Algolia de la locale courante
+- [x] `getTrendingMemes()` : index Algolia de la locale courante
+- [x] `getRecentCountMemes()` : index Algolia de la locale courante
+- [x] Cache keys locale-aware (ajout du locale dans les clés de cache)
 
 ### Insights
 
-- [ ] `src/lib/algolia-insights.ts` : `sendClickEvent`, `sendConversionEvent`, `sendViewEvent` doivent cibler l'index de la locale courante (passer le nom d'index depuis les résultats de recherche au lieu du hardcodé `VITE_ALGOLIA_INDEX`)
-- [ ] `registerMemeView` (`src/server/meme.ts`) : envoyer l'event view à l'index de la locale courante
-- [ ] Les objectIDs restent identiques entre index (= `memeId`)
+- [x] `src/lib/algolia-insights.ts` : `getInsightsIndex()` utilise `getLocale()` pour cibler l'index de la locale courante
+- [x] `registerMemeView` (`src/server/meme.ts`) : event view envoyé à l'index de la locale courante
+- [x] Les objectIDs restent identiques entre index (= `memeId`)
 
 ### Synonymes EN
 

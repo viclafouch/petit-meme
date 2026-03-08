@@ -1,19 +1,40 @@
-import type { MemeWithCategories, MemeWithVideo } from '@/constants/meme'
+import type { MemeAlgoliaData } from '@/constants/meme'
 import { MINUTE } from '@/constants/time'
 import { MemeContentLocale } from '@/db/generated/prisma/enums'
 import { clientEnv } from '@/env/client'
 import { serverEnv } from '@/env/server'
+import {
+  ALGOLIA_TARGET_LOCALES,
+  resolveCategoryTranslation,
+  resolveMemeTranslation,
+  VISIBLE_CONTENT_LOCALES
+} from '@/helpers/i18n-content'
 import { buildVideoImageUrl } from '@/lib/bunny'
 import { algoliaLogger } from '@/lib/logger'
+import type { Locale } from '@/paraglide/runtime'
+import { locales } from '@/paraglide/runtime'
 import type { HighlightResultOption, Hit } from '@algolia/client-search'
 import { searchClient } from '@algolia/client-search'
 import { recommendClient } from '@algolia/recommend'
 import * as Sentry from '@sentry/tanstackstart-react'
 
-export const algoliaIndexName = clientEnv.VITE_ALGOLIA_INDEX
-export const algoliaIndexPopular = `${algoliaIndexName}_replica_popular`
-export const algoliaIndexRecent = `${algoliaIndexName}_replica_recent`
-export const algoliaIndexCreated = `${algoliaIndexName}_replica_created`
+export const algoliaIndexPrefix = clientEnv.VITE_ALGOLIA_INDEX
+
+export function resolveAlgoliaIndexName(locale: Locale) {
+  return `${algoliaIndexPrefix}_${locale}`
+}
+
+export function resolveAlgoliaReplicaPopular(locale: Locale) {
+  return `${algoliaIndexPrefix}_${locale}_replica_popular`
+}
+
+export function resolveAlgoliaReplicaRecent(locale: Locale) {
+  return `${algoliaIndexPrefix}_${locale}_replica_recent`
+}
+
+export function resolveAlgoliaReplicaCreated(locale: Locale) {
+  return `${algoliaIndexPrefix}_${locale}_replica_created`
+}
 
 export const algoliaSearchClient = searchClient(
   clientEnv.VITE_ALGOLIA_APP_ID,
@@ -159,17 +180,31 @@ export function normalizeAlgoliaHit(hit: AlgoliaMemeRecord): AlgoliaMemeRecord {
   }
 }
 
-export function memeToAlgoliaRecord(meme: MemeWithVideo & MemeWithCategories) {
-  const categories = meme.categories.map(({ category }) => {
-    return category
+export function memeToAlgoliaRecord(meme: MemeAlgoliaData, locale: Locale) {
+  const resolved = resolveMemeTranslation({
+    translations: meme.translations,
+    contentLocale: meme.contentLocale,
+    requestedLocale: locale,
+    fallback: meme
+  })
+
+  const resolvedCategories = meme.categories.map(({ category }) => {
+    return {
+      slug: category.slug,
+      ...resolveCategoryTranslation({
+        translations: category.translations,
+        requestedLocale: locale,
+        fallback: category
+      })
+    }
   })
 
   return {
     objectID: meme.id,
     id: meme.id,
-    title: meme.title,
-    description: meme.description,
-    keywords: meme.keywords,
+    title: resolved.title,
+    description: resolved.description,
+    keywords: resolved.keywords,
     contentLocale: meme.contentLocale,
     status: meme.status,
     viewCount: meme.viewCount,
@@ -186,18 +221,71 @@ export function memeToAlgoliaRecord(meme: MemeWithVideo & MemeWithCategories) {
       duration: meme.video.duration,
       bunnyStatus: meme.video.bunnyStatus
     },
-    categoryTitles: categories.map((category) => {
-      return category.title
+    categoryTitles: resolvedCategories.map(({ title }) => {
+      return title
     }),
-    categoryKeywords: categories.map((category) => {
-      return category.keywords
+    categoryKeywords: resolvedCategories.map(({ keywords }) => {
+      return keywords
     }),
-    categorySlugs: categories.map((category) => {
-      return category.slug
+    categorySlugs: resolvedCategories.map(({ slug }) => {
+      return slug
     }),
     categoryCount: meme.categories.length,
     imageURL: buildVideoImageUrl(meme.video.bunnyId),
     createdAtTime: meme.createdAt.getTime(),
     publishedAtTime: meme.publishedAt?.getTime()
   }
+}
+
+export async function syncMemeToAllIndices(meme: MemeAlgoliaData) {
+  const targetLocales = ALGOLIA_TARGET_LOCALES[meme.contentLocale]
+
+  await Promise.all(
+    locales.map((locale) => {
+      if (targetLocales.includes(locale)) {
+        return algoliaAdminClient.saveObject({
+          indexName: resolveAlgoliaIndexName(locale),
+          body: memeToAlgoliaRecord(meme, locale)
+        })
+      }
+
+      return algoliaAdminClient.deleteObject({
+        indexName: resolveAlgoliaIndexName(locale),
+        objectID: meme.id
+      })
+    })
+  )
+}
+
+export async function deleteMemeFromAllIndices(objectID: string) {
+  await Promise.all(
+    locales.map((locale) => {
+      return algoliaAdminClient.deleteObject({
+        indexName: resolveAlgoliaIndexName(locale),
+        objectID
+      })
+    })
+  )
+}
+
+export async function replaceAllIndicesWithMemes(memes: MemeAlgoliaData[]) {
+  return Promise.all(
+    locales.map(async (locale) => {
+      const visibleLocales = VISIBLE_CONTENT_LOCALES[locale]
+      const records = memes
+        .filter((meme) => {
+          return visibleLocales.includes(meme.contentLocale)
+        })
+        .map((meme) => {
+          return memeToAlgoliaRecord(meme, locale)
+        })
+
+      await algoliaAdminClient.replaceAllObjects({
+        indexName: resolveAlgoliaIndexName(locale),
+        objects: records
+      })
+
+      return { locale, count: records.length }
+    })
+  )
 }

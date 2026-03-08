@@ -228,7 +228,7 @@ Phases 0, 1, 1.5 terminées. Interface bilingue FR/EN + 11 email templates tradu
 **Phase 2 — Contenu mèmes + Algolia bilingue :** Plan détaillé dans `.claude/plan-i18n-content.md`
 
 - [x] Phase 2.0 — Schema DB (enum `MemeContentLocale`, tables `MemeTranslation`/`CategoryTranslation`)
-- [ ] Phase 2.1 — Admin (page mème complète, select contentLocale, sections traduction, catégories)
+- [x] Phase 2.1 — Admin (formulaire mème inline avec contentLocale + sections traduction, catégories FR/EN)
 - [x] Phase 2.2 — Couche serveur (résolution locale, filtrage contentLocale, SEO, cache locale-aware)
 - [ ] Phase 2.3 — Algolia (index par locale, migration index existant, sync multi-index, Insights locale-aware)
 - [ ] Phase 2.4 — Frontend & SEO (sitemap hreflang filtré, badge langue, catégories virtuelles Paraglide)

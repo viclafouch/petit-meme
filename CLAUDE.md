@@ -65,6 +65,8 @@ Code must always be clean and readable. Before writing any code, ask whether it 
 
 **A task is NOT complete until steps 1-3 are done.** Never say "done" or summarize changes before finishing the checklist.
 
+**Exception — `/simplify` skill:** When `/simplify` is invoked, **skip step 3** (code-refactoring agent). The `/simplify` skill already performs its own code review via three parallel agents (reuse, quality, efficiency). Running code-refactoring on top is redundant.
+
 ## Design Rule
 
 For any UI/design task, **always use `/frontend-design`** before writing code.

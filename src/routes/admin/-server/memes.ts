@@ -5,13 +5,19 @@ import { IS_PRODUCTION } from '@/constants/env'
 import {
   DEFAULT_MEME_TITLE,
   MAX_SIZE_MEME_IN_BYTES,
+  MEME_ALGOLIA_INCLUDE,
   MEME_FULL_INCLUDE,
   MEMES_PER_PAGE,
   MEMES_SEARCH_SCHEMA,
   TWEET_LINK_SCHEMA
 } from '@/constants/meme'
 import { prismaClient } from '@/db'
-import { MemeStatus } from '@/db/generated/prisma/enums'
+import { MemeContentLocale, MemeStatus } from '@/db/generated/prisma/enums'
+import {
+  buildLocaleRecord,
+  CONTENT_LOCALE_TO_LOCALE,
+  REQUIRED_TRANSLATION_LOCALES
+} from '@/helpers/i18n-content'
 import type { AlgoliaMemeRecord } from '@/lib/algolia'
 import {
   ALGOLIA_ADMIN_SEARCH_PARAMS,
@@ -33,10 +39,18 @@ import {
   getTweetMedia
 } from '@/lib/react-tweet'
 import { captureWithFeature } from '@/lib/sentry'
+import { baseLocale } from '@/paraglide/runtime'
 import { logAuditAction } from '@/server/audit'
 import { adminRequiredMiddleware } from '@/server/user-auth'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
+
+const ALGOLIA_STATUS_FILTERS = {
+  [MemeStatus.PENDING]: 'status:PENDING',
+  [MemeStatus.PUBLISHED]: 'status:PUBLISHED',
+  [MemeStatus.REJECTED]: 'status:REJECTED',
+  [MemeStatus.ARCHIVED]: 'status:ARCHIVED'
+} as const satisfies Record<MemeStatus, string>
 
 export const getAdminMemeById = createServerFn({ method: 'GET' })
   .inputValidator((data) => {
@@ -58,21 +72,53 @@ export const getAdminMemeById = createServerFn({ method: 'GET' })
     return meme
   })
 
-export const MEME_FORM_SCHEMA = z.object({
-  title: z.string().min(3).max(100),
-  keywords: z.array(z.string().max(50)).max(20),
+export const MEME_TRANSLATION_SCHEMA = z.object({
+  title: z.string().max(100),
   description: z.string().max(200),
-  categoryIds: z.array(z.string()).max(10),
-  status: z.enum(MemeStatus),
-  tweetUrl: TWEET_LINK_SCHEMA.nullable().or(
-    z
-      .string()
-      .length(0)
-      .transform(() => {
-        return null
-      })
-  )
+  keywords: z.array(z.string().max(50)).max(20)
 })
+
+const REQUIRED_MEME_TRANSLATION_SCHEMA = MEME_TRANSLATION_SCHEMA.extend({
+  title: z.string().min(3).max(100)
+})
+
+export const MEME_FORM_SCHEMA = z
+  .object({
+    contentLocale: z.enum(MemeContentLocale),
+    translations: z.object(
+      buildLocaleRecord(() => {
+        return MEME_TRANSLATION_SCHEMA
+      })
+    ),
+    categoryIds: z.array(z.string()).max(10),
+    status: z.enum(MemeStatus),
+    tweetUrl: TWEET_LINK_SCHEMA.nullable().or(
+      z
+        .string()
+        .length(0)
+        .transform(() => {
+          return null
+        })
+    )
+  })
+  .superRefine((data, refinementContext) => {
+    const requiredLocales = REQUIRED_TRANSLATION_LOCALES[data.contentLocale]
+
+    for (const locale of requiredLocales) {
+      const result = REQUIRED_MEME_TRANSLATION_SCHEMA.safeParse(
+        data.translations[locale]
+      )
+
+      if (!result.success) {
+        for (const issue of result.error.issues) {
+          refinementContext.addIssue({
+            ...issue,
+            path: ['translations', locale, ...issue.path]
+          })
+        }
+      }
+    }
+  })
 
 function resolvePublishedAt(
   newStatus: string,
@@ -122,6 +168,58 @@ function computeCategoryDiff(currentIds: string[], newIds: string[]) {
   }
 }
 
+type MemeFormTranslations = z.infer<typeof MEME_FORM_SCHEMA>['translations']
+
+function resolveSourceTranslation(
+  contentLocale: MemeContentLocale,
+  translations: MemeFormTranslations
+) {
+  const sourceLocale = CONTENT_LOCALE_TO_LOCALE[contentLocale]
+
+  return translations[sourceLocale]
+}
+
+function normalizeKeywords(keywords: string[]) {
+  return keywords.map((keyword) => {
+    return keyword.toLowerCase().trim()
+  })
+}
+
+type BuildTranslationUpsertsParams = {
+  memeId: string
+  contentLocale: MemeContentLocale
+  translations: MemeFormTranslations
+}
+
+function buildTranslationUpserts({
+  memeId,
+  contentLocale,
+  translations
+}: BuildTranslationUpsertsParams) {
+  const requiredLocales = REQUIRED_TRANSLATION_LOCALES[contentLocale]
+
+  return requiredLocales.map((locale) => {
+    const data = translations[locale]
+    const normalizedKeywords = normalizeKeywords(data.keywords)
+
+    return {
+      // eslint-disable-next-line camelcase -- Prisma compound unique key
+      where: { memeId_locale: { memeId, locale } },
+      update: {
+        title: data.title,
+        description: data.description,
+        keywords: normalizedKeywords
+      },
+      create: {
+        locale,
+        title: data.title,
+        description: data.description,
+        keywords: normalizedKeywords
+      }
+    }
+  })
+}
+
 export const editMeme = createServerFn({ method: 'POST' })
   .inputValidator((data) => {
     return MEME_FORM_SCHEMA.extend({ id: z.string() }).parse(data)
@@ -132,8 +230,10 @@ export const editMeme = createServerFn({ method: 'POST' })
       where: {
         id: values.id
       },
-      include: {
-        video: true,
+      select: {
+        status: true,
+        publishedAt: true,
+        viewCount: true,
         categories: { select: { categoryId: true } }
       }
     })
@@ -154,14 +254,21 @@ export const editMeme = createServerFn({ method: 'POST' })
       values.categoryIds
     )
 
+    const sourceTranslation = resolveSourceTranslation(
+      values.contentLocale,
+      values.translations
+    )
+    const requiredLocales = REQUIRED_TRANSLATION_LOCALES[values.contentLocale]
+
     const memeUpdated = await prismaClient.meme.update({
       where: {
         id: values.id
       },
       data: {
-        title: values.title,
+        contentLocale: values.contentLocale,
+        title: sourceTranslation.title,
+        description: sourceTranslation.description,
         status: values.status,
-        description: values.description,
         publishedAt,
         viewCount,
         categories: {
@@ -175,18 +282,26 @@ export const editMeme = createServerFn({ method: 'POST' })
             }
           })
         },
-        keywords: values.keywords.map((keyword) => {
-          return keyword.toLowerCase().trim()
-        }),
-        tweetUrl: values.tweetUrl || null
+        keywords: normalizeKeywords(sourceTranslation.keywords),
+        tweetUrl: values.tweetUrl || null,
+        translations: {
+          upsert: buildTranslationUpserts({
+            memeId: values.id,
+            contentLocale: values.contentLocale,
+            translations: values.translations
+          }),
+          deleteMany: {
+            locale: { notIn: [...requiredLocales] }
+          }
+        }
       },
-      include: MEME_FULL_INCLUDE
+      include: MEME_ALGOLIA_INCLUDE
     })
 
     await safeAlgoliaOp(
       algoliaAdminClient.partialUpdateObject({
         indexName: algoliaIndexName,
-        objectID: meme.id,
+        objectID: values.id,
         attributesToUpdate: memeToAlgoliaRecord(memeUpdated)
       })
     )
@@ -200,7 +315,7 @@ export const editMeme = createServerFn({ method: 'POST' })
       actingAdminId: context.user.id,
       targetId: memeUpdated.id,
       targetType: 'meme',
-      metadata: { title: values.title }
+      metadata: { title: sourceTranslation.title }
     })
 
     if (hasStatusChanged) {
@@ -209,7 +324,11 @@ export const editMeme = createServerFn({ method: 'POST' })
         actingAdminId: context.user.id,
         targetId: memeUpdated.id,
         targetType: 'meme',
-        metadata: { title: values.title, from: meme.status, to: values.status }
+        metadata: {
+          title: sourceTranslation.title,
+          from: meme.status,
+          to: values.status
+        }
       })
     }
 
@@ -313,6 +432,7 @@ async function createMemeWithVideo({
         title,
         tweetUrl,
         status: 'PENDING',
+        contentLocale: MemeContentLocale.FR,
         video: {
           create: {
             duration: 0,
@@ -321,9 +441,17 @@ async function createMemeWithVideo({
               : undefined,
             bunnyId: videoId
           }
+        },
+        translations: {
+          create: {
+            locale: baseLocale,
+            title,
+            description: '',
+            keywords: []
+          }
         }
       },
-      include: MEME_FULL_INCLUDE
+      include: MEME_ALGOLIA_INCLUDE
     })
   } catch (error) {
     await deleteVideo(videoId).catch((cleanupError: unknown) => {
@@ -431,7 +559,9 @@ export const getAdminMemes = createServerFn({ method: 'GET' })
     const cacheKey = `admin-memes:${data.query ?? ''}:${data.page ?? 1}:${data.status ?? ''}`
 
     return withAlgoliaCache(cacheKey, async () => {
-      const filters = data.status ? `status:${data.status}` : undefined
+      const filters = data.status
+        ? ALGOLIA_STATUS_FILTERS[data.status]
+        : undefined
 
       const searchIndex = data.query ? algoliaIndexName : algoliaIndexCreated
 

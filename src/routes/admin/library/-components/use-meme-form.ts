@@ -1,11 +1,17 @@
 import { toast } from 'sonner'
 import type { z } from 'zod'
-import type { MemeWithCategories } from '@/constants/meme'
+import type { MemeFullData } from '@/constants/meme'
 import type { Meme } from '@/db/generated/prisma/client'
 import { getErrorMessage } from '@/helpers/error'
+import {
+  buildLocaleRecord,
+  findTranslationByLocale,
+  REQUIRED_TRANSLATION_LOCALES
+} from '@/helpers/i18n-content'
 import { useKeywordsField } from '@/hooks/use-keywords-field'
 import { getCategoriesListQueryOpts } from '@/lib/queries'
 import { captureWithFeature } from '@/lib/sentry'
+import type { Locale } from '@/paraglide/runtime'
 import { generateMemeContent } from '@/server/ai'
 import { removeDuplicates } from '@/utils/array'
 import { editMeme, MEME_FORM_SCHEMA } from '@admin/-server/memes'
@@ -13,7 +19,7 @@ import { useForm } from '@tanstack/react-form'
 import { useMutation, useQuery } from '@tanstack/react-query'
 
 type UseMemeFormParams = {
-  meme: MemeWithCategories
+  meme: MemeFullData
   onSuccess?: () => void
 }
 
@@ -52,10 +58,17 @@ export function useMemeForm({ meme, onSuccess }: UseMemeFormParams) {
 
   const form = useForm({
     defaultValues: {
-      keywords: meme.keywords,
+      contentLocale: meme.contentLocale,
+      translations: buildLocaleRecord((locale) => {
+        const translation = findTranslationByLocale(meme.translations, locale)
+
+        return {
+          title: translation?.title ?? '',
+          description: translation?.description ?? '',
+          keywords: translation?.keywords ?? []
+        }
+      }),
       tweetUrl: meme.tweetUrl,
-      title: meme.title,
-      description: meme.description,
       status: meme.status,
       categoryIds: meme.categories.map((category) => {
         return category.categoryId
@@ -70,10 +83,9 @@ export function useMemeForm({ meme, onSuccess }: UseMemeFormParams) {
       }
 
       await editMutation.mutateAsync({
-        title: value.title,
-        keywords: value.keywords,
+        contentLocale: value.contentLocale,
+        translations: value.translations,
         tweetUrl: value.tweetUrl,
-        description: value.description,
         status: value.status,
         id: meme.id,
         categoryIds: value.categoryIds
@@ -81,20 +93,34 @@ export function useMemeForm({ meme, onSuccess }: UseMemeFormParams) {
     }
   })
 
-  const keywordsField = useKeywordsField({
+  const frKeywordsField = useKeywordsField({
     setKeywordsValue: (updater) => {
-      return form.setFieldValue('keywords', updater)
+      return form.setFieldValue('translations.fr.keywords', updater)
     }
   })
 
+  const enKeywordsField = useKeywordsField({
+    setKeywordsValue: (updater) => {
+      return form.setFieldValue('translations.en.keywords', updater)
+    }
+  })
+
+  const keywordsFields = {
+    fr: frKeywordsField,
+    en: enKeywordsField
+  } satisfies Record<Locale, ReturnType<typeof useKeywordsField>>
+
   const generateContentMutation = useMutation({
     mutationKey: ['generate-content'],
-    mutationFn: () => {
+    mutationFn: (_locale: Locale) => {
       return generateMemeContent({ data: { memeId: meme.id } })
     },
-    onSuccess: (result) => {
-      form.setFieldValue('description', result.description)
-      form.setFieldValue('keywords', (prevValue) => {
+    onSuccess: (result, locale) => {
+      form.setFieldValue(
+        `translations.${locale}.description`,
+        result.description
+      )
+      form.setFieldValue(`translations.${locale}.keywords`, (prevValue) => {
         return removeDuplicates([...prevValue, ...result.keywords])
       })
     },
@@ -104,11 +130,21 @@ export function useMemeForm({ meme, onSuccess }: UseMemeFormParams) {
     }
   })
 
+  const isLocaleRequired = (locale: Locale) => {
+    const contentLocale = form.getFieldValue('contentLocale')
+    const required = REQUIRED_TRANSLATION_LOCALES[
+      contentLocale
+    ] as readonly Locale[]
+
+    return required.includes(locale)
+  }
+
   return {
     form,
-    keywordsField,
+    keywordsFields,
     categoriesListQuery,
     categoriesOptions,
-    generateContentMutation
+    generateContentMutation,
+    isLocaleRequired
   }
 }

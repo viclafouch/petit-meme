@@ -11,6 +11,11 @@ export const MEME_FULL_INCLUDE = {
   _count: { select: { bookmarkedBy: true } }
 } as const satisfies Prisma.MemeInclude
 
+export const MEME_ALGOLIA_INCLUDE = {
+  video: true,
+  categories: { include: { category: true } }
+} as const satisfies Prisma.MemeInclude
+
 export const DEFAULT_MEME_TITLE = 'Sans titre'
 export const LEGACY_MEME_TITLE = 'Titre inconnu'
 
@@ -91,6 +96,14 @@ export const MEMES_FILTERS_SCHEMA = z.object({
   // eslint-disable-next-line unicorn/no-useless-undefined
   category: z.string().regex(CATEGORY_SLUG_REGEX).optional().catch(undefined)
 })
+
+export type MemeFullData = Prisma.MemeGetPayload<{
+  include: typeof MEME_FULL_INCLUDE
+}>
+
+export type MemeAlgoliaData = Prisma.MemeGetPayload<{
+  include: typeof MEME_ALGOLIA_INCLUDE
+}>
 
 export type MemeWithVideo = Prisma.MemeGetPayload<{
   include: { video: true }

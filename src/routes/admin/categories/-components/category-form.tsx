@@ -1,4 +1,3 @@
-import React from 'react'
 import { toast } from 'sonner'
 import type { z } from 'zod'
 import { FormFooter } from '@/components/form-footer'
@@ -9,16 +8,24 @@ import {
   FormMessage
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import type { Category } from '@/db/generated/prisma/client'
 import { getErrorMessage } from '@/helpers/error'
+import {
+  buildLocaleRecord,
+  findTranslationByLocale,
+  LOCALE_META
+} from '@/helpers/i18n-content'
 import { useKeywordsField } from '@/hooks/use-keywords-field'
 import { getFieldErrorMessage } from '@/lib/utils'
+import type { Locale } from '@/paraglide/runtime'
+import { locales } from '@/paraglide/runtime'
+import type { EnrichedCategory } from '@/server/categories'
 import {
   addCategory,
   CATEGORY_FORM_SCHEMA,
   editCategory
 } from '@/server/categories'
 import { KeywordsField } from '@admin/-components/keywords-field'
+import type { AnyFieldApi } from '@tanstack/react-form'
 import { useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 
@@ -26,7 +33,7 @@ export type CategoryFormParams =
   | {
       type: 'edit'
       onClose?: () => void
-      category: Category
+      category: EnrichedCategory
       onSuccess?: () => void
     }
   | {
@@ -80,14 +87,27 @@ export const CategoryForm = ({
     defaultValues:
       type === 'edit'
         ? {
-            keywords: category.keywords,
-            title: category.title,
-            slug: category.slug
+            slug: category.slug,
+            translations: buildLocaleRecord((locale) => {
+              const translation = findTranslationByLocale(
+                category.translations,
+                locale
+              )
+
+              return {
+                title: translation?.title ?? '',
+                keywords: translation?.keywords ?? ([] as string[])
+              }
+            })
           }
         : {
-            keywords: [] as string[],
-            title: '',
-            slug: ''
+            slug: '',
+            translations: buildLocaleRecord(() => {
+              return {
+                title: '',
+                keywords: [] as string[]
+              }
+            })
           },
     validators: {
       onChange: CATEGORY_FORM_SCHEMA
@@ -101,49 +121,39 @@ export const CategoryForm = ({
     }
   })
 
-  const keywordsField = useKeywordsField({
+  const frKeywordsField = useKeywordsField({
     setKeywordsValue: (updater) => {
-      return form.setFieldValue('keywords', updater)
+      return form.setFieldValue('translations.fr.keywords', updater)
     }
   })
+
+  const enKeywordsField = useKeywordsField({
+    setKeywordsValue: (updater) => {
+      return form.setFieldValue('translations.en.keywords', updater)
+    }
+  })
+
+  const keywordsFields = {
+    fr: frKeywordsField,
+    en: enKeywordsField
+  } satisfies Record<Locale, ReturnType<typeof useKeywordsField>>
 
   return (
     <form
       id={`${type}-category-form`}
       noValidate
-      className="w-full flex flex-col gap-y-6"
+      className="w-full flex flex-col gap-6"
       onSubmit={(event) => {
         event.preventDefault()
-        keywordsField.handleAddKeyword()
+
+        for (const locale of locales) {
+          keywordsFields[locale].handleAddKeyword()
+        }
+
         void form.handleSubmit()
       }}
     >
-      <div className="flex flex-col gap-y-6">
-        <form.Field
-          name="title"
-          children={(field) => {
-            const errorMessage = getFieldErrorMessage({ field })
-
-            return (
-              <FormItem error={errorMessage}>
-                <FormLabel>Titre</FormLabel>
-                <FormControl>
-                  <Input
-                    required
-                    type="text"
-                    name={field.name}
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => {
-                      return field.handleChange(event.target.value)
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )
-          }}
-        />
+      <div className="flex flex-col gap-6">
         <form.Field
           name="slug"
           children={(field) => {
@@ -171,12 +181,53 @@ export const CategoryForm = ({
             )
           }}
         />
-        <form.Field
-          name="keywords"
-          children={(field) => {
-            return <KeywordsField field={field} {...keywordsField} />
-          }}
-        />
+        {locales.map((locale) => {
+          const meta = LOCALE_META[locale]
+
+          return (
+            <fieldset
+              key={locale}
+              className="flex flex-col gap-4 rounded-lg border p-4"
+            >
+              <legend className="px-2 text-sm font-medium">
+                {meta.flag} {meta.label}
+              </legend>
+              <form.Field
+                name={`translations.${locale}.title`}
+                children={(field: AnyFieldApi) => {
+                  const errorMessage = getFieldErrorMessage({ field })
+
+                  return (
+                    <FormItem error={errorMessage}>
+                      <FormLabel>{meta.label}</FormLabel>
+                      <FormControl>
+                        <Input
+                          required
+                          type="text"
+                          name={field.name}
+                          value={field.state.value as string}
+                          onBlur={field.handleBlur}
+                          onChange={(event) => {
+                            return field.handleChange(event.target.value)
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )
+                }}
+              />
+              <form.Field
+                name={`translations.${locale}.keywords`}
+                children={(field: AnyFieldApi) => {
+                  return (
+                    <KeywordsField field={field} {...keywordsFields[locale]} />
+                  )
+                }}
+              />
+            </fieldset>
+          )
+        })}
       </div>
       <form.Subscribe
         selector={(state) => {

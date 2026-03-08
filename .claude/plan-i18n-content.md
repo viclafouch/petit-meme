@@ -154,30 +154,30 @@ UNIVERSAL + user EN → translation(en) ✓
 
 ### Page mème (refonte)
 
-- [ ] Convertir le formulaire mème de dialog en page complète (`/admin/library/:id/edit` ou similaire)
-- [ ] Select `contentLocale` (FR / EN / UNIVERSAL) en haut du formulaire
-- [ ] Sections par langue, visibilité dynamique selon `contentLocale` :
+- [x] Convertir le formulaire mème de dialog en page complète (formulaire inline dans `/admin/library/$memeId`)
+- [x] Select `contentLocale` (FR / EN / UNIVERSAL) en haut du formulaire
+- [x] Sections par langue, visibilité dynamique selon `contentLocale` :
   - FR → 🇫🇷 section uniquement (titre, description, keywords)
   - EN → 🇬🇧 section uniquement
   - UNIVERSAL → 🇫🇷 + 🇬🇧 sections
-- [ ] L'admin écrit dans `MemeTranslation` (plus dans `Meme.title`)
-- [ ] Validation Zod adaptée selon `contentLocale`
+- [x] L'admin écrit dans `MemeTranslation` (plus dans `Meme.title`)
+- [x] Validation Zod adaptée selon `contentLocale` (superRefine dynamique)
 
 ### Server functions admin
 
-- [ ] `MEME_FORM_SCHEMA` (`src/routes/admin/-server/memes.ts`) : ajouter `contentLocale` et champs traduction par locale
-- [ ] `editMeme` : accepter `contentLocale` + `translations`, sauvegarder dans `MemeTranslation` (upsert par locale), supprimer les rows obsolètes si `contentLocale` change
-- [ ] `createMemeWithVideo` / `createMemeFromTwitterUrl` : accepter `contentLocale` + `translations`, créer les `MemeTranslation` rows. **Note :** `Meme.title` est NOT NULL sans default — écrire le titre source comme copie dénormalisée (jamais lu, juste pour satisfaire la contrainte DB)
+- [x] `MEME_FORM_SCHEMA` (`src/routes/admin/-server/memes.ts`) : `contentLocale` + `translations` par locale, validation dynamique via superRefine
+- [x] `editMeme` : accepte `contentLocale` + `translations`, upsert `MemeTranslation` par locale, supprime les rows obsolètes si `contentLocale` change, sync `Meme.title`/`description`/`keywords` avec la locale source
+- [x] `createMemeWithVideo` : crée une `MemeTranslation(locale='fr')` par défaut à la création. `Meme.title` garde le titre source comme copie dénormalisée
 
 ### Catégories
 
-- [ ] Formulaire catégorie : sections 🇫🇷 + 🇬🇧 (titre, keywords), les deux obligatoires
-- [ ] L'admin écrit dans `CategoryTranslation` (plus dans `Category.title`)
-- [ ] Server function `editCategory` : sauvegarder dans `CategoryTranslation`
+- [x] Formulaire catégorie : sections 🇫🇷 + 🇬🇧 (titre, keywords), les deux obligatoires
+- [x] L'admin écrit dans `CategoryTranslation` (plus dans `Category.title`)
+- [x] Server functions `addCategory` + `editCategory` : upsert `CategoryTranslation` pour les deux locales, sync `Category.title`/`keywords` avec FR
 
 ### Création de mème
 
-- [ ] Flow de création adapté avec `contentLocale` + traductions
+- [x] Flow de création adapté : `createMemeWithVideo` crée une traduction FR par défaut
 
 **COMMIT : `feat(i18n): admin UI for contentLocale and translations (memes + categories)`**
 

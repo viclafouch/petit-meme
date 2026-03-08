@@ -4,7 +4,7 @@ import { LoadingButton } from '@/components/ui/loading-button'
 type FormFooterParams = {
   canSubmit: boolean
   isSubmitting: boolean
-  onCancel: () => void
+  onCancel?: () => void
   submitLabel: string
   isLoadingButton?: boolean
   formId?: string
@@ -20,9 +20,11 @@ export const FormFooter = ({
 }: FormFooterParams) => {
   return (
     <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-      <Button onClick={onCancel} type="button" variant="outline">
-        Annuler
-      </Button>
+      {onCancel ? (
+        <Button onClick={onCancel} type="button" variant="outline">
+          Annuler
+        </Button>
+      ) : null}
       {isLoadingButton ? (
         <LoadingButton
           type="submit"

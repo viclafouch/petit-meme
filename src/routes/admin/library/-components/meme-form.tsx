@@ -5,8 +5,6 @@ import {
   FormLabel,
   FormMessage
 } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { MultiAsyncSelect } from '@/components/ui/multi-select'
 import {
   Select,
   SelectContent,
@@ -14,26 +12,33 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
-import { MemeStatusMeta, type MemeWithCategories } from '@/constants/meme'
-import { MemeStatus } from '@/db/generated/prisma/enums'
+import { type MemeFullData } from '@/constants/meme'
+import type { MemeContentLocale } from '@/db/generated/prisma/enums'
+import {
+  CONTENT_LOCALE_OPTIONS,
+  REQUIRED_TRANSLATION_LOCALES
+} from '@/helpers/i18n-content'
 import { getFieldErrorMessage } from '@/lib/utils'
-import { KeywordsField } from '@admin/-components/keywords-field'
-import { MemeFormDescriptionField } from './meme-form-description-field'
+import type { Locale } from '@/paraglide/runtime'
+import { locales } from '@/paraglide/runtime'
+import type { AnyFieldApi } from '@tanstack/react-form'
+import { MemeFormMetadataFields } from './meme-form-metadata-fields'
+import { MemeTranslationSection } from './meme-translation-section'
 import { useMemeForm } from './use-meme-form'
 
 type MemeFormParams = {
-  meme: MemeWithCategories
-  onCancel: () => void
+  meme: MemeFullData
   onSuccess?: () => void
 }
 
-export const MemeForm = ({ meme, onCancel, onSuccess }: MemeFormParams) => {
+export const MemeForm = ({ meme, onSuccess }: MemeFormParams) => {
   const {
     form,
-    keywordsField,
+    keywordsFields,
     categoriesListQuery,
     categoriesOptions,
-    generateContentMutation
+    generateContentMutation,
+    isLocaleRequired
   } = useMemeForm({ meme, onSuccess })
 
   return (
@@ -43,84 +48,43 @@ export const MemeForm = ({ meme, onCancel, onSuccess }: MemeFormParams) => {
       className="flex flex-col gap-6"
       onSubmit={(event) => {
         event.preventDefault()
-        keywordsField.handleAddKeyword()
+
+        for (const locale of locales) {
+          if (isLocaleRequired(locale)) {
+            keywordsFields[locale].handleAddKeyword()
+          }
+        }
+
         void form.handleSubmit()
       }}
     >
       <div className="flex flex-col gap-6">
         <form.Field
-          name="title"
+          name="contentLocale"
           children={(field) => {
             const errorMessage = getFieldErrorMessage({ field })
 
             return (
               <FormItem error={errorMessage}>
-                <FormLabel>Titre</FormLabel>
-                <FormControl>
-                  <Input
-                    required
-                    type="text"
-                    name={field.name}
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => {
-                      return field.handleChange(event.target.value)
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )
-          }}
-        />
-        <form.Field
-          name="description"
-          children={(field) => {
-            return (
-              <MemeFormDescriptionField
-                field={field}
-                generateContentMutation={generateContentMutation}
-              />
-            )
-          }}
-        />
-        <form.Field
-          name="keywords"
-          children={(field) => {
-            return <KeywordsField field={field} {...keywordsField} />
-          }}
-        />
-        <form.Field
-          name="status"
-          children={(field) => {
-            const errorMessage = getFieldErrorMessage({ field })
-
-            return (
-              <FormItem error={errorMessage}>
-                <FormLabel>Statut</FormLabel>
+                <FormLabel>Langue du contenu</FormLabel>
                 <FormControl>
                   <Select
                     value={field.state.value}
                     onValueChange={(value) => {
-                      return field.handleChange(value as MemeStatus)
+                      return field.handleChange(value as MemeContentLocale)
                     }}
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Sélectionnez un statut" />
+                      <SelectValue placeholder="Sélectionnez une langue" />
                     </SelectTrigger>
-                    <SelectContent className="w-full">
-                      <SelectItem value={MemeStatus.PENDING}>
-                        {MemeStatusMeta.PENDING.label}
-                      </SelectItem>
-                      <SelectItem value={MemeStatus.PUBLISHED}>
-                        {MemeStatusMeta.PUBLISHED.label}
-                      </SelectItem>
-                      <SelectItem value={MemeStatus.ARCHIVED}>
-                        {MemeStatusMeta.ARCHIVED.label}
-                      </SelectItem>
-                      <SelectItem value={MemeStatus.REJECTED}>
-                        {MemeStatusMeta.REJECTED.label}
-                      </SelectItem>
+                    <SelectContent>
+                      {CONTENT_LOCALE_OPTIONS.map((option) => {
+                        return (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        )
+                      })}
                     </SelectContent>
                   </Select>
                 </FormControl>
@@ -129,59 +93,94 @@ export const MemeForm = ({ meme, onCancel, onSuccess }: MemeFormParams) => {
             )
           }}
         />
-        <form.Field
-          name="categoryIds"
-          children={(field) => {
-            const errorMessage = getFieldErrorMessage({ field })
+        <form.Subscribe
+          selector={(state) => {
+            return state.values.contentLocale
+          }}
+          children={(contentLocale) => {
+            const requiredLocales = REQUIRED_TRANSLATION_LOCALES[
+              contentLocale
+            ] as readonly Locale[]
 
             return (
-              <FormItem error={errorMessage}>
-                <FormLabel>Catégories</FormLabel>
-                <FormControl>
-                  <MultiAsyncSelect
-                    loading={categoriesListQuery.isLoading}
-                    error={categoriesListQuery.error}
-                    options={categoriesOptions}
-                    value={field.state.value}
-                    onValueChange={(value) => {
-                      return field.handleChange(value)
-                    }}
-                    hideSelectAll
-                    closeText="Fermer"
-                    clearText="Effacer"
-                    className="w-full"
-                    searchPlaceholder="Rechercher..."
-                    placeholder="Sélectionnez une catégorie..."
-                    maxCount={6}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+              <>
+                {locales
+                  .filter((locale) => {
+                    return requiredLocales.includes(locale)
+                  })
+                  .map((locale) => {
+                    return (
+                      <form.Field
+                        key={locale}
+                        name={`translations.${locale}.title`}
+                        children={(titleField: AnyFieldApi) => {
+                          return (
+                            <form.Field
+                              name={`translations.${locale}.description`}
+                              children={(descriptionField: AnyFieldApi) => {
+                                return (
+                                  <form.Field
+                                    name={`translations.${locale}.keywords`}
+                                    children={(
+                                      keywordsFieldApi: AnyFieldApi
+                                    ) => {
+                                      return (
+                                        <MemeTranslationSection
+                                          locale={locale}
+                                          titleField={titleField}
+                                          descriptionField={descriptionField}
+                                          keywordsFieldApi={keywordsFieldApi}
+                                          keywordsField={keywordsFields[locale]}
+                                          isGenerating={
+                                            generateContentMutation.isPending
+                                          }
+                                          onGenerateContent={() => {
+                                            return generateContentMutation.mutate(
+                                              locale
+                                            )
+                                          }}
+                                        />
+                                      )
+                                    }}
+                                  />
+                                )
+                              }}
+                            />
+                          )
+                        }}
+                      />
+                    )
+                  })}
+              </>
             )
           }}
         />
         <form.Field
-          name="tweetUrl"
-          children={(field) => {
-            const errorMessage = getFieldErrorMessage({ field })
-
+          name="status"
+          children={(statusField: AnyFieldApi) => {
             return (
-              <FormItem error={errorMessage}>
-                <FormLabel>Twitter URL</FormLabel>
-                <FormControl>
-                  <Input
-                    required
-                    type="text"
-                    name={field.name}
-                    value={field.state.value ?? ''}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => {
-                      return field.handleChange(event.target.value)
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+              <form.Field
+                name="categoryIds"
+                children={(categoryIdsField: AnyFieldApi) => {
+                  return (
+                    <form.Field
+                      name="tweetUrl"
+                      children={(tweetUrlField: AnyFieldApi) => {
+                        return (
+                          <MemeFormMetadataFields
+                            statusField={statusField}
+                            categoryIdsField={categoryIdsField}
+                            tweetUrlField={tweetUrlField}
+                            categoriesOptions={categoriesOptions}
+                            isCategoriesLoading={categoriesListQuery.isLoading}
+                            categoriesError={categoriesListQuery.error}
+                          />
+                        )
+                      }}
+                    />
+                  )
+                }}
+              />
             )
           }}
         />
@@ -195,7 +194,6 @@ export const MemeForm = ({ meme, onCancel, onSuccess }: MemeFormParams) => {
             <FormFooter
               canSubmit={canSubmit}
               isSubmitting={isSubmitting}
-              onCancel={onCancel}
               submitLabel="Enregistrer"
               isLoadingButton
               formId="edit-meme-form"

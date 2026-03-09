@@ -4,15 +4,15 @@
 
 ---
 
-## Cleanup branches — Retour sur main
+## Cleanup branches — Retour sur main ✅
 
-La branche de production est `feat/migrate-to-vercel` depuis la migration Railway → Vercel. Il faut tout remettre sur `main`.
+Terminé le 2026-03-09. Toutes les branches mergées dans `main`, production branch Vercel et default branch GitHub pointent sur `main`. Branches supprimées : `feat/migrate-to-vercel`, `feat/i18n`, `feat/i18n-content`, `feat/sentry-server-tracing`.
 
-- [ ] Merge `feat/migrate-to-vercel` → `main` (fast-forward si possible, sinon merge commit)
-- [ ] Vercel : changer la Production Branch de `feat/migrate-to-vercel` à `main` (Settings → Git → Production Branch)
-- [ ] GitHub : changer la default branch de `feat/migrate-to-vercel` à `main` (Settings → General → Default branch)
-- [ ] Supprimer la branche `feat/migrate-to-vercel` (remote + local)
-- [ ] Supprimer la branche `feat/i18n-content` (remote + local)
+- [x] Merge `feat/migrate-to-vercel` → `main` (fast-forward)
+- [x] Vercel : Production Branch → `main` (Settings → Environments → Production)
+- [x] GitHub : Default branch → `main`
+- [x] Supprimer toutes les branches mortes (local + remote)
+- [x] Mettre à jour README.md (références à `feat/migrate-to-vercel` → `main`)
 - [ ] Vérifier que le deploy Vercel se déclenche bien sur push `main`
 
 ---

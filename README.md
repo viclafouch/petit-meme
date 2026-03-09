@@ -4,7 +4,7 @@
 
 Meme management and sharing platform with video support, premium subscriptions, and a TikTok-style reels experience. Built as a full-stack React 19 application with server-side rendering.
 
-Currently available in **French only**. English support is planned.
+Available in **French** and **English**.
 
 ## Features
 
@@ -41,7 +41,7 @@ Currently available in **French only**. English support is planned.
 
 | Service | Purpose |
 |---------|---------|
-| [Vercel](https://vercel.com/) | Hosting (serverless, auto-deploy from `feat/migrate-to-vercel`) |
+| [Vercel](https://vercel.com/) | Hosting (serverless, auto-deploy from `main`) |
 | [Neon](https://neon.tech/) | PostgreSQL database |
 | [Bunny CDN](https://bunny.net/) | Video storage and HLS delivery |
 | [Stripe](https://stripe.com/) | Payment processing and subscriptions |
@@ -107,7 +107,7 @@ This creates a migration file, applies it to the local database, and regenerates
 
 ### Production deployment
 
-Vercel auto-deploys on push to `feat/migrate-to-vercel`. After a deploy that includes new migrations:
+Vercel auto-deploys on push to `main`. After a deploy that includes new migrations:
 
 ```bash
 pnpm run prisma:migrate:prod
@@ -181,7 +181,7 @@ crons/             # Scheduled jobs (Algolia sync, Bunny updates)
 
 ## Deployment
 
-The app is deployed on Vercel with automatic deploys from the `feat/migrate-to-vercel` branch.
+The app is deployed on Vercel with automatic deploys from the `main` branch.
 
 Vercel automatically installs dependencies, builds the app, and deploys serverless functions. Database migrations must be applied separately after each deploy that includes schema changes.
 

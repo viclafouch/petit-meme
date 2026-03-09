@@ -6,6 +6,7 @@ import { buttonVariants } from '@/components/ui/button'
 import { Container } from '@/components/ui/container'
 import { MemeStatusMeta } from '@/constants/meme'
 import { formatDate } from '@/helpers/date'
+import { buildIframeVideoUrl } from '@/lib/bunny'
 import { buildMemeSeo } from '@/lib/seo'
 import { m } from '@/paraglide/messages'
 import { getLocale } from '@/paraglide/runtime'
@@ -79,7 +80,7 @@ const RouteComponent = () => {
       <div className="py-10 flex flex-col gap-8">
         <div className="bg-muted relative aspect-video w-full overflow-hidden rounded-lg border border-white/10">
           <iframe
-            src={`https://iframe.mediadelivery.net/embed/471900/${memeQuery.data.video.bunnyId}?autoplay=false&loop=false&muted=true&preload=true&responsive=true`}
+            src={`${buildIframeVideoUrl(memeQuery.data.video.bunnyId)}?autoplay=false&loop=false&muted=true&preload=true&responsive=true`}
             title={memeQuery.data.title}
             className="size-full"
             allow="autoplay; fullscreen"

@@ -37,6 +37,7 @@ certificates
 src/paraglide/
 
 backup.*
+backups/
 
 dist
 .output

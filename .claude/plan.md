@@ -72,6 +72,8 @@ nitro({
 
 ## Backlog — Futures évolutions
 
+- [ ] Supprimer duplicata mème "Ratatouille", et "zero espagnol", "noel", "Thierry Henry", "let's go".
+
 ### Admin — Items reportés
 
 - [ ] Rate limiting sur les preview deployments Vercel (infra)
@@ -134,7 +136,14 @@ Permettre à l'utilisateur de filtrer par langue du contenu, indépendamment de 
 
 510 mèmes en prod, tous taggés FR par défaut. ~100 sont en réalité en anglais et doivent être retaggés EN avec une traduction EN. L'ordre d'exécution est important.
 
-**Étape 1 — Outils admin (prérequis)**
+**Step 0 — Triage manuel contentLocale** ✅
+
+- [x] Triage des ~510 mèmes terminé
+- [x] Code triage supprimé (page admin, server functions, composant BunnyVideoPlayer, lien sidebar, query options)
+- [x] Champ `contentLocaleReviewed` supprimé (migration `drop_content_locale_reviewed`)
+- [x] **Reindex Algolia** en prod
+
+**Étape 1 — Outils admin (prérequis traduction)**
 
 - [ ] **Filtre contentLocale dans la library admin** — dropdown pour filtrer par FR/EN/UNIVERSAL, utile pour retrouver les mèmes à tagger/traduire
 - [ ] **Dashboard traduction** — compteurs dans le dashboard admin : mèmes sans traduction EN, mèmes taggés FR sans review, couverture traduction (% avec traduction EN)
@@ -144,14 +153,12 @@ Permettre à l'utilisateur de filtrer par langue du contenu, indépendamment de 
 
 - [ ] **Batch "Translate all"** (page library `admin/library`) — bouton qui traduit en masse tous les mèmes sans `MemeTranslation(locale="en")`. Gemini traduit par batch de 10-20 (JSON structuré), les traductions sont écrites en DB. Progress bar dans l'UI. L'admin peut ensuite reviewer chaque mème via le formulaire existant. Si un batch échoue : skip les mèmes en erreur, continuer les suivants, afficher un résumé final (N traduits, M en erreur avec retry possible)
 
-**Étape 3 — Détection et tagging contentLocale (Gemini, jamais appliqué automatiquement)**
+**Étape 3 — Détection et tagging contentLocale (potentiellement inutile après Step 0)**
 
-- [ ] **Suggestion "Detect language"** par mème — Gemini analyse le titre + description pour suggérer FR/EN/UNIVERSAL (le titre seul peut être trop court/ambigu). Le résultat est affiché comme suggestion dans le formulaire (ex: badge "Gemini suggests: EN"), l'admin valide et save manuellement
-- [ ] **Batch "Suggest language"** — même principe en masse : Gemini analyse tous les mèmes et propose un contentLocale pour chacun. Résultat affiché dans une vue de review (tableau avec titre, contentLocale actuel, suggestion Gemini, bouton "Apply"). L'admin applique mème par mème ou sélectionne en masse après review
+- [ ] **Suggestion "Detect language"** par mème — Gemini analyse le titre + description pour suggérer FR/EN/UNIVERSAL. Utile uniquement pour les futurs mèmes, pas pour le backlog déjà trié manuellement
 
 **Étape 4 — Finalisation**
 
-- [ ] Review manuel des ~100 mèmes suggérés EN/UNIVERSAL par Gemini — valider ou corriger chaque suggestion via l'admin existant
 - [ ] Reindex Algolia en dev et prod (`scripts/reindex-memes.ts`) — les index `_en` seront peuplés avec les mèmes retaggés
 - [ ] Badge langue optionnel dans les listes de mèmes (pas seulement la page détail)
 

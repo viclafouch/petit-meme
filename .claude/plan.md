@@ -225,15 +225,46 @@ La page pricing utilise `useSuspenseQuery(getActiveSubscriptionQueryOpts())` pou
 
 Phases 0, 1, 1.5 terminées. Interface bilingue FR/EN + 11 email templates traduits.
 
-**Phase 2 — Contenu mèmes + Algolia bilingue :** Plan détaillé dans `.claude/plan-i18n-content.md`
+**Phase 2 — Contenu mèmes + Algolia bilingue** (terminée, déployée en prod le 2026-03-09)
 
 - [x] Phase 2.0 — Schema DB (enum `MemeContentLocale`, tables `MemeTranslation`/`CategoryTranslation`)
 - [x] Phase 2.1 — Admin (formulaire mème inline avec contentLocale + sections traduction, catégories FR/EN)
 - [x] Phase 2.2 — Couche serveur (résolution locale, filtrage contentLocale, SEO, cache locale-aware)
 - [x] Phase 2.3 — Algolia (code multi-index: sync, search, admin writes, insights — tous locale-aware)
-- [x] Phase 2.3 ops (dev) — Index `_fr`/`_en` + replicas standard créés et peuplés via `scripts/setup-algolia-indices.ts` + `scripts/reindex-memes.ts`, ancien index dev supprimé
-- [ ] Phase 2.3 ops (prod) — Même procédure avec `.env.production` : setup indices → reindex → deploy → supprimer ancien index prod
+- [x] Phase 2.3 ops — Index `_fr`/`_en` + replicas standard créés en dev et prod, anciens index supprimés
 - [x] Phase 2.4 — Frontend & SEO (sitemap hreflang filtré, badge langue, catégories virtuelles Paraglide)
+
+### Phase 2.5 — Outils admin pour traduction et tagging
+
+~100 mèmes sur 500 sont en anglais mais taggés FR sans traduction EN. Traduire et tagger manuellement est trop long.
+
+**Traduction via Gemini (déjà configuré dans `src/server/ai.ts`)**
+
+- [ ] **Bouton "Auto-translate" par mème** (page edit `admin/library/$memeId`) — appel Gemini pour traduire titre + description + keywords FR → EN, pré-remplit la section EN dans le formulaire. L'admin review, ajuste et save manuellement
+- [ ] **Batch "Translate all"** (page library `admin/library`) — bouton qui traduit en masse tous les mèmes sans `MemeTranslation(locale="en")`. Gemini traduit par batch de 10-20 (JSON structuré), les traductions sont écrites en DB. Progress bar dans l'UI. L'admin peut ensuite reviewer chaque mème via le formulaire existant
+
+**Suggestion contentLocale via Gemini (jamais appliquée automatiquement)**
+
+- [ ] **Suggestion "Detect language"** par mème — Gemini analyse le titre pour suggérer FR/EN/UNIVERSAL. Le résultat est affiché comme suggestion dans le formulaire (ex: badge "Gemini suggests: EN"), l'admin valide et save manuellement
+- [ ] **Batch "Suggest language"** — même principe en masse : Gemini analyse tous les mèmes et propose un contentLocale pour chacun. Résultat affiché dans une vue de review (tableau avec titre, contentLocale actuel, suggestion Gemini, bouton "Apply"). L'admin applique mème par mème ou sélectionne en masse après review
+
+**Outils admin complémentaires**
+
+- [ ] **Filtre contentLocale dans la library admin** — dropdown pour filtrer par FR/EN/UNIVERSAL, utile pour retrouver les mèmes à tagger/traduire
+- [ ] **Dashboard traduction** — compteurs dans le dashboard admin : mèmes sans traduction EN, mèmes taggés FR sans review, couverture traduction (% avec traduction EN)
+
+**Finalisation**
+
+- [ ] Après tagging + traduction : reindex Algolia (`scripts/reindex-memes.ts`)
+- [ ] Badge langue optionnel dans les listes de mèmes (pas seulement la page détail)
+
+**Coût :** Gemini free tier (titres/descriptions courts = très peu de tokens, ~25-50 appels API pour 500 mèmes)
+
+### Items i18n reportés
+
+- [ ] Synonymes EN Algolia — ajouter via dashboard quand contenu EN atteint une masse critique
+- [ ] Sync incrémentale Algolia — tracker `updatedAt` au lieu de `replaceAllObjects` dans le cron (optimisation future)
+- [ ] 3e langue — le schema DB est prêt (mapping `locale → contentLocales[]`), pas d'implémentation prévue pour l'instant
 
 ### Migration Prisma → Drizzle
 

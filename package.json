@@ -24,7 +24,7 @@
   },
   "type": "module",
   "scripts": {
-    "dev": "vite dev --mode production",
+    "dev": "vite dev",
     "build": "vite build",
     "start": "node .output/server/index.mjs",
     "prisma:migrate:dev": "dotenv -e .env.development -- prisma migrate deploy",

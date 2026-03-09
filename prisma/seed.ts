@@ -135,6 +135,11 @@ const clearBunny = async () => {
 const seed = async () => {
   logEnvironmentInfo()
 
+  await new Promise((resolve) => {
+    // eslint-disable-next-line no-promise-executor-return
+    return setTimeout(resolve, 5000)
+  })
+
   await clearDatabase()
   await clearAlgolia()
   await clearStripe()

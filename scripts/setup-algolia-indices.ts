@@ -81,7 +81,7 @@ const setupAlgoliaIndices = async () => {
     console.log(`  Languages: ${languages.join(', ')}`)
     console.log(`  Replicas: ${replicas.join(', ')}`)
 
-    await algoliaAdminClient.setSettings({
+    const { taskID } = await algoliaAdminClient.setSettings({
       indexName,
       indexSettings: {
         ...BASE_INDEX_SETTINGS,
@@ -93,16 +93,23 @@ const setupAlgoliaIndices = async () => {
       }
     })
 
-    console.log(`  Done`)
+    await algoliaAdminClient.waitForTask({ indexName, taskID })
+    console.log(`  Primary index configured`)
 
     for (const replica of replicaConfigs) {
       console.log(`  Configuring replica: ${replica.name}`)
 
-      await algoliaAdminClient.setSettings({
+      const replicaResponse = await algoliaAdminClient.setSettings({
         indexName: replica.name,
         indexSettings: {
+          attributesForFaceting: BASE_INDEX_SETTINGS.attributesForFaceting,
           customRanking: replica.customRanking
         }
+      })
+
+      await algoliaAdminClient.waitForTask({
+        indexName: replica.name,
+        taskID: replicaResponse.taskID
       })
 
       console.log(`    Done`)

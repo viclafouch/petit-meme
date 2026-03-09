@@ -1,7 +1,7 @@
 ---
 name: deep-dive
 description: Interview me relentlessly about a specific phase of the plan until we reach a shared understanding. Walks down each branch of the design tree, resolving dependencies between decisions one-by-one. Use when starting work on a new phase to surface missing details, ambiguities, or implicit assumptions.
-user-invokable: true
+user-invocable: true
 ---
 
 # Interview — Plan Phase Deep-Dive

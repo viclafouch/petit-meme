@@ -1,5 +1,7 @@
 ---
-paths: "**/*.{test,spec}.ts, **/__tests__/**"
+paths:
+  - "**/*.{test,spec}.ts"
+  - "**/__tests__/**"
 ---
 
 ## Testing Rules

@@ -2,7 +2,7 @@ import type { VariantProps } from 'class-variance-authority'
 import { z } from 'zod'
 import type { badgeVariants } from '@/components/ui/badge'
 import { type Prisma } from '@/db/generated/prisma/client'
-import { MemeStatus } from '@/db/generated/prisma/enums'
+import { MemeContentLocale, MemeStatus } from '@/db/generated/prisma/enums'
 import { FILTERABLE_CONTENT_LOCALES } from '@/helpers/i18n-content'
 import { m } from '@/paraglide/messages.js'
 
@@ -100,6 +100,7 @@ export const MEMES_SEARCH_SCHEMA = z.object({
   query: z.string().max(200).optional().catch(undefined),
   page: z.coerce.number().int().min(1).max(1000).optional().catch(1),
   status: z.enum(MemeStatus).optional(),
+  contentLocale: z.enum(MemeContentLocale).optional(),
   contentLocales: z
     .string()
     .refine((value) => {

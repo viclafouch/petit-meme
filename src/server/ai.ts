@@ -7,6 +7,7 @@ import {
   CONTENT_LOCALE_TO_LOCALE,
   resolveMemeTranslation
 } from '@/helpers/i18n-content'
+import { withTimeout } from '@/helpers/promise'
 import { buildSignedOriginalUrl } from '@/lib/bunny'
 import { adminLogger } from '@/lib/logger'
 import { captureWithFeature } from '@/lib/sentry'
@@ -24,6 +25,9 @@ const videoSchema = z.object({
 })
 
 const ai = new GoogleGenAI({ apiKey: serverEnv.GEMINI_API_KEY })
+
+const GEMINI_MODEL = 'gemini-3-flash-preview'
+const GEMINI_TIMEOUT_MS = 8_000
 
 export const generateMemeContent = createServerFn({ method: 'POST' })
   .middleware([adminRequiredMiddleware])
@@ -83,14 +87,18 @@ export const generateMemeContent = createServerFn({ method: 'POST' })
     ]
 
     try {
-      const result = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents,
-        config: {
-          responseMimeType: 'application/json',
-          responseJsonSchema: zodToJsonSchema(videoSchema)
-        }
-      })
+      const result = await withTimeout(
+        ai.models.generateContent({
+          model: GEMINI_MODEL,
+          contents,
+          config: {
+            responseMimeType: 'application/json',
+            responseJsonSchema: zodToJsonSchema(videoSchema)
+          }
+        }),
+        GEMINI_TIMEOUT_MS,
+        `Génération AI : timeout après ${GEMINI_TIMEOUT_MS}ms`
+      )
 
       if (!result.text) {
         throw new Error('La génération AI a échoué : réponse vide')

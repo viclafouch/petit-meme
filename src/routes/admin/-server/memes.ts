@@ -12,7 +12,11 @@ import {
   TWEET_LINK_SCHEMA
 } from '@/constants/meme'
 import { prismaClient } from '@/db'
-import { MemeContentLocale, MemeStatus } from '@/db/generated/prisma/enums'
+import {
+  type MemeContentLocale,
+  MemeContentLocale as MemeContentLocaleEnum,
+  MemeStatus
+} from '@/db/generated/prisma/enums'
 import {
   buildLocaleRecord,
   CONTENT_LOCALE_TO_LOCALE,
@@ -52,6 +56,12 @@ const ALGOLIA_STATUS_FILTERS = {
   [MemeStatus.ARCHIVED]: 'status:ARCHIVED'
 } as const satisfies Record<MemeStatus, string>
 
+const ALGOLIA_CONTENT_LOCALE_FILTERS = {
+  [MemeContentLocaleEnum.FR]: 'contentLocale:FR',
+  [MemeContentLocaleEnum.EN]: 'contentLocale:EN',
+  [MemeContentLocaleEnum.UNIVERSAL]: 'contentLocale:UNIVERSAL'
+} as const satisfies Record<MemeContentLocale, string>
+
 export const getAdminMemeById = createServerFn({ method: 'GET' })
   .inputValidator((data) => {
     return z.string().parse(data)
@@ -84,7 +94,7 @@ const REQUIRED_MEME_TRANSLATION_SCHEMA = MEME_TRANSLATION_SCHEMA.extend({
 
 export const MEME_FORM_SCHEMA = z
   .object({
-    contentLocale: z.enum(MemeContentLocale),
+    contentLocale: z.enum(MemeContentLocaleEnum),
     translations: z.object(
       buildLocaleRecord(() => {
         return MEME_TRANSLATION_SCHEMA
@@ -416,7 +426,7 @@ async function createMemeWithVideo({
         title,
         tweetUrl,
         status: 'PENDING',
-        contentLocale: MemeContentLocale.FR,
+        contentLocale: MemeContentLocaleEnum.FR,
         video: {
           create: {
             duration: 0,
@@ -535,12 +545,21 @@ export const getAdminMemes = createServerFn({ method: 'GET' })
   .middleware([adminRequiredMiddleware])
   .inputValidator(MEMES_SEARCH_SCHEMA)
   .handler(async ({ data }) => {
-    const cacheKey = `admin-memes:${data.query ?? ''}:${data.page ?? 1}:${data.status ?? ''}`
+    const cacheKey = `admin-memes:${data.query ?? ''}:${data.page ?? 1}:${data.status ?? ''}:${data.contentLocale ?? ''}`
 
     return withAlgoliaCache(cacheKey, async () => {
-      const filters = data.status
-        ? ALGOLIA_STATUS_FILTERS[data.status]
-        : undefined
+      const filterParts: string[] = []
+
+      if (data.status) {
+        filterParts.push(ALGOLIA_STATUS_FILTERS[data.status])
+      }
+
+      if (data.contentLocale) {
+        filterParts.push(ALGOLIA_CONTENT_LOCALE_FILTERS[data.contentLocale])
+      }
+
+      const filters =
+        filterParts.length > 0 ? filterParts.join(' AND ') : undefined
 
       const searchIndex = data.query
         ? resolveAlgoliaIndexName(baseLocale)

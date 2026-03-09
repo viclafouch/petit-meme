@@ -41,22 +41,24 @@ export const MemeForm = ({ meme, onSuccess }: MemeFormParams) => {
     isLocaleRequired
   } = useMemeForm({ meme, onSuccess })
 
+  const handleSubmit = (event: React.SyntheticEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    for (const locale of locales) {
+      if (isLocaleRequired(locale)) {
+        keywordsFields[locale].handleAddKeyword()
+      }
+    }
+
+    void form.handleSubmit()
+  }
+
   return (
     <form
       id="edit-meme-form"
       noValidate
       className="flex flex-col gap-6"
-      onSubmit={(event) => {
-        event.preventDefault()
-
-        for (const locale of locales) {
-          if (isLocaleRequired(locale)) {
-            keywordsFields[locale].handleAddKeyword()
-          }
-        }
-
-        void form.handleSubmit()
-      }}
+      onSubmit={handleSubmit}
     >
       <div className="flex flex-col gap-6">
         <form.Field

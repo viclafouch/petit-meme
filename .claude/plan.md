@@ -143,28 +143,18 @@ Permettre à l'utilisateur de filtrer par langue du contenu, indépendamment de 
 - [x] Champ `contentLocaleReviewed` supprimé (migration `drop_content_locale_reviewed`)
 - [x] **Reindex Algolia** en prod
 
-**Étape 1 — Outils admin (prérequis traduction)**
+**Étape 1 — Outils admin**
 
-- [ ] **Filtre contentLocale dans la library admin** — dropdown pour filtrer par FR/EN/UNIVERSAL, utile pour retrouver les mèmes à tagger/traduire
-- [ ] **Dashboard traduction** — compteurs dans le dashboard admin : mèmes sans traduction EN, mèmes taggés FR sans review, couverture traduction (% avec traduction EN)
-- [ ] **Bouton "Auto-translate" par mème** (page edit `admin/library/$memeId`) — appel Gemini pour traduire titre + description + keywords FR → EN, pré-remplit la section EN dans le formulaire. L'admin review, ajuste et save manuellement
+- [x] **Filtre contentLocale dans la library admin** — dropdown pour filtrer par FR/EN/UNIVERSAL, composant `MemesFilterContentLocale` dans `src/routes/admin/-components/`, filtre Algolia via `contentLocale:X`
 
-**Étape 2 — Batch traduction (Gemini, déjà configuré dans `src/server/ai.ts`)**
+**Étape 2 — Traduction batch (terminée)** ✅
 
-- [ ] **Batch "Translate all"** (page library `admin/library`) — bouton qui traduit en masse tous les mèmes sans `MemeTranslation(locale="en")`. Gemini traduit par batch de 10-20 (JSON structuré), les traductions sont écrites en DB. Progress bar dans l'UI. L'admin peut ensuite reviewer chaque mème via le formulaire existant. Si un batch échoue : skip les mèmes en erreur, continuer les suivants, afficher un résumé final (N traduits, M en erreur avec retry possible)
+Traduction EN des mèmes UNIVERSAL réalisée via script one-shot (`scripts/migrate-en-memes.ts`, supprimé après usage). Gemini 2.5 Flash analyse les vidéos + métadonnées FR, génère titre/description/keywords EN. 120 mèmes UNIVERSAL traduits, 24 mèmes EN-only traduits (FR ajouté). Données vérifiées en prod, script supprimé du repo.
 
-**Étape 3 — Détection et tagging contentLocale (potentiellement inutile après Step 0)**
+**Étape 3 — Finalisation**
 
-- [ ] **Suggestion "Detect language"** par mème — Gemini analyse le titre + description pour suggérer FR/EN/UNIVERSAL. Utile uniquement pour les futurs mèmes, pas pour le backlog déjà trié manuellement
-
-**Étape 4 — Finalisation**
-
-- [ ] Reindex Algolia en dev et prod (`scripts/reindex-memes.ts`) — les index `_en` seront peuplés avec les mèmes retaggés
+- [ ] Reindex Algolia en prod (`scripts/reindex-memes.ts`) — refléter les traductions EN dans les index de recherche
 - [ ] Badge langue optionnel dans les listes de mèmes (pas seulement la page détail)
-
-**Coût :** Gemini free tier (titres/descriptions courts = très peu de tokens, ~25-50 appels API pour 510 mèmes)
-
-**Scripts utiles :** `scripts/setup-algolia-indices.ts` (recréer les index ou appliquer des changements de settings, ex: ajout `filterOnly(contentLocale)`) + `scripts/reindex-memes.ts` (repeupler après tagging en masse) — à conserver
 
 ### Items i18n reportés
 

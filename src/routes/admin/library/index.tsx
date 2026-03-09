@@ -6,9 +6,9 @@ import { PageHeader } from '@/components/page-header'
 import { Paginator } from '@/components/paginator'
 import { Container } from '@/components/ui/container'
 import { LoadingSpinner } from '@/components/ui/spinner'
-import { MEMES_FILTERS_SCHEMA } from '@/constants/meme'
-import type { MemeStatus } from '@/db/generated/prisma/enums'
+import { MEMES_FILTERS_SCHEMA, type MemesFilters } from '@/constants/meme'
 import { MemeListItem } from '@admin/-components/meme-list-item'
+import { MemesFilterContentLocale } from '@admin/-components/memes-filter-content-locale'
 import { NewMemeButton } from '@admin/-components/new-meme-button'
 import { getAdminMemesListQueryOpts } from '@admin/-lib/queries'
 import { useDebouncedValue } from '@tanstack/react-pacer'
@@ -26,7 +26,8 @@ const MemesListWrapper = () => {
   const filters = {
     query: debouncedValue,
     page: search.page,
-    status: search.status
+    status: search.status,
+    contentLocale: search.contentLocale
   }
 
   const memesListQuery = useSuspenseQuery(getAdminMemesListQueryOpts(filters))
@@ -49,7 +50,8 @@ const MemesListWrapper = () => {
                 return {
                   page,
                   query: prevState.query,
-                  status: prevState.status
+                  status: prevState.status,
+                  contentLocale: prevState.contentLocale
                 }
               }
             }
@@ -65,14 +67,17 @@ const RouteComponent = () => {
   const navigate = Route.useNavigate()
   const search = Route.useSearch()
 
-  const handleStatusChange = (status: MemeStatus | null) => {
+  const handleFilterChange = <TKey extends keyof MemesFilters>(
+    key: TKey,
+    value: MemesFilters[TKey] | null
+  ) => {
     void navigate({
       to: '/admin/library',
       search: (prevState) => {
         return {
+          ...prevState,
           page: 1,
-          query: prevState.query,
-          status: status ?? undefined
+          [key]: value ?? undefined
         }
       },
       viewTransition: false,
@@ -81,18 +86,17 @@ const RouteComponent = () => {
   }
 
   const handleQueryChange = (value: string) => {
-    void navigate({
-      to: '/admin/library',
-      search: (prevState) => {
-        return {
-          page: 1,
-          query: value,
-          status: prevState.status
-        }
-      },
-      viewTransition: false,
-      replace: true
-    })
+    return handleFilterChange('query', value)
+  }
+
+  const handleContentLocaleChange = (
+    value: MemesFilters['contentLocale'] | null
+  ) => {
+    return handleFilterChange('contentLocale', value)
+  }
+
+  const handleStatusChange = (value: MemesFilters['status'] | null) => {
+    return handleFilterChange('status', value)
   }
 
   return (
@@ -112,10 +116,16 @@ const RouteComponent = () => {
               query={search.query ?? ''}
               onQueryChange={handleQueryChange}
             />
-            <MemesFilterStatus
-              status={search.status ?? null}
-              onStatusChange={handleStatusChange}
-            />
+            <div className="flex gap-2">
+              <MemesFilterContentLocale
+                contentLocale={search.contentLocale ?? null}
+                onContentLocaleChange={handleContentLocaleChange}
+              />
+              <MemesFilterStatus
+                status={search.status ?? null}
+                onStatusChange={handleStatusChange}
+              />
+            </div>
           </div>
           <React.Suspense fallback={<LoadingSpinner />}>
             <MemesListWrapper />

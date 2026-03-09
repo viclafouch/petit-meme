@@ -1,11 +1,15 @@
 import { prismaClient } from '@/db'
 import {
+  CONTENT_LOCALE_TO_SITE_LOCALES,
+  resolveMemeTranslation
+} from '@/helpers/i18n-content'
+import {
   buildIframeVideoUrl,
   buildVideoImageUrl,
   buildVideoOriginalUrl
 } from '@/lib/bunny'
 import { buildUrl } from '@/lib/seo'
-import { baseLocale, locales } from '@/paraglide/runtime'
+import { baseLocale, type Locale, locales } from '@/paraglide/runtime'
 import { createFileRoute } from '@tanstack/react-router'
 
 type SitemapChangefreq =
@@ -45,9 +49,12 @@ const escapeXml = (text: string) => {
     .replaceAll("'", '&apos;')
 }
 
-const buildHreflangLinks = (pathname: string) => {
+const buildHreflangLinks = (
+  pathname: string,
+  targetLocales: readonly Locale[]
+) => {
   return [
-    ...locales.map((locale) => {
+    ...targetLocales.map((locale) => {
       return `    <xhtml:link rel="alternate" hreflang="${locale}" href="${buildUrl(pathname, locale)}" />`
     }),
     `    <xhtml:link rel="alternate" hreflang="x-default" href="${buildUrl(pathname, baseLocale)}" />`
@@ -77,6 +84,7 @@ type SitemapPage = StaticPage & {
 
 type UrlEntryParams = SitemapPage & {
   loc: string
+  hreflangLocales: readonly Locale[]
 }
 
 const buildImageTag = ({ loc, title }: SitemapImage) => {
@@ -118,7 +126,8 @@ const buildUrlEntry = ({
   changefreq,
   priority,
   image,
-  video
+  video,
+  hreflangLocales
 }: UrlEntryParams) => {
   return [
     '  <url>',
@@ -126,7 +135,7 @@ const buildUrlEntry = ({
     ...(lastmod ? [`    <lastmod>${lastmod}</lastmod>`] : []),
     `    <changefreq>${changefreq}</changefreq>`,
     `    <priority>${priority}</priority>`,
-    buildHreflangLinks(pathname),
+    buildHreflangLinks(pathname, hreflangLocales),
     ...(image ? [buildImageTag(image)] : []),
     ...(video ? [buildVideoTag(video)] : []),
     '  </url>'
@@ -144,6 +153,14 @@ export const Route = createFileRoute('/sitemap.xml')({
               id: true,
               title: true,
               description: true,
+              contentLocale: true,
+              translations: {
+                select: {
+                  locale: true,
+                  title: true,
+                  description: true
+                }
+              },
               updatedAt: true,
               publishedAt: true,
               video: { select: { bunnyId: true, duration: true } }
@@ -155,7 +172,7 @@ export const Route = createFileRoute('/sitemap.xml')({
           })
         ])
 
-        const allPages: SitemapPage[] = [
+        const genericPages: SitemapPage[] = [
           ...STATIC_PAGES,
           {
             pathname: '/memes/category/all',
@@ -169,24 +186,48 @@ export const Route = createFileRoute('/sitemap.xml')({
               changefreq: 'daily',
               priority: '0.8'
             }
-          }),
-          ...memes.map((meme): SitemapPage => {
-            const { bunnyId } = meme.video
-            const thumbnailUrl = buildVideoImageUrl(bunnyId)
+          })
+        ]
 
-            return {
+        const genericEntries = genericPages.flatMap((page) => {
+          return locales.map((locale) => {
+            return buildUrlEntry({
+              ...page,
+              loc: buildUrl(page.pathname, locale),
+              hreflangLocales: locales
+            })
+          })
+        })
+
+        const memeEntries = memes.flatMap((meme) => {
+          const targetLocales =
+            CONTENT_LOCALE_TO_SITE_LOCALES[meme.contentLocale]
+          const { bunnyId } = meme.video
+          const thumbnailUrl = buildVideoImageUrl(bunnyId)
+
+          return targetLocales.map((locale) => {
+            const resolved = resolveMemeTranslation({
+              translations: meme.translations,
+              contentLocale: meme.contentLocale,
+              requestedLocale: locale,
+              fallback: meme
+            })
+
+            return buildUrlEntry({
               pathname: `/memes/${meme.id}`,
+              loc: buildUrl(`/memes/${meme.id}`, locale),
               lastmod: formatDate(meme.updatedAt),
               changefreq: 'weekly',
               priority: '0.6',
+              hreflangLocales: targetLocales,
               image: {
                 loc: thumbnailUrl,
-                title: meme.title
+                title: resolved.title
               },
               video: {
                 thumbnailLoc: thumbnailUrl,
-                title: meme.title,
-                description: meme.description || meme.title,
+                title: resolved.title,
+                description: resolved.description || resolved.title,
                 contentLoc: buildVideoOriginalUrl(bunnyId),
                 playerLoc: buildIframeVideoUrl(bunnyId),
                 duration: meme.video.duration,
@@ -194,20 +235,11 @@ export const Route = createFileRoute('/sitemap.xml')({
                   ? meme.publishedAt.toISOString()
                   : meme.updatedAt.toISOString()
               }
-            }
-          })
-        ]
-
-        const entries = allPages
-          .flatMap((page) => {
-            return locales.map((locale) => {
-              return buildUrlEntry({
-                ...page,
-                loc: buildUrl(page.pathname, locale)
-              })
             })
           })
-          .join('\n')
+        })
+
+        const entries = [...genericEntries, ...memeEntries].join('\n')
 
         const sitemap = [
           '<?xml version="1.0" encoding="UTF-8"?>',

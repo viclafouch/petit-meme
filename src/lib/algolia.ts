@@ -4,7 +4,7 @@ import { MemeContentLocale } from '@/db/generated/prisma/enums'
 import { clientEnv } from '@/env/client'
 import { serverEnv } from '@/env/server'
 import {
-  ALGOLIA_TARGET_LOCALES,
+  CONTENT_LOCALE_TO_SITE_LOCALES,
   resolveCategoryTranslation,
   resolveMemeTranslation,
   VISIBLE_CONTENT_LOCALES
@@ -238,7 +238,7 @@ export function memeToAlgoliaRecord(meme: MemeAlgoliaData, locale: Locale) {
 }
 
 export async function syncMemeToAllIndices(meme: MemeAlgoliaData) {
-  const targetLocales = ALGOLIA_TARGET_LOCALES[meme.contentLocale]
+  const targetLocales = CONTENT_LOCALE_TO_SITE_LOCALES[meme.contentLocale]
 
   await Promise.all(
     locales.map((locale) => {

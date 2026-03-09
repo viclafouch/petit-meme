@@ -28,11 +28,19 @@ Algolia reste sur l'ancien index unique. Le code serveur a un fallback `Meme.tit
 
 Quand les mèmes sont taggés et les traductions prêtes.
 
-1. Créer les index `${prefix}_fr` et `${prefix}_en` (vides) + replicas via Algolia dashboard. Configurer sur chaque index : `searchableAttributes`, `attributesForFaceting`, `queryLanguages`, `ignorePlurals`, `removeStopWords` (copier la config de l'ancien index puis adapter par langue)
-2. Push le code Phase 2.3 → Vercel deploy
-3. Lancer le cron sync (peuple les nouveaux index)
-4. Vérifier que la recherche fonctionne dans les deux locales
-5. Supprimer l'ancien index et ses replicas via Algolia dashboard
+1. `vercel env pull .env.production`
+2. Créer les index prod + replicas + settings :
+   ```bash
+   npx vite-node --dotenv .env.production scripts/setup-algolia-indices.ts
+   ```
+3. Peupler les nouveaux index :
+   ```bash
+   npx vite-node --dotenv .env.production scripts/reindex-memes.ts
+   ```
+4. Vérifier dans le dashboard Algolia que les index prod `${prefix}_fr` et `${prefix}_en` contiennent les bons records
+5. Push le code → Vercel deploy automatique
+6. Vérifier que la recherche fonctionne dans les deux locales (FR + EN)
+7. Supprimer l'ancien index prod et ses 3 replicas via le dashboard Algolia
 
 ---
 
@@ -82,7 +90,7 @@ UNIVERSAL + user EN → translation(en) ✓
 
 ### Algolia
 
-- Un index par locale : `${prefix}_fr`, `${prefix}_en` (+ replicas virtuelles chacun : _popular, _recent, _created)
+- Un index par locale : `${prefix}_fr`, `${prefix}_en` (+ replicas standard chacun : _popular, _recent, _created)
 - `memes_fr` contient FR + EN + UNIVERSAL :
   - FR → `MemeTranslation(locale="fr").title`
   - EN → `MemeTranslation(locale="en").title` (titre EN, tel quel pour les FR)
@@ -91,7 +99,7 @@ UNIVERSAL + user EN → translation(en) ✓
   - EN → `MemeTranslation(locale="en").title`
   - UNIVERSAL → `MemeTranslation(locale="en").title`
 - `queryLanguages` : `["fr", "en"]` pour `_fr` (contient des titres EN), `["en"]` pour `_en`
-- **Coût free tier :** ~N + K records (N mèmes total, K = EN+UNIVERSAL). 8 index (2 primaires + 6 replicas virtuelles). Free tier = 10k records, ~10 index max. Surveiller.
+- **Coût free tier :** Replicas standard → chaque record est dupliqué dans les replicas. ~N × 4 + K × 4 records (N mèmes FR × 4 index _fr, K mèmes EN+UNIVERSAL × 4 index _en). Avec ~519 mèmes (100% FR) : 519 × 4 = ~2 076 records. Free tier = 10k records, ~10 index max → largement dans les limites.
 - **Migration index existant :** l'ancien index (`VITE_ALGOLIA_INDEX`) est remplacé par `_fr` et `_en`. Stratégie zero-downtime dans la phase 2.3.
 
 ### SEO
@@ -221,16 +229,20 @@ UNIVERSAL + user EN → translation(en) ✓
 
 ### Migration index existant (zero-downtime)
 
-- [ ] Étape 1 : créer les nouveaux index `${prefix}_fr` et `${prefix}_en` et leurs replicas virtuelles via dashboard Algolia
+- [x] Étape 1 : créer les nouveaux index `${prefix}_fr` et `${prefix}_en` et leurs replicas via script `scripts/setup-algolia-indices.ts`
 - [x] Étape 2 : code qui lit/écrit les nouveaux index (le code tombe en fallback si l'index est vide)
-- [ ] Étape 3 : lancer le cron sync pour peupler les nouveaux index
-- [ ] Étape 4 : supprimer l'ancien index et ses replicas (libère le quota)
+- [x] Étape 3 : peupler les nouveaux index via `scripts/reindex-memes.ts`
+- [x] Étape 4 (dev) : supprimer l'ancien index `development` et ses replicas via dashboard
+- [ ] Étape 4 (prod) : supprimer l'ancien index prod et ses replicas via dashboard (après deploy + validation)
 - [x] Garder `VITE_ALGOLIA_INDEX` comme préfixe (le code ajoute `_fr`/`_en` selon la locale — pas de changement d'env var nécessaire)
+
+**Note :** Les replicas sont **standard** (pas virtual) car le free tier Algolia bloque la création de virtual replicas via l'API. Fonctionnellement identique, un peu plus de records comptés mais on est loin des 10k du free tier.
 
 ### Configuration par index
 
-- [ ] `queryLanguages` : `["fr", "en"]` pour `_fr` (contient des titres EN pour les mèmes EN), `["en"]` pour `_en`
-- [ ] `ignorePlurals`, `removeStopWords` adaptés par langue
+- [x] `queryLanguages` : `["fr", "en"]` pour `_fr` (contient des titres EN pour les mèmes EN), `["en"]` pour `_en`
+- [x] `ignorePlurals`, `removeStopWords` adaptés par langue
+- [x] `searchableAttributes`, `attributesForFaceting`, `customRanking` configurés via script
 
 ### Sync cron (`src/routes/api/cron/sync-algolia.ts`)
 
@@ -247,6 +259,7 @@ UNIVERSAL + user EN → translation(en) ✓
 - [x] `createMemeWithVideo` : `syncMemeToAllIndices()` sur les index cibles
 - [x] `deleteMemeById` : `deleteMemeFromAllIndices()` sur tous les index
 - [x] Script `scripts/reindex-memes.ts` : mis à jour pour les deux index
+- [x] Script `scripts/setup-algolia-indices.ts` : crée et configure les index primaires + replicas standard avec settings (searchableAttributes, attributesForFaceting, customRanking, queryLanguages, ignorePlurals, removeStopWords)
 - [x] Bunny webhook (`src/routes/api/bunny.ts`) : `syncMemeToAllIndices()` au lieu de `partialUpdateObject`
 
 ### Search
@@ -275,20 +288,20 @@ UNIVERSAL + user EN → translation(en) ✓
 
 ### Sitemap (`src/routes/sitemap[.]xml.ts`)
 
-- [ ] Filtrer les mèmes FR-only de la boucle EN (le sitemap actuel génère des URLs pour toutes les locales via `locales.map()` — ajouter un filtre `contentLocale`)
-- [ ] Pour les mèmes EN + UNIVERSAL : hreflang FR + EN (le mécanisme `buildHreflangLinks` existe déjà, s'assurer qu'il est conditionnel)
-- [ ] Titres/descriptions localisés dans `<image:title>` et `<video:title>` (résoudre depuis `MemeTranslation` par locale)
-- [ ] Catégories : hreflang FR + EN pour toutes
+- [x] Filtrer les mèmes FR-only de la boucle EN (le sitemap actuel génère des URLs pour toutes les locales via `locales.map()` — ajouter un filtre `contentLocale`)
+- [x] Pour les mèmes EN + UNIVERSAL : hreflang FR + EN (le mécanisme `buildHreflangLinks` existe déjà, s'assurer qu'il est conditionnel)
+- [x] Titres/descriptions localisés dans `<image:title>` et `<video:title>` (résoudre depuis `MemeTranslation` par locale)
+- [x] Catégories : hreflang FR + EN pour toutes
 
 ### Catégories virtuelles
 
-- [ ] Ajouter messages Paraglide : `category_news`, `category_popular` (FR + EN)
-- [ ] `VIRTUAL_CATEGORIES` (`src/constants/meme.ts`) : `title` devient un appel `m.category_news()` (le type change de `string` statique à `string` dynamique)
+- [x] Ajouter messages Paraglide : `meme_category_news`, `meme_category_popular` (FR + EN)
+- [x] `VIRTUAL_CATEGORIES` → `getVirtualCategories()` : title devient un appel `m.meme_category_news()` / `m.meme_category_popular()`
 
 ### Badge langue vidéo
 
-- [ ] Composant badge affichant l'icône de la langue du contenu (drapeau ou label)
-- [ ] Affiché sur la page détail mème
+- [x] Badge affichant le drapeau + label localisé de la langue du contenu (via `CONTENT_LOCALE_META` + messages Paraglide `meme_content_locale_*`)
+- [x] Affiché sur la page détail mème (à côté du titre)
 - [ ] Optionnel : afficher dans les listes aussi
 
 **COMMIT : `feat(i18n): frontend locale filtering, sitemap hreflang, and content badges`**

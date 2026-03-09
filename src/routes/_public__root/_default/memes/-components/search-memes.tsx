@@ -7,7 +7,7 @@ import MemesToggleGrid from '@/components/Meme/Filters/memes-toggle-grid'
 import { MemesList } from '@/components/Meme/memes-list'
 import { buttonVariants } from '@/components/ui/button'
 import { LoadingSpinner } from '@/components/ui/spinner'
-import { type MemesFilters, VIRTUAL_CATEGORIES } from '@/constants/meme'
+import { getVirtualCategories, type MemesFilters } from '@/constants/meme'
 import {
   getCategoriesListQueryOpts,
   getMemesListQueryOpts
@@ -104,7 +104,7 @@ export const SearchMemes = () => {
 
   // eslint-disable-next-line no-restricted-syntax
   const currentCategory = React.useMemo(() => {
-    return [...VIRTUAL_CATEGORIES, ...categories.data].find((category) => {
+    return [...getVirtualCategories(), ...categories.data].find((category) => {
       return category.slug === activeSlug
     })
   }, [categories.data, activeSlug])

@@ -4,6 +4,7 @@ import {
 } from '@/db/generated/prisma/enums'
 import type { CategoryTranslationModel } from '@/db/generated/prisma/models/CategoryTranslation'
 import type { MemeTranslationModel } from '@/db/generated/prisma/models/MemeTranslation'
+import { m } from '@/paraglide/messages.js'
 import { type Locale, locales } from '@/paraglide/runtime'
 
 type LocaleMeta = {
@@ -16,20 +17,34 @@ export const LOCALE_META = {
   en: { flag: '🇬🇧', label: 'English' }
 } as const satisfies Record<Locale, LocaleMeta>
 
-export const CONTENT_LOCALE_META = {
-  FR: { flag: '🇫🇷', label: 'Français' },
-  EN: { flag: '🇬🇧', label: 'Anglais' },
-  UNIVERSAL: { flag: '🌍', label: 'Universel' }
-} as const satisfies Record<MemeContentLocale, LocaleMeta>
+type ContentLocaleMeta = {
+  flag: string
+}
 
-export const CONTENT_LOCALE_OPTIONS = Object.entries(CONTENT_LOCALE_META).map(
-  ([value, meta]) => {
+export const CONTENT_LOCALE_META = {
+  FR: { flag: '🇫🇷' },
+  EN: { flag: '🇬🇧' },
+  UNIVERSAL: { flag: '🌍' }
+} as const satisfies Record<MemeContentLocale, ContentLocaleMeta>
+
+type ContentLocaleMessageKey = `meme_content_locale_${MemeContentLocale}`
+
+export const getContentLocaleLabel = (
+  contentLocale: MemeContentLocale
+): string => {
+  const key: ContentLocaleMessageKey = `meme_content_locale_${contentLocale}`
+
+  return m[key]()
+}
+
+export const getContentLocaleOptions = () => {
+  return Object.values(MemeContentLocaleEnum).map((contentLocale) => {
     return {
-      value: value as MemeContentLocale,
-      label: `${meta.flag} ${meta.label}`
+      value: contentLocale,
+      label: `${CONTENT_LOCALE_META[contentLocale].flag} ${getContentLocaleLabel(contentLocale)}`
     }
-  }
-)
+  })
+}
 
 export const CONTENT_LOCALE_TO_LOCALE = {
   FR: 'fr',
@@ -48,17 +63,16 @@ export const VISIBLE_CONTENT_LOCALES: Record<Locale, MemeContentLocale[]> = {
   en: ['EN', 'UNIVERSAL']
 }
 
-export const ALGOLIA_TARGET_LOCALES: Record<MemeContentLocale, Locale[]> =
-  Object.fromEntries(
-    Object.values(MemeContentLocaleEnum).map((contentLocale) => {
-      return [
-        contentLocale,
-        locales.filter((locale) => {
-          return VISIBLE_CONTENT_LOCALES[locale].includes(contentLocale)
-        })
-      ]
-    })
-  ) as Record<MemeContentLocale, Locale[]>
+export const CONTENT_LOCALE_TO_SITE_LOCALES = Object.fromEntries(
+  Object.values(MemeContentLocaleEnum).map((contentLocale) => {
+    return [
+      contentLocale,
+      locales.filter((locale) => {
+        return VISIBLE_CONTENT_LOCALES[locale].includes(contentLocale)
+      })
+    ]
+  })
+) as Record<MemeContentLocale, Locale[]>
 
 export const buildLocaleRecord = <T>(factory: (locale: Locale) => T) => {
   return Object.fromEntries(
@@ -94,13 +108,15 @@ const findTranslationWithPriority = <T extends { locale: string }>(
 }
 
 type ResolveMemeTranslationParams = {
-  translations: Pick<
+  translations: (Pick<
     MemeTranslationModel,
-    'locale' | 'title' | 'description' | 'keywords'
-  >[]
+    'locale' | 'title' | 'description'
+  > &
+    Partial<Pick<MemeTranslationModel, 'keywords'>>)[]
   contentLocale: MemeContentLocale
   requestedLocale: Locale
-  fallback: Pick<MemeTranslationModel, 'title' | 'description' | 'keywords'>
+  fallback: Pick<MemeTranslationModel, 'title' | 'description'> &
+    Partial<Pick<MemeTranslationModel, 'keywords'>>
 }
 
 export const resolveMemeTranslation = ({
@@ -118,7 +134,7 @@ export const resolveMemeTranslation = ({
   return {
     title: match?.title ?? fallback.title,
     description: match?.description ?? fallback.description,
-    keywords: match?.keywords ?? fallback.keywords
+    keywords: match?.keywords ?? fallback.keywords ?? []
   }
 }
 

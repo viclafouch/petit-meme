@@ -3,7 +3,7 @@ import type { Transition } from 'motion/react'
 import { LayoutGroup, motion, useReducedMotion } from 'motion/react'
 import { buttonVariants } from '@/components/ui/button'
 import type { MemesFilters } from '@/constants/meme'
-import { VIRTUAL_CATEGORIES } from '@/constants/meme'
+import { getVirtualCategories } from '@/constants/meme'
 import { getCategoriesListQueryOpts } from '@/lib/queries'
 import { cn } from '@/lib/utils'
 import { useSuspenseQuery } from '@tanstack/react-query'
@@ -32,7 +32,7 @@ export const CategoriesList = () => {
 
   // eslint-disable-next-line no-restricted-syntax -- stable reference for the merged categories array
   const categories = React.useMemo(() => {
-    return [...VIRTUAL_CATEGORIES, ...categoriesQuery.data]
+    return [...getVirtualCategories(), ...categoriesQuery.data]
   }, [categoriesQuery.data])
 
   const bubbleTransition =

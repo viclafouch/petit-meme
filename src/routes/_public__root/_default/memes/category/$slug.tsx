@@ -1,4 +1,4 @@
-import { MEMES_SEARCH_SCHEMA, VIRTUAL_CATEGORIES } from '@/constants/meme'
+import { getVirtualCategories, MEMES_SEARCH_SCHEMA } from '@/constants/meme'
 import { getCategoriesListQueryOpts } from '@/lib/queries'
 import { seo } from '@/lib/seo'
 import { m } from '@/paraglide/messages.js'
@@ -17,7 +17,7 @@ export const Route = createFileRoute(
       return { category: undefined }
     }
 
-    const virtualCategory = VIRTUAL_CATEGORIES.find((item) => {
+    const virtualCategory = getVirtualCategories().find((item) => {
       return item.slug === params.slug
     })
 

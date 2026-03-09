@@ -15,7 +15,7 @@ import {
 import { type MemeFullData } from '@/constants/meme'
 import type { MemeContentLocale } from '@/db/generated/prisma/enums'
 import {
-  CONTENT_LOCALE_OPTIONS,
+  getContentLocaleOptions,
   REQUIRED_TRANSLATION_LOCALES
 } from '@/helpers/i18n-content'
 import { getFieldErrorMessage } from '@/lib/utils'
@@ -78,7 +78,7 @@ export const MemeForm = ({ meme, onSuccess }: MemeFormParams) => {
                       <SelectValue placeholder="Sélectionnez une langue" />
                     </SelectTrigger>
                     <SelectContent>
-                      {CONTENT_LOCALE_OPTIONS.map((option) => {
+                      {getContentLocaleOptions().map((option) => {
                         return (
                           <SelectItem key={option.value} value={option.value}>
                             {option.label}

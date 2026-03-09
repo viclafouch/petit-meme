@@ -3,6 +3,7 @@ import { z } from 'zod'
 import type { badgeVariants } from '@/components/ui/badge'
 import { type Prisma } from '@/db/generated/prisma/client'
 import { MemeStatus } from '@/db/generated/prisma/enums'
+import { m } from '@/paraglide/messages.js'
 
 export const MEME_FULL_INCLUDE = {
   video: true,
@@ -35,20 +36,22 @@ type VirtualCategory = {
   keywords: string[]
 }
 
-export const VIRTUAL_CATEGORIES = [
-  {
-    id: 'virtual-news',
-    title: 'Nouveautés',
-    slug: NEWS_CATEGORY_SLUG,
-    keywords: []
-  },
-  {
-    id: 'virtual-popular',
-    title: 'Populaires',
-    slug: POPULAR_CATEGORY_SLUG,
-    keywords: []
-  }
-] as const satisfies readonly VirtualCategory[]
+export const getVirtualCategories = (): VirtualCategory[] => {
+  return [
+    {
+      id: 'virtual-news',
+      title: m.meme_category_news(),
+      slug: NEWS_CATEGORY_SLUG,
+      keywords: []
+    },
+    {
+      id: 'virtual-popular',
+      title: m.meme_category_popular(),
+      slug: POPULAR_CATEGORY_SLUG,
+      keywords: []
+    }
+  ]
+}
 
 export const MEMES_PER_PAGE = 30
 export const RELATED_MEMES_COUNT = 4

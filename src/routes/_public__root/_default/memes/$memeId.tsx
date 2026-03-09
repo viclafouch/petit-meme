@@ -25,6 +25,10 @@ import {
   VideoPlayerTimeRange,
   VideoPlayerVolumeRange
 } from '@/components/ui/kibo-ui/video-player'
+import {
+  CONTENT_LOCALE_META,
+  getContentLocaleLabel
+} from '@/helpers/i18n-content'
 import { useDownloadMeme } from '@/hooks/use-download-meme'
 import { useMemeHls } from '@/hooks/use-meme-hls'
 import { useRegisterMemeView } from '@/hooks/use-register-meme-view'
@@ -241,6 +245,10 @@ const RouteComponent = () => {
               <h1 className="font-bricolage text-foreground max-w-4xl text-left font-semibold md:text-balance text-lg leading-[1.2] sm:text-xl lg:text-2xl">
                 {meme.title}
               </h1>
+              <Badge variant="outline" size="sm">
+                {CONTENT_LOCALE_META[meme.contentLocale].flag}{' '}
+                {getContentLocaleLabel(meme.contentLocale)}
+              </Badge>
               <div className="flex">
                 <ToggleLikeButton size="iconLg" meme={meme} />
                 {user && matchIsUserAdmin(user) ? (

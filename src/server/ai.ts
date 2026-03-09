@@ -1,7 +1,12 @@
 import { z } from 'zod/v3'
 import zodToJsonSchema from 'zod-to-json-schema'
+import { MEME_TRANSLATION_SELECT } from '@/constants/meme'
 import { prismaClient } from '@/db'
 import { serverEnv } from '@/env/server'
+import {
+  CONTENT_LOCALE_TO_LOCALE,
+  resolveMemeTranslation
+} from '@/helpers/i18n-content'
 import { buildSignedOriginalUrl } from '@/lib/bunny'
 import { adminLogger } from '@/lib/logger'
 import { captureWithFeature } from '@/lib/sentry'
@@ -35,7 +40,10 @@ export const generateMemeContent = createServerFn({ method: 'POST' })
         id: data.memeId
       },
       include: {
-        video: true
+        video: true,
+        translations: {
+          select: MEME_TRANSLATION_SELECT
+        }
       }
     })
 
@@ -46,6 +54,14 @@ export const generateMemeContent = createServerFn({ method: 'POST' })
       )
       throw new Error('Meme not found')
     }
+
+    const nativeLocale = CONTENT_LOCALE_TO_LOCALE[meme.contentLocale]
+    const resolved = resolveMemeTranslation({
+      translations: meme.translations,
+      contentLocale: meme.contentLocale,
+      requestedLocale: nativeLocale,
+      fallback: meme
+    })
 
     const originalUrl = buildSignedOriginalUrl(meme.video.bunnyId)
 
@@ -60,7 +76,7 @@ export const generateMemeContent = createServerFn({ method: 'POST' })
             }
           },
           {
-            text: `Cette vidéo est un mème. Le titre de la vidéo est "${meme.title}". En français, que se passe-t-il dans cette vidéo ? Donne moi une description pertinente courte pour le SEO et les moteurs de recherche. Ta réponse ne doit intégrer que la description exacte (150 caractères grand maximum) de la vidéo en expliquant que c'est un mème. Le mème est surement populaire. Cherche pourquoi. Cela doit toujours commencer par : "Découvrez et téléchargez ce mème de [ta mini description de 150 caractères grand grand max]`
+            text: `Cette vidéo est un mème. Le titre de la vidéo est "${resolved.title}". En français, que se passe-t-il dans cette vidéo ? Donne moi une description pertinente courte pour le SEO et les moteurs de recherche. Ta réponse ne doit intégrer que la description exacte (150 caractères grand maximum) de la vidéo en expliquant que c'est un mème. Le mème est surement populaire. Cherche pourquoi. Cela doit toujours commencer par : "Découvrez et téléchargez ce mème de [ta mini description de 150 caractères grand grand max]`
           }
         ]
       }

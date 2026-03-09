@@ -4,6 +4,19 @@
 
 ---
 
+## Cleanup branches — Retour sur main
+
+La branche de production est `feat/migrate-to-vercel` depuis la migration Railway → Vercel. Il faut tout remettre sur `main`.
+
+- [ ] Merge `feat/migrate-to-vercel` → `main` (fast-forward si possible, sinon merge commit)
+- [ ] Vercel : changer la Production Branch de `feat/migrate-to-vercel` à `main` (Settings → Git → Production Branch)
+- [ ] GitHub : changer la default branch de `feat/migrate-to-vercel` à `main` (Settings → General → Default branch)
+- [ ] Supprimer la branche `feat/migrate-to-vercel` (remote + local)
+- [ ] Supprimer la branche `feat/i18n-content` (remote + local)
+- [ ] Vérifier que le deploy Vercel se déclenche bien sur push `main`
+
+---
+
 ## Better Auth (v1.5.3)
 
 **Type `UserWithRole` vs `InferUser` :** Bug interne où `UserWithRole.role` est `string | undefined` mais le type inféré retourne `string | null | undefined`. Fix appliqué : type `SessionUser` custom dans `src/lib/role.ts`.
@@ -28,10 +41,6 @@
 
 ---
 
-## Migration Railway → Vercel — Items restants
-
-- [x] Réactiver Sentry server-side tracing — `wrapFetchWithSentry` dans `src/server.ts`, global middlewares (`sentryGlobalRequestMiddleware`/`sentryGlobalFunctionMiddleware`) dans `src/start.ts`, `wrapMiddlewaresWithSentry` sur tous les middlewares custom (`authUserRequired`, `adminRequired`, `rateLimit`). L'instrumentation ORM/third-party reste limitée sans `--import` (ESM incompatible dans Vercel serverless, [sentry-javascript#18859](https://github.com/getsentry/sentry-javascript/issues/18859)).
-
 ## Nitro — Override runtime Node.js 24
 
 **Problème :** Nitro `3.0.1-alpha.2` ne supporte pas Node.js 24 dans sa liste `SUPPORTED_NODE_VERSIONS` ([nitrojs/nitro#3965](https://github.com/nitrojs/nitro/issues/3965)). Il fallback sur `nodejs22.x`, ce qui casse Paraglide (utilise `URLPattern`, disponible nativement à partir de Node 23+).
@@ -54,160 +63,10 @@ nitro({
 
 ---
 
-## Google Images SEO (audit mars 2026)
+## SEO — Items restants
 
-Audit basé sur les recommandations Google Images mises à jour le 2 mars 2026 (https://developers.google.com/search/docs/appearance/google-images).
-
-### Contexte
-
-Le site est un catalogue de mèmes vidéo. Chaque mème a un thumbnail JPG et un preview WebP servis par Bunny CDN. Les images statiques (logo, avatars, templates) sont en PNG/WebP dans `/public/images/`. Le JSON-LD utilise déjà `VideoObject` avec `thumbnailUrl`. L'OG image est bien configuré avec dimensions. Le lazy loading et le `fetchPriority="high"` sont en place.
-
-### Priorité 1 — `primaryImageOfPage` dans le JSON-LD
-
-**Quoi :** Ajouter la propriété Schema.org `primaryImageOfPage` dans le JSON-LD des pages meme (`/memes/:id`). C'est le signal le plus fort que Google utilise pour choisir quelle image afficher dans Google Images.
-
-**Pourquoi :** Actuellement le JSON-LD contient un `VideoObject` avec `thumbnailUrl`, mais rien n'indique explicitement que cette image est LA représentation visuelle de la page. Google peut alors choisir n'importe quelle image de la page (le logo, un avatar, etc.). Avec `primaryImageOfPage`, on contrôle exactement ce qui apparaît.
-
-**Comment :** Dans `src/lib/seo.ts`, fonction `buildMemeJsonLd()`, ajouter un `WebPage` wrapper ou enrichir le JSON-LD existant avec `primaryImageOfPage` pointant vers le thumbnail Bunny CDN. Pattern :
-```json
-{
-  "@type": "WebPage",
-  "primaryImageOfPage": {
-    "@type": "ImageObject",
-    "contentUrl": "https://vz-xxx.b-cdn.net/{videoId}/thumbnail.jpg"
-  },
-  "mainEntity": { "@type": "VideoObject", ... }
-}
-```
-
-**Fichier :** `src/lib/seo.ts`
-
-- [x] Ajouter `primaryImageOfPage` (ImageObject) dans le JSON-LD des pages meme
-- [x] Vérifier avec le Rich Results Test de Google après déploiement
-
-### Priorité 2 — Images dans le sitemap
-
-**Quoi :** Ajouter les balises `<image:image>` dans le sitemap XML existant pour les pages meme.
-
-**Pourquoi :** Les thumbnails sont hébergées sur un domaine Bunny CDN différent du site. Google peut ne pas les découvrir automatiquement. Le sitemap image est le moyen recommandé pour signaler des images sur des domaines externes (CDN). Un sitemap vidéo existe déjà mais ne contient pas les métadonnées image.
-
-**Comment :** Dans `src/routes/sitemap[.]xml.ts`, pour chaque entrée de page meme, ajouter :
-```xml
-<url>
-  <loc>https://petit-meme.com/memes/{slug}</loc>
-  <image:image>
-    <image:loc>https://vz-xxx.b-cdn.net/{videoId}/thumbnail.jpg</image:loc>
-    <image:title>{meme.title}</image:title>
-  </image:image>
-</url>
-```
-Ne pas oublier le namespace `xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"` dans la balise `<urlset>`.
-
-**Fichier :** `src/routes/sitemap[.]xml.ts`
-
-- [x] Ajouter le namespace image dans le sitemap
-- [x] Ajouter `<image:image>` avec `<image:loc>` et `<image:title>` pour chaque page meme
-
-### Priorité 3 — Responsive images (`srcset`) sur les thumbnails
-
-**Quoi :** Utiliser `srcset` et `sizes` sur les `<img>` de thumbnails pour servir des images adaptées à la taille de l'écran.
-
-**Pourquoi :** Actuellement chaque thumbnail est servie en résolution unique quelle que soit la taille d'écran. Sur mobile, on télécharge une image trop grande. Cela impacte les Core Web Vitals (LCP) et donc le ranking Google. Bunny CDN supporte la transformation d'images via query params (`?width=X&height=Y`).
-
-**Comment :** Dans `src/lib/bunny.ts`, enrichir `buildVideoImageUrl()` pour accepter des dimensions optionnelles. Puis dans `src/components/Meme/meme-video-thumbnail.tsx` et `src/routes/_public__root/_default/memes/$memeId.tsx`, ajouter `srcset` avec 2-3 tailles (ex: 480w, 768w, 1280w) et un attribut `sizes` correspondant à la grille CSS.
-
-**Pré-requis :** Vérifier que Bunny CDN supporte les query params de redimensionnement sur les thumbnails vidéo (pas seulement sur le CDN image). Si non supporté, cette tâche est annulée.
-
-**Fichiers :** `src/lib/bunny.ts`, `src/components/Meme/meme-video-thumbnail.tsx`, `src/routes/_public__root/_default/memes/$memeId.tsx`
-
-- ~~Annulé : Bunny CDN ne supporte pas les query params de resize sur les thumbnails vidéo~~
-
-### Priorité 4 — Alt text plus descriptifs (quick fixes)
-
-**Quoi :** Améliorer les alt text trop vagues sur le logo et les avatars.
-
-**Pourquoi :** Google extrait le contexte des images via l'alt text. "Logo" et "Avatar" n'apportent aucune information. Les guidelines recommandent un alt descriptif et pertinent (ex: `alt="Dalmatian puppy playing fetch"` plutôt que `alt="puppy"`).
-
-**Détails :**
-- Logo `alt="Logo"` → `alt="Petit Meme"` dans `src/components/navbar.tsx`
-- Avatars `alt="Avatar"` → `alt="Photo de profil de {username}"` (ou `alt={username}` si le nom est disponible) dans les composants qui utilisent `<AvatarImage>`
-
-**Fichiers :** `src/components/navbar.tsx`, composants utilisant `<AvatarImage>`
-
-- [x] Changer alt du logo → "Petit Meme"
-- [x] Changer alt des avatars → inclure le nom d'utilisateur quand disponible
-
-### Non retenu pour l'instant
-
-- **AVIF** : Google l'indexe mais Bunny CDN ne le supporte pas en transformation automatique sur les thumbnails vidéo. Pas de gain sans pipeline de conversion côté serveur, et le coût Vercel Hobby ne le permet pas.
-- **URLs d'images inconsistantes** : Vérifié — `buildVideoImageUrl()` retourne toujours la même URL déterministe sans token ni timestamp. Pas d'action nécessaire.
-
----
-
-## Google Video SEO (audit mars 2026)
-
-Audit basé sur les recommandations Google Video SEO (https://developers.google.com/search/docs/appearance/video).
-
-### Changements appliqués
-
-- [x] `max-video-preview:-1` dans le robots meta global (`__root.tsx`) — autorise Google à générer des aperçus vidéo sans limite de durée
-- [x] `og:type: video.other` + meta OG vidéo (`og:video`, `og:video:secure_url`, `og:video:type`, `og:video:width`, `og:video:height`) sur les pages meme — signale aux plateformes que la page contient une vidéo
-- [x] Video sitemap (`<video:video>` avec `thumbnail_loc`, `title`, `description`, `content_loc`, `player_loc`, `duration`, `publication_date`) — aide Google à découvrir et indexer les vidéos
-- [x] Suppression du `aggregateRating` fictif (4.8/5, 85 reviews) — données structurées fabricated = risque de pénalité Google
-
-### Items restants
-
-- [x] Vérifier avec le Rich Results Test de Google après déploiement (images + vidéo)
-- [ ] Surveiller le Video Indexing Report dans Search Console après déploiement
-- [x] `max-image-preview:large` dans le robots meta — autorise Google à afficher de grandes vignettes d'images dans les SERP
-- [ ] Stocker `width`/`height` dans le modèle `Video` (migration additive) — permet des `og:video:width/height` corrects par meme au lieu du 1280x720 hardcodé. Utile si des memes verticaux/carrés sont ajoutés
-- [x] Ajouter `<video:family_friendly>yes</video:family_friendly>` dans le video sitemap — signal SafeSearch explicite
-- [x] Ajouter `name` et `description` uniques sur les pages catégorie en JSON-LD `CollectionPage` — déjà implémenté dans `buildCategoryJsonLd`
-- [x] Noms de fichiers descriptifs pour les images statiques — `logo.png` renommé en `petit-meme-logo.png`
-
----
-
-## CSS — Quick wins
-
-### Fix autofill ugly background (dark mode)
-
-Le style natif `autofill` des navigateurs applique un fond bleu/jaune qui casse le design, surtout en dark mode.
-
-**Fix :** Utiliser un inset shadow hack en Tailwind pour forcer la couleur de fond :
-```
-autofill:shadow-[inset_0_0_0px_1000px_var(--color-background)]
-```
-
-- [x] Appliquer le fix autofill sur tous les `<input>` concernés (login, signup, etc.)
-
-### Supprimer le spinner de loading sur la page pricing
-
-La page pricing utilise `useSuspenseQuery(getActiveSubscriptionQueryOpts())` pour vérifier l'abonnement actif. Quand les données ne sont pas encore en cache (premier accès, utilisateur non connecté), cela déclenche le `defaultPendingComponent` (spinner global `DefaultLoading`) pendant le chargement. La page devrait s'afficher immédiatement sans spinner — l'état d'abonnement peut être résolu sans bloquer le rendu.
-
-**Fichier :** `src/routes/_public__root/_default/pricing/index.tsx`
-
-- [x] Remplacer `useSuspenseQuery` par `useQuery` pour `getActiveSubscriptionQueryOpts()` afin que la page s'affiche immédiatement sans suspense/spinner
-- [x] Adapter la logique `hasActiveSubscription` / `isOnFreePlan` pour gérer l'état `isPending` (afficher le plan free par défaut pendant le chargement, ou masquer le badge "actif" tant que la requête n'est pas terminée)
-
----
-
-## Rate Limiting & Server Call Optimization (mars 2026)
-
-**Contexte :** Vercel Firewall rate limit rule (`/_server`, 30 req/60s/IP) déclenchait des 429 "Too Many Requests" lors de navigations rapides entre mèmes. Chaque page mème faisait 6 server calls (3 loader + 3 preload).
-
-### Changements appliqués
-
-- [x] Suppression du preload du prochain mème aléatoire (`useEffect` qui appelait `router.preloadRoute`) — économise 3 server calls par page
-- [x] `getRelatedMemes` déplacé du loader vers un `useQuery` client-side dans `RelatedMemes` — déféré, ne bloque plus le rendu
-- [x] `getRandomMeme` déplacé du loader vers un `useQuery` client-side — déféré, ne bloque plus le rendu
-- [x] Ajout retry avec backoff exponentiel sur les erreurs 429 dans le `QueryClient` (max 3 retries, délai 2s/4s/8s)
-- [x] Helper `matchIsRateLimitError` dans `src/helpers/error.ts`
-
-**Résultat :** Loader réduit à 1 server call (`getMemeById`), le reste est déféré. ~3x moins de calls par navigation.
-
-### Items restants
-
-- [x] Envisager d'augmenter la limite Vercel Firewall (30 → 60+ req/60s) si les 429 persistent après fix code
+- [ ] Surveiller le Video Indexing Report dans Search Console
+- [ ] Stocker `width`/`height` dans le modèle `Video` (migration additive) — permet des `og:video:width/height` corrects par meme au lieu du 1280x720 hardcodé
 
 ---
 
@@ -223,48 +82,134 @@ La page pricing utilise `useSuspenseQuery(getActiveSubscriptionQueryOpts())` pou
 
 ### Internationalisation (FR / EN)
 
-Phases 0, 1, 1.5 terminées. Interface bilingue FR/EN + 11 email templates traduits.
+Phases 0–2.4 terminées et déployées en prod (2026-03-09). Interface bilingue FR/EN, 11 email templates traduits, contenu DB localisé, Algolia multi-index par locale.
 
-**Phase 2 — Contenu mèmes + Algolia bilingue** (terminée, déployée en prod le 2026-03-09)
+### Bugs i18n : locale non respectée dans plusieurs endroits
 
-- [x] Phase 2.0 — Schema DB (enum `MemeContentLocale`, tables `MemeTranslation`/`CategoryTranslation`)
-- [x] Phase 2.1 — Admin (formulaire mème inline avec contentLocale + sections traduction, catégories FR/EN)
-- [x] Phase 2.2 — Couche serveur (résolution locale, filtrage contentLocale, SEO, cache locale-aware)
-- [x] Phase 2.3 — Algolia (code multi-index: sync, search, admin writes, insights — tous locale-aware)
-- [x] Phase 2.3 ops — Index `_fr`/`_en` + replicas standard créés en dev et prod, anciens index supprimés
-- [x] Phase 2.4 — Frontend & SEO (sitemap hreflang filtré, badge langue, catégories virtuelles Paraglide)
+**Reels** (`src/server/reels.ts`) — raw SQL sans filtre `contentLocale`, titres non résolus via `MemeTranslation`
 
-### Phase 2.5 — Outils admin pour traduction et tagging
+- [x] Ajouter `getLocale()` + filtre via `Prisma.sql` template literal (pas de string concat — prévention SQL injection) : `AND m."content_locale" IN (${Prisma.join(VISIBLE_CONTENT_LOCALES[locale])})`
+- [x] Résoudre les titres via `MemeTranslation` (query séparée + `resolveMemeTranslation()`)
+- [x] Index `meme_status_content_locale_idx` existe — non pertinent à vérifier avec ~510 mèmes (PostgreSQL préfère le seq scan sur les petites tables)
 
-~100 mèmes sur 500 sont en anglais mais taggés FR sans traduction EN. Traduire et tagger manuellement est trop long.
+**Favoris** (`src/server/user.ts` — `getFavoritesMemes()`) — pas d'include `translations`, pas de résolution locale
 
-**Traduction via Gemini (déjà configuré dans `src/server/ai.ts`)**
+- [x] Inclure `translations` dans la query Prisma des favoris
+- [x] Résoudre via `resolveMemeTranslation()` avant de retourner les mèmes
 
-- [ ] **Bouton "Auto-translate" par mème** (page edit `admin/library/$memeId`) — appel Gemini pour traduire titre + description + keywords FR → EN, pré-remplit la section EN dans le formulaire. L'admin review, ajuste et save manuellement
-- [ ] **Batch "Translate all"** (page library `admin/library`) — bouton qui traduit en masse tous les mèmes sans `MemeTranslation(locale="en")`. Gemini traduit par batch de 10-20 (JSON structuré), les traductions sont écrites en DB. Progress bar dans l'UI. L'admin peut ensuite reviewer chaque mème via le formulaire existant
+**Export GDPR** (`src/server/user.ts` — `exportUserData()`) — utilise `bookmark.meme.title` brut
 
-**Suggestion contentLocale via Gemini (jamais appliquée automatiquement)**
+- [x] Résoudre les titres des bookmarks via `MemeTranslation` dans l'export
 
-- [ ] **Suggestion "Detect language"** par mème — Gemini analyse le titre pour suggérer FR/EN/UNIVERSAL. Le résultat est affiché comme suggestion dans le formulaire (ex: badge "Gemini suggests: EN"), l'admin valide et save manuellement
-- [ ] **Batch "Suggest language"** — même principe en masse : Gemini analyse tous les mèmes et propose un contentLocale pour chacun. Résultat affiché dans une vue de review (tableau avec titre, contentLocale actuel, suggestion Gemini, bouton "Apply"). L'admin applique mème par mème ou sélectionne en masse après review
+**AI generation** (`src/server/ai.ts` — `generateMemeContent()`) — passe `meme.title` brut à Gemini
 
-**Outils admin complémentaires**
+- [x] Résoudre le titre via `MemeTranslation` avant de le passer à Gemini (utilise `CONTENT_LOCALE_TO_LOCALE[meme.contentLocale]` comme locale cible)
+
+### Filtre langue dans la liste des mèmes
+
+Permettre à l'utilisateur de filtrer par langue du contenu, indépendamment de sa locale.
+
+**UI : dropdown multi-select "Langues"**
+
+- Bouton avec icône globe + nombre de langues sélectionnées (ex: "Langues (2)")
+- Au clic : popover avec liste de checkboxes, une par langue disponible (🇫🇷 Français, 🇬🇧 English, etc.)
+- UNIVERSAL n'apparaît jamais dans la liste (toujours inclus implicitement)
+- Par défaut : langues pré-cochées selon la locale (`VISIBLE_CONTENT_LOCALES`) — FR → FR+EN cochés, EN → EN coché
+- L'utilisateur coche/décoche librement n'importe quelle combinaison
+- Scalable à N langues sans changement de composant
+
+**Implémentation :**
+
+- [ ] Ajouter `filterOnly(contentLocale)` dans `attributesForFaceting` des index Algolia (via `scripts/setup-algolia-indices.ts` + appliquer en dev/prod + reindex)
+- [ ] Composant `LanguageFilter` dans `src/components/Meme/Filters/` — popover + checkboxes, state dans les query params URL (`?contentLocales=FR,EN` pour partage/bookmark)
+- [ ] Paramètre `contentLocales` (tableau) dans `getMemes()` (`src/server/meme.ts`) — facet filter Algolia `contentLocale:FR OR contentLocale:EN`
+- [ ] Quand des langues hors locale sont sélectionnées (ex: utilisateur EN coche FR) : requêter l'index `_fr` (qui contient tout) au lieu de `_en`
+- [ ] Adapter `getRandomMeme()` et `getBestMemesInternal()` pour respecter le filtre si actif
+- [ ] Edge case : au moins une langue doit rester cochée — désactiver le uncheck quand il ne reste qu'une seule langue sélectionnée
+
+### Phase 2.5 — Tagging, traduction et outils admin
+
+510 mèmes en prod, tous taggés FR par défaut. ~100 sont en réalité en anglais et doivent être retaggés EN avec une traduction EN. L'ordre d'exécution est important.
+
+**Étape 1 — Outils admin (prérequis)**
 
 - [ ] **Filtre contentLocale dans la library admin** — dropdown pour filtrer par FR/EN/UNIVERSAL, utile pour retrouver les mèmes à tagger/traduire
 - [ ] **Dashboard traduction** — compteurs dans le dashboard admin : mèmes sans traduction EN, mèmes taggés FR sans review, couverture traduction (% avec traduction EN)
+- [ ] **Bouton "Auto-translate" par mème** (page edit `admin/library/$memeId`) — appel Gemini pour traduire titre + description + keywords FR → EN, pré-remplit la section EN dans le formulaire. L'admin review, ajuste et save manuellement
 
-**Finalisation**
+**Étape 2 — Batch traduction (Gemini, déjà configuré dans `src/server/ai.ts`)**
 
-- [ ] Après tagging + traduction : reindex Algolia (`scripts/reindex-memes.ts`)
+- [ ] **Batch "Translate all"** (page library `admin/library`) — bouton qui traduit en masse tous les mèmes sans `MemeTranslation(locale="en")`. Gemini traduit par batch de 10-20 (JSON structuré), les traductions sont écrites en DB. Progress bar dans l'UI. L'admin peut ensuite reviewer chaque mème via le formulaire existant. Si un batch échoue : skip les mèmes en erreur, continuer les suivants, afficher un résumé final (N traduits, M en erreur avec retry possible)
+
+**Étape 3 — Détection et tagging contentLocale (Gemini, jamais appliqué automatiquement)**
+
+- [ ] **Suggestion "Detect language"** par mème — Gemini analyse le titre + description pour suggérer FR/EN/UNIVERSAL (le titre seul peut être trop court/ambigu). Le résultat est affiché comme suggestion dans le formulaire (ex: badge "Gemini suggests: EN"), l'admin valide et save manuellement
+- [ ] **Batch "Suggest language"** — même principe en masse : Gemini analyse tous les mèmes et propose un contentLocale pour chacun. Résultat affiché dans une vue de review (tableau avec titre, contentLocale actuel, suggestion Gemini, bouton "Apply"). L'admin applique mème par mème ou sélectionne en masse après review
+
+**Étape 4 — Finalisation**
+
+- [ ] Review manuel des ~100 mèmes suggérés EN/UNIVERSAL par Gemini — valider ou corriger chaque suggestion via l'admin existant
+- [ ] Reindex Algolia en dev et prod (`scripts/reindex-memes.ts`) — les index `_en` seront peuplés avec les mèmes retaggés
 - [ ] Badge langue optionnel dans les listes de mèmes (pas seulement la page détail)
 
-**Coût :** Gemini free tier (titres/descriptions courts = très peu de tokens, ~25-50 appels API pour 500 mèmes)
+**Coût :** Gemini free tier (titres/descriptions courts = très peu de tokens, ~25-50 appels API pour 510 mèmes)
+
+**Scripts utiles :** `scripts/setup-algolia-indices.ts` (recréer les index ou appliquer des changements de settings, ex: ajout `filterOnly(contentLocale)`) + `scripts/reindex-memes.ts` (repeupler après tagging en masse) — à conserver
 
 ### Items i18n reportés
 
 - [ ] Synonymes EN Algolia — ajouter via dashboard quand contenu EN atteint une masse critique
 - [ ] Sync incrémentale Algolia — tracker `updatedAt` au lieu de `replaceAllObjects` dans le cron (optimisation future)
 - [ ] 3e langue — le schema DB est prêt (mapping `locale → contentLocales[]`), pas d'implémentation prévue pour l'instant
+
+### Login Discord
+
+Ajouter Discord comme provider OAuth en plus de Twitter/X. Better Auth supporte Discord nativement.
+
+- [ ] Créer une app Discord (Discord Developer Portal) — récupérer Client ID + Client Secret
+- [ ] Ajouter le provider Discord dans la config Better Auth (`src/lib/auth.tsx`) — scopes `identify` + `email` (gérés automatiquement par Better Auth)
+- [ ] Ajouter les env vars `DISCORD_CLIENT_ID` / `DISCORD_CLIENT_SECRET` dans `src/env/server.ts` (validation Zod) + `.env.development` + Vercel env prod
+- [ ] Bouton "Se connecter avec Discord" dans les formulaires login/signup (`auth-dialog.tsx`)
+- [ ] Tester le flow complet (login, link account Discord ↔ Twitter, avatar Discord)
+
+### Propositions de mèmes par les utilisateurs
+
+Les utilisateurs connectés peuvent proposer des mèmes à ajouter via un lien. L'admin review et convertit en mème.
+
+**Côté utilisateur :**
+
+- Formulaire simple (accessible depuis la navbar ou une page dédiée)
+- Champs : titre (requis), lien (requis), langue audio (FR/EN/UNIVERSAL)
+- Types de liens acceptés : lien tweet/X, lien YouTube
+- Pas d'URL MP4 directe (risque SSRF — des URLs arbitraires pourraient cibler des services internes)
+- Validation URL côté client + serveur : schema Zod strict dans `src/constants/meme-submission.ts`
+  - Twitter/X : réutiliser `TWEET_LINK_SCHEMA` existant (whitelist `twitter.com` / `x.com`)
+  - YouTube : whitelist `youtube.com` / `youtu.be` + regex video ID
+- Pas d'upload de fichier, pas de description (l'admin s'en occupe)
+- L'utilisateur doit être connecté
+- Feedback : confirmation après soumission, historique de ses propositions (statut : en attente / accepté / refusé)
+
+**Schema DB (migration additive) :**
+
+- [ ] Enum `MemeSubmissionUrlType` (TWEET, YOUTUBE)
+- [ ] Enum `MemeSubmissionStatus` (PENDING, APPROVED, REJECTED)
+- [ ] Table `MemeSubmission` : `id`, `user_id` (FK User, CASCADE), `title`, `url`, `url_type` (enum), `content_locale` (enum MemeContentLocale), `status` (enum, default PENDING), `admin_note` (optionnel), `meme_id` (FK Meme, nullable — rempli quand converti), `created_at`, `updated_at`
+- [ ] Index : `status`, `user_id`, `(status, created_at DESC)`
+
+**Côté admin :**
+
+- [ ] Page admin `/admin/submissions` — liste des propositions avec filtres (status, date, utilisateur)
+- [ ] Actions : approuver (ouvre le flow de création de mème pré-rempli avec titre + URL + langue via `createMemeWithVideo`), rejeter (avec note optionnelle), supprimer
+- [ ] Quand approuvé et mème créé : lier `MemeSubmission.meme_id` au mème créé
+- [ ] Compteur de submissions en attente visible dans la sidebar admin
+
+**Notifications :**
+
+- [ ] Optionnel : email à l'utilisateur quand sa proposition est acceptée/refusée
+
+**Rate limiting :**
+
+- [ ] Rate limit per-user (5 soumissions / 24h) — créer `createUserRateLimitMiddleware` dans `src/server/rate-limit.ts` (le pattern existant est per-IP, celui-ci est per-user via session)
 
 ### Migration Prisma → Drizzle
 

@@ -18,6 +18,12 @@ export const MEME_ALGOLIA_INCLUDE = {
   categories: { include: { category: { include: { translations: true } } } }
 } as const satisfies Prisma.MemeInclude
 
+export const MEME_TRANSLATION_SELECT = {
+  locale: true,
+  title: true,
+  description: true
+} as const satisfies Prisma.MemeTranslationSelect
+
 export const DEFAULT_MEME_TITLE = 'Sans titre'
 export const LEGACY_MEME_TITLE = 'Titre inconnu'
 

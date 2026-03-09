@@ -1,3 +1,4 @@
+import { MEME_TRANSLATION_SELECT } from '@/constants/meme'
 import { prismaClient } from '@/db'
 import {
   CONTENT_LOCALE_TO_SITE_LOCALES,
@@ -155,11 +156,7 @@ export const Route = createFileRoute('/sitemap.xml')({
               description: true,
               contentLocale: true,
               translations: {
-                select: {
-                  locale: true,
-                  title: true,
-                  description: true
-                }
+                select: MEME_TRANSLATION_SELECT
               },
               updatedAt: true,
               publishedAt: true,

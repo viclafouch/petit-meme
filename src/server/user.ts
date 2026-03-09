@@ -1,14 +1,17 @@
 import type { User } from 'better-auth'
 import { z } from 'zod'
 import { StudioError } from '@/constants/error'
+import { MEME_TRANSLATION_SELECT } from '@/constants/meme'
 import {
   FREE_PLAN_MAX_FAVORITES,
   FREE_PLAN_MAX_GENERATIONS
 } from '@/constants/plan'
 import { prismaClient } from '@/db'
 import type { Meme } from '@/db/generated/prisma/client'
+import { resolveMemeTranslation } from '@/helpers/i18n-content'
 import { authLogger } from '@/lib/logger'
 import { matchIsUserAdmin } from '@/lib/role'
+import { getLocale } from '@/paraglide/runtime'
 import { findActiveSubscription } from '@/server/customer'
 import { authUserRequiredMiddleware } from '@/server/user-auth'
 import { notFound } from '@tanstack/react-router'
@@ -37,15 +40,32 @@ export const getFavoritesMemes = createServerFn({ method: 'GET' })
       include: {
         meme: {
           include: {
-            video: true
+            video: true,
+            translations: {
+              select: MEME_TRANSLATION_SELECT
+            }
           }
         }
       }
     })
 
+    const locale = getLocale()
+
     return {
       bookmarks: bookmarks.map((bookmark) => {
-        return bookmark.meme
+        const { translations, ...meme } = bookmark.meme
+        const resolved = resolveMemeTranslation({
+          translations,
+          contentLocale: meme.contentLocale,
+          requestedLocale: locale,
+          fallback: meme
+        })
+
+        return {
+          ...meme,
+          title: resolved.title,
+          description: resolved.description
+        }
       }),
       count: bookmarks.length
     }
@@ -208,7 +228,16 @@ export const exportUserData = createServerFn({ method: 'GET' })
             createdAt: true,
             meme: {
               select: {
-                title: true
+                title: true,
+                description: true,
+                contentLocale: true,
+                translations: {
+                  select: {
+                    locale: true,
+                    title: true,
+                    description: true
+                  }
+                }
               }
             }
           }
@@ -237,6 +266,8 @@ export const exportUserData = createServerFn({ method: 'GET' })
     ])
 
     authLogger.info({ userId: context.user.id }, 'User data exported')
+
+    const locale = getLocale()
 
     return {
       profile: {
@@ -273,8 +304,15 @@ export const exportUserData = createServerFn({ method: 'GET' })
         }
       }),
       bookmarks: user.bookmarks.map((bookmark) => {
+        const resolved = resolveMemeTranslation({
+          translations: bookmark.meme.translations,
+          contentLocale: bookmark.meme.contentLocale,
+          requestedLocale: locale,
+          fallback: bookmark.meme
+        })
+
         return {
-          memeTitle: bookmark.meme.title,
+          memeTitle: resolved.title,
           createdAt: bookmark.createdAt
         }
       }),

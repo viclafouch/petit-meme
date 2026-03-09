@@ -1,6 +1,7 @@
 import React from 'react'
 import { Shuffle, Smartphone } from 'lucide-react'
 import { CategoriesList } from '@/components/categories/categories-list'
+import { MemesFilterLanguage } from '@/components/Meme/Filters/memes-filter-language'
 import MemesPagination from '@/components/Meme/Filters/memes-pagination'
 import { MemesQuery } from '@/components/Meme/Filters/memes-query'
 import MemesToggleGrid from '@/components/Meme/Filters/memes-toggle-grid'
@@ -8,6 +9,11 @@ import { MemesList } from '@/components/Meme/memes-list'
 import { buttonVariants } from '@/components/ui/button'
 import { LoadingSpinner } from '@/components/ui/spinner'
 import { getVirtualCategories, type MemesFilters } from '@/constants/meme'
+import type { MemeContentLocale } from '@/db/generated/prisma/enums'
+import {
+  parseContentLocalesParam,
+  serializeContentLocalesParam
+} from '@/helpers/i18n-content'
 import {
   getCategoriesListQueryOpts,
   getMemesListQueryOpts
@@ -15,6 +21,7 @@ import {
 import { buildBreadcrumbJsonLd, buildCategoryJsonLd } from '@/lib/seo'
 import { cn } from '@/lib/utils'
 import { m } from '@/paraglide/messages.js'
+import { getLocale } from '@/paraglide/runtime'
 import {
   PageDescription,
   PageHeading
@@ -50,9 +57,10 @@ const MemesListWrapper = ({ columnGridCount }: { columnGridCount: number }) => {
     return {
       query: debouncedValue,
       page: search.page,
-      category: slug === 'all' ? undefined : slug
+      category: slug === 'all' ? undefined : slug,
+      contentLocales: search.contentLocales
     } satisfies MemesFilters
-  }, [debouncedValue, search.page, slug])
+  }, [debouncedValue, search.page, slug, search.contentLocales])
 
   const memesListQuery = useSuspenseQuery(getMemesListQueryOpts(filters))
 
@@ -109,12 +117,38 @@ export const SearchMemes = () => {
     })
   }, [categories.data, activeSlug])
 
+  const locale = getLocale()
+  const rawContentLocales =
+    typeof search.contentLocales === 'string'
+      ? search.contentLocales
+      : undefined
+  const parsedContentLocales = parseContentLocalesParam(
+    rawContentLocales,
+    locale
+  )
+
   const handleQueryChange = (value: string) => {
     void navigate({
       to: '.',
       search: {
         page: undefined,
-        query: value === '' ? undefined : value
+        query: value === '' ? undefined : value,
+        contentLocales: search.contentLocales
+      },
+      viewTransition: false,
+      replace: true
+    })
+  }
+
+  const handleContentLocalesChange = (
+    newContentLocales: MemeContentLocale[]
+  ) => {
+    void navigate({
+      to: '.',
+      search: {
+        page: undefined,
+        query: search.query,
+        contentLocales: serializeContentLocalesParam(newContentLocales, locale)
       },
       viewTransition: false,
       replace: true
@@ -137,6 +171,10 @@ export const SearchMemes = () => {
               onQueryChange={handleQueryChange}
             />
             <div className="gap-x-2 flex shrink-0">
+              <MemesFilterLanguage
+                contentLocales={parsedContentLocales}
+                onContentLocalesChange={handleContentLocalesChange}
+              />
               <div className="hidden lg:flex">
                 <MemesToggleGrid
                   columnValue={columnGridCount}

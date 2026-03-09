@@ -24,7 +24,8 @@ const MemesPagination = ({
             search: (prevState) => {
               return {
                 page,
-                query: prevState.query
+                query: prevState.query,
+                contentLocales: prevState.contentLocales
               }
             }
           }
@@ -35,7 +36,8 @@ const MemesPagination = ({
           search: (prevState) => {
             return {
               page,
-              query: prevState.query
+              query: prevState.query,
+              contentLocales: prevState.contentLocales
             }
           }
         }

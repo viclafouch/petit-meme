@@ -1,5 +1,5 @@
 import { nitro } from 'nitro/vite'
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import { paraglideVitePlugin } from '@inlang/paraglide-js'
 import { sentryTanstackStart } from '@sentry/tanstackstart-react/vite'
@@ -33,80 +33,89 @@ const staticAssetRouteRules = Object.fromEntries(
   })
 )
 
-export default defineConfig({
-  server: {
-    port: 3000
-  },
-  optimizeDeps: {
-    exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/core', '@ffmpeg/util', 'hls.js']
-  },
-  assetsInclude: ['**/*.md'],
-  plugins: [
-    paraglideVitePlugin({
-      project: './project.inlang',
-      outdir: './src/paraglide',
-      outputStructure: 'message-modules',
-      cookieName: 'PARAGLIDE_LOCALE',
-      strategy: ['cookie', 'url', 'preferredLanguage', 'baseLocale'],
-      urlPatterns: [
-        {
-          pattern: '/:path(.*)?',
-          localized: [['en', '/en/:path(.*)?']]
+export default defineConfig(({ mode }) => {
+  // Vite only exposes VITE_* vars to import.meta.env (client-safe).
+  // Server-side code (Nitro, Sentry plugin, etc.) reads from process.env,
+  // which Vite does NOT populate from .env files by default.
+  // loadEnv with an empty prefix ('') loads ALL vars from .env.{mode},
+  // and Object.assign merges them into process.env so server code can access them.
+  Object.assign(process.env, loadEnv(mode, process.cwd(), ''))
+
+  return {
+    server: {
+      port: 3000
+    },
+    optimizeDeps: {
+      exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/core', '@ffmpeg/util', 'hls.js']
+    },
+    assetsInclude: ['**/*.md'],
+    plugins: [
+      paraglideVitePlugin({
+        project: './project.inlang',
+        outdir: './src/paraglide',
+        outputStructure: 'message-modules',
+        cookieName: 'PARAGLIDE_LOCALE',
+        strategy: ['cookie', 'url', 'preferredLanguage', 'baseLocale'],
+        urlPatterns: [
+          {
+            pattern: '/:path(.*)?',
+            localized: [['en', '/en/:path(.*)?']]
+          }
+        ],
+        routeStrategies: [
+          { match: '/api/:path(.*)?', exclude: true },
+          { match: '/admin/:path(.*)?', exclude: true },
+          { match: '/health', exclude: true },
+          { match: '/sitemap.xml', exclude: true },
+          { match: '/robots.txt', exclude: true }
+        ]
+      }),
+      tailwindcss(),
+      tsconfigPaths({
+        projects: ['./tsconfig.json']
+      }),
+      tanstackStart({
+        router: {
+          quoteStyle: 'single',
+          semicolons: false
         }
-      ],
-      routeStrategies: [
-        { match: '/api/:path(.*)?', exclude: true },
-        { match: '/admin/:path(.*)?', exclude: true },
-        { match: '/health', exclude: true },
-        { match: '/sitemap.xml', exclude: true },
-        { match: '/robots.txt', exclude: true }
-      ]
-    }),
-    tailwindcss(),
-    tsconfigPaths({
-      projects: ['./tsconfig.json']
-    }),
-    tanstackStart({
-      router: {
-        quoteStyle: 'single',
-        semicolons: false
-      }
-    }),
-    react(),
-    nitro({
-      preset: 'vercel',
-      sourcemap: true,
-      vercel: {
-        functions: {
-          runtime: 'nodejs24.x'
-        }
-      },
-      routeRules: {
-        '/**': {
-          headers: {
-            ...SECURITY_HEADERS,
-            'Cache-Control': 'no-cache'
+      }),
+      react(),
+      nitro({
+        preset: 'vercel',
+        sourcemap: true,
+        vercel: {
+          functions: {
+            runtime: 'nodejs24.x'
           }
         },
-        ...staticAssetRouteRules,
-        '/admin/**': {
-          headers: {
-            ...SECURITY_HEADERS,
-            'X-Robots-Tag': 'noindex, nofollow'
+        routeRules: {
+          '/**': {
+            headers: {
+              ...SECURITY_HEADERS,
+              'Cache-Control': 'no-cache'
+            }
+          },
+          ...staticAssetRouteRules,
+          '/admin/**': {
+            headers: {
+              ...SECURITY_HEADERS,
+              'X-Robots-Tag': 'noindex, nofollow'
+            }
           }
         }
-      }
-    }),
-    sentryTanstackStart({
-      org: 'viclafouch',
-      project: 'petit-meme',
-      authToken: process.env.SENTRY_AUTH_TOKEN,
-      release: {
-        name: process.env.VERCEL_GIT_COMMIT_SHA
-      },
-      sourcemaps: {
-        filesToDeleteAfterUpload: ['.vercel/output/**/*.map']
-      }
-    })
-  ]
+      }),
+      sentryTanstackStart({
+        org: 'viclafouch',
+        project: 'petit-meme',
+        authToken: process.env.SENTRY_AUTH_TOKEN,
+        release: {
+          name: process.env.VERCEL_GIT_COMMIT_SHA
+        },
+        sourcemaps: {
+          filesToDeleteAfterUpload: ['.vercel/output/**/*.map']
+        }
+      })
+    ]
+  }
 })

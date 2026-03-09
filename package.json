@@ -24,19 +24,17 @@
   },
   "type": "module",
   "scripts": {
-    "dev": "dotenv -e .env.development -- vite dev",
+    "dev": "vite dev --mode production",
     "build": "vite build",
     "start": "node .output/server/index.mjs",
     "prisma:migrate:dev": "dotenv -e .env.development -- prisma migrate deploy",
     "prisma:migrate:prod": "dotenv -e .env.production -- prisma migrate deploy",
-    "prisma:seed:dev": "npx vite-node --dotenv .env.development prisma/seed.ts",
+    "prisma:seed:dev": "npx vite-node --mode development prisma/seed.ts",
     "prisma:reset-db:dev": "dotenv -e .env.development -- prisma migrate reset",
     "postinstall": "prisma generate && node scripts/copy-ffmpeg.js",
     "lint": "tsc && eslint",
     "lint:fix": "tsc && eslint --fix",
     "email:dev": "email dev --dir src/emails --port 3001",
-    "deps": "pnpm dlx taze@latest -Ilw",
-    "deps:major": "pnpm dlx taze@latest major -Ilw",
     "prepare": "husky"
   },
   "dependencies": {

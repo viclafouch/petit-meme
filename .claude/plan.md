@@ -13,7 +13,7 @@ Terminé le 2026-03-09. Toutes les branches mergées dans `main`, production bra
 - [x] GitHub : Default branch → `main`
 - [x] Supprimer toutes les branches mortes (local + remote)
 - [x] Mettre à jour README.md (références à `feat/migrate-to-vercel` → `main`)
-- [ ] Vérifier que le deploy Vercel se déclenche bien sur push `main`
+- [x] Vérifier que le deploy Vercel se déclenche bien sur push `main`
 
 ---
 
@@ -120,12 +120,15 @@ Permettre à l'utilisateur de filtrer par langue du contenu, indépendamment de 
 
 **Implémentation :**
 
-- [ ] Ajouter `filterOnly(contentLocale)` dans `attributesForFaceting` des index Algolia (via `scripts/setup-algolia-indices.ts` + appliquer en dev/prod + reindex)
-- [ ] Composant `LanguageFilter` dans `src/components/Meme/Filters/` — popover + checkboxes, state dans les query params URL (`?contentLocales=FR,EN` pour partage/bookmark)
-- [ ] Paramètre `contentLocales` (tableau) dans `getMemes()` (`src/server/meme.ts`) — facet filter Algolia `contentLocale:FR OR contentLocale:EN`
-- [ ] Quand des langues hors locale sont sélectionnées (ex: utilisateur EN coche FR) : requêter l'index `_fr` (qui contient tout) au lieu de `_en`
+- [x] Ajouter `filterOnly(contentLocale)` dans `attributesForFaceting` des index Algolia (via `scripts/setup-algolia-indices.ts` + appliquer en dev/prod + reindex)
+- [x] Composant `MemesFilterLanguage` dans `src/components/Meme/Filters/memes-filter-language.tsx` — popover + checkboxes, state dans les query params URL (`?contentLocales=FR,EN` pour partage/bookmark)
+- [x] Paramètre `contentLocales` (string comma-separated) dans `MEMES_SEARCH_SCHEMA` + `getMemes()` (`src/server/meme.ts`) — facet filter Algolia `(contentLocale:FR OR contentLocale:UNIVERSAL)`
+- [x] Quand des langues hors locale sont sélectionnées (ex: utilisateur EN coche FR) : requêter l'index `_fr` (qui contient tout) au lieu de `_en` — via `resolveSearchIndex` avec `effectiveLocale`
 - [ ] Adapter `getRandomMeme()` et `getBestMemesInternal()` pour respecter le filtre si actif
-- [ ] Edge case : au moins une langue doit rester cochée — désactiver le uncheck quand il ne reste qu'une seule langue sélectionnée
+- [x] Edge case : au moins une langue doit rester cochée — désactiver le uncheck quand il ne reste qu'une seule langue sélectionnée
+- [x] Helpers `parseContentLocalesParam` / `serializeContentLocalesParam` dans `src/helpers/i18n-content.ts`
+- [x] Constants `FILTERABLE_CONTENT_LOCALES` / `DEFAULT_CONTENT_LOCALE_FILTER` dans `src/helpers/i18n-content.ts`
+- [x] Pagination préserve `contentLocales` dans les search params
 
 ### Phase 2.5 — Tagging, traduction et outils admin
 
@@ -161,16 +164,6 @@ Permettre à l'utilisateur de filtrer par langue du contenu, indépendamment de 
 - [ ] Synonymes EN Algolia — ajouter via dashboard quand contenu EN atteint une masse critique
 - [ ] Sync incrémentale Algolia — tracker `updatedAt` au lieu de `replaceAllObjects` dans le cron (optimisation future)
 - [ ] 3e langue — le schema DB est prêt (mapping `locale → contentLocales[]`), pas d'implémentation prévue pour l'instant
-
-### Login Discord
-
-Ajouter Discord comme provider OAuth en plus de Twitter/X. Better Auth supporte Discord nativement.
-
-- [ ] Créer une app Discord (Discord Developer Portal) — récupérer Client ID + Client Secret
-- [ ] Ajouter le provider Discord dans la config Better Auth (`src/lib/auth.tsx`) — scopes `identify` + `email` (gérés automatiquement par Better Auth)
-- [ ] Ajouter les env vars `DISCORD_CLIENT_ID` / `DISCORD_CLIENT_SECRET` dans `src/env/server.ts` (validation Zod) + `.env.development` + Vercel env prod
-- [ ] Bouton "Se connecter avec Discord" dans les formulaires login/signup (`auth-dialog.tsx`)
-- [ ] Tester le flow complet (login, link account Discord ↔ Twitter, avatar Discord)
 
 ### Propositions de mèmes par les utilisateurs
 
@@ -218,6 +211,16 @@ Remplacer Prisma par Drizzle ORM. Conventions cibles : tables en pluriel, colonn
 ### Stripe — Payment Elements
 
 Évaluer la migration vers Payment Elements (au lieu de Checkout redirect). Pattern : `PaymentIntent` → `confirmPayment` avec `redirect: 'if_required'` → polling post-paiement.
+
+### Login Discord
+
+Ajouter Discord comme provider OAuth en plus de Twitter/X. Better Auth supporte Discord nativement.
+
+- [ ] Créer une app Discord (Discord Developer Portal) — récupérer Client ID + Client Secret
+- [ ] Ajouter le provider Discord dans la config Better Auth (`src/lib/auth.tsx`) — scopes `identify` + `email` (gérés automatiquement par Better Auth)
+- [ ] Ajouter les env vars `DISCORD_CLIENT_ID` / `DISCORD_CLIENT_SECRET` dans `src/env/server.ts` (validation Zod) + `.env.development` + Vercel env prod
+- [ ] Bouton "Se connecter avec Discord" dans les formulaires login/signup (`auth-dialog.tsx`)
+- [ ] Tester le flow complet (login, link account Discord ↔ Twitter, avatar Discord)
 
 ### Migration vers Cloudflare
 

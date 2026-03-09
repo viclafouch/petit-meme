@@ -21,11 +21,16 @@ import {
   THIRTY_DAYS_MS
 } from '@/constants/time'
 import { prismaClient } from '@/db'
-import { MemeStatus } from '@/db/generated/prisma/enums'
+import type { MemeContentLocale } from '@/db/generated/prisma/enums'
+import {
+  MemeContentLocale as MemeContentLocaleEnum,
+  MemeStatus
+} from '@/db/generated/prisma/enums'
 import { clientEnv } from '@/env/client'
 import { serverEnv } from '@/env/server'
 import { truncateToUtcDay } from '@/helpers/date'
 import {
+  parseContentLocalesParam,
   resolveCategoryTranslation,
   resolveMemeTranslation,
   VISIBLE_CONTENT_LOCALES
@@ -48,9 +53,10 @@ import {
 import { auth } from '@/lib/auth'
 import { buildSignedOriginalUrl } from '@/lib/bunny'
 import { algoliaLogger, logger } from '@/lib/logger'
-import { getLocale, type Locale } from '@/paraglide/runtime'
+import { baseLocale, getLocale, type Locale } from '@/paraglide/runtime'
 import { createRateLimitMiddleware, extractClientIp } from '@/server/rate-limit'
 import { authUserRequiredMiddleware } from '@/server/user-auth'
+import { removeDuplicates } from '@/utils/array'
 import { ensureAlgoliaUserToken } from '@/utils/tracking-cookies'
 import { insightsClient as createInsightsClient } from '@algolia/client-insights'
 import { notFound } from '@tanstack/react-router'
@@ -62,8 +68,31 @@ const serverInsightsClient = createInsightsClient(
   serverEnv.ALGOLIA_ADMIN_KEY
 )
 
-function buildMemeFilters(category: string | undefined, thirtyDaysAgo: number) {
+type BuildMemeFiltersParams = {
+  category: string | undefined
+  thirtyDaysAgo: number
+  contentLocales: MemeContentLocale[] | undefined
+}
+
+function buildMemeFilters({
+  category,
+  thirtyDaysAgo,
+  contentLocales
+}: BuildMemeFiltersParams) {
   const filters = [`status:${MemeStatus.PUBLISHED}`]
+
+  if (contentLocales) {
+    const allLocales = removeDuplicates([
+      ...contentLocales,
+      MemeContentLocaleEnum.UNIVERSAL
+    ])
+    const localeFilter = allLocales
+      .map((cl) => {
+        return `contentLocale:${cl}`
+      })
+      .join(' OR ')
+    filters.push(`(${localeFilter})`)
+  }
 
   if (category === NEWS_CATEGORY_SLUG) {
     filters.push(`publishedAtTime >= ${thirtyDaysAgo}`)
@@ -74,24 +103,36 @@ function buildMemeFilters(category: string | undefined, thirtyDaysAgo: number) {
   return filters.join(' AND ')
 }
 
-function resolveSearchIndex(
-  category: string | undefined,
-  hasQuery: boolean,
+type ResolveSearchIndexParams = {
+  category: string | undefined
+  hasQuery: boolean
   locale: Locale
-) {
+  contentLocales: MemeContentLocale[] | undefined
+}
+
+function resolveSearchIndex({
+  category,
+  hasQuery,
+  locale,
+  contentLocales
+}: ResolveSearchIndexParams) {
+  const effectiveLocale = contentLocales?.includes(MemeContentLocaleEnum.FR)
+    ? baseLocale
+    : locale
+
   if (hasQuery) {
-    return resolveAlgoliaIndexName(locale)
+    return resolveAlgoliaIndexName(effectiveLocale)
   }
 
   if (category === POPULAR_CATEGORY_SLUG) {
-    return resolveAlgoliaReplicaPopular(locale)
+    return resolveAlgoliaReplicaPopular(effectiveLocale)
   }
 
   if (category === NEWS_CATEGORY_SLUG) {
-    return resolveAlgoliaReplicaRecent(locale)
+    return resolveAlgoliaReplicaRecent(effectiveLocale)
   }
 
-  return resolveAlgoliaIndexName(locale)
+  return resolveAlgoliaIndexName(effectiveLocale)
 }
 
 export const getMemeById = createServerFn({ method: 'GET' })
@@ -172,8 +213,16 @@ export const getMemes = createServerFn({ method: 'GET' })
   .handler(async ({ data }) => {
     const locale = getLocale()
     const hasQuery = Boolean(data.query)
-    const indexName = resolveSearchIndex(data.category, hasQuery, locale)
-    const cacheKey = `${indexName}:${data.query ?? ''}:${data.page ?? 1}:${data.category ?? ''}`
+    const contentLocales = data.contentLocales
+      ? parseContentLocalesParam(data.contentLocales, locale)
+      : undefined
+    const indexName = resolveSearchIndex({
+      category: data.category,
+      hasQuery,
+      locale,
+      contentLocales
+    })
+    const cacheKey = `${indexName}:${data.query ?? ''}:${data.page ?? 1}:${data.category ?? ''}:${data.contentLocales ?? ''}`
     const hasConsentedToCookies = getCookie(COOKIE_CONSENT_KEY) === 'accepted'
     const userToken = hasConsentedToCookies
       ? getCookie(COOKIE_ALGOLIA_USER_TOKEN_KEY)
@@ -181,7 +230,11 @@ export const getMemes = createServerFn({ method: 'GET' })
 
     return withAlgoliaCache(cacheKey, async () => {
       const thirtyDaysAgo = Date.now() - THIRTY_DAYS_MS
-      const filters = buildMemeFilters(data.category, thirtyDaysAgo)
+      const filters = buildMemeFilters({
+        category: data.category,
+        thirtyDaysAgo,
+        contentLocales
+      })
 
       const response =
         await algoliaSearchClient.searchSingleIndex<AlgoliaMemeRecord>({

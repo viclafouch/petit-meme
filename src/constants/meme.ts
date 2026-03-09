@@ -3,6 +3,7 @@ import { z } from 'zod'
 import type { badgeVariants } from '@/components/ui/badge'
 import { type Prisma } from '@/db/generated/prisma/client'
 import { MemeStatus } from '@/db/generated/prisma/enums'
+import { FILTERABLE_CONTENT_LOCALES } from '@/helpers/i18n-content'
 import { m } from '@/paraglide/messages.js'
 
 export const MEME_FULL_INCLUDE = {
@@ -98,7 +99,17 @@ export const MEMES_SEARCH_SCHEMA = z.object({
   // eslint-disable-next-line unicorn/no-useless-undefined
   query: z.string().max(200).optional().catch(undefined),
   page: z.coerce.number().int().min(1).max(1000).optional().catch(1),
-  status: z.enum(MemeStatus).optional()
+  status: z.enum(MemeStatus).optional(),
+  contentLocales: z
+    .string()
+    .refine((value) => {
+      return value.split(',').every((part) => {
+        return (FILTERABLE_CONTENT_LOCALES as readonly string[]).includes(part)
+      })
+    })
+    .optional()
+    // eslint-disable-next-line unicorn/no-useless-undefined -- Zod .catch() requires an argument
+    .catch(undefined)
 })
 
 export const MEMES_FILTERS_SCHEMA = z.object({

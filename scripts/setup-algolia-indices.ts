@@ -28,7 +28,8 @@ const BASE_INDEX_SETTINGS = {
   attributesForFaceting: [
     'filterOnly(status)',
     'searchable(categorySlugs)',
-    'filterOnly(publishedAtTime)'
+    'filterOnly(publishedAtTime)',
+    'filterOnly(contentLocale)'
   ],
   customRanking: [
     'desc(viewCount)',
@@ -108,10 +109,12 @@ const setupAlgoliaIndices = async () => {
     }
   }
 
+  const mode = import.meta.env.MODE
+
   console.log('\nAll indices configured successfully!')
   console.log('\nNext steps:')
   console.log(
-    '1. Run reindex: npx vite-node --dotenv .env.development scripts/reindex-memes.ts'
+    `1. Run reindex: npx vite-node --mode ${mode} scripts/reindex-memes.ts`
   )
   console.log(
     `2. Delete old index "${algoliaIndexPrefix}" and its replicas from Algolia dashboard`

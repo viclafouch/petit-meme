@@ -3,7 +3,6 @@ import {
   ChevronDown,
   CreditCard,
   LogOutIcon,
-  Send,
   Shield,
   SparklesIcon,
   Star,
@@ -117,12 +116,6 @@ export const UserDropdown = ({ user }: UserDropdownParams) => {
               {m.nav_favorites({
                 count: String(favoritesMemesCountQuery.data?.count ?? 0)
               })}
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to="/submit">
-              <Send />
-              {m.nav_submit()}
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>

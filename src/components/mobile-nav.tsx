@@ -1,12 +1,5 @@
 import React from 'react'
-import {
-  CreditCard,
-  Send,
-  Settings,
-  Shield,
-  SparklesIcon,
-  Star
-} from 'lucide-react'
+import { CreditCard, Settings, Shield, SparklesIcon, Star } from 'lucide-react'
 import { ThemeSwitcher } from '@/components/animate-ui/theme-switcher'
 import { LanguageSwitcher } from '@/components/language-switcher'
 import type { NavigationLink } from '@/components/navbar'
@@ -65,13 +58,19 @@ export const MobileNav = ({ links, user }: MobileNavProps) => {
               <span
                 className={cn(
                   'bg-foreground absolute left-0 block h-0.5 w-4 transition-all duration-100',
-                  isOpen ? 'top-[0.4rem] -rotate-45' : 'top-1'
+                  isOpen ? 'top-[7px] -rotate-45' : 'top-0.5'
                 )}
               />
               <span
                 className={cn(
                   'bg-foreground absolute left-0 block h-0.5 w-4 transition-all duration-100',
-                  isOpen ? 'top-[0.4rem] rotate-45' : 'top-2.5'
+                  isOpen ? 'opacity-0' : 'top-[7px] opacity-100'
+                )}
+              />
+              <span
+                className={cn(
+                  'bg-foreground absolute left-0 block h-0.5 w-4 transition-all duration-100',
+                  isOpen ? 'top-[7px] rotate-45' : 'top-[12px]'
                 )}
               />
             </div>
@@ -121,14 +120,6 @@ export const MobileNav = ({ links, user }: MobileNavProps) => {
                     {m.nav_favorites({
                       count: String(favoritesMemesCountQuery.data?.count ?? 0)
                     })}
-                  </Link>
-                  <Link
-                    to="/submit"
-                    className={ACCOUNT_LINK_CLASS}
-                    onClick={handleClose}
-                  >
-                    <Send className="size-5" />
-                    {m.nav_submit()}
                   </Link>
                   <Link
                     to="/settings"

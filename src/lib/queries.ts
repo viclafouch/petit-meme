@@ -12,6 +12,7 @@ import {
   getVideoStatusById,
   shareMeme
 } from '@/server/meme'
+import { getUserSubmissions } from '@/server/meme-submission'
 import { getInfiniteReels } from '@/server/reels'
 import { getFavoritesMemes } from '@/server/user'
 import { getAuthUser } from '@/server/user-auth'
@@ -160,6 +161,18 @@ export const getRelatedMemesQueryOpts = ({
 }
 
 getRelatedMemesQueryOpts.all = ['related-memes'] as const
+
+export const getUserSubmissionsQueryOpts = () => {
+  return queryOptions({
+    queryKey: [...getUserSubmissionsQueryOpts.all],
+    queryFn: () => {
+      return getUserSubmissions()
+    },
+    staleTime: 5 * MINUTE
+  })
+}
+
+getUserSubmissionsQueryOpts.all = ['user-submissions'] as const
 
 export const getVideoBlobQueryOpts = (memeId: Meme['id']) => {
   return queryOptions({

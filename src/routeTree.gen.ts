@@ -37,7 +37,9 @@ import { Route as Public__rootDefaultTermsOfUseRouteImport } from './routes/_pub
 import { Route as Public__rootDefaultPrivacyRouteImport } from './routes/_public__root/_default/privacy'
 import { Route as Public__rootDefaultMentionsLegalesRouteImport } from './routes/_public__root/_default/mentions-legales'
 import { Route as Public__rootDefaultFavoritesRouteImport } from './routes/_public__root/_default/favorites'
+import { Route as Public__rootDefaultDmcaRouteImport } from './routes/_public__root/_default/dmca'
 import { Route as Public__rootDefaultSettingsRouteRouteImport } from './routes/_public__root/_default/settings/route'
+import { Route as Public__rootDefaultSubmitIndexRouteImport } from './routes/_public__root/_default/submit/index'
 import { Route as Public__rootDefaultSettingsIndexRouteImport } from './routes/_public__root/_default/settings/index'
 import { Route as Public__rootDefaultRandomIndexRouteImport } from './routes/_public__root/_default/random/index'
 import { Route as Public__rootDefaultPricingIndexRouteImport } from './routes/_public__root/_default/pricing/index'
@@ -192,10 +194,21 @@ const Public__rootDefaultFavoritesRoute =
     path: '/favorites',
     getParentRoute: () => Public__rootDefaultRouteRoute,
   } as any)
+const Public__rootDefaultDmcaRoute = Public__rootDefaultDmcaRouteImport.update({
+  id: '/dmca',
+  path: '/dmca',
+  getParentRoute: () => Public__rootDefaultRouteRoute,
+} as any)
 const Public__rootDefaultSettingsRouteRoute =
   Public__rootDefaultSettingsRouteRouteImport.update({
     id: '/settings',
     path: '/settings',
+    getParentRoute: () => Public__rootDefaultRouteRoute,
+  } as any)
+const Public__rootDefaultSubmitIndexRoute =
+  Public__rootDefaultSubmitIndexRouteImport.update({
+    id: '/submit/',
+    path: '/submit/',
     getParentRoute: () => Public__rootDefaultRouteRoute,
   } as any)
 const Public__rootDefaultSettingsIndexRoute =
@@ -272,6 +285,7 @@ export interface FileRoutesByFullPath {
   '/api/sentry-tunnel': typeof ApiSentryTunnelRoute
   '/admin/': typeof AdminIndexRoute
   '/settings': typeof Public__rootDefaultSettingsRouteRouteWithChildren
+  '/dmca': typeof Public__rootDefaultDmcaRoute
   '/favorites': typeof Public__rootDefaultFavoritesRoute
   '/mentions-legales': typeof Public__rootDefaultMentionsLegalesRoute
   '/privacy': typeof Public__rootDefaultPrivacyRoute
@@ -294,6 +308,7 @@ export interface FileRoutesByFullPath {
   '/pricing/': typeof Public__rootDefaultPricingIndexRoute
   '/random/': typeof Public__rootDefaultRandomIndexRoute
   '/settings/': typeof Public__rootDefaultSettingsIndexRoute
+  '/submit/': typeof Public__rootDefaultSubmitIndexRoute
   '/memes/category/$slug': typeof Public__rootDefaultMemesCategorySlugRoute
 }
 export interface FileRoutesByTo {
@@ -308,6 +323,7 @@ export interface FileRoutesByTo {
   '/api/bunny': typeof ApiBunnyRoute
   '/api/sentry-tunnel': typeof ApiSentryTunnelRoute
   '/admin': typeof AdminIndexRoute
+  '/dmca': typeof Public__rootDefaultDmcaRoute
   '/favorites': typeof Public__rootDefaultFavoritesRoute
   '/mentions-legales': typeof Public__rootDefaultMentionsLegalesRoute
   '/privacy': typeof Public__rootDefaultPrivacyRoute
@@ -330,6 +346,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof Public__rootDefaultPricingIndexRoute
   '/random': typeof Public__rootDefaultRandomIndexRoute
   '/settings': typeof Public__rootDefaultSettingsIndexRoute
+  '/submit': typeof Public__rootDefaultSubmitIndexRoute
   '/memes/category/$slug': typeof Public__rootDefaultMemesCategorySlugRoute
 }
 export interface FileRoutesById {
@@ -350,6 +367,7 @@ export interface FileRoutesById {
   '/_public__root/': typeof Public__rootIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/_public__root/_default/settings': typeof Public__rootDefaultSettingsRouteRouteWithChildren
+  '/_public__root/_default/dmca': typeof Public__rootDefaultDmcaRoute
   '/_public__root/_default/favorites': typeof Public__rootDefaultFavoritesRoute
   '/_public__root/_default/mentions-legales': typeof Public__rootDefaultMentionsLegalesRoute
   '/_public__root/_default/privacy': typeof Public__rootDefaultPrivacyRoute
@@ -372,6 +390,7 @@ export interface FileRoutesById {
   '/_public__root/_default/pricing/': typeof Public__rootDefaultPricingIndexRoute
   '/_public__root/_default/random/': typeof Public__rootDefaultRandomIndexRoute
   '/_public__root/_default/settings/': typeof Public__rootDefaultSettingsIndexRoute
+  '/_public__root/_default/submit/': typeof Public__rootDefaultSubmitIndexRoute
   '/_public__root/_default/memes/category/$slug': typeof Public__rootDefaultMemesCategorySlugRoute
 }
 export interface FileRouteTypes {
@@ -390,6 +409,7 @@ export interface FileRouteTypes {
     | '/api/sentry-tunnel'
     | '/admin/'
     | '/settings'
+    | '/dmca'
     | '/favorites'
     | '/mentions-legales'
     | '/privacy'
@@ -412,6 +432,7 @@ export interface FileRouteTypes {
     | '/pricing/'
     | '/random/'
     | '/settings/'
+    | '/submit/'
     | '/memes/category/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -426,6 +447,7 @@ export interface FileRouteTypes {
     | '/api/bunny'
     | '/api/sentry-tunnel'
     | '/admin'
+    | '/dmca'
     | '/favorites'
     | '/mentions-legales'
     | '/privacy'
@@ -448,6 +470,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/random'
     | '/settings'
+    | '/submit'
     | '/memes/category/$slug'
   id:
     | '__root__'
@@ -467,6 +490,7 @@ export interface FileRouteTypes {
     | '/_public__root/'
     | '/admin/'
     | '/_public__root/_default/settings'
+    | '/_public__root/_default/dmca'
     | '/_public__root/_default/favorites'
     | '/_public__root/_default/mentions-legales'
     | '/_public__root/_default/privacy'
@@ -489,6 +513,7 @@ export interface FileRouteTypes {
     | '/_public__root/_default/pricing/'
     | '/_public__root/_default/random/'
     | '/_public__root/_default/settings/'
+    | '/_public__root/_default/submit/'
     | '/_public__root/_default/memes/category/$slug'
   fileRoutesById: FileRoutesById
 }
@@ -708,11 +733,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Public__rootDefaultFavoritesRouteImport
       parentRoute: typeof Public__rootDefaultRouteRoute
     }
+    '/_public__root/_default/dmca': {
+      id: '/_public__root/_default/dmca'
+      path: '/dmca'
+      fullPath: '/dmca'
+      preLoaderRoute: typeof Public__rootDefaultDmcaRouteImport
+      parentRoute: typeof Public__rootDefaultRouteRoute
+    }
     '/_public__root/_default/settings': {
       id: '/_public__root/_default/settings'
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof Public__rootDefaultSettingsRouteRouteImport
+      parentRoute: typeof Public__rootDefaultRouteRoute
+    }
+    '/_public__root/_default/submit/': {
+      id: '/_public__root/_default/submit/'
+      path: '/submit'
+      fullPath: '/submit/'
+      preLoaderRoute: typeof Public__rootDefaultSubmitIndexRouteImport
       parentRoute: typeof Public__rootDefaultRouteRoute
     }
     '/_public__root/_default/settings/': {
@@ -805,6 +844,7 @@ const Public__rootDefaultSettingsRouteRouteWithChildren =
 
 interface Public__rootDefaultRouteRouteChildren {
   Public__rootDefaultSettingsRouteRoute: typeof Public__rootDefaultSettingsRouteRouteWithChildren
+  Public__rootDefaultDmcaRoute: typeof Public__rootDefaultDmcaRoute
   Public__rootDefaultFavoritesRoute: typeof Public__rootDefaultFavoritesRoute
   Public__rootDefaultMentionsLegalesRoute: typeof Public__rootDefaultMentionsLegalesRoute
   Public__rootDefaultPrivacyRoute: typeof Public__rootDefaultPrivacyRoute
@@ -816,6 +856,7 @@ interface Public__rootDefaultRouteRouteChildren {
   Public__rootDefaultMemesIndexRoute: typeof Public__rootDefaultMemesIndexRoute
   Public__rootDefaultPricingIndexRoute: typeof Public__rootDefaultPricingIndexRoute
   Public__rootDefaultRandomIndexRoute: typeof Public__rootDefaultRandomIndexRoute
+  Public__rootDefaultSubmitIndexRoute: typeof Public__rootDefaultSubmitIndexRoute
   Public__rootDefaultMemesCategorySlugRoute: typeof Public__rootDefaultMemesCategorySlugRoute
 }
 
@@ -823,6 +864,7 @@ const Public__rootDefaultRouteRouteChildren: Public__rootDefaultRouteRouteChildr
   {
     Public__rootDefaultSettingsRouteRoute:
       Public__rootDefaultSettingsRouteRouteWithChildren,
+    Public__rootDefaultDmcaRoute: Public__rootDefaultDmcaRoute,
     Public__rootDefaultFavoritesRoute: Public__rootDefaultFavoritesRoute,
     Public__rootDefaultMentionsLegalesRoute:
       Public__rootDefaultMentionsLegalesRoute,
@@ -838,6 +880,7 @@ const Public__rootDefaultRouteRouteChildren: Public__rootDefaultRouteRouteChildr
     Public__rootDefaultMemesIndexRoute: Public__rootDefaultMemesIndexRoute,
     Public__rootDefaultPricingIndexRoute: Public__rootDefaultPricingIndexRoute,
     Public__rootDefaultRandomIndexRoute: Public__rootDefaultRandomIndexRoute,
+    Public__rootDefaultSubmitIndexRoute: Public__rootDefaultSubmitIndexRoute,
     Public__rootDefaultMemesCategorySlugRoute:
       Public__rootDefaultMemesCategorySlugRoute,
   }

@@ -10,6 +10,7 @@ export const getLegalLinks = (): LegalLink[] => {
   return [
     { to: '/privacy', label: m.footer_privacy() },
     { to: '/terms-of-use', label: m.footer_terms() },
-    { to: '/mentions-legales', label: m.footer_legal() }
+    { to: '/mentions-legales', label: m.footer_legal() },
+    { to: '/dmca', label: m.footer_dmca() }
   ]
 }

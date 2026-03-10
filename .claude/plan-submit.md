@@ -14,7 +14,7 @@ Objectif : tout le backend prêt, rien de visible côté user.
 - [x] Enum `MemeSubmissionStatus` (PENDING, APPROVED, REJECTED)
 - [x] Table `MemeSubmission` : `id`, `user_id` (FK User, CASCADE), `title`, `url` (unique constraint globale), `url_type` (enum), `content_locale` (enum MemeContentLocale), `status` (enum, default PENDING), `admin_note` (optionnel, texte libre admin — jamais exposé côté user), `meme_id` (FK Meme, nullable — rempli quand converti), `created_at`, `updated_at`
 - [x] Index : `status`, `user_id`, `(status, created_at DESC)`
-- [ ] Appliquer la migration en dev, vérifier le SQL généré (aucun DROP)
+- [x] Appliquer la migration en dev, vérifier le SQL généré (aucun DROP)
 
 ### 1.2 — Constants & validation Zod
 
@@ -60,75 +60,48 @@ Objectif : le user peut soumettre et voir ses soumissions. Utiliser `/frontend-d
 
 ### 2.0 — Design UI
 
-- [ ] Utiliser `/frontend-design` pour la page `/submit`
+- [x] Utiliser `/frontend-design` pour la page `/submit`
 
 ### 2.1 — Route & navigation
 
-- [ ] Route publique `src/routes/_public__root/_default/submit.tsx` — pas de `beforeLoad` redirect
-- [ ] Si `!user` : message invitant à se connecter + bouton qui ouvre `AuthDialog` via `showDialog('auth', {})` (pattern existant `ToggleLikeButton`). **Pas de redirect automatique vers login.**
-- [ ] Si `user` : formulaire + historique sur la même page, layout unique (pas de tabs)
-- [ ] Lien dans la navbar (dropdown menu user connecté, à côté de Favoris/Settings)
-- [ ] **SEO** : `noindex` — page réservée aux utilisateurs connectés
+- [x] Route publique `src/routes/_public__root/_default/submit/index.tsx` — pas de `beforeLoad` redirect
+- [x] Si `!user` : message invitant à se connecter + bouton qui ouvre `AuthDialog` via `showDialog('auth', {})` (pattern existant `ToggleLikeButton`). **Pas de redirect automatique vers login.**
+- [x] Si `user` : formulaire + historique sur la même page, layout unique (pas de tabs)
+- [x] Lien dans la navbar (dropdown menu user connecté + mobile nav, à côté de Favoris/Settings)
+- [x] **SEO** : `noindex` — page réservée aux utilisateurs connectés
 
 ### 2.2 — Layout page (single scroll, pas de tabs)
 
-- [ ] **Section haute — Règles de soumission** (affichées toujours, au-dessus du formulaire)
-  - Bloc visible, non collapsable, design sobre (callout/alert style)
-  - Règles traduites FR/EN via Paraglide :
-    1. **Durée max 30 secondes** — les clips longs seront refusés
-    2. **Contenu viral uniquement** — le mème doit être reconnu/partagé sur les réseaux, pas une vidéo personnelle ou obscure
-    3. **Pas de doublon** — vérifier que le mème n'est pas déjà sur le site avant de soumettre
-    4. **Lien direct vers la source** — tweet/X ou vidéo YouTube uniquement (pas de lien MP4, Google Drive, Dropbox, etc.)
-    5. **Langue audio correcte** — sélectionner la langue parlée dans la vidéo (FR/EN/UNIVERSAL si pas de parole)
-    6. **Contenu approprié** — pas de NSFW, violence graphique, haine, harcèlement
-    7. **Qualité correcte** — pas de vidéo floue, re-enregistrement d'écran, ou watermarks massifs
-  - Mention en bas des règles : "Les soumissions qui ne respectent pas ces règles seront refusées sans explication."
-- [ ] **Encart Droits d'auteur / Copyright** (entre les règles et le formulaire)
-  - Callout/alert style, visuellement distinct des règles (icône ©)
-  - Titre : "Droits d'auteur" (FR) / "Copyright" (EN)
-  - Texte traduit FR/EN via Paraglide :
-    - "Petit Meme ne détient aucun droit sur les vidéos. Les memes et extraits courts déjà diffusés publiquement sont acceptés."
-    - "Tout contenu peut être retiré sur demande légitime du détenteur des droits (DMCA)."
-  - Lien mailto `legal@petit-meme.io` pour les réclamations
-  - Lien "En savoir plus" vers `/dmca`
-- [ ] **Section milieu — Formulaire de soumission**
-  - Champs : titre (requis, max 100 chars), lien (requis), langue audio (FR/EN/UNIVERSAL, select)
-  - `url_type` auto-détecté depuis le hostname — pas de champ dans le formulaire
-  - Pas d'upload de fichier, pas de description (l'admin s'en occupe)
-  - **Checkbox DMCA/CGU** (obligatoire, `z.literal(true)`) — même pattern que le signup (`signup-form.tsx`) :
-    - FR : "Je confirme que ce contenu est un meme ou extrait court déjà diffusé publiquement sur les réseaux. En cas de réclamation du détenteur des droits, le contenu sera retiré. J'accepte les [CGU] et la [Politique de confidentialité]."
-    - EN : traduction équivalente
-    - Liens inline vers `/terms-of-use` et `/privacy` (`target="_blank"`)
-    - Validation Zod seule, **pas de stockage en DB** — l'existence de la soumission vaut preuve d'acceptation
-  - Bouton submit désactivé pendant la soumission (prevent double-submit)
-  - Afficher le nombre de soumissions restantes (cap 3 pending) au-dessus du bouton
-  - Toast de confirmation après soumission réussie + reset du formulaire + refresh de la liste
-  - Erreurs serveur (URL doublon, cap atteint, rate limit, banni) affichées inline
-- [ ] **Section basse — Historique des soumissions**
-  - Liste des soumissions de l'utilisateur, ordonnée par `created_at DESC`
-  - Chaque item : titre, URL (tronquée, lien cliquable `target="_blank" rel="noopener noreferrer"`), langue, statut (badge coloré : pending=jaune, approved=vert, rejected=rouge), date relative
-  - Le mème lié (si approuvé) : lien cliquable vers la page du mème
-  - Empty state quand aucune soumission
-  - Pas de pagination (cap 3 pending + volume faible — tout charger)
+- [x] **Section haute — Règles de soumission** (`submission-rules.tsx`)
+  - 7 règles avec icônes Lucide, grid 2 colonnes desktop, 1 colonne mobile
+  - Mention warning en bas
+- [x] **Encart Droits d'auteur / Copyright** (`submission-rules.tsx` — `CopyrightNotice`)
+  - Alert variant `info` avec icône Copyright
+  - Lien vers `/dmca`
+- [x] **Section milieu — Formulaire de soumission** (`submission-form.tsx`)
+  - Champs : titre, lien, langue audio (Select), checkbox DMCA/CGU
+  - `url_type` auto-détecté, pas de champ
+  - Toast sonner, reset formulaire, invalidation query
+  - Erreurs serveur affichées inline (StudioError codes mappés)
+  - Compteur soumissions restantes
+- [x] **Section basse — Historique des soumissions** (`submission-history.tsx`)
+  - Liste avec séparateurs, badges statut colorés, date relative
+  - Lien vers le mème si approuvé
+  - Empty state avec icône Inbox
 
 ### 2.3 — Page DMCA
 
-- [ ] Fichiers markdown `md/fr/dmca.md` + `md/en/dmca.md` — procédure DMCA complète style US (17 U.S.C. § 512) :
-  - Objet / ce que fait Petit Meme (indexation, pas propriétaire du contenu)
-  - Procédure de notification DMCA (éléments requis : identification du contenu, preuve de droits, déclaration sous serment / sworn statement, coordonnées)
-  - Designated agent (legal@petit-meme.io)
-  - Contre-notification (procédure pour contester un retrait)
-  - Repeat infringer policy
-  - Contact
-- [ ] Route `src/routes/_public__root/_default/dmca.tsx` — même pattern que `terms-of-use.tsx` (markdown loader par locale, `staleTime: Infinity`)
-- [ ] Lien `/dmca` ajouté dans le footer (`src/components/footer.tsx`) à côté de CGU, Privacy, Mentions légales
+- [x] Fichiers markdown `md/fr/dmca.md` + `md/en/dmca.md` — procédure DMCA complète 17 U.S.C. § 512
+- [x] Route `src/routes/_public__root/_default/dmca.tsx` — markdown loader par locale, `staleTime: Infinity`
+- [x] Lien `/dmca` ajouté dans le footer (`src/constants/navigation.ts`)
 
 ### 2.4 — Messages Paraglide
 
-- [ ] Ajouter tous les messages FR/EN : titre page, règles (7), labels formulaire, erreurs, statuts, empty state, message non connecté
-- [ ] Messages encart copyright : titre, texte explicatif, lien "En savoir plus"
-- [ ] Messages checkbox DMCA/CGU : texte complet avec segments pour les liens inline (pattern signup : préfixe + lien CGU + conjonction + lien privacy)
-- [ ] Messages page DMCA : titre, description SEO
+- [x] Tous les messages FR/EN ajoutés : titre page, règles (7), labels formulaire, erreurs, statuts, empty state, message non connecté
+- [x] Messages encart copyright : titre, texte explicatif, lien "En savoir plus"
+- [x] Messages checkbox DMCA/CGU : préfixe + lien CGU + conjonction + lien privacy
+- [x] Messages page DMCA : titre, description SEO
+- [x] Messages navigation : `nav_submit`, `footer_dmca`
 
 **Déployable à ce stade** : oui. Les users peuvent soumettre, l'admin voit les submissions en DB mais n'a pas encore d'interface dédiée.
 

@@ -17,14 +17,18 @@ const detectUrlType = (url: string): MemeSubmissionUrlType | null => {
   return null
 }
 
-const SUBMISSION_TITLE_SCHEMA = z.string().trim().min(3).max(100)
+const SUBMISSION_TITLE_SCHEMA = z
+  .string()
+  .trim()
+  .min(3, { error: 'titleTooShort' })
+  .max(100)
 
 export const CREATE_MEME_SUBMISSION_SCHEMA = z
   .object({
     title: SUBMISSION_TITLE_SCHEMA,
-    url: z.string(),
+    url: z.url({ protocol: /^https$/, error: 'invalidUrl' }),
     contentLocale: z.enum(MemeContentLocale),
-    acceptTerms: z.literal(true)
+    acceptTerms: z.literal(true, { error: 'acceptTermsRequired' })
   })
   .transform((data, context) => {
     const urlType = detectUrlType(data.url)
@@ -32,7 +36,7 @@ export const CREATE_MEME_SUBMISSION_SCHEMA = z
     if (!urlType) {
       context.addIssue({
         code: 'custom',
-        message: 'invalid_submission_url',
+        message: 'invalidSubmissionUrl',
         path: ['url']
       })
 

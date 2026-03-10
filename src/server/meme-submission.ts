@@ -79,11 +79,18 @@ export const createMemeSubmission = createServerFn({ method: 'POST' })
 export const getUserSubmissions = createServerFn({ method: 'GET' })
   .middleware([authUserRequiredMiddleware])
   .handler(async ({ context }) => {
-    const submissions = await prismaClient.memeSubmission.findMany({
-      where: { userId: context.user.id },
-      select: SUBMISSION_USER_SELECT,
-      orderBy: { createdAt: 'desc' }
-    })
+    const userId = context.user.id
 
-    return submissions
+    const [submissions, pendingCount] = await Promise.all([
+      prismaClient.memeSubmission.findMany({
+        where: { userId },
+        select: SUBMISSION_USER_SELECT,
+        orderBy: { createdAt: 'desc' }
+      }),
+      prismaClient.memeSubmission.count({
+        where: { userId, status: MemeSubmissionStatus.PENDING }
+      })
+    ])
+
+    return { submissions, pendingCount }
   })

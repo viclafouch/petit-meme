@@ -1,5 +1,12 @@
 import React from 'react'
-import { CreditCard, Settings, Shield, SparklesIcon, Star } from 'lucide-react'
+import {
+  CreditCard,
+  Send,
+  Settings,
+  Shield,
+  SparklesIcon,
+  Star
+} from 'lucide-react'
 import { ThemeSwitcher } from '@/components/animate-ui/theme-switcher'
 import { LanguageSwitcher } from '@/components/language-switcher'
 import type { NavigationLink } from '@/components/navbar'
@@ -114,6 +121,14 @@ export const MobileNav = ({ links, user }: MobileNavProps) => {
                     {m.nav_favorites({
                       count: String(favoritesMemesCountQuery.data?.count ?? 0)
                     })}
+                  </Link>
+                  <Link
+                    to="/submit"
+                    className={ACCOUNT_LINK_CLASS}
+                    onClick={handleClose}
+                  >
+                    <Send className="size-5" />
+                    {m.nav_submit()}
                   </Link>
                   <Link
                     to="/settings"

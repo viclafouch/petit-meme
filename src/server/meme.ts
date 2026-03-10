@@ -6,6 +6,7 @@ import {
 } from '@/constants/cookie'
 import {
   MEME_FULL_INCLUDE,
+  MEME_TRANSLATION_SELECT,
   MEMES_FILTERS_SCHEMA,
   MEMES_PER_PAGE,
   MEMES_SEARCH_SCHEMA,
@@ -35,7 +36,8 @@ import {
   parseContentLocalesParam,
   resolveCategoryTranslation,
   resolveMemeTranslation,
-  resolveVisibleContentLocales
+  resolveVisibleContentLocales,
+  VISIBLE_CONTENT_LOCALES
 } from '@/helpers/i18n-content'
 import type { AlgoliaMemeRecord } from '@/lib/algolia'
 import {
@@ -69,6 +71,16 @@ const serverInsightsClient = createInsightsClient(
   serverEnv.ALGOLIA_ADMIN_KEY
 )
 
+const buildAlgoliaContentLocaleFilter = (
+  contentLocales: MemeContentLocale[]
+) => {
+  return `(${contentLocales
+    .map((cl) => {
+      return `contentLocale:${cl}`
+    })
+    .join(' OR ')})`
+}
+
 type BuildMemeFiltersParams = {
   category: string | undefined
   thirtyDaysAgo: number
@@ -83,12 +95,11 @@ function buildMemeFilters({
   const filters = [`status:${MemeStatus.PUBLISHED}`]
 
   if (contentLocales) {
-    const localeFilter = contentLocalesWithUniversal(contentLocales)
-      .map((cl) => {
-        return `contentLocale:${cl}`
-      })
-      .join(' OR ')
-    filters.push(`(${localeFilter})`)
+    filters.push(
+      buildAlgoliaContentLocaleFilter(
+        contentLocalesWithUniversal(contentLocales)
+      )
+    )
   }
 
   if (category === NEWS_CATEGORY_SLUG) {
@@ -292,10 +303,13 @@ const getBestMemesInternal = createServerOnlyFn(
   async (contentLocales?: MemeContentLocale[]) => {
     const locale = getLocale()
 
-    return prismaClient.meme.findMany({
+    const memes = await prismaClient.meme.findMany({
       take: TRENDING_MEMES_COUNT,
       include: {
-        video: true
+        video: true,
+        translations: {
+          select: MEME_TRANSLATION_SELECT
+        }
       },
       orderBy: {
         viewCount: 'desc'
@@ -307,6 +321,21 @@ const getBestMemesInternal = createServerOnlyFn(
         }
       }
     })
+
+    return memes.map(({ translations, ...meme }) => {
+      const resolved = resolveMemeTranslation({
+        translations,
+        contentLocale: meme.contentLocale,
+        requestedLocale: locale,
+        fallback: meme
+      })
+
+      return {
+        ...meme,
+        title: resolved.title,
+        description: resolved.description
+      }
+    })
   }
 )
 
@@ -314,6 +343,9 @@ export const getRelatedMemes = createServerFn({ method: 'GET' })
   .inputValidator(z.object({ memeId: z.string(), title: z.string() }))
   .handler(async ({ data }) => {
     const locale = getLocale()
+    const localeFilter = buildAlgoliaContentLocaleFilter(
+      VISIBLE_CONTENT_LOCALES[locale]
+    )
 
     return withAlgoliaCache(
       `recommend:related:${locale}:${data.memeId}`,
@@ -328,12 +360,12 @@ export const getRelatedMemes = createServerFn({ method: 'GET' })
                 threshold: 0,
                 maxRecommendations: RELATED_MEMES_COUNT,
                 queryParameters: {
-                  filters: `status:${MemeStatus.PUBLISHED}`,
+                  filters: `status:${MemeStatus.PUBLISHED} AND ${localeFilter}`,
                   attributesToRetrieve: [...ALGOLIA_SEARCH_RETRIEVE]
                 },
                 fallbackParameters: {
                   query: data.title,
-                  filters: `status:${MemeStatus.PUBLISHED}`
+                  filters: `status:${MemeStatus.PUBLISHED} AND ${localeFilter}`
                 }
               }
             ]
@@ -355,6 +387,9 @@ export const getRelatedMemes = createServerFn({ method: 'GET' })
 export const getTrendingMemes = createServerFn({ method: 'GET' }).handler(
   async () => {
     const locale = getLocale()
+    const localeFilter = buildAlgoliaContentLocaleFilter(
+      VISIBLE_CONTENT_LOCALES[locale]
+    )
     const trending = await withAlgoliaCache(
       `recommend:trending:${locale}`,
       async () => {
@@ -367,7 +402,7 @@ export const getTrendingMemes = createServerFn({ method: 'GET' }).handler(
                 threshold: 0,
                 maxRecommendations: TRENDING_MEMES_COUNT,
                 queryParameters: {
-                  filters: `status:${MemeStatus.PUBLISHED}`,
+                  filters: `status:${MemeStatus.PUBLISHED} AND ${localeFilter}`,
                   attributesToRetrieve: [...ALGOLIA_SEARCH_RETRIEVE]
                 }
               }

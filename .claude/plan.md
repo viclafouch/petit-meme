@@ -92,6 +92,13 @@ Phases 0–2.4 terminées et déployées en prod (2026-03-09). Interface bilingu
 - [x] Résoudre les titres via `MemeTranslation` (query séparée + `resolveMemeTranslation()`)
 - [x] Index `meme_status_content_locale_idx` existe — non pertinent à vérifier avec ~510 mèmes (PostgreSQL préfère le seq scan sur les petites tables)
 
+**Algolia Recommend** (`src/server/meme.ts`) — `getTrendingMemes` et `getRelatedMemes` sans filtre `contentLocale`
+
+- [x] Ajouter filtre `contentLocale` dans `getTrendingMemes` via `VISIBLE_CONTENT_LOCALES[locale]`
+- [x] Ajouter filtre `contentLocale` dans `getRelatedMemes` (queryParameters + fallbackParameters)
+- [x] Helper `buildAlgoliaContentLocaleFilter(contentLocales)` extrait pour DRY (utilisé aussi par `buildMemeFilters`)
+- [x] `getBestMemesInternal()` : inclure `translations` + `resolveMemeTranslation()` pour résoudre titre/description dans la locale courante (fallback quand Algolia Recommend indispo)
+
 **Favoris** (`src/server/user.ts` — `getFavoritesMemes()`) — pas d'include `translations`, pas de résolution locale
 
 - [x] Inclure `translations` dans la query Prisma des favoris

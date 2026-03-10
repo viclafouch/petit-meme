@@ -51,8 +51,4 @@ export const CREATE_MEME_SUBMISSION_SCHEMA = z
     }
   })
 
-export type CreateMemeSubmissionInput = z.input<
-  typeof CREATE_MEME_SUBMISSION_SCHEMA
->
-
 export const MAX_PENDING_SUBMISSIONS = 3

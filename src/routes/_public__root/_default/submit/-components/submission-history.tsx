@@ -62,6 +62,7 @@ export const SubmissionHistory = () => {
                     <Badge
                       variant={STATUS_BADGE_VARIANT[submission.status]}
                       size="sm"
+                      role="status"
                     >
                       {STATUS_LABELS[submission.status]()}
                     </Badge>

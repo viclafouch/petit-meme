@@ -23,6 +23,7 @@ import {
   extractAuthErrorCode,
   getChangePasswordErrorMessage
 } from '@/helpers/auth-errors'
+import { useErrorFocus } from '@/hooks/use-error-focus'
 import { authClient } from '@/lib/auth-client'
 import { captureWithFeature } from '@/lib/sentry'
 import { getFieldErrorMessage } from '@/lib/utils'
@@ -86,6 +87,8 @@ const UpdatePasswordForm = () => {
       form.reset()
     }
   })
+
+  const errorRef = useErrorFocus(updatePasswordMutation.error)
 
   const form = useForm({
     ...getUpdatePasswordFormOpts(),
@@ -205,9 +208,14 @@ const UpdatePasswordForm = () => {
           }}
         />
         {updatePasswordMutation.error ? (
-          <Alert variant="destructive">
+          <Alert
+            ref={errorRef}
+            variant="destructive"
+            role="alert"
+            tabIndex={-1}
+          >
             <CircleAlert />
-            <AlertDescription>
+            <AlertDescription className="text-destructive-foreground">
               {getChangePasswordErrorMessage(
                 updatePasswordMutation.error.message
               )}

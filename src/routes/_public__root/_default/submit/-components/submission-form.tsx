@@ -25,6 +25,7 @@ import {
 import { MemeContentLocale } from '@/db/generated/prisma/enums'
 import { getErrorMessage, matchIsRateLimitError } from '@/helpers/error'
 import { getContentLocaleLabel } from '@/helpers/i18n-content'
+import { useErrorFocus } from '@/hooks/use-error-focus'
 import { getUserSubmissionsQueryOpts } from '@/lib/queries'
 import { captureWithFeature } from '@/lib/sentry'
 import { getFieldErrorMessage } from '@/lib/utils'
@@ -127,6 +128,8 @@ export const SubmissionForm = ({ pendingCount }: SubmissionFormParams) => {
       })
     }
   })
+
+  const errorRef = useErrorFocus(submitMutation.error)
 
   return (
     <form
@@ -231,15 +234,17 @@ export const SubmissionForm = ({ pendingCount }: SubmissionFormParams) => {
 
           return (
             <FormItem error={getDisplayError(errorMessage)} className="w-full">
-              <div className="flex items-start gap-x-2">
-                <Checkbox
-                  id="acceptTermsSubmit"
-                  checked={field.state.value === true}
-                  onCheckedChange={(checked) => {
-                    return field.handleChange(checked === true)
-                  }}
-                  onBlur={field.handleBlur}
-                />
+              <div className="flex items-start gap-2">
+                <FormControl>
+                  <Checkbox
+                    id="acceptTermsSubmit"
+                    checked={field.state.value === true}
+                    onCheckedChange={(checked) => {
+                      return field.handleChange(checked === true)
+                    }}
+                    onBlur={field.handleBlur}
+                  />
+                </FormControl>
                 <label
                   htmlFor="acceptTermsSubmit"
                   className="text-xs text-muted-foreground leading-snug"
@@ -270,7 +275,7 @@ export const SubmissionForm = ({ pendingCount }: SubmissionFormParams) => {
         }}
       />
       <p className="text-sm text-muted-foreground">
-        {m.submit_pending_count({ remaining: String(remaining) })}
+        {m.submit_pending_count({ remaining })}
       </p>
       <form.Subscribe
         selector={(state) => {
@@ -289,9 +294,9 @@ export const SubmissionForm = ({ pendingCount }: SubmissionFormParams) => {
         }}
       />
       {submitMutation.error ? (
-        <Alert variant="destructive" role="alert">
+        <Alert ref={errorRef} variant="destructive" role="alert" tabIndex={-1}>
           <CircleAlert aria-hidden="true" />
-          <AlertDescription>
+          <AlertDescription className="text-destructive-foreground">
             {getSubmissionErrorMessage(submitMutation.error)}
           </AlertDescription>
         </Alert>

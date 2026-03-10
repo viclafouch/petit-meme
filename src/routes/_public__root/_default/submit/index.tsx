@@ -76,7 +76,7 @@ const RouteComponent = () => {
 
   return (
     <div className="mx-auto max-w-5xl flex flex-col gap-6">
-      <PageHeading className="text-3xl sm:text-4xl lg:text-4xl">
+      <PageHeading className="text-3xl sm:text-4xl">
         {m.submit_heading()}
       </PageHeading>
       {user ? <SubmitPageContent /> : <NotLoggedIn />}

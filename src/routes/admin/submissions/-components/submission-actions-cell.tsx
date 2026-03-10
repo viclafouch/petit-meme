@@ -156,7 +156,7 @@ export const SubmissionActionsCell = ({
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="data-[state=open]:bg-muted text-muted-foreground flex size-9 ml-auto"
+            className="data-[state=open]:bg-muted text-muted-foreground flex ml-auto"
             size="icon"
           >
             <EllipsisVertical />

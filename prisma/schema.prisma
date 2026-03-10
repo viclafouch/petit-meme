@@ -322,6 +322,7 @@ model MemeSubmission {
 
   @@index([status])
   @@index([userId])
+  @@index([userId, status])
   @@index([status, createdAt(sort: Desc)])
   @@map("meme_submission")
 }

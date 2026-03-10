@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { prismaClient } from '@/db'
-import type { Prisma } from '@/db/generated/prisma/client'
+import { Prisma } from '@/db/generated/prisma/client'
 import { MemeSubmissionStatus } from '@/db/generated/prisma/enums'
 import { emailSubjects } from '@/emails/subjects'
 import { SubmissionApprovedEmail } from '@/emails/submission-approved-email'
@@ -50,29 +50,35 @@ export const getAdminSubmissions = createServerFn({ method: 'GET' })
       ? { status: statusFilter }
       : {}
 
-    const countWhere = (status: MemeSubmissionStatus) => {
-      return prismaClient.memeSubmission.count({ where: { status } })
-    }
-
-    const [submissions, pendingCount, approvedCount, rejectedCount] =
-      await Promise.all([
+    try {
+      const [submissions, countsByStatus] = await Promise.all([
         prismaClient.memeSubmission.findMany({
           where,
           select: SUBMISSION_ADMIN_SELECT,
-          orderBy: { createdAt: 'desc' }
+          orderBy: { createdAt: 'desc' },
+          take: 200
         }),
-        countWhere(MemeSubmissionStatus.PENDING),
-        countWhere(MemeSubmissionStatus.APPROVED),
-        countWhere(MemeSubmissionStatus.REJECTED)
+        prismaClient.memeSubmission.groupBy({
+          by: ['status'],
+          _count: { _all: true }
+        })
       ])
 
-    const statusCounts: Record<MemeSubmissionStatus, number> = {
-      [MemeSubmissionStatus.PENDING]: pendingCount,
-      [MemeSubmissionStatus.APPROVED]: approvedCount,
-      [MemeSubmissionStatus.REJECTED]: rejectedCount
-    }
+      const statusCounts: Record<MemeSubmissionStatus, number> = {
+        [MemeSubmissionStatus.PENDING]: 0,
+        [MemeSubmissionStatus.APPROVED]: 0,
+        [MemeSubmissionStatus.REJECTED]: 0
+      }
 
-    return { submissions, statusCounts }
+      for (const row of countsByStatus) {
+        statusCounts[row.status] = row._count._all
+      }
+
+      return { submissions, statusCounts }
+    } catch (error) {
+      captureWithFeature(error, 'admin-submission')
+      throw error
+    }
   })
 
 const UPDATE_SUBMISSION_STATUS_SCHEMA = z.discriminatedUnion('status', [
@@ -94,43 +100,52 @@ export const updateSubmissionStatus = createServerFn({ method: 'POST' })
   })
   .middleware([adminRequiredMiddleware])
   .handler(async ({ data, context }) => {
-    const submission = await prismaClient.memeSubmission.findUnique({
-      where: { id: data.submissionId },
-      select: {
-        id: true,
-        status: true,
-        title: true,
-        userId: true,
-        user: { select: { email: true, name: true, locale: true } }
+    const submission = await prismaClient.$transaction(async (tx) => {
+      const found = await tx.memeSubmission.findUnique({
+        where: { id: data.submissionId },
+        select: {
+          id: true,
+          status: true,
+          title: true,
+          userId: true,
+          user: { select: { email: true, name: true, locale: true } }
+        }
+      })
+
+      if (!found) {
+        setResponseStatus(404)
+        throw new Error('Submission not found')
       }
-    })
 
-    if (!submission) {
-      setResponseStatus(404)
-      throw new Error('Submission not found')
-    }
+      if (found.status !== MemeSubmissionStatus.PENDING) {
+        setResponseStatus(422)
+        throw new Error(
+          'Seules les soumissions en attente peuvent être modifiées'
+        )
+      }
 
-    if (submission.status !== MemeSubmissionStatus.PENDING) {
-      setResponseStatus(422)
-      throw new Error(
-        'Seules les soumissions en attente peuvent être modifiées'
-      )
-    }
+      const updateData: Prisma.MemeSubmissionUpdateInput =
+        data.status === MemeSubmissionStatus.APPROVED
+          ? {
+              status: MemeSubmissionStatus.APPROVED,
+              meme: { connect: { id: data.memeId } }
+            }
+          : {
+              status: MemeSubmissionStatus.REJECTED,
+              adminNote: data.adminNote ?? null
+            }
 
-    const updateData: Prisma.MemeSubmissionUpdateInput =
-      data.status === MemeSubmissionStatus.APPROVED
-        ? {
-            status: MemeSubmissionStatus.APPROVED,
-            meme: { connect: { id: data.memeId } }
-          }
-        : {
-            status: MemeSubmissionStatus.REJECTED,
-            adminNote: data.adminNote ?? null
-          }
+      try {
+        await tx.memeSubmission.update({
+          where: { id: data.submissionId },
+          data: updateData
+        })
+      } catch (error) {
+        captureWithFeature(error, 'admin-submission')
+        throw error
+      }
 
-    await prismaClient.memeSubmission.update({
-      where: { id: data.submissionId },
-      data: updateData
+      return found
     })
 
     if (data.status === MemeSubmissionStatus.APPROVED) {
@@ -192,24 +207,23 @@ export const deleteSubmission = createServerFn({ method: 'POST' })
   })
   .middleware([adminRequiredMiddleware])
   .handler(async ({ data: submissionId, context }) => {
-    const submission = await prismaClient.memeSubmission.findUnique({
-      where: { id: submissionId },
-      select: { id: true, title: true, userId: true }
-    })
-
-    if (!submission) {
-      setResponseStatus(404)
-      throw new Error('Submission not found')
-    }
-
-    try {
-      await prismaClient.memeSubmission.delete({
-        where: { id: submissionId }
+    const submission = await prismaClient.memeSubmission
+      .delete({
+        where: { id: submissionId },
+        select: { id: true, title: true, userId: true }
       })
-    } catch (error) {
-      captureWithFeature(error, 'admin-submission')
-      throw error
-    }
+      .catch((error) => {
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === 'P2025'
+        ) {
+          setResponseStatus(404)
+          throw new Error('Submission not found')
+        }
+
+        captureWithFeature(error, 'admin-submission')
+        throw error
+      })
 
     void logAuditAction({
       action: 'delete',

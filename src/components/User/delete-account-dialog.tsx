@@ -25,6 +25,7 @@ import {
   extractAuthErrorCode,
   getAuthErrorMessage
 } from '@/helpers/auth-errors'
+import { useErrorFocus } from '@/hooks/use-error-focus'
 import { authClient } from '@/lib/auth-client'
 import {
   getActiveSubscriptionQueryOpts,
@@ -78,6 +79,8 @@ const DeleteAccountForm = ({ onCancel }: { onCancel: () => void }) => {
     }
   })
 
+  const errorRef = useErrorFocus(deleteAccountMutation.error)
+
   const form = useForm(deleteAccountFormOpts)
 
   return (
@@ -128,9 +131,14 @@ const DeleteAccountForm = ({ onCancel }: { onCancel: () => void }) => {
                   {m.common_cancel()}
                 </Button>
                 {deleteAccountMutation.error ? (
-                  <Alert variant="destructive">
+                  <Alert
+                    ref={errorRef}
+                    variant="destructive"
+                    role="alert"
+                    tabIndex={-1}
+                  >
                     <CircleAlert />
-                    <AlertDescription>
+                    <AlertDescription className="text-destructive-foreground">
                       {getAuthErrorMessage(deleteAccountMutation.error.message)}
                     </AlertDescription>
                   </Alert>

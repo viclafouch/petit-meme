@@ -38,6 +38,10 @@ export const createMemeSubmission = createServerFn({ method: 'POST' })
     })
 
     if (pendingCount >= MAX_PENDING_SUBMISSIONS) {
+      submissionLogger.warn(
+        { userId, pendingCount },
+        'Submission limit reached'
+      )
       setResponseStatus(422)
       throw new StudioError('submission_limit_reached', {
         code: 'SUBMISSION_LIMIT_REACHED'
@@ -67,6 +71,10 @@ export const createMemeSubmission = createServerFn({ method: 'POST' })
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
+        submissionLogger.warn(
+          { userId, url: data.url },
+          'Duplicate URL submitted'
+        )
         setResponseStatus(409)
         throw new StudioError('duplicate_url', { code: 'DUPLICATE_URL' })
       }
@@ -81,16 +89,22 @@ export const getUserSubmissions = createServerFn({ method: 'GET' })
   .handler(async ({ context }) => {
     const userId = context.user.id
 
-    const [submissions, pendingCount] = await Promise.all([
-      prismaClient.memeSubmission.findMany({
-        where: { userId },
-        select: SUBMISSION_USER_SELECT,
-        orderBy: { createdAt: 'desc' }
-      }),
-      prismaClient.memeSubmission.count({
-        where: { userId, status: MemeSubmissionStatus.PENDING }
-      })
-    ])
+    try {
+      const [submissions, pendingCount] = await Promise.all([
+        prismaClient.memeSubmission.findMany({
+          where: { userId },
+          select: SUBMISSION_USER_SELECT,
+          orderBy: { createdAt: 'desc' },
+          take: 50
+        }),
+        prismaClient.memeSubmission.count({
+          where: { userId, status: MemeSubmissionStatus.PENDING }
+        })
+      ])
 
-    return { submissions, pendingCount }
+      return { submissions, pendingCount }
+    } catch (error) {
+      captureWithFeature(error, 'meme-submission')
+      throw error
+    }
   })

@@ -237,7 +237,7 @@ const RouteComponent = () => {
   return (
     <Container>
       <PageHeader title="Soumissions" />
-      <div className="py-6 space-y-6">
+      <div className="flex flex-col gap-6 py-6">
         <StatusFilterTabs
           currentStatus={submissionStatus ?? 'all'}
           statusCounts={{ ...statusCounts, all: allCount }}

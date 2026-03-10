@@ -60,10 +60,10 @@ Code must always be clean and readable. Before writing any code, ask whether it 
 
 1. Run `pnpm run lint:fix`
 2. Update the plan (`.claude/plan.md`): check off `[x]` completed items
-3. **ALWAYS run `/simplify`** after every task that writes or modifies code. This is NOT optional — skip only if zero code was written (e.g. pure config/doc change). `/simplify` runs three parallel review agents (reuse, quality, efficiency) and fixes issues automatically. If the plan has changed after simplification, update the plan again.
+3. **Run `/simplify` only for significant features or multi-file changes.** Skip for small fixes (one-liner, single class change, minor tweaks). `/simplify` runs three parallel review agents (reuse, quality, efficiency) and fixes issues automatically. If the plan has changed after simplification, update the plan again.
 4. After major features or changes, proactively suggest running relevant audit agents (security, performance, dead-code, GDPR, Tailwind, React performance, etc.)
 
-**A task is NOT complete until steps 1-3 are done.** Never say "done" or summarize changes before finishing the checklist.
+**A task is NOT complete until steps 1-2 are done.** Never say "done" or summarize changes before finishing the checklist.
 
 ## Design Rule
 

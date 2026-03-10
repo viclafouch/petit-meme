@@ -1,15 +1,8 @@
-import { ClipboardPaste } from 'lucide-react'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import { IconButtonStars } from '@/components/animate-ui/buttons/icon-button-stars'
+import { ClipboardPasteInput } from '@/components/clipboard-paste-input'
 import { FormFooter } from '@/components/form-footer'
-import {
-  FormControl,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+import { FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { TWEET_LINK_SCHEMA } from '@/constants/url'
 import { getErrorMessage } from '@/helpers/error'
 import { getFieldErrorMessage } from '@/lib/utils'
@@ -46,26 +39,6 @@ export const TwitterForm = ({ onSuccess, closeDialog }: TwitterFormParams) => {
       })
     }
   })
-
-  const clipboardMutation = useMutation({
-    mutationFn: () => {
-      return navigator.clipboard.readText()
-    },
-    onSuccess: (text) => {
-      form.setFieldValue('url', text.trim())
-    },
-    onError: () => {
-      toast.error('Impossible de lire le presse-papiers')
-    }
-  })
-
-  const handlePasteFromClipboard = () => {
-    void clipboardMutation.mutateAsync().finally(() => {
-      setTimeout(() => {
-        clipboardMutation.reset()
-      }, 3000)
-    })
-  }
 
   const createMemeFromTwitterUrlMutation = useMutation({
     mutationKey: ['createMemeFromTwitterUrl'],
@@ -105,33 +78,19 @@ export const TwitterForm = ({ onSuccess, closeDialog }: TwitterFormParams) => {
             return (
               <FormItem error={errorMessage}>
                 <FormLabel>Tweet URL</FormLabel>
-                <div className="relative w-full">
-                  <FormControl>
-                    <Input
-                      required
-                      type="text"
-                      className="pr-9"
-                      name="twitter-link"
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(event) => {
-                        return field.handleChange(event.target.value)
-                      }}
-                    />
-                  </FormControl>
-                  <IconButtonStars
-                    active={
-                      clipboardMutation.isPending || clipboardMutation.isSuccess
-                    }
-                    className="absolute right-1 top-1/2 -translate-y-1/2 size-7 text-muted-foreground hover:text-foreground"
-                    onClick={handlePasteFromClipboard}
-                    type="button"
-                    onlyStars
-                    aria-label="Coller depuis le presse-papiers"
-                  >
-                    <ClipboardPaste />
-                  </IconButtonStars>
-                </div>
+                <ClipboardPasteInput
+                  required
+                  type="text"
+                  name="twitter-link"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(event) => {
+                    return field.handleChange(event.target.value)
+                  }}
+                  onClipboardPaste={(text) => {
+                    return field.handleChange(text)
+                  }}
+                />
                 <FormMessage />
               </FormItem>
             )

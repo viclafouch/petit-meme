@@ -399,6 +399,8 @@
   "legal_dmca_description": "DMCA procedure for content removal requests on Petit Meme.",
   "legal_dmca_title": "DMCA",
   "nav_submit": "Suggest",
+  "clipboard_error_read": "Unable to read clipboard",
+  "clipboard_paste_aria_label": "Paste from clipboard",
   "validation_accept_terms": "You must accept the terms to continue",
   "validation_passwords_dont_match": "Passwords do not match"
 }

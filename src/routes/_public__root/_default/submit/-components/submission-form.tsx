@@ -1,6 +1,7 @@
 import { CircleAlert } from 'lucide-react'
 import { toast } from 'sonner'
 import type { z } from 'zod'
+import { ClipboardPasteInput } from '@/components/clipboard-paste-input'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -184,19 +185,20 @@ export const SubmissionForm = ({ pendingCount }: SubmissionFormParams) => {
           return (
             <FormItem error={getDisplayError(errorMessage)}>
               <FormLabel>{m.submit_field_link()}</FormLabel>
-              <FormControl>
-                <Input
-                  required
-                  type="url"
-                  placeholder={m.submit_field_link_placeholder()}
-                  name="url"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(event) => {
-                    return field.handleChange(event.target.value)
-                  }}
-                />
-              </FormControl>
+              <ClipboardPasteInput
+                required
+                type="url"
+                placeholder={m.submit_field_link_placeholder()}
+                name="url"
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(event) => {
+                  return field.handleChange(event.target.value)
+                }}
+                onClipboardPaste={(text) => {
+                  return field.handleChange(text)
+                }}
+              />
               <FormMessage />
             </FormItem>
           )

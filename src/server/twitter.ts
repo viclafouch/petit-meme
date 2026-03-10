@@ -2,8 +2,8 @@ import { z } from 'zod'
 import { TWEET_LINK_SCHEMA } from '@/constants/url'
 import { adminLogger } from '@/lib/logger'
 import { getTweetByUrl } from '@/lib/react-tweet'
+import { captureWithFeature } from '@/lib/sentry'
 import { adminRequiredMiddleware } from '@/server/user-auth'
-import * as Sentry from '@sentry/tanstackstart-react'
 import { createServerFn } from '@tanstack/react-start'
 
 export const getTweetFromUrl = createServerFn({ method: 'GET' })
@@ -12,14 +12,20 @@ export const getTweetFromUrl = createServerFn({ method: 'GET' })
   })
   .middleware([adminRequiredMiddleware])
   .handler(async ({ data: url }) => {
-    return getTweetByUrl(url)
+    try {
+      return await getTweetByUrl(url)
+    } catch (error) {
+      adminLogger.error({ err: error, url }, 'Failed to get tweet from URL')
+      captureWithFeature(error, 'admin-downloader')
+
+      throw new Error('Failed to retrieve tweet')
+    }
   })
 
 const TWITTER_MEDIA_HOSTNAME = /^(video|pbs)\.twimg\.com$/
 
-const FETCH_TWEET_MEDIA_SCHEMA = z.object({
-  videoUrl: z.url({ hostname: TWITTER_MEDIA_HOSTNAME }),
-  posterUrl: z.url({ hostname: TWITTER_MEDIA_HOSTNAME })
+const FETCH_TWEET_VIDEO_SCHEMA = z.object({
+  videoUrl: z.url({ hostname: TWITTER_MEDIA_HOSTNAME })
 })
 
 const fetchAsBase64 = async (url: string) => {
@@ -35,21 +41,16 @@ const fetchAsBase64 = async (url: string) => {
     return Buffer.from(buffer).toString('base64')
   } catch (error) {
     adminLogger.error({ err: error, url }, 'Failed to fetch tweet media')
-    Sentry.captureException(error)
+    captureWithFeature(error, 'admin-downloader')
     throw new Error('Failed to download media from Twitter')
   }
 }
 
-export const fetchTweetMedia = createServerFn({ method: 'GET' })
+export const fetchTweetVideo = createServerFn({ method: 'GET' })
   .inputValidator((data) => {
-    return FETCH_TWEET_MEDIA_SCHEMA.parse(data)
+    return FETCH_TWEET_VIDEO_SCHEMA.parse(data)
   })
   .middleware([adminRequiredMiddleware])
   .handler(async ({ data }) => {
-    const [video, poster] = await Promise.all([
-      fetchAsBase64(data.videoUrl),
-      fetchAsBase64(data.posterUrl)
-    ])
-
-    return { video, poster }
+    return fetchAsBase64(data.videoUrl)
   })

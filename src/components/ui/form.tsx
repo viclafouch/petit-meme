@@ -3,6 +3,7 @@ import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 import type * as LabelPrimitive from '@radix-ui/react-label'
 import { Slot } from '@radix-ui/react-slot'
+import { CircleAlert } from 'lucide-react'
 
 const useFormField = () => {
   const itemContext = React.useContext(FormItemContext)
@@ -62,7 +63,7 @@ const FormLabel = ({
     <Label
       data-slot="form-label"
       data-error={Boolean(error)}
-      className={cn('data-[error=true]:text-destructive-foreground', className)}
+      className={cn('data-[error=true]:text-destructive', className)}
       htmlFor={formItemId}
       {...props}
     />
@@ -116,9 +117,10 @@ const FormMessage = ({ className, ...props }: React.ComponentProps<'p'>) => {
       data-slot="form-message"
       id={formMessageId}
       role="alert"
-      className={cn('text-destructive text-sm', className)}
+      className={cn('text-destructive text-sm flex items-start gap-1.5', className)}
       {...props}
     >
+      <CircleAlert aria-hidden="true" className="size-3.5 mt-[3px] shrink-0" />
       {body}
     </p>
   )

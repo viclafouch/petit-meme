@@ -128,7 +128,7 @@
     --success-foreground: hsl(142 41% 75%);
     --warning: oklch(0.41 0.11 46);
     --warning-foreground: oklch(0.99 0.02 95);
-    --destructive: oklch(0.396 0.141 25.723);
+    --destructive: oklch(0.704 0.191 22.216);
     --destructive-foreground: oklch(100% 0.00011 271.152);
     --info: hsl(185, 51%, 41%);
     --info-foreground: hsl(0, 0%, 100%);

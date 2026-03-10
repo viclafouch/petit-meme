@@ -1,5 +1,6 @@
-import { Loader2Icon } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { m } from '@/paraglide/messages.js'
+import { LoadingSpinner } from './ui/spinner'
 
 export const DefaultLoading = ({
   className,
@@ -8,13 +9,13 @@ export const DefaultLoading = ({
   return (
     <div
       className={cn(
-        'mx-auto flex flex-col items-center justify-center gap-2',
+        'flex flex-col items-center justify-center gap-3',
         className
       )}
       {...restProps}
     >
-      <Loader2Icon className="animate-spin text-primary" />
-      <p className="text-muted-foreground text-sm">Chargement...</p>
+      <LoadingSpinner className="text-muted-foreground size-6" />
+      <p className="text-muted-foreground text-sm">{m.common_loading()}</p>
     </div>
   )
 }

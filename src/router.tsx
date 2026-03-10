@@ -67,11 +67,13 @@ export function getRouter() {
     },
     defaultPreloadStaleTime: 30_000,
     defaultStaleTime: 30_000,
-    defaultPendingMs: 1000,
-    defaultPendingMinMs: 200,
+    defaultPendingComponent: () => {
+      return <DefaultLoading className="min-h-screen" />
+    },
+    defaultPendingMs: 3000,
+    defaultPendingMinMs: 500,
     defaultPreloadDelay: 50,
     notFoundMode: 'root',
-    defaultPendingComponent: DefaultLoading,
     defaultNotFoundComponent: NotFound,
     defaultErrorComponent: ({ error }) => {
       return <ErrorComponent error={error} />

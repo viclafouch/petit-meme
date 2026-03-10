@@ -1,14 +1,5 @@
 import type { Locale } from '@/paraglide/runtime'
 
-const LOCALE_FLAGS = {
-  fr: '🇫🇷',
-  en: '🇬🇧'
-} as const satisfies Record<Locale, string>
-
-export const getLocaleFlag = (locale: Locale) => {
-  return LOCALE_FLAGS[locale]
-}
-
 export const getLocaleDisplayName = (locale: Locale, displayLocale: Locale) => {
   const displayNames = new Intl.DisplayNames([displayLocale], {
     type: 'language'

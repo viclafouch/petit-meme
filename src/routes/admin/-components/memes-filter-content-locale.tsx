@@ -1,4 +1,5 @@
 import React from 'react'
+import { CONTENT_LOCALE_FLAGS, FLAG_ICON_CLASS } from '@/components/icon/flags'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -11,10 +12,7 @@ import {
   type MemeContentLocale,
   MemeContentLocale as MemeContentLocaleEnum
 } from '@/db/generated/prisma/enums'
-import {
-  CONTENT_LOCALE_META,
-  getContentLocaleLabel
-} from '@/helpers/i18n-content'
+import { getContentLocaleLabel } from '@/helpers/i18n-content'
 
 const CONTENT_LOCALE_OPTIONS = Object.values(MemeContentLocaleEnum)
 
@@ -48,9 +46,14 @@ export const MemesFilterContentLocale = React.memo(
           >
             <DropdownMenuRadioItem value="all">Tous</DropdownMenuRadioItem>
             {CONTENT_LOCALE_OPTIONS.map((cl) => {
+              const Flag = CONTENT_LOCALE_FLAGS[cl]
+
               return (
                 <DropdownMenuRadioItem key={cl} value={cl}>
-                  {CONTENT_LOCALE_META[cl].flag} {getContentLocaleLabel(cl)}
+                  <span className="flex items-center gap-1.5">
+                    {Flag ? <Flag className={FLAG_ICON_CLASS} /> : null}
+                    {getContentLocaleLabel(cl)}
+                  </span>
                 </DropdownMenuRadioItem>
               )
             })}

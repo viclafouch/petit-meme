@@ -9,24 +9,13 @@ import { type Locale, locales } from '@/paraglide/runtime'
 import { removeDuplicates } from '@/utils/array'
 
 type LocaleMeta = {
-  flag: string
   label: string
 }
 
 export const LOCALE_META = {
-  fr: { flag: '🇫🇷', label: 'Français' },
-  en: { flag: '🇬🇧', label: 'English' }
+  fr: { label: 'Français' },
+  en: { label: 'English' }
 } as const satisfies Record<Locale, LocaleMeta>
-
-type ContentLocaleMeta = {
-  flag: string
-}
-
-export const CONTENT_LOCALE_META = {
-  FR: { flag: '🇫🇷' },
-  EN: { flag: '🇬🇧' },
-  UNIVERSAL: { flag: '🌍' }
-} as const satisfies Record<MemeContentLocale, ContentLocaleMeta>
 
 type ContentLocaleMessageKey = `meme_content_locale_${MemeContentLocale}`
 
@@ -42,7 +31,7 @@ export const getContentLocaleOptions = () => {
   return Object.values(MemeContentLocaleEnum).map((contentLocale) => {
     return {
       value: contentLocale,
-      label: `${CONTENT_LOCALE_META[contentLocale].flag} ${getContentLocaleLabel(contentLocale)}`
+      label: getContentLocaleLabel(contentLocale)
     }
   })
 }
@@ -52,6 +41,17 @@ export const CONTENT_LOCALE_TO_LOCALE = {
   EN: 'en',
   UNIVERSAL: 'fr'
 } as const satisfies Record<MemeContentLocale, Locale>
+
+export const matchIsContentLocaleForeign = (
+  contentLocale: MemeContentLocale,
+  locale: Locale
+): contentLocale is Exclude<MemeContentLocale, 'UNIVERSAL'> => {
+  if (contentLocale === 'UNIVERSAL') {
+    return false
+  }
+
+  return CONTENT_LOCALE_TO_LOCALE[contentLocale] !== locale
+}
 
 export const REQUIRED_TRANSLATION_LOCALES = {
   FR: ['fr'],

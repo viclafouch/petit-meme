@@ -1,5 +1,6 @@
 import React from 'react'
 import { Globe } from 'lucide-react'
+import { CONTENT_LOCALE_FLAGS, FLAG_ICON_CLASS } from '@/components/icon/flags'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -9,7 +10,6 @@ import {
 } from '@/components/ui/popover'
 import type { MemeContentLocale } from '@/db/generated/prisma/enums'
 import {
-  CONTENT_LOCALE_META,
   FILTERABLE_CONTENT_LOCALES,
   getContentLocaleLabel,
   matchIsDefaultContentLocaleFilter
@@ -55,6 +55,7 @@ export const MemesFilterLanguage = React.memo(
             {FILTERABLE_CONTENT_LOCALES.map((contentLocale) => {
               const isChecked = contentLocales.includes(contentLocale)
               const isLastChecked = isChecked && contentLocales.length === 1
+              const Flag = CONTENT_LOCALE_FLAGS[contentLocale]
 
               return (
                 <label
@@ -68,8 +69,8 @@ export const MemesFilterLanguage = React.memo(
                       handleToggle(contentLocale, checked === true)
                     }}
                   />
-                  <span className="text-sm">
-                    {CONTENT_LOCALE_META[contentLocale].flag}{' '}
+                  <span className="flex items-center gap-1.5 text-sm">
+                    {Flag ? <Flag className={FLAG_ICON_CLASS} /> : null}
                     {getContentLocaleLabel(contentLocale)}
                   </span>
                 </label>

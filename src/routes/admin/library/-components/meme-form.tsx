@@ -1,4 +1,5 @@
 import { FormFooter } from '@/components/form-footer'
+import { CONTENT_LOCALE_FLAGS, FLAG_ICON_CLASS } from '@/components/icon/flags'
 import {
   FormControl,
   FormItem,
@@ -81,9 +82,16 @@ export const MemeForm = ({ meme, onSuccess }: MemeFormParams) => {
                     </SelectTrigger>
                     <SelectContent>
                       {getContentLocaleOptions().map((option) => {
+                        const Flag = CONTENT_LOCALE_FLAGS[option.value]
+
                         return (
                           <SelectItem key={option.value} value={option.value}>
-                            {option.label}
+                            <span className="flex items-center gap-2">
+                              {Flag ? (
+                                <Flag className={FLAG_ICON_CLASS} />
+                              ) : null}
+                              {option.label}
+                            </span>
                           </SelectItem>
                         )
                       })}

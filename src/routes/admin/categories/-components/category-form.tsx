@@ -1,6 +1,7 @@
 import { toast } from 'sonner'
 import type { z } from 'zod'
 import { FormFooter } from '@/components/form-footer'
+import { FLAG_ICON_CLASS, LOCALE_FLAGS } from '@/components/icon/flags'
 import {
   FormControl,
   FormItem,
@@ -183,14 +184,16 @@ export const CategoryForm = ({
         />
         {locales.map((locale) => {
           const meta = LOCALE_META[locale]
+          const Flag = LOCALE_FLAGS[locale]
 
           return (
             <fieldset
               key={locale}
               className="flex flex-col gap-4 rounded-lg border p-4"
             >
-              <legend className="px-2 text-sm font-medium">
-                {meta.flag} {meta.label}
+              <legend className="flex items-center gap-1.5 px-2 text-sm font-medium">
+                <Flag className={FLAG_ICON_CLASS} />
+                {meta.label}
               </legend>
               <form.Field
                 name={`translations.${locale}.title`}

@@ -154,7 +154,11 @@ Traduction EN des mèmes UNIVERSAL réalisée via script one-shot (`scripts/migr
 **Étape 3 — Finalisation**
 
 - [x] Reindex Algolia en prod (`scripts/reindex-memes.ts`) — refléter les traductions EN dans les index de recherche
-- [ ] Badge langue optionnel dans les listes de mèmes (pas seulement la page détail)
+- [x] Composant `MemeLanguageBadge` dans `src/components/Meme/meme-language-badge.tsx` — SVG flag (+ label optionnel via `showLabel`), type-safe `Exclude<MemeContentLocale, 'UNIVERSAL'>`, pas de Badge wrapper (texte muted inline)
+- [x] Helper `matchIsContentLocaleForeign` dans `src/helpers/i18n-content.ts` — type guard, retourne true si contentLocale ≠ UNIVERSAL et ≠ locale utilisateur
+- [x] Page mème (`$memeId.tsx`) : badge avec label au-dessus de la date (dans `MemeInfo`), affiché seulement si non-UNIVERSAL
+- [x] Listes de mèmes (`meme-list-item.tsx`) : flag seul, affiché uniquement quand la langue diffère de la locale utilisateur (pas de bruit visuel quand tout match)
+- [x] SVG flags (lipis/flag-icons) : `flag-fr.tsx`, `flag-gb.tsx` dans `src/components/icon/`, records `LOCALE_FLAGS` et `CONTENT_LOCALE_FLAGS` dans `flags.ts` — remplace tous les emojis drapeaux dans le codebase (language switcher, locale banner, filtres, admin forms)
 
 ### Items i18n reportés
 

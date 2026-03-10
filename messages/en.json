@@ -164,6 +164,7 @@
   "meme_content_locale_FR": "French",
   "meme_content_locale_EN": "English",
   "meme_content_locale_UNIVERSAL": "Universal",
+  "meme_audio_language": "Audio in {language}",
   "meme_filter_languages": "Languages",
   "meme_back_to_memes": "Back to memes",
   "meme_back_to_site": "Back to site",

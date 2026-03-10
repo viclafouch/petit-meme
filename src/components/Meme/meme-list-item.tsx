@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { motion } from 'motion/react'
 import { BunnyPlayIcon } from '@/components/icon/Play'
+import { MemeLanguageBadge } from '@/components/Meme/meme-language-badge'
 import { MemeVideoThumbnail } from '@/components/Meme/meme-video-thumbnail'
 import {
   DropdownMenu,
@@ -17,6 +18,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import type { MemeWithVideo } from '@/constants/meme'
+import { matchIsContentLocaleForeign } from '@/helpers/i18n-content'
 import { useDownloadMeme } from '@/hooks/use-download-meme'
 import { useShareMeme } from '@/hooks/use-share-meme'
 import { useToggleBookmark } from '@/hooks/use-toggle-bookmark'
@@ -25,6 +27,7 @@ import { sendClickEvent, sendConversionEvent } from '@/lib/algolia-insights'
 import { getFavoritesMemesQueryOpts } from '@/lib/queries'
 import { cn } from '@/lib/utils'
 import { m } from '@/paraglide/messages.js'
+import { getLocale } from '@/paraglide/runtime'
 import { useShowDialog } from '@/stores/dialog.store'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useRouteContext } from '@tanstack/react-router'
@@ -207,6 +210,9 @@ export const MemeListItem = React.memo(
               )}
             </Link>
             <div className="flex flex-row items-center gap-1.5 text-muted-foreground">
+              {matchIsContentLocaleForeign(meme.contentLocale, getLocale()) ? (
+                <MemeLanguageBadge contentLocale={meme.contentLocale} />
+              ) : null}
               <span className={cn(sizes[size].views)}>
                 {m.meme_views({ count: meme.viewCount })}
               </span>

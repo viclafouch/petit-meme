@@ -10,6 +10,7 @@ import {
   Shuffle
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { MemeLanguageBadge } from '@/components/Meme/meme-language-badge'
 import { MemesList } from '@/components/Meme/memes-list'
 import ToggleLikeButton from '@/components/Meme/toggle-like-button'
 import { Badge } from '@/components/ui/badge'
@@ -25,10 +26,7 @@ import {
   VideoPlayerTimeRange,
   VideoPlayerVolumeRange
 } from '@/components/ui/kibo-ui/video-player'
-import {
-  CONTENT_LOCALE_META,
-  getContentLocaleLabel
-} from '@/helpers/i18n-content'
+import type { MemeFullData } from '@/constants/meme'
 import { useDownloadMeme } from '@/hooks/use-download-meme'
 import { useMemeHls } from '@/hooks/use-meme-hls'
 import { useRegisterMemeView } from '@/hooks/use-register-meme-view'
@@ -55,7 +53,10 @@ import {
 } from '@tanstack/react-router'
 
 type MemeInfoParams = {
-  meme: { description: string; publishedAt: Date | null; viewCount: number }
+  meme: Pick<
+    MemeFullData,
+    'description' | 'publishedAt' | 'viewCount' | 'contentLocale'
+  >
   allTags: string[]
 }
 
@@ -79,6 +80,9 @@ const MemeInfo = ({ meme, allTags }: MemeInfoParams) => {
             <p className="text-muted-foreground text-xs">{meme.description}</p>
             <hr className="my-2" />
           </>
+        ) : null}
+        {meme.contentLocale !== 'UNIVERSAL' ? (
+          <MemeLanguageBadge contentLocale={meme.contentLocale} showLabel />
         ) : null}
         {meme.publishedAt ? (
           <span className="text-muted-foreground text-xs">
@@ -245,10 +249,6 @@ const RouteComponent = () => {
               <h1 className="font-bricolage text-foreground max-w-4xl text-left font-semibold md:text-balance text-lg leading-[1.2] sm:text-xl lg:text-2xl">
                 {meme.title}
               </h1>
-              <Badge variant="outline" size="sm">
-                {CONTENT_LOCALE_META[meme.contentLocale].flag}{' '}
-                {getContentLocaleLabel(meme.contentLocale)}
-              </Badge>
               <div className="flex">
                 <ToggleLikeButton size="iconLg" meme={meme} />
                 {user && matchIsUserAdmin(user) ? (

@@ -2,12 +2,9 @@ import React from 'react'
 import { X } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { AnimatedBanner } from '@/components/custom/animated-banner'
+import { FLAG_ICON_CLASS, LOCALE_FLAGS } from '@/components/icon/flags'
 import { Button } from '@/components/ui/button'
-import {
-  getLocaleDisplayName,
-  getLocaleFlag,
-  getSuggestedLocale
-} from '@/helpers/locale'
+import { getLocaleDisplayName, getSuggestedLocale } from '@/helpers/locale'
 import { dismissLocaleBanner } from '@/lib/locale-banner'
 import { m } from '@/paraglide/messages.js'
 import { getLocale, locales, setLocale } from '@/paraglide/runtime'
@@ -48,6 +45,7 @@ const LocaleBannerContent = ({ isInitiallyDismissed }: LocaleBannerProps) => {
   const displayName = suggestedLocale
     ? getLocaleDisplayName(suggestedLocale, currentLocale)
     : null
+  const SuggestedFlag = suggestedLocale ? LOCALE_FLAGS[suggestedLocale] : null
 
   return (
     <AnimatePresence>
@@ -85,9 +83,9 @@ const LocaleBannerContent = ({ isInitiallyDismissed }: LocaleBannerProps) => {
         >
           <AnimatedBanner>
             <div className="flex w-full items-center justify-center gap-2 px-10 text-foreground sm:gap-3">
-              <span className="text-base" aria-hidden="true">
-                {getLocaleFlag(suggestedLocale)}
-              </span>
+              {SuggestedFlag ? (
+                <SuggestedFlag className={FLAG_ICON_CLASS} />
+              ) : null}
               <span className="text-xs sm:text-sm">
                 {m.locale_banner_available({ language: displayName })}
               </span>

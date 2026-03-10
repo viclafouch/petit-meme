@@ -1,4 +1,5 @@
 import { Stars } from 'lucide-react'
+import { FLAG_ICON_CLASS, LOCALE_FLAGS } from '@/components/icon/flags'
 import {
   FormControl,
   FormItem,
@@ -38,11 +39,13 @@ export const MemeTranslationSection = ({
   const descriptionError = getFieldErrorMessage({ field: descriptionField })
   const descriptionValue = descriptionField.state.value as string
   const meta = LOCALE_META[locale]
+  const Flag = LOCALE_FLAGS[locale]
 
   return (
     <fieldset className="flex flex-col gap-4 rounded-lg border p-4">
-      <legend className="px-2 text-sm font-medium">
-        {meta.flag} {meta.label}
+      <legend className="flex items-center gap-1.5 px-2 text-sm font-medium">
+        <Flag className={FLAG_ICON_CLASS} />
+        {meta.label}
       </legend>
       <FormItem error={titleError}>
         <FormLabel>Titre</FormLabel>

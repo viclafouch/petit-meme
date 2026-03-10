@@ -1,6 +1,6 @@
 import React from 'react'
 import { toast } from 'sonner'
-import { StudioError } from '@/constants/error'
+import { getStudioErrorCode } from '@/constants/error'
 import { FFMPEG_CORE_URL, FFMPEG_WASM_URL } from '@/constants/ffmpeg'
 import type { MemeWithVideo } from '@/constants/meme'
 import type {
@@ -409,18 +409,18 @@ export const useVideoProcessor = (
       }
     },
     onError: (error) => {
-      if (error instanceof StudioError) {
-        if (error.code === 'UNAUTHORIZED') {
-          showDialog('auth', {})
+      const studioCode = getStudioErrorCode(error)
 
-          return
-        }
+      if (studioCode === 'UNAUTHORIZED') {
+        showDialog('auth', {})
 
-        if (error.code === 'PREMIUM_REQUIRED') {
-          toast.error(m.error_bookmark_limit())
+        return
+      }
 
-          return
-        }
+      if (studioCode === 'PREMIUM_REQUIRED') {
+        toast.error(m.error_bookmark_limit())
+
+        return
       }
 
       captureWithFeature(error, 'studio')

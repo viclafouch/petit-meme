@@ -106,10 +106,7 @@ const throwRateLimitExceeded = ({
   )
 
   setResponseStatus(429)
-  throw new Response('Too Many Requests', {
-    status: 429,
-    headers: { 'Retry-After': String(result.retryAfterSeconds) }
-  })
+  throw new Error('Too Many Requests')
 }
 
 export const createRateLimitMiddleware = (config: RateLimitConfig) => {

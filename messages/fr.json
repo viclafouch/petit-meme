@@ -364,6 +364,8 @@
   "submit_error_title_too_short": "Le titre doit contenir au moins 3 caractères",
   "submit_error_limit_reached": "Vous avez atteint la limite de soumissions en attente",
   "submit_error_rate_limit": "Trop de soumissions, veuillez réessayer plus tard",
+  "submit_error_tweet_no_video": "Ce tweet ne contient pas de vidéo",
+  "submit_error_tweet_verification_failed": "Impossible de vérifier le tweet, veuillez réessayer plus tard",
   "submit_field_language": "Langue audio",
   "submit_field_link": "Lien (tweet ou vidéo YouTube)",
   "submit_field_link_placeholder": "https://x.com/... ou https://youtube.com/...",

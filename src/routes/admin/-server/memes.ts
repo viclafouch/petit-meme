@@ -37,11 +37,7 @@ import {
 } from '@/lib/algolia'
 import { createVideo, deleteVideo, uploadVideo } from '@/lib/bunny'
 import { adminLogger, bunnyLogger } from '@/lib/logger'
-import {
-  extractTweetIdFromUrl,
-  getTweetById,
-  getTweetMedia
-} from '@/lib/react-tweet'
+import { getTweetByUrl, getTweetMedia } from '@/lib/react-tweet'
 import { captureWithFeature } from '@/lib/sentry'
 import { baseLocale } from '@/paraglide/runtime'
 import { logAuditAction } from '@/server/audit'
@@ -494,14 +490,12 @@ export const createMemeFromTwitterUrl = createServerFn({ method: 'POST' })
   })
   .middleware([adminRequiredMiddleware])
   .handler(async ({ data: url, context }) => {
-    const tweetId = z.string().parse(extractTweetIdFromUrl(url))
-
-    const tweet = await getTweetById(tweetId)
+    const tweet = await getTweetByUrl(url)
     const media = await getTweetMedia(tweet.video.url, tweet.poster.url)
 
     if (media.video.blob.size > MAX_SIZE_MEME_IN_BYTES) {
       adminLogger.warn(
-        { tweetId, size: filesize(media.video.blob.size) },
+        { tweetId: tweet.id, size: filesize(media.video.blob.size) },
         'Video size too big from Twitter'
       )
       throw new Error(

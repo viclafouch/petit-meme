@@ -364,6 +364,8 @@
   "submit_error_title_too_short": "Title must be at least 3 characters",
   "submit_error_limit_reached": "You've reached the pending submissions limit",
   "submit_error_rate_limit": "Too many submissions, please try again later",
+  "submit_error_tweet_no_video": "This tweet does not contain a video",
+  "submit_error_tweet_verification_failed": "Unable to verify the tweet, please try again later",
   "submit_field_language": "Audio language",
   "submit_field_link": "Link (tweet or YouTube video)",
   "submit_field_link_placeholder": "https://x.com/... or https://youtube.com/...",

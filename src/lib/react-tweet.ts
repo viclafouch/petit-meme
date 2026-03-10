@@ -1,10 +1,26 @@
 import { getTweet } from 'react-tweet/api'
 import { logger } from '@/lib/logger'
 
-export function extractTweetIdFromUrl(tweetUrl: string) {
-  const url = new URL(tweetUrl)
+export class TweetNoVideoError extends Error {
+  constructor(tweetId: string) {
+    super(`Tweet ${tweetId} has no video`)
 
-  return url.searchParams.get('post_id') ?? url.pathname.split('/').at(-1)
+    Object.setPrototypeOf(this, new.target.prototype)
+
+    this.name = this.constructor.name
+  }
+}
+
+const extractTweetIdFromUrl = (tweetUrl: string) => {
+  const url = new URL(tweetUrl)
+  const tweetId =
+    url.searchParams.get('post_id') ?? url.pathname.split('/').at(-1)
+
+  if (!tweetId) {
+    throw new Error('Could not extract tweet ID from URL')
+  }
+
+  return tweetId
 }
 
 const fetchBlob = async (url: string) => {
@@ -37,13 +53,23 @@ export async function getTweetMedia(videoUrl: string, poster: string) {
   }
 }
 
+export async function getTweetByUrl(tweetUrl: string) {
+  const tweetId = extractTweetIdFromUrl(tweetUrl)
+
+  return getTweetById(tweetId)
+}
+
+const TWEET_FETCH_TIMEOUT_MS = 30000
+
 export async function getTweetById(tweetId: string) {
-  const tweet = await getTweet(tweetId)
+  const tweet = await getTweet(tweetId, {
+    signal: AbortSignal.timeout(TWEET_FETCH_TIMEOUT_MS)
+  })
 
   if (!tweet || !tweet.video || tweet.video.variants.length === 0) {
     logger.warn({ tweetId }, 'Tweet invalid or has no video')
 
-    throw new Error('tweet invalid')
+    throw new TweetNoVideoError(tweetId)
   }
 
   logger.debug({ tweetId }, 'Tweet fetched')

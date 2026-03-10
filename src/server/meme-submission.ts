@@ -6,8 +6,12 @@ import {
 import { RATE_LIMIT_SUBMIT_MEME } from '@/constants/rate-limit'
 import { prismaClient } from '@/db'
 import { Prisma } from '@/db/generated/prisma/client'
-import { MemeSubmissionStatus } from '@/db/generated/prisma/enums'
+import {
+  MemeSubmissionStatus,
+  MemeSubmissionUrlType
+} from '@/db/generated/prisma/enums'
 import { submissionLogger } from '@/lib/logger'
+import { getTweetByUrl, TweetNoVideoError } from '@/lib/react-tweet'
 import { captureWithFeature } from '@/lib/sentry'
 import { createUserRateLimitMiddleware } from '@/server/rate-limit'
 import { authUserRequiredMiddleware } from '@/server/user-auth'
@@ -32,6 +36,29 @@ export const createMemeSubmission = createServerFn({ method: 'POST' })
   .middleware([createUserRateLimitMiddleware(RATE_LIMIT_SUBMIT_MEME)])
   .handler(async ({ data, context }) => {
     const userId = context.user.id
+
+    if (data.urlType === MemeSubmissionUrlType.TWEET) {
+      try {
+        await getTweetByUrl(data.url)
+      } catch (error) {
+        submissionLogger.warn(
+          { userId, url: data.url, err: error },
+          'Tweet video verification failed'
+        )
+        setResponseStatus(422)
+
+        const isTweetNoVideo = error instanceof TweetNoVideoError
+
+        throw new StudioError(
+          isTweetNoVideo ? 'tweet_no_video' : 'tweet_verification_failed',
+          {
+            code: isTweetNoVideo
+              ? 'TWEET_NO_VIDEO'
+              : 'TWEET_VERIFICATION_FAILED'
+          }
+        )
+      }
+    }
 
     try {
       const submission = await prismaClient.$transaction(async (tx) => {

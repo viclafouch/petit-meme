@@ -18,7 +18,8 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
-import { StudioError } from '@/constants/error'
+import type { StudioErrorCode } from '@/constants/error'
+import { getStudioErrorCode } from '@/constants/error'
 import {
   CREATE_MEME_SUBMISSION_SCHEMA,
   MAX_PENDING_SUBMISSIONS
@@ -69,15 +70,29 @@ const submissionFormOpts = formOptions({
   }
 })
 
-const getSubmissionErrorMessage = (error: Error) => {
-  if (error instanceof StudioError) {
-    if (error.code === 'SUBMISSION_LIMIT_REACHED') {
-      return m.submit_error_limit_reached()
-    }
+const SUBMISSION_ERROR_MESSAGES: Partial<
+  Record<StudioErrorCode, () => string>
+> = {
+  SUBMISSION_LIMIT_REACHED: () => {
+    return m.submit_error_limit_reached()
+  },
+  DUPLICATE_URL: () => {
+    return m.submit_error_duplicate_url()
+  },
+  TWEET_NO_VIDEO: () => {
+    return m.submit_error_tweet_no_video()
+  },
+  TWEET_VERIFICATION_FAILED: () => {
+    return m.submit_error_tweet_verification_failed()
+  }
+}
 
-    if (error.code === 'DUPLICATE_URL') {
-      return m.submit_error_duplicate_url()
-    }
+const getSubmissionErrorMessage = (error: Error) => {
+  const code = getStudioErrorCode(error)
+  const mapper = code ? SUBMISSION_ERROR_MESSAGES[code] : undefined
+
+  if (mapper) {
+    return mapper()
   }
 
   if (matchIsRateLimitError(error)) {

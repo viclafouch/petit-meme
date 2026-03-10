@@ -6,6 +6,8 @@ export type StudioErrorCode =
   | 'BANNED_USER'
   | 'SUBMISSION_LIMIT_REACHED'
   | 'DUPLICATE_URL'
+  | 'TWEET_NO_VIDEO'
+  | 'TWEET_VERIFICATION_FAILED'
 
 export class StudioError extends Error {
   public code: StudioErrorCode
@@ -18,6 +20,22 @@ export class StudioError extends Error {
     this.name = this.constructor.name
     this.code = options.code
   }
+}
+
+export const matchIsStudioError = (error: unknown): error is StudioError => {
+  return error instanceof Error && 'code' in error
+}
+
+export const getStudioErrorCode = (
+  error: unknown
+): StudioErrorCode | undefined => {
+  if (matchIsStudioError(error)) {
+    return error.code
+  }
+
+  return error instanceof Error
+    ? (error.message.toUpperCase() as StudioErrorCode)
+    : undefined
 }
 
 export const customErrorAdapter = createSerializationAdapter({

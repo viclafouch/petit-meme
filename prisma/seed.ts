@@ -15,11 +15,7 @@ import {
   getBunnyHeaders,
   uploadVideo
 } from '@/lib/bunny'
-import {
-  extractTweetIdFromUrl,
-  getTweetById,
-  getTweetMedia
-} from '@/lib/react-tweet'
+import { getTweetByUrl, getTweetMedia } from '@/lib/react-tweet'
 import { stripeClient } from '@/lib/stripe'
 import { fetchWithZod } from '@/lib/utils'
 import { locales } from '@/paraglide/runtime'
@@ -27,9 +23,7 @@ import { logEnvironmentInfo } from '../scripts/lib/env-guard'
 import mocks from './seed-mock.json' with { type: 'json' }
 
 const createMemeFromTwitterUrl = async (tweetUrl: string, title: string) => {
-  const tweetId = z.string().parse(extractTweetIdFromUrl(tweetUrl))
-
-  const tweet = await getTweetById(tweetId)
+  const tweet = await getTweetByUrl(tweetUrl)
   const media = await getTweetMedia(tweet.video.url, tweet.poster.url)
 
   const buffer = Buffer.from(await media.video.blob.arrayBuffer())

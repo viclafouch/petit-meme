@@ -171,15 +171,19 @@ Traduction EN des mèmes UNIVERSAL réalisée via script one-shot (`scripts/migr
 - [ ] Sync incrémentale Algolia — tracker `updatedAt` au lieu de `replaceAllObjects` dans le cron (optimisation future)
 - [ ] 3e langue — le schema DB est prêt (mapping `locale → contentLocales[]`), pas d'implémentation prévue pour l'instant
 
-### Propositions de mèmes par les utilisateurs
+### Propositions de mèmes par les utilisateurs ✅
 
-**Plan détaillé : [`.claude/plan-submit.md`](.claude/plan-submit.md)** — 5 phases progressives, chacune déployable indépendamment.
+Terminé. 5 phases livrées : fondations DB, page `/submit`, interface admin `/admin/submissions`, notifications email, audits complets.
 
-- **Phase 1** — Fondations (DB, server functions, validation Zod, rate limit per-user)
-- **Phase 2** — Page `/submit` (règles, formulaire, historique soumissions)
-- **Phase 3** — Interface admin `/admin/submissions` (review, approve, reject)
-- **Phase 4** — Notifications email (optionnel)
-- **Phase 5** — Audits & polish (sécurité, perf, a11y, i18n, Tailwind, dead code, `/simplify`)
+#### Validation vidéo Twitter sur `/submit`
+
+Vérifier que le tweet contient une vidéo avant d'accepter la soumission. Twitter uniquement (pas YouTube). Validation au submit côté serveur. Si API Twitter down → bloquer.
+
+- [x] Vérification tweet dans `createMemeSubmission` : si `urlType === TWEET`, appeler `getTweetByUrl` — throw `StudioError` codes `TWEET_NO_VIDEO` / `TWEET_VERIFICATION_FAILED`
+- [x] Mapping erreurs dans `submission-form.tsx` (`getSubmissionErrorMessage`)
+- [x] Messages Paraglide FR/EN : "Ce tweet ne contient pas de vidéo" + "Impossible de vérifier le tweet, réessayez"
+- [x] Refacto : `getTweetByUrl` extrait dans `src/lib/react-tweet.ts`, réutilisé par admin (`createMemeFromTwitterUrl`, `getTweetFromUrl`), submission, et seed. `TweetNoVideoError` typé pour distinguer "pas de vidéo" vs "API down".
+- [ ] **Bug sérialisation** : `customErrorAdapter` dans `start.ts` sérialise côté serveur (tag `$TSR/t/custom-error`) mais le plugin n'est pas enregistré côté client → erreur seroval à la désérialisation. Affecte TOUS les `StudioError` throwés depuis des server functions (PREMIUM_REQUIRED, UNAUTHORIZED, etc.) — jamais testé jusqu'ici. À investiguer : restart dev server, vérifier si `createStart` enregistre les adapters côté client, ou changer d'approche.
 
 ### Migration Prisma → Drizzle
 

@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { TWEET_LINK_SCHEMA } from '@/constants/url'
 import { adminLogger } from '@/lib/logger'
-import { extractTweetIdFromUrl, getTweetById } from '@/lib/react-tweet'
+import { getTweetByUrl } from '@/lib/react-tweet'
 import { adminRequiredMiddleware } from '@/server/user-auth'
 import * as Sentry from '@sentry/tanstackstart-react'
 import { createServerFn } from '@tanstack/react-start'
@@ -12,9 +12,7 @@ export const getTweetFromUrl = createServerFn({ method: 'GET' })
   })
   .middleware([adminRequiredMiddleware])
   .handler(async ({ data: url }) => {
-    const tweetId = z.string().parse(extractTweetIdFromUrl(url))
-
-    return getTweetById(tweetId)
+    return getTweetByUrl(url)
   })
 
 const TWITTER_MEDIA_HOSTNAME = /^(video|pbs)\.twimg\.com$/

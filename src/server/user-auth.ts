@@ -46,7 +46,7 @@ const rawAuthUserRequiredMiddleware = createMiddleware({
   if (session.user.banned === true) {
     authLogger.warn({ userId: session.user.id }, 'Banned user access attempt')
     setResponseStatus(403)
-    throw new StudioError('banned', { code: 'BANNED_USER' })
+    throw new StudioError('banned_user', { code: 'BANNED_USER' })
   }
 
   return next({ context: { user: session.user } })

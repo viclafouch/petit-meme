@@ -1,6 +1,6 @@
 import React from 'react'
 import { toast } from 'sonner'
-import { StudioError } from '@/constants/error'
+import { getStudioErrorCode } from '@/constants/error'
 import type { MemeWithVideo } from '@/constants/meme'
 import { getFavoritesMemesQueryOpts, getMemeByIdQueryOpts } from '@/lib/queries'
 import { captureWithFeature } from '@/lib/sentry'
@@ -60,7 +60,7 @@ export function useToggleBookmark({
       })
     },
     onError: (error) => {
-      if (error instanceof StudioError && error.code === 'PREMIUM_REQUIRED') {
+      if (getStudioErrorCode(error) === 'PREMIUM_REQUIRED') {
         toast.error(m.error_bookmark_limit())
 
         return

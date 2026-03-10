@@ -96,7 +96,7 @@ export const checkGeneration = createServerFn({ method: 'POST' })
         'Generation limit reached'
       )
       setResponseStatus(403)
-      throw new StudioError('auth', { code: 'UNAUTHORIZED' })
+      throw new StudioError('unauthorized', { code: 'UNAUTHORIZED' })
     }
 
     return { result: 'ok' } as const
@@ -137,7 +137,7 @@ const toggleBookmark = createServerOnlyFn(
           if (!activeSubscription) {
             authLogger.warn({ userId }, 'Bookmark limit reached')
             setResponseStatus(403)
-            throw new StudioError('Limite de favoris atteinte', {
+            throw new StudioError('premium_required', {
               code: 'PREMIUM_REQUIRED'
             })
           }

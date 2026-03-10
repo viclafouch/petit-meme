@@ -160,7 +160,7 @@ const RouteComponent = () => {
   const downloadMutation = useDownloadMeme()
   const randomMemeMutation = useMutation({
     mutationFn: () => {
-      return getRandomMeme({ data: meme.id })
+      return getRandomMeme({ data: { exceptId: meme.id } })
     }
   })
 

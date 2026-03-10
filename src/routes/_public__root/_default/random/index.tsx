@@ -4,7 +4,7 @@ import { createFileRoute, redirect } from '@tanstack/react-router'
 export const Route = createFileRoute('/_public__root/_default/random/')({
   pendingMs: 1000,
   loader: async () => {
-    const meme = await getRandomMeme()
+    const meme = await getRandomMeme({ data: {} })
 
     if (meme) {
       throw redirect({

@@ -8,6 +8,7 @@ import {
   MEME_FULL_INCLUDE,
   MEMES_FILTERS_SCHEMA,
   MEMES_PER_PAGE,
+  MEMES_SEARCH_SCHEMA,
   NEWS_CATEGORY_SLUG,
   POPULAR_CATEGORY_SLUG,
   RELATED_MEMES_COUNT,
@@ -30,10 +31,11 @@ import { clientEnv } from '@/env/client'
 import { serverEnv } from '@/env/server'
 import { truncateToUtcDay } from '@/helpers/date'
 import {
+  contentLocalesWithUniversal,
   parseContentLocalesParam,
   resolveCategoryTranslation,
   resolveMemeTranslation,
-  VISIBLE_CONTENT_LOCALES
+  resolveVisibleContentLocales
 } from '@/helpers/i18n-content'
 import type { AlgoliaMemeRecord } from '@/lib/algolia'
 import {
@@ -56,7 +58,6 @@ import { algoliaLogger, logger } from '@/lib/logger'
 import { baseLocale, getLocale, type Locale } from '@/paraglide/runtime'
 import { createRateLimitMiddleware, extractClientIp } from '@/server/rate-limit'
 import { authUserRequiredMiddleware } from '@/server/user-auth'
-import { removeDuplicates } from '@/utils/array'
 import { ensureAlgoliaUserToken } from '@/utils/tracking-cookies'
 import { insightsClient as createInsightsClient } from '@algolia/client-insights'
 import { notFound } from '@tanstack/react-router'
@@ -82,11 +83,7 @@ function buildMemeFilters({
   const filters = [`status:${MemeStatus.PUBLISHED}`]
 
   if (contentLocales) {
-    const allLocales = removeDuplicates([
-      ...contentLocales,
-      MemeContentLocaleEnum.UNIVERSAL
-    ])
-    const localeFilter = allLocales
+    const localeFilter = contentLocalesWithUniversal(contentLocales)
       .map((cl) => {
         return `contentLocale:${cl}`
       })
@@ -291,23 +288,27 @@ export const getRecentCountMemes = createServerFn({ method: 'GET' }).handler(
   }
 )
 
-const getBestMemesInternal = createServerOnlyFn(async () => {
-  const locale = getLocale()
+const getBestMemesInternal = createServerOnlyFn(
+  async (contentLocales?: MemeContentLocale[]) => {
+    const locale = getLocale()
 
-  return prismaClient.meme.findMany({
-    take: TRENDING_MEMES_COUNT,
-    include: {
-      video: true
-    },
-    orderBy: {
-      viewCount: 'desc'
-    },
-    where: {
-      status: MemeStatus.PUBLISHED,
-      contentLocale: { in: VISIBLE_CONTENT_LOCALES[locale] }
-    }
-  })
-})
+    return prismaClient.meme.findMany({
+      take: TRENDING_MEMES_COUNT,
+      include: {
+        video: true
+      },
+      orderBy: {
+        viewCount: 'desc'
+      },
+      where: {
+        status: MemeStatus.PUBLISHED,
+        contentLocale: {
+          in: resolveVisibleContentLocales(locale, contentLocales)
+        }
+      }
+    })
+  }
+)
 
 export const getRelatedMemes = createServerFn({ method: 'GET' })
   .inputValidator(z.object({ memeId: z.string(), title: z.string() }))
@@ -393,17 +394,27 @@ export const getTrendingMemes = createServerFn({ method: 'GET' }).handler(
   }
 )
 
+const GET_RANDOM_MEME_SCHEMA = z.object({
+  exceptId: z.string().optional(),
+  contentLocales: MEMES_SEARCH_SCHEMA.shape.contentLocales
+})
+
 export const getRandomMeme = createServerFn({ method: 'GET' })
   .inputValidator((data) => {
-    return z.string().optional().parse(data)
+    return GET_RANDOM_MEME_SCHEMA.parse(data)
   })
-  .handler(async ({ data: exceptId }) => {
+  .handler(async ({ data }) => {
     const locale = getLocale()
+    const parsedContentLocales = data.contentLocales
+      ? parseContentLocalesParam(data.contentLocales, locale)
+      : undefined
 
     const whereCondition = {
       status: MemeStatus.PUBLISHED,
-      contentLocale: { in: VISIBLE_CONTENT_LOCALES[locale] },
-      ...(exceptId ? { id: { not: exceptId } } : {})
+      contentLocale: {
+        in: resolveVisibleContentLocales(locale, parsedContentLocales)
+      },
+      ...(data.exceptId ? { id: { not: data.exceptId } } : {})
     }
 
     const count = await prismaClient.meme.count({ where: whereCondition })

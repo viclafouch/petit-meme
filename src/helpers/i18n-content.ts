@@ -6,6 +6,7 @@ import type { CategoryTranslationModel } from '@/db/generated/prisma/models/Cate
 import type { MemeTranslationModel } from '@/db/generated/prisma/models/MemeTranslation'
 import { m } from '@/paraglide/messages.js'
 import { type Locale, locales } from '@/paraglide/runtime'
+import { removeDuplicates } from '@/utils/array'
 
 type LocaleMeta = {
   flag: string
@@ -107,6 +108,23 @@ export const serializeContentLocalesParam = (
   return matchIsDefaultContentLocaleFilter(contentLocales, locale)
     ? undefined
     : contentLocales.join(',')
+}
+
+export const contentLocalesWithUniversal = (
+  contentLocales: MemeContentLocale[]
+): MemeContentLocale[] => {
+  return removeDuplicates([...contentLocales, MemeContentLocaleEnum.UNIVERSAL])
+}
+
+export const resolveVisibleContentLocales = (
+  locale: Locale,
+  contentLocales: MemeContentLocale[] | undefined
+): MemeContentLocale[] => {
+  if (!contentLocales) {
+    return VISIBLE_CONTENT_LOCALES[locale]
+  }
+
+  return contentLocalesWithUniversal(contentLocales)
 }
 
 export const CONTENT_LOCALE_TO_SITE_LOCALES = Object.fromEntries(

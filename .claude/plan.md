@@ -126,7 +126,7 @@ Permettre à l'utilisateur de filtrer par langue du contenu, indépendamment de 
 - [x] Composant `MemesFilterLanguage` dans `src/components/Meme/Filters/memes-filter-language.tsx` — popover + checkboxes, state dans les query params URL (`?contentLocales=FR,EN` pour partage/bookmark)
 - [x] Paramètre `contentLocales` (string comma-separated) dans `MEMES_SEARCH_SCHEMA` + `getMemes()` (`src/server/meme.ts`) — facet filter Algolia `(contentLocale:FR OR contentLocale:UNIVERSAL)`
 - [x] Quand des langues hors locale sont sélectionnées (ex: utilisateur EN coche FR) : requêter l'index `_fr` (qui contient tout) au lieu de `_en` — via `resolveSearchIndex` avec `effectiveLocale`
-- [ ] Adapter `getRandomMeme()` et `getBestMemesInternal()` pour respecter le filtre si actif
+- [x] Adapter `getRandomMeme()` et `getBestMemesInternal()` pour respecter le filtre si actif
 - [x] Edge case : au moins une langue doit rester cochée — désactiver le uncheck quand il ne reste qu'une seule langue sélectionnée
 - [x] Helpers `parseContentLocalesParam` / `serializeContentLocalesParam` dans `src/helpers/i18n-content.ts`
 - [x] Constants `FILTERABLE_CONTENT_LOCALES` / `DEFAULT_CONTENT_LOCALE_FILTER` dans `src/helpers/i18n-content.ts`
@@ -153,7 +153,7 @@ Traduction EN des mèmes UNIVERSAL réalisée via script one-shot (`scripts/migr
 
 **Étape 3 — Finalisation**
 
-- [ ] Reindex Algolia en prod (`scripts/reindex-memes.ts`) — refléter les traductions EN dans les index de recherche
+- [x] Reindex Algolia en prod (`scripts/reindex-memes.ts`) — refléter les traductions EN dans les index de recherche
 - [ ] Badge langue optionnel dans les listes de mèmes (pas seulement la page détail)
 
 ### Items i18n reportés

@@ -9,6 +9,12 @@ const DEFAULT_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
   year: 'numeric'
 }
 
+export const DATE_WITH_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
+  ...DEFAULT_FORMAT_OPTIONS,
+  hour: '2-digit',
+  minute: '2-digit'
+}
+
 export function formatDate(
   date: Date,
   locale: Locale,

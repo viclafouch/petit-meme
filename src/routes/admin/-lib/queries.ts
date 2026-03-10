@@ -1,6 +1,7 @@
 import type { MemesFilters } from '@/constants/meme'
 import { MINUTE } from '@/constants/time'
 import type { Meme } from '@/db/generated/prisma/client'
+import type { MemeSubmissionStatus } from '@/db/generated/prisma/enums'
 import type { DashboardPeriod } from '@admin/-server/dashboard'
 import {
   getAdminChartData,
@@ -9,6 +10,10 @@ import {
   getAdminTrendingMemes
 } from '@admin/-server/dashboard'
 import { getAdminMemeById, getAdminMemes } from '@admin/-server/memes'
+import {
+  getAdminPendingSubmissionCount,
+  getAdminSubmissions
+} from '@admin/-server/submissions'
 import { queryOptions } from '@tanstack/react-query'
 
 export const getAdminMemeByIdQueryOpts = (memeId: Meme['id']) => {
@@ -82,3 +87,31 @@ export const getAdminTrendingMemesQueryOpts = () => {
 }
 
 getAdminTrendingMemesQueryOpts.all = ['admin-trending-memes'] as const
+
+export const getAdminSubmissionsQueryOpts = (
+  statusFilter?: MemeSubmissionStatus
+) => {
+  return queryOptions({
+    queryKey: [...getAdminSubmissionsQueryOpts.all, statusFilter],
+    queryFn: () => {
+      return getAdminSubmissions({ data: statusFilter })
+    },
+    staleTime: 2 * MINUTE
+  })
+}
+
+getAdminSubmissionsQueryOpts.all = ['admin-submissions'] as const
+
+export const getAdminPendingSubmissionCountQueryOpts = () => {
+  return queryOptions({
+    queryKey: [...getAdminPendingSubmissionCountQueryOpts.all],
+    queryFn: () => {
+      return getAdminPendingSubmissionCount()
+    },
+    staleTime: 5 * MINUTE
+  })
+}
+
+getAdminPendingSubmissionCountQueryOpts.all = [
+  'admin-pending-submission-count'
+] as const

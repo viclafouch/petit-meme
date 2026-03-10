@@ -2,6 +2,7 @@ import {
   ArrowLeft,
   Blocks,
   LayoutDashboard,
+  MessageSquarePlus,
   SquareLibrary,
   Twitter,
   Users2,
@@ -15,14 +16,20 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem
 } from '@/components/ui/sidebar'
+import { getAdminPendingSubmissionCountQueryOpts } from '@admin/-lib/queries'
+import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 
 export const AdminSidebar = ({
   ...props
 }: React.ComponentProps<typeof Sidebar>) => {
+  const pendingCountQuery = useQuery(getAdminPendingSubmissionCountQueryOpts())
+  const pendingCount = pendingCountQuery.data ?? 0
+
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -65,6 +72,19 @@ export const AdminSidebar = ({
                     <span>Catégories</span>
                   </Link>
                 </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/admin/submissions">
+                    <MessageSquarePlus />
+                    <span>Soumissions</span>
+                  </Link>
+                </SidebarMenuButton>
+                {pendingCount > 0 ? (
+                  <SidebarMenuBadge className="bg-warning text-warning-foreground font-medium">
+                    {pendingCount}
+                  </SidebarMenuBadge>
+                ) : null}
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>

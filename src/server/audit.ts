@@ -10,7 +10,7 @@ export type AuditAction =
   | 'unban'
   | 'status_change'
 
-export type AuditTargetType = 'category' | 'meme' | 'user'
+export type AuditTargetType = 'category' | 'meme' | 'submission' | 'user'
 
 export type AuditMetadata = {
   title?: string

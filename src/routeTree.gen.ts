@@ -25,6 +25,7 @@ import { Route as AdminServicesRouteImport } from './routes/admin/services'
 import { Route as AdminDownloaderRouteImport } from './routes/admin/downloader'
 import { Route as Public__rootDefaultRouteRouteImport } from './routes/_public__root/_default/route'
 import { Route as AdminUsersIndexRouteImport } from './routes/admin/users/index'
+import { Route as AdminSubmissionsIndexRouteImport } from './routes/admin/submissions/index'
 import { Route as AdminLibraryIndexRouteImport } from './routes/admin/library/index'
 import { Route as AdminCategoriesIndexRouteImport } from './routes/admin/categories/index'
 import { Route as ApiCronVerificationReminderRouteImport } from './routes/api/cron/verification-reminder'
@@ -127,6 +128,11 @@ const Public__rootDefaultRouteRoute =
 const AdminUsersIndexRoute = AdminUsersIndexRouteImport.update({
   id: '/users/',
   path: '/users/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminSubmissionsIndexRoute = AdminSubmissionsIndexRouteImport.update({
+  id: '/submissions/',
+  path: '/submissions/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminLibraryIndexRoute = AdminLibraryIndexRouteImport.update({
@@ -298,6 +304,7 @@ export interface FileRoutesByFullPath {
   '/api/cron/verification-reminder': typeof ApiCronVerificationReminderRoute
   '/admin/categories/': typeof AdminCategoriesIndexRoute
   '/admin/library/': typeof AdminLibraryIndexRoute
+  '/admin/submissions/': typeof AdminSubmissionsIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
   '/checkout/success': typeof Public__rootDefaultCheckoutSuccessRoute
   '/memes/$memeId': typeof Public__rootDefaultMemesMemeIdRoute
@@ -336,6 +343,7 @@ export interface FileRoutesByTo {
   '/api/cron/verification-reminder': typeof ApiCronVerificationReminderRoute
   '/admin/categories': typeof AdminCategoriesIndexRoute
   '/admin/library': typeof AdminLibraryIndexRoute
+  '/admin/submissions': typeof AdminSubmissionsIndexRoute
   '/admin/users': typeof AdminUsersIndexRoute
   '/checkout/success': typeof Public__rootDefaultCheckoutSuccessRoute
   '/memes/$memeId': typeof Public__rootDefaultMemesMemeIdRoute
@@ -380,6 +388,7 @@ export interface FileRoutesById {
   '/api/cron/verification-reminder': typeof ApiCronVerificationReminderRoute
   '/admin/categories/': typeof AdminCategoriesIndexRoute
   '/admin/library/': typeof AdminLibraryIndexRoute
+  '/admin/submissions/': typeof AdminSubmissionsIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
   '/_public__root/_default/checkout/success': typeof Public__rootDefaultCheckoutSuccessRoute
   '/_public__root/_default/memes/$memeId': typeof Public__rootDefaultMemesMemeIdRoute
@@ -422,6 +431,7 @@ export interface FileRouteTypes {
     | '/api/cron/verification-reminder'
     | '/admin/categories/'
     | '/admin/library/'
+    | '/admin/submissions/'
     | '/admin/users/'
     | '/checkout/success'
     | '/memes/$memeId'
@@ -460,6 +470,7 @@ export interface FileRouteTypes {
     | '/api/cron/verification-reminder'
     | '/admin/categories'
     | '/admin/library'
+    | '/admin/submissions'
     | '/admin/users'
     | '/checkout/success'
     | '/memes/$memeId'
@@ -503,6 +514,7 @@ export interface FileRouteTypes {
     | '/api/cron/verification-reminder'
     | '/admin/categories/'
     | '/admin/library/'
+    | '/admin/submissions/'
     | '/admin/users/'
     | '/_public__root/_default/checkout/success'
     | '/_public__root/_default/memes/$memeId'
@@ -647,6 +659,13 @@ declare module '@tanstack/react-router' {
       path: '/users'
       fullPath: '/admin/users/'
       preLoaderRoute: typeof AdminUsersIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/submissions/': {
+      id: '/admin/submissions/'
+      path: '/submissions'
+      fullPath: '/admin/submissions/'
+      preLoaderRoute: typeof AdminSubmissionsIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/library/': {
@@ -910,6 +929,7 @@ interface AdminRouteRouteChildren {
   AdminLibraryMemeIdRoute: typeof AdminLibraryMemeIdRoute
   AdminCategoriesIndexRoute: typeof AdminCategoriesIndexRoute
   AdminLibraryIndexRoute: typeof AdminLibraryIndexRoute
+  AdminSubmissionsIndexRoute: typeof AdminSubmissionsIndexRoute
   AdminUsersIndexRoute: typeof AdminUsersIndexRoute
 }
 
@@ -920,6 +940,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminLibraryMemeIdRoute: AdminLibraryMemeIdRoute,
   AdminCategoriesIndexRoute: AdminCategoriesIndexRoute,
   AdminLibraryIndexRoute: AdminLibraryIndexRoute,
+  AdminSubmissionsIndexRoute: AdminSubmissionsIndexRoute,
   AdminUsersIndexRoute: AdminUsersIndexRoute,
 }
 

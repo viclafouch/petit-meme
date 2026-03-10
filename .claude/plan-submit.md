@@ -113,20 +113,28 @@ Objectif : l'admin peut review, approuver et rejeter les soumissions.
 
 ### 3.0 — Design UI
 
-- [ ] Utiliser `/frontend-design` pour la page admin `/admin/submissions`
+- [x] Utiliser `/frontend-design` pour la page admin `/admin/submissions`
 
 ### 3.1 — Server functions admin
 
-- [ ] `getAdminSubmissions` : liste paginée avec filtres (status, date, utilisateur) — vérification rôle admin dans le handler (ne pas se reposer uniquement sur le `beforeLoad` de la route)
-- [ ] `updateSubmissionStatus` : approuver (lier `meme_id`) ou rejeter (avec `admin_note` optionnel) — vérification rôle admin
-- [ ] `deleteSubmission` : suppression — vérification rôle admin
+- [x] `getAdminSubmissions` : liste avec filtre status + counts par status (3 `.count()` parallèles) — vérification rôle admin via `adminRequiredMiddleware`
+- [x] `updateSubmissionStatus` : approve/reject via discriminated union Zod — vérification rôle admin, validation status PENDING
+- [x] `deleteSubmission` : suppression — vérification rôle admin
+- [x] `getAdminPendingSubmissionCount` : compteur pending pour sidebar badge
+- [x] Audit logging pour toutes les actions (status_change, delete) via `logAuditAction`
+- [x] Type `AuditTargetType` étendu avec `'submission'`
+- [x] `SentryFeature` étendu avec `'admin-submission'`
 
 ### 3.2 — Page admin
 
-- [ ] Page `/admin/submissions` — liste des propositions avec filtres (status, date, utilisateur)
-- [ ] Actions : approuver (ouvre le flow de création de mème pré-rempli avec titre + URL + langue via `createMemeWithVideo`), rejeter (avec note optionnelle), supprimer
-- [ ] Quand approuvé et mème créé : lier `MemeSubmission.meme_id` au mème créé
-- [ ] Compteur de submissions en attente visible dans la sidebar admin
+- [x] Page `/admin/submissions` — TanStack Table avec colonnes (utilisateur, titre, lien, langue, statut, date, actions)
+- [x] Filtres par statut via tabs (Toutes/En attente/Approuvées/Rejetées) dans les search params URL (`?submissionStatus=PENDING`), count affiché sur chaque tab (server-side)
+- [x] Actions : approuver tweet (crée le mème via `createMemeFromTwitterUrl` + lie `memeId`), rejeter (dialog avec note optionnelle), supprimer (confirmation), ouvrir le lien externe, voir le mème (si approuvé)
+- [x] Quand approuvé et mème créé : redirection vers `/admin/library/$memeId` pour édition
+- [x] Compteur de submissions en attente visible dans la sidebar admin (badge warning via `SidebarMenuBadge`)
+- [x] Empty state quand aucune soumission ne correspond au filtre
+- [x] Query options avec `staleTime: 2min` (submissions) / `5min` (pending count sidebar), `ensureQueryData` dans le loader, `useSuspenseQuery` dans le composant
+- [x] Composant partagé `RelativeDateTooltip` extrait dans `admin/-components/` (réutilisé par users + submissions)
 
 **Déployable à ce stade** : oui. Feature complète côté user + admin.
 

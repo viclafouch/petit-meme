@@ -8,14 +8,11 @@ import {
   TooltipContent,
   TooltipTrigger
 } from '@/components/ui/tooltip'
-import {
-  differenceInMonths,
-  formatDate,
-  formatRelativeTime
-} from '@/helpers/date'
+import { differenceInMonths, formatDate } from '@/helpers/date'
 import { getUserInitials } from '@/helpers/format'
 import { getLocale } from '@/paraglide/runtime'
 import { AdminTable, getRowId, PAGE_SIZE } from '@admin/-components/admin-table'
+import { RelativeDateTooltip } from '@admin/-components/relative-date-tooltip'
 import type { EnrichedUser } from '@admin/-server/users'
 import { getListUsers } from '@admin/-server/users'
 import { createFileRoute } from '@tanstack/react-router'
@@ -27,14 +24,6 @@ import {
   useReactTable
 } from '@tanstack/react-table'
 import { UserActionsCell } from './-components/user-actions-cell'
-
-const DATE_WITH_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit'
-}
 
 type UserCellParams = {
   user: EnrichedUser
@@ -225,20 +214,7 @@ const columns = [
         return <span className="text-muted-foreground text-sm">Jamais</span>
       }
 
-      const date = new Date(lastActivity)
-
-      return (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="text-sm cursor-default">
-              {formatRelativeTime(date, getLocale())}
-            </span>
-          </TooltipTrigger>
-          <TooltipContent>
-            {formatDate(date, getLocale(), DATE_WITH_TIME_OPTIONS)}
-          </TooltipContent>
-        </Tooltip>
-      )
+      return <RelativeDateTooltip date={new Date(lastActivity)} />
     }
   }),
   columnHelper.display({

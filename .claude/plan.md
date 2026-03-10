@@ -173,42 +173,13 @@ Traduction EN des mèmes UNIVERSAL réalisée via script one-shot (`scripts/migr
 
 ### Propositions de mèmes par les utilisateurs
 
-Les utilisateurs connectés peuvent proposer des mèmes à ajouter via un lien. L'admin review et convertit en mème.
+**Plan détaillé : [`.claude/plan-submit.md`](.claude/plan-submit.md)** — 5 phases progressives, chacune déployable indépendamment.
 
-**Côté utilisateur :**
-
-- Formulaire simple (accessible depuis la navbar ou une page dédiée)
-- Champs : titre (requis), lien (requis), langue audio (FR/EN/UNIVERSAL)
-- Types de liens acceptés : lien tweet/X, lien YouTube
-- Pas d'URL MP4 directe (risque SSRF — des URLs arbitraires pourraient cibler des services internes)
-- Validation URL côté client + serveur : schema Zod strict dans `src/constants/meme-submission.ts`
-  - Twitter/X : réutiliser `TWEET_LINK_SCHEMA` existant (whitelist `twitter.com` / `x.com`)
-  - YouTube : whitelist `youtube.com` / `youtu.be` + regex video ID
-- Pas d'upload de fichier, pas de description (l'admin s'en occupe)
-- L'utilisateur doit être connecté
-- Feedback : confirmation après soumission, historique de ses propositions (statut : en attente / accepté / refusé)
-
-**Schema DB (migration additive) :**
-
-- [ ] Enum `MemeSubmissionUrlType` (TWEET, YOUTUBE)
-- [ ] Enum `MemeSubmissionStatus` (PENDING, APPROVED, REJECTED)
-- [ ] Table `MemeSubmission` : `id`, `user_id` (FK User, CASCADE), `title`, `url`, `url_type` (enum), `content_locale` (enum MemeContentLocale), `status` (enum, default PENDING), `admin_note` (optionnel), `meme_id` (FK Meme, nullable — rempli quand converti), `created_at`, `updated_at`
-- [ ] Index : `status`, `user_id`, `(status, created_at DESC)`
-
-**Côté admin :**
-
-- [ ] Page admin `/admin/submissions` — liste des propositions avec filtres (status, date, utilisateur)
-- [ ] Actions : approuver (ouvre le flow de création de mème pré-rempli avec titre + URL + langue via `createMemeWithVideo`), rejeter (avec note optionnelle), supprimer
-- [ ] Quand approuvé et mème créé : lier `MemeSubmission.meme_id` au mème créé
-- [ ] Compteur de submissions en attente visible dans la sidebar admin
-
-**Notifications :**
-
-- [ ] Optionnel : email à l'utilisateur quand sa proposition est acceptée/refusée
-
-**Rate limiting :**
-
-- [ ] Rate limit per-user (5 soumissions / 24h) — créer `createUserRateLimitMiddleware` dans `src/server/rate-limit.ts` (le pattern existant est per-IP, celui-ci est per-user via session)
+- **Phase 1** — Fondations (DB, server functions, validation Zod, rate limit per-user)
+- **Phase 2** — Page `/submit` (règles, formulaire, historique soumissions)
+- **Phase 3** — Interface admin `/admin/submissions` (review, approve, reject)
+- **Phase 4** — Notifications email (optionnel)
+- **Phase 5** — Audits & polish (sécurité, perf, a11y, i18n, Tailwind, dead code, `/simplify`)
 
 ### Migration Prisma → Drizzle
 

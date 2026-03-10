@@ -65,6 +65,7 @@ nitro({
 
 ## SEO — Items restants
 
+- [x] Fix page `/submit` SEO : supprimé `noindex`, ajouté keywords + meta description enrichie + breadcrumb JSON-LD + intro visible par crawlers + règles de soumission hors auth gate + ajouté au sitemap
 - [ ] Surveiller le Video Indexing Report dans Search Console
 - [ ] Stocker `width`/`height` dans le modèle `Video` (migration additive) — permet des `og:video:width/height` corrects par meme au lieu du 1280x720 hardcodé
 

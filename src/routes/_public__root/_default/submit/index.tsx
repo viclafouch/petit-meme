@@ -3,9 +3,12 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { MAX_PENDING_SUBMISSIONS } from '@/constants/meme-submission'
 import { getUserSubmissionsQueryOpts } from '@/lib/queries'
-import { seo } from '@/lib/seo'
+import { buildBreadcrumbJsonLd, seo } from '@/lib/seo'
 import { m } from '@/paraglide/messages'
-import { PageHeading } from '@/routes/_public__root/-components/page-headers'
+import {
+  PageDescription,
+  PageHeading
+} from '@/routes/_public__root/-components/page-headers'
 import { useShowDialog } from '@/stores/dialog.store'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, useRouteContext } from '@tanstack/react-router'
@@ -17,20 +20,22 @@ const NotLoggedIn = () => {
   const showDialog = useShowDialog()
 
   return (
-    <div className="flex flex-col items-center gap-4 py-12">
-      <p className="text-muted-foreground text-center">
-        {m.submit_login_description()}
-      </p>
-      <Button
-        onClick={(event) => {
-          event.preventDefault()
-          showDialog('auth', {})
-        }}
-      >
-        <LogIn aria-hidden="true" />
-        {m.submit_login_cta()}
-      </Button>
-    </div>
+    <Card>
+      <CardContent className="flex flex-col items-center gap-4 py-8">
+        <p className="text-sm text-muted-foreground text-center">
+          {m.submit_login_description()}
+        </p>
+        <Button
+          onClick={(event) => {
+            event.preventDefault()
+            showDialog('auth', {})
+          }}
+        >
+          <LogIn aria-hidden="true" />
+          {m.submit_login_cta()}
+        </Button>
+      </CardContent>
+    </Card>
   )
 }
 
@@ -66,7 +71,6 @@ const SubmitPageContent = () => {
           </Card>
         </aside>
       ) : null}
-      <SubmissionRules />
     </div>
   )
 }
@@ -75,11 +79,13 @@ const RouteComponent = () => {
   const { user } = useRouteContext({ from: '__root__' })
 
   return (
-    <div className="mx-auto max-w-5xl flex flex-col gap-6">
-      <PageHeading className="text-3xl sm:text-4xl">
-        {m.submit_heading()}
-      </PageHeading>
+    <div className="mx-auto max-w-5xl flex flex-col gap-8">
+      <div className="flex flex-col items-center gap-2">
+        <PageHeading>{m.submit_heading()}</PageHeading>
+        <PageDescription>{m.submit_page_intro()}</PageDescription>
+      </div>
       {user ? <SubmitPageContent /> : <NotLoggedIn />}
+      <SubmissionRules />
     </div>
   )
 }
@@ -87,12 +93,25 @@ const RouteComponent = () => {
 export const Route = createFileRoute('/_public__root/_default/submit/')({
   component: RouteComponent,
   head: () => {
-    return seo({
-      title: m.submit_heading(),
-      pathname: '/submit',
-      description: m.submit_description(),
-      noindex: true
-    })
+    return {
+      ...seo({
+        title: m.submit_heading(),
+        pathname: '/submit',
+        description: m.submit_description(),
+        keywords: m.seo_submit_keywords()
+      }),
+      scripts: [
+        {
+          type: 'application/ld+json',
+          children: JSON.stringify(
+            buildBreadcrumbJsonLd([
+              { name: m.meme_breadcrumb_home(), pathname: '/' },
+              { name: m.submit_heading(), pathname: '/submit' }
+            ])
+          )
+        }
+      ]
+    }
   },
   loader: ({ context }) => {
     if (context.user) {

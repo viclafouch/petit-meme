@@ -8,6 +8,7 @@ import {
   Shield,
   TrendingUp
 } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
 import { m } from '@/paraglide/messages'
 
 type Rule = {
@@ -62,26 +63,28 @@ const RULES = [
 
 export const SubmissionRules = () => {
   return (
-    <div className="flex flex-col gap-2">
-      <h2 className="text-sm font-medium">{m.submit_rules_heading()}</h2>
-      <ul className="flex flex-col gap-1.5">
-        {RULES.map((rule, index) => {
-          const Icon = rule.icon
+    <Card>
+      <CardContent className="flex flex-col gap-3">
+        <h2 className="text-sm font-medium">{m.submit_rules_heading()}</h2>
+        <ul className="grid gap-2 sm:grid-cols-2">
+          {RULES.map((rule, index) => {
+            const Icon = rule.icon
 
-          return (
-            <li
-              key={index}
-              className="flex items-start gap-2 text-xs text-muted-foreground"
-            >
-              <Icon className="mt-0.5 size-3 shrink-0" aria-hidden="true" />
-              <span>{rule.getMessage()}</span>
-            </li>
-          )
-        })}
-      </ul>
-      <p className="text-xs text-muted-foreground">
-        {m.submit_rules_warning()}
-      </p>
-    </div>
+            return (
+              <li
+                key={index}
+                className="flex items-start gap-2 text-xs text-muted-foreground"
+              >
+                <Icon className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+                <span>{rule.getMessage()}</span>
+              </li>
+            )
+          })}
+        </ul>
+        <p className="text-xs text-muted-foreground">
+          {m.submit_rules_warning()}
+        </p>
+      </CardContent>
+    </Card>
   )
 }

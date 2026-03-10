@@ -42,7 +42,7 @@ const RouteComponent = () => {
     <motion.div
       initial={isReducedMotion ? false : { opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="flex flex-col gap-6 items-center pt-20"
+      className="flex flex-col gap-8 items-center pt-20"
     >
       <PageHeading>{m.checkout_success_heading()}</PageHeading>
       <PageDescription>{m.checkout_success_description()}</PageDescription>

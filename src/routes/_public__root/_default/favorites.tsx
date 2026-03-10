@@ -12,10 +12,12 @@ const RouteComponent = () => {
   const favoritesMemeQuery = useSuspenseQuery(getFavoritesMemesQueryOpts())
 
   return (
-    <div>
-      <PageHeading>{m.settings_favorites_heading()}</PageHeading>
-      <PageDescription>{m.settings_favorites_description()}</PageDescription>
-      <div className="w-full mx-auto py-12">
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col items-center gap-2">
+        <PageHeading>{m.settings_favorites_heading()}</PageHeading>
+        <PageDescription>{m.settings_favorites_description()}</PageDescription>
+      </div>
+      <div className="w-full mx-auto">
         <MemesList
           layoutContext="favorites"
           memes={favoritesMemeQuery.data.bookmarks}

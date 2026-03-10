@@ -156,14 +156,14 @@ export const SearchMemes = () => {
   }
 
   return (
-    <div>
+    <div className="flex flex-col gap-8">
       <div className="flex flex-col items-center gap-2">
         <PageHeading>
           {currentCategory ? currentCategory.title : m.meme_all_memes()}
         </PageHeading>
         <PageDescription>{m.meme_search_description()}</PageDescription>
       </div>
-      <div className="w-full mx-auto py-12">
+      <div className="w-full mx-auto">
         <div className="flex flex-col gap-y-4">
           <div className="flex justify-between flex-col sm:flex-row gap-2">
             <MemesQuery

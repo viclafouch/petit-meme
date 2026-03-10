@@ -1,7 +1,7 @@
-import type { VariantProps } from 'class-variance-authority'
 import { ArrowRight } from 'lucide-react'
-import { Badge, type badgeVariants } from '@/components/ui/badge'
+import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
+import { SUBMISSION_STATUS_BADGE_VARIANT } from '@/constants/meme-submission'
 import { MemeSubmissionStatus } from '@/db/generated/prisma/enums'
 import { formatRelativeTime } from '@/helpers/date'
 import { truncateUrl } from '@/helpers/format'
@@ -10,14 +10,6 @@ import { m } from '@/paraglide/messages'
 import { getLocale } from '@/paraglide/runtime'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
-
-type BadgeVariant = NonNullable<VariantProps<typeof badgeVariants>['variant']>
-
-const STATUS_BADGE_VARIANT = {
-  PENDING: 'warning',
-  APPROVED: 'success',
-  REJECTED: 'destructive'
-} as const satisfies Record<MemeSubmissionStatus, BadgeVariant>
 
 const STATUS_LABELS = {
   PENDING: () => {
@@ -60,7 +52,9 @@ export const SubmissionHistory = () => {
                   </a>
                   <div className="flex items-center gap-2 mt-0.5">
                     <Badge
-                      variant={STATUS_BADGE_VARIANT[submission.status]}
+                      variant={
+                        SUBMISSION_STATUS_BADGE_VARIANT[submission.status]
+                      }
                       size="sm"
                       role="status"
                     >

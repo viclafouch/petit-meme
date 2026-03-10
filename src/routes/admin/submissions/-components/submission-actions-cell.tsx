@@ -120,9 +120,7 @@ export const SubmissionActionsCell = ({
       return result
     },
     onSuccess: (result) => {
-      handleCloseDialog()
-      invalidateSubmissions()
-      void router.invalidate()
+      handleMutationSuccess()
       void router.navigate({
         to: '/admin/library/$memeId',
         params: { memeId: result.id }
@@ -166,7 +164,7 @@ export const SubmissionActionsCell = ({
         <DropdownMenuContent align="end" className="w-48">
           <DropdownMenuItem asChild>
             <a href={submission.url} target="_blank" rel="noopener noreferrer">
-              <ExternalLink className="size-4" aria-hidden />
+              <ExternalLink className="size-4" aria-hidden="true" />
               Ouvrir le lien
             </a>
           </DropdownMenuItem>
@@ -176,7 +174,7 @@ export const SubmissionActionsCell = ({
                 to="/admin/library/$memeId"
                 params={{ memeId: submission.memeId }}
               >
-                <Eye className="size-4" aria-hidden />
+                <Eye className="size-4" aria-hidden="true" />
                 Voir le mème
               </Link>
             </DropdownMenuItem>
@@ -190,7 +188,7 @@ export const SubmissionActionsCell = ({
                     setActiveDialog('approve-tweet')
                   }}
                 >
-                  <Check className="size-4" aria-hidden />
+                  <Check className="size-4" aria-hidden="true" />
                   Approuver (Twitter)
                 </DropdownMenuItem>
               ) : null}
@@ -199,7 +197,7 @@ export const SubmissionActionsCell = ({
                   setActiveDialog('reject')
                 }}
               >
-                <X className="size-4" aria-hidden />
+                <X className="size-4" aria-hidden="true" />
                 Rejeter
               </DropdownMenuItem>
             </>
@@ -211,7 +209,7 @@ export const SubmissionActionsCell = ({
               setActiveDialog('delete')
             }}
           >
-            <Trash2 className="size-4" aria-hidden />
+            <Trash2 className="size-4" aria-hidden="true" />
             Supprimer
           </DropdownMenuItem>
         </DropdownMenuContent>

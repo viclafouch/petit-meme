@@ -1,5 +1,6 @@
 import { CircleAlert } from 'lucide-react'
 import { toast } from 'sonner'
+import type { z } from 'zod'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -24,7 +25,7 @@ import {
 } from '@/constants/meme-submission'
 import { MemeContentLocale } from '@/db/generated/prisma/enums'
 import { getErrorMessage, matchIsRateLimitError } from '@/helpers/error'
-import { getContentLocaleLabel } from '@/helpers/i18n-content'
+import { getContentLocaleOptions } from '@/helpers/i18n-content'
 import { useErrorFocus } from '@/hooks/use-error-focus'
 import { getUserSubmissionsQueryOpts } from '@/lib/queries'
 import { captureWithFeature } from '@/lib/sentry'
@@ -56,19 +57,17 @@ const getDisplayError = (errorMessage: string) => {
   return mapper ? mapper() : errorMessage
 }
 
-const getSubmissionFormOpts = () => {
-  return formOptions({
-    defaultValues: {
-      title: '',
-      url: '',
-      contentLocale: MemeContentLocale.FR as MemeContentLocale,
-      acceptTerms: false as boolean
-    },
-    validators: {
-      onSubmit: CREATE_MEME_SUBMISSION_SCHEMA
-    }
-  })
-}
+const submissionFormOpts = formOptions({
+  defaultValues: {
+    title: '',
+    url: '',
+    contentLocale: MemeContentLocale.FR as MemeContentLocale,
+    acceptTerms: false as boolean
+  },
+  validators: {
+    onSubmit: CREATE_MEME_SUBMISSION_SCHEMA
+  }
+})
 
 const getSubmissionErrorMessage = (error: Error) => {
   if (error instanceof StudioError) {
@@ -97,12 +96,7 @@ export const SubmissionForm = ({ pendingCount }: SubmissionFormParams) => {
   const remaining = MAX_PENDING_SUBMISSIONS - pendingCount
 
   const submitMutation = useMutation({
-    mutationFn: async (data: {
-      title: string
-      url: string
-      contentLocale: MemeContentLocale
-      acceptTerms: true
-    }) => {
+    mutationFn: async (data: z.input<typeof CREATE_MEME_SUBMISSION_SCHEMA>) => {
       return createMemeSubmission({ data })
     },
     onError: (error) => {
@@ -118,7 +112,7 @@ export const SubmissionForm = ({ pendingCount }: SubmissionFormParams) => {
   })
 
   const form = useForm({
-    ...getSubmissionFormOpts(),
+    ...submissionFormOpts,
     onSubmit: async ({ value }) => {
       return submitMutation.mutateAsync({
         title: value.title,
@@ -213,10 +207,10 @@ export const SubmissionForm = ({ pendingCount }: SubmissionFormParams) => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {Object.values(MemeContentLocale).map((locale) => {
+                  {getContentLocaleOptions().map((option) => {
                     return (
-                      <SelectItem key={locale} value={locale}>
-                        {getContentLocaleLabel(locale)}
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
                       </SelectItem>
                     )
                   })}

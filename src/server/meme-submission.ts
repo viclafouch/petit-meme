@@ -33,31 +33,33 @@ export const createMemeSubmission = createServerFn({ method: 'POST' })
   .handler(async ({ data, context }) => {
     const userId = context.user.id
 
-    const pendingCount = await prismaClient.memeSubmission.count({
-      where: { userId, status: MemeSubmissionStatus.PENDING }
-    })
-
-    if (pendingCount >= MAX_PENDING_SUBMISSIONS) {
-      submissionLogger.warn(
-        { userId, pendingCount },
-        'Submission limit reached'
-      )
-      setResponseStatus(422)
-      throw new StudioError('submission_limit_reached', {
-        code: 'SUBMISSION_LIMIT_REACHED'
-      })
-    }
-
     try {
-      const submission = await prismaClient.memeSubmission.create({
-        data: {
-          userId,
-          title: data.title,
-          url: data.url,
-          urlType: data.urlType,
-          contentLocale: data.contentLocale
-        },
-        select: SUBMISSION_USER_SELECT
+      const submission = await prismaClient.$transaction(async (tx) => {
+        const pendingCount = await tx.memeSubmission.count({
+          where: { userId, status: MemeSubmissionStatus.PENDING }
+        })
+
+        if (pendingCount >= MAX_PENDING_SUBMISSIONS) {
+          submissionLogger.warn(
+            { userId, pendingCount },
+            'Submission limit reached'
+          )
+          setResponseStatus(422)
+          throw new StudioError('submission_limit_reached', {
+            code: 'SUBMISSION_LIMIT_REACHED'
+          })
+        }
+
+        return tx.memeSubmission.create({
+          data: {
+            userId,
+            title: data.title,
+            url: data.url,
+            urlType: data.urlType,
+            contentLocale: data.contentLocale
+          },
+          select: SUBMISSION_USER_SELECT
+        })
       })
 
       submissionLogger.info(
@@ -67,6 +69,10 @@ export const createMemeSubmission = createServerFn({ method: 'POST' })
 
       return submission
     } catch (error) {
+      if (error instanceof StudioError) {
+        throw error
+      }
+
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'

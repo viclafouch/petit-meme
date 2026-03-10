@@ -159,44 +159,44 @@ Objectif : qualité production. Lancer les agents/skills Claude sur tout le code
 
 ### 5.1 — Sécurité
 
-- [ ] `security-auditor` sur `src/server/meme-submission.ts`, `src/constants/meme-submission.ts`, `src/routes/_public__root/_default/submit.tsx`, `src/routes/_public__root/_default/dmca.tsx`, `src/routes/admin/-components/` (submissions)
-- [ ] Vérifier : injection, CSRF, auth bypass, IDOR, rate limit contournement, SSRF, XSS via titre/URL
+- [x] `security-auditor` sur `src/server/meme-submission.ts`, `src/constants/meme-submission.ts`, `src/routes/_public__root/_default/submit.tsx`, `src/routes/_public__root/_default/dmca.tsx`, `src/routes/admin/-components/` (submissions)
+- [x] Vérifier : injection, CSRF, auth bypass, IDOR, rate limit contournement, SSRF, XSS via titre/URL
 
 ### 5.2 — Performance backend
 
-- [ ] `backend-performance` sur les server functions (`createMemeSubmission`, `getUserSubmissions`, `getAdminSubmissions`, `updateSubmissionStatus`)
-- [ ] Vérifier : N+1 queries, index utilisés, count queries optimisées, pas de leak connexion Prisma
+- [x] `backend-performance` sur les server functions (`createMemeSubmission`, `getUserSubmissions`, `getAdminSubmissions`, `updateSubmissionStatus`)
+- [x] Vérifier : N+1 queries, index utilisés, count queries optimisées, pas de leak connexion Prisma
 
 ### 5.3 — Performance frontend
 
-- [ ] `react-performance` sur la page `/submit` et la page admin `/admin/submissions`
-- [ ] Vérifier : re-renders inutiles, référence stability des callbacks, list rendering keys, suspense boundaries
+- [x] `react-performance` sur la page `/submit` et la page admin `/admin/submissions`
+- [x] Vérifier : re-renders inutiles, référence stability des callbacks, list rendering keys, suspense boundaries
 
 ### 5.4 — Accessibilité
 
-- [ ] `web-design-guidelines` sur la page `/submit` (formulaire, règles, historique, état non connecté)
-- [ ] Vérifier : labels form, aria-attributes, focus management, keyboard navigation, contrast ratios, screen reader (statuts, erreurs, empty state), `role="alert"` sur les erreurs inline
+- [x] `web-design-guidelines` sur la page `/submit` (formulaire, règles, historique, état non connecté)
+- [x] Vérifier : labels form, aria-attributes, focus management, keyboard navigation, contrast ratios, screen reader (statuts, erreurs, empty state), `role="alert"` sur les erreurs inline
 
 ### 5.5 — i18n & wording
 
-- [ ] Relire tous les messages Paraglide FR/EN : clarté, ton cohérent avec le reste du site, pas de jargon technique
-- [ ] Vérifier que les règles de soumission sont compréhensibles par un non-tech (pas de "SSRF", "hostname", etc.)
-- [ ] Vérifier les erreurs user-facing : messages clairs et actionnables ("Ce lien a déjà été proposé" plutôt qu'un code erreur)
-- [ ] Vérifier que toutes les chaînes visibles passent par Paraglide (aucun texte hardcodé)
+- [x] Relire tous les messages Paraglide FR/EN : clarté, ton cohérent avec le reste du site, pas de jargon technique
+- [x] Vérifier que les règles de soumission sont compréhensibles par un non-tech (pas de "SSRF", "hostname", etc.)
+- [x] Vérifier les erreurs user-facing : messages clairs et actionnables ("Ce lien a déjà été proposé" plutôt qu'un code erreur)
+- [x] Vérifier que toutes les chaînes visibles passent par Paraglide (aucun texte hardcodé)
 
 ### 5.6 — Tailwind & dead code
 
-- [ ] `tailwind-audit` sur tous les composants créés/modifiés (page submit, composants admin, badges statut)
-- [ ] `dead-code` sur `src/server/meme-submission.ts`, `src/constants/meme-submission.ts`, composants submissions
+- [x] `tailwind-audit` sur tous les composants créés/modifiés (page submit, composants admin, badges statut)
+- [x] `dead-code` sur `src/server/meme-submission.ts`, `src/constants/meme-submission.ts`, composants submissions
 
 ### 5.7 — Audit logs & error handling
 
-- [ ] Audit backend : vérifier que chaque server function a un logging cohérent (info pour les actions réussies, warn/error pour les échecs, pas de log excessif qui pollue)
-- [ ] Audit frontend : vérifier la gestion d'erreur côté client (mutation errors affichés, pas de `console.error` oublié, messages d'erreur user-facing traduits)
-- [ ] Vérifier que les erreurs Prisma/server sont interceptées et loggées via Sentry (`captureWithFeature`) — pas de throw silencieux
-- [ ] Vérifier les niveaux de log : `info` pour les opérations normales, `warn` pour les cas limites (rate limit, cap atteint), `error` pour les erreurs inattendues
-- [ ] Vérifier qu'aucune donnée sensible (email, token, mot de passe) n'est loggée — respecter la config `redact` de pino
+- [x] Audit backend : vérifier que chaque server function a un logging cohérent (info pour les actions réussies, warn/error pour les échecs, pas de log excessif qui pollue)
+- [x] Audit frontend : vérifier la gestion d'erreur côté client (mutation errors affichés, pas de `console.error` oublié, messages d'erreur user-facing traduits)
+- [x] Vérifier que les erreurs Prisma/server sont interceptées et loggées via Sentry (`captureWithFeature`) — pas de throw silencieux
+- [x] Vérifier les niveaux de log : `info` pour les opérations normales, `warn` pour les cas limites (rate limit, cap atteint), `error` pour les erreurs inattendues
+- [x] Vérifier qu'aucune donnée sensible (email, token, mot de passe) n'est loggée — respecter la config `redact` de pino
 
 ### 5.8 — `/simplify` final
 
-- [ ] Lancer `/simplify` sur l'ensemble du code des phases 1–4 — reuse, quality, efficiency
+- [x] Lancer `/simplify` sur l'ensemble du code des phases 1–4 — reuse, quality, efficiency

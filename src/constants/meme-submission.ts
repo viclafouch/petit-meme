@@ -1,5 +1,8 @@
+import type { VariantProps } from 'class-variance-authority'
 import { z } from 'zod'
+import type { badgeVariants } from '@/components/ui/badge'
 import { TWEET_LINK_SCHEMA, YOUTUBE_LINK_SCHEMA } from '@/constants/url'
+import type { MemeSubmissionStatus } from '@/db/generated/prisma/enums'
 import {
   MemeContentLocale,
   MemeSubmissionUrlType
@@ -52,3 +55,11 @@ export const CREATE_MEME_SUBMISSION_SCHEMA = z
   })
 
 export const MAX_PENDING_SUBMISSIONS = 3
+
+type BadgeVariant = NonNullable<VariantProps<typeof badgeVariants>['variant']>
+
+export const SUBMISSION_STATUS_BADGE_VARIANT = {
+  PENDING: 'warning',
+  APPROVED: 'success',
+  REJECTED: 'destructive'
+} as const satisfies Record<MemeSubmissionStatus, BadgeVariant>

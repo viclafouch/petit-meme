@@ -6,6 +6,7 @@ import { PageHeader } from '@/components/page-header'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Container } from '@/components/ui/container'
+import { SUBMISSION_STATUS_BADGE_VARIANT } from '@/constants/meme-submission'
 import type { MemeSubmissionUrlType } from '@/db/generated/prisma/enums'
 import { MemeSubmissionStatus } from '@/db/generated/prisma/enums'
 import { getUserInitials } from '@/helpers/format'
@@ -24,17 +25,11 @@ import {
 } from '@tanstack/react-table'
 import { SubmissionActionsCell } from './-components/submission-actions-cell'
 
-const STATUS_BADGE_MAP = {
-  [MemeSubmissionStatus.PENDING]: { variant: 'warning', label: 'En attente' },
-  [MemeSubmissionStatus.APPROVED]: { variant: 'success', label: 'Approuvée' },
-  [MemeSubmissionStatus.REJECTED]: {
-    variant: 'destructive',
-    label: 'Rejetée'
-  }
-} as const satisfies Record<
-  MemeSubmissionStatus,
-  { variant: 'warning' | 'success' | 'destructive'; label: string }
->
+const STATUS_LABELS = {
+  [MemeSubmissionStatus.PENDING]: 'En attente',
+  [MemeSubmissionStatus.APPROVED]: 'Approuvée',
+  [MemeSubmissionStatus.REJECTED]: 'Rejetée'
+} as const satisfies Record<MemeSubmissionStatus, string>
 
 const URL_TYPE_CONFIG = {
   TWEET: { icon: Twitter, label: 'Tweet' },
@@ -106,9 +101,9 @@ const columns = [
           rel="noopener noreferrer"
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          <Icon className="size-4 shrink-0" aria-hidden />
+          <Icon className="size-4 shrink-0" aria-hidden="true" />
           <span className="truncate max-w-32">{config.label}</span>
-          <ExternalLink className="size-3 shrink-0" aria-hidden />
+          <ExternalLink className="size-3 shrink-0" aria-hidden="true" />
         </a>
       )
     }
@@ -131,11 +126,10 @@ const columns = [
     header: 'Statut',
     cell: (info) => {
       const status = info.getValue()
-      const config = STATUS_BADGE_MAP[status]
 
       return (
-        <Badge variant={config.variant} size="sm">
-          {config.label}
+        <Badge variant={SUBMISSION_STATUS_BADGE_VARIANT[status]} size="sm">
+          {STATUS_LABELS[status]}
         </Badge>
       )
     }
@@ -195,7 +189,7 @@ const StatusFilterTabs = ({
 const EmptyState = ({ hasFilter }: { hasFilter: boolean }) => {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-      <Inbox className="size-12 mb-4 opacity-50" aria-hidden />
+      <Inbox className="size-12 mb-4 opacity-50" aria-hidden="true" />
       <p className="text-lg font-medium">Aucune soumission</p>
       <p className="text-sm">
         {hasFilter

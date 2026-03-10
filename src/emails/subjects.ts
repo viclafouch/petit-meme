@@ -11,7 +11,9 @@ export const emailSubjects = {
     verificationReminder: 'Rappel : confirme ton email Petit Meme',
     accountDeleted: 'Ton compte Petit Meme a été supprimé',
     accountBanned: 'Ton compte Petit Meme a été suspendu',
-    accountUnbanned: 'Ton compte Petit Meme a été réactivé'
+    accountUnbanned: 'Ton compte Petit Meme a été réactivé',
+    submissionApproved: 'Ta proposition de mème a été acceptée !',
+    submissionRejected: 'Ta proposition de mème n’a pas été retenue'
   },
   en: {
     paymentFailed: 'Payment failed for your Petit Meme subscription',
@@ -23,6 +25,8 @@ export const emailSubjects = {
     verificationReminder: 'Reminder: confirm your Petit Meme email',
     accountDeleted: 'Your Petit Meme account has been deleted',
     accountBanned: 'Your Petit Meme account has been suspended',
-    accountUnbanned: 'Your Petit Meme account has been reactivated'
+    accountUnbanned: 'Your Petit Meme account has been reactivated',
+    submissionApproved: 'Your meme submission has been approved!',
+    submissionRejected: 'Your meme submission was not accepted'
   }
 } as const satisfies Record<Locale, Record<string, string>>

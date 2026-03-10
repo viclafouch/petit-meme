@@ -144,8 +144,12 @@ Objectif : l'admin peut review, approuver et rejeter les soumissions.
 
 Objectif : informer l'utilisateur quand sa soumission est traitée.
 
-- [ ] Email à l'utilisateur quand sa proposition est acceptée/refusée
-- [ ] Template email dans `src/emails/` (FR/EN), layout partagé existant
+- [x] Email à l'utilisateur quand sa proposition est acceptée/refusée
+- [x] Template email dans `src/emails/` (FR/EN), layout partagé existant
+- [x] `submission-approved-email.tsx` : notification avec titre du mème + CTA "Voir le mème" (lien localisé)
+- [x] `submission-rejected-email.tsx` : notification avec titre du mème, raisons génériques, encouragement (admin_note NON exposé)
+- [x] Subjects FR/EN ajoutés dans `src/emails/subjects.ts`
+- [x] `updateSubmissionStatus` (`admin/-server/submissions.tsx`) : fetch user (email, name, locale) + `sendEmailAsync` après update DB
 
 ---
 

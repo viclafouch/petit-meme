@@ -1,7 +1,13 @@
 import { LOGO_PATH } from '@/constants/branding'
+import type { Locale } from '@/paraglide/runtime'
 import { pixelBasedPreset } from '@react-email/components'
 
 export const SITE_URL = 'https://www.petit-meme.io'
+
+export const buildEmailUrl = (path: string, locale: Locale) => {
+  return `${SITE_URL}${locale === 'fr' ? '' : `/${locale}`}${path}`
+}
+
 export const LOGO_URL = `${SITE_URL}${LOGO_PATH}`
 export const CONTACT_EMAIL = 'hello@petit-meme.io'
 

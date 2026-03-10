@@ -2,7 +2,11 @@ import { z } from 'zod'
 import { prismaClient } from '@/db'
 import type { Prisma } from '@/db/generated/prisma/client'
 import { MemeSubmissionStatus } from '@/db/generated/prisma/enums'
+import { emailSubjects } from '@/emails/subjects'
+import { SubmissionApprovedEmail } from '@/emails/submission-approved-email'
+import { SubmissionRejectedEmail } from '@/emails/submission-rejected-email'
 import { submissionLogger } from '@/lib/logger'
+import { sendEmailAsync } from '@/lib/resend'
 import { captureWithFeature } from '@/lib/sentry'
 import { logAuditAction } from '@/server/audit'
 import { adminRequiredMiddleware } from '@/server/user-auth'
@@ -92,7 +96,13 @@ export const updateSubmissionStatus = createServerFn({ method: 'POST' })
   .handler(async ({ data, context }) => {
     const submission = await prismaClient.memeSubmission.findUnique({
       where: { id: data.submissionId },
-      select: { id: true, status: true, title: true, userId: true }
+      select: {
+        id: true,
+        status: true,
+        title: true,
+        userId: true,
+        user: { select: { email: true, name: true, locale: true } }
+      }
     })
 
     if (!submission) {
@@ -122,6 +132,35 @@ export const updateSubmissionStatus = createServerFn({ method: 'POST' })
       where: { id: data.submissionId },
       data: updateData
     })
+
+    if (data.status === MemeSubmissionStatus.APPROVED) {
+      sendEmailAsync({
+        to: submission.user.email,
+        subject: emailSubjects[submission.user.locale].submissionApproved,
+        react: (
+          <SubmissionApprovedEmail
+            username={submission.user.name}
+            memeTitle={submission.title}
+            memeId={data.memeId}
+            locale={submission.user.locale}
+          />
+        ),
+        logMessage: 'Sending submission approved email'
+      })
+    } else {
+      sendEmailAsync({
+        to: submission.user.email,
+        subject: emailSubjects[submission.user.locale].submissionRejected,
+        react: (
+          <SubmissionRejectedEmail
+            username={submission.user.name}
+            memeTitle={submission.title}
+            locale={submission.user.locale}
+          />
+        ),
+        logMessage: 'Sending submission rejected email'
+      })
+    }
 
     void logAuditAction({
       action: 'status_change',

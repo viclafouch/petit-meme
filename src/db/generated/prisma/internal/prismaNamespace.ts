@@ -399,6 +399,7 @@ export const ModelName = {
   Verification: 'Verification',
   StudioGeneration: 'StudioGeneration',
   RateLimit: 'RateLimit',
+  MemeSubmission: 'MemeSubmission',
   MemeTranslation: 'MemeTranslation',
   CategoryTranslation: 'CategoryTranslation'
 } as const
@@ -416,7 +417,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "userBookmark" | "category" | "memeCategory" | "video" | "meme" | "memeViewDaily" | "memeActionDaily" | "user" | "adminAuditLog" | "session" | "subscription" | "account" | "verification" | "studioGeneration" | "rateLimit" | "memeTranslation" | "categoryTranslation"
+    modelProps: "userBookmark" | "category" | "memeCategory" | "video" | "meme" | "memeViewDaily" | "memeActionDaily" | "user" | "adminAuditLog" | "session" | "subscription" | "account" | "verification" | "studioGeneration" | "rateLimit" | "memeSubmission" | "memeTranslation" | "categoryTranslation"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1530,6 +1531,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    MemeSubmission: {
+      payload: Prisma.$MemeSubmissionPayload<ExtArgs>
+      fields: Prisma.MemeSubmissionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MemeSubmissionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeSubmissionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MemeSubmissionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeSubmissionPayload>
+        }
+        findFirst: {
+          args: Prisma.MemeSubmissionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeSubmissionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MemeSubmissionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeSubmissionPayload>
+        }
+        findMany: {
+          args: Prisma.MemeSubmissionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeSubmissionPayload>[]
+        }
+        create: {
+          args: Prisma.MemeSubmissionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeSubmissionPayload>
+        }
+        createMany: {
+          args: Prisma.MemeSubmissionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MemeSubmissionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeSubmissionPayload>[]
+        }
+        delete: {
+          args: Prisma.MemeSubmissionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeSubmissionPayload>
+        }
+        update: {
+          args: Prisma.MemeSubmissionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeSubmissionPayload>
+        }
+        deleteMany: {
+          args: Prisma.MemeSubmissionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MemeSubmissionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MemeSubmissionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeSubmissionPayload>[]
+        }
+        upsert: {
+          args: Prisma.MemeSubmissionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeSubmissionPayload>
+        }
+        aggregate: {
+          args: Prisma.MemeSubmissionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMemeSubmission>
+        }
+        groupBy: {
+          args: Prisma.MemeSubmissionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MemeSubmissionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MemeSubmissionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MemeSubmissionCountAggregateOutputType> | number
+        }
+      }
+    }
     MemeTranslation: {
       payload: Prisma.$MemeTranslationPayload<ExtArgs>
       fields: Prisma.MemeTranslationFieldRefs
@@ -1923,6 +1998,23 @@ export const RateLimitScalarFieldEnum = {
 export type RateLimitScalarFieldEnum = (typeof RateLimitScalarFieldEnum)[keyof typeof RateLimitScalarFieldEnum]
 
 
+export const MemeSubmissionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  title: 'title',
+  url: 'url',
+  urlType: 'urlType',
+  contentLocale: 'contentLocale',
+  status: 'status',
+  adminNote: 'adminNote',
+  memeId: 'memeId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MemeSubmissionScalarFieldEnum = (typeof MemeSubmissionScalarFieldEnum)[keyof typeof MemeSubmissionScalarFieldEnum]
+
+
 export const MemeTranslationScalarFieldEnum = {
   id: 'id',
   memeId: 'memeId',
@@ -2143,6 +2235,18 @@ export const RateLimitOrderByRelevanceFieldEnum = {
 export type RateLimitOrderByRelevanceFieldEnum = (typeof RateLimitOrderByRelevanceFieldEnum)[keyof typeof RateLimitOrderByRelevanceFieldEnum]
 
 
+export const MemeSubmissionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  title: 'title',
+  url: 'url',
+  adminNote: 'adminNote',
+  memeId: 'memeId'
+} as const
+
+export type MemeSubmissionOrderByRelevanceFieldEnum = (typeof MemeSubmissionOrderByRelevanceFieldEnum)[keyof typeof MemeSubmissionOrderByRelevanceFieldEnum]
+
+
 export const MemeTranslationOrderByRelevanceFieldEnum = {
   id: 'id',
   memeId: 'memeId',
@@ -2292,6 +2396,34 @@ export type ListBigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMod
 
 
 /**
+ * Reference to a field of type 'MemeSubmissionUrlType'
+ */
+export type EnumMemeSubmissionUrlTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MemeSubmissionUrlType'>
+    
+
+
+/**
+ * Reference to a field of type 'MemeSubmissionUrlType[]'
+ */
+export type ListEnumMemeSubmissionUrlTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MemeSubmissionUrlType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'MemeSubmissionStatus'
+ */
+export type EnumMemeSubmissionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MemeSubmissionStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'MemeSubmissionStatus[]'
+ */
+export type ListEnumMemeSubmissionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MemeSubmissionStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'Float'
  */
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -2414,6 +2546,7 @@ export type GlobalOmitConfig = {
   verification?: Prisma.VerificationOmit
   studioGeneration?: Prisma.StudioGenerationOmit
   rateLimit?: Prisma.RateLimitOmit
+  memeSubmission?: Prisma.MemeSubmissionOmit
   memeTranslation?: Prisma.MemeTranslationOmit
   categoryTranslation?: Prisma.CategoryTranslationOmit
 }

@@ -66,6 +66,7 @@ export const ModelName = {
   Verification: 'Verification',
   StudioGeneration: 'StudioGeneration',
   RateLimit: 'RateLimit',
+  MemeSubmission: 'MemeSubmission',
   MemeTranslation: 'MemeTranslation',
   CategoryTranslation: 'CategoryTranslation'
 } as const
@@ -292,6 +293,23 @@ export const RateLimitScalarFieldEnum = {
 export type RateLimitScalarFieldEnum = (typeof RateLimitScalarFieldEnum)[keyof typeof RateLimitScalarFieldEnum]
 
 
+export const MemeSubmissionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  title: 'title',
+  url: 'url',
+  urlType: 'urlType',
+  contentLocale: 'contentLocale',
+  status: 'status',
+  adminNote: 'adminNote',
+  memeId: 'memeId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MemeSubmissionScalarFieldEnum = (typeof MemeSubmissionScalarFieldEnum)[keyof typeof MemeSubmissionScalarFieldEnum]
+
+
 export const MemeTranslationScalarFieldEnum = {
   id: 'id',
   memeId: 'memeId',
@@ -510,6 +528,18 @@ export const RateLimitOrderByRelevanceFieldEnum = {
 } as const
 
 export type RateLimitOrderByRelevanceFieldEnum = (typeof RateLimitOrderByRelevanceFieldEnum)[keyof typeof RateLimitOrderByRelevanceFieldEnum]
+
+
+export const MemeSubmissionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  title: 'title',
+  url: 'url',
+  adminNote: 'adminNote',
+  memeId: 'memeId'
+} as const
+
+export type MemeSubmissionOrderByRelevanceFieldEnum = (typeof MemeSubmissionOrderByRelevanceFieldEnum)[keyof typeof MemeSubmissionOrderByRelevanceFieldEnum]
 
 
 export const MemeTranslationOrderByRelevanceFieldEnum = {

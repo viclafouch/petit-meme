@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { TWEET_LINK_SCHEMA } from '@/constants/meme'
+import { TWEET_LINK_SCHEMA } from '@/constants/url'
 import { adminLogger } from '@/lib/logger'
 import { extractTweetIdFromUrl, getTweetById } from '@/lib/react-tweet'
 import { adminRequiredMiddleware } from '@/server/user-auth'

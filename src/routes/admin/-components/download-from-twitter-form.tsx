@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { LoadingButton } from '@/components/ui/loading-button'
-import { TWEET_LINK_SCHEMA } from '@/constants/meme'
+import { TWEET_LINK_SCHEMA } from '@/constants/url'
 import { base64ToBlob } from '@/helpers/blob'
 import { getFieldErrorMessage } from '@/lib/utils'
 import { fetchTweetMedia, getTweetFromUrl } from '@/server/twitter'

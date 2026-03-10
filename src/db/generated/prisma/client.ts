@@ -117,6 +117,11 @@ export type StudioGeneration = Prisma.StudioGenerationModel
  */
 export type RateLimit = Prisma.RateLimitModel
 /**
+ * Model MemeSubmission
+ * 
+ */
+export type MemeSubmission = Prisma.MemeSubmissionModel
+/**
  * Model MemeTranslation
  * 
  */

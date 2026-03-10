@@ -348,6 +348,40 @@ export type BigIntWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedBigIntFilter<$PrismaModel>
 }
 
+export type EnumMemeSubmissionUrlTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.MemeSubmissionUrlType | Prisma.EnumMemeSubmissionUrlTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.MemeSubmissionUrlType[] | Prisma.ListEnumMemeSubmissionUrlTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MemeSubmissionUrlType[] | Prisma.ListEnumMemeSubmissionUrlTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMemeSubmissionUrlTypeFilter<$PrismaModel> | $Enums.MemeSubmissionUrlType
+}
+
+export type EnumMemeSubmissionStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.MemeSubmissionStatus | Prisma.EnumMemeSubmissionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.MemeSubmissionStatus[] | Prisma.ListEnumMemeSubmissionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MemeSubmissionStatus[] | Prisma.ListEnumMemeSubmissionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMemeSubmissionStatusFilter<$PrismaModel> | $Enums.MemeSubmissionStatus
+}
+
+export type EnumMemeSubmissionUrlTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.MemeSubmissionUrlType | Prisma.EnumMemeSubmissionUrlTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.MemeSubmissionUrlType[] | Prisma.ListEnumMemeSubmissionUrlTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MemeSubmissionUrlType[] | Prisma.ListEnumMemeSubmissionUrlTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMemeSubmissionUrlTypeWithAggregatesFilter<$PrismaModel> | $Enums.MemeSubmissionUrlType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumMemeSubmissionUrlTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumMemeSubmissionUrlTypeFilter<$PrismaModel>
+}
+
+export type EnumMemeSubmissionStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.MemeSubmissionStatus | Prisma.EnumMemeSubmissionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.MemeSubmissionStatus[] | Prisma.ListEnumMemeSubmissionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MemeSubmissionStatus[] | Prisma.ListEnumMemeSubmissionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMemeSubmissionStatusWithAggregatesFilter<$PrismaModel> | $Enums.MemeSubmissionStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumMemeSubmissionStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumMemeSubmissionStatusFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -666,6 +700,40 @@ export type NestedBigIntWithAggregatesFilter<$PrismaModel = never> = {
   _sum?: Prisma.NestedBigIntFilter<$PrismaModel>
   _min?: Prisma.NestedBigIntFilter<$PrismaModel>
   _max?: Prisma.NestedBigIntFilter<$PrismaModel>
+}
+
+export type NestedEnumMemeSubmissionUrlTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.MemeSubmissionUrlType | Prisma.EnumMemeSubmissionUrlTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.MemeSubmissionUrlType[] | Prisma.ListEnumMemeSubmissionUrlTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MemeSubmissionUrlType[] | Prisma.ListEnumMemeSubmissionUrlTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMemeSubmissionUrlTypeFilter<$PrismaModel> | $Enums.MemeSubmissionUrlType
+}
+
+export type NestedEnumMemeSubmissionStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.MemeSubmissionStatus | Prisma.EnumMemeSubmissionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.MemeSubmissionStatus[] | Prisma.ListEnumMemeSubmissionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MemeSubmissionStatus[] | Prisma.ListEnumMemeSubmissionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMemeSubmissionStatusFilter<$PrismaModel> | $Enums.MemeSubmissionStatus
+}
+
+export type NestedEnumMemeSubmissionUrlTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.MemeSubmissionUrlType | Prisma.EnumMemeSubmissionUrlTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.MemeSubmissionUrlType[] | Prisma.ListEnumMemeSubmissionUrlTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MemeSubmissionUrlType[] | Prisma.ListEnumMemeSubmissionUrlTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMemeSubmissionUrlTypeWithAggregatesFilter<$PrismaModel> | $Enums.MemeSubmissionUrlType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumMemeSubmissionUrlTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumMemeSubmissionUrlTypeFilter<$PrismaModel>
+}
+
+export type NestedEnumMemeSubmissionStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.MemeSubmissionStatus | Prisma.EnumMemeSubmissionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.MemeSubmissionStatus[] | Prisma.ListEnumMemeSubmissionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MemeSubmissionStatus[] | Prisma.ListEnumMemeSubmissionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMemeSubmissionStatusWithAggregatesFilter<$PrismaModel> | $Enums.MemeSubmissionStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumMemeSubmissionStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumMemeSubmissionStatusFilter<$PrismaModel>
 }
 
 

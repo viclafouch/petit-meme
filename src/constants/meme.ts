@@ -135,13 +135,6 @@ export type MemeWithCategories = Prisma.MemeGetPayload<{
   include: { categories: { include: { category: true } } }
 }>
 
-const TWITTER_REGEX_THAT_INCLUDES_ID =
-  /^https?:\/\/(?:twitter\.com|x\.com)\/(?:[A-Za-z0-9_]+\/status\/\d+|i\/bookmarks\?post_id=\d+)/
-
-export const TWEET_LINK_SCHEMA = z
-  .url({ protocol: /^https$/, hostname: /^(twitter|x)\.com$/ })
-  .regex(TWITTER_REGEX_THAT_INCLUDES_ID, 'Invalid tweet URL')
-
 const SIZE_IN_MB = 16
 export const MAX_SIZE_MEME_IN_BYTES = SIZE_IN_MB * 1024 * 1024
 

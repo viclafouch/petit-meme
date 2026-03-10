@@ -1,4 +1,4 @@
-import { MINUTE } from '@/constants/time'
+import { DAY, MINUTE } from '@/constants/time'
 
 export type RateLimitConfig = {
   action: string
@@ -16,4 +16,10 @@ export const RATE_LIMIT_TRACK = {
   action: 'track',
   maxRequests: 30,
   windowMs: 5 * MINUTE
+} as const satisfies RateLimitConfig
+
+export const RATE_LIMIT_SUBMIT_MEME = {
+  action: 'submit-meme',
+  maxRequests: 5,
+  windowMs: DAY
 } as const satisfies RateLimitConfig

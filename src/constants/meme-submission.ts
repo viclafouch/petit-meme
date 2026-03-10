@@ -1,0 +1,54 @@
+import { z } from 'zod'
+import { TWEET_LINK_SCHEMA, YOUTUBE_LINK_SCHEMA } from '@/constants/url'
+import {
+  MemeContentLocale,
+  MemeSubmissionUrlType
+} from '@/db/generated/prisma/enums'
+
+const detectUrlType = (url: string): MemeSubmissionUrlType | null => {
+  if (TWEET_LINK_SCHEMA.safeParse(url).success) {
+    return MemeSubmissionUrlType.TWEET
+  }
+
+  if (YOUTUBE_LINK_SCHEMA.safeParse(url).success) {
+    return MemeSubmissionUrlType.YOUTUBE
+  }
+
+  return null
+}
+
+const SUBMISSION_TITLE_SCHEMA = z.string().trim().min(3).max(100)
+
+export const CREATE_MEME_SUBMISSION_SCHEMA = z
+  .object({
+    title: SUBMISSION_TITLE_SCHEMA,
+    url: z.string(),
+    contentLocale: z.enum(MemeContentLocale),
+    acceptTerms: z.literal(true)
+  })
+  .transform((data, context) => {
+    const urlType = detectUrlType(data.url)
+
+    if (!urlType) {
+      context.addIssue({
+        code: 'custom',
+        message: 'invalid_submission_url',
+        path: ['url']
+      })
+
+      return z.NEVER
+    }
+
+    return {
+      title: data.title,
+      url: data.url,
+      contentLocale: data.contentLocale,
+      urlType
+    }
+  })
+
+export type CreateMemeSubmissionInput = z.input<
+  typeof CREATE_MEME_SUBMISSION_SCHEMA
+>
+
+export const MAX_PENDING_SUBMISSIONS = 3

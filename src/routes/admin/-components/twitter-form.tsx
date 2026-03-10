@@ -10,7 +10,7 @@ import {
   FormMessage
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { TWEET_LINK_SCHEMA } from '@/constants/meme'
+import { TWEET_LINK_SCHEMA } from '@/constants/url'
 import { getErrorMessage } from '@/helpers/error'
 import { getFieldErrorMessage } from '@/lib/utils'
 import { createMemeFromTwitterUrl } from '@admin/-server/memes'

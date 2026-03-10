@@ -4,6 +4,8 @@ export type StudioErrorCode =
   | 'PREMIUM_REQUIRED'
   | 'UNAUTHORIZED'
   | 'BANNED_USER'
+  | 'SUBMISSION_LIMIT_REACHED'
+  | 'DUPLICATE_URL'
 
 export class StudioError extends Error {
   public code: StudioErrorCode

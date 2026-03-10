@@ -107,6 +107,7 @@ model Meme {
   viewsDaily          MemeViewDaily[]
   actionsDaily        MemeActionDaily[]
   studioGenerations   StudioGeneration[]
+  submissions         MemeSubmission[]
 
   @@index([status])
   @@index([status, viewCount])
@@ -173,6 +174,7 @@ model User {
 
   studioGenerations StudioGeneration[]
   adminActions      AdminAuditLog[]    @relation("AdminActions")
+  memeSubmissions   MemeSubmission[]
 
   @@index([createdAt])
   @@map("user")
@@ -285,6 +287,43 @@ model RateLimit {
 
   @@index([lastRequest])
   @@map("rate_limit")
+}
+
+enum MemeSubmissionUrlType {
+  TWEET
+  YOUTUBE
+
+  @@map("meme_submission_url_type")
+}
+
+enum MemeSubmissionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+
+  @@map("meme_submission_status")
+}
+
+model MemeSubmission {
+  id            String               @id @default(cuid())
+  userId        String               @map("user_id")
+  title         String
+  url           String               @unique
+  urlType       MemeSubmissionUrlType @map("url_type")
+  contentLocale MemeContentLocale     @map("content_locale")
+  status        MemeSubmissionStatus  @default(PENDING)
+  adminNote     String?              @map("admin_note")
+  memeId        String?              @map("meme_id")
+  createdAt     DateTime             @default(now()) @map("created_at")
+  updatedAt     DateTime             @updatedAt @map("updated_at")
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meme Meme? @relation(fields: [memeId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([userId])
+  @@index([status, createdAt(sort: Desc)])
+  @@map("meme_submission")
 }
 
 model MemeTranslation {

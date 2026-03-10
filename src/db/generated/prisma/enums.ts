@@ -34,3 +34,20 @@ export const MemeContentLocale = {
 } as const
 
 export type MemeContentLocale = (typeof MemeContentLocale)[keyof typeof MemeContentLocale]
+
+
+export const MemeSubmissionUrlType = {
+  TWEET: 'TWEET',
+  YOUTUBE: 'YOUTUBE'
+} as const
+
+export type MemeSubmissionUrlType = (typeof MemeSubmissionUrlType)[keyof typeof MemeSubmissionUrlType]
+
+
+export const MemeSubmissionStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED'
+} as const
+
+export type MemeSubmissionStatus = (typeof MemeSubmissionStatus)[keyof typeof MemeSubmissionStatus]

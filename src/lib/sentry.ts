@@ -30,6 +30,7 @@ type SentryFeature =
   | 'file-upload'
   | 'studio'
   | 'scraping-detection'
+  | 'meme-submission'
 
 export const captureWithFeature = (error: unknown, feature: SentryFeature) => {
   Sentry.captureException(error, { tags: { feature } })

@@ -8,9 +8,9 @@ import {
   MEME_ALGOLIA_INCLUDE,
   MEME_FULL_INCLUDE,
   MEMES_PER_PAGE,
-  MEMES_SEARCH_SCHEMA,
-  TWEET_LINK_SCHEMA
+  MEMES_SEARCH_SCHEMA
 } from '@/constants/meme'
+import { TWEET_LINK_SCHEMA } from '@/constants/url'
 import { prismaClient } from '@/db'
 import {
   type MemeContentLocale,

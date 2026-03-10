@@ -15,7 +15,11 @@ import * as Sentry from '@sentry/tanstackstart-react'
 import { QueryClient } from '@tanstack/react-query'
 import { createRouter } from '@tanstack/react-router'
 import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
-import { deLocalizeUrl, localizeUrl } from './paraglide/runtime'
+import {
+  deLocalizeUrl,
+  isExcludedByRouteStrategy,
+  localizeUrl
+} from './paraglide/runtime'
 import { routeTree } from './routeTree.gen'
 
 export function getRouter() {
@@ -47,9 +51,17 @@ export function getRouter() {
     context: { queryClient, user: null },
     rewrite: {
       input: ({ url }) => {
+        if (isExcludedByRouteStrategy(url)) {
+          return url
+        }
+
         return deLocalizeUrl(url)
       },
       output: ({ url }) => {
+        if (isExcludedByRouteStrategy(url)) {
+          return url
+        }
+
         return localizeUrl(url)
       }
     },

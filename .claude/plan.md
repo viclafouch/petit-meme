@@ -72,8 +72,6 @@ nitro({
 
 ## Backlog — Futures évolutions
 
-- [ ] Supprimer duplicata mème "Ratatouille", et "zero espagnol", "noel", "Thierry Henry", "let's go".
-
 ### Admin — Items reportés
 
 - [ ] Rate limiting sur les preview deployments Vercel (infra)

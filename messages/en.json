@@ -222,7 +222,9 @@
   "nav_upgrade_premium": "Upgrade to Premium",
   "plan_feature_favorites": "Saved favorites",
   "plan_feature_generations": "Video generations",
+  "plan_feature_no_watermark": "No watermark",
   "plan_feature_public_memes": "Access to public memes",
+  "plan_feature_watermark": "With watermark",
   "plan_free_description": "Try for free with no time limit. Discover memes, create your first content and save your favorites without entering your credit card.",
   "plan_free_title": "Tester",
   "plan_note_20_max": "20 max",
@@ -404,5 +406,11 @@
   "clipboard_error_read": "Unable to read clipboard",
   "clipboard_paste_aria_label": "Paste from clipboard",
   "validation_accept_terms": "You must accept the terms to continue",
-  "validation_passwords_dont_match": "Passwords do not match"
+  "validation_passwords_dont_match": "Passwords do not match",
+  "watermark_download_with_watermark": "Download with watermark",
+  "watermark_share_with_watermark": "Share with watermark",
+  "watermark_upsell_description": "Upgrade to Premium to download and share your videos without watermark.",
+  "watermark_upsell_features_label": "Premium benefits",
+  "watermark_upsell_price_from": "From {price}/mo",
+  "watermark_upsell_title": "Download without watermark"
 }

@@ -1,9 +1,8 @@
 import React from 'react'
 import { Share2 } from 'lucide-react'
 import { IconButtonStars } from '@/components/animate-ui/buttons/icon-button-stars'
-import { OverlaySpinner } from '@/components/ui/overlay-spinner'
 import type { MemeWithVideo } from '@/constants/meme'
-import { useShareMeme } from '@/hooks/use-share-meme'
+import { useMemeExport } from '@/hooks/use-meme-export'
 import { m } from '@/paraglide/messages.js'
 
 type ShareMemeButtonProps = {
@@ -14,27 +13,24 @@ export const ShareMemeButton = ({
   meme,
   ...restProps
 }: ShareMemeButtonProps) => {
-  const shareMutation = useShareMeme()
+  const shareMutation = useMemeExport({ mode: 'share' })
 
   const handleShare = () => {
     if (shareMutation.isPending) {
       return
     }
 
-    shareMutation.mutate(meme)
+    shareMutation.trigger(meme)
   }
 
   return (
-    <>
-      {shareMutation.isPending ? <OverlaySpinner /> : null}
-      <IconButtonStars
-        active={shareMutation.isPending}
-        onClick={handleShare}
-        aria-label={m.meme_share()}
-        {...restProps}
-      >
-        <Share2 />
-      </IconButtonStars>
-    </>
+    <IconButtonStars
+      active={shareMutation.isPending}
+      onClick={handleShare}
+      aria-label={m.meme_share()}
+      {...restProps}
+    >
+      <Share2 />
+    </IconButtonStars>
   )
 }

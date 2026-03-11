@@ -62,7 +62,8 @@ export const getFreePlan = (): Plan => {
         label: m.plan_feature_generations(),
         status: 'limited',
         note: m.plan_note_3_max()
-      }
+      },
+      { label: m.plan_feature_watermark(), status: 'limited' }
     ],
     pricing: FREE_PLAN_PRICING
   }
@@ -87,7 +88,8 @@ export const getPremiumPlan = (): Plan => {
         label: m.plan_feature_generations(),
         status: 'included',
         note: m.plan_note_unlimited()
-      }
+      },
+      { label: m.plan_feature_no_watermark(), status: 'included' }
     ],
     pricing: PREMIUM_PLAN_PRICING
   }

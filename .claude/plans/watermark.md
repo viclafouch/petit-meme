@@ -241,47 +241,46 @@ Ajouter une section watermark dans le form d'édition du mème (pour les futurs 
 
 Remplacer `useDownloadMeme` + `useShareMeme` (quasi-identiques) par un seul hook.
 
-- [ ] Créer `src/hooks/use-meme-export.ts` :
+- [x] Créer `src/hooks/use-meme-export.ts` :
   - **Paramètre** : `mode: 'download' | 'share'`
   - **`useMutation` interne** :
-    1. Si non-premium → ouvre le dialog upsell via `useShowDialog('watermark-upsell', {})`
-    2. Fetch blob via `shareMeme()` (le serveur gère le watermark)
-    3. `downloadBlob()` ou `shareBlob()` selon le mode
-    4. Ferme le dialog
-    5. `trackMemeAction()` avec l'action appropriée
+    1. Si non-premium → ouvre le dialog upsell via `showDialog('watermark-upsell', { meme, mode })` et **return** (pas de fetch automatique)
+    2. Si premium/admin → fetch blob + toast loading + download/share direct
   - **Check premium côté client** (pour le dialog, pas la sécurité) :
     - `queryClient.getQueryData(getAuthUserQueryOpts().queryKey)` → user ou null
     - `queryClient.getQueryData(getActiveSubscriptionQueryOpts().queryKey)` → subscription ou null
     - `matchIsUserAdmin(user)` pour les admins
-    - Si premium/admin → pas de dialog, download direct avec toast loading (comme actuellement)
   - **State exposé** : `{ trigger, isPending }`
-- [ ] Supprimer `src/hooks/use-download-meme.ts`
-- [ ] Supprimer `src/hooks/use-share-meme.ts`
-- [ ] Migrer les consumers :
+  - **Type `MemeExportMode`** exporté (réutilisé par le dialog)
+- [x] Supprimer `src/hooks/use-download-meme.ts`
+- [x] Supprimer `src/hooks/use-share-meme.ts`
+- [x] Migrer les consumers :
   - `src/components/Meme/player-dialog.tsx`
   - `src/components/Meme/meme-list-item.tsx`
   - `src/components/Meme/share-meme-button.tsx` (supprimer OverlaySpinner dupliqué)
-  - Vérifier `src/routes/_public__root/_default/memes/$memeId.tsx`
+  - `src/routes/_public__root/_default/memes/$memeId.tsx`
 
 ### 7.2 — Dialog upsell premium
 
-- [ ] `/frontend-design` avant de coder le dialog
-- [ ] Enregistrer dans `dialog.store.tsx` : clé `'watermark-upsell'`, composant lazy-loaded
-- [ ] Créer `src/components/Meme/watermark-upsell-dialog.tsx` :
-  - **Dialog (shadcn)** : modal
-  - **Haut** : spinner + texte "Préparation de votre vidéo..."
-  - **Bas** : card premium :
-    - Icône sparkle, titre "Téléchargez sans watermark"
-    - Avantages premium (réutiliser `getPremiumPlan().features`)
-    - Prix (réutiliser `PREMIUM_PLAN_PRICING`)
-    - CTA → `/pricing`
-  - **Fermeture auto** quand le download/share démarre
-  - **Accessibilité** : `aria-busy`, `aria-live="polite"`, focus management
-- [ ] Messages Paraglide FR/EN :
-  - `watermark_preparing` / `watermark_upsell_title` / `watermark_upsell_description`
+- [x] `/frontend-design` avant de coder le dialog
+- [x] Enregistrer dans `dialog.store.tsx` : clé `'watermark-upsell'`, composant lazy-loaded
+- [x] Créer `src/components/Meme/watermark-upsell-dialog.tsx` :
+  - **Dialog (animate-ui)** : modal, max-w-sm, **dialog de choix** (pas de loading automatique), image mème en header (`/images/premium-upsell.webp`)
+  - Reçoit `meme` + `mode` en props via le dialog store
+  - **Contenu** : upsell premium avec features list (CheckCircle2), prix, CTA
+  - **2 actions** :
+    - Primaire : "Passer à Premium" → Link `/pricing`
+    - Secondaire : "Télécharger/Partager avec watermark" → `useMutation` interne (fetch + export + close)
+  - Bouton secondaire affiche `LoadingSpinner` pendant le fetch, icône Download/Share sinon
+  - **Auto-fermeture** via `onOpenChange(false)` dans `onSuccess` du mutation
+  - Bouton secondaire `disabled` pendant la mutation
+  - **Accessibilité** : `aria-busy` + `disabled` sur le bouton, `aria-hidden="true"` sur icônes/spinner, `role="status"` sr-only pour annonce loading, `aria-label` dédié sur la feature list
+- [x] Messages Paraglide FR/EN :
+  - `watermark_download_with_watermark` / `watermark_share_with_watermark`
+  - `watermark_upsell_title` / `watermark_upsell_description` / `watermark_upsell_price_from`
   - `plan_feature_no_watermark` / `plan_feature_watermark`
 
-**Livrable** : un seul hook, 2 anciens supprimés, dialog upsell pendant le fetch.
+**Livrable** : un seul hook, 2 anciens supprimés, dialog upsell avec choix explicite de l'utilisateur.
 
 ---
 
@@ -289,8 +288,8 @@ Remplacer `useDownloadMeme` + `useShareMeme` (quasi-identiques) par un seul hook
 
 ### 8.1 — Plan features
 
-- [ ] Ajouter "Sans watermark" dans `getPremiumPlan().features` (`src/constants/plan.ts`)
-- [ ] Ajouter "Avec watermark" dans `getFreePlan().features`
+- [x] Ajouter "Sans watermark" dans `getPremiumPlan().features` (`src/constants/plan.ts`)
+- [x] Ajouter "Avec watermark" dans `getFreePlan().features`
 
 ### 8.2 — Vérification flow complet
 

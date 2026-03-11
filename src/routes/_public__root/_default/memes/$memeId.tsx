@@ -27,10 +27,9 @@ import {
   VideoPlayerVolumeRange
 } from '@/components/ui/kibo-ui/video-player'
 import type { MemeFullData } from '@/constants/meme'
-import { useDownloadMeme } from '@/hooks/use-download-meme'
+import { useMemeExport } from '@/hooks/use-meme-export'
 import { useMemeHls } from '@/hooks/use-meme-hls'
 import { useRegisterMemeView } from '@/hooks/use-register-meme-view'
-import { useShareMeme } from '@/hooks/use-share-meme'
 import { buildVideoImageUrl, buildVideoOriginalUrl } from '@/lib/bunny'
 import { getMemeByIdQueryOpts, getRelatedMemesQueryOpts } from '@/lib/queries'
 import { matchIsUserAdmin } from '@/lib/role'
@@ -160,8 +159,8 @@ const RouteComponent = () => {
     }
   }
 
-  const shareMutation = useShareMeme()
-  const downloadMutation = useDownloadMeme()
+  const shareMutation = useMemeExport({ mode: 'share' })
+  const downloadMutation = useMemeExport({ mode: 'download' })
   const randomMemeMutation = useMutation({
     mutationFn: () => {
       return getRandomMeme({ data: { exceptId: meme.id } })
@@ -283,7 +282,7 @@ const RouteComponent = () => {
                   variant="outline"
                   className="md:hidden shrink-0 flex-1"
                   onClick={() => {
-                    return shareMutation.mutate(meme)
+                    return shareMutation.trigger(meme)
                   }}
                 >
                   <Share2 />
@@ -294,7 +293,7 @@ const RouteComponent = () => {
                   variant="outline"
                   className="flex-1 shrink-0"
                   onClick={() => {
-                    return downloadMutation.mutate(meme)
+                    return downloadMutation.trigger(meme)
                   }}
                 >
                   <Download />

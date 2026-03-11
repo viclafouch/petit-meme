@@ -19,8 +19,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import type { MemeWithVideo } from '@/constants/meme'
 import { matchIsContentLocaleForeign } from '@/helpers/i18n-content'
-import { useDownloadMeme } from '@/hooks/use-download-meme'
-import { useShareMeme } from '@/hooks/use-share-meme'
+import { useMemeExport } from '@/hooks/use-meme-export'
 import { useToggleBookmark } from '@/hooks/use-toggle-bookmark'
 import type { ConversionEventName } from '@/lib/algolia-insights'
 import { sendClickEvent, sendConversionEvent } from '@/lib/algolia-insights'
@@ -142,8 +141,8 @@ export const MemeListItem = React.memo(
     position,
     authenticatedUserToken
   }: MemeListItemParams) => {
-    const shareMeme = useShareMeme()
-    const downloadMutation = useDownloadMeme()
+    const shareMutation = useMemeExport({ mode: 'share' })
+    const downloadMutation = useMemeExport({ mode: 'download' })
 
     const handleTrackClick = () => {
       sendClickEvent({
@@ -246,7 +245,7 @@ export const MemeListItem = React.memo(
                   onClick={() => {
                     handleTrackConversion('Meme Shared')
 
-                    return shareMeme.mutate(meme)
+                    return shareMutation.trigger(meme)
                   }}
                   className="md:hidden"
                 >
@@ -257,7 +256,7 @@ export const MemeListItem = React.memo(
                   onClick={() => {
                     handleTrackConversion('Meme Downloaded')
 
-                    return downloadMutation.mutate(meme)
+                    return downloadMutation.trigger(meme)
                   }}
                 >
                   <Download />

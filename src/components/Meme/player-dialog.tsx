@@ -6,10 +6,9 @@ import { toast } from 'sonner'
 import { MemeVideoPlayer } from '@/components/Meme/meme-video-player'
 import { Button, buttonVariants } from '@/components/ui/button'
 import type { MemeWithVideo } from '@/constants/meme'
-import { useDownloadMeme } from '@/hooks/use-download-meme'
+import { useMemeExport } from '@/hooks/use-meme-export'
 import { useMemeHls } from '@/hooks/use-meme-hls'
 import { useRegisterMemeView } from '@/hooks/use-register-meme-view'
-import { useShareMeme } from '@/hooks/use-share-meme'
 import type { ConversionEventName } from '@/lib/algolia-insights'
 import { sendConversionEvent } from '@/lib/algolia-insights'
 import { buildVideoImageUrl } from '@/lib/bunny'
@@ -36,8 +35,8 @@ export const PlayerDialog = ({
 }: PlayerDialogParams) => {
   const { videoRef } = useMemeHls({ bunnyId: meme.video.bunnyId })
   const isReducedMotion = useReducedMotion()
-  const shareMutation = useShareMeme()
-  const downloadMutation = useDownloadMeme()
+  const shareMutation = useMemeExport({ mode: 'share' })
+  const downloadMutation = useMemeExport({ mode: 'download' })
   const memeLink = useLinkProps({
     to: '/memes/$memeId',
     params: { memeId: meme.id }
@@ -108,7 +107,7 @@ export const PlayerDialog = ({
 
   const handleShareClick = () => {
     handleTrackConversion('Meme Shared')
-    shareMutation.mutate(meme)
+    shareMutation.trigger(meme)
   }
 
   const handleCopyClick = () => {
@@ -118,7 +117,7 @@ export const PlayerDialog = ({
 
   const handleDownloadClick = () => {
     handleTrackConversion('Meme Downloaded')
-    downloadMutation.mutate(meme)
+    downloadMutation.trigger(meme)
   }
 
   return (

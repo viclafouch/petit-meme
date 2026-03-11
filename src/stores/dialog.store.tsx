@@ -18,6 +18,17 @@ export const DIALOGS = {
         })
       }
     })
+  },
+  'watermark-upsell': {
+    component: React.lazy(async () => {
+      return {
+        default: await import('@/components/Meme/watermark-upsell-dialog').then(
+          (mod) => {
+            return mod.WatermarkUpsellDialog
+          }
+        )
+      }
+    })
   }
 } as const satisfies Record<string, DialogEntry>
 

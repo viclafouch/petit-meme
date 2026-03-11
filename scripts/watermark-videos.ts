@@ -38,7 +38,7 @@ const MEME_VIDEO_SELECT = {
 
 type MemeVideo = Prisma.MemeGetPayload<{ select: typeof MEME_VIDEO_SELECT }>
 
-const UPLOAD_CONCURRENCY = 5
+const UPLOAD_CONCURRENCY = 2
 
 type ParsedOptions = {
   limit: number | undefined

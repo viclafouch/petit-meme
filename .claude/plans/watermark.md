@@ -315,11 +315,11 @@ Lancer tous les audits habituels en parallèle après la feature complète :
 
 ### 8.4 — Déploiement production
 
-- [ ] Créer la Storage zone sur bunny.net (si pas déjà fait en Phase 4)
-- [ ] Ajouter les env vars sur Vercel
+- [x] Créer la Storage zone sur bunny.net (`petit-meme-watermarked-prod`)
+- [x] Ajouter les env vars sur Vercel
 - [ ] Merge `feat/watermark` → `main`
 - [ ] Vérifier le deploy Vercel
-- [ ] Exécuter le script d'upload batch (`--upload`) contre la Storage zone prod
+- [x] Exécuter le script d'upload batch (`--upload`) contre la Storage zone prod — 484/484 uploadés, 0 erreurs
 
 **Livrable** : feature complète, auditée, déployée.
 

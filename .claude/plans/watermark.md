@@ -143,7 +143,7 @@ Créer l'infra Storage et uploader les vidéos watermarkées générées en Phas
 
 ### 4.2 — Env vars
 
-- [ ] Ajouter dans `src/env/server.ts` (validation Zod) :
+- [x] Ajouter dans `src/env/server.ts` (validation Zod, required) :
   - `BUNNY_STORAGE_API_KEY: z.string()`
   - `BUNNY_STORAGE_HOSTNAME: z.string()`
   - `BUNNY_STORAGE_ZONE_NAME: z.string()`
@@ -151,7 +151,7 @@ Créer l'infra Storage et uploader les vidéos watermarkées générées en Phas
 
 ### 4.3 — Bunny Storage helpers
 
-- [ ] Créer `src/lib/bunny-storage.ts` (fonctions server-only) :
+- [x] Ajouté dans `src/lib/bunny.ts` (fusionné, pas de fichier séparé) :
   - `buildStorageUrl(bunnyId)` — `https://{hostname}/{zone}/{bunnyId}.mp4`
   - `getStorageHeaders()` — headers avec `AccessKey`
   - `fetchWatermarkedVideo(bunnyId)` — GET le MP4 depuis Storage (timeout 15s), retourne Response
@@ -161,12 +161,12 @@ Créer l'infra Storage et uploader les vidéos watermarkées générées en Phas
 
 ### 4.4 — Upload batch vers Storage
 
-- [ ] Ajouter mode `--upload` au script `scripts/watermark-videos.ts` :
-  - Lit les fichiers depuis le dossier local `/tmp/petit-meme-watermarked/`
+- [x] Mode `--upload` ajouté au script `scripts/watermark-videos.ts` :
+  - Lit les fichiers depuis le dossier local `./watermarked/`
   - Upload chaque fichier vers Bunny Storage via API PUT
   - Skip si déjà présent en Storage (HEAD check)
   - Concurrence 5 uploads en parallèle
-  - Log résumé (uploadés, skippés, erreurs)
+  - Log résumé (uploadés, skippés, erreurs, manquants)
 
 **Livrable** : Storage zone prête, helpers, ~502 vidéos watermarkées uploadées.
 
@@ -349,7 +349,7 @@ Lancer tous les audits habituels en parallèle après la feature complète :
 | `src/hooks/use-video-processor.ts` | Refactorer — importer depuis `src/utils/ffmpeg.ts` | 2 |
 | `scripts/watermark-videos.ts` | **Nouveau** — batch local + upload | 3, 4 |
 | `src/env/server.ts` | Ajouter 3 env vars Bunny Storage | 4 |
-| `src/lib/bunny-storage.ts` | **Nouveau** — helpers Bunny Storage (CRUD) | 4 |
+| `src/lib/bunny.ts` | Ajouter helpers Bunny Storage (fetch/upload/delete/check watermark) | 4 |
 | `src/server/meme.ts` | Modifier `shareMeme()` — premium check + fetch conditionnel | 5 |
 | `src/routes/admin/-server/watermark.ts` | **Nouveau** — server functions check/upload watermark | 6 |
 | `src/routes/admin/library/-components/use-meme-watermark.ts` | **Nouveau** — hook admin watermark | 6 |

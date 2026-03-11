@@ -13,7 +13,12 @@ import {
 import { prismaClient } from '@/db'
 import type { Prisma } from '@/db/generated/prisma/client'
 import { MemeStatus } from '@/db/generated/prisma/enums'
-import { signOriginalUrl } from '@/lib/bunny'
+import { serverEnv } from '@/env/server'
+import {
+  checkWatermarkExists,
+  signOriginalUrl,
+  uploadWatermarkedVideo
+} from '@/lib/bunny'
 import { logEnvironmentInfo } from './lib/env-guard'
 
 const execFileAsync = promisify(execFile)
@@ -32,10 +37,13 @@ const MEME_VIDEO_SELECT = {
 
 type MemeVideo = Prisma.MemeGetPayload<{ select: typeof MEME_VIDEO_SELECT }>
 
+const UPLOAD_CONCURRENCY = 5
+
 type ParsedOptions = {
   limit: number | undefined
   memeId: string | undefined
   dryRun: boolean
+  upload: boolean
 }
 
 const fetchMemes = async ({
@@ -165,12 +173,12 @@ const processMeme = async (
   }
 }
 
-const processWithConcurrency = async <T>(
+const processWithConcurrency = async <T, TResult extends string>(
   items: T[],
   concurrency: number,
-  fn: (item: T, index: number) => Promise<ProcessResult>
+  fn: (item: T, index: number) => Promise<TResult>
 ) => {
-  const results: ProcessResult[] = []
+  const results: TResult[] = []
   let nextIndex = 0
 
   const worker = async () => {
@@ -200,7 +208,8 @@ const parseArgs = (): ParsedOptions => {
   const options: ParsedOptions = {
     limit: 50,
     memeId: undefined,
-    dryRun: false
+    dryRun: false,
+    upload: false
   }
 
   let argIndex = 0
@@ -228,6 +237,11 @@ const parseArgs = (): ParsedOptions => {
 
       case '--all': {
         options.limit = undefined
+        break
+      }
+
+      case '--upload': {
+        options.upload = true
         break
       }
 
@@ -266,14 +280,122 @@ const computeTotalSize = async () => {
   return { totalMB, fileCount: mp4Files.length }
 }
 
+const countResults = <T extends string>(results: T[]) => {
+  const counts = {} as Record<T, number>
+
+  for (const result of results) {
+    counts[result] = (counts[result] ?? 0) + 1
+  }
+
+  return counts
+}
+
+type UploadResult = 'uploaded' | 'skipped' | 'missing' | 'error'
+
+const uploadMeme = async (meme: MemeVideo): Promise<UploadResult> => {
+  const { bunnyId } = meme.video
+  const localPath = path.join(OUTPUT_DIR, `${bunnyId}.mp4`)
+
+  let fileBuffer: Buffer
+
+  try {
+    fileBuffer = await fs.readFile(localPath)
+  } catch {
+    return 'missing'
+  }
+
+  if (fileBuffer.length === 0) {
+    return 'missing'
+  }
+
+  if (await checkWatermarkExists(bunnyId)) {
+    return 'skipped'
+  }
+
+  await uploadWatermarkedVideo(bunnyId, fileBuffer)
+
+  return 'uploaded'
+}
+
 const formatProgress = (index: number, total: number, bunnyId: string) => {
   return `  [${index + 1}/${total}] ${bunnyId}`
+}
+
+const runUpload = async (options: ParsedOptions) => {
+  console.log(
+    `Storage:   ${serverEnv.BUNNY_STORAGE_HOSTNAME}/${serverEnv.BUNNY_STORAGE_ZONE_NAME}`
+  )
+  console.log(`Source:    ${OUTPUT_DIR}`)
+
+  if (options.dryRun) {
+    console.log('Mode:      DRY RUN')
+  }
+
+  console.log('')
+
+  const memes = await fetchMemes(options)
+  console.log(`Found ${memes.length} published memes to upload\n`)
+
+  if (memes.length === 0) {
+    process.exit(0)
+  }
+
+  const results = await processWithConcurrency(
+    memes,
+    UPLOAD_CONCURRENCY,
+    async (meme, index) => {
+      const prefix = formatProgress(index, memes.length, meme.video.bunnyId)
+
+      if (options.dryRun) {
+        const localPath = path.join(OUTPUT_DIR, `${meme.video.bunnyId}.mp4`)
+        const hasLocal = await hasValidOutput(localPath)
+        console.log(`${prefix} [DRY RUN] local=${hasLocal ? 'yes' : 'no'}`)
+
+        return 'skipped'
+      }
+
+      try {
+        const result = await uploadMeme(meme)
+
+        if (result === 'uploaded') {
+          console.log(`${prefix} uploaded`)
+        } else if (result === 'skipped') {
+          console.log(`${prefix} (already in Storage)`)
+        } else if (result === 'missing') {
+          console.log(`${prefix} (no local file)`)
+        }
+
+        return result
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error)
+        console.error(`${prefix} FAILED: ${message}`)
+
+        return 'error'
+      }
+    }
+  )
+
+  const counts = countResults(results)
+
+  console.log('\n--- Upload Summary ---')
+  console.log(`Uploaded:  ${counts.uploaded ?? 0}`)
+  console.log(`Skipped:   ${counts.skipped ?? 0}`)
+  console.log(`Missing:   ${counts.missing ?? 0}`)
+  console.log(`Errors:    ${counts.error ?? 0}`)
+
+  process.exit((counts.error ?? 0) > 0 ? 1 : 0)
 }
 
 const main = async () => {
   logEnvironmentInfo()
 
   const options = parseArgs()
+
+  if (options.upload) {
+    await runUpload(options)
+
+    return
+  }
 
   await fs.mkdir(OUTPUT_DIR, { recursive: true })
   await fs.access(WATERMARK_PATH)
@@ -319,27 +441,19 @@ const main = async () => {
     }
   )
 
-  const processed = results.filter((result) => {
-    return result === 'processed'
-  }).length
-  const skipped = results.filter((result) => {
-    return result === 'skipped'
-  }).length
-  const errorCount = results.filter((result) => {
-    return result === 'error'
-  }).length
+  const counts = countResults(results)
 
   console.log('\n--- Summary ---')
-  console.log(`Processed: ${processed}`)
-  console.log(`Skipped:   ${skipped}`)
-  console.log(`Errors:    ${errorCount}`)
+  console.log(`Processed: ${counts.processed ?? 0}`)
+  console.log(`Skipped:   ${counts.skipped ?? 0}`)
+  console.log(`Errors:    ${counts.error ?? 0}`)
 
-  if (processed > 0 || skipped > 0) {
+  if ((counts.processed ?? 0) > 0 || (counts.skipped ?? 0) > 0) {
     const { totalMB, fileCount } = await computeTotalSize()
     console.log(`Total size: ${totalMB} MB (${fileCount} files)`)
   }
 
-  process.exit(errorCount > 0 ? 1 : 0)
+  process.exit((counts.error ?? 0) > 0 ? 1 : 0)
 }
 
 void main()

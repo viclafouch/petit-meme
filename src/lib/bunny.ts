@@ -137,3 +137,124 @@ export const uploadVideo = createServerOnlyFn(
     }
   }
 )
+
+const STORAGE_TIMEOUT_MS = 15_000
+const STORAGE_UPLOAD_TIMEOUT_MS = 120_000
+
+const withStorageTimeout = (timeoutMs = STORAGE_TIMEOUT_MS) => {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => {
+    return controller.abort()
+  }, timeoutMs)
+
+  return {
+    signal: controller.signal,
+    clear: () => {
+      return clearTimeout(timeoutId)
+    }
+  }
+}
+
+const buildStorageUrl = (bunnyId: string) => {
+  return `https://${serverEnv.BUNNY_STORAGE_HOSTNAME}/${serverEnv.BUNNY_STORAGE_ZONE_NAME}/${bunnyId}.mp4`
+}
+
+const getStorageHeaders = () => {
+  return new Headers({ AccessKey: serverEnv.BUNNY_STORAGE_API_KEY })
+}
+
+export const fetchWatermarkedVideo = createServerOnlyFn(
+  async (bunnyId: string) => {
+    const timeout = withStorageTimeout()
+
+    try {
+      const response = await fetch(buildStorageUrl(bunnyId), {
+        headers: getStorageHeaders(),
+        signal: timeout.signal
+      })
+
+      if (!response.ok) {
+        throw new Error(
+          `Bunny Storage responded with status ${response.status}`
+        )
+      }
+
+      return response
+    } finally {
+      timeout.clear()
+    }
+  }
+)
+
+export const uploadWatermarkedVideo = createServerOnlyFn(
+  async (bunnyId: string, videoBuffer: Buffer) => {
+    const headers = getStorageHeaders()
+    headers.set('Content-Type', 'application/octet-stream')
+    const timeout = withStorageTimeout(STORAGE_UPLOAD_TIMEOUT_MS)
+
+    try {
+      const response = await fetch(buildStorageUrl(bunnyId), {
+        method: 'PUT',
+        headers,
+        // @ts-expect-error -- fetch body type doesn't accept Buffer but it works at runtime
+        body: videoBuffer,
+        signal: timeout.signal
+      })
+
+      if (!response.ok) {
+        throw new Error(
+          `Bunny Storage upload failed with status ${response.status}`
+        )
+      }
+
+      bunnyLogger.info(
+        { bunnyId, sizeBytes: videoBuffer.length },
+        'Watermarked video uploaded to Storage'
+      )
+    } finally {
+      timeout.clear()
+    }
+  }
+)
+
+export const deleteWatermarkedVideo = createServerOnlyFn(
+  async (bunnyId: string) => {
+    const timeout = withStorageTimeout()
+
+    try {
+      const response = await fetch(buildStorageUrl(bunnyId), {
+        method: 'DELETE',
+        headers: getStorageHeaders(),
+        signal: timeout.signal
+      })
+
+      if (!response.ok && response.status !== 404) {
+        throw new Error(
+          `Bunny Storage delete failed with status ${response.status}`
+        )
+      }
+
+      bunnyLogger.info({ bunnyId }, 'Watermarked video deleted from Storage')
+    } finally {
+      timeout.clear()
+    }
+  }
+)
+
+export const checkWatermarkExists = createServerOnlyFn(
+  async (bunnyId: string) => {
+    const timeout = withStorageTimeout()
+
+    try {
+      const response = await fetch(buildStorageUrl(bunnyId), {
+        method: 'HEAD',
+        headers: getStorageHeaders(),
+        signal: timeout.signal
+      })
+
+      return response.ok
+    } finally {
+      timeout.clear()
+    }
+  }
+)

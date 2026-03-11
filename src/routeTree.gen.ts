@@ -10,6 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SitemapStaticDotxmlRouteImport } from './routes/sitemap-static[.]xml'
+import { Route as SitemapMemesDotxmlRouteImport } from './routes/sitemap-memes[.]xml'
+import { Route as SitemapCategoriesDotxmlRouteImport } from './routes/sitemap-categories[.]xml'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as ReelsRouteImport } from './routes/reels'
 import { Route as ManifestDotjsonRouteImport } from './routes/manifest[.]json'
@@ -55,6 +58,21 @@ import { Route as Public__rootDefaultMemesCategorySlugRouteImport } from './rout
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapStaticDotxmlRoute = SitemapStaticDotxmlRouteImport.update({
+  id: '/sitemap-static.xml',
+  path: '/sitemap-static.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapMemesDotxmlRoute = SitemapMemesDotxmlRouteImport.update({
+  id: '/sitemap-memes.xml',
+  path: '/sitemap-memes.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapCategoriesDotxmlRoute = SitemapCategoriesDotxmlRouteImport.update({
+  id: '/sitemap-categories.xml',
+  path: '/sitemap-categories.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
@@ -284,6 +302,9 @@ export interface FileRoutesByFullPath {
   '/manifest.json': typeof ManifestDotjsonRoute
   '/reels': typeof ReelsRoute
   '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap-categories.xml': typeof SitemapCategoriesDotxmlRoute
+  '/sitemap-memes.xml': typeof SitemapMemesDotxmlRoute
+  '/sitemap-static.xml': typeof SitemapStaticDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/downloader': typeof AdminDownloaderRoute
   '/admin/services': typeof AdminServicesRoute
@@ -324,6 +345,9 @@ export interface FileRoutesByTo {
   '/manifest.json': typeof ManifestDotjsonRoute
   '/reels': typeof ReelsRoute
   '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap-categories.xml': typeof SitemapCategoriesDotxmlRoute
+  '/sitemap-memes.xml': typeof SitemapMemesDotxmlRoute
+  '/sitemap-static.xml': typeof SitemapStaticDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/downloader': typeof AdminDownloaderRoute
   '/admin/services': typeof AdminServicesRoute
@@ -366,6 +390,9 @@ export interface FileRoutesById {
   '/manifest.json': typeof ManifestDotjsonRoute
   '/reels': typeof ReelsRoute
   '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap-categories.xml': typeof SitemapCategoriesDotxmlRoute
+  '/sitemap-memes.xml': typeof SitemapMemesDotxmlRoute
+  '/sitemap-static.xml': typeof SitemapStaticDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_public__root/_default': typeof Public__rootDefaultRouteRouteWithChildren
   '/admin/downloader': typeof AdminDownloaderRoute
@@ -411,6 +438,9 @@ export interface FileRouteTypes {
     | '/manifest.json'
     | '/reels'
     | '/robots.txt'
+    | '/sitemap-categories.xml'
+    | '/sitemap-memes.xml'
+    | '/sitemap-static.xml'
     | '/sitemap.xml'
     | '/admin/downloader'
     | '/admin/services'
@@ -451,6 +481,9 @@ export interface FileRouteTypes {
     | '/manifest.json'
     | '/reels'
     | '/robots.txt'
+    | '/sitemap-categories.xml'
+    | '/sitemap-memes.xml'
+    | '/sitemap-static.xml'
     | '/sitemap.xml'
     | '/admin/downloader'
     | '/admin/services'
@@ -492,6 +525,9 @@ export interface FileRouteTypes {
     | '/manifest.json'
     | '/reels'
     | '/robots.txt'
+    | '/sitemap-categories.xml'
+    | '/sitemap-memes.xml'
+    | '/sitemap-static.xml'
     | '/sitemap.xml'
     | '/_public__root/_default'
     | '/admin/downloader'
@@ -537,6 +573,9 @@ export interface RootRouteChildren {
   ManifestDotjsonRoute: typeof ManifestDotjsonRoute
   ReelsRoute: typeof ReelsRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
+  SitemapCategoriesDotxmlRoute: typeof SitemapCategoriesDotxmlRoute
+  SitemapMemesDotxmlRoute: typeof SitemapMemesDotxmlRoute
+  SitemapStaticDotxmlRoute: typeof SitemapStaticDotxmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiBunnyRoute: typeof ApiBunnyRoute
   ApiSentryTunnelRoute: typeof ApiSentryTunnelRoute
@@ -554,6 +593,27 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap-static.xml': {
+      id: '/sitemap-static.xml'
+      path: '/sitemap-static.xml'
+      fullPath: '/sitemap-static.xml'
+      preLoaderRoute: typeof SitemapStaticDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap-memes.xml': {
+      id: '/sitemap-memes.xml'
+      path: '/sitemap-memes.xml'
+      fullPath: '/sitemap-memes.xml'
+      preLoaderRoute: typeof SitemapMemesDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap-categories.xml': {
+      id: '/sitemap-categories.xml'
+      path: '/sitemap-categories.xml'
+      fullPath: '/sitemap-categories.xml'
+      preLoaderRoute: typeof SitemapCategoriesDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/robots.txt': {
@@ -967,6 +1027,9 @@ const rootRouteChildren: RootRouteChildren = {
   ManifestDotjsonRoute: ManifestDotjsonRoute,
   ReelsRoute: ReelsRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
+  SitemapCategoriesDotxmlRoute: SitemapCategoriesDotxmlRoute,
+  SitemapMemesDotxmlRoute: SitemapMemesDotxmlRoute,
+  SitemapStaticDotxmlRoute: SitemapStaticDotxmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiBunnyRoute: ApiBunnyRoute,
   ApiSentryTunnelRoute: ApiSentryTunnelRoute,

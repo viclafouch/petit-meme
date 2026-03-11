@@ -66,7 +66,7 @@ export default defineConfig(({ mode }) => {
           { match: '/api/:path(.*)?', exclude: true },
           { match: '/admin/:path(.*)?', exclude: true },
           { match: '/health', exclude: true },
-          { match: '/sitemap.xml', exclude: true },
+          { match: '/sitemap:rest(.*)', exclude: true },
           { match: '/robots.txt', exclude: true }
         ]
       }),

@@ -1,16 +1,15 @@
-import { createHash } from 'node:crypto'
-
 type SignBunnyUrlParams = {
   url: string
   securityKey: string
   expirationSeconds: number
 }
 
-export const signBunnyUrl = ({
+export const signBunnyUrl = async ({
   url,
   securityKey,
   expirationSeconds
 }: SignBunnyUrlParams) => {
+  const { createHash } = await import('node:crypto')
   const parsed = new URL(url)
   const expiration = Math.floor(Date.now() / 1000) + expirationSeconds
 

@@ -73,7 +73,7 @@ const fetchMemes = async ({
 }
 
 const downloadVideo = async (bunnyId: string, destPath: string) => {
-  const url = signOriginalUrl(bunnyId)
+  const url = await signOriginalUrl(bunnyId)
   const controller = new AbortController()
   const timeout = setTimeout(() => {
     return controller.abort()

@@ -12,7 +12,7 @@ import { resolveMemeTranslation } from '@/helpers/i18n-content'
 import { authLogger } from '@/lib/logger'
 import { matchIsUserAdmin } from '@/lib/role'
 import { getLocale } from '@/paraglide/runtime'
-import { findActiveSubscription } from '@/server/customer'
+import { findActiveSubscription, matchIsUserPremium } from '@/server/customer'
 import { authUserRequiredMiddleware } from '@/server/user-auth'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
@@ -21,7 +21,7 @@ import { setResponseStatus } from '@tanstack/react-start/server'
 export const getFavoritesMemes = createServerFn({ method: 'GET' })
   .middleware([authUserRequiredMiddleware])
   .handler(async ({ context }) => {
-    const activeSubscription = await findActiveSubscription(context.user.id)
+    const isPremium = await matchIsUserPremium(context.user)
 
     const bookmarks = await prismaClient.userBookmark.findMany({
       where: {
@@ -33,10 +33,7 @@ export const getFavoritesMemes = createServerFn({ method: 'GET' })
       orderBy: {
         createdAt: 'desc'
       },
-      take:
-        activeSubscription || matchIsUserAdmin(context.user)
-          ? undefined
-          : FREE_PLAN_MAX_FAVORITES,
+      take: isPremium ? undefined : FREE_PLAN_MAX_FAVORITES,
       include: {
         meme: {
           include: {
@@ -74,7 +71,7 @@ export const getFavoritesMemes = createServerFn({ method: 'GET' })
 export const checkGeneration = createServerFn({ method: 'POST' })
   .middleware([authUserRequiredMiddleware])
   .handler(async ({ context }) => {
-    const [{ generationCount }, activeSubscription] = await Promise.all([
+    const [{ generationCount }, isPremium] = await Promise.all([
       prismaClient.user.findUniqueOrThrow({
         where: {
           id: context.user.id
@@ -83,14 +80,10 @@ export const checkGeneration = createServerFn({ method: 'POST' })
           generationCount: true
         }
       }),
-      findActiveSubscription(context.user.id)
+      matchIsUserPremium(context.user)
     ])
 
-    if (
-      generationCount >= FREE_PLAN_MAX_GENERATIONS &&
-      !activeSubscription &&
-      !matchIsUserAdmin(context.user)
-    ) {
+    if (generationCount >= FREE_PLAN_MAX_GENERATIONS && !isPremium) {
       authLogger.warn(
         { userId: context.user.id, generationCount },
         'Generation limit reached'

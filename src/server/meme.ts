@@ -55,9 +55,10 @@ import {
   withAlgoliaCache
 } from '@/lib/algolia'
 import { auth } from '@/lib/auth'
-import { buildSignedOriginalUrl } from '@/lib/bunny'
+import { buildSignedOriginalUrl, fetchWatermarkedVideo } from '@/lib/bunny'
 import { algoliaLogger, logger } from '@/lib/logger'
 import { baseLocale, getLocale, type Locale } from '@/paraglide/runtime'
+import { matchIsUserPremium } from '@/server/customer'
 import { createRateLimitMiddleware, extractClientIp } from '@/server/rate-limit'
 import { authUserRequiredMiddleware } from '@/server/user-auth'
 import { ensureAlgoliaUserToken } from '@/utils/tracking-cookies'
@@ -470,38 +471,70 @@ export const getRandomMeme = createServerFn({ method: 'GET' })
     return meme ?? null
   })
 
+const buildVideoProxyResponse = (upstream: Response) => {
+  return new Response(upstream.body, {
+    headers: {
+      'Content-Type': upstream.headers.get('Content-Type') ?? 'video/mp4',
+      'Cache-Control': 'no-cache'
+    }
+  })
+}
+
 export const shareMeme = createServerFn({ method: 'GET' })
   .inputValidator((data) => {
     return z.string().parse(data)
   })
   .middleware([createRateLimitMiddleware(RATE_LIMIT_DOWNLOAD)])
   .handler(async ({ data: memeId }) => {
-    const meme = await prismaClient.meme.findUnique({
-      where: {
-        id: memeId,
-        status: MemeStatus.PUBLISHED
-      },
-      select: {
-        video: {
-          select: {
-            bunnyId: true
+    const request = getRequest()
+
+    const [meme, session] = await Promise.all([
+      prismaClient.meme.findUnique({
+        where: {
+          id: memeId,
+          status: MemeStatus.PUBLISHED
+        },
+        select: {
+          video: {
+            select: {
+              bunnyId: true
+            }
           }
         }
-      }
-    })
+      }),
+      auth.api.getSession({ headers: request.headers }).catch(() => {
+        return null
+      })
+    ])
 
     if (!meme) {
       throw notFound()
     }
 
-    const originalUrl = buildSignedOriginalUrl(meme.video.bunnyId)
-
-    const request = getRequest()
+    const { bunnyId } = meme.video
     const ip = extractClientIp(request)
     const userAgent = request.headers.get('user-agent') ?? 'unknown'
 
-    logger.info({ memeId, ip, userAgent }, 'Meme shared/downloaded')
+    const isPremium = session?.user
+      ? await matchIsUserPremium(session.user)
+      : false
 
+    logger.info({ memeId, ip, userAgent, isPremium }, 'Meme shared/downloaded')
+
+    if (!isPremium) {
+      try {
+        const watermarkedResponse = await fetchWatermarkedVideo(bunnyId)
+
+        return buildVideoProxyResponse(watermarkedResponse)
+      } catch (error) {
+        logger.warn(
+          { memeId, bunnyId, error },
+          'Watermark fallback: serving original video'
+        )
+      }
+    }
+
+    const originalUrl = await buildSignedOriginalUrl(bunnyId)
     const controller = new AbortController()
     const timeoutId = setTimeout(() => {
       return controller.abort()
@@ -516,12 +549,7 @@ export const shareMeme = createServerFn({ method: 'GET' })
         throw new Error(`Bunny CDN responded with status ${response.status}`)
       }
 
-      return new Response(response.body, {
-        headers: {
-          'Content-Type': response.headers.get('Content-Type') ?? 'video/mp4',
-          'Cache-Control': 'no-cache'
-        }
-      })
+      return buildVideoProxyResponse(response)
     } finally {
       clearTimeout(timeoutId)
     }

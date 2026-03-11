@@ -177,19 +177,17 @@ Créer l'infra Storage et uploader les vidéos watermarkées générées en Phas
 
 Modifier `shareMeme()` pour servir la version watermarkée aux non-premium.
 
-- [ ] Modifier `src/server/meme.ts` — `shareMeme()` :
-  - Ajouter optional auth :
-    ```
-    const { headers } = getRequest()
-    const session = await auth.api.getSession({ headers })
-    ```
-  - Déterminer si premium :
-    - Si `session?.user` → `findActiveSubscription(session.user.id)` + `matchIsUserAdmin(session.user)`
-    - Si pas de session → non-premium
-  - **Premium/admin** → fetch depuis Video Library (signed URL, comme aujourd'hui)
-  - **Non-premium** → `fetchWatermarkedVideo(bunnyId)` depuis Bunny Storage
-  - **Fallback** : si Storage retourne 404 → servir l'original + log warning + Sentry capture (`'watermark-fallback'`). Ne jamais bloquer le téléchargement.
-- [ ] Le reste inchangé : proxy Response, rate-limit, logging, timeout
+- [x] Modifier `src/server/meme.ts` — `shareMeme()` :
+  - Optional auth via `auth.api.getSession({ headers }).catch(() => null)`
+  - Premium check via `matchIsUserPremium(session.user)` (helper extrait dans `src/server/customer.ts`)
+  - Non-premium → `fetchWatermarkedVideo(bunnyId)` depuis Bunny Storage
+  - Premium/admin → fetch depuis Video Library (signed URL, comme avant)
+  - Fallback : si Storage échoue → log warning + servir l'original. Ne jamais bloquer.
+- [x] Rate-limit, proxy Response, logging, timeout inchangés. `isPremium` ajouté aux logs.
+- [x] `matchIsUserPremium` helper dans `src/server/customer.ts` — short-circuit admin (sync) puis subscription (async). Remplace le pattern dupliqué dans `shareMeme()`, `getFavoritesMemes()`, `checkGeneration()`.
+- [x] `buildVideoProxyResponse` helper dans `src/server/meme.ts` — factorise la construction Response dupliquée (watermarked + original).
+- [x] `Promise.all` meme query + getSession — parallélisation des deux opérations indépendantes.
+- [x] Fix `node:crypto` externalized for browser : `bunny-token.ts` utilise maintenant `await import('node:crypto')` (lazy) au lieu d'un import top-level. `signBunnyUrl` rendu async, callers mis à jour (`meme.ts`, `ai.ts`, `watermark-videos.ts`).
 
 **Livrable** : non-premium reçoivent le watermark, premium l'original. Transparent côté client.
 

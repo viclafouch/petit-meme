@@ -67,7 +67,7 @@ export const generateMemeContent = createServerFn({ method: 'POST' })
       fallback: meme
     })
 
-    const originalUrl = buildSignedOriginalUrl(meme.video.bunnyId)
+    const originalUrl = await buildSignedOriginalUrl(meme.video.bunnyId)
 
     const contents = [
       {

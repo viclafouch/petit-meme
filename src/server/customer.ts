@@ -1,5 +1,7 @@
 import type { User } from 'better-auth'
 import { auth } from '@/lib/auth'
+import type { SessionUser } from '@/lib/role'
+import { matchIsUserAdmin } from '@/lib/role'
 import { getAuthUser } from '@/server/user-auth'
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
@@ -46,3 +48,13 @@ export const getActiveSubscription = createServerFn({ method: 'GET' }).handler(
 export type ActiveSubscription = NonNullable<
   Awaited<ReturnType<typeof getActiveSubscription>>
 >
+
+export const matchIsUserPremium = createServerOnlyFn(
+  async (user: SessionUser) => {
+    if (matchIsUserAdmin(user)) {
+      return true
+    }
+
+    return Boolean(await findActiveSubscription(user.id))
+  }
+)

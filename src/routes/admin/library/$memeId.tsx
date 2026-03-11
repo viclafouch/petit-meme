@@ -87,10 +87,7 @@ const RouteComponent = () => {
             allow="autoplay; fullscreen"
           />
         </div>
-        <MemeWatermarkSection
-          memeId={memeQuery.data.id}
-          isPublished={memeQuery.data.status === 'PUBLISHED'}
-        />
+        <MemeWatermarkSection memeId={memeQuery.data.id} />
         <MemeForm meme={memeQuery.data} onSuccess={handleEditSuccess} />
       </div>
     </Container>

@@ -145,9 +145,7 @@ export const MemeForm = ({ meme, onSuccess }: MemeFormParams) => {
                                             generateContentMutation.isPending
                                           }
                                           onGenerateContent={() => {
-                                            return generateContentMutation.mutate(
-                                              locale
-                                            )
+                                            return generateContentMutation.mutate()
                                           }}
                                         />
                                       )

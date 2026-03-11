@@ -1,7 +1,5 @@
 import { filesize } from 'filesize'
 import { z } from 'zod'
-import { BUNNY_STATUS } from '@/constants/bunny'
-import { IS_PRODUCTION } from '@/constants/env'
 import {
   DEFAULT_MEME_TITLE,
   MAX_SIZE_MEME_IN_BYTES,
@@ -32,10 +30,10 @@ import {
   resolveAlgoliaIndexName,
   resolveAlgoliaReplicaCreated,
   safeAlgoliaOp,
-  syncMemeToAllIndices,
-  withAlgoliaCache
+  syncMemeToAllIndices
 } from '@/lib/algolia'
 import {
+  checkWatermarkExists,
   createVideo,
   deleteVideo,
   deleteWatermarkedVideo,
@@ -246,6 +244,7 @@ export const editMeme = createServerFn({ method: 'POST' })
         status: true,
         publishedAt: true,
         viewCount: true,
+        video: { select: { bunnyId: true } },
         categories: { select: { categoryId: true } }
       }
     })
@@ -254,6 +253,17 @@ export const editMeme = createServerFn({ method: 'POST' })
       adminLogger.warn({ memeId: values.id }, 'Meme not found for edit')
       setResponseStatus(404)
       throw new Error('Mème introuvable')
+    }
+
+    if (values.status === 'PUBLISHED') {
+      const hasWatermark = await checkWatermarkExists(meme.video.bunnyId)
+
+      if (!hasWatermark) {
+        setResponseStatus(422)
+        throw new Error(
+          'Impossible de publier : le watermark doit être généré et uploadé'
+        )
+      }
     }
 
     const publishedAt = resolvePublishedAt(values.status, meme)
@@ -446,9 +456,6 @@ async function createMemeWithVideo({
         video: {
           create: {
             duration: 0,
-            bunnyStatus: !IS_PRODUCTION
-              ? BUNNY_STATUS.RESOLUTION_FINISHED
-              : undefined,
             bunnyId: videoId
           }
         },
@@ -560,65 +567,61 @@ export const getAdminMemes = createServerFn({ method: 'GET' })
   .middleware([adminRequiredMiddleware])
   .inputValidator(MEMES_SEARCH_SCHEMA)
   .handler(async ({ data }) => {
-    const cacheKey = `admin-memes:${data.query ?? ''}:${data.page ?? 1}:${data.status ?? ''}:${data.contentLocale ?? ''}`
+    const filterParts: string[] = []
 
-    return withAlgoliaCache(cacheKey, async () => {
-      const filterParts: string[] = []
+    if (data.status) {
+      filterParts.push(ALGOLIA_STATUS_FILTERS[data.status])
+    }
 
-      if (data.status) {
-        filterParts.push(ALGOLIA_STATUS_FILTERS[data.status])
-      }
+    if (data.contentLocale) {
+      filterParts.push(ALGOLIA_CONTENT_LOCALE_FILTERS[data.contentLocale])
+    }
 
-      if (data.contentLocale) {
-        filterParts.push(ALGOLIA_CONTENT_LOCALE_FILTERS[data.contentLocale])
-      }
+    const filters =
+      filterParts.length > 0 ? filterParts.join(' AND ') : undefined
 
-      const filters =
-        filterParts.length > 0 ? filterParts.join(' AND ') : undefined
+    const searchIndex = data.query
+      ? resolveAlgoliaIndexName(baseLocale)
+      : resolveAlgoliaReplicaCreated(baseLocale)
 
-      const searchIndex = data.query
-        ? resolveAlgoliaIndexName(baseLocale)
-        : resolveAlgoliaReplicaCreated(baseLocale)
-
-      const response =
-        await algoliaSearchClient.searchSingleIndex<AlgoliaMemeRecord>({
-          indexName: searchIndex,
-          searchParams: {
-            query: data.query,
-            page: data.page ? data.page - 1 : 0,
-            hitsPerPage: MEMES_PER_PAGE,
-            filters,
-            ...ALGOLIA_ADMIN_SEARCH_PARAMS
-          }
-        })
-
-      const hits = response.hits.map(normalizeAlgoliaHit)
-      const memeIds = hits.map((hit) => {
-        return hit.id
+    const response =
+      await algoliaSearchClient.searchSingleIndex<AlgoliaMemeRecord>({
+        indexName: searchIndex,
+        searchParams: {
+          query: data.query,
+          page: data.page ? data.page - 1 : 0,
+          hitsPerPage: MEMES_PER_PAGE,
+          filters,
+          ...ALGOLIA_ADMIN_SEARCH_PARAMS
+        }
       })
 
-      const bookmarkCounts = await prismaClient.userBookmark.groupBy({
-        by: ['memeId'],
-        where: { memeId: { in: memeIds } },
-        _count: { id: true }
-      })
-
-      const bookmarkCountByMemeId = new Map(
-        bookmarkCounts.map((group) => {
-          return [group.memeId, group._count.id] as const
-        })
-      )
-
-      return {
-        memes: hits.map((hit) => {
-          return {
-            ...hit,
-            bookmarkCount: bookmarkCountByMemeId.get(hit.id) ?? 0
-          } satisfies AdminMemeRecord
-        }),
-        query: data.query,
-        page: response.page,
-        totalPages: response.nbPages
-      }
+    const hits = response.hits.map(normalizeAlgoliaHit)
+    const memeIds = hits.map((hit) => {
+      return hit.id
     })
+
+    const bookmarkCounts = await prismaClient.userBookmark.groupBy({
+      by: ['memeId'],
+      where: { memeId: { in: memeIds } },
+      _count: { id: true }
+    })
+
+    const bookmarkCountByMemeId = new Map(
+      bookmarkCounts.map((group) => {
+        return [group.memeId, group._count.id] as const
+      })
+    )
+
+    return {
+      memes: hits.map((hit) => {
+        return {
+          ...hit,
+          bookmarkCount: bookmarkCountByMemeId.get(hit.id) ?? 0
+        } satisfies AdminMemeRecord
+      }),
+      query: data.query,
+      page: response.page,
+      totalPages: response.nbPages
+    }
   })

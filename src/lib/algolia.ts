@@ -241,29 +241,38 @@ export async function syncMemeToAllIndices(meme: MemeAlgoliaData) {
   const targetLocales = CONTENT_LOCALE_TO_SITE_LOCALES[meme.contentLocale]
 
   await Promise.all(
-    locales.map((locale) => {
+    locales.map(async (locale) => {
+      const indexName = resolveAlgoliaIndexName(locale)
+
       if (targetLocales.includes(locale)) {
-        return algoliaAdminClient.saveObject({
-          indexName: resolveAlgoliaIndexName(locale),
+        const { taskID } = await algoliaAdminClient.saveObject({
+          indexName,
           body: memeToAlgoliaRecord(meme, locale)
         })
+
+        return algoliaAdminClient.waitForTask({ indexName, taskID })
       }
 
-      return algoliaAdminClient.deleteObject({
-        indexName: resolveAlgoliaIndexName(locale),
+      const { taskID } = await algoliaAdminClient.deleteObject({
+        indexName,
         objectID: meme.id
       })
+
+      return algoliaAdminClient.waitForTask({ indexName, taskID })
     })
   )
 }
 
 export async function deleteMemeFromAllIndices(objectID: string) {
   await Promise.all(
-    locales.map((locale) => {
-      return algoliaAdminClient.deleteObject({
-        indexName: resolveAlgoliaIndexName(locale),
+    locales.map(async (locale) => {
+      const indexName = resolveAlgoliaIndexName(locale)
+      const { taskID } = await algoliaAdminClient.deleteObject({
+        indexName,
         objectID
       })
+
+      return algoliaAdminClient.waitForTask({ indexName, taskID })
     })
   )
 }

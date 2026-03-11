@@ -21,7 +21,6 @@ import { useMemeWatermark } from './use-meme-watermark'
 
 type MemeWatermarkSectionParams = {
   memeId: Meme['id']
-  isPublished: boolean
 }
 
 type WatermarkStatusBadgeParams = {
@@ -177,8 +176,7 @@ const WatermarkPreviewDialog = ({
 }
 
 export const MemeWatermarkSection = ({
-  memeId,
-  isPublished
+  memeId
 }: MemeWatermarkSectionParams) => {
   const {
     watermarkExists,
@@ -194,9 +192,6 @@ export const MemeWatermarkSection = ({
     isPreviewGenerated,
     dismissPreview
   } = useMemeWatermark(memeId)
-
-  const showWarning =
-    isPublished && !watermarkExists && !isChecking && !previewUrl
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border p-4">
@@ -250,12 +245,6 @@ export const MemeWatermarkSection = ({
           <Progress value={progress} aria-label="Progression du watermark" />
           <span className="text-xs text-muted-foreground">{progress}%</span>
         </div>
-      ) : null}
-      {showWarning ? (
-        <p className="text-xs text-warning-foreground" role="alert">
-          Ce mème est publié sans watermark. Les non-premium recevront la vidéo
-          originale en fallback.
-        </p>
       ) : null}
       <WatermarkPreviewDialog
         previewUrl={previewUrl}

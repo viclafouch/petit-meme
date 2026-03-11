@@ -3,11 +3,13 @@ import { toast } from 'sonner'
 import { WATERMARK_ASSET_PATH } from '@/constants/watermark'
 import type { Meme } from '@/db/generated/prisma/client'
 import { getErrorMessage } from '@/helpers/error'
-import { getVideoBlobQueryOpts } from '@/lib/queries'
 import { captureWithFeature } from '@/lib/sentry'
 import { loadFFmpeg } from '@/utils/ffmpeg'
 import { applyWatermark } from '@/utils/watermark'
-import { getAdminMemeWatermarkQueryOpts } from '@admin/-lib/queries'
+import {
+  getAdminMemeWatermarkQueryOpts,
+  getAdminVideoBlobQueryOpts
+} from '@admin/-lib/queries'
 import {
   previewMemeWatermark,
   uploadMemeWatermark
@@ -60,7 +62,7 @@ export function useMemeWatermark(memeId: Meme['id']) {
 
       try {
         const [videoBlob, watermarkResponse] = await Promise.all([
-          queryClient.ensureQueryData(getVideoBlobQueryOpts(memeId)),
+          queryClient.ensureQueryData(getAdminVideoBlobQueryOpts(memeId)),
           fetch(WATERMARK_ASSET_PATH)
         ])
 

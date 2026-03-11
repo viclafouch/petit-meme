@@ -112,17 +112,25 @@ export function useMemeForm({ meme, onSuccess }: UseMemeFormParams) {
 
   const generateContentMutation = useMutation({
     mutationKey: ['generate-content'],
-    mutationFn: (_locale: Locale) => {
+    mutationFn: () => {
       return generateMemeContent({ data: { memeId: meme.id } })
     },
-    onSuccess: (result, locale) => {
-      form.setFieldValue(
-        `translations.${locale}.description`,
-        result.description
-      )
-      form.setFieldValue(`translations.${locale}.keywords`, (prevValue) => {
-        return removeDuplicates([...prevValue, ...result.keywords])
-      })
+    onSuccess: (result) => {
+      for (const locale of Object.keys(result) as Locale[]) {
+        const translation = result[locale]
+
+        if (!translation) {
+          continue
+        }
+
+        form.setFieldValue(
+          `translations.${locale}.description`,
+          translation.description
+        )
+        form.setFieldValue(`translations.${locale}.keywords`, (prevValue) => {
+          return removeDuplicates([...prevValue, ...translation.keywords])
+        })
+      }
     },
     onError: (error) => {
       captureWithFeature(error, 'ai-generation')

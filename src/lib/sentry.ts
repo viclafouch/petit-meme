@@ -38,6 +38,11 @@ type SentryFeature =
   | 'watermark-fallback'
 
 export const captureWithFeature = (error: unknown, feature: SentryFeature) => {
+  if (process.env.NODE_ENV === 'development') {
+    // eslint-disable-next-line no-console -- dev debugging: errors are otherwise only visible in Sentry
+    console.error(`[${feature}]`, error)
+  }
+
   Sentry.captureException(error, { tags: { feature } })
 }
 

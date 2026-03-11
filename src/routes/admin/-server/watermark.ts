@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { prismaClient } from '@/db'
 import type { Meme, Prisma } from '@/db/generated/prisma/client'
 import {
+  buildSignedOriginalUrl,
   checkWatermarkExists,
   fetchWatermarkedVideo,
   uploadWatermarkedVideo
@@ -74,6 +75,45 @@ export const uploadMemeWatermark = createServerFn({ method: 'POST' })
     )
 
     return { success: true as const }
+  })
+
+export const fetchAdminVideoBlob = createServerFn({ method: 'GET' })
+  .inputValidator((data) => {
+    return z.string().parse(data)
+  })
+  .middleware([adminRequiredMiddleware])
+  .handler(async ({ data: memeId }) => {
+    const bunnyId = await findMemeBunnyId(memeId)
+    const originalUrl = await buildSignedOriginalUrl(bunnyId)
+
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => {
+      return controller.abort()
+    }, 15_000)
+
+    try {
+      const response = await fetch(originalUrl, {
+        signal: controller.signal
+      })
+
+      if (!response.ok) {
+        throw new Error(`Bunny CDN responded with status ${response.status}`)
+      }
+
+      const headers: HeadersInit = {
+        'Content-Type': response.headers.get('Content-Type') ?? 'video/mp4'
+      }
+
+      const contentLength = response.headers.get('Content-Length')
+
+      if (contentLength) {
+        headers['Content-Length'] = contentLength
+      }
+
+      return new Response(response.body, { headers })
+    } finally {
+      clearTimeout(timeoutId)
+    }
   })
 
 export const previewMemeWatermark = createServerFn({ method: 'GET' })

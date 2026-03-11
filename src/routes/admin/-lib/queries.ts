@@ -14,7 +14,10 @@ import {
   getAdminPendingSubmissionCount,
   getAdminSubmissions
 } from '@admin/-server/submissions'
-import { checkMemeWatermark } from '@admin/-server/watermark'
+import {
+  checkMemeWatermark,
+  fetchAdminVideoBlob
+} from '@admin/-server/watermark'
 import { queryOptions } from '@tanstack/react-query'
 
 export const getAdminMemeByIdQueryOpts = (memeId: Meme['id']) => {
@@ -128,3 +131,17 @@ export const getAdminMemeWatermarkQueryOpts = (memeId: Meme['id']) => {
 }
 
 getAdminMemeWatermarkQueryOpts.all = ['admin-meme-watermark'] as const
+
+export const getAdminVideoBlobQueryOpts = (memeId: Meme['id']) => {
+  return queryOptions({
+    queryKey: [...getAdminVideoBlobQueryOpts.all, memeId],
+    queryFn: async () => {
+      const response = await fetchAdminVideoBlob({ data: memeId })
+
+      return response.blob()
+    },
+    staleTime: Infinity
+  })
+}
+
+getAdminVideoBlobQueryOpts.all = ['admin-video-blob'] as const

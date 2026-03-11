@@ -72,20 +72,21 @@ Logique ffmpeg pour appliquer le watermark, réutilisable par l'admin (WASM) et 
 
 ### 2.1 — Extraction utilitaires ffmpeg partagés
 
-- [ ] Créer `src/utils/ffmpeg.ts` — extraire de `use-video-processor.ts` :
+- [x] Créer `src/utils/ffmpeg.ts` — extraire de `use-video-processor.ts` :
   - `readFFmpegOutput(ffmpeg)` — lit `output.mp4`, cleanup, retourne Blob
-  - Constantes d'encodage : `FFMPEG_ENCODING_ARGS` (codec, preset, CRF, pixel format, threads)
-  - `buildBaseEncodingArgs()` — retourne le tableau d'args communs
-- [ ] Refactorer `use-video-processor.ts` pour importer depuis `src/utils/ffmpeg.ts`
+  - `FFMPEG_ENCODING_ARGS` — constante tableau (codec, preset, CRF, pixel format, threads)
+- [x] Refactorer `use-video-processor.ts` pour importer depuis `src/utils/ffmpeg.ts`
+  - `buildFFmpegArgs` utilise `...FFMPEG_ENCODING_ARGS`
+  - `readFFmpegOutput` importé, cleanup `text.txt` déplacé dans `addTextToVideo`
 
 ### 2.2 — Utilitaire watermark
 
-- [ ] Créer `src/utils/watermark.ts` :
+- [x] Créer `src/utils/watermark.ts` :
   - `applyWatermark(ffmpeg, videoBlob, watermarkBlob): Promise<Blob>`
     - Écrit `input.mp4` et `watermark.png` dans le filesystem ffmpeg
-    - Utilise `-filter_complex` : `WATERMARK_FFMPEG_FILTER` depuis `src/constants/watermark.ts`
-    - Utilise `buildBaseEncodingArgs()` et `readFFmpegOutput()` depuis `src/utils/ffmpeg.ts`
-  - `buildWatermarkFilter()` — construit le filter_complex depuis les constantes
+    - Utilise `-filter_complex` avec `WATERMARK_FFMPEG_FILTER` + `-map 0:a:0?` pour l'audio
+    - Utilise `FFMPEG_ENCODING_ARGS` et `readFFmpegOutput()` depuis `src/utils/ffmpeg.ts`
+    - Cleanup des fichiers temp après lecture du résultat
 
 **Livrable** : utilitaire watermark partageable, studio refactoré.
 

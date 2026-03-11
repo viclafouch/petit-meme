@@ -25,6 +25,12 @@ import { captureWithFeature } from '@/lib/sentry'
 import { m } from '@/paraglide/messages.js'
 import { incrementGenerationCount } from '@/server/user'
 import { useShowDialog } from '@/stores/dialog.store'
+import {
+  FFMPEG_ENCODING_ARGS,
+  FFMPEG_INPUT_FILE,
+  FFMPEG_TEXT_FILE,
+  readFFmpegOutput
+} from '@/utils/ffmpeg'
 import type { ProgressEvent } from '@ffmpeg/ffmpeg'
 import { FFmpeg } from '@ffmpeg/ffmpeg'
 import { fetchFile, toBlobURL } from '@ffmpeg/util'
@@ -92,7 +98,7 @@ const ensureVideoFile = async (
     return
   }
 
-  await ffmpeg.writeFile('input.mp4', await fetchFile(videoBlob))
+  await ffmpeg.writeFile(FFMPEG_INPUT_FILE, await fetchFile(videoBlob))
   loadedVideoMap.set(ffmpeg, memeId)
 }
 
@@ -179,47 +185,15 @@ const buildVideoFilter = ({
 const buildFFmpegArgs = (videoFilter: string) => {
   return [
     '-i',
-    'input.mp4',
+    FFMPEG_INPUT_FILE,
     '-map',
     '0:v:0',
     '-map',
     '0:a:0?',
     '-vf',
     videoFilter,
-    '-c:v',
-    'libx264',
-    '-c:a',
-    'copy',
-    '-preset',
-    'ultrafast',
-    '-crf',
-    '20',
-    '-pix_fmt',
-    'yuv420p',
-    '-threads',
-    '1',
-    '-map_metadata',
-    '-1',
-    '-y',
-    'output.mp4'
+    ...FFMPEG_ENCODING_ARGS
   ]
-}
-
-const readFFmpegOutput = async (ffmpeg: FFmpeg) => {
-  const outputData = await ffmpeg.readFile('output.mp4')
-
-  await Promise.all([
-    ffmpeg.deleteFile('text.txt'),
-    ffmpeg.deleteFile('output.mp4')
-  ]).catch(() => {})
-
-  if (!(outputData instanceof Uint8Array)) {
-    throw new Error('Unexpected FFmpeg output format')
-  }
-
-  return new Blob([new Uint8Array(outputData).buffer as ArrayBuffer], {
-    type: 'video/mp4'
-  })
 }
 
 const resolveFont = (fontFamily: StudioFontFamilyId) => {
@@ -256,7 +230,10 @@ const addTextToVideo = async (
   await ensureFontFile(ffmpeg, font)
 
   const wrappedText = wrapText(text, maxCharsPerLine)
-  await ffmpeg.writeFile('text.txt', new TextEncoder().encode(wrappedText))
+  await ffmpeg.writeFile(
+    FFMPEG_TEXT_FILE,
+    new TextEncoder().encode(wrappedText)
+  )
 
   const videoFilter = buildVideoFilter({
     textPosition,
@@ -275,7 +252,10 @@ const addTextToVideo = async (
     throw new Error('FFmpeg error')
   }
 
-  return readFFmpegOutput(ffmpeg)
+  const blob = await readFFmpegOutput(ffmpeg)
+  await ffmpeg.deleteFile(FFMPEG_TEXT_FILE).catch(() => {})
+
+  return blob
 }
 
 export const useVideoInitializer = () => {

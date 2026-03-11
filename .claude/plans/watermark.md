@@ -134,12 +134,12 @@ Créer l'infra Storage et uploader les vidéos watermarkées générées en Phas
 
 ### 4.1 — Bunny Storage zone
 
-- [ ] Créer une Storage zone sur bunny.net (dashboard) :
-  - Nom : `petit-meme-watermarked`
+- [x] Créer **2 Storage zones** sur bunny.net (dashboard) — dev et prod séparées :
+  - Dev : `petit-meme-watermarked-dev` / Prod : `petit-meme-watermarked`
   - Région : EU (même que la Video Library)
   - Tier : Standard ($0.005/GB/mois)
   - Pas de Pull Zone (le serveur proxie)
-- [ ] Récupérer : Storage API Key, hostname, zone name
+- [x] Récupérer : Storage API Key, hostname, zone name pour chaque zone
 
 ### 4.2 — Env vars
 
@@ -147,7 +147,8 @@ Créer l'infra Storage et uploader les vidéos watermarkées générées en Phas
   - `BUNNY_STORAGE_API_KEY: z.string()`
   - `BUNNY_STORAGE_HOSTNAME: z.string()`
   - `BUNNY_STORAGE_ZONE_NAME: z.string()`
-- [ ] Ajouter dans `.env.development` et Vercel env prod
+- [x] Ajouter dans `.env.development` (zone dev) et Vercel env prod (zone prod)
+- [x] Ajouter dans `.env.example`
 
 ### 4.3 — Bunny Storage helpers
 

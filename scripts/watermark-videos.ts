@@ -2,6 +2,7 @@
 import { execFile } from 'node:child_process'
 import { createWriteStream } from 'node:fs'
 import fs from 'node:fs/promises'
+import os from 'node:os'
 import path from 'node:path'
 import { Readable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
@@ -290,31 +291,30 @@ const countResults = <T extends string>(results: T[]) => {
   return counts
 }
 
-type UploadResult = 'uploaded' | 'skipped' | 'missing' | 'error'
+type UploadResult = 'uploaded' | 'skipped' | 'error'
 
-const uploadMeme = async (meme: MemeVideo): Promise<UploadResult> => {
+const processAndUploadMeme = async (meme: MemeVideo): Promise<UploadResult> => {
   const { bunnyId } = meme.video
-  const localPath = path.join(OUTPUT_DIR, `${bunnyId}.mp4`)
-
-  let fileBuffer: Buffer
-
-  try {
-    fileBuffer = await fs.readFile(localPath)
-  } catch {
-    return 'missing'
-  }
-
-  if (fileBuffer.length === 0) {
-    return 'missing'
-  }
 
   if (await checkWatermarkExists(bunnyId)) {
     return 'skipped'
   }
 
-  await uploadWatermarkedVideo(bunnyId, fileBuffer)
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'watermark-'))
+  const tempInputPath = path.join(tmpDir, `input_${bunnyId}.mp4`)
+  const tempOutputPath = path.join(tmpDir, `output_${bunnyId}.mp4`)
 
-  return 'uploaded'
+  try {
+    await downloadVideo(bunnyId, tempInputPath)
+    await runFFmpeg(tempInputPath, tempOutputPath)
+
+    const fileBuffer = await fs.readFile(tempOutputPath)
+    await uploadWatermarkedVideo(bunnyId, fileBuffer)
+
+    return 'uploaded'
+  } finally {
+    await fs.rm(tmpDir, { recursive: true }).catch(() => {})
+  }
 }
 
 const formatProgress = (index: number, total: number, bunnyId: string) => {
@@ -322,10 +322,12 @@ const formatProgress = (index: number, total: number, bunnyId: string) => {
 }
 
 const runUpload = async (options: ParsedOptions) => {
+  await fs.access(WATERMARK_PATH)
+
   console.log(
     `Storage:   ${serverEnv.BUNNY_STORAGE_HOSTNAME}/${serverEnv.BUNNY_STORAGE_ZONE_NAME}`
   )
-  console.log(`Source:    ${OUTPUT_DIR}`)
+  console.log(`Watermark: ${WATERMARK_PATH}`)
 
   if (options.dryRun) {
     console.log('Mode:      DRY RUN')
@@ -334,7 +336,7 @@ const runUpload = async (options: ParsedOptions) => {
   console.log('')
 
   const memes = await fetchMemes(options)
-  console.log(`Found ${memes.length} published memes to upload\n`)
+  console.log(`Found ${memes.length} published memes to process\n`)
 
   if (memes.length === 0) {
     process.exit(0)
@@ -347,22 +349,21 @@ const runUpload = async (options: ParsedOptions) => {
       const prefix = formatProgress(index, memes.length, meme.video.bunnyId)
 
       if (options.dryRun) {
-        const localPath = path.join(OUTPUT_DIR, `${meme.video.bunnyId}.mp4`)
-        const hasLocal = await hasValidOutput(localPath)
-        console.log(`${prefix} [DRY RUN] local=${hasLocal ? 'yes' : 'no'}`)
+        const exists = await checkWatermarkExists(meme.video.bunnyId)
+        console.log(
+          `${prefix} [DRY RUN] storage=${exists ? 'exists' : 'missing'}`
+        )
 
         return 'skipped'
       }
 
       try {
-        const result = await uploadMeme(meme)
+        const result = await processAndUploadMeme(meme)
 
         if (result === 'uploaded') {
           console.log(`${prefix} uploaded`)
         } else if (result === 'skipped') {
           console.log(`${prefix} (already in Storage)`)
-        } else if (result === 'missing') {
-          console.log(`${prefix} (no local file)`)
         }
 
         return result
@@ -380,7 +381,6 @@ const runUpload = async (options: ParsedOptions) => {
   console.log('\n--- Upload Summary ---')
   console.log(`Uploaded:  ${counts.uploaded ?? 0}`)
   console.log(`Skipped:   ${counts.skipped ?? 0}`)
-  console.log(`Missing:   ${counts.missing ?? 0}`)
   console.log(`Errors:    ${counts.error ?? 0}`)
 
   process.exit((counts.error ?? 0) > 0 ? 1 : 0)

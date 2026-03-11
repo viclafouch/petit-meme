@@ -26,7 +26,7 @@ const RouteComponent = () => {
   const { goToBillingPortal, checkoutPremium } = useStripeCheckout()
 
   const [billingPeriod, setBillingPeriod] =
-    React.useState<BillingPeriod>('yearly')
+    React.useState<BillingPeriod>('monthly')
 
   const activeSubscriptionQuery = useSuspenseQuery(
     getActiveSubscriptionQueryOpts()

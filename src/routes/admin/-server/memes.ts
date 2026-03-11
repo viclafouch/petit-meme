@@ -353,7 +353,12 @@ export const deleteMemeById = createServerFn({ method: 'POST' })
   .handler(async ({ data: memeId, context }) => {
     const meme = await prismaClient.meme.findUnique({
       where: { id: memeId },
-      include: { video: true }
+      select: {
+        id: true,
+        title: true,
+        videoId: true,
+        video: { select: { bunnyId: true } }
+      }
     })
 
     if (!meme) {

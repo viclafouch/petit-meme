@@ -306,12 +306,12 @@ Remplacer `useDownloadMeme` + `useShareMeme` (quasi-identiques) par un seul hook
 
 Lancer tous les audits habituels en parallèle après la feature complète :
 
-- [ ] **Security audit** : URL Storage jamais exposées côté client, API key server-only, pas d'injection dans les filenames, auth check `shareMeme()` robuste
-- [ ] **Backend performance** : impact latence `shareMeme()` (+getSession +findActiveSubscription), N+1 queries, Bunny Storage timeout
-- [ ] **React performance** : re-renders dialog upsell, hook `useMemeExport`, section watermark admin
-- [ ] **Dead code** : anciens hooks `use-download-meme.ts` / `use-share-meme.ts` et leurs imports orphelins
-- [ ] **Tailwind audit** : nouveaux composants (dialog upsell, section watermark admin)
-- [ ] **GDPR** : pas de données personnelles dans le flow watermark, vérifier que le tracking `shareMeme()` ne log pas plus qu'avant
+- [x] **Security audit** : `bunnyId` retiré de la réponse `checkMemeWatermark` (information disclosure), `Content-Length` passthrough ajouté, `deleteMemeById` optimisé avec `select`
+- [x] **Backend performance** : `buildVideoProxyResponse` passe `Content-Length`, `deleteMemeById` passe de `include` à `select`, `captureWithFeature` ajouté au fallback watermark
+- [x] **React performance** : RAS — issues mineures (inline handlers, state redundancy admin hook), rien de critique
+- [x] **Dead code** : `buildBunnyUrl` dé-exporté (usage interne uniquement), aucun import orphelin des anciens hooks
+- [x] **Tailwind audit** : 4 classes redondantes supprimées (`tracking-tight`, `text-sm`, `text-foreground`, `sm:max-w-lg`)
+- [x] **GDPR** : zéro nouvelle exposition PII, `isPremium` est un boolean non-identifiant, filenames = `bunnyId` opaque
 
 ### 8.4 — Déploiement production
 

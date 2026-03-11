@@ -35,6 +35,7 @@ type SentryFeature =
   | 'admin-downloader'
   | 'admin-watermark'
   | 'bunny-storage-cleanup'
+  | 'watermark-fallback'
 
 export const captureWithFeature = (error: unknown, feature: SentryFeature) => {
   Sentry.captureException(error, { tags: { feature } })

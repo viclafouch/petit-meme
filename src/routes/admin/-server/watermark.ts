@@ -37,7 +37,7 @@ export const checkMemeWatermark = createServerFn({ method: 'GET' })
     const bunnyId = await findMemeBunnyId(memeId)
     const exists = await checkWatermarkExists(bunnyId)
 
-    return { exists, bunnyId }
+    return { exists }
   })
 
 export const uploadMemeWatermark = createServerFn({ method: 'POST' })

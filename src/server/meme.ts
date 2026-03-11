@@ -57,6 +57,7 @@ import {
 import { auth } from '@/lib/auth'
 import { buildSignedOriginalUrl, fetchWatermarkedVideo } from '@/lib/bunny'
 import { algoliaLogger, logger } from '@/lib/logger'
+import { captureWithFeature } from '@/lib/sentry'
 import { baseLocale, getLocale, type Locale } from '@/paraglide/runtime'
 import { matchIsUserPremium } from '@/server/customer'
 import { createRateLimitMiddleware, extractClientIp } from '@/server/rate-limit'
@@ -472,12 +473,18 @@ export const getRandomMeme = createServerFn({ method: 'GET' })
   })
 
 const buildVideoProxyResponse = (upstream: Response) => {
-  return new Response(upstream.body, {
-    headers: {
-      'Content-Type': upstream.headers.get('Content-Type') ?? 'video/mp4',
-      'Cache-Control': 'no-cache'
-    }
-  })
+  const headers: HeadersInit = {
+    'Content-Type': upstream.headers.get('Content-Type') ?? 'video/mp4',
+    'Cache-Control': 'no-cache'
+  }
+
+  const contentLength = upstream.headers.get('Content-Length')
+
+  if (contentLength) {
+    headers['Content-Length'] = contentLength
+  }
+
+  return new Response(upstream.body, { headers })
 }
 
 export const shareMeme = createServerFn({ method: 'GET' })
@@ -527,6 +534,7 @@ export const shareMeme = createServerFn({ method: 'GET' })
 
         return buildVideoProxyResponse(watermarkedResponse)
       } catch (error) {
+        captureWithFeature(error, 'watermark-fallback')
         logger.warn(
           { memeId, bunnyId, error },
           'Watermark fallback: serving original video'

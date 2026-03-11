@@ -7,7 +7,7 @@ import { bunnyLogger } from '@/lib/logger'
 import { createServerOnlyFn } from '@tanstack/react-start'
 import { fetchWithZod } from './utils'
 
-export const buildBunnyUrl = (pathname: `/${string}`) => {
+const buildBunnyUrl = (pathname: `/${string}`) => {
   return new URL(
     pathname,
     `https://${clientEnv.VITE_BUNNY_HOSTNAME}`

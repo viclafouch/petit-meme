@@ -34,6 +34,7 @@ import { Route as AdminCategoriesIndexRouteImport } from './routes/admin/categor
 import { Route as ApiCronVerificationReminderRouteImport } from './routes/api/cron/verification-reminder'
 import { Route as ApiCronSyncBunnyTitlesRouteImport } from './routes/api/cron/sync-bunny-titles'
 import { Route as ApiCronSyncAlgoliaRouteImport } from './routes/api/cron/sync-algolia'
+import { Route as ApiCronPendingSubmissionsReminderRouteImport } from './routes/api/cron/pending-submissions-reminder'
 import { Route as ApiCronCleanupRouteImport } from './routes/api/cron/cleanup'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as AdminLibraryMemeIdRouteImport } from './routes/admin/library/$memeId'
@@ -179,6 +180,12 @@ const ApiCronSyncAlgoliaRoute = ApiCronSyncAlgoliaRouteImport.update({
   path: '/api/cron/sync-algolia',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCronPendingSubmissionsReminderRoute =
+  ApiCronPendingSubmissionsReminderRouteImport.update({
+    id: '/api/cron/pending-submissions-reminder',
+    path: '/api/cron/pending-submissions-reminder',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiCronCleanupRoute = ApiCronCleanupRouteImport.update({
   id: '/api/cron/cleanup',
   path: '/api/cron/cleanup',
@@ -320,6 +327,7 @@ export interface FileRoutesByFullPath {
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/cron/cleanup': typeof ApiCronCleanupRoute
+  '/api/cron/pending-submissions-reminder': typeof ApiCronPendingSubmissionsReminderRoute
   '/api/cron/sync-algolia': typeof ApiCronSyncAlgoliaRoute
   '/api/cron/sync-bunny-titles': typeof ApiCronSyncBunnyTitlesRoute
   '/api/cron/verification-reminder': typeof ApiCronVerificationReminderRoute
@@ -362,6 +370,7 @@ export interface FileRoutesByTo {
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/cron/cleanup': typeof ApiCronCleanupRoute
+  '/api/cron/pending-submissions-reminder': typeof ApiCronPendingSubmissionsReminderRoute
   '/api/cron/sync-algolia': typeof ApiCronSyncAlgoliaRoute
   '/api/cron/sync-bunny-titles': typeof ApiCronSyncBunnyTitlesRoute
   '/api/cron/verification-reminder': typeof ApiCronVerificationReminderRoute
@@ -410,6 +419,7 @@ export interface FileRoutesById {
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/cron/cleanup': typeof ApiCronCleanupRoute
+  '/api/cron/pending-submissions-reminder': typeof ApiCronPendingSubmissionsReminderRoute
   '/api/cron/sync-algolia': typeof ApiCronSyncAlgoliaRoute
   '/api/cron/sync-bunny-titles': typeof ApiCronSyncBunnyTitlesRoute
   '/api/cron/verification-reminder': typeof ApiCronVerificationReminderRoute
@@ -456,6 +466,7 @@ export interface FileRouteTypes {
     | '/admin/library/$memeId'
     | '/api/auth/$'
     | '/api/cron/cleanup'
+    | '/api/cron/pending-submissions-reminder'
     | '/api/cron/sync-algolia'
     | '/api/cron/sync-bunny-titles'
     | '/api/cron/verification-reminder'
@@ -498,6 +509,7 @@ export interface FileRouteTypes {
     | '/admin/library/$memeId'
     | '/api/auth/$'
     | '/api/cron/cleanup'
+    | '/api/cron/pending-submissions-reminder'
     | '/api/cron/sync-algolia'
     | '/api/cron/sync-bunny-titles'
     | '/api/cron/verification-reminder'
@@ -545,6 +557,7 @@ export interface FileRouteTypes {
     | '/admin/library/$memeId'
     | '/api/auth/$'
     | '/api/cron/cleanup'
+    | '/api/cron/pending-submissions-reminder'
     | '/api/cron/sync-algolia'
     | '/api/cron/sync-bunny-titles'
     | '/api/cron/verification-reminder'
@@ -581,6 +594,7 @@ export interface RootRouteChildren {
   ApiSentryTunnelRoute: typeof ApiSentryTunnelRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiCronCleanupRoute: typeof ApiCronCleanupRoute
+  ApiCronPendingSubmissionsReminderRoute: typeof ApiCronPendingSubmissionsReminderRoute
   ApiCronSyncAlgoliaRoute: typeof ApiCronSyncAlgoliaRoute
   ApiCronSyncBunnyTitlesRoute: typeof ApiCronSyncBunnyTitlesRoute
   ApiCronVerificationReminderRoute: typeof ApiCronVerificationReminderRoute
@@ -761,6 +775,13 @@ declare module '@tanstack/react-router' {
       path: '/api/cron/sync-algolia'
       fullPath: '/api/cron/sync-algolia'
       preLoaderRoute: typeof ApiCronSyncAlgoliaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/pending-submissions-reminder': {
+      id: '/api/cron/pending-submissions-reminder'
+      path: '/api/cron/pending-submissions-reminder'
+      fullPath: '/api/cron/pending-submissions-reminder'
+      preLoaderRoute: typeof ApiCronPendingSubmissionsReminderRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/cron/cleanup': {
@@ -1035,6 +1056,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiSentryTunnelRoute: ApiSentryTunnelRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiCronCleanupRoute: ApiCronCleanupRoute,
+  ApiCronPendingSubmissionsReminderRoute:
+    ApiCronPendingSubmissionsReminderRoute,
   ApiCronSyncAlgoliaRoute: ApiCronSyncAlgoliaRoute,
   ApiCronSyncBunnyTitlesRoute: ApiCronSyncBunnyTitlesRoute,
   ApiCronVerificationReminderRoute: ApiCronVerificationReminderRoute,

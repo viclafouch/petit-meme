@@ -177,6 +177,8 @@ Traduction EN des mèmes UNIVERSAL réalisée via script one-shot (`scripts/migr
 
 Terminé. 5 phases livrées : fondations DB, page `/submit`, interface admin `/admin/submissions`, notifications email, audits complets.
 
+- [x] **Cron rappel submissions pending** — `/api/cron/pending-submissions-reminder`, toutes les 72h (9h UTC), envoie un email admin listant les submissions `PENDING` (skip si aucune). Template `pending-submissions-reminder-email.tsx`, FR-only (admin notification).
+
 #### Validation vidéo Twitter sur `/submit`
 
 Vérifier que le tweet contient une vidéo avant d'accepter la soumission. Twitter uniquement (pas YouTube). Validation au submit côté serveur. Si API Twitter down → bloquer.

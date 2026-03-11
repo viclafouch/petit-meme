@@ -49,6 +49,7 @@ import { logAuditAction } from '@/server/audit'
 import { adminRequiredMiddleware } from '@/server/user-auth'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
+import { setResponseStatus } from '@tanstack/react-start/server'
 
 const ALGOLIA_STATUS_FILTERS = {
   [MemeStatus.PENDING]: 'status:PENDING',
@@ -251,7 +252,8 @@ export const editMeme = createServerFn({ method: 'POST' })
 
     if (!meme) {
       adminLogger.warn({ memeId: values.id }, 'Meme not found for edit')
-      throw new Error('Meme not found')
+      setResponseStatus(404)
+      throw new Error('Mème introuvable')
     }
 
     const publishedAt = resolvePublishedAt(values.status, meme)
@@ -363,7 +365,8 @@ export const deleteMemeById = createServerFn({ method: 'POST' })
 
     if (!meme) {
       adminLogger.warn({ memeId }, 'Meme not found for deletion')
-      throw new Error('Meme not found')
+      setResponseStatus(404)
+      throw new Error('Mème introuvable')
     }
 
     await prismaClient.$transaction([
@@ -515,8 +518,9 @@ export const createMemeFromTwitterUrl = createServerFn({ method: 'POST' })
         { tweetId: tweet.id, size: filesize(media.video.blob.size) },
         'Video size too big from Twitter'
       )
+      setResponseStatus(422)
       throw new Error(
-        `Video size is too big: ${filesize(media.video.blob.size)}`
+        `La vidéo est trop volumineuse : ${filesize(media.video.blob.size)}`
       )
     }
 

@@ -117,14 +117,12 @@ export const updateSubmissionStatus = createServerFn({ method: 'POST' })
 
       if (!found) {
         setResponseStatus(404)
-        throw new Error('Submission not found')
+        throw new Error('Soumission introuvable')
       }
 
       if (found.status !== MemeSubmissionStatus.PENDING) {
         setResponseStatus(422)
-        throw new Error(
-          'Seules les soumissions en attente peuvent être modifiées'
-        )
+        throw new Error('Seule une soumission en attente peut être modifiée')
       }
 
       const updateData: Prisma.MemeSubmissionUpdateInput =
@@ -221,7 +219,7 @@ export const deleteSubmission = createServerFn({ method: 'POST' })
           error.code === 'P2025'
         ) {
           setResponseStatus(404)
-          throw new Error('Submission not found')
+          throw new Error('Soumission introuvable')
         }
 
         captureWithFeature(error, 'admin-submission')

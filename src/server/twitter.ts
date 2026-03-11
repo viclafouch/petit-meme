@@ -5,6 +5,7 @@ import { getTweetByUrl } from '@/lib/react-tweet'
 import { captureWithFeature } from '@/lib/sentry'
 import { adminRequiredMiddleware } from '@/server/user-auth'
 import { createServerFn } from '@tanstack/react-start'
+import { setResponseStatus } from '@tanstack/react-start/server'
 
 export const getTweetFromUrl = createServerFn({ method: 'GET' })
   .inputValidator((url: string) => {
@@ -18,7 +19,8 @@ export const getTweetFromUrl = createServerFn({ method: 'GET' })
       adminLogger.error({ err: error, url }, 'Failed to get tweet from URL')
       captureWithFeature(error, 'admin-downloader')
 
-      throw new Error('Failed to retrieve tweet')
+      setResponseStatus(502)
+      throw new Error('Impossible de récupérer le tweet')
     }
   })
 
@@ -42,7 +44,8 @@ const fetchAsBase64 = async (url: string) => {
   } catch (error) {
     adminLogger.error({ err: error, url }, 'Failed to fetch tweet media')
     captureWithFeature(error, 'admin-downloader')
-    throw new Error('Failed to download media from Twitter')
+    setResponseStatus(502)
+    throw new Error('Impossible de télécharger le média depuis Twitter')
   }
 }
 

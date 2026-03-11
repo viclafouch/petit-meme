@@ -14,6 +14,7 @@ import { captureWithFeature } from '@/lib/sentry'
 import { adminRequiredMiddleware } from '@/server/user-auth'
 import { GoogleGenAI } from '@google/genai'
 import { createServerFn } from '@tanstack/react-start'
+import { setResponseStatus } from '@tanstack/react-start/server'
 
 const videoSchema = z.object({
   description: z
@@ -56,7 +57,8 @@ export const generateMemeContent = createServerFn({ method: 'POST' })
         { memeId: data.memeId },
         'Meme not found for AI generation'
       )
-      throw new Error('Meme not found')
+      setResponseStatus(404)
+      throw new Error('Mème introuvable')
     }
 
     const nativeLocale = CONTENT_LOCALE_TO_LOCALE[meme.contentLocale]
@@ -101,6 +103,7 @@ export const generateMemeContent = createServerFn({ method: 'POST' })
       )
 
       if (!result.text) {
+        setResponseStatus(502)
         throw new Error('La génération AI a échoué : réponse vide')
       }
 
@@ -115,6 +118,7 @@ export const generateMemeContent = createServerFn({ method: 'POST' })
         { err: error, memeId: data.memeId },
         'AI content generation failed'
       )
+      setResponseStatus(502)
       throw new Error('La génération AI a échoué')
     }
   })

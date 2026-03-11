@@ -66,7 +66,12 @@ import { ensureAlgoliaUserToken } from '@/utils/tracking-cookies'
 import { insightsClient as createInsightsClient } from '@algolia/client-insights'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
-import { getCookie, getRequest, setCookie } from '@tanstack/react-start/server'
+import {
+  getCookie,
+  getRequest,
+  setCookie,
+  setResponseStatus
+} from '@tanstack/react-start/server'
 
 const serverInsightsClient = createInsightsClient(
   clientEnv.VITE_ALGOLIA_APP_ID,
@@ -554,6 +559,7 @@ export const shareMeme = createServerFn({ method: 'GET' })
       })
 
       if (!response.ok) {
+        setResponseStatus(502)
         throw new Error(`Bunny CDN responded with status ${response.status}`)
       }
 

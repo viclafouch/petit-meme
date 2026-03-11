@@ -13,7 +13,7 @@ import { logAuditAction } from '@/server/audit'
 import { adminRequiredMiddleware } from '@/server/user-auth'
 import { cleanupUserData } from '@/utils/user-cleanup'
 import { createServerFn } from '@tanstack/react-start'
-import { getRequest } from '@tanstack/react-start/server'
+import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
 
 const USER_LIST_SELECT = {
   id: true,
@@ -233,6 +233,7 @@ export const banUserById = createServerFn({ method: 'POST' })
   .inputValidator(BAN_USER_SCHEMA)
   .handler(async ({ data, context }) => {
     if (data.userId === context.user.id) {
+      setResponseStatus(422)
       throw new Error('Impossible de vous bannir vous-même')
     }
 
@@ -249,14 +250,17 @@ export const banUserById = createServerFn({ method: 'POST' })
     })
 
     if (!targetUser) {
+      setResponseStatus(404)
       throw new Error('Utilisateur introuvable')
     }
 
     if (targetUser.banned === true) {
+      setResponseStatus(422)
       throw new Error('Cet utilisateur est déjà banni')
     }
 
     if (targetUser.role === 'admin') {
+      setResponseStatus(422)
       throw new Error('Impossible de bannir un administrateur')
     }
 
@@ -324,6 +328,7 @@ export const unbanUserById = createServerFn({ method: 'POST' })
     })
 
     if (!targetUser) {
+      setResponseStatus(404)
       throw new Error('Utilisateur introuvable')
     }
 
@@ -366,6 +371,7 @@ export const removeUser = createServerFn({ method: 'POST' })
   .inputValidator(z.string())
   .handler(async ({ data: userId, context }) => {
     if (userId === context.user.id) {
+      setResponseStatus(422)
       throw new Error('Impossible de supprimer votre propre compte')
     }
 
@@ -375,10 +381,12 @@ export const removeUser = createServerFn({ method: 'POST' })
     })
 
     if (!targetUser) {
+      setResponseStatus(404)
       throw new Error('Utilisateur introuvable')
     }
 
     if (targetUser.role === 'admin') {
+      setResponseStatus(422)
       throw new Error('Impossible de supprimer un administrateur')
     }
 

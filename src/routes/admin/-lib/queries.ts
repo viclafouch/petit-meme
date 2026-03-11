@@ -14,6 +14,7 @@ import {
   getAdminPendingSubmissionCount,
   getAdminSubmissions
 } from '@admin/-server/submissions'
+import { checkMemeWatermark } from '@admin/-server/watermark'
 import { queryOptions } from '@tanstack/react-query'
 
 export const getAdminMemeByIdQueryOpts = (memeId: Meme['id']) => {
@@ -115,3 +116,15 @@ export const getAdminPendingSubmissionCountQueryOpts = () => {
 getAdminPendingSubmissionCountQueryOpts.all = [
   'admin-pending-submission-count'
 ] as const
+
+export const getAdminMemeWatermarkQueryOpts = (memeId: Meme['id']) => {
+  return queryOptions({
+    queryKey: [...getAdminMemeWatermarkQueryOpts.all, memeId],
+    queryFn: () => {
+      return checkMemeWatermark({ data: memeId })
+    },
+    staleTime: 5 * MINUTE
+  })
+}
+
+getAdminMemeWatermarkQueryOpts.all = ['admin-meme-watermark'] as const

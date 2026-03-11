@@ -244,16 +244,15 @@ export const deleteWatermarkedVideo = createServerOnlyFn(
 export const checkWatermarkExists = createServerOnlyFn(
   async (bunnyId: string) => {
     const timeout = withStorageTimeout()
-    const headers = getStorageHeaders()
-    headers.set('Range', 'bytes=0-0')
 
     try {
       const response = await fetch(buildStorageUrl(bunnyId), {
-        headers,
+        method: 'HEAD',
+        headers: getStorageHeaders(),
         signal: timeout.signal
       })
 
-      return response.ok || response.status === 206
+      return response.ok
     } finally {
       timeout.clear()
     }

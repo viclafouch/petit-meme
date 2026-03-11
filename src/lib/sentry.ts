@@ -33,6 +33,8 @@ type SentryFeature =
   | 'meme-submission'
   | 'admin-submission'
   | 'admin-downloader'
+  | 'admin-watermark'
+  | 'bunny-storage-cleanup'
 
 export const captureWithFeature = (error: unknown, feature: SentryFeature) => {
   Sentry.captureException(error, { tags: { feature } })

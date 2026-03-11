@@ -1,4 +1,27 @@
-import type { FFmpeg } from '@ffmpeg/ffmpeg'
+import { FFMPEG_CORE_URL, FFMPEG_WASM_URL } from '@/constants/ffmpeg'
+import { withTimeout } from '@/helpers/promise'
+import { FFmpeg } from '@ffmpeg/ffmpeg'
+import { toBlobURL } from '@ffmpeg/util'
+import { createClientOnlyFn } from '@tanstack/react-start'
+
+const FFMPEG_LOAD_TIMEOUT_MS = 30_000
+
+export const loadFFmpeg = createClientOnlyFn(async (timeoutMessage: string) => {
+  const ffmpeg = new FFmpeg()
+
+  const [coreURL, wasmURL] = await Promise.all([
+    toBlobURL(FFMPEG_CORE_URL, 'text/javascript'),
+    toBlobURL(FFMPEG_WASM_URL, 'application/wasm')
+  ])
+
+  await withTimeout(
+    ffmpeg.load({ coreURL, wasmURL }),
+    FFMPEG_LOAD_TIMEOUT_MS,
+    timeoutMessage
+  )
+
+  return ffmpeg
+})
 
 // Virtual filesystem filenames used by ffmpeg WASM pipelines
 export const FFMPEG_INPUT_FILE = 'input.mp4'

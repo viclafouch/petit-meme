@@ -199,48 +199,37 @@ Ajouter une section watermark dans le form d'édition du mème (pour les futurs 
 
 ### 6.1 — Server functions watermark
 
-- [ ] Dans `src/routes/admin/-server/memes.ts` (ou nouveau fichier `-server/watermark.ts`) :
-  - `checkMemeWatermark(memeId)` — server function GET, admin-only
-    - Récupère le `bunnyId` du mème
-    - Appelle `checkWatermarkExists(bunnyId)` sur Bunny Storage
-    - Retourne `{ exists: boolean, bunnyId: string }`
-  - `uploadMemeWatermark(memeId, videoBlob)` — server function POST, admin-only
-    - Récupère le `bunnyId` du mème
-    - Upload le blob watermarké vers Bunny Storage via `uploadWatermarkedVideo(bunnyId, buffer)`
-    - Log audit action `'watermark_upload'`
-    - Retourne `{ success: true }`
+- [x] Créé `src/routes/admin/-server/watermark.ts` :
+  - `checkMemeWatermark(memeId)` — server function GET, admin-only, retourne `{ exists, bunnyId }`
+  - `uploadMemeWatermark(memeId, videoBlob)` — server function POST (FormData), admin-only, audit `'watermark_upload'`
+- [x] Query opts `getAdminMemeWatermarkQueryOpts` dans `src/routes/admin/-lib/queries.ts`
+- [x] Sentry features `'admin-watermark'` et `'bunny-storage-cleanup'` ajoutés
 
 ### 6.2 — Hook admin watermark
 
-- [ ] Créer `src/routes/admin/library/-components/use-meme-watermark.ts` :
-  - **Query** : `checkMemeWatermark(memeId)` — vérifie si le watermark existe en Storage
-  - **Mutation** : génère + upload le watermark
-    1. Charge ffmpeg WASM (pattern `useVideoInitializer` — ici c'est l'admin, on peut cacher l'instance)
-    2. Fetch le blob vidéo original via `getVideoBlobQueryOpts(memeId)` (caché)
-    3. Fetch le watermark PNG
-    4. `applyWatermark(ffmpeg, videoBlob, watermarkBlob)`
-    5. Upload le blob résultat via `uploadMemeWatermark(memeId, blob)`
-    6. Invalidate la query `checkMemeWatermark`
-  - **Progress** : `ffmpeg.on('progress')` pour la barre de progression
-  - **State exposé** : `{ watermarkExists, generate, progress, isGenerating, error }`
+- [x] Créé `src/routes/admin/library/-components/use-meme-watermark.ts` :
+  - Query `checkMemeWatermark`, mutation ffmpeg WASM + upload, progress tracking
+  - ffmpeg instance en ref (lazy load, terminate on unmount)
+  - State exposé : `{ watermarkExists, isChecking, generate, progress, isGenerating, error }`
 
 ### 6.3 — Composant watermark dans le form
 
-- [ ] Créer `src/routes/admin/library/-components/meme-watermark-section.tsx` :
-  - **Badge statut** : "Watermark prêt" (vert) / "Watermark manquant" (orange)
-  - **Bouton "Générer le watermark"** : déclenche la mutation
-  - **Progress bar** pendant le traitement (composant `animate-ui/radix/progress`)
-  - **Bouton "Régénérer"** si le watermark existe déjà (pour mettre à jour après changement de vidéo)
-  - **Message d'erreur** si la génération échoue
-- [ ] Intégrer dans `meme-form.tsx` : nouvelle section entre le preview vidéo et les champs du form
-- [ ] **Validation form** : quand le statut est ou devient PUBLISHED et que `watermarkExists` est false → afficher un warning (pas bloquant, car le fallback serveur sert l'original si manquant)
+- [x] Créé `src/routes/admin/library/-components/meme-watermark-section.tsx` :
+  - Badge statut (Prêt/Manquant/Vérification), bouton Générer/Régénérer, progress bar animée
+  - Warning si publié sans watermark (non bloquant)
+  - `WatermarkPreviewDialog` sub-component : prévisualisation dans un **Dialog** (vidéo `max-h-[60vh]`, boutons Régénérer + Upload conditionnel)
+  - Dialog sert deux cas : preview après génération locale (avec Upload) ET visualisation du watermark existant (fetch depuis CDN, sans Upload)
+  - Bouton Eye (ghost icon) pour prévisualiser le watermark existant dans le dialog (via `previewMemeWatermark` server proxy)
+- [x] Fix WASM watermark aspect ratio : abandonné `scale2ref` (expressions cassées dans ffmpeg 6.x WASM). Nouveau approach : dimensions calculées en JS via `<video>`/`<Image>`, puis `scale=W:H` + `overlay=X:Y` avec valeurs pixel exactes. `WATERMARK_FFMPEG_FILTER_WASM` supprimé, filtre construit dynamiquement dans `buildWasmWatermarkFilter()`.
+- [x] Intégré dans `$memeId.tsx` entre le preview vidéo et le form (pas dans `meme-form.tsx` — séparation des concerns)
+- [x] Créé `src/components/Meme/meme-video-player.tsx` — composant réutilisable extrait de `player-dialog.tsx` :
+  - Encapsule `VideoPlayer` + `VideoPlayerContent` + `VideoOverlay` avec les props communes (crossOrigin, playsInline, disablePictureInPicture, etc.)
+  - Props configurables : `showOverlay`, `showRemainingTime`, `className`, + tous les props vidéo standard
+  - Refactoré `player-dialog.tsx` et `Studio/studio-preview.tsx` (OriginalVideo + ProcessedVideo) pour l'utiliser
 
 ### 6.4 — Suppression watermark à la suppression du mème
 
-- [ ] Modifier `deleteMemeById()` dans `src/routes/admin/-server/memes.ts` :
-  - Ajouter `deleteWatermarkedVideo(meme.video.bunnyId)` dans le `Promise.all` existant
-  - Même pattern async/catch que `deleteVideo()` — failure loggée mais non bloquante
-  - Sentry feature tag : `'bunny-storage-cleanup'`
+- [x] `deleteMemeById()` : ajouté `deleteWatermarkedVideo(bunnyId)` dans le `Promise.all`, Sentry `'bunny-storage-cleanup'`
 
 **Livrable** : admin peut générer/régénérer le watermark depuis le form, suppression automatique au delete.
 
@@ -353,6 +342,7 @@ Lancer tous les audits habituels en parallèle après la feature complète :
 | `src/routes/admin/-server/watermark.ts` | **Nouveau** — server functions check/upload watermark | 6 |
 | `src/routes/admin/library/-components/use-meme-watermark.ts` | **Nouveau** — hook admin watermark | 6 |
 | `src/routes/admin/library/-components/meme-watermark-section.tsx` | **Nouveau** — section watermark dans le form | 6 |
+| `src/components/Meme/meme-video-player.tsx` | **Nouveau** — composant vidéo réutilisable (extrait de player-dialog) | 6 |
 | `src/routes/admin/library/-components/meme-form.tsx` | Intégrer la section watermark | 6 |
 | `src/routes/admin/-server/memes.ts` | Modifier `deleteMemeById()` — supprimer watermark Storage | 6 |
 | `src/hooks/use-meme-export.ts` | **Nouveau** — hook unique download/share | 7 |

@@ -9,6 +9,7 @@ export type AuditAction =
   | 'ban'
   | 'unban'
   | 'status_change'
+  | 'watermark_upload'
 
 export type AuditTargetType = 'category' | 'meme' | 'submission' | 'user'
 

@@ -11,6 +11,7 @@ import { buildMemeSeo } from '@/lib/seo'
 import { m } from '@/paraglide/messages'
 import { getLocale } from '@/paraglide/runtime'
 import { MemeForm } from '@/routes/admin/library/-components/meme-form'
+import { MemeWatermarkSection } from '@/routes/admin/library/-components/meme-watermark-section'
 import { DeleteMemeButton } from '@admin/-components/delete-meme-button'
 import {
   getAdminMemeByIdQueryOpts,
@@ -86,6 +87,10 @@ const RouteComponent = () => {
             allow="autoplay; fullscreen"
           />
         </div>
+        <MemeWatermarkSection
+          memeId={memeQuery.data.id}
+          isPublished={memeQuery.data.status === 'PUBLISHED'}
+        />
         <MemeForm meme={memeQuery.data} onSuccess={handleEditSuccess} />
       </div>
     </Container>

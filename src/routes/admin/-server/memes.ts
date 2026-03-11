@@ -35,7 +35,12 @@ import {
   syncMemeToAllIndices,
   withAlgoliaCache
 } from '@/lib/algolia'
-import { createVideo, deleteVideo, uploadVideo } from '@/lib/bunny'
+import {
+  createVideo,
+  deleteVideo,
+  deleteWatermarkedVideo,
+  uploadVideo
+} from '@/lib/bunny'
 import { adminLogger, bunnyLogger } from '@/lib/logger'
 import { getTweetByUrl, getTweetMedia } from '@/lib/react-tweet'
 import { captureWithFeature } from '@/lib/sentry'
@@ -368,6 +373,13 @@ export const deleteMemeById = createServerFn({ method: 'POST' })
         bunnyLogger.error(
           { err: error, bunnyId: meme.video.bunnyId },
           'Failed to delete video from Bunny CDN'
+        )
+      }),
+      deleteWatermarkedVideo(meme.video.bunnyId).catch((error: unknown) => {
+        captureWithFeature(error, 'bunny-storage-cleanup')
+        bunnyLogger.error(
+          { err: error, bunnyId: meme.video.bunnyId },
+          'Failed to delete watermarked video from Bunny Storage'
         )
       })
     ])

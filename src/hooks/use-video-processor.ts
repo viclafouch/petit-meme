@@ -1,7 +1,6 @@
 import React from 'react'
 import { toast } from 'sonner'
 import { getStudioErrorCode } from '@/constants/error'
-import { FFMPEG_CORE_URL, FFMPEG_WASM_URL } from '@/constants/ffmpeg'
 import type { MemeWithVideo } from '@/constants/meme'
 import type {
   StudioBandColorValue,
@@ -19,7 +18,6 @@ import {
   STUDIO_FONTS,
   STUDIO_LINE_SPACING
 } from '@/constants/studio'
-import { withTimeout } from '@/helpers/promise'
 import { getAuthUserQueryOpts, getVideoBlobQueryOpts } from '@/lib/queries'
 import { captureWithFeature } from '@/lib/sentry'
 import { m } from '@/paraglide/messages.js'
@@ -29,11 +27,11 @@ import {
   FFMPEG_ENCODING_ARGS,
   FFMPEG_INPUT_FILE,
   FFMPEG_TEXT_FILE,
+  loadFFmpeg,
   readFFmpegOutput
 } from '@/utils/ffmpeg'
-import type { ProgressEvent } from '@ffmpeg/ffmpeg'
-import { FFmpeg } from '@ffmpeg/ffmpeg'
-import { fetchFile, toBlobURL } from '@ffmpeg/util'
+import type { FFmpeg, ProgressEvent } from '@ffmpeg/ffmpeg'
+import { fetchFile } from '@ffmpeg/util'
 import {
   useMutation,
   useQueryClient,
@@ -260,21 +258,8 @@ const addTextToVideo = async (
 
 export const useVideoInitializer = () => {
   const query = useSuspenseQuery({
-    queryFn: async () => {
-      const ffmpeg = new FFmpeg()
-
-      const [coreURL, wasmURL] = await Promise.all([
-        toBlobURL(FFMPEG_CORE_URL, 'text/javascript'),
-        toBlobURL(FFMPEG_WASM_URL, 'application/wasm')
-      ])
-
-      await withTimeout(
-        ffmpeg.load({ coreURL, wasmURL }),
-        30_000,
-        m.error_video_timeout()
-      )
-
-      return ffmpeg
+    queryFn: () => {
+      return loadFFmpeg(m.error_video_timeout())
     },
     queryKey: ['video-processor-init'],
     staleTime: Infinity,

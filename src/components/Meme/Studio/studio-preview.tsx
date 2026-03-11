@@ -1,12 +1,8 @@
 import React from 'react'
 import { Progress } from '@/components/animate-ui/radix/progress'
-import { VideoOverlay } from '@/components/Meme/video-overlay'
+import { MemeVideoPlayer } from '@/components/Meme/meme-video-player'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  VideoPlayer,
-  VideoPlayerContent
-} from '@/components/ui/kibo-ui/video-player'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useContainedSize } from '@/hooks/use-contained-size'
 import { useImageAspectRatio } from '@/hooks/use-image-aspect-ratio'
@@ -36,21 +32,12 @@ const OriginalVideo = ({ bunnyId }: OriginalVideoParams) => {
   const { videoRef } = useMemeHls({ bunnyId })
 
   return (
-    <VideoPlayer className="overflow-hidden size-full max-h-full dark">
-      <VideoPlayerContent
-        ref={videoRef}
-        crossOrigin=""
-        className="size-full"
-        playsInline
-        disablePictureInPicture
-        disableRemotePlayback
-        preload="auto"
-        poster={buildVideoImageUrl(bunnyId)}
-        slot="media"
-        tabIndex={-1}
-      />
-      <VideoOverlay />
-    </VideoPlayer>
+    <MemeVideoPlayer
+      ref={videoRef}
+      poster={buildVideoImageUrl(bunnyId)}
+      tabIndex={-1}
+      className="dark"
+    />
   )
 }
 
@@ -64,27 +51,18 @@ const ProcessedVideo = ({
   onAspectRatioDetected
 }: ProcessedVideoParams) => {
   return (
-    <VideoPlayer className="overflow-hidden size-full max-h-full dark">
-      <VideoPlayerContent
-        crossOrigin=""
-        className="size-full"
-        src={url}
-        playsInline
-        disablePictureInPicture
-        disableRemotePlayback
-        preload="auto"
-        slot="media"
-        tabIndex={-1}
-        onLoadedMetadata={(event) => {
-          const { videoWidth, videoHeight } = event.currentTarget
+    <MemeVideoPlayer
+      src={url}
+      tabIndex={-1}
+      className="dark"
+      onLoadedMetadata={(event) => {
+        const { videoWidth, videoHeight } = event.currentTarget
 
-          if (videoWidth > 0 && videoHeight > 0) {
-            onAspectRatioDetected(videoWidth / videoHeight)
-          }
-        }}
-      />
-      <VideoOverlay />
-    </VideoPlayer>
+        if (videoWidth > 0 && videoHeight > 0) {
+          onAspectRatioDetected(videoWidth / videoHeight)
+        }
+      }}
+    />
   )
 }
 

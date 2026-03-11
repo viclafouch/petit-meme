@@ -3,12 +3,8 @@ import { useHotkeys } from 'react-hotkeys-hook'
 import { Clapperboard, Clipboard, Download, Share2, X } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 import { toast } from 'sonner'
-import { VideoOverlay } from '@/components/Meme/video-overlay'
+import { MemeVideoPlayer } from '@/components/Meme/meme-video-player'
 import { Button, buttonVariants } from '@/components/ui/button'
-import {
-  VideoPlayer,
-  VideoPlayerContent
-} from '@/components/ui/kibo-ui/video-player'
 import type { MemeWithVideo } from '@/constants/meme'
 import { useDownloadMeme } from '@/hooks/use-download-meme'
 import { useMemeHls } from '@/hooks/use-meme-hls'
@@ -168,20 +164,11 @@ export const PlayerDialog = ({
               {meme.title}
             </h3>
             <div className="bg-muted relative aspect-video w-full overflow-hidden rounded-lg text-sm border border-white/10 z-1">
-              <VideoPlayer className="overflow-hidden size-full max-h-full">
-                <VideoPlayerContent
-                  crossOrigin=""
-                  poster={buildVideoImageUrl(meme.video.bunnyId)}
-                  className="size-full"
-                  playsInline
-                  disablePictureInPicture
-                  disableRemotePlayback
-                  preload="auto"
-                  slot="media"
-                  ref={videoRef}
-                />
-                <VideoOverlay showRemainingTime />
-              </VideoPlayer>
+              <MemeVideoPlayer
+                ref={videoRef}
+                poster={buildVideoImageUrl(meme.video.bunnyId)}
+                showRemainingTime
+              />
             </div>
             <div
               className="absolute bg-transparent inset-0 -z-1"

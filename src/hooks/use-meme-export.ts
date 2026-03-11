@@ -62,11 +62,16 @@ export const useMemeExport = ({ mode }: UseMemeExportParams) => {
 
       if (mode === 'download') {
         downloadBlob(blob, meme.title)
-      } else {
-        await shareBlob(blob, meme.title)
+        void trackMemeAction({ data: { memeId: meme.id, action: mode } })
+
+        return
       }
 
-      void trackMemeAction({ data: { memeId: meme.id, action: mode } })
+      const wasShared = await shareBlob(blob, meme.title)
+
+      if (wasShared) {
+        void trackMemeAction({ data: { memeId: meme.id, action: mode } })
+      }
     },
     onError: (error) => {
       captureWithFeature(error, mode)

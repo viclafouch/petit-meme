@@ -11,21 +11,11 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { MemeLanguageBadge } from '@/components/Meme/meme-language-badge'
+import { MemeVideoPlayer } from '@/components/Meme/meme-video-player'
 import { MemesList } from '@/components/Meme/memes-list'
 import ToggleLikeButton from '@/components/Meme/toggle-like-button'
 import { Badge } from '@/components/ui/badge'
 import { Button, buttonVariants } from '@/components/ui/button'
-import {
-  VideoFullScreenButton,
-  VideoPlayer,
-  VideoPlayerContent,
-  VideoPlayerControlBar,
-  VideoPlayerMuteButton,
-  VideoPlayerPlayButton,
-  VideoPlayerTimeDisplay,
-  VideoPlayerTimeRange,
-  VideoPlayerVolumeRange
-} from '@/components/ui/kibo-ui/video-player'
 import type { MemeFullData } from '@/constants/meme'
 import { useMemeExport } from '@/hooks/use-meme-export'
 import { useMemeHls } from '@/hooks/use-meme-hls'
@@ -125,7 +115,6 @@ const RelatedMemes = ({ memeId, title }: RelatedMemesParams) => {
 }
 
 const RouteComponent = () => {
-  const { originalUrl } = Route.useLoaderData()
   const { user } = useRouteContext({ from: '__root__' })
   const { memeId } = Route.useParams()
   const memeQuery = useSuspenseQuery(getMemeByIdQueryOpts(memeId))
@@ -145,7 +134,12 @@ const RouteComponent = () => {
     maxMs: 12000
   })
 
+  const pauseVideo = () => {
+    videoRef.current?.pause()
+  }
+
   const handleCopyMemeLink = async () => {
+    pauseVideo()
     const text = buildUrl(memeLink.href as string)
 
     try {
@@ -180,7 +174,7 @@ const RouteComponent = () => {
   }, [meme])
 
   const handleNavigateToRandomMeme = () => {
-    videoRef.current?.pause()
+    pauseVideo()
     randomMemeMutation.mutate(undefined, {
       onSuccess: (randomMeme) => {
         if (randomMeme) {
@@ -218,31 +212,13 @@ const RouteComponent = () => {
                   decoding="async"
                 />
               </div>
-              <VideoPlayer className="overflow-hidden size-full max-h-full dark">
-                <VideoPlayerContent
-                  crossOrigin=""
-                  poster={buildVideoImageUrl(meme.video.bunnyId)}
-                  className="size-full"
-                  playsInline
-                  autoPlay
-                  enableFullscreenOnDoubleClick
-                  disablePictureInPicture
-                  disableRemotePlayback
-                  preload="auto"
-                  slot="media"
-                  src={originalUrl}
-                  tabIndex={-1}
-                  ref={videoRef}
-                />
-                <VideoPlayerControlBar>
-                  <VideoPlayerPlayButton />
-                  <VideoPlayerTimeRange />
-                  <VideoPlayerTimeDisplay showDuration />
-                  <VideoPlayerMuteButton />
-                  <VideoPlayerVolumeRange />
-                  <VideoFullScreenButton />
-                </VideoPlayerControlBar>
-              </VideoPlayer>
+              <MemeVideoPlayer
+                ref={videoRef}
+                poster={buildVideoImageUrl(meme.video.bunnyId)}
+                autoPlay
+                showRemainingTime
+                className="dark"
+              />
             </div>
             <div className="flex justify-center md:justify-start gap-x-2 items-center">
               <h1 className="font-bricolage text-foreground max-w-4xl text-left font-semibold md:text-balance text-lg leading-[1.2] sm:text-xl lg:text-2xl">
@@ -272,6 +248,7 @@ const RouteComponent = () => {
                 to="/memes/$memeId/studio"
                 params={{ memeId: meme.id }}
                 className={cn(buttonVariants({ variant: 'default' }))}
+                onClick={pauseVideo}
               >
                 <Clapperboard />
                 {m.meme_open_studio()}
@@ -282,7 +259,8 @@ const RouteComponent = () => {
                   variant="outline"
                   className="md:hidden shrink-0 flex-1"
                   onClick={() => {
-                    return shareMutation.trigger(meme)
+                    pauseVideo()
+                    shareMutation.trigger(meme)
                   }}
                 >
                   <Share2 />
@@ -293,7 +271,8 @@ const RouteComponent = () => {
                   variant="outline"
                   className="flex-1 shrink-0"
                   onClick={() => {
-                    return downloadMutation.trigger(meme)
+                    pauseVideo()
+                    downloadMutation.trigger(meme)
                   }}
                 >
                   <Download />

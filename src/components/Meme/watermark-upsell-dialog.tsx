@@ -29,6 +29,14 @@ type WatermarkUpsellDialogParams = {
   mode: MemeExportMode
 }
 
+const getTitle = (mode: MemeExportMode) => {
+  if (mode === 'download') {
+    return m.watermark_upsell_title_download()
+  }
+
+  return m.watermark_upsell_title_share()
+}
+
 const getConfirmLabel = (mode: MemeExportMode) => {
   if (mode === 'download') {
     return m.watermark_download_with_watermark()
@@ -61,14 +69,17 @@ export const WatermarkUpsellDialog = ({
 
       if (mode === 'download') {
         downloadBlob(blob, meme.title)
-      } else {
-        await shareBlob(blob, meme.title)
+
+        return true
       }
 
-      void trackMemeAction({ data: { memeId: meme.id, action: mode } })
+      return shareBlob(blob, meme.title)
     },
-    onSuccess: () => {
-      onOpenChange(false)
+    onSuccess: (wasExported) => {
+      if (wasExported) {
+        onOpenChange(false)
+        void trackMemeAction({ data: { memeId: meme.id, action: mode } })
+      }
     },
     onError: (error) => {
       toast.error(getErrorMessage(error))
@@ -94,7 +105,7 @@ export const WatermarkUpsellDialog = ({
                 className="size-6 text-amber-500 shrink-0"
                 aria-hidden
               />
-              {m.watermark_upsell_title()}
+              {getTitle(mode)}
             </DialogTitle>
             <DialogDescription className="text-sm">
               {m.watermark_upsell_description()}

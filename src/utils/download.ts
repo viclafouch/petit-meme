@@ -26,9 +26,13 @@ export async function shareBlob(blob: Blob, title: string, extension = 'mp4') {
 
   try {
     await navigator.share(data)
+
+    return true
   } catch (error) {
     if (!matchIsUserCancelError(error)) {
       captureWithFeature(error, 'share')
     }
+
+    return false
   }
 }

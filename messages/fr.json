@@ -222,9 +222,9 @@
   "nav_upgrade_premium": "Passer à Premium",
   "plan_feature_favorites": "Favoris enregistrés",
   "plan_feature_generations": "Générations de vidéos",
-  "plan_feature_no_watermark": "Sans watermark",
+  "plan_feature_no_watermark": "Téléchargements / partages sans watermark",
   "plan_feature_public_memes": "Accès aux mèmes publics",
-  "plan_feature_watermark": "Avec watermark",
+  "plan_feature_watermark": "Téléchargements / partages avec watermark",
   "plan_free_description": "Testez gratuitement et sans limite de temps. Découvrez les mèmes, créez vos premiers contenus et enregistrez vos favoris sans sortir la carte bleue.",
   "plan_free_title": "Testeur",
   "plan_note_20_max": "20 max",
@@ -412,5 +412,6 @@
   "watermark_upsell_description": "Passez à Premium pour télécharger et partager vos vidéos sans filigrane.",
   "watermark_upsell_features_label": "Avantages Premium",
   "watermark_upsell_price_from": "À partir de {price}/mois",
-  "watermark_upsell_title": "Téléchargez sans watermark"
+  "watermark_upsell_title_download": "Téléchargez sans watermark",
+  "watermark_upsell_title_share": "Partagez sans watermark"
 }

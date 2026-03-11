@@ -277,7 +277,7 @@ Remplacer `useDownloadMeme` + `useShareMeme` (quasi-identiques) par un seul hook
   - **Accessibilité** : `aria-busy` + `disabled` sur le bouton, `aria-hidden="true"` sur icônes/spinner, `role="status"` sr-only pour annonce loading, `aria-label` dédié sur la feature list
 - [x] Messages Paraglide FR/EN :
   - `watermark_download_with_watermark` / `watermark_share_with_watermark`
-  - `watermark_upsell_title` / `watermark_upsell_description` / `watermark_upsell_price_from`
+  - `watermark_upsell_title_download` / `watermark_upsell_title_share` / `watermark_upsell_description` / `watermark_upsell_price_from`
   - `plan_feature_no_watermark` / `plan_feature_watermark`
 
 **Livrable** : un seul hook, 2 anciens supprimés, dialog upsell avec choix explicite de l'utilisateur.
@@ -317,7 +317,7 @@ Lancer tous les audits habituels en parallèle après la feature complète :
 
 - [x] Créer la Storage zone sur bunny.net (`petit-meme-watermarked-prod`)
 - [x] Ajouter les env vars sur Vercel
-- [ ] Merge `feat/watermark` → `main`
+- [x] Merge `feat/watermark` → `main` (fast-forward)
 - [ ] Vérifier le deploy Vercel
 - [x] Exécuter le script d'upload batch (`--upload`) contre la Storage zone prod — 484/484 uploadés, 0 erreurs
 

@@ -50,6 +50,10 @@ export const PlayerDialog = ({
     maxMs: 12000
   })
 
+  const pauseVideo = () => {
+    videoRef.current?.pause()
+  }
+
   const handleTrackConversion = (eventName: ConversionEventName) => {
     sendConversionEvent({
       queryID,
@@ -74,7 +78,7 @@ export const PlayerDialog = ({
   }
 
   const handleClose = () => {
-    videoRef.current?.pause()
+    pauseVideo()
     onClose()
   }
 
@@ -101,21 +105,24 @@ export const PlayerDialog = ({
   }
 
   const handleStudioClick = () => {
+    pauseVideo()
     handleTrackConversion('Meme Studio Opened')
-    videoRef.current?.pause()
   }
 
   const handleShareClick = () => {
+    pauseVideo()
     handleTrackConversion('Meme Shared')
     shareMutation.trigger(meme)
   }
 
   const handleCopyClick = () => {
+    pauseVideo()
     handleTrackConversion('Meme Link Copied')
     void handleCopyMemeLink()
   }
 
   const handleDownloadClick = () => {
+    pauseVideo()
     handleTrackConversion('Meme Downloaded')
     downloadMutation.trigger(meme)
   }

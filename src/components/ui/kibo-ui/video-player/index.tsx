@@ -159,6 +159,7 @@ export const VideoPlayerContent = ({
     <video
       className={cn('mt-0 mb-0', className)}
       ref={mergeRefs<HTMLVideoElement>(ref, mediaRef)}
+      tabIndex={-1}
       onClick={
         enableFullscreenOnDoubleClick ? doubleClickFullscreen : undefined
       }

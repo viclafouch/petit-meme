@@ -5,6 +5,7 @@ import {
   type VideoPlayerContentProps
 } from '@/components/ui/kibo-ui/video-player'
 import { cn } from '@/lib/utils'
+import { ClientOnly } from '@tanstack/react-router'
 
 type MemeVideoPlayerParams = {
   showOverlay?: boolean
@@ -44,7 +45,9 @@ export const MemeVideoPlayer = ({
         {...videoProps}
       />
       {showOverlay ? (
-        <VideoOverlay showRemainingTime={showRemainingTime} />
+        <ClientOnly>
+          <VideoOverlay showRemainingTime={showRemainingTime} />
+        </ClientOnly>
       ) : null}
     </VideoPlayer>
   )

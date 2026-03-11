@@ -52,3 +52,6 @@ public/ffmpeg/
 
 # MCP config (contains auth tokens)
 .mcp.json
+
+# Watermark batch output (temporary)
+watermarked/

@@ -49,8 +49,9 @@ Prérequis pour toutes les phases suivantes. Pas besoin de Bunny Storage à ce s
 ### 1.1 — Asset watermark
 
 - [x] Créer `/public/images/watermark.png` :
-  - Logo petit-meme + texte "petit-meme.io" blanc bold (Arial Bold) sur fond noir semi-transparent (35% opacité)
-  - PNG 24-bit avec alpha, 252x66 px
+  - Logo petit-meme + texte "petit-meme.io" blanc bold (Arial Bold), fond transparent
+  - Bordure noire (`borderw=12, bordercolor=black@0.8`) + ombre portée (`shadowcolor=black@0.5`)
+  - PNG 24-bit avec alpha, 1200x290 px (haute résolution pour downscale propre)
   - Design : logo à gauche, texte à droite, alignés verticalement
   - Généré via ffmpeg CLI (pas de dépendance npm image)
 
@@ -58,9 +59,10 @@ Prérequis pour toutes les phases suivantes. Pas besoin de Bunny Storage à ce s
 
 - [x] Créer `src/constants/watermark.ts` :
   - `WATERMARK_OPACITY` = 0.6
-  - `WATERMARK_WIDTH_RATIO` = 0.15
-  - `WATERMARK_MARGIN_RATIO` = 0.02
-  - `WATERMARK_FFMPEG_FILTER` — filter_complex string (scale → opacity → overlay bottom-right)
+  - `WATERMARK_WIDTH_RATIO` = 0.21 (21% du côté le plus court)
+  - `WATERMARK_MARGIN_RATIO` = 0.03 (3% du côté le plus court)
+  - `WATERMARK_MAX_MARGIN` = 20 (cap en pixels pour les grandes vidéos)
+  - `WATERMARK_FFMPEG_FILTER` — filter_complex string (split + scale rw/rh + opacity + overlay bottom-right)
 
 **Livrable** : asset PNG prêt, constantes exportées.
 
@@ -98,10 +100,10 @@ Générer les vidéos watermarkées **localement dans un dossier temporaire** po
 
 ### 3.1 — Script batch local (50 premiers mèmes)
 
-- [ ] Créer `scripts/watermark-videos.ts` :
+- [x] Créer `scripts/watermark-videos.ts` :
   - **Prérequis** : `ffmpeg` CLI installé localement (ffmpeg 8.0 dispo)
   - **Modes** : `--limit <n>` (défaut 50), `--meme-id <id>`, `--dry-run`, `--all`
-  - **Output** : dossier `/tmp/petit-meme-watermarked/` (hors repo)
+  - **Output** : `./watermarked/` (gitignored)
   - **Flow par vidéo** :
     1. Skip si le fichier existe déjà dans le dossier output
     2. Fetch original depuis Bunny Video Library (signed URL)
@@ -110,14 +112,17 @@ Générer les vidéos watermarkées **localement dans un dossier temporaire** po
     5. Cleanup temp files
   - **Concurrence** : 3 vidéos en parallèle
   - **Log** : résumé (traitées, skippées, erreurs) + taille totale générée
-  - **DB** : lecture seule depuis la DB prod (SELECT bunnyId des mèmes PUBLISHED)
-  - **Exécution** : `pnpm exec dotenv -e .env.production -- pnpm dlx tsx scripts/watermark-videos.ts --limit 50`
+  - **DB** : lecture seule depuis la DB dev (SELECT bunnyId des mèmes PUBLISHED)
+  - **Exécution** : `pnpm exec vite-node --mode development scripts/watermark-videos.ts --limit 50`
 
 ### 3.2 — Vérification visuelle par l'utilisateur
 
-- [ ] Victor vérifie les 50 vidéos dans `/tmp/petit-meme-watermarked/`
-- [ ] Si OK → lancer `--all` pour les ~502 vidéos
-- [ ] Ajuster les constantes (opacité, taille, position) si nécessaire avant de continuer
+- [x] Victor vérifie le rendu sur 1 vidéo — OK
+- [x] Ajuster les constantes : taille 21% du côté le plus court, marge `min(3%, 20px)`
+- [x] Filtre ffmpeg migré de `scale2ref` (déprécié ffmpeg 8) vers `scale` avec `rw` + `split`
+- [x] Watermark PNG régénéré haute résolution (1200x290px) avec bordure/ombre pour lisibilité
+- [x] Test 10 vidéos production — rendu validé par Victor
+- ~~Lancer `--all` localement~~ — pas nécessaire, Phase 4 uploade directement vers Bunny Storage
 
 **Livrable** : vidéos watermarkées vérifiables localement, confiance dans le rendu.
 

@@ -46,13 +46,15 @@ export const buildVideoStreamUrl = (videoId: string) => {
   return buildBunnyUrl(`/${videoId}/playlist.m3u8`)
 }
 
-export const buildSignedOriginalUrl = createServerOnlyFn((videoId: string) => {
+export const signOriginalUrl = (videoId: string) => {
   return signBunnyUrl({
     url: buildVideoOriginalUrl(videoId),
     securityKey: serverEnv.BUNNY_TOKEN_AUTH_KEY,
     expirationSeconds: FIVE_MINUTES_IN_SECONDS
   })
-})
+}
+
+export const buildSignedOriginalUrl = createServerOnlyFn(signOriginalUrl)
 
 export const deleteVideo = createServerOnlyFn(async (videoId: string) => {
   const result = await fetchWithZod(

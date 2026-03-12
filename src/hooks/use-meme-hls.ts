@@ -29,6 +29,9 @@ export const useMemeHls = ({ bunnyId }: UseMemeHlsParams) => {
 
     return () => {
       hlsRef.current?.destroy()
+      video.pause()
+      video.removeAttribute('src')
+      video.load()
     }
   }, [bunnyId])
 

@@ -42,6 +42,8 @@ export const PlayerDialog = ({
     params: { memeId: meme.id }
   })
 
+  const playAbortRef = React.useRef<AbortController | null>(null)
+
   useRegisterMemeView({
     memeId: meme.id,
     videoRef,
@@ -51,6 +53,7 @@ export const PlayerDialog = ({
   })
 
   const pauseVideo = () => {
+    playAbortRef.current?.abort()
     videoRef.current?.pause()
   }
 
@@ -93,13 +96,21 @@ export const PlayerDialog = ({
       return
     }
 
+    playAbortRef.current?.abort()
+    playAbortRef.current = new AbortController()
+    const { signal } = playAbortRef.current
+
     video.play().catch(() => {
+      if (signal.aborted) {
+        return
+      }
+
       video.addEventListener(
         'canplay',
         () => {
           video.play().catch(() => {})
         },
-        { once: true }
+        { once: true, signal }
       )
     })
   }

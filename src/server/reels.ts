@@ -1,4 +1,3 @@
-import * as R from 'remeda'
 import { z } from 'zod'
 import { MEME_TRANSLATION_SELECT, type MemeWithVideo } from '@/constants/meme'
 import { prismaClient } from '@/db'
@@ -45,10 +44,14 @@ export const getInfiniteReels = createServerFn({ method: 'POST' })
       ORDER BY RANDOM()
       LIMIT 20
     `.then((rows) => {
-      return rows.map(R.prop('meme'))
+      return rows.map((row) => {
+        return row.meme
+      })
     })
 
-    const memeIds = rawMemes.map(R.prop('id'))
+    const memeIds = rawMemes.map((m) => {
+      return m.id
+    })
 
     const translations =
       memeIds.length > 0
@@ -61,7 +64,9 @@ export const getInfiniteReels = createServerFn({ method: 'POST' })
           })
         : []
 
-    const translationsByMemeId = R.groupBy(translations, R.prop('memeId'))
+    const translationsByMemeId = Object.groupBy(translations, (translation) => {
+      return translation.memeId
+    })
 
     const memes = rawMemes.map((meme) => {
       const resolved = resolveMemeTranslation({
@@ -79,8 +84,10 @@ export const getInfiniteReels = createServerFn({ method: 'POST' })
     })
 
     const newExcludedIds = [
-      ...R.takeLast(excludedIds, excludedIds.length / 2),
-      ...memes.map(R.prop('id'))
+      ...excludedIds.slice(-Math.floor(excludedIds.length / 2)),
+      ...memes.map((m) => {
+        return m.id
+      })
     ]
 
     return {

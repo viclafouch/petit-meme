@@ -41,6 +41,22 @@ Terminé le 2026-03-09. Toutes les branches mergées dans `main`, production bra
 
 ---
 
+## Tailwind — Enrichir l'agent tailwind-audit avec `canonicalize`
+
+**Contexte :** Tailwind v4 introduit une API `canonicalizeCandidates` qui remplace automatiquement les classes dépréciées ou verbeuses par leur forme canonique (ex: `break-words` → `wrap-break-word`, `bg-gradient-to-r` → `bg-linear-to-r`, `w-6 h-6` → `size-6`). La commande CLI `tailwindcss canonicalize` a été [mergée le 2026-03-11](https://github.com/tailwindlabs/tailwindcss/pull/19783) mais pas encore publiée (dernière release : v4.2.1).
+
+**Action :** Quand la release incluant `canonicalize` sort (v4.2.2 ou v4.3.0), enrichir l'agent `.claude/agents/tailwind-audit.md` pour qu'il référence la liste complète des canonicalisations et les intègre dans son audit checklist. Sources à exploiter :
+- [`canonicalize-candidates.ts`](https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/src/canonicalize-candidates.ts) — pipeline de 9 stratégies de canonicalisation
+- [`canonicalize-candidates.test.ts`](https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/src/canonicalize-candidates.test.ts) — tous les cas de remplacement
+- [`migrate-simple-legacy-classes.ts`](https://github.com/tailwindlabs/tailwindcss/blob/main/packages/%40tailwindcss-upgrade/src/codemods/template/migrate-simple-legacy-classes.ts) — renommages simples v3→v4
+- [`migrate-legacy-classes.ts`](https://github.com/tailwindlabs/tailwindcss/blob/main/packages/%40tailwindcss-upgrade/src/codemods/template/migrate-legacy-classes.ts) — renommages theme-aware
+
+**En attendant :** `npx @tailwindcss/upgrade` fonctionne déjà sur un projet v4 (idempotent depuis v4.1.5, [PR #17717](https://github.com/tailwindlabs/tailwindcss/pull/17717)) et applique les canonicalisations.
+
+- [ ] Surveiller les releases Tailwind (`npm view tailwindcss versions`). Quand `canonicalize` est disponible, mettre à jour l'agent tailwind-audit.
+
+---
+
 ## Nitro — Override runtime Node.js 24
 
 **Problème :** Nitro `3.0.1-alpha.2` ne supporte pas Node.js 24 dans sa liste `SUPPORTED_NODE_VERSIONS` ([nitrojs/nitro#3965](https://github.com/nitrojs/nitro/issues/3965)). Il fallback sur `nodejs22.x`, ce qui casse Paraglide (utilise `URLPattern`, disponible nativement à partir de Node 23+).

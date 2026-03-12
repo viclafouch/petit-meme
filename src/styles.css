@@ -50,6 +50,7 @@
 
 @layer base {
   :root {
+    --navbar-height: 3.5rem;
     --radius: 0.625rem;
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);
@@ -142,6 +143,34 @@
   body {
     @apply bg-background text-foreground;
   }
+  body:has([data-mobile-nav][data-state='open']) {
+    overflow: hidden;
+  }
+
+  body:not(:has([data-mobile-nav][data-state='open'])) .navbar-scroll-fade {
+    @supports (animation-timeline: scroll()) {
+      animation: navbar-fade-to-solid linear both;
+      animation-timeline: scroll();
+      animation-range: 0px 180px;
+    }
+  }
+
+  body:has([data-mobile-nav][data-state='open']) .navbar-scroll-fade {
+    background-color: var(--background);
+
+    [data-navbar-bg] {
+      visibility: hidden;
+    }
+  }
+
+  @keyframes navbar-fade-to-solid {
+    from {
+      background-color: transparent;
+    }
+    to {
+      background-color: var(--background);
+    }
+  }
 
   @media (prefers-reduced-motion: reduce) {
     *,
@@ -193,6 +222,7 @@
     @apply mx-auto max-w-6xl px-4 xl:px-6;
   }
 }
+
 @utility no-scrollbar {
   @apply [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
 }

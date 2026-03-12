@@ -223,6 +223,10 @@ Ajouter Discord comme provider OAuth en plus de Twitter/X. Better Auth supporte 
 - [ ] Bouton "Se connecter avec Discord" dans les formulaires login/signup (`auth-dialog.tsx`)
 - [ ] Tester le flow complet (login, link account Discord ↔ Twitter, avatar Discord)
 
+### Navbar sticky avec scroll fade ✅
+
+Navbar sticky `top-0` avec background qui apparaît progressivement au scroll (0→300px). Double implémentation : CSS `animation-timeline: scroll()` pour les navigateurs modernes (Chrome 115+), fallback Framer Motion (`useScroll` + `useTransform`) pour Safari/Firefox. Hook `useScrollFade` dans `src/hooks/use-scroll-fade.ts`. Pattern repris de Patio Paddle Club.
+
 ### Migration vers Cloudflare
 
 Passer le domaine sur Cloudflare pour bénéficier de ses fonctionnalités natives : CDN/cache, SSL, protection DDoS, Page Rules, etc.

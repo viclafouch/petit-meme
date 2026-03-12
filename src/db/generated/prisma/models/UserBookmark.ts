@@ -1222,6 +1222,11 @@ export type UserBookmarkFindManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Skip the first `n` UserBookmarks.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of UserBookmarks.
+   */
   distinct?: Prisma.UserBookmarkScalarFieldEnum | Prisma.UserBookmarkScalarFieldEnum[]
 }
 

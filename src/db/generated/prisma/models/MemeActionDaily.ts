@@ -1180,6 +1180,11 @@ export type MemeActionDailyFindManyArgs<ExtArgs extends runtime.Types.Extensions
    * Skip the first `n` MemeActionDailies.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of MemeActionDailies.
+   */
   distinct?: Prisma.MemeActionDailyScalarFieldEnum | Prisma.MemeActionDailyScalarFieldEnum[]
 }
 

@@ -1208,6 +1208,11 @@ export type StudioGenerationFindManyArgs<ExtArgs extends runtime.Types.Extension
    * Skip the first `n` StudioGenerations.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of StudioGenerations.
+   */
   distinct?: Prisma.StudioGenerationScalarFieldEnum | Prisma.StudioGenerationScalarFieldEnum[]
 }
 

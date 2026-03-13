@@ -1,5 +1,8 @@
+import React from 'react'
+import { Stars } from 'lucide-react'
 import { FormFooter } from '@/components/form-footer'
 import { CONTENT_LOCALE_FLAGS, FLAG_ICON_CLASS } from '@/components/icon/flags'
+import { Button } from '@/components/ui/button'
 import {
   FormControl,
   FormItem,
@@ -20,7 +23,9 @@ import {
   getRequiredLocales
 } from '@/helpers/i18n-content'
 import { getFieldErrorMessage } from '@/lib/utils'
-import { locales } from '@/paraglide/runtime'
+import { type Locale, locales } from '@/paraglide/runtime'
+import type { AiAssistResult } from '@/server/ai'
+import { AiAssistDialog } from './ai-assist-dialog'
 import { MemeFormMetadataFields } from './meme-form-metadata-fields'
 import { MemeTranslationSection } from './meme-translation-section'
 import { useMemeForm } from './use-meme-form'
@@ -36,10 +41,17 @@ export const MemeForm = ({ meme, onSuccess }: MemeFormParams) => {
     keywordsFields,
     categoriesListQuery,
     categoriesOptions,
-    generateContentMutation,
     translateContentMutation,
     isLocaleRequired
   } = useMemeForm({ meme, onSuccess })
+
+  const [isAiAssistOpen, setIsAiAssistOpen] = React.useState(false)
+
+  const handleAiAssistApply = (locale: Locale, result: AiAssistResult) => {
+    form.setFieldValue(`translations.${locale}.title`, result.title)
+    form.setFieldValue(`translations.${locale}.description`, result.description)
+    form.setFieldValue(`translations.${locale}.keywords`, result.keywords)
+  }
 
   const handleSubmit = (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -61,6 +73,37 @@ export const MemeForm = ({ meme, onSuccess }: MemeFormParams) => {
       onSubmit={handleSubmit}
     >
       <div className="flex flex-col gap-6">
+        <form.Subscribe
+          selector={(state) => {
+            return state.values.contentLocale
+          }}
+          children={(contentLocale) => {
+            return (
+              <>
+                <div className="flex justify-end">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setIsAiAssistOpen(true)
+                    }}
+                  >
+                    <Stars aria-hidden />
+                    AI Assist
+                  </Button>
+                </div>
+                <AiAssistDialog
+                  memeId={meme.id}
+                  contentLocale={contentLocale}
+                  isOpen={isAiAssistOpen}
+                  onOpenChange={setIsAiAssistOpen}
+                  onApply={handleAiAssistApply}
+                />
+              </>
+            )
+          }}
+        />
         <form.Field
           name="contentLocale"
           children={(field) => {
@@ -136,17 +179,6 @@ export const MemeForm = ({ meme, onSuccess }: MemeFormParams) => {
                                           descriptionField={descriptionField}
                                           keywordsFieldApi={keywordsFieldApi}
                                           keywordsField={keywordsFields[locale]}
-                                          isGenerating={
-                                            generateContentMutation.isPending
-                                              ? generateContentMutation.variables ===
-                                                locale
-                                              : false
-                                          }
-                                          onGenerateContent={() => {
-                                            return generateContentMutation.mutate(
-                                              locale
-                                            )
-                                          }}
                                           isTranslateVisible={
                                             contentLocale === 'UNIVERSAL'
                                           }

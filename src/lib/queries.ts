@@ -1,6 +1,7 @@
 import type { MemesFilters } from '@/constants/meme'
 import { MINUTE } from '@/constants/time'
 import type { Meme, Video } from '@/db/generated/prisma/client'
+import type { Locale } from '@/paraglide/runtime'
 import { getCategories } from '@/server/categories'
 import { getActiveSubscription } from '@/server/customer'
 import {
@@ -90,11 +91,11 @@ export const getFavoritesMemesQueryOpts = () => {
 
 getFavoritesMemesQueryOpts.all = ['favorites-memes'] as const
 
-export const getCategoriesListQueryOpts = () => {
+export const getCategoriesListQueryOpts = (locale: Locale) => {
   return queryOptions({
-    queryKey: [...getCategoriesListQueryOpts.all],
+    queryKey: [...getCategoriesListQueryOpts.all, locale],
     queryFn: () => {
-      return getCategories()
+      return getCategories({ data: { locale } })
     },
     staleTime: 10 * MINUTE
   })

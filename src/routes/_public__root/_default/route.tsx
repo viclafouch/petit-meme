@@ -4,6 +4,7 @@ import {
   getCategoriesListQueryOpts,
   getFavoritesMemesQueryOpts
 } from '@/lib/queries'
+import { getLocale } from '@/paraglide/runtime'
 import { createFileRoute, Outlet } from '@tanstack/react-router'
 
 const RouteComponent = () => {
@@ -24,6 +25,8 @@ export const Route = createFileRoute('/_public__root/_default')({
       void context.queryClient.ensureQueryData(getActiveSubscriptionQueryOpts())
     }
 
-    void context.queryClient.ensureQueryData(getCategoriesListQueryOpts())
+    void context.queryClient.ensureQueryData(
+      getCategoriesListQueryOpts(getLocale())
+    )
   }
 })

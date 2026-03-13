@@ -8,12 +8,7 @@ import {
   resolveCategoryTranslation
 } from '@/helpers/i18n-content'
 import { adminLogger } from '@/lib/logger'
-import {
-  baseLocale,
-  getLocale,
-  type Locale,
-  locales
-} from '@/paraglide/runtime'
+import { baseLocale, type Locale, locales } from '@/paraglide/runtime'
 import { logAuditAction } from '@/server/audit'
 import { adminRequiredMiddleware } from '@/server/user-auth'
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
@@ -126,24 +121,30 @@ const resolveCategories = ({ categories, locale }: ResolveCategoriesParams) => {
   })
 }
 
-export const getCategories = createServerFn({ method: 'GET' }).handler(
-  async () => {
-    const locale = getLocale()
+const GET_CATEGORIES_INPUT = z.object({
+  locale: z.enum(locales)
+})
+
+export const getCategories = createServerFn({ method: 'GET' })
+  .inputValidator((data: unknown) => {
+    return GET_CATEGORIES_INPUT.parse(data)
+  })
+  .handler(async ({ data }) => {
+    const { locale } = data
 
     if (categoriesCache && categoriesCache.expiresAt > Date.now()) {
       return resolveCategories({ categories: categoriesCache.data, locale })
     }
 
-    const data = await fetchCategories()
+    const fetched = await fetchCategories()
 
     categoriesCache = {
-      data,
+      data: fetched,
       expiresAt: Date.now() + CATEGORIES_CACHE_TTL_MS
     }
 
-    return resolveCategories({ categories: data, locale })
-  }
-)
+    return resolveCategories({ categories: fetched, locale })
+  })
 
 export const addCategory = createServerFn({ method: 'POST' })
   .middleware([adminRequiredMiddleware])

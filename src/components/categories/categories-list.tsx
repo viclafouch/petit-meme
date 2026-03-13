@@ -6,6 +6,7 @@ import type { MemesFilters } from '@/constants/meme'
 import { getVirtualCategories } from '@/constants/meme'
 import { getCategoriesListQueryOpts } from '@/lib/queries'
 import { cn } from '@/lib/utils'
+import { getLocale } from '@/paraglide/runtime'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link, useParams } from '@tanstack/react-router'
 
@@ -25,7 +26,9 @@ const BUBBLE_TRANSITION_SPRING = {
 } as const satisfies Transition
 
 export const CategoriesList = () => {
-  const categoriesQuery = useSuspenseQuery(getCategoriesListQueryOpts())
+  const categoriesQuery = useSuspenseQuery(
+    getCategoriesListQueryOpts(getLocale())
+  )
   const { slug: activeSlug } = useParams({ strict: false })
   const prefersReducedMotion = useReducedMotion()
   const [hasInteracted, setHasInteracted] = React.useState(false)

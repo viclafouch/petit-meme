@@ -137,6 +137,54 @@ Remplacement du filtre dropdown par statut par un bandeau d'alerte warning cliqu
 - [x] Invalidation dashboard totals ajoutée dans edit/create/delete meme handlers
 - [x] Suppression du composant `MemesFilterStatus` (dead code)
 
+### Admin — AI Assist Dialog (meme edit)
+
+Remplacer les boutons "Générer" par-locale par un dialog unifié "AI Assist". Bouton en haut de `MemeForm` (avant les sections de traduction) ouvre un dialog avec textarea de contexte custom, analyse vidéo par Gemini, et preview éditable (titre + description + keywords) avant application dans le formulaire. FR only pour v1, mais `targetLocale` paramétré pour faciliter EN plus tard.
+
+**Server (`src/server/ai.ts`) :**
+- [x] Nouveau schema `aiAssistResultSchema` : `{ title, description, keywords }` (flat, pas de wrapping par locale)
+- [x] Helper `uploadVideoToGemini(memeId)` — extraire la logique download vidéo + upload Gemini + `waitForFileActive` + cleanup
+- [x] Nouveau prompt `buildAiAssistPrompt({ customPrompt, targetLocale })` — inclut le contexte admin, demande titre + description + keywords dans la langue cible
+- [x] Nouvelle server function `aiAssistMemeContent` — POST + `adminRequiredMiddleware`, input `{ memeId, customPrompt, targetLocale }`, retourne `{ title, description, keywords }`
+- [x] Augmenter `GEMINI_TIMEOUT_MS` à 45_000 (30s trop juste pour vidéo + génération multi-champs)
+- [x] Supprimer `generateMemeContent` + `buildPrompt` (remplacés, seul appelant : `use-meme-form.ts`)
+- [x] Export type `AiAssistResult`
+
+**Design (via `/frontend-design`) :**
+- [x] Lancer `/frontend-design` avant d'écrire le moindre JSX — pour le bouton AI Assist dans `MemeForm`, le layout du dialog (textarea + preview éditable + footer), et les états (loading, empty, filled)
+
+**Nouveau composant :**
+- [x] `src/routes/admin/library/-components/ai-assist-dialog.tsx` — dialog self-contained (pas de hook séparé). State local : `customPrompt`, `preview` (result éditable), `keywordsField` (via `useKeywordsField`). Mutation locale appelle `aiAssistMemeContent`. Props : `memeId, isOpen, onOpenChange, onApply(result)`. Bouton "Analyser" = `LoadingButton` avec `isPending`. Footer : Annuler + Appliquer.
+
+**Intégration frontend :**
+- [x] `meme-form.tsx` : ajouter bouton AI Assist + dialog en haut du form (avant contentLocale select). `onApply` callback appelle directement `form.setFieldValue()` pour les champs FR — pas d'intermediate state, pas de useEffect. Retirer `generateContentMutation` du destructuring.
+- [x] `meme-translation-section.tsx` : retirer props `isGenerating` + `onGenerateContent`, retirer le bouton "Générer" + import `Stars`
+- [x] `use-meme-form.ts` : retirer `generateContentMutation` + import `generateMemeContent` + retirer du return
+
+**Audits post-implémentation :**
+- [x] React performance — clean, aucun problème
+- [x] Dead code — clean
+- [x] Security — `customPrompt` limité à `z.string().max(500)`, `memeId` validé via `z.string().cuid()`. Prompt injection accepté (admin-only tool).
+- [x] Accessibility — `htmlFor`/`id` sur tous les labels+inputs (y compris keywords), `aria-live="polite"` sur le compteur de caractères, `aria-hidden` sur icônes décoratives, `aria-label` sur boutons de suppression keywords
+
+**Décisions d'architecture (issues /simplify) :**
+- Pas de hook `use-ai-assist.ts` séparé — le dialog est assez simple (~80 lignes) pour être self-contained
+- Pas de state intermédiaire dans `$memeId.tsx` — le dialog vit dans `MemeForm` qui a accès direct à `form.setFieldValue()`
+- Pas de `useEffect` pour appliquer les résultats — callback direct (cohérent avec `translateContentMutation.onSuccess`)
+- `targetLocale` paramétré dès v1 — support EN = changement UI uniquement, pas de refacto
+- `LoadingButton` pour "Analyser" — empêche double-clic pendant les 30-45s d'analyse (coût Gemini)
+- Réutiliser `KeywordsField` + `useKeywordsField` + `removeDuplicates` existants
+
+**Fichiers impactés :**
+
+| Fichier | Action |
+|---------|--------|
+| `src/server/ai.ts` | Add schema + helper + server fn + type. Remove `generateMemeContent` + `buildPrompt`. Increase timeout |
+| `ai-assist-dialog.tsx` | **New** — self-contained dialog component |
+| `meme-form.tsx` | Add AI Assist button + dialog + `onApply` callback, remove generate wiring |
+| `meme-translation-section.tsx` | Remove generate button + props |
+| `use-meme-form.ts` | Remove `generateContentMutation` |
+
 ### Admin — Items reportés
 
 - [x] **Watermark upload** : fix `FUNCTION_PAYLOAD_TOO_LARGE` sur Vercel (limite 4.5 MB). L'upload passe maintenant directement du client vers Bunny Storage (admin-only), sans transiter par la serverless function Vercel.
@@ -177,6 +225,13 @@ Phases 0–2.4 terminées et déployées en prod (2026-03-09). Interface bilingu
 **AI generation** (`src/server/ai.ts` — `generateMemeContent()`) — passe `meme.title` brut à Gemini
 
 - [x] Résoudre le titre via `MemeTranslation` avant de le passer à Gemini (utilise `CONTENT_LOCALE_TO_LOCALE[meme.contentLocale]` comme locale cible)
+
+**Admin categories** — `getCategories()` utilisait `getLocale()` côté serveur, mais les appels RPC passent par `/_server` (non exclu des route strategies Paraglide), donc la locale venait du cookie/Accept-Language au lieu de l'URL admin
+
+- [x] `getCategories` accepte maintenant un input `locale` explicite (suppression de `getLocale()` dans le handler)
+- [x] `getCategoriesListQueryOpts(locale)` prend la locale en param, incluse dans le query key (cache par locale)
+- [x] Admin passe `baseLocale` — public passe `getLocale()` depuis les composants/loaders
+- [x] Invalidation unifiée via `getCategoriesListQueryOpts.all` (prefix match, invalide toutes les locales)
 
 ### Filtre langue dans la liste des mèmes
 

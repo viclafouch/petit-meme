@@ -1,15 +1,9 @@
 import { z } from 'zod/v3'
 import zodToJsonSchema from 'zod-to-json-schema'
-import { MEME_TRANSLATION_SELECT } from '@/constants/meme'
 import { prismaClient } from '@/db'
 import { serverEnv } from '@/env/server'
 import { getErrorMessage } from '@/helpers/error'
-import {
-  CONTENT_LOCALE_TO_LOCALE,
-  LOCALE_META,
-  REQUIRED_TRANSLATION_LOCALES,
-  resolveMemeTranslation
-} from '@/helpers/i18n-content'
+import { LOCALE_META } from '@/helpers/i18n-content'
 import { withTimeout } from '@/helpers/promise'
 import { buildSignedOriginalUrl } from '@/lib/bunny'
 import { adminLogger } from '@/lib/logger'
@@ -37,7 +31,7 @@ const translationSchema = z.object({
 const ai = new GoogleGenAI({ apiKey: serverEnv.GEMINI_API_KEY })
 
 const GEMINI_MODEL = 'gemini-3-flash-preview'
-const GEMINI_TIMEOUT_MS = 30_000
+const GEMINI_TIMEOUT_MS = 45_000
 const GEMINI_FILE_POLL_INTERVAL_MS = 2_000
 const GEMINI_FILE_MAX_RETRIES = 15
 
@@ -82,26 +76,117 @@ function buildLocalizedResponseSchema<T extends z.ZodTypeAny>(
   )
 }
 
-function buildPrompt(title: string, targetLocales: readonly Locale[]) {
-  const localeInstructions = targetLocales
-    .map((locale) => {
-      const { label } = LOCALE_META[locale]
-      const prefix =
-        locale === 'fr'
-          ? `Cela doit toujours commencer par : "Découvrez et téléchargez ce mème de [ta mini description de 150 caractères grand grand max]`
-          : `It must always start with: "Discover and download this meme of [your mini description of 150 characters max]`
+const aiAssistResultSchema = z.object({
+  title: z
+    .string()
+    .describe(
+      'Titre court (60 caractères max). Format : "[Qui] [action] - [source]". Qui = personnage ou acteur. Source = film, série, émission si applicable. Langage simple de jeune 15-35 ans, jamais de mots soutenus (pas "s\'esclaffe", "contemple" → "rigole", "regarde"). JAMAIS "mème", "trend", "template". Ex: "Tobey Maguire qui rigole - Spider-Man 3"'
+    ),
+  description: z
+    .string()
+    .describe(
+      'Description SEO (200 caractères max, commence par "Découvrez et téléchargez ce mème de [mini description]")'
+    ),
+  keywords: z
+    .array(z.string())
+    .describe(
+      'Mots-clés de recherche, 1 mot chacun. Même langue que le titre. Public jeune 15-35 ans. Catégories : (1) noms propres (acteur, personnage, film/série — pas de franchise générique comme "marvel"), (2) nom du template mème si connu, (3) verbes ou adjectifs simples en 1 mot (ex: "marrant", "rigoler", "triste", "choqué"). JAMAIS de groupes de mots ("fou rire", "trop drôle", "mort de rire"). JAMAIS de mots génériques (cinéma, réaction, costume, scène). JAMAIS de doublons sémantiques. JAMAIS répéter un mot du titre. 5-8 max.'
+    )
+})
 
-      return `- "${locale}" (${label}): description en ${label} (150 caractères max). ${prefix}`
-    })
-    .join('\n')
+export type AiAssistResult = z.infer<typeof aiAssistResultSchema>
 
-  return `Cette vidéo est un mème. Le titre de la vidéo est "${title}".
-Que se passe-t-il dans cette vidéo ? Le mème est surement populaire. Cherche pourquoi.
+type BuildAiAssistPromptParams = {
+  customPrompt: string
+  targetLocale: Locale
+}
 
-Pour chaque langue ci-dessous, génère une description SEO courte et des mots-clefs pertinents DANS CETTE LANGUE :
-${localeInstructions}
+function buildAiAssistPrompt({
+  customPrompt,
+  targetLocale
+}: BuildAiAssistPromptParams) {
+  const { label } = LOCALE_META[targetLocale]
+  const descriptionPrefix =
+    targetLocale === 'fr'
+      ? 'Découvrez et téléchargez ce mème de'
+      : 'Discover and download this meme of'
 
-Les mots-clefs doivent être dans la langue correspondante.`
+  const contextBlock = customPrompt.trim()
+    ? `\nContexte fourni par l'admin : "${customPrompt.trim()}"\n`
+    : ''
+
+  return `Tu es un expert en mèmes internet et en SEO.
+
+Analyse cette vidéo de mème.${contextBlock}
+Génère en ${label} :
+1. Un titre court (60 caractères max). Format : "[Qui] [action] - [source]". Qui = personnage ou acteur. Action = verbe simple (rigole, pleure, regarde, danse...). Source = film, série, émission si applicable. Langage de jeune 15-35 ans, JAMAIS de mots soutenus (pas "s'esclaffe", "contemple"). JAMAIS "mème", "trend", "template". Ex: "Tobey Maguire qui rigole - Spider-Man 3", "Chat qui fixe la caméra", "Pedro Pascal qui pleure puis rit"
+2. Une description SEO courte (200 caractères max). Elle doit commencer par : "${descriptionPrefix} [ta mini description de 150 caractères max]"
+3. 5-8 mots-clés de recherche en minuscules. TOUS dans la même langue que le reste. Chaque mot-clé = 1 SEUL mot (sauf noms propres composés). Catégories :
+   - Noms propres : acteur, personnage, film/série (pas de franchise générique comme "marvel")
+   - Nom du template mème si connu (ex: "bully maguire", "drake hotline bling")
+   - Verbes ou adjectifs simples en 1 mot que des jeunes 15-35 ans taperaient (ex: "marrant", "rigoler", "triste", "choqué")
+   INTERDIT : groupes de mots ("fou rire", "trop drôle", "mort de rire"), mots génériques (cinéma, réaction, costume, scène), mots soutenus/littéraires, doublons sémantiques, mots déjà dans le titre.
+
+Identifie le template/la référence si possible.`
+}
+
+async function uploadVideoToGemini(memeId: string) {
+  const meme = await prismaClient.meme.findUnique({
+    where: { id: memeId },
+    include: { video: true }
+  })
+
+  if (!meme) {
+    adminLogger.warn({ memeId }, 'Meme not found for AI generation')
+    setResponseStatus(404)
+    throw new Error('Mème introuvable')
+  }
+
+  const originalUrl = await buildSignedOriginalUrl(meme.video.bunnyId)
+  const videoResponse = await fetch(originalUrl)
+
+  if (!videoResponse.ok) {
+    setResponseStatus(502)
+    throw new Error(
+      `Impossible de récupérer la vidéo depuis Bunny (${videoResponse.status})`
+    )
+  }
+
+  const videoBlob = await videoResponse.blob()
+  const uploadedFile = await ai.files.upload({
+    file: videoBlob,
+    config: { mimeType: 'video/mp4' }
+  })
+
+  if (!uploadedFile.name || !uploadedFile.mimeType) {
+    setResponseStatus(502)
+    throw new Error('Upload Gemini Files API échoué : fichier invalide')
+  }
+
+  try {
+    const activeFile = await waitForFileActive(uploadedFile.name)
+
+    if (!activeFile.uri) {
+      setResponseStatus(502)
+      throw new Error('Upload Gemini Files API échoué : URI manquante')
+    }
+
+    return {
+      fileUri: activeFile.uri,
+      fileMimeType: uploadedFile.mimeType,
+      fileName: uploadedFile.name
+    }
+  } catch (error) {
+    ai.files
+      .delete({ name: uploadedFile.name })
+      .catch((deleteError: unknown) => {
+        adminLogger.error(
+          { err: deleteError, fileName: uploadedFile.name },
+          'Failed to cleanup Gemini file after upload error'
+        )
+      })
+    throw error
+  }
 }
 
 const memeTranslateResultSchema = translationSchema.extend({
@@ -215,111 +300,54 @@ export const translateMemeContent = createServerFn({ method: 'POST' })
     }
   })
 
-export const generateMemeContent = createServerFn({ method: 'POST' })
+export const aiAssistMemeContent = createServerFn({ method: 'POST' })
   .middleware([adminRequiredMiddleware])
   .inputValidator((data) => {
     return z
       .object({
-        memeId: z.string(),
-        title: z.string().optional(),
-        targetLocales: z.array(z.enum(locales)).min(1).optional()
+        memeId: z.string().cuid(),
+        customPrompt: z.string().max(500),
+        targetLocale: z.enum(locales)
       })
       .parse(data)
   })
   .handler(async ({ data }) => {
-    const meme = await prismaClient.meme.findUnique({
-      where: {
-        id: data.memeId
-      },
-      include: {
-        video: true,
-        translations: {
-          select: MEME_TRANSLATION_SELECT
-        }
-      }
-    })
-
-    if (!meme) {
-      adminLogger.warn(
-        { memeId: data.memeId },
-        'Meme not found for AI generation'
-      )
-      setResponseStatus(404)
-      throw new Error('Mème introuvable')
-    }
-
-    const nativeLocale = CONTENT_LOCALE_TO_LOCALE[meme.contentLocale]
-    const resolved = resolveMemeTranslation({
-      translations: meme.translations,
-      contentLocale: meme.contentLocale,
-      requestedLocale: nativeLocale,
-      fallback: meme
-    })
-
-    const effectiveTitle = data.title ?? resolved.title
-
-    const targetLocales =
-      data.targetLocales ?? REQUIRED_TRANSLATION_LOCALES[meme.contentLocale]
-    const responseSchema = buildLocalizedResponseSchema(
-      targetLocales,
-      translationSchema
+    const { fileUri, fileMimeType, fileName } = await uploadVideoToGemini(
+      data.memeId
     )
 
-    const originalUrl = await buildSignedOriginalUrl(meme.video.bunnyId)
-    const videoResponse = await fetch(originalUrl)
-
-    if (!videoResponse.ok) {
-      setResponseStatus(502)
-      throw new Error(
-        `Impossible de récupérer la vidéo depuis Bunny (${videoResponse.status})`
-      )
-    }
-
-    const videoBlob = await videoResponse.blob()
-    const uploadedFile = await ai.files.upload({
-      file: videoBlob,
-      config: { mimeType: 'video/mp4' }
-    })
-
-    if (!uploadedFile.name || !uploadedFile.mimeType) {
-      setResponseStatus(502)
-      throw new Error('Upload Gemini Files API échoué : fichier invalide')
-    }
-
     try {
-      const activeFile = await waitForFileActive(uploadedFile.name)
-
-      if (!activeFile.uri) {
-        setResponseStatus(502)
-        throw new Error('Upload Gemini Files API échoué : URI manquante')
-      }
+      const prompt = buildAiAssistPrompt({
+        customPrompt: data.customPrompt,
+        targetLocale: data.targetLocale
+      })
 
       const result = await withTimeout(
         ai.models.generateContent({
           model: GEMINI_MODEL,
           contents: createUserContent([
-            createPartFromUri(activeFile.uri, uploadedFile.mimeType),
-            buildPrompt(effectiveTitle, targetLocales)
+            createPartFromUri(fileUri, fileMimeType),
+            prompt
           ]),
           config: {
             responseMimeType: 'application/json',
-            responseJsonSchema: zodToJsonSchema(responseSchema)
+            responseJsonSchema: zodToJsonSchema(aiAssistResultSchema)
           }
         }),
         GEMINI_TIMEOUT_MS,
-        `Génération AI : timeout après ${GEMINI_TIMEOUT_MS}ms`
+        `AI Assist : timeout après ${GEMINI_TIMEOUT_MS}ms`
       )
 
       if (!result.text) {
         setResponseStatus(502)
-        throw new Error('La génération AI a échoué : réponse vide')
+        throw new Error('AI Assist a échoué : réponse vide')
       }
 
-      const parsed = responseSchema.parse(JSON.parse(result.text))
+      const parsed = aiAssistResultSchema.parse(JSON.parse(result.text))
 
       adminLogger.info(
-        { memeId: data.memeId, locales: targetLocales },
-        'AI content generated'
+        { memeId: data.memeId, targetLocale: data.targetLocale },
+        'AI assist content generated'
       )
 
       return parsed
@@ -327,14 +355,14 @@ export const generateMemeContent = createServerFn({ method: 'POST' })
       captureWithFeature(error, 'ai-generation')
       adminLogger.error(
         { err: error, memeId: data.memeId },
-        'AI content generation failed'
+        'AI assist content generation failed'
       )
       setResponseStatus(502)
-      throw new Error(`La génération AI a échoué : ${getErrorMessage(error)}`)
+      throw new Error(`AI Assist a échoué : ${getErrorMessage(error)}`)
     } finally {
-      ai.files.delete({ name: uploadedFile.name }).catch((error: unknown) => {
+      ai.files.delete({ name: fileName }).catch((error: unknown) => {
         adminLogger.error(
-          { err: error, fileName: uploadedFile.name },
+          { err: error, fileName },
           'Failed to cleanup Gemini file'
         )
       })

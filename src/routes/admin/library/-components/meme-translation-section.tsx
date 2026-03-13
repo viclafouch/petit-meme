@@ -1,4 +1,4 @@
-import { Languages, Stars } from 'lucide-react'
+import { Languages } from 'lucide-react'
 import { FLAG_ICON_CLASS, LOCALE_FLAGS } from '@/components/icon/flags'
 import {
   FormControl,
@@ -23,8 +23,6 @@ type MemeTranslationSectionParams = {
   descriptionField: FormFieldApi<string>
   keywordsFieldApi: FormFieldApi<string[]>
   keywordsField: ReturnType<typeof useKeywordsField>
-  isGenerating: boolean
-  onGenerateContent: () => void
   isTranslateVisible: boolean
   isTranslating: boolean
   onTranslate: () => void
@@ -36,8 +34,6 @@ export const MemeTranslationSection = ({
   descriptionField,
   keywordsFieldApi,
   keywordsField,
-  isGenerating,
-  onGenerateContent,
   isTranslateVisible,
   isTranslating,
   onTranslate
@@ -86,22 +82,10 @@ export const MemeTranslationSection = ({
             }}
           />
         </FormControl>
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center justify-end">
           <span className="text-xs text-muted-foreground">
             {descriptionField.state.value.length}/200 caractères
           </span>
-          <LoadingButton
-            disabled={isTranslating}
-            isLoading={isGenerating}
-            loadingText="Génération..."
-            size="sm"
-            type="button"
-            variant="default"
-            onClick={onGenerateContent}
-          >
-            <Stars />
-            Générer
-          </LoadingButton>
         </div>
         <FormMessage />
       </FormItem>
@@ -109,7 +93,7 @@ export const MemeTranslationSection = ({
       {isTranslateVisible ? (
         <div className="flex justify-end border-t pt-4">
           <LoadingButton
-            disabled={!canTranslate || isGenerating}
+            disabled={!canTranslate}
             isLoading={isTranslating}
             loadingText="Traduction..."
             size="sm"

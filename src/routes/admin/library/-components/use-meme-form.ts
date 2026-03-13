@@ -11,9 +11,8 @@ import {
 import { useKeywordsField } from '@/hooks/use-keywords-field'
 import { getCategoriesListQueryOpts } from '@/lib/queries'
 import { captureWithFeature } from '@/lib/sentry'
-import type { Locale } from '@/paraglide/runtime'
-import { generateMemeContent, translateMemeContent } from '@/server/ai'
-import { removeDuplicates } from '@/utils/array'
+import { baseLocale, type Locale } from '@/paraglide/runtime'
+import { translateMemeContent } from '@/server/ai'
 import { editMeme, MEME_FORM_SCHEMA } from '@admin/-server/memes'
 import { useForm } from '@tanstack/react-form'
 import { useMutation, useQuery } from '@tanstack/react-query'
@@ -24,7 +23,7 @@ type UseMemeFormParams = {
 }
 
 export function useMemeForm({ meme, onSuccess }: UseMemeFormParams) {
-  const categoriesListQuery = useQuery(getCategoriesListQueryOpts())
+  const categoriesListQuery = useQuery(getCategoriesListQueryOpts(baseLocale))
 
   const categoriesOptions =
     categoriesListQuery.data?.map((category) => {
@@ -110,42 +109,6 @@ export function useMemeForm({ meme, onSuccess }: UseMemeFormParams) {
     en: enKeywordsField
   } satisfies Record<Locale, ReturnType<typeof useKeywordsField>>
 
-  const generateContentMutation = useMutation({
-    mutationKey: ['generate-content'],
-    mutationFn: (locale: Locale) => {
-      const title = form.getFieldValue(`translations.${locale}.title`)
-
-      return generateMemeContent({
-        data: {
-          memeId: meme.id,
-          title: title || undefined,
-          targetLocales: [locale]
-        }
-      })
-    },
-    onSuccess: (result) => {
-      for (const locale of Object.keys(result) as Locale[]) {
-        const translation = result[locale]
-
-        if (!translation) {
-          continue
-        }
-
-        form.setFieldValue(
-          `translations.${locale}.description`,
-          translation.description
-        )
-        form.setFieldValue(`translations.${locale}.keywords`, (prevValue) => {
-          return removeDuplicates([...prevValue, ...translation.keywords])
-        })
-      }
-    },
-    onError: (error) => {
-      captureWithFeature(error, 'ai-generation')
-      toast.error(error.message)
-    }
-  })
-
   const translateContentMutation = useMutation({
     mutationKey: ['translate-content'],
     mutationFn: (sourceLocale: Locale) => {
@@ -196,7 +159,7 @@ export function useMemeForm({ meme, onSuccess }: UseMemeFormParams) {
     },
     onError: (error) => {
       captureWithFeature(error, 'ai-translation')
-      toast.error(error.message)
+      toast.error(getErrorMessage(error))
     }
   })
 
@@ -212,7 +175,6 @@ export function useMemeForm({ meme, onSuccess }: UseMemeFormParams) {
     keywordsFields,
     categoriesListQuery,
     categoriesOptions,
-    generateContentMutation,
     translateContentMutation,
     isLocaleRequired
   }

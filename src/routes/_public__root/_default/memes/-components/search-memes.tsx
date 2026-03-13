@@ -108,7 +108,7 @@ export const SearchMemes = () => {
   const navigate = useNavigate()
   const { slug: activeSlug } = useParams({ strict: false })
 
-  const categories = useSuspenseQuery(getCategoriesListQueryOpts())
+  const categories = useSuspenseQuery(getCategoriesListQueryOpts(getLocale()))
 
   // eslint-disable-next-line no-restricted-syntax
   const currentCategory = React.useMemo(() => {

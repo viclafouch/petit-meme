@@ -1,4 +1,5 @@
 import React from 'react'
+import { parseKeywordsInput } from '@/helpers/keywords'
 import { removeDuplicates } from '@/utils/array'
 
 type UseKeywordsFieldParams = {
@@ -13,14 +14,7 @@ export function useKeywordsField({ setKeywordsValue }: UseKeywordsFieldParams) {
       setKeywordsValue((prevState) => {
         return removeDuplicates([
           ...prevState,
-          ...keywordValue
-            .split(',')
-            .map((keyword) => {
-              return keyword.trim().toLowerCase()
-            })
-            .filter((word) => {
-              return Boolean(word.trim())
-            })
+          ...parseKeywordsInput(keywordValue)
         ])
       })
     }

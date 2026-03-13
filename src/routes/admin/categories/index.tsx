@@ -3,7 +3,7 @@ import { PageHeader } from '@/components/page-header'
 import { Badge } from '@/components/ui/badge'
 import { Container } from '@/components/ui/container'
 import { formatDate } from '@/helpers/date'
-import { getLocale } from '@/paraglide/runtime'
+import { baseLocale, getLocale } from '@/paraglide/runtime'
 import { AddCategoryButton } from '@/routes/admin/categories/-components/add-category-button'
 import { CategoryDropdown } from '@/routes/admin/categories/-components/category-dropdown'
 import { type EnrichedCategory, getCategories } from '@/server/categories'
@@ -124,7 +124,9 @@ export const Route = createFileRoute('/admin/categories/')({
     return { meta: [{ title: 'Admin Petit Meme - Catégories' }] }
   },
   loader: async () => {
-    const categories = await getCategories()
+    const categories = await getCategories({
+      data: { locale: baseLocale }
+    })
 
     return {
       crumb: 'Catégories',

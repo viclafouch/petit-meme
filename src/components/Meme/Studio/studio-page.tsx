@@ -1,5 +1,5 @@
 import React from 'react'
-import { ArrowLeft, SlidersHorizontal, Sparkles } from 'lucide-react'
+import { ArrowLeft, Pencil, SlidersHorizontal, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   StudioActions,
@@ -73,7 +73,7 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
   })
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false)
 
-  const { progress, processVideo, isProcessing, processedData, cancel } =
+  const { progress, processVideo, isProcessing, processedData, cancel, reset } =
     useVideoProcessor(ffmpegQuery.data)
 
   const hasText = settings.text.trim().length > 0
@@ -116,41 +116,51 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
             onCancel={cancel}
           />
         </div>
-        {processedData !== null ? (
-          <StudioMobileActions processedData={processedData} />
-        ) : null}
-        <div className="flex items-center gap-2 px-3 py-2.5 border-t bg-background md:hidden">
-          <Input
-            value={settings.text}
-            onChange={handleTextChange}
-            onFocus={triggerPreload}
-            placeholder={m.studio_add_text_placeholder()}
-            autoComplete="off"
-            type="text"
-            maxLength={STUDIO_TEXT_MAX_LENGTH}
-            className="flex-1 h-8"
-            aria-label={m.studio_text_aria()}
-          />
-          <Button
-            variant="outline"
-            size="sm"
-            className="shrink-0"
-            onClick={() => {
-              setIsDrawerOpen(true)
-            }}
-            aria-label={m.studio_open_settings()}
-          >
-            <SlidersHorizontal className="size-4" />
-            {m.studio_settings()}
-          </Button>
-          <LoadingButton
-            isLoading={isProcessing}
-            onClick={handleGenerate}
-            size="sm"
-          >
-            <Sparkles />
-            {m.studio_generate()}
-          </LoadingButton>
+        <div className="flex flex-col gap-2 px-3 py-2.5 border-t bg-background md:hidden">
+          {processedData !== null ? (
+            <>
+              <Button variant="ghost" onClick={reset}>
+                <Pencil className="size-4" />
+                {m.studio_edit()}
+              </Button>
+              <StudioMobileActions processedData={processedData} />
+            </>
+          ) : (
+            <>
+              <Input
+                value={settings.text}
+                onChange={handleTextChange}
+                onFocus={triggerPreload}
+                placeholder={m.studio_add_text_placeholder()}
+                autoComplete="off"
+                type="text"
+                maxLength={STUDIO_TEXT_MAX_LENGTH}
+                className="text-center"
+                aria-label={m.studio_text_aria()}
+              />
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setIsDrawerOpen(true)
+                  }}
+                  aria-label={m.studio_open_settings()}
+                >
+                  <SlidersHorizontal className="size-4" />
+                  {m.studio_settings()}
+                </Button>
+                <LoadingButton
+                  isLoading={isProcessing}
+                  onClick={handleGenerate}
+                  className="flex-1"
+                >
+                  <Sparkles />
+                  {m.studio_generate()}
+                </LoadingButton>
+              </div>
+            </>
+          )}
         </div>
         <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
           <DrawerContent className="max-h-[80dvh]" aria-describedby={undefined}>

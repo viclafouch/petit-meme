@@ -422,6 +422,11 @@ export const useVideoProcessor = (
   }
 
   const reset = () => {
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current)
+      objectUrlRef.current = null
+    }
+
     mutation.reset()
     setProgress(0)
   }

@@ -1,18 +1,23 @@
 import React from 'react'
 import { Plus } from 'lucide-react'
-import { MemesFilterStatus } from '@/components/Meme/Filters/memes-filter-status'
 import { MemesQuery } from '@/components/Meme/Filters/memes-query'
 import { PageHeader } from '@/components/page-header'
 import { Paginator } from '@/components/paginator'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Container } from '@/components/ui/container'
 import { LoadingSpinner } from '@/components/ui/spinner'
 import { MEMES_FILTERS_SCHEMA, type MemesFilters } from '@/constants/meme'
+import { MemeStatus } from '@/db/generated/prisma/enums'
 import { MemeListItem } from '@admin/-components/meme-list-item'
 import { MemesFilterContentLocale } from '@admin/-components/memes-filter-content-locale'
 import { NewMemeButton } from '@admin/-components/new-meme-button'
-import { getAdminMemesListQueryOpts } from '@admin/-lib/queries'
+import {
+  getAdminDashboardTotalsQueryOpts,
+  getAdminMemesListQueryOpts
+} from '@admin/-lib/queries'
 import { useDebouncedValue } from '@tanstack/react-pacer'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 
 const MemesListWrapper = () => {
@@ -34,11 +39,18 @@ const MemesListWrapper = () => {
 
   return (
     <div className="flex flex-col gap-12">
-      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <ul
+        className="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        aria-label="Liste des mèmes"
+      >
         {memesListQuery.data.memes.map((meme) => {
-          return <MemeListItem key={meme.id} meme={meme} />
+          return (
+            <li key={meme.id}>
+              <MemeListItem meme={meme} />
+            </li>
+          )
         })}
-      </div>
+      </ul>
       <div className="flex justify-end z-0">
         <Paginator
           currentPage={(memesListQuery.data.page || 0) + 1}
@@ -63,9 +75,60 @@ const MemesListWrapper = () => {
   )
 }
 
+const StatusToggle = ({
+  isFilteringPending,
+  pendingCount,
+  onSelectAll,
+  onSelectPending
+}: {
+  isFilteringPending: boolean
+  pendingCount: number | undefined
+  onSelectAll: () => void
+  onSelectPending: () => void
+}) => {
+  const hasPendingCount = pendingCount !== undefined
+
+  return (
+    <div className="flex gap-1.5" role="group" aria-label="Filtrer par statut">
+      <Button
+        type="button"
+        variant={isFilteringPending ? 'outline' : 'default'}
+        size="sm"
+        onClick={onSelectAll}
+        aria-pressed={!isFilteringPending}
+      >
+        Tous
+      </Button>
+      <Button
+        type="button"
+        variant={isFilteringPending ? 'default' : 'outline'}
+        size="sm"
+        className={
+          isFilteringPending
+            ? 'bg-info text-info-foreground hover:bg-info/90'
+            : ''
+        }
+        onClick={onSelectPending}
+        aria-pressed={isFilteringPending}
+      >
+        En attente
+        {hasPendingCount && pendingCount > 0 ? (
+          <Badge variant={isFilteringPending ? 'secondary' : 'info'} size="sm">
+            {pendingCount}
+          </Badge>
+        ) : null}
+      </Button>
+    </div>
+  )
+}
+
 const RouteComponent = () => {
   const navigate = Route.useNavigate()
   const search = Route.useSearch()
+
+  const dashboardTotalsQuery = useQuery(getAdminDashboardTotalsQueryOpts())
+
+  const isFilteringPending = search.status === MemeStatus.PENDING
 
   const handleFilterChange = <TKey extends keyof MemesFilters>(
     key: TKey,
@@ -95,8 +158,12 @@ const RouteComponent = () => {
     return handleFilterChange('contentLocale', value)
   }
 
-  const handleStatusChange = (value: MemesFilters['status'] | null) => {
-    return handleFilterChange('status', value)
+  const handleSelectAll = () => {
+    return handleFilterChange('status', null)
+  }
+
+  const handleSelectPending = () => {
+    return handleFilterChange('status', MemeStatus.PENDING)
   }
 
   return (
@@ -105,29 +172,42 @@ const RouteComponent = () => {
         title="Memes"
         action={
           <NewMemeButton>
-            <Plus /> Ajouter un mème
+            <Plus aria-hidden="true" /> Ajouter un mème
           </NewMemeButton>
         }
       />
       <div className="py-10">
         <div className="flex flex-col gap-4">
-          <div className="border-b border-muted pb-4 flex justify-between gap-x-3">
-            <MemesQuery
-              query={search.query ?? ''}
-              onQueryChange={handleQueryChange}
+          <div aria-live="polite" className="sr-only">
+            {isFilteringPending
+              ? 'Filtre actif : mèmes en attente'
+              : 'Affichage de tous les mèmes'}
+          </div>
+          <div className="border-b border-muted pb-4 flex flex-col gap-3">
+            <StatusToggle
+              isFilteringPending={isFilteringPending}
+              pendingCount={dashboardTotalsQuery.data?.pendingMemes}
+              onSelectAll={handleSelectAll}
+              onSelectPending={handleSelectPending}
             />
-            <div className="flex gap-2">
+            <div className="flex items-center justify-between gap-x-3">
+              <MemesQuery
+                query={search.query ?? ''}
+                onQueryChange={handleQueryChange}
+              />
               <MemesFilterContentLocale
                 contentLocale={search.contentLocale ?? null}
                 onContentLocaleChange={handleContentLocaleChange}
               />
-              <MemesFilterStatus
-                status={search.status ?? null}
-                onStatusChange={handleStatusChange}
-              />
             </div>
           </div>
-          <React.Suspense fallback={<LoadingSpinner />}>
+          <React.Suspense
+            fallback={
+              <div role="status" aria-label="Chargement des mèmes">
+                <LoadingSpinner />
+              </div>
+            }
+          >
             <MemesListWrapper />
           </React.Suspense>
         </div>

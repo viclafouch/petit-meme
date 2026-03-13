@@ -14,6 +14,7 @@ import { MemeForm } from '@/routes/admin/library/-components/meme-form'
 import { MemeWatermarkSection } from '@/routes/admin/library/-components/meme-watermark-section'
 import { DeleteMemeButton } from '@admin/-components/delete-meme-button'
 import {
+  getAdminDashboardTotalsQueryOpts,
   getAdminMemeByIdQueryOpts,
   getAdminMemesListQueryOpts
 } from '@admin/-lib/queries'
@@ -35,6 +36,9 @@ const RouteComponent = () => {
     void queryClient.invalidateQueries(
       getAdminMemeByIdQueryOpts(memeQuery.data.id)
     )
+    void queryClient.invalidateQueries({
+      queryKey: getAdminDashboardTotalsQueryOpts.all
+    })
     void router.invalidate()
   }
 

@@ -128,6 +128,15 @@ Bouton "Traduire vers les autres langues" sur chaque carte langue en mode Univer
 - [x] Bouton dans `MemeTranslationSection` — visible uniquement en mode UNIVERSAL, désactivé si champs incomplets ou si génération AI en cours
 - [x] Feature Sentry `ai-translation` ajoutée
 
+### Admin — Pending memes alert banner ✅
+
+Remplacement du filtre dropdown par statut par un bandeau d'alerte warning cliquable dans la page librairie. Affiche le nombre de mèmes en attente de validation. Clic = toggle filtre PENDING. Disparaît quand 0 mèmes en attente.
+
+- [x] Composant `PendingMemesAlert` avec `Alert` variant warning + toggle
+- [x] Réutilise `getAdminDashboardTotalsQueryOpts` (pas de server function dédiée — évite un round-trip DB supplémentaire)
+- [x] Invalidation dashboard totals ajoutée dans edit/create/delete meme handlers
+- [x] Suppression du composant `MemesFilterStatus` (dead code)
+
 ### Admin — Items reportés
 
 - [x] **Watermark upload** : fix `FUNCTION_PAYLOAD_TOO_LARGE` sur Vercel (limite 4.5 MB). L'upload passe maintenant directement du client vers Bunny Storage (admin-only), sans transiter par la serverless function Vercel.

@@ -11,7 +11,10 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { FileForm } from '@admin/-components/file-form'
 import { TwitterForm } from '@admin/-components/twitter-form'
-import { getAdminMemesListQueryOpts } from '@admin/-lib/queries'
+import {
+  getAdminDashboardTotalsQueryOpts,
+  getAdminMemesListQueryOpts
+} from '@admin/-lib/queries'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 
@@ -30,6 +33,9 @@ export const NewMemeButton = ({ ...restButtonProps }: NewMemeButtonProps) => {
     void queryClient.invalidateQueries({
       queryKey: getAdminMemesListQueryOpts.all,
       exact: false
+    })
+    void queryClient.invalidateQueries({
+      queryKey: getAdminDashboardTotalsQueryOpts.all
     })
     void navigate({ to: '/admin/library/$memeId', params: { memeId } })
     closeDialog()

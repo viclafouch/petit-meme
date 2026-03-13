@@ -68,7 +68,8 @@ export const ModelName = {
   RateLimit: 'RateLimit',
   MemeSubmission: 'MemeSubmission',
   MemeTranslation: 'MemeTranslation',
-  CategoryTranslation: 'CategoryTranslation'
+  CategoryTranslation: 'CategoryTranslation',
+  RecommendCache: 'RecommendCache'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -337,6 +338,16 @@ export const CategoryTranslationScalarFieldEnum = {
 export type CategoryTranslationScalarFieldEnum = (typeof CategoryTranslationScalarFieldEnum)[keyof typeof CategoryTranslationScalarFieldEnum]
 
 
+export const RecommendCacheScalarFieldEnum = {
+  key: 'key',
+  data: 'data',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type RecommendCacheScalarFieldEnum = (typeof RecommendCacheScalarFieldEnum)[keyof typeof RecommendCacheScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -351,6 +362,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -563,4 +581,11 @@ export const CategoryTranslationOrderByRelevanceFieldEnum = {
 } as const
 
 export type CategoryTranslationOrderByRelevanceFieldEnum = (typeof CategoryTranslationOrderByRelevanceFieldEnum)[keyof typeof CategoryTranslationOrderByRelevanceFieldEnum]
+
+
+export const RecommendCacheOrderByRelevanceFieldEnum = {
+  key: 'key'
+} as const
+
+export type RecommendCacheOrderByRelevanceFieldEnum = (typeof RecommendCacheOrderByRelevanceFieldEnum)[keyof typeof RecommendCacheOrderByRelevanceFieldEnum]
 

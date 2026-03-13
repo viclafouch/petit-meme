@@ -44,6 +44,7 @@ import { getTweetByUrl, getTweetMedia } from '@/lib/react-tweet'
 import { captureWithFeature } from '@/lib/sentry'
 import { baseLocale } from '@/paraglide/runtime'
 import { logAuditAction } from '@/server/audit'
+import { clearRecommendCache } from '@/server/meme'
 import { adminRequiredMiddleware } from '@/server/user-auth'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
@@ -325,6 +326,14 @@ export const editMeme = createServerFn({ method: 'POST' })
 
     invalidateAlgoliaCache()
 
+    const hasLeftPublished =
+      meme.status === MemeStatus.PUBLISHED &&
+      values.status !== MemeStatus.PUBLISHED
+
+    if (hasLeftPublished) {
+      void clearRecommendCache()
+    }
+
     const hasStatusChanged = meme.status !== values.status
 
     void logAuditAction({
@@ -403,6 +412,7 @@ export const deleteMemeById = createServerFn({ method: 'POST' })
     ])
 
     invalidateAlgoliaCache()
+    void clearRecommendCache()
 
     void logAuditAction({
       action: 'delete',

@@ -12,6 +12,8 @@ import {
   MEMES_SEARCH_SCHEMA,
   NEWS_CATEGORY_SLUG,
   POPULAR_CATEGORY_SLUG,
+  RECOMMEND_RELATED_CACHE_TTL,
+  RECOMMEND_TRENDING_CACHE_TTL,
   RELATED_MEMES_COUNT,
   TRENDING_MEMES_COUNT,
   VIRTUAL_CATEGORY_SLUGS
@@ -23,6 +25,7 @@ import {
   THIRTY_DAYS_MS
 } from '@/constants/time'
 import { prismaClient } from '@/db'
+import type { Prisma } from '@/db/generated/prisma/client'
 import type { MemeContentLocale } from '@/db/generated/prisma/enums'
 import {
   MemeContentLocale as MemeContentLocaleEnum,
@@ -41,7 +44,6 @@ import {
 } from '@/helpers/i18n-content'
 import type { AlgoliaMemeRecord } from '@/lib/algolia'
 import {
-  ALGOLIA_RECOMMEND_CACHE_TTL,
   ALGOLIA_SEARCH_PARAMS_BASE,
   ALGOLIA_SEARCH_RETRIEVE,
   algoliaRecommendClient,
@@ -77,6 +79,58 @@ const serverInsightsClient = createInsightsClient(
   clientEnv.VITE_ALGOLIA_APP_ID,
   serverEnv.ALGOLIA_ADMIN_KEY
 )
+
+type SetRecommendCacheParams = {
+  key: string
+  data: AlgoliaMemeRecord[]
+  ttl: number
+}
+
+const getRecommendCache = createServerOnlyFn(async (key: string) => {
+  const cached = await prismaClient.recommendCache.findUnique({
+    where: { key },
+    select: { data: true, expiresAt: true }
+  })
+
+  if (!cached || cached.expiresAt <= new Date()) {
+    return null
+  }
+
+  return (cached.data as unknown as AlgoliaMemeRecord[]).map(
+    normalizeAlgoliaHit
+  )
+})
+
+const setRecommendCache = createServerOnlyFn(
+  async ({ key, data, ttl }: SetRecommendCacheParams) => {
+    try {
+      const expiresAt = new Date(Date.now() + ttl)
+      const serialized = data as unknown as Prisma.InputJsonValue
+
+      await prismaClient.recommendCache.upsert({
+        where: { key },
+        update: { data: serialized, expiresAt },
+        create: { key, data: serialized, expiresAt }
+      })
+
+      void prismaClient.recommendCache
+        .deleteMany({
+          where: { expiresAt: { lt: new Date() } }
+        })
+        .catch(() => {})
+    } catch (error) {
+      algoliaLogger.warn({ err: error, key }, 'Failed to write recommend cache')
+    }
+  }
+)
+
+export const clearRecommendCache = createServerOnlyFn(async () => {
+  try {
+    await prismaClient.recommendCache.deleteMany()
+  } catch (error) {
+    algoliaLogger.warn({ err: error }, 'Failed to clear recommend cache')
+  }
+})
 
 const buildAlgoliaContentLocaleFilter = (
   contentLocales: MemeContentLocale[]
@@ -350,89 +404,110 @@ export const getRelatedMemes = createServerFn({ method: 'GET' })
   .inputValidator(z.object({ memeId: z.string(), title: z.string() }))
   .handler(async ({ data }) => {
     const locale = getLocale()
+    const cacheKey = `related:${locale}:${data.memeId}`
+
+    const cached = await getRecommendCache(cacheKey)
+
+    if (cached) {
+      return cached
+    }
+
     const localeFilter = buildAlgoliaContentLocaleFilter(
       VISIBLE_CONTENT_LOCALES[locale]
     )
 
-    return withAlgoliaCache(
-      `recommend:related:${locale}:${data.memeId}`,
-      async () => {
-        try {
-          const response = await algoliaRecommendClient.getRecommendations({
-            requests: [
-              {
-                indexName: resolveAlgoliaIndexName(locale),
-                model: 'related-products',
-                objectID: data.memeId,
-                threshold: 0,
-                maxRecommendations: RELATED_MEMES_COUNT,
-                queryParameters: {
-                  filters: `status:${MemeStatus.PUBLISHED} AND ${localeFilter}`,
-                  attributesToRetrieve: [...ALGOLIA_SEARCH_RETRIEVE]
-                },
-                fallbackParameters: {
-                  query: data.title,
-                  filters: `status:${MemeStatus.PUBLISHED} AND ${localeFilter}`
-                }
-              }
-            ]
-          })
+    try {
+      const response = await algoliaRecommendClient.getRecommendations({
+        requests: [
+          {
+            indexName: resolveAlgoliaIndexName(locale),
+            model: 'related-products',
+            objectID: data.memeId,
+            threshold: 0,
+            maxRecommendations: RELATED_MEMES_COUNT,
+            queryParameters: {
+              filters: `status:${MemeStatus.PUBLISHED} AND ${localeFilter}`,
+              attributesToRetrieve: [...ALGOLIA_SEARCH_RETRIEVE]
+            },
+            fallbackParameters: {
+              query: data.title,
+              filters: `status:${MemeStatus.PUBLISHED} AND ${localeFilter}`
+            }
+          }
+        ]
+      })
 
-          const hits = (response.results[0]?.hits ?? []) as AlgoliaMemeRecord[]
+      const hits = (response.results[0]?.hits ?? []) as AlgoliaMemeRecord[]
+      const normalized = hits.map(normalizeAlgoliaHit)
 
-          return hits.map(normalizeAlgoliaHit)
-        } catch {
-          algoliaLogger.warn('Related-products recommendation unavailable')
+      if (normalized.length > 0) {
+        void setRecommendCache({
+          key: cacheKey,
+          data: normalized,
+          ttl: RECOMMEND_RELATED_CACHE_TTL
+        })
+      }
 
-          return []
-        }
-      },
-      ALGOLIA_RECOMMEND_CACHE_TTL
-    )
+      return normalized
+    } catch {
+      algoliaLogger.warn('Related-products recommendation unavailable')
+
+      return []
+    }
   })
 
 export const getTrendingMemes = createServerFn({ method: 'GET' }).handler(
   async () => {
     const locale = getLocale()
+    const cacheKey = `trending:${locale}`
+
+    const cached = await getRecommendCache(cacheKey)
+
+    if (cached) {
+      return cached
+    }
+
     const localeFilter = buildAlgoliaContentLocaleFilter(
       VISIBLE_CONTENT_LOCALES[locale]
     )
-    const trending = await withAlgoliaCache(
-      `recommend:trending:${locale}`,
-      async () => {
-        try {
-          const response = await algoliaRecommendClient.getRecommendations({
-            requests: [
-              {
-                indexName: resolveAlgoliaIndexName(locale),
-                model: 'trending-items',
-                threshold: 0,
-                maxRecommendations: TRENDING_MEMES_COUNT,
-                queryParameters: {
-                  filters: `status:${MemeStatus.PUBLISHED} AND ${localeFilter}`,
-                  attributesToRetrieve: [...ALGOLIA_SEARCH_RETRIEVE]
-                }
-              }
-            ]
-          })
 
-          const hits = (response.results[0]?.hits ?? []) as AlgoliaMemeRecord[]
+    try {
+      const response = await algoliaRecommendClient.getRecommendations({
+        requests: [
+          {
+            indexName: resolveAlgoliaIndexName(locale),
+            model: 'trending-items',
+            threshold: 0,
+            maxRecommendations: TRENDING_MEMES_COUNT,
+            queryParameters: {
+              filters: `status:${MemeStatus.PUBLISHED} AND ${localeFilter}`,
+              attributesToRetrieve: [...ALGOLIA_SEARCH_RETRIEVE]
+            }
+          }
+        ]
+      })
 
-          return hits.map(normalizeAlgoliaHit)
-        } catch {
-          algoliaLogger.warn('Trending-items recommendation unavailable')
+      const hits = (response.results[0]?.hits ?? []) as AlgoliaMemeRecord[]
+      const normalized = hits.map(normalizeAlgoliaHit)
 
-          return []
-        }
-      },
-      ALGOLIA_RECOMMEND_CACHE_TTL
-    )
+      if (normalized.length > 0) {
+        void setRecommendCache({
+          key: cacheKey,
+          data: normalized,
+          ttl: RECOMMEND_TRENDING_CACHE_TTL
+        })
+      }
 
-    if (trending.length === 0) {
+      if (normalized.length === 0) {
+        return await getBestMemesInternal()
+      }
+
+      return normalized
+    } catch {
+      algoliaLogger.warn('Trending-items recommendation unavailable')
+
       return getBestMemesInternal()
     }
-
-    return trending
   }
 )
 

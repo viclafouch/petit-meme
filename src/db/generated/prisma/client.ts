@@ -131,3 +131,8 @@ export type MemeTranslation = Prisma.MemeTranslationModel
  * 
  */
 export type CategoryTranslation = Prisma.CategoryTranslationModel
+/**
+ * Model RecommendCache
+ * 
+ */
+export type RecommendCache = Prisma.RecommendCacheModel

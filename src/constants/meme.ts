@@ -1,6 +1,7 @@
 import type { VariantProps } from 'class-variance-authority'
 import { z } from 'zod'
 import type { badgeVariants } from '@/components/ui/badge'
+import { DAY } from '@/constants/time'
 import { type Prisma } from '@/db/generated/prisma/client'
 import { MemeContentLocale, MemeStatus } from '@/db/generated/prisma/enums'
 import { FILTERABLE_CONTENT_LOCALES } from '@/helpers/i18n-content'
@@ -63,6 +64,9 @@ export const getVirtualCategories = (): VirtualCategory[] => {
 export const MEMES_PER_PAGE = 30
 export const RELATED_MEMES_COUNT = 4
 export const TRENDING_MEMES_COUNT = 12
+
+export const RECOMMEND_TRENDING_CACHE_TTL = DAY
+export const RECOMMEND_RELATED_CACHE_TTL = 7 * DAY
 
 export const MemeStatusMeta = {
   PENDING: {

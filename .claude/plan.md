@@ -27,7 +27,36 @@ Terminé le 2026-03-09. Toutes les branches mergées dans `main`, production bra
 
 ---
 
-## Algolia — Items reportés
+## Algolia — Optimisation billing Recommend
+
+**Problème (2026-03-13) :** 21 442 recommend requests/mois (214% du free tier de 10 000) → 6€/mois d'overage. Cause : l'in-memory cache (`withAlgoliaCache`) est inutile sur Vercel serverless (cold starts), chaque SSR = 1 appel Algolia Recommend.
+
+**Solution :** Cache persistant en DB (table Prisma `RecommendCache`) avec TTL long. Les résultats Algolia Recommend sont stockés en base et réutilisés. Algolia n'est appelé que quand le cache expire.
+
+### Cache DB Algolia Recommend
+
+- [x] **Migration Prisma** : table `RecommendCache` (key PK, data Json, expiresAt, createdAt). Index sur `expiresAt`. Schema ajouté, Prisma Client régénéré. **Migration à créer par l'utilisateur** (`prisma migrate dev`).
+- [x] **`getTrendingMemes`** : lire cache DB (`trending:{locale}`) → si valide, retourner. Sinon appeler Algolia Recommend, écrire en cache (TTL 24h) via `upsert`. Fallback inchangé : `getBestMemesInternal()` si Algolia échoue.
+- [x] **`getRelatedMemes`** : lire cache DB (`related:{locale}:{memeId}`) → si valide, retourner. Sinon appeler Algolia Recommend, écrire en cache (TTL 7 jours) via `upsert`. Fallback inchangé : `[]` si Algolia échoue.
+- [x] **`clearRecommendCache()`** : helper qui fait `DELETE FROM recommend_cache` (max ~1K rows, instantané). Appelé depuis `deleteMemeById` et `editMeme` quand le status quitte PUBLISHED (PUBLISHED → ARCHIVED/REJECTED). Évite les mèmes fantômes (404 au clic) dans le cache.
+- [x] **Cleanup opportuniste** : lors de chaque écriture cache (`upsert`), supprimer les rows expirées (`WHERE expires_at < NOW()`). Pas de cron dédié — évite de réveiller Neon inutilement.
+- [x] **Supprimer le cache in-memory pour recommend** : retiré `withAlgoliaCache` des appels recommend dans `src/server/meme.ts`. Le cache in-memory reste pour les search (non-recommend).
+- [x] **Cleanup** : supprimé `ALGOLIA_RECOMMEND_CACHE_TTL` de `src/lib/algolia.ts` (plus utilisé).
+
+**Décisions :**
+- Storage : table Prisma dans Neon (pas de nouveau service)
+- TTL trending : 24h (~30 appels/mois × 2 locales)
+- TTL related : 7 jours (~73 appels/mois max, en pratique moins — seuls les mèmes vus sont cachés)
+- Invalidation : TTL naturel pour les nouveaux publishes + `clearRecommendCache()` sur delete/archive
+- Cache par locale : une entrée par locale (clés `trending:fr`, `related:en:{memeId}`)
+- Fallback : identique à l'existant (DB pour trending, `[]` pour related)
+- Écriture : `upsert` (INSERT ON CONFLICT UPDATE) — gère les écritures concurrentes sans corruption
+- Estimation : ~100 req Algolia/mois (vs 21 442) → bien dans le free tier
+
+**Trade-offs acceptés :**
+- Titre/description stale après un edit metadata-only → max 7j pour related, 24h pour trending. Non critique pour une sidebar.
+- Nouveau mème publié n'apparaît pas dans trending/related avant expiration TTL → normal, le ML Algolia a aussi besoin de temps pour accumuler des signaux.
+- Studio page (`memes.$memeId.studio.tsx`) bénéficie automatiquement du cache DB car elle appelle le même `getRelatedMemes`.
 
 ### Activer les modèles Recommend (quand suffisamment d'events)
 

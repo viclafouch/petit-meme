@@ -357,3 +357,13 @@ model CategoryTranslation {
   @@unique([categoryId, locale])
   @@map("category_translation")
 }
+
+model RecommendCache {
+  key       String   @id
+  data      Json
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([expiresAt])
+  @@map("recommend_cache")
+}

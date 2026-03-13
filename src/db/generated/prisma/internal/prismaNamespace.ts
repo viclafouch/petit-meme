@@ -401,7 +401,8 @@ export const ModelName = {
   RateLimit: 'RateLimit',
   MemeSubmission: 'MemeSubmission',
   MemeTranslation: 'MemeTranslation',
-  CategoryTranslation: 'CategoryTranslation'
+  CategoryTranslation: 'CategoryTranslation',
+  RecommendCache: 'RecommendCache'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -417,7 +418,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "userBookmark" | "category" | "memeCategory" | "video" | "meme" | "memeViewDaily" | "memeActionDaily" | "user" | "adminAuditLog" | "session" | "subscription" | "account" | "verification" | "studioGeneration" | "rateLimit" | "memeSubmission" | "memeTranslation" | "categoryTranslation"
+    modelProps: "userBookmark" | "category" | "memeCategory" | "video" | "meme" | "memeViewDaily" | "memeActionDaily" | "user" | "adminAuditLog" | "session" | "subscription" | "account" | "verification" | "studioGeneration" | "rateLimit" | "memeSubmission" | "memeTranslation" | "categoryTranslation" | "recommendCache"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1753,6 +1754,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    RecommendCache: {
+      payload: Prisma.$RecommendCachePayload<ExtArgs>
+      fields: Prisma.RecommendCacheFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RecommendCacheFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendCachePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RecommendCacheFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendCachePayload>
+        }
+        findFirst: {
+          args: Prisma.RecommendCacheFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendCachePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RecommendCacheFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendCachePayload>
+        }
+        findMany: {
+          args: Prisma.RecommendCacheFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendCachePayload>[]
+        }
+        create: {
+          args: Prisma.RecommendCacheCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendCachePayload>
+        }
+        createMany: {
+          args: Prisma.RecommendCacheCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RecommendCacheCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendCachePayload>[]
+        }
+        delete: {
+          args: Prisma.RecommendCacheDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendCachePayload>
+        }
+        update: {
+          args: Prisma.RecommendCacheUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendCachePayload>
+        }
+        deleteMany: {
+          args: Prisma.RecommendCacheDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RecommendCacheUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RecommendCacheUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendCachePayload>[]
+        }
+        upsert: {
+          args: Prisma.RecommendCacheUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendCachePayload>
+        }
+        aggregate: {
+          args: Prisma.RecommendCacheAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRecommendCache>
+        }
+        groupBy: {
+          args: Prisma.RecommendCacheGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RecommendCacheGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RecommendCacheCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RecommendCacheCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2042,6 +2117,16 @@ export const CategoryTranslationScalarFieldEnum = {
 export type CategoryTranslationScalarFieldEnum = (typeof CategoryTranslationScalarFieldEnum)[keyof typeof CategoryTranslationScalarFieldEnum]
 
 
+export const RecommendCacheScalarFieldEnum = {
+  key: 'key',
+  data: 'data',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type RecommendCacheScalarFieldEnum = (typeof RecommendCacheScalarFieldEnum)[keyof typeof RecommendCacheScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2056,6 +2141,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -2268,6 +2360,13 @@ export const CategoryTranslationOrderByRelevanceFieldEnum = {
 } as const
 
 export type CategoryTranslationOrderByRelevanceFieldEnum = (typeof CategoryTranslationOrderByRelevanceFieldEnum)[keyof typeof CategoryTranslationOrderByRelevanceFieldEnum]
+
+
+export const RecommendCacheOrderByRelevanceFieldEnum = {
+  key: 'key'
+} as const
+
+export type RecommendCacheOrderByRelevanceFieldEnum = (typeof RecommendCacheOrderByRelevanceFieldEnum)[keyof typeof RecommendCacheOrderByRelevanceFieldEnum]
 
 
 
@@ -2549,6 +2648,7 @@ export type GlobalOmitConfig = {
   memeSubmission?: Prisma.MemeSubmissionOmit
   memeTranslation?: Prisma.MemeTranslationOmit
   categoryTranslation?: Prisma.CategoryTranslationOmit
+  recommendCache?: Prisma.RecommendCacheOmit
 }
 
 /* Types for Logging */

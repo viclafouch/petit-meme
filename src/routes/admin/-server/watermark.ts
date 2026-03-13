@@ -1,11 +1,12 @@
 import { z } from 'zod'
 import { prismaClient } from '@/db'
 import type { Meme, Prisma } from '@/db/generated/prisma/client'
+import { serverEnv } from '@/env/server'
 import {
   buildSignedOriginalUrl,
+  buildStorageUrl,
   checkWatermarkExists,
-  fetchWatermarkedVideo,
-  uploadWatermarkedVideo
+  fetchWatermarkedVideo
 } from '@/lib/bunny'
 import { adminLogger } from '@/lib/logger'
 import { logAuditAction } from '@/server/audit'
@@ -41,27 +42,32 @@ export const checkMemeWatermark = createServerFn({ method: 'GET' })
     return { exists }
   })
 
-export const uploadMemeWatermark = createServerFn({ method: 'POST' })
+export const getWatermarkUploadConfig = createServerFn({ method: 'POST' })
   .inputValidator((data) => {
-    const formData = z.instanceof(FormData).parse(data)
+    return z.string().parse(data)
+  })
+  .middleware([adminRequiredMiddleware])
+  .handler(async ({ data: memeId }) => {
+    const bunnyId = await findMemeBunnyId(memeId)
 
+    return {
+      bunnyId,
+      url: buildStorageUrl(bunnyId),
+      accessKey: serverEnv.BUNNY_STORAGE_API_KEY
+    }
+  })
+
+export const logWatermarkUpload = createServerFn({ method: 'POST' })
+  .inputValidator((data) => {
     return z
       .object({
         memeId: z.string(),
-        video: z.file().min(1).mime('video/mp4')
+        bunnyId: z.string()
       })
-      .parse({
-        memeId: formData.get('memeId'),
-        video: formData.get('video')
-      })
+      .parse(data)
   })
   .middleware([adminRequiredMiddleware])
   .handler(async ({ data, context }) => {
-    const bunnyId = await findMemeBunnyId(data.memeId)
-
-    const buffer = Buffer.from(await data.video.arrayBuffer())
-    await uploadWatermarkedVideo(bunnyId, buffer)
-
     void logAuditAction({
       action: 'watermark_upload',
       actingAdminId: context.user.id,
@@ -70,7 +76,7 @@ export const uploadMemeWatermark = createServerFn({ method: 'POST' })
     })
 
     adminLogger.info(
-      { memeId: data.memeId, bunnyId },
+      { memeId: data.memeId, bunnyId: data.bunnyId },
       'Watermark uploaded via admin'
     )
 

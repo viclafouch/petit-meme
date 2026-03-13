@@ -121,6 +121,7 @@ nitro({
 
 ### Admin — Items reportés
 
+- [x] **Watermark upload** : fix `FUNCTION_PAYLOAD_TOO_LARGE` sur Vercel (limite 4.5 MB). L'upload passe maintenant directement du client vers Bunny Storage (admin-only), sans transiter par la serverless function Vercel.
 - [ ] Rate limiting sur les preview deployments Vercel (infra)
 - [ ] Rate limiting dédié sur le tracking share/download (dédoublonnage par user/meme)
 - `getListUsers` extraction bloquée : module-level functions using `prismaClient` break Vite client bundle (TanStack Start only strips `.handler()` body)

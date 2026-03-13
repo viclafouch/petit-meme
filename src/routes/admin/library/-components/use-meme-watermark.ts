@@ -11,8 +11,9 @@ import {
   getAdminVideoBlobQueryOpts
 } from '@admin/-lib/queries'
 import {
-  previewMemeWatermark,
-  uploadMemeWatermark
+  getWatermarkUploadConfig,
+  logWatermarkUpload,
+  previewMemeWatermark
 } from '@admin/-server/watermark'
 import type { FFmpeg, ProgressEvent } from '@ffmpeg/ffmpeg'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -99,14 +100,27 @@ export function useMemeWatermark(memeId: Meme['id']) {
         throw new Error('No watermark to upload')
       }
 
-      const formData = new FormData()
-      formData.append('memeId', memeId)
-      formData.append(
-        'video',
-        new File([preview.blob], 'watermarked.mp4', { type: 'video/mp4' })
-      )
+      const config = await getWatermarkUploadConfig({ data: memeId })
 
-      await uploadMemeWatermark({ data: formData })
+      const uploadResponse = await fetch(config.url, {
+        method: 'PUT',
+        headers: {
+          AccessKey: config.accessKey,
+          'Content-Type': 'application/octet-stream'
+        },
+        body: preview.blob,
+        signal: AbortSignal.timeout(120_000)
+      })
+
+      if (!uploadResponse.ok) {
+        throw new Error(
+          `Bunny Storage upload failed (${uploadResponse.status})`
+        )
+      }
+
+      await logWatermarkUpload({
+        data: { memeId, bunnyId: config.bunnyId }
+      })
     },
     onSuccess: () => {
       revokePreview()

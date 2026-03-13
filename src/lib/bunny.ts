@@ -155,7 +155,7 @@ const withStorageTimeout = (timeoutMs = STORAGE_TIMEOUT_MS) => {
   }
 }
 
-const buildStorageUrl = (bunnyId: string) => {
+export const buildStorageUrl = (bunnyId: string) => {
   return `https://${serverEnv.BUNNY_STORAGE_HOSTNAME}/${serverEnv.BUNNY_STORAGE_ZONE_NAME}/${bunnyId}.mp4`
 }
 

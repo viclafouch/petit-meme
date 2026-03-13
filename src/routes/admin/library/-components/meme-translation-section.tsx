@@ -1,4 +1,4 @@
-import { Stars } from 'lucide-react'
+import { Languages, Stars } from 'lucide-react'
 import { FLAG_ICON_CLASS, LOCALE_FLAGS } from '@/components/icon/flags'
 import {
   FormControl,
@@ -11,19 +11,23 @@ import { LoadingButton } from '@/components/ui/loading-button'
 import { Textarea } from '@/components/ui/textarea'
 import { LOCALE_META } from '@/helpers/i18n-content'
 import type { useKeywordsField } from '@/hooks/use-keywords-field'
-import { getFieldErrorMessage } from '@/lib/utils'
+import { type FormFieldApi, getFieldErrorMessage } from '@/lib/utils'
 import type { Locale } from '@/paraglide/runtime'
 import { KeywordsField } from '@admin/-components/keywords-field'
-import type { AnyFieldApi } from '@tanstack/react-form'
+
+const MIN_TITLE_LENGTH = 3
 
 type MemeTranslationSectionParams = {
   locale: Locale
-  titleField: AnyFieldApi
-  descriptionField: AnyFieldApi
-  keywordsFieldApi: AnyFieldApi
+  titleField: FormFieldApi<string>
+  descriptionField: FormFieldApi<string>
+  keywordsFieldApi: FormFieldApi<string[]>
   keywordsField: ReturnType<typeof useKeywordsField>
   isGenerating: boolean
   onGenerateContent: () => void
+  isTranslateVisible: boolean
+  isTranslating: boolean
+  onTranslate: () => void
 }
 
 export const MemeTranslationSection = ({
@@ -33,13 +37,20 @@ export const MemeTranslationSection = ({
   keywordsFieldApi,
   keywordsField,
   isGenerating,
-  onGenerateContent
+  onGenerateContent,
+  isTranslateVisible,
+  isTranslating,
+  onTranslate
 }: MemeTranslationSectionParams) => {
   const titleError = getFieldErrorMessage({ field: titleField })
   const descriptionError = getFieldErrorMessage({ field: descriptionField })
-  const descriptionValue = descriptionField.state.value as string
   const meta = LOCALE_META[locale]
   const Flag = LOCALE_FLAGS[locale]
+
+  const canTranslate =
+    titleField.state.value.length >= MIN_TITLE_LENGTH &&
+    descriptionField.state.value.length > 0 &&
+    keywordsFieldApi.state.value.length > 0
 
   return (
     <fieldset className="flex flex-col gap-4 rounded-lg border p-4">
@@ -54,7 +65,7 @@ export const MemeTranslationSection = ({
             required
             type="text"
             name={titleField.name}
-            value={titleField.state.value as string}
+            value={titleField.state.value}
             onBlur={titleField.handleBlur}
             onChange={(event) => {
               return titleField.handleChange(event.target.value)
@@ -69,7 +80,7 @@ export const MemeTranslationSection = ({
           <Textarea
             name={descriptionField.name}
             onBlur={descriptionField.handleBlur}
-            value={descriptionValue}
+            value={descriptionField.state.value}
             onChange={(event) => {
               return descriptionField.handleChange(event.target.value)
             }}
@@ -77,9 +88,10 @@ export const MemeTranslationSection = ({
         </FormControl>
         <div className="flex items-center justify-end gap-2">
           <span className="text-xs text-muted-foreground">
-            {descriptionValue.length}/200 caractères
+            {descriptionField.state.value.length}/200 caractères
           </span>
           <LoadingButton
+            disabled={isTranslating}
             isLoading={isGenerating}
             loadingText="Génération..."
             size="sm"
@@ -94,6 +106,22 @@ export const MemeTranslationSection = ({
         <FormMessage />
       </FormItem>
       <KeywordsField field={keywordsFieldApi} {...keywordsField} />
+      {isTranslateVisible ? (
+        <div className="flex justify-end border-t pt-4">
+          <LoadingButton
+            disabled={!canTranslate || isGenerating}
+            isLoading={isTranslating}
+            loadingText="Traduction..."
+            size="sm"
+            type="button"
+            variant="outline"
+            onClick={onTranslate}
+          >
+            <Languages />
+            Traduire vers les autres langues
+          </LoadingButton>
+        </div>
+      ) : null}
     </fieldset>
   )
 }

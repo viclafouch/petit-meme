@@ -3,6 +3,7 @@ import zodToJsonSchema from 'zod-to-json-schema'
 import { MEME_TRANSLATION_SELECT } from '@/constants/meme'
 import { prismaClient } from '@/db'
 import { serverEnv } from '@/env/server'
+import { getErrorMessage } from '@/helpers/error'
 import {
   CONTENT_LOCALE_TO_LOCALE,
   LOCALE_META,
@@ -13,7 +14,7 @@ import { withTimeout } from '@/helpers/promise'
 import { buildSignedOriginalUrl } from '@/lib/bunny'
 import { adminLogger } from '@/lib/logger'
 import { captureWithFeature } from '@/lib/sentry'
-import type { Locale } from '@/paraglide/runtime'
+import { type Locale, locales } from '@/paraglide/runtime'
 import { adminRequiredMiddleware } from '@/server/user-auth'
 import {
   createPartFromUri,
@@ -68,13 +69,16 @@ async function waitForFileActive(fileName: string) {
   )
 }
 
-function buildResponseSchema(targetLocales: readonly Locale[]) {
+function buildLocalizedResponseSchema<T extends z.ZodTypeAny>(
+  targetLocales: readonly Locale[],
+  itemSchema: T
+) {
   return z.object(
     Object.fromEntries(
       targetLocales.map((locale) => {
-        return [locale, translationSchema]
+        return [locale, itemSchema]
       })
-    ) as Record<Locale, typeof translationSchema>
+    ) as Record<Locale, T>
   )
 }
 
@@ -100,13 +104,125 @@ ${localeInstructions}
 Les mots-clefs doivent être dans la langue correspondante.`
 }
 
+const memeTranslateResultSchema = translationSchema.extend({
+  title: z.string().describe('Titre traduit (100 caractères max)')
+})
+
+type BuildTranslatePromptParams = {
+  sourceLabel: string
+  targetLocales: readonly Locale[]
+  title: string
+  description: string
+  keywords: string[]
+}
+
+function buildTranslatePrompt({
+  sourceLabel,
+  targetLocales,
+  title,
+  description,
+  keywords
+}: BuildTranslatePromptParams) {
+  const targetInstructions = targetLocales
+    .map((locale) => {
+      return `- "${locale}" (${LOCALE_META[locale].label})`
+    })
+    .join('\n')
+
+  return `Tu es un traducteur professionnel spécialisé dans le contenu web et le SEO.
+
+Traduis les métadonnées suivantes d'un mème de ${sourceLabel} vers les langues indiquées.
+
+Titre : "${title}"
+Description : "${description}"
+Mots-clés : ${keywords.join(', ')}
+
+Langues cibles :
+${targetInstructions}
+
+Règles :
+- Conserve le même ton et style
+- Titre : 100 caractères maximum
+- Description : 200 caractères maximum
+- Si la description commence par "Découvrez et téléchargez ce mème de...", adapte le préfixe naturellement ("Discover and download this meme of...")
+- Traduis chaque mot-clé individuellement
+- Les mots-clés doivent être en minuscules
+- Adapte les expressions idiomatiques à la langue cible`
+}
+
+export const translateMemeContent = createServerFn({ method: 'POST' })
+  .middleware([adminRequiredMiddleware])
+  .inputValidator((data) => {
+    return z
+      .object({
+        sourceLocale: z.enum(locales),
+        targetLocales: z.array(z.enum(locales)).min(1),
+        title: z.string().min(1),
+        description: z.string().min(1),
+        keywords: z.array(z.string()).min(1)
+      })
+      .parse(data)
+  })
+  .handler(async ({ data }) => {
+    const sourceLabel = LOCALE_META[data.sourceLocale].label
+    const responseSchema = buildLocalizedResponseSchema(
+      data.targetLocales,
+      memeTranslateResultSchema
+    )
+    const prompt = buildTranslatePrompt({
+      sourceLabel,
+      targetLocales: data.targetLocales,
+      title: data.title,
+      description: data.description,
+      keywords: data.keywords
+    })
+
+    try {
+      const result = await withTimeout(
+        ai.models.generateContent({
+          model: GEMINI_MODEL,
+          contents: prompt,
+          config: {
+            responseMimeType: 'application/json',
+            responseJsonSchema: zodToJsonSchema(responseSchema)
+          }
+        }),
+        GEMINI_TIMEOUT_MS,
+        `Traduction AI : timeout après ${GEMINI_TIMEOUT_MS}ms`
+      )
+
+      if (!result.text) {
+        setResponseStatus(502)
+        throw new Error('La traduction AI a échoué : réponse vide')
+      }
+
+      const parsed = responseSchema.parse(JSON.parse(result.text))
+
+      adminLogger.info(
+        { sourceLocale: data.sourceLocale, targetLocales: data.targetLocales },
+        'AI translation completed'
+      )
+
+      return parsed
+    } catch (error) {
+      captureWithFeature(error, 'ai-translation')
+      adminLogger.error(
+        { err: error, sourceLocale: data.sourceLocale },
+        'AI translation failed'
+      )
+      setResponseStatus(502)
+      throw new Error(`La traduction AI a échoué : ${getErrorMessage(error)}`)
+    }
+  })
+
 export const generateMemeContent = createServerFn({ method: 'POST' })
   .middleware([adminRequiredMiddleware])
   .inputValidator((data) => {
     return z
       .object({
         memeId: z.string(),
-        title: z.string().optional()
+        title: z.string().optional(),
+        targetLocales: z.array(z.enum(locales)).min(1).optional()
       })
       .parse(data)
   })
@@ -142,8 +258,12 @@ export const generateMemeContent = createServerFn({ method: 'POST' })
 
     const effectiveTitle = data.title ?? resolved.title
 
-    const targetLocales = REQUIRED_TRANSLATION_LOCALES[meme.contentLocale]
-    const responseSchema = buildResponseSchema(targetLocales)
+    const targetLocales =
+      data.targetLocales ?? REQUIRED_TRANSLATION_LOCALES[meme.contentLocale]
+    const responseSchema = buildLocalizedResponseSchema(
+      targetLocales,
+      translationSchema
+    )
 
     const originalUrl = await buildSignedOriginalUrl(meme.video.bunnyId)
     const videoResponse = await fetch(originalUrl)
@@ -204,15 +324,13 @@ export const generateMemeContent = createServerFn({ method: 'POST' })
 
       return parsed
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error'
-
       captureWithFeature(error, 'ai-generation')
       adminLogger.error(
-        { err: error, memeId: data.memeId, message },
+        { err: error, memeId: data.memeId },
         'AI content generation failed'
       )
       setResponseStatus(502)
-      throw new Error(`La génération AI a échoué : ${message}`)
+      throw new Error(`La génération AI a échoué : ${getErrorMessage(error)}`)
     } finally {
       ai.files.delete({ name: uploadedFile.name }).catch((error: unknown) => {
         adminLogger.error(

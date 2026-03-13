@@ -10,6 +10,7 @@ type SentryFeature =
   | 'bunny-webhook'
   | 'bunny-cleanup'
   | 'ai-generation'
+  | 'ai-translation'
   | 'resend-email'
   | 'bookmark'
   | 'share'

@@ -7,11 +7,10 @@ import {
   FormMessage
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { getFieldErrorMessage } from '@/lib/utils'
-import type { AnyFieldApi } from '@tanstack/react-form'
+import { type FormFieldApi, getFieldErrorMessage } from '@/lib/utils'
 
 type KeywordsFieldParams = {
-  field: AnyFieldApi
+  field: FormFieldApi<string[]>
   keywordValue: string
   setKeywordValue: (value: string) => void
   handleAddKeyword: () => void
@@ -26,11 +25,10 @@ export const KeywordsField = ({
   handleRemoveKeyword
 }: KeywordsFieldParams) => {
   const errorMessage = getFieldErrorMessage({ field })
-  const keywords = field.state.value as string[]
 
   return (
     <FormItem error={errorMessage}>
-      <FormLabel>Mots clés ({keywords.length})</FormLabel>
+      <FormLabel>Mots clés ({field.state.value.length})</FormLabel>
       <FormControl>
         <Input
           required
@@ -51,9 +49,9 @@ export const KeywordsField = ({
           }}
         />
       </FormControl>
-      {keywords.length > 0 ? (
+      {field.state.value.length > 0 ? (
         <div className="flex flex-wrap gap-2">
-          {keywords.map((keyword, index) => {
+          {field.state.value.map((keyword, index) => {
             return (
               <Badge variant="secondary" key={keyword}>
                 {keyword}

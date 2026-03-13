@@ -119,6 +119,15 @@ nitro({
 
 ## Backlog — Futures évolutions
 
+### Admin — Traduction inter-langues (Universal mode) ✅
+
+Bouton "Traduire vers les autres langues" sur chaque carte langue en mode Universal. Utilise Gemini (text-only, pas d'upload vidéo) pour traduire titre, description et mots-clés d'une langue source vers les autres langues requises. Bouton activé uniquement quand les 3 champs sont remplis (titre ≥ 3 chars, description non vide, ≥ 1 mot-clé).
+
+- [x] Server function `translateMemeContent` dans `src/server/ai.ts` — prompt Gemini text-only, réponse JSON structurée via Zod schema
+- [x] Mutation `translateContentMutation` dans `use-meme-form.ts` — lit les données du formulaire côté client, envoie à Gemini, remplace les champs de la locale cible
+- [x] Bouton dans `MemeTranslationSection` — visible uniquement en mode UNIVERSAL, désactivé si champs incomplets ou si génération AI en cours
+- [x] Feature Sentry `ai-translation` ajoutée
+
 ### Admin — Items reportés
 
 - [x] **Watermark upload** : fix `FUNCTION_PAYLOAD_TOO_LARGE` sur Vercel (limite 4.5 MB). L'upload passe maintenant directement du client vers Bunny Storage (admin-only), sans transiter par la serverless function Vercel.

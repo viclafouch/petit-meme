@@ -14,9 +14,11 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import { MemeStatusMeta } from '@/constants/meme'
-import { MemeStatus } from '@/db/generated/prisma/enums'
-import { getFieldErrorMessage } from '@/lib/utils'
-import type { AnyFieldApi } from '@tanstack/react-form'
+import {
+  type MemeStatus,
+  MemeStatus as MemeStatusEnum
+} from '@/db/generated/prisma/enums'
+import { type FormFieldApi, getFieldErrorMessage } from '@/lib/utils'
 
 type CategoryOption = {
   label: string
@@ -24,9 +26,9 @@ type CategoryOption = {
 }
 
 type MemeFormMetadataFieldsParams = {
-  statusField: AnyFieldApi
-  categoryIdsField: AnyFieldApi
-  tweetUrlField: AnyFieldApi
+  statusField: FormFieldApi<MemeStatus>
+  categoryIdsField: FormFieldApi<string[]>
+  tweetUrlField: FormFieldApi<string | null>
   categoriesOptions: CategoryOption[]
   isCategoriesLoading: boolean
   categoriesError: Error | null
@@ -50,7 +52,7 @@ export const MemeFormMetadataFields = ({
         <FormLabel>Statut</FormLabel>
         <FormControl>
           <Select
-            value={statusField.state.value as string}
+            value={statusField.state.value}
             onValueChange={(value) => {
               return statusField.handleChange(value as MemeStatus)
             }}
@@ -59,16 +61,16 @@ export const MemeFormMetadataFields = ({
               <SelectValue placeholder="Sélectionnez un statut" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={MemeStatus.PENDING}>
+              <SelectItem value={MemeStatusEnum.PENDING}>
                 {MemeStatusMeta.PENDING.label}
               </SelectItem>
-              <SelectItem value={MemeStatus.PUBLISHED}>
+              <SelectItem value={MemeStatusEnum.PUBLISHED}>
                 {MemeStatusMeta.PUBLISHED.label}
               </SelectItem>
-              <SelectItem value={MemeStatus.ARCHIVED}>
+              <SelectItem value={MemeStatusEnum.ARCHIVED}>
                 {MemeStatusMeta.ARCHIVED.label}
               </SelectItem>
-              <SelectItem value={MemeStatus.REJECTED}>
+              <SelectItem value={MemeStatusEnum.REJECTED}>
                 {MemeStatusMeta.REJECTED.label}
               </SelectItem>
             </SelectContent>
@@ -83,7 +85,7 @@ export const MemeFormMetadataFields = ({
             loading={isCategoriesLoading}
             error={categoriesError}
             options={categoriesOptions}
-            value={categoryIdsField.state.value as string[]}
+            value={categoryIdsField.state.value}
             onValueChange={(value) => {
               return categoryIdsField.handleChange(value)
             }}
@@ -104,7 +106,7 @@ export const MemeFormMetadataFields = ({
           <Input
             type="text"
             name={tweetUrlField.name}
-            value={(tweetUrlField.state.value as string | null) ?? ''}
+            value={tweetUrlField.state.value ?? ''}
             onBlur={tweetUrlField.handleBlur}
             onChange={(event) => {
               return tweetUrlField.handleChange(event.target.value)

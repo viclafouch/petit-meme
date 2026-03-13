@@ -2,15 +2,30 @@ import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import type { ZodType } from 'zod'
 import { logger } from '@/lib/logger'
-import type { AnyFieldApi } from '@tanstack/react-form'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function getFieldErrorMessage({ field }: { field: AnyFieldApi }) {
+type FieldMeta = {
+  isTouched: boolean
+  isValid: boolean
+  errors: ({ message: string } | undefined)[]
+}
+
+export type FormFieldApi<T> = {
+  state: {
+    value: T
+    meta: FieldMeta
+  }
+  name: string
+  handleBlur: () => void
+  handleChange: (value: T) => void
+}
+
+export function getFieldErrorMessage<T>({ field }: { field: FormFieldApi<T> }) {
   return field.state.meta.isTouched && !field.state.meta.isValid
-    ? field.state.meta.errors[0].message
+    ? (field.state.meta.errors[0]?.message ?? '')
     : ''
 }
 

@@ -17,12 +17,10 @@ import { type MemeFullData } from '@/constants/meme'
 import type { MemeContentLocale } from '@/db/generated/prisma/enums'
 import {
   getContentLocaleOptions,
-  REQUIRED_TRANSLATION_LOCALES
+  getRequiredLocales
 } from '@/helpers/i18n-content'
 import { getFieldErrorMessage } from '@/lib/utils'
-import type { Locale } from '@/paraglide/runtime'
 import { locales } from '@/paraglide/runtime'
-import type { AnyFieldApi } from '@tanstack/react-form'
 import { MemeFormMetadataFields } from './meme-form-metadata-fields'
 import { MemeTranslationSection } from './meme-translation-section'
 import { useMemeForm } from './use-meme-form'
@@ -39,6 +37,7 @@ export const MemeForm = ({ meme, onSuccess }: MemeFormParams) => {
     categoriesListQuery,
     categoriesOptions,
     generateContentMutation,
+    translateContentMutation,
     isLocaleRequired
   } = useMemeForm({ meme, onSuccess })
 
@@ -108,9 +107,7 @@ export const MemeForm = ({ meme, onSuccess }: MemeFormParams) => {
             return state.values.contentLocale
           }}
           children={(contentLocale) => {
-            const requiredLocales = REQUIRED_TRANSLATION_LOCALES[
-              contentLocale
-            ] as readonly Locale[]
+            const requiredLocales = getRequiredLocales(contentLocale)
 
             return (
               <>
@@ -123,17 +120,15 @@ export const MemeForm = ({ meme, onSuccess }: MemeFormParams) => {
                       <form.Field
                         key={locale}
                         name={`translations.${locale}.title`}
-                        children={(titleField: AnyFieldApi) => {
+                        children={(titleField) => {
                           return (
                             <form.Field
                               name={`translations.${locale}.description`}
-                              children={(descriptionField: AnyFieldApi) => {
+                              children={(descriptionField) => {
                                 return (
                                   <form.Field
                                     name={`translations.${locale}.keywords`}
-                                    children={(
-                                      keywordsFieldApi: AnyFieldApi
-                                    ) => {
+                                    children={(keywordsFieldApi) => {
                                       return (
                                         <MemeTranslationSection
                                           locale={locale}
@@ -143,9 +138,28 @@ export const MemeForm = ({ meme, onSuccess }: MemeFormParams) => {
                                           keywordsField={keywordsFields[locale]}
                                           isGenerating={
                                             generateContentMutation.isPending
+                                              ? generateContentMutation.variables ===
+                                                locale
+                                              : false
                                           }
                                           onGenerateContent={() => {
-                                            return generateContentMutation.mutate()
+                                            return generateContentMutation.mutate(
+                                              locale
+                                            )
+                                          }}
+                                          isTranslateVisible={
+                                            contentLocale === 'UNIVERSAL'
+                                          }
+                                          isTranslating={
+                                            translateContentMutation.isPending
+                                              ? translateContentMutation.variables ===
+                                                locale
+                                              : false
+                                          }
+                                          onTranslate={() => {
+                                            return translateContentMutation.mutate(
+                                              locale
+                                            )
                                           }}
                                         />
                                       )
@@ -165,15 +179,15 @@ export const MemeForm = ({ meme, onSuccess }: MemeFormParams) => {
         />
         <form.Field
           name="status"
-          children={(statusField: AnyFieldApi) => {
+          children={(statusField) => {
             return (
               <form.Field
                 name="categoryIds"
-                children={(categoryIdsField: AnyFieldApi) => {
+                children={(categoryIdsField) => {
                   return (
                     <form.Field
                       name="tweetUrl"
-                      children={(tweetUrlField: AnyFieldApi) => {
+                      children={(tweetUrlField) => {
                         return (
                           <MemeFormMetadataFields
                             statusField={statusField}

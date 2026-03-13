@@ -5,15 +5,14 @@ import type { Meme } from '@/db/generated/prisma/client'
 import { getErrorMessage } from '@/helpers/error'
 import {
   buildLocaleRecord,
-  CONTENT_LOCALE_TO_LOCALE,
   findTranslationByLocale,
-  REQUIRED_TRANSLATION_LOCALES
+  getRequiredLocales
 } from '@/helpers/i18n-content'
 import { useKeywordsField } from '@/hooks/use-keywords-field'
 import { getCategoriesListQueryOpts } from '@/lib/queries'
 import { captureWithFeature } from '@/lib/sentry'
 import type { Locale } from '@/paraglide/runtime'
-import { generateMemeContent } from '@/server/ai'
+import { generateMemeContent, translateMemeContent } from '@/server/ai'
 import { removeDuplicates } from '@/utils/array'
 import { editMeme, MEME_FORM_SCHEMA } from '@admin/-server/memes'
 import { useForm } from '@tanstack/react-form'
@@ -113,17 +112,14 @@ export function useMemeForm({ meme, onSuccess }: UseMemeFormParams) {
 
   const generateContentMutation = useMutation({
     mutationKey: ['generate-content'],
-    mutationFn: () => {
-      const contentLocale = form.getFieldValue('contentLocale')
-      const nativeLocale = CONTENT_LOCALE_TO_LOCALE[contentLocale]
-      const title = form.getFieldValue(
-        `translations.${nativeLocale}.title`
-      ) as string
+    mutationFn: (locale: Locale) => {
+      const title = form.getFieldValue(`translations.${locale}.title`)
 
       return generateMemeContent({
         data: {
           memeId: meme.id,
-          title: title || undefined
+          title: title || undefined,
+          targetLocales: [locale]
         }
       })
     },
@@ -150,11 +146,63 @@ export function useMemeForm({ meme, onSuccess }: UseMemeFormParams) {
     }
   })
 
+  const translateContentMutation = useMutation({
+    mutationKey: ['translate-content'],
+    mutationFn: (sourceLocale: Locale) => {
+      const title = form.getFieldValue(`translations.${sourceLocale}.title`)
+      const description = form.getFieldValue(
+        `translations.${sourceLocale}.description`
+      )
+      const keywords = form.getFieldValue(
+        `translations.${sourceLocale}.keywords`
+      )
+
+      const contentLocale = form.getFieldValue('contentLocale')
+      const requiredLocales = getRequiredLocales(contentLocale)
+      const targetLocales = requiredLocales.filter((locale) => {
+        return locale !== sourceLocale
+      })
+
+      return translateMemeContent({
+        data: {
+          sourceLocale,
+          targetLocales,
+          title,
+          description,
+          keywords
+        }
+      })
+    },
+    onSuccess: (result) => {
+      for (const locale of Object.keys(result) as Locale[]) {
+        const translation = result[locale]
+
+        if (!translation) {
+          continue
+        }
+
+        form.setFieldValue(`translations.${locale}.title`, translation.title)
+        form.setFieldValue(
+          `translations.${locale}.description`,
+          translation.description
+        )
+        form.setFieldValue(
+          `translations.${locale}.keywords`,
+          translation.keywords
+        )
+      }
+
+      toast.success('Traduction terminée !')
+    },
+    onError: (error) => {
+      captureWithFeature(error, 'ai-translation')
+      toast.error(error.message)
+    }
+  })
+
   const isLocaleRequired = (locale: Locale) => {
     const contentLocale = form.getFieldValue('contentLocale')
-    const required = REQUIRED_TRANSLATION_LOCALES[
-      contentLocale
-    ] as readonly Locale[]
+    const required = getRequiredLocales(contentLocale)
 
     return required.includes(locale)
   }
@@ -165,6 +213,7 @@ export function useMemeForm({ meme, onSuccess }: UseMemeFormParams) {
     categoriesListQuery,
     categoriesOptions,
     generateContentMutation,
+    translateContentMutation,
     isLocaleRequired
   }
 }

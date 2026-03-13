@@ -59,6 +59,12 @@ export const REQUIRED_TRANSLATION_LOCALES = {
   UNIVERSAL: ['fr', 'en']
 } as const satisfies Record<MemeContentLocale, readonly Locale[]>
 
+export const getRequiredLocales = (
+  contentLocale: MemeContentLocale
+): readonly Locale[] => {
+  return REQUIRED_TRANSLATION_LOCALES[contentLocale]
+}
+
 export const VISIBLE_CONTENT_LOCALES: Record<Locale, MemeContentLocale[]> = {
   fr: ['FR', 'EN', 'UNIVERSAL'],
   en: ['EN', 'UNIVERSAL']

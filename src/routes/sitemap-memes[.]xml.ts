@@ -4,16 +4,12 @@ import {
   CONTENT_LOCALE_TO_SITE_LOCALES,
   resolveMemeTranslation
 } from '@/helpers/i18n-content'
-import {
-  buildIframeVideoUrl,
-  buildVideoImageUrl,
-  buildVideoOriginalUrl
-} from '@/lib/bunny'
+import { buildVideoImageUrl, buildVideoOriginalUrl } from '@/lib/bunny'
 import { buildUrl } from '@/lib/seo'
 import {
   buildSitemapResponse,
   buildUrlEntry,
-  formatIsoDate,
+  VIDEO_SITEMAP_NAMESPACES,
   wrapUrlset
 } from '@/lib/sitemap'
 import { createFileRoute } from '@tanstack/react-router'
@@ -33,7 +29,6 @@ export const Route = createFileRoute('/sitemap-memes.xml')({
               select: MEME_TRANSLATION_SELECT
             },
             updatedAt: true,
-            publishedAt: true,
             video: { select: { bunnyId: true, duration: true } }
           },
           orderBy: { publishedAt: 'desc' }
@@ -45,6 +40,9 @@ export const Route = createFileRoute('/sitemap-memes.xml')({
               CONTENT_LOCALE_TO_SITE_LOCALES[meme.contentLocale]
             const { bunnyId } = meme.video
             const thumbnailUrl = buildVideoImageUrl(bunnyId)
+            const contentLoc = buildVideoOriginalUrl(bunnyId)
+            const memePath = `/memes/${meme.id}`
+            const lastmod = meme.updatedAt.toISOString()
 
             return targetLocales.map((locale) => {
               const resolved = resolveMemeTranslation({
@@ -55,24 +53,16 @@ export const Route = createFileRoute('/sitemap-memes.xml')({
               })
 
               return buildUrlEntry({
-                pathname: `/memes/${meme.id}`,
-                loc: buildUrl(`/memes/${meme.id}`, locale),
-                lastmod: formatIsoDate(meme.updatedAt),
-                hreflangLocales: targetLocales,
-                image: {
-                  loc: thumbnailUrl,
-                  title: resolved.title
-                },
+                loc: buildUrl(memePath, locale),
+                lastmod,
+                changefreq: 'monthly',
+                priority: '0.7',
                 video: {
                   thumbnailLoc: thumbnailUrl,
                   title: resolved.title,
                   description: resolved.description || resolved.title,
-                  contentLoc: buildVideoOriginalUrl(bunnyId),
-                  playerLoc: buildIframeVideoUrl(bunnyId),
-                  duration: meme.video.duration,
-                  publicationDate: meme.publishedAt
-                    ? meme.publishedAt.toISOString()
-                    : meme.updatedAt.toISOString()
+                  contentLoc,
+                  duration: meme.video.duration
                 }
               })
             })
@@ -80,7 +70,7 @@ export const Route = createFileRoute('/sitemap-memes.xml')({
           .join('\n')
 
         return buildSitemapResponse({
-          body: wrapUrlset(entries),
+          body: wrapUrlset(entries, VIDEO_SITEMAP_NAMESPACES),
           maxAge: 3600
         })
       }

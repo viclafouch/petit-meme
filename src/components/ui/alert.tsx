@@ -1,33 +1,34 @@
-import * as React from 'react'
-import { cva, type VariantProps } from 'class-variance-authority'
-import { cn } from '@/lib/utils'
+import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
+
+import { cn } from "@/lib/utils"
 
 const alertVariants = cva(
-  'relative w-full rounded-lg border px-4 py-3 text-sm grid has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] grid-cols-[0_1fr] has-[>svg]:gap-x-3 gap-y-0.5 items-start [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current',
+  "relative grid w-full grid-cols-[0_1fr] items-start gap-y-0.5 rounded-lg border px-4 py-3 text-sm has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] has-[>svg]:gap-x-3 [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current",
   {
     variants: {
       variant: {
-        default: 'bg-card text-card-foreground',
+        default: "bg-card text-card-foreground",
         destructive:
-          'bg-destructive text-destructive-foreground border border-destructive-foreground/10',
+          "bg-card text-destructive *:data-[slot=alert-description]:text-destructive/90 [&>svg]:text-current",
         success:
-          'bg-success text-success-foreground border border-success-foreground/10',
+          "bg-success text-success-foreground *:data-[slot=alert-description]:text-success-foreground/90 border border-success-foreground/10 [&>svg]:text-current",
         warning:
-          'bg-warning text-warning-foreground border border-warning-foreground/10',
-        info: 'bg-info text-info-foreground border border-info-foreground/10'
-      }
+          "bg-warning text-warning-foreground *:data-[slot=alert-description]:text-warning-foreground/90 border border-warning-foreground/10 [&>svg]:text-current",
+        info: "bg-info text-info-foreground *:data-[slot=alert-description]:text-info-foreground/90 border border-info-foreground/10 [&>svg]:text-current",
+      },
     },
     defaultVariants: {
-      variant: 'default'
-    }
+      variant: "default",
+    },
   }
 )
 
-const Alert = ({
+function Alert({
   className,
   variant,
   ...props
-}: React.ComponentProps<'div'> & VariantProps<typeof alertVariants>) => {
+}: React.ComponentProps<"div"> & VariantProps<typeof alertVariants>) {
   return (
     <div
       data-slot="alert"
@@ -38,12 +39,12 @@ const Alert = ({
   )
 }
 
-const AlertTitle = ({ className, ...props }: React.ComponentProps<'div'>) => {
+function AlertTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="alert-title"
       className={cn(
-        'col-start-2 line-clamp-1 min-h-4 font-medium tracking-tight',
+        "col-start-2 line-clamp-1 min-h-4 font-medium tracking-tight",
         className
       )}
       {...props}
@@ -51,15 +52,15 @@ const AlertTitle = ({ className, ...props }: React.ComponentProps<'div'>) => {
   )
 }
 
-const AlertDescription = ({
+function AlertDescription({
   className,
   ...props
-}: React.ComponentProps<'div'>) => {
+}: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="alert-description"
       className={cn(
-        'text-muted-foreground col-start-2 grid justify-items-start gap-1 text-sm [&_p]:leading-relaxed',
+        "col-start-2 grid justify-items-start gap-1 text-sm text-muted-foreground [&_p]:leading-relaxed",
         className
       )}
       {...props}
@@ -67,4 +68,4 @@ const AlertDescription = ({
   )
 }
 
-export { Alert, AlertDescription, AlertTitle }
+export { Alert, AlertTitle, AlertDescription }

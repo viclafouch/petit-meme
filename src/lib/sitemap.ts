@@ -18,14 +18,44 @@ type SitemapVideo = {
   title: string
   description: string
   contentLoc: string
-  playerLoc: string
+  playerLoc?: string
   duration: number
-  publicationDate: string
+  publicationDate?: string
 }
 
-type UrlEntryParams = SitemapPage & {
+type SitemapChangeFreq =
+  | 'always'
+  | 'hourly'
+  | 'daily'
+  | 'weekly'
+  | 'monthly'
+  | 'yearly'
+  | 'never'
+
+type SitemapPriority =
+  | '0.0'
+  | '0.1'
+  | '0.2'
+  | '0.3'
+  | '0.4'
+  | '0.5'
+  | '0.6'
+  | '0.7'
+  | '0.8'
+  | '0.9'
+  | '1.0'
+
+type UrlEntryParams = {
   loc: string
-  hreflangLocales: readonly Locale[]
+  lastmod?: string
+  changefreq?: SitemapChangeFreq
+  priority?: SitemapPriority
+  image?: SitemapImage
+  video?: SitemapVideo
+  hreflang?: {
+    pathname: string
+    locales: readonly Locale[]
+  }
 }
 
 export const formatIsoDate = (date: Date) => {
@@ -63,8 +93,8 @@ const buildImageTag = ({ loc, title }: SitemapImage) => {
 }
 
 const buildVideoTag = ({
-  thumbnailLoc,
   title,
+  thumbnailLoc,
   description,
   contentLoc,
   playerLoc,
@@ -73,13 +103,19 @@ const buildVideoTag = ({
 }: SitemapVideo) => {
   return [
     '    <video:video>',
-    `      <video:thumbnail_loc>${thumbnailLoc}</video:thumbnail_loc>`,
     `      <video:title>${escapeXml(title)}</video:title>`,
+    `      <video:thumbnail_loc>${thumbnailLoc}</video:thumbnail_loc>`,
     `      <video:description>${escapeXml(description)}</video:description>`,
     `      <video:content_loc>${contentLoc}</video:content_loc>`,
-    `      <video:player_loc>${playerLoc}</video:player_loc>`,
+    ...(playerLoc
+      ? [`      <video:player_loc>${playerLoc}</video:player_loc>`]
+      : []),
     `      <video:duration>${duration}</video:duration>`,
-    `      <video:publication_date>${publicationDate}</video:publication_date>`,
+    ...(publicationDate
+      ? [
+          `      <video:publication_date>${publicationDate}</video:publication_date>`
+        ]
+      : []),
     '      <video:family_friendly>yes</video:family_friendly>',
     '    </video:video>'
   ].join('\n')
@@ -87,19 +123,24 @@ const buildVideoTag = ({
 
 export const buildUrlEntry = ({
   loc,
-  pathname,
   lastmod,
+  changefreq,
+  priority,
   image,
   video,
-  hreflangLocales
+  hreflang
 }: UrlEntryParams) => {
   return [
     '  <url>',
     `    <loc>${loc}</loc>`,
-    ...(lastmod ? [`    <lastmod>${lastmod}</lastmod>`] : []),
-    buildHreflangLinks(pathname, hreflangLocales),
-    ...(image ? [buildImageTag(image)] : []),
     ...(video ? [buildVideoTag(video)] : []),
+    ...(lastmod ? [`    <lastmod>${lastmod}</lastmod>`] : []),
+    ...(changefreq ? [`    <changefreq>${changefreq}</changefreq>`] : []),
+    ...(priority ? [`    <priority>${priority}</priority>`] : []),
+    ...(hreflang
+      ? [buildHreflangLinks(hreflang.pathname, hreflang.locales)]
+      : []),
+    ...(image ? [buildImageTag(image)] : []),
     '  </url>'
   ].join('\n')
 }
@@ -107,28 +148,35 @@ export const buildUrlEntry = ({
 export const buildLocalizedEntries = (pages: readonly SitemapPage[]) => {
   return pages
     .flatMap((page) => {
+      const { pathname, ...content } = page
+
       return locales.map((locale) => {
         return buildUrlEntry({
-          ...page,
-          loc: buildUrl(page.pathname, locale),
-          hreflangLocales: locales
+          ...content,
+          loc: buildUrl(pathname, locale),
+          hreflang: { pathname, locales }
         })
       })
     })
     .join('\n')
 }
 
-const URLSET_NAMESPACES = [
-  'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"',
-  'xmlns:xhtml="http://www.w3.org/1999/xhtml"',
-  'xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"',
-  'xmlns:video="http://www.google.com/schemas/sitemap-video/1.1"'
-].join(' ')
+const NS_SITEMAP = 'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"'
+const NS_XHTML = 'xmlns:xhtml="http://www.w3.org/1999/xhtml"'
+const NS_IMAGE = 'xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"'
+const NS_VIDEO = 'xmlns:video="http://www.google.com/schemas/sitemap-video/1.1"'
 
-export const wrapUrlset = (entries: string) => {
+const DEFAULT_NAMESPACES = [NS_SITEMAP, NS_XHTML, NS_IMAGE, NS_VIDEO].join(' ')
+
+export const VIDEO_SITEMAP_NAMESPACES = [NS_SITEMAP, NS_VIDEO].join(' ')
+
+export const wrapUrlset = (
+  entries: string,
+  namespaces = DEFAULT_NAMESPACES
+) => {
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
-    `<urlset ${URLSET_NAMESPACES}>`,
+    `<urlset ${namespaces}>`,
     entries,
     '</urlset>'
   ].join('\n')

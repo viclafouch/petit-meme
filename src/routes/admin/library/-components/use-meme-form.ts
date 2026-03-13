@@ -5,6 +5,7 @@ import type { Meme } from '@/db/generated/prisma/client'
 import { getErrorMessage } from '@/helpers/error'
 import {
   buildLocaleRecord,
+  CONTENT_LOCALE_TO_LOCALE,
   findTranslationByLocale,
   REQUIRED_TRANSLATION_LOCALES
 } from '@/helpers/i18n-content'
@@ -113,7 +114,18 @@ export function useMemeForm({ meme, onSuccess }: UseMemeFormParams) {
   const generateContentMutation = useMutation({
     mutationKey: ['generate-content'],
     mutationFn: () => {
-      return generateMemeContent({ data: { memeId: meme.id } })
+      const contentLocale = form.getFieldValue('contentLocale')
+      const nativeLocale = CONTENT_LOCALE_TO_LOCALE[contentLocale]
+      const title = form.getFieldValue(
+        `translations.${nativeLocale}.title`
+      ) as string
+
+      return generateMemeContent({
+        data: {
+          memeId: meme.id,
+          title: title || undefined
+        }
+      })
     },
     onSuccess: (result) => {
       for (const locale of Object.keys(result) as Locale[]) {

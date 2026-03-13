@@ -105,7 +105,8 @@ export const generateMemeContent = createServerFn({ method: 'POST' })
   .inputValidator((data) => {
     return z
       .object({
-        memeId: z.string()
+        memeId: z.string(),
+        title: z.string().optional()
       })
       .parse(data)
   })
@@ -138,6 +139,8 @@ export const generateMemeContent = createServerFn({ method: 'POST' })
       requestedLocale: nativeLocale,
       fallback: meme
     })
+
+    const effectiveTitle = data.title ?? resolved.title
 
     const targetLocales = REQUIRED_TRANSLATION_LOCALES[meme.contentLocale]
     const responseSchema = buildResponseSchema(targetLocales)
@@ -176,7 +179,7 @@ export const generateMemeContent = createServerFn({ method: 'POST' })
           model: GEMINI_MODEL,
           contents: createUserContent([
             createPartFromUri(activeFile.uri, uploadedFile.mimeType),
-            buildPrompt(resolved.title, targetLocales)
+            buildPrompt(effectiveTitle, targetLocales)
           ]),
           config: {
             responseMimeType: 'application/json',

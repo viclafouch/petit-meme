@@ -1,12 +1,13 @@
 import React from 'react'
-import { Shuffle, Smartphone } from 'lucide-react'
+import { ErrorBoundary } from 'react-error-boundary'
+import { AlertTriangleIcon, RefreshCw, Shuffle, Smartphone } from 'lucide-react'
 import { CategoriesList } from '@/components/categories/categories-list'
 import { MemesFilterLanguage } from '@/components/Meme/Filters/memes-filter-language'
 import MemesPagination from '@/components/Meme/Filters/memes-pagination'
 import { MemesQuery } from '@/components/Meme/Filters/memes-query'
 import MemesToggleGrid from '@/components/Meme/Filters/memes-toggle-grid'
 import { MemesList } from '@/components/Meme/memes-list'
-import { buttonVariants } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { LoadingSpinner } from '@/components/ui/spinner'
 import { getVirtualCategories, type MemesFilters } from '@/constants/meme'
 import type { MemeContentLocale } from '@/db/generated/prisma/enums'
@@ -27,7 +28,10 @@ import {
   PageHeading
 } from '@/routes/_public__root/-components/page-headers'
 import { useDebouncedValue } from '@tanstack/react-pacer'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import {
+  QueryErrorResetBoundary,
+  useSuspenseQuery
+} from '@tanstack/react-query'
 import {
   Link,
   useLoaderData,
@@ -98,6 +102,31 @@ const MemesListWrapper = ({ columnGridCount }: { columnGridCount: number }) => {
           slug={slug}
         />
       </div>
+    </div>
+  )
+}
+
+const MemesListErrorFallback = ({
+  resetErrorBoundary
+}: {
+  resetErrorBoundary: () => void
+}) => {
+  return (
+    <div
+      role="alert"
+      className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed p-12"
+    >
+      <AlertTriangleIcon
+        className="size-6 text-muted-foreground"
+        aria-hidden="true"
+      />
+      <p className="text-center text-sm text-muted-foreground">
+        {m.error_search_timeout()}
+      </p>
+      <Button variant="outline" size="sm" onClick={resetErrorBoundary}>
+        <RefreshCw className="size-4" />
+        {m.common_retry()}
+      </Button>
     </div>
   )
 }
@@ -200,9 +229,20 @@ export const SearchMemes = () => {
           <div className="w-full border-y border-muted">
             <CategoriesList />
           </div>
-          <React.Suspense fallback={<LoadingSpinner />}>
-            <MemesListWrapper columnGridCount={columnGridCount} />
-          </React.Suspense>
+          <QueryErrorResetBoundary>
+            {({ reset }) => {
+              return (
+                <ErrorBoundary
+                  onReset={reset}
+                  FallbackComponent={MemesListErrorFallback}
+                >
+                  <React.Suspense fallback={<LoadingSpinner />}>
+                    <MemesListWrapper columnGridCount={columnGridCount} />
+                  </React.Suspense>
+                </ErrorBoundary>
+              )
+            }}
+          </QueryErrorResetBoundary>
         </div>
       </div>
     </div>

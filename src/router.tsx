@@ -102,6 +102,7 @@ export function getRouter() {
       replaysSessionSampleRate: 0,
       replaysOnErrorSampleRate: 1.0,
       denyUrls: [/extensions\//i, /^chrome:\/\//i, /^chrome-extension:\/\//i],
+      ignoreErrors: [/Unreachable hosts/],
       beforeSend: scrubUserPii,
       beforeBreadcrumb: scrubSensitiveBreadcrumbs
     })

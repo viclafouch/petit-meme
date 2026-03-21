@@ -1,3 +1,4 @@
+import { ErrorBoundary } from 'react-error-boundary'
 import type { Variants } from 'motion/react'
 import { motion, useReducedMotion } from 'motion/react'
 import { buttonVariants } from '@/components/ui/button'
@@ -73,7 +74,9 @@ export const Hero = () => {
         animate="visible"
         custom={{ delay: 0.5 }}
       >
-        <AnnouncementQuery />
+        <ErrorBoundary fallback={null}>
+          <AnnouncementQuery />
+        </ErrorBoundary>
       </motion.div>
       <PageHeading className="text-foreground/70">
         <TextEffect

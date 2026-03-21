@@ -110,6 +110,7 @@
   "error_sign_out": "An error occurred while signing out",
   "error_title": "Oops! An error occurred",
   "error_trace_label": "Trace:",
+  "error_search_timeout": "The search could not be completed. Check your internet connection and try again.",
   "error_video_timeout": "Video engine loading took too long. Check your connection or browser.",
   "footer_legal": "Legal notice",
   "manifest_category_creation": "Creation",

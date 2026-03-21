@@ -20,7 +20,8 @@ export default [
       '**/components/ui/**',
       '**/components/animate-ui/**',
       'public/ffmpeg/**',
-      '**/paraglide/**'
+      '**/paraglide/**',
+      '.agents/**'
     ]
   },
   ...typescriptConfig,

@@ -27,6 +27,19 @@ Terminé le 2026-03-09. Toutes les branches mergées dans `main`, production bra
 
 ---
 
+## Algolia — Gestion erreur "Unreachable hosts" ✅
+
+**Problème (2026-03-14) :** Sur connexion lente, Algolia throw "Unreachable hosts" → crash page mèmes + pollution Sentry.
+
+**Solution :** Error boundaries locaux + filtrage Sentry.
+
+- [x] **ErrorBoundary local** autour de `MemesListWrapper` dans `search-memes.tsx` — message "Vérifiez votre connexion" + bouton Réessayer. Le reste de la page (nav, filtres, catégories) reste fonctionnel.
+- [x] **ErrorBoundary silencieux** autour de `AnnouncementQuery` dans `hero.tsx` — le badge "X nouveaux mèmes" disparaît sans erreur visible.
+- [x] **Sentry `ignoreErrors`** — `/Unreachable hosts/` filtré dans `router.tsx` (client) et `instrument-server.ts` (serveur).
+- [x] **Messages i18n** — `error_search_timeout` ajouté en FR/EN.
+
+---
+
 ## Algolia — Optimisation billing Recommend
 
 **Problème (2026-03-13) :** 21 442 recommend requests/mois (214% du free tier de 10 000) → 6€/mois d'overage. Cause : l'in-memory cache (`withAlgoliaCache`) est inutile sur Vercel serverless (cold starts), chaque SSR = 1 appel Algolia Recommend.

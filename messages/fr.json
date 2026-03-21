@@ -110,6 +110,7 @@
   "error_sign_out": "Une erreur est survenue lors de la déconnexion",
   "error_title": "Oups ! Une erreur s'est produite",
   "error_trace_label": "Trace :",
+  "error_search_timeout": "La recherche n'a pas pu aboutir. Vérifiez votre connexion internet et réessayez.",
   "error_video_timeout": "Le chargement du moteur vidéo a pris trop de temps. Vérifiez votre connexion ou votre navigateur.",
   "footer_legal": "Mentions légales",
   "manifest_category_creation": "Création",

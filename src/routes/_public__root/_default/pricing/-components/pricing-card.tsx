@@ -67,16 +67,16 @@ const FeatureItem = ({ feature }: FeatureItemParams) => {
   const { icon: Icon, className } = FEATURE_STATUS_STATIC_CONFIG[feature.status]
 
   return (
-    <li className="flex gap-3">
+    <li className="flex items-start gap-3">
       <Icon
         size={20}
-        className={cn('my-auto shrink-0', className)}
+        className={cn('mt-0.5 shrink-0', className)}
         aria-hidden
       />
       <span className="sr-only">
         {getFeatureStatusSrLabel(feature.status)} :
       </span>
-      <p className="pt-0.5 text-foreground">
+      <p className="text-foreground">
         {feature.label}{' '}
         {feature.note ? (
           <span className="text-sm text-muted-foreground">

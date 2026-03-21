@@ -67,6 +67,7 @@ export function getRouter() {
     },
     defaultPreloadStaleTime: 30_000,
     defaultStaleTime: 30_000,
+    defaultStaleReloadMode: 'background',
     defaultPendingComponent: () => {
       return <DefaultLoading className="min-h-screen" />
     },

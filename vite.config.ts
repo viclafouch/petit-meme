@@ -1,6 +1,5 @@
 import { nitro } from 'nitro/vite'
 import { defineConfig, loadEnv } from 'vite'
-import tsconfigPaths from 'vite-tsconfig-paths'
 import { paraglideVitePlugin } from '@inlang/paraglide-js'
 import { sentryTanstackStart } from '@sentry/tanstackstart-react/vite'
 import tailwindcss from '@tailwindcss/vite'
@@ -42,6 +41,9 @@ export default defineConfig(({ mode }) => {
   Object.assign(process.env, loadEnv(mode, process.cwd(), ''))
 
   return {
+    resolve: {
+      tsconfigPaths: true
+    },
     server: {
       port: 3000
     },
@@ -71,9 +73,6 @@ export default defineConfig(({ mode }) => {
         ]
       }),
       tailwindcss(),
-      tsconfigPaths({
-        projects: ['./tsconfig.json']
-      }),
       tanstackStart({
         router: {
           quoteStyle: 'single',

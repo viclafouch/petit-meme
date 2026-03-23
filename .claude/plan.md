@@ -147,6 +147,53 @@ TypeError: __exportAll is not a function
 
 ---
 
+## Cookie Consent — Migration openconsent.dev
+
+**Problème :** La bannière cookie actuelle (petit toast bottom-left) est trop discrète — la plupart des utilisateurs la refusent ou l'ignorent, ce qui empêche Algolia de collecter des click events nécessaires aux recommandations.
+
+**Solution :** Migration vers openconsent.dev (composants shadcn) avec bannière bloquante (overlay + modal), catégories granulaires, et persistence en cookies HTTP pour le gating serveur.
+
+**Décisions :**
+- Catégories : Necessary (requis) + Analytics (Algolia)
+- Mode bloquant : overlay assombri plein écran, apparition après 3.5s (après animations hero)
+- Design style Axeptio : panneau gauche (desktop, slide-in gauche) / bottom sheet (mobile, slide-in bas) avec vidéo + courbe SVG concave
+- Boutons bannière : Personnaliser + Accepter (pas de Refuser en première vue — accessible via Personnaliser → Refuser tout)
+- Média : vidéo `want-a-cookie.mp4` (785 KB) desktop uniquement, image `want-a-cookie.webp` (42 KB) sur mobile — zéro téléchargement vidéo mobile
+- `CookieBanner` wrappé dans `ClientOnly` (SSR ne rend rien, `useIsMobile` a la bonne valeur dès le premier render client)
+- Persistence : cookie HTTP `cookie_consent` (JSON), pas de localStorage — le serveur lit le cookie pour gater les events Algolia
+- Radius boutons = `calc(var(--banner-radius) - var(--banner-gap))` — synchronisé avec le conteneur via CSS variables
+- Pas de Google Consent Mode v2 (aucun service Google)
+- Pas d'audit trail DB
+- CookieTrigger "Gérer les cookies" dans le footer
+- Reset tout le monde (ancien cookie `cookieConsent` ignoré)
+- Consent version `1.0.0` — bumper la version pour re-afficher la bannière si la politique change
+
+### Implémentation
+
+- [x] **Installation openconsent** via shadcn registry (`cookie-consent.json`). Switch component ajouté.
+- [x] **Adaptation TanStack Start** : réécriture des composants pour supprimer les dépendances Next.js, localStorage → cookies HTTP, suppression script-manager/tracker/Google Consent Mode. Fichiers simplifiés : types, utils, provider, banner, settings, trigger, index.
+- [x] **Bannière bloquante style Axeptio** : panneau gauche (desktop) / bottom sheet (mobile) avec vidéo/image en haut, courbe SVG concave, texte convivial, boutons Personnaliser + Accepter. Overlay `bg-black/60 backdrop-blur-sm`. Délai 3.5s pour laisser les animations hero finir. Slide-in gauche (desktop) / bas (mobile).
+- [x] **Intégration __root.tsx** : `CookieConsentProvider` wrapping l'app avec `initialState` du loader SSR. `CookieBanner` dans `ClientOnly` + `CookieSettings` rendus dans le provider.
+- [x] **Gating Algolia** : `matchHasAcceptedCookies()` (client) et `matchIsAnalyticsConsentGiven()` (serveur) lisent le nouveau format JSON. Tous les events Algolia (click, view, conversion) restent gated par le consentement analytics.
+- [x] **CookieTrigger dans le footer** : bouton "Gérer les cookies" qui ouvre le dialog settings. Conditionnel (`state.hasConsented`).
+- [x] **i18n** : 14 clés Paraglide (FR/EN) pour bannière, settings, catégories, greeting.
+- [x] **Média responsive** : `<video>` desktop (avec poster WebP fallback), `<img>` mobile (42 KB WebP). Aucun `<video>` dans le DOM sur mobile.
+- [x] **Cleanup** : suppression ancien `cookie-consent.tsx`, `COOKIE_CONSENT_KEY`, dossier `blocks/`, fichiers openconsent inutilisés (script-manager, tracker, consent-script, use-consent-script).
+
+### Fichiers principaux
+
+| Fichier | Rôle |
+|---------|------|
+| `src/components/cookie-consent/` | Composants adaptés (provider, banner, settings, trigger, types, utils, index) |
+| `src/lib/cookie-consent.ts` | Bridge : config, helpers isomorphiques `getConsentState()`, `matchIsAnalyticsConsentGiven()`, `matchHasAcceptedCookies()` |
+| `src/routes/__root.tsx` | Provider + ClientOnly Banner + Settings, loader lit le cookie |
+| `src/server/meme.ts` | Gating serveur via `matchIsAnalyticsConsentGiven()` |
+| `src/components/footer.tsx` | CookieTrigger conditionnel |
+| `public/videos/want-a-cookie.mp4` | Vidéo bannière (785 KB, desktop) |
+| `public/images/want-a-cookie.webp` | Poster bannière (42 KB, mobile + poster video) |
+
+---
+
 ## SEO — Items restants
 
 - [x] Fix page `/submit` SEO : supprimé `noindex`, ajouté keywords + meta description enrichie + breadcrumb JSON-LD + intro visible par crawlers + règles de soumission hors auth gate + ajouté au sitemap

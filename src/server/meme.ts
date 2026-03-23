@@ -1,8 +1,7 @@
 import { z } from 'zod'
 import {
   COOKIE_ALGOLIA_USER_TOKEN_KEY,
-  COOKIE_ANON_ID_KEY,
-  COOKIE_CONSENT_KEY
+  COOKIE_ANON_ID_KEY
 } from '@/constants/cookie'
 import {
   MEME_FULL_INCLUDE,
@@ -58,6 +57,7 @@ import {
 } from '@/lib/algolia'
 import { auth } from '@/lib/auth'
 import { buildSignedOriginalUrl, fetchWatermarkedVideo } from '@/lib/bunny'
+import { matchIsAnalyticsConsentGiven } from '@/lib/cookie-consent'
 import { algoliaLogger, logger } from '@/lib/logger'
 import { captureWithFeature } from '@/lib/sentry'
 import { baseLocale, getLocale, type Locale } from '@/paraglide/runtime'
@@ -292,7 +292,7 @@ export const getMemes = createServerFn({ method: 'GET' })
       contentLocales
     })
     const cacheKey = `${indexName}:${data.query ?? ''}:${data.page ?? 1}:${data.category ?? ''}:${data.contentLocales ?? ''}`
-    const hasConsentedToCookies = getCookie(COOKIE_CONSENT_KEY) === 'accepted'
+    const hasConsentedToCookies = matchIsAnalyticsConsentGiven()
     const userToken = hasConsentedToCookies
       ? getCookie(COOKIE_ALGOLIA_USER_TOKEN_KEY)
       : undefined
@@ -691,7 +691,7 @@ export const registerMemeView = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const { memeId, watchMs } = data
 
-    const hasConsentedToCookies = getCookie(COOKIE_CONSENT_KEY) === 'accepted'
+    const hasConsentedToCookies = matchIsAnalyticsConsentGiven()
     const existingViewerKey = getCookie(COOKIE_ANON_ID_KEY)
     const viewerKey =
       existingViewerKey ??

@@ -1,7 +1,10 @@
+import { CookieTrigger, useCookieConsent } from '@/components/cookie-consent'
 import { getLegalLinks } from '@/constants/navigation'
 import { Link } from '@tanstack/react-router'
 
 export const Footer = () => {
+  const { state } = useCookieConsent()
+
   return (
     <footer className="border-t bg-background/40 relative">
       <div className="container py-6">
@@ -17,6 +20,7 @@ export const Footer = () => {
               </Link>
             )
           })}
+          {state.hasConsented ? <CookieTrigger /> : null}
         </div>
       </div>
     </footer>

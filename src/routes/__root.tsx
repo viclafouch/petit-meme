@@ -1,11 +1,16 @@
 /// <reference types="vite/client" />
 import React from 'react'
-import { CookieConsentBanner } from '@/components/blocks/cookie-consent'
+import {
+  CookieBanner,
+  CookieConsentProvider,
+  CookieSettings,
+  matchIsAnalyticsConsented
+} from '@/components/cookie-consent'
 import { TailwindIndicator } from '@/components/tailwind-indicator'
 import { Toaster } from '@/components/ui/sonner'
 import { IS_PRODUCTION } from '@/constants/env'
 import { clientEnv } from '@/env/client'
-import { getCookieConsent } from '@/lib/cookie-consent'
+import { getConsentState, getCookieConsentConfig } from '@/lib/cookie-consent'
 import { getAuthUserQueryOpts } from '@/lib/queries'
 import { getStoredTheme, ThemeProvider } from '@/lib/theme'
 import { m } from '@/paraglide/messages.js'
@@ -28,7 +33,8 @@ import appCss from '../styles.css?url'
 
 const RootDocument = ({ children }: { children: React.ReactNode }) => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { _storedTheme, _cookieConsent } = Route.useLoaderData()
+  const { _storedTheme, _consentState } = Route.useLoaderData()
+  const cookieConsentConfig = getCookieConsentConfig()
 
   return (
     <html lang={getLocale()} suppressHydrationWarning dir={getTextDirection()}>
@@ -55,12 +61,20 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => {
           {`document.documentElement.className = ${JSON.stringify(_storedTheme)};`}
         </ScriptOnce>
         <ThemeProvider initialTheme={_storedTheme}>
-          <DialogProvider>{children}</DialogProvider>
-          <ClientOnly>
-            <Toaster richColors />
-          </ClientOnly>
-          <CookieConsentBanner initialConsent={_cookieConsent} />
-          <TailwindIndicator />
+          <CookieConsentProvider
+            config={cookieConsentConfig}
+            initialState={_consentState}
+          >
+            <DialogProvider>{children}</DialogProvider>
+            <ClientOnly>
+              <Toaster richColors />
+            </ClientOnly>
+            <ClientOnly>
+              <CookieBanner />
+            </ClientOnly>
+            <CookieSettings />
+            <TailwindIndicator />
+          </CookieConsentProvider>
         </ThemeProvider>
         <Scripts />
       </body>
@@ -210,15 +224,15 @@ export const Route = createRootRouteWithContext<{
     return { user }
   },
   loader: async () => {
-    const cookieConsent = getCookieConsent()
+    const consentState = getConsentState()
 
-    if (cookieConsent === 'accepted') {
+    if (matchIsAnalyticsConsented(consentState)) {
       ensureAlgoliaUserToken()
     }
 
     return {
       _storedTheme: getStoredTheme(),
-      _cookieConsent: cookieConsent
+      _consentState: consentState
     }
   },
   head: () => {

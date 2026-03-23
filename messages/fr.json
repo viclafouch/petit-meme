@@ -73,6 +73,8 @@
   "checkout_success_description": "Merci pour ton soutien 🙏\nTon achat est validé et ton compte a été mis à jour. Tu peux dès maintenant profiter de toutes tes fonctionnalités premium.",
   "checkout_success_heading": "Félicitations !",
   "checkout_success_title": "Petit Meme - Paiement réussi",
+  "clipboard_error_read": "Impossible de lire le presse-papiers",
+  "clipboard_paste_aria_label": "Coller depuis le presse-papiers",
   "common_avatar_alt": "Photo de profil de {name}",
   "common_cancel": "Annuler",
   "common_close": "Fermer",
@@ -80,21 +82,35 @@
   "common_email": "Email",
   "common_faq_heading": "Questions fréquentes",
   "common_loading": "Chargement…",
-  "common_skip_to_content": "Aller au contenu principal",
   "common_logo_alt": "Petit Meme",
   "common_more_pages": "Plus de pages",
   "common_next": "Suivant",
-  "common_no_results": "Aucun résultat",
   "common_next_page": "Aller à la page suivante",
+  "common_no_results": "Aucun résultat",
   "common_pagination": "Pagination",
   "common_password": "Mot de passe",
   "common_previous": "Précédent",
   "common_previous_page": "Aller à la page précédente",
   "common_retry": "Réessayer",
+  "common_skip_to_content": "Aller au contenu principal",
   "cookie_accept": "Accepter",
+  "cookie_accept_all": "Tout accepter",
+  "cookie_category_analytics_description": "Cookies qui nous aident à comprendre comment les visiteurs interagissent avec notre site.",
+  "cookie_category_analytics_label": "Analytique",
+  "cookie_category_necessary_description": "Cookies essentiels au bon fonctionnement du site. Ils ne peuvent pas être désactivés.",
+  "cookie_category_necessary_label": "Nécessaires",
+  "cookie_customize": "Personnaliser",
   "cookie_decline": "Refuser",
-  "cookie_description": "Nous utilisons des cookies analytiques pour améliorer votre expérience et analyser le trafic.",
+  "cookie_description": "Nous utilisons des cookies pour améliorer votre expérience et analyser le trafic du site.",
+  "cookie_greeting": "Salut, c'est nous !",
   "cookie_learn_more": "En savoir plus",
+  "cookie_manage": "Gérer les cookies",
+  "cookie_privacy_policy": "Politique de confidentialité",
+  "cookie_read_our": "Consultez notre",
+  "cookie_required": "Requis",
+  "cookie_save_preferences": "Enregistrer",
+  "cookie_settings_description": "Gérez vos préférences de cookies ci-dessous.",
+  "cookie_settings_title": "Paramètres des cookies",
   "cookie_title": "Cookies",
   "error_already_subscribed": "Vous avez déjà un abonnement en cours !",
   "error_back_to_site": "Retourner au site",
@@ -107,26 +123,13 @@
   "error_not_found_description": "On dirait que vous vous êtes aventuré dans le domaine inconnu du numérique.",
   "error_not_found_title": "Petit Meme - Page introuvable",
   "error_root_description": "Oups ! Le site a rencontré un problème inattendu.",
+  "error_search_timeout": "La recherche n'a pas pu aboutir. Vérifiez votre connexion internet et réessayez.",
   "error_sign_out": "Une erreur est survenue lors de la déconnexion",
   "error_title": "Oups ! Une erreur s'est produite",
   "error_trace_label": "Trace :",
-  "error_search_timeout": "La recherche n'a pas pu aboutir. Vérifiez votre connexion internet et réessayez.",
   "error_video_timeout": "Le chargement du moteur vidéo a pris trop de temps. Vérifiez votre connexion ou votre navigateur.",
+  "footer_dmca": "DMCA",
   "footer_legal": "Mentions légales",
-  "manifest_category_creation": "Création",
-  "manifest_category_entertainment": "Divertissement",
-  "manifest_category_humor": "Humour",
-  "manifest_category_memes": "Mèmes",
-  "manifest_category_social": "Social",
-  "manifest_description": "Explore, crée et partage des mèmes légendaires sur Petit Meme !",
-  "legal_mentions_description": "Mentions légales du site Petit Meme. Informations sur l'éditeur, l'hébergeur et la propriété intellectuelle.",
-  "legal_mentions_title": "Mentions légales",
-  "legal_privacy_description": "Politique de confidentialité de Petit Meme. Découvrez comment nous collectons, utilisons et protégeons vos données personnelles.",
-  "legal_privacy_title": "Politique de confidentialité",
-  "legal_terms_description": "En utilisant notre site (https://petit-meme.io) et nos services, vous acceptez les présentes Conditions d'utilisation.",
-  "legal_terms_title": "Conditions d'utilisation",
-  "locale_banner_available": "Ce site est aussi disponible en {language}.",
-  "locale_banner_switch": "Passer en {language}",
   "footer_privacy": "Confidentialité",
   "footer_terms": "Conditions",
   "home_best_browse_all": "Tout parcourir",
@@ -159,32 +162,91 @@
   "home_responsive_description": "Petit Mème s'adapte à toi : une expérience fluide et réactive sur mobile, tablette et ordinateur, sans rien installer.",
   "home_responsive_heading": "Ton application, partout",
   "home_responsive_label": "Responsive",
+  "legal_dmca_description": "Procédure DMCA pour les demandes de retrait de contenu sur Petit Meme.",
+  "legal_dmca_title": "DMCA",
+  "legal_mentions_description": "Mentions légales du site Petit Meme. Informations sur l'éditeur, l'hébergeur et la propriété intellectuelle.",
+  "legal_mentions_title": "Mentions légales",
+  "legal_privacy_description": "Politique de confidentialité de Petit Meme. Découvrez comment nous collectons, utilisons et protégeons vos données personnelles.",
+  "legal_privacy_title": "Politique de confidentialité",
+  "legal_terms_description": "En utilisant notre site (https://petit-meme.io) et nos services, vous acceptez les présentes Conditions d'utilisation.",
+  "legal_terms_title": "Conditions d'utilisation",
+  "locale_banner_available": "Ce site est aussi disponible en {language}.",
+  "locale_banner_switch": "Passer en {language}",
+  "manifest_category_creation": "Création",
+  "manifest_category_entertainment": "Divertissement",
+  "manifest_category_humor": "Humour",
+  "manifest_category_memes": "Mèmes",
+  "manifest_category_social": "Social",
+  "manifest_description": "Explore, crée et partage des mèmes légendaires sur Petit Meme !",
+  "meme_add_favorite": "Ajouter aux favoris",
   "meme_added_on": "Ajouté le {date}",
   "meme_all_memes": "Tous les mèmes",
-  "meme_category_news": "Nouveautés",
-  "meme_category_popular": "Populaires",
-  "meme_content_locale_FR": "Français",
-  "meme_content_locale_EN": "Anglais",
-  "meme_content_locale_UNIVERSAL": "Universel",
   "meme_audio_language": "Audio en {language}",
-  "meme_filter_languages": "Langues",
   "meme_back_to_memes": "Retour aux memes",
   "meme_back_to_site": "Retour au site",
+  "meme_bookmarks": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} bookmark",
+        "countPlural=other": "{count} bookmarks"
+      }
+    }
+  ],
   "meme_breadcrumb_fallback": "Mèmes",
   "meme_breadcrumb_home": "Accueil",
-  "meme_bookmarks": [{ "declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": { "countPlural=one": "{count} bookmark", "countPlural=other": "{count} bookmarks" } }],
-  "meme_categories": [{ "declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": { "countPlural=one": "{count} catégorie", "countPlural=other": "{count} catégories" } }],
+  "meme_categories": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} catégorie",
+        "countPlural=other": "{count} catégories"
+      }
+    }
+  ],
   "meme_categories_none": "Aucune catégorie",
+  "meme_category_news": "Nouveautés",
+  "meme_category_popular": "Populaires",
+  "meme_content_locale_EN": "Anglais",
+  "meme_content_locale_FR": "Français",
+  "meme_content_locale_UNIVERSAL": "Universel",
   "meme_copy_link": "Copier le lien",
   "meme_details": "Détails",
   "meme_download": "Télécharger",
   "meme_download_video": "Télécharger la vidéo",
   "meme_edit_aria": "Modifier le mème",
   "meme_exit_fullscreen": "Quitter le plein écran",
+  "meme_filter_languages": "Langues",
   "meme_fullscreen": "Plein écran",
   "meme_link_copied": "Lien copié",
   "meme_link_copy_error": "Impossible de copier le lien",
-  "meme_minutes": [{ "declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": { "countPlural=one": "minute", "countPlural=other": "minutes" } }],
+  "meme_minutes": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "minute",
+        "countPlural=other": "minutes"
+      }
+    }
+  ],
   "meme_mute": "Couper le son",
   "meme_open_studio": "Ouvrir dans Studio",
   "meme_pause_video": "Mettre en pause",
@@ -193,10 +255,23 @@
   "meme_reels_mode": "Mode Reels",
   "meme_related": "Memes similaires",
   "meme_remove_favorite": "Retirer des favoris",
-  "meme_add_favorite": "Ajouter aux favoris",
   "meme_search_description": "Tape, clique, rigole : découvre tous les mèmes en un seul endroit.",
   "meme_search_placeholder": "Rechercher par mots-clés, tags...",
-  "meme_seconds": [{ "declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": { "countPlural=one": "seconde", "countPlural=other": "secondes" } }],
+  "meme_seconds": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "seconde",
+        "countPlural=other": "secondes"
+      }
+    }
+  ],
   "meme_seo_category_description": "Découvrez les mèmes de {title}. Gratuit et accessible à tous !",
   "meme_seo_category_title": "Mèmes {title}",
   "meme_seo_library_description": "Découvre la plus grande bibliothèque de mèmes : crée, explore et partage des mèmes légendaires sur Petit Meme. Gratuit et accessible à tous !",
@@ -206,20 +281,35 @@
   "meme_time_remaining": "{minutes} {minuteUnit} {seconds} {secondUnit} restantes",
   "meme_unmute": "Activer le son",
   "meme_video_feed": "Fil de vidéos",
-  "meme_views": [{ "declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": { "countPlural=one": "{count} vue", "countPlural=other": "{count} vues" } }],
+  "meme_views": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} vue",
+        "countPlural=other": "{count} vues"
+      }
+    }
+  ],
+  "nav_account": "Compte",
   "nav_admin": "Administration",
   "nav_favorites": "Favoris ({count})",
+  "nav_legal": "Légal",
   "nav_manage_subscription": "Gérer mon abonnement",
   "nav_memes": "Mèmes",
   "nav_menu": "Menu",
-  "nav_account": "Compte",
-  "nav_legal": "Légal",
   "nav_my_account": "Mon compte",
   "nav_plans": "Plans",
   "nav_reels": "Reels",
   "nav_sign_in": "Se connecter",
-  "nav_switch_language": "Changer de langue",
   "nav_sign_out": "Se déconnecter",
+  "nav_submit": "Soumettre",
+  "nav_switch_language": "Changer de langue",
   "nav_toggle_menu": "Ouvrir le menu",
   "nav_upgrade_premium": "Passer à Premium",
   "plan_feature_favorites": "Favoris enregistrés",
@@ -333,6 +423,7 @@
   "studio_color_blue": "Bleu",
   "studio_color_red": "Rouge",
   "studio_color_white": "Blanc",
+  "studio_edit": "Modifier",
   "studio_enter_text": "Veuillez saisir du texte",
   "studio_error": "Le moteur vidéo n'a pas pu être chargé.",
   "studio_font": "Police",
@@ -358,18 +449,17 @@
   "studio_template_subtitle": "Sous-titre",
   "studio_template_subtitle_desc": "Fond semi-transparent, texte blanc",
   "studio_templates": "Templates",
-  "studio_try_another_meme": "Essayer avec un autre mème",
   "studio_text_aria": "Texte à ajouter sur la vidéo",
   "studio_text_label": "Texte",
-  "studio_edit": "Modifier",
+  "studio_try_another_meme": "Essayer avec un autre mème",
   "submit_accept_terms_and": " et la ",
   "submit_accept_terms_prefix": "Je confirme que ce contenu est un meme ou extrait court déjà diffusé publiquement sur les réseaux. En cas de réclamation du détenteur des droits, le contenu sera retiré. J'accepte les ",
   "submit_description": "Proposez un mème vidéo à ajouter sur Petit Meme. Partagez un tweet ou une vidéo YouTube virale de maximum 30 secondes. Soumission gratuite, modération rapide.",
   "submit_error_duplicate_url": "Ce lien a déjà été proposé",
   "submit_error_invalid_url": "Veuillez entrer un lien HTTPS valide",
-  "submit_error_title_too_short": "Le titre doit contenir au moins 3 caractères",
   "submit_error_limit_reached": "Vous avez atteint la limite de soumissions en attente",
   "submit_error_rate_limit": "Trop de soumissions, veuillez réessayer plus tard",
+  "submit_error_title_too_short": "Le titre doit contenir au moins 3 caractères",
   "submit_error_tweet_no_video": "Ce tweet ne contient pas de vidéo",
   "submit_error_tweet_verification_failed": "Impossible de vérifier le tweet, veuillez réessayer plus tard",
   "submit_field_language": "Langue audio",
@@ -381,9 +471,23 @@
   "submit_history_heading": "Mes soumissions",
   "submit_history_view_meme": "Voir le meme",
   "submit_login_cta": "Connectez-vous pour soumettre un mème",
-  "submit_page_intro": "Un mème viral à partager ? Soumettez-le, on s'occupe du reste.",
   "submit_login_description": "Vous devez être connecté pour soumettre un meme.",
-  "submit_pending_count": [{ "declarations": ["input remaining", "local remainingPlural = remaining: plural"], "selectors": ["remainingPlural"], "match": { "remainingPlural=one": "{remaining} soumission restante", "remainingPlural=other": "{remaining} soumissions restantes" } }],
+  "submit_page_intro": "Un mème viral à partager ? Soumettez-le, on s'occupe du reste.",
+  "submit_pending_count": [
+    {
+      "declarations": [
+        "input remaining",
+        "local remainingPlural = remaining: plural"
+      ],
+      "selectors": [
+        "remainingPlural"
+      ],
+      "match": {
+        "remainingPlural=one": "{remaining} soumission restante",
+        "remainingPlural=other": "{remaining} soumissions restantes"
+      }
+    }
+  ],
   "submit_privacy_link_text": "Politique de confidentialité",
   "submit_rule_appropriate": "Contenu approprié — pas de NSFW, violence graphique, haine ou harcèlement",
   "submit_rule_duration": "Durée max 30 secondes — les clips longs seront refusés",
@@ -402,12 +506,6 @@
   "submit_terms_link_text": "Conditions Générales d'Utilisation",
   "submit_title": "Petit Meme - Soumettre un mème",
   "submit_url_error": "Le lien doit être un tweet (x.com/twitter.com) ou une vidéo YouTube",
-  "footer_dmca": "DMCA",
-  "legal_dmca_description": "Procédure DMCA pour les demandes de retrait de contenu sur Petit Meme.",
-  "legal_dmca_title": "DMCA",
-  "nav_submit": "Soumettre",
-  "clipboard_error_read": "Impossible de lire le presse-papiers",
-  "clipboard_paste_aria_label": "Coller depuis le presse-papiers",
   "validation_accept_terms": "Vous devez accepter les conditions pour continuer",
   "validation_passwords_dont_match": "Les mots de passe ne correspondent pas",
   "watermark_download_with_watermark": "Télécharger avec watermark",

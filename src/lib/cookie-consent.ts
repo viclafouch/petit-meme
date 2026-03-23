@@ -1,47 +1,64 @@
+import type {
+  CategoryConfig,
+  ConsentState,
+  CookieConsentConfig
+} from '@/components/cookie-consent'
 import {
-  COOKIE_ALGOLIA_USER_TOKEN_KEY,
-  COOKIE_CONSENT_KEY
-} from '@/constants/cookie'
-import { ONE_YEAR_IN_SECONDS } from '@/constants/time'
-import { createClientCookie, readClientCookie } from '@/helpers/cookie'
+  matchIsAnalyticsConsented,
+  parseConsentCookie
+} from '@/components/cookie-consent'
+import { CONSENT_COOKIE_KEY } from '@/constants/cookie'
+import { readClientCookie } from '@/helpers/cookie'
+import { m } from '@/paraglide/messages.js'
 import { createClientOnlyFn, createIsomorphicFn } from '@tanstack/react-start'
 import { getCookie } from '@tanstack/react-start/server'
 
-type CookieConsentValue = 'accepted' | 'declined'
+const CONSENT_VERSION = '1.0.0'
 
-function parseCookieConsent(
-  rawValue: string | undefined | null
-): CookieConsentValue | null {
-  if (rawValue === 'accepted' || rawValue === 'declined') {
-    return rawValue
+export function getCookieConsentConfig(): CookieConsentConfig {
+  const categories = [
+    {
+      key: 'necessary',
+      label: m.cookie_category_necessary_label(),
+      description: m.cookie_category_necessary_description(),
+      required: true
+    },
+    {
+      key: 'analytics',
+      label: m.cookie_category_analytics_label(),
+      description: m.cookie_category_analytics_description()
+    }
+  ] as const satisfies readonly CategoryConfig[]
+
+  return {
+    consentVersion: CONSENT_VERSION,
+    privacyPolicyUrl: '/privacy',
+    categories
   }
-
-  return null
 }
 
-const getCookieConsent = createIsomorphicFn()
+export const getConsentState = createIsomorphicFn()
   .server(() => {
-    return parseCookieConsent(getCookie(COOKIE_CONSENT_KEY))
+    return parseConsentCookie(getCookie(CONSENT_COOKIE_KEY))
   })
   .client(() => {
-    return parseCookieConsent(readClientCookie(COOKIE_CONSENT_KEY))
+    return parseConsentCookie(readClientCookie(CONSENT_COOKIE_KEY))
   })
 
-const setCookieConsent = createClientOnlyFn((value: CookieConsentValue) => {
-  createClientCookie(COOKIE_CONSENT_KEY, value, {
-    maxAge: ONE_YEAR_IN_SECONDS
+export const matchIsAnalyticsConsentGiven = createIsomorphicFn()
+  .server(() => {
+    return matchIsAnalyticsConsented(
+      parseConsentCookie(getCookie(CONSENT_COOKIE_KEY))
+    )
+  })
+  .client(() => {
+    return matchIsAnalyticsConsented(
+      parseConsentCookie(readClientCookie(CONSENT_COOKIE_KEY))
+    )
   })
 
-  if (value === 'accepted') {
-    createClientCookie(COOKIE_ALGOLIA_USER_TOKEN_KEY, crypto.randomUUID(), {
-      maxAge: ONE_YEAR_IN_SECONDS
-    })
-  }
+export const matchHasAcceptedCookies = createClientOnlyFn(() => {
+  return matchIsAnalyticsConsentGiven()
 })
 
-const hasAcceptedCookies = createClientOnlyFn(() => {
-  return readClientCookie(COOKIE_CONSENT_KEY) === 'accepted'
-})
-
-export { getCookieConsent, hasAcceptedCookies, setCookieConsent }
-export type { CookieConsentValue }
+export type { ConsentState }

@@ -1,7 +1,7 @@
 import { COOKIE_ALGOLIA_USER_TOKEN_KEY } from '@/constants/cookie'
 import { clientEnv } from '@/env/client'
 import { readClientCookie } from '@/helpers/cookie'
-import { hasAcceptedCookies } from '@/lib/cookie-consent'
+import { matchHasAcceptedCookies } from '@/lib/cookie-consent'
 import { getLocale } from '@/paraglide/runtime'
 import type {
   ClickedObjectIDs,
@@ -27,7 +27,7 @@ function logInsightsError(error: unknown) {
 }
 
 function getUserToken() {
-  if (!hasAcceptedCookies()) {
+  if (!matchHasAcceptedCookies()) {
     return null
   }
 

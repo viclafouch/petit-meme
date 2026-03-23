@@ -7,7 +7,8 @@ import {
   type ChartGranularity,
   generateDateSeries,
   getChartGranularity,
-  truncateToGranularity
+  truncateToGranularity,
+  truncateToUtcDay
 } from '@/helpers/date'
 import type {
   AuditAction,
@@ -188,12 +189,13 @@ export const getAdminChartData = createServerFn({ method: 'GET' })
     const days = PERIOD_DAYS[period]
     const granularity = getChartGranularity(days)
     const now = new Date()
+    const yesterday = new Date(truncateToUtcDay(now).getTime() - DAY)
     const start =
       days === null
         ? PLATFORM_LAUNCH_DATE
-        : new Date(now.getTime() - days * DAY)
+        : new Date(yesterday.getTime() - days * DAY)
 
-    return fetchChartData({ start, end: now, granularity })
+    return fetchChartData({ start, end: yesterday, granularity })
   })
 
 const RECENT_ACTIVITY_SELECT = {

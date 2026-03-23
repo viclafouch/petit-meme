@@ -152,7 +152,7 @@ export const CookieBanner = () => {
                   </Link>
                 </p>
               </div>
-              <div className="flex items-center p-[--banner-gap] [--banner-gap:0.625rem]">
+              <div className="flex items-center p-[--banner-gap] pb-[calc(var(--banner-gap)+env(safe-area-inset-bottom))] sm:pb-[--banner-gap] [--banner-gap:0.625rem]">
                 <Button
                   variant="outline"
                   onClick={openSettings}

@@ -71,14 +71,14 @@ export const CookieSettings = () => {
     >
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-full bg-muted">
+          <div className="sm:flex sm:items-center sm:gap-3">
+            <div className="hidden size-10 items-center justify-center rounded-full bg-muted sm:flex">
               <Shield
                 className="size-5 text-muted-foreground"
                 aria-hidden="true"
               />
             </div>
-            <div>
+            <div className="text-center sm:text-left">
               <DialogTitle>{m.cookie_settings_title()}</DialogTitle>
               <DialogDescription>
                 {m.cookie_settings_description()}

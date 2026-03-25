@@ -416,6 +416,12 @@ Ajouter Discord comme provider OAuth en plus de Twitter/X. Better Auth supporte 
 
 Navbar sticky `top-0` avec background qui apparaît progressivement au scroll (0→300px). Double implémentation : CSS `animation-timeline: scroll()` pour les navigateurs modernes (Chrome 115+), fallback Framer Motion (`useScroll` + `useTransform`) pour Safari/Firefox. Hook `useScrollFade` dans `src/hooks/use-scroll-fade.ts`. Pattern repris de Patio Paddle Club.
 
+### Header mobile — bouton login compact + language switcher visible ✅
+
+- [x] Bouton "Se connecter" : même style blanc (`variant="default"`) mais texte masqué sur mobile (`max-md:hidden`), réduit en `size-9` carré icône-only. Desktop inchangé (`size="lg"` + texte).
+- [x] Language switcher déplacé hors du menu hamburger → toujours visible dans le header à côté de l'avatar.
+- [x] LanguageSwitcher retiré du footer du mobile-nav (doublon supprimé).
+
 ### Migration vers Cloudflare
 
 Passer le domaine sur Cloudflare pour bénéficier de ses fonctionnalités natives : CDN/cache, SSL, protection DDoS, Page Rules, etc.

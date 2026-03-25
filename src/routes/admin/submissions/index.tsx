@@ -158,7 +158,7 @@ const StatusFilterTabs = ({
   statusCounts
 }: StatusFilterTabsParams) => {
   return (
-    <div className="flex gap-1 rounded-lg bg-muted p-1">
+    <div className="flex gap-1 rounded-lg bg-muted p-1 overflow-x-auto">
       {STATUS_FILTER_OPTIONS.map((option) => {
         const isActive = option.value === (currentStatus || 'all')
         const count = statusCounts[option.value]
@@ -172,7 +172,7 @@ const StatusFilterTabs = ({
             key={option.value}
             from={Route.fullPath}
             search={search}
-            className="relative rounded-md px-3 py-1.5 text-sm font-medium transition-colors aria-selected:bg-background aria-selected:text-foreground aria-selected:shadow-sm text-muted-foreground hover:text-foreground"
+            className="relative shrink-0 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors aria-selected:bg-background aria-selected:text-foreground aria-selected:shadow-sm text-muted-foreground hover:text-foreground"
             aria-selected={isActive}
           >
             {option.label}
@@ -188,7 +188,7 @@ const StatusFilterTabs = ({
 
 const EmptyState = ({ hasFilter }: { hasFilter: boolean }) => {
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+    <div className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground">
       <Inbox className="size-12 mb-4 opacity-50" aria-hidden="true" />
       <p className="text-lg font-medium">Aucune soumission</p>
       <p className="text-sm">

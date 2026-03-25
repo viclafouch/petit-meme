@@ -71,7 +71,9 @@ const MemeInfo = ({ meme, allTags }: MemeInfoParams) => {
           </>
         ) : null}
         {meme.contentLocale !== 'UNIVERSAL' ? (
-          <MemeLanguageBadge contentLocale={meme.contentLocale} showLabel />
+          <div className="flex justify-center md:justify-start">
+            <MemeLanguageBadge contentLocale={meme.contentLocale} showLabel />
+          </div>
         ) : null}
         {meme.publishedAt ? (
           <span className="text-muted-foreground text-xs">

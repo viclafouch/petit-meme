@@ -5,6 +5,7 @@ import { LocaleBanner } from '@/components/locale-banner'
 import { Navbar } from '@/components/navbar'
 import { SentryFeedbackWidget } from '@/components/sentry-feedback-widget'
 import { getLocaleBannerDismissed } from '@/lib/locale-banner'
+import { getMemesListQueryOpts } from '@/lib/queries'
 import { m } from '@/paraglide/messages.js'
 import { createFileRoute, Outlet } from '@tanstack/react-router'
 
@@ -35,7 +36,9 @@ const RouteComponent = () => {
 }
 
 export const Route = createFileRoute('/_public__root')({
-  loader: () => {
+  loader: ({ context }) => {
+    void context.queryClient.prefetchQuery(getMemesListQueryOpts({}))
+
     return {
       _localeBannerDismissed: getLocaleBannerDismissed()
     }

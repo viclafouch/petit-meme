@@ -1,7 +1,6 @@
 import React from 'react'
 import { CreditCard, Settings, Shield, SparklesIcon, Star } from 'lucide-react'
 import { ThemeSwitcher } from '@/components/animate-ui/theme-switcher'
-import { LanguageSwitcher } from '@/components/language-switcher'
 import type { NavigationLink } from '@/components/navbar'
 import { Button } from '@/components/ui/button'
 import {
@@ -203,7 +202,6 @@ export const MobileNav = ({ links, user }: MobileNavProps) => {
               </Link>
             )}
             <div className="flex items-center gap-3">
-              <LanguageSwitcher />
               <ThemeSwitcher />
             </div>
           </div>

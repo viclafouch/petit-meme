@@ -111,7 +111,7 @@ export const Navbar = () => {
           </NavigationMenuList>
         </NavigationMenu>
         <div className="flex flex-1 items-center justify-end gap-3">
-          <LanguageSwitcher className="max-md:hidden" />
+          <LanguageSwitcher />
           <ThemeSwitcher className="max-md:hidden" />
           {user ? (
             <UserDropdown user={user} />
@@ -123,9 +123,10 @@ export const Navbar = () => {
               }}
               variant="default"
               size="lg"
+              className="max-md:size-9 max-md:p-0"
             >
               <User aria-hidden="true" />
-              {m.nav_sign_in()}
+              <span className="max-md:hidden">{m.nav_sign_in()}</span>
             </Button>
           )}
         </div>

@@ -9,7 +9,7 @@ const translations = {
     subtitle: (username: string) => {
       return `Bienvenue dans le mode premium, ${username} !`
     },
-    planLabel: 'Plan',
+    planLabel: 'Abonnement',
     amountLabel: 'Montant',
     periodAnnual: '/an',
     periodMonthly: '/mois',
@@ -22,7 +22,7 @@ const translations = {
     subtitle: (username: string) => {
       return `Welcome to premium, ${username}!`
     },
-    planLabel: 'Plan',
+    planLabel: 'Subscription',
     amountLabel: 'Amount',
     periodAnnual: '/yr',
     periodMonthly: '/mo',

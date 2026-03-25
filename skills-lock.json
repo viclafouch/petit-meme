@@ -1,6 +1,11 @@
 {
   "version": 1,
   "skills": {
+    "deep-dive": {
+      "source": "viclafouch/skills",
+      "sourceType": "github",
+      "computedHash": "f20826e481e0b07a95ce10a3afb632772fdb9e8801121694f74f65c786b9db5f"
+    },
     "email-best-practices": {
       "source": "resend/email-best-practices",
       "sourceType": "github",
@@ -16,6 +21,11 @@
       "sourceType": "github",
       "computedHash": "e4334584500b10b86b95d02b1fcfc39e7245b00694672607eba33082fc0265ac"
     },
+    "react-useeffect": {
+      "source": "viclafouch/skills",
+      "sourceType": "github",
+      "computedHash": "17353810bc34c55321a61ae22717656a88b5ccf215764dff871e2278fe90954c"
+    },
     "resend": {
       "source": "resend/resend-skills",
       "sourceType": "github",
@@ -30,6 +40,16 @@
       "source": "shadcn/ui",
       "sourceType": "github",
       "computedHash": "91c02eb706f046fb9d6a061efbb96496e4be751b5b14c283cf82baaa50f3a985"
+    },
+    "update-deps": {
+      "source": "viclafouch/skills",
+      "sourceType": "github",
+      "computedHash": "808f90a35573f513c33f71fa71de58cb9feba2becbae097e06eb7dd2224141a0"
+    },
+    "web-design-guidelines": {
+      "source": "viclafouch/skills",
+      "sourceType": "github",
+      "computedHash": "1c3beb49ca8f86745378b60b955012ba403c0db391468a4ce360dc700d3b8918"
     }
   }
 }

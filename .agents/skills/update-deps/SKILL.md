@@ -1,7 +1,6 @@
 ---
 name: update-deps
 description: Audit all outdated dependencies with detailed research on changelogs, breaking changes, bug fixes, and deprecations. Creates a temporary plan without updating anything. Use when you want to review what changed in your dependencies before upgrading.
-argument-hint: filter e.g. react or major
 user-invocable: true
 ---
 
@@ -120,7 +119,7 @@ For **patch-only packages** and **`@types/*`**, use a lighter format:
 
 ## Step 3 — Create the plan file
 
-After ALL agents complete, ensure `.claude/plans/` directory exists (`mkdir -p`), then write `.claude/plans/plan-update-deps-DATE.md` (one single write, using today's date from pre-loaded data).
+After ALL agents complete, write `plan-update-deps-DATE.md` (one single write, using today's date from pre-loaded data). Place it in whichever plan directory the project uses (check for `.claude/plans/`, `docs/`, or project root — prefer an existing directory; create `.claude/plans/` as default if none exists).
 
 Structure:
 

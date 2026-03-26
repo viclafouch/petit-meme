@@ -8,7 +8,7 @@ import {
   Star
 } from 'lucide-react'
 import { motion } from 'motion/react'
-import { BunnyPlayIcon } from '@/components/icon/Play'
+import { BunnyPlayIcon } from '@/components/icon'
 import { MemeLanguageBadge } from '@/components/Meme/meme-language-badge'
 import { MemeVideoThumbnail } from '@/components/Meme/meme-video-thumbnail'
 import {

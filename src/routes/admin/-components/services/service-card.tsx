@@ -1,4 +1,4 @@
-import type { LucideIcon } from 'lucide-react'
+import React from 'react'
 import {
   Bug,
   CreditCard,
@@ -8,15 +8,15 @@ import {
   Mail,
   Rabbit,
   Search,
-  Sparkles,
-  Twitter
+  Sparkles
 } from 'lucide-react'
+import { XTwitterIcon } from '@/components/icon'
 import { clientEnv } from '@/env/client'
 import { cn } from '@/lib/utils'
 
 type ServiceConfig = {
   label: string
-  icon: LucideIcon
+  icon: React.ComponentType<React.ComponentProps<'svg'>>
   dashboardUrl: string
   accentClass: string
 }
@@ -79,7 +79,7 @@ export const SERVICES = [
   },
   {
     label: 'X (Twitter)',
-    icon: Twitter,
+    icon: XTwitterIcon,
     dashboardUrl: 'https://console.x.com/',
     accentClass: 'bg-foreground/10 text-foreground'
   }

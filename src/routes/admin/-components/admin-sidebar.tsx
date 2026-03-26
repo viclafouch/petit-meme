@@ -4,10 +4,10 @@ import {
   LayoutDashboard,
   MessageSquarePlus,
   SquareLibrary,
-  Twitter,
   Users2,
   Video
 } from 'lucide-react'
+import { XTwitterIcon } from '@/components/icon'
 import {
   Sidebar,
   SidebarContent,
@@ -97,7 +97,7 @@ export const AdminSidebar = ({
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <Link to="/admin/downloader">
-                    <Twitter />
+                    <XTwitterIcon />
                     <span>Téléchargeur Twitter</span>
                   </Link>
                 </SidebarMenuButton>

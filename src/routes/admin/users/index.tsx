@@ -1,4 +1,5 @@
-import { Crown, Mail, Minus, Twitter } from 'lucide-react'
+import { Crown, Mail, Minus } from 'lucide-react'
+import { XTwitterIcon } from '@/components/icon'
 import { PageHeader } from '@/components/page-header'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -108,7 +109,7 @@ const columns = [
 
       return provider === 'twitter' ? (
         <Badge variant="info" size="sm">
-          <Twitter className="size-3" aria-hidden />
+          <XTwitterIcon className="size-3" aria-hidden />
           Twitter
         </Badge>
       ) : (

@@ -1,6 +1,7 @@
 import React from 'react'
-import { CircleAlert, Twitter } from 'lucide-react'
+import { CircleAlert } from 'lucide-react'
 import { z } from 'zod'
+import { XTwitterIcon } from '@/components/icon'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import {
@@ -193,7 +194,7 @@ export const LoginForm = ({
         </span>
       </div>
       <Button variant="outline" className="w-full" onClick={onTwitterSignIn}>
-        <Twitter />
+        <XTwitterIcon />
         {m.auth_twitter_sign_in()}
       </Button>
       <div className="w-full flex flex-col gap-1 justify-center items-center">

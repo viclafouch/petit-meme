@@ -1,6 +1,7 @@
-import type { LucideIcon } from 'lucide-react'
-import { ExternalLink, Inbox, Twitter, Youtube } from 'lucide-react'
+import React from 'react'
+import { ExternalLink, Inbox } from 'lucide-react'
 import { z } from 'zod'
+import { XTwitterIcon, YoutubeIcon } from '@/components/icon'
 import { CONTENT_LOCALE_FLAGS, FLAG_ICON_CLASS } from '@/components/icon/flags'
 import { PageHeader } from '@/components/page-header'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -32,11 +33,11 @@ const STATUS_LABELS = {
 } as const satisfies Record<MemeSubmissionStatus, string>
 
 const URL_TYPE_CONFIG = {
-  TWEET: { icon: Twitter, label: 'Tweet' },
-  YOUTUBE: { icon: Youtube, label: 'YouTube' }
+  TWEET: { icon: XTwitterIcon, label: 'Tweet' },
+  YOUTUBE: { icon: YoutubeIcon, label: 'YouTube' }
 } as const satisfies Record<
   MemeSubmissionUrlType,
-  { icon: LucideIcon; label: string }
+  { icon: React.ComponentType<React.ComponentProps<'svg'>>; label: string }
 >
 
 const SEARCH_SCHEMA = z.object({

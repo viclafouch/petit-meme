@@ -121,29 +121,12 @@ nitro({
 
 ---
 
-## Vite 8 — Rollback et surveillance upgrade
+## Vite 8 — Migré (2026-03-26)
 
-**Problème (2026-03-21) :** Migration Vite 8.0.1 (Rolldown bundler) a cassé la prod. Erreur Vercel au chargement :
-
-```
-TypeError: __exportAll is not a function
-  at file:///var/task/_ssr/messages-CrqgIZ3f.mjs:813:38
-```
-
-**Cause :** Vite 8 remplace Rollup par Rolldown (bundler Rust). Rolldown produit un chunk SSR (`messages-*.mjs`) où le helper `__exportAll` est **appelé ligne 813** mais **défini ligne 6955** — bug d'ordonnancement des déclarations dans le bundling SSR. Le chunk fusionne les 420 `export *` de Paraglide (`message-modules` output) avec les exports Nitro, et Rolldown ne hoist pas correctement les helpers internes.
-
-**Rollback :** Retour à Vite 7.3.1 (Rollup) + `@vitejs/plugin-react` 5.x + `vite-tsconfig-paths` (remplace `resolve.tsconfigPaths` natif de Vite 8) + `vite-node` 5.x.
-
-**Issues liées :** [vitejs/vite#21466](https://github.com/vitejs/vite/issues/21466), [vitejs/rolldown-vite#580](https://github.com/vitejs/rolldown-vite/issues/580)
-
-**Pour re-tenter l'upgrade :**
-
-1. Vérifier que les issues ci-dessus sont fermées ou qu'un fix Rolldown pour le hoisting SSR est publié
-2. Upgrade : `vite` → 8.x, `@vitejs/plugin-react` → 6.x, `vite-node` → 6.x, supprimer `vite-tsconfig-paths` (remplacé par `resolve.tsconfigPaths` natif)
-3. `pnpm run build` → vérifier que `.vercel/output/functions/__server.func/_ssr/messages-*.mjs` définit `__exportAll` AVANT son premier appel (`grep -n "__exportAll"`)
-4. Déployer en preview Vercel et tester le chargement SSR avant de merger
-
-- [ ] Surveiller les releases Vite 8.x / Rolldown. Quand le bug de hoisting SSR est corrigé, re-tenter la migration.
+- [x] ~~Surveiller les releases Vite 8.x / Rolldown.~~ Bug fixé dans Rolldown rc.11 (PR rolldown/rolldown#8804), inclus dans Vite 8.0.2+.
+- [x] Migration effectuée vers Vite 8.0.3 (Rolldown rc.12) le 2026-03-26.
+- [x] `vite-tsconfig-paths` supprimé, remplacé par `resolve.tsconfigPaths: true` natif.
+- [x] Build prod OK, `__exportAll` correctement importé depuis un chunk séparé.
 
 ---
 

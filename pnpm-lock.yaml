@@ -256,8 +256,8 @@ importers:
         specifier: ^19
         version: 19.2.3(@types/react@19.2.14)
       '@viclafouch/oxc-config':
-        specifier: 1.0.0-alpha.3
-        version: 1.0.0-alpha.3(oxfmt@0.42.0)(oxlint@1.57.0)(typescript@5.9.3)
+        specifier: 1.0.0-alpha.4
+        version: 1.0.0-alpha.4(oxfmt@0.42.0)(oxlint@1.57.0)(typescript@5.9.3)
       '@vitejs/plugin-react':
         specifier: ^6.0.1
         version: 6.0.1(vite@8.0.3(@types/node@25.5.0)(esbuild@0.27.3)(jiti@2.6.1)(tsx@4.21.0))
@@ -3637,8 +3637,8 @@ packages:
     resolution: {integrity: sha512-UycprH3T6n3jH0k44NHMa7pnFHGu/N05MjojYr+Mc6I7obkoLIJujSWwin1pCvdy/eOxrI/l3uDLQsmcrOb4ug==}
     engines: {node: '>= 20'}
 
-  '@viclafouch/oxc-config@1.0.0-alpha.3':
-    resolution: {integrity: sha512-p2VGvVyYeQODGjZM3WRQUWS4Cs1r1pbJGpJ5tD8r4Laa51Bd4Kvx9M2j6XwH6p02prwS8a137cIzHNJ4T7fUBA==}
+  '@viclafouch/oxc-config@1.0.0-alpha.4':
+    resolution: {integrity: sha512-4aYeEQu8NYjVowUudp4OAaOToGGBiBaFLjSgzIMYebuNX/OCHJh6faqo6PLAXX79TwECHS5LZel7n3CaLqwq7Q==}
     peerDependencies:
       eslint-plugin-playwright: '>= 2'
       eslint-plugin-react-native: '>= 5'
@@ -10242,7 +10242,7 @@ snapshots:
 
   '@vercel/oidc@3.2.0': {}
 
-  '@viclafouch/oxc-config@1.0.0-alpha.3(oxfmt@0.42.0)(oxlint@1.57.0)(typescript@5.9.3)':
+  '@viclafouch/oxc-config@1.0.0-alpha.4(oxfmt@0.42.0)(oxlint@1.57.0)(typescript@5.9.3)':
     dependencies:
       oxlint: 1.57.0
       typescript: 5.9.3

@@ -3,71 +3,42 @@
     {
       "title": "Triste",
       "slug": "sad",
-      "keywords": [
-        "pleurer",
-        "déçu"
-      ]
+      "keywords": ["pleurer", "déçu"]
     },
     {
       "title": "Énervé",
       "slug": "angry",
-      "keywords": [
-        "colère",
-        "agacer",
-        "nerveux",
-        "tendu"
-      ]
+      "keywords": ["colère", "agacer", "nerveux", "tendu"]
     },
-{
+    {
       "title": "Rire",
       "slug": "laught",
-      "keywords": [
-        "rigoler",
-        "marrant",
-        "drôle",
-        "mdr",
-        "boring"
-      ]
+      "keywords": ["rigoler", "marrant", "drôle", "mdr", "boring"]
     },
     {
       "title": "Non",
       "slug": "no",
-      "keywords": [
-        "désaccord"
-      ]
+      "keywords": ["désaccord"]
     },
     {
       "title": "Gênant",
       "slug": "cringe",
-      "keywords": [
-        "malaisant",
-        "embarrassant",
-        "cringe"
-      ]
+      "keywords": ["malaisant", "embarrassant", "cringe"]
     },
     {
       "title": "Merci",
       "slug": "thanks",
-      "keywords": [
-        "remerciement"
-      ]
+      "keywords": ["remerciement"]
     },
     {
       "title": "Twitch",
       "slug": "twitch",
-      "keywords": [
-        "stream",
-        "livestream"
-      ]
+      "keywords": ["stream", "livestream"]
     },
     {
       "title": "Politique en France",
       "slug": "politics-in-france",
-      "keywords": [
-        "politique",
-        "ministre",
-        "président"
-      ]
+      "keywords": ["politique", "ministre", "président"]
     },
     {
       "title": "YouTube",
@@ -87,10 +58,7 @@
     {
       "title": "Bagarre",
       "slug": "fight",
-      "keywords": [
-        "combattre",
-        "fight"
-      ]
+      "keywords": ["combattre", "fight"]
     },
     {
       "title": "Insulte",

@@ -1,27 +1,10 @@
 {
   "name": "petit-meme",
-  "description": "Meme management and sharing platform with video support, premium subscriptions, and a TikTok-style reels experience.",
   "version": "0.1.0",
   "private": true,
+  "description": "Meme management and sharing platform with video support, premium subscriptions, and a TikTok-style reels experience.",
   "license": "UNLICENSED",
   "author": "Victor de la Fouchardiere",
-  "packageManager": "pnpm@10.30.3",
-  "engines": {
-    "node": ">=24.0.0"
-  },
-  "pnpm": {
-    "overrides": {
-      "require-in-the-middle": "7.4.0"
-    },
-    "onlyBuiltDependencies": [
-      "@prisma/engines",
-      "@sentry/cli",
-      "esbuild",
-      "prisma",
-      "protobufjs",
-      "sharp"
-    ]
-  },
   "type": "module",
   "scripts": {
     "dev": "vite dev",
@@ -33,9 +16,9 @@
     "prisma:reset-db:dev": "dotenv -e .env.development -- prisma migrate reset",
     "postinstall": "prisma generate && paraglide-js compile --project ./project.inlang && node scripts/copy-ffmpeg.js",
     "lint": "tsc && oxlint",
-    "lint:fix": "tsc && oxlint --fix && oxfmt '**/*.{ts,tsx,js,jsx}'",
-    "format": "oxfmt '**/*.{ts,tsx,js,jsx}'",
-    "format:check": "oxfmt --check '**/*.{ts,tsx,js,jsx}'",
+    "lint:fix": "tsc && oxlint --fix && pnpm run format",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check .",
     "email:dev": "email dev --dir src/emails --port 3001",
     "prepare": "husky"
   },
@@ -123,7 +106,7 @@
     "@types/node": "^25.5.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19",
-    "@viclafouch/oxc-config": "1.0.0-alpha.3",
+    "@viclafouch/oxc-config": "1.0.0-alpha.4",
     "@vitejs/plugin-react": "^6.0.1",
     "dotenv": "^17.3.1",
     "dotenv-cli": "^11.0.0",
@@ -139,5 +122,22 @@
   },
   "overrides": {
     "next": "^16.0.10"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "packageManager": "pnpm@10.30.3",
+  "pnpm": {
+    "overrides": {
+      "require-in-the-middle": "7.4.0"
+    },
+    "onlyBuiltDependencies": [
+      "@prisma/engines",
+      "@sentry/cli",
+      "esbuild",
+      "prisma",
+      "protobufjs",
+      "sharp"
+    ]
   }
 }

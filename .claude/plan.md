@@ -88,7 +88,7 @@ Remplacer Prisma par Drizzle ORM. Conventions cibles : tables en pluriel, colonn
 
 ## Migration ESLint + Prettier → oxlint + oxfmt ✅
 
-**Terminée le 2026-03-27.** Migré de `@viclafouch/eslint-config-viclafouch` v5 vers `@viclafouch/oxc-config` v1.0.0-alpha.0 (oxlint 1.57 + oxfmt 0.42).
+**Terminée le 2026-03-27.** Migré de `@viclafouch/eslint-config-viclafouch` v5 vers `@viclafouch/oxc-config` v1.0.0-alpha.4 (oxlint + oxfmt).
 
 - [x] Migrer path aliases `@/` → `~/`, `@admin/` → `~admin/` (commit séparé)
 - [x] Supprimer ESLint, Prettier → installer oxlint, oxfmt, @viclafouch/oxc-config

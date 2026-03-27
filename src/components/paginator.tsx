@@ -1,3 +1,4 @@
+import type { LinkProps } from '@tanstack/react-router'
 import {
   Pagination,
   PaginationContent,
@@ -6,7 +7,6 @@ import {
   PaginationPrevious
 } from '~/components/ui/pagination'
 import { generatePaginationLinks } from '~/utils/generate-pagination'
-import type { LinkProps } from '@tanstack/react-router'
 
 export type PaginatorProps = {
   currentPage: number

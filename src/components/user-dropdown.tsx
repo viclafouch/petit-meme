@@ -8,6 +8,8 @@ import {
   Star,
   User
 } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
 import { Button } from '~/components/ui/button'
 import {
@@ -27,11 +29,9 @@ import {
   getActiveSubscriptionQueryOpts,
   getFavoritesMemesQueryOpts
 } from '~/lib/queries'
-import type { SessionUser } from '~/lib/role'
 import { matchIsUserAdmin } from '~/lib/role'
+import type { SessionUser } from '~/lib/role'
 import { m } from '~/paraglide/messages.js'
-import { useQuery } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
 
 type UserDropdownParams = {
   user: SessionUser

@@ -1,5 +1,5 @@
-import type { Locale } from '~/paraglide/runtime'
 import { Section, Text } from '@react-email/components'
+import type { Locale } from '~/paraglide/runtime'
 import { BoldText, CONTACT_EMAIL, EmailLayout } from './email-layout'
 
 const translations = {

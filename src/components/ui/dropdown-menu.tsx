@@ -2,8 +2,8 @@ import * as React from 'react'
 import type { VariantProps } from 'class-variance-authority'
 import { cva } from 'class-variance-authority'
 import { CheckIcon, ChevronRightIcon, CircleIcon } from 'lucide-react'
-import { cn } from '~/lib/utils'
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
+import { cn } from '~/lib/utils'
 
 const DropdownMenu = ({
   ...props

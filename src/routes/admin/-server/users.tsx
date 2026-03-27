@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import { createServerFn } from '@tanstack/react-start'
+import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
 import { prismaClient } from '~/db'
 import type { Prisma } from '~/db/generated/prisma/client'
 import { AccountBannedEmail } from '~/emails/account-banned-email'
@@ -12,8 +14,6 @@ import { stripeClient } from '~/lib/stripe'
 import { logAuditAction } from '~/server/audit'
 import { adminRequiredMiddleware } from '~/server/user-auth'
 import { cleanupUserData } from '~/utils/user-cleanup'
-import { createServerFn } from '@tanstack/react-start'
-import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
 
 const USER_LIST_SELECT = {
   id: true,
@@ -212,7 +212,6 @@ const cancelActiveSubscription = async (stripeCustomerId: string | null) => {
     }
 
     await stripeClient.subscriptions.update(activeSubscription.id, {
-      // eslint-disable-next-line camelcase -- Stripe API property
       cancel_at_period_end: true
     })
 

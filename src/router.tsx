@@ -1,3 +1,7 @@
+import * as Sentry from '@sentry/tanstackstart-react'
+import { QueryClient } from '@tanstack/react-query'
+import { createRouter } from '@tanstack/react-router'
+import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
 import { DefaultLoading } from '~/components/default-loading'
 import { ErrorComponent } from '~/components/error-component'
 import { NotFound } from '~/components/not-found'
@@ -11,10 +15,6 @@ import {
   scrubUserPii,
   SENSITIVE_API_PATTERNS
 } from '~/lib/sentry'
-import * as Sentry from '@sentry/tanstackstart-react'
-import { QueryClient } from '@tanstack/react-query'
-import { createRouter } from '@tanstack/react-router'
-import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
 import {
   deLocalizeUrl,
   isExcludedByRouteStrategy,
@@ -117,8 +117,9 @@ export function getRouter() {
   return router
 }
 
+// oxfmt-ignore
 declare module '@tanstack/react-router' {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+  // oxlint-disable-next-line consistent-type-definitions -- TS module augmentation requires interface
   interface Register {
     router: ReturnType<typeof getRouter>
   }

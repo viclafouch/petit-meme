@@ -26,13 +26,13 @@ export const ThemeSwitcher = ({ className }: { className?: string }) => {
   return (
     <Switch.Root
       checked={isDark}
-      onCheckedChange={checked => {
+      onCheckedChange={(checked) => {
         return setTheme(checked ? 'dark' : 'light')
       }}
       asChild
     >
       <motion.button
-        data-slot='switch'
+        data-slot="switch"
         className={cn(
           'relative flex p-0.75 h-6 w-10 shrink-0 cursor-pointer items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input data-[state=checked]:justify-end data-[state=unchecked]:justify-start',
           className
@@ -41,9 +41,6 @@ export const ThemeSwitcher = ({ className }: { className?: string }) => {
         onTapStart={() => {
           return setIsTapped(true)
         }}
-
-
-
         onTapCancel={() => {
           return setIsTapped(false)
         }}
@@ -51,34 +48,29 @@ export const ThemeSwitcher = ({ className }: { className?: string }) => {
           return setIsTapped(false)
         }}
       >
-        <span className='sr-only'>
+        <span className="sr-only">
           Activer thème {isDark ? 'clair' : 'sombre'}
         </span>
         <motion.div
-          data-slot='switch-left-icon'
+          data-slot="switch-left-icon"
           animate={isDark ? VISIBLE : HIDDEN}
           transition={SPRING_NO_BOUNCE}
-          className='absolute [&_svg]:size-3 left-1 top-1/2 -translate-y-1/2 dark:text-neutral-500 text-neutral-400'
+          className="absolute [&_svg]:size-3 left-1 top-1/2 -translate-y-1/2 dark:text-neutral-500 text-neutral-400"
         >
-
-
-
-
-
           <Sun />
         </motion.div>
         <motion.div
-          data-slot='switch-right-icon'
+          data-slot="switch-right-icon"
           animate={isDark ? HIDDEN : VISIBLE}
           transition={SPRING_NO_BOUNCE}
-          className='absolute [&_svg]:size-3 right-1 top-1/2 -translate-y-1/2 dark:text-neutral-400 text-neutral-500'
+          className="absolute [&_svg]:size-3 right-1 top-1/2 -translate-y-1/2 dark:text-neutral-400 text-neutral-500"
         >
           <Moon />
         </motion.div>
         <Switch.Thumb asChild>
           <motion.div
-            data-slot='switch-thumb'
-            className='relative z-1 flex size-4.5 items-center justify-center rounded-full bg-background shadow-lg ring-0'
+            data-slot="switch-thumb"
+            className="relative z-1 flex size-4.5 items-center justify-center rounded-full bg-background shadow-lg ring-0"
             layout
             transition={THUMB_SPRING}
             animate={

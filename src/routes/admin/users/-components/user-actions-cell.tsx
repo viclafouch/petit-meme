@@ -1,6 +1,9 @@
 import React from 'react'
 import { EllipsisVertical } from 'lucide-react'
 import { toast } from 'sonner'
+import * as Sentry from '@sentry/tanstackstart-react'
+import { useMutation } from '@tanstack/react-query'
+import { getRouteApi, useRouter } from '@tanstack/react-router'
 import { ConfirmAlertDialog } from '~/components/confirm-alert-dialog'
 import { Button } from '~/components/ui/button'
 import {
@@ -17,11 +20,6 @@ import {
   SelectValue
 } from '~/components/ui/select'
 import { getErrorMessage } from '~/helpers/error'
-import * as Sentry from '@sentry/tanstackstart-react'
-import { useMutation } from '@tanstack/react-query'
-import { useRouter } from '@tanstack/react-router'
-import { Route } from '../index'
-
 import {
   BAN_REASONS,
   type BanReason,
@@ -29,7 +27,9 @@ import {
   type EnrichedUser,
   removeUser,
   unbanUserById
-} from '~admin/-server/users'
+} from '~/routes/admin/-server/users'
+
+const routeApi = getRouteApi('/admin/users/')
 
 type DialogType = 'ban' | 'unban' | 'delete'
 
@@ -43,7 +43,7 @@ export const UserActionsCell = ({ user }: UserActionsCellParams) => {
   )
   const [banReason, setBanReason] = React.useState<BanReason>(BAN_REASONS[0])
   const router = useRouter()
-  const { user: admin } = Route.useRouteContext()
+  const { user: admin } = routeApi.useRouteContext()
 
   const handleCloseDialog = () => {
     setActiveDialog(null)

@@ -1,10 +1,9 @@
 import type { ComponentProps, CSSProperties } from 'react'
-import { getLocale } from '~/paraglide/runtime'
-import 'media-chrome/dist/lang/fr.js'
 import {
   MediaProvider,
   useMediaRef
 } from 'media-chrome/dist/react/media-store.js'
+import 'media-chrome/dist/lang/fr.js'
 import {
   MediaControlBar,
   MediaController,
@@ -19,6 +18,7 @@ import {
 } from 'media-chrome/react'
 import useDoubleClickFullscreen from '~/hooks/double-click-fullscreen'
 import { cn } from '~/lib/utils'
+import { getLocale } from '~/paraglide/runtime'
 import { mergeRefs } from '~/utils/merge-ref'
 
 export type VideoPlayerProps = ComponentProps<typeof MediaController>

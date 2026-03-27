@@ -1,4 +1,6 @@
 import { toast } from 'sonner'
+import { useQueryClient } from '@tanstack/react-query'
+import { type LinkOptions, useRouteContext } from '@tanstack/react-router'
 import { type BillingPeriod, PREMIUM_PLAN_PRICING } from '~/constants/plan'
 import { getErrorMessage } from '~/helpers/error'
 import { authClient } from '~/lib/auth-client'
@@ -7,8 +9,6 @@ import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
 import { useShowDialog } from '~/stores/dialog.store'
-import { useQueryClient } from '@tanstack/react-query'
-import { type LinkOptions, useRouteContext } from '@tanstack/react-router'
 
 export const useStripeCheckout = () => {
   const { user } = useRouteContext({ from: '__root__' })

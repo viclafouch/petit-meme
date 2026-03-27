@@ -1,8 +1,8 @@
-import { DAY } from '~/constants/time'
+import { createFileRoute } from '@tanstack/react-router'
 import { prismaClient } from '~/db'
+import { DAY } from '~/constants/time'
 import { cronLogger } from '~/lib/logger'
 import { verifyCronSecret } from '~/utils/cron-auth'
-import { createFileRoute } from '@tanstack/react-router'
 
 const log = cronLogger.child({ job: 'cleanup' })
 

@@ -1,17 +1,17 @@
 import React from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
-import { StudioPage } from '~/components/Meme/Studio/studio-page'
+import * as Sentry from '@sentry/tanstackstart-react'
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { createFileRoute } from '@tanstack/react-router'
 import {
   StudioErrorFallback,
   StudioLoadingFallback
 } from '~/components/Meme/studio-fallbacks'
+import { StudioPage } from '~/components/Meme/Studio/studio-page'
 import { buildVideoImageUrl } from '~/lib/bunny'
 import { getMemeByIdQueryOpts } from '~/lib/queries'
 import { buildMemeSeo } from '~/lib/seo'
 import { getRelatedMemes } from '~/server/meme'
-import * as Sentry from '@sentry/tanstackstart-react'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
 
 const RouteComponent = () => {
   const { memeId } = Route.useParams()

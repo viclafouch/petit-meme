@@ -1,4 +1,14 @@
 import { z } from 'zod'
+import { insightsClient as createInsightsClient } from '@algolia/client-insights'
+import { notFound } from '@tanstack/react-router'
+import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
+import {
+  getCookie,
+  getRequest,
+  setCookie,
+  setResponseStatus
+} from '@tanstack/react-start/server'
+import { prismaClient } from '~/db'
 import {
   COOKIE_ALGOLIA_USER_TOKEN_KEY,
   COOKIE_ANON_ID_KEY
@@ -23,13 +33,12 @@ import {
   ONE_YEAR_IN_SECONDS,
   THIRTY_DAYS_MS
 } from '~/constants/time'
-import { prismaClient } from '~/db'
 import type { Prisma } from '~/db/generated/prisma/client'
-import type { MemeContentLocale } from '~/db/generated/prisma/enums'
 import {
   MemeContentLocale as MemeContentLocaleEnum,
   MemeStatus
 } from '~/db/generated/prisma/enums'
+import type { MemeContentLocale } from '~/db/generated/prisma/enums'
 import { clientEnv } from '~/env/client'
 import { serverEnv } from '~/env/server'
 import { truncateToUtcDay } from '~/helpers/date'
@@ -41,7 +50,6 @@ import {
   resolveVisibleContentLocales,
   VISIBLE_CONTENT_LOCALES
 } from '~/helpers/i18n-content'
-import type { AlgoliaMemeRecord } from '~/lib/algolia'
 import {
   ALGOLIA_SEARCH_PARAMS_BASE,
   ALGOLIA_SEARCH_RETRIEVE,
@@ -55,6 +63,7 @@ import {
   safeAlgoliaOp,
   withAlgoliaCache
 } from '~/lib/algolia'
+import type { AlgoliaMemeRecord } from '~/lib/algolia'
 import { auth } from '~/lib/auth'
 import { buildSignedOriginalUrl, fetchWatermarkedVideo } from '~/lib/bunny'
 import { matchIsAnalyticsConsentGiven } from '~/lib/cookie-consent'
@@ -65,15 +74,6 @@ import { matchIsUserPremium } from '~/server/customer'
 import { createRateLimitMiddleware, extractClientIp } from '~/server/rate-limit'
 import { authUserRequiredMiddleware } from '~/server/user-auth'
 import { ensureAlgoliaUserToken } from '~/utils/tracking-cookies'
-import { insightsClient as createInsightsClient } from '@algolia/client-insights'
-import { notFound } from '@tanstack/react-router'
-import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
-import {
-  getCookie,
-  getRequest,
-  setCookie,
-  setResponseStatus
-} from '@tanstack/react-start/server'
 
 const serverInsightsClient = createInsightsClient(
   clientEnv.VITE_ALGOLIA_APP_ID,
@@ -670,7 +670,6 @@ export const trackMemeAction = createServerFn({ method: 'POST' })
 
       await tx.memeActionDaily.upsert({
         where: {
-          // eslint-disable-next-line camelcase -- Prisma compound unique key
           memeId_day_action: { memeId: data.memeId, day, action: data.action }
         },
         create: { memeId: data.memeId, day, action: data.action, count: 1 },

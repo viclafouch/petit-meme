@@ -1,5 +1,6 @@
 import React from 'react'
 import { Check, Shield } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
 import { Button } from '~/components/ui/button'
 import {
   Dialog,
@@ -13,7 +14,6 @@ import { Label } from '~/components/ui/label'
 import { Separator } from '~/components/ui/separator'
 import { Switch } from '~/components/ui/switch'
 import { m } from '~/paraglide/messages.js'
-import { Link } from '@tanstack/react-router'
 import { useCookieConsent } from './cookie-provider'
 import type { ConsentCategory } from './types'
 import { getAllAcceptedCategories, getDefaultCategories } from './utils'

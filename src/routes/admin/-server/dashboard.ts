@@ -1,6 +1,7 @@
 import { z } from 'zod'
-import { DAY } from '~/constants/time'
+import { createServerFn } from '@tanstack/react-start'
 import { prismaClient } from '~/db'
+import { DAY } from '~/constants/time'
 import type { Prisma } from '~/db/generated/prisma/client'
 import { MemeStatus } from '~/db/generated/prisma/enums'
 import {
@@ -16,7 +17,6 @@ import type {
   AuditTargetType
 } from '~/server/audit'
 import { adminRequiredMiddleware } from '~/server/user-auth'
-import { createServerFn } from '@tanstack/react-start'
 
 const TRENDING_WEIGHTS = {
   views: 1,

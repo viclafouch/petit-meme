@@ -1,6 +1,7 @@
 import React from 'react'
 import { ArrowLeft, Pencil, SlidersHorizontal, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
+import { Link } from '@tanstack/react-router'
 import {
   StudioActions,
   StudioMobileActions
@@ -28,7 +29,6 @@ import {
 } from '~/hooks/use-video-processor'
 import { m } from '~/paraglide/messages.js'
 import { useStudioStore } from '~/stores/studio.store'
-import { Link } from '@tanstack/react-router'
 
 type StudioBrandingParams = {
   title: string

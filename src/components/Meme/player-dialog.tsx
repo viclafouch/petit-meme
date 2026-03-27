@@ -3,20 +3,20 @@ import { useHotkeys } from 'react-hotkeys-hook'
 import { Clapperboard, Clipboard, Download, Share2, X } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 import { toast } from 'sonner'
+import { FocusScope } from '@radix-ui/react-focus-scope'
+import { Link, useLinkProps } from '@tanstack/react-router'
 import { MemeVideoPlayer } from '~/components/Meme/meme-video-player'
 import { Button, buttonVariants } from '~/components/ui/button'
 import type { MemeWithVideo } from '~/constants/meme'
 import { useMemeExport } from '~/hooks/use-meme-export'
 import { useMemeHls } from '~/hooks/use-meme-hls'
 import { useRegisterMemeView } from '~/hooks/use-register-meme-view'
-import type { ConversionEventName } from '~/lib/algolia-insights'
 import { sendConversionEvent } from '~/lib/algolia-insights'
+import type { ConversionEventName } from '~/lib/algolia-insights'
 import { buildVideoImageUrl } from '~/lib/bunny'
 import { buildUrl } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
 import { trackMemeAction } from '~/server/meme'
-import { FocusScope } from '@radix-ui/react-focus-scope'
-import { Link, useLinkProps } from '@tanstack/react-router'
 
 type PlayerDialogParams = {
   meme: MemeWithVideo
@@ -49,7 +49,7 @@ export const PlayerDialog = ({
     videoRef,
     ratio: 0.3,
     minMs: 2500,
-    maxMs: 12000
+    maxMs: 12_000
   })
 
   const pauseVideo = () => {

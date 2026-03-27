@@ -13,8 +13,7 @@ import { LOCALE_META } from '~/helpers/i18n-content'
 import type { useKeywordsField } from '~/hooks/use-keywords-field'
 import { type FormFieldApi, getFieldErrorMessage } from '~/lib/utils'
 import type { Locale } from '~/paraglide/runtime'
-
-import { KeywordsField } from '~admin/-components/keywords-field'
+import { KeywordsField } from '~/routes/admin/-components/keywords-field'
 
 const MIN_TITLE_LENGTH = 3
 

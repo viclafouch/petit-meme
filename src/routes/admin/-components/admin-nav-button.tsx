@@ -1,4 +1,5 @@
 import { ArrowLeft } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
 import { Button } from '~/components/ui/button'
 import {
@@ -13,7 +14,6 @@ import { DEFAULT_AVATAR_URL } from '~/constants/avatar'
 import { getUserInitials } from '~/helpers/format'
 import { useSignOut } from '~/hooks/use-sign-out'
 import type { SessionUser } from '~/lib/role'
-import { Link } from '@tanstack/react-router'
 
 type AdminNavButtonParams = {
   user: SessionUser

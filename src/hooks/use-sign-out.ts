@@ -1,4 +1,6 @@
 import { toast } from 'sonner'
+import { useQueryClient } from '@tanstack/react-query'
+import { useRouter } from '@tanstack/react-router'
 import { authClient } from '~/lib/auth-client'
 import {
   getActiveSubscriptionQueryOpts,
@@ -7,8 +9,6 @@ import {
 } from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
-import { useQueryClient } from '@tanstack/react-query'
-import { useRouter } from '@tanstack/react-router'
 
 export const useSignOut = () => {
   const router = useRouter()

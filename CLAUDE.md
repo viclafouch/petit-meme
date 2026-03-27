@@ -20,8 +20,10 @@ Minimize costs on all external services (database, Algolia, Sentry, Vercel, etc.
 ```bash
 pnpm run build            # Production build (Vite + Nitro vercel preset)
 pnpm start                # Start production server
-pnpm run lint             # TypeScript check + ESLint
-pnpm run lint:fix         # Auto-fix lint issues
+pnpm run lint             # TypeScript check + oxlint
+pnpm run lint:fix         # Auto-fix lint issues + format with oxfmt
+pnpm run format           # Format with oxfmt
+pnpm run format:check     # Check formatting (CI)
 pnpm run email:dev        # Email preview server (port 3001)
 ```
 **Never start the dev server (`pnpm run dev`)** — this is always done by the user.

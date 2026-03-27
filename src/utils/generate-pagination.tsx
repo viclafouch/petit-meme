@@ -1,6 +1,6 @@
 import React from 'react'
-import { PaginationItem, PaginationLink } from '~/components/ui/pagination'
 import type { LinkProps } from '@tanstack/react-router'
+import { PaginationItem, PaginationLink } from '~/components/ui/pagination'
 
 type GeneratePaginationLinksParams = {
   currentPage: number

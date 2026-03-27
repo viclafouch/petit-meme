@@ -1,7 +1,7 @@
-import * as React from 'react'
+import React from 'react'
+import * as Sentry from '@sentry/tanstackstart-react'
 import type { Meme } from '~/db/generated/prisma/client'
 import { registerMemeView } from '~/server/meme'
-import * as Sentry from '@sentry/tanstackstart-react'
 
 type UseRegisterMemeViewParams = {
   memeId: Meme['id']
@@ -40,7 +40,7 @@ export function useRegisterMemeView({
   enabled = true,
   ratio = 0.3,
   minMs = 2500,
-  maxMs = 12000
+  maxMs = 12_000
 }: UseRegisterMemeViewParams) {
   const sentRef = React.useRef(false)
   const watchMsRef = React.useRef(0)

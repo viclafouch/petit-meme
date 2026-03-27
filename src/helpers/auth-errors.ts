@@ -120,7 +120,7 @@ export function getAuthErrorMessage(code: string): string {
   }
 
   if (import.meta.env.DEV) {
-    // eslint-disable-next-line no-console
+    // oxlint-disable-next-line no-console
     console.warn(`[auth-errors] Untranslated code: ${code}`)
   }
 

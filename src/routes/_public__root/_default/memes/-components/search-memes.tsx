@@ -1,6 +1,18 @@
 import React from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { AlertTriangleIcon, RefreshCw, Shuffle, Smartphone } from 'lucide-react'
+import { useDebouncedValue } from '@tanstack/react-pacer'
+import {
+  QueryErrorResetBoundary,
+  useSuspenseQuery
+} from '@tanstack/react-query'
+import {
+  Link,
+  useLoaderData,
+  useNavigate,
+  useParams,
+  useSearch
+} from '@tanstack/react-router'
 import { CategoriesList } from '~/components/categories/categories-list'
 import { MemesFilterLanguage } from '~/components/Meme/Filters/memes-filter-language'
 import MemesPagination from '~/components/Meme/Filters/memes-pagination'
@@ -27,18 +39,6 @@ import {
   PageDescription,
   PageHeading
 } from '~/routes/_public__root/-components/page-headers'
-import { useDebouncedValue } from '@tanstack/react-pacer'
-import {
-  QueryErrorResetBoundary,
-  useSuspenseQuery
-} from '@tanstack/react-query'
-import {
-  Link,
-  useLoaderData,
-  useNavigate,
-  useParams,
-  useSearch
-} from '@tanstack/react-router'
 
 const MemesListWrapper = ({ columnGridCount }: { columnGridCount: number }) => {
   const search = useSearch({
@@ -56,7 +56,6 @@ const MemesListWrapper = ({ columnGridCount }: { columnGridCount: number }) => {
     leading: false
   })
 
-  // eslint-disable-next-line no-restricted-syntax
   const filters = React.useMemo(() => {
     return {
       query: debouncedValue,
@@ -139,7 +138,6 @@ export const SearchMemes = () => {
 
   const categories = useSuspenseQuery(getCategoriesListQueryOpts(getLocale()))
 
-  // eslint-disable-next-line no-restricted-syntax
   const currentCategory = React.useMemo(() => {
     return [...getVirtualCategories(), ...categories.data].find((category) => {
       return category.slug === activeSlug

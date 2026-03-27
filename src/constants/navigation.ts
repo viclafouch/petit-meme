@@ -1,5 +1,5 @@
-import { m } from '~/paraglide/messages.js'
 import type { LinkOptions } from '@tanstack/react-router'
+import { m } from '~/paraglide/messages.js'
 
 export type LegalLink = {
   to: LinkOptions['to']

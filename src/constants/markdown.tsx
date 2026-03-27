@@ -1,6 +1,6 @@
-/* eslint-disable jsx-a11y/anchor-has-content */
-/* eslint-disable id-length */
-/* eslint-disable jsx-a11y/heading-has-content */
+/* oxlint-disable jsx-a11y/anchor-has-content */
+/* oxlint-disable jsx-a11y/heading-has-content */
+/* oxlint-disable id-length */
 import type { Components } from 'react-markdown'
 import { Separator } from '~/components/ui/separator'
 import { baseLocale, getLocale } from '~/paraglide/runtime'

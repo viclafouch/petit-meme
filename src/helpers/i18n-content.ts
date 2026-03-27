@@ -172,9 +172,6 @@ const findTranslationWithPriority = <T extends { locale: string }>(
       return match
     }
   }
-
-  // eslint-disable-next-line consistent-return, unicorn/no-useless-undefined -- find-like function returns T | undefined
-  return undefined
 }
 
 type ResolveMemeTranslationParams = {

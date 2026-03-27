@@ -1,6 +1,6 @@
-/* eslint-disable id-length */
-/* eslint-disable @typescript-eslint/no-shadow */
-/* eslint-disable complexity */
+/* oxlint-disable id-length */
+/* oxlint-disable @typescript-eslint/no-shadow */
+/* oxlint-disable complexity */
 import * as React from 'react'
 import {
   FileArchiveIcon,
@@ -11,8 +11,8 @@ import {
   FileTextIcon,
   FileVideoIcon
 } from 'lucide-react'
-import { cn } from '~/lib/utils'
 import { Slot } from '@radix-ui/react-slot'
+import { cn } from '~/lib/utils'
 
 const ROOT_NAME = 'FileUpload'
 const DROPZONE_NAME = 'FileUploadDropzone'
@@ -882,7 +882,7 @@ const FileUploadDropzone = (props: FileUploadDropzoneProps) => {
   const DropzonePrimitive = asChild ? Slot : 'div'
 
   return (
-    // eslint-disable-next-line jsx-a11y/role-supports-aria-props
+    // oxlint-disable-next-line jsx-a11y/role-supports-aria-props
     <DropzonePrimitive
       role="region"
       id={context.dropzoneId}
@@ -975,7 +975,7 @@ const FileUploadList = (props: FileUploadListProps) => {
   const ListPrimitive = asChild ? Slot : 'div'
 
   return (
-    // eslint-disable-next-line jsx-a11y/role-supports-aria-props
+    // oxlint-disable-next-line jsx-a11y/role-supports-aria-props
     <ListPrimitive
       role="list"
       id={context.listId}
@@ -1087,7 +1087,7 @@ const FileUploadItem = (props: FileUploadItemProps) => {
           className
         )}
       >
-        {/* eslint-disable-next-line react/destructuring-assignment */}
+        {/* oxlint-disable-next-line react/destructuring-assignment */}
         {props.children}
         <span id={statusId} className="sr-only">
           {statusText}

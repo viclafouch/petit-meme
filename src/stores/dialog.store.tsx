@@ -1,11 +1,11 @@
 import React from 'react'
 import { create } from 'zustand'
+import { ClientOnly } from '@tanstack/react-router'
 import type { WithDialog } from '~/@types/dialog'
 import { OverlaySpinner } from '~/components/ui/overlay-spinner'
-import { ClientOnly } from '@tanstack/react-router'
 
 type DialogEntry = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line no-explicit-any -- generic lazy component wrapper
   component: React.LazyExoticComponent<React.ComponentType<any>>
 }
 

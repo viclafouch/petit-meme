@@ -1,14 +1,14 @@
 import React from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { AnimatePresence } from 'motion/react'
-import type { MemeListItemParams } from '~/components/Meme/meme-list-item'
+import { useRouteContext } from '@tanstack/react-router'
 import { MemeListItem } from '~/components/Meme/meme-list-item'
+import type { MemeListItemParams } from '~/components/Meme/meme-list-item'
 import { PlayerDialog } from '~/components/Meme/player-dialog'
-import type { MemeWithVideo } from '~/constants/meme'
 import { MEMES_PER_PAGE } from '~/constants/meme'
+import type { MemeWithVideo } from '~/constants/meme'
 import { sendViewEvent } from '~/lib/algolia-insights'
 import * as m from '~/paraglide/messages'
-import { useRouteContext } from '@tanstack/react-router'
 
 type MemeWithHighlight = MemeWithVideo & {
   highlightedTitle?: string
@@ -49,7 +49,7 @@ export const MemesList = ({
     sendViewEvent({ objectIDs: memeIds, authenticatedUserToken })
 
     return () => {}
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // oxlint-disable-next-line react/exhaustive-deps
   }, [memeIdsKey, authenticatedUserToken])
 
   useHotkeys(

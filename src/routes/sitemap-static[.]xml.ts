@@ -1,10 +1,10 @@
+import { createFileRoute } from '@tanstack/react-router'
 import {
   buildLocalizedEntries,
   buildSitemapResponse,
   type SitemapPage,
   wrapUrlset
 } from '~/lib/sitemap'
-import { createFileRoute } from '@tanstack/react-router'
 
 const STATIC_PAGES = [
   { pathname: '/' },

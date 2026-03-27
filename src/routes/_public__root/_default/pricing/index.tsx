@@ -1,4 +1,6 @@
 import React from 'react'
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { createFileRoute, useRouteContext } from '@tanstack/react-router'
 import {
   type BillingPeriod,
   getFreePlan,
@@ -12,8 +14,6 @@ import {
   PageDescription,
   PageHeading
 } from '~/routes/_public__root/-components/page-headers'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { createFileRoute, useRouteContext } from '@tanstack/react-router'
 import { BillingToggle } from './-components/billing-toggle'
 import { getPricingFaqItems } from './-components/constants'
 import { GuaranteeBanner } from './-components/guarantee-banner'

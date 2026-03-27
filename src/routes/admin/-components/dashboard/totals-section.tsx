@@ -1,8 +1,7 @@
 import { Clock, Crown, FileVideo, Users } from 'lucide-react'
 import { getLocale } from '~/paraglide/runtime'
+import type { DashboardTotals } from '~/routes/admin/-server/dashboard'
 import type { IconConfig } from './types'
-
-import type { DashboardTotals } from '~admin/-server/dashboard'
 
 const TOTAL_CONFIGS = [
   {

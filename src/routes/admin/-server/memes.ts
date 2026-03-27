@@ -1,5 +1,9 @@
 import { filesize } from 'filesize'
 import { z } from 'zod'
+import { notFound } from '@tanstack/react-router'
+import { createServerFn } from '@tanstack/react-start'
+import { setResponseStatus } from '@tanstack/react-start/server'
+import { prismaClient } from '~/db'
 import {
   DEFAULT_MEME_TITLE,
   MAX_SIZE_MEME_IN_BYTES,
@@ -9,7 +13,6 @@ import {
   MEMES_SEARCH_SCHEMA
 } from '~/constants/meme'
 import { TWEET_LINK_SCHEMA } from '~/constants/url'
-import { prismaClient } from '~/db'
 import {
   type MemeContentLocale,
   MemeContentLocale as MemeContentLocaleEnum,
@@ -20,7 +23,6 @@ import {
   CONTENT_LOCALE_TO_LOCALE,
   REQUIRED_TRANSLATION_LOCALES
 } from '~/helpers/i18n-content'
-import type { AlgoliaMemeRecord } from '~/lib/algolia'
 import {
   ALGOLIA_ADMIN_SEARCH_PARAMS,
   algoliaSearchClient,
@@ -32,6 +34,7 @@ import {
   safeAlgoliaOp,
   syncMemeToAllIndices
 } from '~/lib/algolia'
+import type { AlgoliaMemeRecord } from '~/lib/algolia'
 import {
   checkWatermarkExists,
   createVideo,
@@ -46,9 +49,6 @@ import { baseLocale } from '~/paraglide/runtime'
 import { logAuditAction } from '~/server/audit'
 import { clearRecommendCache } from '~/server/meme'
 import { adminRequiredMiddleware } from '~/server/user-auth'
-import { notFound } from '@tanstack/react-router'
-import { createServerFn } from '@tanstack/react-start'
-import { setResponseStatus } from '@tanstack/react-start/server'
 
 const ALGOLIA_STATUS_FILTERS = {
   [MemeStatus.PENDING]: 'status:PENDING',
@@ -214,7 +214,6 @@ function buildTranslationUpserts({
     const normalizedKeywords = normalizeKeywords(data.keywords)
 
     return {
-      // eslint-disable-next-line camelcase -- Prisma compound unique key
       where: { memeId_locale: { memeId, locale } },
       update: {
         title: data.title,

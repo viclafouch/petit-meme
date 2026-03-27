@@ -1,3 +1,4 @@
+import { createFileRoute } from '@tanstack/react-router'
 import { prismaClient } from '~/db'
 import { MemeSubmissionStatus } from '~/db/generated/prisma/enums'
 import { CONTACT_EMAIL } from '~/emails/constants'
@@ -6,7 +7,6 @@ import { formatDate } from '~/helpers/date'
 import { cronLogger } from '~/lib/logger'
 import { EMAIL_FROM, getEmailRecipient, resend } from '~/lib/resend'
 import { verifyCronSecret } from '~/utils/cron-auth'
-import { createFileRoute } from '@tanstack/react-router'
 
 const log = cronLogger.child({ job: 'pending-submissions-reminder' })
 

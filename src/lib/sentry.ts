@@ -1,7 +1,7 @@
-import { m } from '~/paraglide/messages.js'
 import type { FeedbackInternalOptions } from '@sentry/core'
 import * as Sentry from '@sentry/tanstackstart-react'
 import { wrapMiddlewaresWithSentry } from '@sentry/tanstackstart-react'
+import { m } from '~/paraglide/messages.js'
 
 type SentryFeature =
   | 'stripe-checkout'
@@ -40,7 +40,7 @@ type SentryFeature =
 
 export const captureWithFeature = (error: unknown, feature: SentryFeature) => {
   if (process.env.NODE_ENV === 'development') {
-    // eslint-disable-next-line no-console -- dev debugging: errors are otherwise only visible in Sentry
+    // oxlint-disable-next-line no-console -- dev debugging: errors are otherwise only visible in Sentry
     console.error(`[${feature}]`, error)
   }
 

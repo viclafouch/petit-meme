@@ -1,6 +1,6 @@
-/* eslint-disable no-console */
-import { MEME_ALGOLIA_INCLUDE } from '~/constants/meme'
 import { prismaClient } from '~/db'
+/* oxlint-disable no-console */
+import { MEME_ALGOLIA_INCLUDE } from '~/constants/meme'
 import {
   replaceAllIndicesWithMemes,
   resolveAlgoliaIndexName

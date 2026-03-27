@@ -1,5 +1,5 @@
-import { MEMES_SEARCH_SCHEMA } from '~/constants/meme'
 import { createFileRoute, redirect } from '@tanstack/react-router'
+import { MEMES_SEARCH_SCHEMA } from '~/constants/meme'
 
 export const Route = createFileRoute('/_public__root/_default/memes/')({
   validateSearch: (search) => {

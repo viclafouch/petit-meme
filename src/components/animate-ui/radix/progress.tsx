@@ -34,7 +34,7 @@ const Progress = ({
       <MotionProgressIndicator
         data-slot="progress-indicator"
         className="h-full w-full flex-1 bg-primary rounded-full"
-        // eslint-disable-next-line id-length
+        // oxlint-disable-next-line id-length
         animate={{ x: `-${100 - (value || 0)}%` }}
         initial={false}
         transition={transition}

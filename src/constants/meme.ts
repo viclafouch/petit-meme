@@ -100,7 +100,7 @@ export const MemeStatusMeta = {
 export const CATEGORY_SLUG_REGEX = /^[\da-z-]{1,60}$/
 
 export const MEMES_SEARCH_SCHEMA = z.object({
-  // eslint-disable-next-line unicorn/no-useless-undefined
+  // oxlint-disable-next-line unicorn/no-useless-undefined
   query: z.string().max(200).optional().catch(undefined),
   page: z.coerce.number().int().min(1).max(1000).optional().catch(1),
   status: z.enum(MemeStatus).optional(),
@@ -113,13 +113,13 @@ export const MEMES_SEARCH_SCHEMA = z.object({
       })
     })
     .optional()
-    // eslint-disable-next-line unicorn/no-useless-undefined -- Zod .catch() requires an argument
+    // oxlint-disable-next-line unicorn/no-useless-undefined -- Zod .catch() requires an argument
     .catch(undefined)
 })
 
 export const MEMES_FILTERS_SCHEMA = z.object({
   ...MEMES_SEARCH_SCHEMA.shape,
-  // eslint-disable-next-line unicorn/no-useless-undefined
+  // oxlint-disable-next-line unicorn/no-useless-undefined
   category: z.string().regex(CATEGORY_SLUG_REGEX).optional().catch(undefined)
 })
 

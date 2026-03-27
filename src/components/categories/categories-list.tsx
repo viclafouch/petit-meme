@@ -1,14 +1,14 @@
 import React from 'react'
 import type { Transition } from 'motion/react'
 import { LayoutGroup, motion, useReducedMotion } from 'motion/react'
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { Link, useParams } from '@tanstack/react-router'
 import { buttonVariants } from '~/components/ui/button'
-import type { MemesFilters } from '~/constants/meme'
 import { getVirtualCategories } from '~/constants/meme'
+import type { MemesFilters } from '~/constants/meme'
 import { getCategoriesListQueryOpts } from '~/lib/queries'
 import { cn } from '~/lib/utils'
 import { getLocale } from '~/paraglide/runtime'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { Link, useParams } from '@tanstack/react-router'
 
 const resetPageSearch = (prevState: MemesFilters) => {
   return {
@@ -33,7 +33,6 @@ export const CategoriesList = () => {
   const prefersReducedMotion = useReducedMotion()
   const [hasInteracted, setHasInteracted] = React.useState(false)
 
-  // eslint-disable-next-line no-restricted-syntax -- stable reference for the merged categories array
   const categories = React.useMemo(() => {
     return [...getVirtualCategories(), ...categoriesQuery.data]
   }, [categoriesQuery.data])

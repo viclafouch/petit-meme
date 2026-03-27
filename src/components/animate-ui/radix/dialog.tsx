@@ -1,4 +1,4 @@
-/* eslint-disable react/no-object-type-as-default-prop */
+/* oxlint-disable react/no-object-type-as-default-prop */
 import * as React from 'react'
 import { X } from 'lucide-react'
 import {
@@ -50,7 +50,7 @@ const Dialog = ({ children, ...props }: DialogProps) => {
   )
 
   return (
-    // eslint-disable-next-line react/jsx-no-constructed-context-values
+    // oxlint-disable-next-line react/jsx-no-constructed-context-values
     <DialogContext.Provider value={{ isOpen }}>
       <DialogPrimitive.Root
         data-slot="dialog"

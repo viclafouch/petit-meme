@@ -1,12 +1,12 @@
-import { StudioError } from '~/constants/error'
+import { createMiddleware, createServerFn } from '@tanstack/react-start'
+import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
+import { waitUntil } from '@vercel/functions'
 import { prismaClient } from '~/db'
+import { StudioError } from '~/constants/error'
 import { auth } from '~/lib/auth'
 import { authLogger } from '~/lib/logger'
 import { wrapMiddlewareWithSentry } from '~/lib/sentry'
 import { getLocale } from '~/paraglide/runtime'
-import { createMiddleware, createServerFn } from '@tanstack/react-start'
-import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
-import { waitUntil } from '@vercel/functions'
 
 export const getAuthUser = createServerFn({ method: 'GET' }).handler(
   async () => {

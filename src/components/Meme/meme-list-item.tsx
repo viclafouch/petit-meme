@@ -8,6 +8,8 @@ import {
   Star
 } from 'lucide-react'
 import { motion } from 'motion/react'
+import { useQuery } from '@tanstack/react-query'
+import { Link, useRouteContext } from '@tanstack/react-router'
 import { BunnyPlayIcon } from '~/components/icon'
 import { MemeLanguageBadge } from '~/components/Meme/meme-language-badge'
 import { MemeVideoThumbnail } from '~/components/Meme/meme-video-thumbnail'
@@ -21,15 +23,13 @@ import type { MemeWithVideo } from '~/constants/meme'
 import { matchIsContentLocaleForeign } from '~/helpers/i18n-content'
 import { useMemeExport } from '~/hooks/use-meme-export'
 import { useToggleBookmark } from '~/hooks/use-toggle-bookmark'
-import type { ConversionEventName } from '~/lib/algolia-insights'
 import { sendClickEvent, sendConversionEvent } from '~/lib/algolia-insights'
+import type { ConversionEventName } from '~/lib/algolia-insights'
 import { getFavoritesMemesQueryOpts } from '~/lib/queries'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
 import { useShowDialog } from '~/stores/dialog.store'
-import { useQuery } from '@tanstack/react-query'
-import { Link, useRouteContext } from '@tanstack/react-router'
 
 export type MemeListItemParams = {
   meme: MemeWithVideo
@@ -201,7 +201,7 @@ export const MemeListItem = React.memo(
               {highlightedTitle ? (
                 <span
                   className="[&>em]:not-italic [&>em]:bg-yellow-200 [&>em]:text-black [&>em]:rounded-sm"
-                  // eslint-disable-next-line react/no-danger
+                  // oxlint-disable-next-line react/no-danger
                   dangerouslySetInnerHTML={{ __html: highlightedTitle }}
                 />
               ) : (

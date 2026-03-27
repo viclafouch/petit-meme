@@ -1,5 +1,5 @@
-import type { StudioTemplate } from '~/constants/studio'
 import { getStudioTemplates, STUDIO_FONTS } from '~/constants/studio'
+import type { StudioTemplate } from '~/constants/studio'
 import { buildVideoImageUrl } from '~/lib/bunny'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'

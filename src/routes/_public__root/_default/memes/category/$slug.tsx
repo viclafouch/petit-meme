@@ -1,10 +1,10 @@
+import { createFileRoute, notFound } from '@tanstack/react-router'
 import { getVirtualCategories, MEMES_SEARCH_SCHEMA } from '~/constants/meme'
 import { getCategoriesListQueryOpts } from '~/lib/queries'
 import { seo } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
 import { SearchMemes } from '~/routes/_public__root/_default/memes/-components/search-memes'
-import { createFileRoute, notFound } from '@tanstack/react-router'
 
 export const Route = createFileRoute(
   '/_public__root/_default/memes/category/$slug'

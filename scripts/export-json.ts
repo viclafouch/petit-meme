@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+/* oxlint-disable no-console */
 import fs from 'node:fs/promises'
 import { prismaClient } from '~/db'
 import { logEnvironmentInfo } from './lib/env-guard'

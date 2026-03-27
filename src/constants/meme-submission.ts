@@ -2,11 +2,11 @@ import type { VariantProps } from 'class-variance-authority'
 import { z } from 'zod'
 import type { badgeVariants } from '~/components/ui/badge'
 import { TWEET_LINK_SCHEMA, YOUTUBE_LINK_SCHEMA } from '~/constants/url'
-import type { MemeSubmissionStatus } from '~/db/generated/prisma/enums'
 import {
   MemeContentLocale,
   MemeSubmissionUrlType
 } from '~/db/generated/prisma/enums'
+import type { MemeSubmissionStatus } from '~/db/generated/prisma/enums'
 
 const detectUrlType = (url: string): MemeSubmissionUrlType | null => {
   if (TWEET_LINK_SCHEMA.safeParse(url).success) {

@@ -1,5 +1,5 @@
-import type { Locale } from '~/paraglide/runtime'
 import { Button, Section, Text } from '@react-email/components'
+import type { Locale } from '~/paraglide/runtime'
 import { BUTTON_CLASS, EmailLayout, SITE_URL } from './email-layout'
 
 const translations = {

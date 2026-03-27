@@ -1,5 +1,7 @@
 import React from 'react'
 import { CreditCard, Settings, Shield, SparklesIcon, Star } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
 import { ThemeSwitcher } from '~/components/animate-ui/theme-switcher'
 import type { NavigationLink } from '~/components/navbar'
 import { Button } from '~/components/ui/button'
@@ -14,12 +16,10 @@ import {
   getActiveSubscriptionQueryOpts,
   getFavoritesMemesQueryOpts
 } from '~/lib/queries'
-import type { SessionUser } from '~/lib/role'
 import { matchIsUserAdmin } from '~/lib/role'
+import type { SessionUser } from '~/lib/role'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
-import { useQuery } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
 
 const ACCOUNT_LINK_CLASS = 'flex items-center gap-3 text-lg font-medium'
 const STICKY_CTA_CLASS =

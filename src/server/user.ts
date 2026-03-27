@@ -1,12 +1,15 @@
 import type { User } from 'better-auth'
 import { z } from 'zod'
+import { notFound } from '@tanstack/react-router'
+import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
+import { setResponseStatus } from '@tanstack/react-start/server'
+import { prismaClient } from '~/db'
 import { StudioError } from '~/constants/error'
 import { MEME_TRANSLATION_SELECT } from '~/constants/meme'
 import {
   FREE_PLAN_MAX_FAVORITES,
   FREE_PLAN_MAX_GENERATIONS
 } from '~/constants/plan'
-import { prismaClient } from '~/db'
 import type { Meme } from '~/db/generated/prisma/client'
 import { resolveMemeTranslation } from '~/helpers/i18n-content'
 import { authLogger } from '~/lib/logger'
@@ -14,9 +17,6 @@ import { matchIsUserAdmin } from '~/lib/role'
 import { getLocale } from '~/paraglide/runtime'
 import { findActiveSubscription, matchIsUserPremium } from '~/server/customer'
 import { authUserRequiredMiddleware } from '~/server/user-auth'
-import { notFound } from '@tanstack/react-router'
-import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
-import { setResponseStatus } from '@tanstack/react-start/server'
 
 export const getFavoritesMemes = createServerFn({ method: 'GET' })
   .middleware([authUserRequiredMiddleware])
@@ -105,14 +105,12 @@ const toggleBookmark = createServerOnlyFn(
   async ({ userId, memeId, isAdmin }: ToggleBookmarkParams) => {
     return prismaClient.$transaction(async (tx) => {
       const bookmark = await tx.userBookmark.findUnique({
-        // eslint-disable-next-line camelcase
         where: { userId_memeId: { userId, memeId } },
         select: { id: true }
       })
 
       if (bookmark) {
         await tx.userBookmark.delete({
-          // eslint-disable-next-line camelcase
           where: { userId_memeId: { userId, memeId } }
         })
 

@@ -1,17 +1,17 @@
+import { createClientOnlyFn, createIsomorphicFn } from '@tanstack/react-start'
+import { getCookie } from '@tanstack/react-start/server'
+import {
+  matchIsAnalyticsConsented,
+  parseConsentCookie
+} from '~/components/cookie-consent'
 import type {
   CategoryConfig,
   ConsentState,
   CookieConsentConfig
 } from '~/components/cookie-consent'
-import {
-  matchIsAnalyticsConsented,
-  parseConsentCookie
-} from '~/components/cookie-consent'
 import { CONSENT_COOKIE_KEY } from '~/constants/cookie'
 import { readClientCookie } from '~/helpers/cookie'
 import { m } from '~/paraglide/messages.js'
-import { createClientOnlyFn, createIsomorphicFn } from '@tanstack/react-start'
-import { getCookie } from '@tanstack/react-start/server'
 
 const CONSENT_VERSION = '1.0.0'
 

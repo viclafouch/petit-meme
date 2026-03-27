@@ -1,5 +1,8 @@
 import React from 'react'
 import { AlertTriangleIcon } from 'lucide-react'
+import * as Sentry from '@sentry/tanstackstart-react'
+import { useQueryErrorResetBoundary } from '@tanstack/react-query'
+import { Link, useRouter } from '@tanstack/react-router'
 import {
   Accordion,
   AccordionContent,
@@ -10,9 +13,6 @@ import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
 import { Button } from '~/components/ui/button'
 import { IS_PRODUCTION } from '~/constants/env'
 import { m } from '~/paraglide/messages.js'
-import * as Sentry from '@sentry/tanstackstart-react'
-import { useQueryErrorResetBoundary } from '@tanstack/react-query'
-import { Link, useRouter } from '@tanstack/react-router'
 
 export const ErrorComponent = ({ error }: { error: Error }) => {
   const router = useRouter()

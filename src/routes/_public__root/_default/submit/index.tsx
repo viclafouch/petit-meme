@@ -1,4 +1,6 @@
 import { LogIn } from 'lucide-react'
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { createFileRoute, useRouteContext } from '@tanstack/react-router'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
 import { MAX_PENDING_SUBMISSIONS } from '~/constants/meme-submission'
@@ -10,8 +12,6 @@ import {
   PageHeading
 } from '~/routes/_public__root/-components/page-headers'
 import { useShowDialog } from '~/stores/dialog.store'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { createFileRoute, useRouteContext } from '@tanstack/react-router'
 import { SubmissionForm } from './-components/submission-form'
 import { SubmissionHistory } from './-components/submission-history'
 import { SubmissionRules } from './-components/submission-rules'

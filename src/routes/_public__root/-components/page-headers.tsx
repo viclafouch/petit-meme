@@ -1,7 +1,7 @@
 import React from 'react'
-import { cn } from '~/lib/utils'
 import type { LinkOptions } from '@tanstack/react-router'
 import { Link } from '@tanstack/react-router'
+import { cn } from '~/lib/utils'
 
 type PageContainerProps = {
   as?: React.ElementType

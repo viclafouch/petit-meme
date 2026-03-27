@@ -1,5 +1,13 @@
-import { z } from 'zod/v3'
 import zodToJsonSchema from 'zod-to-json-schema'
+import { z } from 'zod/v3'
+import {
+  createPartFromUri,
+  createUserContent,
+  FileState,
+  GoogleGenAI
+} from '@google/genai'
+import { createServerFn } from '@tanstack/react-start'
+import { setResponseStatus } from '@tanstack/react-start/server'
 import { prismaClient } from '~/db'
 import { serverEnv } from '~/env/server'
 import { getErrorMessage } from '~/helpers/error'
@@ -10,14 +18,6 @@ import { adminLogger } from '~/lib/logger'
 import { captureWithFeature } from '~/lib/sentry'
 import { type Locale, locales } from '~/paraglide/runtime'
 import { adminRequiredMiddleware } from '~/server/user-auth'
-import {
-  createPartFromUri,
-  createUserContent,
-  FileState,
-  GoogleGenAI
-} from '@google/genai'
-import { createServerFn } from '@tanstack/react-start'
-import { setResponseStatus } from '@tanstack/react-start/server'
 
 const translationSchema = z.object({
   description: z
@@ -32,14 +32,14 @@ const ai = new GoogleGenAI({ apiKey: serverEnv.GEMINI_API_KEY })
 
 const GEMINI_MODEL = 'gemini-3-flash-preview'
 const GEMINI_TIMEOUT_MS = 45_000
-const GEMINI_FILE_POLL_INTERVAL_MS = 2_000
+const GEMINI_FILE_POLL_INTERVAL_MS = 2000
 const GEMINI_FILE_MAX_RETRIES = 15
 
 async function waitForFileActive(fileName: string) {
   let retries = 0
 
   while (retries < GEMINI_FILE_MAX_RETRIES) {
-    // eslint-disable-next-line no-await-in-loop -- sequential polling required
+    // oxlint-disable-next-line no-await-in-loop -- sequential polling required
     const file = await ai.files.get({ name: fileName })
 
     if (file.state === FileState.ACTIVE) {
@@ -52,7 +52,7 @@ async function waitForFileActive(fileName: string) {
 
     retries += 1
 
-    // eslint-disable-next-line no-await-in-loop -- intentional delay between polls
+    // oxlint-disable-next-line no-await-in-loop -- intentional delay between polls
     await new Promise((resolve) => {
       setTimeout(resolve, GEMINI_FILE_POLL_INTERVAL_MS)
     })

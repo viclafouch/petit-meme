@@ -1,5 +1,4 @@
 import React from 'react'
-import type { Locale } from '~/paraglide/runtime'
 import {
   Body,
   Column,
@@ -15,6 +14,7 @@ import {
   Tailwind,
   Text
 } from '@react-email/components'
+import type { Locale } from '~/paraglide/runtime'
 import {
   BUTTON_CLASS,
   CONTACT_EMAIL,

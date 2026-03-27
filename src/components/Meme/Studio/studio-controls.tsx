@@ -11,6 +11,13 @@ import {
 } from '~/components/ui/select'
 import { Separator } from '~/components/ui/separator'
 import { ToggleGroup, ToggleGroupItem } from '~/components/ui/toggle-group'
+import {
+  getStudioBandColors,
+  getStudioColors,
+  getStudioFontSizes,
+  STUDIO_FONTS,
+  STUDIO_TEXT_MAX_LENGTH
+} from '~/constants/studio'
 import type {
   StudioBandColorValue,
   StudioColorEntry,
@@ -19,13 +26,6 @@ import type {
   StudioFontSizeValue,
   StudioSettings,
   StudioTextPosition
-} from '~/constants/studio'
-import {
-  getStudioBandColors,
-  getStudioColors,
-  getStudioFontSizes,
-  STUDIO_FONTS,
-  STUDIO_TEXT_MAX_LENGTH
 } from '~/constants/studio'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'

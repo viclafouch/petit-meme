@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/filename-case */
 import React from 'react'
 import {
   ArrowLeft,
@@ -10,6 +9,13 @@ import {
   Shuffle
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useMutation, useQuery, useSuspenseQuery } from '@tanstack/react-query'
+import {
+  createFileRoute,
+  Link,
+  useLinkProps,
+  useRouteContext
+} from '@tanstack/react-router'
 import { MemeLanguageBadge } from '~/components/Meme/meme-language-badge'
 import { MemeVideoPlayer } from '~/components/Meme/meme-video-player'
 import { MemesList } from '~/components/Meme/memes-list'
@@ -33,13 +39,6 @@ import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
 import { getRandomMeme, trackMemeAction } from '~/server/meme'
-import { useMutation, useQuery, useSuspenseQuery } from '@tanstack/react-query'
-import {
-  createFileRoute,
-  Link,
-  useLinkProps,
-  useRouteContext
-} from '@tanstack/react-router'
 
 type MemeInfoParams = {
   meme: Pick<
@@ -133,7 +132,7 @@ const RouteComponent = () => {
     videoRef,
     ratio: 0.3,
     minMs: 2500,
-    maxMs: 12000
+    maxMs: 12_000
   })
 
   const pauseVideo = () => {
@@ -163,7 +162,6 @@ const RouteComponent = () => {
     }
   })
 
-  // eslint-disable-next-line no-restricted-syntax
   const allTags = React.useMemo(() => {
     return [
       ...new Set([

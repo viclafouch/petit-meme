@@ -1,4 +1,6 @@
 import { ArrowRight } from 'lucide-react'
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
 import { Badge } from '~/components/ui/badge'
 import { Separator } from '~/components/ui/separator'
 import { SUBMISSION_STATUS_BADGE_VARIANT } from '~/constants/meme-submission'
@@ -8,8 +10,6 @@ import { truncateUrl } from '~/helpers/format'
 import { getUserSubmissionsQueryOpts } from '~/lib/queries'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
 
 const STATUS_LABELS = {
   PENDING: () => {

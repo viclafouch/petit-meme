@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+/* oxlint-disable no-console */
 import { execFile } from 'node:child_process'
 import { createWriteStream } from 'node:fs'
 import fs from 'node:fs/promises'
@@ -7,11 +7,11 @@ import path from 'node:path'
 import { Readable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
 import { promisify } from 'node:util'
+import { prismaClient } from '~/db'
 import {
   WATERMARK_ASSET_PATH,
   WATERMARK_FFMPEG_FILTER
 } from '~/constants/watermark'
-import { prismaClient } from '~/db'
 import type { Prisma } from '~/db/generated/prisma/client'
 import { MemeStatus } from '~/db/generated/prisma/enums'
 import { serverEnv } from '~/env/server'
@@ -189,7 +189,7 @@ const processWithConcurrency = async <T, TResult extends string>(
       const item = items[index]
 
       if (item) {
-        // eslint-disable-next-line no-await-in-loop -- intentional sequential processing within each concurrent worker
+        // oxlint-disable-next-line no-await-in-loop -- intentional sequential processing within each concurrent worker
         results[index] = await fn(item, index)
       }
     }

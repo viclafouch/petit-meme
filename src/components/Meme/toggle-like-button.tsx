@@ -1,14 +1,14 @@
 import React from 'react'
 import type { User } from 'better-auth'
 import { Star } from 'lucide-react'
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { useRouteContext } from '@tanstack/react-router'
 import { IconButtonStars } from '~/components/animate-ui/buttons/icon-button-stars'
 import type { MemeWithVideo } from '~/constants/meme'
 import { useToggleBookmark } from '~/hooks/use-toggle-bookmark'
 import { getFavoritesMemesQueryOpts } from '~/lib/queries'
 import { m } from '~/paraglide/messages.js'
 import { useShowDialog } from '~/stores/dialog.store'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { useRouteContext } from '@tanstack/react-router'
 
 type ToggleLikeButtonProps = {
   meme: MemeWithVideo

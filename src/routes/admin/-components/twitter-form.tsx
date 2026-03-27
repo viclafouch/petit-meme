@@ -1,15 +1,14 @@
 import { toast } from 'sonner'
 import { z } from 'zod'
+import { formOptions, useForm } from '@tanstack/react-form'
+import { useMutation } from '@tanstack/react-query'
 import { ClipboardPasteInput } from '~/components/clipboard-paste-input'
 import { FormFooter } from '~/components/form-footer'
 import { FormItem, FormLabel, FormMessage } from '~/components/ui/form'
 import { TWEET_LINK_SCHEMA } from '~/constants/url'
 import { getErrorMessage } from '~/helpers/error'
 import { getFieldErrorMessage } from '~/lib/utils'
-import { formOptions, useForm } from '@tanstack/react-form'
-import { useMutation } from '@tanstack/react-query'
-
-import { createMemeFromTwitterUrl } from '~admin/-server/memes'
+import { createMemeFromTwitterUrl } from '~/routes/admin/-server/memes'
 
 const formSchema = z.object({ url: TWEET_LINK_SCHEMA })
 

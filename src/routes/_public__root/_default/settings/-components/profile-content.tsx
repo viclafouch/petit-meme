@@ -2,6 +2,8 @@ import React from 'react'
 import type { User } from 'better-auth'
 import { CreditCard, Download, Key, Stars, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useMutation } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
 import { Button } from '~/components/ui/button'
 import {
   Card,
@@ -28,8 +30,6 @@ import { getLocale } from '~/paraglide/runtime'
 import type { ActiveSubscription } from '~/server/customer'
 import { exportUserData } from '~/server/user'
 import { downloadBlob } from '~/utils/download'
-import { useMutation } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
 
 const SETTINGS_ROW_CLASS_NAME =
   'flex md:items-center justify-between gap-6 flex-col md:flex-row'

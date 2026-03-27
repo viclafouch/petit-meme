@@ -9,18 +9,18 @@ const logoPositions = [
   {
     x: '-left-30',
     y: 'top-1/3 -translate-y-1/3',
-    duration: 12000,
+    duration: 12_000,
     delay: 2000
   },
-  { x: 'left-0', y: 'bottom-0', duration: 10500, delay: 4000 },
+  { x: 'left-0', y: 'bottom-0', duration: 10_500, delay: 4000 },
   { x: 'right-0', y: 'top-0', duration: 9500, delay: 1000 },
   {
     x: '-right-30',
     y: 'top-1/3 -translate-y-1/3',
-    duration: 11000,
+    duration: 11_000,
     delay: 3000
   },
-  { x: 'right-0', y: 'bottom-0', duration: 13000, delay: 5000 }
+  { x: 'right-0', y: 'bottom-0', duration: 13_000, delay: 5000 }
 ] as const satisfies {
   x: string
   y: string
@@ -72,11 +72,9 @@ export const FloatingLogos = ({ variants }: { variants: Variants }) => {
               }
               transition={{
                 repeat: Infinity,
-                // eslint-disable-next-line react-hooks/purity
                 duration: 4 + Math.random() * 4,
                 ease: 'easeInOut',
                 times: [0, 0.5, 1],
-                // eslint-disable-next-line react-hooks/purity
                 delay: Math.random() * 2
               }}
             >

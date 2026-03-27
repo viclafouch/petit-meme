@@ -1,6 +1,8 @@
 import { ErrorBoundary } from 'react-error-boundary'
 import type { Variants } from 'motion/react'
 import { motion, useReducedMotion } from 'motion/react'
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
 import { buttonVariants } from '~/components/ui/button'
 import { TextEffect } from '~/components/ui/text-effect'
 import { NEWS_CATEGORY_SLUG } from '~/constants/meme'
@@ -8,8 +10,6 @@ import { useIsMobile } from '~/hooks/use-mobile'
 import { getRecentCountMemesQueryOpts } from '~/lib/queries'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
 import { FloatingLogos } from './floating-logo'
 import {
   Announcement,

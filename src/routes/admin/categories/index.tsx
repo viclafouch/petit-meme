@@ -1,12 +1,4 @@
 import { Plus } from 'lucide-react'
-import { PageHeader } from '~/components/page-header'
-import { Badge } from '~/components/ui/badge'
-import { Container } from '~/components/ui/container'
-import { formatDate } from '~/helpers/date'
-import { baseLocale, getLocale } from '~/paraglide/runtime'
-import { AddCategoryButton } from '~/routes/admin/categories/-components/add-category-button'
-import { CategoryDropdown } from '~/routes/admin/categories/-components/category-dropdown'
-import { type EnrichedCategory, getCategories } from '~/server/categories'
 import { createFileRoute } from '@tanstack/react-router'
 import {
   createColumnHelper,
@@ -15,8 +7,19 @@ import {
   getSortedRowModel,
   useReactTable
 } from '@tanstack/react-table'
-
-import { AdminTable, getRowId, PAGE_SIZE } from '~admin/-components/admin-table'
+import { PageHeader } from '~/components/page-header'
+import { Badge } from '~/components/ui/badge'
+import { Container } from '~/components/ui/container'
+import { formatDate } from '~/helpers/date'
+import { baseLocale, getLocale } from '~/paraglide/runtime'
+import {
+  AdminTable,
+  getRowId,
+  PAGE_SIZE
+} from '~/routes/admin/-components/admin-table'
+import { AddCategoryButton } from '~/routes/admin/categories/-components/add-category-button'
+import { CategoryDropdown } from '~/routes/admin/categories/-components/category-dropdown'
+import { type EnrichedCategory, getCategories } from '~/server/categories'
 
 const columnHelper = createColumnHelper<EnrichedCategory>()
 
@@ -86,7 +89,6 @@ const columns = [
 const RouteComponent = () => {
   const { categories } = Route.useLoaderData()
 
-  // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table v8 is not compatible with React Compiler (https://github.com/TanStack/table/issues/5903)
   const table = useReactTable({
     data: categories,
     columns,

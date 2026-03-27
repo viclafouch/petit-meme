@@ -1,4 +1,4 @@
-/* eslint-disable id-length */
+/* oxlint-disable id-length */
 import * as React from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Button } from '~/components/ui/button'

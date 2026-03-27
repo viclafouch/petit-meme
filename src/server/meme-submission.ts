@@ -1,10 +1,12 @@
+import { createServerFn } from '@tanstack/react-start'
+import { setResponseStatus } from '@tanstack/react-start/server'
+import { prismaClient } from '~/db'
 import { StudioError } from '~/constants/error'
 import {
   CREATE_MEME_SUBMISSION_SCHEMA,
   MAX_PENDING_SUBMISSIONS
 } from '~/constants/meme-submission'
 import { RATE_LIMIT_SUBMIT_MEME } from '~/constants/rate-limit'
-import { prismaClient } from '~/db'
 import { Prisma } from '~/db/generated/prisma/client'
 import {
   MemeSubmissionStatus,
@@ -15,8 +17,6 @@ import { getTweetByUrl, TweetNoVideoError } from '~/lib/react-tweet'
 import { captureWithFeature } from '~/lib/sentry'
 import { createUserRateLimitMiddleware } from '~/server/rate-limit'
 import { authUserRequiredMiddleware } from '~/server/user-auth'
-import { createServerFn } from '@tanstack/react-start'
-import { setResponseStatus } from '@tanstack/react-start/server'
 
 const SUBMISSION_USER_SELECT = {
   id: true,

@@ -2,6 +2,9 @@ import type { User } from 'better-auth'
 import { CircleAlert, MessageCircleWarning } from 'lucide-react'
 import { toast } from 'sonner'
 import { z } from 'zod'
+import { formOptions, useForm } from '@tanstack/react-form'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useRouter } from '@tanstack/react-router'
 import type { WithDialog } from '~/@types/dialog'
 import {
   Dialog,
@@ -35,9 +38,6 @@ import {
 import { captureWithFeature } from '~/lib/sentry'
 import { getFieldErrorMessage } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
-import { formOptions, useForm } from '@tanstack/react-form'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useRouter } from '@tanstack/react-router'
 
 const deleteAccountSchema = z.object({
   currentPassword: z.string().nonempty()

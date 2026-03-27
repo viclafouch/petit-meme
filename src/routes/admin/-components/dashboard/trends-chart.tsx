@@ -8,18 +8,20 @@ import {
   CardHeader,
   CardTitle
 } from '~/components/ui/card'
-import type { ChartConfig } from '~/components/ui/chart'
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent
 } from '~/components/ui/chart'
+import type { ChartConfig } from '~/components/ui/chart'
 import { formatDate } from '~/helpers/date'
-import type { Locale } from '~/paraglide/runtime'
 import { getLocale } from '~/paraglide/runtime'
+import type { Locale } from '~/paraglide/runtime'
+import type {
+  ChartDataPoint,
+  DashboardPeriod
+} from '~/routes/admin/-server/dashboard'
 import type { IconConfig } from './types'
-
-import type { ChartDataPoint, DashboardPeriod } from '~admin/-server/dashboard'
 
 type MetricKey = keyof Omit<ChartDataPoint, 'date'>
 

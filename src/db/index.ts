@@ -1,5 +1,5 @@
-import { IS_PRODUCTION } from '~/constants/env'
 import { PrismaPg } from '@prisma/adapter-pg'
+import { IS_PRODUCTION } from '~/constants/env'
 import { PrismaClient } from './generated/prisma/client'
 
 const prismaClientSingleton = () => {
@@ -7,12 +7,13 @@ const prismaClientSingleton = () => {
     connectionString: process.env.DATABASE_URL,
     max: 5,
     idleTimeoutMillis: 10_000,
-    connectionTimeoutMillis: 5_000
+    connectionTimeoutMillis: 5000
   })
 
   return new PrismaClient({ adapter })
 }
 
+// oxlint-disable-next-line no-shadow-restricted-names -- standard Prisma singleton pattern
 declare const globalThis: {
   prismaGlobal: ReturnType<typeof prismaClientSingleton>
 } & typeof global

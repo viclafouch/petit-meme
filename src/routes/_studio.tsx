@@ -1,5 +1,5 @@
-import { StarsBackground } from '~/components/animate-ui/backgrounds/stars'
 import { createFileRoute, Outlet } from '@tanstack/react-router'
+import { StarsBackground } from '~/components/animate-ui/backgrounds/stars'
 
 const RouteComponent = () => {
   return (

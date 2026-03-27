@@ -1,6 +1,7 @@
 import React from 'react'
 import { X } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { ClientOnly } from '@tanstack/react-router'
 import { AnimatedBanner } from '~/components/custom/animated-banner'
 import { FLAG_ICON_CLASS, LOCALE_FLAGS } from '~/components/icon/flags'
 import { Button } from '~/components/ui/button'
@@ -9,7 +10,6 @@ import { dismissLocaleBanner } from '~/lib/locale-banner'
 import { m } from '~/paraglide/messages.js'
 import { getLocale, locales, setLocale } from '~/paraglide/runtime'
 import { updateUserLocale } from '~/server/user-locale'
-import { ClientOnly } from '@tanstack/react-router'
 
 type LocaleBannerProps = {
   isInitiallyDismissed: boolean

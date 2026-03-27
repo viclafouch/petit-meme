@@ -1,6 +1,9 @@
 import React from 'react'
 import { EllipsisVertical } from 'lucide-react'
 import { toast } from 'sonner'
+import * as Sentry from '@sentry/tanstackstart-react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useRouter } from '@tanstack/react-router'
 import { ConfirmAlertDialog } from '~/components/confirm-alert-dialog'
 import { Button } from '~/components/ui/button'
 import {
@@ -20,9 +23,6 @@ import { getErrorMessage } from '~/helpers/error'
 import { getCategoriesListQueryOpts } from '~/lib/queries'
 import { CategoryForm } from '~/routes/admin/categories/-components/category-form'
 import { deleteCategory, type EnrichedCategory } from '~/server/categories'
-import * as Sentry from '@sentry/tanstackstart-react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useRouter } from '@tanstack/react-router'
 
 type CategoryDropdownProps = {
   category: EnrichedCategory

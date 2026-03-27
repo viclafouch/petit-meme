@@ -1,3 +1,4 @@
+import { createServerOnlyFn } from '@tanstack/react-start'
 import { prismaClient } from '~/db'
 import { emailSubjects } from '~/emails/subjects'
 import { authLogger } from '~/lib/logger'
@@ -5,7 +6,6 @@ import { sendEmailAsync } from '~/lib/resend'
 import { captureWithFeature } from '~/lib/sentry'
 import { stripeClient } from '~/lib/stripe'
 import type { Locale } from '~/paraglide/runtime'
-import { createServerOnlyFn } from '@tanstack/react-start'
 import AccountDeletedEmail from '../emails/account-deleted-email'
 
 type CleanupUserDataParams = {

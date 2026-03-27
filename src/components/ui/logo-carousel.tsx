@@ -1,4 +1,4 @@
-/* eslint-disable id-length */
+/* oxlint-disable id-length */
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 
@@ -14,7 +14,7 @@ export type Logo = {
 const shuffleArray = <T,>(array: T[]): T[] => {
   const shuffled = [...array]
 
-  // eslint-disable-next-line no-plusplus
+  // oxlint-disable-next-line no-plusplus
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
     ;[shuffled[i], shuffled[j]] = [shuffled[j]!, shuffled[i]!]

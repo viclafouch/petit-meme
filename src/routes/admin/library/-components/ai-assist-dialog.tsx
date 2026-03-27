@@ -1,6 +1,7 @@
 import React from 'react'
 import { Stars, X } from 'lucide-react'
 import { toast } from 'sonner'
+import { useMutation } from '@tanstack/react-query'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import {
@@ -29,7 +30,6 @@ import {
   translateMemeContent
 } from '~/server/ai'
 import { removeDuplicates } from '~/utils/array'
-import { useMutation } from '@tanstack/react-query'
 
 type AiAssistDialogParams = {
   memeId: Meme['id']

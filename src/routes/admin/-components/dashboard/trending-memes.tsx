@@ -7,12 +7,11 @@ import {
   Sparkles,
   TrendingUp
 } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
 import { buildVideoImageUrl } from '~/lib/bunny'
 import { cn } from '~/lib/utils'
-import { Link } from '@tanstack/react-router'
+import type { TrendingMeme } from '~/routes/admin/-server/dashboard'
 import type { IconConfig } from './types'
-
-import type { TrendingMeme } from '~admin/-server/dashboard'
 
 type SignalKey = keyof Omit<TrendingMeme, 'meme' | 'rank' | 'score'>
 

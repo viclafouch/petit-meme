@@ -1,8 +1,8 @@
 import { hydrateRoot } from 'react-dom/client'
 import { z } from 'zod'
-import type { Locale } from '~/paraglide/runtime'
-import { getLocale } from '~/paraglide/runtime'
 import { RouterClient } from '@tanstack/react-router/ssr/client'
+import { getLocale } from '~/paraglide/runtime'
+import type { Locale } from '~/paraglide/runtime'
 import { getRouter } from './router'
 
 const ZOD_LOCALE_IMPORTS = {

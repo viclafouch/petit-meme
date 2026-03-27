@@ -1,4 +1,12 @@
 import { Crown, Mail, Minus } from 'lucide-react'
+import { createFileRoute } from '@tanstack/react-router'
+import {
+  createColumnHelper,
+  getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable
+} from '@tanstack/react-table'
 import { XTwitterIcon } from '~/components/icon'
 import { PageHeader } from '~/components/page-header'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
@@ -12,20 +20,15 @@ import {
 import { differenceInMonths, formatDate } from '~/helpers/date'
 import { getUserInitials } from '~/helpers/format'
 import { getLocale } from '~/paraglide/runtime'
-import { createFileRoute } from '@tanstack/react-router'
 import {
-  createColumnHelper,
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable
-} from '@tanstack/react-table'
+  AdminTable,
+  getRowId,
+  PAGE_SIZE
+} from '~/routes/admin/-components/admin-table'
+import { RelativeDateTooltip } from '~/routes/admin/-components/relative-date-tooltip'
+import type { EnrichedUser } from '~/routes/admin/-server/users'
+import { getListUsers } from '~/routes/admin/-server/users'
 import { UserActionsCell } from './-components/user-actions-cell'
-
-import { AdminTable, getRowId, PAGE_SIZE } from '~admin/-components/admin-table'
-import { RelativeDateTooltip } from '~admin/-components/relative-date-tooltip'
-import type { EnrichedUser } from '~admin/-server/users'
-import { getListUsers } from '~admin/-server/users'
 
 type UserCellParams = {
   user: EnrichedUser
@@ -230,7 +233,6 @@ const columns = [
 const RouteComponent = () => {
   const { users } = Route.useLoaderData()
 
-  // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table v8 is not compatible with React Compiler (https://github.com/TanStack/table/issues/5903)
   const table = useReactTable({
     data: users,
     columns,

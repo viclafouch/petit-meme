@@ -1,8 +1,8 @@
 import React from 'react'
-import { ONE_YEAR_IN_SECONDS } from '~/constants/time'
-import { createClientCookie, readClientCookie } from '~/helpers/cookie'
 import { createIsomorphicFn } from '@tanstack/react-start'
 import { getCookie } from '@tanstack/react-start/server'
+import { ONE_YEAR_IN_SECONDS } from '~/constants/time'
+import { createClientCookie, readClientCookie } from '~/helpers/cookie'
 
 export type Theme = 'light' | 'dark'
 
@@ -46,7 +46,6 @@ export const ThemeProvider = ({
     root.classList.add(theme)
   }, [theme])
 
-  // eslint-disable-next-line no-restricted-syntax
   const handleSetTheme = React.useCallback(
     (newTheme: Theme) => {
       setTheme(newTheme)
@@ -57,7 +56,6 @@ export const ThemeProvider = ({
     [setTheme]
   )
 
-  // eslint-disable-next-line no-restricted-syntax
   const value = React.useMemo(() => {
     return { theme, setTheme: handleSetTheme }
   }, [theme, handleSetTheme])

@@ -1,12 +1,12 @@
-/* eslint-disable no-await-in-loop */
+/* oxlint-disable no-await-in-loop */
 import { z } from 'zod'
+import { createFileRoute } from '@tanstack/react-router'
 import { prismaClient } from '~/db'
 import { clientEnv } from '~/env/client'
 import { getBunnyHeaders } from '~/lib/bunny'
 import { cronLogger } from '~/lib/logger'
 import { fetchWithZod } from '~/lib/utils'
 import { verifyCronSecret } from '~/utils/cron-auth'
-import { createFileRoute } from '@tanstack/react-router'
 
 const log = cronLogger.child({ job: 'sync-bunny-titles' })
 

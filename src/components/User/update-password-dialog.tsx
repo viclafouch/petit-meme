@@ -1,6 +1,8 @@
 import type { User } from 'better-auth'
 import { CircleAlert } from 'lucide-react'
 import { z } from 'zod'
+import { formOptions, useForm } from '@tanstack/react-form'
+import { useMutation } from '@tanstack/react-query'
 import type { WithDialog } from '~/@types/dialog'
 import {
   Dialog,
@@ -28,8 +30,6 @@ import { authClient } from '~/lib/auth-client'
 import { captureWithFeature } from '~/lib/sentry'
 import { getFieldErrorMessage } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
-import { formOptions, useForm } from '@tanstack/react-form'
-import { useMutation } from '@tanstack/react-query'
 
 const getUpdatePasswordSchema = () => {
   return z

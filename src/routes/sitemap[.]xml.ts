@@ -1,6 +1,6 @@
+import { createFileRoute } from '@tanstack/react-router'
 import { websiteOrigin } from '~/lib/seo'
 import { buildSitemapResponse } from '~/lib/sitemap'
-import { createFileRoute } from '@tanstack/react-router'
 
 const SUB_SITEMAPS = [
   'sitemap-static.xml',

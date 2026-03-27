@@ -1,6 +1,6 @@
-/* eslint-disable id-length */
-/* eslint-disable @typescript-eslint/no-misused-spread */
-/* eslint-disable complexity */
+/* oxlint-disable id-length */
+/* oxlint-disable @typescript-eslint/no-misused-spread */
+/* oxlint-disable complexity */
 import React from 'react'
 import type {
   TargetAndTransition,

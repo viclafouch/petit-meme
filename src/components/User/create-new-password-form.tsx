@@ -1,5 +1,8 @@
 import { CircleAlert } from 'lucide-react'
 import { toast } from 'sonner'
+import { formOptions, useForm } from '@tanstack/react-form'
+import { useMutation } from '@tanstack/react-query'
+import { useRouter } from '@tanstack/react-router'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import {
   FormControl,
@@ -19,9 +22,6 @@ import { authClient } from '~/lib/auth-client'
 import { captureWithFeature } from '~/lib/sentry'
 import { getFieldErrorMessage } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
-import { formOptions, useForm } from '@tanstack/react-form'
-import { useMutation } from '@tanstack/react-query'
-import { useRouter } from '@tanstack/react-router'
 
 const getCreateNewPasswordFormOpts = () => {
   return formOptions({

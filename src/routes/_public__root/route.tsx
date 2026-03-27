@@ -1,4 +1,5 @@
 import React from 'react'
+import { createFileRoute, Outlet } from '@tanstack/react-router'
 import { StarsBackground } from '~/components/animate-ui/backgrounds/stars'
 import { Footer } from '~/components/footer'
 import { LocaleBanner } from '~/components/locale-banner'
@@ -7,10 +8,8 @@ import { SentryFeedbackWidget } from '~/components/sentry-feedback-widget'
 import { getLocaleBannerDismissed } from '~/lib/locale-banner'
 import { getMemesListQueryOpts } from '~/lib/queries'
 import { m } from '~/paraglide/messages.js'
-import { createFileRoute, Outlet } from '@tanstack/react-router'
 
 const RouteComponent = () => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { _localeBannerDismissed } = Route.useLoaderData()
 
   return (

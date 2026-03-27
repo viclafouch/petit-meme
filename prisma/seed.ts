@@ -1,8 +1,8 @@
-/* eslint-disable no-console */
+/* oxlint-disable no-console */
 import { hashPassword } from 'better-auth/crypto'
 import { z } from 'zod'
-import { MEME_ALGOLIA_INCLUDE } from '~/constants/meme'
 import { prismaClient } from '~/db'
+import { MEME_ALGOLIA_INCLUDE } from '~/constants/meme'
 import { clientEnv } from '~/env/client'
 import {
   algoliaAdminClient,
@@ -100,7 +100,7 @@ const clearStripe = async () => {
   const customers = await stripeClient.customers.list()
 
   for (const customer of customers.data) {
-    // eslint-disable-next-line no-await-in-loop -- sequential deletion required by Stripe API
+    // oxlint-disable-next-line no-await-in-loop -- sequential deletion required by Stripe API
     await stripeClient.customers.del(customer.id)
   }
 
@@ -119,7 +119,7 @@ const clearBunny = async () => {
   )
 
   for (const bunnyVideo of items) {
-    // eslint-disable-next-line no-await-in-loop -- sequential deletion required by Bunny API
+    // oxlint-disable-next-line no-await-in-loop -- sequential deletion required by Bunny API
     await deleteVideo(bunnyVideo.guid)
   }
 
@@ -130,7 +130,7 @@ const seed = async () => {
   logEnvironmentInfo()
 
   await new Promise((resolve) => {
-    // eslint-disable-next-line no-promise-executor-return
+    // oxlint-disable-next-line no-promise-executor-return
     return setTimeout(resolve, 5000)
   })
 
@@ -142,7 +142,7 @@ const seed = async () => {
   console.log(`Creating ${mocks.categories.length} categories...`)
 
   for (const category of mocks.categories) {
-    // eslint-disable-next-line no-await-in-loop -- sequential creation to preserve ordering
+    // oxlint-disable-next-line no-await-in-loop -- sequential creation to preserve ordering
     await prismaClient.category.create({
       data: category
     })
@@ -151,7 +151,7 @@ const seed = async () => {
   console.log(`Creating and uploading ${mocks.memes.length} memes...`)
 
   for (const meme of mocks.memes) {
-    // eslint-disable-next-line no-await-in-loop -- sequential upload to avoid rate limiting
+    // oxlint-disable-next-line no-await-in-loop -- sequential upload to avoid rate limiting
     await createMemeFromTwitterUrl(meme.tweetUrl, meme.title)
   }
 

@@ -7,6 +7,8 @@ import {
   Users2,
   Video
 } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
 import { XTwitterIcon } from '~/components/icon'
 import {
   Sidebar,
@@ -20,10 +22,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem
 } from '~/components/ui/sidebar'
-import { useQuery } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
-
-import { getAdminPendingSubmissionCountQueryOpts } from '~admin/-lib/queries'
+import { getAdminPendingSubmissionCountQueryOpts } from '~/routes/admin/-lib/queries'
 
 export const AdminSidebar = ({
   ...props

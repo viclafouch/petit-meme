@@ -1,6 +1,9 @@
 import React from 'react'
 import { CircleAlert } from 'lucide-react'
 import { z } from 'zod'
+import { formOptions, useForm } from '@tanstack/react-form'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Link, useRouter } from '@tanstack/react-router'
 import { XTwitterIcon } from '~/components/icon'
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
 import { Button } from '~/components/ui/button'
@@ -24,9 +27,6 @@ import {
 import { captureWithFeature } from '~/lib/sentry'
 import { getFieldErrorMessage } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
-import { formOptions, useForm } from '@tanstack/react-form'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Link, useRouter } from '@tanstack/react-router'
 
 type LoginFormParams = {
   onOpenChange?: (open: boolean) => void

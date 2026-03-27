@@ -1,6 +1,6 @@
+import { createFileRoute } from '@tanstack/react-router'
 import { ResetPasswordForm } from '~/components/User/reset-password-form'
 import { m } from '~/paraglide/messages.js'
-import { createFileRoute } from '@tanstack/react-router'
 
 const RouteComponent = () => {
   return (

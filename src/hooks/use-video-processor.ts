@@ -1,14 +1,14 @@
 import React from 'react'
 import { toast } from 'sonner'
+import type { FFmpeg, ProgressEvent } from '@ffmpeg/ffmpeg'
+import { fetchFile } from '@ffmpeg/util'
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery
+} from '@tanstack/react-query'
 import { getStudioErrorCode } from '~/constants/error'
 import type { MemeWithVideo } from '~/constants/meme'
-import type {
-  StudioBandColorValue,
-  StudioFontColorValue,
-  StudioFontFamilyId,
-  StudioFontSizeValue,
-  StudioTextPosition
-} from '~/constants/studio'
 import {
   STUDIO_BASELINE_RATIO,
   STUDIO_DEFAULT_BAND_HEIGHT,
@@ -17,6 +17,13 @@ import {
   STUDIO_DEFAULT_MAX_CHARS_PER_LINE,
   STUDIO_FONTS,
   STUDIO_LINE_SPACING
+} from '~/constants/studio'
+import type {
+  StudioBandColorValue,
+  StudioFontColorValue,
+  StudioFontFamilyId,
+  StudioFontSizeValue,
+  StudioTextPosition
 } from '~/constants/studio'
 import { getAuthUserQueryOpts, getVideoBlobQueryOpts } from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
@@ -30,13 +37,6 @@ import {
   loadFFmpeg,
   readFFmpegOutput
 } from '~/utils/ffmpeg'
-import type { FFmpeg, ProgressEvent } from '@ffmpeg/ffmpeg'
-import { fetchFile } from '@ffmpeg/util'
-import {
-  useMutation,
-  useQueryClient,
-  useSuspenseQuery
-} from '@tanstack/react-query'
 
 type VideoProcessingParams = {
   text: string
@@ -323,7 +323,6 @@ export const useVideoProcessor = (
   const showDialog = useShowDialog()
   const queryClient = useQueryClient()
 
-  // eslint-disable-next-line no-restricted-syntax -- referential stability required for ffmpeg.on/off event listener pairing
   const handleProgress = React.useCallback(
     ({ progress: progressValue }: ProgressEvent) => {
       if (progressValue < 0 || progressValue > 1) {

@@ -59,7 +59,7 @@ export async function getTweetByUrl(tweetUrl: string) {
   return getTweetById(tweetId)
 }
 
-const TWEET_FETCH_TIMEOUT_MS = 30000
+const TWEET_FETCH_TIMEOUT_MS = 30_000
 
 export async function getTweetById(tweetId: string) {
   const tweet = await getTweet(tweetId, {

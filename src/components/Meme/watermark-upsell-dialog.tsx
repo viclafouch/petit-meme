@@ -1,6 +1,8 @@
 import React from 'react'
 import { CheckCircle2, Download, Share2, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
+import { useMutation } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
 import type { WithDialog } from '~/@types/dialog'
 import {
   Dialog,
@@ -21,8 +23,6 @@ import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
 import { shareMeme, trackMemeAction } from '~/server/meme'
 import { downloadBlob, shareBlob } from '~/utils/download'
-import { useMutation } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
 
 type WatermarkUpsellDialogParams = {
   meme: Pick<MemeWithVideo, 'id' | 'title'>

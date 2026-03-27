@@ -1,3 +1,5 @@
+import type { FFmpeg, LogEvent } from '@ffmpeg/ffmpeg'
+import { fetchFile } from '@ffmpeg/util'
 import {
   WATERMARK_MARGIN_RATIO,
   WATERMARK_MAX_MARGIN,
@@ -10,8 +12,6 @@ import {
   FFMPEG_WATERMARK_FILE,
   readFFmpegOutput
 } from '~/utils/ffmpeg'
-import type { FFmpeg, LogEvent } from '@ffmpeg/ffmpeg'
-import { fetchFile } from '@ffmpeg/util'
 
 type ApplyWatermarkParams = {
   ffmpeg: FFmpeg

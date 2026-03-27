@@ -1,5 +1,16 @@
 /// <reference types="vite/client" />
 import React from 'react'
+import * as Sentry from '@sentry/tanstackstart-react'
+import type { QueryClient } from '@tanstack/react-query'
+import type { ErrorComponentProps } from '@tanstack/react-router'
+import {
+  ClientOnly,
+  createRootRouteWithContext,
+  HeadContent,
+  Outlet,
+  ScriptOnce,
+  Scripts
+} from '@tanstack/react-router'
 import {
   CookieBanner,
   CookieConsentProvider,
@@ -18,21 +29,9 @@ import { getLocale, getTextDirection, localizeHref } from '~/paraglide/runtime'
 import type { getAuthUser } from '~/server/user-auth'
 import { DialogProvider } from '~/stores/dialog.store'
 import { ensureAlgoliaUserToken } from '~/utils/tracking-cookies'
-import * as Sentry from '@sentry/tanstackstart-react'
-import type { QueryClient } from '@tanstack/react-query'
-import type { ErrorComponentProps } from '@tanstack/react-router'
-import {
-  ClientOnly,
-  createRootRouteWithContext,
-  HeadContent,
-  Outlet,
-  ScriptOnce,
-  Scripts
-} from '@tanstack/react-router'
 import appCss from '../styles.css?url'
 
 const RootDocument = ({ children }: { children: React.ReactNode }) => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { _storedTheme, _consentState } = Route.useLoaderData()
   const cookieConsentConfig = getCookieConsentConfig()
 
@@ -238,7 +237,7 @@ export const Route = createRootRouteWithContext<{
   head: () => {
     return {
       meta: [
-        { charSet: 'utf-8' },
+        { charSet: 'utf8' },
         {
           name: 'theme-color',
           content: '#000000'

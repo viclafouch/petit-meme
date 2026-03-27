@@ -1,9 +1,9 @@
 import { Ban } from 'lucide-react'
 import { z } from 'zod'
+import { createFileRoute, Link, Navigate } from '@tanstack/react-router'
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
 import { CreateNewPasswordForm } from '~/components/User/create-new-password-form'
 import { m } from '~/paraglide/messages.js'
-import { createFileRoute, Link, Navigate } from '@tanstack/react-router'
 
 const RouteComponent = () => {
   const search = Route.useSearch()
@@ -46,9 +46,9 @@ export const Route = createFileRoute(
   validateSearch: (search) => {
     return z
       .object({
-        // eslint-disable-next-line unicorn/no-useless-undefined
+        // oxlint-disable-next-line unicorn/no-useless-undefined
         token: z.string().optional().catch(undefined),
-        // eslint-disable-next-line unicorn/no-useless-undefined
+        // oxlint-disable-next-line unicorn/no-useless-undefined
         error: z.literal('INVALID_TOKEN').optional().catch(undefined)
       })
       .parse(search)

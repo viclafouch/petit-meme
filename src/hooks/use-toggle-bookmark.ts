@@ -1,12 +1,12 @@
 import React from 'react'
 import { toast } from 'sonner'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { getStudioErrorCode } from '~/constants/error'
 import type { MemeWithVideo } from '~/constants/meme'
 import { getFavoritesMemesQueryOpts, getMemeByIdQueryOpts } from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
 import { toggleBookmarkByMemeId } from '~/server/user'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 type UseToggleBookmarkParams = {
   meme: MemeWithVideo
@@ -19,7 +19,6 @@ export function useToggleBookmark({
 }: UseToggleBookmarkParams) {
   const queryClient = useQueryClient()
 
-  // eslint-disable-next-line no-restricted-syntax
   const isMemeBookmarked = React.useMemo(() => {
     if (!bookmarks) {
       return false

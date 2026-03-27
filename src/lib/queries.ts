@@ -1,3 +1,4 @@
+import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
 import type { MemesFilters } from '~/constants/meme'
 import { MINUTE } from '~/constants/time'
 import type { Meme, Video } from '~/db/generated/prisma/client'
@@ -17,7 +18,6 @@ import { getUserSubmissions } from '~/server/meme-submission'
 import { getInfiniteReels } from '~/server/reels'
 import { getFavoritesMemes } from '~/server/user'
 import { getAuthUser } from '~/server/user-auth'
-import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
 
 export const getMemesListQueryOpts = (filters: MemesFilters) => {
   return queryOptions({

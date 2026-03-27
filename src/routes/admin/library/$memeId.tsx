@@ -1,5 +1,6 @@
-/* eslint-disable unicorn/filename-case */
 import { ExternalLink, Trash } from 'lucide-react'
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
 import { PageHeader } from '~/components/page-header'
 import { Badge } from '~/components/ui/badge'
 import { buttonVariants } from '~/components/ui/button'
@@ -10,17 +11,14 @@ import { buildIframeVideoUrl } from '~/lib/bunny'
 import { buildMemeSeo } from '~/lib/seo'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
-import { MemeForm } from '~/routes/admin/library/-components/meme-form'
-import { MemeWatermarkSection } from '~/routes/admin/library/-components/meme-watermark-section'
-import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
-import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
-
-import { DeleteMemeButton } from '~admin/-components/delete-meme-button'
+import { DeleteMemeButton } from '~/routes/admin/-components/delete-meme-button'
 import {
   getAdminDashboardTotalsQueryOpts,
   getAdminMemeByIdQueryOpts,
   getAdminMemesListQueryOpts
-} from '~admin/-lib/queries'
+} from '~/routes/admin/-lib/queries'
+import { MemeForm } from '~/routes/admin/library/-components/meme-form'
+import { MemeWatermarkSection } from '~/routes/admin/library/-components/meme-watermark-section'
 
 const RouteComponent = () => {
   const { memeId } = Route.useParams()

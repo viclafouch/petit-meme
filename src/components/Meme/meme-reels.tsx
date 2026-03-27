@@ -2,6 +2,10 @@ import React from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import Hls from 'hls.js'
 import { Pause, Play, Volume2, VolumeX } from 'lucide-react'
+import { useDebouncer } from '@tanstack/react-pacer'
+import { useInfiniteQuery } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import { ShareMemeButton } from '~/components/Meme/share-meme-button'
 import ToggleLikeButton from '~/components/Meme/toggle-like-button'
 import { Button, buttonVariants } from '~/components/ui/button'
@@ -11,10 +15,6 @@ import type { MemeWithVideo } from '~/constants/meme'
 import { buildVideoImageUrl, buildVideoStreamUrl } from '~/lib/bunny'
 import { getInfiniteReelsQueryOpts } from '~/lib/queries'
 import { m } from '~/paraglide/messages.js'
-import { useDebouncer } from '@tanstack/react-pacer'
-import { useInfiniteQuery } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
-import { useVirtualizer } from '@tanstack/react-virtual'
 
 type ReelProps = {
   meme: MemeWithVideo
@@ -207,7 +207,6 @@ export const MemeReels = () => {
     new Map<string, React.RefObject<HTMLDivElement | null>>()
   )
 
-  // eslint-disable-next-line no-restricted-syntax
   const memesWithRefs = React.useMemo(() => {
     const refsMap = refsMapRef.current
 
@@ -234,7 +233,6 @@ export const MemeReels = () => {
     )
   }, [infiniteReels.data])
 
-  // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Virtual is not compatible with React Compiler (https://github.com/TanStack/virtual/issues/736)
   const rowVirtualizer = useVirtualizer({
     count: memesWithRefs.length,
     getScrollElement: () => {

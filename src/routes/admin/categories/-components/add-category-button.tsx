@@ -1,4 +1,6 @@
 import React from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useRouter } from '@tanstack/react-router'
 import { Button } from '~/components/ui/button'
 import {
   Dialog,
@@ -10,8 +12,6 @@ import {
 } from '~/components/ui/dialog'
 import { getCategoriesListQueryOpts } from '~/lib/queries'
 import { CategoryForm } from '~/routes/admin/categories/-components/category-form'
-import { useQueryClient } from '@tanstack/react-query'
-import { useRouter } from '@tanstack/react-router'
 
 export const AddCategoryButton = ({
   ...restButtonProps

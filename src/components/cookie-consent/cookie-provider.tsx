@@ -107,7 +107,6 @@ export const CookieConsentProvider = ({
     return state.categories[category] ?? false
   }
 
-  // eslint-disable-next-line no-restricted-syntax -- useMemo prevents all context consumers from re-rendering on every provider render
   const value: CookieConsentContextValue = React.useMemo(() => {
     return {
       state,
@@ -121,7 +120,7 @@ export const CookieConsentProvider = ({
       matchHasConsent,
       config
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- stable config object, functions use latest state via closure
+    // oxlint-disable-next-line react/exhaustive-deps -- stable config object, functions use latest state via closure
   }, [state, isBannerVisible, isSettingsOpen, config])
 
   return (

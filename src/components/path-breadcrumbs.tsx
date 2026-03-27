@@ -1,5 +1,6 @@
 import React from 'react'
 import { Home } from 'lucide-react'
+import { isMatch, Link, useMatches } from '@tanstack/react-router'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -8,7 +9,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator
 } from '~/components/ui/breadcrumb'
-import { isMatch, Link, useMatches } from '@tanstack/react-router'
 
 export const PathBreadcrumbs = () => {
   const matches = useMatches()

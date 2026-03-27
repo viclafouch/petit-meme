@@ -1,5 +1,5 @@
-/* eslint-disable react/no-object-type-as-default-prop */
-/* eslint-disable id-length */
+/* oxlint-disable react/no-object-type-as-default-prop */
+/* oxlint-disable id-length */
 import * as React from 'react'
 import {
   type HTMLMotionProps,

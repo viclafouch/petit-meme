@@ -1,5 +1,5 @@
-import { IS_PRODUCTION } from '~/constants/env'
 import * as Sentry from '@sentry/tanstackstart-react'
+import { IS_PRODUCTION } from '~/constants/env'
 
 const FULL_SAMPLE_RATE = 1.0
 const DROP_SAMPLE_RATE = 0

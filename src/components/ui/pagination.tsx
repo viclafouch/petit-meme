@@ -1,16 +1,16 @@
-/* eslint-disable */
+/* oxlint-disable */
 import * as React from 'react'
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
   MoreHorizontalIcon
 } from 'lucide-react'
-import type { Button } from '~/components/ui/button'
-import { buttonVariants } from '~/components/ui/button'
-import { cn } from '~/lib/utils'
-import { m } from '~/paraglide/messages.js'
 import type { LinkProps } from '@tanstack/react-router'
 import { Link } from '@tanstack/react-router'
+import { buttonVariants } from '~/components/ui/button'
+import type { Button } from '~/components/ui/button'
+import { cn } from '~/lib/utils'
+import { m } from '~/paraglide/messages.js'
 
 const Pagination = ({ className, ...props }: React.ComponentProps<'nav'>) => {
   return (

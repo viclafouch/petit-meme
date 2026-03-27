@@ -1,6 +1,7 @@
 import type React from 'react'
 import { CheckCircle2, MinusCircle, XCircle } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
+import NumberFlow from '@number-flow/react'
 import { Button } from '~/components/ui/button'
 import {
   Card,
@@ -19,7 +20,6 @@ import { convertCentsToEuros, formatCentsToEuros } from '~/helpers/number'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
-import NumberFlow from '@number-flow/react'
 
 type FeatureStatusStaticConfig = {
   icon: React.ElementType
@@ -29,7 +29,6 @@ type FeatureStatusStaticConfig = {
 const FEATURE_STATUS_STATIC_CONFIG = {
   included: { icon: CheckCircle2, className: 'text-success-foreground' },
   limited: { icon: MinusCircle, className: 'text-warning-foreground' },
-  // eslint-disable-next-line camelcase -- maps to PlanFeature status value
   not_included: { icon: XCircle, className: 'text-destructive' }
 } as const satisfies Record<
   Plan['features'][number]['status'],

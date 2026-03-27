@@ -1,6 +1,7 @@
 import { z } from 'zod'
-import { CATEGORY_SLUG_REGEX } from '~/constants/meme'
+import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 import { prismaClient } from '~/db'
+import { CATEGORY_SLUG_REGEX } from '~/constants/meme'
 import type { Prisma } from '~/db/generated/prisma/client'
 import { MemeStatus } from '~/db/generated/prisma/enums'
 import {
@@ -11,7 +12,6 @@ import { adminLogger } from '~/lib/logger'
 import { baseLocale, type Locale, locales } from '~/paraglide/runtime'
 import { logAuditAction } from '~/server/audit'
 import { adminRequiredMiddleware } from '~/server/user-auth'
-import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 
 export const CATEGORY_TRANSLATION_SCHEMA = z.object({
   title: z.string().min(3).max(100),
@@ -56,7 +56,6 @@ function buildCategoryTranslationUpserts({
     const data = translations[locale]
 
     return {
-      // eslint-disable-next-line camelcase -- Prisma compound unique key
       where: { categoryId_locale: { categoryId, locale } },
       update: { title: data.title, keywords: data.keywords },
       create: { locale, title: data.title, keywords: data.keywords }

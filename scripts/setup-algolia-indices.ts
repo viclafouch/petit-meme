@@ -1,4 +1,5 @@
-/* eslint-disable no-console, no-await-in-loop */
+import type { SupportedLanguage } from '@algolia/client-search'
+/* oxlint-disable no-console, no-await-in-loop */
 import {
   algoliaAdminClient,
   algoliaIndexPrefix,
@@ -7,9 +8,8 @@ import {
   resolveAlgoliaReplicaPopular,
   resolveAlgoliaReplicaRecent
 } from '~/lib/algolia'
-import type { Locale } from '~/paraglide/runtime'
 import { locales } from '~/paraglide/runtime'
-import type { SupportedLanguage } from '@algolia/client-search'
+import type { Locale } from '~/paraglide/runtime'
 import { logEnvironmentInfo } from './lib/env-guard'
 
 const INDEX_LANGUAGES = {

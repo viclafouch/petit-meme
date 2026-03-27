@@ -1,3 +1,7 @@
+import type { HighlightResultOption, Hit } from '@algolia/client-search'
+import { searchClient } from '@algolia/client-search'
+import { recommendClient } from '@algolia/recommend'
+import * as Sentry from '@sentry/tanstackstart-react'
 import type { MemeAlgoliaData } from '~/constants/meme'
 import { MINUTE } from '~/constants/time'
 import { MemeContentLocale } from '~/db/generated/prisma/enums'
@@ -11,12 +15,8 @@ import {
 } from '~/helpers/i18n-content'
 import { buildVideoImageUrl } from '~/lib/bunny'
 import { algoliaLogger } from '~/lib/logger'
-import type { Locale } from '~/paraglide/runtime'
 import { locales } from '~/paraglide/runtime'
-import type { HighlightResultOption, Hit } from '@algolia/client-search'
-import { searchClient } from '@algolia/client-search'
-import { recommendClient } from '@algolia/recommend'
-import * as Sentry from '@sentry/tanstackstart-react'
+import type { Locale } from '~/paraglide/runtime'
 
 export const algoliaIndexPrefix = clientEnv.VITE_ALGOLIA_INDEX
 

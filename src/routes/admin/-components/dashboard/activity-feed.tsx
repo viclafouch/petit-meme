@@ -3,10 +3,9 @@ import { DEFAULT_AVATAR_URL } from '~/constants/avatar'
 import { formatRelativeTime } from '~/helpers/date'
 import { getUserInitials } from '~/helpers/format'
 import { getLocale } from '~/paraglide/runtime'
-
-import { getActionIcon } from '~admin/-helpers/action-icon'
-import { formatAuditEntry } from '~admin/-helpers/audit'
-import type { AuditLogEntry } from '~admin/-server/dashboard'
+import { getActionIcon } from '~/routes/admin/-helpers/action-icon'
+import { formatAuditEntry } from '~/routes/admin/-helpers/audit'
+import type { AuditLogEntry } from '~/routes/admin/-server/dashboard'
 
 type ActivityFeedParams = {
   entries: AuditLogEntry[]

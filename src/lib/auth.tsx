@@ -2,6 +2,12 @@ import { betterAuth } from 'better-auth'
 import { admin } from 'better-auth/plugins'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import type Stripe from 'stripe'
+import { prismaAdapter } from '@better-auth/prisma-adapter'
+import { stripe } from '@better-auth/stripe'
+import { createServerOnlyFn } from '@tanstack/react-start'
+// Vercel-specific: replace with platform equivalent if migrating (e.g. Railway)
+import { waitUntil } from '@vercel/functions'
+import { prismaClient } from '~/db'
 import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '~/constants/auth'
 import { IS_PRODUCTION } from '~/constants/env'
 import {
@@ -10,7 +16,6 @@ import {
   ONE_HOUR_IN_SECONDS,
   SEVEN_DAYS_IN_SECONDS
 } from '~/constants/time'
-import { prismaClient } from '~/db'
 import { emailSubjects } from '~/emails/subjects'
 import { clientEnv } from '~/env/client'
 import { serverEnv } from '~/env/server'
@@ -22,11 +27,6 @@ import { captureWithFeature } from '~/lib/sentry'
 import { stripeClient } from '~/lib/stripe'
 import { getLocale } from '~/paraglide/runtime'
 import { cleanupUserData } from '~/utils/user-cleanup'
-import { prismaAdapter } from '@better-auth/prisma-adapter'
-import { stripe } from '@better-auth/stripe'
-import { createServerOnlyFn } from '@tanstack/react-start'
-// Vercel-specific: replace with platform equivalent if migrating (e.g. Railway)
-import { waitUntil } from '@vercel/functions'
 import EmailVerification from '../emails/email-verification'
 import PasswordChangedEmail from '../emails/password-changed-email'
 import PaymentFailedEmail from '../emails/payment-failed-email'
@@ -74,7 +74,6 @@ const handlePaymentFailed = async (event: Stripe.Event) => {
   try {
     portalSession = await stripeClient.billingPortal.sessions.create({
       customer: customerId,
-      // eslint-disable-next-line camelcase -- Stripe API uses snake_case
       return_url: `${clientEnv.VITE_SITE_URL}/settings`
     })
   } catch (error) {

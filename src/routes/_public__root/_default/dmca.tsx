@@ -1,11 +1,11 @@
 import Markdown from 'react-markdown'
+import { createFileRoute } from '@tanstack/react-router'
+import { createServerFn } from '@tanstack/react-start'
 import { BASE_MARKDOWN_COMPONENTS } from '~/constants/markdown'
 import { seo } from '~/lib/seo'
 import { m } from '~/paraglide/messages'
-import type { Locale } from '~/paraglide/runtime'
 import { getLocale } from '~/paraglide/runtime'
-import { createFileRoute } from '@tanstack/react-router'
-import { createServerFn } from '@tanstack/react-start'
+import type { Locale } from '~/paraglide/runtime'
 
 const MARKDOWN_LOADERS = {
   fr: () => {

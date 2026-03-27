@@ -1,4 +1,6 @@
 import React from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from '@tanstack/react-router'
 import { Button } from '~/components/ui/button'
 import {
   Dialog,
@@ -9,15 +11,12 @@ import {
   DialogTrigger
 } from '~/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
-import { useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from '@tanstack/react-router'
-
-import { FileForm } from '~admin/-components/file-form'
-import { TwitterForm } from '~admin/-components/twitter-form'
+import { FileForm } from '~/routes/admin/-components/file-form'
+import { TwitterForm } from '~/routes/admin/-components/twitter-form'
 import {
   getAdminDashboardTotalsQueryOpts,
   getAdminMemesListQueryOpts
-} from '~admin/-lib/queries'
+} from '~/routes/admin/-lib/queries'
 
 type NewMemeButtonProps = Partial<React.ComponentProps<typeof Button>>
 

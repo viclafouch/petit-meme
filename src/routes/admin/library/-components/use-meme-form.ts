@@ -1,5 +1,7 @@
 import { toast } from 'sonner'
 import type { z } from 'zod'
+import { useForm } from '@tanstack/react-form'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import type { MemeFullData } from '~/constants/meme'
 import type { Meme } from '~/db/generated/prisma/client'
 import { getErrorMessage } from '~/helpers/error'
@@ -12,11 +14,8 @@ import { useKeywordsField } from '~/hooks/use-keywords-field'
 import { getCategoriesListQueryOpts } from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
 import { baseLocale, type Locale } from '~/paraglide/runtime'
+import { editMeme, MEME_FORM_SCHEMA } from '~/routes/admin/-server/memes'
 import { translateMemeContent } from '~/server/ai'
-import { useForm } from '@tanstack/react-form'
-import { useMutation, useQuery } from '@tanstack/react-query'
-
-import { editMeme, MEME_FORM_SCHEMA } from '~admin/-server/memes'
 
 type UseMemeFormParams = {
   meme: MemeFullData

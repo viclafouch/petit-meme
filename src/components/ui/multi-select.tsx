@@ -1,10 +1,11 @@
-/* eslint-disable id-denylist */
-/* eslint-disable @typescript-eslint/no-shadow */
-/* eslint-disable complexity */
+/* oxlint-disable id-denylist */
+/* oxlint-disable @typescript-eslint/no-shadow */
+/* oxlint-disable complexity */
 
 import * as React from 'react'
 import { useEffect, useImperativeHandle, useRef } from 'react'
 import { CheckIcon, ChevronDown, X } from 'lucide-react'
+import type { PopoverContentProps } from '@radix-ui/react-popover'
 import { Badge } from '~/components/ui/badge'
 import {
   Command,
@@ -23,7 +24,6 @@ import {
 import { Separator } from '~/components/ui/separator'
 import { LoadingSpinner } from '~/components/ui/spinner'
 import { cn } from '~/lib/utils'
-import type { PopoverContentProps } from '@radix-ui/react-popover'
 
 export type Option = {
   label: string

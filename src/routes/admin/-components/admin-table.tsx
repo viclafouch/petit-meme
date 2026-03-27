@@ -1,4 +1,11 @@
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
+import type {
+  Header,
+  RowData,
+  SortDirection,
+  Table as TableType
+} from '@tanstack/react-table'
+import { flexRender } from '@tanstack/react-table'
 import { Button } from '~/components/ui/button'
 import {
   Table,
@@ -9,13 +16,6 @@ import {
   TableHeader,
   TableRow
 } from '~/components/ui/table'
-import type {
-  Header,
-  RowData,
-  SortDirection,
-  Table as TableType
-} from '@tanstack/react-table'
-import { flexRender } from '@tanstack/react-table'
 
 const PAGE_SIZE = 20
 

@@ -1,5 +1,5 @@
-import { getActiveSubscriptionQueryOpts } from '~/lib/queries'
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
+import { getActiveSubscriptionQueryOpts } from '~/lib/queries'
 
 const RouteComponent = () => {
   return <Outlet />

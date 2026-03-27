@@ -1,3 +1,4 @@
+import { createFileRoute } from '@tanstack/react-router'
 import { MINUTE } from '~/constants/time'
 import {
   getFavoritesMemesQueryOpts,
@@ -8,7 +9,6 @@ import { buildHomeJsonLd, seo } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
 import { Faq, getHomeFaqItems } from '~/routes/_public__root/-components/faq'
 import { Responsive } from '~/routes/_public__root/-components/responsive'
-import { createFileRoute } from '@tanstack/react-router'
 import { BestMemes } from './-components/best-memes'
 import { Hero } from './-components/hero'
 import { PageContainer } from './-components/page-headers'

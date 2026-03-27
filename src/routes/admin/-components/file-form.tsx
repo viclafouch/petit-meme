@@ -2,6 +2,8 @@ import React from 'react'
 import { Upload, X } from 'lucide-react'
 import { toast } from 'sonner'
 import type { z } from 'zod'
+import { formOptions, useForm } from '@tanstack/react-form'
+import { useMutation } from '@tanstack/react-query'
 import { FormFooter } from '~/components/form-footer'
 import { Button } from '~/components/ui/button'
 import {
@@ -17,13 +19,10 @@ import {
 import { FormItem, FormMessage } from '~/components/ui/form'
 import { getErrorMessage } from '~/helpers/error'
 import { getFieldErrorMessage } from '~/lib/utils'
-import { formOptions, useForm } from '@tanstack/react-form'
-import { useMutation } from '@tanstack/react-query'
-
 import {
   CREATE_MEME_FROM_FILE_SCHEMA,
   createMemeFromFile
-} from '~admin/-server/memes'
+} from '~/routes/admin/-server/memes'
 
 type FileFormParams = {
   onSuccess?: ({ memeId }: { memeId: string }) => void
@@ -75,7 +74,6 @@ export const FileForm = ({ onSuccess, closeDialog }: FileFormParams) => {
     }
   })
 
-  // eslint-disable-next-line no-restricted-syntax
   const onFileReject = React.useCallback((file: File, message: string) => {
     toast(message, {
       description: `"${file.name.length > 20 ? `${file.name.slice(0, 20)}...` : file.name}" has been rejected`

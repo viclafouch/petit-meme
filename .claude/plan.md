@@ -86,6 +86,20 @@ Remplacer Prisma par Drizzle ORM. Conventions cibles : tables en pluriel, colonn
 
 ---
 
+## Migration ESLint + Prettier → oxlint + oxfmt ✅
+
+**Terminée le 2026-03-27.** Migré de `@viclafouch/eslint-config-viclafouch` v5 vers `@viclafouch/oxc-config` v1.0.0-alpha.0 (oxlint 1.57 + oxfmt 0.42).
+
+- [x] Migrer path aliases `@/` → `~/`, `@admin/` → `~admin/` (commit séparé)
+- [x] Supprimer ESLint, Prettier → installer oxlint, oxfmt, @viclafouch/oxc-config
+- [x] Créer oxlint.config.ts et oxfmt.config.ts (sort imports custom)
+- [x] Mettre à jour scripts, VS Code, husky
+- [x] Supprimer ~36 eslint-disable comments obsolètes
+- [x] Fixer import/no-cycle (getRouteApi), filename-case (Play.tsx), no-shadow (globalThis)
+- [x] Convertir les eslint-disable restants en oxlint-disable dans les fichiers source (hors generated/ui/animate-ui/routeTree)
+
+---
+
 ## Internationalisation — Backlog
 
 - [ ] Synonymes EN Algolia — ajouter via dashboard quand contenu EN atteint une masse critique

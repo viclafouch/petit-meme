@@ -1,10 +1,10 @@
 import React from 'react'
 import { Cookie } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
+import { Link } from '@tanstack/react-router'
 import { Button } from '~/components/ui/button'
 import { useIsMobile } from '~/hooks/use-mobile'
 import { m } from '~/paraglide/messages.js'
-import { Link } from '@tanstack/react-router'
 import { useCookieConsent } from './cookie-provider'
 
 const APPEAR_DELAY_S = 3.5

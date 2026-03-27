@@ -16,6 +16,7 @@ import type {
   WebSite,
   WithContext
 } from 'schema-dts'
+import type { AnyRouteMatch } from '@tanstack/react-router'
 import type { FaqItem } from '~/components/faq-section'
 import { LOGO_PATH } from '~/constants/branding'
 import type { MemeWithCategories, MemeWithVideo } from '~/constants/meme'
@@ -29,14 +30,13 @@ import {
   buildVideoOriginalUrl
 } from '~/lib/bunny'
 import { m } from '~/paraglide/messages.js'
-import type { Locale } from '~/paraglide/runtime'
 import {
   baseLocale,
   getLocale,
   locales,
   localizeUrl
 } from '~/paraglide/runtime'
-import type { AnyRouteMatch } from '@tanstack/react-router'
+import type { Locale } from '~/paraglide/runtime'
 
 export const websiteOrigin = clientEnv.VITE_SITE_URL
 const websiteId = `${websiteOrigin}/#website`

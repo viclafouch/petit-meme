@@ -1,8 +1,8 @@
-import { FFMPEG_CORE_URL, FFMPEG_WASM_URL } from '~/constants/ffmpeg'
-import { withTimeout } from '~/helpers/promise'
 import { FFmpeg } from '@ffmpeg/ffmpeg'
 import { toBlobURL } from '@ffmpeg/util'
 import { createClientOnlyFn } from '@tanstack/react-start'
+import { FFMPEG_CORE_URL, FFMPEG_WASM_URL } from '~/constants/ffmpeg'
+import { withTimeout } from '~/helpers/promise'
 
 const FFMPEG_LOAD_TIMEOUT_MS = 30_000
 

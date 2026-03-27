@@ -8,6 +8,8 @@ import {
   X
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Link, useRouter } from '@tanstack/react-router'
 import { ConfirmAlertDialog } from '~/components/confirm-alert-dialog'
 import { Button } from '~/components/ui/button'
 import {
@@ -24,19 +26,16 @@ import {
 } from '~/db/generated/prisma/enums'
 import { getErrorMessage } from '~/helpers/error'
 import { captureWithFeature } from '~/lib/sentry'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Link, useRouter } from '@tanstack/react-router'
-
 import {
   getAdminPendingSubmissionCountQueryOpts,
   getAdminSubmissionsQueryOpts
-} from '~admin/-lib/queries'
-import { createMemeFromTwitterUrl } from '~admin/-server/memes'
-import type { AdminSubmission } from '~admin/-server/submissions'
+} from '~/routes/admin/-lib/queries'
+import { createMemeFromTwitterUrl } from '~/routes/admin/-server/memes'
+import type { AdminSubmission } from '~/routes/admin/-server/submissions'
 import {
   deleteSubmission,
   updateSubmissionStatus
-} from '~admin/-server/submissions'
+} from '~/routes/admin/-server/submissions'
 
 type DialogType = 'reject' | 'delete' | 'approve-tweet'
 

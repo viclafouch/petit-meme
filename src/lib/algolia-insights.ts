@@ -1,8 +1,3 @@
-import { COOKIE_ALGOLIA_USER_TOKEN_KEY } from '~/constants/cookie'
-import { clientEnv } from '~/env/client'
-import { readClientCookie } from '~/helpers/cookie'
-import { matchHasAcceptedCookies } from '~/lib/cookie-consent'
-import { getLocale } from '~/paraglide/runtime'
 import type {
   ClickedObjectIDs,
   ClickedObjectIDsAfterSearch,
@@ -14,6 +9,11 @@ import type {
 import { insightsClient } from '@algolia/client-insights'
 import * as Sentry from '@sentry/tanstackstart-react'
 import { createClientOnlyFn } from '@tanstack/react-start'
+import { COOKIE_ALGOLIA_USER_TOKEN_KEY } from '~/constants/cookie'
+import { clientEnv } from '~/env/client'
+import { readClientCookie } from '~/helpers/cookie'
+import { matchHasAcceptedCookies } from '~/lib/cookie-consent'
+import { getLocale } from '~/paraglide/runtime'
 
 const algoliaInsights = insightsClient(
   clientEnv.VITE_ALGOLIA_APP_ID,
@@ -21,7 +21,7 @@ const algoliaInsights = insightsClient(
 )
 
 function logInsightsError(error: unknown) {
-  // eslint-disable-next-line no-console
+  // oxlint-disable-next-line no-console
   console.warn('[Algolia Insights]', error)
   Sentry.captureException(error)
 }

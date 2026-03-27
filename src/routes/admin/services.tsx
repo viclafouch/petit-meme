@@ -1,5 +1,5 @@
-import { PageHeader } from '~/components/page-header'
 import { createFileRoute } from '@tanstack/react-router'
+import { PageHeader } from '~/components/page-header'
 import { ServicesGrid } from './-components/services/services-grid'
 
 const RouteComponent = () => {

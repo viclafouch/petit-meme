@@ -1,3 +1,4 @@
+import { createFileRoute, Outlet } from '@tanstack/react-router'
 import { Container } from '~/components/ui/container'
 import {
   getActiveSubscriptionQueryOpts,
@@ -5,7 +6,6 @@ import {
   getFavoritesMemesQueryOpts
 } from '~/lib/queries'
 import { getLocale } from '~/paraglide/runtime'
-import { createFileRoute, Outlet } from '@tanstack/react-router'
 
 const RouteComponent = () => {
   return (

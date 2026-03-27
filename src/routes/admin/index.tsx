@@ -2,26 +2,28 @@ import React from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
 import { z } from 'zod'
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { createFileRoute } from '@tanstack/react-router'
 import { PageHeader } from '~/components/page-header'
 import { Button } from '~/components/ui/button'
 import { Card } from '~/components/ui/card'
 import { Skeleton } from '~/components/ui/skeleton'
 import { captureWithFeature } from '~/lib/sentry'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
-import { ActivityFeed } from './-components/dashboard/activity-feed'
-import { PeriodSelector } from './-components/dashboard/period-selector'
-import { TotalsSection } from './-components/dashboard/totals-section'
-import { TrendingMemes } from './-components/dashboard/trending-memes'
-import { TrendsChart } from './-components/dashboard/trends-chart'
-
 import {
   getAdminChartDataQueryOpts,
   getAdminDashboardTotalsQueryOpts,
   getAdminRecentActivityQueryOpts,
   getAdminTrendingMemesQueryOpts
-} from '~admin/-lib/queries'
-import { type DashboardPeriod, PERIOD_SCHEMA } from '~admin/-server/dashboard'
+} from '~/routes/admin/-lib/queries'
+import {
+  type DashboardPeriod,
+  PERIOD_SCHEMA
+} from '~/routes/admin/-server/dashboard'
+import { ActivityFeed } from './-components/dashboard/activity-feed'
+import { PeriodSelector } from './-components/dashboard/period-selector'
+import { TotalsSection } from './-components/dashboard/totals-section'
+import { TrendingMemes } from './-components/dashboard/trending-memes'
+import { TrendsChart } from './-components/dashboard/trends-chart'
 
 const dashboardSearchSchema = z.object({
   period: PERIOD_SCHEMA.optional().default('30d').catch('30d')

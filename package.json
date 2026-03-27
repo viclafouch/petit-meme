@@ -17,8 +17,8 @@
     "postinstall": "prisma generate && paraglide-js compile --project ./project.inlang && node scripts/copy-ffmpeg.js",
     "lint": "tsc && oxlint",
     "lint:fix": "tsc && oxlint --fix && pnpm run format",
-    "format": "oxfmt .",
-    "format:check": "oxfmt --check .",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
     "email:dev": "email dev --dir src/emails --port 3001",
     "prepare": "husky"
   },

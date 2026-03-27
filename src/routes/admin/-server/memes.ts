@@ -7,20 +7,20 @@ import {
   MEME_FULL_INCLUDE,
   MEMES_PER_PAGE,
   MEMES_SEARCH_SCHEMA
-} from '@/constants/meme'
-import { TWEET_LINK_SCHEMA } from '@/constants/url'
-import { prismaClient } from '@/db'
+} from '~/constants/meme'
+import { TWEET_LINK_SCHEMA } from '~/constants/url'
+import { prismaClient } from '~/db'
 import {
   type MemeContentLocale,
   MemeContentLocale as MemeContentLocaleEnum,
   MemeStatus
-} from '@/db/generated/prisma/enums'
+} from '~/db/generated/prisma/enums'
 import {
   buildLocaleRecord,
   CONTENT_LOCALE_TO_LOCALE,
   REQUIRED_TRANSLATION_LOCALES
-} from '@/helpers/i18n-content'
-import type { AlgoliaMemeRecord } from '@/lib/algolia'
+} from '~/helpers/i18n-content'
+import type { AlgoliaMemeRecord } from '~/lib/algolia'
 import {
   ALGOLIA_ADMIN_SEARCH_PARAMS,
   algoliaSearchClient,
@@ -31,21 +31,21 @@ import {
   resolveAlgoliaReplicaCreated,
   safeAlgoliaOp,
   syncMemeToAllIndices
-} from '@/lib/algolia'
+} from '~/lib/algolia'
 import {
   checkWatermarkExists,
   createVideo,
   deleteVideo,
   deleteWatermarkedVideo,
   uploadVideo
-} from '@/lib/bunny'
-import { adminLogger, bunnyLogger } from '@/lib/logger'
-import { getTweetByUrl, getTweetMedia } from '@/lib/react-tweet'
-import { captureWithFeature } from '@/lib/sentry'
-import { baseLocale } from '@/paraglide/runtime'
-import { logAuditAction } from '@/server/audit'
-import { clearRecommendCache } from '@/server/meme'
-import { adminRequiredMiddleware } from '@/server/user-auth'
+} from '~/lib/bunny'
+import { adminLogger, bunnyLogger } from '~/lib/logger'
+import { getTweetByUrl, getTweetMedia } from '~/lib/react-tweet'
+import { captureWithFeature } from '~/lib/sentry'
+import { baseLocale } from '~/paraglide/runtime'
+import { logAuditAction } from '~/server/audit'
+import { clearRecommendCache } from '~/server/meme'
+import { adminRequiredMiddleware } from '~/server/user-auth'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { setResponseStatus } from '@tanstack/react-start/server'

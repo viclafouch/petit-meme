@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { XIcon } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '~/lib/utils'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 
 const Dialog = ({

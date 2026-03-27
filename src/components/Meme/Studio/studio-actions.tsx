@@ -1,11 +1,11 @@
 import { Download, Share2, Sparkles } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
-import { LoadingButton } from '@/components/ui/loading-button'
-import type { ProcessedData } from '@/hooks/use-video-processor'
-import { m } from '@/paraglide/messages.js'
-import { downloadBlob, shareBlob } from '@/utils/download'
+import { Button } from '~/components/ui/button'
+import { LoadingButton } from '~/components/ui/loading-button'
+import type { ProcessedData } from '~/hooks/use-video-processor'
+import { m } from '~/paraglide/messages.js'
+import { downloadBlob, shareBlob } from '~/utils/download'
 
 type StudioMobileActionsParams = {
   processedData: ProcessedData

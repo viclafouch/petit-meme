@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { m } from '@/paraglide/messages.js'
+import { m } from '~/paraglide/messages.js'
 
 export const PASSWORD_MIN_LENGTH = 8
 export const PASSWORD_MAX_LENGTH = 100

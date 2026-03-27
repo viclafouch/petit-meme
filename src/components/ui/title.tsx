@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
-import { cn } from '@/lib/utils'
+import { cn } from '~/lib/utils'
 
 const titleVariants = cva(
   'font-bricolage text-foreground max-w-4xl text-center font-semibold text-balance mx-auto',

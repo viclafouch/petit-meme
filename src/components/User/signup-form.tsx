@@ -1,26 +1,26 @@
 import { CheckCircle, CircleAlert } from 'lucide-react'
 import { z } from 'zod'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
+import { Checkbox } from '~/components/ui/checkbox'
 import {
   FormControl,
   FormItem,
   FormLabel,
   FormMessage
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { LoadingButton } from '@/components/ui/loading-button'
-import { getPasswordWithConfirmationSchema } from '@/constants/auth'
+} from '~/components/ui/form'
+import { Input } from '~/components/ui/input'
+import { LoadingButton } from '~/components/ui/loading-button'
+import { getPasswordWithConfirmationSchema } from '~/constants/auth'
 import {
   extractAuthErrorCode,
   getAuthErrorMessage
-} from '@/helpers/auth-errors'
-import { useErrorFocus } from '@/hooks/use-error-focus'
-import { authClient } from '@/lib/auth-client'
-import { captureWithFeature } from '@/lib/sentry'
-import { getFieldErrorMessage } from '@/lib/utils'
-import { m } from '@/paraglide/messages.js'
-import { localizeHref } from '@/paraglide/runtime'
+} from '~/helpers/auth-errors'
+import { useErrorFocus } from '~/hooks/use-error-focus'
+import { authClient } from '~/lib/auth-client'
+import { captureWithFeature } from '~/lib/sentry'
+import { getFieldErrorMessage } from '~/lib/utils'
+import { m } from '~/paraglide/messages.js'
+import { localizeHref } from '~/paraglide/runtime'
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'

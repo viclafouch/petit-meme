@@ -10,29 +10,29 @@ import {
   Shuffle
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { MemeLanguageBadge } from '@/components/Meme/meme-language-badge'
-import { MemeVideoPlayer } from '@/components/Meme/meme-video-player'
-import { MemesList } from '@/components/Meme/memes-list'
-import ToggleLikeButton from '@/components/Meme/toggle-like-button'
-import { Badge } from '@/components/ui/badge'
-import { Button, buttonVariants } from '@/components/ui/button'
-import type { MemeFullData } from '@/constants/meme'
-import { useMemeExport } from '@/hooks/use-meme-export'
-import { useMemeHls } from '@/hooks/use-meme-hls'
-import { useRegisterMemeView } from '@/hooks/use-register-meme-view'
-import { buildVideoImageUrl, buildVideoOriginalUrl } from '@/lib/bunny'
-import { getMemeByIdQueryOpts, getRelatedMemesQueryOpts } from '@/lib/queries'
-import { matchIsUserAdmin } from '@/lib/role'
+import { MemeLanguageBadge } from '~/components/Meme/meme-language-badge'
+import { MemeVideoPlayer } from '~/components/Meme/meme-video-player'
+import { MemesList } from '~/components/Meme/memes-list'
+import ToggleLikeButton from '~/components/Meme/toggle-like-button'
+import { Badge } from '~/components/ui/badge'
+import { Button, buttonVariants } from '~/components/ui/button'
+import type { MemeFullData } from '~/constants/meme'
+import { useMemeExport } from '~/hooks/use-meme-export'
+import { useMemeHls } from '~/hooks/use-meme-hls'
+import { useRegisterMemeView } from '~/hooks/use-register-meme-view'
+import { buildVideoImageUrl, buildVideoOriginalUrl } from '~/lib/bunny'
+import { getMemeByIdQueryOpts, getRelatedMemesQueryOpts } from '~/lib/queries'
+import { matchIsUserAdmin } from '~/lib/role'
 import {
   buildBreadcrumbJsonLd,
   buildMemeJsonLd,
   buildMemeSeo,
   buildUrl
-} from '@/lib/seo'
-import { cn } from '@/lib/utils'
-import { m } from '@/paraglide/messages.js'
-import { getLocale } from '@/paraglide/runtime'
-import { getRandomMeme, trackMemeAction } from '@/server/meme'
+} from '~/lib/seo'
+import { cn } from '~/lib/utils'
+import { m } from '~/paraglide/messages.js'
+import { getLocale } from '~/paraglide/runtime'
+import { getRandomMeme, trackMemeAction } from '~/server/meme'
 import { useMutation, useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import {
   createFileRoute,

@@ -1,6 +1,6 @@
 import React from 'react'
-import { Input } from '@/components/ui/input'
-import { m } from '@/paraglide/messages.js'
+import { Input } from '~/components/ui/input'
+import { m } from '~/paraglide/messages.js'
 
 type MemesQueryParams = {
   query: string

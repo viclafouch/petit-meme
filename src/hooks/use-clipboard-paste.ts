@@ -1,5 +1,5 @@
 import { toast } from 'sonner'
-import { m } from '@/paraglide/messages'
+import { m } from '~/paraglide/messages'
 import { useMutation } from '@tanstack/react-query'
 
 const RESET_DELAY_MS = 3000

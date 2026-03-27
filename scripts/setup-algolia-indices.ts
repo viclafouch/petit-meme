@@ -6,9 +6,9 @@ import {
   resolveAlgoliaReplicaCreated,
   resolveAlgoliaReplicaPopular,
   resolveAlgoliaReplicaRecent
-} from '@/lib/algolia'
-import type { Locale } from '@/paraglide/runtime'
-import { locales } from '@/paraglide/runtime'
+} from '~/lib/algolia'
+import type { Locale } from '~/paraglide/runtime'
+import { locales } from '~/paraglide/runtime'
 import type { SupportedLanguage } from '@algolia/client-search'
 import { logEnvironmentInfo } from './lib/env-guard'
 

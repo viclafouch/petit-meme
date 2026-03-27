@@ -1,12 +1,12 @@
 import type { User } from 'better-auth'
 import { Calendar, Mail } from 'lucide-react'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
-import { DEFAULT_AVATAR_URL } from '@/constants/avatar'
-import { m } from '@/paraglide/messages.js'
-import { getLocale } from '@/paraglide/runtime'
-import type { ActiveSubscription } from '@/server/customer'
+import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
+import { Badge } from '~/components/ui/badge'
+import { Card, CardContent } from '~/components/ui/card'
+import { DEFAULT_AVATAR_URL } from '~/constants/avatar'
+import { m } from '~/paraglide/messages.js'
+import { getLocale } from '~/paraglide/runtime'
+import type { ActiveSubscription } from '~/server/customer'
 
 export const ProfileHeader = ({
   user,

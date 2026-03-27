@@ -1,24 +1,24 @@
 import { CircleAlert } from 'lucide-react'
 import { toast } from 'sonner'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription } from '~/components/ui/alert'
 import {
   FormControl,
   FormItem,
   FormLabel,
   FormMessage
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { LoadingButton } from '@/components/ui/loading-button'
-import { getPasswordWithConfirmationSchema } from '@/constants/auth'
+} from '~/components/ui/form'
+import { Input } from '~/components/ui/input'
+import { LoadingButton } from '~/components/ui/loading-button'
+import { getPasswordWithConfirmationSchema } from '~/constants/auth'
 import {
   extractAuthErrorCode,
   getAuthErrorMessage
-} from '@/helpers/auth-errors'
-import { useErrorFocus } from '@/hooks/use-error-focus'
-import { authClient } from '@/lib/auth-client'
-import { captureWithFeature } from '@/lib/sentry'
-import { getFieldErrorMessage } from '@/lib/utils'
-import { m } from '@/paraglide/messages.js'
+} from '~/helpers/auth-errors'
+import { useErrorFocus } from '~/hooks/use-error-focus'
+import { authClient } from '~/lib/auth-client'
+import { captureWithFeature } from '~/lib/sentry'
+import { getFieldErrorMessage } from '~/lib/utils'
+import { m } from '~/paraglide/messages.js'
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'

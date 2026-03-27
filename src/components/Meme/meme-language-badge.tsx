@@ -1,7 +1,7 @@
-import { CONTENT_LOCALE_FLAGS } from '@/components/icon/flags'
-import type { MemeContentLocale } from '@/db/generated/prisma/enums'
-import { getContentLocaleLabel } from '@/helpers/i18n-content'
-import { m } from '@/paraglide/messages.js'
+import { CONTENT_LOCALE_FLAGS } from '~/components/icon/flags'
+import type { MemeContentLocale } from '~/db/generated/prisma/enums'
+import { getContentLocaleLabel } from '~/helpers/i18n-content'
+import { m } from '~/paraglide/messages.js'
 
 type MemeLanguageBadgeParams = {
   contentLocale: Exclude<MemeContentLocale, 'UNIVERSAL'>

@@ -1,5 +1,5 @@
 import React from 'react'
-import { LoadingSpinner } from '@/components/ui/spinner'
+import { LoadingSpinner } from '~/components/ui/spinner'
 
 export const OverlaySpinner = (props: React.ComponentProps<'div'>) => {
   return (

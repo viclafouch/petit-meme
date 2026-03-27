@@ -5,7 +5,7 @@
 import * as React from 'react'
 import { useEffect, useImperativeHandle, useRef } from 'react'
 import { CheckIcon, ChevronDown, X } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { Badge } from '~/components/ui/badge'
 import {
   Command,
   CommandEmpty,
@@ -14,15 +14,15 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator
-} from '@/components/ui/command'
+} from '~/components/ui/command'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger
-} from '@/components/ui/popover'
-import { Separator } from '@/components/ui/separator'
-import { LoadingSpinner } from '@/components/ui/spinner'
-import { cn } from '@/lib/utils'
+} from '~/components/ui/popover'
+import { Separator } from '~/components/ui/separator'
+import { LoadingSpinner } from '~/components/ui/spinner'
+import { cn } from '~/lib/utils'
 import type { PopoverContentProps } from '@radix-ui/react-popover'
 
 export type Option = {

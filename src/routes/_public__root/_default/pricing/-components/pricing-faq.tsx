@@ -1,5 +1,5 @@
-import { FaqSection } from '@/components/faq-section'
-import { m } from '@/paraglide/messages.js'
+import { FaqSection } from '~/components/faq-section'
+import { m } from '~/paraglide/messages.js'
 import { getPricingFaqItems } from './constants'
 
 export const PricingFaq = () => {

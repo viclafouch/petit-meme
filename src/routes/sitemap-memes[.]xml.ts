@@ -1,17 +1,17 @@
-import { MEME_TRANSLATION_SELECT } from '@/constants/meme'
-import { prismaClient } from '@/db'
+import { MEME_TRANSLATION_SELECT } from '~/constants/meme'
+import { prismaClient } from '~/db'
 import {
   CONTENT_LOCALE_TO_SITE_LOCALES,
   resolveMemeTranslation
-} from '@/helpers/i18n-content'
-import { buildVideoImageUrl, buildVideoOriginalUrl } from '@/lib/bunny'
-import { buildUrl } from '@/lib/seo'
+} from '~/helpers/i18n-content'
+import { buildVideoImageUrl, buildVideoOriginalUrl } from '~/lib/bunny'
+import { buildUrl } from '~/lib/seo'
 import {
   buildSitemapResponse,
   buildUrlEntry,
   VIDEO_SITEMAP_NAMESPACES,
   wrapUrlset
-} from '@/lib/sitemap'
+} from '~/lib/sitemap'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/sitemap-memes.xml')({

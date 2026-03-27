@@ -1,17 +1,18 @@
 import React from 'react'
 import { toast } from 'sonner'
-import { ConfirmAlertDialog } from '@/components/confirm-alert-dialog'
-import { Button } from '@/components/ui/button'
-import type { Meme } from '@/db/generated/prisma/client'
-import { getErrorMessage } from '@/helpers/error'
+import { ConfirmAlertDialog } from '~/components/confirm-alert-dialog'
+import { Button } from '~/components/ui/button'
+import type { Meme } from '~/db/generated/prisma/client'
+import { getErrorMessage } from '~/helpers/error'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useRouter } from '@tanstack/react-router'
+
 import {
   getAdminDashboardTotalsQueryOpts,
   getAdminMemeByIdQueryOpts,
   getAdminMemesListQueryOpts
-} from '@admin/-lib/queries'
-import { deleteMemeById } from '@admin/-server/memes'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useRouter } from '@tanstack/react-router'
+} from '~admin/-lib/queries'
+import { deleteMemeById } from '~admin/-server/memes'
 
 type DeleteMemeButtonProps = {
   meme: Meme

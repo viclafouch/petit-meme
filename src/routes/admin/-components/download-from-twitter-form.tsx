@@ -1,6 +1,6 @@
 import { toast } from 'sonner'
 import { z } from 'zod'
-import { ClipboardPasteInput } from '@/components/clipboard-paste-input'
+import { ClipboardPasteInput } from '~/components/clipboard-paste-input'
 import {
   Card,
   CardContent,
@@ -8,16 +8,16 @@ import {
   CardFooter,
   CardHeader,
   CardTitle
-} from '@/components/ui/card'
-import { FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { LoadingButton } from '@/components/ui/loading-button'
-import { TWEET_LINK_SCHEMA } from '@/constants/url'
-import { base64ToBlob } from '@/helpers/blob'
-import { getErrorMessage } from '@/helpers/error'
-import { captureWithFeature } from '@/lib/sentry'
-import { getFieldErrorMessage } from '@/lib/utils'
-import { fetchTweetVideo, getTweetFromUrl } from '@/server/twitter'
-import { downloadBlob } from '@/utils/download'
+} from '~/components/ui/card'
+import { FormItem, FormLabel, FormMessage } from '~/components/ui/form'
+import { LoadingButton } from '~/components/ui/loading-button'
+import { TWEET_LINK_SCHEMA } from '~/constants/url'
+import { base64ToBlob } from '~/helpers/blob'
+import { getErrorMessage } from '~/helpers/error'
+import { captureWithFeature } from '~/lib/sentry'
+import { getFieldErrorMessage } from '~/lib/utils'
+import { fetchTweetVideo, getTweetFromUrl } from '~/server/twitter'
+import { downloadBlob } from '~/utils/download'
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 

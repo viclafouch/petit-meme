@@ -1,13 +1,12 @@
 import { Plus } from 'lucide-react'
-import { PageHeader } from '@/components/page-header'
-import { Badge } from '@/components/ui/badge'
-import { Container } from '@/components/ui/container'
-import { formatDate } from '@/helpers/date'
-import { baseLocale, getLocale } from '@/paraglide/runtime'
-import { AddCategoryButton } from '@/routes/admin/categories/-components/add-category-button'
-import { CategoryDropdown } from '@/routes/admin/categories/-components/category-dropdown'
-import { type EnrichedCategory, getCategories } from '@/server/categories'
-import { AdminTable, getRowId, PAGE_SIZE } from '@admin/-components/admin-table'
+import { PageHeader } from '~/components/page-header'
+import { Badge } from '~/components/ui/badge'
+import { Container } from '~/components/ui/container'
+import { formatDate } from '~/helpers/date'
+import { baseLocale, getLocale } from '~/paraglide/runtime'
+import { AddCategoryButton } from '~/routes/admin/categories/-components/add-category-button'
+import { CategoryDropdown } from '~/routes/admin/categories/-components/category-dropdown'
+import { type EnrichedCategory, getCategories } from '~/server/categories'
 import { createFileRoute } from '@tanstack/react-router'
 import {
   createColumnHelper,
@@ -16,6 +15,8 @@ import {
   getSortedRowModel,
   useReactTable
 } from '@tanstack/react-table'
+
+import { AdminTable, getRowId, PAGE_SIZE } from '~admin/-components/admin-table'
 
 const columnHelper = createColumnHelper<EnrichedCategory>()
 

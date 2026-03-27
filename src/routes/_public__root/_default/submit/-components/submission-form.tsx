@@ -1,39 +1,39 @@
 import { CircleAlert } from 'lucide-react'
 import { toast } from 'sonner'
 import type { z } from 'zod'
-import { ClipboardPasteInput } from '@/components/clipboard-paste-input'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Checkbox } from '@/components/ui/checkbox'
+import { ClipboardPasteInput } from '~/components/clipboard-paste-input'
+import { Alert, AlertDescription } from '~/components/ui/alert'
+import { Checkbox } from '~/components/ui/checkbox'
 import {
   FormControl,
   FormItem,
   FormLabel,
   FormMessage
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { LoadingButton } from '@/components/ui/loading-button'
+} from '~/components/ui/form'
+import { Input } from '~/components/ui/input'
+import { LoadingButton } from '~/components/ui/loading-button'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@/components/ui/select'
-import type { StudioErrorCode } from '@/constants/error'
-import { getStudioErrorCode } from '@/constants/error'
+} from '~/components/ui/select'
+import type { StudioErrorCode } from '~/constants/error'
+import { getStudioErrorCode } from '~/constants/error'
 import {
   CREATE_MEME_SUBMISSION_SCHEMA,
   MAX_PENDING_SUBMISSIONS
-} from '@/constants/meme-submission'
-import { MemeContentLocale } from '@/db/generated/prisma/enums'
-import { getErrorMessage, matchIsRateLimitError } from '@/helpers/error'
-import { getContentLocaleOptions } from '@/helpers/i18n-content'
-import { useErrorFocus } from '@/hooks/use-error-focus'
-import { getUserSubmissionsQueryOpts } from '@/lib/queries'
-import { captureWithFeature } from '@/lib/sentry'
-import { getFieldErrorMessage } from '@/lib/utils'
-import { m } from '@/paraglide/messages'
-import { createMemeSubmission } from '@/server/meme-submission'
+} from '~/constants/meme-submission'
+import { MemeContentLocale } from '~/db/generated/prisma/enums'
+import { getErrorMessage, matchIsRateLimitError } from '~/helpers/error'
+import { getContentLocaleOptions } from '~/helpers/i18n-content'
+import { useErrorFocus } from '~/hooks/use-error-focus'
+import { getUserSubmissionsQueryOpts } from '~/lib/queries'
+import { captureWithFeature } from '~/lib/sentry'
+import { getFieldErrorMessage } from '~/lib/utils'
+import { m } from '~/paraglide/messages'
+import { createMemeSubmission } from '~/server/meme-submission'
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'

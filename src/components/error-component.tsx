@@ -5,11 +5,11 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger
-} from '@/components/ui/accordion'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { IS_PRODUCTION } from '@/constants/env'
-import { m } from '@/paraglide/messages.js'
+} from '~/components/ui/accordion'
+import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
+import { Button } from '~/components/ui/button'
+import { IS_PRODUCTION } from '~/constants/env'
+import { m } from '~/paraglide/messages.js'
 import * as Sentry from '@sentry/tanstackstart-react'
 import { useQueryErrorResetBoundary } from '@tanstack/react-query'
 import { Link, useRouter } from '@tanstack/react-router'

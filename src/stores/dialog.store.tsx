@@ -1,7 +1,7 @@
 import React from 'react'
 import { create } from 'zustand'
-import type { WithDialog } from '@/@types/dialog'
-import { OverlaySpinner } from '@/components/ui/overlay-spinner'
+import type { WithDialog } from '~/@types/dialog'
+import { OverlaySpinner } from '~/components/ui/overlay-spinner'
 import { ClientOnly } from '@tanstack/react-router'
 
 type DialogEntry = {
@@ -13,7 +13,7 @@ export const DIALOGS = {
   auth: {
     component: React.lazy(async () => {
       return {
-        default: await import('@/components/User/auth-dialog').then((mod) => {
+        default: await import('~/components/User/auth-dialog').then((mod) => {
           return mod.AuthDialog
         })
       }
@@ -22,7 +22,7 @@ export const DIALOGS = {
   'watermark-upsell': {
     component: React.lazy(async () => {
       return {
-        default: await import('@/components/Meme/watermark-upsell-dialog').then(
+        default: await import('~/components/Meme/watermark-upsell-dialog').then(
           (mod) => {
             return mod.WatermarkUpsellDialog
           }

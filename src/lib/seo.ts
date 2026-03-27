@@ -16,26 +16,26 @@ import type {
   WebSite,
   WithContext
 } from 'schema-dts'
-import type { FaqItem } from '@/components/faq-section'
-import { LOGO_PATH } from '@/constants/branding'
-import type { MemeWithCategories, MemeWithVideo } from '@/constants/meme'
-import type { Plan } from '@/constants/plan'
-import type { CategoryModel } from '@/db/generated/prisma/models'
-import { clientEnv } from '@/env/client'
-import { convertCentsToEuros } from '@/helpers/number'
+import type { FaqItem } from '~/components/faq-section'
+import { LOGO_PATH } from '~/constants/branding'
+import type { MemeWithCategories, MemeWithVideo } from '~/constants/meme'
+import type { Plan } from '~/constants/plan'
+import type { CategoryModel } from '~/db/generated/prisma/models'
+import { clientEnv } from '~/env/client'
+import { convertCentsToEuros } from '~/helpers/number'
 import {
   buildIframeVideoUrl,
   buildVideoImageUrl,
   buildVideoOriginalUrl
-} from '@/lib/bunny'
-import { m } from '@/paraglide/messages.js'
-import type { Locale } from '@/paraglide/runtime'
+} from '~/lib/bunny'
+import { m } from '~/paraglide/messages.js'
+import type { Locale } from '~/paraglide/runtime'
 import {
   baseLocale,
   getLocale,
   locales,
   localizeUrl
-} from '@/paraglide/runtime'
+} from '~/paraglide/runtime'
 import type { AnyRouteMatch } from '@tanstack/react-router'
 
 export const websiteOrigin = clientEnv.VITE_SITE_URL

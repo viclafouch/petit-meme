@@ -8,8 +8,8 @@ import {
   Star,
   User
 } from 'lucide-react'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
+import { Button } from '~/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,18 +18,18 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { DEFAULT_AVATAR_URL } from '@/constants/avatar'
-import { getUserInitials } from '@/helpers/format'
-import { useSignOut } from '@/hooks/use-sign-out'
-import { useStripeCheckout } from '@/hooks/use-stripe-checkout'
+} from '~/components/ui/dropdown-menu'
+import { DEFAULT_AVATAR_URL } from '~/constants/avatar'
+import { getUserInitials } from '~/helpers/format'
+import { useSignOut } from '~/hooks/use-sign-out'
+import { useStripeCheckout } from '~/hooks/use-stripe-checkout'
 import {
   getActiveSubscriptionQueryOpts,
   getFavoritesMemesQueryOpts
-} from '@/lib/queries'
-import type { SessionUser } from '@/lib/role'
-import { matchIsUserAdmin } from '@/lib/role'
-import { m } from '@/paraglide/messages.js'
+} from '~/lib/queries'
+import type { SessionUser } from '~/lib/role'
+import { matchIsUserAdmin } from '~/lib/role'
+import { m } from '~/paraglide/messages.js'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 

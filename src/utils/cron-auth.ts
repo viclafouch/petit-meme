@@ -1,5 +1,5 @@
-import { serverEnv } from '@/env/server'
-import { cronLogger } from '@/lib/logger'
+import { serverEnv } from '~/env/server'
+import { cronLogger } from '~/lib/logger'
 
 export const verifyCronSecret = (request: Request): Response | null => {
   const secret = serverEnv.CRON_SECRET

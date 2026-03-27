@@ -1,32 +1,32 @@
 import React from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { AlertTriangleIcon, RefreshCw, Shuffle, Smartphone } from 'lucide-react'
-import { CategoriesList } from '@/components/categories/categories-list'
-import { MemesFilterLanguage } from '@/components/Meme/Filters/memes-filter-language'
-import MemesPagination from '@/components/Meme/Filters/memes-pagination'
-import { MemesQuery } from '@/components/Meme/Filters/memes-query'
-import MemesToggleGrid from '@/components/Meme/Filters/memes-toggle-grid'
-import { MemesList } from '@/components/Meme/memes-list'
-import { Button, buttonVariants } from '@/components/ui/button'
-import { LoadingSpinner } from '@/components/ui/spinner'
-import { getVirtualCategories, type MemesFilters } from '@/constants/meme'
-import type { MemeContentLocale } from '@/db/generated/prisma/enums'
+import { CategoriesList } from '~/components/categories/categories-list'
+import { MemesFilterLanguage } from '~/components/Meme/Filters/memes-filter-language'
+import MemesPagination from '~/components/Meme/Filters/memes-pagination'
+import { MemesQuery } from '~/components/Meme/Filters/memes-query'
+import MemesToggleGrid from '~/components/Meme/Filters/memes-toggle-grid'
+import { MemesList } from '~/components/Meme/memes-list'
+import { Button, buttonVariants } from '~/components/ui/button'
+import { LoadingSpinner } from '~/components/ui/spinner'
+import { getVirtualCategories, type MemesFilters } from '~/constants/meme'
+import type { MemeContentLocale } from '~/db/generated/prisma/enums'
 import {
   parseContentLocalesParam,
   serializeContentLocalesParam
-} from '@/helpers/i18n-content'
+} from '~/helpers/i18n-content'
 import {
   getCategoriesListQueryOpts,
   getMemesListQueryOpts
-} from '@/lib/queries'
-import { buildBreadcrumbJsonLd, buildCategoryJsonLd } from '@/lib/seo'
-import { cn } from '@/lib/utils'
-import { m } from '@/paraglide/messages.js'
-import { getLocale } from '@/paraglide/runtime'
+} from '~/lib/queries'
+import { buildBreadcrumbJsonLd, buildCategoryJsonLd } from '~/lib/seo'
+import { cn } from '~/lib/utils'
+import { m } from '~/paraglide/messages.js'
+import { getLocale } from '~/paraglide/runtime'
 import {
   PageDescription,
   PageHeading
-} from '@/routes/_public__root/-components/page-headers'
+} from '~/routes/_public__root/-components/page-headers'
 import { useDebouncedValue } from '@tanstack/react-pacer'
 import {
   QueryErrorResetBoundary,

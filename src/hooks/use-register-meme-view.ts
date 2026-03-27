@@ -1,6 +1,6 @@
 import * as React from 'react'
-import type { Meme } from '@/db/generated/prisma/client'
-import { registerMemeView } from '@/server/meme'
+import type { Meme } from '~/db/generated/prisma/client'
+import { registerMemeView } from '~/server/meme'
 import * as Sentry from '@sentry/tanstackstart-react'
 
 type UseRegisterMemeViewParams = {

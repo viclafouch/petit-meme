@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import fs from 'node:fs/promises'
-import { prismaClient } from '@/db'
+import { prismaClient } from '~/db'
 import { logEnvironmentInfo } from './lib/env-guard'
 
 const exportJson = async () => {

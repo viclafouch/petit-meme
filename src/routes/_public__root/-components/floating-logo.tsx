@@ -1,8 +1,8 @@
 import React from 'react'
 import type { Variants } from 'motion/react'
 import { motion, useReducedMotion } from 'motion/react'
-import LogoCarousel from '@/components/ui/logo-carousel'
-import { logos } from '@/constants/config'
+import LogoCarousel from '~/components/ui/logo-carousel'
+import { logos } from '~/constants/config'
 
 const logoPositions = [
   { x: 'left-0', y: 'top-0', duration: 8000, delay: 0 },

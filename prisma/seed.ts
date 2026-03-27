@@ -1,24 +1,24 @@
 /* eslint-disable no-console */
 import { hashPassword } from 'better-auth/crypto'
 import { z } from 'zod'
-import { MEME_ALGOLIA_INCLUDE } from '@/constants/meme'
-import { prismaClient } from '@/db'
-import { clientEnv } from '@/env/client'
+import { MEME_ALGOLIA_INCLUDE } from '~/constants/meme'
+import { prismaClient } from '~/db'
+import { clientEnv } from '~/env/client'
 import {
   algoliaAdminClient,
   resolveAlgoliaIndexName,
   syncMemeToAllIndices
-} from '@/lib/algolia'
+} from '~/lib/algolia'
 import {
   createVideo,
   deleteVideo,
   getBunnyHeaders,
   uploadVideo
-} from '@/lib/bunny'
-import { getTweetByUrl, getTweetMedia } from '@/lib/react-tweet'
-import { stripeClient } from '@/lib/stripe'
-import { fetchWithZod } from '@/lib/utils'
-import { locales } from '@/paraglide/runtime'
+} from '~/lib/bunny'
+import { getTweetByUrl, getTweetMedia } from '~/lib/react-tweet'
+import { stripeClient } from '~/lib/stripe'
+import { fetchWithZod } from '~/lib/utils'
+import { locales } from '~/paraglide/runtime'
 import { logEnvironmentInfo } from '../scripts/lib/env-guard'
 import mocks from './seed-mock.json' with { type: 'json' }
 

@@ -1,26 +1,26 @@
 import React from 'react'
 import { CheckCircle2, Download, Share2, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
-import type { WithDialog } from '@/@types/dialog'
+import type { WithDialog } from '~/@types/dialog'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle
-} from '@/components/animate-ui/radix/dialog'
-import { Button } from '@/components/ui/button'
-import { LoadingSpinner } from '@/components/ui/spinner'
-import type { MemeWithVideo } from '@/constants/meme'
-import { getPremiumPlan, PREMIUM_PLAN_PRICING } from '@/constants/plan'
-import { getErrorMessage } from '@/helpers/error'
-import { formatCentsToEuros } from '@/helpers/number'
-import type { MemeExportMode } from '@/hooks/use-meme-export'
-import { captureWithFeature } from '@/lib/sentry'
-import { m } from '@/paraglide/messages.js'
-import { getLocale } from '@/paraglide/runtime'
-import { shareMeme, trackMemeAction } from '@/server/meme'
-import { downloadBlob, shareBlob } from '@/utils/download'
+} from '~/components/animate-ui/radix/dialog'
+import { Button } from '~/components/ui/button'
+import { LoadingSpinner } from '~/components/ui/spinner'
+import type { MemeWithVideo } from '~/constants/meme'
+import { getPremiumPlan, PREMIUM_PLAN_PRICING } from '~/constants/plan'
+import { getErrorMessage } from '~/helpers/error'
+import { formatCentsToEuros } from '~/helpers/number'
+import type { MemeExportMode } from '~/hooks/use-meme-export'
+import { captureWithFeature } from '~/lib/sentry'
+import { m } from '~/paraglide/messages.js'
+import { getLocale } from '~/paraglide/runtime'
+import { shareMeme, trackMemeAction } from '~/server/meme'
+import { downloadBlob, shareBlob } from '~/utils/download'
 import { useMutation } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 

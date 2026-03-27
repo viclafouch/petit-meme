@@ -1,9 +1,9 @@
-import type { StudioTemplate } from '@/constants/studio'
-import { getStudioTemplates, STUDIO_FONTS } from '@/constants/studio'
-import { buildVideoImageUrl } from '@/lib/bunny'
-import { cn } from '@/lib/utils'
-import { m } from '@/paraglide/messages.js'
-import { useStudioStore } from '@/stores/studio.store'
+import type { StudioTemplate } from '~/constants/studio'
+import { getStudioTemplates, STUDIO_FONTS } from '~/constants/studio'
+import { buildVideoImageUrl } from '~/lib/bunny'
+import { cn } from '~/lib/utils'
+import { m } from '~/paraglide/messages.js'
+import { useStudioStore } from '~/stores/studio.store'
 
 const PREVIEW_FONT_SIZE = 14
 

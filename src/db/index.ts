@@ -1,4 +1,4 @@
-import { IS_PRODUCTION } from '@/constants/env'
+import { IS_PRODUCTION } from '~/constants/env'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from './generated/prisma/client'
 

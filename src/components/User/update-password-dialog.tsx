@@ -1,7 +1,7 @@
 import type { User } from 'better-auth'
 import { CircleAlert } from 'lucide-react'
 import { z } from 'zod'
-import type { WithDialog } from '@/@types/dialog'
+import type { WithDialog } from '~/@types/dialog'
 import {
   Dialog,
   DialogContent,
@@ -9,25 +9,25 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/animate-ui/radix/dialog'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+} from '~/components/animate-ui/radix/dialog'
+import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
 import {
   FormControl,
   FormItem,
   FormLabel,
   FormMessage
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { LoadingButton } from '@/components/ui/loading-button'
+} from '~/components/ui/form'
+import { Input } from '~/components/ui/input'
+import { LoadingButton } from '~/components/ui/loading-button'
 import {
   extractAuthErrorCode,
   getChangePasswordErrorMessage
-} from '@/helpers/auth-errors'
-import { useErrorFocus } from '@/hooks/use-error-focus'
-import { authClient } from '@/lib/auth-client'
-import { captureWithFeature } from '@/lib/sentry'
-import { getFieldErrorMessage } from '@/lib/utils'
-import { m } from '@/paraglide/messages.js'
+} from '~/helpers/auth-errors'
+import { useErrorFocus } from '~/hooks/use-error-focus'
+import { authClient } from '~/lib/auth-client'
+import { captureWithFeature } from '~/lib/sentry'
+import { getFieldErrorMessage } from '~/lib/utils'
+import { m } from '~/paraglide/messages.js'
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 

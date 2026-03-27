@@ -7,18 +7,19 @@ import {
   CardDescription,
   CardHeader,
   CardTitle
-} from '@/components/ui/card'
-import type { ChartConfig } from '@/components/ui/chart'
+} from '~/components/ui/card'
+import type { ChartConfig } from '~/components/ui/chart'
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent
-} from '@/components/ui/chart'
-import { formatDate } from '@/helpers/date'
-import type { Locale } from '@/paraglide/runtime'
-import { getLocale } from '@/paraglide/runtime'
-import type { ChartDataPoint, DashboardPeriod } from '@admin/-server/dashboard'
+} from '~/components/ui/chart'
+import { formatDate } from '~/helpers/date'
+import type { Locale } from '~/paraglide/runtime'
+import { getLocale } from '~/paraglide/runtime'
 import type { IconConfig } from './types'
+
+import type { ChartDataPoint, DashboardPeriod } from '~admin/-server/dashboard'
 
 type MetricKey = keyof Omit<ChartDataPoint, 'date'>
 

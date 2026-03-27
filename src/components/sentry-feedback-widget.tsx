@@ -1,7 +1,7 @@
 import React from 'react'
 import { MessageSquarePlus } from 'lucide-react'
 import { motion } from 'motion/react'
-import { m } from '@/paraglide/messages.js'
+import { m } from '~/paraglide/messages.js'
 import * as Sentry from '@sentry/tanstackstart-react'
 import { ClientOnly } from '@tanstack/react-router'
 

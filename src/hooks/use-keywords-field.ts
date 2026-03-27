@@ -1,6 +1,6 @@
 import React from 'react'
-import { parseKeywordsInput } from '@/helpers/keywords'
-import { removeDuplicates } from '@/utils/array'
+import { parseKeywordsInput } from '~/helpers/keywords'
+import { removeDuplicates } from '~/utils/array'
 
 type UseKeywordsFieldParams = {
   setKeywordsValue: (updater: (prev: string[]) => string[]) => void

@@ -1,9 +1,9 @@
-import type { MemesFilters } from '@/constants/meme'
-import { MINUTE } from '@/constants/time'
-import type { Meme, Video } from '@/db/generated/prisma/client'
-import type { Locale } from '@/paraglide/runtime'
-import { getCategories } from '@/server/categories'
-import { getActiveSubscription } from '@/server/customer'
+import type { MemesFilters } from '~/constants/meme'
+import { MINUTE } from '~/constants/time'
+import type { Meme, Video } from '~/db/generated/prisma/client'
+import type { Locale } from '~/paraglide/runtime'
+import { getCategories } from '~/server/categories'
+import { getActiveSubscription } from '~/server/customer'
 import {
   getMemeById,
   getMemes,
@@ -12,11 +12,11 @@ import {
   getTrendingMemes,
   getVideoStatusById,
   shareMeme
-} from '@/server/meme'
-import { getUserSubmissions } from '@/server/meme-submission'
-import { getInfiniteReels } from '@/server/reels'
-import { getFavoritesMemes } from '@/server/user'
-import { getAuthUser } from '@/server/user-auth'
+} from '~/server/meme'
+import { getUserSubmissions } from '~/server/meme-submission'
+import { getInfiniteReels } from '~/server/reels'
+import { getFavoritesMemes } from '~/server/user'
+import { getAuthUser } from '~/server/user-auth'
 import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
 
 export const getMemesListQueryOpts = (filters: MemesFilters) => {

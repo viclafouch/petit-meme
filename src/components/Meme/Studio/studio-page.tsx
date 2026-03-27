@@ -4,30 +4,30 @@ import { toast } from 'sonner'
 import {
   StudioActions,
   StudioMobileActions
-} from '@/components/Meme/Studio/studio-actions'
-import { StudioControls } from '@/components/Meme/Studio/studio-controls'
-import { StudioPreview } from '@/components/Meme/Studio/studio-preview'
-import { StudioRelatedMemes } from '@/components/Meme/Studio/studio-related-memes'
-import { Button, buttonVariants } from '@/components/ui/button'
+} from '~/components/Meme/Studio/studio-actions'
+import { StudioControls } from '~/components/Meme/Studio/studio-controls'
+import { StudioPreview } from '~/components/Meme/Studio/studio-preview'
+import { StudioRelatedMemes } from '~/components/Meme/Studio/studio-related-memes'
+import { Button, buttonVariants } from '~/components/ui/button'
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle
-} from '@/components/ui/drawer'
-import { Input } from '@/components/ui/input'
-import { LoadingButton } from '@/components/ui/loading-button'
-import { Separator } from '@/components/ui/separator'
-import { LOGO_PATH } from '@/constants/branding'
-import type { MemeWithVideo } from '@/constants/meme'
-import { STUDIO_TEXT_MAX_LENGTH } from '@/constants/studio'
+} from '~/components/ui/drawer'
+import { Input } from '~/components/ui/input'
+import { LoadingButton } from '~/components/ui/loading-button'
+import { Separator } from '~/components/ui/separator'
+import { LOGO_PATH } from '~/constants/branding'
+import type { MemeWithVideo } from '~/constants/meme'
+import { STUDIO_TEXT_MAX_LENGTH } from '~/constants/studio'
 import {
   useVideoInitializer,
   useVideoPreloader,
   useVideoProcessor
-} from '@/hooks/use-video-processor'
-import { m } from '@/paraglide/messages.js'
-import { useStudioStore } from '@/stores/studio.store'
+} from '~/hooks/use-video-processor'
+import { m } from '~/paraglide/messages.js'
+import { useStudioStore } from '~/stores/studio.store'
 import { Link } from '@tanstack/react-router'
 
 type StudioBrandingParams = {

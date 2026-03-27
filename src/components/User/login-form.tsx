@@ -1,29 +1,29 @@
 import React from 'react'
 import { CircleAlert } from 'lucide-react'
 import { z } from 'zod'
-import { XTwitterIcon } from '@/components/icon'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
+import { XTwitterIcon } from '~/components/icon'
+import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
+import { Button } from '~/components/ui/button'
 import {
   FormControl,
   FormItem,
   FormLabel,
   FormMessage
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { LoadingButton } from '@/components/ui/loading-button'
+} from '~/components/ui/form'
+import { Input } from '~/components/ui/input'
+import { LoadingButton } from '~/components/ui/loading-button'
 import {
   extractAuthErrorCode,
   getAuthErrorMessage
-} from '@/helpers/auth-errors'
-import { authClient } from '@/lib/auth-client'
+} from '~/helpers/auth-errors'
+import { authClient } from '~/lib/auth-client'
 import {
   getActiveSubscriptionQueryOpts,
   getAuthUserQueryOpts
-} from '@/lib/queries'
-import { captureWithFeature } from '@/lib/sentry'
-import { getFieldErrorMessage } from '@/lib/utils'
-import { m } from '@/paraglide/messages.js'
+} from '~/lib/queries'
+import { captureWithFeature } from '~/lib/sentry'
+import { getFieldErrorMessage } from '~/lib/utils'
+import { m } from '~/paraglide/messages.js'
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link, useRouter } from '@tanstack/react-router'

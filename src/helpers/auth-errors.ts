@@ -1,6 +1,6 @@
-import { PASSWORD_MIN_LENGTH } from '@/constants/auth'
-import type { authClient } from '@/lib/auth-client'
-import { m } from '@/paraglide/messages.js'
+import { PASSWORD_MIN_LENGTH } from '~/constants/auth'
+import type { authClient } from '~/lib/auth-client'
+import { m } from '~/paraglide/messages.js'
 
 type AuthErrorCode = keyof typeof authClient.$ERROR_CODES
 

@@ -1,10 +1,10 @@
-import { VideoOverlay } from '@/components/Meme/video-overlay'
+import { VideoOverlay } from '~/components/Meme/video-overlay'
 import {
   VideoPlayer,
   VideoPlayerContent,
   type VideoPlayerContentProps
-} from '@/components/ui/kibo-ui/video-player'
-import { cn } from '@/lib/utils'
+} from '~/components/ui/kibo-ui/video-player'
+import { cn } from '~/lib/utils'
 import { ClientOnly } from '@tanstack/react-router'
 
 type MemeVideoPlayerParams = {

@@ -4,8 +4,8 @@ import {
   PaginationItem,
   PaginationNext,
   PaginationPrevious
-} from '@/components/ui/pagination'
-import { generatePaginationLinks } from '@/utils/generate-pagination'
+} from '~/components/ui/pagination'
+import { generatePaginationLinks } from '~/utils/generate-pagination'
 import type { LinkProps } from '@tanstack/react-router'
 
 export type PaginatorProps = {

@@ -1,21 +1,22 @@
 import { toast } from 'sonner'
 import type { z } from 'zod'
-import type { MemeFullData } from '@/constants/meme'
-import type { Meme } from '@/db/generated/prisma/client'
-import { getErrorMessage } from '@/helpers/error'
+import type { MemeFullData } from '~/constants/meme'
+import type { Meme } from '~/db/generated/prisma/client'
+import { getErrorMessage } from '~/helpers/error'
 import {
   buildLocaleRecord,
   findTranslationByLocale,
   getRequiredLocales
-} from '@/helpers/i18n-content'
-import { useKeywordsField } from '@/hooks/use-keywords-field'
-import { getCategoriesListQueryOpts } from '@/lib/queries'
-import { captureWithFeature } from '@/lib/sentry'
-import { baseLocale, type Locale } from '@/paraglide/runtime'
-import { translateMemeContent } from '@/server/ai'
-import { editMeme, MEME_FORM_SCHEMA } from '@admin/-server/memes'
+} from '~/helpers/i18n-content'
+import { useKeywordsField } from '~/hooks/use-keywords-field'
+import { getCategoriesListQueryOpts } from '~/lib/queries'
+import { captureWithFeature } from '~/lib/sentry'
+import { baseLocale, type Locale } from '~/paraglide/runtime'
+import { translateMemeContent } from '~/server/ai'
 import { useForm } from '@tanstack/react-form'
 import { useMutation, useQuery } from '@tanstack/react-query'
+
+import { editMeme, MEME_FORM_SCHEMA } from '~admin/-server/memes'
 
 type UseMemeFormParams = {
   meme: MemeFullData

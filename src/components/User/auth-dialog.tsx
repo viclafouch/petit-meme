@@ -1,6 +1,6 @@
 import React from 'react'
 import { toast } from 'sonner'
-import type { WithDialog } from '@/@types/dialog'
+import type { WithDialog } from '~/@types/dialog'
 import {
   Dialog,
   DialogContent,
@@ -8,14 +8,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/animate-ui/radix/dialog'
-import { LoginForm } from '@/components/User/login-form'
-import { SignupForm } from '@/components/User/signup-form'
-import { getAuthErrorMessage } from '@/helpers/auth-errors'
-import { authClient } from '@/lib/auth-client'
-import { captureWithFeature } from '@/lib/sentry'
-import { m } from '@/paraglide/messages.js'
-import { localizeHref } from '@/paraglide/runtime'
+} from '~/components/animate-ui/radix/dialog'
+import { LoginForm } from '~/components/User/login-form'
+import { SignupForm } from '~/components/User/signup-form'
+import { getAuthErrorMessage } from '~/helpers/auth-errors'
+import { authClient } from '~/lib/auth-client'
+import { captureWithFeature } from '~/lib/sentry'
+import { m } from '~/paraglide/messages.js'
+import { localizeHref } from '~/paraglide/runtime'
 
 export const AuthDialog = ({ open, onOpenChange }: WithDialog<unknown>) => {
   const [authType, setAuthType] = React.useState<'login' | 'signup'>('login')

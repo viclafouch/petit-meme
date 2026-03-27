@@ -1,8 +1,8 @@
-import type { RateLimitConfig } from '@/constants/rate-limit'
-import { SECOND } from '@/constants/time'
-import { logger } from '@/lib/logger'
-import { captureWithFeature, wrapMiddlewareWithSentry } from '@/lib/sentry'
-import { authUserRequiredMiddleware } from '@/server/user-auth'
+import type { RateLimitConfig } from '~/constants/rate-limit'
+import { SECOND } from '~/constants/time'
+import { logger } from '~/lib/logger'
+import { captureWithFeature, wrapMiddlewareWithSentry } from '~/lib/sentry'
+import { authUserRequiredMiddleware } from '~/server/user-auth'
 import { createMiddleware } from '@tanstack/react-start'
 import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
 

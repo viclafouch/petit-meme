@@ -3,7 +3,7 @@ import {
   buildSitemapResponse,
   type SitemapPage,
   wrapUrlset
-} from '@/lib/sitemap'
+} from '~/lib/sitemap'
 import { createFileRoute } from '@tanstack/react-router'
 
 const STATIC_PAGES = [

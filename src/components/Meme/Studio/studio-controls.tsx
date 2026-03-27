@@ -1,16 +1,16 @@
 import React from 'react'
-import { StudioTemplates } from '@/components/Meme/Studio/studio-templates'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { StudioTemplates } from '~/components/Meme/Studio/studio-templates'
+import { Input } from '~/components/ui/input'
+import { Label } from '~/components/ui/label'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@/components/ui/select'
-import { Separator } from '@/components/ui/separator'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+} from '~/components/ui/select'
+import { Separator } from '~/components/ui/separator'
+import { ToggleGroup, ToggleGroupItem } from '~/components/ui/toggle-group'
 import type {
   StudioBandColorValue,
   StudioColorEntry,
@@ -19,16 +19,16 @@ import type {
   StudioFontSizeValue,
   StudioSettings,
   StudioTextPosition
-} from '@/constants/studio'
+} from '~/constants/studio'
 import {
   getStudioBandColors,
   getStudioColors,
   getStudioFontSizes,
   STUDIO_FONTS,
   STUDIO_TEXT_MAX_LENGTH
-} from '@/constants/studio'
-import { cn } from '@/lib/utils'
-import { m } from '@/paraglide/messages.js'
+} from '~/constants/studio'
+import { cn } from '~/lib/utils'
+import { m } from '~/paraglide/messages.js'
 
 type ColorSwatchesParams = {
   colors: StudioColorEntry[]

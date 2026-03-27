@@ -1,8 +1,8 @@
 import type { User } from 'better-auth'
-import { auth } from '@/lib/auth'
-import type { SessionUser } from '@/lib/role'
-import { matchIsUserAdmin } from '@/lib/role'
-import { getAuthUser } from '@/server/user-auth'
+import { auth } from '~/lib/auth'
+import type { SessionUser } from '~/lib/role'
+import { matchIsUserAdmin } from '~/lib/role'
+import { getAuthUser } from '~/server/user-auth'
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
 

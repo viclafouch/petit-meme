@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button } from '@/components/ui/button'
+import { Button } from '~/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -7,16 +7,17 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger
-} from '@/components/ui/dialog'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { FileForm } from '@admin/-components/file-form'
-import { TwitterForm } from '@admin/-components/twitter-form'
+} from '~/components/ui/dialog'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
+import { useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from '@tanstack/react-router'
+
+import { FileForm } from '~admin/-components/file-form'
+import { TwitterForm } from '~admin/-components/twitter-form'
 import {
   getAdminDashboardTotalsQueryOpts,
   getAdminMemesListQueryOpts
-} from '@admin/-lib/queries'
-import { useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from '@tanstack/react-router'
+} from '~admin/-lib/queries'
 
 type NewMemeButtonProps = Partial<React.ComponentProps<typeof Button>>
 

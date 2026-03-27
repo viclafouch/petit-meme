@@ -2,13 +2,13 @@ import {
   Tooltip,
   TooltipContent,
   TooltipTrigger
-} from '@/components/ui/tooltip'
+} from '~/components/ui/tooltip'
 import {
   DATE_WITH_TIME_OPTIONS,
   formatDate,
   formatRelativeTime
-} from '@/helpers/date'
-import { getLocale } from '@/paraglide/runtime'
+} from '~/helpers/date'
+import { getLocale } from '~/paraglide/runtime'
 
 type RelativeDateTooltipParams = {
   date: Date

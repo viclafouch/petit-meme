@@ -1,4 +1,4 @@
-import { m } from '@/paraglide/messages.js'
+import { m } from '~/paraglide/messages.js'
 import type { FeedbackInternalOptions } from '@sentry/core'
 import * as Sentry from '@sentry/tanstackstart-react'
 import { wrapMiddlewaresWithSentry } from '@sentry/tanstackstart-react'

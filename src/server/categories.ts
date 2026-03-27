@@ -1,16 +1,16 @@
 import { z } from 'zod'
-import { CATEGORY_SLUG_REGEX } from '@/constants/meme'
-import { prismaClient } from '@/db'
-import type { Prisma } from '@/db/generated/prisma/client'
-import { MemeStatus } from '@/db/generated/prisma/enums'
+import { CATEGORY_SLUG_REGEX } from '~/constants/meme'
+import { prismaClient } from '~/db'
+import type { Prisma } from '~/db/generated/prisma/client'
+import { MemeStatus } from '~/db/generated/prisma/enums'
 import {
   buildLocaleRecord,
   resolveCategoryTranslation
-} from '@/helpers/i18n-content'
-import { adminLogger } from '@/lib/logger'
-import { baseLocale, type Locale, locales } from '@/paraglide/runtime'
-import { logAuditAction } from '@/server/audit'
-import { adminRequiredMiddleware } from '@/server/user-auth'
+} from '~/helpers/i18n-content'
+import { adminLogger } from '~/lib/logger'
+import { baseLocale, type Locale, locales } from '~/paraglide/runtime'
+import { logAuditAction } from '~/server/audit'
+import { adminRequiredMiddleware } from '~/server/user-auth'
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 
 export const CATEGORY_TRANSLATION_SCHEMA = z.object({

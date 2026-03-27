@@ -18,9 +18,8 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@admin/*": ["./src/routes/admin/*"],
-      "~/*": ["./*"]
+      "~/*": ["./src/*"],
+      "~admin/*": ["./src/routes/admin/*"]
     },
     "noEmit": true
   }

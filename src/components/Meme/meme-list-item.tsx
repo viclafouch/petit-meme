@@ -8,26 +8,26 @@ import {
   Star
 } from 'lucide-react'
 import { motion } from 'motion/react'
-import { BunnyPlayIcon } from '@/components/icon'
-import { MemeLanguageBadge } from '@/components/Meme/meme-language-badge'
-import { MemeVideoThumbnail } from '@/components/Meme/meme-video-thumbnail'
+import { BunnyPlayIcon } from '~/components/icon'
+import { MemeLanguageBadge } from '~/components/Meme/meme-language-badge'
+import { MemeVideoThumbnail } from '~/components/Meme/meme-video-thumbnail'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import type { MemeWithVideo } from '@/constants/meme'
-import { matchIsContentLocaleForeign } from '@/helpers/i18n-content'
-import { useMemeExport } from '@/hooks/use-meme-export'
-import { useToggleBookmark } from '@/hooks/use-toggle-bookmark'
-import type { ConversionEventName } from '@/lib/algolia-insights'
-import { sendClickEvent, sendConversionEvent } from '@/lib/algolia-insights'
-import { getFavoritesMemesQueryOpts } from '@/lib/queries'
-import { cn } from '@/lib/utils'
-import { m } from '@/paraglide/messages.js'
-import { getLocale } from '@/paraglide/runtime'
-import { useShowDialog } from '@/stores/dialog.store'
+} from '~/components/ui/dropdown-menu'
+import type { MemeWithVideo } from '~/constants/meme'
+import { matchIsContentLocaleForeign } from '~/helpers/i18n-content'
+import { useMemeExport } from '~/hooks/use-meme-export'
+import { useToggleBookmark } from '~/hooks/use-toggle-bookmark'
+import type { ConversionEventName } from '~/lib/algolia-insights'
+import { sendClickEvent, sendConversionEvent } from '~/lib/algolia-insights'
+import { getFavoritesMemesQueryOpts } from '~/lib/queries'
+import { cn } from '~/lib/utils'
+import { m } from '~/paraglide/messages.js'
+import { getLocale } from '~/paraglide/runtime'
+import { useShowDialog } from '~/stores/dialog.store'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useRouteContext } from '@tanstack/react-router'
 

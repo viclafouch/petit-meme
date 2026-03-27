@@ -5,13 +5,13 @@ import {
   useMediaDispatch,
   useMediaSelector
 } from 'media-chrome/react/media-store'
-import { Button } from '@/components/ui/button'
+import { Button } from '~/components/ui/button'
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger
-} from '@/components/ui/tooltip'
-import { m } from '@/paraglide/messages.js'
+} from '~/components/ui/tooltip'
+import { m } from '~/paraglide/messages.js'
 
 const OVERLAY_BUTTON_CLASS =
   'rounded-full bg-black/50 hover:bg-black/70 text-white size-9 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/50'

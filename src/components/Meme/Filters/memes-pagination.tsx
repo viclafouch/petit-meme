@@ -1,5 +1,5 @@
 import React from 'react'
-import { Paginator } from '@/components/paginator'
+import { Paginator } from '~/components/paginator'
 
 type MemesPaginationProps = {
   currentPage: number

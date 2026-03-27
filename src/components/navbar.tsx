@@ -1,21 +1,21 @@
 import React from 'react'
 import { User } from 'lucide-react'
 import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react'
-import { ThemeSwitcher } from '@/components/animate-ui/theme-switcher'
-import { LanguageSwitcher } from '@/components/language-switcher'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { ThemeSwitcher } from '~/components/animate-ui/theme-switcher'
+import { LanguageSwitcher } from '~/components/language-switcher'
+import { Button, buttonVariants } from '~/components/ui/button'
 import {
   NavigationMenu,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList
-} from '@/components/ui/navigation-menu'
-import { UserDropdown } from '@/components/user-dropdown'
-import { LOGO_PATH } from '@/constants/branding'
-import { useNeedsScrollFadeFallback } from '@/hooks/use-scroll-fade'
-import { cn } from '@/lib/utils'
-import { m } from '@/paraglide/messages.js'
-import { useShowDialog } from '@/stores/dialog.store'
+} from '~/components/ui/navigation-menu'
+import { UserDropdown } from '~/components/user-dropdown'
+import { LOGO_PATH } from '~/constants/branding'
+import { useNeedsScrollFadeFallback } from '~/hooks/use-scroll-fade'
+import { cn } from '~/lib/utils'
+import { m } from '~/paraglide/messages.js'
+import { useShowDialog } from '~/stores/dialog.store'
 import type { LinkOptions } from '@tanstack/react-router'
 import { Link, useRouteContext } from '@tanstack/react-router'
 import { MobileNav } from './mobile-nav'

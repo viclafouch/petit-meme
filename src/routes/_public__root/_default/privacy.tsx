@@ -1,19 +1,19 @@
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { BASE_MARKDOWN_COMPONENTS } from '@/constants/markdown'
-import { seo } from '@/lib/seo'
-import { m } from '@/paraglide/messages'
-import type { Locale } from '@/paraglide/runtime'
-import { getLocale } from '@/paraglide/runtime'
+import { BASE_MARKDOWN_COMPONENTS } from '~/constants/markdown'
+import { seo } from '~/lib/seo'
+import { m } from '~/paraglide/messages'
+import type { Locale } from '~/paraglide/runtime'
+import { getLocale } from '~/paraglide/runtime'
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 
 const MARKDOWN_LOADERS = {
   fr: () => {
-    return import('~/md/fr/privacy.md?raw')
+    return import('../../../../md/fr/privacy.md?raw')
   },
   en: () => {
-    return import('~/md/en/privacy.md?raw')
+    return import('../../../../md/en/privacy.md?raw')
   }
 } satisfies Record<Locale, () => Promise<{ default: string }>>
 

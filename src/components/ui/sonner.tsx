@@ -1,6 +1,6 @@
 import type { ToasterProps } from 'sonner'
 import { Toaster as Sonner } from 'sonner'
-import { useTheme } from '@/lib/theme'
+import { useTheme } from '~/lib/theme'
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme } = useTheme()

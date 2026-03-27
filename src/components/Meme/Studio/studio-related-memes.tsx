@@ -1,8 +1,8 @@
 import React from 'react'
-import { Label } from '@/components/ui/label'
-import type { MemeWithVideo } from '@/constants/meme'
-import { buildVideoImageUrl } from '@/lib/bunny'
-import { m } from '@/paraglide/messages.js'
+import { Label } from '~/components/ui/label'
+import type { MemeWithVideo } from '~/constants/meme'
+import { buildVideoImageUrl } from '~/lib/bunny'
+import { m } from '~/paraglide/messages.js'
 import { Link } from '@tanstack/react-router'
 
 type StudioRelatedMemesParams = {

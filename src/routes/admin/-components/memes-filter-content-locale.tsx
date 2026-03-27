@@ -1,18 +1,18 @@
 import React from 'react'
-import { CONTENT_LOCALE_FLAGS, FLAG_ICON_CLASS } from '@/components/icon/flags'
-import { Button } from '@/components/ui/button'
+import { CONTENT_LOCALE_FLAGS, FLAG_ICON_CLASS } from '~/components/icon/flags'
+import { Button } from '~/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
+} from '~/components/ui/dropdown-menu'
 import {
   type MemeContentLocale,
   MemeContentLocale as MemeContentLocaleEnum
-} from '@/db/generated/prisma/enums'
-import { getContentLocaleLabel } from '@/helpers/i18n-content'
+} from '~/db/generated/prisma/enums'
+import { getContentLocaleLabel } from '~/helpers/i18n-content'
 
 const CONTENT_LOCALE_OPTIONS = Object.values(MemeContentLocaleEnum)
 

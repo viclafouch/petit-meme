@@ -1,10 +1,10 @@
 import React from 'react'
 import { ClipboardPaste } from 'lucide-react'
-import { IconButtonStars } from '@/components/animate-ui/buttons/icon-button-stars'
-import { FormControl } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { useClipboardPaste } from '@/hooks/use-clipboard-paste'
-import { m } from '@/paraglide/messages'
+import { IconButtonStars } from '~/components/animate-ui/buttons/icon-button-stars'
+import { FormControl } from '~/components/ui/form'
+import { Input } from '~/components/ui/input'
+import { useClipboardPaste } from '~/hooks/use-clipboard-paste'
+import { m } from '~/paraglide/messages'
 
 type ClipboardPasteInputParams = {
   onClipboardPaste: (text: string) => void

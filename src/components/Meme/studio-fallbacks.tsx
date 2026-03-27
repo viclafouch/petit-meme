@@ -1,7 +1,7 @@
 import type { FallbackProps } from 'react-error-boundary'
-import { Button } from '@/components/ui/button'
-import { LoadingSpinner } from '@/components/ui/spinner'
-import { m } from '@/paraglide/messages.js'
+import { Button } from '~/components/ui/button'
+import { LoadingSpinner } from '~/components/ui/spinner'
+import { m } from '~/paraglide/messages.js'
 
 export const StudioLoadingFallback = () => {
   return (

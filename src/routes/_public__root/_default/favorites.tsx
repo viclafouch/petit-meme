@@ -1,10 +1,10 @@
-import { MemesList } from '@/components/Meme/memes-list'
-import { getFavoritesMemesQueryOpts } from '@/lib/queries'
-import { m } from '@/paraglide/messages.js'
+import { MemesList } from '~/components/Meme/memes-list'
+import { getFavoritesMemesQueryOpts } from '~/lib/queries'
+import { m } from '~/paraglide/messages.js'
 import {
   PageDescription,
   PageHeading
-} from '@/routes/_public__root/-components/page-headers'
+} from '~/routes/_public__root/-components/page-headers'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 

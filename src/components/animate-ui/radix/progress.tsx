@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { motion, type Transition } from 'motion/react'
 import { Progress as ProgressPrimitive } from 'radix-ui'
-import { cn } from '@/lib/utils'
+import { cn } from '~/lib/utils'
 
 const MotionProgressIndicator = motion.create(ProgressPrimitive.Indicator)
 

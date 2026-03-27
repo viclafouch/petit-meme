@@ -1,5 +1,5 @@
-import { LOGO_PATH } from '@/constants/branding'
-import type { Locale } from '@/paraglide/runtime'
+import { LOGO_PATH } from '~/constants/branding'
+import type { Locale } from '~/paraglide/runtime'
 import { pixelBasedPreset } from '@react-email/components'
 
 export const SITE_URL = 'https://www.petit-meme.io'

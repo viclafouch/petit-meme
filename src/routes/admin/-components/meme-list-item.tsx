@@ -1,21 +1,22 @@
 import React from 'react'
 import { Bookmark, Eye, Tag } from 'lucide-react'
 import { motion } from 'motion/react'
-import { MemeVideoThumbnail } from '@/components/Meme/meme-video-thumbnail'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
+import { MemeVideoThumbnail } from '~/components/Meme/meme-video-thumbnail'
+import { Badge } from '~/components/ui/badge'
+import { Skeleton } from '~/components/ui/skeleton'
 import {
   DEFAULT_MEME_TITLE,
   LEGACY_MEME_TITLE,
   MemeStatusMeta
-} from '@/constants/meme'
-import { getVideoStatusByIdQueryOpts } from '@/lib/queries'
-import { cn } from '@/lib/utils'
-import { m } from '@/paraglide/messages'
-import { matchIsVideoPlayable } from '@/utils/video'
-import type { AdminMemeRecord } from '@admin/-server/memes'
+} from '~/constants/meme'
+import { getVideoStatusByIdQueryOpts } from '~/lib/queries'
+import { cn } from '~/lib/utils'
+import { m } from '~/paraglide/messages'
+import { matchIsVideoPlayable } from '~/utils/video'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
+
+import type { AdminMemeRecord } from '~admin/-server/memes'
 
 type MemeListItemParams = {
   meme: AdminMemeRecord

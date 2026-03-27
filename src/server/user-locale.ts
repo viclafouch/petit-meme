@@ -1,7 +1,7 @@
 import { z } from 'zod'
-import { prismaClient } from '@/db'
-import { auth } from '@/lib/auth'
-import { locales } from '@/paraglide/runtime'
+import { prismaClient } from '~/db'
+import { auth } from '~/lib/auth'
+import { locales } from '~/paraglide/runtime'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
 

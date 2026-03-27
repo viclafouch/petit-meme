@@ -1,15 +1,15 @@
 import { LogIn } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { MAX_PENDING_SUBMISSIONS } from '@/constants/meme-submission'
-import { getUserSubmissionsQueryOpts } from '@/lib/queries'
-import { buildBreadcrumbJsonLd, seo } from '@/lib/seo'
-import { m } from '@/paraglide/messages'
+import { Button } from '~/components/ui/button'
+import { Card, CardContent } from '~/components/ui/card'
+import { MAX_PENDING_SUBMISSIONS } from '~/constants/meme-submission'
+import { getUserSubmissionsQueryOpts } from '~/lib/queries'
+import { buildBreadcrumbJsonLd, seo } from '~/lib/seo'
+import { m } from '~/paraglide/messages'
 import {
   PageDescription,
   PageHeading
-} from '@/routes/_public__root/-components/page-headers'
-import { useShowDialog } from '@/stores/dialog.store'
+} from '~/routes/_public__root/-components/page-headers'
+import { useShowDialog } from '~/stores/dialog.store'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, useRouteContext } from '@tanstack/react-router'
 import { SubmissionForm } from './-components/submission-form'

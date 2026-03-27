@@ -2,8 +2,8 @@ import React from 'react'
 import { Upload, X } from 'lucide-react'
 import { toast } from 'sonner'
 import type { z } from 'zod'
-import { FormFooter } from '@/components/form-footer'
-import { Button } from '@/components/ui/button'
+import { FormFooter } from '~/components/form-footer'
+import { Button } from '~/components/ui/button'
 import {
   FileUpload,
   FileUploadDropzone,
@@ -13,16 +13,17 @@ import {
   FileUploadItemPreview,
   FileUploadList,
   FileUploadTrigger
-} from '@/components/ui/file-upload'
-import { FormItem, FormMessage } from '@/components/ui/form'
-import { getErrorMessage } from '@/helpers/error'
-import { getFieldErrorMessage } from '@/lib/utils'
+} from '~/components/ui/file-upload'
+import { FormItem, FormMessage } from '~/components/ui/form'
+import { getErrorMessage } from '~/helpers/error'
+import { getFieldErrorMessage } from '~/lib/utils'
+import { formOptions, useForm } from '@tanstack/react-form'
+import { useMutation } from '@tanstack/react-query'
+
 import {
   CREATE_MEME_FROM_FILE_SCHEMA,
   createMemeFromFile
-} from '@admin/-server/memes'
-import { formOptions, useForm } from '@tanstack/react-form'
-import { useMutation } from '@tanstack/react-query'
+} from '~admin/-server/memes'
 
 type FileFormParams = {
   onSuccess?: ({ memeId }: { memeId: string }) => void

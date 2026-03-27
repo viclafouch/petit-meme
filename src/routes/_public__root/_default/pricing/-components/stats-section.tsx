@@ -1,4 +1,4 @@
-import { m } from '@/paraglide/messages.js'
+import { m } from '~/paraglide/messages.js'
 import { getStatItems } from './constants'
 
 export const StatsSection = () => {

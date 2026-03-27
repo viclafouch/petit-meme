@@ -1,21 +1,21 @@
 import { z } from 'zod'
-import { DAY } from '@/constants/time'
-import { prismaClient } from '@/db'
-import type { Prisma } from '@/db/generated/prisma/client'
-import { MemeStatus } from '@/db/generated/prisma/enums'
+import { DAY } from '~/constants/time'
+import { prismaClient } from '~/db'
+import type { Prisma } from '~/db/generated/prisma/client'
+import { MemeStatus } from '~/db/generated/prisma/enums'
 import {
   type ChartGranularity,
   generateDateSeries,
   getChartGranularity,
   truncateToGranularity,
   truncateToUtcDay
-} from '@/helpers/date'
+} from '~/helpers/date'
 import type {
   AuditAction,
   AuditMetadata,
   AuditTargetType
-} from '@/server/audit'
-import { adminRequiredMiddleware } from '@/server/user-auth'
+} from '~/server/audit'
+import { adminRequiredMiddleware } from '~/server/user-auth'
 import { createServerFn } from '@tanstack/react-start'
 
 const TRENDING_WEIGHTS = {

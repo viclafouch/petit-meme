@@ -1,8 +1,8 @@
 /* eslint-disable id-length */
 import * as React from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { Button } from '~/components/ui/button'
+import { cn } from '~/lib/utils'
 
 type IconButtonStarsProps = React.ComponentProps<typeof Button> & {
   active?: boolean

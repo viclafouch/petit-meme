@@ -1,11 +1,11 @@
 import React from 'react'
 import { motion, useReducedMotion } from 'motion/react'
-import { buttonVariants } from '@/components/ui/button'
-import { m } from '@/paraglide/messages.js'
+import { buttonVariants } from '~/components/ui/button'
+import { m } from '~/paraglide/messages.js'
 import {
   PageDescription,
   PageHeading
-} from '@/routes/_public__root/-components/page-headers'
+} from '~/routes/_public__root/-components/page-headers'
 import { createFileRoute, Link } from '@tanstack/react-router'
 
 const showCanvas = async (canvasElement: HTMLCanvasElement) => {

@@ -1,16 +1,16 @@
 import { z } from 'zod'
-import { prismaClient } from '@/db'
-import type { Meme, Prisma } from '@/db/generated/prisma/client'
-import { serverEnv } from '@/env/server'
+import { prismaClient } from '~/db'
+import type { Meme, Prisma } from '~/db/generated/prisma/client'
+import { serverEnv } from '~/env/server'
 import {
   buildSignedOriginalUrl,
   buildStorageUrl,
   checkWatermarkExists,
   fetchWatermarkedVideo
-} from '@/lib/bunny'
-import { adminLogger } from '@/lib/logger'
-import { logAuditAction } from '@/server/audit'
-import { adminRequiredMiddleware } from '@/server/user-auth'
+} from '~/lib/bunny'
+import { adminLogger } from '~/lib/logger'
+import { logAuditAction } from '~/server/audit'
+import { adminRequiredMiddleware } from '~/server/user-auth'
 import { createServerFn } from '@tanstack/react-start'
 
 const MEME_BUNNY_ID_SELECT = {

@@ -1,5 +1,5 @@
 import React from 'react'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { ToggleGroup, ToggleGroupItem } from '~/components/ui/toggle-group'
 
 const defaultValues = [4, 5, 6]
 

@@ -1,10 +1,10 @@
-import { Container } from '@/components/ui/container'
+import { Container } from '~/components/ui/container'
 import {
   getActiveSubscriptionQueryOpts,
   getCategoriesListQueryOpts,
   getFavoritesMemesQueryOpts
-} from '@/lib/queries'
-import { getLocale } from '@/paraglide/runtime'
+} from '~/lib/queries'
+import { getLocale } from '~/paraglide/runtime'
 import { createFileRoute, Outlet } from '@tanstack/react-router'
 
 const RouteComponent = () => {

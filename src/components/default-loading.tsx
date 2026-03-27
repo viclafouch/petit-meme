@@ -1,5 +1,5 @@
-import { cn } from '@/lib/utils'
-import { m } from '@/paraglide/messages.js'
+import { cn } from '~/lib/utils'
+import { m } from '~/paraglide/messages.js'
 import { LoadingSpinner } from './ui/spinner'
 
 export const DefaultLoading = ({

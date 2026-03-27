@@ -1,12 +1,12 @@
 import {
   type MemeContentLocale,
   MemeContentLocale as MemeContentLocaleEnum
-} from '@/db/generated/prisma/enums'
-import type { CategoryTranslationModel } from '@/db/generated/prisma/models/CategoryTranslation'
-import type { MemeTranslationModel } from '@/db/generated/prisma/models/MemeTranslation'
-import { m } from '@/paraglide/messages.js'
-import { type Locale, locales } from '@/paraglide/runtime'
-import { removeDuplicates } from '@/utils/array'
+} from '~/db/generated/prisma/enums'
+import type { CategoryTranslationModel } from '~/db/generated/prisma/models/CategoryTranslation'
+import type { MemeTranslationModel } from '~/db/generated/prisma/models/MemeTranslation'
+import { m } from '~/paraglide/messages.js'
+import { type Locale, locales } from '~/paraglide/runtime'
+import { removeDuplicates } from '~/utils/array'
 
 type LocaleMeta = {
   label: string

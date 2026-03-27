@@ -1,16 +1,16 @@
 import { toast } from 'sonner'
-import type { MemeWithVideo } from '@/constants/meme'
-import { getErrorMessage } from '@/helpers/error'
+import type { MemeWithVideo } from '~/constants/meme'
+import { getErrorMessage } from '~/helpers/error'
 import {
   getActiveSubscriptionQueryOpts,
   getAuthUserQueryOpts
-} from '@/lib/queries'
-import { matchIsUserAdmin } from '@/lib/role'
-import { captureWithFeature } from '@/lib/sentry'
-import { m } from '@/paraglide/messages.js'
-import { shareMeme, trackMemeAction } from '@/server/meme'
-import { useShowDialog } from '@/stores/dialog.store'
-import { downloadBlob, shareBlob } from '@/utils/download'
+} from '~/lib/queries'
+import { matchIsUserAdmin } from '~/lib/role'
+import { captureWithFeature } from '~/lib/sentry'
+import { m } from '~/paraglide/messages.js'
+import { shareMeme, trackMemeAction } from '~/server/meme'
+import { useShowDialog } from '~/stores/dialog.store'
+import { downloadBlob, shareBlob } from '~/utils/download'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 export type MemeExportMode = 'download' | 'share'

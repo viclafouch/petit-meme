@@ -1,8 +1,8 @@
 import type React from 'react'
 import { Resend } from 'resend'
-import { serverEnv } from '@/env/server'
-import { emailLogger } from '@/lib/logger'
-import { captureWithFeature } from '@/lib/sentry'
+import { serverEnv } from '~/env/server'
+import { emailLogger } from '~/lib/logger'
+import { captureWithFeature } from '~/lib/sentry'
 
 export const resend = new Resend(serverEnv.RESEND_API_KEY)
 

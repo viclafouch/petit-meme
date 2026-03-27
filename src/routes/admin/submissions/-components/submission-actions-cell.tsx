@@ -8,34 +8,35 @@ import {
   X
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { ConfirmAlertDialog } from '@/components/confirm-alert-dialog'
-import { Button } from '@/components/ui/button'
+import { ConfirmAlertDialog } from '~/components/confirm-alert-dialog'
+import { Button } from '~/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { Textarea } from '@/components/ui/textarea'
+} from '~/components/ui/dropdown-menu'
+import { Textarea } from '~/components/ui/textarea'
 import {
   MemeSubmissionStatus,
   MemeSubmissionUrlType
-} from '@/db/generated/prisma/enums'
-import { getErrorMessage } from '@/helpers/error'
-import { captureWithFeature } from '@/lib/sentry'
+} from '~/db/generated/prisma/enums'
+import { getErrorMessage } from '~/helpers/error'
+import { captureWithFeature } from '~/lib/sentry'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Link, useRouter } from '@tanstack/react-router'
+
 import {
   getAdminPendingSubmissionCountQueryOpts,
   getAdminSubmissionsQueryOpts
-} from '@admin/-lib/queries'
-import { createMemeFromTwitterUrl } from '@admin/-server/memes'
-import type { AdminSubmission } from '@admin/-server/submissions'
+} from '~admin/-lib/queries'
+import { createMemeFromTwitterUrl } from '~admin/-server/memes'
+import type { AdminSubmission } from '~admin/-server/submissions'
 import {
   deleteSubmission,
   updateSubmissionStatus
-} from '@admin/-server/submissions'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Link, useRouter } from '@tanstack/react-router'
+} from '~admin/-server/submissions'
 
 type DialogType = 'reject' | 'delete' | 'approve-tweet'
 

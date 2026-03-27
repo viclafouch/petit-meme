@@ -1,4 +1,4 @@
-import { customErrorAdapter } from '@/constants/error'
+import { customErrorAdapter } from '~/constants/error'
 import {
   sentryGlobalFunctionMiddleware,
   sentryGlobalRequestMiddleware

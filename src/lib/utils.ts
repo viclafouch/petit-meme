@@ -1,7 +1,7 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import type { ZodType } from 'zod'
-import { logger } from '@/lib/logger'
+import { logger } from '~/lib/logger'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))

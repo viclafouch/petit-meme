@@ -1,4 +1,4 @@
-import { BUNNY_STATUS } from '@/constants/bunny'
+import { BUNNY_STATUS } from '~/constants/bunny'
 
 export const matchIsVideoPlayable = (bunnyStatus: number) => {
   return (

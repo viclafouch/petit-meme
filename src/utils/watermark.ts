@@ -3,13 +3,13 @@ import {
   WATERMARK_MAX_MARGIN,
   WATERMARK_OPACITY,
   WATERMARK_WIDTH_RATIO
-} from '@/constants/watermark'
+} from '~/constants/watermark'
 import {
   FFMPEG_ENCODING_ARGS,
   FFMPEG_INPUT_FILE,
   FFMPEG_WATERMARK_FILE,
   readFFmpegOutput
-} from '@/utils/ffmpeg'
+} from '~/utils/ffmpeg'
 import type { FFmpeg, LogEvent } from '@ffmpeg/ffmpeg'
 import { fetchFile } from '@ffmpeg/util'
 

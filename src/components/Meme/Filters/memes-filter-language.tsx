@@ -1,21 +1,21 @@
 import React from 'react'
 import { Globe } from 'lucide-react'
-import { CONTENT_LOCALE_FLAGS, FLAG_ICON_CLASS } from '@/components/icon/flags'
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
+import { CONTENT_LOCALE_FLAGS, FLAG_ICON_CLASS } from '~/components/icon/flags'
+import { Button } from '~/components/ui/button'
+import { Checkbox } from '~/components/ui/checkbox'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger
-} from '@/components/ui/popover'
-import type { MemeContentLocale } from '@/db/generated/prisma/enums'
+} from '~/components/ui/popover'
+import type { MemeContentLocale } from '~/db/generated/prisma/enums'
 import {
   FILTERABLE_CONTENT_LOCALES,
   getContentLocaleLabel,
   matchIsDefaultContentLocaleFilter
-} from '@/helpers/i18n-content'
-import { m } from '@/paraglide/messages.js'
-import { getLocale } from '@/paraglide/runtime'
+} from '~/helpers/i18n-content'
+import { m } from '~/paraglide/messages.js'
+import { getLocale } from '~/paraglide/runtime'
 
 type MemesFilterLanguageProps = {
   contentLocales: MemeContentLocale[]

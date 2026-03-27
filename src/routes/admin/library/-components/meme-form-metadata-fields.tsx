@@ -3,22 +3,22 @@ import {
   FormItem,
   FormLabel,
   FormMessage
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { MultiAsyncSelect } from '@/components/ui/multi-select'
+} from '~/components/ui/form'
+import { Input } from '~/components/ui/input'
+import { MultiAsyncSelect } from '~/components/ui/multi-select'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@/components/ui/select'
-import { MemeStatusMeta } from '@/constants/meme'
+} from '~/components/ui/select'
+import { MemeStatusMeta } from '~/constants/meme'
 import {
   type MemeStatus,
   MemeStatus as MemeStatusEnum
-} from '@/db/generated/prisma/enums'
-import { type FormFieldApi, getFieldErrorMessage } from '@/lib/utils'
+} from '~/db/generated/prisma/enums'
+import { type FormFieldApi, getFieldErrorMessage } from '~/lib/utils'
 
 type CategoryOption = {
   label: string

@@ -1,13 +1,13 @@
 import { X } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { Badge } from '~/components/ui/badge'
 import {
   FormControl,
   FormItem,
   FormLabel,
   FormMessage
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { type FormFieldApi, getFieldErrorMessage } from '@/lib/utils'
+} from '~/components/ui/form'
+import { Input } from '~/components/ui/input'
+import { type FormFieldApi, getFieldErrorMessage } from '~/lib/utils'
 
 type KeywordsFieldParams = {
   field: FormFieldApi<string[]>

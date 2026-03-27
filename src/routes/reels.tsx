@@ -1,8 +1,8 @@
-import { DefaultLoading } from '@/components/default-loading'
-import { MemeReels } from '@/components/Meme/meme-reels'
-import { getInfiniteReelsQueryOpts } from '@/lib/queries'
-import { seo } from '@/lib/seo'
-import { m } from '@/paraglide/messages.js'
+import { DefaultLoading } from '~/components/default-loading'
+import { MemeReels } from '~/components/Meme/meme-reels'
+import { getInfiniteReelsQueryOpts } from '~/lib/queries'
+import { seo } from '~/lib/seo'
+import { m } from '~/paraglide/messages.js'
 import { createFileRoute } from '@tanstack/react-router'
 
 const RouteComponent = () => {

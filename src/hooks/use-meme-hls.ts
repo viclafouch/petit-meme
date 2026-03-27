@@ -1,6 +1,6 @@
 import React from 'react'
 import Hls from 'hls.js'
-import { buildVideoStreamUrl } from '@/lib/bunny'
+import { buildVideoStreamUrl } from '~/lib/bunny'
 
 type UseMemeHlsParams = {
   bunnyId: string

@@ -1,8 +1,8 @@
 /* eslint-disable react/jsx-no-constructed-context-values */
 import * as React from 'react'
 import { type VariantProps } from 'class-variance-authority'
-import { toggleVariants } from '@/components/ui/toggle'
-import { cn } from '@/lib/utils'
+import { toggleVariants } from '~/components/ui/toggle'
+import { cn } from '~/lib/utils'
 import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group'
 
 const ToggleGroupContext = React.createContext<

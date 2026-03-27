@@ -5,10 +5,10 @@ import {
   ChevronRightIcon,
   MoreHorizontalIcon
 } from 'lucide-react'
-import type { Button } from '@/components/ui/button'
-import { buttonVariants } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
-import { m } from '@/paraglide/messages.js'
+import type { Button } from '~/components/ui/button'
+import { buttonVariants } from '~/components/ui/button'
+import { cn } from '~/lib/utils'
+import { m } from '~/paraglide/messages.js'
 import type { LinkProps } from '@tanstack/react-router'
 import { Link } from '@tanstack/react-router'
 

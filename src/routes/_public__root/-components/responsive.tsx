@@ -2,13 +2,13 @@ import React from 'react'
 import { Eye, MonitorSmartphone } from 'lucide-react'
 import type { Variants } from 'motion/react'
 import { motion, useInView, useReducedMotion } from 'motion/react'
-import { Badge } from '@/components/ui/badge'
+import { Badge } from '~/components/ui/badge'
 import {
   VideoPlayer,
   VideoPlayerContent
-} from '@/components/ui/kibo-ui/video-player'
-import { m } from '@/paraglide/messages.js'
-import { PageHeading2 } from '@/routes/_public__root/-components/page-headers'
+} from '~/components/ui/kibo-ui/video-player'
+import { m } from '~/paraglide/messages.js'
+import { PageHeading2 } from '~/routes/_public__root/-components/page-headers'
 
 const tabletVariants: Variants = {
   offscreen: {

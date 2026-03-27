@@ -1,20 +1,20 @@
-import { StudioError } from '@/constants/error'
+import { StudioError } from '~/constants/error'
 import {
   CREATE_MEME_SUBMISSION_SCHEMA,
   MAX_PENDING_SUBMISSIONS
-} from '@/constants/meme-submission'
-import { RATE_LIMIT_SUBMIT_MEME } from '@/constants/rate-limit'
-import { prismaClient } from '@/db'
-import { Prisma } from '@/db/generated/prisma/client'
+} from '~/constants/meme-submission'
+import { RATE_LIMIT_SUBMIT_MEME } from '~/constants/rate-limit'
+import { prismaClient } from '~/db'
+import { Prisma } from '~/db/generated/prisma/client'
 import {
   MemeSubmissionStatus,
   MemeSubmissionUrlType
-} from '@/db/generated/prisma/enums'
-import { submissionLogger } from '@/lib/logger'
-import { getTweetByUrl, TweetNoVideoError } from '@/lib/react-tweet'
-import { captureWithFeature } from '@/lib/sentry'
-import { createUserRateLimitMiddleware } from '@/server/rate-limit'
-import { authUserRequiredMiddleware } from '@/server/user-auth'
+} from '~/db/generated/prisma/enums'
+import { submissionLogger } from '~/lib/logger'
+import { getTweetByUrl, TweetNoVideoError } from '~/lib/react-tweet'
+import { captureWithFeature } from '~/lib/sentry'
+import { createUserRateLimitMiddleware } from '~/server/rate-limit'
+import { authUserRequiredMiddleware } from '~/server/user-auth'
 import { createServerFn } from '@tanstack/react-start'
 import { setResponseStatus } from '@tanstack/react-start/server'
 

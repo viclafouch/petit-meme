@@ -1,4 +1,4 @@
-import { getRandomMeme } from '@/server/meme'
+import { getRandomMeme } from '~/server/meme'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_public__root/_default/random/')({

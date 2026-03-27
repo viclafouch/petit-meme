@@ -1,16 +1,16 @@
-import { DefaultLoading } from '@/components/default-loading'
-import { ErrorComponent } from '@/components/error-component'
-import { NotFound } from '@/components/not-found'
-import { IS_PRODUCTION } from '@/constants/env'
-import { MINUTE, SECOND } from '@/constants/time'
-import { clientEnv } from '@/env/client'
-import { matchIsRateLimitError } from '@/helpers/error'
+import { DefaultLoading } from '~/components/default-loading'
+import { ErrorComponent } from '~/components/error-component'
+import { NotFound } from '~/components/not-found'
+import { IS_PRODUCTION } from '~/constants/env'
+import { MINUTE, SECOND } from '~/constants/time'
+import { clientEnv } from '~/env/client'
+import { matchIsRateLimitError } from '~/helpers/error'
 import {
   getFeedbackOptions,
   scrubSensitiveBreadcrumbs,
   scrubUserPii,
   SENSITIVE_API_PATTERNS
-} from '@/lib/sentry'
+} from '~/lib/sentry'
 import * as Sentry from '@sentry/tanstackstart-react'
 import { QueryClient } from '@tanstack/react-query'
 import { createRouter } from '@tanstack/react-router'

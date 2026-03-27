@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button } from '@/components/ui/button'
+import { Button } from '~/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -7,9 +7,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger
-} from '@/components/ui/dialog'
-import { getCategoriesListQueryOpts } from '@/lib/queries'
-import { CategoryForm } from '@/routes/admin/categories/-components/category-form'
+} from '~/components/ui/dialog'
+import { getCategoriesListQueryOpts } from '~/lib/queries'
+import { CategoryForm } from '~/routes/admin/categories/-components/category-form'
 import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 

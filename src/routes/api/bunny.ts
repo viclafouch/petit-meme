@@ -1,14 +1,14 @@
 import { z } from 'zod'
-import { MEME_ALGOLIA_INCLUDE } from '@/constants/meme'
-import { prismaClient } from '@/db'
+import { MEME_ALGOLIA_INCLUDE } from '~/constants/meme'
+import { prismaClient } from '~/db'
 import {
   invalidateAlgoliaCache,
   safeAlgoliaOp,
   syncMemeToAllIndices
-} from '@/lib/algolia'
-import { getVideoPlayData } from '@/lib/bunny'
-import { bunnyLogger } from '@/lib/logger'
-import { captureWithFeature } from '@/lib/sentry'
+} from '~/lib/algolia'
+import { getVideoPlayData } from '~/lib/bunny'
+import { bunnyLogger } from '~/lib/logger'
+import { captureWithFeature } from '~/lib/sentry'
 import { createFileRoute } from '@tanstack/react-router'
 
 const WEBHOOK_RESPONSE_SCHEMA = z.object({

@@ -1,22 +1,23 @@
 import React from 'react'
 import { toast } from 'sonner'
-import { WATERMARK_ASSET_PATH } from '@/constants/watermark'
-import type { Meme } from '@/db/generated/prisma/client'
-import { getErrorMessage } from '@/helpers/error'
-import { captureWithFeature } from '@/lib/sentry'
-import { loadFFmpeg } from '@/utils/ffmpeg'
-import { applyWatermark } from '@/utils/watermark'
+import { WATERMARK_ASSET_PATH } from '~/constants/watermark'
+import type { Meme } from '~/db/generated/prisma/client'
+import { getErrorMessage } from '~/helpers/error'
+import { captureWithFeature } from '~/lib/sentry'
+import { loadFFmpeg } from '~/utils/ffmpeg'
+import { applyWatermark } from '~/utils/watermark'
+import type { FFmpeg, ProgressEvent } from '@ffmpeg/ffmpeg'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+
 import {
   getAdminMemeWatermarkQueryOpts,
   getAdminVideoBlobQueryOpts
-} from '@admin/-lib/queries'
+} from '~admin/-lib/queries'
 import {
   getWatermarkUploadConfig,
   logWatermarkUpload,
   previewMemeWatermark
-} from '@admin/-server/watermark'
-import type { FFmpeg, ProgressEvent } from '@ffmpeg/ffmpeg'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+} from '~admin/-server/watermark'
 
 export function useMemeWatermark(memeId: Meme['id']) {
   const queryClient = useQueryClient()

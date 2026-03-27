@@ -2,7 +2,7 @@ import { z } from 'zod'
 import {
   COOKIE_ALGOLIA_USER_TOKEN_KEY,
   COOKIE_ANON_ID_KEY
-} from '@/constants/cookie'
+} from '~/constants/cookie'
 import {
   MEME_FULL_INCLUDE,
   MEME_TRANSLATION_SELECT,
@@ -16,23 +16,23 @@ import {
   RELATED_MEMES_COUNT,
   TRENDING_MEMES_COUNT,
   VIRTUAL_CATEGORY_SLUGS
-} from '@/constants/meme'
-import { RATE_LIMIT_DOWNLOAD, RATE_LIMIT_TRACK } from '@/constants/rate-limit'
+} from '~/constants/meme'
+import { RATE_LIMIT_DOWNLOAD, RATE_LIMIT_TRACK } from '~/constants/rate-limit'
 import {
   ONE_HOUR_MS,
   ONE_YEAR_IN_SECONDS,
   THIRTY_DAYS_MS
-} from '@/constants/time'
-import { prismaClient } from '@/db'
-import type { Prisma } from '@/db/generated/prisma/client'
-import type { MemeContentLocale } from '@/db/generated/prisma/enums'
+} from '~/constants/time'
+import { prismaClient } from '~/db'
+import type { Prisma } from '~/db/generated/prisma/client'
+import type { MemeContentLocale } from '~/db/generated/prisma/enums'
 import {
   MemeContentLocale as MemeContentLocaleEnum,
   MemeStatus
-} from '@/db/generated/prisma/enums'
-import { clientEnv } from '@/env/client'
-import { serverEnv } from '@/env/server'
-import { truncateToUtcDay } from '@/helpers/date'
+} from '~/db/generated/prisma/enums'
+import { clientEnv } from '~/env/client'
+import { serverEnv } from '~/env/server'
+import { truncateToUtcDay } from '~/helpers/date'
 import {
   contentLocalesWithUniversal,
   parseContentLocalesParam,
@@ -40,8 +40,8 @@ import {
   resolveMemeTranslation,
   resolveVisibleContentLocales,
   VISIBLE_CONTENT_LOCALES
-} from '@/helpers/i18n-content'
-import type { AlgoliaMemeRecord } from '@/lib/algolia'
+} from '~/helpers/i18n-content'
+import type { AlgoliaMemeRecord } from '~/lib/algolia'
 import {
   ALGOLIA_SEARCH_PARAMS_BASE,
   ALGOLIA_SEARCH_RETRIEVE,
@@ -54,17 +54,17 @@ import {
   resolveAlgoliaReplicaRecent,
   safeAlgoliaOp,
   withAlgoliaCache
-} from '@/lib/algolia'
-import { auth } from '@/lib/auth'
-import { buildSignedOriginalUrl, fetchWatermarkedVideo } from '@/lib/bunny'
-import { matchIsAnalyticsConsentGiven } from '@/lib/cookie-consent'
-import { algoliaLogger, logger } from '@/lib/logger'
-import { captureWithFeature } from '@/lib/sentry'
-import { baseLocale, getLocale, type Locale } from '@/paraglide/runtime'
-import { matchIsUserPremium } from '@/server/customer'
-import { createRateLimitMiddleware, extractClientIp } from '@/server/rate-limit'
-import { authUserRequiredMiddleware } from '@/server/user-auth'
-import { ensureAlgoliaUserToken } from '@/utils/tracking-cookies'
+} from '~/lib/algolia'
+import { auth } from '~/lib/auth'
+import { buildSignedOriginalUrl, fetchWatermarkedVideo } from '~/lib/bunny'
+import { matchIsAnalyticsConsentGiven } from '~/lib/cookie-consent'
+import { algoliaLogger, logger } from '~/lib/logger'
+import { captureWithFeature } from '~/lib/sentry'
+import { baseLocale, getLocale, type Locale } from '~/paraglide/runtime'
+import { matchIsUserPremium } from '~/server/customer'
+import { createRateLimitMiddleware, extractClientIp } from '~/server/rate-limit'
+import { authUserRequiredMiddleware } from '~/server/user-auth'
+import { ensureAlgoliaUserToken } from '~/utils/tracking-cookies'
 import { insightsClient as createInsightsClient } from '@algolia/client-insights'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'

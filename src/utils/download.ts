@@ -1,4 +1,4 @@
-import { captureWithFeature } from '@/lib/sentry'
+import { captureWithFeature } from '~/lib/sentry'
 
 const matchIsUserCancelError = (error: unknown) => {
   return (

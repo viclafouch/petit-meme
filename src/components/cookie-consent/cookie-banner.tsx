@@ -1,9 +1,9 @@
 import React from 'react'
 import { Cookie } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
-import { Button } from '@/components/ui/button'
-import { useIsMobile } from '@/hooks/use-mobile'
-import { m } from '@/paraglide/messages.js'
+import { Button } from '~/components/ui/button'
+import { useIsMobile } from '~/hooks/use-mobile'
+import { m } from '~/paraglide/messages.js'
 import { Link } from '@tanstack/react-router'
 import { useCookieConsent } from './cookie-provider'
 

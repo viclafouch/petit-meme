@@ -1,6 +1,6 @@
 import React from 'react'
-import { ONE_YEAR_IN_SECONDS } from '@/constants/time'
-import { createClientCookie, readClientCookie } from '@/helpers/cookie'
+import { ONE_YEAR_IN_SECONDS } from '~/constants/time'
+import { createClientCookie, readClientCookie } from '~/helpers/cookie'
 import { createIsomorphicFn } from '@tanstack/react-start'
 import { getCookie } from '@tanstack/react-start/server'
 

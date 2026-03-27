@@ -1,4 +1,4 @@
-import { m } from '@/paraglide/messages.js'
+import { m } from '~/paraglide/messages.js'
 import { createFileRoute, useRouteContext } from '@tanstack/react-router'
 import { ProfileContent } from './-components/profile-content'
 import { ProfileHeader } from './-components/profile-header'

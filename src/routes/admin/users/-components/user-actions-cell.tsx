@@ -1,22 +1,27 @@
 import React from 'react'
 import { EllipsisVertical } from 'lucide-react'
 import { toast } from 'sonner'
-import { ConfirmAlertDialog } from '@/components/confirm-alert-dialog'
-import { Button } from '@/components/ui/button'
+import { ConfirmAlertDialog } from '~/components/confirm-alert-dialog'
+import { Button } from '~/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
+} from '~/components/ui/dropdown-menu'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@/components/ui/select'
-import { getErrorMessage } from '@/helpers/error'
+} from '~/components/ui/select'
+import { getErrorMessage } from '~/helpers/error'
+import * as Sentry from '@sentry/tanstackstart-react'
+import { useMutation } from '@tanstack/react-query'
+import { useRouter } from '@tanstack/react-router'
+import { Route } from '../index'
+
 import {
   BAN_REASONS,
   type BanReason,
@@ -24,11 +29,7 @@ import {
   type EnrichedUser,
   removeUser,
   unbanUserById
-} from '@admin/-server/users'
-import * as Sentry from '@sentry/tanstackstart-react'
-import { useMutation } from '@tanstack/react-query'
-import { useRouter } from '@tanstack/react-router'
-import { Route } from '../index'
+} from '~admin/-server/users'
 
 type DialogType = 'ban' | 'unban' | 'delete'
 

@@ -1,5 +1,5 @@
 import pino from 'pino'
-import { IS_PRODUCTION } from '@/constants/env'
+import { IS_PRODUCTION } from '~/constants/env'
 
 const level = process.env.LOG_LEVEL ?? (!IS_PRODUCTION ? 'debug' : 'info')
 

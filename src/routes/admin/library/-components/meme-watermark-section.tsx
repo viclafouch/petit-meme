@@ -6,17 +6,17 @@ import {
   RefreshCw,
   Upload
 } from 'lucide-react'
-import { Progress } from '@/components/animate-ui/radix/progress'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { Progress } from '~/components/animate-ui/radix/progress'
+import { Badge } from '~/components/ui/badge'
+import { Button } from '~/components/ui/button'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import type { Meme } from '@/db/generated/prisma/client'
+} from '~/components/ui/dialog'
+import type { Meme } from '~/db/generated/prisma/client'
 import { useMemeWatermark } from './use-meme-watermark'
 
 type MemeWatermarkSectionParams = {

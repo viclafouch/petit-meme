@@ -1,30 +1,30 @@
 import React from 'react'
 import { Stars } from 'lucide-react'
-import { FormFooter } from '@/components/form-footer'
-import { CONTENT_LOCALE_FLAGS, FLAG_ICON_CLASS } from '@/components/icon/flags'
-import { Button } from '@/components/ui/button'
+import { FormFooter } from '~/components/form-footer'
+import { CONTENT_LOCALE_FLAGS, FLAG_ICON_CLASS } from '~/components/icon/flags'
+import { Button } from '~/components/ui/button'
 import {
   FormControl,
   FormItem,
   FormLabel,
   FormMessage
-} from '@/components/ui/form'
+} from '~/components/ui/form'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@/components/ui/select'
-import { type MemeFullData } from '@/constants/meme'
-import type { MemeContentLocale } from '@/db/generated/prisma/enums'
+} from '~/components/ui/select'
+import { type MemeFullData } from '~/constants/meme'
+import type { MemeContentLocale } from '~/db/generated/prisma/enums'
 import {
   getContentLocaleOptions,
   getRequiredLocales
-} from '@/helpers/i18n-content'
-import { getFieldErrorMessage } from '@/lib/utils'
-import { type Locale, locales } from '@/paraglide/runtime'
-import type { AiAssistResult } from '@/server/ai'
+} from '~/helpers/i18n-content'
+import { getFieldErrorMessage } from '~/lib/utils'
+import { type Locale, locales } from '~/paraglide/runtime'
+import type { AiAssistResult } from '~/server/ai'
 import { AiAssistDialog } from './ai-assist-dialog'
 import { MemeFormMetadataFields } from './meme-form-metadata-fields'
 import { MemeTranslationSection } from './meme-translation-section'

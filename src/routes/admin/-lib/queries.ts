@@ -1,24 +1,25 @@
-import type { MemesFilters } from '@/constants/meme'
-import { MINUTE } from '@/constants/time'
-import type { Meme } from '@/db/generated/prisma/client'
-import type { MemeSubmissionStatus } from '@/db/generated/prisma/enums'
-import type { DashboardPeriod } from '@admin/-server/dashboard'
+import type { MemesFilters } from '~/constants/meme'
+import { MINUTE } from '~/constants/time'
+import type { Meme } from '~/db/generated/prisma/client'
+import type { MemeSubmissionStatus } from '~/db/generated/prisma/enums'
+import { queryOptions } from '@tanstack/react-query'
+
+import type { DashboardPeriod } from '~admin/-server/dashboard'
 import {
   getAdminChartData,
   getAdminDashboardTotals,
   getAdminRecentActivity,
   getAdminTrendingMemes
-} from '@admin/-server/dashboard'
-import { getAdminMemeById, getAdminMemes } from '@admin/-server/memes'
+} from '~admin/-server/dashboard'
+import { getAdminMemeById, getAdminMemes } from '~admin/-server/memes'
 import {
   getAdminPendingSubmissionCount,
   getAdminSubmissions
-} from '@admin/-server/submissions'
+} from '~admin/-server/submissions'
 import {
   checkMemeWatermark,
   fetchAdminVideoBlob
-} from '@admin/-server/watermark'
-import { queryOptions } from '@tanstack/react-query'
+} from '~admin/-server/watermark'
 
 export const getAdminMemeByIdQueryOpts = (memeId: Meme['id']) => {
   return queryOptions({

@@ -1,4 +1,4 @@
-import type { Locale } from '@/paraglide/runtime'
+import type { Locale } from '~/paraglide/runtime'
 
 export const emailSubjects = {
   fr: {

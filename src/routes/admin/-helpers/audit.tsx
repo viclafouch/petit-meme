@@ -2,7 +2,7 @@ import type {
   AuditAction,
   AuditMetadata,
   AuditTargetType
-} from '@/server/audit'
+} from '~/server/audit'
 
 function getAuditTargetLabel(targetType: AuditTargetType) {
   switch (targetType) {

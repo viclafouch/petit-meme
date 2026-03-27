@@ -1,4 +1,4 @@
-import { DAY, MINUTE } from '@/constants/time'
+import { DAY, MINUTE } from '~/constants/time'
 
 export type RateLimitConfig = {
   action: string

@@ -1,6 +1,6 @@
 import type React from 'react'
-import type { MemeContentLocale } from '@/db/generated/prisma/enums'
-import type { Locale } from '@/paraglide/runtime'
+import type { MemeContentLocale } from '~/db/generated/prisma/enums'
+import type { Locale } from '~/paraglide/runtime'
 import { FlagFr } from './flag-fr'
 import { FlagGb } from './flag-gb'
 

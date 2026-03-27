@@ -1,19 +1,20 @@
 import { Languages } from 'lucide-react'
-import { FLAG_ICON_CLASS, LOCALE_FLAGS } from '@/components/icon/flags'
+import { FLAG_ICON_CLASS, LOCALE_FLAGS } from '~/components/icon/flags'
 import {
   FormControl,
   FormItem,
   FormLabel,
   FormMessage
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { LoadingButton } from '@/components/ui/loading-button'
-import { Textarea } from '@/components/ui/textarea'
-import { LOCALE_META } from '@/helpers/i18n-content'
-import type { useKeywordsField } from '@/hooks/use-keywords-field'
-import { type FormFieldApi, getFieldErrorMessage } from '@/lib/utils'
-import type { Locale } from '@/paraglide/runtime'
-import { KeywordsField } from '@admin/-components/keywords-field'
+} from '~/components/ui/form'
+import { Input } from '~/components/ui/input'
+import { LoadingButton } from '~/components/ui/loading-button'
+import { Textarea } from '~/components/ui/textarea'
+import { LOCALE_META } from '~/helpers/i18n-content'
+import type { useKeywordsField } from '~/hooks/use-keywords-field'
+import { type FormFieldApi, getFieldErrorMessage } from '~/lib/utils'
+import type { Locale } from '~/paraglide/runtime'
+
+import { KeywordsField } from '~admin/-components/keywords-field'
 
 const MIN_TITLE_LENGTH = 3
 

@@ -1,12 +1,12 @@
 import { toast } from 'sonner'
-import { authClient } from '@/lib/auth-client'
+import { authClient } from '~/lib/auth-client'
 import {
   getActiveSubscriptionQueryOpts,
   getAuthUserQueryOpts,
   getFavoritesMemesQueryOpts
-} from '@/lib/queries'
-import { captureWithFeature } from '@/lib/sentry'
-import { m } from '@/paraglide/messages.js'
+} from '~/lib/queries'
+import { captureWithFeature } from '~/lib/sentry'
+import { m } from '~/paraglide/messages.js'
 import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 

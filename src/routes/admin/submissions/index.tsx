@@ -1,20 +1,16 @@
 import React from 'react'
 import { ExternalLink, Inbox } from 'lucide-react'
 import { z } from 'zod'
-import { XTwitterIcon, YoutubeIcon } from '@/components/icon'
-import { CONTENT_LOCALE_FLAGS, FLAG_ICON_CLASS } from '@/components/icon/flags'
-import { PageHeader } from '@/components/page-header'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import { Container } from '@/components/ui/container'
-import { SUBMISSION_STATUS_BADGE_VARIANT } from '@/constants/meme-submission'
-import type { MemeSubmissionUrlType } from '@/db/generated/prisma/enums'
-import { MemeSubmissionStatus } from '@/db/generated/prisma/enums'
-import { getUserInitials } from '@/helpers/format'
-import { AdminTable, getRowId, PAGE_SIZE } from '@admin/-components/admin-table'
-import { RelativeDateTooltip } from '@admin/-components/relative-date-tooltip'
-import { getAdminSubmissionsQueryOpts } from '@admin/-lib/queries'
-import type { AdminSubmission } from '@admin/-server/submissions'
+import { XTwitterIcon, YoutubeIcon } from '~/components/icon'
+import { CONTENT_LOCALE_FLAGS, FLAG_ICON_CLASS } from '~/components/icon/flags'
+import { PageHeader } from '~/components/page-header'
+import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
+import { Badge } from '~/components/ui/badge'
+import { Container } from '~/components/ui/container'
+import { SUBMISSION_STATUS_BADGE_VARIANT } from '~/constants/meme-submission'
+import type { MemeSubmissionUrlType } from '~/db/generated/prisma/enums'
+import { MemeSubmissionStatus } from '~/db/generated/prisma/enums'
+import { getUserInitials } from '~/helpers/format'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import {
@@ -25,6 +21,11 @@ import {
   useReactTable
 } from '@tanstack/react-table'
 import { SubmissionActionsCell } from './-components/submission-actions-cell'
+
+import { AdminTable, getRowId, PAGE_SIZE } from '~admin/-components/admin-table'
+import { RelativeDateTooltip } from '~admin/-components/relative-date-tooltip'
+import { getAdminSubmissionsQueryOpts } from '~admin/-lib/queries'
+import type { AdminSubmission } from '~admin/-server/submissions'
 
 const STATUS_LABELS = {
   [MemeSubmissionStatus.PENDING]: 'En attente',

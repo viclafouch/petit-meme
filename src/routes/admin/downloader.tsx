@@ -1,6 +1,7 @@
-import { PageHeader } from '@/components/page-header'
-import { DownloadFromTwitterForm } from '@admin/-components/download-from-twitter-form'
+import { PageHeader } from '~/components/page-header'
 import { createFileRoute } from '@tanstack/react-router'
+
+import { DownloadFromTwitterForm } from '~admin/-components/download-from-twitter-form'
 
 const RouteComponent = () => {
   return (

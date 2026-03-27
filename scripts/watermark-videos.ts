@@ -10,16 +10,16 @@ import { promisify } from 'node:util'
 import {
   WATERMARK_ASSET_PATH,
   WATERMARK_FFMPEG_FILTER
-} from '@/constants/watermark'
-import { prismaClient } from '@/db'
-import type { Prisma } from '@/db/generated/prisma/client'
-import { MemeStatus } from '@/db/generated/prisma/enums'
-import { serverEnv } from '@/env/server'
+} from '~/constants/watermark'
+import { prismaClient } from '~/db'
+import type { Prisma } from '~/db/generated/prisma/client'
+import { MemeStatus } from '~/db/generated/prisma/enums'
+import { serverEnv } from '~/env/server'
 import {
   checkWatermarkExists,
   signOriginalUrl,
   uploadWatermarkedVideo
-} from '@/lib/bunny'
+} from '~/lib/bunny'
 import { logEnvironmentInfo } from './lib/env-guard'
 
 const execFileAsync = promisify(execFile)

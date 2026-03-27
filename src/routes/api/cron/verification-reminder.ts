@@ -1,14 +1,14 @@
 /* eslint-disable no-await-in-loop */
 import { randomBytes, randomUUID } from 'node:crypto'
-import { DAY, HOUR } from '@/constants/time'
-import { prismaClient } from '@/db'
-import type { UserLocale } from '@/db/generated/prisma/client'
-import { emailSubjects } from '@/emails/subjects'
-import { VerificationReminderEmail } from '@/emails/verification-reminder-email'
-import { clientEnv } from '@/env/client'
-import { cronLogger } from '@/lib/logger'
-import { EMAIL_FROM, getEmailRecipient, resend } from '@/lib/resend'
-import { verifyCronSecret } from '@/utils/cron-auth'
+import { DAY, HOUR } from '~/constants/time'
+import { prismaClient } from '~/db'
+import type { UserLocale } from '~/db/generated/prisma/client'
+import { emailSubjects } from '~/emails/subjects'
+import { VerificationReminderEmail } from '~/emails/verification-reminder-email'
+import { clientEnv } from '~/env/client'
+import { cronLogger } from '~/lib/logger'
+import { EMAIL_FROM, getEmailRecipient, resend } from '~/lib/resend'
+import { verifyCronSecret } from '~/utils/cron-auth'
 import { createFileRoute } from '@tanstack/react-router'
 
 const log = cronLogger.child({ job: 'verification-reminder' })

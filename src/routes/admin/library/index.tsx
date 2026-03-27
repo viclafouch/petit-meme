@@ -1,24 +1,25 @@
 import React from 'react'
 import { Plus } from 'lucide-react'
-import { MemesQuery } from '@/components/Meme/Filters/memes-query'
-import { PageHeader } from '@/components/page-header'
-import { Paginator } from '@/components/paginator'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Container } from '@/components/ui/container'
-import { LoadingSpinner } from '@/components/ui/spinner'
-import { MEMES_FILTERS_SCHEMA, type MemesFilters } from '@/constants/meme'
-import { MemeStatus } from '@/db/generated/prisma/enums'
-import { MemeListItem } from '@admin/-components/meme-list-item'
-import { MemesFilterContentLocale } from '@admin/-components/memes-filter-content-locale'
-import { NewMemeButton } from '@admin/-components/new-meme-button'
-import {
-  getAdminDashboardTotalsQueryOpts,
-  getAdminMemesListQueryOpts
-} from '@admin/-lib/queries'
+import { MemesQuery } from '~/components/Meme/Filters/memes-query'
+import { PageHeader } from '~/components/page-header'
+import { Paginator } from '~/components/paginator'
+import { Badge } from '~/components/ui/badge'
+import { Button } from '~/components/ui/button'
+import { Container } from '~/components/ui/container'
+import { LoadingSpinner } from '~/components/ui/spinner'
+import { MEMES_FILTERS_SCHEMA, type MemesFilters } from '~/constants/meme'
+import { MemeStatus } from '~/db/generated/prisma/enums'
 import { useDebouncedValue } from '@tanstack/react-pacer'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
+
+import { MemeListItem } from '~admin/-components/meme-list-item'
+import { MemesFilterContentLocale } from '~admin/-components/memes-filter-content-locale'
+import { NewMemeButton } from '~admin/-components/new-meme-button'
+import {
+  getAdminDashboardTotalsQueryOpts,
+  getAdminMemesListQueryOpts
+} from '~admin/-lib/queries'
 
 const MemesListWrapper = () => {
   const search = Route.useSearch()

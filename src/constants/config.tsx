@@ -1,4 +1,4 @@
-import type { Logo } from '@/components/ui/logo-carousel'
+import type { Logo } from '~/components/ui/logo-carousel'
 
 export const logos = [
   {

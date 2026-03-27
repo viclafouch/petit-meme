@@ -1,4 +1,4 @@
-import { PageHeader } from '@/components/page-header'
+import { PageHeader } from '~/components/page-header'
 import { createFileRoute } from '@tanstack/react-router'
 import { ServicesGrid } from './-components/services/services-grid'
 

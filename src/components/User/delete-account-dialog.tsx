@@ -2,7 +2,7 @@ import type { User } from 'better-auth'
 import { CircleAlert, MessageCircleWarning } from 'lucide-react'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import type { WithDialog } from '@/@types/dialog'
+import type { WithDialog } from '~/@types/dialog'
 import {
   Dialog,
   DialogContent,
@@ -10,31 +10,31 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/animate-ui/radix/dialog'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
+} from '~/components/animate-ui/radix/dialog'
+import { Alert, AlertDescription } from '~/components/ui/alert'
+import { Button } from '~/components/ui/button'
 import {
   FormControl,
   FormItem,
   FormLabel,
   FormMessage
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { LoadingButton } from '@/components/ui/loading-button'
+} from '~/components/ui/form'
+import { Input } from '~/components/ui/input'
+import { LoadingButton } from '~/components/ui/loading-button'
 import {
   extractAuthErrorCode,
   getAuthErrorMessage
-} from '@/helpers/auth-errors'
-import { useErrorFocus } from '@/hooks/use-error-focus'
-import { authClient } from '@/lib/auth-client'
+} from '~/helpers/auth-errors'
+import { useErrorFocus } from '~/hooks/use-error-focus'
+import { authClient } from '~/lib/auth-client'
 import {
   getActiveSubscriptionQueryOpts,
   getAuthUserQueryOpts,
   getFavoritesMemesQueryOpts
-} from '@/lib/queries'
-import { captureWithFeature } from '@/lib/sentry'
-import { getFieldErrorMessage } from '@/lib/utils'
-import { m } from '@/paraglide/messages.js'
+} from '~/lib/queries'
+import { captureWithFeature } from '~/lib/sentry'
+import { getFieldErrorMessage } from '~/lib/utils'
+import { m } from '~/paraglide/messages.js'
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'

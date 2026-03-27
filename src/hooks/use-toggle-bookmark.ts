@@ -1,11 +1,11 @@
 import React from 'react'
 import { toast } from 'sonner'
-import { getStudioErrorCode } from '@/constants/error'
-import type { MemeWithVideo } from '@/constants/meme'
-import { getFavoritesMemesQueryOpts, getMemeByIdQueryOpts } from '@/lib/queries'
-import { captureWithFeature } from '@/lib/sentry'
-import { m } from '@/paraglide/messages.js'
-import { toggleBookmarkByMemeId } from '@/server/user'
+import { getStudioErrorCode } from '~/constants/error'
+import type { MemeWithVideo } from '~/constants/meme'
+import { getFavoritesMemesQueryOpts, getMemeByIdQueryOpts } from '~/lib/queries'
+import { captureWithFeature } from '~/lib/sentry'
+import { m } from '~/paraglide/messages.js'
+import { toggleBookmarkByMemeId } from '~/server/user'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 type UseToggleBookmarkParams = {

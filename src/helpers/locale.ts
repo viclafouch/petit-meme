@@ -1,4 +1,4 @@
-import type { Locale } from '@/paraglide/runtime'
+import type { Locale } from '~/paraglide/runtime'
 
 export const getLocaleDisplayName = (locale: Locale, displayLocale: Locale) => {
   const displayNames = new Intl.DisplayNames([displayLocale], {

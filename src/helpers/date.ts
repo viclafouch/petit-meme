@@ -1,5 +1,5 @@
-import { DAY, HOUR, MINUTE, SECOND } from '@/constants/time'
-import type { Locale } from '@/paraglide/runtime'
+import { DAY, HOUR, MINUTE, SECOND } from '~/constants/time'
+import type { Locale } from '~/paraglide/runtime'
 
 export type ChartGranularity = 'day' | 'week' | 'month'
 

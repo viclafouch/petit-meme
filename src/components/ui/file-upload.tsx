@@ -11,7 +11,7 @@ import {
   FileTextIcon,
   FileVideoIcon
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '~/lib/utils'
 import { Slot } from '@radix-ui/react-slot'
 
 const ROOT_NAME = 'FileUpload'

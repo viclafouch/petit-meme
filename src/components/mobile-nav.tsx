@@ -1,23 +1,23 @@
 import React from 'react'
 import { CreditCard, Settings, Shield, SparklesIcon, Star } from 'lucide-react'
-import { ThemeSwitcher } from '@/components/animate-ui/theme-switcher'
-import type { NavigationLink } from '@/components/navbar'
-import { Button } from '@/components/ui/button'
+import { ThemeSwitcher } from '~/components/animate-ui/theme-switcher'
+import type { NavigationLink } from '~/components/navbar'
+import { Button } from '~/components/ui/button'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger
-} from '@/components/ui/popover'
-import { getLegalLinks } from '@/constants/navigation'
-import { useStripeCheckout } from '@/hooks/use-stripe-checkout'
+} from '~/components/ui/popover'
+import { getLegalLinks } from '~/constants/navigation'
+import { useStripeCheckout } from '~/hooks/use-stripe-checkout'
 import {
   getActiveSubscriptionQueryOpts,
   getFavoritesMemesQueryOpts
-} from '@/lib/queries'
-import type { SessionUser } from '@/lib/role'
-import { matchIsUserAdmin } from '@/lib/role'
-import { cn } from '@/lib/utils'
-import { m } from '@/paraglide/messages.js'
+} from '~/lib/queries'
+import type { SessionUser } from '~/lib/role'
+import { matchIsUserAdmin } from '~/lib/role'
+import { cn } from '~/lib/utils'
+import { m } from '~/paraglide/messages.js'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 

@@ -1,34 +1,35 @@
 import { toast } from 'sonner'
 import type { z } from 'zod'
-import { FormFooter } from '@/components/form-footer'
-import { FLAG_ICON_CLASS, LOCALE_FLAGS } from '@/components/icon/flags'
+import { FormFooter } from '~/components/form-footer'
+import { FLAG_ICON_CLASS, LOCALE_FLAGS } from '~/components/icon/flags'
 import {
   FormControl,
   FormItem,
   FormLabel,
   FormMessage
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { getErrorMessage } from '@/helpers/error'
+} from '~/components/ui/form'
+import { Input } from '~/components/ui/input'
+import { getErrorMessage } from '~/helpers/error'
 import {
   buildLocaleRecord,
   findTranslationByLocale,
   LOCALE_META
-} from '@/helpers/i18n-content'
-import { useKeywordsField } from '@/hooks/use-keywords-field'
-import { getFieldErrorMessage } from '@/lib/utils'
-import type { Locale } from '@/paraglide/runtime'
-import { locales } from '@/paraglide/runtime'
-import type { EnrichedCategory } from '@/server/categories'
+} from '~/helpers/i18n-content'
+import { useKeywordsField } from '~/hooks/use-keywords-field'
+import { getFieldErrorMessage } from '~/lib/utils'
+import type { Locale } from '~/paraglide/runtime'
+import { locales } from '~/paraglide/runtime'
+import type { EnrichedCategory } from '~/server/categories'
 import {
   addCategory,
   CATEGORY_FORM_SCHEMA,
   editCategory
-} from '@/server/categories'
-import { KeywordsField } from '@admin/-components/keywords-field'
+} from '~/server/categories'
 import type { AnyFieldApi } from '@tanstack/react-form'
 import { useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
+
+import { KeywordsField } from '~admin/-components/keywords-field'
 
 export type CategoryFormParams =
   | {

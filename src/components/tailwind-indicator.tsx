@@ -1,5 +1,5 @@
 import React from 'react'
-import { IS_PRODUCTION } from '@/constants/env'
+import { IS_PRODUCTION } from '~/constants/env'
 
 export const TailwindIndicator = () => {
   if (IS_PRODUCTION) {

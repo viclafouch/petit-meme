@@ -10,9 +10,9 @@ import {
   Search,
   Sparkles
 } from 'lucide-react'
-import { XTwitterIcon } from '@/components/icon'
-import { clientEnv } from '@/env/client'
-import { cn } from '@/lib/utils'
+import { XTwitterIcon } from '~/components/icon'
+import { clientEnv } from '~/env/client'
+import { cn } from '~/lib/utils'
 
 type ServiceConfig = {
   label: string

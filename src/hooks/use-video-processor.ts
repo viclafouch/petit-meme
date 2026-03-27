@@ -1,14 +1,14 @@
 import React from 'react'
 import { toast } from 'sonner'
-import { getStudioErrorCode } from '@/constants/error'
-import type { MemeWithVideo } from '@/constants/meme'
+import { getStudioErrorCode } from '~/constants/error'
+import type { MemeWithVideo } from '~/constants/meme'
 import type {
   StudioBandColorValue,
   StudioFontColorValue,
   StudioFontFamilyId,
   StudioFontSizeValue,
   StudioTextPosition
-} from '@/constants/studio'
+} from '~/constants/studio'
 import {
   STUDIO_BASELINE_RATIO,
   STUDIO_DEFAULT_BAND_HEIGHT,
@@ -17,19 +17,19 @@ import {
   STUDIO_DEFAULT_MAX_CHARS_PER_LINE,
   STUDIO_FONTS,
   STUDIO_LINE_SPACING
-} from '@/constants/studio'
-import { getAuthUserQueryOpts, getVideoBlobQueryOpts } from '@/lib/queries'
-import { captureWithFeature } from '@/lib/sentry'
-import { m } from '@/paraglide/messages.js'
-import { incrementGenerationCount } from '@/server/user'
-import { useShowDialog } from '@/stores/dialog.store'
+} from '~/constants/studio'
+import { getAuthUserQueryOpts, getVideoBlobQueryOpts } from '~/lib/queries'
+import { captureWithFeature } from '~/lib/sentry'
+import { m } from '~/paraglide/messages.js'
+import { incrementGenerationCount } from '~/server/user'
+import { useShowDialog } from '~/stores/dialog.store'
 import {
   FFMPEG_ENCODING_ARGS,
   FFMPEG_INPUT_FILE,
   FFMPEG_TEXT_FILE,
   loadFFmpeg,
   readFFmpegOutput
-} from '@/utils/ffmpeg'
+} from '~/utils/ffmpeg'
 import type { FFmpeg, ProgressEvent } from '@ffmpeg/ffmpeg'
 import { fetchFile } from '@ffmpeg/util'
 import {

@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/button'
-import { LoadingButton } from '@/components/ui/loading-button'
+import { Button } from '~/components/ui/button'
+import { LoadingButton } from '~/components/ui/loading-button'
 
 type FormFooterParams = {
   canSubmit: boolean

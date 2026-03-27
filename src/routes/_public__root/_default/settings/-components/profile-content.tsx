@@ -2,32 +2,32 @@ import React from 'react'
 import type { User } from 'better-auth'
 import { CreditCard, Download, Key, Stars, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
+import { Button } from '~/components/ui/button'
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle
-} from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
-import { LoadingButton } from '@/components/ui/loading-button'
-import { Separator } from '@/components/ui/separator'
-import { DeleteAccountDialog } from '@/components/User/delete-account-dialog'
-import { UpdatePasswordDialog } from '@/components/User/update-password-dialog'
+} from '~/components/ui/card'
+import { Label } from '~/components/ui/label'
+import { LoadingButton } from '~/components/ui/loading-button'
+import { Separator } from '~/components/ui/separator'
+import { DeleteAccountDialog } from '~/components/User/delete-account-dialog'
+import { UpdatePasswordDialog } from '~/components/User/update-password-dialog'
 import {
   type BetterAuthPlanName,
   getFreePlan,
   getPremiumPlan
-} from '@/constants/plan'
-import { getSubscriptionDisplayInfo } from '@/helpers/subscription'
-import { useStripeCheckout } from '@/hooks/use-stripe-checkout'
-import { captureWithFeature } from '@/lib/sentry'
-import { m } from '@/paraglide/messages.js'
-import { getLocale } from '@/paraglide/runtime'
-import type { ActiveSubscription } from '@/server/customer'
-import { exportUserData } from '@/server/user'
-import { downloadBlob } from '@/utils/download'
+} from '~/constants/plan'
+import { getSubscriptionDisplayInfo } from '~/helpers/subscription'
+import { useStripeCheckout } from '~/hooks/use-stripe-checkout'
+import { captureWithFeature } from '~/lib/sentry'
+import { m } from '~/paraglide/messages.js'
+import { getLocale } from '~/paraglide/runtime'
+import type { ActiveSubscription } from '~/server/customer'
+import { exportUserData } from '~/server/user'
+import { downloadBlob } from '~/utils/download'
 import { useMutation } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 

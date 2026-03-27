@@ -1,5 +1,5 @@
-import { m } from '@/paraglide/messages.js'
-import { baseLocale, getLocale } from '@/paraglide/runtime'
+import { m } from '~/paraglide/messages.js'
+import { baseLocale, getLocale } from '~/paraglide/runtime'
 import { createFileRoute } from '@tanstack/react-router'
 
 const getLocalizedPathname = (pathname: string) => {

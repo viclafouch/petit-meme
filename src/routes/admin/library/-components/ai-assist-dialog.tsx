@@ -1,8 +1,8 @@
 import React from 'react'
 import { Stars, X } from 'lucide-react'
 import { toast } from 'sonner'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { Badge } from '~/components/ui/badge'
+import { Button } from '~/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -10,25 +10,25 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { LoadingButton } from '@/components/ui/loading-button'
-import { Textarea } from '@/components/ui/textarea'
-import type { Meme } from '@/db/generated/prisma/client'
-import type { MemeContentLocale } from '@/db/generated/prisma/enums'
-import { getErrorMessage } from '@/helpers/error'
-import { CONTENT_LOCALE_TO_LOCALE } from '@/helpers/i18n-content'
-import { parseKeywordsInput } from '@/helpers/keywords'
-import { useKeywordsField } from '@/hooks/use-keywords-field'
-import { captureWithFeature } from '@/lib/sentry'
-import type { Locale } from '@/paraglide/runtime'
+} from '~/components/ui/dialog'
+import { Input } from '~/components/ui/input'
+import { Label } from '~/components/ui/label'
+import { LoadingButton } from '~/components/ui/loading-button'
+import { Textarea } from '~/components/ui/textarea'
+import type { Meme } from '~/db/generated/prisma/client'
+import type { MemeContentLocale } from '~/db/generated/prisma/enums'
+import { getErrorMessage } from '~/helpers/error'
+import { CONTENT_LOCALE_TO_LOCALE } from '~/helpers/i18n-content'
+import { parseKeywordsInput } from '~/helpers/keywords'
+import { useKeywordsField } from '~/hooks/use-keywords-field'
+import { captureWithFeature } from '~/lib/sentry'
+import type { Locale } from '~/paraglide/runtime'
 import {
   aiAssistMemeContent,
   type AiAssistResult,
   translateMemeContent
-} from '@/server/ai'
-import { removeDuplicates } from '@/utils/array'
+} from '~/server/ai'
+import { removeDuplicates } from '~/utils/array'
 import { useMutation } from '@tanstack/react-query'
 
 type AiAssistDialogParams = {

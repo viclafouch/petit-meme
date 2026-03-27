@@ -1,8 +1,8 @@
-import { COOKIE_ALGOLIA_USER_TOKEN_KEY } from '@/constants/cookie'
-import { clientEnv } from '@/env/client'
-import { readClientCookie } from '@/helpers/cookie'
-import { matchHasAcceptedCookies } from '@/lib/cookie-consent'
-import { getLocale } from '@/paraglide/runtime'
+import { COOKIE_ALGOLIA_USER_TOKEN_KEY } from '~/constants/cookie'
+import { clientEnv } from '~/env/client'
+import { readClientCookie } from '~/helpers/cookie'
+import { matchHasAcceptedCookies } from '~/lib/cookie-consent'
+import { getLocale } from '~/paraglide/runtime'
 import type {
   ClickedObjectIDs,
   ClickedObjectIDsAfterSearch,

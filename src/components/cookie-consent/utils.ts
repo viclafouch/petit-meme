@@ -1,6 +1,6 @@
-import { CONSENT_COOKIE_KEY } from '@/constants/cookie'
-import { ONE_YEAR_IN_SECONDS } from '@/constants/time'
-import { createClientCookie } from '@/helpers/cookie'
+import { CONSENT_COOKIE_KEY } from '~/constants/cookie'
+import { ONE_YEAR_IN_SECONDS } from '~/constants/time'
+import { createClientCookie } from '~/helpers/cookie'
 import type { ConsentCategories, ConsentState } from './types'
 
 export function getDefaultCategories(): ConsentCategories {

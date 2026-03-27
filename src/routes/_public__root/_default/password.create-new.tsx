@@ -1,8 +1,8 @@
 import { Ban } from 'lucide-react'
 import { z } from 'zod'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { CreateNewPasswordForm } from '@/components/User/create-new-password-form'
-import { m } from '@/paraglide/messages.js'
+import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
+import { CreateNewPasswordForm } from '~/components/User/create-new-password-form'
+import { m } from '~/paraglide/messages.js'
 import { createFileRoute, Link, Navigate } from '@tanstack/react-router'
 
 const RouteComponent = () => {

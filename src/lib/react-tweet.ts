@@ -1,5 +1,5 @@
 import { getTweet } from 'react-tweet/api'
-import { logger } from '@/lib/logger'
+import { logger } from '~/lib/logger'
 
 export class TweetNoVideoError extends Error {
   constructor(tweetId: string) {

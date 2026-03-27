@@ -1,8 +1,8 @@
 import React from 'react'
 import { LayoutGroup, motion, useReducedMotion } from 'motion/react'
-import { ANNUAL_DISCOUNT_PERCENT, type BillingPeriod } from '@/constants/plan'
-import { cn } from '@/lib/utils'
-import { m } from '@/paraglide/messages.js'
+import { ANNUAL_DISCOUNT_PERCENT, type BillingPeriod } from '~/constants/plan'
+import { cn } from '~/lib/utils'
+import { m } from '~/paraglide/messages.js'
 
 type BillingToggleParams = {
   billingPeriod: BillingPeriod

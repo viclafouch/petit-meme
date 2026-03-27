@@ -1,4 +1,4 @@
-import { m } from '@/paraglide/messages.js'
+import { m } from '~/paraglide/messages.js'
 
 export type BillingPeriod = 'monthly' | 'yearly'
 

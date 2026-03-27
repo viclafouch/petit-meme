@@ -1,4 +1,4 @@
-import { m } from '@/paraglide/messages.js'
+import { m } from '~/paraglide/messages.js'
 
 export const STUDIO_DEFAULT_BAND_HEIGHT = 100
 export const STUDIO_DEFAULT_FONT_SIZE = 36

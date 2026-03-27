@@ -1,18 +1,18 @@
-import type { MemeAlgoliaData } from '@/constants/meme'
-import { MINUTE } from '@/constants/time'
-import { MemeContentLocale } from '@/db/generated/prisma/enums'
-import { clientEnv } from '@/env/client'
-import { serverEnv } from '@/env/server'
+import type { MemeAlgoliaData } from '~/constants/meme'
+import { MINUTE } from '~/constants/time'
+import { MemeContentLocale } from '~/db/generated/prisma/enums'
+import { clientEnv } from '~/env/client'
+import { serverEnv } from '~/env/server'
 import {
   CONTENT_LOCALE_TO_SITE_LOCALES,
   resolveCategoryTranslation,
   resolveMemeTranslation,
   VISIBLE_CONTENT_LOCALES
-} from '@/helpers/i18n-content'
-import { buildVideoImageUrl } from '@/lib/bunny'
-import { algoliaLogger } from '@/lib/logger'
-import type { Locale } from '@/paraglide/runtime'
-import { locales } from '@/paraglide/runtime'
+} from '~/helpers/i18n-content'
+import { buildVideoImageUrl } from '~/lib/bunny'
+import { algoliaLogger } from '~/lib/logger'
+import type { Locale } from '~/paraglide/runtime'
+import { locales } from '~/paraglide/runtime'
 import type { HighlightResultOption, Hit } from '@algolia/client-search'
 import { searchClient } from '@algolia/client-search'
 import { recommendClient } from '@algolia/recommend'

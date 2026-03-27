@@ -1,19 +1,19 @@
 import { Check } from 'lucide-react'
-import { FLAG_ICON_CLASS, LOCALE_FLAGS } from '@/components/icon/flags'
-import { Button } from '@/components/ui/button'
+import { FLAG_ICON_CLASS, LOCALE_FLAGS } from '~/components/icon/flags'
+import { Button } from '~/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { getLocaleDisplayName } from '@/helpers/locale'
-import { dismissLocaleBanner } from '@/lib/locale-banner'
-import { cn } from '@/lib/utils'
-import { m } from '@/paraglide/messages.js'
-import type { Locale } from '@/paraglide/runtime'
-import { getLocale, locales, setLocale } from '@/paraglide/runtime'
-import { updateUserLocale } from '@/server/user-locale'
+} from '~/components/ui/dropdown-menu'
+import { getLocaleDisplayName } from '~/helpers/locale'
+import { dismissLocaleBanner } from '~/lib/locale-banner'
+import { cn } from '~/lib/utils'
+import { m } from '~/paraglide/messages.js'
+import type { Locale } from '~/paraglide/runtime'
+import { getLocale, locales, setLocale } from '~/paraglide/runtime'
+import { updateUserLocale } from '~/server/user-locale'
 
 type LanguageSwitcherParams = {
   className?: string

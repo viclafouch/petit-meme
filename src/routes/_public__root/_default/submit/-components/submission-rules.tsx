@@ -8,8 +8,8 @@ import {
   Shield,
   TrendingUp
 } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
-import { m } from '@/paraglide/messages'
+import { Card, CardContent } from '~/components/ui/card'
+import { m } from '~/paraglide/messages'
 
 type Rule = {
   icon: LucideIcon

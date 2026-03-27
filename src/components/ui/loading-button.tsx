@@ -1,7 +1,7 @@
 import React from 'react'
 import { Loader2Icon } from 'lucide-react'
 import { useSpinDelay } from 'spin-delay'
-import { Button } from '@/components/ui/button'
+import { Button } from '~/components/ui/button'
 
 export const LoadingButton = ({
   children,

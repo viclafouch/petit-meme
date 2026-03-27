@@ -7,7 +7,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator
-} from '@/components/ui/breadcrumb'
+} from '~/components/ui/breadcrumb'
 import { isMatch, Link, useMatches } from '@tanstack/react-router'
 
 export const PathBreadcrumbs = () => {

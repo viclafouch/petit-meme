@@ -3,9 +3,9 @@ import {
   type BillingPeriod,
   getBillingPeriodLabel,
   PREMIUM_PLAN_PRICING
-} from '@/constants/plan'
-import { formatCentsToEuros } from '@/helpers/number'
-import type { Locale } from '@/paraglide/runtime'
+} from '~/constants/plan'
+import { formatCentsToEuros } from '~/helpers/number'
+import type { Locale } from '~/paraglide/runtime'
 
 export const getBillingPeriodFromPlan = (
   planName: BetterAuthPlanName

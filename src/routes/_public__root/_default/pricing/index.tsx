@@ -3,15 +3,15 @@ import {
   type BillingPeriod,
   getFreePlan,
   getPremiumPlan
-} from '@/constants/plan'
-import { useStripeCheckout } from '@/hooks/use-stripe-checkout'
-import { getActiveSubscriptionQueryOpts } from '@/lib/queries'
-import { buildPricingJsonLd, seo } from '@/lib/seo'
-import { m } from '@/paraglide/messages.js'
+} from '~/constants/plan'
+import { useStripeCheckout } from '~/hooks/use-stripe-checkout'
+import { getActiveSubscriptionQueryOpts } from '~/lib/queries'
+import { buildPricingJsonLd, seo } from '~/lib/seo'
+import { m } from '~/paraglide/messages.js'
 import {
   PageDescription,
   PageHeading
-} from '@/routes/_public__root/-components/page-headers'
+} from '~/routes/_public__root/-components/page-headers'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, useRouteContext } from '@tanstack/react-router'
 import { BillingToggle } from './-components/billing-toggle'

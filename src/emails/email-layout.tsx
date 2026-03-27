@@ -1,5 +1,5 @@
 import React from 'react'
-import type { Locale } from '@/paraglide/runtime'
+import type { Locale } from '~/paraglide/runtime'
 import {
   Body,
   Column,

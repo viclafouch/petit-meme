@@ -1,5 +1,5 @@
-import { Badge } from '@/components/ui/badge'
-import { buildVideoImageUrl, buildVideoPreviewUrl } from '@/lib/bunny'
+import { Badge } from '~/components/ui/badge'
+import { buildVideoImageUrl, buildVideoPreviewUrl } from '~/lib/bunny'
 
 type MemeVideoThumbnailParams = {
   bunnyId: string

@@ -1,9 +1,9 @@
 /* eslint-disable no-await-in-loop */
-import { MEME_ALGOLIA_INCLUDE, type MemeAlgoliaData } from '@/constants/meme'
-import { prismaClient } from '@/db'
-import { replaceAllIndicesWithMemes } from '@/lib/algolia'
-import { cronLogger } from '@/lib/logger'
-import { verifyCronSecret } from '@/utils/cron-auth'
+import { MEME_ALGOLIA_INCLUDE, type MemeAlgoliaData } from '~/constants/meme'
+import { prismaClient } from '~/db'
+import { replaceAllIndicesWithMemes } from '~/lib/algolia'
+import { cronLogger } from '~/lib/logger'
+import { verifyCronSecret } from '~/utils/cron-auth'
 import { createFileRoute } from '@tanstack/react-router'
 
 const log = cronLogger.child({ job: 'sync-algolia' })

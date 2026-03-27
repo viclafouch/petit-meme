@@ -3,8 +3,8 @@ import { Moon, Sun } from 'lucide-react'
 import type { TargetAndTransition, Transition } from 'motion/react'
 import { motion } from 'motion/react'
 import { Switch } from 'radix-ui'
-import { useTheme } from '@/lib/theme'
-import { cn } from '@/lib/utils'
+import { useTheme } from '~/lib/theme'
+import { cn } from '~/lib/utils'
 
 const SPRING_NO_BOUNCE = {
   type: 'spring',

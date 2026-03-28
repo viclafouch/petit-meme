@@ -22,7 +22,9 @@ const badgeVariants = cva(
           'bg-warning text-warning-foreground border border-warning-foreground/10',
         info: 'bg-info text-info-foreground border border-info-foreground/10',
         outline:
-          'text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground'
+          'text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
+        amber:
+          'border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-300'
       },
       size: {
         sm: 'px-1 py-0.5 text-xs font-normal',

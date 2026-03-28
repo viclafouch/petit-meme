@@ -35,6 +35,9 @@ type SocialProvider = {
   errorMessage: () => string
 }
 
+const ANIMATED_TAB_CONTENT_CLASS =
+  '[grid-area:1/1] transition-[height,opacity] duration-300 ease-in-out data-[state=inactive]:h-0 data-[state=inactive]:overflow-hidden data-[state=inactive]:opacity-0'
+
 const SOCIAL_PROVIDERS = [
   {
     id: 'twitter',
@@ -82,7 +85,7 @@ export const AuthDialog = ({ open, onOpenChange }: WithDialog<unknown>) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto p-4 sm:p-6">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle />
           <DialogDescription />
@@ -120,28 +123,32 @@ export const AuthDialog = ({ open, onOpenChange }: WithDialog<unknown>) => {
                 {m.auth_create_account()}
               </TabsTrigger>
             </TabsList>
-            <TabsContent
-              value="login"
-              className="pt-4 animate-in fade-in-0 duration-300"
-            >
-              <LoginForm
-                onOpenChange={onOpenChange}
-                lastLoginMethod={lastLoginMethod}
-              />
-            </TabsContent>
-            <TabsContent
-              value="signup"
-              className="pt-4 animate-in fade-in-0 duration-300"
-            >
-              <SignupForm />
-            </TabsContent>
+            <div className="grid [interpolate-size:allow-keywords] pt-4">
+              <TabsContent
+                forceMount
+                value="login"
+                className={ANIMATED_TAB_CONTENT_CLASS}
+              >
+                <LoginForm
+                  onOpenChange={onOpenChange}
+                  lastLoginMethod={lastLoginMethod}
+                />
+              </TabsContent>
+              <TabsContent
+                forceMount
+                value="signup"
+                className={ANIMATED_TAB_CONTENT_CLASS}
+              >
+                <SignupForm />
+              </TabsContent>
+            </div>
           </Tabs>
           <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t w-full">
             <span className="bg-background text-muted-foreground relative z-10 px-2">
               {m.auth_or()}
             </span>
           </div>
-          <div className="flex flex-col gap-y-3 w-full">
+          <div className="grid grid-cols-2 gap-3 w-full">
             {SOCIAL_PROVIDERS.map((provider) => {
               const isLastUsed = lastLoginMethod === provider.id
 

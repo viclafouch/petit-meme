@@ -83,11 +83,7 @@ export default defineConfig(({ mode }) => {
       nitro({
         preset: 'vercel',
         sourcemap: true,
-        vercel: {
-          functions: {
-            runtime: 'nodejs24.x'
-          }
-        },
+        vercel: {},
         routeRules: {
           '/**': {
             headers: {

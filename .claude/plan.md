@@ -31,14 +31,6 @@
 
 ---
 
-## Nitro — Override runtime Node.js 24
-
-**Problème :** Nitro `3.0.1-alpha.2` ne supporte pas Node.js 24 dans sa liste `SUPPORTED_NODE_VERSIONS` ([nitrojs/nitro#3965](https://github.com/nitrojs/nitro/issues/3965)). Fix temporaire : override `runtime: 'nodejs24.x'` dans `vite.config.ts`.
-
-**Fix upstream :** PR [nitrojs/nitro#3967](https://github.com/nitrojs/nitro/pull/3967) mergée mais pas encore publiée.
-
-- [ ] Surveiller les releases Nitro. Quand une version ≥ `3.0.1` inclut le support Node 24, supprimer le bloc `vercel.functions.runtime` de `vite.config.ts`.
-
 ---
 
 ## SEO — Items restants
@@ -64,35 +56,6 @@
 
 ---
 
-## Login Discord
-
-- [x] Ajouter le provider Discord dans la config Better Auth (`src/lib/auth.tsx`) — conditionnel sur env vars
-- [x] Ajouter les env vars `AUTH_DISCORD_ID` / `AUTH_DISCORD_SECRET` dans `src/env/server.ts` (requises)
-- [x] Bouton "Continuer avec Discord" dans le dialog auth
-- [x] Créer une app Discord (Discord Developer Portal) — Client ID + Secret récupérés
-- [x] Ajouter les env vars dans `.env.development`
-- [ ] Ajouter redirect URI prod dans Discord Developer Portal : `https://petit-meme.io/api/auth/callback/discord`
-- [ ] Ajouter `AUTH_DISCORD_ID` + `AUTH_DISCORD_SECRET` dans Vercel env prod
-- [ ] Tester le flow complet (login, link account Discord ↔ Twitter, avatar Discord)
-
-## Refonte UI Auth
-
-- [x] Redesign auth dialog avec Tabs (Connexion / Créer un compte)
-- [x] Logo + titre "Bienvenue sur Petit Meme"
-- [x] Social providers (X + Discord) en bas avec séparateur "ou"
-- [x] Plugin `lastLoginMethod` (Better Auth) — serveur + client
-- [x] Badge "Dernière connexion" sur le provider/méthode utilisée en dernier
-- [x] Hook `useLastLoginMethod` pour lire la méthode depuis le cookie
-- [x] Nouvelles clés i18n (FR + EN)
-- [x] Simplification login-form et signup-form (social + navigation retirés)
-- [x] Messages d'erreur Zod custom i18n (email, password, name, required)
-- [x] Dialog scrollable (max-h-[85vh] overflow-y-auto)
-- [x] `update-password-dialog` corrigé : utilise `getPasswordSchema()` au lieu de `.min(4)` hardcodé
-- [x] `useErrorFocus` ajouté au login-form
-- [x] `aria-hidden` sur toutes les icônes décoratives des alertes auth
-
----
-
 ## Migration Prisma → Drizzle
 
 Remplacer Prisma par Drizzle ORM. Conventions cibles : tables en pluriel, colonnes en `snake_case`, timestamps `_at`, booleans `is_*`, prix en centimes (integer), UUIDs partout, `ON DELETE CASCADE` pour auth, `is_anonymized` pour GDPR.
@@ -102,20 +65,6 @@ Remplacer Prisma par Drizzle ORM. Conventions cibles : tables en pluriel, colonn
 ## Stripe — Payment Elements
 
 Évaluer la migration vers Payment Elements (au lieu de Checkout redirect). Pattern : `PaymentIntent` → `confirmPayment` avec `redirect: 'if_required'` → polling post-paiement.
-
----
-
-## Migration ESLint + Prettier → oxlint + oxfmt ✅
-
-**Terminée le 2026-03-27.** Migré de `@viclafouch/eslint-config-viclafouch` v5 vers `@viclafouch/oxc-config` v1.0.0-alpha.4 (oxlint + oxfmt).
-
-- [x] Migrer path aliases `@/` → `~/`, `@admin/` → `~admin/` (commit séparé)
-- [x] Supprimer ESLint, Prettier → installer oxlint, oxfmt, @viclafouch/oxc-config
-- [x] Créer oxlint.config.ts et oxfmt.config.ts (sort imports custom)
-- [x] Mettre à jour scripts, VS Code, husky
-- [x] Supprimer ~36 eslint-disable comments obsolètes
-- [x] Fixer import/no-cycle (getRouteApi), filename-case (Play.tsx), no-shadow (globalThis)
-- [x] Convertir les eslint-disable restants en oxlint-disable dans les fichiers source (hors generated/ui/animate-ui/routeTree)
 
 ---
 

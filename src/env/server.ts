@@ -3,6 +3,8 @@ import { createEnv } from '@t3-oss/env-core'
 
 export const serverEnv = createEnv({
   server: {
+    AUTH_DISCORD_ID: z.string(),
+    AUTH_DISCORD_SECRET: z.string(),
     AUTH_TWITTER_ID: z.string(),
     AUTH_TWITTER_SECRET: z.string(),
     BETTER_AUTH_SECRET: z.string().min(32),

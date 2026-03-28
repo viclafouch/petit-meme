@@ -66,11 +66,30 @@
 
 ## Login Discord
 
-- [ ] Créer une app Discord (Discord Developer Portal) — récupérer Client ID + Client Secret
-- [ ] Ajouter le provider Discord dans la config Better Auth (`src/lib/auth.tsx`) — scopes `identify` + `email` (gérés automatiquement par Better Auth)
-- [ ] Ajouter les env vars `DISCORD_CLIENT_ID` / `DISCORD_CLIENT_SECRET` dans `src/env/server.ts` (validation Zod) + `.env.development` + Vercel env prod
-- [ ] Bouton "Se connecter avec Discord" dans les formulaires login/signup (`auth-dialog.tsx`)
+- [x] Ajouter le provider Discord dans la config Better Auth (`src/lib/auth.tsx`) — conditionnel sur env vars
+- [x] Ajouter les env vars `AUTH_DISCORD_ID` / `AUTH_DISCORD_SECRET` dans `src/env/server.ts` (requises)
+- [x] Bouton "Continuer avec Discord" dans le dialog auth
+- [x] Créer une app Discord (Discord Developer Portal) — Client ID + Secret récupérés
+- [x] Ajouter les env vars dans `.env.development`
+- [ ] Ajouter redirect URI prod dans Discord Developer Portal : `https://petit-meme.io/api/auth/callback/discord`
+- [ ] Ajouter `AUTH_DISCORD_ID` + `AUTH_DISCORD_SECRET` dans Vercel env prod
 - [ ] Tester le flow complet (login, link account Discord ↔ Twitter, avatar Discord)
+
+## Refonte UI Auth
+
+- [x] Redesign auth dialog avec Tabs (Connexion / Créer un compte)
+- [x] Logo + titre "Bienvenue sur Petit Meme"
+- [x] Social providers (X + Discord) en bas avec séparateur "ou"
+- [x] Plugin `lastLoginMethod` (Better Auth) — serveur + client
+- [x] Badge "Dernière connexion" sur le provider/méthode utilisée en dernier
+- [x] Hook `useLastLoginMethod` pour lire la méthode depuis le cookie
+- [x] Nouvelles clés i18n (FR + EN)
+- [x] Simplification login-form et signup-form (social + navigation retirés)
+- [x] Messages d'erreur Zod custom i18n (email, password, name, required)
+- [x] Dialog scrollable (max-h-[85vh] overflow-y-auto)
+- [x] `update-password-dialog` corrigé : utilise `getPasswordSchema()` au lieu de `.min(4)` hardcodé
+- [x] `useErrorFocus` ajouté au login-form
+- [x] `aria-hidden` sur toutes les icônes décoratives des alertes auth
 
 ---
 

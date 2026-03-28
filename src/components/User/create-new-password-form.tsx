@@ -153,7 +153,7 @@ export const CreateNewPasswordForm = ({ token }: { token: string }) => {
       />
       {resetPasswordMutation.error ? (
         <Alert ref={errorRef} variant="destructive" role="alert" tabIndex={-1}>
-          <CircleAlert />
+          <CircleAlert aria-hidden="true" />
           <AlertDescription className="text-destructive-foreground">
             {getAuthErrorMessage(resetPasswordMutation.error.message)}
           </AlertDescription>

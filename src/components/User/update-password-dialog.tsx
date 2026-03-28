@@ -21,6 +21,7 @@ import {
 } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
 import { LoadingButton } from '~/components/ui/loading-button'
+import { getPasswordSchema } from '~/constants/auth'
 import {
   extractAuthErrorCode,
   getChangePasswordErrorMessage
@@ -32,11 +33,13 @@ import { getFieldErrorMessage } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 
 const getUpdatePasswordSchema = () => {
+  const passwordField = getPasswordSchema()
+
   return z
     .object({
-      currentPassword: z.string().nonempty(),
-      newPassword: z.string().min(4),
-      confirmPassword: z.string().min(4)
+      currentPassword: z.string().min(1, { message: m.validation_required() }),
+      newPassword: passwordField,
+      confirmPassword: passwordField
     })
     .refine(
       (data) => {
@@ -214,7 +217,7 @@ const UpdatePasswordForm = () => {
             role="alert"
             tabIndex={-1}
           >
-            <CircleAlert />
+            <CircleAlert aria-hidden="true" />
             <AlertDescription className="text-destructive-foreground">
               {getChangePasswordErrorMessage(
                 updatePasswordMutation.error.message
@@ -229,7 +232,7 @@ const UpdatePasswordForm = () => {
           children={(isSubmitted) => {
             return isSubmitted && updatePasswordMutation.isSuccess ? (
               <Alert variant="success" className="mt-4">
-                <CircleAlert />
+                <CircleAlert aria-hidden="true" />
                 <AlertTitle>{m.auth_password_updated_title()}</AlertTitle>
                 <AlertDescription>
                   {m.auth_password_updated_description()}

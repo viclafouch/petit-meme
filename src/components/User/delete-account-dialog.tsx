@@ -137,7 +137,7 @@ const DeleteAccountForm = ({ onCancel }: { onCancel: () => void }) => {
                     role="alert"
                     tabIndex={-1}
                   >
-                    <CircleAlert />
+                    <CircleAlert aria-hidden="true" />
                     <AlertDescription className="text-destructive-foreground">
                       {getAuthErrorMessage(deleteAccountMutation.error.message)}
                     </AlertDescription>

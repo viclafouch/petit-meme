@@ -13,7 +13,10 @@ import {
 } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
 import { LoadingButton } from '~/components/ui/loading-button'
-import { getPasswordWithConfirmationSchema } from '~/constants/auth'
+import {
+  getEmailSchema,
+  getPasswordWithConfirmationSchema
+} from '~/constants/auth'
 import {
   extractAuthErrorCode,
   getAuthErrorMessage
@@ -25,15 +28,11 @@ import { getFieldErrorMessage } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 import { localizeHref } from '~/paraglide/runtime'
 
-type SignupFormParams = {
-  onAuthTypeChange: (authType: 'login' | 'signup') => void
-}
-
 const getSignupSchema = () => {
   return z
     .object({
-      name: z.string(),
-      email: z.email(),
+      name: z.string().min(1, { message: m.validation_name_required() }),
+      email: getEmailSchema(),
       acceptTerms: z.literal(true, {
         message: m.validation_accept_terms()
       })
@@ -59,14 +58,14 @@ const getSignupFormOpts = () => {
 const SignupSuccessAlert = () => {
   return (
     <Alert variant="success" className="mt-4">
-      <CheckCircle />
+      <CheckCircle aria-hidden="true" />
       <AlertTitle>{m.auth_signup_success_title()}</AlertTitle>
       <AlertDescription>{m.auth_signup_success_description()}</AlertDescription>
     </Alert>
   )
 }
 
-export const SignupForm = ({ onAuthTypeChange }: SignupFormParams) => {
+export const SignupForm = () => {
   const signupMutation = useMutation({
     mutationFn: async ({
       email,
@@ -251,6 +250,7 @@ export const SignupForm = ({ onAuthTypeChange }: SignupFormParams) => {
                     to="/terms-of-use"
                     className="text-info underline"
                     target="_blank"
+                    rel="noopener noreferrer"
                   >
                     {m.auth_terms_link_text()}
                   </Link>
@@ -259,6 +259,7 @@ export const SignupForm = ({ onAuthTypeChange }: SignupFormParams) => {
                     to="/privacy"
                     className="text-info underline"
                     target="_blank"
+                    rel="noopener noreferrer"
                   >
                     {m.auth_privacy_link_text()}
                   </Link>
@@ -287,7 +288,7 @@ export const SignupForm = ({ onAuthTypeChange }: SignupFormParams) => {
       />
       {signupMutation.error ? (
         <Alert ref={errorRef} variant="destructive" role="alert" tabIndex={-1}>
-          <CircleAlert />
+          <CircleAlert aria-hidden="true" />
           <AlertDescription className="text-destructive-foreground">
             {getAuthErrorMessage(signupMutation.error.message)}
           </AlertDescription>
@@ -303,19 +304,6 @@ export const SignupForm = ({ onAuthTypeChange }: SignupFormParams) => {
           ) : null
         }}
       />
-      <div className="text-center text-sm gap-x-1 inline-flex justify-center w-full text-primary">
-        {m.auth_already_have_account()}
-        <button
-          onClick={(event) => {
-            event.preventDefault()
-            onAuthTypeChange('login')
-          }}
-          type="button"
-          className="underline underline-offset-4 cursor-pointer"
-        >
-          {m.nav_sign_in()}
-        </button>
-      </div>
     </form>
   )
 }

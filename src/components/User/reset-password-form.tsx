@@ -11,6 +11,7 @@ import {
 } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
 import { LoadingButton } from '~/components/ui/loading-button'
+import { getEmailSchema } from '~/constants/auth'
 import {
   extractAuthErrorCode,
   getAuthErrorMessage
@@ -22,18 +23,22 @@ import { getFieldErrorMessage } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 import { localizeHref } from '~/paraglide/runtime'
 
-const resetPasswordSchema = z.object({
-  email: z.email()
-})
+const getResetPasswordSchema = () => {
+  return z.object({
+    email: getEmailSchema()
+  })
+}
 
-const resetPasswordFormOpts = formOptions({
-  defaultValues: {
-    email: ''
-  },
-  validators: {
-    onChange: resetPasswordSchema
-  }
-})
+const getResetPasswordFormOpts = () => {
+  return formOptions({
+    defaultValues: {
+      email: ''
+    },
+    validators: {
+      onChange: getResetPasswordSchema()
+    }
+  })
+}
 
 export const ResetPasswordForm = () => {
   const resetPasswordMutation = useMutation({
@@ -58,7 +63,7 @@ export const ResetPasswordForm = () => {
   const errorRef = useErrorFocus(resetPasswordMutation.error)
 
   const form = useForm({
-    ...resetPasswordFormOpts,
+    ...getResetPasswordFormOpts(),
     onSubmit: async ({ value }) => {
       return resetPasswordMutation.mutateAsync({ email: value.email })
     }
@@ -127,7 +132,7 @@ export const ResetPasswordForm = () => {
             role="alert"
             tabIndex={-1}
           >
-            <CircleAlert />
+            <CircleAlert aria-hidden="true" />
             <AlertDescription className="text-destructive-foreground">
               {getAuthErrorMessage(resetPasswordMutation.error.message)}
             </AlertDescription>
@@ -135,7 +140,7 @@ export const ResetPasswordForm = () => {
         ) : null}
         {resetPasswordMutation.isSuccess ? (
           <Alert variant="success" className="mt-4">
-            <CircleAlert />
+            <CircleAlert aria-hidden="true" />
             <AlertTitle>{m.auth_reset_email_sent_title()}</AlertTitle>
             <AlertDescription>
               {m.auth_reset_email_sent_description()}

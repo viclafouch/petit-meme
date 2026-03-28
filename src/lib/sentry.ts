@@ -21,6 +21,7 @@ type SentryFeature =
   | 'admin-user-delete'
   | 'sign-in'
   | 'sign-in-twitter'
+  | 'sign-in-discord'
   | 'sign-up'
   | 'sign-out'
   | 'reset-password'

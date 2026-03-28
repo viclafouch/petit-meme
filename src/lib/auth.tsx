@@ -1,5 +1,5 @@
 import { betterAuth } from 'better-auth'
-import { admin } from 'better-auth/plugins'
+import { admin, lastLoginMethod } from 'better-auth/plugins'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import type Stripe from 'stripe'
 import { prismaAdapter } from '@better-auth/prisma-adapter'
@@ -215,6 +215,10 @@ const getAuthConfig = createServerOnlyFn(() => {
       twitter: {
         clientId: serverEnv.AUTH_TWITTER_ID,
         clientSecret: serverEnv.AUTH_TWITTER_SECRET
+      },
+      discord: {
+        clientId: serverEnv.AUTH_DISCORD_ID,
+        clientSecret: serverEnv.AUTH_DISCORD_SECRET
       }
     },
     rateLimit: {
@@ -260,6 +264,7 @@ const getAuthConfig = createServerOnlyFn(() => {
     trustedOrigins: [clientEnv.VITE_SITE_URL],
     plugins: [
       admin({ defaultRole: 'user' }),
+      lastLoginMethod(),
       tanstackStartCookies(),
       stripe({
         stripeClient,

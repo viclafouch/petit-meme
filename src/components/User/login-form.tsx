@@ -4,9 +4,7 @@ import { z } from 'zod'
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link, useRouter } from '@tanstack/react-router'
-import { XTwitterIcon } from '~/components/icon'
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
-import { Button } from '~/components/ui/button'
 import {
   FormControl,
   FormItem,
@@ -15,10 +13,13 @@ import {
 } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
 import { LoadingButton } from '~/components/ui/loading-button'
+import { LastLoginBadge } from '~/components/User/last-login-badge'
+import { getEmailSchema } from '~/constants/auth'
 import {
   extractAuthErrorCode,
   getAuthErrorMessage
 } from '~/helpers/auth-errors'
+import { useErrorFocus } from '~/hooks/use-error-focus'
 import { authClient } from '~/lib/auth-client'
 import {
   getActiveSubscriptionQueryOpts,
@@ -30,31 +31,31 @@ import { m } from '~/paraglide/messages.js'
 
 type LoginFormParams = {
   onOpenChange?: (open: boolean) => void
-  onSuccess?: () => void
-  onTwitterSignIn: (event: React.MouseEvent<HTMLButtonElement>) => void
-  onAuthTypeChange: (authType: 'login' | 'signup') => void
+  lastLoginMethod: string | null
 }
 
-const loginSchema = z.object({
-  email: z.string(),
-  password: z.string()
-})
+const getLoginSchema = () => {
+  return z.object({
+    email: getEmailSchema(),
+    password: z.string().min(1, { message: m.validation_required() })
+  })
+}
 
-const loginFormOpts = formOptions({
-  defaultValues: {
-    email: '',
-    password: ''
-  },
-  validators: {
-    onChange: loginSchema
-  }
-})
+const getLoginFormOpts = () => {
+  return formOptions({
+    defaultValues: {
+      email: '',
+      password: ''
+    },
+    validators: {
+      onChange: getLoginSchema()
+    }
+  })
+}
 
 export const LoginForm = ({
   onOpenChange,
-  onSuccess,
-  onAuthTypeChange,
-  onTwitterSignIn
+  lastLoginMethod
 }: LoginFormParams) => {
   const router = useRouter()
   const queryClient = useQueryClient()
@@ -84,15 +85,17 @@ export const LoginForm = ({
       await router.invalidate({ sync: true })
       await queryClient.invalidateQueries(getActiveSubscriptionQueryOpts())
 
-      onSuccess?.()
+      onOpenChange?.(false)
     }
   })
+
+  const errorRef = useErrorFocus(signInMutation.error)
 
   const matchIsEmailNotVerified =
     signInMutation.error?.message === 'EMAIL_NOT_VERIFIED'
 
   const form = useForm({
-    ...loginFormOpts,
+    ...getLoginFormOpts(),
     onSubmit: async ({ value }) => {
       return signInMutation.mutateAsync({
         email: value.email,
@@ -100,6 +103,8 @@ export const LoginForm = ({
       })
     }
   })
+
+  const isLastLoginEmail = lastLoginMethod === 'email'
 
   return (
     <form
@@ -164,6 +169,17 @@ export const LoginForm = ({
           )
         }}
       />
+      <div className="w-full flex justify-end">
+        <Link
+          to="/password/reset"
+          className="underline text-xs text-muted-foreground py-2"
+          onClick={() => {
+            return onOpenChange?.(false)
+          }}
+        >
+          {m.auth_forgot_password()}
+        </Link>
+      </div>
       <form.Subscribe
         selector={(state) => {
           return state.isSubmitting
@@ -173,57 +189,25 @@ export const LoginForm = ({
             <LoadingButton
               isLoading={isSubmitting}
               type="submit"
-              className="w-full"
+              className="w-full relative"
             >
               {m.nav_sign_in()}
+              {isLastLoginEmail ? <LastLoginBadge /> : null}
             </LoadingButton>
           )
         }}
       />
       {signInMutation.error && !matchIsEmailNotVerified ? (
-        <Alert variant="destructive">
-          <CircleAlert />
+        <Alert ref={errorRef} variant="destructive" role="alert" tabIndex={-1}>
+          <CircleAlert aria-hidden="true" />
           <AlertDescription>
             {getAuthErrorMessage(signInMutation.error.message)}
           </AlertDescription>
         </Alert>
       ) : null}
-      <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t w-full">
-        <span className="bg-background text-muted-foreground relative z-10 px-2">
-          {m.auth_or_continue_with()}
-        </span>
-      </div>
-      <Button variant="outline" className="w-full" onClick={onTwitterSignIn}>
-        <XTwitterIcon />
-        {m.auth_twitter_sign_in()}
-      </Button>
-      <div className="w-full flex flex-col gap-1 justify-center items-center">
-        <Link
-          to="/password/reset"
-          className="underline text-xs text-primary"
-          onClick={() => {
-            return onOpenChange?.(false)
-          }}
-        >
-          {m.auth_forgot_password()}
-        </Link>
-        <div className="text-center text-sm gap-x-1 inline-flex justify-center w-full text-primary">
-          {m.auth_no_account()}
-          <button
-            onClick={(event) => {
-              event.preventDefault()
-              onAuthTypeChange('signup')
-            }}
-            type="button"
-            className="underline underline-offset-4 cursor-pointer"
-          >
-            {m.auth_sign_up()}
-          </button>
-        </div>
-      </div>
       {matchIsEmailNotVerified ? (
-        <Alert variant="destructive" className="mt-4">
-          <CircleAlert />
+        <Alert variant="destructive" role="alert">
+          <CircleAlert aria-hidden="true" />
           <AlertTitle>{m.auth_email_not_verified_title()}</AlertTitle>
           <AlertDescription>
             {m.auth_email_not_verified_description()}

@@ -23,12 +23,6 @@
 
 ---
 
-## Tailwind — Enrichir l'agent tailwind-audit avec `canonicalize`
-
-**Contexte :** Tailwind v4 introduit une API `canonicalizeCandidates` qui remplace automatiquement les classes dépréciées ou verbeuses par leur forme canonique (ex: `break-words` → `wrap-break-word`, `bg-gradient-to-r` → `bg-linear-to-r`, `w-6 h-6` → `size-6`). La commande CLI `tailwindcss canonicalize` a été [mergée le 2026-03-11](https://github.com/tailwindlabs/tailwindcss/pull/19783) mais pas encore publiée.
-
-- [ ] Surveiller les releases Tailwind (`npm view tailwindcss versions`). Quand `canonicalize` est disponible, mettre à jour l'agent tailwind-audit.
-
 ---
 
 ---

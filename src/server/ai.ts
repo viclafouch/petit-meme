@@ -31,7 +31,7 @@ const translationSchema = z.object({
 const ai = new GoogleGenAI({ apiKey: serverEnv.GEMINI_API_KEY })
 
 const GEMINI_MODEL = 'gemini-3-flash-preview'
-const GEMINI_TIMEOUT_MS = 45_000
+const GEMINI_TIMEOUT_MS = 100_000
 const GEMINI_FILE_POLL_INTERVAL_MS = 2000
 const GEMINI_FILE_MAX_RETRIES = 15
 

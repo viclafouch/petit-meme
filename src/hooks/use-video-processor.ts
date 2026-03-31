@@ -66,19 +66,20 @@ export type ProcessedData = {
 }
 
 const wrapText = (text: string, maxLength: number) => {
-  return text
-    .split(' ')
-    .reduce<string[]>((lines, word) => {
-      const lastLine = lines.at(-1) ?? ''
-      const currentLine = lastLine ? `${lastLine} ${word}` : word
+  const lines: string[] = []
 
-      if (currentLine.length <= maxLength) {
-        return [...lines.slice(0, -1), currentLine]
-      }
+  for (const word of text.split(' ')) {
+    const lastLine = lines.at(-1) ?? ''
+    const currentLine = lastLine ? `${lastLine} ${word}` : word
 
-      return [...lines, word]
-    }, [])
-    .join('\n')
+    if (lines.length > 0 && currentLine.length <= maxLength) {
+      lines[lines.length - 1] = currentLine
+    } else {
+      lines.push(word)
+    }
+  }
+
+  return lines.join('\n')
 }
 
 const loadedVideoMap = new WeakMap<FFmpeg, string>()

@@ -64,18 +64,15 @@ export const getAdminSubmissions = createServerFn({ method: 'GET' })
         })
       ])
 
-      const statusCounts = countsByStatus.reduce<
-        Record<MemeSubmissionStatus, number>
-      >(
-        (accumulator, row) => {
-          return { ...accumulator, [row.status]: row._count._all }
-        },
-        {
-          [MemeSubmissionStatus.PENDING]: 0,
-          [MemeSubmissionStatus.APPROVED]: 0,
-          [MemeSubmissionStatus.REJECTED]: 0
-        }
-      )
+      const statusCounts: Record<MemeSubmissionStatus, number> = {
+        [MemeSubmissionStatus.PENDING]: 0,
+        [MemeSubmissionStatus.APPROVED]: 0,
+        [MemeSubmissionStatus.REJECTED]: 0
+      }
+
+      for (const row of countsByStatus) {
+        statusCounts[row.status] = row._count._all
+      }
 
       return { submissions, statusCounts }
     } catch (error) {

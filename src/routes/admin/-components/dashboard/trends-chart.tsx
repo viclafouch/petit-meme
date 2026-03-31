@@ -65,17 +65,16 @@ const METRIC_SUMMARIES = [
 ] as const satisfies readonly IconConfig<MetricKey>[]
 
 function computeMetricTotals(data: ChartDataPoint[]) {
-  return METRIC_KEYS.reduce(
-    (result, key) => {
-      return {
-        ...result,
-        [key]: data.reduce((sum, point) => {
+  return Object.fromEntries(
+    METRIC_KEYS.map((key) => {
+      return [
+        key,
+        data.reduce((sum, point) => {
           return sum + point[key]
         }, 0)
-      }
-    },
-    {} as Record<MetricKey, number>
-  )
+      ]
+    })
+  ) as Record<MetricKey, number>
 }
 
 const PERIOD_DESCRIPTIONS = {

@@ -9,4 +9,5 @@ allowBuilds:
   esbuild: true
   prisma: true
   protobufjs: true
+  msw: true
   sharp: true

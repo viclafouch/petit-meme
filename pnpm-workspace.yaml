@@ -1,0 +1,12 @@
+minimumReleaseAge: 10080 # 7 days in minutes
+
+trustPolicy: no-downgrade
+
+strictDepBuilds: true
+allowBuilds:
+  '@prisma/engines': true
+  '@sentry/cli': true
+  esbuild: true
+  prisma: true
+  protobufjs: true
+  sharp: true

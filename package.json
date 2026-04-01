@@ -135,14 +135,6 @@
       "allowedVersions": {
         "vitefu>vite": "8"
       }
-    },
-    "onlyBuiltDependencies": [
-      "@prisma/engines",
-      "@sentry/cli",
-      "esbuild",
-      "prisma",
-      "protobufjs",
-      "sharp"
-    ]
+    }
   }
 }

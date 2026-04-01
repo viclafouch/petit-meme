@@ -30,6 +30,9 @@ function parseEnvelopeHeader(envelope: string) {
 export const Route = createFileRoute('/api/sentry-tunnel')({
   server: {
     handlers: {
+      GET: () => {
+        return new Response('Method Not Allowed', { status: 405 })
+      },
       POST: async ({ request }) => {
         const envelopeBytes = await request.arrayBuffer()
         const envelope = new TextDecoder().decode(envelopeBytes)

@@ -102,7 +102,7 @@ const LocaleBannerContent = ({ isInitiallyDismissed }: LocaleBannerProps) => {
               size="icon"
               onClick={handleDismiss}
               aria-label={m.common_close()}
-              className="absolute right-2 min-h-11 min-w-11 shrink-0 text-foreground/60 hover:bg-transparent hover:text-foreground"
+              className="absolute right-1 shrink-0 text-foreground/60 hover:bg-transparent hover:text-foreground"
             >
               <X className="size-3.5" aria-hidden="true" />
             </Button>

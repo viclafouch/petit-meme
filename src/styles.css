@@ -150,7 +150,7 @@
   body:not(:has([data-mobile-nav][data-state='open'])) .navbar-scroll-fade {
     @supports (animation-timeline: scroll()) {
       animation: navbar-fade-to-solid linear both;
-      animation-timeline: scroll();
+      animation-timeline: scroll(root);
       animation-range: 0px 180px;
     }
   }

@@ -65,7 +65,7 @@ export const Navbar = () => {
   const shouldReduceMotion = useReducedMotion()
 
   return (
-    <header className="navbar-scroll-fade fixed top-0 right-0 left-0 z-50 h-(--navbar-height)">
+    <header className="navbar-scroll-fade relative h-(--navbar-height)">
       {needsFallback && !shouldReduceMotion ? (
         <NavbarScrollFadeFallback />
       ) : null}

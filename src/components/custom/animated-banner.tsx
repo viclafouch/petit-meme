@@ -49,7 +49,7 @@ export const AnimatedBanner = ({ children }: AnimatedBannerProps) => {
       <style>{ANIMATION_KEYFRAMES}</style>
       <div
         role="status"
-        className="sticky top-0 z-40 flex min-h-12 items-center justify-center bg-background px-4 py-2 text-center text-sm font-medium"
+        className="relative isolate flex min-h-12 items-center justify-center bg-background px-4 py-2 text-center text-sm font-medium"
       >
         <div className="absolute inset-0 z-[-1]" style={LAYER_1_STYLE} />
         <div className="absolute inset-0 z-[-1]" style={LAYER_2_STYLE} />

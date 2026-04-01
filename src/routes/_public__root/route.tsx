@@ -21,8 +21,10 @@ const RouteComponent = () => {
         >
           {m.common_skip_to_content()}
         </a>
-        <LocaleBanner isInitiallyDismissed={_localeBannerDismissed} />
-        <Navbar />
+        <div className="fixed top-0 right-0 left-0 z-50">
+          <LocaleBanner isInitiallyDismissed={_localeBannerDismissed} />
+          <Navbar />
+        </div>
         <div className="h-(--navbar-height)" aria-hidden="true" />
         <main id="main-content" className="flex flex-1 flex-col">
           <Outlet />

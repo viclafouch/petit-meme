@@ -16,7 +16,6 @@
     "allowJs": true,
     "noUncheckedIndexedAccess": true,
     "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
     "paths": {
       "~/*": ["./src/*"]
     },

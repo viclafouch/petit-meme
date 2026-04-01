@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '~/components/ui/select'
-import { type MemeFullData } from '~/constants/meme'
+import type { MemeFullData } from '~/constants/meme'
 import type { MemeContentLocale } from '~/db/generated/prisma/enums'
 import {
   getContentLocaleOptions,

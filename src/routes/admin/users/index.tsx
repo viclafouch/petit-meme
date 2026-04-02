@@ -7,7 +7,7 @@ import {
   getSortedRowModel,
   useReactTable
 } from '@tanstack/react-table'
-import { XTwitterIcon } from '~/components/icon'
+import { DiscordIcon, XTwitterIcon } from '~/components/icon'
 import { PageHeader } from '~/components/page-header'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
 import { Badge } from '~/components/ui/badge'
@@ -17,6 +17,7 @@ import {
   TooltipContent,
   TooltipTrigger
 } from '~/components/ui/tooltip'
+import type { AuthProviderId } from '~/constants/auth'
 import { differenceInMonths, formatDate } from '~/helpers/date'
 import { getUserInitials } from '~/helpers/format'
 import { getLocale } from '~/paraglide/runtime'
@@ -59,6 +60,30 @@ const UserStatusBadges = ({ user }: UserCellParams) => {
     </div>
   )
 }
+
+type ProviderDisplayConfig = {
+  label: string
+  icon: React.ComponentType<React.ComponentProps<'svg'>>
+  variant: React.ComponentProps<typeof Badge>['variant']
+}
+
+const AUTH_PROVIDER_DISPLAY = {
+  credential: {
+    label: 'Email',
+    icon: Mail,
+    variant: 'secondary'
+  },
+  twitter: {
+    label: 'Twitter',
+    icon: XTwitterIcon,
+    variant: 'info'
+  },
+  discord: {
+    label: 'Discord',
+    icon: DiscordIcon,
+    variant: 'default'
+  }
+} as const satisfies Record<AuthProviderId, ProviderDisplayConfig>
 
 const columnHelper = createColumnHelper<EnrichedUser>()
 
@@ -109,17 +134,13 @@ const columns = [
     header: 'Provider',
     enableSorting: false,
     cell: (info) => {
-      const provider = info.getValue()
+      const config = AUTH_PROVIDER_DISPLAY[info.getValue()]
+      const Icon = config.icon
 
-      return provider === 'twitter' ? (
-        <Badge variant="info" size="sm">
-          <XTwitterIcon className="size-3" aria-hidden />
-          Twitter
-        </Badge>
-      ) : (
-        <Badge variant="secondary" size="sm">
-          <Mail className="size-3" aria-hidden />
-          Email
+      return (
+        <Badge variant={config.variant} size="sm">
+          <Icon className="size-3" aria-hidden />
+          {config.label}
         </Badge>
       )
     }

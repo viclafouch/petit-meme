@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { LastLoginBadge } from '~/components/User/last-login-badge'
 import { LoginForm } from '~/components/User/login-form'
 import { SignupForm } from '~/components/User/signup-form'
+import type { AuthProviderId } from '~/constants/auth'
 import { getAuthErrorMessage } from '~/helpers/auth-errors'
 import { useLastLoginMethod } from '~/hooks/use-last-login-method'
 import { authClient } from '~/lib/auth-client'
@@ -29,7 +30,7 @@ const matchIsAuthType = (value: string): value is AuthType => {
 }
 
 type SocialProvider = {
-  id: string
+  id: Exclude<AuthProviderId, 'credential'>
   icon: React.ComponentType<React.ComponentProps<'svg'>>
   label: () => string
   errorMessage: () => string

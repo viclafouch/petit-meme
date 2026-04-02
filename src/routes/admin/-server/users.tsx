@@ -2,6 +2,8 @@ import { z } from 'zod'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
 import { prismaClient } from '~/db'
+import { matchIsAuthProviderId } from '~/constants/auth'
+import type { AuthProviderId } from '~/constants/auth'
 import type { Prisma } from '~/db/generated/prisma/client'
 import { AccountBannedEmail } from '~/emails/account-banned-email'
 import { AccountUnbannedEmail } from '~/emails/account-unbanned-email'
@@ -47,7 +49,7 @@ export type SubscriptionInfo = {
 export type EnrichedUser = Prisma.UserGetPayload<{
   select: typeof USER_LIST_SELECT
 }> & {
-  provider: 'twitter' | 'credential'
+  provider: AuthProviderId
   subscription: SubscriptionInfo
   bookmarkCount: number
   generationCount: number
@@ -159,11 +161,14 @@ export const getListUsers = createServerFn({ method: 'GET' })
     )
 
     const enrichedUsers = users.map((user) => {
-      const provider = providerByUserId.get(user.id)
+      const rawProvider = providerByUserId.get(user.id)
 
       return {
         ...user,
-        provider: provider === 'twitter' ? 'twitter' : 'credential',
+        provider:
+          rawProvider !== undefined && matchIsAuthProviderId(rawProvider)
+            ? rawProvider
+            : 'credential',
         subscription: subscriptionByUserId.get(user.id) ?? {
           status: 'none',
           startedAt: null,

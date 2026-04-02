@@ -1,6 +1,22 @@
 import { z } from 'zod'
 import { m } from '~/paraglide/messages.js'
 
+export const AUTH_PROVIDER_IDS = [
+  'credential',
+  'twitter',
+  'discord'
+] as const satisfies readonly string[]
+
+export type AuthProviderId = (typeof AUTH_PROVIDER_IDS)[number]
+
+const authProviderIdSet = new Set<string>(AUTH_PROVIDER_IDS)
+
+export const matchIsAuthProviderId = (
+  value: string
+): value is AuthProviderId => {
+  return authProviderIdSet.has(value)
+}
+
 export const PASSWORD_MIN_LENGTH = 8
 export const PASSWORD_MAX_LENGTH = 100
 

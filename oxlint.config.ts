@@ -4,11 +4,12 @@ import {
   react,
   hooks,
   jsxA11y,
-  imports
+  imports,
+  tanstackQuery
 } from '@viclafouch/oxc-config'
 
 export default defineConfig({
-  extends: [typescript, react, hooks, jsxA11y, imports],
+  extends: [typescript, react, hooks, jsxA11y, imports, tanstackQuery],
   ignorePatterns: [
     '**/.output/**',
     '**/.vercel/**',

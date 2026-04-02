@@ -294,6 +294,8 @@ export const MemeReels = () => {
     rowVirtualizer.scrollToIndex(prevIndex, { align: 'start' })
   })
 
+  const { hasNextPage, fetchNextPage, isFetchingNextPage } = infiniteReels
+
   React.useEffect(() => {
     const items = rowVirtualizer.getVirtualItems()
     const [lastItem] = items.toReversed()
@@ -304,18 +306,17 @@ export const MemeReels = () => {
 
     if (
       memesWithRefs.length - 3 < lastItem.index &&
-      infiniteReels.hasNextPage &&
-      !infiniteReels.isFetchingNextPage
+      hasNextPage &&
+      !isFetchingNextPage
     ) {
-      void infiniteReels.fetchNextPage()
+      void fetchNextPage()
     }
   }, [
-    infiniteReels.hasNextPage,
-    infiniteReels.fetchNextPage,
+    hasNextPage,
+    fetchNextPage,
     memesWithRefs.length,
-    infiniteReels.isFetchingNextPage,
+    isFetchingNextPage,
     virtualItemsKey,
-    infiniteReels,
     rowVirtualizer
   ])
 

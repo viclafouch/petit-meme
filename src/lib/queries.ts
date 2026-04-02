@@ -153,7 +153,7 @@ export const getRelatedMemesQueryOpts = ({
   title
 }: GetRelatedMemesQueryOptsParams) => {
   return queryOptions({
-    queryKey: [...getRelatedMemesQueryOpts.all, memeId],
+    queryKey: [...getRelatedMemesQueryOpts.all, memeId, title],
     queryFn: () => {
       return getRelatedMemes({ data: { memeId, title } })
     },

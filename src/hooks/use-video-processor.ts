@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import type { FFmpeg, ProgressEvent } from '@ffmpeg/ffmpeg'
 import { fetchFile } from '@ffmpeg/util'
 import {
+  queryOptions,
   useMutation,
   useQueryClient,
   useSuspenseQuery
@@ -257,15 +258,21 @@ const addTextToVideo = async (
   return blob
 }
 
-export const useVideoInitializer = () => {
-  const query = useSuspenseQuery({
+const getVideoInitQueryOpts = () => {
+  return queryOptions({
+    queryKey: [...getVideoInitQueryOpts.all],
     queryFn: () => {
       return loadFFmpeg(m.error_video_timeout())
     },
-    queryKey: ['video-processor-init'],
     staleTime: Infinity,
     refetchOnMount: 'always'
   })
+}
+
+getVideoInitQueryOpts.all = ['video-processor-init'] as const
+
+export const useVideoInitializer = () => {
+  const query = useSuspenseQuery(getVideoInitQueryOpts())
 
   React.useEffect(() => {
     return () => {
@@ -416,9 +423,7 @@ export const useVideoProcessor = (
 
     mutation.reset()
     setProgress(0)
-    void queryClient.invalidateQueries({
-      queryKey: ['video-processor-init']
-    })
+    void queryClient.invalidateQueries(getVideoInitQueryOpts())
   }
 
   const reset = () => {

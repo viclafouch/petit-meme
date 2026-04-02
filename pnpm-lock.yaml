@@ -259,8 +259,8 @@ importers:
         specifier: ^19
         version: 19.2.3(@types/react@19.2.14)
       '@viclafouch/oxc-config':
-        specifier: 1.0.0-alpha.7
-        version: 1.0.0-alpha.7(@tanstack/eslint-plugin-query@5.96.1(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3))(oxfmt@0.43.0)(oxlint@1.58.0)(typescript@5.9.3)
+        specifier: 1.0.0-alpha.11
+        version: 1.0.0-alpha.11(@tanstack/eslint-plugin-query@5.96.1(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3))(oxfmt@0.43.0)(oxlint@1.58.0)(typescript@5.9.3)
       '@vitejs/plugin-react':
         specifier: ^6.0.1
         version: 6.0.1(vite@8.0.3(@types/node@25.5.0)(esbuild@0.27.3)(jiti@2.6.1)(tsx@4.21.0))
@@ -3743,8 +3743,8 @@ packages:
     resolution: {integrity: sha512-UycprH3T6n3jH0k44NHMa7pnFHGu/N05MjojYr+Mc6I7obkoLIJujSWwin1pCvdy/eOxrI/l3uDLQsmcrOb4ug==}
     engines: {node: '>= 20'}
 
-  '@viclafouch/oxc-config@1.0.0-alpha.7':
-    resolution: {integrity: sha512-BSNOES83hufeuX519EuS09er90McgHdp3gwYQ7vFromOBnsQkgomgIc4gmmTe1hNf4+9Pw6YuPW8Witt+Eys/g==}
+  '@viclafouch/oxc-config@1.0.0-alpha.11':
+    resolution: {integrity: sha512-2L41//hIE5/KjtOlSwO+4q+6ZTk+KtgUMdBhZwfxrjOja/8ndzL5Ga7uY4rXw+HvM9vxl6b7vX9WJXhSFUOWbA==}
     peerDependencies:
       '@tanstack/eslint-plugin-query': '>= 5'
       eslint-plugin-playwright: '>= 2'
@@ -10623,7 +10623,7 @@ snapshots:
 
   '@vercel/oidc@3.2.0': {}
 
-  '@viclafouch/oxc-config@1.0.0-alpha.7(@tanstack/eslint-plugin-query@5.96.1(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3))(oxfmt@0.43.0)(oxlint@1.58.0)(typescript@5.9.3)':
+  '@viclafouch/oxc-config@1.0.0-alpha.11(@tanstack/eslint-plugin-query@5.96.1(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3))(oxfmt@0.43.0)(oxlint@1.58.0)(typescript@5.9.3)':
     dependencies:
       oxlint: 1.58.0
       typescript: 5.9.3

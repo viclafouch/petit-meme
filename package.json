@@ -107,7 +107,7 @@
     "@types/node": "^25.5.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19",
-    "@viclafouch/oxc-config": "1.0.0-alpha.7",
+    "@viclafouch/oxc-config": "1.0.0-alpha.11",
     "@vitejs/plugin-react": "^6.0.1",
     "dotenv": "^17.3.1",
     "dotenv-cli": "^11.0.0",

@@ -60,7 +60,7 @@ export const ThemeProvider = ({
     return { theme, setTheme: handleSetTheme }
   }, [theme, handleSetTheme])
 
-  return <ThemeContext value={value}>{children}</ThemeContext>
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }
 
 export const useTheme = () => {

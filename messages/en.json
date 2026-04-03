@@ -11,7 +11,6 @@
   "ai_search_no_results": "No memes found. Try rephrasing your request.",
   "ai_search_placeholder": "E.g.: a meme for when you miss your bus…",
   "ai_search_quota_remaining": "{remaining}/{limit} searches remaining",
-  "ai_search_quota_unlimited": "Unlimited",
   "ai_search_results_title": "Results",
   "ai_search_retry": "Retry",
   "ai_search_seo_description": "Describe the perfect meme and let AI find it for you. Search by natural language description.",

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Download, Eye, Share2, Sparkles } from 'lucide-react'
+import { BrainCircuit, Download, Eye, Share2, Sparkles } from 'lucide-react'
 import { CartesianGrid, Line, LineChart, XAxis } from 'recharts'
 import {
   Card,
@@ -30,7 +30,8 @@ const METRIC_KEYS = [
   'studioGenerations',
   'shares',
   'downloads',
-  'signups'
+  'signups',
+  'aiSearches'
 ] as const satisfies readonly MetricKey[]
 
 const CHART_CONFIG = {
@@ -38,7 +39,8 @@ const CHART_CONFIG = {
   studioGenerations: { label: 'Générations', color: 'var(--chart-3)' },
   shares: { label: 'Partages', color: 'var(--chart-5)' },
   downloads: { label: 'Téléchargements', color: 'var(--chart-6)' },
-  signups: { label: 'Nouveaux utilisateurs', color: 'var(--chart-2)' }
+  signups: { label: 'Nouveaux utilisateurs', color: 'var(--chart-2)' },
+  aiSearches: { label: 'Recherches IA', color: 'var(--chart-7)' }
 } as const satisfies ChartConfig
 
 const METRIC_SUMMARIES = [
@@ -61,6 +63,11 @@ const METRIC_SUMMARIES = [
     key: 'downloads',
     label: 'Téléchargements',
     icon: <Download className="size-4" aria-hidden />
+  },
+  {
+    key: 'aiSearches',
+    label: 'Recherches IA',
+    icon: <BrainCircuit className="size-4" aria-hidden />
   }
 ] as const satisfies readonly IconConfig<MetricKey>[]
 

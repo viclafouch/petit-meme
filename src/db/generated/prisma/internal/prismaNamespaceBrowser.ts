@@ -605,8 +605,7 @@ export const AiSearchLogOrderByRelevanceFieldEnum = {
   prompt: 'prompt',
   query: 'query',
   categorySlugs: 'categorySlugs',
-  memeIds: 'memeIds',
-  locale: 'locale'
+  memeIds: 'memeIds'
 } as const
 
 export type AiSearchLogOrderByRelevanceFieldEnum =

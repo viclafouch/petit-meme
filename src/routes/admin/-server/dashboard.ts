@@ -73,6 +73,7 @@ export type ChartDataPoint = {
   shares: number
   downloads: number
   signups: number
+  aiSearches: number
 }
 
 function aggregateRowsByGranularity(
@@ -120,30 +121,37 @@ async function fetchChartData({
 }: FetchChartDataParams) {
   const dateRange = { gte: start, lte: end }
 
-  const [viewRows, generationRows, actionRows, signupRows] = await Promise.all([
-    prismaClient.memeViewDaily.groupBy({
-      by: ['day'],
-      where: { day: dateRange },
-      _count: { id: true }
-    }),
-    prismaClient.$queryRaw<DailyCountRow[]>`
+  const [viewRows, generationRows, actionRows, signupRows, aiSearchRows] =
+    await Promise.all([
+      prismaClient.memeViewDaily.groupBy({
+        by: ['day'],
+        where: { day: dateRange },
+        _count: { id: true }
+      }),
+      prismaClient.$queryRaw<DailyCountRow[]>`
         SELECT date_trunc('day', "created_at") AS day, COUNT(*) AS count
         FROM "studio_generation"
         WHERE "created_at" >= ${start} AND "created_at" <= ${end}
         GROUP BY 1
       `,
-    prismaClient.memeActionDaily.groupBy({
-      by: ['day', 'action'],
-      where: { day: dateRange },
-      _sum: { count: true }
-    }),
-    prismaClient.$queryRaw<DailyCountRow[]>`
+      prismaClient.memeActionDaily.groupBy({
+        by: ['day', 'action'],
+        where: { day: dateRange },
+        _sum: { count: true }
+      }),
+      prismaClient.$queryRaw<DailyCountRow[]>`
         SELECT date_trunc('day', "created_at") AS day, COUNT(*) AS count
         FROM "user"
         WHERE "created_at" >= ${start} AND "created_at" <= ${end}
         GROUP BY 1
+      `,
+      prismaClient.$queryRaw<DailyCountRow[]>`
+        SELECT date_trunc('day', "created_at") AS day, COUNT(*) AS count
+        FROM "ai_search_log"
+        WHERE "created_at" >= ${start} AND "created_at" <= ${end}
+        GROUP BY 1
       `
-  ])
+    ])
 
   const viewsMap = aggregateRowsByGranularity(
     viewRows.map((row) => {
@@ -165,6 +173,12 @@ async function fetchChartData({
     }),
     granularity
   )
+  const aiSearchesMap = aggregateRowsByGranularity(
+    aiSearchRows.map((row) => {
+      return { day: row.day, count: Number(row.count) }
+    }),
+    granularity
+  )
 
   const series = generateDateSeries({ start, end, granularity })
 
@@ -175,7 +189,8 @@ async function fetchChartData({
       studioGenerations: generationsMap.get(dateKey) ?? 0,
       shares: sharesMap.get(dateKey) ?? 0,
       downloads: downloadsMap.get(dateKey) ?? 0,
-      signups: signupsMap.get(dateKey) ?? 0
+      signups: signupsMap.get(dateKey) ?? 0,
+      aiSearches: aiSearchesMap.get(dateKey) ?? 0
     }
   })
 }

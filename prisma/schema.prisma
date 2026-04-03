@@ -366,7 +366,7 @@ model AiSearchLog {
   query          String
   categorySlugs  String[] @map("category_slugs")
   memeIds        String[] @map("meme_ids")
-  locale         String
+  locale         UserLocale
   resultCount    Int      @map("result_count")
   createdAt      DateTime @default(now()) @map("created_at")
 

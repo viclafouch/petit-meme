@@ -137,7 +137,7 @@ export const AiSearchPage = () => {
             </span>
           </div>
           <div className="flex items-center justify-between gap-4">
-            {isLoggedIn && quotaQuery.data ? (
+            {isLoggedIn && quotaQuery.data && !quotaQuery.data.isPremium ? (
               <QuotaBadge quota={quotaQuery.data} />
             ) : (
               <div />
@@ -195,14 +195,6 @@ type QuotaBadgeProps = {
 }
 
 const QuotaBadge = ({ quota }: QuotaBadgeProps) => {
-  if (quota.isPremium) {
-    return (
-      <Badge variant="secondary" aria-live="polite">
-        {m.ai_search_quota_unlimited()}
-      </Badge>
-    )
-  }
-
   const remaining = Math.max(0, quota.limit - quota.used)
 
   return (

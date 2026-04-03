@@ -9,6 +9,7 @@ import {
   getSortedRowModel,
   useReactTable
 } from '@tanstack/react-table'
+import { FLAG_ICON_CLASS, LOCALE_FLAGS } from '~/components/icon/flags'
 import { PageHeader } from '~/components/page-header'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
 import { Badge } from '~/components/ui/badge'
@@ -107,9 +108,10 @@ const columns = [
     header: 'Locale',
     enableSorting: false,
     cell: (info) => {
-      return (
-        <span className="text-muted-foreground text-sm">{info.getValue()}</span>
-      )
+      const locale = info.getValue()
+      const FlagComponent = LOCALE_FLAGS[locale]
+
+      return <FlagComponent className={FLAG_ICON_CLASS} aria-label={locale} />
     }
   }),
   columnHelper.accessor('createdAt', {
@@ -123,7 +125,7 @@ const columns = [
 type StatCardParams = {
   label: string
   value: number
-  icon: React.ReactElement
+  icon: React.ReactNode
 }
 
 const StatCard = ({ label, value, icon }: StatCardParams) => {
@@ -140,7 +142,6 @@ const StatCard = ({ label, value, icon }: StatCardParams) => {
 
 const RouteComponent = () => {
   const logsQuery = useSuspenseQuery(getAdminAiSearchLogsQueryOpts())
-  const { stats } = logsQuery.data
 
   const table = useReactTable({
     data: logsQuery.data.logs,
@@ -162,22 +163,22 @@ const RouteComponent = () => {
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           <StatCard
             label="Total recherches"
-            value={stats.totalCount}
+            value={logsQuery.data.stats.totalCount}
             icon={<Hash className="size-5" aria-hidden="true" />}
           />
           <StatCard
             label="Aujourd'hui"
-            value={stats.todayCount}
+            value={logsQuery.data.stats.todayCount}
             icon={<Activity className="size-5" aria-hidden="true" />}
           />
           <StatCard
             label="Affichées"
-            value={stats.displayedCount}
+            value={logsQuery.data.stats.displayedCount}
             icon={<Search className="size-5" aria-hidden="true" />}
           />
           <StatCard
             label="0 résultat"
-            value={stats.zeroResultCount}
+            value={logsQuery.data.stats.zeroResultCount}
             icon={<XCircle className="size-5" aria-hidden="true" />}
           />
         </div>

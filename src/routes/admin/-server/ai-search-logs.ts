@@ -1,6 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { prismaClient } from '~/db'
 import type { Prisma } from '~/db/generated/prisma/client'
+import { truncateToUtcDay } from '~/helpers/date'
 import { adminRequiredMiddleware } from '~/server/user-auth'
 
 const AI_SEARCH_LOG_SELECT = {
@@ -29,7 +30,9 @@ export type AdminAiSearchLog = Prisma.AiSearchLogGetPayload<{
 export const getAdminAiSearchLogs = createServerFn({ method: 'GET' })
   .middleware([adminRequiredMiddleware])
   .handler(async () => {
-    const [logs, totalCount, todayCount] = await Promise.all([
+    const now = new Date()
+
+    const [logs, totalCount, todayCount, zeroResultCount] = await Promise.all([
       prismaClient.aiSearchLog.findMany({
         select: AI_SEARCH_LOG_SELECT,
         orderBy: { createdAt: 'desc' },
@@ -37,23 +40,12 @@ export const getAdminAiSearchLogs = createServerFn({ method: 'GET' })
       }),
       prismaClient.aiSearchLog.count(),
       prismaClient.aiSearchLog.count({
-        where: {
-          createdAt: {
-            gte: new Date(
-              Date.UTC(
-                new Date().getUTCFullYear(),
-                new Date().getUTCMonth(),
-                new Date().getUTCDate()
-              )
-            )
-          }
-        }
+        where: { createdAt: { gte: truncateToUtcDay(now) } }
+      }),
+      prismaClient.aiSearchLog.count({
+        where: { resultCount: 0 }
       })
     ])
-
-    const zeroResultCount = logs.filter((log) => {
-      return log.resultCount === 0
-    }).length
 
     return {
       logs,

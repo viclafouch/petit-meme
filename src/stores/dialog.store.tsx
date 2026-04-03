@@ -29,6 +29,17 @@ export const DIALOGS = {
         )
       }
     })
+  },
+  'ai-search-upsell': {
+    component: React.lazy(async () => {
+      return {
+        default: await import('~/components/Meme/ai-search-upsell-dialog').then(
+          (mod) => {
+            return mod.AiSearchUpsellDialog
+          }
+        )
+      }
+    })
   }
 } as const satisfies Record<string, DialogEntry>
 

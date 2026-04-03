@@ -3,7 +3,6 @@ import type { MemesFilters } from '~/constants/meme'
 import { MINUTE } from '~/constants/time'
 import type { Meme, Video } from '~/db/generated/prisma/client'
 import type { Locale } from '~/paraglide/runtime'
-import { getAiSearchQuota } from '~/server/ai-search'
 import { getCategories } from '~/server/categories'
 import { getActiveSubscription } from '~/server/customer'
 import {
@@ -189,15 +188,3 @@ export const getVideoBlobQueryOpts = (memeId: Meme['id']) => {
 }
 
 getVideoBlobQueryOpts.all = ['video-blob'] as const
-
-export const getAiSearchQuotaQueryOpts = () => {
-  return queryOptions({
-    queryKey: [...getAiSearchQuotaQueryOpts.all],
-    queryFn: () => {
-      return getAiSearchQuota()
-    },
-    staleTime: Infinity
-  })
-}
-
-getAiSearchQuotaQueryOpts.all = ['ai-search-quota'] as const

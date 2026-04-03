@@ -12,7 +12,6 @@ import {
   MAX_AI_SEARCH_RESULTS,
   MAX_PROMPT_LENGTH
 } from '~/constants/ai-search'
-import { StudioError } from '~/constants/error'
 import { RATE_LIMIT_AI_SEARCH } from '~/constants/rate-limit'
 import {
   MemeContentLocale as MemeContentLocaleEnum,
@@ -199,9 +198,8 @@ export const aiSearchMemes = createServerFn({ method: 'POST' })
     }
 
     if (!isPremium && monthlyCount >= FREE_PLAN_MAX_AI_SEARCHES) {
-      throw new StudioError('AI search quota exceeded', {
-        code: 'AI_SEARCH_QUOTA_EXCEEDED'
-      })
+      setResponseStatus(429)
+      throw new Error('AI search quota exceeded')
     }
 
     const validSlugs = new Set(
@@ -287,30 +285,5 @@ export const aiSearchMemes = createServerFn({ method: 'POST' })
       query,
       categorySlugs,
       queryID: response.queryID
-    }
-  })
-
-export const getAiSearchQuota = createServerFn({ method: 'GET' })
-  .middleware([
-    createRateLimitMiddleware(RATE_LIMIT_AI_SEARCH),
-    createUserRateLimitMiddleware(RATE_LIMIT_AI_SEARCH)
-  ])
-  .handler(async ({ context }) => {
-    const userId = context.user.id
-
-    const [isPremium, used] = await Promise.all([
-      matchIsUserPremium(context.user),
-      prismaClient.aiSearchLog.count({
-        where: {
-          userId,
-          createdAt: { gte: truncateToUtcMonth(new Date()) }
-        }
-      })
-    ])
-
-    return {
-      used,
-      limit: isPremium ? Number.MAX_SAFE_INTEGER : FREE_PLAN_MAX_AI_SEARCHES,
-      isPremium
     }
   })

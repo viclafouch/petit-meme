@@ -1,19 +1,14 @@
 import React from 'react'
 import { SparklesIcon } from 'lucide-react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link, useRouteContext } from '@tanstack/react-router'
+import { toast } from 'sonner'
+import { useMutation } from '@tanstack/react-query'
+import { useRouteContext } from '@tanstack/react-router'
 import { MemesList } from '~/components/Meme/memes-list'
 import { Badge } from '~/components/ui/badge'
-import { Button, buttonVariants } from '~/components/ui/button'
 import { LoadingButton } from '~/components/ui/loading-button'
 import { Textarea } from '~/components/ui/textarea'
-import {
-  FREE_PLAN_MAX_AI_SEARCHES,
-  MAX_PROMPT_LENGTH
-} from '~/constants/ai-search'
-import { getStudioErrorCode } from '~/constants/error'
+import { MAX_PROMPT_LENGTH } from '~/constants/ai-search'
 import { matchIsRateLimitError } from '~/helpers/error'
-import { getAiSearchQuotaQueryOpts } from '~/lib/queries'
 import { buildBreadcrumbJsonLd } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
 import {
@@ -22,7 +17,6 @@ import {
   PageHeader,
   PageHeading
 } from '~/routes/_public__root/-components/page-headers'
-import type { getAiSearchQuota } from '~/server/ai-search'
 import { aiSearchMemes } from '~/server/ai-search'
 import { useShowDialog } from '~/stores/dialog.store'
 
@@ -33,17 +27,13 @@ function getSearchErrorMessage(error: unknown) {
     return m.ai_search_error_rate_limit()
   }
 
-  const code = getStudioErrorCode(error)
-
-  if (code === 'AI_SEARCH_QUOTA_EXCEEDED') {
-    return m.ai_search_error_quota({ limit: FREE_PLAN_MAX_AI_SEARCHES })
-  }
-
   return m.ai_search_error_generic()
 }
 
 function matchIsQuotaExceeded(error: unknown) {
-  return getStudioErrorCode(error) === 'AI_SEARCH_QUOTA_EXCEEDED'
+  return (
+    error instanceof Error && error.message.includes('AI search quota exceeded')
+  )
 }
 
 type AiSearchResult = Awaited<ReturnType<typeof aiSearchMemes>>
@@ -51,8 +41,6 @@ type AiSearchResult = Awaited<ReturnType<typeof aiSearchMemes>>
 export const AiSearchPage = () => {
   const { user } = useRouteContext({ from: '__root__' })
   const showDialog = useShowDialog()
-  const queryClient = useQueryClient()
-  const isLoggedIn = Boolean(user)
   const [prompt, setPrompt] = React.useState(() => {
     if (typeof window === 'undefined') {
       return ''
@@ -64,19 +52,18 @@ export const AiSearchPage = () => {
     return saved ?? ''
   })
 
-  const quotaQuery = useQuery({
-    ...getAiSearchQuotaQueryOpts(),
-    enabled: isLoggedIn
-  })
-
   const searchMutation = useMutation({
     mutationFn: (data: { prompt: string }) => {
       return aiSearchMemes({ data })
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: getAiSearchQuotaQueryOpts.all
-      })
+    onError: (error) => {
+      if (matchIsQuotaExceeded(error)) {
+        showDialog('ai-search-upsell', {})
+
+        return
+      }
+
+      toast.error(getSearchErrorMessage(error))
     }
   })
 
@@ -136,12 +123,7 @@ export const AiSearchPage = () => {
               {prompt.length}/{MAX_PROMPT_LENGTH}
             </span>
           </div>
-          <div className="flex items-center justify-between gap-4">
-            {isLoggedIn && quotaQuery.data && !quotaQuery.data.isPremium ? (
-              <QuotaBadge quota={quotaQuery.data} />
-            ) : (
-              <div />
-            )}
+          <div className="flex justify-end">
             <LoadingButton
               type="submit"
               size="lg"
@@ -153,33 +135,6 @@ export const AiSearchPage = () => {
             </LoadingButton>
           </div>
         </form>
-        {searchMutation.error ? (
-          <div
-            role="alert"
-            className="mx-auto flex w-full max-w-2xl flex-col items-center gap-4 rounded-xl border border-dashed p-8 text-center"
-          >
-            <p className="text-muted-foreground text-sm">
-              {getSearchErrorMessage(searchMutation.error)}
-            </p>
-            {matchIsQuotaExceeded(searchMutation.error) ? (
-              <Link
-                to="/pricing"
-                className={buttonVariants({ variant: 'default' })}
-              >
-                {m.ai_search_cta_premium()}
-              </Link>
-            ) : (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  searchMutation.reset()
-                }}
-              >
-                {m.ai_search_retry()}
-              </Button>
-            )}
-          </div>
-        ) : null}
         <div aria-live="polite">
           {searchMutation.data ? (
             <AiSearchResults result={searchMutation.data} />
@@ -187,23 +142,6 @@ export const AiSearchPage = () => {
         </div>
       </section>
     </PageContainer>
-  )
-}
-
-type QuotaBadgeProps = {
-  quota: Awaited<ReturnType<typeof getAiSearchQuota>>
-}
-
-const QuotaBadge = ({ quota }: QuotaBadgeProps) => {
-  const remaining = Math.max(0, quota.limit - quota.used)
-
-  return (
-    <Badge variant="outline" aria-live="polite">
-      {m.ai_search_quota_remaining({
-        remaining,
-        limit: quota.limit
-      })}
-    </Badge>
   )
 }
 

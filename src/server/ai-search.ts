@@ -177,13 +177,20 @@ export const aiSearchMemes = createServerFn({ method: 'POST' })
     const userId = context.user.id
     const now = new Date()
 
-    const [dailyCount, isPremium, categoriesData] = await Promise.all([
-      prismaClient.aiSearchLog.count({
-        where: { createdAt: { gte: truncateToUtcDay(now) } }
-      }),
-      matchIsUserPremium(context.user),
-      getCategories({ data: { locale } })
-    ])
+    const [dailyCount, isPremium, categoriesData, monthlyCount] =
+      await Promise.all([
+        prismaClient.aiSearchLog.count({
+          where: { createdAt: { gte: truncateToUtcDay(now) } }
+        }),
+        matchIsUserPremium(context.user),
+        getCategories({ data: { locale } }),
+        prismaClient.aiSearchLog.count({
+          where: {
+            userId,
+            createdAt: { gte: truncateToUtcMonth(now) }
+          }
+        })
+      ])
 
     if (dailyCount >= DAILY_GLOBAL_AI_SEARCH_CAP) {
       aiSearchLogger.warn({ dailyCount }, 'Daily global AI search cap reached')
@@ -191,19 +198,10 @@ export const aiSearchMemes = createServerFn({ method: 'POST' })
       throw new Error('AI search temporarily unavailable')
     }
 
-    if (!isPremium) {
-      const monthlyCount = await prismaClient.aiSearchLog.count({
-        where: {
-          userId,
-          createdAt: { gte: truncateToUtcMonth(now) }
-        }
+    if (!isPremium && monthlyCount >= FREE_PLAN_MAX_AI_SEARCHES) {
+      throw new StudioError('AI search quota exceeded', {
+        code: 'AI_SEARCH_QUOTA_EXCEEDED'
       })
-
-      if (monthlyCount >= FREE_PLAN_MAX_AI_SEARCHES) {
-        throw new StudioError('AI search quota exceeded', {
-          code: 'AI_SEARCH_QUOTA_EXCEEDED'
-        })
-      }
     }
 
     const validSlugs = new Set(
@@ -293,17 +291,22 @@ export const aiSearchMemes = createServerFn({ method: 'POST' })
   })
 
 export const getAiSearchQuota = createServerFn({ method: 'GET' })
-  .middleware([createUserRateLimitMiddleware(RATE_LIMIT_AI_SEARCH)])
+  .middleware([
+    createRateLimitMiddleware(RATE_LIMIT_AI_SEARCH),
+    createUserRateLimitMiddleware(RATE_LIMIT_AI_SEARCH)
+  ])
   .handler(async ({ context }) => {
     const userId = context.user.id
-    const isPremium = await matchIsUserPremium(context.user)
 
-    const used = await prismaClient.aiSearchLog.count({
-      where: {
-        userId,
-        createdAt: { gte: truncateToUtcMonth(new Date()) }
-      }
-    })
+    const [isPremium, used] = await Promise.all([
+      matchIsUserPremium(context.user),
+      prismaClient.aiSearchLog.count({
+        where: {
+          userId,
+          createdAt: { gte: truncateToUtcMonth(new Date()) }
+        }
+      })
+    ])
 
     return {
       used,

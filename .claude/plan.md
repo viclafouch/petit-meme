@@ -158,17 +158,11 @@ Feature permettant aux utilisateurs de décrire en langage naturel le mème qu'i
 
 ### Phase 7 — Audits & Production
 
-- [ ] **Audit sécurité** : prompt injection (le system prompt ne contient aucune info sensible, instruction anti-injection), auth, double rate limiting (IP + user), validation Zod côté serveur, vérifier que `ANTHROPIC_API_KEY` est dans `serverEnv` et jamais exposée côté client, tester le cap global quotidien
-- [ ] **Audit accessibilité** : labels ARIA, navigation clavier, focus management (focus retour au textarea après fermeture dialog login), screen reader, contraste, `aria-busy`, `aria-live`, `role="status"`
-- [ ] **Audit performance** : vérifier que `@anthropic-ai/sdk` est tree-shaked côté client (import uniquement dans `.handler()`), latence réponse Haiku, impact Neon compute (INSERT + COUNT par recherche, `matchIsUserPremium` query subscription, devrait être négligeable), bundle size de la page
-- [ ] **Tests production** : vérifier Vercel env vars, tester les flows :
-  - Visiteur non connecté → page visible, submit → dialog login → prompt restauré après login
-  - Free → prompt → résultats → compteur mis à jour → 3/3 → quota épuisé → CTA pricing
-  - Premium → prompt → résultats → badge illimité → rate limit 10/min → message explicatif
-  - Login social (Twitter/Discord) → callbackURL → prompt restauré
-  - Abonnement expiré mid-session → serveur refuse, client se resynchronise
-  - 0 résultat, erreur Haiku (timeout), erreur réseau
-- [ ] **Monitoring** : dashboard Anthropic pour les coûts API, review périodique des `AiSearchLog` en admin (qualité des résultats, prompts fréquents, taux de 0 résultats). Futur : page admin dédiée `/admin/ai-search`
+- [x] **Audit sécurité** : prompt injection OK (system prompt sans info sensible, instruction anti-injection), auth OK (middleware chain), double rate limiting IP+user sur les 2 endpoints, validation Zod serveur, `ANTHROPIC_API_KEY` dans `serverEnv` uniquement, cap global quotidien vérifié. Fix : ajout rate limit IP sur `getAiSearchQuota`
+- [x] **Audit accessibilité** : `aria-label` textarea, `role="alert"` erreurs, `aria-hidden` icônes, `aria-live="polite"` quota + résultats, `aria-busy` via `LoadingButton`, touch targets ≥ 44px
+- [x] **Audit performance + dead-code + GDPR** : `Promise.all` étendu (4 queries parallèles dans `aiSearchMemes`, 2 dans `getAiSearchQuota`), `waitUntil` pour log DB, dead code nettoyé (`nav_ai_search`), export complété (`categorySlugs`, `locale`)
+- [ ] **Tests production** : vérifier Vercel env vars, tester les flows manuellement après deploy
+- [ ] **Monitoring** : dashboard Anthropic pour les coûts API, review périodique des `AiSearchLog` en admin. Futur : page admin dédiée `/admin/ai-search`
 
 ---
 

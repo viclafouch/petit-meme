@@ -3,6 +3,7 @@ import {
   Blocks,
   LayoutDashboard,
   MessageSquarePlus,
+  SparklesIcon,
   SquareLibrary,
   Users2,
   Video
@@ -85,6 +86,14 @@ export const AdminSidebar = ({
                     {pendingCount}
                   </SidebarMenuBadge>
                 ) : null}
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/admin/ai-search">
+                    <SparklesIcon />
+                    <span>Recherche IA</span>
+                  </Link>
+                </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>

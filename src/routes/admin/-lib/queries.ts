@@ -3,6 +3,7 @@ import type { MemesFilters } from '~/constants/meme'
 import { MINUTE } from '~/constants/time'
 import type { Meme } from '~/db/generated/prisma/client'
 import type { MemeSubmissionStatus } from '~/db/generated/prisma/enums'
+import { getAdminAiSearchLogs } from '~/routes/admin/-server/ai-search-logs'
 import type { DashboardPeriod } from '~/routes/admin/-server/dashboard'
 import {
   getAdminChartData,
@@ -145,3 +146,15 @@ export const getAdminVideoBlobQueryOpts = (memeId: Meme['id']) => {
 }
 
 getAdminVideoBlobQueryOpts.all = ['admin-video-blob'] as const
+
+export const getAdminAiSearchLogsQueryOpts = () => {
+  return queryOptions({
+    queryKey: [...getAdminAiSearchLogsQueryOpts.all],
+    queryFn: () => {
+      return getAdminAiSearchLogs()
+    },
+    staleTime: 2 * MINUTE
+  })
+}
+
+getAdminAiSearchLogsQueryOpts.all = ['admin-ai-search-logs'] as const

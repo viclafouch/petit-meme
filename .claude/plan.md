@@ -162,7 +162,7 @@ Feature permettant aux utilisateurs de décrire en langage naturel le mème qu'i
 - [x] **Audit accessibilité** : `aria-label` textarea, `role="alert"` erreurs, `aria-hidden` icônes, `aria-live="polite"` quota + résultats, `aria-busy` via `LoadingButton`, touch targets ≥ 44px
 - [x] **Audit performance + dead-code + GDPR** : `Promise.all` étendu (4 queries parallèles dans `aiSearchMemes`, 2 dans `getAiSearchQuota`), `waitUntil` pour log DB, dead code nettoyé (`nav_ai_search`), export complété (`categorySlugs`, `locale`)
 - [ ] **Tests production** : vérifier Vercel env vars, tester les flows manuellement après deploy
-- [ ] **Monitoring** : dashboard Anthropic pour les coûts API, review périodique des `AiSearchLog` en admin. Futur : page admin dédiée `/admin/ai-search`
+- [x] **Monitoring** : page admin `/admin/ai-search` avec table complète (prompt, query, catégories, résultats, user, date), stats cards (total, aujourd'hui, 0 résultat), sidebar link. Dashboard Anthropic pour les coûts API à surveiller manuellement
 
 ---
 

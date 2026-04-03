@@ -1,8 +1,7 @@
 import React from 'react'
-import { Stars, X } from 'lucide-react'
+import { Stars } from 'lucide-react'
 import { toast } from 'sonner'
 import { useMutation } from '@tanstack/react-query'
-import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import {
   Dialog,
@@ -12,7 +11,6 @@ import {
   DialogHeader,
   DialogTitle
 } from '~/components/ui/dialog'
-import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { LoadingButton } from '~/components/ui/loading-button'
 import { Textarea } from '~/components/ui/textarea'
@@ -30,18 +28,37 @@ import {
   translateMemeContent
 } from '~/server/ai'
 import { removeDuplicates } from '~/utils/array'
+import { AiAssistPreview } from './ai-assist-preview'
+
+export type AiAssistFieldSelection = {
+  title: boolean
+  description: boolean
+  keywords: boolean
+}
 
 type AiAssistDialogParams = {
   memeId: Meme['id']
   contentLocale: MemeContentLocale
+  currentValues: AiAssistResult
   isOpen: boolean
   onOpenChange: (open: boolean) => void
-  onApply: (locale: Locale, result: AiAssistResult) => void
+  onApply: (
+    locale: Locale,
+    result: AiAssistResult,
+    selectedFields: AiAssistFieldSelection
+  ) => void
+}
+
+const DEFAULT_FIELD_SELECTION: AiAssistFieldSelection = {
+  title: true,
+  description: true,
+  keywords: true
 }
 
 export const AiAssistDialog = ({
   memeId,
   contentLocale,
+  currentValues,
   isOpen,
   onOpenChange,
   onApply
@@ -50,7 +67,9 @@ export const AiAssistDialog = ({
   const [editedTitle, setEditedTitle] = React.useState('')
   const [editedDescription, setEditedDescription] = React.useState('')
   const [editedKeywords, setEditedKeywords] = React.useState<string[]>([])
-  const [hasPreview, setHasPreview] = React.useState(false)
+  const [selectedFields, setSelectedFields] = React.useState(
+    DEFAULT_FIELD_SELECTION
+  )
 
   const keywordsField = useKeywordsField({
     setKeywordsValue: setEditedKeywords
@@ -67,14 +86,10 @@ export const AiAssistDialog = ({
         }
       })
     },
-    onMutate: () => {
-      setHasPreview(false)
-    },
     onSuccess: (result) => {
       setEditedTitle(result.title)
       setEditedDescription(result.description)
       setEditedKeywords(result.keywords)
-      setHasPreview(true)
       keywordsField.setKeywordValue('')
     },
     onError: (error) => {
@@ -100,7 +115,7 @@ export const AiAssistDialog = ({
       })
     },
     onSuccess: (translated) => {
-      onApply(applyLocale, translated[applyLocale])
+      onApply(applyLocale, translated[applyLocale], selectedFields)
       handleOpenChange(false)
     },
     onError: (error) => {
@@ -109,13 +124,20 @@ export const AiAssistDialog = ({
     }
   })
 
+  const handleToggleField = (field: keyof AiAssistFieldSelection) => {
+    setSelectedFields((prev) => {
+      return { ...prev, [field]: !prev[field] }
+    })
+  }
+
   const handleReset = () => {
     translateMutation.reset()
     setCustomPrompt('')
     setEditedTitle('')
     setEditedDescription('')
     setEditedKeywords([])
-    setHasPreview(false)
+    analysisMutation.reset()
+    setSelectedFields(DEFAULT_FIELD_SELECTION)
     keywordsField.setKeywordValue('')
   }
 
@@ -128,6 +150,16 @@ export const AiAssistDialog = ({
   }
 
   const handleApply = () => {
+    if (
+      !selectedFields.title &&
+      !selectedFields.description &&
+      !selectedFields.keywords
+    ) {
+      toast.warning('Sélectionnez au moins un champ à appliquer.')
+
+      return
+    }
+
     const pendingKeywords = parseKeywordsInput(keywordsField.keywordValue)
     const result = {
       title: editedTitle,
@@ -141,13 +173,13 @@ export const AiAssistDialog = ({
       return
     }
 
-    onApply('fr', result)
+    onApply('fr', result, selectedFields)
     handleOpenChange(false)
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-xl">
+      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Stars className="size-5" aria-hidden />
@@ -197,85 +229,21 @@ export const AiAssistDialog = ({
               </LoadingButton>
             </div>
           </div>
-          {hasPreview ? (
-            <div className="flex flex-col gap-4 border-t pt-4">
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="ai-assist-title">Titre</Label>
-                <Input
-                  id="ai-assist-title"
-                  type="text"
-                  value={editedTitle}
-                  onChange={(event) => {
-                    setEditedTitle(event.target.value)
-                  }}
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="ai-assist-description">Description</Label>
-                <Textarea
-                  id="ai-assist-description"
-                  value={editedDescription}
-                  onChange={(event) => {
-                    setEditedDescription(event.target.value)
-                  }}
-                />
-                <span
-                  className="self-end text-xs text-muted-foreground"
-                  role="status"
-                  aria-live="polite"
-                >
-                  {editedDescription.length}/200 caractères
-                </span>
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="ai-assist-keywords">
-                  Mots-clés ({editedKeywords.length})
-                </Label>
-                <Input
-                  id="ai-assist-keywords"
-                  type="text"
-                  placeholder="Ajouter un mot-clé..."
-                  value={keywordsField.keywordValue}
-                  onChange={(event) => {
-                    keywordsField.setKeywordValue(event.target.value)
-                  }}
-                  enterKeyHint="done"
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter') {
-                      event.preventDefault()
-                      event.stopPropagation()
-                      keywordsField.handleAddKeyword()
-                    }
-                  }}
-                />
-                {editedKeywords.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {editedKeywords.map((keyword, index) => {
-                      return (
-                        <Badge variant="secondary" key={keyword}>
-                          {keyword}
-                          <button
-                            onClick={(event) => {
-                              event.preventDefault()
-                              event.stopPropagation()
-                              keywordsField.handleRemoveKeyword(index)
-                            }}
-                            aria-label={`Supprimer le mot-clé "${keyword}"`}
-                            type="button"
-                            className="-m-1 flex cursor-pointer items-center rounded p-1.5 hover:bg-muted"
-                          >
-                            <X className="size-3" />
-                          </button>
-                        </Badge>
-                      )
-                    })}
-                  </div>
-                ) : null}
-              </div>
-            </div>
+          {analysisMutation.isSuccess ? (
+            <AiAssistPreview
+              currentValues={currentValues}
+              selectedFields={selectedFields}
+              editedTitle={editedTitle}
+              editedDescription={editedDescription}
+              editedKeywords={editedKeywords}
+              keywordsField={keywordsField}
+              onToggleField={handleToggleField}
+              onTitleChange={setEditedTitle}
+              onDescriptionChange={setEditedDescription}
+            />
           ) : null}
         </div>
-        {hasPreview ? (
+        {analysisMutation.isSuccess ? (
           <DialogFooter>
             <Button
               type="button"

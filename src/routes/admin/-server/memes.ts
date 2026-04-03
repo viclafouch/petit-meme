@@ -83,9 +83,11 @@ export const getAdminMemeById = createServerFn({ method: 'GET' })
     return meme
   })
 
+export const MEME_DESCRIPTION_MAX_LENGTH = 200
+
 export const MEME_TRANSLATION_SCHEMA = z.object({
   title: z.string().max(100),
-  description: z.string().max(200),
+  description: z.string().max(MEME_DESCRIPTION_MAX_LENGTH),
   keywords: z.array(z.string().max(50)).max(20)
 })
 

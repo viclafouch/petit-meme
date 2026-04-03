@@ -19,13 +19,14 @@ import {
 import type { MemeFullData } from '~/constants/meme'
 import type { MemeContentLocale } from '~/db/generated/prisma/enums'
 import {
+  CONTENT_LOCALE_TO_LOCALE,
   getContentLocaleOptions,
   getRequiredLocales
 } from '~/helpers/i18n-content'
 import { getFieldErrorMessage } from '~/lib/utils'
 import { type Locale, locales } from '~/paraglide/runtime'
 import type { AiAssistResult } from '~/server/ai'
-import { AiAssistDialog } from './ai-assist-dialog'
+import { AiAssistDialog, type AiAssistFieldSelection } from './ai-assist-dialog'
 import { MemeFormMetadataFields } from './meme-form-metadata-fields'
 import { MemeTranslationSection } from './meme-translation-section'
 import { useMemeForm } from './use-meme-form'
@@ -47,10 +48,25 @@ export const MemeForm = ({ meme, onSuccess }: MemeFormParams) => {
 
   const [isAiAssistOpen, setIsAiAssistOpen] = React.useState(false)
 
-  const handleAiAssistApply = (locale: Locale, result: AiAssistResult) => {
-    form.setFieldValue(`translations.${locale}.title`, result.title)
-    form.setFieldValue(`translations.${locale}.description`, result.description)
-    form.setFieldValue(`translations.${locale}.keywords`, result.keywords)
+  const handleAiAssistApply = (
+    locale: Locale,
+    result: AiAssistResult,
+    fields: AiAssistFieldSelection
+  ) => {
+    if (fields.title) {
+      form.setFieldValue(`translations.${locale}.title`, result.title)
+    }
+
+    if (fields.description) {
+      form.setFieldValue(
+        `translations.${locale}.description`,
+        result.description
+      )
+    }
+
+    if (fields.keywords) {
+      form.setFieldValue(`translations.${locale}.keywords`, result.keywords)
+    }
   }
 
   const handleSubmit = (event: React.SyntheticEvent<HTMLFormElement>) => {
@@ -78,6 +94,15 @@ export const MemeForm = ({ meme, onSuccess }: MemeFormParams) => {
             return state.values.contentLocale
           }}
           children={(contentLocale) => {
+            const applyLocale = CONTENT_LOCALE_TO_LOCALE[contentLocale]
+            const currentValues = form.getFieldValue(
+              `translations.${applyLocale}`
+            ) ?? {
+              title: '',
+              description: '',
+              keywords: []
+            }
+
             return (
               <>
                 <div className="flex justify-end">
@@ -96,6 +121,7 @@ export const MemeForm = ({ meme, onSuccess }: MemeFormParams) => {
                 <AiAssistDialog
                   memeId={meme.id}
                   contentLocale={contentLocale}
+                  currentValues={currentValues}
                   isOpen={isAiAssistOpen}
                   onOpenChange={setIsAiAssistOpen}
                   onApply={handleAiAssistApply}

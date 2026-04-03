@@ -14,6 +14,7 @@ import type { useKeywordsField } from '~/hooks/use-keywords-field'
 import { type FormFieldApi, getFieldErrorMessage } from '~/lib/utils'
 import type { Locale } from '~/paraglide/runtime'
 import { KeywordsField } from '~/routes/admin/-components/keywords-field'
+import { MEME_DESCRIPTION_MAX_LENGTH } from '~/routes/admin/-server/memes'
 
 const MIN_TITLE_LENGTH = 3
 
@@ -84,7 +85,8 @@ export const MemeTranslationSection = ({
         </FormControl>
         <div className="flex items-center justify-end">
           <span className="text-xs text-muted-foreground">
-            {descriptionField.state.value.length}/200 caractères
+            {descriptionField.state.value.length}/{MEME_DESCRIPTION_MAX_LENGTH}{' '}
+            caractères
           </span>
         </div>
         <FormMessage />

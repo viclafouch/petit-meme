@@ -16,23 +16,15 @@
 
 ## Algolia — Activer les modèles Recommend
 
-- [ ] Activer "Related Items" dans le dashboard Algolia → Recommend
-- [ ] Activer "Trending Items" dans le dashboard Algolia → Recommend
+- [x] Activer "Related Items" dans le dashboard Algolia → Recommend — content-based filtering activé (2026-04-03) avec attributs `title`, `description`, `keywords`. Modèle en cours d'entraînement. Le code (`getRelatedMemes` + composant `RelatedMemes` sur page slug) est déjà en place avec fallback par titre.
+- [ ] Activer "Trending Items" dans le dashboard Algolia → Recommend — nécessite 10 000 events (604 actuellement). Accélérer via upload CSV d'events passés depuis `MemeViewDaily`.
 - [ ] Vérifier que les fallbacks (Prisma + `fallbackParameters`) se désactivent naturellement quand les modèles ML fonctionnent
 - [ ] Consulter régulièrement le dashboard Algolia Analytics (recherches sans résultats, recherches populaires, click position, taux de conversion)
-
----
-
----
-
----
 
 ## SEO — Items restants
 
 - [ ] Surveiller le Video Indexing Report dans Search Console
 - [ ] Stocker `width`/`height` dans le modèle `Video` (migration additive) — permet des `og:video:width/height` corrects par meme au lieu du 1280x720 hardcodé
-
----
 
 ## Admin — Items reportés
 
@@ -42,13 +34,9 @@
 - Bans temporaires (`banExpires`) — non prioritaire
 - Extraction sous-composants `categories/`, `library/`, `downloader.tsx`
 
----
-
 ## Bug — Sérialisation `customErrorAdapter`
 
 - [ ] **Bug sérialisation** : `customErrorAdapter` dans `start.ts` sérialise côté serveur (tag `$TSR/t/custom-error`) mais le plugin n'est pas enregistré côté client → erreur seroval à la désérialisation. Affecte TOUS les `StudioError` throwés depuis des server functions (PREMIUM_REQUIRED, UNAUTHORIZED, etc.) — jamais testé jusqu'ici. À investiguer : restart dev server, vérifier si `createStart` enregistre les adapters côté client, ou changer d'approche.
-
----
 
 ## Migration Prisma → Drizzle
 

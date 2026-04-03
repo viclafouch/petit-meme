@@ -73,6 +73,10 @@ export function truncateToUtcDay(date: Date) {
   )
 }
 
+export function truncateToUtcMonth(date: Date) {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1))
+}
+
 export function computeDateRanges(days: number) {
   const now = new Date()
   const currentStart = new Date(now.getTime() - days * DAY)

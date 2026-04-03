@@ -20,9 +20,6 @@ importers:
       '@algolia/recommend':
         specifier: ^5.50.0
         version: 5.50.0
-      '@anthropic-ai/sdk':
-        specifier: ^0.82.0
-        version: 0.82.0(zod@4.3.6)
       '@better-auth/prisma-adapter':
         specifier: ^1.5.6
         version: 1.5.6(@better-auth/core@1.5.6(@better-auth/utils@0.3.1)(@better-fetch/fetch@1.1.21)(@opentelemetry/api@1.9.0)(better-call@1.3.2(zod@4.3.6))(jose@6.1.3)(kysely@0.28.14)(nanostores@1.1.1))(@better-auth/utils@0.3.1)(@prisma/client@7.5.0(prisma@7.5.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(typescript@5.9.3))(prisma@7.5.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))
@@ -107,6 +104,12 @@ importers:
       '@t3-oss/env-core':
         specifier: ^0.13.11
         version: 0.13.11(typescript@5.9.3)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6)
+      '@tanstack/ai':
+        specifier: ^0.10.0
+        version: 0.10.0
+      '@tanstack/ai-anthropic':
+        specifier: ^0.7.2
+        version: 0.7.2(@tanstack/ai@0.10.0)(zod@4.3.6)
       '@tanstack/react-form':
         specifier: ^1.28.5
         version: 1.28.5(@tanstack/react-start@1.167.8(crossws@0.4.4(srvx@0.11.9))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vite@8.0.3(@types/node@25.5.0)(esbuild@0.27.3)(jiti@2.6.1)(tsx@4.21.0)))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -328,8 +331,8 @@ packages:
     resolution: {integrity: sha512-xpwefe4fCOWnZgXCbkGpqQY6jgBSCf2hmgnySbyzZIccrv3SoashHKGPE4x6vVG+gdHrGciMTAcDo9HOZwH22Q==}
     engines: {node: '>= 14.0.0'}
 
-  '@anthropic-ai/sdk@0.82.0':
-    resolution: {integrity: sha512-xdHTjL1GlUlDugHq/I47qdOKp/ROPvuHl7ROJCgUQigbvPu7asf9KcAcU1EqdrP2LuVhEKaTs7Z+ShpZDRzHdQ==}
+  '@anthropic-ai/sdk@0.71.2':
+    resolution: {integrity: sha512-TGNDEUuEstk/DKu0/TflXAEt+p+p/WhTlFzEnoosvbaDU2LTjm42igSdlL0VijrKpWejtOKxX0b8A7uc+XiSAQ==}
     hasBin: true
     peerDependencies:
       zod: ^3.25.0 || ^4.0.0
@@ -3375,6 +3378,21 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7 || ^8
 
+  '@tanstack/ai-anthropic@0.7.2':
+    resolution: {integrity: sha512-ZV01BPuplBOhnnzPpFqoPBWLQNGFSBPkIUaE23NqGrjzyKfeWed4mkTl/Q5cg2rF1VDTS8iOYXWME206kHuiPA==}
+    peerDependencies:
+      '@tanstack/ai': ^0.10.0
+      zod: ^4.0.0
+
+  '@tanstack/ai-event-client@0.2.0':
+    resolution: {integrity: sha512-1O7PbBlSo0gCrv4/bmOvnemZ6Cvf+kZmHqug19JEz8Bj4/anup3GkwvKBk8XzEvPIB+vQb4GL9TLN4Tfo6ZCkA==}
+    peerDependencies:
+      '@tanstack/ai': 0.10.0
+
+  '@tanstack/ai@0.10.0':
+    resolution: {integrity: sha512-b1GDenJs2udQfjFMnAWZ6WX9RLg04O9wC85V4cSD8phuVMJscs+Qp0UkNj7FTc+V1ggqf4Pz1jLFfqjLO2z3mg==}
+    engines: {node: '>=18'}
+
   '@tanstack/devtools-event-client@0.4.3':
     resolution: {integrity: sha512-OZI6QyULw0FI0wjgmeYzCIfbgPsOEzwJtCpa69XrfLMtNXLGnz3d/dIabk7frg0TmHo+Ah49w5I4KC7Tufwsvw==}
     engines: {node: '>=18'}
@@ -6007,6 +6025,9 @@ packages:
     resolution: {integrity: sha512-CiyeOxFT/JZyN5m0z9PfXw4SCBJ6Sygz1Dpl0wqjlhDEGGBP1GnsUVEL0p63hoG1fcj3fHynXi9NYO4nWOL+qQ==}
     engines: {node: '>= 0.8'}
 
+  partial-json@0.1.7:
+    resolution: {integrity: sha512-Njv/59hHaokb/hRUjce3Hdv12wd60MtM9Z5Olmn+nehe0QDAsRtRbJPvJ0Z91TusF0SuZRIvnM+S4l6EIP8leA==}
+
   path-browserify@1.0.1:
     resolution: {integrity: sha512-b7uo2UCUOYZcnF/3ID0lulOJi/bafxa1xPe7ZPsammBSpjSWQkjNxlt635YGS2MiR9GjvuXCtz2emr3jbsz98g==}
 
@@ -7370,7 +7391,7 @@ snapshots:
     dependencies:
       '@algolia/client-common': 5.50.0
 
-  '@anthropic-ai/sdk@0.82.0(zod@4.3.6)':
+  '@anthropic-ai/sdk@0.71.2(zod@4.3.6)':
     dependencies:
       json-schema-to-ts: 3.1.1
     optionalDependencies:
@@ -10184,6 +10205,22 @@ snapshots:
       tailwindcss: 4.2.2
       vite: 8.0.3(@types/node@25.5.0)(esbuild@0.27.3)(jiti@2.6.1)(tsx@4.21.0)
 
+  '@tanstack/ai-anthropic@0.7.2(@tanstack/ai@0.10.0)(zod@4.3.6)':
+    dependencies:
+      '@anthropic-ai/sdk': 0.71.2(zod@4.3.6)
+      '@tanstack/ai': 0.10.0
+      zod: 4.3.6
+
+  '@tanstack/ai-event-client@0.2.0(@tanstack/ai@0.10.0)':
+    dependencies:
+      '@tanstack/ai': 0.10.0
+      '@tanstack/devtools-event-client': 0.4.3
+
+  '@tanstack/ai@0.10.0':
+    dependencies:
+      '@tanstack/ai-event-client': 0.2.0(@tanstack/ai@0.10.0)
+      partial-json: 0.1.7
+
   '@tanstack/devtools-event-client@0.4.3': {}
 
   '@tanstack/eslint-plugin-query@5.96.1(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3)':
@@ -12957,6 +12994,8 @@ snapshots:
       peberminta: 0.9.0
 
   parseurl@1.3.3: {}
+
+  partial-json@0.1.7: {}
 
   path-browserify@1.0.1: {}
 

@@ -132,7 +132,7 @@ export const clearRecommendCache = createServerOnlyFn(async () => {
   }
 })
 
-const buildAlgoliaContentLocaleFilter = (
+export const buildAlgoliaContentLocaleFilter = (
   contentLocales: MemeContentLocale[]
 ) => {
   return `(${contentLocales

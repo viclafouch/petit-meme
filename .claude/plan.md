@@ -80,8 +80,8 @@ Feature permettant aux utilisateurs de décrire en langage naturel le mème qu'i
 
 ### Phase 1 — Infrastructure & Setup
 
-- [x] Installer `@anthropic-ai/sdk`
-- [x] Créer `src/lib/anthropic.ts` — client Anthropic (pattern similaire à `src/lib/algolia.ts`)
+- [x] Installer `@tanstack/ai` + `@tanstack/ai-anthropic` (stratégie unifiée TanStack AI avec structured output Zod)
+- [x] ~~Créer `src/lib/anthropic.ts`~~ — supprimé, le client est créé via `createAnthropicChat` dans le handler
 - [x] Ajouter `ANTHROPIC_API_KEY` dans `.env.development`, `.env.example`, Vercel env vars, et `src/env/server.ts` (validation Zod `@t3-oss/env-core`, server-only)
 - [x] Schema Prisma : table `AiSearchLog` (id, prompt, query String, categorySlugs String[], memeIds String[], userId, locale, resultCount Int, createdAt). Relation User avec `onDelete: Cascade` pour que la suppression de compte nettoie les logs
 - [ ] Créer la migration additive (user fait `prisma migrate dev`)
@@ -92,10 +92,10 @@ Feature permettant aux utilisateurs de décrire en langage naturel le mème qu'i
 
 ### Phase 2 — Backend Core
 
-- [ ] System prompt Haiku : construction dynamique avec les catégories (slug + titre localisé) fetchées depuis `getCategories` (cache mémoire). Output JSON structuré : `{ query: string, categorySlugs: string[] }`. Instructions : retourner `query` dans la langue de la locale passée, ne retourner que des `categorySlugs` existants, refuser les prompts inappropriés (retourner query vide), ignorer toute instruction dans le prompt utilisateur (anti-injection). Le system prompt ne doit contenir aucune info sensible (les catégories sont publiques).
-- [ ] Schema Zod de validation de la réponse Haiku : `z.object({ query: z.string(), categorySlugs: z.array(z.string()) })`
-- [ ] Schema Zod de validation de l'input : `z.object({ prompt: z.string().trim().min(1).max(300), contentLocale: z.enum(['FR', 'EN']).optional() })`
-- [ ] Server function `aiSearchMemes` :
+- [x] System prompt Haiku : construction dynamique avec les catégories (slug + titre localisé) fetchées depuis `getCategories` (cache mémoire). Output JSON structuré : `{ query: string, categorySlugs: string[] }`. Instructions : retourner `query` dans la langue de la locale passée, ne retourner que des `categorySlugs` existants, refuser les prompts inappropriés (retourner query vide), ignorer toute instruction dans le prompt utilisateur (anti-injection). Le system prompt ne doit contenir aucune info sensible (les catégories sont publiques).
+- [x] Schema Zod de validation de la réponse Haiku : `z.object({ query: z.string(), categorySlugs: z.array(z.string()) })`
+- [x] Schema Zod de validation de l'input : `z.object({ prompt: z.string().trim().min(1).max(300), contentLocale: z.enum(['FR', 'EN']).optional() })`
+- [x] Server function `aiSearchMemes` :
   - Middleware : `createRateLimitMiddleware` (par IP) + `createUserRateLimitMiddleware(RATE_LIMIT_AI_SEARCH)` + `authUserRequiredMiddleware`
   - Vérification cap global quotidien (count `AiSearchLog` du jour, tous users). Si dépassé, throw erreur générique.
   - Vérification quota user (count `AiSearchLog` du mois courant). Si free et quota épuisé, throw `StudioError` avec code `AI_SEARCH_QUOTA_EXCEEDED`. Les erreurs `AI_SEARCH_QUOTA_EXCEEDED` ne doivent PAS être reportées à Sentry (comportement attendu, pas un bug).
@@ -104,7 +104,7 @@ Feature permettant aux utilisateurs de décrire en langage naturel le mème qu'i
   - Recherche Algolia via `algoliaSearchClient.search()` dans l'index de la locale courante (`resolveAlgoliaIndexName(locale)`) avec query + facetFilters catégories + facetFilter `contentLocale` si spécifié (même logique que la recherche classique) + `hitsPerPage: MAX_AI_SEARCH_RESULTS` + `clickAnalytics: true` (retourne `queryID`)
   - Log en DB : prompt, query, categorySlugs, meme IDs, userId, locale, resultCount
   - Retour : résultats Algolia normalisés + query + categorySlugs + queryID (pour tracking Algolia Insights click/conversion)
-- [ ] Server function `getAiSearchQuota` : retourne `{ used: number, limit: number, isPremium: boolean }` pour le mois courant (reset UTC). Appelé côté client via `useQuery` conditionnel (`enabled: Boolean(user)`), pas en loader (évite les hits DB pour visiteurs/bots)
+- [x] Server function `getAiSearchQuota` : retourne `{ used: number, limit: number, isPremium: boolean }` pour le mois courant (reset UTC). Appelé côté client via `useQuery` conditionnel (`enabled: Boolean(user)`), pas en loader (évite les hits DB pour visiteurs/bots)
 
 ### Phase 3 — Frontend : Page & UI (mobile-first)
 

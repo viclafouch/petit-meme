@@ -94,6 +94,15 @@ const runRetentionCleanup = async () => {
     'Deleted old meme action daily records (365d)'
   )
 
+  const deletedAiSearchLogs = await prismaClient.aiSearchLog.deleteMany({
+    where: { createdAt: { lt: analyticsCutoff } }
+  })
+
+  log.info(
+    { count: deletedAiSearchLogs.count },
+    'Deleted old AI search logs (365d)'
+  )
+
   const auditLogCutoff = new Date(
     now.getTime() - AUDIT_LOG_RETENTION_YEARS * 365 * DAY
   )
@@ -154,6 +163,7 @@ const runRetentionCleanup = async () => {
     deletedGenerations: deletedGenerations.count,
     deletedActions: deletedActions.count,
     deletedAuditLogs: deletedAuditLogs.count,
+    deletedAiSearchLogs: deletedAiSearchLogs.count,
     anonymizedCount
   }
 }

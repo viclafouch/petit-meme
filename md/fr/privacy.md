@@ -70,7 +70,23 @@ de générations gratuites) et l'amélioration du service (statistiques d'usage
 agrégées). Elles sont conservées pendant **365 jours**, puis supprimées
 automatiquement.
 
-### 2.6. Données de paiement
+### 2.7. Données de recherche IA
+
+Lorsque vous utilisez la fonctionnalité de recherche IA (description en langage
+naturel d'un mème recherché), nous enregistrons :
+
+- Le texte de votre demande (prompt)
+- Les mots-clés extraits par l'IA
+- Les identifiants des mèmes retournés
+- La date de la recherche
+
+Ces données sont utilisées pour le contrôle d'utilisation (limitation du nombre
+de recherches gratuites) et l'amélioration du service. Votre prompt est transmis
+à **Anthropic** pour l'extraction de mots-clés, sans lien avec votre identité
+personnelle (seul le texte de la requête est envoyé). Les données sont
+conservées pendant **365 jours**, puis supprimées automatiquement.
+
+### 2.8. Données de paiement
 
 Les paiements sont gérés par **Stripe**. Nous ne stockons jamais vos
 informations de carte bancaire. Stripe collecte les données nécessaires au
@@ -90,6 +106,7 @@ traitement des paiements conformément à sa propre politique de confidentialit�
 | Envoi d'e-mails transactionnels | Exécution du contrat | Adresse e-mail |
 | Recherche de mèmes | Exécution du contrat | Requêtes de recherche |
 | Contrôle d'utilisation et analytics Studio | Intérêt légitime | Date de génération, identifiant du mème |
+| Recherche IA par langage naturel | Exécution du contrat | Prompt, mots-clés extraits, résultats, date |
 | Suivi des erreurs et stabilité du service | Intérêt légitime | Données techniques (URL, navigateur, traces d'erreur) |
 
 ---
@@ -130,6 +147,7 @@ service :
 | **Google Fonts** | Chargement des polices d'affichage (adresse IP transmise) | États-Unis (clauses contractuelles types) |
 | **Neon** | Hébergement de la base de données | États-Unis (clauses contractuelles types) |
 | **Vercel** | Hébergement et exécution de l'application | États-Unis (clauses contractuelles types) |
+| **Anthropic** | Recherche IA par langage naturel | États-Unis (clauses contractuelles types) |
 
 Pour les transferts de données hors de l'Union européenne, des garanties
 appropriées sont mises en place (clauses contractuelles types de la Commission
@@ -150,6 +168,7 @@ européenne).
 | Données d'événements Algolia (vues, clics) | Selon la politique de rétention d'Algolia (30 jours par défaut) |
 | Données de génération Studio | 365 jours, puis supprimées automatiquement |
 | Données du journal d'audit administratif | 2 ans, puis supprimées automatiquement |
+| Données de recherche IA | 365 jours, puis supprimées automatiquement |
 | Données de paiement (Stripe) | Selon les obligations légales de Stripe |
 | E-mails transactionnels | Selon la politique de rétention de Resend |
 

@@ -67,7 +67,22 @@ This data is used for usage control (limiting the number of free generations)
 and service improvement (aggregated usage statistics). It is retained for
 **365 days**, then automatically deleted.
 
-### 2.6. Payment data
+### 2.7. AI search data
+
+When you use the AI search feature (natural language description of a meme
+you're looking for), we record:
+
+- The text of your request (prompt)
+- Keywords extracted by the AI
+- Identifiers of the memes returned
+- The date of the search
+
+This data is used for usage control (limiting the number of free searches) and
+service improvement. Your prompt is transmitted to **Anthropic** for keyword
+extraction, with no connection to your personal identity (only the request text
+is sent). Data is retained for **365 days**, then automatically deleted.
+
+### 2.8. Payment data
 
 Payments are handled by **Stripe**. We never store your credit card
 information. Stripe collects the data necessary for payment processing in
@@ -87,6 +102,7 @@ accordance with its own privacy policy.
 | Sending transactional emails | Performance of contract | Email address |
 | Meme search | Performance of contract | Search queries |
 | Usage control and Studio analytics | Legitimate interest | Generation date, meme identifier |
+| AI search by natural language | Performance of contract | Prompt, extracted keywords, results, date |
 | Error tracking and service stability | Legitimate interest | Technical data (URL, browser, error traces) |
 
 ---
@@ -126,6 +142,7 @@ We use the following sub-processors for the operation of the service:
 | **Google Fonts** | Loading display fonts (IP address transmitted) | United States (standard contractual clauses) |
 | **Neon** | Database hosting | United States (standard contractual clauses) |
 | **Vercel** | Application hosting and execution | United States (standard contractual clauses) |
+| **Anthropic** | AI search by natural language | United States (standard contractual clauses) |
 
 For data transfers outside the European Union, appropriate safeguards are in
 place (European Commission standard contractual clauses).
@@ -145,6 +162,7 @@ place (European Commission standard contractual clauses).
 | Algolia event data (views, clicks) | Per Algolia's retention policy (30 days by default) |
 | Studio generation data | 365 days, then automatically deleted |
 | Administrative audit log data | 2 years, then automatically deleted |
+| AI search data | 365 days, then automatically deleted |
 | Payment data (Stripe) | Per Stripe's legal obligations |
 | Transactional emails | Per Resend's retention policy |
 

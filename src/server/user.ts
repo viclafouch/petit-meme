@@ -236,7 +236,7 @@ export const exportUserData = createServerFn({ method: 'GET' })
       }
     })
 
-    const [subscriptions, studioGenerations] = await Promise.all([
+    const [subscriptions, studioGenerations, aiSearchLogs] = await Promise.all([
       prismaClient.subscription.findMany({
         where: { referenceId: context.user.id },
         select: {
@@ -251,6 +251,16 @@ export const exportUserData = createServerFn({ method: 'GET' })
         select: {
           createdAt: true,
           memeId: true
+        },
+        orderBy: { createdAt: 'desc' }
+      }),
+      prismaClient.aiSearchLog.findMany({
+        where: { userId: context.user.id },
+        select: {
+          prompt: true,
+          query: true,
+          resultCount: true,
+          createdAt: true
         },
         orderBy: { createdAt: 'desc' }
       })
@@ -319,6 +329,14 @@ export const exportUserData = createServerFn({ method: 'GET' })
         return {
           createdAt: generation.createdAt,
           memeId: generation.memeId
+        }
+      }),
+      aiSearchLogs: aiSearchLogs.map((log) => {
+        return {
+          prompt: log.prompt,
+          query: log.query,
+          resultCount: log.resultCount,
+          createdAt: log.createdAt
         }
       })
     }

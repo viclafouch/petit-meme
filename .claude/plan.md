@@ -148,17 +148,13 @@ Feature permettant aux utilisateurs de décrire en langage naturel le mème qu'i
 - [ ] og:image : créer une image OG statique dédiée dans `/public/` pour le partage social
 - [x] JSON-LD : `BreadcrumbList` (Home > AI Search) dans le composant page
 - [x] Route ajoutée dans le sitemap
-- [ ] Floating logos décoratifs sur la page AI search (reporté)
 
 ### Phase 6 — RGPD & Conformité
 
-- [ ] **Privacy policy** (FR `md/fr/privacy.md` + EN `md/en/privacy.md`) :
-  - Ajouter section "Données de recherche IA" : données collectées (prompt, query extraite, résultats, date), finalité (contrôle d'usage et amélioration du service), base légale (exécution du contrat / intérêt légitime)
-  - Ajouter durée de conservation dans le tableau (365 jours, puis suppression automatique)
-  - Ajouter **Anthropic** dans le tableau des sous-traitants (finalité: "Recherche IA par langage naturel", localisation: "États-Unis, clauses contractuelles types")
-- [ ] **Data export** : ajouter `AiSearchLog` dans `exportUserData` (`src/server/user.ts`) — exporter prompt, createdAt, resultCount au minimum
-- [ ] **Data retention cron** : ajouter nettoyage des `AiSearchLog` > 365 jours dans `src/routes/api/cron/cleanup.ts`
-- [ ] **Anonymisation** : vérifier que `onDelete: Cascade` sur la relation User couvre la suppression de compte. Vérifier le cron GDPR d'anonymisation (`src/utils/user-cleanup.ts`)
+- [x] **Privacy policy** (FR + EN) : section 2.7 "Données de recherche IA", finalité dans le tableau, Anthropic dans les sous-traitants, durée de conservation 365 jours
+- [x] **Data export** : `AiSearchLog` ajouté dans `exportUserData` (prompt, query, resultCount, createdAt)
+- [x] **Data retention cron** : nettoyage `AiSearchLog` > 365 jours ajouté dans `cleanup.ts`
+- [x] **Anonymisation** : `onDelete: Cascade` sur la relation User vérifié, couvre la suppression de compte
 
 ### Phase 7 — Audits & Production
 

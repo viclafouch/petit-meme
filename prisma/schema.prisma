@@ -175,6 +175,7 @@ model User {
   studioGenerations StudioGeneration[]
   adminActions      AdminAuditLog[]    @relation("AdminActions")
   memeSubmissions   MemeSubmission[]
+  aiSearchLogs      AiSearchLog[]
 
   @@index([createdAt])
   @@map("user")
@@ -356,6 +357,24 @@ model CategoryTranslation {
 
   @@unique([categoryId, locale])
   @@map("category_translation")
+}
+
+model AiSearchLog {
+  id             String   @id @default(cuid())
+  userId         String   @map("user_id")
+  prompt         String
+  query          String
+  categorySlugs  String[] @map("category_slugs")
+  memeIds        String[] @map("meme_ids")
+  locale         String
+  resultCount    Int      @map("result_count")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
+  @@map("ai_search_log")
 }
 
 model RecommendCache {

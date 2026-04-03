@@ -67,6 +67,8 @@ Code must always be clean and readable. Before writing any code, ask whether it 
 
 **A task is NOT complete until steps 1-2 are done.** Never say "done" or summarize changes before finishing the checklist.
 
+**Multi-phase plans:** each phase in `.claude/plan.md` is a separate task. After completing the checklist for a phase, **always ask the user before starting the next phase**. Never chain phases automatically.
+
 ## Design Rule
 
 For any UI/design task, **always use `/frontend-design`** before writing code.

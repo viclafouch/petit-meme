@@ -23,3 +23,9 @@ export const RATE_LIMIT_SUBMIT_MEME = {
   maxRequests: 5,
   windowMs: DAY
 } as const satisfies RateLimitConfig
+
+export const RATE_LIMIT_AI_SEARCH = {
+  action: 'ai-search',
+  maxRequests: 10,
+  windowMs: MINUTE
+} as const satisfies RateLimitConfig

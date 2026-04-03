@@ -38,6 +38,7 @@ type SentryFeature =
   | 'admin-watermark'
   | 'bunny-storage-cleanup'
   | 'watermark-fallback'
+  | 'ai-search'
 
 export const captureWithFeature = (error: unknown, feature: SentryFeature) => {
   if (process.env.NODE_ENV === 'development') {

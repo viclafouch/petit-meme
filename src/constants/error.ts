@@ -8,6 +8,7 @@ export type StudioErrorCode =
   | 'DUPLICATE_URL'
   | 'TWEET_NO_VIDEO'
   | 'TWEET_VERIFICATION_FAILED'
+  | 'AI_SEARCH_QUOTA_EXCEEDED'
 
 export class StudioError extends Error {
   public code: StudioErrorCode

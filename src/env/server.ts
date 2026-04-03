@@ -15,6 +15,7 @@ export const serverEnv = createEnv({
     BUNNY_STORAGE_HOSTNAME: z.string(),
     BUNNY_STORAGE_ZONE_NAME: z.string(),
     ALGOLIA_ADMIN_KEY: z.string(),
+    ANTHROPIC_API_KEY: z.string(),
     GEMINI_API_KEY: z.string(),
     RESEND_API_KEY: z.string().startsWith('re_'),
     EMAIL_OVERRIDE_TO: z.string().optional(),

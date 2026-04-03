@@ -13,6 +13,7 @@ TypeScript's inference is extremely powerful. Let it do its job.
 - NO type annotations on variables initialized with a value
 - NO type annotations on parameters with default values
 - NO type annotations on function expressions or arrow functions
+- NO return type annotations on functions — trust inference by default
 
 **Explicit types ARE required when inference is too loose:**
 - Return types on functions where TypeScript infers a wider type than intended (e.g. `string` instead of a union, `object` instead of a specific shape)

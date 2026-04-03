@@ -108,43 +108,35 @@ Feature permettant aux utilisateurs de décrire en langage naturel le mème qu'i
 
 ### Phase 3 — Frontend : Page & UI (mobile-first)
 
-- [ ] **Utiliser `/frontend-design`** avant d'écrire le moindre code UI pour cette page (règle CLAUDE.md)
-- [ ] Route TanStack : `src/routes/_public__root/_default/memes/ai-search.tsx`
-- [ ] Messages i18n (FR/EN) : titre page, placeholder textarea, labels, états vides/erreur, quota, quota épuisé, rate limit, cap global, message erreur Haiku
-- [ ] Composant page centré :
+- [x] **Utiliser `/frontend-design`** avant d'écrire le moindre code UI pour cette page (règle CLAUDE.md)
+- [x] Route TanStack : `src/routes/_public__root/_default/memes/ai-search.tsx`
+- [x] Messages i18n (FR/EN) : titre page, placeholder textarea, labels, états vides/erreur, quota, quota épuisé, rate limit, cap global, message erreur Haiku
+- [x] Composant page centré :
   - Heading Bricolage Grotesque centré ("Décris le mème parfait" / "Describe your perfect meme")
   - Sous-titre explicatif
-  - Grand textarea auto-expand (`field-sizing-content` + fallback JS pour Safari : `ResizeObserver` ou calcul hauteur au `input` event). Bords arrondis, max 300 chars (utiliser `<Textarea>` shadcn)
+  - Grand textarea auto-expand (`field-sizing-content` via shadcn Textarea). Bords arrondis, max 300 chars
   - Compteur de caractères (ex: "42/300")
-  - Filtre langue contenu (FR/EN) sous le textarea — contrôle le `contentLocale` pour filtrer les mèmes (pas la locale du site). Même concept que `MemesFilterLanguage` sur la recherche classique
+  - ~~Filtre langue contenu~~ (reporté, pas de filtre contentLocale pour l'instant — la recherche Algolia utilise l'index de la locale du site)
   - Bouton submit large, intégré visuellement (toujours cliquable, jamais désactivé)
-- [ ] Auth gate : au clic submit, si non connecté → sauvegarder le prompt + options dans `sessionStorage` → ouvrir dialog login → après login, restaurer le prompt depuis `sessionStorage` et soumettre automatiquement (ou laisser l'utilisateur cliquer). Pour le login social (redirect), utiliser `callbackURL` vers `/memes/ai-search` pour revenir sur la page
-- [ ] Affichage quota : badge discret "X/3 recherches restantes ce mois" (données de `getAiSearchQuota` via `useQuery` conditionnel, `enabled: Boolean(user)`)
-- [ ] Mise à jour quota côté client : `queryClient.invalidateQueries` en `onSuccess` de la mutation
-- [ ] État quota épuisé : bouton submit toujours actif, au clic affiche message explicatif + CTA bouton vers /pricing. Distinguer l'erreur `AI_SEARCH_QUOTA_EXCEEDED` (message quota i18n) de l'erreur rate limit (message "trop de recherches, réessayez dans X secondes" i18n) — utiliser `matchIsRateLimitError` pour la distinction
-- [ ] État premium : pas de compteur, badge "Illimité"
-- [ ] État visiteur non connecté : pas de badge quota, afficher un message "Connectez-vous pour rechercher" ou des exemples de prompts pour le SEO et la conversion
-- [ ] Contenu SEO pour visiteurs/Google : exemples de prompts sous le textarea ("Ex: Un mème pour quand tu rates ton bus"), brève FAQ inline ("Comment ça marche ?", "C'est gratuit ?"). La page ne doit pas être vide pour Google (thin content)
-- [ ] Design mobile-first :
-  - Textarea pleine largeur sur mobile avec padding adapté
-  - Bouton submit pleine largeur sur mobile
-  - Options (langue, quota) empilées verticalement sur mobile
-  - Touch targets ≥ 44px
-  - Aucun scroll horizontal
-  - `scrollIntoView` au focus du textarea sur mobile (clavier virtuel)
+- [x] Auth gate : au clic submit, si non connecté → sauvegarder le prompt dans `sessionStorage` → ouvrir dialog login → après login, restaurer le prompt depuis `sessionStorage`
+- [x] Affichage quota : badge discret "X/3 recherches restantes ce mois" (données de `getAiSearchQuota` via `useQuery` conditionnel, `enabled: Boolean(user)`)
+- [x] Mise à jour quota côté client : `queryClient.invalidateQueries` en `onSuccess` de la mutation
+- [x] État quota épuisé : bouton submit toujours actif, au clic affiche message explicatif + CTA bouton vers /pricing. Distinguer l'erreur `AI_SEARCH_QUOTA_EXCEEDED` (message quota i18n) de l'erreur rate limit (message "trop de recherches, réessayez dans X secondes" i18n) — utiliser `matchIsRateLimitError` pour la distinction
+- [x] État premium : pas de compteur, badge "Illimité"
+- [x] État visiteur non connecté : pas de badge quota
+- ~~Contenu SEO~~ (supprimé : exemples, FAQ, message login retirés)
+- [x] Design mobile-first (responsive textarea, bouton, quota badge)
+- [ ] `scrollIntoView` au focus du textarea sur mobile (clavier virtuel) — à ajouter si besoin après test
 
 ### Phase 4 — Frontend : Loading & Résultats
 
-- [ ] UX loading (animation séquentielle côté frontend, pas de streaming réel) :
-  - Étape 1 : "Analyse de votre demande..." avec animation (pendant `mutation.isPending`)
-  - Étape 2 : Query + categorySlugs extraits apparaissent (tags animés, affichés après réception de la réponse)
-  - Étape 3 : Résultats apparaissent avec animation Framer Motion
-- [ ] Grille résultats : réutiliser `MemesList` / `MemeCard` existants (`src/components/Meme/memes-list.tsx`). Passer le `queryID` Algolia pour le tracking click/conversion via `sendClickEvent` / `sendConversionEvent`
-- [ ] État 0 résultat : message clair + suggestion de reformuler
-- [ ] État erreur : messages i18n distincts selon le type d'erreur (quota épuisé, rate limit, timeout Haiku, erreur générique). Ne pas utiliser `getErrorMessage()` directement (message français hardcodé). Bouton retry pour les erreurs récupérables (timeout, erreur Haiku)
-- [ ] Respect `useReducedMotion()` pour toutes les animations
-- [ ] `aria-live="polite"` sur la zone de résultats et `role="status"` sur la zone de loading (screen readers)
-- [ ] `aria-live="polite"` sur le badge quota (mise à jour après recherche)
+- [x] UX loading : "Analyse de votre demande..." via `LoadingButton` (pendant `mutation.isPending`)
+- [ ] Animation séquentielle (tags catégories + résultats avec Framer Motion) — à affiner après test
+- [x] Grille résultats : réutilise `MemesList` existant avec `queryID` Algolia pour le tracking
+- [x] État 0 résultat : message clair + suggestion de reformuler
+- [x] État erreur : messages i18n distincts (quota épuisé, rate limit, daily cap, erreur générique). Bouton retry pour erreurs récupérables, CTA premium pour quota
+- [ ] Respect `useReducedMotion()` pour les animations futures
+- [x] `aria-live="polite"` sur le badge quota et la zone de résultats
 
 ### Phase 5 — Navigation, Pricing & SEO
 

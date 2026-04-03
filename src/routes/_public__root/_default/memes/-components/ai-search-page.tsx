@@ -14,6 +14,7 @@ import {
 import { getStudioErrorCode } from '~/constants/error'
 import { matchIsRateLimitError } from '~/helpers/error'
 import { getAiSearchQuotaQueryOpts } from '~/lib/queries'
+import { buildBreadcrumbJsonLd } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
 import {
   PageContainer,
@@ -98,8 +99,16 @@ export const AiSearchPage = () => {
     searchMutation.mutate({ prompt: trimmed })
   }
 
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: m.meme_breadcrumb_home(), pathname: '/' },
+    { name: m.ai_search_seo_title(), pathname: '/memes/ai-search' }
+  ])
+
   return (
     <PageContainer as="main">
+      <script type="application/ld+json">
+        {JSON.stringify(breadcrumbJsonLd)}
+      </script>
       <PageHeader>
         <PageHeading>{m.ai_search_title()}</PageHeading>
         <PageDescription>{m.ai_search_description()}</PageDescription>

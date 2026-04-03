@@ -1,6 +1,6 @@
 import React from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
-import { AlertTriangleIcon, RefreshCw, Shuffle, Smartphone } from 'lucide-react'
+import { AlertTriangleIcon, RefreshCw, SparklesIcon } from 'lucide-react'
 import { useDebouncedValue } from '@tanstack/react-pacer'
 import {
   QueryErrorResetBoundary,
@@ -32,7 +32,6 @@ import {
   getMemesListQueryOpts
 } from '~/lib/queries'
 import { buildBreadcrumbJsonLd, buildCategoryJsonLd } from '~/lib/seo'
-import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
 import {
@@ -193,10 +192,19 @@ export const SearchMemes = () => {
       <div className="w-full mx-auto">
         <div className="flex flex-col gap-y-4">
           <div className="flex justify-between flex-col sm:flex-row gap-2">
-            <MemesQuery
-              query={search.query ?? ''}
-              onQueryChange={handleQueryChange}
-            />
+            <div className="flex items-center gap-2 w-full sm:max-w-xs">
+              <MemesQuery
+                query={search.query ?? ''}
+                onQueryChange={handleQueryChange}
+              />
+              <Link
+                to="/memes/ai-search"
+                className={buttonVariants({ variant: 'outline' })}
+              >
+                <SparklesIcon aria-hidden="true" />
+                {m.meme_ai_search_cta()}
+              </Link>
+            </div>
             <div className="gap-x-2 flex shrink-0">
               <MemesFilterLanguage
                 contentLocales={parsedContentLocales}
@@ -208,20 +216,6 @@ export const SearchMemes = () => {
                   onColumnValueChange={setColumnGridCount}
                 />
               </div>
-              <Link
-                to="/random"
-                className={cn('flex-1', buttonVariants({ variant: 'outline' }))}
-              >
-                <Shuffle />
-                {m.meme_random()}
-              </Link>
-              <Link
-                to="/reels"
-                className={cn('flex-1', buttonVariants({ variant: 'outline' }))}
-              >
-                <Smartphone />
-                {m.meme_reels_mode()}
-              </Link>
             </div>
           </div>
           <div className="w-full border-y border-muted">

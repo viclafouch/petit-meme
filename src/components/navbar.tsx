@@ -33,13 +33,7 @@ const getNavigationLinks = (): NavigationLink[] => {
   return [
     { to: '/memes', label: m.nav_memes(), preload: 'viewport' },
     { to: '/pricing', label: m.nav_plans(), preload: 'viewport' },
-    { to: '/submit', label: m.nav_submit(), preload: 'intent' },
-    {
-      to: '/reels',
-      label: m.nav_reels(),
-      className: 'md:hidden',
-      preload: 'intent'
-    }
+    { to: '/submit', label: m.nav_submit(), preload: 'intent' }
   ]
 }
 

@@ -140,18 +140,15 @@ Feature permettant aux utilisateurs de décrire en langage naturel le mème qu'i
 
 ### Phase 5 — Navigation, Pricing & SEO
 
-- [ ] **Utiliser `/frontend-design`** avant de modifier la navbar et le CTA sur la page recherche (positionnement, style du lien/bouton, badge "New")
-- [ ] Lien navbar : ajouter dans `getNavigationLinks()`. Desktop : lien visible dans la barre. Mobile : dans le popover `MobileNav`. Préciser la position (après "Memes" ? avant "Plans" ?)
-- [ ] Bouton sur la page recherche classique `/memes/category/*` : CTA "Essayer la recherche IA". Positionner à côté du champ de recherche ou en dessous de la barre de filtres (la barre est déjà dense sur mobile)
-- [ ] Mise à jour `src/constants/plan.ts` :
-  - Ajouter `maxAiSearchesCount` au type `Plan` (cohérence avec `maxGenerationsCount`, `maxFavoritesCount`)
-  - `getFreePlan` : `maxAiSearchesCount: FREE_PLAN_MAX_AI_SEARCHES`, feature `plan_feature_ai_search` status `limited` (note: "3/mois")
-  - `getPremiumPlan` : `maxAiSearchesCount: Number.MAX_SAFE_INTEGER`, feature `plan_feature_ai_search` status `included` (note: "illimité")
-- [ ] Messages i18n pricing (FR/EN) : `plan_feature_ai_search`, `plan_note_3_per_month`
-- [ ] SEO : `head()` avec `seo()` sur `/memes/ai-search` (title, description, og:title, og:description, keywords i18n, pathname)
+- ~~Lien navbar~~ : retiré, la navbar reste Memes / Abonnements / Soumettre
+- [x] Lien "IA" à côté de l'input de recherche sur la page memes classique (boutons Aléatoire et Mode Réel supprimés, lien Reels retiré de la navbar)
+- [x] Mise à jour `src/constants/plan.ts` : `maxAiSearchesCount` ajouté au type `Plan`, free (3) et premium (illimité), feature `plan_feature_ai_search`
+- [x] Messages i18n pricing (FR/EN) : `plan_feature_ai_search`, `meme_ai_search_cta` ("IA"/"AI")
+- [x] SEO : `head()` avec `seo()` déjà en place depuis Phase 3
 - [ ] og:image : créer une image OG statique dédiée dans `/public/` pour le partage social
-- [ ] JSON-LD : `WebPage` + `BreadcrumbList` (Home > AI Search), cohérent avec les autres pages
-- [ ] Ajouter la route dans le sitemap (`src/routes/sitemap-static[.]xml.ts`)
+- [x] JSON-LD : `BreadcrumbList` (Home > AI Search) dans le composant page
+- [x] Route ajoutée dans le sitemap
+- [ ] Floating logos décoratifs sur la page AI search (reporté)
 
 ### Phase 6 — RGPD & Conformité
 

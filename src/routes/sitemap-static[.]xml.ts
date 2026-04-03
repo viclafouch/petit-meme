@@ -13,7 +13,8 @@ const STATIC_PAGES = [
   { pathname: '/submit' },
   { pathname: '/terms-of-use' },
   { pathname: '/privacy' },
-  { pathname: '/mentions-legales' }
+  { pathname: '/mentions-legales' },
+  { pathname: '/memes/ai-search' }
 ] as const satisfies readonly SitemapPage[]
 
 export const Route = createFileRoute('/sitemap-static.xml')({

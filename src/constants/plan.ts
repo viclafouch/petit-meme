@@ -1,3 +1,4 @@
+import { FREE_PLAN_MAX_AI_SEARCHES } from '~/constants/ai-search'
 import { m } from '~/paraglide/messages.js'
 
 export type BillingPeriod = 'monthly' | 'yearly'
@@ -19,6 +20,7 @@ export type Plan = {
   title: string
   maxGenerationsCount: number
   maxFavoritesCount: number
+  maxAiSearchesCount: number
   productId: string
   description: string
   features: PlanFeature[]
@@ -48,6 +50,7 @@ export const getFreePlan = (): Plan => {
     title: m.plan_free_title(),
     maxGenerationsCount: FREE_PLAN_MAX_GENERATIONS,
     maxFavoritesCount: FREE_PLAN_MAX_FAVORITES,
+    maxAiSearchesCount: FREE_PLAN_MAX_AI_SEARCHES,
     productId: 'free',
     isExclusive: false,
     description: m.plan_free_description(),
@@ -63,7 +66,12 @@ export const getFreePlan = (): Plan => {
         status: 'limited',
         note: m.plan_note_3_max()
       },
-      { label: m.plan_feature_watermark(), status: 'limited' }
+      { label: m.plan_feature_watermark(), status: 'limited' },
+      {
+        label: m.plan_feature_ai_search(),
+        status: 'limited',
+        note: m.plan_note_3_max()
+      }
     ],
     pricing: FREE_PLAN_PRICING
   }
@@ -74,6 +82,7 @@ export const getPremiumPlan = (): Plan => {
     title: m.plan_premium_title(),
     maxGenerationsCount: Number.MAX_SAFE_INTEGER,
     maxFavoritesCount: Number.MAX_SAFE_INTEGER,
+    maxAiSearchesCount: Number.MAX_SAFE_INTEGER,
     productId: PREMIUM_PLAN_PRODUCT_ID,
     isExclusive: true,
     description: m.plan_premium_description(),
@@ -89,7 +98,12 @@ export const getPremiumPlan = (): Plan => {
         status: 'included',
         note: m.plan_note_unlimited()
       },
-      { label: m.plan_feature_no_watermark(), status: 'included' }
+      { label: m.plan_feature_no_watermark(), status: 'included' },
+      {
+        label: m.plan_feature_ai_search(),
+        status: 'included',
+        note: m.plan_note_unlimited()
+      }
     ],
     pricing: PREMIUM_PLAN_PRICING
   }

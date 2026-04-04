@@ -7,6 +7,7 @@ import { waitUntil } from '@vercel/functions'
 import { prismaClient } from '~/db'
 import {
   AI_SEARCH_TIMEOUT_MS,
+  AI_SEARCH_QUOTA_EXCEEDED_MESSAGE,
   DAILY_GLOBAL_AI_SEARCH_CAP,
   FREE_PLAN_MAX_AI_SEARCHES,
   MAX_AI_SEARCH_RESULTS,
@@ -199,7 +200,7 @@ export const aiSearchMemes = createServerFn({ method: 'POST' })
 
     if (!isPremium && monthlyCount >= FREE_PLAN_MAX_AI_SEARCHES) {
       setResponseStatus(429)
-      throw new Error('AI search quota exceeded')
+      throw new Error(AI_SEARCH_QUOTA_EXCEEDED_MESSAGE)
     }
 
     const validSlugs = new Set(

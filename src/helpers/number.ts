@@ -19,6 +19,10 @@ function formatEuros(euros: number, params: FormatCurrencyParams) {
   })
 }
 
+export function getRandomFloatInRange(min: number, max: number) {
+  return min + Math.random() * (max - min)
+}
+
 export function computePercentChange(current: number, previous: number) {
   if (previous === 0) {
     return null

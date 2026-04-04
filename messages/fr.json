@@ -1,5 +1,8 @@
 {
   "ai_search_analyzing": "Analyse de votre demande…",
+  "ai_search_stage_context": "Extraction du contexte…",
+  "ai_search_stage_keywords": "Identification des mots-clés…",
+  "ai_search_stage_search": "Recherche des meilleurs mèmes…",
   "ai_search_categories_label": "Catégories détectées",
   "ai_search_description": "Décris ce que tu cherches, l'IA trouve le mème parfait.",
   "ai_search_error_generic": "La recherche a échoué. Réessaie.",
@@ -9,6 +12,21 @@
   "ai_search_keywords_label": "Mots-clés extraits",
   "ai_search_no_results": "Aucun mème trouvé. Essaie de reformuler ta demande.",
   "ai_search_placeholder": "Ex : un mème pour quand tu rates ton bus…",
+  "ai_search_result_count": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} mème trouvé",
+        "countPlural=other": "{count} mèmes trouvés"
+      }
+    }
+  ],
   "ai_search_results_title": "Résultats",
   "ai_search_seo_description": "Décris le mème parfait et laisse l'IA le trouver pour toi. Recherche par description en langage naturel.",
   "ai_search_seo_keywords": "recherche ia mème, trouver mème, recherche mème ia, petit meme ia",

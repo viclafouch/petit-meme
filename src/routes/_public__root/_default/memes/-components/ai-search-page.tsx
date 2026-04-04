@@ -1,14 +1,24 @@
 import React from 'react'
 import { SparklesIcon } from 'lucide-react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { toast } from 'sonner'
 import { useMutation } from '@tanstack/react-query'
 import { useRouteContext } from '@tanstack/react-router'
 import { MemesList } from '~/components/Meme/memes-list'
 import { Badge } from '~/components/ui/badge'
-import { LoadingButton } from '~/components/ui/loading-button'
+import { Button } from '~/components/ui/button'
+import { Separator } from '~/components/ui/separator'
 import { Textarea } from '~/components/ui/textarea'
-import { MAX_PROMPT_LENGTH } from '~/constants/ai-search'
-import { getErrorMessage, matchIsRateLimitError } from '~/helpers/error'
+import {
+  AI_SEARCH_PROMPT_STORAGE_KEY,
+  MAX_PROMPT_LENGTH
+} from '~/constants/ai-search'
+import {
+  getErrorMessage,
+  matchIsAiSearchQuotaExceeded,
+  matchIsRateLimitError
+} from '~/helpers/error'
+import { useAiSearchStages } from '~/hooks/use-ai-search-stages'
 import { captureWithFeature } from '~/lib/sentry'
 import { buildBreadcrumbJsonLd } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
@@ -18,10 +28,9 @@ import {
   PageHeader,
   PageHeading
 } from '~/routes/_public__root/-components/page-headers'
+import { AiSearchStages } from '~/routes/_public__root/_default/memes/-components/ai-search-stages'
 import { aiSearchMemes } from '~/server/ai-search'
 import { useShowDialog } from '~/stores/dialog.store'
-
-const AI_SEARCH_PROMPT_STORAGE_KEY = 'ai-search-prompt'
 
 function getSearchErrorMessage(error: unknown) {
   if (matchIsRateLimitError(error)) {
@@ -29,12 +38,6 @@ function getSearchErrorMessage(error: unknown) {
   }
 
   return m.ai_search_error_generic()
-}
-
-function matchIsQuotaExceeded(error: unknown) {
-  return (
-    error instanceof Error && error.message.includes('AI search quota exceeded')
-  )
 }
 
 type AiSearchResult = Awaited<ReturnType<typeof aiSearchMemes>>
@@ -58,7 +61,7 @@ export const AiSearchPage = () => {
       return aiSearchMemes({ data })
     },
     onError: (error) => {
-      if (matchIsQuotaExceeded(error)) {
+      if (matchIsAiSearchQuotaExceeded(error)) {
         showDialog('ai-search-upsell', {})
 
         return
@@ -70,6 +73,8 @@ export const AiSearchPage = () => {
       })
     }
   })
+
+  const searchStages = useAiSearchStages(searchMutation.isPending)
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault()
@@ -104,10 +109,10 @@ export const AiSearchPage = () => {
         <PageHeading>{m.ai_search_title()}</PageHeading>
         <PageDescription>{m.ai_search_description()}</PageDescription>
       </PageHeader>
-      <section className="container flex flex-col gap-8">
+      <section className="container flex flex-col gap-y-8">
         <form
           onSubmit={handleSubmit}
-          className="mx-auto flex w-full max-w-2xl flex-col gap-4"
+          className="mx-auto flex w-full max-w-2xl flex-col gap-y-4"
         >
           <div className="relative">
             <Textarea
@@ -128,21 +133,31 @@ export const AiSearchPage = () => {
             </span>
           </div>
           <div className="flex justify-end">
-            <LoadingButton
+            <Button
               type="submit"
               size="lg"
-              isLoading={searchMutation.isPending}
-              loadingText={m.ai_search_analyzing()}
+              disabled={searchStages.isActive}
+              aria-busy={searchStages.isActive}
             >
               <SparklesIcon aria-hidden="true" />
               {m.ai_search_submit()}
-            </LoadingButton>
+            </Button>
           </div>
         </form>
         <div aria-live="polite">
-          {searchMutation.data ? (
-            <AiSearchResults result={searchMutation.data} />
-          ) : null}
+          <AnimatePresence mode="wait">
+            {searchStages.isActive ? (
+              <AiSearchStages key="stages" stages={searchStages.stages} />
+            ) : null}
+            {!searchStages.isActive &&
+            searchMutation.data &&
+            searchStages.isAllCompleted ? (
+              <AiSearchResultsAnimated
+                key="results"
+                result={searchMutation.data}
+              />
+            ) : null}
+          </AnimatePresence>
         </div>
       </section>
     </PageContainer>
@@ -151,6 +166,20 @@ export const AiSearchPage = () => {
 
 type AiSearchResultsProps = {
   result: AiSearchResult
+}
+
+const AiSearchResultsAnimated = ({ result }: AiSearchResultsProps) => {
+  const isReducedMotion = useReducedMotion()
+
+  return (
+    <motion.div
+      initial={isReducedMotion ? false : { opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+    >
+      <AiSearchResults result={result} />
+    </motion.div>
+  )
 }
 
 const AiSearchResults = ({ result }: AiSearchResultsProps) => {
@@ -165,21 +194,29 @@ const AiSearchResults = ({ result }: AiSearchResultsProps) => {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      {result.categorySlugs.length > 0 ? (
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-muted-foreground text-sm">
-            {m.ai_search_categories_label()}
-          </span>
-          {result.categorySlugs.map((slug) => {
-            return (
-              <Badge key={slug} variant="secondary">
-                {slug}
-              </Badge>
-            )
-          })}
+    <div className="flex flex-col gap-y-8">
+      <div className="flex flex-col gap-y-4">
+        <Separator />
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-muted-foreground text-sm">
+            {m.ai_search_result_count({ count: result.memes.length })}
+          </p>
+          {result.categorySlugs.length > 0 ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-muted-foreground text-sm">
+                {m.ai_search_categories_label()}
+              </span>
+              {result.categorySlugs.map((slug) => {
+                return (
+                  <Badge key={slug} variant="secondary">
+                    {slug}
+                  </Badge>
+                )
+              })}
+            </div>
+          ) : null}
         </div>
-      ) : null}
+      </div>
       <MemesList
         memes={result.memes}
         layoutContext="ai-search"

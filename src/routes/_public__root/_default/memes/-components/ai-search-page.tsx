@@ -8,7 +8,8 @@ import { Badge } from '~/components/ui/badge'
 import { LoadingButton } from '~/components/ui/loading-button'
 import { Textarea } from '~/components/ui/textarea'
 import { MAX_PROMPT_LENGTH } from '~/constants/ai-search'
-import { matchIsRateLimitError } from '~/helpers/error'
+import { getErrorMessage, matchIsRateLimitError } from '~/helpers/error'
+import { captureWithFeature } from '~/lib/sentry'
 import { buildBreadcrumbJsonLd } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
 import {
@@ -63,7 +64,10 @@ export const AiSearchPage = () => {
         return
       }
 
-      toast.error(getSearchErrorMessage(error))
+      captureWithFeature(error, 'ai-search')
+      toast.error(getSearchErrorMessage(error), {
+        description: getErrorMessage(error)
+      })
     }
   })
 

@@ -1,6 +1,6 @@
 import React from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
-import { AlertTriangleIcon, RefreshCw, SparklesIcon } from 'lucide-react'
+import { AlertTriangleIcon, RefreshCw } from 'lucide-react'
 import { useDebouncedValue } from '@tanstack/react-pacer'
 import {
   QueryErrorResetBoundary,
@@ -13,6 +13,8 @@ import {
   useParams,
   useSearch
 } from '@tanstack/react-router'
+import { AnimateIcon } from '~/components/animate-ui/icons/icon'
+import { Sparkles } from '~/components/animate-ui/icons/sparkles'
 import { CategoriesList } from '~/components/categories/categories-list'
 import { MemesFilterLanguage } from '~/components/Meme/Filters/memes-filter-language'
 import MemesPagination from '~/components/Meme/Filters/memes-pagination'
@@ -197,13 +199,19 @@ export const SearchMemes = () => {
                 query={search.query ?? ''}
                 onQueryChange={handleQueryChange}
               />
-              <Link
-                to="/memes/ai-search"
-                className={buttonVariants({ variant: 'outline' })}
-              >
-                <SparklesIcon aria-hidden="true" />
-                {m.meme_ai_search_cta()}
-              </Link>
+              <AnimateIcon animateOnHover asChild>
+                <Link
+                  to="/memes/ai-search"
+                  className={buttonVariants({ variant: 'outline' })}
+                >
+                  <Sparkles
+                    size={16}
+                    className="text-amber-500"
+                    aria-hidden="true"
+                  />
+                  {m.meme_ai_search_cta()}
+                </Link>
+              </AnimateIcon>
             </div>
             <div className="gap-x-2 flex shrink-0">
               <MemesFilterLanguage

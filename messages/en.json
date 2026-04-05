@@ -8,6 +8,21 @@
   "ai_search_upsell_description": "Upgrade to Premium for unlimited AI searches and find the perfect meme every time.",
   "ai_search_upsell_title": "AI searches used up",
   "ai_search_error_rate_limit": "Too many searches, please wait a few seconds.",
+  "ai_search_remaining_searches": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} search remaining this month",
+        "countPlural=other": "{count} searches remaining this month"
+      }
+    }
+  ],
   "ai_search_no_results": "No memes found. Try rephrasing your request.",
   "ai_search_placeholder": "E.g.: a meme for when you miss your bus…",
   "ai_search_result_count": [

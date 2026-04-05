@@ -2,7 +2,7 @@ import React from 'react'
 import { SparklesIcon } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { toast } from 'sonner'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouteContext } from '@tanstack/react-router'
 import { MemesList } from '~/components/Meme/memes-list'
 import { Button } from '~/components/ui/button'
@@ -12,12 +12,9 @@ import {
   AI_SEARCH_PROMPT_STORAGE_KEY,
   MAX_PROMPT_LENGTH
 } from '~/constants/ai-search'
-import {
-  getErrorMessage,
-  matchIsAiSearchQuotaExceeded,
-  matchIsRateLimitError
-} from '~/helpers/error'
+import { getErrorMessage, matchIsRateLimitError } from '~/helpers/error'
 import { useAiSearchStages } from '~/hooks/use-ai-search-stages'
+import { getAiSearchQuotaQueryOpts } from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
 import { buildBreadcrumbJsonLd } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
@@ -44,6 +41,7 @@ type AiSearchResult = Awaited<ReturnType<typeof aiSearchMemes>>
 export const AiSearchPage = () => {
   const { user } = useRouteContext({ from: '__root__' })
   const showDialog = useShowDialog()
+  const queryClient = useQueryClient()
   const [prompt, setPrompt] = React.useState(() => {
     if (typeof window === 'undefined') {
       return ''
@@ -55,16 +53,22 @@ export const AiSearchPage = () => {
     return saved ?? ''
   })
 
+  const quotaQuery = useQuery({
+    ...getAiSearchQuotaQueryOpts(),
+    enabled: Boolean(user)
+  })
+
   const searchMutation = useMutation({
     mutationFn: (data: { prompt: string }) => {
       return aiSearchMemes({ data })
     },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: getAiSearchQuotaQueryOpts.all
+      })
+    },
     onError: (error) => {
-      if (matchIsAiSearchQuotaExceeded(error)) {
-        showDialog('ai-search-upsell', {})
-
-        return
-      }
+      searchStagesResetRef.current()
 
       captureWithFeature(error, 'ai-search')
       toast.error(getSearchErrorMessage(error), {
@@ -74,6 +78,8 @@ export const AiSearchPage = () => {
   })
 
   const searchStages = useAiSearchStages(searchMutation.isPending)
+  const searchStagesResetRef = React.useRef(searchStages.reset)
+  searchStagesResetRef.current = searchStages.reset
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault()
@@ -87,6 +93,12 @@ export const AiSearchPage = () => {
     if (!user) {
       sessionStorage.setItem(AI_SEARCH_PROMPT_STORAGE_KEY, trimmed)
       showDialog('auth', {})
+
+      return
+    }
+
+    if (quotaQuery.data && !quotaQuery.data.canSearch) {
+      showDialog('ai-search-upsell', {})
 
       return
     }
@@ -111,7 +123,7 @@ export const AiSearchPage = () => {
       <section className="container flex flex-col gap-y-8">
         <form
           onSubmit={handleSubmit}
-          className="mx-auto flex w-full max-w-2xl flex-col gap-y-4"
+          className="mx-auto flex w-full max-w-2xl flex-col gap-y-2"
         >
           <div className="relative">
             <Textarea
@@ -131,11 +143,20 @@ export const AiSearchPage = () => {
               {prompt.length}/{MAX_PROMPT_LENGTH}
             </span>
           </div>
-          <div className="flex justify-end">
+          <div className="flex items-start justify-between">
+            <div>
+              {quotaQuery.data &&
+              !quotaQuery.data.isPremium &&
+              quotaQuery.data.remainingSearches !== null ? (
+                <RemainingSearches
+                  remainingSearches={quotaQuery.data.remainingSearches}
+                />
+              ) : null}
+            </div>
             <Button
               type="submit"
               size="lg"
-              disabled={searchStages.isActive}
+              disabled={searchStages.isActive || quotaQuery.isPending}
               aria-busy={searchStages.isActive}
             >
               <SparklesIcon aria-hidden="true" />
@@ -143,7 +164,7 @@ export const AiSearchPage = () => {
             </Button>
           </div>
         </form>
-        <div aria-live="polite">
+        <div aria-live="polite" role="region" aria-label={m.ai_search_title()}>
           <AnimatePresence mode="wait">
             {searchStages.isActive ? (
               <AiSearchStages key="stages" stages={searchStages.stages} />
@@ -163,15 +184,37 @@ export const AiSearchPage = () => {
   )
 }
 
+type RemainingSearchesProps = {
+  remainingSearches: number
+}
+
+const RemainingSearches = ({ remainingSearches }: RemainingSearchesProps) => {
+  return (
+    <p className="text-muted-foreground text-sm">
+      {m.ai_search_remaining_searches({
+        count: Math.max(0, remainingSearches)
+      })}
+    </p>
+  )
+}
+
 type AiSearchResultsProps = {
   result: AiSearchResult
 }
 
 const AiSearchResultsAnimated = ({ result }: AiSearchResultsProps) => {
   const isReducedMotion = useReducedMotion()
+  const resultsRef = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    resultsRef.current?.focus({ preventScroll: true })
+  }, [])
 
   return (
     <motion.div
+      ref={resultsRef}
+      tabIndex={-1}
+      className="outline-none"
       initial={isReducedMotion ? false : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}

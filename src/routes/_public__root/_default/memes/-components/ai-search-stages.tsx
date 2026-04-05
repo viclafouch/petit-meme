@@ -15,6 +15,14 @@ const STAGE_LABELS = {
   }
 } as const satisfies Record<Stage['key'], () => string>
 
+function getActiveStageKey(stages: readonly Stage[]): Stage['key'] {
+  const active = stages.find((stage) => {
+    return stage.status === 'active'
+  })
+
+  return active?.key ?? stages.at(-1)!.key
+}
+
 type AiSearchStagesProps = {
   stages: readonly Stage[]
 }
@@ -33,9 +41,10 @@ export const AiSearchStages = ({ stages }: AiSearchStagesProps) => {
       }
       transition={{ duration: 0.3 }}
       className="flex flex-col items-center gap-y-3"
-      role="status"
-      aria-live="polite"
     >
+      <span className="sr-only" role="status">
+        {STAGE_LABELS[getActiveStageKey(stages)]()}
+      </span>
       {stages.map((stage) => {
         const isVisible =
           stage.status === 'active' || stage.status === 'completed'

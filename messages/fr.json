@@ -8,6 +8,21 @@
   "ai_search_upsell_description": "Passe à Premium pour des recherches IA illimitées et trouver le mème parfait à chaque fois.",
   "ai_search_upsell_title": "Recherches IA épuisées",
   "ai_search_error_rate_limit": "Trop de recherches, patiente quelques secondes.",
+  "ai_search_remaining_searches": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} recherche restante ce mois-ci",
+        "countPlural=other": "{count} recherches restantes ce mois-ci"
+      }
+    }
+  ],
   "ai_search_no_results": "Aucun mème trouvé. Essaie de reformuler ta demande.",
   "ai_search_placeholder": "Ex : un mème pour quand tu rates ton bus…",
   "ai_search_result_count": [

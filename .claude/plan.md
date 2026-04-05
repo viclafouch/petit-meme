@@ -50,16 +50,6 @@ Remplacer Prisma par Drizzle ORM. Conventions cibles : tables en pluriel, colonn
 
 ---
 
-## AI Search — Items restants
-
-- [ ] og:image : créer une image OG statique dédiée dans `/public/` pour le partage social
-- [ ] Floating logos décoratifs sur la page AI search
-- [x] Animation séquentielle Framer Motion — staged loading pipeline (3 étapes avec délais random 1.5-2.5s, `useAiSearchStages` hook + `AiSearchStages` component, `AnimatePresence mode="wait"` pour transition stages→résultats, separator + compteur de mèmes, `useReducedMotion()` intégré)
-- [ ] `scrollIntoView` au focus du textarea sur mobile
-- [ ] Tests production : vérifier Vercel env vars, tester les flows manuellement après deploy
-
----
-
 ## Internationalisation — Backlog
 
 - [ ] Synonymes EN Algolia — ajouter via dashboard quand contenu EN atteint une masse critique

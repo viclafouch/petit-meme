@@ -14,6 +14,7 @@ type StagesState = {
   isActive: boolean
   stages: readonly Stage[]
   isAllCompleted: boolean
+  reset: () => void
 }
 
 const INITIAL_STAGES = [
@@ -126,8 +127,24 @@ export function useAiSearchStages(isPending: boolean): StagesState {
     }, getRandomStageDelay())
   }
 
+  function reset() {
+    if (stageTimerRef.current) {
+      clearTimeout(stageTimerRef.current)
+      stageTimerRef.current = null
+    }
+
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current)
+      hideTimerRef.current = null
+    }
+
+    activeIndexRef.current = -1
+    setActiveIndex(-1)
+    setIsAllCompleted(false)
+  }
+
   const isActive = activeIndex >= 0
   const stages = isActive ? buildStages(activeIndex) : INITIAL_STAGES
 
-  return { isActive, stages, isAllCompleted }
+  return { isActive, stages, isAllCompleted, reset }
 }

@@ -40,6 +40,7 @@ import {
   createRateLimitMiddleware,
   createUserRateLimitMiddleware
 } from '~/server/rate-limit'
+import { authUserRequiredMiddleware } from '~/server/user-auth'
 
 const HAIKU_MODEL = 'claude-haiku-4-5'
 
@@ -228,5 +229,29 @@ export const aiSearchMemes = createServerFn({ method: 'POST' })
       }),
       query,
       queryID: response.queryID
+    }
+  })
+
+export const checkAiSearchQuota = createServerFn({ method: 'GET' })
+  .middleware([authUserRequiredMiddleware])
+  .handler(async ({ context }) => {
+    const [monthlyCount, isPremium] = await Promise.all([
+      prismaClient.aiSearchLog.count({
+        where: {
+          userId: context.user.id,
+          createdAt: { gte: truncateToUtcMonth(new Date()) }
+        }
+      }),
+      matchIsUserPremium(context.user)
+    ])
+
+    const remainingSearches = isPremium
+      ? null
+      : FREE_PLAN_MAX_AI_SEARCHES - monthlyCount
+
+    return {
+      canSearch: isPremium || monthlyCount < FREE_PLAN_MAX_AI_SEARCHES,
+      remainingSearches,
+      isPremium
     }
   })

@@ -5,7 +5,6 @@ import { toast } from 'sonner'
 import { useMutation } from '@tanstack/react-query'
 import { useRouteContext } from '@tanstack/react-router'
 import { MemesList } from '~/components/Meme/memes-list'
-import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { Separator } from '~/components/ui/separator'
 import { Textarea } from '~/components/ui/textarea'
@@ -197,25 +196,9 @@ const AiSearchResults = ({ result }: AiSearchResultsProps) => {
     <div className="flex flex-col gap-y-8">
       <div className="flex flex-col gap-y-4">
         <Separator />
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-muted-foreground text-sm">
-            {m.ai_search_result_count({ count: result.memes.length })}
-          </p>
-          {result.categorySlugs.length > 0 ? (
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-muted-foreground text-sm">
-                {m.ai_search_categories_label()}
-              </span>
-              {result.categorySlugs.map((slug) => {
-                return (
-                  <Badge key={slug} variant="secondary">
-                    {slug}
-                  </Badge>
-                )
-              })}
-            </div>
-          ) : null}
-        </div>
+        <p className="text-muted-foreground text-sm">
+          {m.ai_search_result_count({ count: result.memes.length })}
+        </p>
       </div>
       <MemesList
         memes={result.memes}

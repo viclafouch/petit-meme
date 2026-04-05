@@ -259,7 +259,6 @@ export const exportUserData = createServerFn({ method: 'GET' })
         select: {
           prompt: true,
           query: true,
-          categorySlugs: true,
           locale: true,
           resultCount: true,
           createdAt: true
@@ -337,7 +336,6 @@ export const exportUserData = createServerFn({ method: 'GET' })
         return {
           prompt: log.prompt,
           query: log.query,
-          categorySlugs: log.categorySlugs,
           locale: log.locale,
           resultCount: log.resultCount,
           createdAt: log.createdAt

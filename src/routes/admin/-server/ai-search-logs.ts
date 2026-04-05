@@ -9,7 +9,6 @@ const AI_SEARCH_LOG_SELECT = {
   userId: true,
   prompt: true,
   query: true,
-  categorySlugs: true,
   memeIds: true,
   locale: true,
   resultCount: true,

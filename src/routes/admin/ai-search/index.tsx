@@ -71,27 +71,6 @@ const columns = [
       )
     }
   }),
-  columnHelper.accessor('categorySlugs', {
-    header: 'Catégories',
-    enableSorting: false,
-    cell: (info) => {
-      const slugs = info.getValue()
-
-      return slugs.length > 0 ? (
-        <div className="flex flex-wrap gap-1">
-          {slugs.map((slug) => {
-            return (
-              <Badge key={slug} variant="secondary" size="sm">
-                {slug}
-              </Badge>
-            )
-          })}
-        </div>
-      ) : (
-        <span className="text-muted-foreground text-xs">—</span>
-      )
-    }
-  }),
   columnHelper.accessor('resultCount', {
     header: 'Résultats',
     cell: (info) => {

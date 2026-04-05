@@ -360,15 +360,14 @@ model CategoryTranslation {
 }
 
 model AiSearchLog {
-  id             String   @id @default(cuid())
-  userId         String   @map("user_id")
-  prompt         String
-  query          String
-  categorySlugs  String[] @map("category_slugs")
-  memeIds        String[] @map("meme_ids")
-  locale         UserLocale
-  resultCount    Int      @map("result_count")
-  createdAt      DateTime @default(now()) @map("created_at")
+  id          String     @id @default(cuid())
+  userId      String     @map("user_id")
+  prompt      String
+  query       String
+  memeIds     String[]   @map("meme_ids")
+  locale      UserLocale
+  resultCount Int        @map("result_count")
+  createdAt   DateTime   @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

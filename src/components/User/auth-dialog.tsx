@@ -149,7 +149,7 @@ export const AuthDialog = ({ open, onOpenChange }: WithDialog<unknown>) => {
               {m.auth_or()}
             </span>
           </div>
-          <div className="grid grid-cols-2 gap-3 w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
             {SOCIAL_PROVIDERS.map((provider) => {
               const isLastUsed = lastLoginMethod === provider.id
 

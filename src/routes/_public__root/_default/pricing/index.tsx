@@ -38,7 +38,7 @@ const RouteComponent = () => {
   const isOnFreePlan = isLoggedIn && !hasActiveSubscription
 
   return (
-    <div className="container flex flex-col items-center gap-8 pb-16">
+    <div className="flex flex-col items-center gap-8 pb-16">
       <div className="flex flex-col items-center gap-2">
         <PageHeading>{m.pricing_heading()}</PageHeading>
         <PageDescription>{m.pricing_description()}</PageDescription>

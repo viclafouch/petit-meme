@@ -35,10 +35,7 @@ export const PageHeader = ({
 }: PageHeaderProps) => {
   return (
     <Component
-      className={cn(
-        'relative container flex flex-col items-center gap-6',
-        className
-      )}
+      className={cn('relative flex flex-col items-center gap-6', className)}
       {...props}
     >
       {children}

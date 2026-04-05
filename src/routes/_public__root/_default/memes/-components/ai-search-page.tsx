@@ -120,7 +120,7 @@ export const AiSearchPage = () => {
         <PageHeading>{m.ai_search_title()}</PageHeading>
         <PageDescription>{m.ai_search_description()}</PageDescription>
       </PageHeader>
-      <section className="container flex flex-col gap-y-8">
+      <section className="flex flex-col gap-y-8">
         <form
           onSubmit={handleSubmit}
           className="mx-auto flex w-full max-w-2xl flex-col gap-y-2"
@@ -156,7 +156,9 @@ export const AiSearchPage = () => {
             <Button
               type="submit"
               size="lg"
-              disabled={searchStages.isActive || quotaQuery.isPending}
+              disabled={
+                searchStages.isActive || (Boolean(user) && quotaQuery.isPending)
+              }
               aria-busy={searchStages.isActive}
             >
               <SparklesIcon aria-hidden="true" />

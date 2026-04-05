@@ -67,7 +67,7 @@ export const Hero = () => {
   const isReducedMotion = useReducedMotion()
 
   return (
-    <PageHeader as="div">
+    <PageHeader as="div" className="container">
       <motion.div
         variants={variants}
         initial={isReducedMotion ? false : 'hidden'}

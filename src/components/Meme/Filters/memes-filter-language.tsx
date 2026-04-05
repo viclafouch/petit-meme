@@ -20,10 +20,15 @@ import { getLocale } from '~/paraglide/runtime'
 type MemesFilterLanguageProps = {
   contentLocales: MemeContentLocale[]
   onContentLocalesChange: (contentLocales: MemeContentLocale[]) => void
+  className?: string
 }
 
 export const MemesFilterLanguage = React.memo(
-  ({ contentLocales, onContentLocalesChange }: MemesFilterLanguageProps) => {
+  ({
+    contentLocales,
+    onContentLocalesChange,
+    className
+  }: MemesFilterLanguageProps) => {
     const locale = getLocale()
     const isActive = !matchIsDefaultContentLocaleFilter(contentLocales, locale)
 
@@ -45,7 +50,7 @@ export const MemesFilterLanguage = React.memo(
     return (
       <Popover>
         <PopoverTrigger asChild>
-          <Button active={isActive} variant="outline">
+          <Button active={isActive} variant="outline" className={className}>
             <Globe aria-hidden />
             {m.meme_filter_languages()}
           </Button>

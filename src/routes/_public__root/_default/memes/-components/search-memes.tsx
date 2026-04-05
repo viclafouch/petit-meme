@@ -193,35 +193,68 @@ export const SearchMemes = () => {
       </div>
       <div className="w-full mx-auto">
         <div className="flex flex-col gap-y-4">
-          <div className="flex justify-between flex-col sm:flex-row gap-2">
-            <div className="flex items-center gap-2 w-full sm:max-w-xs">
+          <div className="flex flex-col gap-2">
+            <div className="hidden sm:flex sm:items-center sm:justify-between sm:gap-2">
+              <div className="flex flex-1 items-center gap-2">
+                <div className="flex-1">
+                  <MemesQuery
+                    query={search.query ?? ''}
+                    onQueryChange={handleQueryChange}
+                  />
+                </div>
+                <AnimateIcon animateOnHover asChild>
+                  <Link
+                    to="/memes/ai-search"
+                    className={buttonVariants({ variant: 'outline' })}
+                  >
+                    <Sparkles
+                      size={16}
+                      className="text-amber-500"
+                      aria-hidden="true"
+                    />
+                    {m.meme_ai_search_cta()}
+                  </Link>
+                </AnimateIcon>
+              </div>
+              <div className="flex shrink-0 items-center gap-x-2">
+                <MemesFilterLanguage
+                  contentLocales={parsedContentLocales}
+                  onContentLocalesChange={handleContentLocalesChange}
+                />
+                <div className="hidden lg:flex">
+                  <MemesToggleGrid
+                    columnValue={columnGridCount}
+                    onColumnValueChange={setColumnGridCount}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col gap-2 sm:hidden">
               <MemesQuery
                 query={search.query ?? ''}
                 onQueryChange={handleQueryChange}
               />
-              <AnimateIcon animateOnHover asChild>
-                <Link
-                  to="/memes/ai-search"
-                  className={buttonVariants({ variant: 'outline' })}
-                >
-                  <Sparkles
-                    size={16}
-                    className="text-amber-500"
-                    aria-hidden="true"
-                  />
-                  {m.meme_ai_search_cta()}
-                </Link>
-              </AnimateIcon>
-            </div>
-            <div className="gap-x-2 flex shrink-0">
-              <MemesFilterLanguage
-                contentLocales={parsedContentLocales}
-                onContentLocalesChange={handleContentLocalesChange}
-              />
-              <div className="hidden lg:flex">
-                <MemesToggleGrid
-                  columnValue={columnGridCount}
-                  onColumnValueChange={setColumnGridCount}
+              <div className="grid grid-cols-2 gap-2">
+                <AnimateIcon animateOnHover asChild>
+                  <Link
+                    to="/memes/ai-search"
+                    className={buttonVariants({
+                      variant: 'outline',
+                      className: 'w-full'
+                    })}
+                  >
+                    <Sparkles
+                      size={16}
+                      className="text-amber-500"
+                      aria-hidden="true"
+                    />
+                    {m.meme_ai_search_cta_mobile()}
+                  </Link>
+                </AnimateIcon>
+                <MemesFilterLanguage
+                  contentLocales={parsedContentLocales}
+                  onContentLocalesChange={handleContentLocalesChange}
+                  className="w-full"
                 />
               </div>
             </div>

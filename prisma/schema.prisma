@@ -363,7 +363,7 @@ model AiSearchLog {
   id          String     @id @default(cuid())
   userId      String     @map("user_id")
   prompt      String
-  query       String
+  keywords    String[]
   memeIds     String[]   @map("meme_ids")
   locale      UserLocale
   resultCount Int        @map("result_count")

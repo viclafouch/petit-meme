@@ -258,7 +258,7 @@ export const exportUserData = createServerFn({ method: 'GET' })
         where: { userId: context.user.id },
         select: {
           prompt: true,
-          query: true,
+          keywords: true,
           locale: true,
           resultCount: true,
           createdAt: true
@@ -335,7 +335,7 @@ export const exportUserData = createServerFn({ method: 'GET' })
       aiSearchLogs: aiSearchLogs.map((log) => {
         return {
           prompt: log.prompt,
-          query: log.query,
+          keywords: log.keywords,
           locale: log.locale,
           resultCount: log.resultCount,
           createdAt: log.createdAt

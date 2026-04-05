@@ -61,13 +61,19 @@ const columns = [
       )
     }
   }),
-  columnHelper.accessor('query', {
-    header: 'Query extraite',
+  columnHelper.accessor('keywords', {
+    header: 'Mots-clés',
     cell: (info) => {
       return (
-        <span className="block max-w-48 truncate text-sm text-muted-foreground">
-          {info.getValue()}
-        </span>
+        <div className="flex max-w-48 flex-wrap gap-1">
+          {info.getValue().map((keyword) => {
+            return (
+              <Badge key={keyword} variant="secondary" size="sm">
+                {keyword}
+              </Badge>
+            )
+          })}
+        </div>
       )
     }
   }),

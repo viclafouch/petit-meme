@@ -59,7 +59,6 @@ export type AiSearchLogCountAggregateOutputType = {
   userId: number
   prompt: number
   query: number
-  categorySlugs: number
   memeIds: number
   locale: number
   resultCount: number
@@ -100,7 +99,6 @@ export type AiSearchLogCountAggregateInputType = {
   userId?: true
   prompt?: true
   query?: true
-  categorySlugs?: true
   memeIds?: true
   locale?: true
   resultCount?: true
@@ -206,7 +204,6 @@ export type AiSearchLogGroupByOutputType = {
   userId: string
   prompt: string
   query: string
-  categorySlugs: string[]
   memeIds: string[]
   locale: $Enums.UserLocale
   resultCount: number
@@ -239,7 +236,6 @@ export type AiSearchLogWhereInput = {
   userId?: Prisma.StringFilter<'AiSearchLog'> | string
   prompt?: Prisma.StringFilter<'AiSearchLog'> | string
   query?: Prisma.StringFilter<'AiSearchLog'> | string
-  categorySlugs?: Prisma.StringNullableListFilter<'AiSearchLog'>
   memeIds?: Prisma.StringNullableListFilter<'AiSearchLog'>
   locale?: Prisma.EnumUserLocaleFilter<'AiSearchLog'> | $Enums.UserLocale
   resultCount?: Prisma.IntFilter<'AiSearchLog'> | number
@@ -252,7 +248,6 @@ export type AiSearchLogOrderByWithRelationInput = {
   userId?: Prisma.SortOrder
   prompt?: Prisma.SortOrder
   query?: Prisma.SortOrder
-  categorySlugs?: Prisma.SortOrder
   memeIds?: Prisma.SortOrder
   locale?: Prisma.SortOrder
   resultCount?: Prisma.SortOrder
@@ -270,7 +265,6 @@ export type AiSearchLogWhereUniqueInput = Prisma.AtLeast<
     userId?: Prisma.StringFilter<'AiSearchLog'> | string
     prompt?: Prisma.StringFilter<'AiSearchLog'> | string
     query?: Prisma.StringFilter<'AiSearchLog'> | string
-    categorySlugs?: Prisma.StringNullableListFilter<'AiSearchLog'>
     memeIds?: Prisma.StringNullableListFilter<'AiSearchLog'>
     locale?: Prisma.EnumUserLocaleFilter<'AiSearchLog'> | $Enums.UserLocale
     resultCount?: Prisma.IntFilter<'AiSearchLog'> | number
@@ -285,7 +279,6 @@ export type AiSearchLogOrderByWithAggregationInput = {
   userId?: Prisma.SortOrder
   prompt?: Prisma.SortOrder
   query?: Prisma.SortOrder
-  categorySlugs?: Prisma.SortOrder
   memeIds?: Prisma.SortOrder
   locale?: Prisma.SortOrder
   resultCount?: Prisma.SortOrder
@@ -309,7 +302,6 @@ export type AiSearchLogScalarWhereWithAggregatesInput = {
   userId?: Prisma.StringWithAggregatesFilter<'AiSearchLog'> | string
   prompt?: Prisma.StringWithAggregatesFilter<'AiSearchLog'> | string
   query?: Prisma.StringWithAggregatesFilter<'AiSearchLog'> | string
-  categorySlugs?: Prisma.StringNullableListFilter<'AiSearchLog'>
   memeIds?: Prisma.StringNullableListFilter<'AiSearchLog'>
   locale?:
     | Prisma.EnumUserLocaleWithAggregatesFilter<'AiSearchLog'>
@@ -322,7 +314,6 @@ export type AiSearchLogCreateInput = {
   id?: string
   prompt: string
   query: string
-  categorySlugs?: Prisma.AiSearchLogCreatecategorySlugsInput | string[]
   memeIds?: Prisma.AiSearchLogCreatememeIdsInput | string[]
   locale: $Enums.UserLocale
   resultCount: number
@@ -335,7 +326,6 @@ export type AiSearchLogUncheckedCreateInput = {
   userId: string
   prompt: string
   query: string
-  categorySlugs?: Prisma.AiSearchLogCreatecategorySlugsInput | string[]
   memeIds?: Prisma.AiSearchLogCreatememeIdsInput | string[]
   locale: $Enums.UserLocale
   resultCount: number
@@ -346,7 +336,6 @@ export type AiSearchLogUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   prompt?: Prisma.StringFieldUpdateOperationsInput | string
   query?: Prisma.StringFieldUpdateOperationsInput | string
-  categorySlugs?: Prisma.AiSearchLogUpdatecategorySlugsInput | string[]
   memeIds?: Prisma.AiSearchLogUpdatememeIdsInput | string[]
   locale?: Prisma.EnumUserLocaleFieldUpdateOperationsInput | $Enums.UserLocale
   resultCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -359,7 +348,6 @@ export type AiSearchLogUncheckedUpdateInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   prompt?: Prisma.StringFieldUpdateOperationsInput | string
   query?: Prisma.StringFieldUpdateOperationsInput | string
-  categorySlugs?: Prisma.AiSearchLogUpdatecategorySlugsInput | string[]
   memeIds?: Prisma.AiSearchLogUpdatememeIdsInput | string[]
   locale?: Prisma.EnumUserLocaleFieldUpdateOperationsInput | $Enums.UserLocale
   resultCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -371,7 +359,6 @@ export type AiSearchLogCreateManyInput = {
   userId: string
   prompt: string
   query: string
-  categorySlugs?: Prisma.AiSearchLogCreatecategorySlugsInput | string[]
   memeIds?: Prisma.AiSearchLogCreatememeIdsInput | string[]
   locale: $Enums.UserLocale
   resultCount: number
@@ -382,7 +369,6 @@ export type AiSearchLogUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   prompt?: Prisma.StringFieldUpdateOperationsInput | string
   query?: Prisma.StringFieldUpdateOperationsInput | string
-  categorySlugs?: Prisma.AiSearchLogUpdatecategorySlugsInput | string[]
   memeIds?: Prisma.AiSearchLogUpdatememeIdsInput | string[]
   locale?: Prisma.EnumUserLocaleFieldUpdateOperationsInput | $Enums.UserLocale
   resultCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -394,7 +380,6 @@ export type AiSearchLogUncheckedUpdateManyInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   prompt?: Prisma.StringFieldUpdateOperationsInput | string
   query?: Prisma.StringFieldUpdateOperationsInput | string
-  categorySlugs?: Prisma.AiSearchLogUpdatecategorySlugsInput | string[]
   memeIds?: Prisma.AiSearchLogUpdatememeIdsInput | string[]
   locale?: Prisma.EnumUserLocaleFieldUpdateOperationsInput | $Enums.UserLocale
   resultCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -424,7 +409,6 @@ export type AiSearchLogCountOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   prompt?: Prisma.SortOrder
   query?: Prisma.SortOrder
-  categorySlugs?: Prisma.SortOrder
   memeIds?: Prisma.SortOrder
   locale?: Prisma.SortOrder
   resultCount?: Prisma.SortOrder
@@ -569,17 +553,8 @@ export type AiSearchLogUncheckedUpdateManyWithoutUserNestedInput = {
     | Prisma.AiSearchLogScalarWhereInput[]
 }
 
-export type AiSearchLogCreatecategorySlugsInput = {
-  set: string[]
-}
-
 export type AiSearchLogCreatememeIdsInput = {
   set: string[]
-}
-
-export type AiSearchLogUpdatecategorySlugsInput = {
-  set?: string[]
-  push?: string | string[]
 }
 
 export type AiSearchLogUpdatememeIdsInput = {
@@ -591,7 +566,6 @@ export type AiSearchLogCreateWithoutUserInput = {
   id?: string
   prompt: string
   query: string
-  categorySlugs?: Prisma.AiSearchLogCreatecategorySlugsInput | string[]
   memeIds?: Prisma.AiSearchLogCreatememeIdsInput | string[]
   locale: $Enums.UserLocale
   resultCount: number
@@ -602,7 +576,6 @@ export type AiSearchLogUncheckedCreateWithoutUserInput = {
   id?: string
   prompt: string
   query: string
-  categorySlugs?: Prisma.AiSearchLogCreatecategorySlugsInput | string[]
   memeIds?: Prisma.AiSearchLogCreatememeIdsInput | string[]
   locale: $Enums.UserLocale
   resultCount: number
@@ -664,7 +637,6 @@ export type AiSearchLogScalarWhereInput = {
   userId?: Prisma.StringFilter<'AiSearchLog'> | string
   prompt?: Prisma.StringFilter<'AiSearchLog'> | string
   query?: Prisma.StringFilter<'AiSearchLog'> | string
-  categorySlugs?: Prisma.StringNullableListFilter<'AiSearchLog'>
   memeIds?: Prisma.StringNullableListFilter<'AiSearchLog'>
   locale?: Prisma.EnumUserLocaleFilter<'AiSearchLog'> | $Enums.UserLocale
   resultCount?: Prisma.IntFilter<'AiSearchLog'> | number
@@ -675,7 +647,6 @@ export type AiSearchLogCreateManyUserInput = {
   id?: string
   prompt: string
   query: string
-  categorySlugs?: Prisma.AiSearchLogCreatecategorySlugsInput | string[]
   memeIds?: Prisma.AiSearchLogCreatememeIdsInput | string[]
   locale: $Enums.UserLocale
   resultCount: number
@@ -686,7 +657,6 @@ export type AiSearchLogUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   prompt?: Prisma.StringFieldUpdateOperationsInput | string
   query?: Prisma.StringFieldUpdateOperationsInput | string
-  categorySlugs?: Prisma.AiSearchLogUpdatecategorySlugsInput | string[]
   memeIds?: Prisma.AiSearchLogUpdatememeIdsInput | string[]
   locale?: Prisma.EnumUserLocaleFieldUpdateOperationsInput | $Enums.UserLocale
   resultCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -697,7 +667,6 @@ export type AiSearchLogUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   prompt?: Prisma.StringFieldUpdateOperationsInput | string
   query?: Prisma.StringFieldUpdateOperationsInput | string
-  categorySlugs?: Prisma.AiSearchLogUpdatecategorySlugsInput | string[]
   memeIds?: Prisma.AiSearchLogUpdatememeIdsInput | string[]
   locale?: Prisma.EnumUserLocaleFieldUpdateOperationsInput | $Enums.UserLocale
   resultCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -708,7 +677,6 @@ export type AiSearchLogUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   prompt?: Prisma.StringFieldUpdateOperationsInput | string
   query?: Prisma.StringFieldUpdateOperationsInput | string
-  categorySlugs?: Prisma.AiSearchLogUpdatecategorySlugsInput | string[]
   memeIds?: Prisma.AiSearchLogUpdatememeIdsInput | string[]
   locale?: Prisma.EnumUserLocaleFieldUpdateOperationsInput | $Enums.UserLocale
   resultCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -724,7 +692,6 @@ export type AiSearchLogSelect<
     userId?: boolean
     prompt?: boolean
     query?: boolean
-    categorySlugs?: boolean
     memeIds?: boolean
     locale?: boolean
     resultCount?: boolean
@@ -743,7 +710,6 @@ export type AiSearchLogSelectCreateManyAndReturn<
     userId?: boolean
     prompt?: boolean
     query?: boolean
-    categorySlugs?: boolean
     memeIds?: boolean
     locale?: boolean
     resultCount?: boolean
@@ -762,7 +728,6 @@ export type AiSearchLogSelectUpdateManyAndReturn<
     userId?: boolean
     prompt?: boolean
     query?: boolean
-    categorySlugs?: boolean
     memeIds?: boolean
     locale?: boolean
     resultCount?: boolean
@@ -777,7 +742,6 @@ export type AiSearchLogSelectScalar = {
   userId?: boolean
   prompt?: boolean
   query?: boolean
-  categorySlugs?: boolean
   memeIds?: boolean
   locale?: boolean
   resultCount?: boolean
@@ -792,7 +756,6 @@ export type AiSearchLogOmit<
   | 'userId'
   | 'prompt'
   | 'query'
-  | 'categorySlugs'
   | 'memeIds'
   | 'locale'
   | 'resultCount'
@@ -832,7 +795,6 @@ export type $AiSearchLogPayload<
       userId: string
       prompt: string
       query: string
-      categorySlugs: string[]
       memeIds: string[]
       locale: $Enums.UserLocale
       resultCount: number
@@ -1450,7 +1412,6 @@ export interface AiSearchLogFieldRefs {
   readonly userId: Prisma.FieldRef<'AiSearchLog', 'String'>
   readonly prompt: Prisma.FieldRef<'AiSearchLog', 'String'>
   readonly query: Prisma.FieldRef<'AiSearchLog', 'String'>
-  readonly categorySlugs: Prisma.FieldRef<'AiSearchLog', 'String[]'>
   readonly memeIds: Prisma.FieldRef<'AiSearchLog', 'String[]'>
   readonly locale: Prisma.FieldRef<'AiSearchLog', 'UserLocale'>
   readonly resultCount: Prisma.FieldRef<'AiSearchLog', 'Int'>

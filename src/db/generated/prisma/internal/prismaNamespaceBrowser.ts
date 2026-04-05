@@ -347,7 +347,6 @@ export const AiSearchLogScalarFieldEnum = {
   userId: 'userId',
   prompt: 'prompt',
   query: 'query',
-  categorySlugs: 'categorySlugs',
   memeIds: 'memeIds',
   locale: 'locale',
   resultCount: 'resultCount',
@@ -604,7 +603,6 @@ export const AiSearchLogOrderByRelevanceFieldEnum = {
   userId: 'userId',
   prompt: 'prompt',
   query: 'query',
-  categorySlugs: 'categorySlugs',
   memeIds: 'memeIds'
 } as const
 

@@ -231,13 +231,13 @@ const columns = [
       )
     }
   }),
-  columnHelper.accessor('lastActivityAt', {
+  columnHelper.accessor('lastActiveAt', {
     header: 'Dernière activité',
     cell: (info) => {
       const lastActivity = info.getValue()
 
       if (!lastActivity) {
-        return <span className="text-muted-foreground text-sm">Jamais</span>
+        return <span className="text-muted-foreground text-sm">-</span>
       }
 
       return <RelativeDateTooltip date={new Date(lastActivity)} />
@@ -262,7 +262,7 @@ const RouteComponent = () => {
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     initialState: {
-      sorting: [{ id: 'lastActivityAt', desc: true }],
+      sorting: [{ id: 'lastActiveAt', desc: true }],
       pagination: {
         pageSize: PAGE_SIZE
       }

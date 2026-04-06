@@ -1,6 +1,6 @@
 # Privacy Policy - Petit Meme
 
-Last updated: **February 2026**
+Last updated: **April 2026**
 
 This Privacy Policy describes how **Petit Meme**
 (accessible at [https://petit-meme.io](https://petit-meme.io))
@@ -37,6 +37,7 @@ When creating an account, we collect:
 
 - IP address (temporarily processed for security purposes)
 - Authentication session data (session cookies)
+- Last activity date (automatically updated on login and service usage)
 
 ### 2.3. View and interaction data
 
@@ -103,6 +104,7 @@ accordance with its own privacy policy.
 | Meme search | Performance of contract | Search queries |
 | Usage control and Studio analytics | Legitimate interest | Generation date, meme identifier |
 | AI search by natural language | Performance of contract | Prompt, extracted keywords, results, date |
+| Inactivity detection and account anonymization | Legitimate interest | Last activity date |
 | Error tracking and service stability | Legitimate interest | Technical data (URL, browser, error traces) |
 
 ---
@@ -163,6 +165,7 @@ place (European Commission standard contractual clauses).
 | Studio generation data | 365 days, then automatically deleted |
 | Administrative audit log data | 2 years, then automatically deleted |
 | AI search data | 365 days, then automatically deleted |
+| Last activity date | Cleared upon account deletion or anonymization |
 | Payment data (Stripe) | Per Stripe's legal obligations |
 | Transactional emails | Per Resend's retention policy |
 

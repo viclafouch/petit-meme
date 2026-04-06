@@ -171,6 +171,7 @@ model User {
   verificationReminderSent Boolean   @default(false) @map("verification_reminder_sent")
   isAnonymized             Boolean   @default(false) @map("is_anonymized")
   locale                   UserLocale @default(fr)
+  lastActiveAt             DateTime?  @map("last_active_at")
 
   studioGenerations StudioGeneration[]
   adminActions      AdminAuditLog[]    @relation("AdminActions")

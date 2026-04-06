@@ -53,6 +53,7 @@ export type UserMinAggregateOutputType = {
   verificationReminderSent: boolean | null
   isAnonymized: boolean | null
   locale: $Enums.UserLocale | null
+  lastActiveAt: Date | null
 }
 
 export type UserMaxAggregateOutputType = {
@@ -74,6 +75,7 @@ export type UserMaxAggregateOutputType = {
   verificationReminderSent: boolean | null
   isAnonymized: boolean | null
   locale: $Enums.UserLocale | null
+  lastActiveAt: Date | null
 }
 
 export type UserCountAggregateOutputType = {
@@ -95,6 +97,7 @@ export type UserCountAggregateOutputType = {
   verificationReminderSent: number
   isAnonymized: number
   locale: number
+  lastActiveAt: number
   _all: number
 }
 
@@ -125,6 +128,7 @@ export type UserMinAggregateInputType = {
   verificationReminderSent?: true
   isAnonymized?: true
   locale?: true
+  lastActiveAt?: true
 }
 
 export type UserMaxAggregateInputType = {
@@ -146,6 +150,7 @@ export type UserMaxAggregateInputType = {
   verificationReminderSent?: true
   isAnonymized?: true
   locale?: true
+  lastActiveAt?: true
 }
 
 export type UserCountAggregateInputType = {
@@ -167,6 +172,7 @@ export type UserCountAggregateInputType = {
   verificationReminderSent?: true
   isAnonymized?: true
   locale?: true
+  lastActiveAt?: true
   _all?: true
 }
 
@@ -282,6 +288,7 @@ export type UserGroupByOutputType = {
   verificationReminderSent: boolean
   isAnonymized: boolean
   locale: $Enums.UserLocale
+  lastActiveAt: Date | null
   _count: UserCountAggregateOutputType | null
   _avg: UserAvgAggregateOutputType | null
   _sum: UserSumAggregateOutputType | null
@@ -327,6 +334,7 @@ export type UserWhereInput = {
   verificationReminderSent?: Prisma.BoolFilter<'User'> | boolean
   isAnonymized?: Prisma.BoolFilter<'User'> | boolean
   locale?: Prisma.EnumUserLocaleFilter<'User'> | $Enums.UserLocale
+  lastActiveAt?: Prisma.DateTimeNullableFilter<'User'> | Date | string | null
   accounts?: Prisma.AccountListRelationFilter
   sessions?: Prisma.SessionListRelationFilter
   bookmarks?: Prisma.UserBookmarkListRelationFilter
@@ -355,6 +363,7 @@ export type UserOrderByWithRelationInput = {
   verificationReminderSent?: Prisma.SortOrder
   isAnonymized?: Prisma.SortOrder
   locale?: Prisma.SortOrder
+  lastActiveAt?: Prisma.SortOrderInput | Prisma.SortOrder
   accounts?: Prisma.AccountOrderByRelationAggregateInput
   sessions?: Prisma.SessionOrderByRelationAggregateInput
   bookmarks?: Prisma.UserBookmarkOrderByRelationAggregateInput
@@ -396,6 +405,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<
     verificationReminderSent?: Prisma.BoolFilter<'User'> | boolean
     isAnonymized?: Prisma.BoolFilter<'User'> | boolean
     locale?: Prisma.EnumUserLocaleFilter<'User'> | $Enums.UserLocale
+    lastActiveAt?: Prisma.DateTimeNullableFilter<'User'> | Date | string | null
     accounts?: Prisma.AccountListRelationFilter
     sessions?: Prisma.SessionListRelationFilter
     bookmarks?: Prisma.UserBookmarkListRelationFilter
@@ -426,6 +436,7 @@ export type UserOrderByWithAggregationInput = {
   verificationReminderSent?: Prisma.SortOrder
   isAnonymized?: Prisma.SortOrder
   locale?: Prisma.SortOrder
+  lastActiveAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _avg?: Prisma.UserAvgOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
@@ -474,6 +485,11 @@ export type UserScalarWhereWithAggregatesInput = {
   verificationReminderSent?: Prisma.BoolWithAggregatesFilter<'User'> | boolean
   isAnonymized?: Prisma.BoolWithAggregatesFilter<'User'> | boolean
   locale?: Prisma.EnumUserLocaleWithAggregatesFilter<'User'> | $Enums.UserLocale
+  lastActiveAt?:
+    | Prisma.DateTimeNullableWithAggregatesFilter<'User'>
+    | Date
+    | string
+    | null
 }
 
 export type UserCreateInput = {
@@ -495,6 +511,7 @@ export type UserCreateInput = {
   verificationReminderSent?: boolean
   isAnonymized?: boolean
   locale?: $Enums.UserLocale
+  lastActiveAt?: Date | string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   bookmarks?: Prisma.UserBookmarkCreateNestedManyWithoutUserInput
@@ -523,6 +540,7 @@ export type UserUncheckedCreateInput = {
   verificationReminderSent?: boolean
   isAnonymized?: boolean
   locale?: $Enums.UserLocale
+  lastActiveAt?: Date | string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   bookmarks?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutUserInput
@@ -566,6 +584,11 @@ export type UserUpdateInput = {
   verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   locale?: Prisma.EnumUserLocaleFieldUpdateOperationsInput | $Enums.UserLocale
+  lastActiveAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   bookmarks?: Prisma.UserBookmarkUpdateManyWithoutUserNestedInput
@@ -609,6 +632,11 @@ export type UserUncheckedUpdateInput = {
   verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   locale?: Prisma.EnumUserLocaleFieldUpdateOperationsInput | $Enums.UserLocale
+  lastActiveAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   bookmarks?: Prisma.UserBookmarkUncheckedUpdateManyWithoutUserNestedInput
@@ -637,6 +665,7 @@ export type UserCreateManyInput = {
   verificationReminderSent?: boolean
   isAnonymized?: boolean
   locale?: $Enums.UserLocale
+  lastActiveAt?: Date | string | null
 }
 
 export type UserUpdateManyMutationInput = {
@@ -673,6 +702,11 @@ export type UserUpdateManyMutationInput = {
   verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   locale?: Prisma.EnumUserLocaleFieldUpdateOperationsInput | $Enums.UserLocale
+  lastActiveAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null
 }
 
 export type UserUncheckedUpdateManyInput = {
@@ -709,6 +743,11 @@ export type UserUncheckedUpdateManyInput = {
   verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   locale?: Prisma.EnumUserLocaleFieldUpdateOperationsInput | $Enums.UserLocale
+  lastActiveAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null
 }
 
 export type UserScalarRelationFilter = {
@@ -743,6 +782,7 @@ export type UserCountOrderByAggregateInput = {
   verificationReminderSent?: Prisma.SortOrder
   isAnonymized?: Prisma.SortOrder
   locale?: Prisma.SortOrder
+  lastActiveAt?: Prisma.SortOrder
 }
 
 export type UserAvgOrderByAggregateInput = {
@@ -768,6 +808,7 @@ export type UserMaxOrderByAggregateInput = {
   verificationReminderSent?: Prisma.SortOrder
   isAnonymized?: Prisma.SortOrder
   locale?: Prisma.SortOrder
+  lastActiveAt?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
@@ -789,6 +830,7 @@ export type UserMinOrderByAggregateInput = {
   verificationReminderSent?: Prisma.SortOrder
   isAnonymized?: Prisma.SortOrder
   locale?: Prisma.SortOrder
+  lastActiveAt?: Prisma.SortOrder
 }
 
 export type UserSumOrderByAggregateInput = {
@@ -1008,6 +1050,7 @@ export type UserCreateWithoutBookmarksInput = {
   verificationReminderSent?: boolean
   isAnonymized?: boolean
   locale?: $Enums.UserLocale
+  lastActiveAt?: Date | string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   studioGenerations?: Prisma.StudioGenerationCreateNestedManyWithoutUserInput
@@ -1035,6 +1078,7 @@ export type UserUncheckedCreateWithoutBookmarksInput = {
   verificationReminderSent?: boolean
   isAnonymized?: boolean
   locale?: $Enums.UserLocale
+  lastActiveAt?: Date | string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   studioGenerations?: Prisma.StudioGenerationUncheckedCreateNestedManyWithoutUserInput
@@ -1105,6 +1149,11 @@ export type UserUpdateWithoutBookmarksInput = {
   verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   locale?: Prisma.EnumUserLocaleFieldUpdateOperationsInput | $Enums.UserLocale
+  lastActiveAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   studioGenerations?: Prisma.StudioGenerationUpdateManyWithoutUserNestedInput
@@ -1147,6 +1196,11 @@ export type UserUncheckedUpdateWithoutBookmarksInput = {
   verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   locale?: Prisma.EnumUserLocaleFieldUpdateOperationsInput | $Enums.UserLocale
+  lastActiveAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   studioGenerations?: Prisma.StudioGenerationUncheckedUpdateManyWithoutUserNestedInput
@@ -1174,6 +1228,7 @@ export type UserCreateWithoutAdminActionsInput = {
   verificationReminderSent?: boolean
   isAnonymized?: boolean
   locale?: $Enums.UserLocale
+  lastActiveAt?: Date | string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   bookmarks?: Prisma.UserBookmarkCreateNestedManyWithoutUserInput
@@ -1201,6 +1256,7 @@ export type UserUncheckedCreateWithoutAdminActionsInput = {
   verificationReminderSent?: boolean
   isAnonymized?: boolean
   locale?: $Enums.UserLocale
+  lastActiveAt?: Date | string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   bookmarks?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutUserInput
@@ -1271,6 +1327,11 @@ export type UserUpdateWithoutAdminActionsInput = {
   verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   locale?: Prisma.EnumUserLocaleFieldUpdateOperationsInput | $Enums.UserLocale
+  lastActiveAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   bookmarks?: Prisma.UserBookmarkUpdateManyWithoutUserNestedInput
@@ -1313,6 +1374,11 @@ export type UserUncheckedUpdateWithoutAdminActionsInput = {
   verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   locale?: Prisma.EnumUserLocaleFieldUpdateOperationsInput | $Enums.UserLocale
+  lastActiveAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   bookmarks?: Prisma.UserBookmarkUncheckedUpdateManyWithoutUserNestedInput
@@ -1340,6 +1406,7 @@ export type UserCreateWithoutSessionsInput = {
   verificationReminderSent?: boolean
   isAnonymized?: boolean
   locale?: $Enums.UserLocale
+  lastActiveAt?: Date | string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   bookmarks?: Prisma.UserBookmarkCreateNestedManyWithoutUserInput
   studioGenerations?: Prisma.StudioGenerationCreateNestedManyWithoutUserInput
@@ -1367,6 +1434,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   verificationReminderSent?: boolean
   isAnonymized?: boolean
   locale?: $Enums.UserLocale
+  lastActiveAt?: Date | string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   bookmarks?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutUserInput
   studioGenerations?: Prisma.StudioGenerationUncheckedCreateNestedManyWithoutUserInput
@@ -1437,6 +1505,11 @@ export type UserUpdateWithoutSessionsInput = {
   verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   locale?: Prisma.EnumUserLocaleFieldUpdateOperationsInput | $Enums.UserLocale
+  lastActiveAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   bookmarks?: Prisma.UserBookmarkUpdateManyWithoutUserNestedInput
   studioGenerations?: Prisma.StudioGenerationUpdateManyWithoutUserNestedInput
@@ -1479,6 +1552,11 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   locale?: Prisma.EnumUserLocaleFieldUpdateOperationsInput | $Enums.UserLocale
+  lastActiveAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   bookmarks?: Prisma.UserBookmarkUncheckedUpdateManyWithoutUserNestedInput
   studioGenerations?: Prisma.StudioGenerationUncheckedUpdateManyWithoutUserNestedInput
@@ -1506,6 +1584,7 @@ export type UserCreateWithoutAccountsInput = {
   verificationReminderSent?: boolean
   isAnonymized?: boolean
   locale?: $Enums.UserLocale
+  lastActiveAt?: Date | string | null
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   bookmarks?: Prisma.UserBookmarkCreateNestedManyWithoutUserInput
   studioGenerations?: Prisma.StudioGenerationCreateNestedManyWithoutUserInput
@@ -1533,6 +1612,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   verificationReminderSent?: boolean
   isAnonymized?: boolean
   locale?: $Enums.UserLocale
+  lastActiveAt?: Date | string | null
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   bookmarks?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutUserInput
   studioGenerations?: Prisma.StudioGenerationUncheckedCreateNestedManyWithoutUserInput
@@ -1603,6 +1683,11 @@ export type UserUpdateWithoutAccountsInput = {
   verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   locale?: Prisma.EnumUserLocaleFieldUpdateOperationsInput | $Enums.UserLocale
+  lastActiveAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   bookmarks?: Prisma.UserBookmarkUpdateManyWithoutUserNestedInput
   studioGenerations?: Prisma.StudioGenerationUpdateManyWithoutUserNestedInput
@@ -1645,6 +1730,11 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   locale?: Prisma.EnumUserLocaleFieldUpdateOperationsInput | $Enums.UserLocale
+  lastActiveAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   bookmarks?: Prisma.UserBookmarkUncheckedUpdateManyWithoutUserNestedInput
   studioGenerations?: Prisma.StudioGenerationUncheckedUpdateManyWithoutUserNestedInput
@@ -1672,6 +1762,7 @@ export type UserCreateWithoutStudioGenerationsInput = {
   verificationReminderSent?: boolean
   isAnonymized?: boolean
   locale?: $Enums.UserLocale
+  lastActiveAt?: Date | string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   bookmarks?: Prisma.UserBookmarkCreateNestedManyWithoutUserInput
@@ -1699,6 +1790,7 @@ export type UserUncheckedCreateWithoutStudioGenerationsInput = {
   verificationReminderSent?: boolean
   isAnonymized?: boolean
   locale?: $Enums.UserLocale
+  lastActiveAt?: Date | string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   bookmarks?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutUserInput
@@ -1769,6 +1861,11 @@ export type UserUpdateWithoutStudioGenerationsInput = {
   verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   locale?: Prisma.EnumUserLocaleFieldUpdateOperationsInput | $Enums.UserLocale
+  lastActiveAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   bookmarks?: Prisma.UserBookmarkUpdateManyWithoutUserNestedInput
@@ -1811,6 +1908,11 @@ export type UserUncheckedUpdateWithoutStudioGenerationsInput = {
   verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   locale?: Prisma.EnumUserLocaleFieldUpdateOperationsInput | $Enums.UserLocale
+  lastActiveAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   bookmarks?: Prisma.UserBookmarkUncheckedUpdateManyWithoutUserNestedInput
@@ -1838,6 +1940,7 @@ export type UserCreateWithoutMemeSubmissionsInput = {
   verificationReminderSent?: boolean
   isAnonymized?: boolean
   locale?: $Enums.UserLocale
+  lastActiveAt?: Date | string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   bookmarks?: Prisma.UserBookmarkCreateNestedManyWithoutUserInput
@@ -1865,6 +1968,7 @@ export type UserUncheckedCreateWithoutMemeSubmissionsInput = {
   verificationReminderSent?: boolean
   isAnonymized?: boolean
   locale?: $Enums.UserLocale
+  lastActiveAt?: Date | string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   bookmarks?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutUserInput
@@ -1935,6 +2039,11 @@ export type UserUpdateWithoutMemeSubmissionsInput = {
   verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   locale?: Prisma.EnumUserLocaleFieldUpdateOperationsInput | $Enums.UserLocale
+  lastActiveAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   bookmarks?: Prisma.UserBookmarkUpdateManyWithoutUserNestedInput
@@ -1977,6 +2086,11 @@ export type UserUncheckedUpdateWithoutMemeSubmissionsInput = {
   verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   locale?: Prisma.EnumUserLocaleFieldUpdateOperationsInput | $Enums.UserLocale
+  lastActiveAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   bookmarks?: Prisma.UserBookmarkUncheckedUpdateManyWithoutUserNestedInput
@@ -2004,6 +2118,7 @@ export type UserCreateWithoutAiSearchLogsInput = {
   verificationReminderSent?: boolean
   isAnonymized?: boolean
   locale?: $Enums.UserLocale
+  lastActiveAt?: Date | string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   bookmarks?: Prisma.UserBookmarkCreateNestedManyWithoutUserInput
@@ -2031,6 +2146,7 @@ export type UserUncheckedCreateWithoutAiSearchLogsInput = {
   verificationReminderSent?: boolean
   isAnonymized?: boolean
   locale?: $Enums.UserLocale
+  lastActiveAt?: Date | string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   bookmarks?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutUserInput
@@ -2101,6 +2217,11 @@ export type UserUpdateWithoutAiSearchLogsInput = {
   verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   locale?: Prisma.EnumUserLocaleFieldUpdateOperationsInput | $Enums.UserLocale
+  lastActiveAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   bookmarks?: Prisma.UserBookmarkUpdateManyWithoutUserNestedInput
@@ -2143,6 +2264,11 @@ export type UserUncheckedUpdateWithoutAiSearchLogsInput = {
   verificationReminderSent?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAnonymized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   locale?: Prisma.EnumUserLocaleFieldUpdateOperationsInput | $Enums.UserLocale
+  lastActiveAt?:
+    | Prisma.NullableDateTimeFieldUpdateOperationsInput
+    | Date
+    | string
+    | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   bookmarks?: Prisma.UserBookmarkUncheckedUpdateManyWithoutUserNestedInput
@@ -2284,6 +2410,7 @@ export type UserSelect<
     verificationReminderSent?: boolean
     isAnonymized?: boolean
     locale?: boolean
+    lastActiveAt?: boolean
     accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
     sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
     bookmarks?: boolean | Prisma.User$bookmarksArgs<ExtArgs>
@@ -2319,6 +2446,7 @@ export type UserSelectCreateManyAndReturn<
     verificationReminderSent?: boolean
     isAnonymized?: boolean
     locale?: boolean
+    lastActiveAt?: boolean
   },
   ExtArgs['result']['user']
 >
@@ -2346,6 +2474,7 @@ export type UserSelectUpdateManyAndReturn<
     verificationReminderSent?: boolean
     isAnonymized?: boolean
     locale?: boolean
+    lastActiveAt?: boolean
   },
   ExtArgs['result']['user']
 >
@@ -2369,6 +2498,7 @@ export type UserSelectScalar = {
   verificationReminderSent?: boolean
   isAnonymized?: boolean
   locale?: boolean
+  lastActiveAt?: boolean
 }
 
 export type UserOmit<
@@ -2392,7 +2522,8 @@ export type UserOmit<
   | 'privacyAcceptedAt'
   | 'verificationReminderSent'
   | 'isAnonymized'
-  | 'locale',
+  | 'locale'
+  | 'lastActiveAt',
   ExtArgs['result']['user']
 >
 export type UserInclude<
@@ -2451,6 +2582,7 @@ export type $UserPayload<
       verificationReminderSent: boolean
       isAnonymized: boolean
       locale: $Enums.UserLocale
+      lastActiveAt: Date | null
     },
     ExtArgs['result']['user']
   >
@@ -3138,6 +3270,7 @@ export interface UserFieldRefs {
   readonly verificationReminderSent: Prisma.FieldRef<'User', 'Boolean'>
   readonly isAnonymized: Prisma.FieldRef<'User', 'Boolean'>
   readonly locale: Prisma.FieldRef<'User', 'UserLocale'>
+  readonly lastActiveAt: Prisma.FieldRef<'User', 'DateTime'>
 }
 
 // Custom InputTypes

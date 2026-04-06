@@ -194,7 +194,8 @@ export const UserScalarFieldEnum = {
   privacyAcceptedAt: 'privacyAcceptedAt',
   verificationReminderSent: 'verificationReminderSent',
   isAnonymized: 'isAnonymized',
-  locale: 'locale'
+  locale: 'locale',
+  lastActiveAt: 'lastActiveAt'
 } as const
 
 export type UserScalarFieldEnum =

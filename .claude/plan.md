@@ -28,6 +28,8 @@
 
 ## Admin — Items reportés
 
+- [x] Fix "Dernière activité" affichant "Jamais" pour la majorité des users — ajout champ `lastActiveAt` sur User, mis à jour via `databaseHooks` session create/update (1 write/user/jour max). Admin lit directement `user.lastActiveAt`, plus de dépendance aux sessions. Migration additive requise (`last_active_at`). RGPD : privacy policies FR/EN mises à jour, export de données complété
+- [ ] RGPD : clear `last_active_at` à l'anonymisation (cron cleanup) + migrer la requête d'éligibilité vers `lastActiveAt`
 - [ ] Rate limiting sur les preview deployments Vercel (infra)
 - [ ] Rate limiting dédié sur le tracking share/download (dédoublonnage par user/meme)
 - `getListUsers` extraction bloquée : module-level functions using `prismaClient` break Vite client bundle (TanStack Start only strips `.handler()` body)

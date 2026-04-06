@@ -100,6 +100,19 @@ const handlePaymentFailed = async (event: Stripe.Event) => {
   })
 }
 
+const touchUserLastActive = async (session: { userId: string }) => {
+  waitUntil(
+    prismaClient.user
+      .update({
+        where: { id: session.userId },
+        data: { lastActiveAt: new Date() }
+      })
+      .catch((error) => {
+        authLogger.error({ err: error }, 'Failed to update lastActiveAt')
+      })
+  )
+}
+
 const getAuthConfig = createServerOnlyFn(() => {
   return betterAuth({
     appName: 'Petit Meme',
@@ -259,6 +272,10 @@ const getAuthConfig = createServerOnlyFn(() => {
             }
           }
         }
+      },
+      session: {
+        create: { after: touchUserLastActive },
+        update: { after: touchUserLastActive }
       }
     },
     trustedOrigins: [clientEnv.VITE_SITE_URL],

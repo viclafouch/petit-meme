@@ -1,6 +1,6 @@
 # Politique de confidentialité - Petit Meme
 
-Dernière mise à jour : **Février 2026**
+Dernière mise à jour : **Avril 2026**
 
 La présente Politique de confidentialité décrit la manière dont **Petit Meme**
 (accessible à l'adresse [https://petit-meme.io](https://petit-meme.io))
@@ -38,6 +38,8 @@ Lors de la création d'un compte, nous collectons :
 
 - Adresse IP (traitée temporairement pour la sécurité)
 - Données de session d'authentification (cookies de session)
+- Date de dernière activité (mise à jour automatiquement lors de la connexion
+  et de l'utilisation du service)
 
 ### 2.3. Données de vues et interactions
 
@@ -107,6 +109,7 @@ traitement des paiements conformément à sa propre politique de confidentialit�
 | Recherche de mèmes | Exécution du contrat | Requêtes de recherche |
 | Contrôle d'utilisation et analytics Studio | Intérêt légitime | Date de génération, identifiant du mème |
 | Recherche IA par langage naturel | Exécution du contrat | Prompt, mots-clés extraits, résultats, date |
+| Détection d'inactivité et anonymisation des comptes | Intérêt légitime | Date de dernière activité |
 | Suivi des erreurs et stabilité du service | Intérêt légitime | Données techniques (URL, navigateur, traces d'erreur) |
 
 ---
@@ -169,6 +172,7 @@ européenne).
 | Données de génération Studio | 365 jours, puis supprimées automatiquement |
 | Données du journal d'audit administratif | 2 ans, puis supprimées automatiquement |
 | Données de recherche IA | 365 jours, puis supprimées automatiquement |
+| Date de dernière activité | Effacée à la suppression ou à l'anonymisation du compte |
 | Données de paiement (Stripe) | Selon les obligations légales de Stripe |
 | E-mails transactionnels | Selon la politique de rétention de Resend |
 

@@ -2,7 +2,7 @@ import React from 'react'
 import type { Transition } from 'motion/react'
 import { LayoutGroup, motion, useReducedMotion } from 'motion/react'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { Link, useParams } from '@tanstack/react-router'
+import { Link, useParams, useSearch } from '@tanstack/react-router'
 import { buttonVariants } from '~/components/ui/button'
 import { getVirtualCategories } from '~/constants/meme'
 import type { MemesFilters } from '~/constants/meme'
@@ -30,6 +30,8 @@ export const CategoriesList = () => {
     getCategoriesListQueryOpts(getLocale())
   )
   const { slug: activeSlug } = useParams({ strict: false })
+  const { query } = useSearch({ strict: false })
+  const hasSearchQuery = Boolean(query)
   const prefersReducedMotion = useReducedMotion()
   const [hasInteracted, setHasInteracted] = React.useState(false)
 
@@ -47,7 +49,7 @@ export const CategoriesList = () => {
       <div className="w-full overflow-x-auto no-scrollbar py-2">
         <ul className="flex items-center gap-x-2">
           {categories.map((category) => {
-            const isActive = activeSlug === category.slug
+            const isActive = !hasSearchQuery && activeSlug === category.slug
 
             return (
               <li key={category.id} className="shrink-0">

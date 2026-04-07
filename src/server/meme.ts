@@ -24,16 +24,22 @@ import {
   RECOMMEND_RELATED_CACHE_TTL,
   RECOMMEND_TRENDING_CACHE_TTL,
   RELATED_MEMES_COUNT,
+  TRENDING_CATEGORY_CACHE_TTL,
+  TRENDING_CATEGORY_DAYS,
+  TRENDING_CATEGORY_LIMIT,
+  TRENDING_CATEGORY_SLUG,
   TRENDING_MEMES_COUNT,
+  TRENDING_WEIGHTS,
   VIRTUAL_CATEGORY_SLUGS
 } from '~/constants/meme'
 import { RATE_LIMIT_DOWNLOAD, RATE_LIMIT_TRACK } from '~/constants/rate-limit'
 import {
+  DAY,
   ONE_HOUR_MS,
   ONE_YEAR_IN_SECONDS,
   THIRTY_DAYS_MS
 } from '~/constants/time'
-import type { Prisma } from '~/db/generated/prisma/client'
+import { Prisma } from '~/db/generated/prisma/client'
 import {
   MemeContentLocale as MemeContentLocaleEnum,
   MemeStatus
@@ -47,6 +53,7 @@ import {
   parseContentLocalesParam,
   resolveCategoryTranslation,
   resolveMemeTranslation,
+  mapMemesWithResolvedTranslations,
   resolveVisibleContentLocales,
   VISIBLE_CONTENT_LOCALES
 } from '~/helpers/i18n-content'
@@ -80,13 +87,13 @@ const serverInsightsClient = createInsightsClient(
   serverEnv.ALGOLIA_ADMIN_KEY
 )
 
-type SetRecommendCacheParams = {
+type SetDbCacheParams = {
   key: string
-  data: AlgoliaMemeRecord[]
+  data: Prisma.InputJsonValue
   ttl: number
 }
 
-const getRecommendCache = createServerOnlyFn(async (key: string) => {
+const getDbCache = createServerOnlyFn(async (key: string) => {
   const cached = await prismaClient.recommendCache.findUnique({
     where: { key },
     select: { data: true, expiresAt: true }
@@ -96,21 +103,18 @@ const getRecommendCache = createServerOnlyFn(async (key: string) => {
     return null
   }
 
-  return (cached.data as unknown as AlgoliaMemeRecord[]).map(
-    normalizeAlgoliaHit
-  )
+  return cached.data
 })
 
-const setRecommendCache = createServerOnlyFn(
-  async ({ key, data, ttl }: SetRecommendCacheParams) => {
+const setDbCache = createServerOnlyFn(
+  async ({ key, data, ttl }: SetDbCacheParams) => {
     try {
       const expiresAt = new Date(Date.now() + ttl)
-      const serialized = data as unknown as Prisma.InputJsonValue
 
       await prismaClient.recommendCache.upsert({
         where: { key },
-        update: { data: serialized, expiresAt },
-        create: { key, data: serialized, expiresAt }
+        update: { data, expiresAt },
+        create: { key, data, expiresAt }
       })
 
       void prismaClient.recommendCache
@@ -123,6 +127,16 @@ const setRecommendCache = createServerOnlyFn(
     }
   }
 )
+
+async function getAlgoliaRecommendCache(key: string) {
+  const data = await getDbCache(key)
+
+  if (!data) {
+    return null
+  }
+
+  return (data as unknown as AlgoliaMemeRecord[]).map(normalizeAlgoliaHit)
+}
 
 export const clearRecommendCache = createServerOnlyFn(async () => {
   try {
@@ -202,6 +216,137 @@ function resolveSearchIndex({
   }
 
   return resolveAlgoliaIndexName(effectiveLocale)
+}
+
+type TrendingCategoryRow = {
+  memeId: string
+}
+
+async function fetchTrendingCategoryMemeIds(
+  visibleLocales: MemeContentLocale[]
+) {
+  const since = new Date(Date.now() - TRENDING_CATEGORY_DAYS * DAY)
+
+  const rows = await prismaClient.$queryRaw<TrendingCategoryRow[]>`
+    SELECT m.id AS "memeId"
+    FROM "meme" m
+    LEFT JOIN (
+      SELECT "meme_id", COUNT(*)::bigint AS views
+      FROM "meme_view_daily"
+      WHERE day >= ${since}
+      GROUP BY "meme_id"
+    ) v ON v."meme_id" = m.id
+    LEFT JOIN (
+      SELECT "meme_id", COUNT(*)::bigint AS bookmarks
+      FROM "user_bookmark"
+      WHERE "created_at" >= ${since}
+      GROUP BY "meme_id"
+    ) b ON b."meme_id" = m.id
+    LEFT JOIN (
+      SELECT
+        "meme_id",
+        SUM(CASE WHEN action = 'download' THEN count ELSE 0 END)::bigint AS downloads,
+        SUM(CASE WHEN action = 'share' THEN count ELSE 0 END)::bigint AS shares
+      FROM "meme_action_daily"
+      WHERE day >= ${since} AND action IN ('download', 'share')
+      GROUP BY "meme_id"
+    ) ds ON ds."meme_id" = m.id
+    LEFT JOIN (
+      SELECT "meme_id", COUNT(*)::bigint AS generations
+      FROM "studio_generation"
+      WHERE "created_at" >= ${since} AND "meme_id" IS NOT NULL
+      GROUP BY "meme_id"
+    ) g ON g."meme_id" = m.id
+    WHERE m.status = ${MemeStatus.PUBLISHED}
+    AND m."content_locale" IN (${Prisma.join(visibleLocales)})
+    AND (
+      COALESCE(v.views, 0)
+      + COALESCE(b.bookmarks, 0)
+      + COALESCE(ds.downloads, 0)
+      + COALESCE(g.generations, 0)
+      + COALESCE(ds.shares, 0)
+    ) > 0
+    ORDER BY (
+      COALESCE(v.views, 0) * ${TRENDING_WEIGHTS.views}
+      + COALESCE(b.bookmarks, 0) * ${TRENDING_WEIGHTS.bookmarks}
+      + COALESCE(ds.downloads, 0) * ${TRENDING_WEIGHTS.downloads}
+      + COALESCE(g.generations, 0) * ${TRENDING_WEIGHTS.generations}
+      + COALESCE(ds.shares, 0) * ${TRENDING_WEIGHTS.shares}
+    ) DESC
+    LIMIT ${TRENDING_CATEGORY_LIMIT}
+  `
+
+  return rows.map((row) => {
+    return row.memeId
+  })
+}
+
+const MEME_WITH_VIDEO_AND_TRANSLATIONS_INCLUDE = {
+  video: true,
+  translations: { select: MEME_TRANSLATION_SELECT }
+} as const satisfies Prisma.MemeInclude
+
+async function getCachedTrendingMemeIds(visibleLocales: MemeContentLocale[]) {
+  const cacheKey = `trending-category:${visibleLocales.join(',')}`
+  const cached = await getDbCache(cacheKey)
+
+  if (cached) {
+    return cached as unknown as string[]
+  }
+
+  const memeIds = await fetchTrendingCategoryMemeIds(visibleLocales)
+
+  if (memeIds.length > 0) {
+    void setDbCache({
+      key: cacheKey,
+      data: memeIds,
+      ttl: TRENDING_CATEGORY_CACHE_TTL
+    })
+  }
+
+  return memeIds
+}
+
+async function fetchTrendingCategoryMemes(
+  locale: Locale,
+  visibleLocales: MemeContentLocale[]
+) {
+  const memeIds = await getCachedTrendingMemeIds(visibleLocales)
+
+  if (memeIds.length === 0) {
+    const fallback = await prismaClient.meme.findMany({
+      take: TRENDING_CATEGORY_LIMIT,
+      include: MEME_WITH_VIDEO_AND_TRANSLATIONS_INCLUDE,
+      orderBy: { viewCount: 'desc' },
+      where: {
+        status: MemeStatus.PUBLISHED,
+        contentLocale: { in: visibleLocales }
+      }
+    })
+
+    return mapMemesWithResolvedTranslations(fallback, locale)
+  }
+
+  const memes = await prismaClient.meme.findMany({
+    where: { id: { in: memeIds } },
+    include: MEME_WITH_VIDEO_AND_TRANSLATIONS_INCLUDE
+  })
+
+  const memeMap = new Map(
+    memes.map((meme) => {
+      return [meme.id, meme]
+    })
+  )
+
+  const sorted = memeIds
+    .map((id) => {
+      return memeMap.get(id)
+    })
+    .filter((meme) => {
+      return meme !== undefined
+    })
+
+  return mapMemesWithResolvedTranslations(sorted, locale)
 }
 
 export const getMemeById = createServerFn({ method: 'GET' })
@@ -285,6 +430,23 @@ export const getMemes = createServerFn({ method: 'GET' })
     const contentLocales = data.contentLocales
       ? parseContentLocalesParam(data.contentLocales, locale)
       : undefined
+
+    if (data.category === TRENDING_CATEGORY_SLUG && !hasQuery) {
+      const visibleLocales = resolveVisibleContentLocales(
+        locale,
+        contentLocales
+      )
+      const memes = await fetchTrendingCategoryMemes(locale, visibleLocales)
+
+      return {
+        memes,
+        query: data.query,
+        queryID: undefined,
+        page: 0,
+        totalPages: 0
+      }
+    }
+
     const indexName = resolveSearchIndex({
       category: data.category,
       hasQuery,
@@ -366,15 +528,8 @@ const getBestMemesInternal = createServerOnlyFn(
 
     const memes = await prismaClient.meme.findMany({
       take: TRENDING_MEMES_COUNT,
-      include: {
-        video: true,
-        translations: {
-          select: MEME_TRANSLATION_SELECT
-        }
-      },
-      orderBy: {
-        viewCount: 'desc'
-      },
+      include: MEME_WITH_VIDEO_AND_TRANSLATIONS_INCLUDE,
+      orderBy: { viewCount: 'desc' },
       where: {
         status: MemeStatus.PUBLISHED,
         contentLocale: {
@@ -383,20 +538,7 @@ const getBestMemesInternal = createServerOnlyFn(
       }
     })
 
-    return memes.map(({ translations, ...meme }) => {
-      const resolved = resolveMemeTranslation({
-        translations,
-        contentLocale: meme.contentLocale,
-        requestedLocale: locale,
-        fallback: meme
-      })
-
-      return {
-        ...meme,
-        title: resolved.title,
-        description: resolved.description
-      }
-    })
+    return mapMemesWithResolvedTranslations(memes, locale)
   }
 )
 
@@ -406,7 +548,7 @@ export const getRelatedMemes = createServerFn({ method: 'GET' })
     const locale = getLocale()
     const cacheKey = `related:${locale}:${data.memeId}`
 
-    const cached = await getRecommendCache(cacheKey)
+    const cached = await getAlgoliaRecommendCache(cacheKey)
 
     if (cached) {
       return cached
@@ -441,7 +583,7 @@ export const getRelatedMemes = createServerFn({ method: 'GET' })
       const normalized = hits.map(normalizeAlgoliaHit)
 
       if (normalized.length > 0) {
-        void setRecommendCache({
+        void setDbCache({
           key: cacheKey,
           data: normalized,
           ttl: RECOMMEND_RELATED_CACHE_TTL
@@ -461,7 +603,7 @@ export const getTrendingMemes = createServerFn({ method: 'GET' }).handler(
     const locale = getLocale()
     const cacheKey = `trending:${locale}`
 
-    const cached = await getRecommendCache(cacheKey)
+    const cached = await getAlgoliaRecommendCache(cacheKey)
 
     if (cached) {
       return cached
@@ -491,7 +633,7 @@ export const getTrendingMemes = createServerFn({ method: 'GET' }).handler(
       const normalized = hits.map(normalizeAlgoliaHit)
 
       if (normalized.length > 0) {
-        void setRecommendCache({
+        void setDbCache({
           key: cacheKey,
           data: normalized,
           ttl: RECOMMEND_TRENDING_CACHE_TTL

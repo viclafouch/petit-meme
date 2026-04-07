@@ -27,6 +27,7 @@ model UserBookmark {
   @@index([userId])
   @@index([memeId])
   @@index([createdAt])
+  @@index([createdAt, memeId])
   @@map("user_bookmark")
 }
 
@@ -130,6 +131,7 @@ model MemeViewDaily {
   @@index([memeId, day])
   @@index([viewerKey, day])
   @@index([day])
+  @@index([day, memeId])
   @@map("meme_view_daily")
 }
 

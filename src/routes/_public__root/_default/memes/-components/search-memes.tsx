@@ -23,7 +23,11 @@ import MemesToggleGrid from '~/components/Meme/Filters/memes-toggle-grid'
 import { MemesList } from '~/components/Meme/memes-list'
 import { Button, buttonVariants } from '~/components/ui/button'
 import { LoadingSpinner } from '~/components/ui/spinner'
-import { getVirtualCategories, type MemesFilters } from '~/constants/meme'
+import {
+  getVirtualCategories,
+  TRENDING_CATEGORY_SLUG,
+  type MemesFilters
+} from '~/constants/meme'
 import type { MemeContentLocale } from '~/db/generated/prisma/enums'
 import {
   parseContentLocalesParam,
@@ -95,13 +99,15 @@ const MemesListWrapper = ({ columnGridCount }: { columnGridCount: number }) => {
         queryID={memesListQuery.data.queryID}
         page={memesListQuery.data.page}
       />
-      <div className="flex justify-end z-0">
-        <MemesPagination
-          currentPage={(memesListQuery.data.page || 0) + 1}
-          totalPages={memesListQuery.data.totalPages ?? 0}
-          slug={slug}
-        />
-      </div>
+      {slug !== TRENDING_CATEGORY_SLUG ? (
+        <div className="flex justify-end z-0">
+          <MemesPagination
+            currentPage={(memesListQuery.data.page || 0) + 1}
+            totalPages={memesListQuery.data.totalPages ?? 0}
+            slug={slug}
+          />
+        </div>
+      ) : null}
     </div>
   )
 }

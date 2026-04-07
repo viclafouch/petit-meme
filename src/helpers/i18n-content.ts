@@ -205,6 +205,36 @@ export const resolveMemeTranslation = ({
   }
 }
 
+type MemeWithTranslationsToResolve = {
+  translations: Pick<MemeTranslationModel, 'locale' | 'title' | 'description'>[]
+  contentLocale: MemeContentLocale
+  title: string
+  description: string
+}
+
+export const mapMemesWithResolvedTranslations = <
+  T extends MemeWithTranslationsToResolve
+>(
+  memes: T[],
+  locale: Locale
+) => {
+  return memes.map(({ translations, ...meme }) => {
+    const resolved = resolveMemeTranslation({
+      translations,
+      contentLocale: meme.contentLocale,
+      requestedLocale: locale,
+      fallback: meme
+    })
+
+    return {
+      ...meme,
+      title: resolved.title,
+      description: resolved.description,
+      keywords: resolved.keywords
+    }
+  })
+}
+
 type ResolveCategoryTranslationParams = {
   translations: Pick<
     CategoryTranslationModel,

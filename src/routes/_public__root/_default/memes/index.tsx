@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { MEMES_SEARCH_SCHEMA } from '~/constants/meme'
+import { MEMES_SEARCH_SCHEMA, TRENDING_CATEGORY_SLUG } from '~/constants/meme'
 
 export const Route = createFileRoute('/_public__root/_default/memes/')({
   validateSearch: (search) => {
@@ -8,10 +8,10 @@ export const Route = createFileRoute('/_public__root/_default/memes/')({
   beforeLoad: ({ search }) => {
     throw redirect({
       to: '/memes/category/$slug',
-      params: { slug: 'all' },
+      params: { slug: TRENDING_CATEGORY_SLUG },
       search,
       replace: true,
-      statusCode: 301
+      statusCode: 308
     })
   }
 })

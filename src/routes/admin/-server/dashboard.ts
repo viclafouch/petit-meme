@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { createServerFn } from '@tanstack/react-start'
 import { prismaClient } from '~/db'
+import { TRENDING_CATEGORY_DAYS, TRENDING_WEIGHTS } from '~/constants/meme'
 import { DAY } from '~/constants/time'
 import type { Prisma } from '~/db/generated/prisma/client'
 import { MemeStatus } from '~/db/generated/prisma/enums'
@@ -17,16 +18,6 @@ import type {
   AuditTargetType
 } from '~/server/audit'
 import { adminRequiredMiddleware } from '~/server/user-auth'
-
-const TRENDING_WEIGHTS = {
-  views: 1,
-  bookmarks: 2,
-  downloads: 3,
-  generations: 4,
-  shares: 5
-} as const satisfies Record<string, number>
-
-const TRENDING_DAYS = 7
 
 export const PERIOD_SCHEMA = z.enum(['7d', '30d', '90d', 'all'])
 
@@ -283,7 +274,7 @@ export type TrendingMeme = {
 }
 
 async function fetchTrendingMemes() {
-  const since = new Date(Date.now() - TRENDING_DAYS * DAY)
+  const since = new Date(Date.now() - TRENDING_CATEGORY_DAYS * DAY)
 
   const rows = await prismaClient.$queryRaw<RawTrendingRow[]>`
     SELECT

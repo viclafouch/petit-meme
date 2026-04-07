@@ -17,6 +17,7 @@ export const Route = createFileRoute('/sitemap-categories.xml')({
         })
 
         const pages: SitemapPage[] = [
+          { pathname: '/memes/category/trending' },
           { pathname: '/memes/category/all' },
           ...categories.map((category): SitemapPage => {
             return {

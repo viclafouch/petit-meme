@@ -4,6 +4,62 @@
 
 ---
 
+## Catégorie "Tendances" — Page mèmes par défaut
+
+Problème : la page `/memes/` affiche toujours les mêmes mèmes populaires all-time. Aucune impression de renouvellement pour l'utilisateur.
+
+Solution : nouvelle catégorie virtuelle "Tendances" basée sur l'activité récente (scoring pondéré sur 7 jours), qui devient la catégorie par défaut.
+
+### Scoring
+
+Réutilise la logique du dashboard admin (`src/routes/admin/-server/dashboard.ts`) :
+- Vues (x1), favoris (x2), téléchargements (x3), générations studio (x4), partages (x5)
+- Fenêtre : 7 jours glissants
+- Sources : `meme_view_daily`, `user_bookmark`, `meme_action_daily`, `studio_generation`
+
+### Cache
+
+- Cache DB via `recommend_cache` (table existante), TTL 12 heures. Stocke uniquement les IDs triés (pas les objets mèmes)
+- Clé de cache : `trending-category:{contentLocales}`
+- Chaque requête : 1 lecture cache + 1 fetch mèmes par IDs (léger). Le scoring SQL coûteux ne tourne qu'à l'expiration du cache
+- Coût Algolia : zéro
+- Index composites ajoutés : `MemeViewDaily(day, memeId)`, `UserBookmark(createdAt, memeId)` — migration additive requise
+
+### Comportement
+
+- `/memes/` redirige côté client vers `/memes/category/trending` (au lieu de `all`), pas de 301 pour préserver le SEO
+- Désélection d'une catégorie → retour sur Tendances
+- Grille sans pagination, top 30 max (si moins de 30 tendances, la page est simplement plus courte)
+- Si recherche textuelle → bascule sur Algolia (comme les autres catégories)
+- Filtre langue (contentLocales) appliqué au niveau du mème (JOIN sur `meme.content_locale`), pas sur les tables d'analytics
+- Fallback uniquement si 0 résultats (sécurité) : populaire all-time
+
+### Catégories virtuelles (ordre des pills)
+
+Tendances → Nouveautés → Populaire → [catégories DB]
+
+### Hors scope
+
+- Pas de changement sur la home page ("Best Memes" Algolia Recommend)
+- Pas de modification des replicas Algolia
+- Pas de cron (recalcul à la demande, à l'expiration du cache)
+
+### Tâches
+
+- [x] Ajouter la catégorie virtuelle `trending` dans `src/constants/meme.ts` (slug, traductions FR/EN)
+- [x] Créer la server function de calcul des tendances (scoring pondéré 7j, cache in-memory 12h via `withAlgoliaCache`)
+- [x] Intégrer dans `getMemes` : quand category = `trending` et pas de query, utiliser le calcul DB au lieu d'Algolia
+- [x] Modifier la redirection `/memes/` → `/memes/category/trending` (client-side, sans 301)
+- [x] Désélection de catégorie → retour sur Tendances (automatique via redirect `/memes/`)
+- [x] `getVirtualCategories()` : ordre Tendances → Nouveautés → Populaire → DB cats
+- [x] Pas de pagination pour Tendances (`search-memes.tsx`)
+- [x] Filtre contentLocales dans le calcul tendances (via `resolveVisibleContentLocales` + SQL `content_locale IN`)
+- [x] Messages i18n FR ("Tendances") / EN ("Trending")
+- [x] Sitemap : `/memes/category/trending` ajouté
+- [x] SEO : géré automatiquement par le loader virtual category existant
+
+---
+
 ## Better Auth
 
 **Type `UserWithRole` vs `InferUser` :** Bug interne où `UserWithRole.role` est `string | undefined` mais le type inféré retourne `string | null | undefined`. Fix appliqué : type `SessionUser` custom dans `src/lib/role.ts`.

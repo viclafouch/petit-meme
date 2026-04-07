@@ -1,7 +1,7 @@
 import type { VariantProps } from 'class-variance-authority'
 import { z } from 'zod'
 import type { badgeVariants } from '~/components/ui/badge'
-import { DAY } from '~/constants/time'
+import { DAY, HOUR } from '~/constants/time'
 import type { Prisma } from '~/db/generated/prisma/client'
 import { MemeContentLocale, MemeStatus } from '~/db/generated/prisma/enums'
 import { FILTERABLE_CONTENT_LOCALES } from '~/helpers/i18n-content'
@@ -29,10 +29,12 @@ export const MEME_TRANSLATION_SELECT = {
 export const DEFAULT_MEME_TITLE = 'Sans titre'
 export const LEGACY_MEME_TITLE = 'Titre inconnu'
 
+export const TRENDING_CATEGORY_SLUG = 'trending'
 export const NEWS_CATEGORY_SLUG = 'news'
 export const POPULAR_CATEGORY_SLUG = 'popular'
 
 export const VIRTUAL_CATEGORY_SLUGS = new Set([
+  TRENDING_CATEGORY_SLUG,
   NEWS_CATEGORY_SLUG,
   POPULAR_CATEGORY_SLUG
 ])
@@ -46,6 +48,12 @@ type VirtualCategory = {
 
 export const getVirtualCategories = (): VirtualCategory[] => {
   return [
+    {
+      id: 'virtual-trending',
+      title: m.meme_category_trending(),
+      slug: TRENDING_CATEGORY_SLUG,
+      keywords: []
+    },
     {
       id: 'virtual-news',
       title: m.meme_category_news(),
@@ -67,6 +75,18 @@ export const TRENDING_MEMES_COUNT = 12
 
 export const RECOMMEND_TRENDING_CACHE_TTL = DAY
 export const RECOMMEND_RELATED_CACHE_TTL = 7 * DAY
+
+export const TRENDING_CATEGORY_CACHE_TTL = 12 * HOUR
+export const TRENDING_CATEGORY_LIMIT = 30
+export const TRENDING_CATEGORY_DAYS = 7
+
+export const TRENDING_WEIGHTS = {
+  views: 1,
+  bookmarks: 2,
+  downloads: 3,
+  generations: 4,
+  shares: 5
+} as const satisfies Record<string, number>
 
 export const MemeStatusMeta = {
   PENDING: {

@@ -51,14 +51,7 @@ const columns = [
   columnHelper.accessor('prompt', {
     header: 'Prompt',
     cell: (info) => {
-      return (
-        <span
-          className="block max-w-64 truncate text-sm"
-          title={info.getValue()}
-        >
-          {info.getValue()}
-        </span>
-      )
+      return <span className="text-sm">{info.getValue()}</span>
     }
   }),
   columnHelper.accessor('keywords', {

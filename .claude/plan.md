@@ -112,6 +112,15 @@ Remplacer Prisma par Drizzle ORM. Conventions cibles : tables en pluriel, colonn
 
 ---
 
+## Dependency Updates — 2026-04-08
+
+29 packages updated (lint + build OK). Audit plan : `.claude/plan-update-deps-2026-04-08.md`.
+
+**Bloqué :** `stripe` 20.4.1 → 22.0.1 (peer dep `@better-auth/stripe` ne supporte que `^18||^19||^20`).
+**Exclu :** TypeScript 6.
+
+---
+
 ## Internationalisation — Backlog
 
 - [ ] Synonymes EN Algolia — ajouter via dashboard quand contenu EN atteint une masse critique

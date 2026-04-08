@@ -69,7 +69,7 @@ export function getRouter() {
     defaultStaleTime: 30_000,
     defaultStaleReloadMode: 'background',
     defaultPendingComponent: () => {
-      return <DefaultLoading className="min-h-screen" />
+      return <DefaultLoading className="flex-1" />
     },
     defaultPendingMs: 3000,
     defaultPendingMinMs: 500,

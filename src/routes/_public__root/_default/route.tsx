@@ -9,8 +9,8 @@ import { getLocale } from '~/paraglide/runtime'
 
 const RouteComponent = () => {
   return (
-    <div className="pb-10 pt-10 sm:pt-12">
-      <Container>
+    <div className="pb-10 pt-10 sm:pt-12 flex flex-1 flex-col">
+      <Container className="flex flex-1 flex-col">
         <Outlet />
       </Container>
     </div>

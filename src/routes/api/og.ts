@@ -69,6 +69,10 @@ export const Route = createFileRoute('/api/og')({
           {
             width: 1200,
             height: 630,
+            module: () => {
+              // oxlint-disable-next-line no-useless-return -- forces Takumi WASM mode, native .node unavailable on Vercel
+              return
+            },
             fonts: [
               {
                 name: 'Bricolage Grotesque',

@@ -4,62 +4,6 @@
 
 ---
 
-## Catégorie "Tendances" — Page mèmes par défaut
-
-Problème : la page `/memes/` affiche toujours les mêmes mèmes populaires all-time. Aucune impression de renouvellement pour l'utilisateur.
-
-Solution : nouvelle catégorie virtuelle "Tendances" basée sur l'activité récente (scoring pondéré sur 7 jours), qui devient la catégorie par défaut.
-
-### Scoring
-
-Réutilise la logique du dashboard admin (`src/routes/admin/-server/dashboard.ts`) :
-- Vues (x1), favoris (x2), téléchargements (x3), générations studio (x4), partages (x5)
-- Fenêtre : 7 jours glissants
-- Sources : `meme_view_daily`, `user_bookmark`, `meme_action_daily`, `studio_generation`
-
-### Cache
-
-- Cache DB via `recommend_cache` (table existante), TTL 12 heures. Stocke uniquement les IDs triés (pas les objets mèmes)
-- Clé de cache : `trending-category:{contentLocales}`
-- Chaque requête : 1 lecture cache + 1 fetch mèmes par IDs (léger). Le scoring SQL coûteux ne tourne qu'à l'expiration du cache
-- Coût Algolia : zéro
-- Index composites ajoutés : `MemeViewDaily(day, memeId)`, `UserBookmark(createdAt, memeId)` — migration additive requise
-
-### Comportement
-
-- `/memes/` redirige côté client vers `/memes/category/trending` (au lieu de `all`), pas de 301 pour préserver le SEO
-- Désélection d'une catégorie → retour sur Tendances
-- Grille sans pagination, top 30 max (si moins de 30 tendances, la page est simplement plus courte)
-- Si recherche textuelle → bascule sur Algolia (comme les autres catégories)
-- Filtre langue (contentLocales) appliqué au niveau du mème (JOIN sur `meme.content_locale`), pas sur les tables d'analytics
-- Fallback uniquement si 0 résultats (sécurité) : populaire all-time
-
-### Catégories virtuelles (ordre des pills)
-
-Tendances → Nouveautés → Populaire → [catégories DB]
-
-### Hors scope
-
-- Pas de changement sur la home page ("Best Memes" Algolia Recommend)
-- Pas de modification des replicas Algolia
-- Pas de cron (recalcul à la demande, à l'expiration du cache)
-
-### Tâches
-
-- [x] Ajouter la catégorie virtuelle `trending` dans `src/constants/meme.ts` (slug, traductions FR/EN)
-- [x] Créer la server function de calcul des tendances (scoring pondéré 7j, cache in-memory 12h via `withAlgoliaCache`)
-- [x] Intégrer dans `getMemes` : quand category = `trending` et pas de query, utiliser le calcul DB au lieu d'Algolia
-- [x] Modifier la redirection `/memes/` → `/memes/category/trending` (client-side, sans 301)
-- [x] Désélection de catégorie → retour sur Tendances (automatique via redirect `/memes/`)
-- [x] `getVirtualCategories()` : ordre Tendances → Nouveautés → Populaire → DB cats
-- [x] Pas de pagination pour Tendances (`search-memes.tsx`)
-- [x] Filtre contentLocales dans le calcul tendances (via `resolveVisibleContentLocales` + SQL `content_locale IN`)
-- [x] Messages i18n FR ("Tendances") / EN ("Trending")
-- [x] Sitemap : `/memes/category/trending` ajouté
-- [x] SEO : géré automatiquement par le loader virtual category existant
-
----
-
 ## Better Auth
 
 **Type `UserWithRole` vs `InferUser` :** Bug interne où `UserWithRole.role` est `string | undefined` mais le type inféré retourne `string | null | undefined`. Fix appliqué : type `SessionUser` custom dans `src/lib/role.ts`.
@@ -72,10 +16,71 @@ Tendances → Nouveautés → Populaire → [catégories DB]
 
 ## Algolia — Activer les modèles Recommend
 
-- [x] Activer "Related Items" dans le dashboard Algolia → Recommend — content-based filtering activé (2026-04-03) avec attributs `title`, `description`, `keywords`. Modèle en cours d'entraînement. Le code (`getRelatedMemes` + composant `RelatedMemes` sur page slug) est déjà en place avec fallback par titre.
 - [ ] Activer "Trending Items" dans le dashboard Algolia → Recommend — nécessite 10 000 events (604 actuellement). Accélérer via upload CSV d'events passés depuis `MemeViewDaily`.
 - [ ] Vérifier que les fallbacks (Prisma + `fallbackParameters`) se désactivent naturellement quand les modèles ML fonctionnent
 - [ ] Consulter régulièrement le dashboard Algolia Analytics (recherches sans résultats, recherches populaires, click position, taux de conversion)
+
+## OG Images — Takumi
+
+Ajouter des OG images (Open Graph + Twitter Card) à toutes les pages publiques. Outil : **Takumi** (`@takumi-rs/image-response`), moteur de rendu d'images en Rust, gratuit, open source, compatible TanStack Start et Vercel.
+
+### Documentation
+
+Toujours consulter `https://takumi.kane.tw/llms-full.txt` avant de prendre une décision technique sur Takumi (API, config, fonts, formats, options de rendu). Ne pas deviner.
+
+### Architecture
+
+- Route API : `src/routes/api/og.ts` — endpoint GET, `ImageResponse` importé dynamiquement dans le handler (tree-shaking TanStack Start)
+- Paramètres URL : `?type=category&title=Tendances&locale=fr`, etc.
+- Template JSX réutilisable : un composant `OgTemplate` commun (logo, fond, titre, sous-titre) avec variantes par type de page
+- Cache : header `Cache-Control: public, max-age=31536000, immutable` — Vercel CDN cache, zéro regénération
+- Invalidation : constante `OG_VERSION` centralisée dans `buildOgImageUrl`, à incrémenter si le design change
+- Dimensions : **1200x630** (standard OG/Twitter `summary_large_image`)
+- Font : Bricolage Grotesque (font du site), fichier TTF embarqué dans le projet
+- Modifications mineures de `seo()` nécessaires : ajouter `og:image:type` (nouveau param `imageType`), `og:image:secure_url` (duplique `og:image`), et rendre `og:description`/`twitter:description` conditionnels (bug existant : `content: undefined` quand `description` est omis)
+
+### Pages concernées
+
+**Pages dynamiques (OG via `/api/og`):**
+
+| Page | Route | Params OG |
+|---|---|---|
+| Catégories (all, trending, popular, newest, DB cats) | `/memes/category/$slug` | `type=category&title={catTitle}&locale={locale}` |
+| AI Search | `/memes/ai-search` | `type=ai-search&locale={locale}` |
+| Pricing | `/pricing` | `type=pricing&locale={locale}` |
+| Reels | `/reels` | `type=reels&locale={locale}` |
+| Submit | `/submit` | `type=submit&locale={locale}` |
+| Pages légales (`/privacy`, `/terms-of-use`, `/mentions-legales`, `/dmca`) | voir routes | `type=legal&title={pageTitle}&locale={locale}` |
+
+**Page d'accueil :** images statiques par locale, fournies manuellement par l'utilisateur : `/public/images/og-home-fr.png` (FR) et `/public/images/og-home-en.png` (EN).
+
+**Pages déjà couvertes :** `/memes/$memeId` et `/memes/$memeId/studio` (thumbnail Bunny CDN via `buildVideoImageUrl()`).
+
+**Pages exclues (noindex ou redirects) :** `/favorites`, `/settings`, `/checkout.success`, `/password.reset`, `/password.create-new`, `/admin/*`, `/memes` (redirect 308), `/random` (redirect serveur).
+
+### Phases
+
+#### Phase 1 — Setup Takumi + endpoint + template de base
+
+- [ ] Corriger `seo()` : ajouter `og:image:type` (param `imageType`), `og:image:secure_url`, et rendre `og:description`/`twitter:description` conditionnels quand `description` est absent
+- [ ] Installer `@takumi-rs/image-response`
+- [ ] Configurer Nitro `externals.traceInclude` dans `vite.config.ts` pour inclure les bindings natifs Takumi dans la serverless function Vercel
+- [ ] Créer la route API `src/routes/api/og.ts` (GET handler, `ImageResponse` importé dynamiquement, `Cache-Control` immutable)
+- [ ] Explorer les templates existants sur `https://takumi.kane.tw` et en choisir un adapté au style du site, puis l'adapter
+- [ ] Créer le composant template OG (`src/components/og/og-template.tsx`) basé sur le template choisi
+- [ ] Charger la font Bricolage Grotesque (fichier TTF embarqué)
+- [ ] Valider que l'endpoint retourne un PNG correct en local
+
+#### Phase 2 — Brancher toutes les pages
+
+- [ ] Helper `buildOgImageUrl(params)` dans `src/lib/seo.ts` (constante `OG_VERSION` centralisée pour l'invalidation cache)
+- [ ] Passer `image` + `imageAlt` à `seo()` sur chaque route listée dans le tableau ci-dessus
+- [ ] Brancher la home (`/`) avec l'image statique par locale (`og-home-fr.png` / `og-home-en.png`, fournies par l'utilisateur)
+
+#### Phase 3 — Validation
+
+- [ ] Tester toutes les pages avec un validateur OG (opengraph.xyz, Twitter Card Validator)
+- [ ] Vérifier le cache Vercel CDN (header `x-vercel-cache: HIT` après 2e requête)
 
 ## SEO — Items restants
 
@@ -84,7 +89,6 @@ Tendances → Nouveautés → Populaire → [catégories DB]
 
 ## Admin — Items reportés
 
-- [x] Fix "Dernière activité" affichant "Jamais" pour la majorité des users — ajout champ `lastActiveAt` sur User, mis à jour via `databaseHooks` session create/update (1 write/user/jour max). Admin lit directement `user.lastActiveAt`, plus de dépendance aux sessions. Migration additive requise (`last_active_at`). RGPD : privacy policies FR/EN mises à jour, export de données complété
 - [ ] RGPD : clear `last_active_at` à l'anonymisation (cron cleanup) + migrer la requête d'éligibilité vers `lastActiveAt`
 - [ ] Rate limiting sur les preview deployments Vercel (infra)
 - [ ] Rate limiting dédié sur le tracking share/download (dédoublonnage par user/meme)

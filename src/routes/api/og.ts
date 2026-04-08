@@ -56,48 +56,38 @@ export const Route = createFileRoute('/api/og')({
 
         const displayTitle = title ?? OG_DEFAULT_TITLES[locale][type] ?? type
 
-        const { fromJsx } = await import('@takumi-rs/helpers/jsx')
-        const wasm = await import('@takumi-rs/wasm')
-        await wasm.default()
+        const { default: ImageResponse } = await import('takumi-js/response')
 
-        const { node, stylesheets } = await fromJsx(
+        const response = new ImageResponse(
           OgTemplate({
             title: displayTitle,
             subtitle,
             hostname,
             logoUrl,
             heroImageUrl
-          })
+          }),
+          {
+            width: 1200,
+            height: 630,
+            fonts: [
+              {
+                name: 'Bricolage Grotesque',
+                data: () => {
+                  return fetch(fontUrl).then((res) => {
+                    return res.arrayBuffer()
+                  })
+                }
+              }
+            ]
+          }
         )
 
-        const renderer = new wasm.Renderer()
+        response.headers.set(
+          'Cache-Control',
+          `public, max-age=${ONE_YEAR_IN_SECONDS}, immutable`
+        )
 
-        await renderer.loadFonts([
-          {
-            name: 'Bricolage Grotesque',
-            data: () => {
-              return fetch(fontUrl).then((res) => {
-                return res.arrayBuffer()
-              })
-            }
-          }
-        ])
-
-        const imageBuffer = await renderer.render(node, {
-          width: 1200,
-          height: 630,
-          format: 'png',
-          stylesheets
-        })
-
-        renderer.free()
-
-        return new Response(imageBuffer.buffer as ArrayBuffer, {
-          headers: {
-            'Content-Type': 'image/png',
-            'Cache-Control': `public, max-age=${ONE_YEAR_IN_SECONDS}, immutable`
-          }
-        })
+        return response
       }
     }
   }

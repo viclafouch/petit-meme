@@ -47,8 +47,18 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 3000
     },
+    ssr: {
+      external: ['takumi-js', '@takumi-rs/core']
+    },
     optimizeDeps: {
-      exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/core', '@ffmpeg/util', 'hls.js']
+      exclude: [
+        '@ffmpeg/ffmpeg',
+        '@ffmpeg/core',
+        '@ffmpeg/util',
+        'hls.js',
+        'takumi-js',
+        '@takumi-rs/core'
+      ]
     },
     assetsInclude: ['**/*.md'],
     plugins: [
@@ -83,6 +93,7 @@ export default defineConfig(({ mode }) => {
       nitro({
         preset: 'vercel',
         sourcemap: true,
+        traceDeps: ['takumi-js', '@takumi-rs/core'],
         vercel: {},
         routeRules: {
           '/**': {

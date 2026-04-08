@@ -54,6 +54,8 @@
     "@react-email/components": "^1.0.11",
     "@sentry/tanstackstart-react": "10.47.0",
     "@t3-oss/env-core": "^0.13.11",
+    "@takumi-rs/helpers": "1.0.0-rc.16",
+    "@takumi-rs/wasm": "1.0.0-rc.16",
     "@tanstack/ai": "^0.10.0",
     "@tanstack/ai-anthropic": "^0.7.2",
     "@tanstack/react-form": "^1.28.6",

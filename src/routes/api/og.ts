@@ -56,42 +56,47 @@ export const Route = createFileRoute('/api/og')({
 
         const displayTitle = title ?? OG_DEFAULT_TITLES[locale][type] ?? type
 
-        const { ImageResponse } = await import('takumi-js/response')
+        const { fromJsx } = await import('@takumi-rs/helpers/jsx')
+        const wasm = await import('@takumi-rs/wasm')
 
-        const response = new ImageResponse(
+        const { node, stylesheets } = await fromJsx(
           OgTemplate({
             title: displayTitle,
             subtitle,
             hostname,
             logoUrl,
             heroImageUrl
-          }),
+          })
+        )
+
+        const renderer = new wasm.Renderer()
+
+        await renderer.loadFonts([
           {
-            width: 1200,
-            height: 630,
-            module: () => {
-              // oxlint-disable-next-line no-useless-return -- forces Takumi WASM mode, native .node unavailable on Vercel
-              return
-            },
-            fonts: [
-              {
-                name: 'Bricolage Grotesque',
-                data: () => {
-                  return fetch(fontUrl).then((res) => {
-                    return res.arrayBuffer()
-                  })
-                }
-              }
-            ]
+            name: 'Bricolage Grotesque',
+            data: () => {
+              return fetch(fontUrl).then((res) => {
+                return res.arrayBuffer()
+              })
+            }
           }
-        )
+        ])
 
-        response.headers.set(
-          'Cache-Control',
-          `public, max-age=${ONE_YEAR_IN_SECONDS}, immutable`
-        )
+        const imageBuffer = await renderer.render(node, {
+          width: 1200,
+          height: 630,
+          format: 'png',
+          stylesheets
+        })
 
-        return response
+        renderer.free()
+
+        return new Response(imageBuffer.buffer as ArrayBuffer, {
+          headers: {
+            'Content-Type': 'image/png',
+            'Cache-Control': `public, max-age=${ONE_YEAR_IN_SECONDS}, immutable`
+          }
+        })
       }
     }
   }

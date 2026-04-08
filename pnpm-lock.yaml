@@ -104,6 +104,12 @@ importers:
       '@t3-oss/env-core':
         specifier: ^0.13.11
         version: 0.13.11(typescript@5.9.3)(valibot@1.2.0(typescript@5.9.3))(zod@4.3.6)
+      '@takumi-rs/helpers':
+        specifier: 1.0.0-rc.16
+        version: 1.0.0-rc.16(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      '@takumi-rs/wasm':
+        specifier: 1.0.0-rc.16
+        version: 1.0.0-rc.16(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       '@tanstack/ai':
         specifier: ^0.10.0
         version: 0.10.0

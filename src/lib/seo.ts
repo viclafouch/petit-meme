@@ -41,6 +41,48 @@ import type { Locale } from '~/paraglide/runtime'
 export const websiteOrigin = clientEnv.VITE_SITE_URL
 const websiteId = `${websiteOrigin}/#website`
 
+const OG_VERSION = 1
+
+export const OG_TYPE_VALUES = [
+  'category',
+  'ai-search',
+  'pricing',
+  'reels',
+  'submit',
+  'legal'
+] as const satisfies readonly string[]
+
+export type OgImageType = (typeof OG_TYPE_VALUES)[number]
+
+type BuildOgImageUrlParams = {
+  type: OgImageType
+  title?: string
+  subtitle?: string
+  locale: Locale
+}
+
+export const buildOgImageUrl = ({
+  type,
+  title,
+  subtitle,
+  locale
+}: BuildOgImageUrlParams): string => {
+  const url = new URL('/api/og', websiteOrigin)
+  url.searchParams.set('type', type)
+  url.searchParams.set('locale', locale)
+  url.searchParams.set('v', String(OG_VERSION))
+
+  if (title) {
+    url.searchParams.set('title', title)
+  }
+
+  if (subtitle) {
+    url.searchParams.set('subtitle', subtitle)
+  }
+
+  return url.href
+}
+
 const OG_LOCALE_MAP = {
   fr: 'fr_FR',
   en: 'en_US'
@@ -67,6 +109,7 @@ type SeoParams = {
   description?: string
   image?: string
   imageAlt?: string
+  imageType?: 'image/png' | 'image/jpeg'
   keywords?: string
   isAdmin?: boolean
   pathname?: string
@@ -86,6 +129,7 @@ export const seo = ({
   keywords,
   image,
   imageAlt,
+  imageType = 'image/png',
   isAdmin = false,
   pathname = '/',
   noindex = false,
@@ -105,17 +149,14 @@ export const seo = ({
 
   const meta = [
     { title: titlePrefixed },
-    { name: 'description', content: description },
-    { name: 'keywords', content: keywords },
+    ...(keywords ? [{ name: 'keywords', content: keywords }] : []),
     { name: 'author', content: 'Victor de la Fouchardière' },
     { name: 'twitter:title', content: titlePrefixed },
-    { name: 'twitter:description', content: description },
     { name: 'twitter:creator', content: '@TrustedSheriff' },
     { name: 'twitter:site', content: '@TrustedSheriff' },
     { property: 'og:type', content: ogType },
     { property: 'og:site_name', content: 'Petit Meme' },
     { property: 'og:title', content: titlePrefixed },
-    { property: 'og:description', content: description },
     { property: 'og:url', content: canonicalUrl },
     { property: 'og:locale', content: OG_LOCALE_MAP[locale] },
     ...alternateLocales.map((alternateLocale) => {
@@ -124,6 +165,13 @@ export const seo = ({
         content: OG_LOCALE_MAP[alternateLocale]
       }
     }),
+    ...(description
+      ? [
+          { name: 'description', content: description },
+          { name: 'twitter:description', content: description },
+          { property: 'og:description', content: description }
+        ]
+      : []),
     ...(noindex ? [{ name: 'robots', content: 'noindex, follow' }] : []),
     {
       name: 'twitter:card',
@@ -135,6 +183,9 @@ export const seo = ({
           { property: 'og:image', content: image },
           { property: 'og:image:width', content: '1200' },
           { property: 'og:image:height', content: '630' },
+          ...(imageType
+            ? [{ property: 'og:image:type', content: imageType }]
+            : []),
           ...(imageAlt
             ? [
                 { name: 'twitter:image:alt', content: imageAlt },
@@ -190,6 +241,7 @@ export const buildMemeSeo = (
     keywords: [...meme.keywords, ...categoryKeywords].join(', '),
     image: buildVideoImageUrl(meme.video.bunnyId),
     imageAlt: m.seo_meme_image_alt({ title: meme.title }),
+    imageType: 'image/jpeg',
     description,
     ogType: 'video.other',
     ...overrideOptions

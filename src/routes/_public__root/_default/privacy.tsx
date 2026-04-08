@@ -3,7 +3,7 @@ import remarkGfm from 'remark-gfm'
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { BASE_MARKDOWN_COMPONENTS } from '~/constants/markdown'
-import { seo } from '~/lib/seo'
+import { buildOgImageUrl, seo } from '~/lib/seo'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import type { Locale } from '~/paraglide/runtime'
@@ -43,10 +43,20 @@ export const Route = createFileRoute('/_public__root/_default/privacy')({
     return loadMarkdown()
   },
   head: () => {
+    const locale = getLocale()
+    const title = m.legal_privacy_title()
+
     return seo({
-      title: m.legal_privacy_title(),
+      title,
       pathname: '/privacy',
-      description: m.legal_privacy_description()
+      description: m.legal_privacy_description(),
+      image: buildOgImageUrl({
+        type: 'legal',
+        title,
+        subtitle: m.legal_privacy_description(),
+        locale
+      }),
+      imageAlt: title
     })
   }
 })

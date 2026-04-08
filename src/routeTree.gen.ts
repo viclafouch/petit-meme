@@ -23,6 +23,7 @@ import { Route as Public__rootRouteRouteImport } from './routes/_public__root/ro
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as Public__rootIndexRouteImport } from './routes/_public__root/index'
 import { Route as ApiSentryTunnelRouteImport } from './routes/api/sentry-tunnel'
+import { Route as ApiOgRouteImport } from './routes/api/og'
 import { Route as ApiBunnyRouteImport } from './routes/api/bunny'
 import { Route as AdminServicesRouteImport } from './routes/admin/services'
 import { Route as AdminDownloaderRouteImport } from './routes/admin/downloader'
@@ -124,6 +125,11 @@ const Public__rootIndexRoute = Public__rootIndexRouteImport.update({
 const ApiSentryTunnelRoute = ApiSentryTunnelRouteImport.update({
   id: '/api/sentry-tunnel',
   path: '/api/sentry-tunnel',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiOgRoute = ApiOgRouteImport.update({
+  id: '/api/og',
+  path: '/api/og',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiBunnyRoute = ApiBunnyRouteImport.update({
@@ -329,6 +335,7 @@ export interface FileRoutesByFullPath {
   '/admin/downloader': typeof AdminDownloaderRoute
   '/admin/services': typeof AdminServicesRoute
   '/api/bunny': typeof ApiBunnyRoute
+  '/api/og': typeof ApiOgRoute
   '/api/sentry-tunnel': typeof ApiSentryTunnelRoute
   '/admin/': typeof AdminIndexRoute
   '/settings': typeof Public__rootDefaultSettingsRouteRouteWithChildren
@@ -375,6 +382,7 @@ export interface FileRoutesByTo {
   '/admin/downloader': typeof AdminDownloaderRoute
   '/admin/services': typeof AdminServicesRoute
   '/api/bunny': typeof ApiBunnyRoute
+  '/api/og': typeof ApiOgRoute
   '/api/sentry-tunnel': typeof ApiSentryTunnelRoute
   '/admin': typeof AdminIndexRoute
   '/dmca': typeof Public__rootDefaultDmcaRoute
@@ -424,6 +432,7 @@ export interface FileRoutesById {
   '/admin/downloader': typeof AdminDownloaderRoute
   '/admin/services': typeof AdminServicesRoute
   '/api/bunny': typeof ApiBunnyRoute
+  '/api/og': typeof ApiOgRoute
   '/api/sentry-tunnel': typeof ApiSentryTunnelRoute
   '/_public__root/': typeof Public__rootIndexRoute
   '/admin/': typeof AdminIndexRoute
@@ -474,6 +483,7 @@ export interface FileRouteTypes {
     | '/admin/downloader'
     | '/admin/services'
     | '/api/bunny'
+    | '/api/og'
     | '/api/sentry-tunnel'
     | '/admin/'
     | '/settings'
@@ -520,6 +530,7 @@ export interface FileRouteTypes {
     | '/admin/downloader'
     | '/admin/services'
     | '/api/bunny'
+    | '/api/og'
     | '/api/sentry-tunnel'
     | '/admin'
     | '/dmca'
@@ -568,6 +579,7 @@ export interface FileRouteTypes {
     | '/admin/downloader'
     | '/admin/services'
     | '/api/bunny'
+    | '/api/og'
     | '/api/sentry-tunnel'
     | '/_public__root/'
     | '/admin/'
@@ -616,6 +628,7 @@ export interface RootRouteChildren {
   SitemapStaticDotxmlRoute: typeof SitemapStaticDotxmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiBunnyRoute: typeof ApiBunnyRoute
+  ApiOgRoute: typeof ApiOgRoute
   ApiSentryTunnelRoute: typeof ApiSentryTunnelRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiCronCleanupRoute: typeof ApiCronCleanupRoute
@@ -723,6 +736,13 @@ declare module '@tanstack/react-router' {
       path: '/api/sentry-tunnel'
       fullPath: '/api/sentry-tunnel'
       preLoaderRoute: typeof ApiSentryTunnelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/og': {
+      id: '/api/og'
+      path: '/api/og'
+      fullPath: '/api/og'
+      preLoaderRoute: typeof ApiOgRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/bunny': {
@@ -1097,6 +1117,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapStaticDotxmlRoute: SitemapStaticDotxmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiBunnyRoute: ApiBunnyRoute,
+  ApiOgRoute: ApiOgRoute,
   ApiSentryTunnelRoute: ApiSentryTunnelRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiCronCleanupRoute: ApiCronCleanupRoute,

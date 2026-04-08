@@ -8,8 +8,9 @@ import {
 } from '~/constants/plan'
 import { useStripeCheckout } from '~/hooks/use-stripe-checkout'
 import { getActiveSubscriptionQueryOpts } from '~/lib/queries'
-import { buildPricingJsonLd, seo } from '~/lib/seo'
+import { buildOgImageUrl, buildPricingJsonLd, seo } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
+import { getLocale } from '~/paraglide/runtime'
 import {
   PageDescription,
   PageHeading
@@ -97,11 +98,19 @@ export const Route = createFileRoute('/_public__root/_default/pricing/')({
     ]
   },
   head: () => {
+    const locale = getLocale()
+
     return seo({
       title: m.seo_pricing_title(),
       pathname: '/pricing',
       description: m.seo_pricing_description(),
-      keywords: m.seo_pricing_keywords()
+      keywords: m.seo_pricing_keywords(),
+      image: buildOgImageUrl({
+        type: 'pricing',
+        subtitle: m.seo_pricing_description(),
+        locale
+      }),
+      imageAlt: m.seo_pricing_title()
     })
   }
 })

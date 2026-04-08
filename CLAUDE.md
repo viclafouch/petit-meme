@@ -65,7 +65,7 @@ Code must always be clean and readable. Before writing any code, ask whether it 
 3. **Run `/simplify` only for significant features or multi-file changes.** Skip for small fixes (one-liner, single class change, minor tweaks). `/simplify` runs three parallel review agents (reuse, quality, efficiency) and fixes issues automatically. If the plan has changed after simplification, update the plan again.
 4. After major features or changes, proactively suggest running relevant audit agents (security, performance, dead-code, GDPR, Tailwind, React performance, etc.)
 
-**A task is NOT complete until steps 1-2 are done.** Never say "done" or summarize changes before finishing the checklist.
+**A task is NOT complete until steps 1-3 are done.** Never say "done" or summarize changes before finishing the checklist. Step 3 (`/simplify`) must ALWAYS run for multi-file changes — do not skip it, do not forget it, do not defer it.
 
 **Multi-phase plans:** each phase in `.claude/plan.md` is a separate task. After completing the checklist for a phase, **always ask the user before starting the next phase**. Never chain phases automatically.
 

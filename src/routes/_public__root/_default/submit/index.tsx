@@ -5,8 +5,9 @@ import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
 import { MAX_PENDING_SUBMISSIONS } from '~/constants/meme-submission'
 import { getUserSubmissionsQueryOpts } from '~/lib/queries'
-import { buildBreadcrumbJsonLd, seo } from '~/lib/seo'
+import { buildBreadcrumbJsonLd, buildOgImageUrl, seo } from '~/lib/seo'
 import { m } from '~/paraglide/messages'
+import { getLocale } from '~/paraglide/runtime'
 import {
   PageDescription,
   PageHeading
@@ -93,12 +94,20 @@ const RouteComponent = () => {
 export const Route = createFileRoute('/_public__root/_default/submit/')({
   component: RouteComponent,
   head: () => {
+    const locale = getLocale()
+
     return {
       ...seo({
         title: m.submit_heading(),
         pathname: '/submit',
         description: m.submit_description(),
-        keywords: m.seo_submit_keywords()
+        keywords: m.seo_submit_keywords(),
+        image: buildOgImageUrl({
+          type: 'submit',
+          subtitle: m.submit_description(),
+          locale
+        }),
+        imageAlt: m.submit_heading()
       }),
       scripts: [
         {

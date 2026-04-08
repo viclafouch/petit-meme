@@ -62,25 +62,26 @@ Toujours consulter `https://takumi.kane.tw/llms-full.txt` avant de prendre une d
 
 #### Phase 1 — Setup Takumi + endpoint + template de base
 
-- [ ] Corriger `seo()` : ajouter `og:image:type` (param `imageType`), `og:image:secure_url`, et rendre `og:description`/`twitter:description` conditionnels quand `description` est absent
-- [ ] Installer `@takumi-rs/image-response`
-- [ ] Configurer Nitro `externals.traceInclude` dans `vite.config.ts` pour inclure les bindings natifs Takumi dans la serverless function Vercel
-- [ ] Créer la route API `src/routes/api/og.ts` (GET handler, `ImageResponse` importé dynamiquement, `Cache-Control` immutable)
-- [ ] Explorer les templates existants sur `https://takumi.kane.tw` et en choisir un adapté au style du site, puis l'adapter
-- [ ] Créer le composant template OG (`src/components/og/og-template.tsx`) basé sur le template choisi
-- [ ] Charger la font Bricolage Grotesque (fichier TTF embarqué)
-- [ ] Valider que l'endpoint retourne un PNG correct en local
+- [x] Corriger `seo()` : ajouter `og:image:type` (param `imageType`, default `image/png`), rendre `og:description`/`twitter:description` conditionnels quand `description` est absent (`og:image:secure_url` retiré, inutile en full HTTPS)
+- [x] Installer `takumi-js` (RC v1.0.0-rc.16, le nom `@takumi-rs/image-response` du plan initial était incorrect)
+- [x] Configurer `.npmrc` hoisting pour `@takumi-rs/core-*` + route rule Nitro `Cache-Control` pour `/api/og`
+- [x] Créer la route API `src/routes/api/og.ts` (GET handler, `ImageResponse` importé dynamiquement, `Cache-Control` immutable)
+- [x] Template custom (pas de galerie sur takumi.kane.tw) : fond sombre, logo, titre bold, sous-titre contextuel, gradient accent
+- [x] Créer le composant template OG (`src/components/og/og-template.tsx`)
+- [x] Charger la font Bricolage Grotesque (TTF Bold dans `public/fonts/`, fetch depuis handler)
+- [x] Valider que l'endpoint retourne un PNG correct en local
 
 #### Phase 2 — Brancher toutes les pages
 
-- [ ] Helper `buildOgImageUrl(params)` dans `src/lib/seo.ts` (constante `OG_VERSION` centralisée pour l'invalidation cache)
-- [ ] Passer `image` + `imageAlt` à `seo()` sur chaque route listée dans le tableau ci-dessus
-- [ ] Brancher la home (`/`) avec l'image statique par locale (`og-home-fr.png` / `og-home-en.png`, fournies par l'utilisateur)
+- [x] Helper `buildOgImageUrl(params)` dans `src/lib/seo.ts` (constante `OG_VERSION` centralisée pour l'invalidation cache)
+- [x] Passer `image` + `imageAlt` + `imageType` à `seo()` sur chaque route : catégories, ai-search, pricing, reels, submit, 4 pages légales
+- [ ] ~~Home~~ reporté : brancher la home (`/`) avec image statique par locale (`og-home-${locale}.png`), images à fournir manuellement
 
 #### Phase 3 — Validation
 
 - [ ] Tester toutes les pages avec un validateur OG (opengraph.xyz, Twitter Card Validator)
 - [ ] Vérifier le cache Vercel CDN (header `x-vercel-cache: HIT` après 2e requête)
+- [ ] Brancher OG image statique sur la home une fois les images fournies
 
 ## SEO — Items restants
 

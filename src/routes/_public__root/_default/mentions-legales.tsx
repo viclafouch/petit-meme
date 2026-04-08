@@ -3,7 +3,7 @@ import remarkGfm from 'remark-gfm'
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { BASE_MARKDOWN_COMPONENTS } from '~/constants/markdown'
-import { seo } from '~/lib/seo'
+import { buildOgImageUrl, seo } from '~/lib/seo'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import type { Locale } from '~/paraglide/runtime'
@@ -45,10 +45,20 @@ export const Route = createFileRoute(
     return loadMarkdown()
   },
   head: () => {
+    const locale = getLocale()
+    const title = m.legal_mentions_title()
+
     return seo({
-      title: m.legal_mentions_title(),
+      title,
       pathname: '/mentions-legales',
-      description: m.legal_mentions_description()
+      description: m.legal_mentions_description(),
+      image: buildOgImageUrl({
+        type: 'legal',
+        title,
+        subtitle: m.legal_mentions_description(),
+        locale
+      }),
+      imageAlt: title
     })
   }
 })

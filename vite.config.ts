@@ -92,6 +92,12 @@ export default defineConfig(({ mode }) => {
             }
           },
           ...staticAssetRouteRules,
+          '/api/og': {
+            headers: {
+              ...SECURITY_HEADERS,
+              'Cache-Control': `public, max-age=${ONE_YEAR_IN_SECONDS}, immutable`
+            }
+          },
           '/admin/**': {
             headers: {
               ...SECURITY_HEADERS,

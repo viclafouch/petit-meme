@@ -58,6 +58,7 @@ export const Route = createFileRoute('/api/og')({
 
         const { fromJsx } = await import('@takumi-rs/helpers/jsx')
         const wasm = await import('@takumi-rs/wasm')
+        await wasm.default()
 
         const { node, stylesheets } = await fromJsx(
           OgTemplate({

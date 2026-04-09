@@ -88,7 +88,8 @@ export const OgTemplate = ({
               style={{
                 fontSize: '28px',
                 lineHeight: 1.4,
-                lineClamp: 3
+                lineClamp: 3,
+                textOverflow: 'ellipsis'
               }}
             >
               {subtitle}

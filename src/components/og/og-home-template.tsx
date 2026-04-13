@@ -182,6 +182,7 @@ export const OgHomeTemplate = ({
           <div
             tw="mt-5"
             style={{
+              display: 'block',
               width: '100%',
               fontSize: '22px',
               lineHeight: 1.5,

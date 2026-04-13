@@ -5,8 +5,9 @@ import {
   getRecentCountMemesQueryOpts,
   getTrendingMemesQueryOpts
 } from '~/lib/queries'
-import { buildHomeJsonLd, seo } from '~/lib/seo'
+import { buildHomeJsonLd, buildOgImageUrl, seo } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
+import { getLocale } from '~/paraglide/runtime'
 import { Faq, getHomeFaqItems } from '~/routes/_public__root/-components/faq'
 import { Responsive } from '~/routes/_public__root/-components/responsive'
 import { BestMemes } from './-components/best-memes'
@@ -37,10 +38,18 @@ export const Route = createFileRoute('/_public__root/')({
   pendingMs: 3000,
   staleTime: 10 * MINUTE,
   head: () => {
+    const locale = getLocale()
+    const description = m.seo_home_description()
+
     return seo({
       title: m.seo_home_title(),
       keywords: m.seo_home_keywords(),
-      description: m.seo_home_description()
+      description,
+      image: buildOgImageUrl({
+        type: 'home',
+        locale
+      }),
+      imageAlt: m.seo_home_title()
     })
   },
   scripts: () => {

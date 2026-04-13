@@ -52,7 +52,7 @@ Toujours consulter `https://takumi.kane.tw/llms-full.txt` avant de prendre une d
 | Submit | `/submit` | `type=submit&locale={locale}` |
 | Pages légales (`/privacy`, `/terms-of-use`, `/mentions-legales`, `/dmca`) | voir routes | `type=legal&title={pageTitle}&locale={locale}` |
 
-**Page d'accueil :** images statiques par locale, fournies manuellement par l'utilisateur : `/public/images/og-home-fr.png` (FR) et `/public/images/og-home-en.png` (EN).
+**Page d'accueil :** image dynamique via `/api/og?type=home&locale={locale}` (template dédié `OgHomeTemplate` avec starfield, mèmes flottants, titre coloré, bouton "Découvrir").
 
 **Pages déjà couvertes :** `/memes/$memeId` et `/memes/$memeId/studio` (thumbnail Bunny CDN via `buildVideoImageUrl()`).
 
@@ -75,13 +75,13 @@ Toujours consulter `https://takumi.kane.tw/llms-full.txt` avant de prendre une d
 
 - [x] Helper `buildOgImageUrl(params)` dans `src/lib/seo.ts` (constante `OG_VERSION` centralisée pour l'invalidation cache)
 - [x] Passer `image` + `imageAlt` + `imageType` à `seo()` sur chaque route : catégories, ai-search, pricing, reels, submit, 4 pages légales
-- [ ] ~~Home~~ reporté : brancher la home (`/`) avec image statique par locale (`og-home-${locale}.png`), images à fournir manuellement
+- [x] Home : image OG dynamique via `type=home`, template `OgHomeTemplate` (starfield, 6 mèmes flottants, titre bicolore, description, bouton "Découvrir"), utilitaires starfield extraits dans `og-stars.ts`
 
 #### Phase 3 — Validation
 
 - [ ] Tester toutes les pages avec un validateur OG (opengraph.xyz, Twitter Card Validator)
 - [ ] Vérifier le cache Vercel CDN (header `x-vercel-cache: HIT` après 2e requête)
-- [ ] Brancher OG image statique sur la home une fois les images fournies
+- [x] ~~Brancher OG image statique sur la home~~ remplacé par OG dynamique (`type=home`)
 
 ## SEO — Items restants
 

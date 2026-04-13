@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { createFileRoute } from '@tanstack/react-router'
+import { OgHomeTemplate } from '~/components/og/og-home-template'
 import { OgTemplate } from '~/components/og/og-template'
 import { ONE_YEAR_IN_SECONDS } from '~/constants/time'
 import { clientEnv } from '~/env/client'
@@ -14,6 +15,8 @@ const OG_QUERY_SCHEMA = z.object({
   subtitle: z.string().max(500).optional(),
   locale: z.enum(locales).default('fr')
 })
+
+type OgDefaultTitleType = Exclude<OgImageType, 'home'>
 
 const OG_DEFAULT_TITLES = {
   fr: {
@@ -32,7 +35,10 @@ const OG_DEFAULT_TITLES = {
     submit: 'Submit a meme',
     legal: undefined
   }
-} as const satisfies Record<Locale, Record<OgImageType, string | undefined>>
+} as const satisfies Record<
+  Locale,
+  Record<OgDefaultTitleType, string | undefined>
+>
 
 export const Route = createFileRoute('/api/og')({
   server: {
@@ -50,37 +56,36 @@ export const Route = createFileRoute('/api/og')({
         const { type, title, subtitle, locale } = parsed.data
         const siteUrl = clientEnv.VITE_SITE_URL
         const logoUrl = `${siteUrl}/images/og-logo.png`
-        const heroImageUrl = `${siteUrl}/images/will-smith-flipped.png`
         const fontUrl = `${siteUrl}/fonts/bricolage-grotesque-bold.ttf`
         const { hostname } = new URL(siteUrl)
 
-        const displayTitle = title ?? OG_DEFAULT_TITLES[locale][type] ?? type
-
         const { default: ImageResponse } = await import('takumi-js/response')
 
-        const response = new ImageResponse(
-          OgTemplate({
-            title: displayTitle,
-            subtitle,
-            hostname,
-            logoUrl,
-            heroImageUrl
-          }),
-          {
-            width: 1200,
-            height: 630,
-            fonts: [
-              {
-                name: 'Bricolage Grotesque',
-                data: () => {
-                  return fetch(fontUrl).then((res) => {
-                    return res.arrayBuffer()
-                  })
-                }
+        const template =
+          type === 'home'
+            ? OgHomeTemplate({ locale, siteUrl, hostname, logoUrl })
+            : OgTemplate({
+                title: title ?? OG_DEFAULT_TITLES[locale][type] ?? type,
+                subtitle,
+                hostname,
+                logoUrl,
+                heroImageUrl: `${siteUrl}/images/will-smith-flipped.png`
+              })
+
+        const response = new ImageResponse(template, {
+          width: 1200,
+          height: 630,
+          fonts: [
+            {
+              name: 'Bricolage Grotesque',
+              data: () => {
+                return fetch(fontUrl).then((res) => {
+                  return res.arrayBuffer()
+                })
               }
-            ]
-          }
-        )
+            }
+          ]
+        })
 
         response.headers.set(
           'Cache-Control',

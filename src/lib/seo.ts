@@ -44,6 +44,7 @@ const websiteId = `${websiteOrigin}/#website`
 const OG_VERSION = 1
 
 export const OG_TYPE_VALUES = [
+  'home',
   'category',
   'ai-search',
   'pricing',

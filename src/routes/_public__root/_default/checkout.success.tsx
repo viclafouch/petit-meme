@@ -55,7 +55,11 @@ const RouteComponent = () => {
       >
         {m.checkout_success_back()}
       </Link>
-      <canvas ref={canvasRef} className="fixed size-full inset-0 -z-10" />
+      <canvas
+        ref={canvasRef}
+        className="fixed size-full inset-0 -z-10"
+        aria-hidden="true"
+      />
     </motion.div>
   )
 }

@@ -24,7 +24,7 @@ export const getTweetFromUrl = createServerFn({ method: 'GET' })
     }
   })
 
-const TWITTER_MEDIA_HOSTNAME = /^(video|pbs)\.twimg\.com$/
+const TWITTER_MEDIA_HOSTNAME = /^(video|pbs)\.twimg\.com$/u
 
 const FETCH_TWEET_VIDEO_SCHEMA = z.object({
   videoUrl: z.url({ hostname: TWITTER_MEDIA_HOSTNAME })

@@ -1,18 +1,18 @@
 import { z } from 'zod'
 
 const TWITTER_REGEX_THAT_INCLUDES_ID =
-  /^https:\/\/(?:twitter\.com|x\.com)\/(?:[A-Za-z0-9_]+\/status\/\d+|i\/bookmarks\?post_id=\d+)/
+  /^https:\/\/(?:twitter\.com|x\.com)\/(?:[A-Za-z0-9_]+\/status\/\d+|i\/bookmarks\?post_id=\d+)/u
 
 export const TWEET_LINK_SCHEMA = z
-  .url({ protocol: /^https$/, hostname: /^(twitter|x)\.com$/ })
+  .url({ protocol: /^https$/u, hostname: /^(twitter|x)\.com$/u })
   .regex(TWITTER_REGEX_THAT_INCLUDES_ID, 'Invalid tweet URL')
 
 const YOUTUBE_REGEX =
-  /^https:\/\/(?:(?:www\.)?youtube\.com\/watch\?v=[\w-]{11}|youtu\.be\/[\w-]{11})/
+  /^https:\/\/(?:(?:www\.)?youtube\.com\/watch\?v=[\w-]{11}|youtu\.be\/[\w-]{11})/u
 
 export const YOUTUBE_LINK_SCHEMA = z
   .url({
-    protocol: /^https$/,
-    hostname: /^(?:(?:www\.)?youtube\.com|youtu\.be)$/
+    protocol: /^https$/u,
+    hostname: /^(?:(?:www\.)?youtube\.com|youtu\.be)$/u
   })
   .regex(YOUTUBE_REGEX, 'Invalid YouTube URL')

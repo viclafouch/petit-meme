@@ -25,7 +25,7 @@ Sentry.init({
 
     return DEFAULT_SAMPLE_RATE
   },
-  ignoreErrors: [/Unreachable hosts/],
+  ignoreErrors: [/Unreachable hosts/u],
   beforeSend: (event) => {
     if (event.request?.data) {
       const url = event.request.url ?? ''

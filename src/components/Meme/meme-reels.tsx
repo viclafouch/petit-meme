@@ -115,6 +115,7 @@ export const Reel = React.memo(
           disableRemotePlayback
           ref={videoRef}
           preload="auto"
+          aria-label="Meme video"
         />
         <div
           className="absolute inset-0 bg-transparent"

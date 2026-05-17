@@ -29,7 +29,7 @@ const SUBMISSION_TITLE_SCHEMA = z
 export const CREATE_MEME_SUBMISSION_SCHEMA = z
   .object({
     title: SUBMISSION_TITLE_SCHEMA,
-    url: z.url({ protocol: /^https$/, error: 'invalidUrl' }),
+    url: z.url({ protocol: /^https$/u, error: 'invalidUrl' }),
     contentLocale: z.enum(MemeContentLocale),
     acceptTerms: z.literal(true, { error: 'acceptTermsRequired' })
   })

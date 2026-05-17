@@ -48,6 +48,7 @@ const BannerMedia = ({ isMobile, videoRef }: BannerMediaProps) => {
           poster={BANNER_POSTER_SRC}
           className="aspect-4/3 max-h-[40dvh] w-full object-cover object-top sm:rounded-t-(--banner-radius) motion-reduce:hidden"
           src={BANNER_VIDEO_SRC}
+          aria-hidden="true"
         />
       )}
       <VideoCurve />

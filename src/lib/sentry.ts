@@ -71,7 +71,7 @@ const SENSITIVE_API_PATHS = [
 ] as const satisfies readonly string[]
 
 export const SENSITIVE_API_PATTERNS = SENSITIVE_API_PATHS.map((path) => {
-  return new RegExp(path.replaceAll('/', '\\/'))
+  return new RegExp(path.replaceAll('/', '\\/'), 'u')
 })
 
 export const getFeedbackOptions = (): FeedbackOptions => {

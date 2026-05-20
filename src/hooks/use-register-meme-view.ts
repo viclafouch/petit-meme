@@ -123,11 +123,8 @@ export function useRegisterMemeView({
     }
 
     const onVisibilityChange = () => {
-      if (document.visibilityState !== 'visible') {
-        lastTRef.current = null
-      } else {
-        lastTRef.current = video.currentTime
-      }
+      lastTRef.current =
+        document.visibilityState !== 'visible' ? null : video.currentTime
     }
 
     video.addEventListener('play', onPlay)

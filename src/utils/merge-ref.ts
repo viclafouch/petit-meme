@@ -7,7 +7,7 @@ export function mergeRefs<T>(
 ): React.Ref<T> | null {
   const filteredRefs = refs.filter(Boolean)
 
-  if (!filteredRefs.length) {
+  if (filteredRefs.length === 0) {
     return null
   }
 

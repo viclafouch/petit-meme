@@ -43,6 +43,10 @@ type SubmissionActionsCellParams = {
   submission: AdminSubmission
 }
 
+const handleMutationError = (error: Error) => {
+  captureWithFeature(error, 'admin-submission')
+}
+
 export const SubmissionActionsCell = ({
   submission
 }: SubmissionActionsCellParams) => {
@@ -71,10 +75,6 @@ export const SubmissionActionsCell = ({
     handleCloseDialog()
     invalidateSubmissions()
     void router.invalidate()
-  }
-
-  const handleMutationError = (error: Error) => {
-    captureWithFeature(error, 'admin-submission')
   }
 
   const rejectMutation = useMutation({

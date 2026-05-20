@@ -12,7 +12,7 @@ export function downloadBlob(blob: Blob, filename: string) {
   const url = window.URL.createObjectURL(blob)
   element.href = url
   element.download = filename
-  document.body.appendChild(element)
+  document.body.append(element)
   element.click()
   element.remove()
   URL.revokeObjectURL(url)

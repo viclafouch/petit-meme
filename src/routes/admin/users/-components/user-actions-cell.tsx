@@ -37,6 +37,13 @@ type UserActionsCellParams = {
   user: EnrichedUser
 }
 
+const handleMutationError = (
+  error: Error,
+  feature: 'admin-user-ban' | 'admin-user-unban' | 'admin-user-delete'
+) => {
+  Sentry.captureException(error, { tags: { feature } })
+}
+
 export const UserActionsCell = ({ user }: UserActionsCellParams) => {
   const [activeDialog, setActiveDialog] = React.useState<DialogType | null>(
     null
@@ -52,13 +59,6 @@ export const UserActionsCell = ({ user }: UserActionsCellParams) => {
   const handleMutationSuccess = () => {
     handleCloseDialog()
     void router.invalidate()
-  }
-
-  const handleMutationError = (
-    error: Error,
-    feature: 'admin-user-ban' | 'admin-user-unban' | 'admin-user-delete'
-  ) => {
-    Sentry.captureException(error, { tags: { feature } })
   }
 
   const banMutation = useMutation({

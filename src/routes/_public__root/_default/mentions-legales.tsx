@@ -6,7 +6,7 @@ import { BASE_MARKDOWN_COMPONENTS } from '~/constants/markdown'
 import { buildOgImageUrl, seo } from '~/lib/seo'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
-import type { Locale } from '~/paraglide/runtime'
+import { type Locale } from '~/paraglide/runtime'
 
 const MARKDOWN_LOADERS = {
   fr: () => {
@@ -18,7 +18,9 @@ const MARKDOWN_LOADERS = {
 } satisfies Record<Locale, () => Promise<{ default: string }>>
 
 const loadMarkdown = createServerFn({ method: 'GET' }).handler(async () => {
-  return (await MARKDOWN_LOADERS[getLocale()]()).default
+  const module = await MARKDOWN_LOADERS[getLocale()]()
+
+  return module.default
 })
 
 const RouteComponent = () => {

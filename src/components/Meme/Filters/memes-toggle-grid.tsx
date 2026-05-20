@@ -37,4 +37,4 @@ const MemesToggleGrid = ({
   )
 }
 
-export default MemesToggleGrid
+export { MemesToggleGrid }

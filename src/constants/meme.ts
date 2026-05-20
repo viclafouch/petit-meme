@@ -109,13 +109,14 @@ export const MemeStatusMeta = {
     className: 'text-muted-foreground',
     badgeVariant: 'destructive'
   }
-} as const satisfies {
-  [key in MemeStatus]: {
+} as const satisfies Record<
+  MemeStatus,
+  {
     label: string
     className: string
     badgeVariant: VariantProps<typeof badgeVariants>['variant']
   }
-}
+>
 
 export const CATEGORY_SLUG_REGEX = /^[\da-z-]{1,60}$/u
 

@@ -3,7 +3,7 @@ export async function withTimeout<T>(
   ms: number,
   message: string
 ): Promise<T> {
-  let timer: ReturnType<typeof setTimeout>
+  let timer: ReturnType<typeof setTimeout> | undefined
 
   const timeout = new Promise<never>((_, reject) => {
     timer = setTimeout(() => {
@@ -14,6 +14,6 @@ export async function withTimeout<T>(
   try {
     return await Promise.race([promise, timeout])
   } finally {
-    clearTimeout(timer!)
+    clearTimeout(timer)
   }
 }

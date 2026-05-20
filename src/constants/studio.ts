@@ -103,10 +103,12 @@ const BAND_COLOR_ORDER: StudioBandColorValue[] = [
 export const getStudioBandColors = (): StudioColorEntry[] => {
   const allColors = getStudioColors()
 
-  return BAND_COLOR_ORDER.map((id) => {
-    return allColors.find((color) => {
+  return BAND_COLOR_ORDER.flatMap((id) => {
+    const match = allColors.find((color) => {
       return color.id === id
-    })!
+    })
+
+    return match ? [match] : []
   })
 }
 

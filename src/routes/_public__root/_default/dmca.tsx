@@ -17,7 +17,9 @@ const MARKDOWN_LOADERS = {
 } satisfies Record<Locale, () => Promise<{ default: string }>>
 
 const loadMarkdown = createServerFn({ method: 'GET' }).handler(async () => {
-  return (await MARKDOWN_LOADERS[getLocale()]()).default
+  const module = await MARKDOWN_LOADERS[getLocale()]()
+
+  return module.default
 })
 
 const RouteComponent = () => {

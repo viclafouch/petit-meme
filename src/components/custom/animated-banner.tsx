@@ -19,6 +19,7 @@ const LAYER_BASE_STYLE = {
   backgroundSize: '200% 100%'
 } as const satisfies React.CSSProperties
 
+// oxlint-disable-next-line typescript/consistent-type-assertions -- CSS custom properties not in CSSProperties
 const LAYER_1_STYLE = {
   ...LAYER_BASE_STYLE,
   animation: '16s linear 0s infinite reverse none running fd-moving-banner',
@@ -31,6 +32,7 @@ const LAYER_1_STYLE = {
   mixBlendMode: 'difference'
 } as React.CSSProperties
 
+// oxlint-disable-next-line typescript/consistent-type-assertions -- CSS custom properties not in CSSProperties
 const LAYER_2_STYLE = {
   ...LAYER_BASE_STYLE,
   animation: '20s linear 0s infinite normal none running fd-moving-banner',

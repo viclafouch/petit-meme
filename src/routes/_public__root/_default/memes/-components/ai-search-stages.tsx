@@ -20,7 +20,7 @@ function getActiveStageKey(stages: readonly Stage[]): Stage['key'] {
     return stage.status === 'active'
   })
 
-  return active?.key ?? stages.at(-1)!.key
+  return active?.key ?? stages.at(-1)?.key ?? 'context'
 }
 
 type AiSearchStagesProps = {

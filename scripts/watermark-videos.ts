@@ -282,7 +282,7 @@ const computeTotalSize = async () => {
 }
 
 const countResults = <T extends string>(results: T[]) => {
-  const counts = {} as Record<T, number>
+  const counts: Partial<Record<T, number>> = {}
 
   for (const result of results) {
     counts[result] = (counts[result] ?? 0) + 1
@@ -368,7 +368,7 @@ const runUpload = async (options: ParsedOptions) => {
 
         return result
       } catch (error) {
-        const message = error instanceof Error ? error.message : String(error)
+        const message = Error.isError(error) ? error.message : String(error)
         console.error(`${prefix} FAILED: ${message}`)
 
         return 'error'
@@ -433,7 +433,7 @@ const main = async () => {
         return result
       } catch (error) {
         const prefix = formatProgress(index, memes.length, meme.video.bunnyId)
-        const message = error instanceof Error ? error.message : String(error)
+        const message = Error.isError(error) ? error.message : String(error)
         console.error(`${prefix} FAILED: ${message}`)
 
         return 'error'

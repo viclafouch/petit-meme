@@ -26,5 +26,14 @@ export default defineConfig({
   rules: {
     'react/no-children-prop': 'off',
     'id-length': ['error', { exceptions: ['R', '_', 'm', 'x', 'y', 'T'] }]
-  }
+  },
+  overrides: [
+    {
+      // react-email and entry point require default exports
+      files: ['src/emails/**', 'src/server.ts'],
+      rules: {
+        'import/no-default-export': 'off'
+      }
+    }
+  ]
 })

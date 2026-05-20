@@ -97,7 +97,7 @@ export const CategoryForm = ({
 
               return {
                 title: translation?.title ?? '',
-                keywords: translation?.keywords ?? ([] as string[])
+                keywords: (translation?.keywords ?? []) satisfies string[]
               }
             })
           }
@@ -106,7 +106,7 @@ export const CategoryForm = ({
             translations: buildLocaleRecord(() => {
               return {
                 title: '',
-                keywords: [] as string[]
+                keywords: [] satisfies string[]
               }
             })
           },

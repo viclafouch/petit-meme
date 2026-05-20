@@ -7,7 +7,7 @@ export class TweetNoVideoError extends Error {
 
     Object.setPrototypeOf(this, new.target.prototype)
 
-    this.name = this.constructor.name
+    this.name = 'TweetNoVideoError'
   }
 }
 
@@ -75,7 +75,10 @@ export async function getTweetById(tweetId: string) {
   logger.debug({ tweetId }, 'Tweet fetched')
 
   const { poster } = tweet.video
-  const video = tweet.video.variants.at(-1)!
+  const video = tweet.video.variants.at(-1)
+  if (!video) {
+    throw new TweetNoVideoError(tweetId)
+  }
   const videoUrl = video.src
 
   const tweetUrl = `https://x.com/${tweet.user.screen_name}/status/${tweet.id_str}`

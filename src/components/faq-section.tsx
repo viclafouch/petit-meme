@@ -27,9 +27,9 @@ export const FaqSection = ({
     <section className={className}>
       <h2 className={headingClassName}>{heading}</h2>
       <Accordion type="single" collapsible>
-        {items.map((item, index) => {
+        {items.map((item) => {
           return (
-            <AccordionItem key={index} value={`item-${index}`}>
+            <AccordionItem key={item.question} value={item.question}>
               <AccordionTrigger className="font-semibold hover:no-underline">
                 {item.question}
               </AccordionTrigger>

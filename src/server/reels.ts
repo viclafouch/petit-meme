@@ -23,9 +23,10 @@ export const getInfiniteReels = createServerFn({ method: 'POST' })
     const MAX_EXCLUDED_IDS = 100
     const excludedIds = data.excludedIds.slice(-MAX_EXCLUDED_IDS)
 
-    const excludeClause = excludedIds.length
-      ? Prisma.sql`AND m."id" NOT IN (${Prisma.join(excludedIds)})`
-      : Prisma.empty
+    const excludeClause =
+      excludedIds.length > 0
+        ? Prisma.sql`AND m."id" NOT IN (${Prisma.join(excludedIds)})`
+        : Prisma.empty
 
     const rawMemes = await prismaClient.$queryRaw<{ meme: MemeWithVideo }[]>`
       SELECT json_build_object(

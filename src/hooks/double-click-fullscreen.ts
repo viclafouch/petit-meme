@@ -4,7 +4,7 @@ import {
   useMediaSelector
 } from 'media-chrome/react/media-store'
 
-export default function useDoubleClickFullscreen() {
+export function useDoubleClickFullscreen() {
   const dispatch = useMediaDispatch()
   const mediaIsFullscreen = useMediaSelector((state) => {
     return state.mediaIsFullscreen

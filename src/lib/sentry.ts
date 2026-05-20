@@ -55,7 +55,7 @@ export const wrapMiddlewareWithSentry = <T extends SentryMiddleware>(
   name: string,
   middleware: T
 ): T => {
-  return wrapMiddlewaresWithSentry({ [name]: middleware })[0]!
+  return wrapMiddlewaresWithSentry({ [name]: middleware })[0] as T
 }
 
 type FeedbackOptions = Partial<
@@ -71,7 +71,7 @@ const SENSITIVE_API_PATHS = [
 ] as const satisfies readonly string[]
 
 export const SENSITIVE_API_PATTERNS = SENSITIVE_API_PATHS.map((path) => {
-  return new RegExp(path.replaceAll('/', '\\/'), 'u')
+  return new RegExp(path.replaceAll('/', String.raw`\/`), 'u')
 })
 
 export const getFeedbackOptions = (): FeedbackOptions => {

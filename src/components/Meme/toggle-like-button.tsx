@@ -74,4 +74,4 @@ const ToggleLikeButton = ({ meme, ...restProps }: ToggleLikeButtonProps) => {
   )
 }
 
-export default ToggleLikeButton
+export { ToggleLikeButton }

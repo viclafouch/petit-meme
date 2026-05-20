@@ -21,6 +21,7 @@ export const useMemeHls = ({ bunnyId }: UseMemeHlsParams) => {
 
     if (video.canPlayType('application/vnd.apple.mpegurl')) {
       video.src = videoSrc
+      // oxlint-disable-next-line import/no-named-as-default-member -- isSupported is a static method, not a named export in hls.js types
     } else if (Hls.isSupported()) {
       hlsRef.current = new Hls()
       hlsRef.current.loadSource(videoSrc)

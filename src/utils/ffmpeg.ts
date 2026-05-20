@@ -64,7 +64,7 @@ export const readFFmpegOutput = async (ffmpeg: FFmpeg) => {
   const outputData = await ffmpeg.readFile(FFMPEG_OUTPUT_FILE)
   await ffmpeg.deleteFile(FFMPEG_OUTPUT_FILE).catch(() => {})
 
-  if (!(outputData instanceof Uint8Array)) {
+  if (!(outputData instanceof globalThis.Uint8Array)) {
     throw new Error('Unexpected FFmpeg output format')
   }
 

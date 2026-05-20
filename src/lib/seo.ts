@@ -427,6 +427,7 @@ export const buildHomeJsonLd = ({
         url: websiteOrigin,
         name: 'Petit Meme',
         publisher: { '@id': `${websiteOrigin}/#organization` },
+        // oxlint-disable-next-line typescript/consistent-type-assertions -- query-input not in SearchAction type
         potentialAction: {
           '@type': 'SearchAction',
           target: {

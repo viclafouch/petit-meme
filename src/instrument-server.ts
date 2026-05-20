@@ -37,7 +37,7 @@ Sentry.init({
 
     if (event.request?.headers) {
       for (const header of SENSITIVE_HEADERS) {
-        delete event.request.headers[header]
+        Reflect.deleteProperty(event.request.headers, header)
       }
     }
 

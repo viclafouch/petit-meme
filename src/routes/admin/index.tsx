@@ -56,6 +56,7 @@ const SummarySkeleton = () => {
       {Array.from({ length: 4 }).map((_, index) => {
         return (
           <div
+            // oxlint-disable-next-line react/no-array-index-key -- static skeleton, never reordered
             key={index}
             className="flex flex-col gap-3 rounded-xl border bg-card p-4"
           >
@@ -77,6 +78,7 @@ const TotalsSkeleton = () => {
       {Array.from({ length: 4 }).map((_, index) => {
         return (
           <div
+            // oxlint-disable-next-line react/no-array-index-key -- static skeleton, never reordered
             key={index}
             className="flex items-center gap-3 rounded-xl border bg-card p-4"
           >
@@ -97,6 +99,7 @@ const TrendingSkeleton = () => {
     <div className="flex flex-col gap-3">
       {Array.from({ length: 5 }).map((_, index) => {
         return (
+          // oxlint-disable-next-line react/no-array-index-key -- static skeleton, never reordered
           <div key={index} className="flex items-center gap-3">
             <Skeleton className="size-6 rounded-full" />
             <Skeleton className="size-10 rounded-md" />
@@ -116,6 +119,7 @@ const FeedSkeleton = () => {
     <div className="flex flex-col gap-3">
       {Array.from({ length: 5 }).map((_, index) => {
         return (
+          // oxlint-disable-next-line react/no-array-index-key -- static skeleton, never reordered
           <div key={index} className="flex items-start gap-3">
             <Skeleton className="size-7 rounded-md" />
             <div className="flex flex-col gap-1">

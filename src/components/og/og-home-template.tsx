@@ -148,10 +148,16 @@ export const OgHomeTemplate = ({
             style={{ objectFit: 'contain' }}
           />
           <div tw="flex flex-col items-center mt-6" style={{ gap: '4px' }}>
-            {lines.map((line, lineIndex) => {
+            {lines.map((line) => {
+              const lineKey = line
+                .map((segment) => {
+                  return segment.text
+                })
+                .join('')
+
               return (
                 <div
-                  key={lineIndex}
+                  key={lineKey}
                   tw="flex items-baseline justify-center"
                   style={{
                     fontSize: '52px',

@@ -19,7 +19,7 @@ import {
 import { MemeLanguageBadge } from '~/components/Meme/meme-language-badge'
 import { MemeVideoPlayer } from '~/components/Meme/meme-video-player'
 import { MemesList } from '~/components/Meme/memes-list'
-import ToggleLikeButton from '~/components/Meme/toggle-like-button'
+import { ToggleLikeButton } from '~/components/Meme/toggle-like-button'
 import { Badge } from '~/components/ui/badge'
 import { Button, buttonVariants } from '~/components/ui/button'
 import type { MemeFullData } from '~/constants/meme'

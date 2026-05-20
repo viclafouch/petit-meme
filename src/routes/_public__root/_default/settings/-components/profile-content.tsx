@@ -108,12 +108,12 @@ export const ProfileContent = ({
                       {activeSubscription.cancelAtPeriodEnd
                         ? m.settings_subscription_ends({
                             date: new Date(
-                              activeSubscription.periodEnd!
+                              activeSubscription.periodEnd ?? Date.now()
                             ).toLocaleDateString(getLocale())
                           })
                         : m.settings_subscription_renews({
                             date: new Date(
-                              activeSubscription.periodEnd!
+                              activeSubscription.periodEnd ?? Date.now()
                             ).toLocaleDateString(getLocale())
                           })}
                     </span>

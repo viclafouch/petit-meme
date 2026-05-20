@@ -29,15 +29,15 @@ const getVideoDimensions = (blob: Blob) => {
     const video = document.createElement('video')
     const url = URL.createObjectURL(blob)
 
-    video.onloadedmetadata = () => {
+    video.addEventListener('loadedmetadata', () => {
       URL.revokeObjectURL(url)
       resolve({ width: video.videoWidth, height: video.videoHeight })
-    }
+    })
 
-    video.onerror = () => {
+    video.addEventListener('error', () => {
       URL.revokeObjectURL(url)
       reject(new Error('Failed to load video metadata'))
-    }
+    })
 
     video.src = url
   })
@@ -48,15 +48,15 @@ const getImageDimensions = (blob: Blob) => {
     const img = new Image()
     const url = URL.createObjectURL(blob)
 
-    img.onload = () => {
+    img.addEventListener('load', () => {
       URL.revokeObjectURL(url)
       resolve({ width: img.naturalWidth, height: img.naturalHeight })
-    }
+    })
 
-    img.onerror = () => {
+    img.addEventListener('error', () => {
       URL.revokeObjectURL(url)
       reject(new Error('Failed to load watermark image'))
-    }
+    })
 
     img.src = url
   })

@@ -16,7 +16,7 @@ import {
   MediaTimeRange,
   MediaVolumeRange
 } from 'media-chrome/react'
-import useDoubleClickFullscreen from '~/hooks/double-click-fullscreen'
+import { useDoubleClickFullscreen } from '~/hooks/double-click-fullscreen'
 import { cn } from '~/lib/utils'
 import { getLocale } from '~/paraglide/runtime'
 import { mergeRefs } from '~/utils/merge-ref'

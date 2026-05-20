@@ -18,13 +18,13 @@ export class StudioError extends Error {
 
     Object.setPrototypeOf(this, new.target.prototype)
 
-    this.name = this.constructor.name
+    this.name = 'StudioError'
     this.code = options.code
   }
 }
 
 export const matchIsStudioError = (error: unknown): error is StudioError => {
-  return error instanceof Error && 'code' in error
+  return Error.isError(error) && 'code' in error
 }
 
 export const getStudioErrorCode = (
@@ -34,7 +34,7 @@ export const getStudioErrorCode = (
     return error.code
   }
 
-  return error instanceof Error
+  return Error.isError(error)
     ? (error.message.toUpperCase() as StudioErrorCode)
     : undefined
 }

@@ -47,4 +47,4 @@ const MemesPagination = ({
   )
 }
 
-export default MemesPagination
+export { MemesPagination }

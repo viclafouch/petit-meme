@@ -67,12 +67,12 @@ export const SubmissionRules = () => {
       <CardContent className="flex flex-col gap-3">
         <h2 className="text-sm font-medium">{m.submit_rules_heading()}</h2>
         <ul className="grid gap-2 sm:grid-cols-2">
-          {RULES.map((rule, index) => {
+          {RULES.map((rule) => {
             const Icon = rule.icon
 
             return (
               <li
-                key={index}
+                key={Icon.displayName}
                 className="flex items-start gap-2 text-xs text-muted-foreground"
               >
                 <Icon className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />

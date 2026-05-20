@@ -1,6 +1,6 @@
 import type React from 'react'
 import { Lock, MousePointerClick, ShieldCheck } from 'lucide-react'
-import type { FaqItem } from '~/components/faq-section'
+import { type FaqItem } from '~/components/faq-section'
 import { m } from '~/paraglide/messages.js'
 
 export const getPricingFaqItems = (): FaqItem[] => {

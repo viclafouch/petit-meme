@@ -55,7 +55,7 @@ export const Route = createFileRoute('/manifest.json')({
           ]
         }
 
-        return new Response(JSON.stringify(manifest), {
+        return Response.json(manifest, {
           headers: {
             'Content-Type': 'application/manifest+json'
           }

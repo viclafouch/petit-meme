@@ -62,27 +62,27 @@ const SOCIAL_PROVIDERS = [
   }
 ] as const satisfies readonly SocialProvider[]
 
+const handleSignInWithSocial = async (
+  provider: (typeof SOCIAL_PROVIDERS)[number]
+) => {
+  try {
+    await authClient.signIn.social({
+      provider: provider.id,
+      callbackURL: localizeHref('/')
+    })
+  } catch (error) {
+    captureWithFeature(error, `sign-in-${provider.id}`)
+    toast.error(
+      Error.isError(error)
+        ? getAuthErrorMessage(error.message)
+        : provider.errorMessage()
+    )
+  }
+}
+
 export const AuthDialog = ({ open, onOpenChange }: WithDialog<unknown>) => {
   const [authType, setAuthType] = React.useState<AuthType>('login')
   const lastLoginMethod = useLastLoginMethod()
-
-  const handleSignInWithSocial = async (
-    provider: (typeof SOCIAL_PROVIDERS)[number]
-  ) => {
-    try {
-      await authClient.signIn.social({
-        provider: provider.id,
-        callbackURL: localizeHref('/')
-      })
-    } catch (error) {
-      captureWithFeature(error, `sign-in-${provider.id}`)
-      toast.error(
-        error instanceof Error
-          ? getAuthErrorMessage(error.message)
-          : provider.errorMessage()
-      )
-    }
-  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

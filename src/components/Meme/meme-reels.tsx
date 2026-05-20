@@ -7,7 +7,7 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { ShareMemeButton } from '~/components/Meme/share-meme-button'
-import ToggleLikeButton from '~/components/Meme/toggle-like-button'
+import { ToggleLikeButton } from '~/components/Meme/toggle-like-button'
 import { Button, buttonVariants } from '~/components/ui/button'
 import { LoadingSpinner } from '~/components/ui/spinner'
 import { LOGO_PATH } from '~/constants/branding'
@@ -71,6 +71,7 @@ export const Reel = React.memo(
 
       if (videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
         videoRef.current.src = videoSrc
+        // oxlint-disable-next-line import/no-named-as-default-member -- isSupported is a static method, not a named export in hls.js types
       } else if (Hls.isSupported()) {
         const hls = new Hls()
         hls.loadSource(videoSrc)
@@ -258,7 +259,7 @@ export const MemeReels = () => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
             const index = Number.parseInt(
-              entry.target.getAttribute('data-index')!,
+              entry.target.getAttribute('data-index') ?? '0',
               10
             )
             setActiveDebouncer.maybeExecute(index)

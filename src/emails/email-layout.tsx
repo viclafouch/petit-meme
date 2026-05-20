@@ -50,7 +50,7 @@ export const BoldText = ({ text }: { text: string }) => {
   return (
     <>
       {parts.map((part, index) => {
-        return index % 2 === 1 ? <b key={index}>{part}</b> : part
+        return index % 2 === 1 ? <b key={`bold-${part}`}>{part}</b> : part
       })}
     </>
   )

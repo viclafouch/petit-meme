@@ -75,7 +75,7 @@ export const ALGOLIA_SEARCH_RETRIEVE = [
 
 export const ALGOLIA_SEARCH_PARAMS_BASE = {
   attributesToRetrieve: [...ALGOLIA_SEARCH_RETRIEVE],
-  attributesToSnippet: [] as string[]
+  attributesToSnippet: [] satisfies string[]
 }
 
 export const ALGOLIA_ADMIN_SEARCH_PARAMS = {
@@ -85,7 +85,7 @@ export const ALGOLIA_ADMIN_SEARCH_PARAMS = {
     '-publishedAtTime',
     '-imageURL'
   ],
-  attributesToSnippet: [] as string[]
+  attributesToSnippet: [] satisfies string[]
 }
 
 const ALGOLIA_CACHE_TTL = 5 * MINUTE

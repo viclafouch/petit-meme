@@ -12,6 +12,8 @@
 
 **Issues à surveiller :** [#2596](https://github.com/better-auth/better-auth/issues/2596), [#3033](https://github.com/better-auth/better-auth/issues/3033), [#7452](https://github.com/better-auth/better-auth/issues/7452)
 
+**Fix crash Stripe (2026-06-12) :** Better Auth 1.6 a ajouté des champs au model Subscription (`cancelAt`, `canceledAt`, `billingInterval`) sans migration Prisma. Migration appliquée + ajout préventif de `endedAt` et `stripeScheduleId` (champs documentés par Better Auth Stripe).
+
 ---
 
 ## Algolia — Activer les modèles Recommend

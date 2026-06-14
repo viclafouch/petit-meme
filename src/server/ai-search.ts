@@ -101,7 +101,7 @@ async function extractSearchKeywords(prompt: string, systemPrompt: string) {
         systemPrompts: [systemPrompt],
         messages: [{ role: 'user', content: prompt }],
         outputSchema: AI_SEARCH_RESPONSE_SCHEMA,
-        maxTokens: 100
+        modelOptions: { max_tokens: 100 }
       }),
       AI_SEARCH_TIMEOUT_MS,
       `AI search: timeout after ${AI_SEARCH_TIMEOUT_MS}ms`

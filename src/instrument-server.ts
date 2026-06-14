@@ -11,7 +11,11 @@ Sentry.init({
   dsn: process.env.VITE_SENTRY_DSN,
   environment: process.env.NODE_ENV || 'production',
   enabled: IS_PRODUCTION,
-  sendDefaultPii: false,
+  dataCollection: {
+    userInfo: false,
+    httpBodies: [],
+    genAI: { inputs: false, outputs: false }
+  },
   tracesSampler: (samplingContext) => {
     const url = String(samplingContext.attributes?.['http.url'] ?? '')
 

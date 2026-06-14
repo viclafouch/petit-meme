@@ -1,4 +1,4 @@
-import { Link, Section, Text } from '@react-email/components'
+import { Link, Section, Text } from 'react-email'
 import { BUTTON_CLASS, SITE_URL } from './constants'
 import { EmailLayout } from './email-layout'
 

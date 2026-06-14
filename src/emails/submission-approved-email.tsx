@@ -1,4 +1,4 @@
-import { Link, Section, Text } from '@react-email/components'
+import { Link, Section, Text } from 'react-email'
 import type { Locale } from '~/paraglide/runtime'
 import { buildEmailUrl } from './constants'
 import { BoldText, BUTTON_CLASS, EmailLayout } from './email-layout'

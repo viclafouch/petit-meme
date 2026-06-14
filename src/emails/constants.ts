@@ -1,4 +1,4 @@
-import { pixelBasedPreset } from '@react-email/components'
+import { pixelBasedPreset } from 'react-email'
 import { LOGO_PATH } from '~/constants/branding'
 import type { Locale } from '~/paraglide/runtime'
 

@@ -8,12 +8,10 @@ import { createServerEntry } from '@tanstack/react-start/server-entry'
 import { paraglideMiddleware } from './paraglide/server.js'
 
 const customHandler = defineHandlerCallback(async (context) => {
-  const response = await defaultStreamHandler(context)
+  context.responseHeaders.set('Cross-Origin-Opener-Policy', 'same-origin')
+  context.responseHeaders.set('Cross-Origin-Resource-Policy', 'cross-origin')
 
-  response.headers.set('Cross-Origin-Opener-Policy', 'same-origin')
-  response.headers.set('Cross-Origin-Resource-Policy', 'cross-origin')
-
-  return response
+  return defaultStreamHandler(context)
 })
 
 const handler = createStartHandler(customHandler)

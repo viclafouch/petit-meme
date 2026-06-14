@@ -4,6 +4,7 @@ trustPolicyExclude:
 
 strictDepBuilds: true
 allowBuilds:
+  '@google/genai': true
   '@prisma/engines': true
   '@sentry/cli': true
   esbuild: true

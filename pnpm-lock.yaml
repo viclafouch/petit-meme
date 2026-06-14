@@ -36,8 +36,8 @@ importers:
         specifier: ^0.12.2
         version: 0.12.2
       '@google/genai':
-        specifier: ^1.49.0
-        version: 1.49.0(@modelcontextprotocol/sdk@1.27.1(zod@4.4.3))
+        specifier: ^2.8.0
+        version: 2.8.0(@modelcontextprotocol/sdk@1.27.1(zod@4.4.3))
       '@number-flow/react':
         specifier: ^0.6.0
         version: 0.6.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -1155,8 +1155,8 @@ packages:
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
 
-  '@google/genai@1.49.0':
-    resolution: {integrity: sha512-hO69Zl0H3x+L0KL4stl1pLYgnqnwHoLqtKy6MRlNnW8TAxjqMdOUVafomKd4z1BePkzoxJWbYILny9a2Zk43VQ==}
+  '@google/genai@2.8.0':
+    resolution: {integrity: sha512-pc2ayxqO5+O7AvnHBqpNHIk7PAZkHZgL31tbyx0gJZBSS9qPYiQoqwK7oYOw/ePmG6QY4EMSu+304vD5QlhXAw==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
       '@modelcontextprotocol/sdk': ^1.25.2
@@ -7882,7 +7882,7 @@ snapshots:
 
   '@floating-ui/utils@0.2.10': {}
 
-  '@google/genai@1.49.0(@modelcontextprotocol/sdk@1.27.1(zod@4.4.3))':
+  '@google/genai@2.8.0(@modelcontextprotocol/sdk@1.27.1(zod@4.4.3))':
     dependencies:
       google-auth-library: 10.5.0
       p-retry: 4.6.2

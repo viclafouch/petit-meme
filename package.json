@@ -31,7 +31,7 @@
     "@ffmpeg/core": "0.12.10",
     "@ffmpeg/ffmpeg": "^0.12.15",
     "@ffmpeg/util": "^0.12.2",
-    "@google/genai": "^1.49.0",
+    "@google/genai": "^2.8.0",
     "@number-flow/react": "^0.6.0",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",

@@ -6,7 +6,6 @@ import {
 } from '~/components/cookie-consent'
 import type {
   CategoryConfig,
-  ConsentState,
   CookieConsentConfig
 } from '~/components/cookie-consent'
 import { CONSENT_COOKIE_KEY } from '~/constants/cookie'
@@ -61,4 +60,4 @@ export const matchHasAcceptedCookies = createClientOnlyFn(() => {
   return matchIsAnalyticsConsentGiven()
 })
 
-export type { ConsentState }
+export type { ConsentState } from '~/components/cookie-consent'

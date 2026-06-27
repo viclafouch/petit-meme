@@ -33,6 +33,7 @@ export const CookieSettings = () => {
 
   React.useEffect(() => {
     if (isSettingsOpen) {
+      // oxlint-disable-next-line react/react-compiler
       setLocalCategories(state.categories)
     }
   }, [isSettingsOpen, state.categories])

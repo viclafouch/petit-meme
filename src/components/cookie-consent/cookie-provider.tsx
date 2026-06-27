@@ -1,3 +1,4 @@
+/* oxlint-disable react/react-compiler -- intentionally omitting stable function deps from useMemo */
 import React from 'react'
 import type {
   ConsentCategories,

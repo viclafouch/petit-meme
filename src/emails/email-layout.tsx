@@ -15,13 +15,8 @@ import {
   Text
 } from 'react-email'
 import type { Locale } from '~/paraglide/runtime'
-import {
-  BUTTON_CLASS,
-  CONTACT_EMAIL,
-  LOGO_URL,
-  SITE_URL,
-  TAILWIND_CONFIG
-} from './constants'
+// oxlint-disable-next-line unicorn/prefer-export-from -- used locally and re-exported, waiting for checkUsedVariables: false
+import { CONTACT_EMAIL, LOGO_URL, SITE_URL, TAILWIND_CONFIG } from './constants'
 
 const layoutTranslations = {
   fr: {
@@ -42,7 +37,8 @@ type EmailLayoutProps = {
   children: React.ReactNode
 }
 
-export { BUTTON_CLASS, CONTACT_EMAIL, LOGO_URL, SITE_URL }
+export { BUTTON_CLASS } from './constants'
+export { CONTACT_EMAIL, LOGO_URL, SITE_URL }
 
 export const BoldText = ({ text }: { text: string }) => {
   const parts = text.split('**')

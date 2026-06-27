@@ -79,7 +79,9 @@ export const AiSearchPage = () => {
 
   const searchStages = useAiSearchStages(searchMutation.isPending)
   const searchStagesResetRef = React.useRef(searchStages.reset)
-  searchStagesResetRef.current = searchStages.reset
+  React.useEffect(() => {
+    searchStagesResetRef.current = searchStages.reset
+  }, [searchStages.reset])
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault()

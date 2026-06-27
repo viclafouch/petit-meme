@@ -205,6 +205,7 @@ const EmptyState = ({ hasFilter }: { hasFilter: boolean }) => {
   )
 }
 
+// oxlint-disable-next-line react/react-compiler -- useReactTable is flagged as incompatible library
 const RouteComponent = () => {
   const { submissionStatus } = Route.useSearch()
   const submissionsQuery = useSuspenseQuery(

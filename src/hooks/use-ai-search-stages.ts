@@ -1,3 +1,4 @@
+/* oxlint-disable react/react-compiler -- timer-based animation hook with intentional setState in effects */
 import React from 'react'
 import { getRandomFloatInRange } from '~/helpers/number'
 

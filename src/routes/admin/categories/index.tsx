@@ -86,6 +86,7 @@ const columns = [
   })
 ]
 
+// oxlint-disable-next-line react/react-compiler -- useReactTable is flagged as incompatible library
 const RouteComponent = () => {
   const { categories } = Route.useLoaderData()
 

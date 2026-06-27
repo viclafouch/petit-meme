@@ -25,6 +25,7 @@ export default defineConfig({
   ],
   rules: {
     'react/no-children-prop': 'off',
+    'react/react-compiler': ['error', { reportAllBailouts: false }],
     'id-length': ['error', { exceptions: ['R', '_', 'm', 'x', 'y', 'T'] }]
   },
   overrides: [

@@ -28,6 +28,13 @@ const logoPositions = [
   delay: number
 }[]
 
+const positionRandoms = logoPositions.map(() => {
+  return {
+    duration: 4 + Math.random() * 4,
+    delay: Math.random() * 2
+  }
+})
+
 export const FloatingLogos = ({ variants }: { variants: Variants }) => {
   const isReducedMotion = useReducedMotion()
   const logosPerPosition = Math.floor(logos.length / logoPositions.length)
@@ -39,11 +46,14 @@ export const FloatingLogos = ({ variants }: { variants: Variants }) => {
     const endIndex =
       startIndex + logosPerPosition + (index < remainingLogos ? 1 : 0)
     const positionLogos = logos.slice(startIndex, endIndex)
+    const random = positionRandoms[index] ?? { duration: 4, delay: 0 }
 
     return {
       ...position,
       logos: positionLogos,
-      index
+      index,
+      randomDuration: random.duration,
+      randomDelay: random.delay
     }
   })
 
@@ -72,10 +82,10 @@ export const FloatingLogos = ({ variants }: { variants: Variants }) => {
               }
               transition={{
                 repeat: Infinity,
-                duration: 4 + Math.random() * 4,
+                duration: position.randomDuration,
                 ease: 'easeInOut',
                 times: [0, 0.5, 1],
-                delay: Math.random() * 2
+                delay: position.randomDelay
               }}
             >
               <LogoCarousel

@@ -68,6 +68,10 @@ export const ProfileContent = ({
     }
   })
 
+  const subscriptionDate = activeSubscription?.periodEnd
+    ? new Date(activeSubscription.periodEnd).toLocaleDateString(getLocale())
+    : ''
+
   return (
     <>
       <UpdatePasswordDialog
@@ -107,14 +111,10 @@ export const ProfileContent = ({
                     <span className="text-info">
                       {activeSubscription.cancelAtPeriodEnd
                         ? m.settings_subscription_ends({
-                            date: new Date(
-                              activeSubscription.periodEnd ?? Date.now()
-                            ).toLocaleDateString(getLocale())
+                            date: subscriptionDate
                           })
                         : m.settings_subscription_renews({
-                            date: new Date(
-                              activeSubscription.periodEnd ?? Date.now()
-                            ).toLocaleDateString(getLocale())
+                            date: subscriptionDate
                           })}
                     </span>
                   </p>

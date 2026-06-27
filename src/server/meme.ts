@@ -199,9 +199,7 @@ function resolveSearchIndex({
   locale,
   contentLocales
 }: ResolveSearchIndexParams) {
-  const effectiveLocale = contentLocales?.includes(MemeContentLocaleEnum.FR)
-    ? baseLocale
-    : locale
+  const effectiveLocale = resolveEffectiveLocale(locale, contentLocales)
 
   if (hasQuery) {
     return resolveAlgoliaIndexName(effectiveLocale)
@@ -307,28 +305,35 @@ async function getCachedTrendingMemeIds(visibleLocales: MemeContentLocale[]) {
   return memeIds
 }
 
-async function fetchTrendingCategoryMemes(
-  locale: Locale,
-  visibleLocales: MemeContentLocale[]
-) {
-  const memeIds = await getCachedTrendingMemeIds(visibleLocales)
+async function getTrendingPage1Ids(visibleLocales: MemeContentLocale[]) {
+  const trendingIds = await getCachedTrendingMemeIds(visibleLocales)
 
-  if (memeIds.length === 0) {
-    const fallback = await prismaClient.meme.findMany({
-      take: TRENDING_CATEGORY_LIMIT,
-      include: MEME_WITH_VIDEO_AND_TRANSLATIONS_INCLUDE,
-      orderBy: { viewCount: 'desc' },
-      where: {
-        status: MemeStatus.PUBLISHED,
-        contentLocale: { in: visibleLocales }
-      }
-    })
-
-    return mapMemesWithResolvedTranslations(fallback, locale)
+  if (trendingIds.length >= MEMES_PER_PAGE) {
+    return trendingIds.slice(0, MEMES_PER_PAGE)
   }
 
+  const complementIds = await prismaClient.meme.findMany({
+    take: MEMES_PER_PAGE - trendingIds.length,
+    select: { id: true },
+    orderBy: { viewCount: 'desc' },
+    where: {
+      status: MemeStatus.PUBLISHED,
+      contentLocale: { in: visibleLocales },
+      id: { notIn: trendingIds }
+    }
+  })
+
+  return [
+    ...trendingIds,
+    ...complementIds.map((row) => {
+      return row.id
+    })
+  ]
+}
+
+async function hydrateTrendingPage1(page1Ids: string[], locale: Locale) {
   const memes = await prismaClient.meme.findMany({
-    where: { id: { in: memeIds } },
+    where: { id: { in: page1Ids } },
     include: MEME_WITH_VIDEO_AND_TRANSLATIONS_INCLUDE
   })
 
@@ -338,7 +343,7 @@ async function fetchTrendingCategoryMemes(
     })
   )
 
-  const sorted = memeIds
+  const sorted = page1Ids
     .map((id) => {
       return memeMap.get(id)
     })
@@ -347,6 +352,23 @@ async function fetchTrendingCategoryMemes(
     })
 
   return mapMemesWithResolvedTranslations(sorted, locale)
+}
+
+function buildAlgoliaExclusionFilter(ids: string[]) {
+  return ids
+    .map((id) => {
+      return `NOT objectID:${id}`
+    })
+    .join(' AND ')
+}
+
+function resolveEffectiveLocale(
+  locale: Locale,
+  contentLocales: MemeContentLocale[] | undefined
+) {
+  return contentLocales?.includes(MemeContentLocaleEnum.FR)
+    ? baseLocale
+    : locale
 }
 
 export const getMemeById = createServerFn({ method: 'GET' })
@@ -436,15 +458,80 @@ export const getMemes = createServerFn({ method: 'GET' })
         locale,
         contentLocales
       )
-      const memes = await fetchTrendingCategoryMemes(locale, visibleLocales)
+      const requestedPage = data.page ?? 1
+      const page1Ids = await getTrendingPage1Ids(visibleLocales)
 
-      return {
-        memes,
-        query: data.query,
-        queryID: undefined,
-        page: 0,
-        totalPages: 0
+      const localeFilter = contentLocales
+        ? buildAlgoliaContentLocaleFilter(
+            contentLocalesWithUniversal(contentLocales)
+          )
+        : undefined
+
+      const algoliaFilters = [
+        `status:${MemeStatus.PUBLISHED}`,
+        localeFilter,
+        buildAlgoliaExclusionFilter(page1Ids)
+      ]
+        .filter(Boolean)
+        .join(' AND ')
+
+      const indexName = resolveAlgoliaIndexName(
+        resolveEffectiveLocale(locale, contentLocales)
+      )
+
+      if (requestedPage <= 1) {
+        const [memes, countResponse] = await Promise.all([
+          hydrateTrendingPage1(page1Ids, locale),
+          algoliaSearchClient.searchSingleIndex<AlgoliaMemeRecord>({
+            indexName,
+            searchParams: {
+              query: '',
+              hitsPerPage: 0,
+              filters: algoliaFilters
+            }
+          })
+        ])
+
+        return {
+          memes,
+          query: data.query,
+          queryID: undefined,
+          page: 0,
+          totalPages: 1 + (countResponse.nbPages ?? 0)
+        }
       }
+
+      const hasConsentedToCookies = matchIsAnalyticsConsentGiven()
+      const userToken = hasConsentedToCookies
+        ? getCookie(COOKIE_ALGOLIA_USER_TOKEN_KEY)
+        : undefined
+
+      const algoliaPage = requestedPage - 2
+      const cacheKey = `trending-page:${indexName}:${requestedPage}:${data.contentLocales ?? ''}`
+
+      return withAlgoliaCache(cacheKey, async () => {
+        const response =
+          await algoliaSearchClient.searchSingleIndex<AlgoliaMemeRecord>({
+            indexName,
+            searchParams: {
+              query: '',
+              page: algoliaPage,
+              hitsPerPage: MEMES_PER_PAGE,
+              filters: algoliaFilters,
+              clickAnalytics: true,
+              userToken,
+              ...ALGOLIA_SEARCH_PARAMS_BASE
+            }
+          })
+
+        return {
+          memes: response.hits.map(normalizeAlgoliaHit),
+          query: data.query,
+          queryID: response.queryID,
+          page: (response.page ?? 0) + 1,
+          totalPages: 1 + (response.nbPages ?? 0)
+        }
+      })
     }
 
     const indexName = resolveSearchIndex({

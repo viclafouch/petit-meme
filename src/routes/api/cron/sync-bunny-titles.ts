@@ -73,6 +73,7 @@ export const Route = createFileRoute('/api/cron/sync-bunny-titles')({
           let cursor: string | undefined
           let totalProcessed = 0
 
+          // oxlint-disable-next-line typescript/no-unnecessary-condition -- cursor-based pagination loop
           while (true) {
             const memes = await prismaClient.meme.findMany({
               take: BATCH_SIZE,

@@ -282,7 +282,9 @@ const RouteComponent = () => {
               <Button
                 variant="outline"
                 className="shrink-0 flex-1"
-                onClick={handleCopyMemeLink}
+                onClick={() => {
+                  void handleCopyMemeLink()
+                }}
               >
                 <Clipboard />
                 {m.meme_copy_link()}
@@ -359,7 +361,7 @@ export const Route = createFileRoute('/_public__root/_default/memes/$memeId')({
       return {
         ...seo,
         links: [
-          ...(seo.links ?? []),
+          ...seo.links,
           {
             rel: 'preload',
             as: 'image',

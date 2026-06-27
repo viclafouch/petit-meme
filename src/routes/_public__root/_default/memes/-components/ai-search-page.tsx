@@ -83,7 +83,7 @@ export const AiSearchPage = () => {
     searchStagesResetRef.current = searchStages.reset
   }, [searchStages.reset])
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault()
 
     const trimmed = prompt.trim()

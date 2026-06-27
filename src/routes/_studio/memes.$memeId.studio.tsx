@@ -64,7 +64,7 @@ export const Route = createFileRoute('/_studio/memes/$memeId/studio')({
       return {
         ...result,
         links: [
-          ...(result.links ?? []),
+          ...result.links,
           {
             rel: 'preload',
             as: 'image',

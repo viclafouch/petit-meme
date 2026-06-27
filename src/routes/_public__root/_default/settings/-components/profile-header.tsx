@@ -26,7 +26,7 @@ export const ProfileHeader = ({
                 alt={user.name}
               />
               <AvatarFallback className="rounded-lg">
-                {((user.name[0] ?? '') + user.name[1]).toUpperCase()}
+                {((user.name[0] ?? '') + (user.name[1] ?? '')).toUpperCase()}
               </AvatarFallback>
             </Avatar>
           </div>

@@ -172,6 +172,7 @@ export function getHighlightedTitle(hit: Hit<AlgoliaMemeRecord>) {
 export function normalizeAlgoliaHit(hit: AlgoliaMemeRecord): AlgoliaMemeRecord {
   return {
     ...hit,
+    // oxlint-disable-next-line typescript/no-unnecessary-condition -- Algolia records may lack contentLocale for legacy data
     contentLocale: hit.contentLocale ?? MemeContentLocale.FR,
     createdAt: new Date(hit.createdAt),
     updatedAt: new Date(hit.updatedAt),

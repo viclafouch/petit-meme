@@ -54,7 +54,7 @@ export const Route = createFileRoute('/admin')({
   component: RouteComponent,
   errorComponent: ErrorComponent,
   beforeLoad: async ({ context }) => {
-    if (!context.user || context.user.role !== 'admin') {
+    if (context.user?.role !== 'admin') {
       throw redirect({ to: '/' })
     }
 

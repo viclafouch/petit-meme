@@ -308,7 +308,7 @@ export const editMeme = createServerFn({ method: 'POST' })
           })
         },
         keywords: normalizeKeywords(sourceTranslation.keywords),
-        tweetUrl: values.tweetUrl || null,
+        tweetUrl: values.tweetUrl ?? null,
         translations: {
           upsert: buildTranslationUpserts({
             memeId: values.id,

@@ -107,6 +107,7 @@ async function extractSearchKeywords(prompt: string, systemPrompt: string) {
       `AI search: timeout after ${AI_SEARCH_TIMEOUT_MS}ms`
     )
 
+    // oxlint-disable-next-line typescript/no-unnecessary-condition -- @tanstack/ai structured output can return null at runtime despite types (since 0.34.0)
     return result?.keywords ?? [prompt]
   } catch (error) {
     captureWithFeature(error, 'ai-search')

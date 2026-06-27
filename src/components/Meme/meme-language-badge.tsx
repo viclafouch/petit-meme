@@ -21,7 +21,7 @@ export const MemeLanguageBadge = ({
       className="inline-flex items-center gap-1 text-muted-foreground text-xs"
       aria-label={ariaLabel}
     >
-      {Flag ? <Flag className="size-3.5 shrink-0 rounded-sm" /> : null}
+      <Flag className="size-3.5 shrink-0 rounded-sm" />
       {showLabel ? label : null}
     </span>
   )

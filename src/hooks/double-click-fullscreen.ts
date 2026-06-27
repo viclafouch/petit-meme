@@ -10,7 +10,7 @@ export function useDoubleClickFullscreen() {
     return state.mediaIsFullscreen
   })
 
-  return (event: React.MouseEvent<HTMLVideoElement, MouseEvent>) => {
+  return (event: React.MouseEvent<HTMLVideoElement>) => {
     if (event.detail === 2) {
       const type = mediaIsFullscreen
         ? MediaActionTypes.MEDIA_EXIT_FULLSCREEN_REQUEST

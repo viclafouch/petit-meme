@@ -105,7 +105,7 @@ export const CookieConsentProvider = ({
   }
 
   const matchHasConsent = (category: ConsentCategory) => {
-    return state.categories[category] ?? false
+    return state.categories[category]
   }
 
   const value: CookieConsentContextValue = React.useMemo(() => {

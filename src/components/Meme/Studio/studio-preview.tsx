@@ -81,7 +81,7 @@ export const StudioPreview = ({
     React.useState<ProcessedRatioState | null>(null)
 
   const effectiveRatio =
-    processedRatio !== null && processedRatio.url === processedVideoUrl
+    processedRatio?.url === processedVideoUrl
       ? processedRatio.ratio
       : posterRatio
   const size = useContainedSize(containerRef, effectiveRatio)

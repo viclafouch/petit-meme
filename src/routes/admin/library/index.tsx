@@ -53,7 +53,7 @@ const MemesListWrapper = () => {
       </ul>
       <div className="flex justify-end z-0">
         <Paginator
-          currentPage={(memesListQuery.data.page || 0) + 1}
+          currentPage={(memesListQuery.data.page ?? 0) + 1}
           totalPages={memesListQuery.data.totalPages ?? 0}
           getLinkProps={(page) => {
             return {

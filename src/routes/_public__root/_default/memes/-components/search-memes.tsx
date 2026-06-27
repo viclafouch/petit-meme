@@ -73,7 +73,7 @@ const MemesListWrapper = ({ columnGridCount }: { columnGridCount: number }) => {
   const memesListQuery = useSuspenseQuery(getMemesListQueryOpts(filters))
 
   const categoryJsonLd = buildCategoryJsonLd(selectedCategory, {
-    page: memesListQuery.data.page || 1,
+    page: memesListQuery.data.page ?? 1,
     memes: memesListQuery.data.memes
   })
 
@@ -102,7 +102,7 @@ const MemesListWrapper = ({ columnGridCount }: { columnGridCount: number }) => {
       {slug !== TRENDING_CATEGORY_SLUG ? (
         <div className="flex justify-end z-0">
           <MemesPagination
-            currentPage={(memesListQuery.data.page || 0) + 1}
+            currentPage={(memesListQuery.data.page ?? 0) + 1}
             totalPages={memesListQuery.data.totalPages ?? 0}
             slug={slug}
           />

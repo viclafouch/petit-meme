@@ -41,7 +41,7 @@ export const MemesFilterContentLocale = React.memo(
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-40">
           <DropdownMenuRadioGroup
-            value={contentLocale || 'all'}
+            value={contentLocale ?? 'all'}
             onValueChange={handleChange}
           >
             <DropdownMenuRadioItem value="all">Tous</DropdownMenuRadioItem>

@@ -24,6 +24,7 @@ export const Route = createFileRoute('/api/cron/sync-algolia')({
           const allMemes: MemeAlgoliaData[] = []
           let cursor: string | undefined
 
+          // oxlint-disable-next-line typescript/no-unnecessary-condition -- cursor-based pagination loop
           while (true) {
             const memes = await prismaClient.meme.findMany({
               take: BATCH_SIZE,

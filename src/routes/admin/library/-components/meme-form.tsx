@@ -97,11 +97,7 @@ export const MemeForm = ({ meme, onSuccess }: MemeFormParams) => {
             const applyLocale = CONTENT_LOCALE_TO_LOCALE[contentLocale]
             const currentValues = form.getFieldValue(
               `translations.${applyLocale}`
-            ) ?? {
-              title: '',
-              description: '',
-              keywords: []
-            }
+            )
 
             return (
               <>

@@ -54,7 +54,13 @@ export const AdminNavButton = ({ user }: AdminNavButtonParams) => {
             Retour au site
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={signOut}>Se déconnecter</DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => {
+            void signOut()
+          }}
+        >
+          Se déconnecter
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

@@ -75,7 +75,7 @@ export const MemesFilterLanguage = React.memo(
                     }}
                   />
                   <span className="flex items-center gap-1.5 text-sm">
-                    {Flag ? <Flag className={FLAG_ICON_CLASS} /> : null}
+                    <Flag className={FLAG_ICON_CLASS} />
                     {getContentLocaleLabel(contentLocale)}
                   </span>
                 </label>

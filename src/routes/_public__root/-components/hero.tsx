@@ -37,8 +37,8 @@ const variants = {
       y: 0,
       filter: 'blur(0px)',
       transition: {
-        delay: custom?.delay ?? 0,
-        duration: custom?.duration ?? 0.6
+        delay: custom.delay ?? 0,
+        duration: custom.duration ?? 0.6
       }
     }
   }

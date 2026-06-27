@@ -140,10 +140,6 @@ export function useMemeForm({ meme, onSuccess }: UseMemeFormParams) {
       for (const locale of Object.keys(result) as Locale[]) {
         const translation = result[locale]
 
-        if (!translation) {
-          continue
-        }
-
         form.setFieldValue(`translations.${locale}.title`, translation.title)
         form.setFieldValue(
           `translations.${locale}.description`,

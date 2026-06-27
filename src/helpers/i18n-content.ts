@@ -164,7 +164,7 @@ export const findTranslationByLocale = <T extends { locale: string }>(
 const findTranslationWithPriority = <T extends { locale: string }>(
   translations: T[],
   localePriority: readonly string[]
-) => {
+): T | undefined => {
   for (const locale of localePriority) {
     const match = findTranslationByLocale(translations, locale)
 
@@ -172,6 +172,9 @@ const findTranslationWithPriority = <T extends { locale: string }>(
       return match
     }
   }
+
+  // oxlint-disable-next-line typescript/consistent-return -- explicit undefined return for no-match case, function returns T | undefined
+  return undefined
 }
 
 type ResolveMemeTranslationParams = {

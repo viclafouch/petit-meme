@@ -134,7 +134,12 @@ export const UserDropdown = ({ user }: UserDropdownParams) => {
           ) : null}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={signOut} className="text-red-600!">
+        <DropdownMenuItem
+          onClick={() => {
+            void signOut()
+          }}
+          className="text-red-600!"
+        >
           <LogOutIcon className="text-red-600!" />
           {m.nav_sign_out()}
         </DropdownMenuItem>

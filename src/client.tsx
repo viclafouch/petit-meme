@@ -14,7 +14,7 @@ const ZOD_LOCALE_IMPORTS = {
   }
 } as const satisfies Record<
   Locale,
-  () => Promise<{ default: () => { localeError: z.ZodErrorMap } }>
+  () => Promise<{ default: () => { localeError: z.core.$ZodErrorMap } }>
 >
 
 const zodLocaleModule = await ZOD_LOCALE_IMPORTS[getLocale()]()

@@ -1,4 +1,13 @@
-import { Ban, Edit, FilePlus, RefreshCw, ShieldOff, Trash2 } from 'lucide-react'
+import React from 'react'
+import {
+  Ban,
+  Edit,
+  FilePlus,
+  RefreshCw,
+  ShieldOff,
+  Trash2,
+  Upload
+} from 'lucide-react'
 import type { AuditAction } from '~/server/audit'
 
 export function getActionIcon(action: AuditAction) {
@@ -25,6 +34,10 @@ export function getActionIcon(action: AuditAction) {
 
     case 'status_change': {
       return <RefreshCw className="size-4" aria-hidden />
+    }
+
+    case 'watermark_upload': {
+      return <Upload className="size-4" aria-hidden />
     }
 
     default: {

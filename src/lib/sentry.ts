@@ -117,6 +117,7 @@ const matchIsSensitiveApiUrl = (url: string) => {
 }
 
 export const scrubUserPii = (event: Sentry.ErrorEvent) => {
+  // oxlint-disable-next-line typescript/no-unnecessary-condition -- event.type can be 'feedback' at runtime despite Sentry type definition
   if (!event.user || event.type === 'feedback') {
     return event
   }

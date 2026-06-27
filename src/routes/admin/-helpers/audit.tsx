@@ -18,6 +18,10 @@ function getAuditTargetLabel(targetType: AuditTargetType) {
       return 'Utilisateur'
     }
 
+    case 'submission': {
+      return 'Soumission'
+    }
+
     default: {
       return targetType
     }
@@ -52,8 +56,12 @@ function getAuditActionVerb(action: AuditAction, targetType: AuditTargetType) {
       return 'Statut modifié'
     }
 
+    case 'watermark_upload': {
+      return 'Watermark uploadé'
+    }
+
     default: {
-      return `${label} — ${action}`
+      return `${label} ${action}`
     }
   }
 }

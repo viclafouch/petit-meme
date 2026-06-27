@@ -47,7 +47,7 @@ export function useMemeWatermark(memeId: Meme['id']) {
       setProgress(0)
     },
     mutationFn: async () => {
-      ffmpegRef.current ||= await loadFFmpeg('FFmpeg loading timeout')
+      ffmpegRef.current ??= await loadFFmpeg('FFmpeg loading timeout')
 
       const ffmpeg = ffmpegRef.current
 

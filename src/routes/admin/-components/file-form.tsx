@@ -97,6 +97,7 @@ export const FileForm = ({ onSuccess, closeDialog }: FileFormParams) => {
           return (
             <FormItem error={errorMessage} className="w-full">
               <FileUpload
+                // oxlint-disable-next-line typescript/no-unnecessary-condition -- defaultValue is `undefined as unknown as File`, runtime value can be undefined
                 value={field.state.value ? [field.state.value] : []}
                 onValueChange={(files) => {
                   return field.handleChange(files[0] as File)
@@ -125,6 +126,7 @@ export const FileForm = ({ onSuccess, closeDialog }: FileFormParams) => {
                   </FileUploadTrigger>
                 </FileUploadDropzone>
                 <FileUploadList>
+                  {/* oxlint-disable-next-line typescript/no-unnecessary-condition -- defaultValue is `undefined as unknown as File` */}
                   {field.state.value ? (
                     <FileUploadItem value={field.state.value}>
                       <FileUploadItemPreview />

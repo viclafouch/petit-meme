@@ -1,9 +1,7 @@
 import { createClientOnlyFn } from '@tanstack/react-start'
 
 export const readClientCookie = createClientOnlyFn((name: string) => {
-  const match = document.cookie.match(
-    new RegExp(`(?:^|; )${name}=([^;]*)`, 'u')
-  )
+  const match = new RegExp(`(?:^|; )${name}=([^;]*)`, 'u').exec(document.cookie)
 
   return match?.[1]
 })

@@ -9,7 +9,7 @@ const SENSITIVE_HEADERS = ['authorization', 'cookie', 'set-cookie']
 
 Sentry.init({
   dsn: process.env.VITE_SENTRY_DSN,
-  environment: process.env.NODE_ENV || 'production',
+  environment: process.env.NODE_ENV ?? 'production',
   enabled: IS_PRODUCTION,
   dataCollection: {
     userInfo: false,

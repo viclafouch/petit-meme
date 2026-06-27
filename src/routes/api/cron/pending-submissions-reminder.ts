@@ -40,7 +40,7 @@ const runPendingSubmissionsReminder = async () => {
     return {
       id: submission.id,
       title: submission.title,
-      userName: submission.user.name ?? 'Anonyme',
+      userName: submission.user.name,
       createdAt: formatDate(submission.createdAt, 'fr', LONG_DATE_OPTIONS)
     }
   })

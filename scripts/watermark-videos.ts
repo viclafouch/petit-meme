@@ -218,6 +218,11 @@ const parseArgs = (): ParsedOptions => {
   while (argIndex < args.length) {
     const arg = args[argIndex]
 
+    if (arg === undefined) {
+      argIndex += 1
+      continue
+    }
+
     switch (arg) {
       case '--limit': {
         argIndex += 1

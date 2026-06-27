@@ -18,6 +18,7 @@ declare const globalThis: {
   prismaGlobal: ReturnType<typeof prismaClientSingleton>
 } & typeof global
 
+// oxlint-disable-next-line typescript/no-unnecessary-condition -- globalThis.prismaGlobal may be undefined at first run
 export const prismaClient = globalThis.prismaGlobal ?? prismaClientSingleton()
 
 if (!IS_PRODUCTION) {

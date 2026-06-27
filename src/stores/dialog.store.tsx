@@ -51,7 +51,7 @@ type DefaultDialogProps = keyof WithDialog<unknown>
 const initialState: {
   component: Dialogs[DialogKey]['component'] | null
   componentName: DialogKey | null
-  componentProps: React.ComponentProps<Dialogs[DialogKey]['component']> | null
+  componentProps: Record<string, unknown> | null
   forceCloseDialog: () => void
 } = {
   component: null,
@@ -113,7 +113,7 @@ export const useDialog = create<
       set((prev) => {
         return {
           component: modal.component,
-          componentName: componentName as T,
+          componentName,
           componentProps: {
             ...componentProps,
             open: true,

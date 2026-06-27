@@ -129,8 +129,12 @@ export function truncateToGranularity(
       )
     }
 
-    default: {
+    case 'month': {
       return formatUtcDateKey(year, month + 1, 1)
+    }
+
+    default: {
+      return formatUtcDateKey(year, month + 1, day)
     }
   }
 }
@@ -161,11 +165,19 @@ function advanceDate(timestamp: number, granularity: ChartGranularity) {
       )
     }
 
-    default: {
+    case 'month': {
       return Date.UTC(
         date.getUTCFullYear(),
         date.getUTCMonth() + 1,
         date.getUTCDate()
+      )
+    }
+
+    default: {
+      return Date.UTC(
+        date.getUTCFullYear(),
+        date.getUTCMonth(),
+        date.getUTCDate() + 1
       )
     }
   }

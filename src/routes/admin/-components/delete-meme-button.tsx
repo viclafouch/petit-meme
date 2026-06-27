@@ -46,7 +46,7 @@ export const DeleteMemeButton = ({
         queryKey: getAdminMemesListQueryOpts.all,
         exact: false
       })
-      await queryClient.removeQueries(getAdminMemeByIdQueryOpts(meme.id))
+      queryClient.removeQueries(getAdminMemeByIdQueryOpts(meme.id))
       void queryClient.invalidateQueries({
         queryKey: getAdminDashboardTotalsQueryOpts.all
       })

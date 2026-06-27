@@ -43,19 +43,18 @@ export function useToggleBookmark({
           return old
         }
 
-        if (!newValue) {
-          return {
-            bookmarks: old.bookmarks.filter((bookmark) => {
-              return bookmark.id !== meme.id
-            }),
-            count: old.count - 1
-          }
-        }
-
-        return {
-          bookmarks: [meme, ...old.bookmarks],
-          count: old.count + 1
-        }
+        // oxlint-disable-next-line typescript/consistent-return -- early return for empty cache is valid, setQueryData accepts undefined
+        return newValue
+          ? {
+              bookmarks: [meme, ...old.bookmarks],
+              count: old.count + 1
+            }
+          : {
+              bookmarks: old.bookmarks.filter((bookmark) => {
+                return bookmark.id !== meme.id
+              }),
+              count: old.count - 1
+            }
       })
     },
     onError: (error) => {

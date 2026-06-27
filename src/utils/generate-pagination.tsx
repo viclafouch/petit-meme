@@ -14,7 +14,7 @@ export const generatePaginationLinks = ({
   getLinkProps
 }: GeneratePaginationLinksParams): React.JSX.Element[] => {
   const pages: React.JSX.Element[] = []
-  const maxVisible = 6
+  const maxVisible = 8
 
   if (totalPages <= maxVisible) {
     for (let index = 1; index <= totalPages; index += 1) {

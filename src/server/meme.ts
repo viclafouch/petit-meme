@@ -492,12 +492,15 @@ export const getMemes = createServerFn({ method: 'GET' })
           })
         ])
 
+        const remainingHits = countResponse.nbHits ?? 0
+        const remainingPages = Math.ceil(remainingHits / MEMES_PER_PAGE)
+
         return {
           memes,
           query: data.query,
           queryID: undefined,
           page: 0,
-          totalPages: 1 + (countResponse.nbPages ?? 0)
+          totalPages: 1 + remainingPages
         }
       }
 

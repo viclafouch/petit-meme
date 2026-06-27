@@ -141,7 +141,7 @@ const MemesListErrorFallback = ({
 }
 
 export const SearchMemes = () => {
-  const [columnGridCount, setColumnGridCount] = React.useState<number>(4)
+  const [columnGridCount, setColumnGridCount] = React.useState<number>(5)
   const search = useSearch({ strict: false })
   const navigate = useNavigate()
   const { slug: activeSlug } = useParams({ strict: false })

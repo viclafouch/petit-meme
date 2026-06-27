@@ -125,7 +125,7 @@ const GET_CATEGORIES_INPUT = z.object({
 })
 
 export const getCategories = createServerFn({ method: 'GET' })
-  .inputValidator((data: unknown) => {
+  .validator((data: unknown) => {
     return GET_CATEGORIES_INPUT.parse(data)
   })
   .handler(async ({ data }) => {
@@ -147,7 +147,7 @@ export const getCategories = createServerFn({ method: 'GET' })
 
 export const addCategory = createServerFn({ method: 'POST' })
   .middleware([adminRequiredMiddleware])
-  .inputValidator((data) => {
+  .validator((data) => {
     return CATEGORY_FORM_SCHEMA.parse(data)
   })
   .handler(async ({ data, context }) => {
@@ -184,7 +184,7 @@ export const addCategory = createServerFn({ method: 'POST' })
 
 export const editCategory = createServerFn({ method: 'POST' })
   .middleware([adminRequiredMiddleware])
-  .inputValidator((data) => {
+  .validator((data) => {
     return CATEGORY_FORM_SCHEMA.extend({
       id: z.string()
     }).parse(data)
@@ -225,7 +225,7 @@ export const editCategory = createServerFn({ method: 'POST' })
 
 export const deleteCategory = createServerFn({ method: 'POST' })
   .middleware([adminRequiredMiddleware])
-  .inputValidator((data) => {
+  .validator((data) => {
     return z.string().parse(data)
   })
   .handler(async ({ data: categoryId, context }) => {

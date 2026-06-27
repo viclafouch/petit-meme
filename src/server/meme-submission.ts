@@ -30,7 +30,7 @@ const SUBMISSION_USER_SELECT = {
 } as const satisfies Prisma.MemeSubmissionSelect
 
 export const createMemeSubmission = createServerFn({ method: 'POST' })
-  .inputValidator((data) => {
+  .validator((data) => {
     return CREATE_MEME_SUBMISSION_SCHEMA.parse(data)
   })
   .middleware([createUserRateLimitMiddleware(RATE_LIMIT_SUBMIT_MEME)])

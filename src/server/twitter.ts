@@ -8,7 +8,7 @@ import { captureWithFeature } from '~/lib/sentry'
 import { adminRequiredMiddleware } from '~/server/user-auth'
 
 export const getTweetFromUrl = createServerFn({ method: 'GET' })
-  .inputValidator((url: string) => {
+  .validator((url: string) => {
     return TWEET_LINK_SCHEMA.parse(url)
   })
   .middleware([adminRequiredMiddleware])
@@ -50,7 +50,7 @@ const fetchAsBase64 = async (url: string) => {
 }
 
 export const fetchTweetVideo = createServerFn({ method: 'GET' })
-  .inputValidator((data) => {
+  .validator((data) => {
     return FETCH_TWEET_VIDEO_SCHEMA.parse(data)
   })
   .middleware([adminRequiredMiddleware])

@@ -350,7 +350,7 @@ async function fetchTrendingCategoryMemes(
 }
 
 export const getMemeById = createServerFn({ method: 'GET' })
-  .inputValidator((data) => {
+  .validator((data) => {
     return z.string().parse(data)
   })
   .handler(async ({ data: memeId }) => {
@@ -399,7 +399,7 @@ export const getMemeById = createServerFn({ method: 'GET' })
   })
 
 export const getVideoStatusById = createServerFn({ method: 'GET' })
-  .inputValidator((data) => {
+  .validator((data) => {
     return z.number().parse(data)
   })
   .middleware([authUserRequiredMiddleware])
@@ -423,7 +423,7 @@ export const getVideoStatusById = createServerFn({ method: 'GET' })
   })
 
 export const getMemes = createServerFn({ method: 'GET' })
-  .inputValidator(MEMES_FILTERS_SCHEMA)
+  .validator(MEMES_FILTERS_SCHEMA)
   .handler(async ({ data }) => {
     const locale = getLocale()
     const hasQuery = Boolean(data.query)
@@ -543,7 +543,7 @@ const getBestMemesInternal = createServerOnlyFn(
 )
 
 export const getRelatedMemes = createServerFn({ method: 'GET' })
-  .inputValidator(z.object({ memeId: z.string(), title: z.string() }))
+  .validator(z.object({ memeId: z.string(), title: z.string() }))
   .handler(async ({ data }) => {
     const locale = getLocale()
     const cacheKey = `related:${locale}:${data.memeId}`
@@ -659,7 +659,7 @@ const GET_RANDOM_MEME_SCHEMA = z.object({
 })
 
 export const getRandomMeme = createServerFn({ method: 'GET' })
-  .inputValidator((data) => {
+  .validator((data) => {
     return GET_RANDOM_MEME_SCHEMA.parse(data)
   })
   .handler(async ({ data }) => {
@@ -710,7 +710,7 @@ const buildVideoProxyResponse = (upstream: Response) => {
 }
 
 export const shareMeme = createServerFn({ method: 'GET' })
-  .inputValidator((data) => {
+  .validator((data) => {
     return z.string().parse(data)
   })
   .middleware([createRateLimitMiddleware(RATE_LIMIT_DOWNLOAD)])
@@ -792,7 +792,7 @@ const TRACK_MEME_ACTION_SCHEMA = z.object({
 })
 
 export const trackMemeAction = createServerFn({ method: 'POST' })
-  .inputValidator((data) => {
+  .validator((data) => {
     return TRACK_MEME_ACTION_SCHEMA.parse(data)
   })
   .middleware([createRateLimitMiddleware(RATE_LIMIT_TRACK)])
@@ -821,7 +821,7 @@ export const trackMemeAction = createServerFn({ method: 'POST' })
   })
 
 export const registerMemeView = createServerFn({ method: 'POST' })
-  .inputValidator((data) => {
+  .validator((data) => {
     return z
       .object({
         memeId: z.string(),

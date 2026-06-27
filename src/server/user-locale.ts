@@ -8,7 +8,7 @@ import { locales } from '~/paraglide/runtime'
 const LOCALE_SCHEMA = z.object({ locale: z.enum(locales) })
 
 export const updateUserLocale = createServerFn({ method: 'POST' })
-  .inputValidator((data) => {
+  .validator((data) => {
     return LOCALE_SCHEMA.parse(data)
   })
   .handler(async ({ data }) => {

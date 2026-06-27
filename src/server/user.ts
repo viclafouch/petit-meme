@@ -145,7 +145,7 @@ const toggleBookmark = createServerOnlyFn(
 )
 
 export const toggleBookmarkByMemeId = createServerFn({ method: 'POST' })
-  .inputValidator((data) => {
+  .validator((data) => {
     return z.string().parse(data)
   })
   .middleware([authUserRequiredMiddleware])
@@ -347,7 +347,7 @@ export const exportUserData = createServerFn({ method: 'GET' })
   })
 
 export const incrementGenerationCount = createServerFn({ method: 'POST' })
-  .inputValidator((data) => {
+  .validator((data) => {
     return z.object({ memeId: z.string() }).parse(data)
   })
   .middleware([authUserRequiredMiddleware])

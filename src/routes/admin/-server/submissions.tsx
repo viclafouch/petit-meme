@@ -41,7 +41,7 @@ const ADMIN_SUBMISSION_STATUS_FILTER_SCHEMA = z
   .optional()
 
 export const getAdminSubmissions = createServerFn({ method: 'GET' })
-  .inputValidator((data) => {
+  .validator((data) => {
     return ADMIN_SUBMISSION_STATUS_FILTER_SCHEMA.parse(data)
   })
   .middleware([adminRequiredMiddleware])
@@ -95,7 +95,7 @@ const UPDATE_SUBMISSION_STATUS_SCHEMA = z.discriminatedUnion('status', [
 ])
 
 export const updateSubmissionStatus = createServerFn({ method: 'POST' })
-  .inputValidator((data) => {
+  .validator((data) => {
     return UPDATE_SUBMISSION_STATUS_SCHEMA.parse(data)
   })
   .middleware([adminRequiredMiddleware])
@@ -200,7 +200,7 @@ export const updateSubmissionStatus = createServerFn({ method: 'POST' })
   })
 
 export const deleteSubmission = createServerFn({ method: 'POST' })
-  .inputValidator((data) => {
+  .validator((data) => {
     return z.string().parse(data)
   })
   .middleware([adminRequiredMiddleware])

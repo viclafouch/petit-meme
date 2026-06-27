@@ -214,7 +214,7 @@ const cancelActiveSubscription = async (stripeCustomerId: string | null) => {
 
 export const banUserById = createServerFn({ method: 'POST' })
   .middleware([adminRequiredMiddleware])
-  .inputValidator(BAN_USER_SCHEMA)
+  .validator(BAN_USER_SCHEMA)
   .handler(async ({ data, context }) => {
     if (data.userId === context.user.id) {
       setResponseStatus(422)
@@ -304,7 +304,7 @@ export const banUserById = createServerFn({ method: 'POST' })
 
 export const unbanUserById = createServerFn({ method: 'POST' })
   .middleware([adminRequiredMiddleware])
-  .inputValidator(z.string())
+  .validator(z.string())
   .handler(async ({ data: userId, context }) => {
     const targetUser = await prismaClient.user.findUnique({
       where: { id: userId },
@@ -352,7 +352,7 @@ export const unbanUserById = createServerFn({ method: 'POST' })
 
 export const removeUser = createServerFn({ method: 'POST' })
   .middleware([adminRequiredMiddleware])
-  .inputValidator(z.string())
+  .validator(z.string())
   .handler(async ({ data: userId, context }) => {
     if (userId === context.user.id) {
       setResponseStatus(422)

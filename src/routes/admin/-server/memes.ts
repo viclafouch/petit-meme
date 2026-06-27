@@ -64,7 +64,7 @@ const ALGOLIA_CONTENT_LOCALE_FILTERS = {
 } as const satisfies Record<MemeContentLocale, string>
 
 export const getAdminMemeById = createServerFn({ method: 'GET' })
-  .inputValidator((data) => {
+  .validator((data) => {
     return z.string().parse(data)
   })
   .middleware([adminRequiredMiddleware])
@@ -233,7 +233,7 @@ function buildTranslationUpserts({
 }
 
 export const editMeme = createServerFn({ method: 'POST' })
-  .inputValidator((data) => {
+  .validator((data) => {
     return MEME_FORM_SCHEMA.extend({ id: z.string() }).parse(data)
   })
   .middleware([adminRequiredMiddleware])
@@ -368,7 +368,7 @@ export const editMeme = createServerFn({ method: 'POST' })
   })
 
 export const deleteMemeById = createServerFn({ method: 'POST' })
-  .inputValidator((data) => {
+  .validator((data) => {
     return z.string().parse(data)
   })
   .middleware([adminRequiredMiddleware])
@@ -523,7 +523,7 @@ async function createMemeWithVideo({
 }
 
 export const createMemeFromTwitterUrl = createServerFn({ method: 'POST' })
-  .inputValidator((url: string) => {
+  .validator((url: string) => {
     return TWEET_LINK_SCHEMA.parse(url)
   })
   .middleware([adminRequiredMiddleware])
@@ -556,7 +556,7 @@ export const CREATE_MEME_FROM_FILE_SCHEMA = z.object({
 })
 
 export const createMemeFromFile = createServerFn({ method: 'POST' })
-  .inputValidator((data) => {
+  .validator((data) => {
     const formData = z.instanceof(FormData).parse(data)
 
     return CREATE_MEME_FROM_FILE_SCHEMA.parse({
@@ -576,7 +576,7 @@ export type AdminMemeRecord = AlgoliaMemeRecord & {
 
 export const getAdminMemes = createServerFn({ method: 'GET' })
   .middleware([adminRequiredMiddleware])
-  .inputValidator(MEMES_SEARCH_SCHEMA)
+  .validator(MEMES_SEARCH_SCHEMA)
   .handler(async ({ data }) => {
     const filterParts: string[] = []
 

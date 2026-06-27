@@ -31,7 +31,7 @@ async function findMemeBunnyId(memeId: Meme['id']) {
 }
 
 export const checkMemeWatermark = createServerFn({ method: 'GET' })
-  .inputValidator((data) => {
+  .validator((data) => {
     return z.string().parse(data)
   })
   .middleware([adminRequiredMiddleware])
@@ -43,7 +43,7 @@ export const checkMemeWatermark = createServerFn({ method: 'GET' })
   })
 
 export const getWatermarkUploadConfig = createServerFn({ method: 'POST' })
-  .inputValidator((data) => {
+  .validator((data) => {
     return z.string().parse(data)
   })
   .middleware([adminRequiredMiddleware])
@@ -58,7 +58,7 @@ export const getWatermarkUploadConfig = createServerFn({ method: 'POST' })
   })
 
 export const logWatermarkUpload = createServerFn({ method: 'POST' })
-  .inputValidator((data) => {
+  .validator((data) => {
     return z
       .object({
         memeId: z.string(),
@@ -84,7 +84,7 @@ export const logWatermarkUpload = createServerFn({ method: 'POST' })
   })
 
 export const fetchAdminVideoBlob = createServerFn({ method: 'GET' })
-  .inputValidator((data) => {
+  .validator((data) => {
     return z.string().parse(data)
   })
   .middleware([adminRequiredMiddleware])
@@ -123,7 +123,7 @@ export const fetchAdminVideoBlob = createServerFn({ method: 'GET' })
   })
 
 export const previewMemeWatermark = createServerFn({ method: 'GET' })
-  .inputValidator((data) => {
+  .validator((data) => {
     return z.string().parse(data)
   })
   .middleware([adminRequiredMiddleware])

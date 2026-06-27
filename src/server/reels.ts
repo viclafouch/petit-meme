@@ -10,7 +10,7 @@ import {
 import { getLocale } from '~/paraglide/runtime'
 
 export const getInfiniteReels = createServerFn({ method: 'POST' })
-  .inputValidator((data) => {
+  .validator((data) => {
     return z
       .object({
         excludedIds: z.array(z.string()).default([])

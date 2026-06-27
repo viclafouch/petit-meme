@@ -187,7 +187,7 @@ async function fetchChartData({
 }
 
 export const getAdminChartData = createServerFn({ method: 'GET' })
-  .inputValidator((data) => {
+  .validator((data) => {
     return PERIOD_SCHEMA.parse(data)
   })
   .middleware([adminRequiredMiddleware])

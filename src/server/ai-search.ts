@@ -107,7 +107,7 @@ async function extractSearchKeywords(prompt: string, systemPrompt: string) {
       `AI search: timeout after ${AI_SEARCH_TIMEOUT_MS}ms`
     )
 
-    return result.keywords
+    return result?.keywords ?? [prompt]
   } catch (error) {
     captureWithFeature(error, 'ai-search')
     aiSearchLogger.error(
@@ -134,7 +134,7 @@ function buildAlgoliaFilters(
 }
 
 export const aiSearchMemes = createServerFn({ method: 'POST' })
-  .inputValidator((data) => {
+  .validator((data) => {
     return AI_SEARCH_INPUT_SCHEMA.parse(data)
   })
   .middleware([

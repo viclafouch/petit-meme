@@ -237,7 +237,7 @@ Règles :
 
 export const translateMemeContent = createServerFn({ method: 'POST' })
   .middleware([adminRequiredMiddleware])
-  .inputValidator((data) => {
+  .validator((data) => {
     return z
       .object({
         sourceLocale: z.enum(locales),
@@ -302,7 +302,7 @@ export const translateMemeContent = createServerFn({ method: 'POST' })
 
 export const aiAssistMemeContent = createServerFn({ method: 'POST' })
   .middleware([adminRequiredMiddleware])
-  .inputValidator((data) => {
+  .validator((data) => {
     return z
       .object({
         memeId: z.string().cuid(),

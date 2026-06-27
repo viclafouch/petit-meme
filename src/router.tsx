@@ -89,7 +89,6 @@ export function getRouter() {
       tunnel: '/api/sentry-tunnel',
       environment: process.env.NODE_ENV,
       enabled: IS_PRODUCTION,
-      sendDefaultPii: false,
       integrations: [
         Sentry.tanstackRouterBrowserTracingIntegration(router),
         Sentry.replayIntegration({

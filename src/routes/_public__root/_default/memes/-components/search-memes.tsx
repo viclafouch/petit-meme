@@ -61,14 +61,23 @@ const MemesListWrapper = ({ columnGridCount }: { columnGridCount: number }) => {
     leading: false
   })
 
+  const hasSearchQuery = Boolean(debouncedValue)
+  const categorySlug = slug === 'all' ? undefined : slug
+
   const filters = React.useMemo(() => {
     return {
       query: debouncedValue,
       page: search.page,
-      category: slug === 'all' ? undefined : slug,
+      category: hasSearchQuery ? undefined : categorySlug,
       contentLocales: search.contentLocales
     } satisfies MemesFilters
-  }, [debouncedValue, search.page, slug, search.contentLocales])
+  }, [
+    debouncedValue,
+    search.page,
+    hasSearchQuery,
+    categorySlug,
+    search.contentLocales
+  ])
 
   const memesListQuery = useSuspenseQuery(getMemesListQueryOpts(filters))
 

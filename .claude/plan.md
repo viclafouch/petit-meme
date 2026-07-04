@@ -124,6 +124,19 @@ Remplacer Prisma par Drizzle ORM. Conventions cibles : tables en pluriel, colonn
 
 ---
 
+## Premium Reminder Modal
+
+- [x] Modale de rappel premium pour utilisateurs non-abonnés (connectés et anonymes)
+- Déclencheur : 5s après chargement sur pages mèmes (`/memes/*`)
+- Cooldown : 72h via localStorage
+- Composant : `PremiumReminderDialog` (composition de `PremiumUpsellDialog`)
+- Hook : `usePremiumReminder` avec param `enabled`
+- CTA : lien vers `/pricing`, bouton dismiss "Pas maintenant"
+- Enregistré dans `dialog.store.tsx` (lazy-loaded)
+- i18n FR/EN complet
+
+---
+
 ## Internationalisation — Backlog
 
 - [ ] Synonymes EN Algolia — ajouter via dashboard quand contenu EN atteint une masse critique

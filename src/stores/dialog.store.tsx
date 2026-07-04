@@ -40,6 +40,17 @@ export const DIALOGS = {
         )
       }
     })
+  },
+  'premium-reminder': {
+    component: React.lazy(async () => {
+      return {
+        default: await import('~/components/premium-reminder-dialog').then(
+          (mod) => {
+            return mod.PremiumReminderDialog
+          }
+        )
+      }
+    })
   }
 } as const satisfies Record<string, DialogEntry>
 

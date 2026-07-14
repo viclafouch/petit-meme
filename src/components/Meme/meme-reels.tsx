@@ -259,9 +259,8 @@ export const MemeReels = () => {
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
-            const index = Number.parseInt(
-              entry.target.getAttribute('data-index') ?? '0',
-              10
+            const index = Math.trunc(
+              Number(entry.target.getAttribute('data-index') ?? '0')
             )
             setActiveDebouncer.maybeExecute(index)
           }

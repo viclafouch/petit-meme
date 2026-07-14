@@ -1,7 +1,6 @@
 import type { VariantProps } from 'class-variance-authority'
 import { z } from 'zod'
 import type { badgeVariants } from '~/components/ui/badge'
-// oxlint-disable-next-line unicorn/prefer-export-from -- false positive: used in expressions, not re-exported
 import { DAY, HOUR } from '~/constants/time'
 import type { Prisma } from '~/db/generated/prisma/client'
 import { MemeContentLocale, MemeStatus } from '~/db/generated/prisma/enums'

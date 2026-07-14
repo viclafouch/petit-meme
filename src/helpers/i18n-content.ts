@@ -24,6 +24,7 @@ export const getContentLocaleLabel = (
 ): string => {
   const key: ContentLocaleMessageKey = `meme_content_locale_${contentLocale}`
 
+  // oxlint-disable-next-line import/namespace -- accès dynamique type-safe aux messages Paraglide (key est une union de littéraux)
   return m[key]()
 }
 

@@ -63,7 +63,9 @@ const submissionFormOpts = formOptions({
   defaultValues: {
     title: '',
     url: '',
+    // oxlint-disable-next-line typescript/no-unnecessary-type-assertion -- widen literal to union so TanStack Form infers MemeContentLocale, not "FR"
     contentLocale: MemeContentLocale.FR as MemeContentLocale,
+    // oxlint-disable-next-line typescript/no-unnecessary-type-assertion -- widen literal to boolean so TanStack Form infers boolean, not false
     acceptTerms: false as boolean
   },
   validators: {

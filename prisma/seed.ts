@@ -107,10 +107,13 @@ const clearStripe = async () => {
   console.log(`  ${customers.data.length} customers deleted`)
 }
 
+const bunnyVideoSchema = z.object({ guid: z.string() })
+const bunnyVideosSchema = z.object({ items: z.array(bunnyVideoSchema) })
+
 const clearBunny = async () => {
   console.log('Clearing Bunny CDN videos...')
   const { items } = await fetchWithZod(
-    z.object({ items: z.array(z.object({ guid: z.string() })) }),
+    bunnyVideosSchema,
     `https://video.bunnycdn.com/library/${clientEnv.VITE_BUNNY_LIBRARY_ID}/videos`,
     {
       method: 'GET',

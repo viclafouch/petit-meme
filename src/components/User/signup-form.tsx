@@ -47,7 +47,7 @@ const getSignupFormOpts = () => {
       email: '',
       password: '',
       confirmPassword: '',
-      acceptTerms: false as boolean
+      acceptTerms: false
     },
     validators: {
       onChange: getSignupSchema()

@@ -1,5 +1,4 @@
 import { prismaClient } from '~/db'
-import type { Prisma } from '~/db/generated/prisma/client'
 import { adminLogger } from '~/lib/logger'
 
 export type AuditAction =
@@ -44,7 +43,7 @@ export const logAuditAction = async ({
         actingAdminId,
         targetId,
         targetType,
-        metadata: (metadata ?? {}) as Prisma.InputJsonObject
+        metadata: metadata ?? {}
       }
     })
   } catch (error) {

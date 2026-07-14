@@ -25,7 +25,7 @@ export const useStripeCheckout = () => {
     try {
       const promise = authClient.subscription.billingPortal({
         locale: getLocale(),
-        returnUrl: '/settings' as LinkOptions['to']
+        returnUrl: '/settings'
       })
       toast.promise(promise, {
         loading: m.common_loading(),
@@ -68,7 +68,7 @@ export const useStripeCheckout = () => {
           plan: planName,
           successUrl: '/checkout/success' satisfies LinkOptions['to'],
           cancelUrl: '/pricing' satisfies LinkOptions['to'],
-          returnUrl: '/settings' as LinkOptions['to']
+          returnUrl: '/settings' satisfies LinkOptions['to']
         })
 
         if (error) {

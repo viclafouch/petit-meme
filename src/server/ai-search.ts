@@ -249,11 +249,12 @@ export const aiSearchMemes = createServerFn({ method: 'POST' })
 export const checkAiSearchQuota = createServerFn({ method: 'GET' })
   .middleware([authUserRequiredMiddleware])
   .handler(async ({ context }) => {
+    const monthStart = truncateToUtcMonth(new Date())
     const [monthlyCount, isPremium] = await Promise.all([
       prismaClient.aiSearchLog.count({
         where: {
           userId: context.user.id,
-          createdAt: { gte: truncateToUtcMonth(new Date()) }
+          createdAt: { gte: monthStart }
         }
       }),
       matchIsUserPremium(context.user)

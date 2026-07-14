@@ -322,13 +322,13 @@ export const aiAssistMemeContent = createServerFn({ method: 'POST' })
         targetLocale: data.targetLocale
       })
 
+      const filePart = createPartFromUri(fileUri, fileMimeType)
+      const userContent = createUserContent([filePart, prompt])
+
       const result = await withTimeout(
         ai.models.generateContent({
           model: GEMINI_MODEL,
-          contents: createUserContent([
-            createPartFromUri(fileUri, fileMimeType),
-            prompt
-          ]),
+          contents: userContent,
           config: {
             responseMimeType: 'application/json',
             responseJsonSchema: zodToJsonSchema(aiAssistResultSchema)

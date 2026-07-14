@@ -16,6 +16,7 @@ type StarLayerProps = HTMLMotionProps<'div'> & {
   size: number
   transition: Transition
   starColor: string
+  animated: boolean
 }
 
 function generateStars(count: number, starColor: string) {
@@ -35,6 +36,7 @@ const StarLayer = ({
   size,
   transition,
   starColor,
+  animated,
   className,
   ...props
 }: StarLayerProps) => {
@@ -47,8 +49,8 @@ const StarLayer = ({
   return (
     <motion.div
       data-slot="star-layer"
-      animate={{ y: [0, -2000] }}
-      transition={transition}
+      animate={animated ? { y: [0, -2000] } : undefined}
+      transition={animated ? transition : undefined}
       className={cn(
         'absolute top-0 left-0 w-full h-500 will-change-transform',
         className
@@ -80,6 +82,7 @@ type StarsBackgroundProps = React.ComponentProps<'div'> & {
   speed?: number
   transition?: SpringOptions
   starColor?: string
+  animated?: boolean
 }
 
 export const StarsBackground = ({
@@ -88,6 +91,7 @@ export const StarsBackground = ({
   speed = 50,
   transition = { stiffness: 50, damping: 20 },
   starColor = '#fff',
+  animated = true,
   ...props
 }: StarsBackgroundProps) => {
   const offsetX = useMotionValue(1)
@@ -112,6 +116,7 @@ export const StarsBackground = ({
           size={1}
           transition={{ repeat: Infinity, duration: speed, ease: 'linear' }}
           starColor={starColor}
+          animated={animated}
         />
         <StarLayer
           count={400}
@@ -122,6 +127,7 @@ export const StarsBackground = ({
             ease: 'linear'
           }}
           starColor={starColor}
+          animated={animated}
         />
         <StarLayer
           count={200}
@@ -132,6 +138,7 @@ export const StarsBackground = ({
             ease: 'linear'
           }}
           starColor={starColor}
+          animated={animated}
         />
       </motion.div>
       {children}

@@ -3,7 +3,7 @@ import { StarsBackground } from '~/components/animate-ui/backgrounds/stars'
 
 const RouteComponent = () => {
   return (
-    <StarsBackground>
+    <StarsBackground animated={false}>
       <div className="z-10 relative h-dvh flex flex-col overflow-hidden">
         <Outlet />
       </div>

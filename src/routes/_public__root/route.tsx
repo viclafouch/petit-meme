@@ -1,5 +1,5 @@
 import React from 'react'
-import { createFileRoute, Outlet } from '@tanstack/react-router'
+import { createFileRoute, Outlet, useMatchRoute } from '@tanstack/react-router'
 import { StarsBackground } from '~/components/animate-ui/backgrounds/stars'
 import { Footer } from '~/components/footer'
 import { LocaleBanner } from '~/components/locale-banner'
@@ -11,9 +11,11 @@ import { m } from '~/paraglide/messages.js'
 
 const RouteComponent = () => {
   const { _localeBannerDismissed } = Route.useLoaderData()
+  const matchRoute = useMatchRoute()
+  const isHomePage = Boolean(matchRoute({ to: '/' }))
 
   return (
-    <StarsBackground>
+    <StarsBackground animated={isHomePage}>
       <div className="z-10 relative min-h-dvh flex flex-col">
         <a
           href="#main-content"

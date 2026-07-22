@@ -1,6 +1,5 @@
 import React from 'react'
 import { Plus } from 'lucide-react'
-import { useDebouncedValue } from '@tanstack/react-pacer'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { MemesQuery } from '~/components/Meme/Filters/memes-query'
@@ -23,13 +22,8 @@ import {
 const MemesListWrapper = () => {
   const search = Route.useSearch()
 
-  const [debouncedValue] = useDebouncedValue(search.query, {
-    wait: 300,
-    leading: false
-  })
-
   const filters = {
-    query: debouncedValue,
+    query: search.query,
     page: search.page,
     status: search.status,
     contentLocale: search.contentLocale

@@ -1,7 +1,6 @@
 import React from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { AlertTriangleIcon, RefreshCw } from 'lucide-react'
-import { useDebouncedValue } from '@tanstack/react-pacer'
 import {
   QueryErrorResetBoundary,
   useSuspenseQuery
@@ -52,23 +51,18 @@ const MemesListWrapper = ({ columnGridCount }: { columnGridCount: number }) => {
     from: '/_public__root/_default/memes/category/$slug'
   }).category
 
-  const [debouncedValue] = useDebouncedValue(search.query, {
-    wait: 300,
-    leading: false
-  })
-
-  const hasSearchQuery = Boolean(debouncedValue)
+  const hasSearchQuery = Boolean(search.query)
   const categorySlug = slug === 'all' ? undefined : slug
 
   const filters = React.useMemo(() => {
     return {
-      query: debouncedValue,
+      query: search.query,
       page: search.page,
       category: hasSearchQuery ? undefined : categorySlug,
       contentLocales: search.contentLocales
     } satisfies MemesFilters
   }, [
-    debouncedValue,
+    search.query,
     search.page,
     hasSearchQuery,
     categorySlug,

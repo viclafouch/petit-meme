@@ -1,5 +1,6 @@
 import React from 'react'
 import { Input } from '~/components/ui/input'
+import { useSyncedInputValue } from '~/hooks/use-synced-input-value'
 import { m } from '~/paraglide/messages.js'
 
 type MemesQueryParams = {
@@ -9,14 +10,16 @@ type MemesQueryParams = {
 
 export const MemesQuery = React.memo(
   ({ query, onQueryChange }: MemesQueryParams) => {
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      onQueryChange(event.target.value)
-    }
+    const { inputRef, defaultValue, handleChange } = useSyncedInputValue({
+      externalValue: query,
+      onValueChange: onQueryChange
+    })
 
     return (
       <div className="flex w-full sm:max-w-xs items-center gap-2">
         <Input
-          value={query}
+          ref={inputRef}
+          defaultValue={defaultValue}
           onChange={handleChange}
           type="search"
           placeholder={m.meme_search_placeholder()}

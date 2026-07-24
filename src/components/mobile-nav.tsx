@@ -22,6 +22,8 @@ import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 
 const ACCOUNT_LINK_CLASS = 'flex items-center gap-3 text-lg font-medium'
+const LEGAL_LINK_CLASS =
+  'text-foreground hover:text-primary w-fit py-1 text-base font-medium transition-colors'
 const STICKY_CTA_CLASS =
   'flex w-full items-center justify-center gap-2 rounded-full bg-white py-3 text-base font-semibold text-gray-900 shadow-sm ring-1 ring-black/5'
 
@@ -165,13 +167,13 @@ export const MobileNav = ({ links, user }: MobileNavProps) => {
                 <p className="text-muted-foreground text-sm font-medium">
                   {m.nav_legal()}
                 </p>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-1">
                   {getLegalLinks().map((link) => {
                     return (
                       <Link
                         key={link.to}
                         to={link.to}
-                        className="text-muted-foreground text-sm"
+                        className={LEGAL_LINK_CLASS}
                         onClick={handleClose}
                       >
                         {link.label}

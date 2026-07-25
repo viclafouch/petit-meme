@@ -1,6 +1,6 @@
 import React from 'react'
-import Hls from 'hls.js'
 import { buildVideoStreamUrl } from '~/lib/bunny'
+import { attachHlsSource } from '~/utils/video'
 
 type UseMemeHlsParams = {
   bunnyId: string
@@ -8,7 +8,6 @@ type UseMemeHlsParams = {
 
 export const useMemeHls = ({ bunnyId }: UseMemeHlsParams) => {
   const videoRef = React.useRef<HTMLVideoElement>(null)
-  const hlsRef = React.useRef<Hls>(null)
 
   React.useEffect(() => {
     const video = videoRef.current
@@ -17,24 +16,18 @@ export const useMemeHls = ({ bunnyId }: UseMemeHlsParams) => {
       return () => {}
     }
 
-    const videoSrc = buildVideoStreamUrl(bunnyId)
-
-    if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      video.src = videoSrc
-      // oxlint-disable-next-line import/no-named-as-default-member -- isSupported is a static method, not a named export in hls.js types
-    } else if (Hls.isSupported()) {
-      hlsRef.current = new Hls()
-      hlsRef.current.loadSource(videoSrc)
-      hlsRef.current.attachMedia(video)
-    }
+    const detachHlsSource = attachHlsSource({
+      video,
+      videoSrc: buildVideoStreamUrl(bunnyId)
+    })
 
     return () => {
-      hlsRef.current?.destroy()
+      detachHlsSource()
       video.pause()
       video.removeAttribute('src')
       video.load()
     }
   }, [bunnyId])
 
-  return { videoRef, hlsRef }
+  return { videoRef }
 }

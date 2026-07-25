@@ -1,6 +1,5 @@
 import React from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
-import Hls from 'hls.js'
 import { Pause, Play, Volume2, VolumeX } from 'lucide-react'
 import { useDebouncer } from '@tanstack/react-pacer'
 import { useInfiniteQuery } from '@tanstack/react-query'
@@ -15,6 +14,7 @@ import type { MemeWithVideo } from '~/constants/meme'
 import { buildVideoImageUrl, buildVideoStreamUrl } from '~/lib/bunny'
 import { getInfiniteReelsQueryOpts } from '~/lib/queries'
 import { m } from '~/paraglide/messages.js'
+import { attachHlsSource } from '~/utils/video'
 
 type ReelProps = {
   meme: MemeWithVideo
@@ -63,26 +63,16 @@ export const Reel = React.memo(
     }, [isActive, isPlaying])
 
     React.useLayoutEffect(() => {
-      if (!videoRef.current) {
+      const video = videoRef.current
+
+      if (!video) {
         return () => {}
       }
 
-      const videoSrc = buildVideoStreamUrl(meme.video.bunnyId)
-
-      if (videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
-        videoRef.current.src = videoSrc
-        // oxlint-disable-next-line import/no-named-as-default-member -- isSupported is a static method, not a named export in hls.js types
-      } else if (Hls.isSupported()) {
-        const hls = new Hls()
-        hls.loadSource(videoSrc)
-        hls.attachMedia(videoRef.current)
-
-        return () => {
-          hls.destroy()
-        }
-      }
-
-      return () => {}
+      return attachHlsSource({
+        video,
+        videoSrc: buildVideoStreamUrl(meme.video.bunnyId)
+      })
     }, [meme.video.id, meme.video.bunnyId])
 
     return (

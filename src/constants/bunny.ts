@@ -11,3 +11,5 @@ export const BUNNY_STATUS = {
   CAPTIONS_GENERATED: 9,
   TITLE_OR_DESCRIPTION_GENERATED: 10
 } as const satisfies Record<string, number>
+
+export const HLS_MIME_TYPE = 'application/vnd.apple.mpegurl'

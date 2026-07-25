@@ -109,6 +109,7 @@ model Meme {
   actionsDaily        MemeActionDaily[]
   studioGenerations   StudioGeneration[]
   submissions         MemeSubmission[]
+  activityEvents      ActivityEvent[]
 
   @@index([status])
   @@index([status, viewCount])
@@ -179,6 +180,7 @@ model User {
   adminActions      AdminAuditLog[]    @relation("AdminActions")
   memeSubmissions   MemeSubmission[]
   aiSearchLogs      AiSearchLog[]
+  activityEvents    ActivityEvent[]
 
   @@index([createdAt])
   @@map("user")
@@ -392,4 +394,36 @@ model RecommendCache {
 
   @@index([expiresAt])
   @@map("recommend_cache")
+}
+
+enum ActivityEventType {
+  VIEW
+  DOWNLOAD
+  SHARE
+  GENERATION
+  AI_SEARCH
+  BOOKMARK_ADDED
+  SIGNUP
+  SUBSCRIPTION
+}
+
+model ActivityEvent {
+  id        String            @id @default(cuid())
+  type      ActivityEventType
+  createdAt DateTime          @default(now()) @map("created_at")
+  ipAddress String?           @map("ip_address")
+  userAgent String?           @map("user_agent")
+  userId    String?           @map("user_id")
+  memeId    String?           @map("meme_id")
+  dedupKey  String?           @unique @map("dedup_key")
+  metadata  Json?
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meme Meme? @relation(fields: [memeId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([userId, createdAt])
+  @@index([ipAddress, createdAt])
+  @@index([type, createdAt])
+  @@map("activity_event")
 }

@@ -8,6 +8,7 @@ export const serverEnv = createEnv({
     AUTH_TWITTER_ID: z.string(),
     AUTH_TWITTER_SECRET: z.string(),
     BETTER_AUTH_SECRET: z.string().min(32),
+    VISITOR_KEY_SALT: z.string().min(32),
     BUNNY_ACCESS_KEY: z.string(),
     BUNNY_COLLECTION_ID: z.string(),
     BUNNY_TOKEN_AUTH_KEY: z.string().min(16),

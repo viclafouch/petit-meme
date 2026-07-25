@@ -162,7 +162,8 @@ Relations inverses à ajouter : `activityEvents ActivityEvent[]` sur `User` et s
 Nom de migration : `add_activity_event`.
 
 - [x] Enum `ActivityEventType`, model `ActivityEvent` et relations inverses (`User`, `Meme`) écrits dans `prisma/schema.prisma`
-- [ ] Migration `add_activity_event` créée et appliquée en local (à lancer par Victor)
+- [x] Migration `20260725094442_add_activity_event` créée et appliquée en local. Elle embarque aussi deux colonnes `subscription` (`ended_at`, `stripe_schedule_id`) présentes dans le schema mais jamais migrées, additives et nullables
+- [ ] `prisma:migrate:prod` après déploiement
 
 ### 1.2 Le VisitorKey
 

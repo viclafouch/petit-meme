@@ -94,15 +94,15 @@ Ne pas tout déployer d'un coup. Deux déploiements distincts, pour que la seule
 Ton habitude documentée est de pousser puis de migrer. **Ici c'est l'inverse.** La migration étant purement additive, l'appliquer avant que le code n'arrive est sans danger : la table reste vide. L'ordre inverse ouvre une fenêtre pendant laquelle le code écrit dans une table inexistante. Comme les écritures passent par `waitUntil` avec un `catch`, elles échoueraient **silencieusement**, et tu ne verrais que du bruit dans Sentry.
 
 1. [x] `VISITOR_KEY_SALT` ajouté dans Vercel (Production et Preview, 64 caractères, vérifié le 2026-07-25). **Sans elle, le déploiement crashe au démarrage** sur la validation Zod de `src/env/server.ts`
-2. [ ] `vercel env pull --environment=production .env.production` (le drapeau est obligatoire, sinon le CLI tire le scope development)
-3. [ ] `pnpm run prisma:migrate:prod`
-4. [ ] `git push`, qui déclenche le déploiement Vercel
+2. [x] `vercel env pull --environment=production .env.production` (le drapeau est obligatoire, sinon le CLI tire le scope development)
+3. [x] `pnpm run prisma:migrate:prod` — `migrate status` confirme les 32 migrations appliquées
+4. [x] `git push`, qui déclenche le déploiement Vercel
 5. [ ] Vérifier dans Sentry qu'aucune erreur d'écriture ne remonte
 
 ### Recette en dev avant toute bascule en prod
 
-- [ ] `pnpm exec dotenv -e .env.development -- pnpm exec prisma migrate dev --name add_activity_event`
-- [ ] Relire le `migration.sql` généré, vérifier qu'il ne contient aucune opération destructive
+- [x] `pnpm exec dotenv -e .env.development -- pnpm exec prisma migrate dev --name add_activity_event`
+- [x] Relire le `migration.sql` généré, vérifier qu'il ne contient aucune opération destructive
 - [ ] Lancer l'app, regarder un meme jusqu'au bout : une ligne `VIEW` apparaît
 - [ ] Regarder **le même meme une seconde fois** : aucune ligne supplémentaire, la déduplication fonctionne
 - [ ] Regarder un **autre** meme : une nouvelle ligne apparaît

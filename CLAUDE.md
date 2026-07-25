@@ -40,7 +40,8 @@ pnpm exec dotenv -e .env.development -- pnpm exec prisma migrate dev --name <nam
 pnpm run prisma:migrate:dev    # uses .env.development
 
 # Apply pending migrations (prod) — pull env first
-vercel env pull .env.production
+# --environment=production is required: without it the CLI pulls the development scope
+vercel env pull --environment=production .env.production
 pnpm run prisma:migrate:prod   # uses .env.production
 
 # Other

@@ -113,7 +113,7 @@ Vercel auto-deploys on push to `main`. After a deploy that includes new migratio
 pnpm run prisma:migrate:prod
 ```
 
-This uses `.env.production` (pulled via `vercel env pull .env.production`) which contains the production `DATABASE_URL`. It applies only pending migrations and is safe and idempotent.
+This uses `.env.production` (pulled via `vercel env pull --environment=production .env.production`, the flag is required or the CLI pulls the development scope) which contains the production `DATABASE_URL`. It applies only pending migrations and is safe and idempotent.
 
 ### Rules
 

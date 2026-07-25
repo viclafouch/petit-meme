@@ -51,11 +51,13 @@ Après le deploy Vercel, appliquer les migrations contre la base Neon :
 
 ```bash
 # 1. Tirer les variables d'environnement de prod depuis Vercel
-vercel env pull .env.production
+vercel env pull --environment=production .env.production
 
 # 2. Appliquer les migrations pendantes
 pnpm run prisma:migrate:prod
 ```
+
+**`--environment=production` n'est pas optionnel.** Sans ce drapeau, `vercel env pull` tire le scope *development*, quel que soit le nom du fichier de destination. Le fichier obtenu s'appellerait `.env.production` sans contenir les variables de production.
 
 Le script `prisma:migrate:prod` utilise `dotenv -e .env.production -- prisma migrate deploy`. `migrate deploy` est safe : il n'applique que les migrations non encore appliquées et ne touche jamais au schema directement.
 
@@ -68,7 +70,7 @@ Le script `prisma:migrate:prod` utilise `dotenv -e .env.production -- prisma mig
 | `pnpm exec dotenv -e .env.development -- pnpm exec prisma migrate dev --name <nom>` | Local | Créer + appliquer une migration |
 | `pnpm exec dotenv -e .env.development -- pnpm exec prisma generate` | Local | Régénérer le client (aussi dans `postinstall`) |
 | `pnpm run prisma:migrate:dev` | Local | Appliquer les migrations pendantes (via `.env.development`) |
-| `vercel env pull .env.production` | — | Tirer les env de prod depuis Vercel |
+| `vercel env pull --environment=production .env.production` | — | Tirer les env de prod depuis Vercel |
 | `pnpm run prisma:migrate:prod` | Production | Appliquer les migrations pendantes (via `.env.production`) |
 
 ### Ce que Claude Code ne doit JAMAIS faire

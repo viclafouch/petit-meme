@@ -93,8 +93,8 @@ Ne pas tout déployer d'un coup. Deux déploiements distincts, pour que la seule
 
 Ton habitude documentée est de pousser puis de migrer. **Ici c'est l'inverse.** La migration étant purement additive, l'appliquer avant que le code n'arrive est sans danger : la table reste vide. L'ordre inverse ouvre une fenêtre pendant laquelle le code écrit dans une table inexistante. Comme les écritures passent par `waitUntil` avec un `catch`, elles échoueraient **silencieusement**, et tu ne verrais que du bruit dans Sentry.
 
-1. [ ] `VISITOR_KEY_SALT` ajouté dans Vercel. **Sans elle, le déploiement crashe au démarrage** sur la validation Zod de `src/env/server.ts`
-2. [ ] `vercel env pull .env.production`
+1. [x] `VISITOR_KEY_SALT` ajouté dans Vercel (Production et Preview, 64 caractères, vérifié le 2026-07-25). **Sans elle, le déploiement crashe au démarrage** sur la validation Zod de `src/env/server.ts`
+2. [ ] `vercel env pull --environment=production .env.production` (le drapeau est obligatoire, sinon le CLI tire le scope development)
 3. [ ] `pnpm run prisma:migrate:prod`
 4. [ ] `git push`, qui déclenche le déploiement Vercel
 5. [ ] Vérifier dans Sentry qu'aucune erreur d'écriture ne remonte
@@ -228,7 +228,7 @@ Dans `runRetentionCleanup` (`src/routes/api/cron/cleanup.ts`), deux constantes :
 
 - [x] `VISITOR_KEY_SALT: z.string().min(32)` ajouté à `src/env/server.ts`
 - [x] `VISITOR_KEY_SALT` renseigné dans `.env.development`, documenté dans `.env.example`
-- [ ] `VISITOR_KEY_SALT` créé dans Vercel (puis `vercel env pull .env.production`)
+- [x] `VISITOR_KEY_SALT` créé dans Vercel, scopes Production et Preview (le scope Development reste vide, sans effet : en local on lit `.env.development`)
 - [ ] Créer et tester la migration en dev, puis l'appliquer en prod **avant** de pousser le code. Voir « Ordre des opérations » dans la section Migrations et ruptures de données
 
 ---

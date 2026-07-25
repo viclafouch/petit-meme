@@ -6,7 +6,7 @@ import { BASE_MARKDOWN_COMPONENTS } from '~/constants/markdown'
 import { buildOgImageUrl, seo } from '~/lib/seo'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
-import { type Locale } from '~/paraglide/runtime'
+import type { Locale } from '~/paraglide/runtime'
 
 const MARKDOWN_LOADERS = {
   fr: () => {

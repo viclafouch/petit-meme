@@ -1,6 +1,7 @@
 import { ArrowLeft, EyeOff } from 'lucide-react'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { CountryFlag } from '~/components/country-flag'
 import { PageHeader } from '~/components/page-header'
 import { Badge } from '~/components/ui/badge'
 import { buttonVariants } from '~/components/ui/button'
@@ -78,7 +79,14 @@ const RouteComponent = () => {
   return (
     <Container>
       <PageHeader
-        title={<span className="font-mono break-all">{ip}</span>}
+        title={
+          <span className="flex flex-wrap items-center gap-2">
+            {detailQuery.data.country ? (
+              <CountryFlag countryCode={detailQuery.data.country} size="md" />
+            ) : null}
+            <span className="font-mono break-all">{ip}</span>
+          </span>
+        }
         description={
           <div className="flex flex-col gap-2">
             <span className="text-sm text-muted-foreground" aria-live="polite">

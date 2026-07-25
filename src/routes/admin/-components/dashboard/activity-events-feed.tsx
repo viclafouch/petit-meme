@@ -1,3 +1,4 @@
+import { CountryFlag } from '~/components/country-flag'
 import {
   ActivityTypeIcon,
   formatActivityEntry
@@ -14,10 +15,15 @@ const ActivityActor = ({ entry }: ActivityActorParams) => {
     return <FeedActor name={entry.user.name} image={entry.user.image} />
   }
 
-  return entry.ipAddress ? (
-    <span className="truncate font-mono">{entry.ipAddress}</span>
-  ) : (
-    <span className="truncate">Anonyme</span>
+  if (!entry.ipAddress) {
+    return <span className="truncate">Anonyme</span>
+  }
+
+  return (
+    <span className="flex min-w-0 items-center gap-1.5">
+      {entry.country ? <CountryFlag countryCode={entry.country} /> : null}
+      <span className="truncate font-mono">{entry.ipAddress}</span>
+    </span>
   )
 }
 

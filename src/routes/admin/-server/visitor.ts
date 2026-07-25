@@ -29,9 +29,14 @@ export const getAdminVisitorDetail = createServerFn({ method: 'GET' })
   .handler(async ({ data: ipAddress }) => {
     const where = buildVisitorWhere(ipAddress)
 
-    const [summary, memeGroups, userAgentGroups, userGroups] =
+    const [summary, latestCountry, memeGroups, userAgentGroups, userGroups] =
       await Promise.all([
         fetchActivitySummary(where),
+        prismaClient.activityEvent.findFirst({
+          where: { ...where, country: { not: null } },
+          orderBy: { createdAt: 'desc' },
+          select: { country: true }
+        }),
         prismaClient.activityEvent.groupBy({
           by: ['memeId'],
           where: { ...where, memeId: { not: null } },
@@ -111,6 +116,7 @@ export const getAdminVisitorDetail = createServerFn({ method: 'GET' })
 
     return {
       ipAddress,
+      country: latestCountry?.country ?? null,
       summary,
       memes: memeCounts.flatMap((entry) => {
         const meme = memeById.get(entry.memeId)

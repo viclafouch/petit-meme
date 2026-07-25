@@ -9,6 +9,7 @@ import {
   SidebarProvider,
   SidebarTrigger
 } from '~/components/ui/sidebar'
+import { FLAG_CDN_ORIGIN } from '~/helpers/country'
 import { useTheme } from '~/lib/theme'
 import { AdminNavButton } from '~/routes/admin/-components/admin-nav-button'
 import { AdminSidebar } from '~/routes/admin/-components/admin-sidebar'
@@ -62,7 +63,8 @@ export const Route = createFileRoute('/admin')({
   },
   head: () => {
     return {
-      meta: [{ name: 'robots', content: 'noindex,nofollow' }]
+      meta: [{ name: 'robots', content: 'noindex,nofollow' }],
+      links: [{ rel: 'preconnect', href: FLAG_CDN_ORIGIN }]
     }
   }
 })

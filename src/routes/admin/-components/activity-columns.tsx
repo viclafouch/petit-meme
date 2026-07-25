@@ -13,6 +13,7 @@ import { DAY } from '~/constants/time'
 import { EmptyCell } from '~/routes/admin/-components/empty-cell'
 import { RelativeDateTooltip } from '~/routes/admin/-components/relative-date-tooltip'
 import { TruncatedText } from '~/routes/admin/-components/truncated-text'
+import { VisitorIpLink } from '~/routes/admin/-components/visitor-ip-link'
 import {
   ACTIVITY_TYPE_DISPLAY,
   ActivityTypeIcon,
@@ -108,8 +109,7 @@ export const ACTIVITY_COLUMNS = [
     id: 'detail',
     header: 'Détail',
     cell: (info) => {
-      const { metadata, userAgent } = info.row.original
-      const detail = getActivityMetadataText(metadata) ?? userAgent
+      const detail = getActivityMetadataText(info.row.original.metadata)
 
       if (!detail) {
         return <EmptyCell />
@@ -128,16 +128,15 @@ export const ACTIVITY_COLUMNS = [
     enableSorting: false,
     cell: (info) => {
       const ipAddress = info.getValue()
+      const { country } = info.row.original
 
       if (ipAddress) {
         return (
-          <Link
-            to="/admin/activity/$ip"
-            params={{ ip: ipAddress }}
-            className="block py-1 font-mono text-xs hover:text-primary transition-colors"
-          >
-            {ipAddress}
-          </Link>
+          <VisitorIpLink
+            ipAddress={ipAddress}
+            country={country}
+            className="text-xs"
+          />
         )
       }
 

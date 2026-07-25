@@ -4,7 +4,7 @@ import { waitUntil } from '@vercel/functions'
 import { prismaClient } from '~/db'
 import type { Prisma } from '~/db/generated/prisma/client'
 import type { ActivityEventType } from '~/db/generated/prisma/enums'
-import { extractClientIp } from '~/helpers/request'
+import { extractClientCountry, extractClientIp } from '~/helpers/request'
 import { matchIsUserAdmin } from '~/lib/role'
 import type { SessionUser, UserRoleHolder } from '~/lib/role'
 import { captureWithFeature } from '~/lib/sentry'
@@ -44,6 +44,7 @@ export const recordActivityEvent = createServerOnlyFn(
               dedupKey,
               metadata,
               ipAddress: headers ? extractClientIp(headers) : undefined,
+              country: headers ? extractClientCountry(headers) : undefined,
               userAgent: headers?.get('user-agent') ?? undefined
             }
           ],

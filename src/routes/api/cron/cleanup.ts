@@ -137,7 +137,7 @@ const runRetentionCleanup = async () => {
       createdAt: { lt: activityIpCutoff },
       OR: [{ ipAddress: { not: null } }, { dedupKey: { not: null } }]
     },
-    data: { ipAddress: null, dedupKey: null }
+    data: { ipAddress: null, country: null, dedupKey: null }
   })
 
   log.info(

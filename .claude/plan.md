@@ -68,6 +68,7 @@ Règles générales dans [`.claude/rules/database.md`](rules/database.md). Cette
 | Migration | Contenu | Risque |
 |---|---|---|
 | `add_activity_event` | `CREATE TYPE ActivityEventType`, `CREATE TABLE activity_event`, ses index, les deux relations inverses | **Aucun.** Strictement additif |
+| `add_activity_event_country` | `ALTER TABLE "activity_event" ADD COLUMN "country" TEXT` | **Aucun.** Colonne nullable, aucune valeur par défaut, aucun index |
 
 Aucun `DROP`, aucun `ALTER COLUMN`, aucune colonne rendue obligatoire sur une table existante. Les tables `meme_view_daily`, `meme_action_daily`, `user` et `meme` ne sont pas modifiées.
 
@@ -350,9 +351,88 @@ Conséquence assumée : un visiteur EN voit les dates en heure de Paris. C'est l
 
 ---
 
+## Phase 4 — Le pays d'origine
+
+**Revient sur la décision « géolocalisation hors périmètre » de la phase 3.** Motif : le pays ne coûte rien à collecter (Vercel le pose déjà sur chaque requête) et il change la lecture du flux, une IP nue ne disant rien de qui est derrière.
+
+### Décisions
+
+| Sujet | Décision | Raison |
+|---|---|---|
+| Source | En-tête `x-vercel-ip-country` | Posé par le proxy Vercel sur **chaque** requête, sans restriction de plan. Aucune librairie de géolocalisation, aucune API externe, aucun coût |
+| Granularité | Pays seul, code ISO 3166-1 alpha-2 | Vercel donne aussi ville, région et coordonnées. On ne les prend pas : minimisation, et la ville n'apporte rien à la détection d'abus |
+| Nom du pays | `Intl.DisplayNames` | Aucun mapping en dur, traduit dans la locale courante |
+| Drapeaux | `flagcdn.com`, SVG, `https://flagcdn.com/<code minuscule>.svg` | Choix de Victor **pour le moment**. Aucune dépendance ajoutée, aucun octet de bundle. Contrepartie : requête vers un tiers, uniquement depuis les pages admin |
+| Rétention du pays | **Purgé avec l'IP à 30 jours** | Le pays est une donnée dérivée de l'IP. Le conserver sur la bande 30-90 jours contredirait la décision « Events entre J+30 et J+90 réellement anonymes ». **Conséquence assumée : pas de drapeau sur cette bande, et aucun agrégat géographique historique possible** |
+| Rattrapage | **Aucun, et impossible** | Les Events existants n'ont pas de pays ; ceux de plus de 30 jours ont perdu l'IP dont il aurait fallu le dériver |
+| VPN et proxies | Pays faux, assumé | Vercel géolocalise le point de sortie. Ce n'est pas un bug, c'est la limite de la méthode |
+| Fiche Visitor | Un seul pays pour la page, pas un par ligne | Le pays est une propriété de l'IP, pas de l'Event. Dérivé du dernier Event qui en porte un |
+
+### Collecte
+
+- [x] `country String?` sur `ActivityEvent` (`prisma/schema.prisma`). Pas d'index : aucune requête ne filtre dessus
+- [x] `extractClientCountry` (`src/helpers/request.ts`), à côté d'`extractClientIp` et sur le même motif : prend des `Headers`, rend `undefined` si l'en-tête est absent. `COUNTRY_HEADER_NAME` vient de `@vercel/functions/headers` — le nom de l'en-tête n'est pas écrit en dur. Le sous-chemin `/headers` est un module pur sans import Node, safe au niveau module
+- [x] `recordActivityEvent` (`src/utils/activity-event.ts`) le capte à côté de l'IP et du user-agent. Les `SUBSCRIPTION`, écrits depuis le webhook Stripe, n'ont ni IP ni pays : normal, la garde `headers ?` couvre les deux
+- [x] **En local, `country` est toujours `null`** : l'en-tête n'existe que derrière le proxy Vercel. Ne pas conclure à un bug en dev
+
+### Affichage
+
+- [x] `CountryFlag` (`src/components/country-flag.tsx`), composant partagé unique. Boîte 4:3 à taille fixe (`sm` pour les tables et le feed, `md` pour le titre de la fiche Visitor), `object-contain` et `ring-1 ring-border` : les drapeaux carrés (Suisse) ou en drapeau vertical (Népal) ne sont ni déformés ni rognés, et les drapeaux clairs (Japon) restent visibles sur fond blanc. Le nom du pays est toujours rendu, en `sr-only` par défaut et visible avec `withLabel`
+- [x] **Un code inconnu ne casse pas le rendu** : `getCountryName` (`src/helpers/country.ts`) valide la forme (deux lettres) puis vérifie qu'`Intl.DisplayNames` a bien résolu un nom, `of()` renvoyant le code lui-même quand il ne connaît pas. À défaut, `CountryFlag` rend une icône `Globe` de la même taille que la boîte, libellée `Pays inconnu (T1)`. L'alignement des colonnes ne bouge pas d'une ligne à l'autre, et le code brut reste lisible — utile, `T1` étant le code que Vercel pose sur le trafic Tor
+- [x] `Intl.DisplayNames` mis en cache par locale dans une `Map` au niveau module : une table affiche 50 lignes, la construction n'a pas à être refaite à chaque cellule
+- [x] Les quatre points d'affichage d'une IP : colonne IP d'`activity-columns.tsx` (flux et fiche User), `user-ip-list.tsx`, titre d'`activity/$ip.tsx`, `activity-events-feed.tsx`
+- [x] Fiche Visitor : drapeau `md` dans le titre, à côté de l'IP. Un seul rendu par page
+- [x] **L'absence de drapeau est un état normal**, pas une erreur : aucun Event existant n'a de pays, et la bande 30-90 jours n'en aura jamais. Aucun placeholder, aucun tiret, le drapeau est simplement absent
+- [x] `rounded-sm` aligné sur `FLAG_ICON_CLASS` (`src/components/icon/flags.ts`), la convention des drapeaux FR/GB du sélecteur de langue. La taille, elle, diverge volontairement : le sélecteur affiche un carré `size-4`, le pays est une pastille 4:3
+- [x] `preconnect` vers `flagcdn.com` dans le `head()` d'`admin/route.tsx`, et **pas** dans `__root.tsx` : le site public n'a aucune raison d'ouvrir une connexion vers ce tiers. Pas de `crossOrigin`, les `<img>` n'en portent pas, sans quoi la connexion préchauffée ne serait pas celle réutilisée
+
+### Requêtes
+
+- [x] `country` ajouté à `ACTIVITY_ROW_SELECT` (`-server/activity.ts`), qui sert le flux, la fiche User et l'aperçu du dashboard
+- [x] Fiche User : le `groupBy(['ipAddress'])` existant gagne `_max: { country: true }`. **Zéro requête supplémentaire.** `MAX()` ignore les `NULL` en SQL, ce qui donne exactement « un pays observé pour cette IP, en ignorant les Events qui n'en portent pas ». Grouper par `['ipAddress', 'country']` aurait dédoublé une IP dont le pays a changé, et cassé les clés React de `DetailList`
+- [x] Fiche Visitor : un `findFirst` de plus dans le `Promise.all` existant, `country: { not: null }` trié par `createdAt desc`, soit littéralement « le dernier Event qui en porte un ». Sert l'index `[ipAddress, createdAt]`
+
+### Colonne Détail du flux
+
+- [x] Le repli `?? userAgent` retiré d'`activity-columns.tsx`. **La colonne reste**, elle porte encore le `metadata` : le prompt des `AI_SEARCH` et le plan des `SUBSCRIPTION`. Retirer la colonne entière aurait fait disparaître le prompt de recherche IA, seul endroit de l'admin où il est visible
+- [x] `userAgent` sorti d'`ACTIVITY_ROW_SELECT`, plus aucun lecteur : quelques centaines d'octets de moins par ligne sur les trois tables et l'aperçu du dashboard. Il reste consultable dans le bloc « User-agents observés » de la fiche Visitor, servi par son propre `groupBy`
+
+### RGPD
+
+- [x] Section 2.9 « Journal d'activité », **FR et EN** : le pays ajouté aux catégories, avec la précision explicite que ni la ville, ni la région, ni les coordonnées ne sont déduites. Ligne « Finalités et bases légales » et ligne « Durées de conservation » mises à jour dans les deux markdown
+- [x] La durée est écrite noir sur blanc : le pays n'a **pas** de durée propre, il disparaît avec l'IP à 30 jours
+- [x] `runRetentionCleanup` (`cleanup.ts`) : `country: null` ajouté à l'`updateMany` des 30 jours. Le garde `OR` n'est **pas** élargi : `country` n'est écrit que sur la branche qui écrit aussi `ipAddress`, et `extractClientIp` ne rend jamais `null` (repli `'unknown'`), donc `country != null` implique `ipAddress != null`. Une troisième clause n'aurait sélectionné aucune ligne de plus, pour un prédicat de plus à évaluer sur une bande de 60 jours
+- [x] `exportUserData` (`src/server/user.ts`) : `country` ajouté au select et à la projection des `activityEvents`
+- [x] Suppression de compte : rien à faire, le `ON DELETE CASCADE` d'`activity_event_user_id_fkey` emporte la colonne avec la ligne
+
+### Extractions issues de `/simplify`
+
+- `VisitorIpLink` (`-components/visitor-ip-link.tsx`) : le couple drapeau + IP mono renvoyant vers `/admin/activity/$ip` était écrit deux fois et **avait déjà divergé dans le même commit** (`div` contre `span`, `min-w-0` présent d'un côté seulement, `block py-1` contre `truncate py-1`). Seule la taille du texte reste un paramètre. Le lien enveloppe désormais le drapeau, ce qui agrandit la cible tactile
+- `FLAG_CDN_ORIGIN` et `getCountryFlagUrl` remontés dans `src/helpers/country.ts`, à côté de `getCountryName` : les deux dérivations d'un code pays vivent au même endroit, et changer de CDN ne touche qu'un fichier. Le composant ne fabrique plus d'URL
+- `CountryFlag` perd ses props `withLabel` et `className`, devenues sans appelant une fois le badge retiré. Le nom du pays est toujours en `sr-only`, jamais visible
+
+### Écarté sciemment
+
+- **Unifier les deux dérivations du pays d'une IP.** La fiche User lit `_max: { country: true }` sur un `groupBy` existant (zéro requête de plus, mais sémantique « plus grand code par ordre alphabétique »), la fiche Visitor fait un `findFirst` trié par date (« le dernier Event qui en porte un », exact, une requête de plus). Ce ne sont pas deux réponses à la même question : la fiche User a besoin d'un pays **par IP** pour huit IP, un `findFirst` y coûterait huit requêtes. Les deux coïncident dès lors qu'une IP porte un seul pays, ce qui est l'hypothèse du modèle
+- **Valider le code ISO à l'ingestion** plutôt qu'au rendu : ferait perdre `T1`, le code que Vercel pose sur le trafic Tor, alors que c'est précisément le genre de signal qu'on veut voir dans une enquête d'abus. Le repli `Globe` existe pour l'afficher, pas pour rattraper une donnée sale
+- **Réutiliser `ipAddress()` de `@vercel/functions/headers` dans `extractClientIp`** : le repli `x-forwarded-for` reste nécessaire hors Vercel et ne suit pas la même règle (`.at(-1)` contre première entrée). Hors périmètre, la fonction est antérieure
+- **Mutualiser le cache `Intl.DisplayNames` avec `getLocaleDisplayName`** (`src/helpers/locale.ts`) : type `'language'` contre `'region'`, et le sélecteur de langue appelle deux fois par rendu là où une table en fait cinquante. Le besoin de cache n'est pas le même
+- **Faire passer `activity-events-feed.tsx` et le titre d'`activity/$ip.tsx` par `VisitorIpLink`** : ni l'un ni l'autre n'est un lien (le feed reste cohérent avec son acteur User non cliquable, le titre est la page elle-même), et les y forcer aurait demandé deux props de structure pour trois lignes de JSX chacun
+
+### Reste à faire
+
+- [x] Migration `20260725122957_add_activity_event_country` créée et appliquée en local
+- [x] `migration.sql` relu : un seul `ALTER TABLE "activity_event" ADD COLUMN "country" TEXT`, nullable, sans `DEFAULT` ni `NOT NULL` ni index. `ADD COLUMN` nullable sans défaut ne réécrit pas la table sous Postgres, c'est une modification de catalogue instantanée
+- [x] `prisma:migrate:prod` appliqué le 2026-07-25 à 12:31:05 UTC, un pas, aucun rollback. Vérifié en base : colonne `country` en `text` nullable sans défaut, et **zéro migration en attente** (les 33 dossiers locaux sont tous appliqués)
+- [ ] Vérifier en production qu'un drapeau apparaît sur les nouveaux Events, et qu'aucune erreur d'écriture ne remonte dans Sentry
+
+---
+
 ## Hors périmètre, acté
 
-Bannissement et blocage d'IP, alertes par email au-delà d'un seuil, durcissement de `RATE_LIMIT_DOWNLOAD`, logging de la recherche Algolia, géolocalisation, regroupement des lignes du flux, temps réel par SSE ou WebSocket.
+Bannissement et blocage d'IP, alertes par email au-delà d'un seuil, durcissement de `RATE_LIMIT_DOWNLOAD`, logging de la recherche Algolia, regroupement des lignes du flux, temps réel par SSE ou WebSocket.
+
+Géolocalisation : **sortie du hors-périmètre**, traitée en phase 4, limitée au pays.
 
 À reconsidérer plus tard, une fois qu'il y aura des données à regarder.
 

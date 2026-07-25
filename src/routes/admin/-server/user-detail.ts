@@ -73,7 +73,7 @@ export const getAdminUserDetail = createServerFn({ method: 'GET' })
         by: ['ipAddress'],
         where: { userId, ipAddress: { not: null } },
         _count: { _all: true },
-        _max: { createdAt: true },
+        _max: { createdAt: true, country: true },
         orderBy: { _max: { createdAt: 'desc' } },
         take: USER_IP_LIST_SIZE
       })
@@ -87,6 +87,7 @@ export const getAdminUserDetail = createServerFn({ method: 'GET' })
       return [
         {
           ipAddress: group.ipAddress,
+          country: group._max.country,
           eventCount: group._count._all,
           lastSeenAt: group._max.createdAt
         }

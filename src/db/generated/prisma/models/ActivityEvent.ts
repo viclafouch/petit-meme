@@ -29,6 +29,7 @@ export type ActivityEventMinAggregateOutputType = {
   type: $Enums.ActivityEventType | null
   createdAt: Date | null
   ipAddress: string | null
+  country: string | null
   userAgent: string | null
   userId: string | null
   memeId: string | null
@@ -40,6 +41,7 @@ export type ActivityEventMaxAggregateOutputType = {
   type: $Enums.ActivityEventType | null
   createdAt: Date | null
   ipAddress: string | null
+  country: string | null
   userAgent: string | null
   userId: string | null
   memeId: string | null
@@ -51,6 +53,7 @@ export type ActivityEventCountAggregateOutputType = {
   type: number
   createdAt: number
   ipAddress: number
+  country: number
   userAgent: number
   userId: number
   memeId: number
@@ -65,6 +68,7 @@ export type ActivityEventMinAggregateInputType = {
   type?: true
   createdAt?: true
   ipAddress?: true
+  country?: true
   userAgent?: true
   userId?: true
   memeId?: true
@@ -76,6 +80,7 @@ export type ActivityEventMaxAggregateInputType = {
   type?: true
   createdAt?: true
   ipAddress?: true
+  country?: true
   userAgent?: true
   userId?: true
   memeId?: true
@@ -87,6 +92,7 @@ export type ActivityEventCountAggregateInputType = {
   type?: true
   createdAt?: true
   ipAddress?: true
+  country?: true
   userAgent?: true
   userId?: true
   memeId?: true
@@ -172,6 +178,7 @@ export type ActivityEventGroupByOutputType = {
   type: $Enums.ActivityEventType
   createdAt: Date
   ipAddress: string | null
+  country: string | null
   userAgent: string | null
   userId: string | null
   memeId: string | null
@@ -205,6 +212,7 @@ export type ActivityEventWhereInput = {
   type?: Prisma.EnumActivityEventTypeFilter<"ActivityEvent"> | $Enums.ActivityEventType
   createdAt?: Prisma.DateTimeFilter<"ActivityEvent"> | Date | string
   ipAddress?: Prisma.StringNullableFilter<"ActivityEvent"> | string | null
+  country?: Prisma.StringNullableFilter<"ActivityEvent"> | string | null
   userAgent?: Prisma.StringNullableFilter<"ActivityEvent"> | string | null
   userId?: Prisma.StringNullableFilter<"ActivityEvent"> | string | null
   memeId?: Prisma.StringNullableFilter<"ActivityEvent"> | string | null
@@ -219,6 +227,7 @@ export type ActivityEventOrderByWithRelationInput = {
   type?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   ipAddress?: Prisma.SortOrderInput | Prisma.SortOrder
+  country?: Prisma.SortOrderInput | Prisma.SortOrder
   userAgent?: Prisma.SortOrderInput | Prisma.SortOrder
   userId?: Prisma.SortOrderInput | Prisma.SortOrder
   memeId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -238,6 +247,7 @@ export type ActivityEventWhereUniqueInput = Prisma.AtLeast<{
   type?: Prisma.EnumActivityEventTypeFilter<"ActivityEvent"> | $Enums.ActivityEventType
   createdAt?: Prisma.DateTimeFilter<"ActivityEvent"> | Date | string
   ipAddress?: Prisma.StringNullableFilter<"ActivityEvent"> | string | null
+  country?: Prisma.StringNullableFilter<"ActivityEvent"> | string | null
   userAgent?: Prisma.StringNullableFilter<"ActivityEvent"> | string | null
   userId?: Prisma.StringNullableFilter<"ActivityEvent"> | string | null
   memeId?: Prisma.StringNullableFilter<"ActivityEvent"> | string | null
@@ -251,6 +261,7 @@ export type ActivityEventOrderByWithAggregationInput = {
   type?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   ipAddress?: Prisma.SortOrderInput | Prisma.SortOrder
+  country?: Prisma.SortOrderInput | Prisma.SortOrder
   userAgent?: Prisma.SortOrderInput | Prisma.SortOrder
   userId?: Prisma.SortOrderInput | Prisma.SortOrder
   memeId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -269,6 +280,7 @@ export type ActivityEventScalarWhereWithAggregatesInput = {
   type?: Prisma.EnumActivityEventTypeWithAggregatesFilter<"ActivityEvent"> | $Enums.ActivityEventType
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ActivityEvent"> | Date | string
   ipAddress?: Prisma.StringNullableWithAggregatesFilter<"ActivityEvent"> | string | null
+  country?: Prisma.StringNullableWithAggregatesFilter<"ActivityEvent"> | string | null
   userAgent?: Prisma.StringNullableWithAggregatesFilter<"ActivityEvent"> | string | null
   userId?: Prisma.StringNullableWithAggregatesFilter<"ActivityEvent"> | string | null
   memeId?: Prisma.StringNullableWithAggregatesFilter<"ActivityEvent"> | string | null
@@ -281,6 +293,7 @@ export type ActivityEventCreateInput = {
   type: $Enums.ActivityEventType
   createdAt?: Date | string
   ipAddress?: string | null
+  country?: string | null
   userAgent?: string | null
   dedupKey?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -293,6 +306,7 @@ export type ActivityEventUncheckedCreateInput = {
   type: $Enums.ActivityEventType
   createdAt?: Date | string
   ipAddress?: string | null
+  country?: string | null
   userAgent?: string | null
   userId?: string | null
   memeId?: string | null
@@ -305,6 +319,7 @@ export type ActivityEventUpdateInput = {
   type?: Prisma.EnumActivityEventTypeFieldUpdateOperationsInput | $Enums.ActivityEventType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dedupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -317,6 +332,7 @@ export type ActivityEventUncheckedUpdateInput = {
   type?: Prisma.EnumActivityEventTypeFieldUpdateOperationsInput | $Enums.ActivityEventType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -329,6 +345,7 @@ export type ActivityEventCreateManyInput = {
   type: $Enums.ActivityEventType
   createdAt?: Date | string
   ipAddress?: string | null
+  country?: string | null
   userAgent?: string | null
   userId?: string | null
   memeId?: string | null
@@ -341,6 +358,7 @@ export type ActivityEventUpdateManyMutationInput = {
   type?: Prisma.EnumActivityEventTypeFieldUpdateOperationsInput | $Enums.ActivityEventType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dedupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -351,6 +369,7 @@ export type ActivityEventUncheckedUpdateManyInput = {
   type?: Prisma.EnumActivityEventTypeFieldUpdateOperationsInput | $Enums.ActivityEventType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -379,6 +398,7 @@ export type ActivityEventCountOrderByAggregateInput = {
   type?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   ipAddress?: Prisma.SortOrder
+  country?: Prisma.SortOrder
   userAgent?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   memeId?: Prisma.SortOrder
@@ -391,6 +411,7 @@ export type ActivityEventMaxOrderByAggregateInput = {
   type?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   ipAddress?: Prisma.SortOrder
+  country?: Prisma.SortOrder
   userAgent?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   memeId?: Prisma.SortOrder
@@ -402,6 +423,7 @@ export type ActivityEventMinOrderByAggregateInput = {
   type?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   ipAddress?: Prisma.SortOrder
+  country?: Prisma.SortOrder
   userAgent?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   memeId?: Prisma.SortOrder
@@ -501,6 +523,7 @@ export type ActivityEventCreateWithoutMemeInput = {
   type: $Enums.ActivityEventType
   createdAt?: Date | string
   ipAddress?: string | null
+  country?: string | null
   userAgent?: string | null
   dedupKey?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -512,6 +535,7 @@ export type ActivityEventUncheckedCreateWithoutMemeInput = {
   type: $Enums.ActivityEventType
   createdAt?: Date | string
   ipAddress?: string | null
+  country?: string | null
   userAgent?: string | null
   userId?: string | null
   dedupKey?: string | null
@@ -552,6 +576,7 @@ export type ActivityEventScalarWhereInput = {
   type?: Prisma.EnumActivityEventTypeFilter<"ActivityEvent"> | $Enums.ActivityEventType
   createdAt?: Prisma.DateTimeFilter<"ActivityEvent"> | Date | string
   ipAddress?: Prisma.StringNullableFilter<"ActivityEvent"> | string | null
+  country?: Prisma.StringNullableFilter<"ActivityEvent"> | string | null
   userAgent?: Prisma.StringNullableFilter<"ActivityEvent"> | string | null
   userId?: Prisma.StringNullableFilter<"ActivityEvent"> | string | null
   memeId?: Prisma.StringNullableFilter<"ActivityEvent"> | string | null
@@ -564,6 +589,7 @@ export type ActivityEventCreateWithoutUserInput = {
   type: $Enums.ActivityEventType
   createdAt?: Date | string
   ipAddress?: string | null
+  country?: string | null
   userAgent?: string | null
   dedupKey?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -575,6 +601,7 @@ export type ActivityEventUncheckedCreateWithoutUserInput = {
   type: $Enums.ActivityEventType
   createdAt?: Date | string
   ipAddress?: string | null
+  country?: string | null
   userAgent?: string | null
   memeId?: string | null
   dedupKey?: string | null
@@ -612,6 +639,7 @@ export type ActivityEventCreateManyMemeInput = {
   type: $Enums.ActivityEventType
   createdAt?: Date | string
   ipAddress?: string | null
+  country?: string | null
   userAgent?: string | null
   userId?: string | null
   dedupKey?: string | null
@@ -623,6 +651,7 @@ export type ActivityEventUpdateWithoutMemeInput = {
   type?: Prisma.EnumActivityEventTypeFieldUpdateOperationsInput | $Enums.ActivityEventType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dedupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -634,6 +663,7 @@ export type ActivityEventUncheckedUpdateWithoutMemeInput = {
   type?: Prisma.EnumActivityEventTypeFieldUpdateOperationsInput | $Enums.ActivityEventType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dedupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -645,6 +675,7 @@ export type ActivityEventUncheckedUpdateManyWithoutMemeInput = {
   type?: Prisma.EnumActivityEventTypeFieldUpdateOperationsInput | $Enums.ActivityEventType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dedupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -656,6 +687,7 @@ export type ActivityEventCreateManyUserInput = {
   type: $Enums.ActivityEventType
   createdAt?: Date | string
   ipAddress?: string | null
+  country?: string | null
   userAgent?: string | null
   memeId?: string | null
   dedupKey?: string | null
@@ -667,6 +699,7 @@ export type ActivityEventUpdateWithoutUserInput = {
   type?: Prisma.EnumActivityEventTypeFieldUpdateOperationsInput | $Enums.ActivityEventType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dedupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -678,6 +711,7 @@ export type ActivityEventUncheckedUpdateWithoutUserInput = {
   type?: Prisma.EnumActivityEventTypeFieldUpdateOperationsInput | $Enums.ActivityEventType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dedupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -689,6 +723,7 @@ export type ActivityEventUncheckedUpdateManyWithoutUserInput = {
   type?: Prisma.EnumActivityEventTypeFieldUpdateOperationsInput | $Enums.ActivityEventType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dedupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -702,6 +737,7 @@ export type ActivityEventSelect<ExtArgs extends runtime.Types.Extensions.Interna
   type?: boolean
   createdAt?: boolean
   ipAddress?: boolean
+  country?: boolean
   userAgent?: boolean
   userId?: boolean
   memeId?: boolean
@@ -716,6 +752,7 @@ export type ActivityEventSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   type?: boolean
   createdAt?: boolean
   ipAddress?: boolean
+  country?: boolean
   userAgent?: boolean
   userId?: boolean
   memeId?: boolean
@@ -730,6 +767,7 @@ export type ActivityEventSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   type?: boolean
   createdAt?: boolean
   ipAddress?: boolean
+  country?: boolean
   userAgent?: boolean
   userId?: boolean
   memeId?: boolean
@@ -744,6 +782,7 @@ export type ActivityEventSelectScalar = {
   type?: boolean
   createdAt?: boolean
   ipAddress?: boolean
+  country?: boolean
   userAgent?: boolean
   userId?: boolean
   memeId?: boolean
@@ -751,7 +790,7 @@ export type ActivityEventSelectScalar = {
   metadata?: boolean
 }
 
-export type ActivityEventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "type" | "createdAt" | "ipAddress" | "userAgent" | "userId" | "memeId" | "dedupKey" | "metadata", ExtArgs["result"]["activityEvent"]>
+export type ActivityEventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "type" | "createdAt" | "ipAddress" | "country" | "userAgent" | "userId" | "memeId" | "dedupKey" | "metadata", ExtArgs["result"]["activityEvent"]>
 export type ActivityEventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.ActivityEvent$userArgs<ExtArgs>
   meme?: boolean | Prisma.ActivityEvent$memeArgs<ExtArgs>
@@ -776,6 +815,7 @@ export type $ActivityEventPayload<ExtArgs extends runtime.Types.Extensions.Inter
     type: $Enums.ActivityEventType
     createdAt: Date
     ipAddress: string | null
+    country: string | null
     userAgent: string | null
     userId: string | null
     memeId: string | null
@@ -1210,6 +1250,7 @@ export interface ActivityEventFieldRefs {
   readonly type: Prisma.FieldRef<"ActivityEvent", 'ActivityEventType'>
   readonly createdAt: Prisma.FieldRef<"ActivityEvent", 'DateTime'>
   readonly ipAddress: Prisma.FieldRef<"ActivityEvent", 'String'>
+  readonly country: Prisma.FieldRef<"ActivityEvent", 'String'>
   readonly userAgent: Prisma.FieldRef<"ActivityEvent", 'String'>
   readonly userId: Prisma.FieldRef<"ActivityEvent", 'String'>
   readonly memeId: Prisma.FieldRef<"ActivityEvent", 'String'>

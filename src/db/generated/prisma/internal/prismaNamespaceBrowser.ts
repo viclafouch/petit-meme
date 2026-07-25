@@ -375,6 +375,7 @@ export const ActivityEventScalarFieldEnum = {
   type: 'type',
   createdAt: 'createdAt',
   ipAddress: 'ipAddress',
+  country: 'country',
   userAgent: 'userAgent',
   userId: 'userId',
   memeId: 'memeId',
@@ -643,6 +644,7 @@ export type RecommendCacheOrderByRelevanceFieldEnum = (typeof RecommendCacheOrde
 export const ActivityEventOrderByRelevanceFieldEnum = {
   id: 'id',
   ipAddress: 'ipAddress',
+  country: 'country',
   userAgent: 'userAgent',
   userId: 'userId',
   memeId: 'memeId',

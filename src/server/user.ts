@@ -285,6 +285,7 @@ export const exportUserData = createServerFn({ method: 'GET' })
             createdAt: true,
             memeId: true,
             ipAddress: true,
+            country: true,
             userAgent: true,
             metadata: true
           },
@@ -373,6 +374,7 @@ export const exportUserData = createServerFn({ method: 'GET' })
           createdAt: event.createdAt,
           memeId: event.memeId,
           ipAddress: event.ipAddress,
+          country: event.country,
           userAgent: event.userAgent,
           metadata: event.metadata
         }

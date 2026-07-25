@@ -107,6 +107,9 @@ enregistrons côté serveur chaque action effectuée sur le service :
   ajout en favori, inscription, souscription d'un abonnement
 - La date et l'heure
 - Votre adresse IP et votre user-agent (navigateur et système d'exploitation)
+- Le pays déduit de votre adresse IP, sous la forme d'un code à deux lettres.
+  Nous ne déduisons ni votre ville, ni votre région, ni vos coordonnées
+  géographiques
 - L'identifiant du mème concerné, lorsque l'action en vise un
 - L'identifiant de votre compte, si vous êtes connecté
 
@@ -115,9 +118,11 @@ pas connectée, c'est le seul moyen de mesurer la fréquentation réelle du site
 et de repérer un usage abusif. Il ne dépose aucun cookie et ne sert ni à la
 publicité ni au profilage.
 
-L'adresse IP est effacée au bout de **30 jours** ; l'enregistrement lui-même
-est supprimé au bout de **90 jours**. Vous pouvez vous opposer à ce traitement
-à l'adresse indiquée en section 11.
+L'adresse IP est effacée au bout de **30 jours**, et le pays qui en est déduit
+disparaît avec elle : il n'a pas de durée de conservation propre. Passé ce
+délai, l'enregistrement ne porte plus aucune donnée de localisation.
+L'enregistrement lui-même est supprimé au bout de **90 jours**. Vous pouvez
+vous opposer à ce traitement à l'adresse indiquée en section 11.
 
 ---
 
@@ -128,7 +133,7 @@ est supprimé au bout de **90 jours**. Vous pouvez vous opposer à ce traitement
 | Création et gestion de compte | Exécution du contrat | Pseudo, e-mail, mot de passe |
 | Authentification et sécurité | Intérêt légitime | Données de session, IP |
 | Comptage des vues uniques | Intérêt légitime | Empreinte quotidienne dérivée de l'adresse IP |
-| Mesure d'audience, sécurité et prévention des abus | Intérêt légitime | Adresse IP, user-agent, actions réalisées et leur date |
+| Mesure d'audience, sécurité et prévention des abus | Intérêt légitime | Adresse IP, pays déduit de l'IP, user-agent, actions réalisées et leur date |
 | Amélioration de la recherche (Algolia Insights) | Consentement | Identifiant anonyme, événements de vue et de clic |
 | Traitement des paiements | Exécution du contrat | Données transmises à Stripe |
 | Envoi d'e-mails transactionnels | Exécution du contrat | Adresse e-mail |
@@ -199,7 +204,7 @@ européenne).
 | Données de génération Studio | 365 jours, puis supprimées automatiquement |
 | Données du journal d'audit administratif | 2 ans, puis supprimées automatiquement |
 | Données de recherche IA | 365 jours, puis supprimées automatiquement |
-| Journal d'activité — adresse IP | 30 jours, puis effacée définitivement |
+| Journal d'activité — adresse IP et pays déduit | 30 jours, puis effacés définitivement |
 | Journal d'activité — enregistrement complet | 90 jours, puis supprimé automatiquement |
 | Date de dernière activité | Effacée à la suppression ou à l'anonymisation du compte |
 | Données de paiement (Stripe) | Selon les obligations légales de Stripe |

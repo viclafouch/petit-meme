@@ -1,3 +1,5 @@
+import { COUNTRY_HEADER_NAME } from '@vercel/functions/headers'
+
 const UNKNOWN_CLIENT_IP = 'unknown'
 
 export const extractClientIp = (headers: Headers) => {
@@ -16,4 +18,10 @@ export const extractClientIp = (headers: Headers) => {
   }
 
   return UNKNOWN_CLIENT_IP
+}
+
+export const extractClientCountry = (headers: Headers) => {
+  const country = headers.get(COUNTRY_HEADER_NAME)?.trim()
+
+  return country ? country.toUpperCase() : undefined
 }

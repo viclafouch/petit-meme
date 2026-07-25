@@ -412,6 +412,7 @@ model ActivityEvent {
   type      ActivityEventType
   createdAt DateTime          @default(now()) @map("created_at")
   ipAddress String?           @map("ip_address")
+  country   String?
   userAgent String?           @map("user_agent")
   userId    String?           @map("user_id")
   memeId    String?           @map("meme_id")

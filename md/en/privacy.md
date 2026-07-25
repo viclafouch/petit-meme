@@ -101,6 +101,8 @@ performed on the service:
   added, sign-up, subscription
 - The date and time
 - Your IP address and your user-agent (browser and operating system)
+- The country inferred from your IP address, as a two-letter code. We infer
+  neither your city, nor your region, nor your geographic coordinates
 - The identifier of the meme concerned, when the action targets one
 - Your account identifier, if you are signed in
 
@@ -109,9 +111,11 @@ signed in, it is the only way to measure actual usage of the site and to spot
 abusive behaviour. It sets no cookie and is used neither for advertising nor
 for profiling.
 
-The IP address is erased after **30 days**; the record itself is deleted after
-**90 days**. You may object to this processing at the address given in
-section 11.
+The IP address is erased after **30 days**, and the country inferred from it
+disappears along with it: it has no retention period of its own. Past that
+point, the record carries no location data at all. The record itself is
+deleted after **90 days**. You may object to this processing at the address
+given in section 11.
 
 ---
 
@@ -122,7 +126,7 @@ section 11.
 | Account creation and management | Performance of contract | Username, email, password |
 | Authentication and security | Legitimate interest | Session data, IP |
 | Unique view counting | Legitimate interest | Daily fingerprint derived from the IP address |
-| Audience measurement, security and abuse prevention | Legitimate interest | IP address, user-agent, actions performed and their date |
+| Audience measurement, security and abuse prevention | Legitimate interest | IP address, country inferred from the IP, user-agent, actions performed and their date |
 | Search improvement (Algolia Insights) | Consent | Anonymous identifier, view and click events |
 | Payment processing | Performance of contract | Data transmitted to Stripe |
 | Sending transactional emails | Performance of contract | Email address |
@@ -191,7 +195,7 @@ place (European Commission standard contractual clauses).
 | Studio generation data | 365 days, then automatically deleted |
 | Administrative audit log data | 2 years, then automatically deleted |
 | AI search data | 365 days, then automatically deleted |
-| Activity log — IP address | 30 days, then permanently erased |
+| Activity log — IP address and inferred country | 30 days, then permanently erased |
 | Activity log — full record | 90 days, then automatically deleted |
 | Last activity date | Cleared upon account deletion or anonymization |
 | Payment data (Stripe) | Per Stripe's legal obligations |

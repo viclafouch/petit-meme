@@ -13,7 +13,7 @@ const ACTIVITY_ROW_SELECT = {
   type: true,
   createdAt: true,
   ipAddress: true,
-  userAgent: true,
+  country: true,
   metadata: true,
   user: { select: { id: true, name: true, email: true, image: true } },
   meme: { select: { id: true, title: true } }

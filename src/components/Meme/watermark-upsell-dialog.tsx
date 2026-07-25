@@ -6,9 +6,8 @@ import type { WithDialog } from '~/@types/dialog'
 import { PremiumUpsellDialog } from '~/components/premium-upsell-dialog'
 import { Button } from '~/components/ui/button'
 import { LoadingSpinner } from '~/components/ui/spinner'
-import type { MemeWithVideo } from '~/constants/meme'
+import type { MemeExportMode, MemeWithVideo } from '~/constants/meme'
 import { getErrorMessage } from '~/helpers/error'
-import type { MemeExportMode } from '~/hooks/use-meme-export'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
 import { shareMeme, trackMemeAction } from '~/server/meme'
@@ -48,7 +47,7 @@ export const WatermarkUpsellDialog = ({
 }: WithDialog<WatermarkUpsellDialogParams>) => {
   const exportMutation = useMutation({
     mutationFn: async () => {
-      const response = await shareMeme({ data: meme.id })
+      const response = await shareMeme({ data: { memeId: meme.id, mode } })
       const blob = await response.blob()
 
       if (mode === 'download') {

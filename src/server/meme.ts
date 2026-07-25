@@ -5,17 +5,15 @@ import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 import {
   getCookie,
   getRequest,
-  setCookie,
   setResponseStatus
 } from '@tanstack/react-start/server'
 import { prismaClient } from '~/db'
+import { COOKIE_ALGOLIA_USER_TOKEN_KEY } from '~/constants/cookie'
 import {
-  COOKIE_ALGOLIA_USER_TOKEN_KEY,
-  COOKIE_ANON_ID_KEY
-} from '~/constants/cookie'
-import {
+  MEME_EXPORT_MODES,
   MEME_FULL_INCLUDE,
   MEME_TRANSLATION_SELECT,
+  MEME_VIDEO_INTENTS,
   MEMES_FILTERS_SCHEMA,
   MEMES_PER_PAGE,
   MEMES_SEARCH_SCHEMA,
@@ -32,19 +30,23 @@ import {
   TRENDING_WEIGHTS,
   VIRTUAL_CATEGORY_SLUGS
 } from '~/constants/meme'
-import { RATE_LIMIT_DOWNLOAD, RATE_LIMIT_TRACK } from '~/constants/rate-limit'
+import type { MemeVideoIntent } from '~/constants/meme'
 import {
-  DAY,
-  ONE_HOUR_MS,
-  ONE_YEAR_IN_SECONDS,
-  THIRTY_DAYS_MS
-} from '~/constants/time'
+  RATE_LIMIT_DOWNLOAD,
+  RATE_LIMIT_TRACK,
+  RATE_LIMIT_VIEW
+} from '~/constants/rate-limit'
+import { DAY, ONE_HOUR_MS, THIRTY_DAYS_MS } from '~/constants/time'
 import { Prisma } from '~/db/generated/prisma/client'
 import {
+  ActivityEventType as ActivityEventTypeEnum,
   MemeContentLocale as MemeContentLocaleEnum,
   MemeStatus
 } from '~/db/generated/prisma/enums'
-import type { MemeContentLocale } from '~/db/generated/prisma/enums'
+import type {
+  ActivityEventType,
+  MemeContentLocale
+} from '~/db/generated/prisma/enums'
 import { clientEnv } from '~/env/client'
 import { serverEnv } from '~/env/server'
 import { truncateToUtcDay } from '~/helpers/date'
@@ -57,6 +59,7 @@ import {
   resolveVisibleContentLocales,
   VISIBLE_CONTENT_LOCALES
 } from '~/helpers/i18n-content'
+import { extractClientIp } from '~/helpers/request'
 import {
   ALGOLIA_SEARCH_PARAMS_BASE,
   ALGOLIA_SEARCH_RETRIEVE,
@@ -75,12 +78,15 @@ import { auth } from '~/lib/auth'
 import { buildSignedOriginalUrl, fetchWatermarkedVideo } from '~/lib/bunny'
 import { matchIsAnalyticsConsentGiven } from '~/lib/cookie-consent'
 import { algoliaLogger, logger } from '~/lib/logger'
+import { matchIsUserAdmin } from '~/lib/role'
 import { captureWithFeature } from '~/lib/sentry'
 import { baseLocale, getLocale, type Locale } from '~/paraglide/runtime'
 import { matchIsUserPremium } from '~/server/customer'
-import { createRateLimitMiddleware, extractClientIp } from '~/server/rate-limit'
+import { createRateLimitMiddleware } from '~/server/rate-limit'
 import { authUserRequiredMiddleware } from '~/server/user-auth'
+import { recordActivityEvent } from '~/utils/activity-event'
 import { ensureAlgoliaUserToken } from '~/utils/tracking-cookies'
+import { getVisitorKey } from '~/utils/visitor-key'
 
 const serverInsightsClient = createInsightsClient(
   clientEnv.VITE_ALGOLIA_APP_ID,
@@ -799,12 +805,24 @@ const buildVideoProxyResponse = (upstream: Response) => {
   return new Response(upstream.body, { headers })
 }
 
+const SHARE_MEME_SCHEMA = z.object({
+  memeId: z.string(),
+  mode: z.enum(MEME_VIDEO_INTENTS)
+})
+
+const ACTIVITY_EVENT_TYPE_BY_VIDEO_INTENT = {
+  download: ActivityEventTypeEnum.DOWNLOAD,
+  share: ActivityEventTypeEnum.SHARE,
+  studio: null
+} as const satisfies Record<MemeVideoIntent, ActivityEventType | null>
+
 export const shareMeme = createServerFn({ method: 'GET' })
   .validator((data) => {
-    return z.string().parse(data)
+    return SHARE_MEME_SCHEMA.parse(data)
   })
   .middleware([createRateLimitMiddleware(RATE_LIMIT_DOWNLOAD)])
-  .handler(async ({ data: memeId }) => {
+  .handler(async ({ data }) => {
+    const { memeId, mode } = data
     const request = getRequest()
 
     const [meme, session] = await Promise.all([
@@ -831,14 +849,28 @@ export const shareMeme = createServerFn({ method: 'GET' })
     }
 
     const { bunnyId } = meme.video
-    const ip = extractClientIp(request)
+    const ip = extractClientIp(request.headers)
     const userAgent = request.headers.get('user-agent') ?? 'unknown'
 
     const isPremium = session?.user
       ? await matchIsUserPremium(session.user)
       : false
 
-    logger.info({ memeId, ip, userAgent, isPremium }, 'Meme shared/downloaded')
+    logger.info(
+      { memeId, mode, ip, userAgent, isPremium },
+      'Meme shared/downloaded'
+    )
+
+    const activityEventType = ACTIVITY_EVENT_TYPE_BY_VIDEO_INTENT[mode]
+
+    if (activityEventType) {
+      recordActivityEvent({
+        type: activityEventType,
+        actor: session?.user,
+        headers: request.headers,
+        memeId
+      })
+    }
 
     if (!isPremium) {
       try {
@@ -878,7 +910,7 @@ export const shareMeme = createServerFn({ method: 'GET' })
 
 const TRACK_MEME_ACTION_SCHEMA = z.object({
   memeId: z.string(),
-  action: z.enum(['share', 'download'])
+  action: z.enum(MEME_EXPORT_MODES)
 })
 
 export const trackMemeAction = createServerFn({ method: 'POST' })
@@ -919,35 +951,27 @@ export const registerMemeView = createServerFn({ method: 'POST' })
       })
       .parse(data)
   })
+  .middleware([createRateLimitMiddleware(RATE_LIMIT_VIEW)])
   .handler(async ({ data }) => {
     const { memeId, watchMs } = data
+    const request = getRequest()
 
-    const hasConsentedToCookies = matchIsAnalyticsConsentGiven()
-    const existingViewerKey = getCookie(COOKIE_ANON_ID_KEY)
-    const viewerKey =
-      existingViewerKey ??
-      getCookie(COOKIE_ALGOLIA_USER_TOKEN_KEY) ??
-      crypto.randomUUID()
+    const session = await auth.api
+      .getSession({ headers: request.headers })
+      .catch(() => {
+        return null
+      })
 
-    if (hasConsentedToCookies) {
-      ensureAlgoliaUserToken(viewerKey)
-
-      if (!existingViewerKey) {
-        setCookie(COOKIE_ANON_ID_KEY, viewerKey, {
-          httpOnly: true,
-          secure: true,
-          sameSite: 'lax',
-          path: '/',
-          maxAge: ONE_YEAR_IN_SECONDS
-        })
-      }
+    if (session?.user && matchIsUserAdmin(session.user)) {
+      return
     }
 
+    const visitorKey = getVisitorKey(extractClientIp(request.headers))
     const day = truncateToUtcDay(new Date())
 
     const viewTransaction = prismaClient.$transaction(async (tx) => {
       const result = await tx.memeViewDaily.createMany({
-        data: [{ memeId, viewerKey, day, watchMs }],
+        data: [{ memeId, viewerKey: visitorKey, day, watchMs }],
         skipDuplicates: true
       })
 
@@ -959,24 +983,26 @@ export const registerMemeView = createServerFn({ method: 'POST' })
       }
     })
 
-    const trackAlgoliaView = async () => {
-      if (!hasConsentedToCookies) {
-        return
-      }
+    recordActivityEvent({
+      type: ActivityEventTypeEnum.VIEW,
+      actor: session?.user,
+      headers: request.headers,
+      memeId,
+      dedupKey: `${memeId}:${visitorKey}`
+    })
 
-      const locale = getLocale()
-      const { headers } = getRequest()
-      const session = await auth.api.getSession({ headers })
+    if (matchIsAnalyticsConsentGiven()) {
+      const indexName = resolveAlgoliaIndexName(getLocale())
 
-      await safeAlgoliaOp(
+      void safeAlgoliaOp(
         serverInsightsClient.pushEvents({
           events: [
             {
               eventType: 'view',
               eventName: 'Meme Viewed',
-              index: resolveAlgoliaIndexName(locale),
+              index: indexName,
               objectIDs: [memeId],
-              userToken: viewerKey,
+              userToken: ensureAlgoliaUserToken(),
               authenticatedUserToken: session?.user.id
             }
           ]
@@ -984,6 +1010,5 @@ export const registerMemeView = createServerFn({ method: 'POST' })
       )
     }
 
-    void trackAlgoliaView()
     await viewTransaction
   })

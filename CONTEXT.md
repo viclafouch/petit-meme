@@ -28,7 +28,7 @@ _Avoid_: Partage (le mot désigne une seule des deux intentions)
 Un Export dont l'intention est d'enregistrer le fichier sur l'appareil.
 
 **Share**:
-Un Export dont l'intention est le partage natif, et uniquement lorsque ce partage a abouti. Un partage abandonné n'est pas un Share.
+Un Export dont l'intention est le partage natif. Se mesure à deux endroits qui ne comptent pas la même chose. Le compteur d'Audience ne retient que les partages **aboutis**, seul le navigateur pouvant connaître l'issue. L'Event d'Activity retient l'**intention**, le serveur voyant passer le fichier sans jamais apprendre la suite. Un partage abandonné compte donc dans l'Activity et pas dans l'Audience.
 _Avoid_: Envoi, diffusion
 
 **Generation**:

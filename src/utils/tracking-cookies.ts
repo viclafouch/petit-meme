@@ -8,33 +8,37 @@ import { ONE_YEAR_IN_SECONDS } from '~/constants/time'
 import { createClientCookie, readClientCookie } from '~/helpers/cookie'
 
 export const ensureAlgoliaUserToken = createIsomorphicFn()
-  .server((fallbackToken?: string) => {
-    if (getCookie(COOKIE_ALGOLIA_USER_TOKEN_KEY)) {
-      return
+  .server(() => {
+    const existingToken = getCookie(COOKIE_ALGOLIA_USER_TOKEN_KEY)
+
+    if (existingToken) {
+      return existingToken
     }
 
-    const value =
-      fallbackToken ?? getCookie(COOKIE_ANON_ID_KEY) ?? crypto.randomUUID()
+    const token = getCookie(COOKIE_ANON_ID_KEY) ?? crypto.randomUUID()
 
-    setCookie(COOKIE_ALGOLIA_USER_TOKEN_KEY, value, {
+    setCookie(COOKIE_ALGOLIA_USER_TOKEN_KEY, token, {
       httpOnly: false,
       secure: true,
       sameSite: 'lax',
       path: '/',
       maxAge: ONE_YEAR_IN_SECONDS
     })
+
+    return token
   })
-  .client((fallbackToken?: string) => {
-    if (readClientCookie(COOKIE_ALGOLIA_USER_TOKEN_KEY)) {
-      return
+  .client(() => {
+    const existingToken = readClientCookie(COOKIE_ALGOLIA_USER_TOKEN_KEY)
+
+    if (existingToken) {
+      return existingToken
     }
 
-    const value =
-      fallbackToken ??
-      readClientCookie(COOKIE_ANON_ID_KEY) ??
-      crypto.randomUUID()
+    const token = readClientCookie(COOKIE_ANON_ID_KEY) ?? crypto.randomUUID()
 
-    createClientCookie(COOKIE_ALGOLIA_USER_TOKEN_KEY, value, {
+    createClientCookie(COOKIE_ALGOLIA_USER_TOKEN_KEY, token, {
       maxAge: ONE_YEAR_IN_SECONDS
     })
+
+    return token
   })

@@ -12,6 +12,12 @@ export const RATE_LIMIT_DOWNLOAD = {
   windowMs: 5 * MINUTE
 } as const satisfies RateLimitConfig
 
+export const RATE_LIMIT_VIEW = {
+  action: 'view',
+  maxRequests: 60,
+  windowMs: 5 * MINUTE
+} as const satisfies RateLimitConfig
+
 export const RATE_LIMIT_TRACK = {
   action: 'track',
   maxRequests: 30,

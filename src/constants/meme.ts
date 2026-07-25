@@ -69,6 +69,20 @@ export const getVirtualCategories = (): VirtualCategory[] => {
   ]
 }
 
+export const MEME_EXPORT_MODES = [
+  'download',
+  'share'
+] as const satisfies readonly string[]
+
+export type MemeExportMode = (typeof MEME_EXPORT_MODES)[number]
+
+export const MEME_VIDEO_INTENTS = [
+  ...MEME_EXPORT_MODES,
+  'studio'
+] as const satisfies readonly string[]
+
+export type MemeVideoIntent = (typeof MEME_VIDEO_INTENTS)[number]
+
 export const MEMES_PER_PAGE = 30
 export const RELATED_MEMES_COUNT = 4
 export const TRENDING_MEMES_COUNT = 12

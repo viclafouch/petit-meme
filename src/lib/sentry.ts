@@ -39,6 +39,7 @@ type SentryFeature =
   | 'bunny-storage-cleanup'
   | 'watermark-fallback'
   | 'ai-search'
+  | 'activity-event'
 
 export const captureWithFeature = (error: unknown, feature: SentryFeature) => {
   if (process.env.NODE_ENV === 'development') {

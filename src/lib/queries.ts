@@ -180,7 +180,9 @@ export const getVideoBlobQueryOpts = (memeId: Meme['id']) => {
   return queryOptions({
     queryKey: [...getVideoBlobQueryOpts.all, memeId],
     queryFn: async () => {
-      const response = await shareMeme({ data: memeId })
+      const response = await shareMeme({
+        data: { memeId, mode: 'studio' }
+      })
 
       return response.blob()
     },

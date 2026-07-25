@@ -1,6 +1,6 @@
 import { toast } from 'sonner'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import type { MemeWithVideo } from '~/constants/meme'
+import type { MemeExportMode, MemeWithVideo } from '~/constants/meme'
 import { getErrorMessage } from '~/helpers/error'
 import {
   getActiveSubscriptionQueryOpts,
@@ -12,8 +12,6 @@ import { m } from '~/paraglide/messages.js'
 import { shareMeme, trackMemeAction } from '~/server/meme'
 import { useShowDialog } from '~/stores/dialog.store'
 import { downloadBlob, shareBlob } from '~/utils/download'
-
-export type MemeExportMode = 'download' | 'share'
 
 type UseMemeExportParams = {
   mode: MemeExportMode
@@ -49,7 +47,9 @@ export const useMemeExport = ({ mode }: UseMemeExportParams) => {
         return
       }
 
-      const blobPromise = shareMeme({ data: meme.id }).then((response) => {
+      const blobPromise = shareMeme({
+        data: { memeId: meme.id, mode }
+      }).then((response) => {
         return response.blob()
       })
 

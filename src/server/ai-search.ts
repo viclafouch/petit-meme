@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { chat } from '@tanstack/ai'
 import { createAnthropicChat } from '@tanstack/ai-anthropic'
 import { createServerFn } from '@tanstack/react-start'
-import { setResponseStatus } from '@tanstack/react-start/server'
+import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
 import { waitUntil } from '@vercel/functions'
 import { prismaClient } from '~/db'
 import {
@@ -15,6 +15,7 @@ import {
 } from '~/constants/ai-search'
 import { RATE_LIMIT_AI_SEARCH } from '~/constants/rate-limit'
 import {
+  ActivityEventType,
   MemeContentLocale as MemeContentLocaleEnum,
   MemeStatus
 } from '~/db/generated/prisma/enums'
@@ -41,6 +42,7 @@ import {
   createUserRateLimitMiddleware
 } from '~/server/rate-limit'
 import { authUserRequiredMiddleware } from '~/server/user-auth'
+import { recordActivityEvent } from '~/utils/activity-event'
 
 const HAIKU_MODEL = 'claude-haiku-4-5'
 
@@ -227,6 +229,13 @@ export const aiSearchMemes = createServerFn({ method: 'POST' })
           aiSearchLogger.error({ err: error }, 'Failed to log AI search')
         })
     )
+
+    recordActivityEvent({
+      type: ActivityEventType.AI_SEARCH,
+      actor: context.user,
+      headers: getRequest().headers,
+      metadata: { prompt: data.prompt }
+    })
 
     aiSearchLogger.info(
       {

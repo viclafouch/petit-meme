@@ -15,6 +15,7 @@ import {
   ONE_HOUR_IN_SECONDS,
   SEVEN_DAYS_IN_SECONDS
 } from '~/constants/time'
+import { ActivityEventType } from '~/db/generated/prisma/enums'
 import { emailSubjects } from '~/emails/subjects'
 import { clientEnv } from '~/env/client'
 import { serverEnv } from '~/env/server'
@@ -25,6 +26,7 @@ import { sendEmailAsync } from '~/lib/resend'
 import { captureWithFeature } from '~/lib/sentry'
 import { stripeClient } from '~/lib/stripe'
 import { getLocale } from '~/paraglide/runtime'
+import { recordActivityEvent } from '~/utils/activity-event'
 import { cleanupUserData } from '~/utils/user-cleanup'
 import EmailVerification from '../emails/email-verification'
 import PasswordChangedEmail from '../emails/password-changed-email'
@@ -269,6 +271,13 @@ const getAuthConfig = createServerOnlyFn(() => {
                 locale: getLocale()
               }
             }
+          },
+          after: async (user, context) => {
+            recordActivityEvent({
+              type: ActivityEventType.SIGNUP,
+              actor: { id: user.id },
+              headers: context?.headers
+            })
           }
         }
       },
@@ -310,12 +319,18 @@ const getAuthConfig = createServerOnlyFn(() => {
 
             const user = await prismaClient.user.findUnique({
               where: { id: subscription.referenceId },
-              select: { email: true, name: true, locale: true }
+              select: { email: true, name: true, locale: true, role: true }
             })
 
             if (!user) {
               return
             }
+
+            recordActivityEvent({
+              type: ActivityEventType.SUBSCRIPTION,
+              actor: { id: subscription.referenceId, role: user.role },
+              metadata: { plan: plan.name }
+            })
 
             const stripePrice = stripeSubscription.items.data[0]?.price
             const priceCents = stripePrice?.unit_amount ?? 0

@@ -2,6 +2,7 @@ import { createMiddleware } from '@tanstack/react-start'
 import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
 import type { RateLimitConfig } from '~/constants/rate-limit'
 import { SECOND } from '~/constants/time'
+import { extractClientIp } from '~/helpers/request'
 import { logger } from '~/lib/logger'
 import { captureWithFeature, wrapMiddlewareWithSentry } from '~/lib/sentry'
 import { authUserRequiredMiddleware } from '~/server/user-auth'
@@ -27,24 +28,6 @@ const pruneStore = () => {
   for (const key of keysToDelete) {
     store.delete(key)
   }
-}
-
-export const extractClientIp = (request: Request) => {
-  const realIp = request.headers.get('x-real-ip')
-
-  if (realIp) {
-    return realIp.trim()
-  }
-
-  const forwarded = request.headers.get('x-forwarded-for')
-
-  if (forwarded) {
-    const ips = forwarded.split(',')
-
-    return ips.at(-1)?.trim() ?? 'unknown'
-  }
-
-  return 'unknown'
 }
 
 type RateLimitCheckResult = {
@@ -113,7 +96,7 @@ export const createRateLimitMiddleware = (config: RateLimitConfig) => {
   const middleware = createMiddleware({ type: 'function' }).server(
     async ({ next }) => {
       const request = getRequest()
-      const ip = extractClientIp(request)
+      const ip = extractClientIp(request.headers)
       const key = `${config.action}:${ip}`
       const result = checkRateLimit(key, config)
 

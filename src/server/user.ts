@@ -2,7 +2,7 @@ import type { User } from 'better-auth'
 import { z } from 'zod'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
-import { setResponseStatus } from '@tanstack/react-start/server'
+import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
 import { prismaClient } from '~/db'
 import { StudioError } from '~/constants/error'
 import { MEME_TRANSLATION_SELECT } from '~/constants/meme'
@@ -11,12 +11,14 @@ import {
   FREE_PLAN_MAX_GENERATIONS
 } from '~/constants/plan'
 import type { Meme } from '~/db/generated/prisma/client'
+import { ActivityEventType } from '~/db/generated/prisma/enums'
 import { resolveMemeTranslation } from '~/helpers/i18n-content'
 import { authLogger } from '~/lib/logger'
 import { matchIsUserAdmin } from '~/lib/role'
 import { getLocale } from '~/paraglide/runtime'
 import { findActiveSubscription, matchIsUserPremium } from '~/server/customer'
 import { authUserRequiredMiddleware } from '~/server/user-auth'
+import { recordActivityEvent } from '~/utils/activity-event'
 
 export const getFavoritesMemes = createServerFn({ method: 'GET' })
   .middleware([authUserRequiredMiddleware])
@@ -173,6 +175,15 @@ export const toggleBookmarkByMemeId = createServerFn({ method: 'POST' })
       { userId: context.user.id, memeId, bookmarked },
       'Bookmark toggled'
     )
+
+    if (bookmarked) {
+      recordActivityEvent({
+        type: ActivityEventType.BOOKMARK_ADDED,
+        actor: context.user,
+        headers: getRequest().headers,
+        memeId
+      })
+    }
 
     return { bookmarked }
   })
@@ -370,6 +381,13 @@ export const incrementGenerationCount = createServerFn({ method: 'POST' })
         data: { userId: context.user.id, memeId: data.memeId }
       })
     ])
+
+    recordActivityEvent({
+      type: ActivityEventType.GENERATION,
+      actor: context.user,
+      headers: getRequest().headers,
+      memeId: data.memeId
+    })
 
     return { result: 'ok' } as const
   })

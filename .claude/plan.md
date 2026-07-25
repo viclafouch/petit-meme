@@ -46,6 +46,8 @@ Sur 7 jours : 189 `viewer_key` distincts dont **131 avec une seule ligne** (69 %
 | Recherche classique | Non loggée | Algolia expose déjà ses top recherches, éviterait un aller-retour par recherche |
 | Events de compte | Inscription, abonnement, favori ajouté. Pas les connexions | La table `session` porte déjà `ip_address` |
 | Partage vs téléchargement | `mode` passé à `shareMeme` | `shareMeme` sert le fichier sans savoir laquelle des deux intentions |
+| Share tenté vs Share abouti | L'Activity compte l'intention, l'Audience l'aboutissement | Seul le navigateur connaît l'issue de `navigator.share()`. Déporter l'Event côté client le rendrait contournable, ce qui ôterait à l'Activity sa seule qualité : être observée par le serveur |
+| Rate limit sur `registerMemeView` | **Ajouté** (`RATE_LIMIT_VIEW`, 60 / 5 min) | Revient sur la décision initiale. `dedupKey` plafonne les *lignes*, pas les *requêtes* : un `createMany` qui n'insère rien coûte quand même un aller-retour, sur une base facturée au compute |
 | Nom `shareMeme` | **Conservé** malgré l'écart de vocabulaire | Choix de Victor, documenté dans `CONTEXT.md` |
 | Écriture | `waitUntil` (`@vercel/functions`) | Pattern déjà en place ; h3 v2 expose un équivalent portable si départ de Vercel |
 | Audience vs Activity | **Alignées** sur la même clé | Refus d'avoir deux chiffres divergents sous le mot « vues » |
@@ -111,6 +113,7 @@ Ton habitude documentée est de pousser puis de migrer. **Ici c'est l'inverse.**
 - [ ] Connecté en admin : **aucune ligne créée**, la garde Creator fonctionne
 - [ ] Vérifier que `meme_view_daily.viewer_key` contient bien une empreinte hexadécimale et **jamais une IP en clair**
 - [ ] Vérifier que le cookie Algolia contient toujours un UUID et **pas** l'empreinte
+- [ ] Enchaîner une trentaine de mèmes d'affilée : aucun 429, le seuil `RATE_LIMIT_VIEW` ne doit pas gêner un visiteur réel. Un dépassement se voit dans Sentry, taggé `scraping-detection`, et le hook `use-register-meme-view` l'avale sans casser la lecture
 - [ ] Déclencher le cron de nettoyage à la main et vérifier qu'il ne supprime rien sur des données récentes
 
 ---
@@ -181,10 +184,10 @@ Nouveau fichier `src/utils/visitor-key.ts`, wrappé dans `createServerOnlyFn` :
 
 Dans `registerMemeView` (`src/server/meme.ts:913`) :
 
-- [ ] `viewerKey` reçoit désormais le VisitorKey, plus le cookie ni un `crypto.randomUUID()`
-- [ ] **Ne plus passer cette valeur à `ensureAlgoliaUserToken()`** (`meme.ts:933`). Aujourd'hui elle est recopiée dans un cookie `httpOnly: false` (`tracking-cookies.ts:20`) et envoyée à Algolia comme `userToken`. Y écrire l'empreinte dégraderait les recommandations, y écrire l'IP serait une fuite
-- [ ] Ne plus écrire `COOKIE_ANON_ID_KEY` avec cette valeur ; le cookie reste en place pour le seul usage Algolia
-- [ ] Rate limit sur `registerMemeView` : **non pour l'instant**. La fonction n'en a aucun, mais `dedupKey` plafonne à une ligne par Meme, Visitor et jour
+- [x] `viewerKey` reçoit désormais le VisitorKey, plus le cookie ni un `crypto.randomUUID()`
+- [x] **Ne plus passer cette valeur à `ensureAlgoliaUserToken()`**. La fonction ne prend plus de `fallbackToken` et **retourne** son jeton, que `registerMemeView` transmet à Algolia. Le cookie `httpOnly: false` garde donc son UUID, jamais l'empreinte ni l'IP
+- [x] Ne plus écrire `COOKIE_ANON_ID_KEY` avec cette valeur ; le cookie n'est plus écrit nulle part, il reste lu comme repli par `ensureAlgoliaUserToken` pour les visiteurs déjà venus
+- [x] Rate limit sur `registerMemeView` : **ajouté**, `RATE_LIMIT_VIEW` (60 requêtes / 5 min). Le raisonnement initial (« `dedupKey` plafonne à une ligne par Meme, Visitor et jour ») vaut pour le nombre de lignes, pas pour le nombre de requêtes. Le point 1.4 ajoute une seconde écriture par appel sur le seul endpoint public sans limite. Le seuil est volontairement large : `RATE_LIMIT_TRACK` (30 / 5 min) casserait un visiteur qui enchaîne des mèmes courts. Le store étant en mémoire donc propre à chaque instance serverless, la limite est un plafond mou, pas une garantie
 
 **⚠️ Ce point est le seul de la phase 1 qui altère des données de production, et il ne comporte aucune migration.** Rupture nette dans l'historique de `meme_view_daily` (cookies avant, empreintes après) et marche visible à la baisse dans la courbe des vues, l'audience ayant été surévaluée jusqu'ici. À déployer **seul**, après le reste de la phase 1. Voir « Découpage de déploiement recommandé ».
 
@@ -192,21 +195,33 @@ Dans `registerMemeView` (`src/server/meme.ts:913`) :
 
 Tous en `waitUntil`, hors chemin critique, avec `captureException` en cas d'échec. Tous précédés de la garde Creator.
 
-| Event | Fichier | Détail |
-|---|---|---|
-| `VIEW` | `src/server/meme.ts:913` `registerMemeView` | `dedupKey` renseigné |
-| `DOWNLOAD` / `SHARE` | `src/server/meme.ts:802` `shareMeme` | validateur passe de `z.string()` à `{ memeId, mode }` |
-| `BOOKMARK_ADDED` | `src/server/user.ts:147` `toggleBookmarkByMemeId` | à l'ajout seulement, pas au retrait |
-| `GENERATION` | `src/server/user.ts:349` `incrementGenerationCount` | |
-| `AI_SEARCH` | `src/server/ai-search.ts` | `metadata` porte le prompt |
-| `SIGNUP` | `src/lib/auth.tsx` `databaseHooks` | hook `user.create.after`, à confirmer à l'implémentation |
-| `SUBSCRIPTION` | `src/lib/auth.tsx` plugin Stripe | |
+**Une seule fonction d'écriture** : `recordActivityEvent` (`src/utils/activity-event.ts`), wrappée dans `createServerOnlyFn`. Elle porte la garde Creator, le `waitUntil`, le `createMany({ skipDuplicates: true })`, le `captureException` et la dérivation IP / user-agent depuis les `Headers`. Les sept points d'écriture ne font que l'appeler.
 
-Appelants à mettre à jour pour la nouvelle signature de `shareMeme` : `src/hooks/use-meme-export.ts:52` et `src/components/Meme/watermark-upsell-dialog.tsx:51`.
+- [x] `VIEW` — `registerMemeView` (`src/server/meme.ts`), `dedupKey` = `${memeId}:${visitorKey}`
+- [x] `DOWNLOAD` / `SHARE` — `shareMeme` (`src/server/meme.ts`)
+- [x] `BOOKMARK_ADDED` — `toggleBookmarkByMemeId` (`src/server/user.ts`), à l'ajout seulement
+- [x] `GENERATION` — `incrementGenerationCount` (`src/server/user.ts`)
+- [x] `AI_SEARCH` — `aiSearchMemes` (`src/server/ai-search.ts`), `metadata` porte le prompt
+- [x] `SIGNUP` — hook `databaseHooks.user.create.after` (`src/lib/auth.tsx`), IP tirée de `context.headers`
+- [x] `SUBSCRIPTION` — `onSubscriptionComplete` (`src/lib/auth.tsx`), `metadata` porte le plan. **Aucune IP** : le webhook Stripe donnerait celle de Stripe, pas celle du Visitor
 
-**Garde Creator** : `matchIsUserAdmin` (`src/lib/role.ts`). Le `cookieCache` Better Auth est actif 5 minutes (`auth.tsx:127`), la lecture de session ne coûte donc pas de requête. Portée volontairement partielle : Victor déconnecté ou sur mobile compte comme un Visitor ordinaire.
+**Signature de `shareMeme`** : le validateur passe de `z.string()` à `{ memeId, mode }`.
+
+- [x] `src/hooks/use-meme-export.ts`
+- [x] `src/components/Meme/watermark-upsell-dialog.tsx`
+- [x] `src/lib/queries.ts` `getVideoBlobQueryOpts` — **troisième appelant non prévu au plan**. Le Studio réutilise `shareMeme` pour récupérer la vidéo à éditer, ce qui n'est ni un Download ni un Share. `mode` accepte donc une troisième valeur `'studio'`, seule à ne produire aucun Event. `MEME_EXPORT_MODES` (les deux intentions d'Export) et `MEME_VIDEO_INTENTS` (les trois) vivent dans `src/constants/meme.ts` ; `trackMemeAction` réutilise le premier
+
+**Garde Creator** : `matchIsUserAdmin` (`src/lib/role.ts`, paramètre élargi à `UserRoleHolder` pour accepter aussi le `role` nullable venu de Prisma). Le `cookieCache` Better Auth est actif 5 minutes, la lecture de session ne coûte donc pas de requête. Portée volontairement partielle : Victor déconnecté ou sur mobile compte comme un Visitor ordinaire.
+
+Dans `registerMemeView` la garde est un **retour anticipé en tête de handler**, seule façon de couvrir d'un même test l'Activity, l'Audience (`meme_view_daily` + `view_count`) et l'événement Algolia Insights.
 
 **Écart de comptage à connaître** : le flux comptera **plus** de téléchargements que le dashboard. `shareMeme` voit passer les octets, `trackMemeAction` est un appel client que n'importe quel script peut ignorer.
+
+**Un Share est enregistré à l'intention, pas à l'aboutissement.** `shareMeme` sert le fichier avant que le navigateur ne sache si le partage natif a abouti, contrairement à `trackMemeAction`. Écart assumé avec la définition de `CONTEXT.md`.
+
+**`COOKIE_ANON_ID_KEY` devient un cookie en lecture seule.** Plus aucun code ne l'écrit. `ensureAlgoliaUserToken` le lit encore comme repli, pour ne pas casser la continuité Algolia des visiteurs déjà venus. Le cookie ayant une durée d'un an, cette lecture pourra être supprimée avec la constante à partir de **juillet 2027**.
+
+**Effet de bord assumé sur `extractClientIp`** : la fonction quitte `src/server/rate-limit.ts` pour `src/helpers/request.ts` et prend désormais des `Headers`. Sans ce déplacement, `src/lib/auth.tsx` → `activity-event` → `rate-limit` → `user-auth` → `auth.tsx` formait un cycle d'imports sur un module dont l'initialisation est un appel de fonction.
 
 ### 1.5 Purge
 
@@ -268,7 +283,12 @@ Bannissement et blocage d'IP, alertes par email au-delà d'un seuil, durcissemen
 
 ## Points de vigilance
 
+- **La non-falsifiabilité de l'IP vient de Vercel, pas du code.** `extractClientIp` fait confiance à `x-real-ip` puis `x-forwarded-for` sans les valider. C'est sûr aujourd'hui parce que Vercel écrase ces en-têtes (« we currently overwrite the `X-Forwarded-For` header and do not forward external IPs. This restriction is in place to prevent IP spoofing », [Request headers](https://vercel.com/docs/headers/request-headers)) et que `x-real-ip` y est déclaré identique. L'option Trusted Proxy, qui permettrait de passer sa propre valeur, est réservée aux comptes Enterprise. **En cas de migration hors Vercel, l'IP redevient falsifiable** et avec elle le rate limiting, le VisitorKey, la déduplication des vues et le contenu d'`activity_event.ip_address`
+- Un audit de sécurité a d'abord conclu à une faille de spoofing sur ce point, faute d'avoir pu vérifier le comportement de Vercel. Vérification faite, c'était un faux positif. Ne pas le reconclure sans relire la documentation citée ci-dessus
+- `incrementGenerationCount` ne revalide pas `FREE_PLAN_MAX_GENERATIONS` : le quota est vérifié par `checkGeneration`, un appel séparé. Un compte gratuit qui appelle l'endpoint directement dépasse la limite. Pré-existant, hors périmètre de la phase 1
 - `RATE_LIMIT_DOWNLOAD` autorise 10 téléchargements par 5 minutes, soit 2 880/jour, alors que le site entier en fait 150. Le store est en mémoire (`rate-limit.ts:18`), donc propre à chaque instance serverless : un scraper obtient mécaniquement plusieurs fois le quota. Constat posé, aucune action décidée
 - `trackMemeAction` reste contournable, ses compteurs sont donc structurellement sous-évalués
 - Tree-shaking TanStack Start : tout appel Prisma ou import Node hors d'un `.handler()` casse le build Vercel
 - `oxlint --fix` supprime à tort certains `as` d'élargissement, vérifier `tsc` après
+- `registerMemeView` lit désormais la session à chaque vue, pour la garde Creator. Coût vérifié : Better Auth rend `null` sans toucher la base quand aucun cookie de session n'est présent, et sert le `cookieCache` pendant 5 minutes. Le seul aller-retour DB concerne un User connecté dont le cache a expiré, soit 8 comptes actifs par semaine
+- Pistes écartées faute de rapport au périmètre, à reconsidérer : sortir le Studio de `shareMeme` (le `mode: 'studio'` n'existe que pour n'écrire aucun Event) et interpoler `MEME_EXPORT_MODES` dans les requêtes SQL brutes de `meme.ts` et `dashboard.ts`, qui écrivent encore `'download'` / `'share'` en dur

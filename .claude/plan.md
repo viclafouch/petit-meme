@@ -166,7 +166,7 @@ Nom de migration : `add_activity_event`.
 
 - [x] Enum `ActivityEventType`, model `ActivityEvent` et relations inverses (`User`, `Meme`) écrits dans `prisma/schema.prisma`
 - [x] Migration `20260725094442_add_activity_event` créée et appliquée en local. Elle embarque aussi deux colonnes `subscription` (`ended_at`, `stripe_schedule_id`) présentes dans le schema mais jamais migrées, additives et nullables
-- [ ] `prisma:migrate:prod` après déploiement
+- [x] `prisma:migrate:prod` après déploiement — `migrate status` confirme les 32 migrations appliquées, aucune en attente
 
 ### 1.2 Le VisitorKey
 
@@ -250,7 +250,7 @@ Le scan de l'`updateMany` reste large (bande 30-90 j parcourue pour ~400 lignes 
 - [x] `VISITOR_KEY_SALT: z.string().min(32)` ajouté à `src/env/server.ts`
 - [x] `VISITOR_KEY_SALT` renseigné dans `.env.development`, documenté dans `.env.example`
 - [x] `VISITOR_KEY_SALT` créé dans Vercel, scopes Production et Preview (le scope Development reste vide, sans effet : en local on lit `.env.development`)
-- [ ] Créer et tester la migration en dev, puis l'appliquer en prod **avant** de pousser le code. Voir « Ordre des opérations » dans la section Migrations et ruptures de données
+- [x] Créer et tester la migration en dev, puis l'appliquer en prod **avant** de pousser le code. Fait le 2026-07-25, `20260725094442_add_activity_event`
 
 ---
 

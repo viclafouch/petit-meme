@@ -12,6 +12,8 @@ const ANALYTICS_RETENTION_DAYS = 365
 const AUDIT_LOG_RETENTION_YEARS = 2
 const ANONYMIZATION_YEARS = 3
 const UNVERIFIED_RETENTION_DAYS = 30
+const ACTIVITY_IP_RETENTION_DAYS = 30
+const ACTIVITY_RETENTION_DAYS = 90
 
 const maskId = (id: string) => {
   return id.slice(0, 8)
@@ -113,6 +115,34 @@ const runRetentionCleanup = async () => {
 
   log.info({ count: deletedAuditLogs.count }, 'Deleted old audit logs (2y)')
 
+  const activityCutoff = new Date(now.getTime() - ACTIVITY_RETENTION_DAYS * DAY)
+
+  const deletedActivityEvents = await prismaClient.activityEvent.deleteMany({
+    where: { createdAt: { lt: activityCutoff } }
+  })
+
+  log.info(
+    { count: deletedActivityEvents.count },
+    'Deleted old activity events (90d)'
+  )
+
+  const activityIpCutoff = new Date(
+    now.getTime() - ACTIVITY_IP_RETENTION_DAYS * DAY
+  )
+
+  const anonymizedActivityEvents = await prismaClient.activityEvent.updateMany({
+    where: {
+      createdAt: { lt: activityIpCutoff },
+      OR: [{ ipAddress: { not: null } }, { dedupKey: { not: null } }]
+    },
+    data: { ipAddress: null, dedupKey: null }
+  })
+
+  log.info(
+    { count: anonymizedActivityEvents.count },
+    'Anonymized activity events (30d)'
+  )
+
   const anonymizationCutoff = new Date(
     now.getTime() - ANONYMIZATION_YEARS * 365 * DAY
   )
@@ -164,6 +194,8 @@ const runRetentionCleanup = async () => {
     deletedActions: deletedActions.count,
     deletedAuditLogs: deletedAuditLogs.count,
     deletedAiSearchLogs: deletedAiSearchLogs.count,
+    deletedActivityEvents: deletedActivityEvents.count,
+    anonymizedActivityEvents: anonymizedActivityEvents.count,
     anonymizedCount
   }
 }

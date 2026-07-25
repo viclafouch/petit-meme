@@ -227,15 +227,21 @@ Dans `registerMemeView` la garde est un **retour anticipé en tête de handler**
 
 Dans `runRetentionCleanup` (`src/routes/api/cron/cleanup.ts`), deux constantes :
 
-- [ ] `ACTIVITY_IP_RETENTION_DAYS = 30` → `updateMany` mettant `ipAddress` **et `dedupKey`** à `NULL`. Purger `dedupKey` est indispensable : il contient une empreinte du jour et constituerait sinon un pseudonyme persistant sur 90 jours, ce qui contredirait la décision « lignes réellement anonymes ». La déduplication ne servant que le jour même, sa suppression est sans effet
-- [ ] `ACTIVITY_RETENTION_DAYS = 90` → `deleteMany`
+- [x] `ACTIVITY_IP_RETENTION_DAYS = 30` → `updateMany` mettant `ipAddress` **et `dedupKey`** à `NULL`. Purger `dedupKey` est indispensable : il contient une empreinte du jour et constituerait sinon un pseudonyme persistant sur 90 jours, ce qui contredirait la décision « lignes réellement anonymes ». La déduplication ne servant que le jour même, sa suppression est sans effet
+- [x] `ACTIVITY_RETENTION_DAYS = 90` → `deleteMany`
+
+Le `deleteMany` (90 j) passe **avant** l'`updateMany` (30 j) : les lignes à supprimer sortent de la table avant que l'anonymisation ne les parcoure. L'`updateMany` porte un garde `OR: [{ ipAddress: { not: null } }, { dedupKey: { not: null } }]`, sans lequel chaque passage réécrirait toute la bande 30-90 jours, soit ~24 000 lignes par jour de WAL pour rien. Compteurs `deletedActivityEvents` et `anonymizedActivityEvents` ajoutés au retour de `runRetentionCleanup`.
+
+Le scan de l'`updateMany` reste large (bande 30-90 j parcourue pour ~400 lignes réellement concernées). Un index partiel `WHERE ip_address IS NOT NULL OR dedup_key IS NOT NULL` le réduirait, mais exigerait une migration en SQL brut et coûterait de la maintenance d'index sur chaque insertion. Écarté à ce volume, à reconsidérer si la table grossit d'un ordre de grandeur.
 
 ### 1.6 RGPD
 
-- [ ] `src/routes/_public__root/_default/privacy.tsx` : finalité (mesure d'audience, sécurité, prévention des abus), base légale (intérêt légitime), catégories (IP, user-agent, actions), durées (30 j pour l'IP, 90 j pour l'Event)
-- [ ] Messages Paraglide **FR et EN** (page publique)
-- [ ] `exportUserData` (`src/server/user.ts:180`) : ajouter les Events du User, ils relèvent du droit d'accès
-- [ ] Suppression de compte : couverte par `onDelete: Cascade`
+- [x] Section « Journal d'activité » (2.9) ajoutée à la politique de confidentialité : finalité (mesure d'audience, sécurité, prévention des abus), base légale (intérêt légitime), catégories (IP, user-agent, type d'action, date, Meme, compte), durées (30 j pour l'IP, 90 j pour l'Event). Nouvelles lignes dans les tableaux « Finalités et bases légales » et « Durées de conservation »
+- [x] **FR et EN**. La page ne passe pas par des messages Paraglide : `privacy.tsx` charge `md/fr/privacy.md` ou `md/en/privacy.md` selon la locale, seuls le titre et la description SEO sont des messages. Aucun message à ajouter, les deux markdown ont été modifiés à l'identique
+- [x] Corrections induites par le point 1.3, déjà déployé : le comptage des vues ne repose plus sur le cookie `anonId` (consentement) mais sur l'empreinte quotidienne dérivée de l'IP (intérêt légitime). Le tableau des cookies décrit désormais `anonId` comme un cookie en lecture seule. Sans ces corrections la politique décrivait un mécanisme qui n'existe plus
+- [x] Le nettoyage automatique était annoncé « une fois par semaine » alors que le cron tourne tous les jours à 2 h (`vercel.json`). Corrigé
+- [x] `exportUserData` (`src/server/user.ts`) : quatrième requête dans le `Promise.all` existant, `activityEvents` porte type, date, Meme, IP, user-agent et `metadata`. `dedupKey` est exclu : empreinte technique interne, sans information que la date et le Meme ne donnent déjà
+- [x] Suppression de compte : **vérifié**, pas supposé. `activity_event_user_id_fkey ... ON DELETE CASCADE` dans `prisma/migrations/20260725094442_add_activity_event/migration.sql`, et `deleteUser` de Better Auth (`src/lib/auth.tsx:136`) supprime bien la ligne `user`
 
 ### 1.7 Action requise de Victor avant déploiement
 

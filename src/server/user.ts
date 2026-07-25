@@ -248,36 +248,49 @@ export const exportUserData = createServerFn({ method: 'GET' })
       }
     })
 
-    const [subscriptions, studioGenerations, aiSearchLogs] = await Promise.all([
-      prismaClient.subscription.findMany({
-        where: { referenceId: context.user.id },
-        select: {
-          plan: true,
-          status: true,
-          periodStart: true,
-          periodEnd: true
-        }
-      }),
-      prismaClient.studioGeneration.findMany({
-        where: { userId: context.user.id },
-        select: {
-          createdAt: true,
-          memeId: true
-        },
-        orderBy: { createdAt: 'desc' }
-      }),
-      prismaClient.aiSearchLog.findMany({
-        where: { userId: context.user.id },
-        select: {
-          prompt: true,
-          keywords: true,
-          locale: true,
-          resultCount: true,
-          createdAt: true
-        },
-        orderBy: { createdAt: 'desc' }
-      })
-    ])
+    const [subscriptions, studioGenerations, aiSearchLogs, activityEvents] =
+      await Promise.all([
+        prismaClient.subscription.findMany({
+          where: { referenceId: context.user.id },
+          select: {
+            plan: true,
+            status: true,
+            periodStart: true,
+            periodEnd: true
+          }
+        }),
+        prismaClient.studioGeneration.findMany({
+          where: { userId: context.user.id },
+          select: {
+            createdAt: true,
+            memeId: true
+          },
+          orderBy: { createdAt: 'desc' }
+        }),
+        prismaClient.aiSearchLog.findMany({
+          where: { userId: context.user.id },
+          select: {
+            prompt: true,
+            keywords: true,
+            locale: true,
+            resultCount: true,
+            createdAt: true
+          },
+          orderBy: { createdAt: 'desc' }
+        }),
+        prismaClient.activityEvent.findMany({
+          where: { userId: context.user.id },
+          select: {
+            type: true,
+            createdAt: true,
+            memeId: true,
+            ipAddress: true,
+            userAgent: true,
+            metadata: true
+          },
+          orderBy: { createdAt: 'desc' }
+        })
+      ])
 
     authLogger.info({ userId: context.user.id }, 'User data exported')
 
@@ -352,6 +365,16 @@ export const exportUserData = createServerFn({ method: 'GET' })
           locale: log.locale,
           resultCount: log.resultCount,
           createdAt: log.createdAt
+        }
+      }),
+      activityEvents: activityEvents.map((event) => {
+        return {
+          type: event.type,
+          createdAt: event.createdAt,
+          memeId: event.memeId,
+          ipAddress: event.ipAddress,
+          userAgent: event.userAgent,
+          metadata: event.metadata
         }
       })
     }

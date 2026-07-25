@@ -1,6 +1,6 @@
 # Privacy Policy - Petit Meme
 
-Last updated: **April 2026**
+Last updated: **July 2026**
 
 This Privacy Policy describes how **Petit Meme**
 (accessible at [https://petit-meme.io](https://petit-meme.io))
@@ -41,8 +41,10 @@ When creating an account, we collect:
 
 ### 2.3. View and interaction data
 
-- Anonymous identifier (`anonId`) for unique view counting
-  (cookie, only with your consent)
+- A daily technical identifier, computed server-side from your IP address, a
+  secret salt and the current date. It is used to count only one view per
+  meme, per visitor and per day. It changes every day, is never sent to your
+  browser and cannot be used to re-identify you
 - Number of views and watch time for memes
 
 ### 2.4. Search and Algolia analytics data (with consent)
@@ -89,6 +91,28 @@ Payments are handled by **Stripe**. We never store your credit card
 information. Stripe collects the data necessary for payment processing in
 accordance with its own privacy policy.
 
+### 2.9. Activity log
+
+To measure the site's audience, keep it secure and prevent abuse (automated
+scraping of videos, quota circumvention), we record server-side every action
+performed on the service:
+
+- The action type: view, download, share, generation, AI search, bookmark
+  added, sign-up, subscription
+- The date and time
+- Your IP address and your user-agent (browser and operating system)
+- The identifier of the meme concerned, when the action targets one
+- Your account identifier, if you are signed in
+
+This processing relies on **legitimate interest**: since most traffic is not
+signed in, it is the only way to measure actual usage of the site and to spot
+abusive behaviour. It sets no cookie and is used neither for advertising nor
+for profiling.
+
+The IP address is erased after **30 days**; the record itself is deleted after
+**90 days**. You may object to this processing at the address given in
+section 11.
+
 ---
 
 ## 3. Purposes and legal bases
@@ -97,7 +121,8 @@ accordance with its own privacy policy.
 |---------|------------|----------------|
 | Account creation and management | Performance of contract | Username, email, password |
 | Authentication and security | Legitimate interest | Session data, IP |
-| View counting (with `anonId` cookie) | Consent | Anonymous identifier |
+| Unique view counting | Legitimate interest | Daily fingerprint derived from the IP address |
+| Audience measurement, security and abuse prevention | Legitimate interest | IP address, user-agent, actions performed and their date |
 | Search improvement (Algolia Insights) | Consent | Anonymous identifier, view and click events |
 | Payment processing | Performance of contract | Data transmitted to Stripe |
 | Sending transactional emails | Performance of contract | Email address |
@@ -120,12 +145,13 @@ accordance with its own privacy policy.
 | `theme` | Theme preference (light/dark) | 1 year | No (strictly necessary) |
 | `PARAGLIDE_LOCALE` | Remember the chosen language (fr/en) | 1 year | No (strictly necessary) |
 | `localeBannerDismissed` | Remember dismissal of the language suggestion banner | 1 year | No (strictly necessary) |
-| `anonId` | Unique view counting | 1 year | Yes |
+| `anonId` | Former view-counting identifier. No longer set, only read for visitors who already have it, to preserve the continuity of Algolia recommendations | 1 year | Yes |
 | `algoliaUserToken` | Linking search events (views, clicks) for Algolia | 1 year | Yes |
 
 You can manage your cookie preferences at any time. If you decline analytics
-cookies, the `anonId` and `algoliaUserToken` cookies will not be set. No events
-will be sent to Algolia.
+cookies, the `algoliaUserToken` cookie will not be set and no events will be
+sent to Algolia. View counting itself relies on no cookie at all (see
+section 2.3).
 
 ---
 
@@ -165,12 +191,15 @@ place (European Commission standard contractual clauses).
 | Studio generation data | 365 days, then automatically deleted |
 | Administrative audit log data | 2 years, then automatically deleted |
 | AI search data | 365 days, then automatically deleted |
+| Activity log — IP address | 30 days, then permanently erased |
+| Activity log — full record | 90 days, then automatically deleted |
 | Last activity date | Cleared upon account deletion or anonymization |
 | Payment data (Stripe) | Per Stripe's legal obligations |
 | Transactional emails | Per Resend's retention policy |
 
-An automated cleanup process runs once a week to delete expired sessions,
-obsolete verification tokens and aggregate view data beyond 90 days.
+An automated cleanup process runs every day to delete expired sessions and
+obsolete verification tokens, aggregate view data beyond 90 days and enforce
+the activity log retention periods.
 
 Upon deletion of your account, your personal data is deleted within 30 days,
 except for data we are required to retain under legal obligations.

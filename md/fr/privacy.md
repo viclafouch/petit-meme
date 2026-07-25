@@ -1,6 +1,6 @@
 # Politique de confidentialité - Petit Meme
 
-Dernière mise à jour : **Avril 2026**
+Dernière mise à jour : **Juillet 2026**
 
 La présente Politique de confidentialité décrit la manière dont **Petit Meme**
 (accessible à l'adresse [https://petit-meme.io](https://petit-meme.io))
@@ -43,8 +43,11 @@ Lors de la création d'un compte, nous collectons :
 
 ### 2.3. Données de vues et interactions
 
-- Identifiant anonyme (`anonId`) pour le comptage des vues uniques
-  (cookie, uniquement avec votre consentement)
+- Un identifiant technique quotidien, calculé côté serveur à partir de votre
+  adresse IP, d'un sel secret et de la date du jour. Il sert à ne compter
+  qu'une seule vue par mème, par visiteur et par jour. Il change chaque jour,
+  n'est jamais transmis à votre navigateur et ne permet pas de vous
+  réidentifier
 - Nombre de vues et temps de visionnage des mèmes
 
 ### 2.4. Données de recherche et analytics Algolia (avec consentement)
@@ -94,6 +97,28 @@ Les paiements sont gérés par **Stripe**. Nous ne stockons jamais vos
 informations de carte bancaire. Stripe collecte les données nécessaires au
 traitement des paiements conformément à sa propre politique de confidentialité.
 
+### 2.9. Journal d'activité
+
+Pour mesurer l'audience du site, en assurer la sécurité et prévenir les abus
+(aspiration automatisée des vidéos, contournement des quotas), nous
+enregistrons côté serveur chaque action effectuée sur le service :
+
+- Le type d'action : vue, téléchargement, partage, génération, recherche IA,
+  ajout en favori, inscription, souscription d'un abonnement
+- La date et l'heure
+- Votre adresse IP et votre user-agent (navigateur et système d'exploitation)
+- L'identifiant du mème concerné, lorsque l'action en vise un
+- L'identifiant de votre compte, si vous êtes connecté
+
+Ce traitement repose sur l'**intérêt légitime** : la majorité du trafic n'étant
+pas connectée, c'est le seul moyen de mesurer la fréquentation réelle du site
+et de repérer un usage abusif. Il ne dépose aucun cookie et ne sert ni à la
+publicité ni au profilage.
+
+L'adresse IP est effacée au bout de **30 jours** ; l'enregistrement lui-même
+est supprimé au bout de **90 jours**. Vous pouvez vous opposer à ce traitement
+à l'adresse indiquée en section 11.
+
 ---
 
 ## 3. Finalités et bases légales
@@ -102,7 +127,8 @@ traitement des paiements conformément à sa propre politique de confidentialit�
 |----------|------------|-------------------|
 | Création et gestion de compte | Exécution du contrat | Pseudo, e-mail, mot de passe |
 | Authentification et sécurité | Intérêt légitime | Données de session, IP |
-| Comptage des vues (avec cookie `anonId`) | Consentement | Identifiant anonyme |
+| Comptage des vues uniques | Intérêt légitime | Empreinte quotidienne dérivée de l'adresse IP |
+| Mesure d'audience, sécurité et prévention des abus | Intérêt légitime | Adresse IP, user-agent, actions réalisées et leur date |
 | Amélioration de la recherche (Algolia Insights) | Consentement | Identifiant anonyme, événements de vue et de clic |
 | Traitement des paiements | Exécution du contrat | Données transmises à Stripe |
 | Envoi d'e-mails transactionnels | Exécution du contrat | Adresse e-mail |
@@ -125,12 +151,13 @@ traitement des paiements conformément à sa propre politique de confidentialit�
 | `theme` | Préférence de thème (clair/sombre) | 1 an | Non (strictement nécessaire) |
 | `PARAGLIDE_LOCALE` | Mémoriser la langue choisie (fr/en) | 1 an | Non (strictement nécessaire) |
 | `localeBannerDismissed` | Mémoriser la fermeture de la bannière de suggestion de langue | 1 an | Non (strictement nécessaire) |
-| `anonId` | Comptage des vues uniques | 1 an | Oui |
+| `anonId` | Ancien identifiant de comptage des vues. N'est plus déposé, seulement lu chez les visiteurs qui le possèdent déjà, pour la continuité des recommandations Algolia | 1 an | Oui |
 | `algoliaUserToken` | Liaison des événements de recherche (vues, clics) pour Algolia | 1 an | Oui |
 
 Vous pouvez gérer vos préférences cookies à tout moment. Si vous refusez les
-cookies analytiques, les cookies `anonId` et `algoliaUserToken` ne seront pas
-posés. Aucun événement ne sera transmis à Algolia.
+cookies analytiques, le cookie `algoliaUserToken` ne sera pas posé et aucun
+événement ne sera transmis à Algolia. Le comptage des vues, lui, ne dépend
+d'aucun cookie (voir section 2.3).
 
 ---
 
@@ -172,13 +199,15 @@ européenne).
 | Données de génération Studio | 365 jours, puis supprimées automatiquement |
 | Données du journal d'audit administratif | 2 ans, puis supprimées automatiquement |
 | Données de recherche IA | 365 jours, puis supprimées automatiquement |
+| Journal d'activité — adresse IP | 30 jours, puis effacée définitivement |
+| Journal d'activité — enregistrement complet | 90 jours, puis supprimé automatiquement |
 | Date de dernière activité | Effacée à la suppression ou à l'anonymisation du compte |
 | Données de paiement (Stripe) | Selon les obligations légales de Stripe |
 | E-mails transactionnels | Selon la politique de rétention de Resend |
 
-Un processus automatisé de nettoyage s'exécute une fois par semaine pour
-supprimer les sessions expirées, les tokens de vérification obsolètes et
-agréger les données de vues au-delà de 90 jours.
+Un processus automatisé de nettoyage s'exécute chaque jour pour supprimer les
+sessions expirées et les tokens de vérification obsolètes, agréger les données
+de vues au-delà de 90 jours et appliquer les durées du journal d'activité.
 
 À la suppression de votre compte, vos données personnelles sont supprimées
 dans un délai de 30 jours, à l'exception des données que nous sommes tenus de

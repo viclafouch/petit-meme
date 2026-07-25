@@ -1,5 +1,5 @@
 import { createMiddleware } from '@tanstack/react-start'
-import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
+import { getRequest } from '@tanstack/react-start/server'
 import type { RateLimitConfig } from '~/constants/rate-limit'
 import { extractClientIp } from '~/helpers/request'
 import { logger } from '~/lib/logger'
@@ -33,8 +33,14 @@ const throwRateLimitExceeded = ({
     'scraping-detection'
   )
 
-  setResponseStatus(429)
-  throw new Error('Too Many Requests')
+  // Throw a Response, not an Error: the server-fn handler returns any thrown
+  // Response verbatim (`error instanceof Response`), so this reaches the client
+  // as a real 429 with Retry-After. A thrown Error escapes to the outer server
+  // layer as an unhandled 500 instead.
+  throw new Response('Too Many Requests', {
+    status: 429,
+    headers: { 'Retry-After': String(result.retryAfterSeconds) }
+  })
 }
 
 export const createRateLimitMiddleware = (config: RateLimitConfig) => {

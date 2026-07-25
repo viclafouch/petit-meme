@@ -57,6 +57,64 @@ Sur 7 jours : 189 `viewer_key` distincts dont **131 avec une seule ligne** (69 %
 
 ---
 
+## Migrations et ruptures de données — À LIRE AVANT TOUT DÉPLOIEMENT
+
+Règles générales dans [`.claude/rules/database.md`](rules/database.md). Cette section couvre ce qui est spécifique à cette feature.
+
+### Une seule migration, et elle est sans risque
+
+| Migration | Contenu | Risque |
+|---|---|---|
+| `add_activity_event` | `CREATE TYPE ActivityEventType`, `CREATE TABLE activity_event`, ses index, les deux relations inverses | **Aucun.** Strictement additif |
+
+Aucun `DROP`, aucun `ALTER COLUMN`, aucune colonne rendue obligatoire sur une table existante. Les tables `meme_view_daily`, `meme_action_daily`, `user` et `meme` ne sont pas modifiées.
+
+**Relire le `migration.sql` généré avant de l'appliquer.** S'il contient autre chose que `CREATE TYPE`, `CREATE TABLE`, `CREATE INDEX` et `ALTER TABLE ... ADD CONSTRAINT`, s'arrêter et comprendre pourquoi.
+
+### Les vraies ruptures n'ont PAS de migration
+
+C'est le piège de cette feature. Trois changements altèrent des données de production **sans qu'aucun SQL ne soit exécuté**, donc sans qu'aucun garde-fou ne se déclenche.
+
+**Rupture 1 — le contenu de `viewer_key` (point 1.3).** À la seconde où le code est déployé, la colonne cesse de recevoir des identifiants cookie et reçoit des empreintes. Aucune ligne existante n'est modifiée, mais la colonne contient désormais deux natures de valeurs selon la date. Revenir en arrière ne répare rien : les lignes écrites pendant la fenêtre gardent leur empreinte. Effet visible sous 24 h : marche à la baisse dans la courbe des vues du dashboard, et chute du nombre de visiteurs uniques. **C'est attendu, ce n'est pas une régression.**
+
+**Rupture 2 — l'exclusion du Creator (point 1.4).** Les `view_count` publics de tes memes cessent d'intégrer tes propres passages. Les compteurs déjà accumulés ne bougent pas, ils progressent simplement moins vite. Irréversible pour la période concernée.
+
+**Rupture 3 — la purge (point 1.5).** `deleteMany` est définitif. Un `ACTIVITY_RETENTION_DAYS` mal saisi (9 au lieu de 90) supprimerait des Events dès le premier passage du cron, sans avertissement. **Vérifier les deux constantes ligne à ligne avant de pousser.** Le premier passage réel est inoffensif puisque aucune donnée n'aura l'âge requis, ce qui rend l'erreur d'autant plus facile à ne pas voir.
+
+### Découpage de déploiement recommandé
+
+Ne pas tout déployer d'un coup. Deux déploiements distincts, pour que la seule rupture irréversible arrive quand tu peux déjà l'observer.
+
+**Déploiement A, zéro rupture** : points 1.1, 1.2, 1.4, 1.5, 1.6. On crée la table, on écrit les Events, on purge, on documente. Rien d'existant n'est touché. Si quelque chose cloche, il suffit de revenir en arrière.
+
+**Déploiement B, la rupture** : point 1.3 seul, l'alignement de `viewer_key`. À faire une fois que tu as vérifié dans `/admin/activity`, ou directement en base, que les VisitorKey se calculent correctement et dédupliquent bien. Tu bascules alors l'agrégat en connaissance de cause.
+
+### Ordre des opérations — la migration AVANT le push
+
+Ton habitude documentée est de pousser puis de migrer. **Ici c'est l'inverse.** La migration étant purement additive, l'appliquer avant que le code n'arrive est sans danger : la table reste vide. L'ordre inverse ouvre une fenêtre pendant laquelle le code écrit dans une table inexistante. Comme les écritures passent par `waitUntil` avec un `catch`, elles échoueraient **silencieusement**, et tu ne verrais que du bruit dans Sentry.
+
+1. [ ] `VISITOR_KEY_SALT` ajouté dans Vercel. **Sans elle, le déploiement crashe au démarrage** sur la validation Zod de `src/env/server.ts`
+2. [ ] `vercel env pull .env.production`
+3. [ ] `pnpm run prisma:migrate:prod`
+4. [ ] `git push`, qui déclenche le déploiement Vercel
+5. [ ] Vérifier dans Sentry qu'aucune erreur d'écriture ne remonte
+
+### Recette en dev avant toute bascule en prod
+
+- [ ] `pnpm exec dotenv -e .env.development -- pnpm exec prisma migrate dev --name add_activity_event`
+- [ ] Relire le `migration.sql` généré, vérifier qu'il ne contient aucune opération destructive
+- [ ] Lancer l'app, regarder un meme jusqu'au bout : une ligne `VIEW` apparaît
+- [ ] Regarder **le même meme une seconde fois** : aucune ligne supplémentaire, la déduplication fonctionne
+- [ ] Regarder un **autre** meme : une nouvelle ligne apparaît
+- [ ] Télécharger un meme : une ligne `DOWNLOAD` avec l'IP et le user-agent renseignés
+- [ ] Télécharger **le même meme deux fois** : deux lignes, les Downloads ne sont pas dédupliqués
+- [ ] Connecté en admin : **aucune ligne créée**, la garde Creator fonctionne
+- [ ] Vérifier que `meme_view_daily.viewer_key` contient bien une empreinte hexadécimale et **jamais une IP en clair**
+- [ ] Vérifier que le cookie Algolia contient toujours un UUID et **pas** l'empreinte
+- [ ] Déclencher le cron de nettoyage à la main et vérifier qu'il ne supprime rien sur des données récentes
+
+---
+
 ## Phase 1 — Collecte (invisible, à déployer en premier)
 
 Le flux n'a aucun intérêt tant qu'il est vide. Mettre la collecte en production d'abord garantit plusieurs jours de données au moment où l'interface arrive.
@@ -103,6 +161,9 @@ Relations inverses à ajouter : `activityEvents ActivityEvent[]` sur `User` et s
 
 Nom de migration : `add_activity_event`.
 
+- [x] Enum `ActivityEventType`, model `ActivityEvent` et relations inverses (`User`, `Meme`) écrits dans `prisma/schema.prisma`
+- [ ] Migration `add_activity_event` créée et appliquée en local (à lancer par Victor)
+
 ### 1.2 Le VisitorKey
 
 Nouveau fichier `src/utils/visitor-key.ts`, wrappé dans `createServerOnlyFn` :
@@ -113,6 +174,8 @@ Nouveau fichier `src/utils/visitor-key.ts`, wrappé dans `createServerOnlyFn` :
 
 **Piège TanStack Start** : ce helper ne doit jamais être référencé au niveau module en dehors d'un `.handler()`, sinon Node est embarqué dans le bundle client et le build Vercel casse.
 
+- [x] `src/utils/visitor-key.ts` créé : `getVisitorKey(ipAddress, date = new Date())` wrappé dans `createServerOnlyFn`, `createHash` synchrone, jour issu de `truncateToUtcDay`
+
 ### 1.3 Alignement de l'Audience sur le VisitorKey
 
 Dans `registerMemeView` (`src/server/meme.ts:913`) :
@@ -122,7 +185,7 @@ Dans `registerMemeView` (`src/server/meme.ts:913`) :
 - [ ] Ne plus écrire `COOKIE_ANON_ID_KEY` avec cette valeur ; le cookie reste en place pour le seul usage Algolia
 - [ ] Rate limit sur `registerMemeView` : **non pour l'instant**. La fonction n'en a aucun, mais `dedupKey` plafonne à une ligne par Meme, Visitor et jour
 
-**Conséquence assumée** : rupture nette dans l'historique de `meme_view_daily` (cookies avant, empreintes après) et marche visible à la baisse dans la courbe des vues, l'audience ayant été surévaluée jusqu'ici.
+**⚠️ Ce point est le seul de la phase 1 qui altère des données de production, et il ne comporte aucune migration.** Rupture nette dans l'historique de `meme_view_daily` (cookies avant, empreintes après) et marche visible à la baisse dans la courbe des vues, l'audience ayant été surévaluée jusqu'ici. À déployer **seul**, après le reste de la phase 1. Voir « Découpage de déploiement recommandé ».
 
 ### 1.4 Points d'écriture
 
@@ -160,8 +223,12 @@ Dans `runRetentionCleanup` (`src/routes/api/cron/cleanup.ts`), deux constantes :
 
 ### 1.7 Action requise de Victor avant déploiement
 
-- [ ] Créer `VISITOR_KEY_SALT` (32 caractères minimum) dans Vercel, `.env.development` et `.env.production`, et l'ajouter à `src/env/server.ts`. **Ne pas réutiliser `BETTER_AUTH_SECRET`** : le sel peut avoir à tourner un jour, alors que faire tourner le secret d'authentification déconnecterait tous les utilisateurs
-- [ ] Lancer la migration (`prisma migrate dev`), puis `prisma:migrate:prod` après déploiement
+**Ne pas réutiliser `BETTER_AUTH_SECRET`** : le sel peut avoir à tourner un jour, alors que faire tourner le secret d'authentification déconnecterait tous les utilisateurs.
+
+- [x] `VISITOR_KEY_SALT: z.string().min(32)` ajouté à `src/env/server.ts`
+- [x] `VISITOR_KEY_SALT` renseigné dans `.env.development`, documenté dans `.env.example`
+- [ ] `VISITOR_KEY_SALT` créé dans Vercel (puis `vercel env pull .env.production`)
+- [ ] Créer et tester la migration en dev, puis l'appliquer en prod **avant** de pousser le code. Voir « Ordre des opérations » dans la section Migrations et ruptures de données
 
 ---
 

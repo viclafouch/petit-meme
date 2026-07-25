@@ -1,5 +1,4 @@
 import { UserAvatar } from '~/components/user-avatar'
-import { DEFAULT_AVATAR_URL } from '~/constants/avatar'
 import { formatRelativeTime } from '~/helpers/date'
 import { getLocale } from '~/paraglide/runtime'
 import { EmptyMessage } from '~/routes/admin/-components/empty-message'
@@ -12,7 +11,7 @@ type FeedActorParams = {
 export const FeedActor = ({ name, image }: FeedActorParams) => {
   return (
     <span className="flex min-w-0 items-center gap-1.5">
-      <UserAvatar name={name} image={image ?? DEFAULT_AVATAR_URL} size="sm" />
+      <UserAvatar name={name} image={image} size="xs" />
       <span className="truncate">{name}</span>
     </span>
   )

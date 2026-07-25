@@ -25,6 +25,7 @@ pnpm run lint:fix         # Auto-fix lint issues + format with oxfmt
 pnpm run format           # Format with oxfmt
 pnpm run format:check     # Check formatting (CI)
 pnpm run email:dev        # Email preview server (port 3001)
+pnpm run avatars:generate # Regenerate the 24 avatar SVGs into public/avatars/
 ```
 **Never start the dev server (`pnpm run dev`)** — this is always done by the user.
 

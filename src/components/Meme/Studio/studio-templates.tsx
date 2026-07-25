@@ -1,5 +1,6 @@
 import { getStudioTemplates, STUDIO_FONTS } from '~/constants/studio'
 import type { StudioTemplate } from '~/constants/studio'
+import { SELECTED_TILE_RING_CLASS_NAME } from '~/constants/ui'
 import { buildVideoImageUrl } from '~/lib/bunny'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
@@ -28,8 +29,6 @@ const buildBandStyle = (template: StudioTemplate) => {
 
 const BUTTON_BASE_CLASSES =
   'flex-1 rounded-lg border border-border overflow-hidden cursor-pointer transition-shadow'
-const BUTTON_ACTIVE_CLASSES =
-  'data-active:ring-2 data-active:ring-primary data-active:ring-offset-2 data-active:ring-offset-background'
 
 type TemplateCardParams = {
   template: StudioTemplate
@@ -64,7 +63,7 @@ const CaptionTemplateCard = ({
       className={cn(
         'flex flex-col',
         BUTTON_BASE_CLASSES,
-        BUTTON_ACTIVE_CLASSES
+        SELECTED_TILE_RING_CLASS_NAME
       )}
       onClick={onSelect}
     >
@@ -98,7 +97,7 @@ const OverlayTemplateCard = ({
       className={cn(
         'relative aspect-video',
         BUTTON_BASE_CLASSES,
-        BUTTON_ACTIVE_CLASSES
+        SELECTED_TILE_RING_CLASS_NAME
       )}
       onClick={onSelect}
     >

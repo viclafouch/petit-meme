@@ -11,10 +11,9 @@ import {
 } from '@tanstack/react-table'
 import { FLAG_ICON_CLASS, LOCALE_FLAGS } from '~/components/icon/flags'
 import { PageHeader } from '~/components/page-header'
-import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
 import { Badge } from '~/components/ui/badge'
 import { Container } from '~/components/ui/container'
-import { getUserInitials } from '~/helpers/format'
+import { UserAvatar } from '~/components/user-avatar'
 import {
   AdminTable,
   getRowId,
@@ -35,14 +34,7 @@ const columns = [
 
       return (
         <div className="flex items-center gap-2">
-          <Avatar className="size-8">
-            {user.image ? (
-              <AvatarImage src={user.image} alt={user.name} />
-            ) : null}
-            <AvatarFallback className="text-xs">
-              {getUserInitials(user.name)}
-            </AvatarFallback>
-          </Avatar>
+          <UserAvatar name={user.name} image={user.image} />
           <span className="font-medium truncate max-w-24">{user.name}</span>
         </div>
       )

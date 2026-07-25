@@ -156,6 +156,7 @@ model User {
   email           String         @unique
   emailVerified   Boolean        @map("email_verified")
   image           String?
+  providerAvatar   String?        @map("provider_avatar")
   createdAt       DateTime       @map("created_at")
   updatedAt       DateTime       @map("updated_at")
   accounts        Account[]

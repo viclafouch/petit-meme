@@ -30,6 +30,7 @@ export type SentryFeature =
   | 'request-password-reset'
   | 'delete-account'
   | 'update-password'
+  | 'update-avatar'
   | 'data-export'
   | 'file-upload'
   | 'studio'

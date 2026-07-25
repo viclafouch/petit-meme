@@ -7,6 +7,7 @@ import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import react from '@vitejs/plugin-react'
 
 const ONE_YEAR_IN_SECONDS = 31_536_000
+const ONE_WEEK_IN_SECONDS = 604_800
 
 const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
@@ -17,6 +18,11 @@ const SECURITY_HEADERS = {
 const IMMUTABLE_ASSET_HEADERS = {
   ...SECURITY_HEADERS,
   'Cache-Control': `public, max-age=${ONE_YEAR_IN_SECONDS}, immutable`
+}
+
+const AVATAR_ASSET_HEADERS = {
+  ...SECURITY_HEADERS,
+  'Cache-Control': `public, max-age=${ONE_WEEK_IN_SECONDS}`
 }
 
 const STATIC_ASSET_ROUTES = [
@@ -103,6 +109,9 @@ export default defineConfig(({ mode }) => {
             }
           },
           ...staticAssetRouteRules,
+          '/avatars/**': {
+            headers: AVATAR_ASSET_HEADERS
+          },
           '/api/og': {
             headers: {
               ...SECURITY_HEADERS,

@@ -27,6 +27,7 @@ import type {
   StudioSettings,
   StudioTextPosition
 } from '~/constants/studio'
+import { SELECTED_TILE_RING_CLASS_NAME } from '~/constants/ui'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 
@@ -58,7 +59,7 @@ const ColorSwatches = ({
             data-active={isSelected || undefined}
             className={cn(
               'size-6 rounded-full border-2 border-border transition-colors',
-              'data-active:ring-2 data-active:ring-primary data-active:ring-offset-2 data-active:ring-offset-background',
+              SELECTED_TILE_RING_CLASS_NAME,
               color.className
             )}
             onClick={() => {

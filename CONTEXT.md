@@ -59,6 +59,18 @@ _Avoid_: Statistiques, analytics
 
 ### Identité
 
+**Avatar**:
+L'image qui représente un User sur le site. Toujours définie, éventuellement par une valeur par défaut.
+_Avoid_: Photo de profil, image
+
+**ProviderAvatar**:
+L'Avatar fourni par Discord ou Twitter à l'inscription, figé à cet instant et jamais réécrit. Sert de choix par défaut et de retour arrière possible.
+_Avoid_: Photo SSO, avatar d'origine
+
+**AvatarSlot**:
+Un emplacement du catalogue d'Avatars, identifié par son rang et non par le dessin qu'il porte. Un User choisit un AvatarSlot, jamais un visage : redessiner le catalogue change ce que tout le monde voit sans changer ce que quiconque a choisi.
+_Avoid_: Preset, modèle, avatar par défaut
+
 **VisitorKey**:
 L'identifiant qui distingue deux Visitors sans les nommer. Dérivé de l'IP et renouvelé chaque jour, il permet de compter sans conserver de trace réidentifiable.
 _Avoid_: viewerKey, anonId, userToken

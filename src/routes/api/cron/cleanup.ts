@@ -176,6 +176,7 @@ const runRetentionCleanup = async () => {
         "name" = 'Utilisateur supprimé',
         "email" = 'deleted-' || LEFT(encode(sha256(CAST("id" AS bytea)), 'hex'), 8) || '@anonymized.local',
         "image" = NULL,
+        "provider_avatar" = NULL,
         "email_verified" = false,
         "is_anonymized" = true,
         "updated_at" = ${now}

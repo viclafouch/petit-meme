@@ -4,19 +4,27 @@ import { notFound } from '@tanstack/react-router'
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
 import { prismaClient } from '~/db'
+import {
+  AVATAR_CATALOG,
+  AVATAR_PROVIDER_SELECTION,
+  type AvatarSelection
+} from '~/constants/avatar'
 import { StudioError } from '~/constants/error'
 import { MEME_TRANSLATION_SELECT, MEME_VIDEO_INCLUDE } from '~/constants/meme'
 import {
   FREE_PLAN_MAX_FAVORITES,
   FREE_PLAN_MAX_GENERATIONS
 } from '~/constants/plan'
+import { RATE_LIMIT_UPDATE_AVATAR } from '~/constants/rate-limit'
 import type { Meme } from '~/db/generated/prisma/client'
 import { ActivityEventType } from '~/db/generated/prisma/enums'
+import { matchIsAvatarPath, resolveAvatar } from '~/helpers/avatar'
 import { resolveMemeTranslation } from '~/helpers/i18n-content'
 import { authLogger } from '~/lib/logger'
 import { matchIsUserAdmin } from '~/lib/role'
 import { getLocale } from '~/paraglide/runtime'
 import { findActiveSubscription, matchIsUserPremium } from '~/server/customer'
+import { createRateLimitMiddleware } from '~/server/rate-limit'
 import { authUserRequiredMiddleware } from '~/server/user-auth'
 import { recordActivityEvent } from '~/utils/activity-event'
 
@@ -188,6 +196,79 @@ export const toggleBookmarkByMemeId = createServerFn({ method: 'POST' })
     return { bookmarked }
   })
 
+const AVATAR_SELECTION_SCHEMA = z.enum([
+  ...AVATAR_CATALOG.map((slot) => {
+    return slot.id
+  }),
+  AVATAR_PROVIDER_SELECTION
+])
+
+const PROVIDER_AVATAR_UNAVAILABLE_MESSAGE = 'Provider avatar unavailable'
+
+type ResolveNextAvatarParams = {
+  selection: AvatarSelection
+  providerAvatar: string | null
+}
+
+const resolveNextAvatar = ({
+  selection,
+  providerAvatar
+}: ResolveNextAvatarParams) => {
+  const nextImage = resolveAvatar({ selection, providerAvatar })
+
+  if (nextImage === null) {
+    setResponseStatus(400)
+
+    throw new Error(PROVIDER_AVATAR_UNAVAILABLE_MESSAGE)
+  }
+
+  return nextImage
+}
+
+export const updateUserAvatar = createServerFn({ method: 'POST' })
+  .validator((data) => {
+    return AVATAR_SELECTION_SCHEMA.parse(data)
+  })
+  .middleware([
+    authUserRequiredMiddleware,
+    createRateLimitMiddleware(RATE_LIMIT_UPDATE_AVATAR)
+  ])
+  .handler(async ({ data: selection, context }) => {
+    const { image, providerAvatar } = await prismaClient.user.findUniqueOrThrow(
+      {
+        where: { id: context.user.id },
+        select: { image: true, providerAvatar: true }
+      }
+    )
+
+    const recoveredProviderAvatar =
+      providerAvatar === null && image !== null && !matchIsAvatarPath(image)
+        ? image
+        : null
+
+    const nextImage = resolveNextAvatar({
+      selection,
+      providerAvatar: providerAvatar ?? recoveredProviderAvatar
+    })
+
+    await prismaClient.user.update({
+      where: { id: context.user.id },
+      data: {
+        image: nextImage,
+        ...(recoveredProviderAvatar
+          ? { providerAvatar: recoveredProviderAvatar }
+          : {})
+      }
+    })
+
+    authLogger.debug(
+      { userId: context.user.id, selection },
+      'User avatar updated'
+    )
+
+    return { image: nextImage }
+  })
+
 export const exportUserData = createServerFn({ method: 'GET' })
   .middleware([authUserRequiredMiddleware])
   .handler(async ({ context }) => {
@@ -199,6 +280,7 @@ export const exportUserData = createServerFn({ method: 'GET' })
         email: true,
         emailVerified: true,
         image: true,
+        providerAvatar: true,
         createdAt: true,
         updatedAt: true,
         role: true,
@@ -304,6 +386,7 @@ export const exportUserData = createServerFn({ method: 'GET' })
         email: user.email,
         emailVerified: user.emailVerified,
         image: user.image,
+        providerAvatar: user.providerAvatar,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
         role: user.role,

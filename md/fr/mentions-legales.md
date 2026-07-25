@@ -1,6 +1,6 @@
 # Mentions légales - Petit Meme
 
-Dernière mise à jour : **Février 2026**
+Dernière mise à jour : **Juillet 2026**
 
 ---
 
@@ -70,3 +70,14 @@ Pour plus de détails, consultez la section Cookies de notre
 
 Pour toute question concernant les mentions légales :
 [legal@petit-meme.io](mailto:legal@petit-meme.io)
+
+---
+
+## 8. Crédits
+
+Les avatars proposés sur le site sont générés à partir du style suivant :
+
+Remix of
+[„Adventurer Neutral”](https://www.figma.com/community/file/1184595184137881796)
+by „Lisa Wischofsky”, licensed under
+[„CC BY 4.0”](https://creativecommons.org/licenses/by/4.0/)

@@ -243,6 +243,12 @@ importers:
         specifier: ^5.0.14
         version: 5.0.14(@types/react@19.2.17)(immer@11.1.4)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7))
     devDependencies:
+      '@dicebear/core':
+        specifier: 10.3.0
+        version: 10.3.0
+      '@dicebear/styles':
+        specifier: 10.2.0
+        version: 10.2.0
       '@inlang/paraglide-js':
         specifier: 2.20.2
         version: 2.20.2(typescript@7.0.2)
@@ -589,6 +595,13 @@ packages:
 
   '@better-fetch/fetch@1.3.1':
     resolution: {integrity: sha512-ABkD1WhyfPZprKRQI3bhATjeiFuNWC9PXhfGWqL+sg/gKrM977oFrYkdb4msM3hgUGonr7KlOsOFT5TU2rht9g==}
+
+  '@dicebear/core@10.3.0':
+    resolution: {integrity: sha512-HbzHvYY/E0m3B7BfBjs8SO7JyqJnORJgQhM2YM7VoN/EQzrqJ3Z0j4+op+WfEWXWzZj75tQqBU5SZpUssi5m/Q==}
+    engines: {node: '>=22.0.0'}
+
+  '@dicebear/styles@10.2.0':
+    resolution: {integrity: sha512-o4rw0+7Q7sSAyr9YxYrUe3jCxlOAzEcBvbQvl4hQKQ+9WNmBK4p7wGYvsmGeJbxFh8y/Ux6ltrCPyXBIDV6qYA==}
 
   '@dotenvx/dotenvx@1.54.1':
     resolution: {integrity: sha512-41gU3q7v05GM92QPuPUf4CmUw+mmF8p4wLUh6MCRlxpCkJ9ByLcY9jUf6MwrMNmiKyG/rIckNxj9SCfmNCmCqw==}
@@ -7724,6 +7737,10 @@ snapshots:
       '@noble/hashes': 2.0.1
 
   '@better-fetch/fetch@1.3.1': {}
+
+  '@dicebear/core@10.3.0': {}
+
+  '@dicebear/styles@10.2.0': {}
 
   '@dotenvx/dotenvx@1.54.1':
     dependencies:

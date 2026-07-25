@@ -1,6 +1,5 @@
 import { ArrowLeft } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
-import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
 import { Button } from '~/components/ui/button'
 import {
   DropdownMenu,
@@ -10,8 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '~/components/ui/dropdown-menu'
-import { DEFAULT_AVATAR_URL } from '~/constants/avatar'
-import { getUserInitials } from '~/helpers/format'
+import { UserAvatar } from '~/components/user-avatar'
 import { useSignOut } from '~/hooks/use-sign-out'
 import type { SessionUser } from '~/lib/role'
 
@@ -26,16 +24,7 @@ export const AdminNavButton = ({ user }: AdminNavButtonParams) => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative size-9 rounded-full">
-          <Avatar className="size-9">
-            <AvatarImage
-              src={user.image ?? DEFAULT_AVATAR_URL}
-              alt={user.name}
-              referrerPolicy="no-referrer"
-            />
-            <AvatarFallback className="rounded-lg">
-              {getUserInitials(user.name)}
-            </AvatarFallback>
-          </Avatar>
+          <UserAvatar name={user.name} image={user.image} size="lg" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>

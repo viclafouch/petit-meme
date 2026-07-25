@@ -1,10 +1,12 @@
-import { DAY, MINUTE } from '~/constants/time'
+import { DAY, HOUR, MINUTE } from '~/constants/time'
 
 export type RateLimitConfig = {
   action: string
   maxRequests: number
   windowMs: number
 }
+
+export const RATE_LIMIT_ERROR_MESSAGE = 'Too Many Requests'
 
 export const RATE_LIMIT_DOWNLOAD = {
   action: 'download',
@@ -28,6 +30,12 @@ export const RATE_LIMIT_SUBMIT_MEME = {
   action: 'submit-meme',
   maxRequests: 5,
   windowMs: DAY
+} as const satisfies RateLimitConfig
+
+export const RATE_LIMIT_UPDATE_AVATAR = {
+  action: 'update-avatar',
+  maxRequests: 20,
+  windowMs: HOUR
 } as const satisfies RateLimitConfig
 
 export const RATE_LIMIT_AI_SEARCH = {

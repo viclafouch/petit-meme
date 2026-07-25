@@ -1,4 +1,4 @@
-import { betterAuth } from 'better-auth'
+import { betterAuth, type BetterAuthOptions } from 'better-auth'
 import { admin, lastLoginMethod } from 'better-auth/plugins'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import type Stripe from 'stripe'
@@ -15,10 +15,11 @@ import {
   ONE_HOUR_IN_SECONDS,
   SEVEN_DAYS_IN_SECONDS
 } from '~/constants/time'
-import { ActivityEventType } from '~/db/generated/prisma/enums'
+import { ActivityEventType, UserLocale } from '~/db/generated/prisma/enums'
 import { emailSubjects } from '~/emails/subjects'
 import { clientEnv } from '~/env/client'
 import { serverEnv } from '~/env/server'
+import { getAvatarSlotIdForEmail, resolveAvatarPath } from '~/helpers/avatar'
 import { formatDate } from '~/helpers/date'
 import { formatCentsToEuros } from '~/helpers/number'
 import { authLogger, stripeLogger } from '~/lib/logger'
@@ -114,6 +115,34 @@ const touchUserLastActive = async (session: { userId: string }) => {
   )
 }
 
+const USER_ADDITIONAL_FIELDS = {
+  providerAvatar: { type: 'string', required: false, input: false },
+  termsAcceptedAt: { type: 'date', required: false, input: false },
+  privacyAcceptedAt: { type: 'date', required: false, input: false },
+  locale: { type: Object.values(UserLocale), required: false, input: false }
+} as const satisfies NonNullable<
+  NonNullable<BetterAuthOptions['user']>['additionalFields']
+>
+
+const buildUserCreateData = <
+  User extends { email: string; image?: string | null }
+>(
+  user: User
+) => {
+  const now = new Date()
+  const providerAvatar = user.image ?? null
+
+  return {
+    ...user,
+    image:
+      providerAvatar ?? resolveAvatarPath(getAvatarSlotIdForEmail(user.email)),
+    providerAvatar,
+    termsAcceptedAt: now,
+    privacyAcceptedAt: now,
+    locale: getLocale()
+  }
+}
+
 const getAuthConfig = createServerOnlyFn(() => {
   return betterAuth({
     appName: 'Petit Meme',
@@ -133,6 +162,7 @@ const getAuthConfig = createServerOnlyFn(() => {
       }
     },
     user: {
+      additionalFields: USER_ADDITIONAL_FIELDS,
       deleteUser: {
         enabled: true,
         beforeDelete: async (user) => {
@@ -261,16 +291,7 @@ const getAuthConfig = createServerOnlyFn(() => {
       user: {
         create: {
           before: async (user) => {
-            const now = new Date()
-
-            return {
-              data: {
-                ...user,
-                termsAcceptedAt: now,
-                privacyAcceptedAt: now,
-                locale: getLocale()
-              }
-            }
+            return { data: buildUserCreateData(user) }
           },
           after: async (user, context) => {
             recordActivityEvent({

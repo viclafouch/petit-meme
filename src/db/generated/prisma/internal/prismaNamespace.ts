@@ -2107,6 +2107,7 @@ export const UserScalarFieldEnum = {
   email: 'email',
   emailVerified: 'emailVerified',
   image: 'image',
+  providerAvatar: 'providerAvatar',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   generationCount: 'generationCount',
@@ -2420,6 +2421,7 @@ export const UserOrderByRelevanceFieldEnum = {
   name: 'name',
   email: 'email',
   image: 'image',
+  providerAvatar: 'providerAvatar',
   role: 'role',
   banReason: 'banReason',
   stripeCustomerId: 'stripeCustomerId'

@@ -1,193 +1,242 @@
-# Plan — Protection du contenu vidéo (démarré le 2026-07-25)
-
-**L'app est en production avec des utilisateurs et des données réelles.** Toute migration Prisma doit être additive (nouveaux champs optionnels, nouveaux index). Ne jamais supprimer/renommer de colonnes, reset la base, ou faire de migration destructive.
-
-Le plan précédent (« Plan — Activity », phases 1 à 4 livrées, phase 5 détection de bots) est dans l'historique git. Ce qui reste vivant de la phase 5 est repris ci-dessous.
-
----
+# Plan — Avatar personnalisable (DiceBear)
 
 ## Objectif
 
-Plus aucune URL de fichier vidéo en clair dans le DOM, watermarkée ou non. Le visiteur n'obtient qu'un `blob:` sur l'élément `<video>` et aucun lien téléchargeable. La copie individuelle reste possible et c'est assumé ; ce qu'on tue, c'est l'aspiration par script, aujourd'hui gratuite et invisible.
+Permettre à tout utilisateur connecté de choisir son Avatar depuis un catalogue, tout en conservant l'Avatar fourni par Discord ou Twitter à l'inscription et en pouvant y revenir à tout moment.
 
-Contrainte qui encadre tout le reste, formulée par Victor le 2026-07-25 : **le problème est le volume et l'énumérabilité, pas le fichier**. Un téléchargement à la fois derrière un rate limit est acceptable ; un catalogue de 683 vidéos en libre-service, non. C'est cette contrainte qui rend possible l'exposition contrôlée du watermarké, longtemps écartée par principe.
+Vocabulaire : voir `CONTEXT.md`, section Identité (`Avatar`, `ProviderAvatar`, `AvatarSlot`).
 
-## Diagnostic (vérifié en production le 2026-07-25)
+## Décisions actées
 
-Le `bunnyId` est un identifiant **permanent et suffisant** : qui le possède télécharge, pour toujours, sans rien demander.
+### Pourquoi DiceBear est généré localement et jamais appelé via son API
 
-Le scraper ne passe donc jamais par l'app. Il la visite une fois pour récolter les identifiants, puis tape `vz-eb732fb9-3bc.b-cdn.net` en direct. Le challenge Vercel, le middleware CSRF, le rate limiting et l'instrumentation Sentry sont sur une porte qu'il n'emprunte pas.
+`api.dicebear.com` est réservé à un usage non commercial. Leur documentation dit textuellement : *"Our API is free to use for non-commercial purposes"* et *"For commercial use or higher limits, please set up your own instance."* Petit Meme vend des abonnements Stripe, donc l'usage est commercial. S'y ajoutent l'absence de garantie de disponibilité annoncée par DiceBear et l'envoi de l'IP des utilisateurs à un tiers.
 
-| Surface | Constat |
-|---|---|
-| `/{bunnyId}/original` | `HTTP 200`, MP4 **sans watermark**, `access-control-allow-origin: *`, aucun token. Un `curl` suffit |
-| `/{bunnyId}/playlist.m3u8` | `HTTP 200`, HLS ouvert, rendus jusqu'au **720p**, non watermarké. Un `ffmpeg -i playlist.m3u8` reconstitue la source |
-| `sitemap-memes.xml` | **683 `<video:content_loc>` pointant vers `/original`**, déclaré dans `robots.txt` et dans l'index. Catalogue lisible par machine |
-| HTML de la page mème | `originalUrl` sérialisé dans le payload SSR du loader, plus `contentUrl` dans le JSON-LD, sur la page détail **et** sur les pages catégorie |
-| Edge Vercel | Un `curl` avec UA `curl/x` reçoit `HTTP 429` + `x-vercel-mitigated: challenge`. Protège l'app, **pas** le CDN Bunny |
+**Ne pas remplacer la génération locale par un appel à leur API.** `@dicebear/core` est en MIT et reste en `devDependencies` : il ne sert qu'au script de génération, jamais au runtime.
 
-**Le contournement du gating premium est réel.** `shareMeme` (`src/server/meme.ts:819`) sert le watermark aux comptes gratuits et l'original aux comptes premium. L'original étant public et non signé, la distinction payante ne tient pas.
+### Style retenu : Adventurer Neutral, et le crédit qu'il impose
 
-**Le `bunnyId` restera public quoi qu'on fasse.** Il est écrit en clair dans le `poster` du `<video>`, dans `og:image`, dans `thumbnailUrl` du JSON-LD, dans le `link rel=preload` (`$memeId.tsx:366`) et dans les enregistrements Algolia, interrogeables publiquement. 14 points d'appel de `buildVideoImageUrl`. Ces vignettes doivent rester publiques, sinon les aperçus Twitter et Google cassent. De cet identifiant on réécrit `playlist.m3u8` et `/original` à la main. La seule question est donc de rendre l'identifiant sans valeur, ce que fait le token auth de la phase 4. Blob et token auth sont complémentaires, aucun ne suffit seul.
+Victor a tranché sur la planche de contact : **Adventurer Neutral**. Ce style est en **CC BY 4.0**, pas en CC0 comme les trois autres candidats. Le retenir engage le site à afficher une ligne de crédit, sans quoi la licence n'est pas respectée.
 
-## Mesure Search Console (relevée le 2026-07-25, sur 3 mois)
+Texte exact fourni par la définition du style (`meta.license.text`) :
 
-L'indexation vidéo est **active et en croissance**, l'arbitrage SEO n'est pas théorique.
+> Remix of „Adventurer Neutral” (https://www.figma.com/community/file/1184595184137881796) by „Lisa Wischofsky”, licensed under „CC BY 4.0” (https://creativecommons.org/licenses/by/4.0/)
 
-| Indicateur | Valeur |
-|---|---|
-| Vidéos indexées | **166** sur 476 connues de Google (683 publiées, toutes ne sont pas découvertes) |
-| Non indexées | 310, dont **154 pour « La vidéo n'est pas sur une page de lecture »** et 156 en attente de traitement |
-| Clics, recherche Vidéo | **222** sur 3 mois, CTR 8 %, position moyenne 11 |
-| Impressions, recherche Vidéo | **2 781**, passées de ~7/jour fin avril à ~80/jour en juillet |
-| Répartition | 85 % mobile, 151 clics en France. 4 pages font 134 des 222 clics |
+L'obligation vit tant que les SVG sont servis. Elle est portée par la phase 5 (crédit sur `mentions-legales.tsx`) et doit être retirée le jour où le style change pour un CC0.
 
-Deux lectures en découlent. Les 166 vidéos indexées le sont grâce au `content_loc` du sitemap, que la doc Google décrit comme *« the most effective way for Google to fetch your video content files »*. Et le motif dominant d'échec montre que Google peine déjà à qualifier nos pages de pages de lecture, ce qui rend le signal on-page d'autant plus précieux.
+### Modèle de stockage
 
-## Stratégie retenue
+- `user.image` porte **l'Avatar affiché**, sous forme d'URL prête à rendre : soit une URL de provider, soit un chemin `/avatars/avatar-NN.svg`. Les 13 points de lecture existants restent inchangés, et aucun `additionalFields` n'est nécessaire côté better-auth.
+- `user.providerImage` archive l'URL fournie par Discord ou Twitter à l'inscription. Écrite une seule fois, jamais réécrite.
+- Le client envoie un **id d'AvatarSlot** (`avatar-07`) ou `provider`, jamais une URL. Le serveur valide contre `AVATAR_CATALOG` et écrit l'URL correspondante. Sans cette validation, la colonne devient écrivable par l'utilisateur avec une URL arbitraire (vecteur de tracking et de stored XSS).
 
-**1. Séparer les assets en deux zones.** Une zone publique et durable qui ne contient que le fichier **watermarké**, servie à Google et à quiconque, protégée par une règle de débit au bord. Une zone Stream **signée** qui contient la source et n'est atteignable qu'en passant par le site. Ce qui reste librement récupérable devient exactement ce qui est déjà offert gratuitement par `shareMeme`, mais au goutte-à-goutte au lieu du robinet ouvert.
+### Pourquoi le catalogue est nommé par emplacement et pas par style
 
-**2. Signer le streaming, pas le supprimer.** La [CDN token authentication](https://docs.bunny.net/stream/security) de Bunny agit au niveau de la pull zone et couvre « MP4 fallbacks, HLS playlists and segments, thumbnails, and previews ». Elle est explicitement prévue pour « secure and sign direct video URLs on a lower level and use those in **your own video player or custom solution** », donc le player hls.js maison est conservé.
+Les fichiers s'appellent `avatar-01.svg` … `avatar-24.svg`, sans mention du style DiceBear. Changer de style se réduit donc à relancer le script de génération : les 24 mêmes fichiers sont réécrits, aucune ligne de base ne bouge. Le choix de l'utilisateur porte sur un **emplacement**, pas sur un visage : un changement de style redessine la tête de tout le monde, ce qui est assumé.
 
-**Piège documenté** : il faut les tokens **path-style** (`token_path`, [Token Authentication V2](https://bunny.net/blog/were-bringing-token-authentication-to-the-next-level/)) pour que les segments `.ts` soient couverts. Signer seulement le `playlist.m3u8` laisse les segments ouverts.
+Le catalogue est **append-only**. On n'efface jamais un fichier, on ne renomme jamais. Le filet de sécurité est `AvatarFallback` (initiales), qui prend la main si un SVG répond 404.
 
-**3. Rate limiter au bord, gratuitement.** [Bunny Shield Basic](https://bunny.net/shield/) est gratuit et inclut 2 règles de rate limit, 25M requêtes/mois et une détection de bots simple. C'est le levier qui répond à la contrainte de volume, et il manquait : le rate limiting de l'app est en mémoire et le scraper ne passe pas par l'app.
+`/avatars/**` est servi en `max-age=604800` (7 jours) et **pas** en `immutable`, sinon un changement de style resterait invisible jusqu'à un an. Contrepartie assumée : un changement de style met jusqu'à 7 jours à se propager. Échappatoire si un jour il faut que ce soit immédiat : renommer le dossier en `/avatars/v2/` et passer `UPDATE "user" SET "image" = replace("image", '/v1/', '/v2/')`.
 
-Fait qui rend le calibrage confortable : **la pull zone publique ne servirait que Googlebot et les scrapers.** Toutes les lectures du watermarké par l'app passent par `fetchWatermarkedVideo`, qui tape le Storage API avec l'AccessKey côté serveur (`buildStorageUrl`, `bunny.ts:158`). Aucun utilisateur légitime n'atteint la zone publique, le seuil peut donc être bas sans gêner personne.
+### Limite connue et assumée
 
-### Écarté, avec la raison
+Un compte créé en email/mot de passe qui se connecte ensuite via Discord voit son compte lié (better-auth active `accountLinking` par défaut), mais n'obtient **aucun ProviderAvatar** : `image` n'est pas réécrit et le hook `user.create.before` ne repasse pas. Cette personne a déjà un AvatarSlot attribué à l'inscription et peut en changer normalement.
 
-- **`<video:player_loc>` vers l'iframe Bunny.** Techniquement accepté par Google en alternative à `content_loc` (*« It's required to provide either a `<video:content_loc>` or `<video:player_loc>` tag »*), mais cadré pour les plateformes d'embed : *« For Vimeo, YouTube, and other video hosting platforms that allow embedding videos through iframe videos, this value is used rather than `video:content_loc` »*. L'iframe n'étant pas présente sur nos pages, le motif « pas sur une page de lecture » qui frappe déjà 154 vidéos risquait de s'étendre à tout le catalogue
-- **Retirer le bloc `<video:video>`.** Coûterait 222 clics sur 3 mois et une croissance d'un facteur dix depuis avril, alors que le rate limit répond à la contrainte de volume sans ce sacrifice
-- **Proxy vidéo par notre serveur.** L'URL de proxy devient le nouvel identifiant permanent, aussi récoltable, sauf à y ajouter une signature par session, ce que Bunny fait déjà au bord et gratuitement. On paierait la bande passante vidéo sur Vercel Hobby, sans plafond ni Spend Management, pour une protection identique
-- **Remplacer le player par l'iframe Bunny.** Coûterait `videoRef`, dont dépendent `useRegisterMemeView` (`ratio: 0.3`, `minMs: 2500`, `maxMs: 12000`), `pauseVideo()`, `VideoOverlay`, le poster et le thème dark
-- **Watermarker le flux HLS.** Imposerait le watermark aux abonnés premium pendant la lecture, ce qu'ils paient précisément pour ne pas avoir
-- **MediaCage Basic DRM.** Chiffrement « dynamic clear key » : la clé transite jusqu'au navigateur, donc contournable. À reconsidérer seulement si le token auth se révèle insuffisant
-- **MediaCage Enterprise DRM.** 99 $/mois plus les licences, sans rapport avec l'économie du site
-- **Désactiver « Enable Direct Play ».** Ferait répondre 403 aux URLs directes, donc casserait le player hls.js maison
-- **Allowlist Googlebot par plages IP.** Google recommande la vérification par reverse DNS et fait évoluer ses plages : liste figée = dette qui se périme sans prévenir, pour l'unique custom access list du plan gratuit. À n'ajouter que si la mesure montre que Googlebot frôle le seuil
+Les deux corrections possibles ont été écartées : `updateUserInfoOnLink: true` écraserait l'Avatar choisi à chaque connexion, et un hook `account.create.after` ne dispose pas de l'image du profil distant (la ligne `Account` ne porte que les jetons).
 
 ---
 
-## Phase 0 — Le player fuyait sur Chrome et Edge (fait)
+## Phase 0 — Choix du style et curation des seeds
 
-`use-meme-hls.ts` et `meme-reels.tsx` testaient `canPlayType('application/vnd.apple.mpegurl')` **avant** `Hls.isSupported()`. Depuis Chrome 142 ce test renvoie `"maybe"` sur Chrome et Edge desktop, pas seulement sur Safari. Vérifié en prod sur Chrome 150 : `<video src="https://vz-….b-cdn.net/{bunnyId}/playlist.m3u8">` en clair dans le DOM, lecture normale. Seuls Firefox et les Chromium anciens atteignaient la branche hls.js.
+- [x] Écrire `scripts/generate-avatars.ts` (`@dicebear/core@10.3.0` + `@dicebear/styles@10.2.0` en `devDependencies`)
+- [x] Mode planche de contact : 4 styles candidats (Pixel Art, Lorelei, Notionists, Adventurer Neutral), 60 seeds chacun (`petit-meme-01` … `petit-meme-60`), rendus à 32px et 96px, sur fond clair et sur fond sombre, dans un HTML autonome écrit hors du repo (`$TMPDIR/petit-meme-avatars/contact-sheet.html`)
+- [x] Planche transformée en instrument de sélection : habillage gris neutre sans chroma pour ne pas fausser le jugement des palettes, épreuve coupée en deux (blanc du thème clair à gauche, noir du thème sombre à droite), clic pour retenir un seed, l'ordre des clics devenant l'ordre du catalogue, compteur sur 24, sélection persistée en `localStorage`, et sortie prête à coller (`--style=… --palette=… --seeds=…`) consommable par le mode `generate` de la phase 1
+- [x] Victor tranche le style : **Adventurer Neutral** (CC BY 4.0, crédit obligatoire, voir « Décisions actées »)
+- [x] Victor tranche la palette de fond : **`pastel`** (`#b6e3f4`, `#c0aede`, `#d1d4f9`, `#ffd5dc`, `#ffdfbf`)
+- [x] Victor sélectionne 24 seeds sur la planche : les 24 premiers, `petit-meme-01` … `petit-meme-24`, dans l'ordre
+- [x] Figer les seeds retenus dans `src/constants/avatar.ts` : `AVATAR_STYLE_ID`, `AVATAR_BACKGROUND_PALETTE`, et les seeds eux-mêmes. Ils vivent dans `AVATAR_CATALOG`, un seed par AvatarSlot, et non dans un `AVATAR_SEEDS` séparé comme annoncé ici à l'origine : les deux tableaux auraient pu se désynchroniser. Source de vérité unique, consommée par `scripts/generate-avatars.ts` (le compteur de la planche vaut `AVATAR_CATALOG.length`)
 
-- [x] Correctif recommandé par les mainteneurs de hls.js : natif **uniquement** si `ManagedMediaSource` existe, sinon hls.js. Donne un `blob:` partout, iOS 17.1+ compris. Seul iOS antérieur retombe sur le natif
-- [x] Logique dupliquée entre le hook et les reels extraite dans `attachHlsSource` / `matchIsNativeHlsPreferred` (`src/utils/video.ts`), qui renvoie sa fonction de nettoyage
-- [x] `HLS_MIME_TYPE` dans `src/constants/bunny.ts`, `hlsRef` retiré du retour de `useMemeHls` (inutilisé)
-- [x] `pnpm run lint:fix` passe
+Répartition des couleurs sur les 24 retenus : 8 roses, 6 pêches, 4 lavandes, 3 violets, 3 bleus. Déséquilibre assumé, conséquence du choix « les 24 premiers » plutôt qu'une sélection équilibrée à la main. Rattrapable sans casse tant que la phase 1 n'est pas commitée, et rattrapable après coup au prix d'une régénération des fichiers (les emplacements ne bougent pas, seuls les dessins changent).
 
-**Conséquence à compenser en phase 3.** Googlebot est Chrome : il recevait jusqu'ici un `src` exploitable sur la page. Il ne voit plus qu'un `poster`. Le signal on-page doit être rendu par le JSON-LD.
+Le script a eu deux modes le temps de la curation (`--mode=contact-sheet`, `--mode=generate`). **La planche a été supprimée après la revue de la phase 4** : elle avait rempli son office, pesait environ 500 des 731 lignes du script, et seul `--mode=generate` était câblé dans `package.json`. `scripts/generate-avatars.ts` ne fait plus qu'une chose et ne prend plus d'arguments. L'historique git garde la planche si un changement de style impose d'en rejouer une.
 
-Une tentative antérieure de retrait de `contentUrl` et `originalUrl` du HTML a été annulée dans l'arbre. L'arbitrage ci-dessous la rend caduque : `contentUrl` revient, pointant vers le watermarké.
+Adventurer Neutral n'expose qu'une seule couleur, `background` : le visage est un trait noir sans couleur propre, et sa palette d'origine ne contient que quatre bruns (`#f2d3b1`, `#ecad80`, `#9e5622`, `#763900`), d'où l'impression de monochromie. Le moteur accepte n'importe quelle palette de remplacement et en tire une couleur par seed, de façon déterministe. La planche compare dix palettes : `origine`, `neutre`, `papier`, `pastel`, `bonbon`, `agrumes`, `lagon`, `terre`, `vif`, `large`. **La palette retenue devra être passée au mode `generate` en phase 1 et figée à côté des seeds** : deux palettes différentes sur le même seed donnent deux fichiers différents.
 
-## Phase 1 — Mesurer avant d'investir (fait)
+Le nombre de couleurs d'une palette compte autant que leur teinte : sur 24 emplacements, une palette de 5 couleurs fait revenir chaque teinte environ cinq fois, d'où `large` (12 couleurs) qui réduit les répétitions au prix de teintes plus proches les unes des autres, difficiles à distinguer à 32px.
 
-- [x] Search Console, rapport « Indexation des vidéos » et Performances onglet Vidéo. Résultats dans la section Mesure ci-dessus. Conclusion : l'indexation vidéo vaut d'être sauvée
-- [x] Couverture watermark. Question close en phase 2, sans instrumentation
+Les styles en CC BY 4.0 (Adventurer, Micah, Big Smile, Fun Emoji, Personas, Croodles, Miniavs, Big Ears, Dylan, Toon Head, Glyphs) imposent une ligne d'attribution visible sur le site. **Adventurer Neutral, ajouté à la planche à la demande de Victor, est dans ce lot** : la planche le signale par un badge. Le retenir engage à afficher le crédit « Remix of "Adventurer Neutral" by Lisa Wischofsky, licensed under CC BY 4.0 ».
 
-## Phase 2 — Couverture watermark (close, rien à construire)
+## Phase 1 — Catalogue statique
 
-**Décision de Victor le 2026-07-25 : tout mème publié en production a un watermark, c'est un acquis, on ne le vérifie pas.** Ne pas rouvrir.
+- [x] `src/constants/avatar.ts` : `AVATAR_CATALOG` en `as const satisfies`, un id par AvatarSlot (`avatar-01` … `avatar-24`) avec son seed, plus `AVATAR_STYLE_ID`, `AVATAR_DIRECTORY`, `AVATAR_BACKGROUND_PALETTE` et le type `AvatarSlotId`. Source de vérité unique, déjà consommée par le script
+- [x] Générer les 24 SVG dans `public/avatars/` et les commiter (`pnpm run avatars:generate`, 168 Ko au total)
+- [x] `vite.config.ts` : route rule `/avatars/**` en `max-age=604800`, via `AVATAR_ASSET_HEADERS`, distincte de `IMMUTABLE_ASSET_HEADERS`
+- [x] `src/helpers/avatar.ts` : `resolveAvatarPath`, `matchIsAvatarPath` et `getAvatarSlotIdForEmail` (FNV-1a, e-mail normalisé en minuscules et trimé, répartition vérifiée sur 5000 adresses : 189 à 229 par emplacement pour 208 attendus)
 
-La phase visait à ajouter `watermarkedAt DateTime?` au modèle `Video`, avec migration et backfill. **Abandonné.** Schema et `logWatermarkUpload` remis en l'état, aucune migration créée, aucune touchée en production.
+**Le chemin n'est pas stocké dans le catalogue**, contrairement à la formulation initiale : il se déduit mécaniquement de l'id (`/avatars/<id>.svg`) et le stocker deux fois ouvrirait une désynchronisation. `resolveAvatarPath` est la seule façon de le construire.
 
-Deux raisons, dans l'ordre. La règle métier est **déjà appliquée par le code** : `editMeme` (`src/routes/admin/-server/memes.ts:260`) refuse le passage à `PUBLISHED` quand `checkWatermarkExists` répond non, avec un 422, depuis `e64e17b` du 2026-03-11. Et `editMeme` est le seul chemin vers `PUBLISHED`, la création forçant `PENDING` (`memes.ts:465`), sans qu'aucun cron ni script ne touche au statut. Ensuite, la colonne n'était qu'un proxy de cette règle, et un proxy moins fiable : la vérité est dans le Storage, et un watermark supprimé après publication laisserait la colonne affirmer « watermarké » pendant que Google prend un 404.
+Les SVG sont écrits **sans attributs `width`/`height`**, uniquement avec leur `viewBox` : ils prennent la taille de leur conteneur CSS, donc les mêmes fichiers servent la navbar en 32px et les réglages en 96px. Ils embarquent le bloc RDF de DiceBear qui porte la licence, ce qui ne dispense pas du crédit visible de la phase 5.
 
-- [x] Garde-fou de publication : en place et vérifié, aucun autre chemin vers `PUBLISHED`
-- [x] Couverture des publiés : acquise par hypothèse, pas d'audit, pas de colonne, pas de migration
+## Phase 2 — Base de données
 
-**Conséquence pour la phase 3** : `content_loc` peut pointer vers le watermarké sans filtre en base, `status = PUBLISHED` suffisant à garantir la présence du fichier.
+- [x] `prisma/schema.prisma` : `providerImage String? @map("provider_image")` sur `model User`
+- [x] Migration additive lancée par Victor : `20260725215859_add_user_provider_avatar`, un seul `ALTER TABLE "user" ADD COLUMN "provider_avatar" TEXT`. Aucune opération destructive, aucune valeur par défaut nécessaire puisque la colonne est nullable. La première version, `20260725210249_add_user_provider_image`, a été supprimée avec le renommage du vocabulaire (voir phase 4) : elle n'avait jamais atteint la prod, seule la base de dev l'avait appliquée
+- [x] `src/lib/auth.tsx`, hook `databaseHooks.user.create.before` : extrait dans `buildUserCreateData` au niveau module (la config dépassait la limite de 250 lignes par fonction). Écrit `providerImage` depuis l'image OAuth quand elle existe, et n'attribue un AvatarSlot dérivé du hash de l'e-mail que lorsque `image` est absent. Une image OAuth n'est jamais écrasée
+- [x] `scripts/backfill-provider-avatars.ts`, lancé une fois via `pnpm dlx tsx` (tsx n'est pas une dépendance du projet) :
+  - `provider_image = image` en un seul `UPDATE`, pour les lignes dont `image` n'est ni null, ni un chemin du catalogue, et qui ne sont pas anonymisées. Le prédicat vit dans une seule `Prisma.sql` partagée par le comptage `--dry-run` et l'`UPDATE`, et son motif `LIKE` est dérivé d'`AVATAR_DIRECTORY` plutôt que réécrit
+  - attribution d'un AvatarSlot aux lignes dont `image` est null, via la **même fonction de hash** que le hook, jamais un équivalent réécrit en SQL
+  - les lignes `is_anonymized = true` sont exclues des deux étapes : sans cette exclusion le backfill rendrait un avatar à des comptes supprimés
+  - les mises à jour sont groupées par AvatarSlot, donc au plus 24 `updateMany` dans une transaction quel que soit le nombre de comptes, pour ne pas réveiller la base plus que nécessaire
+  - `--dry-run` compte sans rien écrire
 
-**Détecteur de rupture déjà en place.** Si l'invariant cassait, le fallback de `shareMeme` (`meme.ts:876`) sert l'original à la place du watermark et remonte l'erreur dans Sentry sous `watermark-fallback`. C'est la sonde temps réel, elle signale au moment où ça se produit, ce qu'une colonne n'aurait pas fait. À surveiller après la bascule de la phase 3.
+`buildUserCreateData` écrit `providerImage` dès l'inscription, ce que la formulation initiale de cette phase passait sous silence en ne parlant que de l'attribution d'un AvatarSlot. Sans cette écriture, un compte OAuth créé après le deploy ne devrait son ProviderAvatar qu'à la garde auto-réparante de la phase 3, qui ne se déclenche qu'au premier changement d'avatar.
 
-**Seul reliquat conservé dans l'arbre**, indépendant de tout ce qui précède : `MemeWithVideo` valait `MemeGetPayload<{ include: { video: true } }>`, donc le modèle `Video` entier, alors que les enregistrements Algolia ne portent que 4 champs vidéo. Le type dérive maintenant de `MEME_VIDEO_INCLUDE` (`src/constants/meme.ts`), construit sur `MEME_VIDEO_SELECT` (`id`, `bunnyId`, `duration`, `bunnyStatus`), réutilisé par `MEME_FULL_INCLUDE`, `MEME_ALGOLIA_INCLUDE`, `MEME_WITH_VIDEO_AND_TRANSLATIONS_INCLUDE` (`meme.ts:288`) et les bookmarks (`user.ts:42`). Le type dit désormais la vérité sur ce qui est réellement partagé, et tout futur champ ajouté à `Video` restera hors d'Algolia et hors des payloads client. Aucun effet à l'exécution, la projection est identique aux 4 champs existants.
+## Phase 3 — Serveur
 
-Les `include: { video: true }` restants (`ai.ts:136`, `sync-bunny-titles.ts:82`) sont purement serveur et n'ont pas été touchés.
+- [x] Server fn `updateUserAvatar` (`src/server/user.ts`) : `.middleware([authUserRequiredMiddleware, createRateLimitMiddleware(RATE_LIMIT_UPDATE_AVATAR)])`, `.validator()` sur `AVATAR_SELECTION_SCHEMA`, un `z.enum` construit à partir des ids du catalogue plus `AVATAR_PROVIDER_SELECTION`. Retourne `{ image }` pour la mise à jour optimiste de la phase 4
+- [x] Garde auto-réparante dans le handler : si `providerImage` est null et que `image` n'est pas un chemin du catalogue (`matchIsAvatarPath`), `image` est recopié dans `providerImage`. Ferme la fenêtre entre le deploy Vercel et le passage du backfill, pendant laquelle un changement d'avatar perdrait définitivement le ProviderAvatar
+- [x] `provider` résout vers `providerImage`. Si null, la valeur est refusée par un `throw new Response(..., { status: 400 })`. Un `setResponseStatus(400)` suivi d'un `throw new Error` ne donne **pas** un 400 : l'Error remonte à la couche serveur externe en 500. Leçon déjà apprise sur le rate limiter au commit 390e369, appliquée ici après la revue de la phase 4
+- [x] `src/constants/rate-limit.ts` : `RATE_LIMIT_UPDATE_AVATAR`, 20 changements par heure et par IP, en mémoire, aucune écriture en base
+- [x] `src/routes/api/cron/cleanup.ts` : `"provider_image" = NULL` ajouté à l'`UPDATE` d'anonymisation. Une URL Discord contient l'identifiant Discord de la personne, elle est donc réidentifiante et doit disparaître avec le reste
+- [x] `exportUserData` (`src/server/user.ts`) : `providerImage` ajouté au `select` et au payload `profile`
 
-**Duplication repérée, pas traitée.** `processWithConcurrency` existe en double, version positionnelle dans `scripts/watermark-videos.ts:177` et version objet dans `sync-bunny-titles.ts:35`. L'extraction dans `src/helpers/concurrency.ts` a été faite puis annulée : elle n'avait plus de motif une fois l'audit abandonné, et refactorer un cron de production n'a rien à faire dans un lot « protection vidéo ». À reprendre dans un lot dédié.
+Aucune valeur ajoutée à `ActivityEventType` : changer d'avatar est un réglage de compte, pas un acte de consommation, et un enum Prisma ne se retire jamais.
 
-## Phase 3 — Zone publique pour le watermarké, rate limit, et bascule du SEO
+La réparation et l'écriture du nouvel Avatar tiennent dans **un seul `UPDATE`** plutôt que dans une transaction interactive : une instruction unique est déjà atomique, et elle épargne à Neon les allers-retours d'un `BEGIN`/`COMMIT`. `providerImage` n'est présent dans le `data` que lorsqu'il y a effectivement quelque chose à réparer, ce qui préserve la règle « écrite une seule fois, jamais réécrite ».
 
-Le watermark vit dans Bunny **Storage**, zone privée avec AccessKey. Google ne peut pas le lire.
+`AVATAR_PROVIDER_SELECTION` et le type `AvatarSelection` vivent dans `src/constants/avatar.ts` : la phase 4 en a besoin pour envoyer la valeur, le littéral `'provider'` n'est donc écrit qu'une fois.
 
-- [ ] Créer une pull zone publique devant la zone Storage. La bande passante reste chez Bunny, pas sur le quota Vercel
-- [ ] Vérifier le coût de cette bande passante avant bascule
-- [ ] Activer Bunny Shield Basic sur cette zone. Deux règles : un plafond haut permanent, de l'ordre de 300 requêtes/minute par IP, contre l'aspiration brutale ; une règle de travail calibrée **large d'abord**, de l'ordre de 60/minute par IP
-- [ ] `content_loc` du sitemap pointe vers le fichier watermarké, durable et public
-- [ ] `contentUrl` du `VideoObject` de la page pointe vers **la même URL**, pour rendre à Google le signal on-page que le passage au `blob:` retire
-- [ ] Après recrawl, lire dans les logs Bunny le débit maximum atteint par Googlebot sur une minute, poser le seuil définitif à trois ou quatre fois ce maximum
+## Phase 4 — UI
 
-Pourquoi large d'abord : la situation actuelle est déjà pire que tout calibrage trop généreux, puisque `/original` répond 200 sans limite à qui veut. Il n'y a aucune prime à serrer tout de suite, et une pénalité réelle à serrer trop, la Search Console mettant plusieurs semaines à signaler que Googlebot a été coupé.
+- [x] Consolider les 5 rendus d'avatar sur `UserAvatar` (`src/components/user-avatar.tsx`). Le composant gagne deux axes plutôt qu'une seule taille `lg` : cinq tailles (`xs` 16px feed admin, `sm` 24px trigger du dropdown, `md` 32px label du dropdown, `lg` 36px bouton admin, `xl` 96px réglages) et une forme (`circle` par défaut, `rounded` pour les deux rendus du dropdown). Les tailles sont à parité pixel exacte avec l'existant : chacune est dimensionnée sur son bouton conteneur, les rabattre sur une valeur commune aurait déformé la navbar
+- [x] `referrerPolicy="no-referrer"` et l'alt `m.common_avatar_alt` généralisés à tous les rendus. Le premier n'existait que sur `admin-nav-button`, le second que sur `user-dropdown`
+- [x] Il y avait **7 rendus, pas 5**. `admin/ai-search/index.tsx` et `admin/submissions/index.tsx` construisaient eux aussi un `Avatar` brut, en dehors de la liste du plan, et affichent des URL de provider : la fuite de referrer que le point précédent visait à fermer y restait ouverte. Trouvés à la revue de la phase 4, tous deux passés sur `UserAvatar` en taille `md`, à parité pixel
+- [x] Retirer `?? DEFAULT_AVATAR_URL` partout : les initiales de `AvatarFallback` redeviennent le vrai filet, aujourd'hui neutralisé
+- [x] Supprimer `DEFAULT_AVATAR_URL`, `public/images/avatar.png` et `public/images/avatar-30x30.png` (ce dernier était déjà mort). Recherche préalable sur tout le dépôt : plus aucune référence hors documentation
+- [x] Modale de sélection depuis `profile-header.tsx` (`avatar-picker-dialog.tsx`) : grille de 24 vignettes, précédée de la vignette du ProviderAvatar quand il existe, séparée d'elle par un `Separator` et son propre libellé
+- [x] Déclencheur : l'avatar des réglages devient un vrai `<button>`, avec un voile au survol **et au `focus-visible`**, plus un badge crayon toujours visible. Le survol seul n'était atteignable ni au clavier ni au doigt
+- [x] Dialog partout, pas de Drawer sur mobile. Une grille tient dans un Dialog centré à toutes les tailles (4 colonnes, 6 à partir de `sm`), et `useIsMobile()` renvoie `false` au premier rendu serveur, ce qui aurait fait apparaître le Drawer après hydratation
+- [x] Clic sur une vignette = enregistré. Pas de bouton de confirmation : le choix est réversible en un clic
+- [x] `useUpdateAvatar` (`src/hooks/use-update-avatar.ts`) : mise à jour optimiste, invalidation de `getAuthUserQueryOpts.all`, **et `router.invalidate()`**
+- [x] Toast `sonner` et retour à l'état précédent en cas d'échec
+- [x] Accessibilité : vignettes en `min-w-11` (44px) quelle que soit la largeur, `aria-busy` pendant la mutation, et navigation clavier aux flèches. La grille est un `ToggleGroup` Radix en `type="single"`, qui apporte le `tabindex` glissant et `aria-pressed` sans code maison
 
-## Phase 4 — CDN token authentication sur le streaming
+### Trois choses que la formulation initiale de cette phase disait de travers
 
-- [ ] Activer la CDN token authentication sur la pull zone Stream
-- [ ] Tokens **path-style** avec `token_path`, sinon les segments `.ts` restent ouverts
-- [ ] Expiration courte, quelques minutes
-- [ ] Signature **côté serveur** à chaque rendu. `signBunnyUrl` (`src/lib/bunny-token.ts`) et `BUNNY_TOKEN_AUTH_KEY` existent déjà, utilisés par `signOriginalUrl` (`bunny.ts:49`) mais pas pour le streaming, et la zone n'a pas l'option activée
-- [ ] `useMemeHls` reçoit une URL signée en paramètre au lieu de la construire côté client
-- [ ] Les 4 surfaces de lecture suivent : `$memeId.tsx:123`, `player-dialog.tsx:36`, `studio-preview.tsx:32` (via le hook) et `meme-reels.tsx` (appel direct à `buildVideoStreamUrl`)
-- [ ] Décider du verrouillage par IP. Protège d'un scrape distribué, mais casse potentiellement les bascules de réseau mobile
-- [ ] Vérifier que `/original` et `/playlist.m3u8` répondent 403 sans token
+**L'invalidation de la query ne suffisait pas, et le `staleTime` n'était pas le coupable.** `ProfileHeader` et la navbar lisent tous deux `user` dans le contexte de route (`settings/route.tsx`, `navbar.tsx`), lui-même figé par le `beforeLoad` racine (`__root.tsx`). Invalider le cache TanStack ne déclenche aucun re-render : il faut `router.invalidate()` pour rejouer le `beforeLoad`. Sans lui l'ancien avatar restait affiché jusqu'au prochain rechargement complet, pas cinq minutes.
 
-**Question ouverte à trancher avant de coder** : durée de vie du token contre mise en cache du HTML. Une URL signée à TTL court insérée dans une page mise en cache produit une lecture cassée. Déterminer ce qui est réellement caché dans le rendu SSR et le loader.
+**Il y avait un second cache de cinq minutes, non identifié.** `session.cookieCache` (`auth.tsx`) sert un cookie signé pendant 300 s sans toucher la base, donc `getAuthUser` renvoyait l'ancien `image` même après `router.invalidate()`. `useUpdateAvatar` appelle donc `authClient.getSession({ query: { disableCookieCache: true } })` après la mutation, ce qui relit la base et réécrit le cookie. Une requête par changement d'avatar, opération rare et déjà plafonnée à 20/h.
 
-## Phase 5 — Resserrer ce qui reste
+**Le précédent Drawer invoqué n'existait pas.** `studio-page.tsx` monte son Drawer en dur dans un bloc mobile face à une sidebar `hidden md:flex` : c'est du CSS, pas `useIsMobile()`.
 
-- [ ] Baisser `RATE_LIMIT_DOWNLOAD` : 10 par 5 min font 2 880 par jour pour 150 téléchargements réels. Une constante, le levier le moins cher
-- [x] Le rate limit renvoie un vrai 429 au lieu d'un 500 sur les server fns GET
-- [ ] Déployer l'instrumentation CSRF et observer une semaine de Sentry `scraping-detection` avant toute décision BotID
-- [ ] Note : si l'embed token authentication est un jour activée, l'iframe admin (`src/routes/admin/library/$memeId.tsx:87`) doit être signée aussi
+### La grille est un ToggleGroup, et `aria-pressed` revient par la bande
+
+Premier jet : `role="radiogroup"` à la main plus un hook `useRovingFocus` de 74 lignes, au motif que choisir un avatar est un choix unique et que `studio-templates.tsx` fait déjà comme ça. La revue a objecté que `src/components/ui/toggle-group.tsx` existe et donne le `tabindex` glissant gratuitement. Elle a raison : le hook est supprimé, la grille est un `ToggleGroup` en `type="single"`, et la sélection courante devient **une seule valeur** au lieu d'un `isSelected` par vignette doublé d'une arithmétique d'index. Radix rend des boutons `aria-pressed`, donc la sémantique demandée à l'origine par la phase revient d'elle-même.
+
+Contrepartie assumée : `toggleVariants` est dessiné pour un segmented control horizontal (`h-9 px-2 rounded-md`, `flex w-fit`, `first:rounded-l-md last:rounded-r-md`). La modale doit donc l'écraser sur une poignée de classes (`size-auto`, `p-0`, `rounded-full`, `first:rounded-full last:rounded-full`, conteneur en `grid`). C'est le prix du composant partagé, il reste inférieur au coût du hook maison.
+
+### `providerImage` était silencieusement jeté à l'inscription
+
+Pour que la modale sache si un ProviderAvatar existe, `providerImage` est déclaré en `user.additionalFields` (`input: false`, donc non écrivable par le client) et arrive dans la session, dans `SessionUser` et dans le contexte de route, sans une requête de plus.
+
+Cette déclaration ne fait pas qu'alimenter la modale : **elle répare la phase 2.** `transformInput` (`@better-auth/core/dist/db/adapter/factory.mjs`) construit la ligne à insérer en bouclant sur les seuls champs déclarés au schéma better-auth, et jette tout le reste. `providerImage`, renvoyé par `buildUserCreateData`, n'était donc jamais écrit à l'inscription : la colonne restait NULL jusqu'à ce que la garde auto-réparante de la phase 3 la remplisse au premier changement d'avatar. Corrigé.
+
+Effet de bord du passage en `additionalFields` : better-auth réinfère le type utilisateur et `image` devient `string | null | undefined`. `UserAvatar` accepte les trois, et l'optimiste normalise en `undefined`.
+
+### Déduplication
+
+`src/constants/ui.ts` porte `SELECTED_TILE_RING_CLASS_NAME` et `FOCUS_VISIBLE_RING_CLASS_NAME`. La première chaîne existait en trois exemplaires identiques : `studio-templates.tsx`, `studio-controls.tsx` et la nouvelle modale. Toucher au Studio sort du périmètre annoncé de la phase, c'est assumé et signalé.
+
+`resolveAvatarImage` (`src/helpers/avatar.ts`) porte désormais seule la correspondance sélection → URL. `resolveNextAvatar` (`src/server/user.ts`) l'appelle et n'ajoute que le 400 quand il n'y a pas de ProviderAvatar, au lieu de réécrire la même logique côté client.
+
+`profile-header.tsx` ne dupliquait pas `getUserInitials`, il en implémentait une **autre** : deux premiers caractères du nom là où le helper prend l'initiale des deux premiers mots. Les réglages affichent donc désormais `VD` là où ils affichaient `VI`.
+
+### Vocabulaire aligné sur CONTEXT.md
+
+`CONTEXT.md` nomme le concept **ProviderAvatar** et range `image` puis `Photo SSO` sous `_Avoid_`. Le premier jet livrait pourtant `providerImage` partout. Renommé : `providerAvatar`, colonne `provider_avatar`, `resolveAvatar`, `recoveredProviderAvatar`, `archiveProviderAvatars`. Les deux chaînes fautives suivent : `common_avatar_alt` passe de « Photo de profil de {name} » à « Avatar de {name} », et `settings_avatar_provider_label` de « Photo de votre compte lié » à « Avatar de votre compte lié ».
+
+Fait maintenant parce que la fenêtre se refermait : la migration n'avait jamais atteint la prod. Elle a été supprimée et doit être recréée sous le nom `add_user_provider_avatar`.
+
+### Les consentements RGPD n'étaient jamais écrits non plus
+
+Même mécanisme que `providerImage`, découvert en tirant le même fil. `buildUserCreateData` renvoie `termsAcceptedAt`, `privacyAcceptedAt` et `locale`, et `transformInput` les jetait tous les trois faute de déclaration. Conséquences en production aujourd'hui : les deux horodatages de consentement restent NULL à l'inscription, et un compte créé en anglais retombe sur le défaut Prisma `locale = fr`, ce qui décide de la langue de ses e-mails. Les trois rejoignent `USER_ADDITIONAL_FIELDS`, extrait au niveau module parce que la config dépassait de nouveau les 250 lignes. `locale` tire ses valeurs autorisées d'`Object.values(UserLocale)`, l'enum Prisma, plutôt que d'une liste réécrite à la main.
+
+### `tsc` ne voit pas les erreurs de `select` Prisma
+
+Vérifié pendant le renommage : avec un client généré périmé, `select: { thisFieldDoesNotExist: true }` passe `tsc` sans broncher. C'est **oxlint-tsgolint** qui rattrape, via `typescript/no-unnecessary-condition` sur les valeurs devenues `never`. Conséquence pratique : après toute modification du schema, un `tsc` vert ne prouve rien tant que `prisma generate` n'a pas tourné. Toujours lancer `pnpm run lint:fix` en entier.
+
+### Clés i18n écrites ici et non en phase 5
+
+Les six clés de la modale (`settings_avatar_*`) sont dans `messages/fr.json` et `messages/en.json`, pour que le site reste bilingue entre les deux phases. La phase 5 ne porte plus que le crédit CC BY.
+
+## Phase 5 — i18n et finitions
+
+- [x] ~~Clés de la modale dans `messages/fr.json` et `messages/en.json`~~ — livrées en phase 4, voir la note en fin de phase 4
+- [x] **Crédit CC BY 4.0** : section « 8. Crédits » ajoutée à `md/fr/mentions-legales.md` et `md/en/mentions-legales.md`, pas de clé Paraglide et pas une ligne de JSX (voir la note ci-dessous). Liens cliquables vers le fichier Figma source et vers la licence. Non facultatif : sans cette ligne, l'usage des SVG est hors licence
+- [x] `pnpm run lint:fix`
+- [x] ~~`/simplify` (changement multi-fichiers)~~ — sauté sur décision de Victor : la phase 5 ne touche que deux fichiers markdown, il n'y a pas de code à simplifier
+- [ ] Suggérer les audits pertinents : `security-auditor` (colonne nouvellement écrivable par l'utilisateur), `gdpr-auditor` (anonymisation et export), `dead-code` (placeholder supprimé)
+
+### Le crédit ne passe pas par une clé Paraglide
+
+La formulation initiale demandait une clé de message dans les deux locales et un bloc de liens dans `mentions-legales.tsx`. Ce fichier ne porte aucun texte : il charge `md/<locale>/mentions-legales.md` et le rend. Les seules clés `legal_mentions_*` servent le `<title>` et la meta description. Écrire le crédit en Paraglide aurait imposé de découper une phrase de deux liens en quatre clés par locale, puis de recoller le tout en JSX sous le `<Markdown>`, visuellement détaché des sept sections numérotées.
+
+Le crédit est donc une section markdown comme les autres. `BASE_MARKDOWN_COMPONENTS.a` (`src/constants/markdown.tsx`) pose déjà `target="_blank" rel="noopener noreferrer"` sur tout lien qui ne commence pas par `/`, l'exigence est satisfaite sans code neuf.
+
+Le texte d'attribution reste **en anglais dans les deux locales**, mot pour mot ce que renvoie `meta.license.text` du style, guillemets `„ ”` compris. Seule la phrase d'introduction est traduite. Traduire l'attribution elle-même la ferait diverger de la formulation exigée par la licence.
+
+`Dernière mise à jour` / `Last updated` passe de février à **juillet 2026** dans les deux fichiers : la page vient d'être modifiée, la date précédente devenait fausse.
 
 ---
 
-## Où on en est (session close le 2026-07-25)
+## Correctif post-livraison — un 429 ne remontait aucune erreur au client
 
-Phases 0, 1 et 2 terminées et commitées. Les phases 2 et 3 ont un statut à ne pas confondre : la 2 est close parce qu'il n'y a **rien à construire**, pas parce qu'elle a été livrée.
+Constaté par Victor en dev : dépasser `RATE_LIMIT_UPDATE_AVATAR` ne produit aucun toast. Ce n'est pas un bug de la feature avatar, c'est le commit `390e369` qui l'a introduit sur **tous** les server fn limités.
 
-**Reprise à la phase 3, dans cet ordre.** Rien n'a encore été fait côté Bunny.
+Le chemin, vérifié dans les sources du framework :
 
-1. Victor crée la pull zone publique devant la zone Storage et active Bunny Shield Basic. Partie console, pas de code
-2. Valider le coût de bande passante **avant** la bascule. C'est la condition posée par Victor, elle n'est pas levée. Un chiffrage à partir du poids moyen des watermarkés, du nombre de vidéos et de la fréquence de recrawl Googlebot avait été proposé, il n'a pas été fait
-3. Seulement ensuite, le code : `content_loc` du sitemap et `contentUrl` du `VideoObject` basculent vers l'URL publique du watermarké. Pas de filtre sur la présence du watermark, la phase 2 a tranché que `status = PUBLISHED` suffit
-4. Attendre le recrawl et vérifier en Search Console que les vidéos restent indexées, **avant** de toucher à la phase 4
+1. `createServerFn.ts:353` enveloppe toute la chaîne de middlewares dans un `try/catch` qui transforme n'importe quel `throw` en `{ ...ctx, error }`. Une `Response` jetée n'atteint donc jamais le `catch (error) { if (error instanceof Response) return error }` de `server-functions-handler.ts:372` sur lequel s'appuyait le commentaire de `rate-limit.ts`.
+2. `server-functions-handler.ts:161` récupère `res.result || res.error`, donc la `Response` 429.
+3. Ligne 176, comme ce n'est pas un redirect, elle reçoit l'en-tête `X-TSS-Raw-Response: true`.
+4. `serverFnFetcher.ts:247` lit cet en-tête et fait `return response` : **la promesse est résolue, pas rejetée**.
 
-Repères de mesure pour l'après : 166 vidéos indexées, 222 clics et 2 781 impressions sur 3 mois, détail dans la section « Mesure Search Console ». Exports du 2026-07-25 conservés sur le Desktop de Victor, `petit-meme.io-Video-indexing-2026-07-25/` et `petit-meme.io-Performance-on-Search-2026-07-25/`, à re-tirer pour comparer après la bascule.
+La mutation réussissait donc silencieusement, `onSuccess` relançait `authClient.getSession()` et l'avatar revenait en arrière sans un mot. Les erreurs ordinaires remontent bien parce qu'elles passent par l'enveloppe sérialisée, que la chaîne cliente déballe avec `if (result.error) throw result.error` (`createServerFn.ts:314`) ; une `Response` court-circuite cette enveloppe.
 
-## Ordre de déploiement (risque principal du plan)
+Dégâts collatéraux : `matchIsRateLimitError` ne pouvait jamais matcher, donc trois branches étaient mortes sans que personne le voie — `submission-form.tsx:101`, `ai-search-page.tsx:32` et le retry de `router.tsx:33`.
 
-**La phase 3 doit être déployée et recrawlée AVANT la phase 4.** Activer le token auth pendant que le sitemap pointe encore vers `/original` ferait répondre 403 à Googlebot sur 683 URLs, le scénario le plus coûteux de tous. Séquence : zone publique et règle Shield en ligne, sitemap et JSON-LD basculés sur le watermarké, attente du recrawl, vérification que les vidéos restent indexées, puis seulement token auth sur la Stream.
+- [x] `src/server/rate-limit.ts` : retour à `setResponseStatus(429)` + `setResponseHeader('Retry-After', …)` + `throw new Error`. Le statut et l'en-tête sont repris par `serializeResult`, qui lit `getResponse()`, et l'Error passe par l'enveloppe donc le client rejette
+- [x] `src/constants/rate-limit.ts` : `RATE_LIMIT_ERROR_MESSAGE`, consommée par le throw et par `matchIsRateLimitError` (`src/helpers/error.ts`), qui réécrivait le littéral `'Too Many Requests'` à la main
+- [x] `src/server/user.ts`, `resolveNextAvatar` : même correction sur le `throw new Response(…, { status: 400 })` quand il n'y a pas de ProviderAvatar, qui souffrait du même silence
+- [x] `useUpdateAvatar` : message dédié `settings_avatar_error_rate_limit` dans les deux locales, sur le modèle de `submission-form.tsx`. Le message générique disait « Réessayez », mauvais conseil quand le quota est bloqué pour une heure
+- [ ] **À retester par Victor en dev** : dépasser 20 changements et vérifier qu'un toast apparaît *et* que la réponse est bien en 429. `390e369` affirme avoir observé un 500 avec `setResponseStatus` + `throw new Error` ; si le 500 revient, se rabattre sur un `throw new Error` sans statut (feedback garanti, réponse en 200)
 
-## Ce que la stratégie ne fera pas
+## Resynchronisation de la base de dev — faite
 
-Le sitemap continuera de lister 683 URLs de fichiers watermarkés : l'énumérabilité reste entière, c'est la **vitesse** qui est bridée. Un scraper patient, un fichier par minute, met onze heures et passe sous le radar. Le rate limit rend l'aspiration lente, bruyante et journalisée, il ne la rend pas impossible. Un adversaire déterminé pilotera par ailleurs un navigateur headless pour récupérer les URLs signées du streaming avant expiration ; en 2026 c'est une trentaine de lignes. Le gain réel est de supprimer l'aspiration triviale et de forcer le passage par les défenses existantes. Au-delà, seul le DRM matériel change quelque chose, et la capture d'écran reste imbattable. Calibrer l'investissement en conséquence.
+Le renommage du vocabulaire a supprimé la migration déjà appliquée en dev. Séquence exécutée par Victor, `lint:fix` vert ensuite :
 
----
+```bash
+pnpm run prisma:reset-db:dev
+pnpm exec dotenv -e .env.development -- pnpm exec prisma migrate dev --name add_user_provider_avatar
+pnpm exec dotenv -e .env.development -- pnpm exec prisma generate
+pnpm run prisma:seed:dev
+pnpm run lint:fix
+```
 
-## Pen test de production (2026-07-25, autorisé par Victor sur son propre site)
+**`prisma generate` doit passer avant le seed, pas après.** `migrate dev` ne régénère pas le client custom (`output` personnalisé dans le schema). Sans cette étape, le client garde l'ancien nom de colonne et le seed échoue sur un `P2022 ColumnNotFound`, parce que Prisma termine ses `INSERT` par un `RETURNING` qui liste tous les champs scalaires du modèle.
 
-Effets de bord assumés sur la prod : `downloadCount` du meme `cme0domjh003lzg8iqfjtv1v9` incrémenté de **+2** (via `trackMemeAction` forgé), et **~10 Events `DOWNLOAD`** enregistrés dans l'Activity depuis l'IP de test. À discounter dans le flux.
+## Séquence de déploiement
 
-| Couche | Résultat |
-|---|---|
-| Edge Vercel | Un `curl` avec UA `curl/x` reçoit `HTTP 429` + `x-vercel-mitigated: challenge`. Le challenge JS arrête les clients sans navigateur au bord, **avant** l'app |
-| UA navigateur | Sitemap public lu intégralement (683 memes, IDs exposés), donc la source **sans** watermark via `/original` |
-| Server fn IDs | Extraits du bundle client (`main-*.js`, factory `pt(e){"/_serverFn/"+e}`) puis mappés aux noms via `.vercel/output/.../meme-*.mjs` qui garde `name`/`filename`. `shareMeme` = `a125486…`, `registerMemeView` = `a34794f…`, `trackMemeAction` = `29a665c…` |
-| CSRF sans en-tête | `POST`/`GET` sans `Origin` ni `Sec-Fetch-Site` → **403**. Le cas scraper naïf est arrêté |
-| **CSRF avec 1 en-tête forgé** | `-H 'origin: https://www.petit-meme.io'` **ou** `-H 'sec-fetch-site: same-origin'`, **sans aucun cookie** → **200, 767 KB de MP4 watermarké**. Le portail CSRF tombe avec une seule ligne d'en-tête |
+**La migration part en prod AVANT le code.** L'ordre inverse, écrit ici jusqu'à la revue de la phase 4, casserait toutes les inscriptions.
 
-## Points de vigilance
+1. `vercel env pull --environment=production .env.production`
+2. `pnpm run prisma:migrate:prod`
+3. Push, deploy Vercel automatique
+4. `pnpm exec dotenv -e .env.production -- pnpm dlx tsx scripts/backfill-provider-avatars.ts`
 
-- **La non-falsifiabilité de l'IP vient de Vercel, pas du code.** `extractClientIp` fait confiance à `x-real-ip` puis `x-forwarded-for` sans les valider. C'est sûr aujourd'hui parce que Vercel écrase ces en-têtes (« we currently overwrite the `X-Forwarded-For` header and do not forward external IPs. This restriction is in place to prevent IP spoofing », [Request headers](https://vercel.com/docs/headers/request-headers)) et que `x-real-ip` y est déclaré identique. L'option Trusted Proxy est réservée aux comptes Enterprise. **En cas de migration hors Vercel, l'IP redevient falsifiable** et avec elle le rate limiting, le VisitorKey, la déduplication des vues et le contenu d'`activity_event.ip_address`
-- Un audit de sécurité a d'abord conclu à une faille de spoofing sur ce point, faute d'avoir pu vérifier le comportement de Vercel. Vérification faite, c'était un faux positif. **Ne pas le reconclure sans relire la documentation citée ci-dessus**
-- Le rate limiting de Bunny Shield agrège ses compteurs sur le réseau global, avec une propagation de quelques secondes. Ce n'est pas un plafond exact, quelques requêtes passent avant l'application de la règle
-- `getWatermarkUploadConfig` (`src/routes/admin/-server/watermark.ts:44`) renvoie `BUNNY_STORAGE_API_KEY` au navigateur pour l'upload direct. Protégé par `adminRequiredMiddleware`, donc limité au compte de Victor, mais une clé d'écriture Storage transite jusqu'au client
-- `incrementGenerationCount` ne revalide pas `FREE_PLAN_MAX_GENERATIONS` : le quota est vérifié par `checkGeneration`, un appel séparé. Un compte gratuit qui appelle l'endpoint directement dépasse la limite
-- Le store de rate limiting est en mémoire (`rate-limit.ts:18`), donc propre à chaque instance serverless : un scraper obtient mécaniquement plusieurs fois le quota
-- `trackMemeAction` reste contournable, ses compteurs sont structurellement sous-évalués
-- Tree-shaking TanStack Start : tout appel Prisma ou import Node hors d'un `.handler()` casse le build Vercel
-- `oxlint --fix` supprime à tort certains `as` d'élargissement, vérifier `tsc` après
-- **Toujours se demander « est-ce que ça empêche la base de dormir ? »** avant d'ajouter du polling, un cron ou des connexions persistantes. Neon est facturé à l'heure de compute
+Migrer d'abord est sans danger : la migration est purement additive et le code actuellement en prod ignore la colonne, qui est nullable.
+
+### Pourquoi l'ordre inverse était dangereux
+
+La formulation initiale faisait partir le code d'abord, en s'appuyant sur la garde auto-réparante de la phase 3. Ce raisonnement tenait tant que `providerImage` n'était pas déclaré à better-auth : `transformInput` le jetait silencieusement, donc l'`INSERT` d'inscription ne mentionnait jamais la colonne manquante. La déclaration en `additionalFields` ajoutée en phase 4 change exactement cela. Entre le deploy et la migration, chaque inscription tenterait d'écrire `provider_image` dans une table qui ne l'a pas encore, et échouerait sur un `42703`.
+
+La garde auto-réparante reste utile, mais pour une autre raison : elle rattrape les comptes qui changent d'avatar entre la migration et le passage du backfill.

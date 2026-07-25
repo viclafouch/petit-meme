@@ -189,6 +189,8 @@
 
 @theme {
   --font-bricolage: 'Bricolage Grotesque', 'Bricolage Grotesque Fallback';
+  --text-3xs: 0.5rem;
+  --text-2xs: 0.625rem;
   --animate-background-shine: background-shine 2s linear infinite;
   --animate-ping-slow: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
   --animate-bounce-subtle: bounce-subtle 3s ease-in-out infinite;

@@ -40,6 +40,7 @@ export type UserMinAggregateOutputType = {
   email: string | null
   emailVerified: boolean | null
   image: string | null
+  providerAvatar: string | null
   createdAt: Date | null
   updatedAt: Date | null
   generationCount: number | null
@@ -62,6 +63,7 @@ export type UserMaxAggregateOutputType = {
   email: string | null
   emailVerified: boolean | null
   image: string | null
+  providerAvatar: string | null
   createdAt: Date | null
   updatedAt: Date | null
   generationCount: number | null
@@ -84,6 +86,7 @@ export type UserCountAggregateOutputType = {
   email: number
   emailVerified: number
   image: number
+  providerAvatar: number
   createdAt: number
   updatedAt: number
   generationCount: number
@@ -116,6 +119,7 @@ export type UserMinAggregateInputType = {
   email?: true
   emailVerified?: true
   image?: true
+  providerAvatar?: true
   createdAt?: true
   updatedAt?: true
   generationCount?: true
@@ -138,6 +142,7 @@ export type UserMaxAggregateInputType = {
   email?: true
   emailVerified?: true
   image?: true
+  providerAvatar?: true
   createdAt?: true
   updatedAt?: true
   generationCount?: true
@@ -160,6 +165,7 @@ export type UserCountAggregateInputType = {
   email?: true
   emailVerified?: true
   image?: true
+  providerAvatar?: true
   createdAt?: true
   updatedAt?: true
   generationCount?: true
@@ -269,6 +275,7 @@ export type UserGroupByOutputType = {
   email: string
   emailVerified: boolean
   image: string | null
+  providerAvatar: string | null
   createdAt: Date
   updatedAt: Date
   generationCount: number
@@ -314,6 +321,7 @@ export type UserWhereInput = {
   email?: Prisma.StringFilter<"User"> | string
   emailVerified?: Prisma.BoolFilter<"User"> | boolean
   image?: Prisma.StringNullableFilter<"User"> | string | null
+  providerAvatar?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   generationCount?: Prisma.IntFilter<"User"> | number
@@ -344,6 +352,7 @@ export type UserOrderByWithRelationInput = {
   email?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
   image?: Prisma.SortOrderInput | Prisma.SortOrder
+  providerAvatar?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   generationCount?: Prisma.SortOrder
@@ -378,6 +387,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"User"> | string
   emailVerified?: Prisma.BoolFilter<"User"> | boolean
   image?: Prisma.StringNullableFilter<"User"> | string | null
+  providerAvatar?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   generationCount?: Prisma.IntFilter<"User"> | number
@@ -408,6 +418,7 @@ export type UserOrderByWithAggregationInput = {
   email?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
   image?: Prisma.SortOrderInput | Prisma.SortOrder
+  providerAvatar?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   generationCount?: Prisma.SortOrder
@@ -438,6 +449,7 @@ export type UserScalarWhereWithAggregatesInput = {
   email?: Prisma.StringWithAggregatesFilter<"User"> | string
   emailVerified?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   image?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  providerAvatar?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   generationCount?: Prisma.IntWithAggregatesFilter<"User"> | number
@@ -460,6 +472,7 @@ export type UserCreateInput = {
   email: string
   emailVerified: boolean
   image?: string | null
+  providerAvatar?: string | null
   createdAt: Date | string
   updatedAt: Date | string
   generationCount?: number
@@ -490,6 +503,7 @@ export type UserUncheckedCreateInput = {
   email: string
   emailVerified: boolean
   image?: string | null
+  providerAvatar?: string | null
   createdAt: Date | string
   updatedAt: Date | string
   generationCount?: number
@@ -520,6 +534,7 @@ export type UserUpdateInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerAvatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   generationCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -550,6 +565,7 @@ export type UserUncheckedUpdateInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerAvatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   generationCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -580,6 +596,7 @@ export type UserCreateManyInput = {
   email: string
   emailVerified: boolean
   image?: string | null
+  providerAvatar?: string | null
   createdAt: Date | string
   updatedAt: Date | string
   generationCount?: number
@@ -602,6 +619,7 @@ export type UserUpdateManyMutationInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerAvatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   generationCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -624,6 +642,7 @@ export type UserUncheckedUpdateManyInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerAvatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   generationCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -657,6 +676,7 @@ export type UserCountOrderByAggregateInput = {
   email?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
   image?: Prisma.SortOrder
+  providerAvatar?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   generationCount?: Prisma.SortOrder
@@ -683,6 +703,7 @@ export type UserMaxOrderByAggregateInput = {
   email?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
   image?: Prisma.SortOrder
+  providerAvatar?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   generationCount?: Prisma.SortOrder
@@ -705,6 +726,7 @@ export type UserMinOrderByAggregateInput = {
   email?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
   image?: Prisma.SortOrder
+  providerAvatar?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   generationCount?: Prisma.SortOrder
@@ -862,6 +884,7 @@ export type UserCreateWithoutBookmarksInput = {
   email: string
   emailVerified: boolean
   image?: string | null
+  providerAvatar?: string | null
   createdAt: Date | string
   updatedAt: Date | string
   generationCount?: number
@@ -891,6 +914,7 @@ export type UserUncheckedCreateWithoutBookmarksInput = {
   email: string
   emailVerified: boolean
   image?: string | null
+  providerAvatar?: string | null
   createdAt: Date | string
   updatedAt: Date | string
   generationCount?: number
@@ -936,6 +960,7 @@ export type UserUpdateWithoutBookmarksInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerAvatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   generationCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -965,6 +990,7 @@ export type UserUncheckedUpdateWithoutBookmarksInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerAvatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   generationCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -994,6 +1020,7 @@ export type UserCreateWithoutAdminActionsInput = {
   email: string
   emailVerified: boolean
   image?: string | null
+  providerAvatar?: string | null
   createdAt: Date | string
   updatedAt: Date | string
   generationCount?: number
@@ -1023,6 +1050,7 @@ export type UserUncheckedCreateWithoutAdminActionsInput = {
   email: string
   emailVerified: boolean
   image?: string | null
+  providerAvatar?: string | null
   createdAt: Date | string
   updatedAt: Date | string
   generationCount?: number
@@ -1068,6 +1096,7 @@ export type UserUpdateWithoutAdminActionsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerAvatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   generationCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1097,6 +1126,7 @@ export type UserUncheckedUpdateWithoutAdminActionsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerAvatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   generationCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1126,6 +1156,7 @@ export type UserCreateWithoutSessionsInput = {
   email: string
   emailVerified: boolean
   image?: string | null
+  providerAvatar?: string | null
   createdAt: Date | string
   updatedAt: Date | string
   generationCount?: number
@@ -1155,6 +1186,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   email: string
   emailVerified: boolean
   image?: string | null
+  providerAvatar?: string | null
   createdAt: Date | string
   updatedAt: Date | string
   generationCount?: number
@@ -1200,6 +1232,7 @@ export type UserUpdateWithoutSessionsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerAvatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   generationCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1229,6 +1262,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerAvatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   generationCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1258,6 +1292,7 @@ export type UserCreateWithoutAccountsInput = {
   email: string
   emailVerified: boolean
   image?: string | null
+  providerAvatar?: string | null
   createdAt: Date | string
   updatedAt: Date | string
   generationCount?: number
@@ -1287,6 +1322,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   email: string
   emailVerified: boolean
   image?: string | null
+  providerAvatar?: string | null
   createdAt: Date | string
   updatedAt: Date | string
   generationCount?: number
@@ -1332,6 +1368,7 @@ export type UserUpdateWithoutAccountsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerAvatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   generationCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1361,6 +1398,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerAvatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   generationCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1390,6 +1428,7 @@ export type UserCreateWithoutStudioGenerationsInput = {
   email: string
   emailVerified: boolean
   image?: string | null
+  providerAvatar?: string | null
   createdAt: Date | string
   updatedAt: Date | string
   generationCount?: number
@@ -1419,6 +1458,7 @@ export type UserUncheckedCreateWithoutStudioGenerationsInput = {
   email: string
   emailVerified: boolean
   image?: string | null
+  providerAvatar?: string | null
   createdAt: Date | string
   updatedAt: Date | string
   generationCount?: number
@@ -1464,6 +1504,7 @@ export type UserUpdateWithoutStudioGenerationsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerAvatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   generationCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1493,6 +1534,7 @@ export type UserUncheckedUpdateWithoutStudioGenerationsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerAvatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   generationCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1522,6 +1564,7 @@ export type UserCreateWithoutMemeSubmissionsInput = {
   email: string
   emailVerified: boolean
   image?: string | null
+  providerAvatar?: string | null
   createdAt: Date | string
   updatedAt: Date | string
   generationCount?: number
@@ -1551,6 +1594,7 @@ export type UserUncheckedCreateWithoutMemeSubmissionsInput = {
   email: string
   emailVerified: boolean
   image?: string | null
+  providerAvatar?: string | null
   createdAt: Date | string
   updatedAt: Date | string
   generationCount?: number
@@ -1596,6 +1640,7 @@ export type UserUpdateWithoutMemeSubmissionsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerAvatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   generationCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1625,6 +1670,7 @@ export type UserUncheckedUpdateWithoutMemeSubmissionsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerAvatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   generationCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1654,6 +1700,7 @@ export type UserCreateWithoutAiSearchLogsInput = {
   email: string
   emailVerified: boolean
   image?: string | null
+  providerAvatar?: string | null
   createdAt: Date | string
   updatedAt: Date | string
   generationCount?: number
@@ -1683,6 +1730,7 @@ export type UserUncheckedCreateWithoutAiSearchLogsInput = {
   email: string
   emailVerified: boolean
   image?: string | null
+  providerAvatar?: string | null
   createdAt: Date | string
   updatedAt: Date | string
   generationCount?: number
@@ -1728,6 +1776,7 @@ export type UserUpdateWithoutAiSearchLogsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerAvatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   generationCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1757,6 +1806,7 @@ export type UserUncheckedUpdateWithoutAiSearchLogsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerAvatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   generationCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1786,6 +1836,7 @@ export type UserCreateWithoutActivityEventsInput = {
   email: string
   emailVerified: boolean
   image?: string | null
+  providerAvatar?: string | null
   createdAt: Date | string
   updatedAt: Date | string
   generationCount?: number
@@ -1815,6 +1866,7 @@ export type UserUncheckedCreateWithoutActivityEventsInput = {
   email: string
   emailVerified: boolean
   image?: string | null
+  providerAvatar?: string | null
   createdAt: Date | string
   updatedAt: Date | string
   generationCount?: number
@@ -1860,6 +1912,7 @@ export type UserUpdateWithoutActivityEventsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerAvatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   generationCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1889,6 +1942,7 @@ export type UserUncheckedUpdateWithoutActivityEventsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerAvatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   generationCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2012,6 +2066,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   email?: boolean
   emailVerified?: boolean
   image?: boolean
+  providerAvatar?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   generationCount?: boolean
@@ -2043,6 +2098,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   email?: boolean
   emailVerified?: boolean
   image?: boolean
+  providerAvatar?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   generationCount?: boolean
@@ -2065,6 +2121,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   email?: boolean
   emailVerified?: boolean
   image?: boolean
+  providerAvatar?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   generationCount?: boolean
@@ -2087,6 +2144,7 @@ export type UserSelectScalar = {
   email?: boolean
   emailVerified?: boolean
   image?: boolean
+  providerAvatar?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   generationCount?: boolean
@@ -2103,7 +2161,7 @@ export type UserSelectScalar = {
   lastActiveAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "createdAt" | "updatedAt" | "generationCount" | "role" | "banned" | "banReason" | "banExpires" | "stripeCustomerId" | "termsAcceptedAt" | "privacyAcceptedAt" | "verificationReminderSent" | "isAnonymized" | "locale" | "lastActiveAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "providerAvatar" | "createdAt" | "updatedAt" | "generationCount" | "role" | "banned" | "banReason" | "banExpires" | "stripeCustomerId" | "termsAcceptedAt" | "privacyAcceptedAt" | "verificationReminderSent" | "isAnonymized" | "locale" | "lastActiveAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
@@ -2136,6 +2194,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     email: string
     emailVerified: boolean
     image: string | null
+    providerAvatar: string | null
     createdAt: Date
     updatedAt: Date
     generationCount: number
@@ -2586,6 +2645,7 @@ export interface UserFieldRefs {
   readonly email: Prisma.FieldRef<"User", 'String'>
   readonly emailVerified: Prisma.FieldRef<"User", 'Boolean'>
   readonly image: Prisma.FieldRef<"User", 'String'>
+  readonly providerAvatar: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly generationCount: Prisma.FieldRef<"User", 'Int'>

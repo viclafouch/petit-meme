@@ -1,6 +1,6 @@
 # Legal Notice - Petit Meme
 
-Last updated: **February 2026**
+Last updated: **July 2026**
 
 ---
 
@@ -68,3 +68,14 @@ For more details, please see the Cookies section of our
 
 For any questions regarding this legal notice:
 [legal@petit-meme.io](mailto:legal@petit-meme.io)
+
+---
+
+## 8. Credits
+
+The avatars offered on this website are generated from the following style:
+
+Remix of
+[„Adventurer Neutral”](https://www.figma.com/community/file/1184595184137881796)
+by „Lisa Wischofsky”, licensed under
+[„CC BY 4.0”](https://creativecommons.org/licenses/by/4.0/)

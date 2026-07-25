@@ -1,8 +1,11 @@
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
 import { getUserInitials } from '~/helpers/format'
 import { cn } from '~/lib/utils'
+import { m } from '~/paraglide/messages.js'
 
-type UserAvatarSize = 'sm' | 'md'
+type UserAvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+
+type UserAvatarShape = 'circle' | 'rounded'
 
 type UserAvatarSizeClasses = {
   avatar: string
@@ -10,14 +13,23 @@ type UserAvatarSizeClasses = {
 }
 
 const USER_AVATAR_SIZE_CLASSES = {
-  sm: { avatar: 'size-4', fallback: 'text-[8px]' },
-  md: { avatar: 'size-8', fallback: 'text-xs' }
+  xs: { avatar: 'size-4', fallback: 'text-3xs' },
+  sm: { avatar: 'size-6', fallback: 'text-2xs' },
+  md: { avatar: 'size-8', fallback: 'text-xs' },
+  lg: { avatar: 'size-9', fallback: 'text-sm' },
+  xl: { avatar: 'size-24', fallback: 'text-2xl' }
 } as const satisfies Record<UserAvatarSize, UserAvatarSizeClasses>
+
+const USER_AVATAR_SHAPE_CLASSES = {
+  circle: 'rounded-full',
+  rounded: 'rounded-lg'
+} as const satisfies Record<UserAvatarShape, string>
 
 type UserAvatarParams = {
   name: string
-  image: string | null
+  image: string | null | undefined
   size?: UserAvatarSize
+  shape?: UserAvatarShape
   className?: string
 }
 
@@ -25,14 +37,22 @@ export const UserAvatar = ({
   name,
   image,
   size = 'md',
+  shape = 'circle',
   className
 }: UserAvatarParams) => {
   const sizeClasses = USER_AVATAR_SIZE_CLASSES[size]
+  const shapeClassName = USER_AVATAR_SHAPE_CLASSES[shape]
 
   return (
-    <Avatar className={cn(sizeClasses.avatar, className)}>
-      {image ? <AvatarImage src={image} alt={name} /> : null}
-      <AvatarFallback className={sizeClasses.fallback}>
+    <Avatar className={cn(sizeClasses.avatar, shapeClassName, className)}>
+      {image ? (
+        <AvatarImage
+          src={image}
+          alt={m.common_avatar_alt({ name })}
+          referrerPolicy="no-referrer"
+        />
+      ) : null}
+      <AvatarFallback className={cn(shapeClassName, sizeClasses.fallback)}>
         {getUserInitials(name)}
       </AvatarFallback>
     </Avatar>

@@ -14,6 +14,7 @@
     "prisma:migrate:prod": "dotenv -e .env.production -- prisma migrate deploy",
     "prisma:seed:dev": "npx vite-node --mode development prisma/seed.ts",
     "prisma:reset-db:dev": "dotenv -e .env.development -- prisma migrate reset",
+    "avatars:generate": "pnpm dlx tsx scripts/generate-avatars.ts",
     "postinstall": "paraglide-js compile --project ./project.inlang && node scripts/copy-ffmpeg.js",
     "lint": "tsc && oxlint",
     "lint:fix": "tsc && oxlint --fix && pnpm run format",
@@ -102,6 +103,8 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@dicebear/core": "10.3.0",
+    "@dicebear/styles": "10.2.0",
     "@inlang/paraglide-js": "2.20.2",
     "@react-email/ui": "6.6.5",
     "@tailwindcss/vite": "^4.3.1",

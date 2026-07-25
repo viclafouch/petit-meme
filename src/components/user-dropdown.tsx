@@ -10,7 +10,6 @@ import {
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
-import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
 import { Button } from '~/components/ui/button'
 import {
   DropdownMenu,
@@ -21,8 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '~/components/ui/dropdown-menu'
-import { DEFAULT_AVATAR_URL } from '~/constants/avatar'
-import { getUserInitials } from '~/helpers/format'
+import { UserAvatar } from '~/components/user-avatar'
 import { useSignOut } from '~/hooks/use-sign-out'
 import { useStripeCheckout } from '~/hooks/use-stripe-checkout'
 import {
@@ -49,15 +47,12 @@ export const UserDropdown = ({ user }: UserDropdownParams) => {
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="gap-2 px-2">
-          <Avatar className="size-6 rounded-lg">
-            <AvatarImage
-              src={user.image ?? DEFAULT_AVATAR_URL}
-              alt={m.common_avatar_alt({ name: user.name })}
-            />
-            <AvatarFallback className="rounded-lg">
-              {getUserInitials(user.name)}
-            </AvatarFallback>
-          </Avatar>
+          <UserAvatar
+            name={user.name}
+            image={user.image}
+            size="sm"
+            shape="rounded"
+          />
           <div className="truncate max-md:hidden">{user.name}</div>
           <ChevronDown className="max-md:hidden" />
         </Button>
@@ -68,15 +63,7 @@ export const UserDropdown = ({ user }: UserDropdownParams) => {
       >
         <DropdownMenuLabel className="p-0 font-normal">
           <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-            <Avatar className="size-8 rounded-lg">
-              <AvatarImage
-                src={user.image ?? DEFAULT_AVATAR_URL}
-                alt={m.common_avatar_alt({ name: user.name })}
-              />
-              <AvatarFallback className="rounded-lg">
-                {getUserInitials(user.name)}
-              </AvatarFallback>
-            </Avatar>
+            <UserAvatar name={user.name} image={user.image} shape="rounded" />
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-semibold">{user.name}</span>
               <span className="text-muted-foreground truncate text-xs">

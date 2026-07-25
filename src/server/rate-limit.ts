@@ -1,5 +1,10 @@
 import { createMiddleware } from '@tanstack/react-start'
-import { getRequest } from '@tanstack/react-start/server'
+import {
+  getRequest,
+  setResponseHeader,
+  setResponseStatus
+} from '@tanstack/react-start/server'
+import { RATE_LIMIT_ERROR_MESSAGE } from '~/constants/rate-limit'
 import type { RateLimitConfig } from '~/constants/rate-limit'
 import { extractClientIp } from '~/helpers/request'
 import { logger } from '~/lib/logger'
@@ -33,14 +38,16 @@ const throwRateLimitExceeded = ({
     'scraping-detection'
   )
 
-  // Throw a Response, not an Error: the server-fn handler returns any thrown
-  // Response verbatim (`error instanceof Response`), so this reaches the client
-  // as a real 429 with Retry-After. A thrown Error escapes to the outer server
-  // layer as an unhandled 500 instead.
-  throw new Response('Too Many Requests', {
-    status: 429,
-    headers: { 'Retry-After': String(result.retryAfterSeconds) }
-  })
+  // Throw an Error, never a Response. `executeMiddleware` catches every throw
+  // into `{ ...ctx, error }`, and a Response there is flagged
+  // `X-TSS-Raw-Response` and handed back to the client as a resolved value:
+  // the mutation would succeed silently and `onError` would never fire.
+  // An Error goes through the serialized envelope instead, which the client
+  // chain unwraps with `if (result.error) throw result.error`.
+  setResponseStatus(429)
+  setResponseHeader('Retry-After', String(result.retryAfterSeconds))
+
+  throw new Error(RATE_LIMIT_ERROR_MESSAGE)
 }
 
 export const createRateLimitMiddleware = (config: RateLimitConfig) => {

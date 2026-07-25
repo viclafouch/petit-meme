@@ -49,6 +49,7 @@ const columns = [
           <UserAvatar
             name={user.name}
             image={user.image}
+            email={user.email}
             className={user.banned === true ? 'ring-2 ring-destructive' : ''}
           />
           <span className="font-medium truncate max-w-32">{user.name}</span>

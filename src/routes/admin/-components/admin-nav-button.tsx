@@ -24,7 +24,12 @@ export const AdminNavButton = ({ user }: AdminNavButtonParams) => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative size-9 rounded-full">
-          <UserAvatar name={user.name} image={user.image} size="lg" />
+          <UserAvatar
+            name={user.name}
+            image={user.image}
+            email={user.email}
+            size="lg"
+          />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>

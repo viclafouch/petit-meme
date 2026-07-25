@@ -1,4 +1,6 @@
+import React from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
+import { getAvatarSlotIdForEmail, resolveAvatarPath } from '~/helpers/avatar'
 import { getUserInitials } from '~/helpers/format'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
@@ -28,6 +30,7 @@ const USER_AVATAR_SHAPE_CLASSES = {
 type UserAvatarParams = {
   name: string
   image: string | null | undefined
+  email?: string
   size?: UserAvatarSize
   shape?: UserAvatarShape
   className?: string
@@ -36,24 +39,43 @@ type UserAvatarParams = {
 export const UserAvatar = ({
   name,
   image,
+  email,
   size = 'md',
   shape = 'circle',
   className
 }: UserAvatarParams) => {
+  const [hasImageFailed, setHasImageFailed] = React.useState(false)
+
   const sizeClasses = USER_AVATAR_SIZE_CLASSES[size]
   const shapeClassName = USER_AVATAR_SHAPE_CLASSES[shape]
+  const alt = m.common_avatar_alt({ name })
+
+  const catalogFallbackImage = email
+    ? resolveAvatarPath(getAvatarSlotIdForEmail(email))
+    : null
 
   return (
     <Avatar className={cn(sizeClasses.avatar, shapeClassName, className)}>
       {image ? (
         <AvatarImage
           src={image}
-          alt={m.common_avatar_alt({ name })}
+          alt={alt}
           referrerPolicy="no-referrer"
+          onLoadingStatusChange={(status) => {
+            setHasImageFailed(status === 'error')
+          }}
         />
       ) : null}
       <AvatarFallback className={cn(shapeClassName, sizeClasses.fallback)}>
-        {getUserInitials(name)}
+        {hasImageFailed && catalogFallbackImage ? (
+          <img
+            src={catalogFallbackImage}
+            alt={alt}
+            className="aspect-square size-full"
+          />
+        ) : (
+          getUserInitials(name)
+        )}
       </AvatarFallback>
     </Avatar>
   )

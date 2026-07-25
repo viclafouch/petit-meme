@@ -210,6 +210,22 @@ Dégâts collatéraux : `matchIsRateLimitError` ne pouvait jamais matcher, donc 
 - [x] `useUpdateAvatar` : message dédié `settings_avatar_error_rate_limit` dans les deux locales, sur le modèle de `submission-form.tsx`. Le message générique disait « Réessayez », mauvais conseil quand le quota est bloqué pour une heure
 - [ ] **À retester par Victor en dev** : dépasser 20 changements et vérifier qu'un toast apparaît *et* que la réponse est bien en 429. `390e369` affirme avoir observé un 500 avec `setResponseStatus` + `throw new Error` ; si le 500 revient, se rabattre sur un `throw new Error` sans statut (feedback garanti, réponse en 200)
 
+## Correctif post-livraison — les URL de provider meurent, le filet devient le catalogue
+
+Constaté par Victor après le déploiement : des comptes Discord n'affichent aucun avatar. Vérifié en interrogeant les 18 URL de provider stockées en prod : **4 des 12 URL Discord renvoient 404**, les 8 autres et les 6 Twitter répondent 200.
+
+Une URL Discord contient le hash de l'avatar, pas seulement l'identifiant (`cdn.discordapp.com/avatars/<user_id>/<hash>.png`). Dès que la personne change sa photo sur Discord, l'ancienne URL meurt définitivement. Ces URL sont capturées à l'inscription et jamais rafraîchies, donc ce n'est pas un état figé mais une dérive : chaque utilisateur qui changera de photo cassera la sienne.
+
+La note « le filet de sécurité est `AvatarFallback` (initiales) » de la phase 1 décrivait donc bien le comportement, mais ce comportement n'est pas souhaitable : la personne voit ses initiales, pas un avatar.
+
+- [x] `UserAvatar` prend un `email` optionnel et en dérive l'avatar du catalogue via `getAvatarSlotIdForEmail`, la **même** fonction que le hook d'inscription et le backfill. Pas de seconde règle de hachage
+- [x] Le repli n'est armé que sur `status === 'error'`, via `onLoadingStatusChange`. Radix rend `AvatarFallback` pendant le chargement **et** en cas d'erreur : mettre l'image du catalogue sans condition aurait fait apparaître un premier visage puis un second à chaque chargement de page, pour les 14 comptes dont l'URL fonctionne. On garde donc les initiales pendant le chargement, le catalogue seulement en cas d'échec
+- [x] Câblé sur les 7 rendus qui disposent de l'e-mail : les deux du dropdown, les réglages, le bouton admin, `activity-columns`, `admin/users/index` et `admin/users/$userId`
+
+**Non couvert, assumé** : `admin/submissions`, `admin/ai-search`, `dashboard-feed` et `visitor-lists` n'ont pas l'e-mail dans leur payload et restent sur les initiales. Élargir leur `select` serveur pour un repli d'affichage ne le vaut pas.
+
+**Non traité** : rien n'est réparé en base, les 4 URL restent mortes. La vignette « avatar de votre compte lié » de la modale les affichera toujours cassées, puisque `AvatarTile` utilise un `<img>` brut. Et la cause reste entière : seul un rafraîchissement de l'URL à chaque connexion l'éliminerait, au prix d'une écriture par connexion, à peser vu la facture Neon.
+
 ## Resynchronisation de la base de dev — faite
 
 Le renommage du vocabulaire a supprimé la migration déjà appliquée en dev. Séquence exécutée par Victor, `lint:fix` vert ensuite :
@@ -224,14 +240,19 @@ pnpm run lint:fix
 
 **`prisma generate` doit passer avant le seed, pas après.** `migrate dev` ne régénère pas le client custom (`output` personnalisé dans le schema). Sans cette étape, le client garde l'ancien nom de colonne et le seed échoue sur un `P2022 ColumnNotFound`, parce que Prisma termine ses `INSERT` par un `RETURNING` qui liste tous les champs scalaires du modèle.
 
-## Séquence de déploiement
+## Séquence de déploiement — faite le 2026-07-26
 
 **La migration part en prod AVANT le code.** L'ordre inverse, écrit ici jusqu'à la revue de la phase 4, casserait toutes les inscriptions.
 
-1. `vercel env pull --environment=production .env.production`
-2. `pnpm run prisma:migrate:prod`
-3. Push, deploy Vercel automatique
-4. `pnpm exec dotenv -e .env.production -- pnpm dlx tsx scripts/backfill-provider-avatars.ts`
+1. [x] `vercel env pull --environment=production .env.production`
+2. [x] `pnpm run prisma:migrate:prod`
+3. [x] Dry-run du backfill contre la prod pendant que l'ancien code tournait encore : 18 ProviderAvatars archivables, 43 AvatarSlots à attribuer. Lecture seule, les deux écritures sont derrière `if (!isDryRun)`. C'était le premier passage du script, jamais exécuté jusque-là
+4. [x] Commit `2add73f`, push, deploy Vercel `Ready` en 57 s. Vérifié ensuite que `/avatars/avatar-NN.svg` répond `200 image/svg+xml` avec `cache-control: public, max-age=604800`
+5. [x] `pnpm exec dotenv -e .env.production -- pnpm dlx tsx scripts/backfill-provider-avatars.ts` — 18 et 43, identiques au dry-run
+
+Le backfill est **idempotent** : ses deux prédicats (`provider_avatar IS NULL`, `image IS NULL`) sont maintenant faux pour les lignes traitées. Un nouveau dry-run doit renvoyer 0 et 0, c'est la façon la moins chère de confirmer que l'écriture a bien eu lieu.
+
+Un `curl` sans User-Agent sur les SVG reçoit un **429** : c'est la détection de bots, pas un défaut de déploiement. Avec un UA de navigateur, tout répond 200.
 
 Migrer d'abord est sans danger : la migration est purement additive et le code actuellement en prod ignore la colonne, qui est nullable.
 

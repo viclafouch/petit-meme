@@ -60,6 +60,7 @@ const RouteComponent = () => {
             <UserAvatar
               name={detailQuery.data.user.name}
               image={detailQuery.data.user.image}
+              email={detailQuery.data.user.email}
               className={cn(
                 'size-10',
                 detailQuery.data.user.banned === true

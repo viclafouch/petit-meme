@@ -71,7 +71,7 @@ export const ACTIVITY_COLUMNS = [
           params={{ userId: user.id }}
           className="flex items-center gap-2 py-1 hover:text-primary transition-colors"
         >
-          <UserAvatar name={user.name} image={user.image} />
+          <UserAvatar name={user.name} image={user.image} email={user.email} />
           <div className="flex min-w-0 flex-col">
             <span className="max-w-32 truncate font-medium">{user.name}</span>
             <span className="max-w-32 truncate text-xs text-muted-foreground">

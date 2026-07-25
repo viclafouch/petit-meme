@@ -42,7 +42,12 @@ export const ProfileHeader = ({
               setIsAvatarPickerOpened(true)
             }}
           >
-            <UserAvatar name={user.name} image={user.image} size="xl" />
+            <UserAvatar
+              name={user.name}
+              image={user.image}
+              email={user.email}
+              size="xl"
+            />
             <span
               aria-hidden="true"
               className="absolute inset-0 rounded-full bg-black/50 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"

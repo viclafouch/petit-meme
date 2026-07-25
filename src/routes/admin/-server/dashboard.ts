@@ -12,6 +12,7 @@ import {
   truncateToGranularity,
   truncateToUtcDay
 } from '~/helpers/date'
+import { DASHBOARD_FEED_SIZE } from '~/routes/admin/-lib/constants'
 import type {
   AuditAction,
   AuditMetadata,
@@ -204,7 +205,7 @@ export const getAdminChartData = createServerFn({ method: 'GET' })
     return fetchChartData({ start, end: yesterday, granularity })
   })
 
-const RECENT_ACTIVITY_SELECT = {
+const RECENT_AUDIT_SELECT = {
   id: true,
   action: true,
   targetType: true,
@@ -217,7 +218,7 @@ const RECENT_ACTIVITY_SELECT = {
 } as const satisfies Prisma.AdminAuditLogSelect
 
 type RawAuditLogEntry = Prisma.AdminAuditLogGetPayload<{
-  select: typeof RECENT_ACTIVITY_SELECT
+  select: typeof RECENT_AUDIT_SELECT
 }>
 
 export type AuditLogEntry = Omit<
@@ -229,20 +230,20 @@ export type AuditLogEntry = Omit<
   metadata: AuditMetadata | null
 }
 
-async function fetchRecentActivity() {
+async function fetchRecentAudit() {
   const entries = await prismaClient.adminAuditLog.findMany({
-    take: 10,
+    take: DASHBOARD_FEED_SIZE,
     orderBy: { createdAt: 'desc' },
-    select: RECENT_ACTIVITY_SELECT
+    select: RECENT_AUDIT_SELECT
   })
 
   return entries as AuditLogEntry[]
 }
 
-export const getAdminRecentActivity = createServerFn({ method: 'GET' })
+export const getAdminRecentAudit = createServerFn({ method: 'GET' })
   .middleware([adminRequiredMiddleware])
   .handler(() => {
-    return fetchRecentActivity()
+    return fetchRecentAudit()
   })
 
 type RawTrendingRow = {

@@ -1,4 +1,5 @@
 import {
+  Activity,
   ArrowLeft,
   Blocks,
   LayoutDashboard,
@@ -55,6 +56,14 @@ export const AdminSidebar = ({
                   <Link to="/admin">
                     <LayoutDashboard />
                     <span>Dashboard</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/admin/activity">
+                    <Activity />
+                    <span>Activité</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

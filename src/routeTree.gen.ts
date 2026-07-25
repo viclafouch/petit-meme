@@ -33,6 +33,7 @@ import { Route as AdminSubmissionsIndexRouteImport } from './routes/admin/submis
 import { Route as AdminLibraryIndexRouteImport } from './routes/admin/library/index'
 import { Route as AdminCategoriesIndexRouteImport } from './routes/admin/categories/index'
 import { Route as AdminAiSearchIndexRouteImport } from './routes/admin/ai-search/index'
+import { Route as AdminActivityIndexRouteImport } from './routes/admin/activity/index'
 import { Route as ApiCronVerificationReminderRouteImport } from './routes/api/cron/verification-reminder'
 import { Route as ApiCronSyncBunnyTitlesRouteImport } from './routes/api/cron/sync-bunny-titles'
 import { Route as ApiCronSyncAlgoliaRouteImport } from './routes/api/cron/sync-algolia'
@@ -175,6 +176,11 @@ const AdminCategoriesIndexRoute = AdminCategoriesIndexRouteImport.update({
 const AdminAiSearchIndexRoute = AdminAiSearchIndexRouteImport.update({
   id: '/ai-search/',
   path: '/ai-search/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminActivityIndexRoute = AdminActivityIndexRouteImport.update({
+  id: '/activity/',
+  path: '/activity/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const ApiCronVerificationReminderRoute =
@@ -351,6 +357,7 @@ export interface FileRoutesByFullPath {
   '/api/cron/sync-algolia': typeof ApiCronSyncAlgoliaRoute
   '/api/cron/sync-bunny-titles': typeof ApiCronSyncBunnyTitlesRoute
   '/api/cron/verification-reminder': typeof ApiCronVerificationReminderRoute
+  '/admin/activity/': typeof AdminActivityIndexRoute
   '/admin/ai-search/': typeof AdminAiSearchIndexRoute
   '/admin/categories/': typeof AdminCategoriesIndexRoute
   '/admin/library/': typeof AdminLibraryIndexRoute
@@ -397,6 +404,7 @@ export interface FileRoutesByTo {
   '/api/cron/sync-algolia': typeof ApiCronSyncAlgoliaRoute
   '/api/cron/sync-bunny-titles': typeof ApiCronSyncBunnyTitlesRoute
   '/api/cron/verification-reminder': typeof ApiCronVerificationReminderRoute
+  '/admin/activity': typeof AdminActivityIndexRoute
   '/admin/ai-search': typeof AdminAiSearchIndexRoute
   '/admin/categories': typeof AdminCategoriesIndexRoute
   '/admin/library': typeof AdminLibraryIndexRoute
@@ -449,6 +457,7 @@ export interface FileRoutesById {
   '/api/cron/sync-algolia': typeof ApiCronSyncAlgoliaRoute
   '/api/cron/sync-bunny-titles': typeof ApiCronSyncBunnyTitlesRoute
   '/api/cron/verification-reminder': typeof ApiCronVerificationReminderRoute
+  '/admin/activity/': typeof AdminActivityIndexRoute
   '/admin/ai-search/': typeof AdminAiSearchIndexRoute
   '/admin/categories/': typeof AdminCategoriesIndexRoute
   '/admin/library/': typeof AdminLibraryIndexRoute
@@ -499,6 +508,7 @@ export interface FileRouteTypes {
     | '/api/cron/sync-algolia'
     | '/api/cron/sync-bunny-titles'
     | '/api/cron/verification-reminder'
+    | '/admin/activity/'
     | '/admin/ai-search/'
     | '/admin/categories/'
     | '/admin/library/'
@@ -545,6 +555,7 @@ export interface FileRouteTypes {
     | '/api/cron/sync-algolia'
     | '/api/cron/sync-bunny-titles'
     | '/api/cron/verification-reminder'
+    | '/admin/activity'
     | '/admin/ai-search'
     | '/admin/categories'
     | '/admin/library'
@@ -596,6 +607,7 @@ export interface FileRouteTypes {
     | '/api/cron/sync-algolia'
     | '/api/cron/sync-bunny-titles'
     | '/api/cron/verification-reminder'
+    | '/admin/activity/'
     | '/admin/ai-search/'
     | '/admin/categories/'
     | '/admin/library/'
@@ -806,6 +818,13 @@ declare module '@tanstack/react-router' {
       path: '/ai-search'
       fullPath: '/admin/ai-search/'
       preLoaderRoute: typeof AdminAiSearchIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/activity/': {
+      id: '/admin/activity/'
+      path: '/activity'
+      fullPath: '/admin/activity/'
+      preLoaderRoute: typeof AdminActivityIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/api/cron/verification-reminder': {
@@ -1070,6 +1089,7 @@ interface AdminRouteRouteChildren {
   AdminServicesRoute: typeof AdminServicesRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminLibraryMemeIdRoute: typeof AdminLibraryMemeIdRoute
+  AdminActivityIndexRoute: typeof AdminActivityIndexRoute
   AdminAiSearchIndexRoute: typeof AdminAiSearchIndexRoute
   AdminCategoriesIndexRoute: typeof AdminCategoriesIndexRoute
   AdminLibraryIndexRoute: typeof AdminLibraryIndexRoute
@@ -1082,6 +1102,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminServicesRoute: AdminServicesRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminLibraryMemeIdRoute: AdminLibraryMemeIdRoute,
+  AdminActivityIndexRoute: AdminActivityIndexRoute,
   AdminAiSearchIndexRoute: AdminAiSearchIndexRoute,
   AdminCategoriesIndexRoute: AdminCategoriesIndexRoute,
   AdminLibraryIndexRoute: AdminLibraryIndexRoute,

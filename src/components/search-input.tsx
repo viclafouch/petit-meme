@@ -1,18 +1,18 @@
 import React from 'react'
 import { Input } from '~/components/ui/input'
 import { useSyncedInputValue } from '~/hooks/use-synced-input-value'
-import { m } from '~/paraglide/messages.js'
 
-type MemesQueryParams = {
-  query: string
-  onQueryChange: (query: string) => void
+type SearchInputParams = {
+  value: string
+  placeholder: string
+  onValueChange: (value: string) => void
 }
 
-export const MemesQuery = React.memo(
-  ({ query, onQueryChange }: MemesQueryParams) => {
+export const SearchInput = React.memo(
+  ({ value, placeholder, onValueChange }: SearchInputParams) => {
     const { inputRef, defaultValue, handleChange } = useSyncedInputValue({
-      externalValue: query,
-      onValueChange: onQueryChange
+      externalValue: value,
+      onValueChange
     })
 
     return (
@@ -22,11 +22,11 @@ export const MemesQuery = React.memo(
           defaultValue={defaultValue}
           onChange={handleChange}
           type="search"
-          placeholder={m.meme_search_placeholder()}
+          placeholder={placeholder}
         />
       </div>
     )
   }
 )
 
-MemesQuery.displayName = 'MemesQuery'
+SearchInput.displayName = 'SearchInput'

@@ -1,14 +1,19 @@
-import { queryOptions } from '@tanstack/react-query'
+import { keepPreviousData, queryOptions } from '@tanstack/react-query'
+import type { ActivityFilters } from '~/constants/activity'
 import type { MemesFilters } from '~/constants/meme'
 import { MINUTE } from '~/constants/time'
 import type { Meme } from '~/db/generated/prisma/client'
 import type { MemeSubmissionStatus } from '~/db/generated/prisma/enums'
+import {
+  getAdminActivity,
+  getAdminRecentActivityEvents
+} from '~/routes/admin/-server/activity'
 import { getAdminAiSearchLogs } from '~/routes/admin/-server/ai-search-logs'
 import type { DashboardPeriod } from '~/routes/admin/-server/dashboard'
 import {
   getAdminChartData,
   getAdminDashboardTotals,
-  getAdminRecentActivity,
+  getAdminRecentAudit,
   getAdminTrendingMemes
 } from '~/routes/admin/-server/dashboard'
 import { getAdminMemeById, getAdminMemes } from '~/routes/admin/-server/memes'
@@ -69,17 +74,44 @@ export const getAdminChartDataQueryOpts = (period: DashboardPeriod) => {
 
 getAdminChartDataQueryOpts.all = ['admin-chart-data'] as const
 
-export const getAdminRecentActivityQueryOpts = () => {
+export const getAdminRecentAuditQueryOpts = () => {
   return queryOptions({
-    queryKey: [...getAdminRecentActivityQueryOpts.all],
+    queryKey: [...getAdminRecentAuditQueryOpts.all],
     queryFn: () => {
-      return getAdminRecentActivity()
+      return getAdminRecentAudit()
     },
     staleTime: 10 * MINUTE
   })
 }
 
-getAdminRecentActivityQueryOpts.all = ['admin-recent-activity'] as const
+getAdminRecentAuditQueryOpts.all = ['admin-recent-audit'] as const
+
+export const getAdminActivityQueryOpts = (filters: ActivityFilters) => {
+  return queryOptions({
+    queryKey: [...getAdminActivityQueryOpts.all, filters],
+    queryFn: () => {
+      return getAdminActivity({ data: filters })
+    },
+    placeholderData: keepPreviousData,
+    staleTime: MINUTE
+  })
+}
+
+getAdminActivityQueryOpts.all = ['admin-activity'] as const
+
+export const getAdminRecentActivityEventsQueryOpts = () => {
+  return queryOptions({
+    queryKey: [...getAdminRecentActivityEventsQueryOpts.all],
+    queryFn: () => {
+      return getAdminRecentActivityEvents()
+    },
+    staleTime: 10 * MINUTE
+  })
+}
+
+getAdminRecentActivityEventsQueryOpts.all = [
+  'admin-recent-activity-events'
+] as const
 
 export const getAdminTrendingMemesQueryOpts = () => {
   return queryOptions({

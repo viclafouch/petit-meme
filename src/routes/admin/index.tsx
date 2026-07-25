@@ -1,9 +1,9 @@
 import React from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
-import { AlertTriangle, RefreshCw } from 'lucide-react'
+import { AlertTriangle, ArrowRight, RefreshCw } from 'lucide-react'
 import { z } from 'zod'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { PageHeader } from '~/components/page-header'
 import { Button } from '~/components/ui/button'
 import { Card } from '~/components/ui/card'
@@ -12,14 +12,16 @@ import { captureWithFeature } from '~/lib/sentry'
 import {
   getAdminChartDataQueryOpts,
   getAdminDashboardTotalsQueryOpts,
-  getAdminRecentActivityQueryOpts,
+  getAdminRecentActivityEventsQueryOpts,
+  getAdminRecentAuditQueryOpts,
   getAdminTrendingMemesQueryOpts
 } from '~/routes/admin/-lib/queries'
 import {
   type DashboardPeriod,
   PERIOD_SCHEMA
 } from '~/routes/admin/-server/dashboard'
-import { ActivityFeed } from './-components/dashboard/activity-feed'
+import { ActivityEventsFeed } from './-components/dashboard/activity-events-feed'
+import { AuditFeed } from './-components/dashboard/audit-feed'
 import { PeriodSelector } from './-components/dashboard/period-selector'
 import { TotalsSection } from './-components/dashboard/totals-section'
 import { TrendingMemes } from './-components/dashboard/trending-memes'
@@ -175,10 +177,18 @@ const TrendingContent = () => {
   return <TrendingMemes entries={trendingQuery.data} />
 }
 
-const FeedContent = () => {
-  const feedQuery = useSuspenseQuery(getAdminRecentActivityQueryOpts())
+const AuditContent = () => {
+  const auditQuery = useSuspenseQuery(getAdminRecentAuditQueryOpts())
 
-  return <ActivityFeed entries={feedQuery.data} />
+  return <AuditFeed entries={auditQuery.data} />
+}
+
+const ActivityContent = () => {
+  const activityQuery = useSuspenseQuery(
+    getAdminRecentActivityEventsQueryOpts()
+  )
+
+  return <ActivityEventsFeed entries={activityQuery.data} />
 }
 
 const handleSectionError = (error: unknown) => {
@@ -198,6 +208,22 @@ const DashboardSection = ({ fallback, children }: DashboardSectionParams) => {
     >
       <React.Suspense fallback={fallback}>{children}</React.Suspense>
     </ErrorBoundary>
+  )
+}
+
+type SectionHeadingParams = {
+  title: string
+  action?: React.ReactNode
+}
+
+const SectionHeading = ({ title, action }: SectionHeadingParams) => {
+  return (
+    <div className="mb-3 flex min-h-8 items-center justify-between gap-2">
+      <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+        {title}
+      </h2>
+      {action}
+    </div>
   )
 }
 
@@ -225,9 +251,7 @@ const RouteComponent = () => {
       </DashboardSection>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
         <section className="lg:col-span-3" aria-label="Memes tendances">
-          <h2 className="mb-3 text-sm font-medium text-muted-foreground uppercase tracking-wider">
-            Tendances — 7 derniers jours
-          </h2>
+          <SectionHeading title="Tendances — 7 derniers jours" />
           <div className="rounded-xl border bg-card p-4">
             <DashboardSection fallback={<TrendingSkeleton />}>
               <TrendingContent />
@@ -235,16 +259,33 @@ const RouteComponent = () => {
           </div>
         </section>
         <section className="lg:col-span-2" aria-label="Activité récente">
-          <h2 className="mb-3 text-sm font-medium text-muted-foreground uppercase tracking-wider">
-            Activité récente
-          </h2>
+          <SectionHeading
+            title="Activité récente"
+            action={
+              <Link
+                to="/admin/activity"
+                className="flex items-center gap-1 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Tout voir
+                <ArrowRight className="size-3" aria-hidden />
+              </Link>
+            }
+          />
           <div className="rounded-xl border bg-card p-4">
             <DashboardSection fallback={<FeedSkeleton />}>
-              <FeedContent />
+              <ActivityContent />
             </DashboardSection>
           </div>
         </section>
       </div>
+      <section aria-label="Journal d'administration">
+        <SectionHeading title="Journal d'administration" />
+        <div className="rounded-xl border bg-card p-4">
+          <DashboardSection fallback={<FeedSkeleton />}>
+            <AuditContent />
+          </DashboardSection>
+        </div>
+      </section>
     </div>
   )
 }

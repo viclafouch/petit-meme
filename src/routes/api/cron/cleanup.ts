@@ -1,5 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { prismaClient } from '~/db'
+import {
+  ACTIVITY_IP_RETENTION_DAYS,
+  ACTIVITY_RETENTION_DAYS
+} from '~/constants/activity'
 import { DAY } from '~/constants/time'
 import { cronLogger } from '~/lib/logger'
 import { verifyCronSecret } from '~/utils/cron-auth'
@@ -12,8 +16,6 @@ const ANALYTICS_RETENTION_DAYS = 365
 const AUDIT_LOG_RETENTION_YEARS = 2
 const ANONYMIZATION_YEARS = 3
 const UNVERIFIED_RETENTION_DAYS = 30
-const ACTIVITY_IP_RETENTION_DAYS = 30
-const ACTIVITY_RETENTION_DAYS = 90
 
 const maskId = (id: string) => {
   return id.slice(0, 8)

@@ -26,6 +26,7 @@ import {
   getRowId,
   PAGE_SIZE
 } from '~/routes/admin/-components/admin-table'
+import { EmptyCell } from '~/routes/admin/-components/empty-cell'
 import { RelativeDateTooltip } from '~/routes/admin/-components/relative-date-tooltip'
 import type { EnrichedUser } from '~/routes/admin/-server/users'
 import { getListUsers } from '~/routes/admin/-server/users'
@@ -237,7 +238,7 @@ const columns = [
       const lastActivity = info.getValue()
 
       if (!lastActivity) {
-        return <span className="text-muted-foreground text-sm">-</span>
+        return <EmptyCell />
       }
 
       return <RelativeDateTooltip date={new Date(lastActivity)} />

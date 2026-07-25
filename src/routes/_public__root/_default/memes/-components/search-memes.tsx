@@ -17,9 +17,9 @@ import { Sparkles } from '~/components/animate-ui/icons/sparkles'
 import { CategoriesList } from '~/components/categories/categories-list'
 import { MemesFilterLanguage } from '~/components/Meme/Filters/memes-filter-language'
 import { MemesPagination } from '~/components/Meme/Filters/memes-pagination'
-import { MemesQuery } from '~/components/Meme/Filters/memes-query'
 import { MemesToggleGrid } from '~/components/Meme/Filters/memes-toggle-grid'
 import { MemesList } from '~/components/Meme/memes-list'
+import { SearchInput } from '~/components/search-input'
 import { Button, buttonVariants } from '~/components/ui/button'
 import { LoadingSpinner } from '~/components/ui/spinner'
 import { getVirtualCategories, type MemesFilters } from '~/constants/meme'
@@ -200,9 +200,10 @@ export const SearchMemes = () => {
             <div className="hidden sm:flex sm:items-center sm:justify-between sm:gap-2">
               <div className="flex flex-1 items-center gap-2">
                 <div className="flex-1">
-                  <MemesQuery
-                    query={search.query ?? ''}
-                    onQueryChange={handleQueryChange}
+                  <SearchInput
+                    value={search.query ?? ''}
+                    placeholder={m.meme_search_placeholder()}
+                    onValueChange={handleQueryChange}
                   />
                 </div>
                 <AnimateIcon animateOnHover asChild>
@@ -233,9 +234,10 @@ export const SearchMemes = () => {
               </div>
             </div>
             <div className="flex flex-col gap-2 sm:hidden">
-              <MemesQuery
-                query={search.query ?? ''}
-                onQueryChange={handleQueryChange}
+              <SearchInput
+                value={search.query ?? ''}
+                placeholder={m.meme_search_placeholder()}
+                onValueChange={handleQueryChange}
               />
               <div className="grid grid-cols-2 gap-2">
                 <AnimateIcon animateOnHover asChild>

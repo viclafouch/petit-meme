@@ -258,14 +258,37 @@ Le scan de l'`updateMany` reste large (bande 30-90 j parcourue pour ~400 lignes 
 
 **`/frontend-design` obligatoire avant toute écriture d'UI.**
 
-- [ ] Route `/admin/activity`
-- [ ] Server fn `getAdminActivity` avec `adminRequiredMiddleware`, validateur Zod `{ page, types[], scope, search }`, retour `{ rows, total }`
-- [ ] `AdminTable` réutilisé tel quel avec `manualPagination: true`, `PAGE_SIZE = 20`, `pageCount` fourni par le serveur. Rendu strictement identique aux autres pages admin
-- [ ] Filtre par type : `DropdownMenu` + `DropdownMenuCheckboxItem`, trigger repris de `memes-filter-content-locale.tsx`. **Pas** `MultiAsyncSelect`, réservé aux listes longues avec recherche
-- [ ] Filtre Connectés / Anonymes, recherche par IP ou email, tous traités en SQL
-- [ ] Aucun `refetchInterval`. Refetch au focus de l'onglet, plus un bouton manuel
-- [ ] Dashboard : aperçu des 10 derniers Events avec lien « Tout voir »
-- [ ] Renommer le bloc existant `activity-feed.tsx` en **« Journal d'administration »**, il affiche l'Audit et non l'Activity
+- [x] Route `/admin/activity` (`src/routes/admin/activity/index.tsx`), entrée « Activité » dans `admin-sidebar.tsx`
+- [x] Server fn `getAdminActivity` (`src/routes/admin/-server/activity.ts`) avec `adminRequiredMiddleware`, validateur `ACTIVITY_FILTERS_SCHEMA` `{ page, types[], scope, search }`, retour `{ rows, total }` via un `Promise.all` `findMany` + `count`
+- [x] `AdminTable` réutilisé tel quel avec `manualPagination: true`, `PAGE_SIZE` importé du composant, `pageCount = Math.ceil(total / PAGE_SIZE)`. Aucune modification d'`AdminTable`. Tri désactivé sur toutes les colonnes : l'ordre est celui du serveur (`createdAt desc`), un tri client ne porterait que sur la page courante
+- [x] Filtre par type : `DropdownMenu` + `DropdownMenuCheckboxItem`, trigger `Button active` repris de `memes-filter-content-locale.tsx`, `onSelect` neutralisé pour garder le menu ouvert en sélection multiple
+- [x] Filtre Connectés / Anonymes (`scope`), recherche par IP ou email, tous traités en SQL. `USER_ID_FILTER_BY_SCOPE` mappe le scope sur `userId`, la recherche est un `OR` `ipAddress contains` / `user.email contains insensitive`
+- [x] Aucun `refetchInterval`. `refetchOnWindowFocus` est déjà le défaut global (`router.tsx`, actif en production seulement), `staleTime` d'une minute, plus un bouton « Rafraîchir » manuel
+- [x] Dashboard : aperçu des 10 derniers Events (`activity-events-feed.tsx`) avec lien « Tout voir »
+- [x] Renommé : `activity-feed.tsx` → `audit-feed.tsx`, composant `AuditFeed`, bloc titré **« Journal d'administration »** passé pleine largeur sous la grille. La server fn `getAdminRecentActivity` devient `getAdminRecentAudit` et `RECENT_ACTIVITY_SELECT` devient `RECENT_AUDIT_SELECT`, sans quoi deux notions distinctes portaient le même nom
+
+**Détails d'implémentation.**
+
+- `src/constants/activity.ts` : `ACTIVITY_IP_RETENTION_DAYS` et `ACTIVITY_RETENTION_DAYS` y sont remontées depuis `cleanup.ts` (le cron et l'affichage doivent lire la même valeur), plus `ACTIVITY_SCOPES` et `ACTIVITY_FILTERS_SCHEMA`, partagé par le `validateSearch` de la route et le validateur de la server fn
+- `src/routes/admin/-helpers/activity.tsx` : `ACTIVITY_TYPE_DISPLAY` (libellé singulier pour une ligne, pluriel pour le filtre, icône), `getActivityMetadataText` qui lit `metadata` sans jamais le caster (garde `typeof`, `null`, `Array.isArray`, puis `typeof value === 'string'`), `formatActivityEntry`
+- **`ip_address` à `NULL` n'est pas une anomalie** : la cellule IP affiche un tiret avec un tooltip qui distingue les deux cas, `IP purgée automatiquement après 30 jours` si l'Event a plus de 30 jours, `Aucune IP collectée pour cet événement` sinon (le cas des `SUBSCRIPTION`, écrits depuis le webhook Stripe)
+- `SearchInput` (`src/components/search-input.tsx`) extrait de `MemesQuery`, supprimé. Le composant enveloppait déjà `useSyncedInputValue` (debounce 300 ms, input non contrôlé pour les touches mortes) ; seul le placeholder variait. Trois appelants mis à jour : la recherche publique (deux fois) et `/admin/library`
+- Aucune migration, aucune garde Creator côté lecture (elle est en amont dans `recordActivityEvent`)
+
+**Extractions issues de `/simplify`.**
+
+- `DashboardFeed` + `FeedActor` (`-components/dashboard/dashboard-feed.tsx`) : le rendu des deux blocs du dashboard (Activity et Audit) était identique au détail près de l'icône, du texte et de l'acteur. `AuditFeed` et `ActivityEventsFeed` se réduisent à une projection vers `{ id, icon, text, actor, createdAt }`
+- `UserAvatar` (`src/components/user-avatar.tsx`), variantes `sm` (feeds) et `md` (tables). Les autres pages admin gardent leur `Avatar` inline, hors périmètre
+- `EmptyCell` (`-components/empty-cell.tsx`), le tiret des cellules vides, partagé avec `/admin/users`
+- `DASHBOARD_FEED_SIZE` (`-lib/constants.ts`) : les deux feeds côte à côte doivent avoir la même longueur, le `take: 10` était écrit deux fois
+- La page ne garde qu'un `updateSearch` ; `ActivityFilterBar` reçoit un unique `onFiltersChange` au lieu de trois callbacks, et perd son `React.memo` qui ne pouvait jamais toucher (les handlers sont recréés à chaque rendu, `useCallback` étant proscrit)
+- Aperçu du dashboard aligné sur les autres blocs (`staleTime` de 10 minutes) : un focus d'onglet ne doit pas coûter une requête de plus. La page `/admin/activity`, elle, garde une minute, c'est l'outil d'observation et il a son bouton de rafraîchissement
+
+**Écarté sciemment.**
+
+- Déplacer `PAGE_SIZE` hors d'`admin-table.tsx` : `AdminTable` ne doit pas être touché, et les quatre autres pages admin l'importent déjà de là
+- Généraliser `ActivityScopeToggle` et le `StatusToggle` de `/admin/library` en un `SegmentedFilter` : le second porte un badge et des couleurs `info` propres, le composant commun devrait exposer des slots pour ça
+- Recherche en `startsWith` plutôt que `contains`, ou pagination par curseur : les deux économiseraient un scan séquentiel, sans objet à 35 000 lignes. À reconsidérer si la table grossit d'un ordre de grandeur
 
 ---
 

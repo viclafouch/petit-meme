@@ -2,9 +2,9 @@ import React from 'react'
 import { Plus } from 'lucide-react'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { MemesQuery } from '~/components/Meme/Filters/memes-query'
 import { PageHeader } from '~/components/page-header'
 import { Paginator } from '~/components/paginator'
+import { SearchInput } from '~/components/search-input'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { Container } from '~/components/ui/container'
@@ -185,9 +185,10 @@ const RouteComponent = () => {
               onSelectPending={handleSelectPending}
             />
             <div className="flex items-center justify-between gap-x-3">
-              <MemesQuery
-                query={search.query ?? ''}
-                onQueryChange={handleQueryChange}
+              <SearchInput
+                value={search.query ?? ''}
+                placeholder="Rechercher un mème"
+                onValueChange={handleQueryChange}
               />
               <MemesFilterContentLocale
                 contentLocale={search.contentLocale ?? null}

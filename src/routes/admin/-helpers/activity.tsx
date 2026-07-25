@@ -99,9 +99,7 @@ const ACTIVITY_METADATA_SCHEMA = z
   .partial()
   .catch({})
 
-export function getActivityMetadataText(
-  metadata: AdminActivityRow['metadata']
-) {
+function getActivityMetadataText(metadata: AdminActivityRow['metadata']) {
   const { prompt, plan } = ACTIVITY_METADATA_SCHEMA.parse(metadata)
 
   return prompt ?? plan ?? null
@@ -114,10 +112,11 @@ export function formatActivityEntry({
   meme,
   metadata
 }: ActivityEntryParams) {
-  const { label } = ACTIVITY_TYPE_DISPLAY[type]
-  const detail = meme?.title ?? getActivityMetadataText(metadata)
-
-  return detail ? `${label} : ${detail}` : label
+  return (
+    meme?.title ??
+    getActivityMetadataText(metadata) ??
+    ACTIVITY_TYPE_DISPLAY[type].label
+  )
 }
 
 type ActivityTypeIconParams = {

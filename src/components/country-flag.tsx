@@ -22,7 +22,7 @@ export const CountryFlag = ({
   const countryName = getCountryName(countryCode, getLocale())
   const label = countryName ?? `Pays inconnu (${countryCode})`
   const boxClassName = cn(
-    'shrink-0 rounded-sm ring-1 ring-border',
+    'shrink-0 ring-1 ring-border',
     COUNTRY_FLAG_SIZE_CLASSES[size]
   )
 

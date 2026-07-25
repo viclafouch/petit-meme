@@ -383,7 +383,7 @@ Conséquence assumée : un visiteur EN voit les dates en heure de Paris. C'est l
 - [x] Les quatre points d'affichage d'une IP : colonne IP d'`activity-columns.tsx` (flux et fiche User), `user-ip-list.tsx`, titre d'`activity/$ip.tsx`, `activity-events-feed.tsx`
 - [x] Fiche Visitor : drapeau `md` dans le titre, à côté de l'IP. Un seul rendu par page
 - [x] **L'absence de drapeau est un état normal**, pas une erreur : aucun Event existant n'a de pays, et la bande 30-90 jours n'en aura jamais. Aucun placeholder, aucun tiret, le drapeau est simplement absent
-- [x] `rounded-sm` aligné sur `FLAG_ICON_CLASS` (`src/components/icon/flags.ts`), la convention des drapeaux FR/GB du sélecteur de langue. La taille, elle, diverge volontairement : le sélecteur affiche un carré `size-4`, le pays est une pastille 4:3
+- [x] **Aucun arrondi** sur le drapeau, choix de Victor. Il diverge donc du `rounded-sm` de `FLAG_ICON_CLASS` (`src/components/icon/flags.ts`), tout comme la taille : le sélecteur de langue affiche un carré `size-4`, le pays est une pastille 4:3. L'anneau `ring-1 ring-border` reste, sans quoi un drapeau clair (Japon) disparaît sur fond blanc
 - [x] `preconnect` vers `flagcdn.com` dans le `head()` d'`admin/route.tsx`, et **pas** dans `__root.tsx` : le site public n'a aucune raison d'ouvrir une connexion vers ce tiers. Pas de `crossOrigin`, les `<img>` n'en portent pas, sans quoi la connexion préchauffée ne serait pas celle réutilisée
 
 ### Requêtes
@@ -394,7 +394,10 @@ Conséquence assumée : un visiteur EN voit les dates en heure de Paris. C'est l
 
 ### Colonne Détail du flux
 
-- [x] Le repli `?? userAgent` retiré d'`activity-columns.tsx`. **La colonne reste**, elle porte encore le `metadata` : le prompt des `AI_SEARCH` et le plan des `SUBSCRIPTION`. Retirer la colonne entière aurait fait disparaître le prompt de recherche IA, seul endroit de l'admin où il est visible
+- [x] **Colonne entièrement retirée** d'`activity-columns.tsx`. Le plan initial la gardait pour le `metadata`, au motif que le prompt des `AI_SEARCH` n'était visible nulle part ailleurs. **Vérification faite, c'était faux** : `/admin/ai-search` a une colonne « Prompt » sur les 500 derniers logs, avec en plus les mots-clés, le nombre de résultats et la locale, servie par la table `ai_search_log`. Le plan des `SUBSCRIPTION` se lit sur la fiche User. La colonne ne portait donc rien d'unique, et affichait un tiret sur la quasi-totalité des lignes
+- [x] `getActivityMetadataText` n'est plus exporté : son seul appelant restant est `formatActivityEntry`, dans le même fichier, qui sert le texte de l'aperçu du dashboard. `metadata` reste donc dans `ACTIVITY_ROW_SELECT`
+- [x] **Aperçu du dashboard : le préfixe de type retiré du texte.** `formatActivityEntry` rendait `Vue : <titre>`, il rend désormais le titre seul, l'icône portant déjà le type. Le libellé ne reste qu'en dernier repli, pour les Events sans meme ni `metadata` (`SIGNUP`), sans quoi la ligne serait vide
+- [x] `ActivityTypeIcon` étant `aria-hidden`, l'icône ne dit rien à un lecteur d'écran : le libellé du type est réinjecté en `sr-only` à côté d'elle dans `activity-events-feed.tsx`. Sans ça, retirer le préfixe supprimait purement et simplement le type pour les technologies d'assistance. Pas de `sr-only` dans la colonne Type du flux, où le libellé est déjà du texte visible
 - [x] `userAgent` sorti d'`ACTIVITY_ROW_SELECT`, plus aucun lecteur : quelques centaines d'octets de moins par ligne sur les trois tables et l'aperçu du dashboard. Il reste consultable dans le bloc « User-agents observés » de la fiche Visitor, servi par son propre `groupBy`
 
 ### RGPD

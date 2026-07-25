@@ -1,5 +1,6 @@
 import { CountryFlag } from '~/components/country-flag'
 import {
+  ACTIVITY_TYPE_DISPLAY,
   ActivityTypeIcon,
   formatActivityEntry
 } from '~/routes/admin/-helpers/activity'
@@ -38,7 +39,14 @@ export const ActivityEventsFeed = ({ entries }: ActivityEventsFeedParams) => {
       entries={entries.map((entry) => {
         return {
           id: entry.id,
-          icon: <ActivityTypeIcon type={entry.type} className="size-4" />,
+          icon: (
+            <>
+              <ActivityTypeIcon type={entry.type} className="size-4" />
+              <span className="sr-only">
+                {ACTIVITY_TYPE_DISPLAY[entry.type].label}
+              </span>
+            </>
+          ),
           text: formatActivityEntry(entry),
           actor: <ActivityActor entry={entry} />,
           createdAt: new Date(entry.createdAt)

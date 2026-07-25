@@ -12,12 +12,10 @@ import { ACTIVITY_IP_RETENTION_DAYS } from '~/constants/activity'
 import { DAY } from '~/constants/time'
 import { EmptyCell } from '~/routes/admin/-components/empty-cell'
 import { RelativeDateTooltip } from '~/routes/admin/-components/relative-date-tooltip'
-import { TruncatedText } from '~/routes/admin/-components/truncated-text'
 import { VisitorIpLink } from '~/routes/admin/-components/visitor-ip-link'
 import {
   ACTIVITY_TYPE_DISPLAY,
-  ActivityTypeIcon,
-  getActivityMetadataText
+  ActivityTypeIcon
 } from '~/routes/admin/-helpers/activity'
 import type { AdminActivityRow } from '~/routes/admin/-server/activity'
 
@@ -102,24 +100,6 @@ export const ACTIVITY_COLUMNS = [
         >
           {meme.title}
         </Link>
-      )
-    }
-  }),
-  columnHelper.display({
-    id: 'detail',
-    header: 'Détail',
-    cell: (info) => {
-      const detail = getActivityMetadataText(info.row.original.metadata)
-
-      if (!detail) {
-        return <EmptyCell />
-      }
-
-      return (
-        <TruncatedText
-          text={detail}
-          className="max-w-48 text-muted-foreground"
-        />
       )
     }
   }),

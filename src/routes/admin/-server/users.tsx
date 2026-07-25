@@ -30,7 +30,7 @@ const USER_LIST_SELECT = {
 
 export type SubscriptionStatus = 'active' | 'past' | 'none'
 
-const SUBSCRIPTION_LIST_SELECT = {
+export const SUBSCRIPTION_LIST_SELECT = {
   referenceId: true,
   status: true,
   periodStart: true,
@@ -45,6 +45,38 @@ export type SubscriptionInfo = {
   status: SubscriptionStatus
   startedAt: SubscriptionRow['periodStart']
   endsAt: SubscriptionRow['periodEnd']
+}
+
+const NO_SUBSCRIPTION: SubscriptionInfo = {
+  status: 'none',
+  startedAt: null,
+  endsAt: null
+}
+
+export function buildSubscriptionInfo(subscriptions: SubscriptionRow[]) {
+  return subscriptions.reduce<SubscriptionInfo>((merged, subscription) => {
+    const isActive = subscription.status === 'active'
+
+    return {
+      status: merged.status === 'active' || isActive ? 'active' : 'past',
+      startedAt:
+        subscription.periodStart &&
+        (!merged.startedAt || subscription.periodStart < merged.startedAt)
+          ? subscription.periodStart
+          : merged.startedAt,
+      endsAt:
+        subscription.periodEnd &&
+        (!merged.endsAt || subscription.periodEnd > merged.endsAt)
+          ? subscription.periodEnd
+          : merged.endsAt
+    }
+  }, NO_SUBSCRIPTION)
+}
+
+export function resolveAuthProvider(providerId?: string) {
+  return providerId !== undefined && matchIsAuthProviderId(providerId)
+    ? providerId
+    : 'credential'
 }
 
 export type EnrichedUser = Prisma.UserGetPayload<{
@@ -97,37 +129,12 @@ export const getListUsers = createServerFn({ method: 'GET' })
       })
     )
 
-    const subscriptionByUserId = new Map<string, SubscriptionInfo>()
-
-    for (const sub of subscriptions) {
-      const current = subscriptionByUserId.get(sub.referenceId)
-      const subStatus = sub.status === 'active' ? 'active' : 'past'
-
-      if (!current) {
-        subscriptionByUserId.set(sub.referenceId, {
-          status: subStatus,
-          startedAt: sub.periodStart,
-          endsAt: sub.periodEnd
-        })
-        continue
+    const subscriptionsByUserId = Object.groupBy(
+      subscriptions,
+      (subscription) => {
+        return subscription.referenceId
       }
-
-      subscriptionByUserId.set(sub.referenceId, {
-        status:
-          current.status !== 'active' && subStatus === 'active'
-            ? 'active'
-            : current.status,
-        startedAt:
-          sub.periodStart &&
-          (!current.startedAt || sub.periodStart < current.startedAt)
-            ? sub.periodStart
-            : current.startedAt,
-        endsAt:
-          sub.periodEnd && (!current.endsAt || sub.periodEnd > current.endsAt)
-            ? sub.periodEnd
-            : current.endsAt
-      })
-    }
+    )
 
     const bookmarkCountByUserId = new Map(
       bookmarkCounts.map((group) => {
@@ -142,19 +149,12 @@ export const getListUsers = createServerFn({ method: 'GET' })
     )
 
     const enrichedUsers = users.map((user) => {
-      const rawProvider = providerByUserId.get(user.id)
-
       return {
         ...user,
-        provider:
-          rawProvider !== undefined && matchIsAuthProviderId(rawProvider)
-            ? rawProvider
-            : 'credential',
-        subscription: subscriptionByUserId.get(user.id) ?? {
-          status: 'none',
-          startedAt: null,
-          endsAt: null
-        },
+        provider: resolveAuthProvider(providerByUserId.get(user.id)),
+        subscription: buildSubscriptionInfo(
+          subscriptionsByUserId[user.id] ?? []
+        ),
         bookmarkCount: bookmarkCountByUserId.get(user.id) ?? 0,
         generationCount: generationCountByUserId.get(user.id) ?? 0
       } satisfies EnrichedUser

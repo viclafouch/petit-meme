@@ -9,6 +9,7 @@ import { Button } from '~/components/ui/button'
 import { Card } from '~/components/ui/card'
 import { Skeleton } from '~/components/ui/skeleton'
 import { captureWithFeature } from '~/lib/sentry'
+import { SectionHeading } from '~/routes/admin/-components/section-heading'
 import {
   getAdminChartDataQueryOpts,
   getAdminDashboardTotalsQueryOpts,
@@ -208,22 +209,6 @@ const DashboardSection = ({ fallback, children }: DashboardSectionParams) => {
     >
       <React.Suspense fallback={fallback}>{children}</React.Suspense>
     </ErrorBoundary>
-  )
-}
-
-type SectionHeadingParams = {
-  title: string
-  action?: React.ReactNode
-}
-
-const SectionHeading = ({ title, action }: SectionHeadingParams) => {
-  return (
-    <div className="mb-3 flex min-h-8 items-center justify-between gap-2">
-      <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-        {title}
-      </h2>
-      {action}
-    </div>
   )
 }
 

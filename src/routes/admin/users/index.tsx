@@ -1,5 +1,5 @@
-import { Crown, Mail, Minus } from 'lucide-react'
-import { createFileRoute } from '@tanstack/react-router'
+import { Minus } from 'lucide-react'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -7,9 +7,7 @@ import {
   getSortedRowModel,
   useReactTable
 } from '@tanstack/react-table'
-import { DiscordIcon, XTwitterIcon } from '~/components/icon'
 import { PageHeader } from '~/components/page-header'
-import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
 import { Badge } from '~/components/ui/badge'
 import { Container } from '~/components/ui/container'
 import {
@@ -17,10 +15,7 @@ import {
   TooltipContent,
   TooltipTrigger
 } from '~/components/ui/tooltip'
-import type { AuthProviderId } from '~/constants/auth'
-import { differenceInMonths, formatDate } from '~/helpers/date'
-import { getUserInitials } from '~/helpers/format'
-import { getLocale } from '~/paraglide/runtime'
+import { UserAvatar } from '~/components/user-avatar'
 import {
   AdminTable,
   getRowId,
@@ -31,60 +26,11 @@ import { RelativeDateTooltip } from '~/routes/admin/-components/relative-date-to
 import type { EnrichedUser } from '~/routes/admin/-server/users'
 import { getListUsers } from '~/routes/admin/-server/users'
 import { UserActionsCell } from './-components/user-actions-cell'
-
-type UserCellParams = {
-  user: EnrichedUser
-}
-
-const UserStatusBadges = ({ user }: UserCellParams) => {
-  const isBanned = user.banned === true
-  const isUnverified = user.emailVerified === false
-  const isActive = !isBanned && !isUnverified
-
-  return (
-    <div className="flex flex-wrap gap-1">
-      {isActive ? (
-        <Badge variant="success" size="sm">
-          Actif
-        </Badge>
-      ) : null}
-      {isBanned ? (
-        <Badge variant="destructive" size="sm">
-          Banni
-        </Badge>
-      ) : null}
-      {isUnverified ? (
-        <Badge variant="warning" size="sm">
-          Non vérifié
-        </Badge>
-      ) : null}
-    </div>
-  )
-}
-
-type ProviderDisplayConfig = {
-  label: string
-  icon: React.ComponentType<React.ComponentProps<'svg'>>
-  variant: React.ComponentProps<typeof Badge>['variant']
-}
-
-const AUTH_PROVIDER_DISPLAY = {
-  credential: {
-    label: 'Email',
-    icon: Mail,
-    variant: 'secondary'
-  },
-  twitter: {
-    label: 'Twitter',
-    icon: XTwitterIcon,
-    variant: 'info'
-  },
-  discord: {
-    label: 'Discord',
-    icon: DiscordIcon,
-    variant: 'default'
-  }
-} as const satisfies Record<AuthProviderId, ProviderDisplayConfig>
+import {
+  AuthProviderBadge,
+  SubscriptionBadge,
+  UserStatusBadges
+} from './-components/user-badges'
 
 const columnHelper = createColumnHelper<EnrichedUser>()
 
@@ -93,22 +39,20 @@ const columns = [
     header: 'Utilisateur',
     cell: (info) => {
       const user = info.row.original
-      const isBanned = user.banned === true
 
       return (
-        <div className="flex items-center gap-2">
-          <Avatar
-            className={isBanned ? 'size-8 ring-2 ring-destructive' : 'size-8'}
-          >
-            {user.image ? (
-              <AvatarImage src={user.image} alt={user.name} />
-            ) : null}
-            <AvatarFallback className="text-xs">
-              {getUserInitials(user.name)}
-            </AvatarFallback>
-          </Avatar>
+        <Link
+          to="/admin/users/$userId"
+          params={{ userId: user.id }}
+          className="flex items-center gap-2 py-1 hover:text-primary transition-colors"
+        >
+          <UserAvatar
+            name={user.name}
+            image={user.image}
+            className={user.banned === true ? 'ring-2 ring-destructive' : ''}
+          />
           <span className="font-medium truncate max-w-32">{user.name}</span>
-        </div>
+        </Link>
       )
     }
   }),
@@ -135,22 +79,21 @@ const columns = [
     header: 'Provider',
     enableSorting: false,
     cell: (info) => {
-      const config = AUTH_PROVIDER_DISPLAY[info.getValue()]
-      const Icon = config.icon
-
-      return (
-        <Badge variant={config.variant} size="sm">
-          <Icon className="size-3" aria-hidden />
-          {config.label}
-        </Badge>
-      )
+      return <AuthProviderBadge provider={info.getValue()} />
     }
   }),
   columnHelper.display({
     id: 'status',
     header: 'Statut',
     cell: (info) => {
-      return <UserStatusBadges user={info.row.original} />
+      const user = info.row.original
+
+      return (
+        <UserStatusBadges
+          banned={user.banned}
+          emailVerified={user.emailVerified}
+        />
+      )
     }
   }),
   columnHelper.display({
@@ -168,44 +111,12 @@ const columns = [
         )
       }
 
-      const months = subscription.startedAt
-        ? Math.max(
-            1,
-            differenceInMonths(new Date(), new Date(subscription.startedAt))
-          )
-        : 1
-
-      const tooltipLines = [
-        `${months} mois d'abonnement`,
-        subscription.endsAt
-          ? `Fin : ${formatDate(new Date(subscription.endsAt), getLocale())}`
-          : null
-      ]
-        .filter(Boolean)
-        .join('\n')
-
-      const badge =
-        subscription.status === 'active' ? (
-          <Badge className="bg-amber-500 text-white border-amber-600" size="sm">
-            <Crown className="size-3" aria-hidden />
-            Premium
-          </Badge>
-        ) : (
-          <Badge variant="outline" size="sm">
-            <Crown className="size-3" aria-hidden />
-            Ancien
-          </Badge>
-        )
-
       return (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="cursor-default">{badge}</span>
-          </TooltipTrigger>
-          <TooltipContent className="whitespace-pre-line">
-            {tooltipLines}
-          </TooltipContent>
-        </Tooltip>
+        <SubscriptionBadge
+          isActive={subscription.status === 'active'}
+          startedAt={subscription.startedAt}
+          endsAt={subscription.endsAt}
+        />
       )
     }
   }),
@@ -217,13 +128,11 @@ const columns = [
 
       return (
         <Tooltip>
-          <TooltipTrigger asChild>
-            <span
-              className="text-muted-foreground text-sm tabular-nums cursor-default"
-              aria-label={`${user.bookmarkCount} bookmarks, ${user.generationCount} générations`}
-            >
-              {user.bookmarkCount}b {user.generationCount}g
-            </span>
+          <TooltipTrigger
+            className="text-muted-foreground text-sm tabular-nums cursor-default rounded-sm"
+            aria-label={`${user.bookmarkCount} bookmarks, ${user.generationCount} générations`}
+          >
+            {user.bookmarkCount}b {user.generationCount}g
           </TooltipTrigger>
           <TooltipContent>
             {user.bookmarkCount} bookmarks · {user.generationCount} générations

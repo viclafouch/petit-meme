@@ -2,6 +2,7 @@ import { UserAvatar } from '~/components/user-avatar'
 import { DEFAULT_AVATAR_URL } from '~/constants/avatar'
 import { formatRelativeTime } from '~/helpers/date'
 import { getLocale } from '~/paraglide/runtime'
+import { EmptyMessage } from '~/routes/admin/-components/empty-message'
 
 type FeedActorParams = {
   name: string
@@ -32,11 +33,7 @@ type DashboardFeedParams = {
 
 export const DashboardFeed = ({ entries, emptyLabel }: DashboardFeedParams) => {
   if (entries.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground py-6 text-center">
-        {emptyLabel}
-      </p>
-    )
+    return <EmptyMessage>{emptyLabel}</EmptyMessage>
   }
 
   const locale = getLocale()

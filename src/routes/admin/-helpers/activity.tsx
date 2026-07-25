@@ -11,7 +11,11 @@ import {
 import { z } from 'zod'
 import { ActivityEventType } from '~/db/generated/prisma/enums'
 import { getLocale } from '~/paraglide/runtime'
-import type { AdminActivityRow } from '~/routes/admin/-server/activity'
+import type { StatTileEntry } from '~/routes/admin/-components/stat-tiles'
+import type {
+  ActivityTotals,
+  AdminActivityRow
+} from '~/routes/admin/-server/activity'
 
 type ActivityTypeDisplay = {
   label: string
@@ -63,6 +67,24 @@ export const ACTIVITY_TYPE_DISPLAY = {
 } as const satisfies Record<ActivityEventType, ActivityTypeDisplay>
 
 export const ACTIVITY_TYPE_OPTIONS = Object.values(ActivityEventType)
+
+const ACTIVITY_TILE_TYPES = [
+  ActivityEventType.VIEW,
+  ActivityEventType.DOWNLOAD,
+  ActivityEventType.SHARE,
+  ActivityEventType.GENERATION
+] as const satisfies readonly ActivityEventType[]
+
+export function buildActivityTiles(totals: ActivityTotals) {
+  return ACTIVITY_TILE_TYPES.map((type) => {
+    return {
+      key: type,
+      label: ACTIVITY_TYPE_DISPLAY[type].pluralLabel,
+      value: totals[type],
+      icon: <ActivityTypeIcon type={type} className="size-4" />
+    }
+  }) satisfies StatTileEntry[]
+}
 
 export function formatEventCount(total: number) {
   const formattedTotal = new Intl.NumberFormat(getLocale()).format(total)

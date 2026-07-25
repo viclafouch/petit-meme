@@ -40,7 +40,9 @@ import { Route as ApiCronSyncAlgoliaRouteImport } from './routes/api/cron/sync-a
 import { Route as ApiCronPendingSubmissionsReminderRouteImport } from './routes/api/cron/pending-submissions-reminder'
 import { Route as ApiCronCleanupRouteImport } from './routes/api/cron/cleanup'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
+import { Route as AdminUsersUserIdRouteImport } from './routes/admin/users/$userId'
 import { Route as AdminLibraryMemeIdRouteImport } from './routes/admin/library/$memeId'
+import { Route as AdminActivityIpRouteImport } from './routes/admin/activity/$ip'
 import { Route as Public__rootDefaultTermsOfUseRouteImport } from './routes/_public__root/_default/terms-of-use'
 import { Route as Public__rootDefaultPrivacyRouteImport } from './routes/_public__root/_default/privacy'
 import { Route as Public__rootDefaultMentionsLegalesRouteImport } from './routes/_public__root/_default/mentions-legales'
@@ -215,9 +217,19 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminUsersUserIdRoute = AdminUsersUserIdRouteImport.update({
+  id: '/users/$userId',
+  path: '/users/$userId',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminLibraryMemeIdRoute = AdminLibraryMemeIdRouteImport.update({
   id: '/library/$memeId',
   path: '/library/$memeId',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminActivityIpRoute = AdminActivityIpRouteImport.update({
+  id: '/activity/$ip',
+  path: '/activity/$ip',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const Public__rootDefaultTermsOfUseRoute =
@@ -350,7 +362,9 @@ export interface FileRoutesByFullPath {
   '/mentions-legales': typeof Public__rootDefaultMentionsLegalesRoute
   '/privacy': typeof Public__rootDefaultPrivacyRoute
   '/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
+  '/admin/activity/$ip': typeof AdminActivityIpRoute
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
+  '/admin/users/$userId': typeof AdminUsersUserIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/cron/cleanup': typeof ApiCronCleanupRoute
   '/api/cron/pending-submissions-reminder': typeof ApiCronPendingSubmissionsReminderRoute
@@ -397,7 +411,9 @@ export interface FileRoutesByTo {
   '/mentions-legales': typeof Public__rootDefaultMentionsLegalesRoute
   '/privacy': typeof Public__rootDefaultPrivacyRoute
   '/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
+  '/admin/activity/$ip': typeof AdminActivityIpRoute
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
+  '/admin/users/$userId': typeof AdminUsersUserIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/cron/cleanup': typeof ApiCronCleanupRoute
   '/api/cron/pending-submissions-reminder': typeof ApiCronPendingSubmissionsReminderRoute
@@ -450,7 +466,9 @@ export interface FileRoutesById {
   '/_public__root/_default/mentions-legales': typeof Public__rootDefaultMentionsLegalesRoute
   '/_public__root/_default/privacy': typeof Public__rootDefaultPrivacyRoute
   '/_public__root/_default/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
+  '/admin/activity/$ip': typeof AdminActivityIpRoute
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
+  '/admin/users/$userId': typeof AdminUsersUserIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/cron/cleanup': typeof ApiCronCleanupRoute
   '/api/cron/pending-submissions-reminder': typeof ApiCronPendingSubmissionsReminderRoute
@@ -501,7 +519,9 @@ export interface FileRouteTypes {
     | '/mentions-legales'
     | '/privacy'
     | '/terms-of-use'
+    | '/admin/activity/$ip'
     | '/admin/library/$memeId'
+    | '/admin/users/$userId'
     | '/api/auth/$'
     | '/api/cron/cleanup'
     | '/api/cron/pending-submissions-reminder'
@@ -548,7 +568,9 @@ export interface FileRouteTypes {
     | '/mentions-legales'
     | '/privacy'
     | '/terms-of-use'
+    | '/admin/activity/$ip'
     | '/admin/library/$memeId'
+    | '/admin/users/$userId'
     | '/api/auth/$'
     | '/api/cron/cleanup'
     | '/api/cron/pending-submissions-reminder'
@@ -600,7 +622,9 @@ export interface FileRouteTypes {
     | '/_public__root/_default/mentions-legales'
     | '/_public__root/_default/privacy'
     | '/_public__root/_default/terms-of-use'
+    | '/admin/activity/$ip'
     | '/admin/library/$memeId'
+    | '/admin/users/$userId'
     | '/api/auth/$'
     | '/api/cron/cleanup'
     | '/api/cron/pending-submissions-reminder'
@@ -869,11 +893,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/users/$userId': {
+      id: '/admin/users/$userId'
+      path: '/users/$userId'
+      fullPath: '/admin/users/$userId'
+      preLoaderRoute: typeof AdminUsersUserIdRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/library/$memeId': {
       id: '/admin/library/$memeId'
       path: '/library/$memeId'
       fullPath: '/admin/library/$memeId'
       preLoaderRoute: typeof AdminLibraryMemeIdRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/activity/$ip': {
+      id: '/admin/activity/$ip'
+      path: '/activity/$ip'
+      fullPath: '/admin/activity/$ip'
+      preLoaderRoute: typeof AdminActivityIpRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/_public__root/_default/terms-of-use': {
@@ -1088,7 +1126,9 @@ interface AdminRouteRouteChildren {
   AdminDownloaderRoute: typeof AdminDownloaderRoute
   AdminServicesRoute: typeof AdminServicesRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminActivityIpRoute: typeof AdminActivityIpRoute
   AdminLibraryMemeIdRoute: typeof AdminLibraryMemeIdRoute
+  AdminUsersUserIdRoute: typeof AdminUsersUserIdRoute
   AdminActivityIndexRoute: typeof AdminActivityIndexRoute
   AdminAiSearchIndexRoute: typeof AdminAiSearchIndexRoute
   AdminCategoriesIndexRoute: typeof AdminCategoriesIndexRoute
@@ -1101,7 +1141,9 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminDownloaderRoute: AdminDownloaderRoute,
   AdminServicesRoute: AdminServicesRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminActivityIpRoute: AdminActivityIpRoute,
   AdminLibraryMemeIdRoute: AdminLibraryMemeIdRoute,
+  AdminUsersUserIdRoute: AdminUsersUserIdRoute,
   AdminActivityIndexRoute: AdminActivityIndexRoute,
   AdminAiSearchIndexRoute: AdminAiSearchIndexRoute,
   AdminCategoriesIndexRoute: AdminCategoriesIndexRoute,

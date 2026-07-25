@@ -296,11 +296,57 @@ Le scan de l'`updateMany` reste large (bande 30-90 j parcourue pour ~400 lignes 
 
 **`/frontend-design` obligatoire.**
 
-- [ ] Route `/admin/users/$userId`. N'existe pas aujourd'hui, la fiche est à créer intégralement : en-tête (nom, email, provider, statut d'abonnement, date d'inscription, dernière activité), quatre tuiles de totaux (Views, Downloads, Shares, Generations), dernières IP connues, timeline paginée, actions bannir et supprimer rapatriées depuis `user-actions-cell.tsx`
-- [ ] Route `/admin/activity/$ip` (fiche Visitor) : totaux, Memes touchés, user-agents observés, comptes associés, timeline. **Fenêtre de 30 jours**, au-delà l'IP est purgée
-- [ ] Navigation : nom cliquable dans la liste `/admin/users`, et depuis le flux vers la fiche User comme vers la fiche IP
-- [ ] Encoder l'IP dans l'URL (IPv6 contient des `:`)
-- [ ] Admin en français en dur, pas d'i18n, cohérent avec l'existant
+- [x] Route `/admin/users/$userId` (`src/routes/admin/users/$userId.tsx`) : en-tête (avatar, nom, email, provider, statuts, abonnement, date d'inscription, dernière activité), quatre tuiles de totaux, dernières IP connues, timeline paginée, actions bannir / débannir / supprimer
+- [x] Route `/admin/activity/$ip` (fiche Visitor, `src/routes/admin/activity/$ip.tsx`) : totaux, Memes touchés, user-agents observés, comptes associés, timeline. **Fenêtre de 30 jours** matérialisée par un badge, borne `createdAt >= now - ACTIVITY_IP_RETENTION_DAYS` qui sert aussi l'index `[ipAddress, createdAt]`
+- [x] Navigation : nom cliquable dans `/admin/users`, colonnes Visiteur et IP du flux liées aux deux fiches, IP de la fiche User vers la fiche Visitor, comptes de la fiche Visitor vers la fiche User, bouton « Voir dans le flux » qui pré-remplit la recherche
+- [x] Encoder l'IP dans l'URL. **Rien à écrire** : `interpolatePath` de `@tanstack/router-core` applique `encodeURIComponent` sur les params et `decodeURIComponent` au match (`path.js` `encodePathParam`, `new-process-route-tree.js`). Une IPv6 sort en `2001%3Adb8%3A%3A1` et revient intacte de `useParams`. Encoder à la main produirait un double encodage
+- [x] Admin en français en dur, pas d'i18n
+
+**Server fns (toutes sous `adminRequiredMiddleware`).**
+
+- `-server/user-detail.ts` : `getAdminUserDetail` (user + provider + abonnement + résumé d'activité + IP groupées) et `getAdminUserActivity`
+- `-server/visitor.ts` : `getAdminVisitorDetail` (résumé + memes + user-agents + comptes) et `getAdminVisitorActivity`
+- `-server/activity.ts` : trois primitives `createServerOnlyFn` partagées, `fetchActivityRows` (la page de lignes seule), `fetchActivityPage` (les lignes **plus** le `count`, pour le flux global dont le total varie avec les filtres) et `fetchActivitySummary` (**un seul `groupBy` par `type`** rendant les totaux, le total, `firstSeenAt` et `lastSeenAt`). Aucun comptage en mémoire
+- **Un `COUNT` économisé par chargement et par clic de pagination sur chaque fiche.** Le `where` d'une fiche ne varie pas d'une page à l'autre, seul `skip` change : le total est donc déjà dans `summary.total`, et les deux fiches appellent `fetchActivityRows` puis lisent ce total. Seul `getAdminActivity` garde le `count`, ses filtres le rendant réellement variable
+- Vérifié dans `@tanstack/start-client-core` (`createServerFn.js:43`) : `resolvedMiddleware = [...middleware, serverFnBaseToMiddleware(options)]`. Le validateur **et** le handler vivent dans le dernier maillon, donc le middleware admin s'exécute toujours avant les deux, quel que soit l'ordre d'écriture dans le builder
+
+**Extractions et réutilisations.**
+
+- `ActivityTimeline` (`-components/activity-timeline.tsx`) : le motif `manualPagination` + `ACTIVITY_COLUMNS` + états de chargement, désormais partagé par les **trois** tables d'activité. `columnVisibility` masque la colonne Visiteur sur la fiche User et la colonne IP sur la fiche Visitor, qui y seraient constantes. `AdminTable` n'est pas touché
+- `activity-columns.tsx` remonté de `activity/-components/` vers `-components/`, les trois pages le partageant
+- `SectionHeading` sorti de `admin/index.tsx`, `StatTiles` sorti de `totals-section.tsx`, `EmptyMessage` sorti de `dashboard-feed.tsx` : les trois étaient inlinés dans le dashboard et sont maintenant partagés
+- `DetailList` (`-components/detail-list.tsx`) : une seule primitive de liste `divide-y` pour les quatre blocs (IP, memes, user-agents, comptes)
+- `buildActivityTiles` (`-helpers/activity.tsx`) dérive les quatre tuiles d'`ACTIVITY_TYPE_DISPLAY` : aucun libellé ni icône redéfini
+- `useUserModeration` + `UserModerationDialogs` : les trois mutations et les trois `ConfirmAlertDialog` étaient sur le point d'être dupliqués entre la liste et la fiche. La liste **garde son menu ⋮**, la fiche affiche des boutons, les deux partagent la même logique. La suppression depuis la fiche renvoie vers `/admin/users`
+- `user-badges.tsx` : `UserStatusBadges`, `AuthProviderBadge` et `SubscriptionBadge` sortis de `users/index.tsx`, partagés avec la fiche
+- `-server/users.tsx` : `buildSubscriptionInfo` et `resolveAuthProvider` extraits, `getListUsers` remplace sa boucle de fusion par `Object.groupBy` + le helper partagé
+- `ACTIVITY_PAGE_SCHEMA` extrait dans `src/constants/activity.ts`, `ACTIVITY_FILTERS_SCHEMA` l'étend : une seule définition du paramètre `page`
+- Invalidation : bannir ou supprimer invalide `getAdminUserDetailQueryOpts` **et** appelle `router.invalidate()`, la liste `/admin/users` étant servie par un loader de route et non par une query
+
+**Piège corrigé — mismatch d'hydratation.** Les en-têtes formataient une date avec l'heure via `Intl.DateTimeFormat` sans `timeZone` : le serveur Node rend en UTC, le navigateur en `Europe/Paris`, soit deux heures d'écart et un `Hydration failed` à l'arrivée sur la fiche. Le premier correctif épinglait le fuseau dans deux constantes optionnelles, ce qui ne réparait que les appels concernés. **Correctif retenu : `formatDate` (`src/helpers/date.ts`) applique lui-même `timeZone: 'Europe/Paris'`**, surchargeable par les options du chargeur d'appel. Aucun appelant ne peut plus se tromper, et deux mismatches latents pré-existants tombent au passage, `admin/library/$memeId.tsx` et `admin/categories/index.tsx`.
+
+Conséquence assumée : un visiteur EN voit les dates en heure de Paris. C'est le fuseau éditorial du site et c'est déterministe ; l'alternative serait un composant de date strictement client.
+
+**Reste ouvert, non traité ici** : `formatRelativeTime` dépend de `Date.now()` et non du fuseau, donc `formatDate` ne le couvre pas. Le trigger de `RelativeDateTooltip` l'affiche en SSR sur les tables admin servies par un loader. Le risque ne se matérialise que sur des dates de moins d'une minute. Pré-existant, à corriger dans ce composant s'il se manifeste.
+
+**Corrections issues de `/simplify`.**
+
+- `getUserModerationPermissions` (`use-user-moderation.ts`) : le menu de la liste et les boutons de la fiche calculaient chacun la même matrice de droits, et **avaient déjà divergé** (`user.banned` truthy d'un côté, `=== true` de l'autre). Une seule source, les deux composants ne diffèrent plus que par leur habillage
+- Les trois `useMutation` copiées-collées du hook deviennent une mutation unique pilotée par `MODERATION_ACTIONS`, sur le modèle d'`ACTIVITY_TYPE_DISPLAY`. Le hook expose `isPending`, les boutons de la fiche portent `aria-busy`
+- `SectionCard` (`section-heading.tsx`) : le triplet `section` + `SectionHeading` + carte était répété sept fois, avec un `aria-label` recopié à la main du titre situé juste en dessous, donc voué à diverger
+- `ActivityTimeline` reçoit un `scope` (`global` / `user` / `visitor`) et non plus une `VisibilityState`. Les identifiants de colonnes ne fuient plus dans les fichiers de route, où `Record<string, boolean>` les rendait non vérifiables : un renommage de colonne échouait en silence. `ACTIVITY_TIMELINE_SCOPES` vit à côté d'`ACTIVITY_COLUMNS`
+- **La fenêtre de 90 jours est désormais réelle.** `fetchActivitySummary` n'était borné par rien côté fiche User alors que l'en-tête annonçait « 90 derniers jours » : la borne n'existait que par effet de bord du cron de purge. `buildUserActivityWhere` l'applique en SQL, le libellé et la requête dérivent de `ACTIVITY_RETENTION_DAYS`
+- `subtitle` ajouté à `DetailList` : la ligne « vu il y a X » était construite à l'identique dans deux listes
+- `pickEarliest` / `pickLatest` fusionnés en `pickDateBound`, le handler Visitor garde ses `memeId` / `userId` une fois au lieu de trois
+
+**Écarté sciemment.**
+
+- Retirer la colonne d'actions de `/admin/users` : arbitrage de Victor, la liste garde son menu
+- Passer un unique `UseQueryResult` à `ActivityTimeline` au lieu de cinq props : les trois appelants n'ont plus la même forme depuis que les fiches lisent leur total dans `summary` et reçoivent un tableau nu
+- `SubscriptionBadge` prenant un `SubscriptionInfo` entier plutôt que trois props : `SubscriptionInfo` n'est pas une union discriminée, un `status: 'none'` s'afficherait silencieusement « Ancien ». Les trois props rendent le contrat total
+- Tuiles couvrant les huit types d'Event : le plan en spécifie quatre. L'en-tête de la fiche Visitor annonce donc un total plus large que la somme des tuiles, les quatre types restants n'apparaissant que dans la timeline
+- Sortir `PAGE_SIZE` d'`admin-table.tsx` : décision déjà consignée en phase 2
+- Extraire un composant d'« état vide encadré » pour `VisitorEmptyState` : le motif n'a jamais été extrait ailleurs, l'abstraction naîtrait pour un seul appelant
 
 ---
 

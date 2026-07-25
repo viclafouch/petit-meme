@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import type { VisibilityState } from '@tanstack/react-table'
 import { createColumnHelper } from '@tanstack/react-table'
 import { Badge } from '~/components/ui/badge'
 import {
@@ -11,6 +12,7 @@ import { ACTIVITY_IP_RETENTION_DAYS } from '~/constants/activity'
 import { DAY } from '~/constants/time'
 import { EmptyCell } from '~/routes/admin/-components/empty-cell'
 import { RelativeDateTooltip } from '~/routes/admin/-components/relative-date-tooltip'
+import { TruncatedText } from '~/routes/admin/-components/truncated-text'
 import {
   ACTIVITY_TYPE_DISPLAY,
   ActivityTypeIcon,
@@ -65,7 +67,11 @@ export const ACTIVITY_COLUMNS = [
       }
 
       return (
-        <div className="flex items-center gap-2">
+        <Link
+          to="/admin/users/$userId"
+          params={{ userId: user.id }}
+          className="flex items-center gap-2 py-1 hover:text-primary transition-colors"
+        >
           <UserAvatar name={user.name} image={user.image} />
           <div className="flex min-w-0 flex-col">
             <span className="max-w-32 truncate font-medium">{user.name}</span>
@@ -73,7 +79,7 @@ export const ACTIVITY_COLUMNS = [
               {user.email}
             </span>
           </div>
-        </div>
+        </Link>
       )
     }
   }),
@@ -110,16 +116,10 @@ export const ACTIVITY_COLUMNS = [
       }
 
       return (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="block max-w-48 cursor-default truncate text-sm text-muted-foreground">
-              {detail}
-            </span>
-          </TooltipTrigger>
-          <TooltipContent className="max-w-xs wrap-break-word">
-            {detail}
-          </TooltipContent>
-        </Tooltip>
+        <TruncatedText
+          text={detail}
+          className="max-w-48 text-muted-foreground"
+        />
       )
     }
   }),
@@ -130,15 +130,21 @@ export const ACTIVITY_COLUMNS = [
       const ipAddress = info.getValue()
 
       if (ipAddress) {
-        return <span className="font-mono text-xs">{ipAddress}</span>
+        return (
+          <Link
+            to="/admin/activity/$ip"
+            params={{ ip: ipAddress }}
+            className="block py-1 font-mono text-xs hover:text-primary transition-colors"
+          >
+            {ipAddress}
+          </Link>
+        )
       }
 
       return (
         <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="cursor-default">
-              <EmptyCell />
-            </span>
+          <TooltipTrigger className="cursor-default rounded-sm">
+            <EmptyCell />
           </TooltipTrigger>
           <TooltipContent>
             {getMissingIpReason(info.row.original.createdAt)}
@@ -155,3 +161,11 @@ export const ACTIVITY_COLUMNS = [
     }
   })
 ]
+
+export const ACTIVITY_TIMELINE_SCOPES = {
+  global: {},
+  user: { visitor: false },
+  visitor: { ipAddress: false }
+} as const satisfies Record<string, VisibilityState>
+
+export type ActivityTimelineScope = keyof typeof ACTIVITY_TIMELINE_SCOPES

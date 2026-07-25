@@ -15,15 +15,17 @@ export const DATE_WITH_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
   minute: '2-digit'
 }
 
+const SITE_TIME_ZONE = 'Europe/Paris'
+
 export function formatDate(
   date: Date,
   locale: Locale,
   options?: Intl.DateTimeFormatOptions
 ) {
-  return new Intl.DateTimeFormat(
-    locale,
-    options ?? DEFAULT_FORMAT_OPTIONS
-  ).format(date)
+  return new Intl.DateTimeFormat(locale, {
+    timeZone: SITE_TIME_ZONE,
+    ...(options ?? DEFAULT_FORMAT_OPTIONS)
+  }).format(date)
 }
 
 const RELATIVE_TIME_THRESHOLDS = [

@@ -12,8 +12,11 @@ export const ACTIVITY_SCOPES = [
 
 export type ActivityScope = (typeof ACTIVITY_SCOPES)[number]
 
-export const ACTIVITY_FILTERS_SCHEMA = z.object({
-  page: z.coerce.number().int().min(1).max(1000).default(1).catch(1),
+export const ACTIVITY_PAGE_SCHEMA = z.object({
+  page: z.coerce.number().int().min(1).max(1000).default(1).catch(1)
+})
+
+export const ACTIVITY_FILTERS_SCHEMA = ACTIVITY_PAGE_SCHEMA.extend({
   types: z
     .array(z.enum(ActivityEventType))
     .optional()

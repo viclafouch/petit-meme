@@ -2,7 +2,7 @@ import { keepPreviousData, queryOptions } from '@tanstack/react-query'
 import type { ActivityFilters } from '~/constants/activity'
 import type { MemesFilters } from '~/constants/meme'
 import { MINUTE } from '~/constants/time'
-import type { Meme } from '~/db/generated/prisma/client'
+import type { Meme, User } from '~/db/generated/prisma/client'
 import type { MemeSubmissionStatus } from '~/db/generated/prisma/enums'
 import {
   getAdminActivity,
@@ -21,6 +21,16 @@ import {
   getAdminPendingSubmissionCount,
   getAdminSubmissions
 } from '~/routes/admin/-server/submissions'
+import type { AdminUserActivityFilters } from '~/routes/admin/-server/user-detail'
+import {
+  getAdminUserActivity,
+  getAdminUserDetail
+} from '~/routes/admin/-server/user-detail'
+import type { AdminVisitorActivityFilters } from '~/routes/admin/-server/visitor'
+import {
+  getAdminVisitorActivity,
+  getAdminVisitorDetail
+} from '~/routes/admin/-server/visitor'
 import {
   checkMemeWatermark,
   fetchAdminVideoBlob
@@ -112,6 +122,60 @@ export const getAdminRecentActivityEventsQueryOpts = () => {
 getAdminRecentActivityEventsQueryOpts.all = [
   'admin-recent-activity-events'
 ] as const
+
+export const getAdminUserDetailQueryOpts = (userId: User['id']) => {
+  return queryOptions({
+    queryKey: [...getAdminUserDetailQueryOpts.all, userId],
+    queryFn: () => {
+      return getAdminUserDetail({ data: userId })
+    },
+    staleTime: MINUTE
+  })
+}
+
+getAdminUserDetailQueryOpts.all = ['admin-user-detail'] as const
+
+export const getAdminUserActivityQueryOpts = (
+  filters: AdminUserActivityFilters
+) => {
+  return queryOptions({
+    queryKey: [...getAdminUserActivityQueryOpts.all, filters],
+    queryFn: () => {
+      return getAdminUserActivity({ data: filters })
+    },
+    placeholderData: keepPreviousData,
+    staleTime: MINUTE
+  })
+}
+
+getAdminUserActivityQueryOpts.all = ['admin-user-activity'] as const
+
+export const getAdminVisitorDetailQueryOpts = (ipAddress: string) => {
+  return queryOptions({
+    queryKey: [...getAdminVisitorDetailQueryOpts.all, ipAddress],
+    queryFn: () => {
+      return getAdminVisitorDetail({ data: ipAddress })
+    },
+    staleTime: MINUTE
+  })
+}
+
+getAdminVisitorDetailQueryOpts.all = ['admin-visitor-detail'] as const
+
+export const getAdminVisitorActivityQueryOpts = (
+  filters: AdminVisitorActivityFilters
+) => {
+  return queryOptions({
+    queryKey: [...getAdminVisitorActivityQueryOpts.all, filters],
+    queryFn: () => {
+      return getAdminVisitorActivity({ data: filters })
+    },
+    placeholderData: keepPreviousData,
+    staleTime: MINUTE
+  })
+}
+
+getAdminVisitorActivityQueryOpts.all = ['admin-visitor-activity'] as const
 
 export const getAdminTrendingMemesQueryOpts = () => {
   return queryOptions({

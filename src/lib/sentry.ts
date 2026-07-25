@@ -3,7 +3,7 @@ import * as Sentry from '@sentry/tanstackstart-react'
 import { wrapMiddlewaresWithSentry } from '@sentry/tanstackstart-react'
 import { m } from '~/paraglide/messages.js'
 
-type SentryFeature =
+export type SentryFeature =
   | 'stripe-checkout'
   | 'stripe-payment'
   | 'stripe-billing-portal'
@@ -18,6 +18,8 @@ type SentryFeature =
   | 'admin-ban'
   | 'admin-dashboard'
   | 'admin-meme-edit'
+  | 'admin-user-ban'
+  | 'admin-user-unban'
   | 'admin-user-delete'
   | 'sign-in'
   | 'sign-in-twitter'

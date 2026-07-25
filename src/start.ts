@@ -4,10 +4,16 @@ import {
 } from '@sentry/tanstackstart-react'
 import { createCsrfMiddleware, createStart } from '@tanstack/react-start'
 import { customErrorAdapter } from '~/constants/error'
+import { observeCsrfBlock } from '~/utils/csrf-observer'
 
 const csrfMiddleware = createCsrfMiddleware({
   filter: (ctx) => {
     return ctx.handlerType === 'serverFn'
+  },
+  failureResponse: (ctx) => {
+    observeCsrfBlock(ctx.request)
+
+    return new Response('Forbidden', { status: 403 })
   }
 })
 

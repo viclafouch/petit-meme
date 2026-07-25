@@ -1,69 +1,14 @@
 import { createMiddleware } from '@tanstack/react-start'
 import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
 import type { RateLimitConfig } from '~/constants/rate-limit'
-import { SECOND } from '~/constants/time'
 import { extractClientIp } from '~/helpers/request'
 import { logger } from '~/lib/logger'
 import { captureWithFeature, wrapMiddlewareWithSentry } from '~/lib/sentry'
 import { authUserRequiredMiddleware } from '~/server/user-auth'
+import { checkRateLimit } from '~/utils/rate-limit-store'
+import type { RateLimitCheckResult } from '~/utils/rate-limit-store'
 
 const rateLimitLogger = logger.child({ module: 'rate-limit' })
-
-type RateLimitEntry = {
-  count: number
-  windowStart: number
-}
-
-const MAX_STORE_SIZE = 10_000
-
-const store = new Map<string, RateLimitEntry>()
-
-const pruneStore = () => {
-  if (store.size <= MAX_STORE_SIZE) {
-    return
-  }
-
-  const keysToDelete = [...store.keys()].slice(0, store.size - MAX_STORE_SIZE)
-
-  for (const key of keysToDelete) {
-    store.delete(key)
-  }
-}
-
-type RateLimitCheckResult = {
-  exceeded: boolean
-  retryAfterSeconds: number
-  entry: RateLimitEntry
-}
-
-const checkRateLimit = (
-  key: string,
-  config: RateLimitConfig
-): RateLimitCheckResult => {
-  const now = Date.now()
-  const existing = store.get(key)
-
-  const isWindowExpired =
-    !existing || existing.windowStart < now - config.windowMs
-  const entry: RateLimitEntry = isWindowExpired
-    ? { count: 1, windowStart: now }
-    : { count: existing.count + 1, windowStart: existing.windowStart }
-
-  store.set(key, entry)
-  pruneStore()
-
-  if (entry.count > config.maxRequests) {
-    const windowEndMs = entry.windowStart + config.windowMs
-    const retryAfterSeconds = Math.max(
-      1,
-      Math.ceil((windowEndMs - now) / SECOND)
-    )
-
-    return { exceeded: true, retryAfterSeconds, entry }
-  }
-
-  return { exceeded: false, retryAfterSeconds: 0, entry }
-}
 
 type ThrowRateLimitExceededParams = {
   identifier: Record<string, unknown>

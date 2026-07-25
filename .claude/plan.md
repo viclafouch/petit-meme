@@ -431,6 +431,41 @@ Conséquence assumée : un visiteur EN voit les dates en heure de Paris. C'est l
 
 ---
 
+## Phase 5 — Détection de bots (démarré le 2026-07-25)
+
+**Objectif.** Rendre visible le trafic non-navigateur, sans le bloquer davantage. Aucune migration, aucune collecte nouvelle en base.
+
+### Instrumentation du portail CSRF
+
+Le middleware `createCsrfMiddleware` (`src/start.ts`) protège déjà toutes les server functions (`filter: handlerType === 'serverFn'`). Un `POST`/`GET` sans `Sec-Fetch-Site`/`Origin`/`Referer` same-origin reçoit un `403`. Ces blocages étaient jusqu'ici **invisibles** : le middleware s'exécute avant la résolution de la server fn, donc avant `recordActivityEvent`.
+
+- [x] `failureResponse` ajouté à `createCsrfMiddleware` : appelle `observeCsrfBlock(ctx.request)` avant de rendre le `403`
+- [x] `src/utils/csrf-observer.ts` : extrait IP, pays, user-agent, `Sec-Fetch-Site`, chemin ; échantillonne à **un capture Sentry par IP / 10 min** (tag `scraping-detection`) pour ne pas noyer Sentry sur un scraper en boucle. Client-safe au niveau module (aucun import Prisma/pino/node), car `start.ts` est isomorphe
+- [x] `checkRateLimit` + `RateLimitCheckResult` extraits de `src/server/rate-limit.ts` vers `src/utils/rate-limit-store.ts`. `rate-limit.ts` (chaîne `auth` → Prisma) ne pouvait pas être importé depuis `start.ts` sans embarquer Prisma dans le bundle client. Le store partagé n'importe que des constantes
+- [x] `pnpm run build` vérifié : le bundle client passe, aucun Prisma/node embarqué
+
+### Pen test de production (2026-07-25, autorisé par Victor sur son propre site)
+
+Effets de bord assumés sur la prod : `downloadCount` du meme `cme0domjh003lzg8iqfjtv1v9` incrémenté de **+2** (via `trackMemeAction` forgé), et **~10 Events `DOWNLOAD`** enregistrés dans l'Activity depuis l'IP de test. À discounter dans le flux.
+
+| Couche | Résultat |
+|---|---|
+| Edge Vercel | Un `curl` avec UA `curl/x` reçoit `HTTP 429` + `x-vercel-mitigated: challenge`. Le challenge JS arrête les clients sans navigateur au bord, **avant** l'app |
+| UA navigateur | Sitemap public lu intégralement (683 memes, IDs exposés). Contenu public, watermarké, sans enjeu |
+| Server fn IDs | Extraits du bundle client (`main-*.js`, factory `pt(e){"/_serverFn/"+e}`) puis mappés aux noms via `.vercel/output/.../meme-*.mjs` qui garde `name`/`filename`. `shareMeme` = `a125486…`, `registerMemeView` = `a34794f…`, `trackMemeAction` = `29a665c…` |
+| CSRF sans en-tête | `POST`/`GET` sans `Origin` ni `Sec-Fetch-Site` → **403**. Le cas scraper naïf est arrêté |
+| **CSRF avec 1 en-tête forgé** | `-H 'origin: https://www.petit-meme.io'` **ou** `-H 'sec-fetch-site: same-origin'`, **sans aucun cookie** → **200, 767 KB de MP4 watermarké**. Le portail CSRF tombe avec une seule ligne d'en-tête |
+| Rate limit `shareMeme` | Bloque après 10 requêtes / 5 min / IP. **Mais renvoie `{"status":500,"unhandled":true,"message":"HTTPError"}`** au lieu d'un `429` : `setResponseStatus(429)` ne survit pas à l'`Error` jetée sur une server fn GET, resérialisée en 500 non géré. Bloque quand même, mais sans `Retry-After` et en polluant Sentry |
+
+### Reste à faire (non traité, décisions ouvertes)
+
+- [ ] Déployer l'instrumentation CSRF et observer une semaine de Sentry `scraping-detection` avant toute décision BotID
+- [ ] Baisser `RATE_LIMIT_DOWNLOAD` (10/5min = 2880/j pour 150/j réels). Levier le moins cher, une constante
+- [ ] Corriger le 500-au-lieu-de-429 du rate limit sur les server fns GET (renvoyer une `Response` 429 explicite plutôt que `throw`)
+- [ ] `Sec-Fetch-Site: cross-site` reste refusé par défaut ; envisager de resserrer `secFetchSite`/`referer` n'apporte rien tant qu'un `Origin` forgé passe. La seule vraie barrière contre un client qui forge les en-têtes est Deep Analysis (Pro) ou un token signé par requête, hors périmètre
+
+---
+
 ## Hors périmètre, acté
 
 Bannissement et blocage d'IP, alertes par email au-delà d'un seuil, durcissement de `RATE_LIMIT_DOWNLOAD`, logging de la recherche Algolia, regroupement des lignes du flux, temps réel par SSE ou WebSocket.

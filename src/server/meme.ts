@@ -13,6 +13,7 @@ import {
   MEME_EXPORT_MODES,
   MEME_FULL_INCLUDE,
   MEME_TRANSLATION_SELECT,
+  MEME_VIDEO_INCLUDE,
   MEME_VIDEO_INTENTS,
   MEMES_FILTERS_SCHEMA,
   MEMES_PER_PAGE,
@@ -286,7 +287,7 @@ async function fetchTrendingCategoryMemeIds(
 }
 
 const MEME_WITH_VIDEO_AND_TRANSLATIONS_INCLUDE = {
-  video: true,
+  ...MEME_VIDEO_INCLUDE,
   translations: { select: MEME_TRANSLATION_SELECT }
 } as const satisfies Prisma.MemeInclude
 

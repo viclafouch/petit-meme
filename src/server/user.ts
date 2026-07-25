@@ -5,7 +5,7 @@ import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
 import { prismaClient } from '~/db'
 import { StudioError } from '~/constants/error'
-import { MEME_TRANSLATION_SELECT } from '~/constants/meme'
+import { MEME_TRANSLATION_SELECT, MEME_VIDEO_INCLUDE } from '~/constants/meme'
 import {
   FREE_PLAN_MAX_FAVORITES,
   FREE_PLAN_MAX_GENERATIONS
@@ -39,7 +39,7 @@ export const getFavoritesMemes = createServerFn({ method: 'GET' })
       include: {
         meme: {
           include: {
-            video: true,
+            ...MEME_VIDEO_INCLUDE,
             translations: {
               select: MEME_TRANSLATION_SELECT
             }

@@ -7,15 +7,26 @@ import { MemeContentLocale, MemeStatus } from '~/db/generated/prisma/enums'
 import { FILTERABLE_CONTENT_LOCALES } from '~/helpers/i18n-content'
 import { m } from '~/paraglide/messages.js'
 
+export const MEME_VIDEO_SELECT = {
+  id: true,
+  bunnyId: true,
+  duration: true,
+  bunnyStatus: true
+} as const satisfies Prisma.VideoSelect
+
+export const MEME_VIDEO_INCLUDE = {
+  video: { select: MEME_VIDEO_SELECT }
+} as const satisfies Prisma.MemeInclude
+
 export const MEME_FULL_INCLUDE = {
-  video: true,
+  ...MEME_VIDEO_INCLUDE,
   categories: { include: { category: { include: { translations: true } } } },
   translations: true,
   _count: { select: { bookmarkedBy: true } }
 } as const satisfies Prisma.MemeInclude
 
 export const MEME_ALGOLIA_INCLUDE = {
-  video: true,
+  ...MEME_VIDEO_INCLUDE,
   translations: true,
   categories: { include: { category: { include: { translations: true } } } }
 } as const satisfies Prisma.MemeInclude
@@ -167,7 +178,7 @@ export type MemeAlgoliaData = Prisma.MemeGetPayload<{
 }>
 
 export type MemeWithVideo = Prisma.MemeGetPayload<{
-  include: { video: true }
+  include: typeof MEME_VIDEO_INCLUDE
 }>
 
 export type MemeWithCategories = Prisma.MemeGetPayload<{

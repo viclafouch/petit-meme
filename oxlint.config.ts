@@ -50,6 +50,15 @@ export default defineConfig({
       rules: {
         'import/no-default-export': 'off'
       }
+    },
+    {
+      // `tw` is Takumi's built-in Tailwind prop, not a DOM attribute. Ignoring
+      // it keeps the rule live for genuine typos, which an OG template cannot
+      // reveal by inspection.
+      files: ['src/components/og/**'],
+      rules: {
+        'react/no-unknown-property': ['error', { ignore: ['tw'] }]
+      }
     }
   ]
 })

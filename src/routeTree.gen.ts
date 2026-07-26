@@ -9,97 +9,61 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as SitemapStaticDotxmlRouteImport } from './routes/sitemap-static[.]xml'
-import { Route as SitemapMemesDotxmlRouteImport } from './routes/sitemap-memes[.]xml'
-import { Route as SitemapCategoriesDotxmlRouteImport } from './routes/sitemap-categories[.]xml'
-import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
-import { Route as ReelsRouteImport } from './routes/reels'
-import { Route as ManifestDotjsonRouteImport } from './routes/manifest[.]json'
-import { Route as HealthRouteImport } from './routes/health'
+import { Route as Public__rootRouteRouteImport } from './routes/_public__root/route'
 import { Route as StudioRouteImport } from './routes/_studio'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
-import { Route as Public__rootRouteRouteImport } from './routes/_public__root/route'
-import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as HealthRouteImport } from './routes/health'
+import { Route as ManifestDotjsonRouteImport } from './routes/manifest[.]json'
+import { Route as ReelsRouteImport } from './routes/reels'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as SitemapCategoriesDotxmlRouteImport } from './routes/sitemap-categories[.]xml'
+import { Route as SitemapMemesDotxmlRouteImport } from './routes/sitemap-memes[.]xml'
+import { Route as SitemapStaticDotxmlRouteImport } from './routes/sitemap-static[.]xml'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as Public__rootIndexRouteImport } from './routes/_public__root/index'
-import { Route as ApiSentryTunnelRouteImport } from './routes/api/sentry-tunnel'
-import { Route as ApiOgRouteImport } from './routes/api/og'
-import { Route as ApiBunnyRouteImport } from './routes/api/bunny'
-import { Route as AdminServicesRouteImport } from './routes/admin/services'
-import { Route as AdminDownloaderRouteImport } from './routes/admin/downloader'
 import { Route as Public__rootDefaultRouteRouteImport } from './routes/_public__root/_default/route'
-import { Route as AdminUsersIndexRouteImport } from './routes/admin/users/index'
-import { Route as AdminSubmissionsIndexRouteImport } from './routes/admin/submissions/index'
-import { Route as AdminLibraryIndexRouteImport } from './routes/admin/library/index'
-import { Route as AdminCategoriesIndexRouteImport } from './routes/admin/categories/index'
-import { Route as AdminAiSearchIndexRouteImport } from './routes/admin/ai-search/index'
-import { Route as AdminActivityIndexRouteImport } from './routes/admin/activity/index'
-import { Route as ApiCronVerificationReminderRouteImport } from './routes/api/cron/verification-reminder'
-import { Route as ApiCronSyncBunnyTitlesRouteImport } from './routes/api/cron/sync-bunny-titles'
-import { Route as ApiCronSyncAlgoliaRouteImport } from './routes/api/cron/sync-algolia'
-import { Route as ApiCronPendingSubmissionsReminderRouteImport } from './routes/api/cron/pending-submissions-reminder'
-import { Route as ApiCronCleanupRouteImport } from './routes/api/cron/cleanup'
-import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
-import { Route as AdminUsersUserIdRouteImport } from './routes/admin/users/$userId'
-import { Route as AdminLibraryMemeIdRouteImport } from './routes/admin/library/$memeId'
-import { Route as AdminActivityIpRouteImport } from './routes/admin/activity/$ip'
-import { Route as Public__rootDefaultTermsOfUseRouteImport } from './routes/_public__root/_default/terms-of-use'
-import { Route as Public__rootDefaultPrivacyRouteImport } from './routes/_public__root/_default/privacy'
-import { Route as Public__rootDefaultMentionsLegalesRouteImport } from './routes/_public__root/_default/mentions-legales'
-import { Route as Public__rootDefaultFavoritesRouteImport } from './routes/_public__root/_default/favorites'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminDownloaderRouteImport } from './routes/admin/downloader'
+import { Route as AdminServicesRouteImport } from './routes/admin/services'
+import { Route as ApiBunnyRouteImport } from './routes/api/bunny'
+import { Route as ApiOgRouteImport } from './routes/api/og'
+import { Route as ApiSentryTunnelRouteImport } from './routes/api/sentry-tunnel'
 import { Route as Public__rootDefaultDmcaRouteImport } from './routes/_public__root/_default/dmca'
+import { Route as Public__rootDefaultFavoritesRouteImport } from './routes/_public__root/_default/favorites'
+import { Route as Public__rootDefaultMentionsLegalesRouteImport } from './routes/_public__root/_default/mentions-legales'
+import { Route as Public__rootDefaultPrivacyRouteImport } from './routes/_public__root/_default/privacy'
 import { Route as Public__rootDefaultSettingsRouteRouteImport } from './routes/_public__root/_default/settings/route'
-import { Route as Public__rootDefaultSubmitIndexRouteImport } from './routes/_public__root/_default/submit/index'
-import { Route as Public__rootDefaultSettingsIndexRouteImport } from './routes/_public__root/_default/settings/index'
-import { Route as Public__rootDefaultRandomIndexRouteImport } from './routes/_public__root/_default/random/index'
-import { Route as Public__rootDefaultPricingIndexRouteImport } from './routes/_public__root/_default/pricing/index'
-import { Route as Public__rootDefaultMemesIndexRouteImport } from './routes/_public__root/_default/memes/index'
-import { Route as StudioMemesMemeIdStudioRouteImport } from './routes/_studio/memes.$memeId.studio'
-import { Route as Public__rootDefaultPasswordResetRouteImport } from './routes/_public__root/_default/password.reset'
-import { Route as Public__rootDefaultPasswordCreateNewRouteImport } from './routes/_public__root/_default/password.create-new'
-import { Route as Public__rootDefaultMemesAiSearchRouteImport } from './routes/_public__root/_default/memes/ai-search'
-import { Route as Public__rootDefaultMemesMemeIdRouteImport } from './routes/_public__root/_default/memes/$memeId'
+import { Route as Public__rootDefaultTermsOfUseRouteImport } from './routes/_public__root/_default/terms-of-use'
+import { Route as AdminActivityIndexRouteImport } from './routes/admin/activity/index'
+import { Route as AdminActivityIpRouteImport } from './routes/admin/activity/$ip'
+import { Route as AdminAiSearchIndexRouteImport } from './routes/admin/ai-search/index'
+import { Route as AdminCategoriesIndexRouteImport } from './routes/admin/categories/index'
+import { Route as AdminLibraryIndexRouteImport } from './routes/admin/library/index'
+import { Route as AdminLibraryMemeIdRouteImport } from './routes/admin/library/$memeId'
+import { Route as AdminSubmissionsIndexRouteImport } from './routes/admin/submissions/index'
+import { Route as AdminUsersIndexRouteImport } from './routes/admin/users/index'
+import { Route as AdminUsersUserIdRouteImport } from './routes/admin/users/$userId'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
+import { Route as ApiCronCleanupRouteImport } from './routes/api/cron/cleanup'
+import { Route as ApiCronPendingSubmissionsReminderRouteImport } from './routes/api/cron/pending-submissions-reminder'
+import { Route as ApiCronSyncAlgoliaRouteImport } from './routes/api/cron/sync-algolia'
+import { Route as ApiCronSyncBunnyTitlesRouteImport } from './routes/api/cron/sync-bunny-titles'
+import { Route as ApiCronVerificationReminderRouteImport } from './routes/api/cron/verification-reminder'
 import { Route as Public__rootDefaultCheckoutSuccessRouteImport } from './routes/_public__root/_default/checkout.success'
+import { Route as Public__rootDefaultMemesIndexRouteImport } from './routes/_public__root/_default/memes/index'
+import { Route as Public__rootDefaultMemesMemeIdRouteImport } from './routes/_public__root/_default/memes/$memeId'
+import { Route as Public__rootDefaultMemesAiSearchRouteImport } from './routes/_public__root/_default/memes/ai-search'
+import { Route as Public__rootDefaultPasswordCreateNewRouteImport } from './routes/_public__root/_default/password.create-new'
+import { Route as Public__rootDefaultPasswordResetRouteImport } from './routes/_public__root/_default/password.reset'
+import { Route as Public__rootDefaultPricingIndexRouteImport } from './routes/_public__root/_default/pricing/index'
+import { Route as Public__rootDefaultRandomIndexRouteImport } from './routes/_public__root/_default/random/index'
+import { Route as Public__rootDefaultSettingsIndexRouteImport } from './routes/_public__root/_default/settings/index'
+import { Route as Public__rootDefaultSubmitIndexRouteImport } from './routes/_public__root/_default/submit/index'
+import { Route as StudioMemesMemeIdStudioRouteImport } from './routes/_studio/memes.$memeId.studio'
 import { Route as Public__rootDefaultMemesCategorySlugRouteImport } from './routes/_public__root/_default/memes/category/$slug'
 
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapStaticDotxmlRoute = SitemapStaticDotxmlRouteImport.update({
-  id: '/sitemap-static.xml',
-  path: '/sitemap-static.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapMemesDotxmlRoute = SitemapMemesDotxmlRouteImport.update({
-  id: '/sitemap-memes.xml',
-  path: '/sitemap-memes.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapCategoriesDotxmlRoute = SitemapCategoriesDotxmlRouteImport.update({
-  id: '/sitemap-categories.xml',
-  path: '/sitemap-categories.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
-  id: '/robots.txt',
-  path: '/robots.txt',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ReelsRoute = ReelsRouteImport.update({
-  id: '/reels',
-  path: '/reels',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ManifestDotjsonRoute = ManifestDotjsonRouteImport.update({
-  id: '/manifest.json',
-  path: '/manifest.json',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HealthRoute = HealthRouteImport.update({
-  id: '/health',
-  path: '/health',
+const Public__rootRouteRoute = Public__rootRouteRouteImport.update({
+  id: '/_public__root',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StudioRoute = StudioRouteImport.update({
@@ -111,38 +75,59 @@ const AdminRouteRoute = AdminRouteRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const Public__rootRouteRoute = Public__rootRouteRouteImport.update({
-  id: '/_public__root',
+const HealthRoute = HealthRouteImport.update({
+  id: '/health',
+  path: '/health',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminIndexRoute = AdminIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminRouteRoute,
+const ManifestDotjsonRoute = ManifestDotjsonRouteImport.update({
+  id: '/manifest.json',
+  path: '/manifest.json',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReelsRoute = ReelsRouteImport.update({
+  id: '/reels',
+  path: '/reels',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapCategoriesDotxmlRoute = SitemapCategoriesDotxmlRouteImport.update({
+  id: '/sitemap-categories.xml',
+  path: '/sitemap-categories.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapMemesDotxmlRoute = SitemapMemesDotxmlRouteImport.update({
+  id: '/sitemap-memes.xml',
+  path: '/sitemap-memes.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapStaticDotxmlRoute = SitemapStaticDotxmlRouteImport.update({
+  id: '/sitemap-static.xml',
+  path: '/sitemap-static.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const Public__rootIndexRoute = Public__rootIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => Public__rootRouteRoute,
 } as any)
-const ApiSentryTunnelRoute = ApiSentryTunnelRouteImport.update({
-  id: '/api/sentry-tunnel',
-  path: '/api/sentry-tunnel',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiOgRoute = ApiOgRouteImport.update({
-  id: '/api/og',
-  path: '/api/og',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiBunnyRoute = ApiBunnyRouteImport.update({
-  id: '/api/bunny',
-  path: '/api/bunny',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminServicesRoute = AdminServicesRouteImport.update({
-  id: '/services',
-  path: '/services',
+const Public__rootDefaultRouteRoute =
+  Public__rootDefaultRouteRouteImport.update({
+    id: '/_default',
+    getParentRoute: () => Public__rootRouteRoute,
+  } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminDownloaderRoute = AdminDownloaderRouteImport.update({
@@ -150,98 +135,35 @@ const AdminDownloaderRoute = AdminDownloaderRouteImport.update({
   path: '/downloader',
   getParentRoute: () => AdminRouteRoute,
 } as any)
-const Public__rootDefaultRouteRoute =
-  Public__rootDefaultRouteRouteImport.update({
-    id: '/_default',
-    getParentRoute: () => Public__rootRouteRoute,
-  } as any)
-const AdminUsersIndexRoute = AdminUsersIndexRouteImport.update({
-  id: '/users/',
-  path: '/users/',
+const AdminServicesRoute = AdminServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
   getParentRoute: () => AdminRouteRoute,
 } as any)
-const AdminSubmissionsIndexRoute = AdminSubmissionsIndexRouteImport.update({
-  id: '/submissions/',
-  path: '/submissions/',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminLibraryIndexRoute = AdminLibraryIndexRouteImport.update({
-  id: '/library/',
-  path: '/library/',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminCategoriesIndexRoute = AdminCategoriesIndexRouteImport.update({
-  id: '/categories/',
-  path: '/categories/',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminAiSearchIndexRoute = AdminAiSearchIndexRouteImport.update({
-  id: '/ai-search/',
-  path: '/ai-search/',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminActivityIndexRoute = AdminActivityIndexRouteImport.update({
-  id: '/activity/',
-  path: '/activity/',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const ApiCronVerificationReminderRoute =
-  ApiCronVerificationReminderRouteImport.update({
-    id: '/api/cron/verification-reminder',
-    path: '/api/cron/verification-reminder',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiCronSyncBunnyTitlesRoute = ApiCronSyncBunnyTitlesRouteImport.update({
-  id: '/api/cron/sync-bunny-titles',
-  path: '/api/cron/sync-bunny-titles',
+const ApiBunnyRoute = ApiBunnyRouteImport.update({
+  id: '/api/bunny',
+  path: '/api/bunny',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiCronSyncAlgoliaRoute = ApiCronSyncAlgoliaRouteImport.update({
-  id: '/api/cron/sync-algolia',
-  path: '/api/cron/sync-algolia',
+const ApiOgRoute = ApiOgRouteImport.update({
+  id: '/api/og',
+  path: '/api/og',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiCronPendingSubmissionsReminderRoute =
-  ApiCronPendingSubmissionsReminderRouteImport.update({
-    id: '/api/cron/pending-submissions-reminder',
-    path: '/api/cron/pending-submissions-reminder',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiCronCleanupRoute = ApiCronCleanupRouteImport.update({
-  id: '/api/cron/cleanup',
-  path: '/api/cron/cleanup',
+const ApiSentryTunnelRoute = ApiSentryTunnelRouteImport.update({
+  id: '/api/sentry-tunnel',
+  path: '/api/sentry-tunnel',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
-  id: '/api/auth/$',
-  path: '/api/auth/$',
-  getParentRoute: () => rootRouteImport,
+const Public__rootDefaultDmcaRoute = Public__rootDefaultDmcaRouteImport.update({
+  id: '/dmca',
+  path: '/dmca',
+  getParentRoute: () => Public__rootDefaultRouteRoute,
 } as any)
-const AdminUsersUserIdRoute = AdminUsersUserIdRouteImport.update({
-  id: '/users/$userId',
-  path: '/users/$userId',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminLibraryMemeIdRoute = AdminLibraryMemeIdRouteImport.update({
-  id: '/library/$memeId',
-  path: '/library/$memeId',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminActivityIpRoute = AdminActivityIpRouteImport.update({
-  id: '/activity/$ip',
-  path: '/activity/$ip',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const Public__rootDefaultTermsOfUseRoute =
-  Public__rootDefaultTermsOfUseRouteImport.update({
-    id: '/terms-of-use',
-    path: '/terms-of-use',
-    getParentRoute: () => Public__rootDefaultRouteRoute,
-  } as any)
-const Public__rootDefaultPrivacyRoute =
-  Public__rootDefaultPrivacyRouteImport.update({
-    id: '/privacy',
-    path: '/privacy',
+const Public__rootDefaultFavoritesRoute =
+  Public__rootDefaultFavoritesRouteImport.update({
+    id: '/favorites',
+    path: '/favorites',
     getParentRoute: () => Public__rootDefaultRouteRoute,
   } as any)
 const Public__rootDefaultMentionsLegalesRoute =
@@ -250,45 +172,105 @@ const Public__rootDefaultMentionsLegalesRoute =
     path: '/mentions-legales',
     getParentRoute: () => Public__rootDefaultRouteRoute,
   } as any)
-const Public__rootDefaultFavoritesRoute =
-  Public__rootDefaultFavoritesRouteImport.update({
-    id: '/favorites',
-    path: '/favorites',
+const Public__rootDefaultPrivacyRoute =
+  Public__rootDefaultPrivacyRouteImport.update({
+    id: '/privacy',
+    path: '/privacy',
     getParentRoute: () => Public__rootDefaultRouteRoute,
   } as any)
-const Public__rootDefaultDmcaRoute = Public__rootDefaultDmcaRouteImport.update({
-  id: '/dmca',
-  path: '/dmca',
-  getParentRoute: () => Public__rootDefaultRouteRoute,
-} as any)
 const Public__rootDefaultSettingsRouteRoute =
   Public__rootDefaultSettingsRouteRouteImport.update({
     id: '/settings',
     path: '/settings',
     getParentRoute: () => Public__rootDefaultRouteRoute,
   } as any)
-const Public__rootDefaultSubmitIndexRoute =
-  Public__rootDefaultSubmitIndexRouteImport.update({
-    id: '/submit/',
-    path: '/submit/',
+const Public__rootDefaultTermsOfUseRoute =
+  Public__rootDefaultTermsOfUseRouteImport.update({
+    id: '/terms-of-use',
+    path: '/terms-of-use',
     getParentRoute: () => Public__rootDefaultRouteRoute,
   } as any)
-const Public__rootDefaultSettingsIndexRoute =
-  Public__rootDefaultSettingsIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => Public__rootDefaultSettingsRouteRoute,
+const AdminActivityIndexRoute = AdminActivityIndexRouteImport.update({
+  id: '/activity/',
+  path: '/activity/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminActivityIpRoute = AdminActivityIpRouteImport.update({
+  id: '/activity/$ip',
+  path: '/activity/$ip',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminAiSearchIndexRoute = AdminAiSearchIndexRouteImport.update({
+  id: '/ai-search/',
+  path: '/ai-search/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminCategoriesIndexRoute = AdminCategoriesIndexRouteImport.update({
+  id: '/categories/',
+  path: '/categories/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminLibraryIndexRoute = AdminLibraryIndexRouteImport.update({
+  id: '/library/',
+  path: '/library/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminLibraryMemeIdRoute = AdminLibraryMemeIdRouteImport.update({
+  id: '/library/$memeId',
+  path: '/library/$memeId',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminSubmissionsIndexRoute = AdminSubmissionsIndexRouteImport.update({
+  id: '/submissions/',
+  path: '/submissions/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminUsersIndexRoute = AdminUsersIndexRouteImport.update({
+  id: '/users/',
+  path: '/users/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminUsersUserIdRoute = AdminUsersUserIdRouteImport.update({
+  id: '/users/$userId',
+  path: '/users/$userId',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCronCleanupRoute = ApiCronCleanupRouteImport.update({
+  id: '/api/cron/cleanup',
+  path: '/api/cron/cleanup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCronPendingSubmissionsReminderRoute =
+  ApiCronPendingSubmissionsReminderRouteImport.update({
+    id: '/api/cron/pending-submissions-reminder',
+    path: '/api/cron/pending-submissions-reminder',
+    getParentRoute: () => rootRouteImport,
   } as any)
-const Public__rootDefaultRandomIndexRoute =
-  Public__rootDefaultRandomIndexRouteImport.update({
-    id: '/random/',
-    path: '/random/',
-    getParentRoute: () => Public__rootDefaultRouteRoute,
+const ApiCronSyncAlgoliaRoute = ApiCronSyncAlgoliaRouteImport.update({
+  id: '/api/cron/sync-algolia',
+  path: '/api/cron/sync-algolia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCronSyncBunnyTitlesRoute = ApiCronSyncBunnyTitlesRouteImport.update({
+  id: '/api/cron/sync-bunny-titles',
+  path: '/api/cron/sync-bunny-titles',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCronVerificationReminderRoute =
+  ApiCronVerificationReminderRouteImport.update({
+    id: '/api/cron/verification-reminder',
+    path: '/api/cron/verification-reminder',
+    getParentRoute: () => rootRouteImport,
   } as any)
-const Public__rootDefaultPricingIndexRoute =
-  Public__rootDefaultPricingIndexRouteImport.update({
-    id: '/pricing/',
-    path: '/pricing/',
+const Public__rootDefaultCheckoutSuccessRoute =
+  Public__rootDefaultCheckoutSuccessRouteImport.update({
+    id: '/checkout/success',
+    path: '/checkout/success',
     getParentRoute: () => Public__rootDefaultRouteRoute,
   } as any)
 const Public__rootDefaultMemesIndexRoute =
@@ -297,21 +279,10 @@ const Public__rootDefaultMemesIndexRoute =
     path: '/memes/',
     getParentRoute: () => Public__rootDefaultRouteRoute,
   } as any)
-const StudioMemesMemeIdStudioRoute = StudioMemesMemeIdStudioRouteImport.update({
-  id: '/memes/$memeId/studio',
-  path: '/memes/$memeId/studio',
-  getParentRoute: () => StudioRoute,
-} as any)
-const Public__rootDefaultPasswordResetRoute =
-  Public__rootDefaultPasswordResetRouteImport.update({
-    id: '/password/reset',
-    path: '/password/reset',
-    getParentRoute: () => Public__rootDefaultRouteRoute,
-  } as any)
-const Public__rootDefaultPasswordCreateNewRoute =
-  Public__rootDefaultPasswordCreateNewRouteImport.update({
-    id: '/password/create-new',
-    path: '/password/create-new',
+const Public__rootDefaultMemesMemeIdRoute =
+  Public__rootDefaultMemesMemeIdRouteImport.update({
+    id: '/memes/$memeId',
+    path: '/memes/$memeId',
     getParentRoute: () => Public__rootDefaultRouteRoute,
   } as any)
 const Public__rootDefaultMemesAiSearchRoute =
@@ -320,18 +291,47 @@ const Public__rootDefaultMemesAiSearchRoute =
     path: '/memes/ai-search',
     getParentRoute: () => Public__rootDefaultRouteRoute,
   } as any)
-const Public__rootDefaultMemesMemeIdRoute =
-  Public__rootDefaultMemesMemeIdRouteImport.update({
-    id: '/memes/$memeId',
-    path: '/memes/$memeId',
+const Public__rootDefaultPasswordCreateNewRoute =
+  Public__rootDefaultPasswordCreateNewRouteImport.update({
+    id: '/password/create-new',
+    path: '/password/create-new',
     getParentRoute: () => Public__rootDefaultRouteRoute,
   } as any)
-const Public__rootDefaultCheckoutSuccessRoute =
-  Public__rootDefaultCheckoutSuccessRouteImport.update({
-    id: '/checkout/success',
-    path: '/checkout/success',
+const Public__rootDefaultPasswordResetRoute =
+  Public__rootDefaultPasswordResetRouteImport.update({
+    id: '/password/reset',
+    path: '/password/reset',
     getParentRoute: () => Public__rootDefaultRouteRoute,
   } as any)
+const Public__rootDefaultPricingIndexRoute =
+  Public__rootDefaultPricingIndexRouteImport.update({
+    id: '/pricing/',
+    path: '/pricing/',
+    getParentRoute: () => Public__rootDefaultRouteRoute,
+  } as any)
+const Public__rootDefaultRandomIndexRoute =
+  Public__rootDefaultRandomIndexRouteImport.update({
+    id: '/random/',
+    path: '/random/',
+    getParentRoute: () => Public__rootDefaultRouteRoute,
+  } as any)
+const Public__rootDefaultSettingsIndexRoute =
+  Public__rootDefaultSettingsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => Public__rootDefaultSettingsRouteRoute,
+  } as any)
+const Public__rootDefaultSubmitIndexRoute =
+  Public__rootDefaultSubmitIndexRouteImport.update({
+    id: '/submit/',
+    path: '/submit/',
+    getParentRoute: () => Public__rootDefaultRouteRoute,
+  } as any)
+const StudioMemesMemeIdStudioRoute = StudioMemesMemeIdStudioRouteImport.update({
+  id: '/memes/$memeId/studio',
+  path: '/memes/$memeId/studio',
+  getParentRoute: () => StudioRoute,
+} as any)
 const Public__rootDefaultMemesCategorySlugRoute =
   Public__rootDefaultMemesCategorySlugRouteImport.update({
     id: '/memes/category/$slug',
@@ -676,60 +676,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap-static.xml': {
-      id: '/sitemap-static.xml'
-      path: '/sitemap-static.xml'
-      fullPath: '/sitemap-static.xml'
-      preLoaderRoute: typeof SitemapStaticDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap-memes.xml': {
-      id: '/sitemap-memes.xml'
-      path: '/sitemap-memes.xml'
-      fullPath: '/sitemap-memes.xml'
-      preLoaderRoute: typeof SitemapMemesDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap-categories.xml': {
-      id: '/sitemap-categories.xml'
-      path: '/sitemap-categories.xml'
-      fullPath: '/sitemap-categories.xml'
-      preLoaderRoute: typeof SitemapCategoriesDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/robots.txt': {
-      id: '/robots.txt'
-      path: '/robots.txt'
-      fullPath: '/robots.txt'
-      preLoaderRoute: typeof RobotsDottxtRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reels': {
-      id: '/reels'
-      path: '/reels'
-      fullPath: '/reels'
-      preLoaderRoute: typeof ReelsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/manifest.json': {
-      id: '/manifest.json'
-      path: '/manifest.json'
-      fullPath: '/manifest.json'
-      preLoaderRoute: typeof ManifestDotjsonRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/health': {
-      id: '/health'
-      path: '/health'
-      fullPath: '/health'
-      preLoaderRoute: typeof HealthRouteImport
+    '/_public__root': {
+      id: '/_public__root'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof Public__rootRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_studio': {
@@ -746,19 +697,61 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_public__root': {
-      id: '/_public__root'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof Public__rootRouteRouteImport
+    '/health': {
+      id: '/health'
+      path: '/health'
+      fullPath: '/health'
+      preLoaderRoute: typeof HealthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/': {
-      id: '/admin/'
-      path: '/'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof AdminRouteRoute
+    '/manifest.json': {
+      id: '/manifest.json'
+      path: '/manifest.json'
+      fullPath: '/manifest.json'
+      preLoaderRoute: typeof ManifestDotjsonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reels': {
+      id: '/reels'
+      path: '/reels'
+      fullPath: '/reels'
+      preLoaderRoute: typeof ReelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap-categories.xml': {
+      id: '/sitemap-categories.xml'
+      path: '/sitemap-categories.xml'
+      fullPath: '/sitemap-categories.xml'
+      preLoaderRoute: typeof SitemapCategoriesDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap-memes.xml': {
+      id: '/sitemap-memes.xml'
+      path: '/sitemap-memes.xml'
+      fullPath: '/sitemap-memes.xml'
+      preLoaderRoute: typeof SitemapMemesDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap-static.xml': {
+      id: '/sitemap-static.xml'
+      path: '/sitemap-static.xml'
+      fullPath: '/sitemap-static.xml'
+      preLoaderRoute: typeof SitemapStaticDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_public__root/': {
       id: '/_public__root/'
@@ -767,32 +760,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Public__rootIndexRouteImport
       parentRoute: typeof Public__rootRouteRoute
     }
-    '/api/sentry-tunnel': {
-      id: '/api/sentry-tunnel'
-      path: '/api/sentry-tunnel'
-      fullPath: '/api/sentry-tunnel'
-      preLoaderRoute: typeof ApiSentryTunnelRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_public__root/_default': {
+      id: '/_public__root/_default'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof Public__rootDefaultRouteRouteImport
+      parentRoute: typeof Public__rootRouteRoute
     }
-    '/api/og': {
-      id: '/api/og'
-      path: '/api/og'
-      fullPath: '/api/og'
-      preLoaderRoute: typeof ApiOgRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/bunny': {
-      id: '/api/bunny'
-      path: '/api/bunny'
-      fullPath: '/api/bunny'
-      preLoaderRoute: typeof ApiBunnyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/services': {
-      id: '/admin/services'
-      path: '/services'
-      fullPath: '/admin/services'
-      preLoaderRoute: typeof AdminServicesRouteImport
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/downloader': {
@@ -802,137 +781,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDownloaderRouteImport
       parentRoute: typeof AdminRouteRoute
     }
-    '/_public__root/_default': {
-      id: '/_public__root/_default'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof Public__rootDefaultRouteRouteImport
-      parentRoute: typeof Public__rootRouteRoute
-    }
-    '/admin/users/': {
-      id: '/admin/users/'
-      path: '/users'
-      fullPath: '/admin/users/'
-      preLoaderRoute: typeof AdminUsersIndexRouteImport
+    '/admin/services': {
+      id: '/admin/services'
+      path: '/services'
+      fullPath: '/admin/services'
+      preLoaderRoute: typeof AdminServicesRouteImport
       parentRoute: typeof AdminRouteRoute
     }
-    '/admin/submissions/': {
-      id: '/admin/submissions/'
-      path: '/submissions'
-      fullPath: '/admin/submissions/'
-      preLoaderRoute: typeof AdminSubmissionsIndexRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/library/': {
-      id: '/admin/library/'
-      path: '/library'
-      fullPath: '/admin/library/'
-      preLoaderRoute: typeof AdminLibraryIndexRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/categories/': {
-      id: '/admin/categories/'
-      path: '/categories'
-      fullPath: '/admin/categories/'
-      preLoaderRoute: typeof AdminCategoriesIndexRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/ai-search/': {
-      id: '/admin/ai-search/'
-      path: '/ai-search'
-      fullPath: '/admin/ai-search/'
-      preLoaderRoute: typeof AdminAiSearchIndexRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/activity/': {
-      id: '/admin/activity/'
-      path: '/activity'
-      fullPath: '/admin/activity/'
-      preLoaderRoute: typeof AdminActivityIndexRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/api/cron/verification-reminder': {
-      id: '/api/cron/verification-reminder'
-      path: '/api/cron/verification-reminder'
-      fullPath: '/api/cron/verification-reminder'
-      preLoaderRoute: typeof ApiCronVerificationReminderRouteImport
+    '/api/bunny': {
+      id: '/api/bunny'
+      path: '/api/bunny'
+      fullPath: '/api/bunny'
+      preLoaderRoute: typeof ApiBunnyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/cron/sync-bunny-titles': {
-      id: '/api/cron/sync-bunny-titles'
-      path: '/api/cron/sync-bunny-titles'
-      fullPath: '/api/cron/sync-bunny-titles'
-      preLoaderRoute: typeof ApiCronSyncBunnyTitlesRouteImport
+    '/api/og': {
+      id: '/api/og'
+      path: '/api/og'
+      fullPath: '/api/og'
+      preLoaderRoute: typeof ApiOgRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/cron/sync-algolia': {
-      id: '/api/cron/sync-algolia'
-      path: '/api/cron/sync-algolia'
-      fullPath: '/api/cron/sync-algolia'
-      preLoaderRoute: typeof ApiCronSyncAlgoliaRouteImport
+    '/api/sentry-tunnel': {
+      id: '/api/sentry-tunnel'
+      path: '/api/sentry-tunnel'
+      fullPath: '/api/sentry-tunnel'
+      preLoaderRoute: typeof ApiSentryTunnelRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/cron/pending-submissions-reminder': {
-      id: '/api/cron/pending-submissions-reminder'
-      path: '/api/cron/pending-submissions-reminder'
-      fullPath: '/api/cron/pending-submissions-reminder'
-      preLoaderRoute: typeof ApiCronPendingSubmissionsReminderRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/cron/cleanup': {
-      id: '/api/cron/cleanup'
-      path: '/api/cron/cleanup'
-      fullPath: '/api/cron/cleanup'
-      preLoaderRoute: typeof ApiCronCleanupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/auth/$': {
-      id: '/api/auth/$'
-      path: '/api/auth/$'
-      fullPath: '/api/auth/$'
-      preLoaderRoute: typeof ApiAuthSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/users/$userId': {
-      id: '/admin/users/$userId'
-      path: '/users/$userId'
-      fullPath: '/admin/users/$userId'
-      preLoaderRoute: typeof AdminUsersUserIdRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/library/$memeId': {
-      id: '/admin/library/$memeId'
-      path: '/library/$memeId'
-      fullPath: '/admin/library/$memeId'
-      preLoaderRoute: typeof AdminLibraryMemeIdRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/activity/$ip': {
-      id: '/admin/activity/$ip'
-      path: '/activity/$ip'
-      fullPath: '/admin/activity/$ip'
-      preLoaderRoute: typeof AdminActivityIpRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/_public__root/_default/terms-of-use': {
-      id: '/_public__root/_default/terms-of-use'
-      path: '/terms-of-use'
-      fullPath: '/terms-of-use'
-      preLoaderRoute: typeof Public__rootDefaultTermsOfUseRouteImport
-      parentRoute: typeof Public__rootDefaultRouteRoute
-    }
-    '/_public__root/_default/privacy': {
-      id: '/_public__root/_default/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof Public__rootDefaultPrivacyRouteImport
-      parentRoute: typeof Public__rootDefaultRouteRoute
-    }
-    '/_public__root/_default/mentions-legales': {
-      id: '/_public__root/_default/mentions-legales'
-      path: '/mentions-legales'
-      fullPath: '/mentions-legales'
-      preLoaderRoute: typeof Public__rootDefaultMentionsLegalesRouteImport
+    '/_public__root/_default/dmca': {
+      id: '/_public__root/_default/dmca'
+      path: '/dmca'
+      fullPath: '/dmca'
+      preLoaderRoute: typeof Public__rootDefaultDmcaRouteImport
       parentRoute: typeof Public__rootDefaultRouteRoute
     }
     '/_public__root/_default/favorites': {
@@ -942,11 +823,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Public__rootDefaultFavoritesRouteImport
       parentRoute: typeof Public__rootDefaultRouteRoute
     }
-    '/_public__root/_default/dmca': {
-      id: '/_public__root/_default/dmca'
-      path: '/dmca'
-      fullPath: '/dmca'
-      preLoaderRoute: typeof Public__rootDefaultDmcaRouteImport
+    '/_public__root/_default/mentions-legales': {
+      id: '/_public__root/_default/mentions-legales'
+      path: '/mentions-legales'
+      fullPath: '/mentions-legales'
+      preLoaderRoute: typeof Public__rootDefaultMentionsLegalesRouteImport
+      parentRoute: typeof Public__rootDefaultRouteRoute
+    }
+    '/_public__root/_default/privacy': {
+      id: '/_public__root/_default/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof Public__rootDefaultPrivacyRouteImport
       parentRoute: typeof Public__rootDefaultRouteRoute
     }
     '/_public__root/_default/settings': {
@@ -956,32 +844,123 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Public__rootDefaultSettingsRouteRouteImport
       parentRoute: typeof Public__rootDefaultRouteRoute
     }
-    '/_public__root/_default/submit/': {
-      id: '/_public__root/_default/submit/'
-      path: '/submit'
-      fullPath: '/submit/'
-      preLoaderRoute: typeof Public__rootDefaultSubmitIndexRouteImport
+    '/_public__root/_default/terms-of-use': {
+      id: '/_public__root/_default/terms-of-use'
+      path: '/terms-of-use'
+      fullPath: '/terms-of-use'
+      preLoaderRoute: typeof Public__rootDefaultTermsOfUseRouteImport
       parentRoute: typeof Public__rootDefaultRouteRoute
     }
-    '/_public__root/_default/settings/': {
-      id: '/_public__root/_default/settings/'
-      path: '/'
-      fullPath: '/settings/'
-      preLoaderRoute: typeof Public__rootDefaultSettingsIndexRouteImport
-      parentRoute: typeof Public__rootDefaultSettingsRouteRoute
+    '/admin/activity/': {
+      id: '/admin/activity/'
+      path: '/activity'
+      fullPath: '/admin/activity/'
+      preLoaderRoute: typeof AdminActivityIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
-    '/_public__root/_default/random/': {
-      id: '/_public__root/_default/random/'
-      path: '/random'
-      fullPath: '/random/'
-      preLoaderRoute: typeof Public__rootDefaultRandomIndexRouteImport
-      parentRoute: typeof Public__rootDefaultRouteRoute
+    '/admin/activity/$ip': {
+      id: '/admin/activity/$ip'
+      path: '/activity/$ip'
+      fullPath: '/admin/activity/$ip'
+      preLoaderRoute: typeof AdminActivityIpRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
-    '/_public__root/_default/pricing/': {
-      id: '/_public__root/_default/pricing/'
-      path: '/pricing'
-      fullPath: '/pricing/'
-      preLoaderRoute: typeof Public__rootDefaultPricingIndexRouteImport
+    '/admin/ai-search/': {
+      id: '/admin/ai-search/'
+      path: '/ai-search'
+      fullPath: '/admin/ai-search/'
+      preLoaderRoute: typeof AdminAiSearchIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/categories/': {
+      id: '/admin/categories/'
+      path: '/categories'
+      fullPath: '/admin/categories/'
+      preLoaderRoute: typeof AdminCategoriesIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/library/': {
+      id: '/admin/library/'
+      path: '/library'
+      fullPath: '/admin/library/'
+      preLoaderRoute: typeof AdminLibraryIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/library/$memeId': {
+      id: '/admin/library/$memeId'
+      path: '/library/$memeId'
+      fullPath: '/admin/library/$memeId'
+      preLoaderRoute: typeof AdminLibraryMemeIdRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/submissions/': {
+      id: '/admin/submissions/'
+      path: '/submissions'
+      fullPath: '/admin/submissions/'
+      preLoaderRoute: typeof AdminSubmissionsIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/users/': {
+      id: '/admin/users/'
+      path: '/users'
+      fullPath: '/admin/users/'
+      preLoaderRoute: typeof AdminUsersIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/users/$userId': {
+      id: '/admin/users/$userId'
+      path: '/users/$userId'
+      fullPath: '/admin/users/$userId'
+      preLoaderRoute: typeof AdminUsersUserIdRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/cleanup': {
+      id: '/api/cron/cleanup'
+      path: '/api/cron/cleanup'
+      fullPath: '/api/cron/cleanup'
+      preLoaderRoute: typeof ApiCronCleanupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/pending-submissions-reminder': {
+      id: '/api/cron/pending-submissions-reminder'
+      path: '/api/cron/pending-submissions-reminder'
+      fullPath: '/api/cron/pending-submissions-reminder'
+      preLoaderRoute: typeof ApiCronPendingSubmissionsReminderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/sync-algolia': {
+      id: '/api/cron/sync-algolia'
+      path: '/api/cron/sync-algolia'
+      fullPath: '/api/cron/sync-algolia'
+      preLoaderRoute: typeof ApiCronSyncAlgoliaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/sync-bunny-titles': {
+      id: '/api/cron/sync-bunny-titles'
+      path: '/api/cron/sync-bunny-titles'
+      fullPath: '/api/cron/sync-bunny-titles'
+      preLoaderRoute: typeof ApiCronSyncBunnyTitlesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/verification-reminder': {
+      id: '/api/cron/verification-reminder'
+      path: '/api/cron/verification-reminder'
+      fullPath: '/api/cron/verification-reminder'
+      preLoaderRoute: typeof ApiCronVerificationReminderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_public__root/_default/checkout/success': {
+      id: '/_public__root/_default/checkout/success'
+      path: '/checkout/success'
+      fullPath: '/checkout/success'
+      preLoaderRoute: typeof Public__rootDefaultCheckoutSuccessRouteImport
       parentRoute: typeof Public__rootDefaultRouteRoute
     }
     '/_public__root/_default/memes/': {
@@ -991,25 +970,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Public__rootDefaultMemesIndexRouteImport
       parentRoute: typeof Public__rootDefaultRouteRoute
     }
-    '/_studio/memes/$memeId/studio': {
-      id: '/_studio/memes/$memeId/studio'
-      path: '/memes/$memeId/studio'
-      fullPath: '/memes/$memeId/studio'
-      preLoaderRoute: typeof StudioMemesMemeIdStudioRouteImport
-      parentRoute: typeof StudioRoute
-    }
-    '/_public__root/_default/password/reset': {
-      id: '/_public__root/_default/password/reset'
-      path: '/password/reset'
-      fullPath: '/password/reset'
-      preLoaderRoute: typeof Public__rootDefaultPasswordResetRouteImport
-      parentRoute: typeof Public__rootDefaultRouteRoute
-    }
-    '/_public__root/_default/password/create-new': {
-      id: '/_public__root/_default/password/create-new'
-      path: '/password/create-new'
-      fullPath: '/password/create-new'
-      preLoaderRoute: typeof Public__rootDefaultPasswordCreateNewRouteImport
+    '/_public__root/_default/memes/$memeId': {
+      id: '/_public__root/_default/memes/$memeId'
+      path: '/memes/$memeId'
+      fullPath: '/memes/$memeId'
+      preLoaderRoute: typeof Public__rootDefaultMemesMemeIdRouteImport
       parentRoute: typeof Public__rootDefaultRouteRoute
     }
     '/_public__root/_default/memes/ai-search': {
@@ -1019,19 +984,54 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Public__rootDefaultMemesAiSearchRouteImport
       parentRoute: typeof Public__rootDefaultRouteRoute
     }
-    '/_public__root/_default/memes/$memeId': {
-      id: '/_public__root/_default/memes/$memeId'
-      path: '/memes/$memeId'
-      fullPath: '/memes/$memeId'
-      preLoaderRoute: typeof Public__rootDefaultMemesMemeIdRouteImport
+    '/_public__root/_default/password/create-new': {
+      id: '/_public__root/_default/password/create-new'
+      path: '/password/create-new'
+      fullPath: '/password/create-new'
+      preLoaderRoute: typeof Public__rootDefaultPasswordCreateNewRouteImport
       parentRoute: typeof Public__rootDefaultRouteRoute
     }
-    '/_public__root/_default/checkout/success': {
-      id: '/_public__root/_default/checkout/success'
-      path: '/checkout/success'
-      fullPath: '/checkout/success'
-      preLoaderRoute: typeof Public__rootDefaultCheckoutSuccessRouteImport
+    '/_public__root/_default/password/reset': {
+      id: '/_public__root/_default/password/reset'
+      path: '/password/reset'
+      fullPath: '/password/reset'
+      preLoaderRoute: typeof Public__rootDefaultPasswordResetRouteImport
       parentRoute: typeof Public__rootDefaultRouteRoute
+    }
+    '/_public__root/_default/pricing/': {
+      id: '/_public__root/_default/pricing/'
+      path: '/pricing'
+      fullPath: '/pricing/'
+      preLoaderRoute: typeof Public__rootDefaultPricingIndexRouteImport
+      parentRoute: typeof Public__rootDefaultRouteRoute
+    }
+    '/_public__root/_default/random/': {
+      id: '/_public__root/_default/random/'
+      path: '/random'
+      fullPath: '/random/'
+      preLoaderRoute: typeof Public__rootDefaultRandomIndexRouteImport
+      parentRoute: typeof Public__rootDefaultRouteRoute
+    }
+    '/_public__root/_default/settings/': {
+      id: '/_public__root/_default/settings/'
+      path: '/'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof Public__rootDefaultSettingsIndexRouteImport
+      parentRoute: typeof Public__rootDefaultSettingsRouteRoute
+    }
+    '/_public__root/_default/submit/': {
+      id: '/_public__root/_default/submit/'
+      path: '/submit'
+      fullPath: '/submit/'
+      preLoaderRoute: typeof Public__rootDefaultSubmitIndexRouteImport
+      parentRoute: typeof Public__rootDefaultRouteRoute
+    }
+    '/_studio/memes/$memeId/studio': {
+      id: '/_studio/memes/$memeId/studio'
+      path: '/memes/$memeId/studio'
+      fullPath: '/memes/$memeId/studio'
+      preLoaderRoute: typeof StudioMemesMemeIdStudioRouteImport
+      parentRoute: typeof StudioRoute
     }
     '/_public__root/_default/memes/category/$slug': {
       id: '/_public__root/_default/memes/category/$slug'

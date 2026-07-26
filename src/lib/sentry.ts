@@ -43,6 +43,7 @@ export type SentryFeature =
   | 'watermark-fallback'
   | 'ai-search'
   | 'activity-event'
+  | 'og-image'
 
 export const captureWithFeature = (error: unknown, feature: SentryFeature) => {
   if (process.env.NODE_ENV === 'development') {

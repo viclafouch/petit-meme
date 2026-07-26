@@ -5,9 +5,10 @@ import { sentryTanstackStart } from '@sentry/tanstackstart-react/vite'
 import tailwindcss from '@tailwindcss/vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import react from '@vitejs/plugin-react'
-
-const ONE_YEAR_IN_SECONDS = 31_536_000
-const ONE_WEEK_IN_SECONDS = 604_800
+import {
+  IMMUTABLE_CACHE_CONTROL,
+  WEEKLY_CACHE_CONTROL
+} from './src/constants/http'
 
 const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
@@ -17,12 +18,12 @@ const SECURITY_HEADERS = {
 
 const IMMUTABLE_ASSET_HEADERS = {
   ...SECURITY_HEADERS,
-  'Cache-Control': `public, max-age=${ONE_YEAR_IN_SECONDS}, immutable`
+  'Cache-Control': IMMUTABLE_CACHE_CONTROL
 }
 
 const AVATAR_ASSET_HEADERS = {
   ...SECURITY_HEADERS,
-  'Cache-Control': `public, max-age=${ONE_WEEK_IN_SECONDS}`
+  'Cache-Control': WEEKLY_CACHE_CONTROL
 }
 
 const STATIC_ASSET_ROUTES = [
@@ -99,6 +100,10 @@ export default defineConfig(({ mode }) => {
       nitro({
         preset: 'vercel',
         sourcemap: true,
+        // Nitro enables `unwasm` on every preset, which makes takumi-js resolve
+        // `#backend` to WebAssembly at build time while Node resolves it to the
+        // native addon at runtime. Negating the condition keeps both on native.
+        exportConditions: ['!unwasm'],
         traceDeps: ['takumi-js', '@takumi-rs/core'],
         vercel: {},
         routeRules: {
@@ -112,11 +117,9 @@ export default defineConfig(({ mode }) => {
           '/avatars/**': {
             headers: AVATAR_ASSET_HEADERS
           },
+          // Keeps `/**` from downgrading the handler's own header to no-cache.
           '/api/og': {
-            headers: {
-              ...SECURITY_HEADERS,
-              'Cache-Control': `public, max-age=${ONE_YEAR_IN_SECONDS}, immutable`
-            }
+            headers: IMMUTABLE_ASSET_HEADERS
           },
           '/admin/**': {
             headers: {

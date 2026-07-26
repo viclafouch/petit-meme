@@ -20,6 +20,7 @@ import type { AnyRouteMatch } from '@tanstack/react-router'
 import type { FaqItem } from '~/components/faq-section'
 import { LOGO_PATH } from '~/constants/branding'
 import type { MemeWithCategories, MemeWithVideo } from '~/constants/meme'
+import { OG_IMAGE_HEIGHT, OG_IMAGE_WIDTH } from '~/constants/og'
 import type { Plan } from '~/constants/plan'
 import type { CategoryModel } from '~/db/generated/prisma/models'
 import { clientEnv } from '~/env/client'
@@ -41,26 +42,33 @@ import type { Locale } from '~/paraglide/runtime'
 export const websiteOrigin = clientEnv.VITE_SITE_URL
 const websiteId = `${websiteOrigin}/#website`
 
-const OG_VERSION = 1
+const OG_VERSION = 2
 
-export const OG_TYPE_VALUES = [
-  'home',
-  'category',
+/** Types whose title is resolved server-side from the requested locale. */
+export const OG_DEFAULTED_TYPE_VALUES = [
   'ai-search',
   'pricing',
   'reels',
-  'submit',
+  'submit'
+] as const satisfies readonly string[]
+
+/** Types whose title is content-driven and must always be supplied. */
+export const OG_TITLED_TYPE_VALUES = [
+  'category',
   'legal'
 ] as const satisfies readonly string[]
 
-export type OgImageType = (typeof OG_TYPE_VALUES)[number]
+export type OgDefaultedType = (typeof OG_DEFAULTED_TYPE_VALUES)[number]
+type OgTitledType = (typeof OG_TITLED_TYPE_VALUES)[number]
 
 type BuildOgImageUrlParams = {
-  type: OgImageType
-  title?: string
   subtitle?: string
   locale: Locale
-}
+} & (
+  | { type: 'home'; title?: never }
+  | { type: OgDefaultedType; title?: string }
+  | { type: OgTitledType; title: string }
+)
 
 export const buildOgImageUrl = ({
   type,
@@ -182,8 +190,8 @@ export const seo = ({
       ? [
           { name: 'twitter:image', content: image },
           { property: 'og:image', content: image },
-          { property: 'og:image:width', content: '1200' },
-          { property: 'og:image:height', content: '630' },
+          { property: 'og:image:width', content: String(OG_IMAGE_WIDTH) },
+          { property: 'og:image:height', content: String(OG_IMAGE_HEIGHT) },
           { property: 'og:image:type', content: imageType },
           ...(imageAlt
             ? [

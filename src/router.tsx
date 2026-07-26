@@ -51,10 +51,6 @@ export function getRouter() {
     context: { queryClient, user: null },
     rewrite: {
       input: ({ url }) => {
-        if (isExcludedByRouteStrategy(url)) {
-          return url
-        }
-
         return deLocalizeUrl(url)
       },
       output: ({ url }) => {

@@ -4,6 +4,7 @@ import { Badge } from '~/components/ui/badge'
 import { Card, CardContent } from '~/components/ui/card'
 import { UserAvatar } from '~/components/user-avatar'
 import { FOCUS_VISIBLE_RING_CLASS_NAME } from '~/constants/ui'
+import { formatDate } from '~/helpers/date'
 import type { SessionUser } from '~/lib/role'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
@@ -76,7 +77,7 @@ export const ProfileHeader = ({
               <div className="flex items-center gap-1">
                 <Calendar className="size-4" />
                 {m.settings_member_since({
-                  date: new Date(user.createdAt).toLocaleDateString(getLocale())
+                  date: formatDate(new Date(user.createdAt), getLocale())
                 })}
               </div>
             </div>

@@ -23,6 +23,7 @@ import { ToggleLikeButton } from '~/components/Meme/toggle-like-button'
 import { Badge } from '~/components/ui/badge'
 import { Button, buttonVariants } from '~/components/ui/button'
 import type { MemeFullData } from '~/constants/meme'
+import { formatDate } from '~/helpers/date'
 import { useMemeExport } from '~/hooks/use-meme-export'
 import { useMemeHls } from '~/hooks/use-meme-hls'
 import { useRegisterMemeView } from '~/hooks/use-register-meme-view'
@@ -77,7 +78,7 @@ const MemeInfo = ({ meme, allTags }: MemeInfoParams) => {
         {meme.publishedAt ? (
           <span className="text-muted-foreground text-xs">
             {m.meme_added_on({
-              date: new Date(meme.publishedAt).toLocaleDateString(getLocale())
+              date: formatDate(new Date(meme.publishedAt), getLocale())
             })}
           </span>
         ) : null}

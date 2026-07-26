@@ -22,6 +22,7 @@ import {
   getFreePlan,
   getPremiumPlan
 } from '~/constants/plan'
+import { formatDate } from '~/helpers/date'
 import { getSubscriptionDisplayInfo } from '~/helpers/subscription'
 import { useStripeCheckout } from '~/hooks/use-stripe-checkout'
 import { captureWithFeature } from '~/lib/sentry'
@@ -69,7 +70,7 @@ export const ProfileContent = ({
   })
 
   const subscriptionDate = activeSubscription?.periodEnd
-    ? new Date(activeSubscription.periodEnd).toLocaleDateString(getLocale())
+    ? formatDate(new Date(activeSubscription.periodEnd), getLocale())
     : ''
 
   return (

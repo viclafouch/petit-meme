@@ -46,7 +46,8 @@ vercel env pull --environment=production .env.production
 pnpm run prisma:migrate:prod   # uses .env.production
 
 # Other
-pnpm exec dotenv -e .env.development -- pnpm exec prisma generate  # Regenerate client (also runs on postinstall)
+# Regenerate client — NOT run by postinstall, always call it explicitly after a prisma bump
+pnpm exec dotenv -e .env.development -- pnpm exec prisma generate
 pnpm run prisma:seed:dev       # Seed database (uses .env.development)
 pnpm run prisma:reset-db:dev   # Reset DB (uses .env.development) — NEVER in production
 ```

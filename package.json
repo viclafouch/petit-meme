@@ -33,7 +33,7 @@
     "@ffmpeg/ffmpeg": "^0.12.15",
     "@ffmpeg/util": "^0.12.2",
     "@google/genai": "^2.10.0",
-    "@number-flow/react": "^0.6.0",
+    "@number-flow/react": "^0.6.2",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@radix-ui/react-accordion": "^1.2.14",
@@ -56,30 +56,30 @@
     "@t3-oss/env-core": "^0.13.11",
     "@tanstack/ai": "^0.38.0",
     "@tanstack/ai-anthropic": "^0.15.11",
-    "@tanstack/react-form": "^1.33.0",
+    "@tanstack/react-form": "^1.33.2",
     "@tanstack/react-pacer": "^0.22.1",
-    "@tanstack/react-query": "^5.101.1",
+    "@tanstack/react-query": "^5.101.4",
     "@tanstack/react-router": "1.170.16",
     "@tanstack/react-router-ssr-query": "1.167.1",
     "@tanstack/react-start": "1.168.26",
     "@tanstack/react-table": "^8.21.3",
-    "@tanstack/react-virtual": "^3.14.4",
+    "@tanstack/react-virtual": "^3.14.8",
     "@vercel/functions": "^3.7.4",
     "better-auth": "^1.6.22",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
-    "filesize": "^11.0.19",
+    "filesize": "^11.0.22",
     "hls.js": "^1.6.16",
     "lucide-react": "^1.21.0",
     "media-chrome": "^4.19.2",
-    "motion": "^12.42.0",
+    "motion": "^12.42.2",
     "nitro": "3.0.260610-beta",
     "pino": "^10.3.1",
     "radix-ui": "^1.6.0",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
     "react-email": "^6.6.5",
     "react-error-boundary": "^6.1.2",
     "react-hotkeys-hook": "^5.3.3",
@@ -108,12 +108,12 @@
     "@inlang/paraglide-js": "2.20.2",
     "@react-email/ui": "6.6.5",
     "@tailwindcss/vite": "^4.3.1",
-    "@tanstack/eslint-plugin-query": "^5.101.1",
-    "@types/node": "^26.0.1",
+    "@tanstack/eslint-plugin-query": "^5.101.4",
+    "@types/node": "^26.1.1",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19",
     "@viclafouch/oxc-config": "1.0.0-alpha.24",
-    "@vitejs/plugin-react": "^6.0.3",
+    "@vitejs/plugin-react": "^6.0.4",
     "dotenv": "^17.4.2",
     "dotenv-cli": "^11.0.0",
     "husky": "^9.1.7",
@@ -126,20 +126,23 @@
     "typescript": "^7.0.2",
     "vite-node": "^6.0.0"
   },
-  "overrides": {
-    "next": "^16.0.10"
-  },
   "engines": {
     "node": ">=24.0.0"
   },
   "packageManager": "pnpm@10.30.3",
   "pnpm": {
     "overrides": {
-      "require-in-the-middle": "7.4.0"
+      "require-in-the-middle": "7.4.0",
+      "next": "^16.2.11"
     },
     "peerDependencyRules": {
       "allowedVersions": {
-        "vitefu>vite": "8"
+        "vitefu>vite": "8",
+        "@tanstack/eslint-plugin-query>typescript": "7",
+        "@typescript-eslint/utils>typescript": "7",
+        "@typescript-eslint/typescript-estree>typescript": "7",
+        "@typescript-eslint/project-service>typescript": "7",
+        "@typescript-eslint/tsconfig-utils>typescript": "7"
       }
     }
   }

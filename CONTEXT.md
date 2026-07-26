@@ -64,7 +64,7 @@ L'image qui représente un User sur le site. Toujours définie, éventuellement 
 _Avoid_: Photo de profil, image
 
 **ProviderAvatar**:
-L'Avatar fourni par Discord ou Twitter à l'inscription, figé à cet instant et jamais réécrit. Sert de choix par défaut et de retour arrière possible.
+L'Avatar fourni par Discord ou Twitter à l'inscription, figé à cet instant et jamais réécrit. Sert de choix par défaut et de retour arrière possible. Sa durée de vie n'est pas garantie : une URL Discord contient le hash de l'image, donc elle meurt le jour où la personne change sa photo. C'est un état connu, le repli est l'AvatarSlot dérivé de l'e-mail.
 _Avoid_: Photo SSO, avatar d'origine
 
 **AvatarSlot**:
@@ -78,3 +78,22 @@ _Avoid_: viewerKey, anonId, userToken
 **AlgoliaUserToken**:
 Le jeton stable transmis à Algolia pour la pertinence des recommandations. Distinct du VisitorKey et posé uniquement avec le consentement du Visitor.
 _Avoid_: userToken seul (ambigu : chez Algolia le mot désigne un anonyme)
+
+## Contraintes
+
+Des décisions qui se défont facilement de bonne foi, parce que le code seul ne dit pas pourquoi il est écrit ainsi.
+
+**Le catalogue d'Avatars est append-only.**
+On n'efface ni ne renomme jamais un fichier de `public/avatars/`. Un User a choisi un rang, pas un visage : retirer un fichier casse son Avatar sans qu'il ait rien fait. Redessiner les 24 mêmes fichiers est en revanche sans danger.
+
+**DiceBear est généré localement et jamais appelé par son API.**
+`api.dicebear.com` est réservé à l'usage non commercial et le site vend des abonnements Stripe. `@dicebear/core` reste en `devDependencies` : il sert à `pnpm run avatars:generate`, jamais au runtime.
+
+**Le style d'avatar porte une obligation d'attribution.**
+`AVATAR_STYLE_ID` vaut `adventurer-neutral`, publié en CC BY 4.0, ce qui impose le crédit visible de la section 8 des mentions légales. Changer de style oblige à reprendre cette section dans les deux locales : un style CC0 la rend inutile, un autre style CC BY en change le texte. Le texte exact est celui de `meta.license.text` du style, il ne se traduit pas.
+
+**`/avatars/**` est servi en `max-age` d'une semaine, jamais en `immutable`.**
+Volontaire. Un changement de style réécrit les 24 mêmes fichiers sous les mêmes noms, et `immutable` figerait l'ancien dessin jusqu'à un an chez les visiteurs. Contrepartie acceptée : un changement met jusqu'à sept jours à se propager.
+
+**Tout champ écrit à l'inscription doit être déclaré à better-auth.**
+`transformInput` construit la ligne insérée en bouclant sur les seuls champs connus du schema better-auth et jette le reste sans une erreur. Un champ renvoyé par le hook `user.create.before` mais absent de `USER_ADDITIONAL_FIELDS` n'est tout simplement jamais écrit. Ce piège a déjà coûté `provider_avatar`, puis les horodatages de consentement RGPD et la locale des e-mails.

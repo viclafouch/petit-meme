@@ -1,146 +1,215 @@
-# Migration takumi-js 1.8.7 → 2.5.0
+# Plan : montée de version des libs AI (2026-07-26)
 
-Génération des images Open Graph (`src/routes/api/og.ts` + `src/components/og/`).
+**Statut : bump appliqué.** Aucune modification de code applicatif. `pnpm run lint:fix` passe.
 
-## Phase 1 — Rétro-compatibilité (terminée)
+Ce document a été réécrit après contre-vérification aux sources primaires (tarballs npm des
+versions concernées, `.d.ts` publiés, `npm view` pour les peers). L'audit initial concluait
+« bump direct, zéro modification de code » : la conclusion tient, mais deux de ses
+raisonnements étaient faux et sont corrigés plus bas.
 
-- [x] Bump `takumi-js` 1.8.7 → 2.5.0 (`@takumi-rs/core`, `helpers`, `wasm` suivent en 2.5.0)
-- [x] Vérifier l'API `ImageResponse` : signature inchangée, `fonts` accepte toujours le descripteur `{ name, data: () => Promise<ArrayBuffer> }`. `createImageResponse` supprimé en v2 mais non utilisé ici.
-- [x] Comparaison visuelle avant/après sur 4 scènes (home FR, page avec sous-titre, page sans sous-titre, débordement titre + sous-titre)
-- [x] Conclusion : **aucune modification de template nécessaire**. Les changements de défauts v2 annoncés dans le guide (`object-position` et `transform-origin` top-left → center) ne touchent pas ce code : v1 centrait déjà sur ce chemin. Écart résiduel = anti-aliasing du rééchantillonnage d'images (0,14 % des pixels à 5 % de tolérance, 0,01 % à 15 %).
-- [x] Tentative puis **retrait** de `objectPosition: '0 0'` / `transformOrigin: '0 0'` : mesurés comme des régressions (diff 37 608 px vs 26 291 px sans).
-- [x] `line-clamp` (raccourci en v2) : troncature du sous-titre identique à v1 sur contenu débordant.
-- [x] Correctif build : `exportConditions: ['!unwasm']` dans la config nitro (`vite.config.ts`)
-- [x] Validation runtime dans le bundle Vercel tracé : PNG 200 / `image/png` / headers OK
+## Périmètre
 
-### Le piège du build
-
-Nitro active la condition `unwasm` sur tous les presets. En v2, `takumi-js` expose un champ `imports["#backend"]` qui liste `unwasm` **avant** `node`. Résultat sans correctif :
-
-- au build, le tracer résout `#backend` → `dist/backend/wasm.mjs` et ne trace que `@takumi-rs/wasm` (sans même embarquer le binaire `.wasm`)
-- au runtime, Node résout `#backend` → `dist/backend/node.mjs`, jamais tracé
-- crash `ERR_MODULE_NOT_FOUND` sur `/api/og` en production
-
-`exportConditions: ['!unwasm']` fait résoudre les deux côtés vers le backend natif, comme en v1. Vérifié : seuls `nitro` et les paquets `takumi` déclarent cette condition, la négation n'affecte aucune autre dépendance (Prisma passe par un `.wasm-base64.mjs`, pas par unwasm).
-
-### Ce que la v2 corrige gratuitement
-
-- La font était refetchée en HTTP à **chaque** render en v1 (`loadRendererResources` appelait `loadFonts` par appel). Le `FontRegistry` v2 déduplique par `name` et ne résout le loader qu'une fois par process.
-- Un panic Rust tuait le process Node en v1 ; il remonte désormais en erreur JS attrapable (`title`/`subtitle` viennent de la query string, non authentifiés).
-- Plafonds d'octets et timeout de 5 s appliqués aux fonts (images seulement en v1), limite de décodage 8192×8192.
-- Le peer `react-dom` disparaît : `takumi-js` n'est plus résolu deux fois dans le lockfile.
-
-## Phase 2 — Audit indépendant (2026-07-26)
-
-Contre-audit de la liste issue de la phase 1. Chaque point ci-dessous a été **mesuré**, pas déduit. Le plan d'action est en attente de validation ; rien n'est encore codé.
-
-### Mesures de référence
-
-Harnais local : serveur HTTP statique éphémère sur `public/`, rendu des vrais templates via `tsx`, latence d'assets injectable pour simuler le trajet lambda → CDN.
-
-| Scénario | Render à froid | Renders à chaud | Requêtes HTTP / 5 renders |
-|---|---|---|---|
-| home, latence 0 ms, sans cache | 54 ms | 14 / 13 / 12 / 12 ms | 36 |
-| home, latence 0 ms, `fetchCache` | 52 ms | 9 / 9 / 9 / 9 ms | 8 |
-| home, latence 30 ms, sans cache | 120 ms | 47 / 44 / 45 / 43 ms | 36 |
-| home, latence 30 ms, `fetchCache` | 113 ms | **9 / 9 / 9 / 9 ms** | 8 |
-| page, latence 30 ms, sans cache | 51 ms | 42 / 41 / 42 / 41 ms | 10 |
-| page, latence 30 ms, `fetchCache` | 48 ms | **7 / 7 / 7 / 7 ms** | 1 |
-
-Production (v1 encore déployée, UA navigateur, `x` unique pour forcer un MISS CDN) : home `total` 145–190 ms, page 115–120 ms, `x-vercel-cache: MISS` puis `HIT` au second appel. Le CDN Vercel cache donc bien la route ; le trafic légitime coûte une invocation par URL distincte.
-
-### Corrections apportées au constat de phase 1
-
-- **`fonts` n'est plus dans les types.** `ImageResponseOptions = RenderOptions & ResponseInit & { onError }`, et `RenderOptions` n'expose ni `fonts` ni `fontFamilies`. L'option est traitée à l'exécution par `prepareRenderInput` dans `@takumi-rs/helpers/renderer`, mais TypeScript ne la valide plus. Vérifié : `fonts` avec les octets d'Arial sous le nom `Bricolage Grotesque` rend de l'Arial, sans `fonts` du tout rend le Geist embarqué. **Une faute de frappe sur `fonts` dégraderait silencieusement le rendu.**
-- **Le `FontRegistry` déduplique bien**, clé `"{name}:{weight}:{style}"` sur l'instance de `Renderer`, et `takumi-js` réutilise un `globalRenderer` module-level. La police est donc fetchée une fois par process. Confirmé.
-- **Deux copies de React : faux positif.** `pnpm why react` ne renvoie que `19.2.8`. Les dossiers `takumi-js@1.8.7_react-dom@19.2.7…` sous `node_modules/.pnpm` sont des orphelins du store, pas des copies résolues.
-- **Jeton de version dans l'URL : déjà implémenté.** `OG_VERSION = 1` dans `src/lib/seo.ts:42`, propagé en `&v=`. Il reste à documenter qu'il faut le bump lors d'une refonte de template.
-- **Un firewall est déjà actif.** Un UA `curl` par défaut reçoit un 429 « Vercel Security Checkpoint » sur `/` comme sur `/api/og` : l'Attack Challenge Mode est activé au niveau du site.
-- **`text-fit` est typé mais pas implémenté en 2.5.0.** `textFit: 'shrink'` en style inline et `text-fit: shrink` via `stylesheets` produisent tous deux un PNG **strictement identique** au rendu sans la propriété (même hash SHA-1, mêmes octets). Le `measure()` n'est donc pas la seule option, mais `text-fit` n'en est pas une.
-- **`lineClamp: 2` + `textOverflow: 'ellipsis'` fonctionne sur le titre** (64 px, gras) : vérifié visuellement, troncature avec ellipse. Suffit à corriger le débordement sans passe de mesure.
-
-### Constats absents du plan de phase 1
-
-- **`prepareImages` a `throwOnError: true` par défaut.** Un seul asset qui échoue fait échouer tout le rendu. La home dépend aujourd'hui de 7 fetchs, soit 7 points de défaillance uniques **par render**.
-- **Les 7 assets sont auto-hébergés mais fetchés en HTTPS depuis la lambda vers le CDN public.** Aller-retour réseau facturé dans les deux sens, à chaque render non caché.
-- **La police de dernier recours a changé en 2.0.0** : `{Geist, Geist Mono, Manrope}` → un sous-ensemble latin de Geist qui ne revendique plus la famille générique `sans-serif`. Sans risque pour du latin, tofu garanti pour du CJK ou un emoji sans provider.
-- **`Cache-Control` en double : à ne pas « corriger » naïvement.** C'est l'en-tête renvoyé par la fonction qui décide de la mise en cache CDN ; la route rule Vercel s'applique à l'arrivée. Supprimer la ligne du handler risque de désactiver le cache CDN, supprimer la route rule fait retomber `/api/og` sur `/**` qui pose `no-cache`. Les deux restent, seule la valeur doit être dédupliquée.
-
-### Plan d'action réalisé
-
-P0 :
-
-- [x] `images: { fetchCache }` (Map module-level dans `og.ts`). Mesuré sur le bundle Vercel tracé, assets réels servis par le CDN de prod : home fr à froid **950 ms**, home en juste après **11 ms**, category ensuite **10 ms**. Les 7 assets et la police ne sont fetchés qu'une fois par process.
-- [x] `onError` → `captureWithFeature(error, 'og-image')`, nouvelle valeur `'og-image'` dans `SentryFeature`. Vérifié en provoquant un asset injoignable : `onError` reçoit bien l'erreur.
-- [ ] ~~`signal: request.signal`~~ — **écarté**. `ImageResponse` renvoie un flux consommé *après* le retour du handler. Selon le moment où srvx/Nitro abandonne le signal d'une requête GET sans corps, on risquerait d'annuler chaque rendu. Impossible à vérifier sans lancer le serveur ; le gain (couper le CPU quand un scraper abandonne un rendu de ~100 ms) ne justifie pas le risque de casser toutes les images OG.
-
-P1 :
-
-- [x] Schéma Zod en union discriminée à trois branches : `home` (aucun titre), types à défaut localisé (`ai-search`, `pricing`, `reels`, `submit`), types à titre obligatoire (`category`, `legal`). `OG_DEFAULT_TITLES` n'a plus d'entrée `undefined` et le fallback `?? type` a disparu. `BuildOgImageUrlParams` suit la même union : un `category` sans titre ne compile plus.
-- [x] `lineClamp: 2` + `textOverflow: 'ellipsis'` sur le titre. Vérifié visuellement : titre de 78 caractères tronqué avec ellipse, sous-titre entièrement visible ; le cas court rend exactement les mêmes octets qu'avant (78 671 B).
-- [x] `src/constants/http.ts` : `IMMUTABLE_CACHE_CONTROL`, `WEEKLY_CACHE_CONTROL`, `NO_CACHE_CONTROL`, `SECURITY_HEADERS`, importés par `vite.config.ts` et `og.ts`. Les deux points d'émission restent, avec un commentaire expliquant pourquoi.
-- [x] `src/constants/og.ts` : `OG_IMAGE_WIDTH` / `OG_IMAGE_HEIGHT`, qui étaient écrits en dur trois fois (`og.ts`, `seo.ts` pour `og:image:width/height`, `og-stars.ts`).
-- [x] `overrides` sur `src/components/og/**` dans `oxlint.config.ts`, les deux `/* oxlint-disable */` en tête de fichier sont supprimés. La règle n'est pas coupée : `['error', { ignore: ['tw'] }]`. Vérifié en injectant un `classname="oops"` → toujours signalé.
-- [x] `og-stars.ts` : `Array.from({ length })` au lieu de `push`.
-- [x] `OG_VERSION` passé à `2` avec le commentaire expliquant qu'il faut le bump à chaque refonte de template. Les URLs `v=1` déjà scrapées restent valides (`v` n'est pas dans le schéma, les clés inconnues sont ignorées).
-
-### Vérifications
-
-`pnpm run lint:fix` et `pnpm run build` passent. Le binding natif `@takumi-rs/core-darwin-arm64` est bien tracé dans `__server.func/node_modules`. Handler appelé directement depuis le bundle Vercel tracé :
-
-| Cas | Statut | Content-Type | Cache-Control | Durée |
+| Package | Avant | Après | Type | Fichier impacté |
 |---|---|---|---|---|
-| `type=home&locale=fr` | 200 | image/png | `max-age=31536000, immutable` | 950 ms (froid) |
-| `type=home&locale=en` | 200 | image/png | idem | 11 ms |
-| `type=pricing` (titre par défaut) | 200 | image/png | idem | 46 ms |
-| `type=category` + titre long | 200 | image/png | idem | 10 ms |
-| `type=category` sans titre | 400 | text/plain | — | 1 ms |
-| `type=legal` sans titre | 400 | text/plain | — | 0 ms |
-| `type` inconnu | 400 | text/plain | — | 0 ms |
+| `@google/genai` | 2.10.0 | 2.13.0 | minor | `src/server/ai.ts` |
+| `@tanstack/ai` | 0.38.0 | 0.42.0 | minor (0.x) | `src/server/ai-search.ts` |
+| `@tanstack/ai-anthropic` | 0.15.11 | 0.16.3 | minor (0.x, breaking) | `src/server/ai-search.ts` |
 
-### Passe `/simplify` (4 agents : reuse, simplification, efficiency, altitude)
+Couplage vérifié via `npm view` : `@tanstack/ai-anthropic@0.16.3` déclare
+`peerDependencies: { zod: '^4.0.0', '@tanstack/ai': '^0.42.0' }`. Le peer se resserre à
+chaque patch de la série 0.16 (`0.16.0 → ^0.39.1`, `0.16.1 → ^0.40.0`, `0.16.2 → ^0.41.0`),
+donc les deux packages TanStack doivent bouger ensemble. Zod installé : `4.4.3`, compatible.
+`@tanstack/ai` garde le peer **optionnel** `@opentelemetry/api >=1.9.0`, déjà satisfait en
+transitif par `better-auth` (1.9.1) — pas de nouveau conflit malgré `strict-peer-dependencies=true`.
 
-Appliqué :
+---
 
-- [x] `react/no-unknown-property` en `['error', { ignore: ['tw'] }]` au lieu de `'off'` — l'option existe bien dans le schéma oxlint. Un `classname` ou un `stlye` dans un template OG ne peut pas se repérer à l'œil, la règle doit rester vivante.
-- [x] Code mort supprimé : `OG_TYPE_VALUES` et `OgImageType` n'avaient plus aucun consommateur après le passage à l'union discriminée. `OgTitledType` n'est plus exporté.
-- [x] `src/components/og/og-backdrop.tsx` : le champ d'étoiles et la barre dégradée étaient dupliqués à l'identique dans les deux templates (16 lignes). Extraction vérifiée **au SHA-1** : `of-short.png` et `of-long.png` rendent des octets strictement identiques avant et après.
-- [x] `NO_CACHE_CONTROL` supprimé — alias d'une chaîne nue utilisé une seule fois, qui prétendait être une source unique alors que `src/server/meme.ts:797` et `src/lib/sitemap.ts:197` gardaient leurs littéraux.
-- [x] `SECURITY_HEADERS` remis dans `vite.config.ts` : c'est du build-only, sans dérivation. `src/constants/http.ts` ne garde que les deux valeurs dérivées de `constants/time.ts`, ce qui réduit la surface de l'import relatif depuis la config Vite.
-- [x] Schéma Zod : `OG_SHARED_SHAPE` étalé dans les trois branches à la place des trois alias `*_FIELD`, ce qui laisse `title` seul visible comme la raison d'être de l'union.
-- [x] `og-stars.ts` : `spread` sorti de la boucle (invariant), signature passée en paramètres objet (la règle projet plafonne à 2 positionnels, `generateStarShadows(80, 1, 42)` était illisible).
-- [x] `og.ts` : `const query = parsed.data` au lieu d'une demi-déstructuration, docstring périmée qui parlait d'un `switch` inexistant supprimée, commentaire sur `fonts` raccourci.
-- [x] Rappel de bump d'`OG_VERSION` déplacé dans `og-backdrop.tsx`, là où on édite les templates, plutôt que dans `seo.ts`.
+## 1. `@google/genai` 2.10.0 → 2.13.0
 
-Écarté, avec la raison :
+### Vérifications (sources primaires)
 
-- **Retirer `title` optionnel des quatre types à défaut.** Rendrait `?type=pricing&title=Foo` silencieusement différent (« Tarifs » au lieu de « Foo »). Aucune URL générée par l'app n'est concernée, mais c'est un changement de contrat sur un endpoint public qui n'a pas été demandé.
-- **`OG_DEFAULT_TITLES` doublonne Paraglide** (`submit_heading` vaut déjà « Soumettre un mème »). Constat juste et c'est le point le plus profond de la zone, mais basculer sur `m.x({}, { locale })` change la source des libellés et donc potentiellement le rendu. À traiter séparément.
-- **Déplacer `OG_DEFAULTED_TYPE_VALUES` / `OG_TITLED_TYPE_VALUES` dans `src/constants/og.ts`** pour réunir le domaine OG. Churn réel pour un gain de rangement ; `buildOgImageUrl` doit rester dans `seo.ts` de toute façon.
-- **Propager un constant de cache dans `src/server/meme.ts` et `src/lib/sitemap.ts`.** Hors périmètre, et résolu autrement en supprimant `NO_CACHE_CONTROL`.
-- **Dériver `'category' | 'legal'` de `OG_TITLED_TYPE_VALUES` dans `resolvePageTitle`.** `.includes()` ne narrowe pas : la version « profonde » serait strictement pire. Les deux modes de dérive sont déjà des erreurs de compilation.
+Diff des `dist/genai.d.ts` 2.10.0 vs 2.13.0 :
 
-Efficiency n'a rien trouvé à corriger : le keyspace du `fetchCache` est fermé à 8 clés (aucune entrée pilotée par la requête n'atteint une URL d'image), plafond ~460 Kio par instance.
+- **`GenerateContentConfig` est identique octet pour octet** entre les deux versions. C'est le
+  seul type qu'on passe. `responseMimeType`, `responseSchema` et `responseJsonSchema` sont
+  inchangés et non dépréciés.
+- `FileState`, la classe `Files`, `createPartFromUri` et `createUserContent` : **identiques**.
+- Les retraits de 2.11 (`cached_content`, `presence_penalty`, `frequency_penalty`) sont sur
+  l'API **Interactions**, que `src/server/ai.ts` n'utilise pas.
+- `engines.node` : `>=20.0.0`, inchangé.
+- Toutes les nouveautés 2.11 → 2.13 (Triggers, `custom_vocabulary`, model selector, ASR,
+  `exa_ai_search`, agents Antigravity/CodeMender) visent Vertex AI, Gemini Enterprise, Live API
+  ou Interactions. **Rien d'exploitable pour `translateMemeContent` / `aiAssistMemeContent`.**
 
-### Risque résiduel assumé
+### Verdict
 
-`ImageResponse` répond **200 avec le `Cache-Control` immutable avant que le rendu ait commencé** : en cas d'échec, le flux est avorté après l'envoi des en-têtes. Vérifié. Le CDN ne devrait pas mettre en cache un corps tronqué, mais c'est une propriété du design streaming de takumi, pas un choix de ce projet, et c'était déjà le cas en v1. `onError` remonte désormais l'incident dans Sentry, ce qui est le vrai correctif accessible ici.
+🟢 Update purement additif sur notre chemin d'appel. Risque nul, valeur nulle.
 
-### Écarté après re-challenge
+---
 
-- **`cacheMaxBytes`** : sans objet. Le `ResourceCache` par défaut fait 16 Mio pour 8 assets (460 Kio encodés, décodés à la taille de dessin). Le régler ne peut que nuire.
-- **Signature HMAC des paramètres** : l'Attack Challenge Mode couvre déjà le vecteur, les pages adossées à la DB sont plus chères à attaquer que `/api/og`, et signer impose un secret côté serveur alors que `buildOgImageUrl` tourne aussi au client dans `head()`. Coût réel, bénéfice marginal.
-- **`measure()` pour ajuster la taille du titre** : une passe de layout supplémentaire par render pour un cas que `lineClamp` règle. Reproduit seulement à 78 caractères ; les vrais `category.title` sont courts.
-- **`fonts: [fontUrl]`** : marche (`fontFromUrl`), mais le nom de famille viendrait du fichier au lieu du `Bricolage Grotesque` référencé par les templates. Couplage en plus, pas une ligne en moins.
-- **`emoji: 'from-font'`** : la police de dernier recours est latine sans emoji, donc tofu. On garde `twemoji` en assumant la dépendance jsdelivr, désormais documentée. Aucun message SEO ne contient d'emoji aujourd'hui (`checkout_success_description` est le seul, hors OG).
-- Confirmé écarté depuis la phase 1 : `renderSvg()`, `renderAnimation`, `setGlyphCacheMaxBytes`, `allowUrl`, `googleFonts()` / `baseUrl`, `:lang()`, layout grid, descripteurs `generic`.
+## 2. `@tanstack/ai` 0.38.0 → 0.42.0
 
-### Outillage
+### Vérifications (sources primaires)
 
-- [x] Harnais de mesure sorti du repo, dans `/tmp/og-probe/` (éphémère). Contient : serveur statique local avec latence injectable, benchmark des deux templates, sondes de résolution de police, reproduction du débordement de titre, test de `text-fit`, appel direct du handler depuis le bundle Vercel tracé, vérification de `onError`. À promouvoir dans `scripts/` si on retouche encore les templates — non fait ici pour ne pas ajouter du code à maintenir sans demande.
+- `chat()` : signature de générique et corps du dispatcher **identiques** entre 0.38.0 et 0.42.0.
+- `runAgenticStructuredOutput` (notre branche réelle : `outputSchema` présent, `stream` non
+  passé) : **127 lignes identiques octet pour octet** entre les deux versions. `diff` vide.
+- `src/types.ts` : diff **strictement additif** (`ProviderExecutedToolMetadata`, `input` sur les
+  tool-call parts, `toolCallCount` / `lastTurnToolCallCount`, `maxToolCallsPerTurn`,
+  `capabilities`, `approvals`, events sandbox/harness/code-mode). `systemPrompts`, `outputSchema`
+  et `modelOptions` : **aucune modification de forme ni de sémantique**.
+- Les dépendances internes qui portent la conversion de schéma sont **épinglées à l'identique**
+  dans les deux versions : `@tanstack/ai-utils@0.3.1`, `@tanstack/ai-event-client@0.6.8`. La
+  couche Zod → JSON Schema ne bouge donc pas d'un octet, même en transitif.
+- Aucun usage de tools, agent loop, approbations, sandbox ou streaming chez nous : toutes les
+  nouveautés 0.39 → 0.42 sont hors périmètre. `maxToolCallsPerTurn` et la stratégie
+  `maxToolCalls(n)` ne deviendraient pertinents que si on ajoutait des tools.
 
-### Amont
+### Verdict
 
-- [ ] Ouvrir une issue chez `kane50613/takumi` : la page d'intégration Nitro affirme que le binaire WASM est embarqué dans le bundle serveur, ce qui ne se vérifie pas (échec `WebAssembly.Module(): expected magic word`), et le guide de migration v1→v2 ne mentionne nulle part le changement de résolution du backend. Note : la 2.0.3 documente bien `exportConditions: ["!unwasm"]` dans ses notes de version, mais ce n'est repris nulle part dans la doc.
-- [ ] Signaler que `fonts` a disparu des types publics de `takumi-js` alors que le runtime le supporte toujours.
-- [ ] Signaler que `text-fit` est exposé dans `NodeAttributes` / `CSSProperties` sans être implémenté par le moteur de rendu.
+🟢 Bump sans effet observable. Le seul gain réel est le fix des barrels dans les `.d.ts`
+publiés (0.41.0), qui améliore la résolution TypeScript sous `bundler` / `node16` / `nodenext`.
+
+---
+
+## 3. `@tanstack/ai-anthropic` 0.15.11 → 0.16.3
+
+### Vérifications (sources primaires)
+
+- **`claude-haiku-4-5` survit à la purge.** Confirmé dans `src/model-meta.ts` de 0.16.3 :
+  présent dans `ANTHROPIC_MODELS`, `max_output_tokens: 64_000`, pricing $1 / $5 par MTok.
+  Diff des IDs 0.15.11 → 0.16.3 — retirés : `claude-3-5-haiku`, `claude-3-7-sonnet`,
+  `claude-3-haiku`, `claude-haiku-3`, `claude-haiku-3-5`, `claude-opus-4`, `claude-sonnet-4`,
+  `claude-sonnet-3-7`, `claude-opus-4.8` (renommé `claude-opus-4-8`) et toutes les variantes
+  `-fast`. Ajoutés : `claude-fable-5`, `claude-sonnet-5`, `claude-opus-4-8`. **Aucun ID retiré
+  n'est référencé dans le repo.**
+- **Le changement de défaut `max_tokens` de 0.16.1 ne nous touche pas.** Le code est
+  `modelOptions?.max_tokens ?? getAnthropicDefaultMaxTokens(this.model, { stream })` : notre
+  `modelOptions: { max_tokens: 100 }` court-circuite le défaut. Le nouveau warning de
+  troncature est explicitement gardé par `if (options.modelOptions?.max_tokens == null)`, donc
+  il ne se déclenchera jamais chez nous.
+- `createAnthropicChat<TModel extends (typeof ANTHROPIC_MODELS)[number]>(model, apiKey, config?)` :
+  signature inchangée. `max_tokens` reste dans `AnthropicSamplingOptions`, que le meta de
+  Haiku 4.5 satisfait — `modelOptions: { max_tokens: 100 }` typecheck toujours.
+- Diff complet de `src/adapters/text.ts` : hors le défaut `max_tokens`, tout le delta est de la
+  plomberie pour les server-tools Anthropic (`web_search` / `web_fetch`, blocs
+  `server_tool_use` rejoués verbatim) et des chemins d'import concrets à la place des barrels.
+  Zéro impact sur un appel sans tools.
+- Aucun modèle moins cher que Haiku 4.5 dans la nouvelle liste (Sonnet 5 à $3 / $15, Fable 5 à
+  $10 / $50). **On garde Haiku 4.5.**
+
+### Verdict
+
+🟡 Breaking en théorie, 🟢 en pratique. Bump appliqué sans modification de code.
+
+---
+
+## Désaccords avec l'audit initial
+
+### A. Le chemin d'exécution décrit était faux
+
+L'audit supposait qu'on passait par `structuredOutput()` de l'adapter (le contournement
+« forced tool use », non streamé) et en tirait l'hypothèse que le cap à 100 tokens pouvait
+produire un `null` absorbé par `result?.keywords ?? [prompt]`.
+
+C'est faux. `claude-haiku-4-5` figure dans `ANTHROPIC_COMBINED_TOOLS_AND_SCHEMA_MODELS` **dans
+les deux versions**, donc `supportsCombinedToolsAndSchema()` renvoie `true` et le moteur prend
+le **mode natif combiné** : requête Messages *streamée* avec `output_config.format`, et le JSON
+est récolté dans le texte du dernier tour. `structuredOutput()` n'est jamais appelé chez nous.
+
+Conséquence concrète : en cas de troncature, c'est la branche `stop_reason: 'max_tokens'` du
+stream qui s'applique, elle émet un `RUN_ERROR`, `chat()` **lève** — elle ne résout pas `null`.
+On retombe donc dans notre `catch`, qui logge dans Sentry et renvoie `[prompt]`. Une troncature
+est visible dans les logs, pas silencieuse. C'est un comportement pré-existant, inchangé par le
+bump.
+
+Effet de bord de ce même constat : la seule modification de 0.16.3 qui touche
+`structuredOutput()` (le passage de `{ stream: false }` à `mapCommonOptionsToAnthropic`) est
+sans objet pour nous.
+
+### B. Le `oxlint-disable` de `ai-search.ts:112` ne peut pas devenir inutile
+
+L'audit demandait de revérifier après bump si le `?.` devenait superflu.
+`runAgenticStructuredOutput` retourne `Promise<InferSchemaType<TSchema>>` et **lève** sur chaque
+chemin sans résultat (`finalizationError`, puis
+`throw new Error('structured output finalization produced no result')`). Le type n'a jamais été
+nullable et ne l'est toujours pas, à l'identique en 0.38.0 et 0.42.0. Le `?.` restera donc
+toujours flaggé par `typescript/no-unnecessary-condition`, et le disable reste nécessaire.
+
+Vérifié après bump : `pnpm exec oxlint --report-unused-disable-directives` ne signale aucun
+disable inutile sur le projet. Le commentaire ligne 112 est conservé tel quel.
+
+### C. Ce que l'audit a manqué : un `$ref` hors spec Gemini, déjà en production
+
+En exécutant les deux convertisseurs sur la forme réelle du schéma de traduction
+(`buildLocalizedResponseSchema` → `{ fr: item, en: item }`), `zod-to-json-schema` produit :
+
+```json
+"fr": { "type": "object", ... },
+"en": { "$ref": "#/properties/fr" },
+"required": ["fr", "en"]
+```
+
+Or la doc de `responseJsonSchema` (lue dans le `.d.ts` de `@google/genai`) dit des `$ref` :
+*« Cyclic references are unrolled to a limited degree and, as such, may only be used within
+**non-required** properties. »* Notre `en` est dans `required`. On envoie donc aujourd'hui, en
+production, un `$ref` en dehors du sous-ensemble documenté comme supporté.
+
+Ça n'est pas causé par le bump et ça semble passer en pratique, mais c'est fragile : ça ne se
+déclenche que quand plusieurs locales cibles sont demandées d'un coup (traduction FR → EN seule
+n'a qu'une clé, donc pas de réutilisation, donc pas de `$ref`). Voir la section hors périmètre.
+
+---
+
+## Réalisé
+
+- [x] Bump : `pnpm add @google/genai@^2.13.0 @tanstack/ai@^0.42.0 @tanstack/ai-anthropic@^0.16.3`
+- [x] `pnpm run lint:fix` (tsc + oxlint + oxfmt) — passe, zéro diagnostic
+- [x] Aucun code applicatif modifié : `git diff` ne touche que `package.json`, `pnpm-lock.yaml`
+      et ce plan
+- [x] Vérification qu'aucun disable oxlint n'est devenu inutile
+- [ ] `/simplify` — non applicable, aucun code source modifié
+
+## À tester à la main en dev
+
+- [ ] Recherche AI (`aiSearchMemes`), prompt FR puis prompt EN
+- [ ] Admin, traduction d'un mème (`translateMemeContent`) : FR → EN
+- [ ] Admin, traduction vers **plusieurs locales d'un coup** si l'UI le permet (chemin `$ref`)
+- [ ] Admin, AI Assist sur une vidéo (`aiAssistMemeContent`) : upload, polling `FileState.ACTIVE`,
+      cleanup du fichier Gemini
+
+---
+
+## Hors périmètre
+
+### 1. `zod-to-json-schema` → `z.toJSONSchema()` (Zod 4) — recommandé, à faire séparément
+
+`src/server/ai.ts` importe `zod/v3` et `zod-to-json-schema` uniquement pour fabriquer le JSON
+Schema passé à Gemini. Zod 4 (`4.4.3`, installé) expose `z.toJSONSchema()` nativement.
+
+L'audit initial présentait la migration comme un risque à valider côté Gemini (JSON Schema
+2020-12 par défaut). **C'est l'inverse** : sortie comparée en exécutant les deux convertisseurs
+sur la forme réelle du schéma, `z.toJSONSchema(schema, { target: 'draft-7' })` produit un
+document **identique à l'actuel sauf sur un point** — il **inline** la locale dupliquée au lieu
+d'émettre `"en": { "$ref": "#/properties/fr" }`. La valeur de `$schema` reste
+`http://json-schema.org/draft-07/schema#`, exactement celle envoyée aujourd'hui.
+
+Autrement dit la migration **rapproche** le payload du sous-ensemble supporté par Gemini au
+lieu de l'en éloigner, en plus de supprimer une dépendance et l'import legacy `zod/v3`.
+
+Ne pas laisser le `target` par défaut : `z.toJSONSchema()` sans option émet
+`$schema: "https://json-schema.org/draft/2020-12/schema"`, une valeur jamais envoyée jusqu'ici.
+Pas de raison de changer ça dans le même passage.
+
+Coût réel : le fichier importe `zod/v3` aussi pour ses `validator()`, donc la migration touche
+tout le fichier, pas seulement les deux appels `zodToJsonSchema()`. À faire en une passe
+dédiée, avec test manuel de la traduction multi-locales.
+
+### 2. `recharts` 3.8.1 → 3.10.1
+
+Épinglé sans `^`, choix volontaire. Hors sujet.
+
+### 3. Advisory `hono` GHSA-9r54-q6cx-xmh5
+
+Transitive via `shadcn > @modelcontextprotocol/sdk > hono`, devDependency CLI uniquement.
+Aucune surface d'exposition runtime.

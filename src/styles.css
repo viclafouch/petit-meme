@@ -188,6 +188,9 @@
 }
 
 @theme {
+  --font-sans:
+    ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    'Segoe UI Symbol', 'Noto Color Emoji';
   --font-bricolage: 'Bricolage Grotesque', 'Bricolage Grotesque Fallback';
   --text-3xs: 0.5rem;
   --text-2xs: 0.625rem;

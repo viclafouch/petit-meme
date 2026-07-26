@@ -24,9 +24,9 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@algolia/client-insights": "^5.55.1",
-    "@algolia/client-search": "^5.55.1",
-    "@algolia/recommend": "^5.55.1",
+    "@algolia/client-insights": "^5.56.0",
+    "@algolia/client-search": "^5.56.0",
+    "@algolia/recommend": "^5.56.0",
     "@better-auth/prisma-adapter": "^1.6.25",
     "@better-auth/stripe": "^1.6.25",
     "@ffmpeg/core": "0.12.10",

@@ -1,3 +1,4 @@
+import React from 'react'
 import type { WithDialog } from '~/@types/dialog'
 import {
   Dialog,
@@ -25,7 +26,19 @@ const AVATAR_TILE_CLASS_NAME = cn(
   SELECTED_TILE_RING_CLASS_NAME
 )
 
-const AVATAR_GRID_CLASS_NAME = 'grid grid-cols-4 gap-3 sm:grid-cols-6'
+type AvatarSectionParams = {
+  label: string
+  children: React.ReactNode
+}
+
+const AvatarSection = ({ label, children }: AvatarSectionParams) => {
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-muted-foreground text-xs">{label}</p>
+      <div className="grid grid-cols-4 gap-3 sm:grid-cols-6">{children}</div>
+    </div>
+  )
+}
 
 type AvatarTileParams = {
   selection: AvatarSelection
@@ -105,23 +118,18 @@ export const AvatarPickerDialog = ({
         >
           {providerAvatar ? (
             <>
-              <div className="flex flex-col gap-2">
-                <p className="text-muted-foreground text-xs">
-                  {m.settings_avatar_provider_label()}
-                </p>
-                <div className={AVATAR_GRID_CLASS_NAME}>
-                  <AvatarTile
-                    selection={AVATAR_PROVIDER_SELECTION}
-                    image={providerAvatar}
-                    label={m.settings_avatar_provider_label()}
-                    isSelected={user.image === providerAvatar}
-                  />
-                </div>
-              </div>
+              <AvatarSection label={m.settings_avatar_provider_label()}>
+                <AvatarTile
+                  selection={AVATAR_PROVIDER_SELECTION}
+                  image={providerAvatar}
+                  label={m.settings_avatar_provider_label()}
+                  isSelected={user.image === providerAvatar}
+                />
+              </AvatarSection>
               <Separator />
             </>
           ) : null}
-          <div className={AVATAR_GRID_CLASS_NAME}>
+          <AvatarSection label={m.settings_avatar_catalog_label()}>
             {AVATAR_CATALOG.map((slot, index) => {
               const image = resolveAvatarPath(slot.id)
 
@@ -137,7 +145,7 @@ export const AvatarPickerDialog = ({
                 />
               )
             })}
-          </div>
+          </AvatarSection>
         </ToggleGroup>
       </DialogContent>
     </Dialog>

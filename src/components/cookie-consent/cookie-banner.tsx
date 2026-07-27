@@ -4,10 +4,12 @@ import { AnimatePresence, motion } from 'motion/react'
 import { Link } from '@tanstack/react-router'
 import { Button } from '~/components/ui/button'
 import { useIsMobile } from '~/hooks/use-mobile'
+import { useTimeout } from '~/hooks/use-timeout'
 import { m } from '~/paraglide/messages.js'
+import { useIsDialogOpen } from '~/stores/dialog.store'
 import { useCookieConsent } from './cookie-provider'
 
-const APPEAR_DELAY_S = 3.5
+const APPEAR_DELAY_MS = 3500
 const BANNER_VIDEO_SRC = '/videos/want-a-cookie.mp4'
 const BANNER_POSTER_SRC = '/images/want-a-cookie.webp'
 
@@ -26,10 +28,9 @@ const VideoCurve = () => {
 
 type BannerMediaProps = {
   isMobile: boolean
-  videoRef: React.RefObject<HTMLVideoElement | null>
 }
 
-const BannerMedia = ({ isMobile, videoRef }: BannerMediaProps) => {
+const BannerMedia = ({ isMobile }: BannerMediaProps) => {
   return (
     <div className="relative shrink-0">
       {isMobile ? (
@@ -40,7 +41,7 @@ const BannerMedia = ({ isMobile, videoRef }: BannerMediaProps) => {
         />
       ) : (
         <video
-          ref={videoRef}
+          autoPlay
           muted
           loop
           playsInline
@@ -60,26 +61,15 @@ export const CookieBanner = () => {
   const { isBannerVisible, acceptAll, openSettings, config } =
     useCookieConsent()
   const isMobile = useIsMobile()
-  const videoRef = React.useRef<HTMLVideoElement>(null)
+  const isDialogOpen = useIsDialogOpen()
+  const [hasDelayElapsed, setHasDelayElapsed] = React.useState(false)
 
-  React.useEffect(() => {
-    if (!isBannerVisible || isMobile) {
-      return () => {}
-    }
-
-    const timer = setTimeout(() => {
-      const video = videoRef.current
-
-      if (video) {
-        video.currentTime = 0
-        video.play().catch(() => {})
-      }
-    }, APPEAR_DELAY_S * 1000)
-
-    return () => {
-      clearTimeout(timer)
-    }
-  }, [isBannerVisible, isMobile])
+  useTimeout({
+    callback: () => {
+      setHasDelayElapsed(true)
+    },
+    delayMs: APPEAR_DELAY_MS
+  })
 
   const slideInitial = isMobile
     ? { y: '100%', opacity: 0 }
@@ -93,13 +83,13 @@ export const CookieBanner = () => {
 
   return (
     <AnimatePresence>
-      {isBannerVisible ? (
+      {isBannerVisible && hasDelayElapsed && !isDialogOpen ? (
         <>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{
               opacity: 1,
-              transition: { delay: APPEAR_DELAY_S, duration: 0.3 }
+              transition: { duration: 0.3 }
             }}
             exit={{ opacity: 0, transition: { duration: 0.2 } }}
             className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
@@ -112,8 +102,7 @@ export const CookieBanner = () => {
               transition: {
                 type: 'spring',
                 damping: 28,
-                stiffness: 220,
-                delay: APPEAR_DELAY_S
+                stiffness: 220
               }
             }}
             exit={{
@@ -129,7 +118,7 @@ export const CookieBanner = () => {
               className="flex max-h-dvh flex-col overflow-hidden bg-card shadow-2xl sm:max-h-[calc(100dvh-2.5rem)] sm:rounded-(--banner-radius) sm:ring-1 sm:ring-border/30"
               style={{ '--banner-radius': '1.5rem' } as React.CSSProperties}
             >
-              <BannerMedia isMobile={isMobile} videoRef={videoRef} />
+              <BannerMedia isMobile={isMobile} />
               <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-7 pb-5 pt-1">
                 <div className="space-y-0.5">
                   <p className="text-sm text-muted-foreground">

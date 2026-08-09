@@ -1,4 +1,5 @@
 import { getTweet } from 'react-tweet/api'
+import { extractTweetIdFromUrl } from '~/helpers/tweet-url'
 import { logger } from '~/lib/logger'
 
 export class TweetNoVideoError extends Error {
@@ -9,18 +10,6 @@ export class TweetNoVideoError extends Error {
 
     this.name = 'TweetNoVideoError'
   }
-}
-
-const extractTweetIdFromUrl = (tweetUrl: string) => {
-  const url = new URL(tweetUrl)
-  const tweetId =
-    url.searchParams.get('post_id') ?? url.pathname.split('/').at(-1)
-
-  if (!tweetId) {
-    throw new Error('Could not extract tweet ID from URL')
-  }
-
-  return tweetId
 }
 
 const fetchBlob = async (url: string) => {
@@ -55,6 +44,10 @@ export async function getTweetMedia(videoUrl: string, poster: string) {
 
 export async function getTweetByUrl(tweetUrl: string) {
   const tweetId = extractTweetIdFromUrl(tweetUrl)
+
+  if (!tweetId) {
+    throw new Error('Could not extract tweet ID from URL')
+  }
 
   return getTweetById(tweetId)
 }

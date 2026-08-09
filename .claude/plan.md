@@ -1,84 +1,124 @@
-# Plan : overlay du cookie banner bloquant les clics au premier chargement (2026-07-27)
+# Plan : prise en charge des liens X `/status/<id>/video/1` (2026-08-09)
 
-**Statut : corrigé.** `pnpm run lint:fix` passe.
+**Statut : corrigé.** `pnpm run lint:fix` passe. Les deux formats extraient la vidéo.
 
 ## Symptôme
 
-Sur une première visite, aucun bouton de la page n'est cliquable pendant ~3,5 s, puis
-l'interface redevient utilisable au moment où la bannière de cookies apparaît.
+Le nouveau format de lien copié depuis le menu contextuel d'une vidéo sur X,
+`https://x.com/Monty_Brogan69/status/2081431421944471694/video/1`, ne fonctionne pas dans
+les formulaires admin (« Télécharger une vidéo depuis un tweet » et création de mème
+depuis un tweet).
 
 ## Cause
 
-`src/components/cookie-consent/cookie-banner.tsx` appliquait le délai d'apparition à
-l'**animation** et non au **montage** :
+La validation n'était pas en cause. `TWITTER_REGEX_THAT_INCLUDES_ID` dans
+`src/constants/url.ts` n'était pas ancrée à la fin (`...\/status\/\d+` sans `$`), donc le
+suffixe `/video/1` passait le `TWEET_LINK_SCHEMA` sans erreur.
 
-```tsx
-initial={{ opacity: 0 }}
-animate={{ opacity: 1, transition: { delay: APPEAR_DELAY_S, duration: 0.3 } }}
-className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+La panne était à l'extraction de l'identifiant, dans `src/lib/react-tweet.ts` :
+
+```ts
+url.searchParams.get('post_id') ?? url.pathname.split('/').at(-1)
 ```
 
-L'overlay était donc présent dans le DOM dès le premier rendu, en `fixed inset-0 z-50`.
-`opacity: 0` ne retire pas un élément du hit-testing : la div interceptait tous les clics
-de la page pendant toute la durée du délai.
+Le dernier segment du chemin vaut `1` pour ce format. `getTweet('1')` était donc appelé
+avec un identifiant faux, et l'appel échouait côté serveur (502 « Impossible de récupérer
+le tweet »). Même conséquence pour le format `/photo/1`.
 
-`isBannerVisible` valant `true` dès le montage du provider pour un visiteur sans consentement
-enregistré, le problème ne touchait que les nouveaux arrivants — cohérent avec le rapport.
+Le schéma de validation et l'extraction étaient deux sources de vérité distinctes qui
+pouvaient diverger : la première acceptait des URL que la seconde ne savait pas lire.
 
 ## Correctif
 
-- [x] Nouveau hook bas niveau `src/hooks/use-timeout.ts` — `{ callback, delayMs, isEnabled }`,
-      `clearTimeout` au cleanup. Le callback passe par `React.useEffectEvent` : sans ça il
-      faudrait le mettre en dépendance, et comme il est recréé à chaque rendu (le projet
-      interdit `useCallback` sans problème de perf mesuré) le timer redémarrerait sans cesse
-      et l'échéance ne tomberait jamais. Seuls `delayMs` et `isEnabled` sont en dépendances.
+- [x] Nouveau `src/helpers/tweet-url.ts` — `extractTweetIdFromUrl(tweetUrl)` retourne
+      l'identifiant ou `null`. Deux expressions régulières ancrées, à groupe nommé
+      `tweetId` : une pour `/<handle>/status/<id>` avec suffixe média optionnel
+      (`/video/<n>` ou `/photo/<n>`), barre oblique finale et chaîne de requête ou
+      fragment optionnels ; une pour `/i/bookmarks?post_id=<id>`.
 
-      `useEffectEvent` est stable depuis React 19.2 (installé : 19.2.8) et l'appel asynchrone
-      depuis un `setTimeout` est le motif documenté dans « Separating Events from Effects ».
-      La contrainte « top level d'un composant ou de tes propres Hooks » est respectée.
-      Écrit `React.useEffectEvent` et non l'import destructuré, conformément à
-      `.claude/rules/frontend.md`.
-- [x] `CookieBanner` consomme `useTimeout` directement avec un `useState` local. Pas de hook
-      `useDelayedAppearance` intermédiaire : il n'aurait fait qu'envelopper `useTimeout` sans
-      rien ajouter.
-- [x] `CookieBanner` monte l'overlay et le panneau seulement quand
-      `isBannerVisible && hasDelayElapsed`. Rien dans le DOM avant l'échéance, donc plus rien
-      à intercepter.
-- [x] `delay` retiré des deux transitions `motion` (overlay + slide) : le délai est désormais
-      porté par le montage, le cumuler aurait doublé l'attente.
-- [x] `APPEAR_DELAY_S = 3.5` → `APPEAR_DELAY_MS = 3500` (le hook prend des millisecondes).
-- [x] `BannerMedia` : suppression du `videoRef` et de l'effet de lecture différée, remplacés
-      par l'attribut `autoPlay`. Le composant ne se monte plus qu'au moment voulu, la lecture
-      manuelle après timer n'a plus de raison d'être. `muted` + `playsInline` sont déjà là,
-      l'autoplay reste autorisé par les navigateurs.
+      Pas de `new URL()` ni de `URL.parse()` : le helper est appelé côté client par le
+      schéma de validation des formulaires, et `URL.parse` demande Safari 18, au-dessus de
+      la cible de compilation Vite par défaut.
 
-## Correctif 2 — bannière rendue derrière la modale de connexion
+- [x] `src/constants/url.ts` — `TWEET_LINK_SCHEMA` passe de `.regex(...)` à
+      `.refine((url) => extractTweetIdFromUrl(url) !== null, 'Invalid tweet URL')`.
+      Une seule source de vérité : le formulaire n'accepte plus que ce que le serveur sait
+      lire. Effet de bord voulu, les URL auparavant acceptées à tort et vouées à un 502
+      (`/status/<id>/analytics` par exemple) sont maintenant refusées à la saisie.
 
-`AuthDialog` utilise le `Dialog` Radix sans prop `modal`, donc `modal={true}`. Radix applique
-alors à tout ce qui est hors du portail : `pointer-events: none` sur `<body>`,
-`aria-hidden="true"` sur les frères du portail, et un piège de focus. La bannière étant rendue
-dans l'arbre normal (`__root.tsx:72`), la faire passer devant via le z-index l'aurait rendue
-**visible mais inerte** — boutons non cliquables, invisible aux lecteurs d'écran, hors du
-parcours clavier.
+- [x] `src/lib/react-tweet.ts` — suppression de l'`extractTweetIdFromUrl` local,
+      `getTweetByUrl` consomme le helper partagé et lève si l'identifiant est absent.
 
-- [x] `useIsDialogOpen()` ajouté à `src/stores/dialog.store.tsx`. Le prédicat est
-      `componentProps?.open === true` et non `component !== null` : `closeDialog` ne remet pas
-      `component` à `null` (seul `forceCloseDialog` le fait), donc `component` reste non-nul
-      après la première ouverture et ne dit rien de l'état réel.
-- [x] `CookieBanner` gate son montage sur `!isDialogOpen`. La bannière attend la fermeture du
-      dialogue au lieu de se superposer.
+Aucune modification de schéma Prisma, aucune migration.
 
-Sens unique en pratique : tant que la bannière est affichée, son overlay couvre la page, donc
-aucun dialogue ne peut être ouvert par un clic. Le cas inverse ne se produit que pour un
-dialogue déclenché par timer (`premium-reminder`), où `AnimatePresence` joue la sortie.
+## Portée
 
-## Vérifié
+Le correctif couvre les points d'entrée qui partagent `TWEET_LINK_SCHEMA` :
 
-- Aucun autre overlay plein écran monté inconditionnellement : `player-dialog.tsx` et
-  `animate-ui/radix/dialog.tsx` sont tous deux conditionnés par un état d'ouverture.
+- `src/routes/admin/-components/download-from-twitter-form.tsx` (téléchargement seul)
+- `src/routes/admin/-components/twitter-form.tsx` et `createMemeFromTwitterUrl`
+  (`src/routes/admin/-server/memes.ts`)
+- `detectUrlType` des propositions utilisateur (`src/constants/meme-submission.ts`)
 
-## Non traité (à arbitrer)
+Le champ `tweetUrl` du formulaire de mème (`src/routes/admin/-server/memes.ts`) enregistre
+l'URL telle qu'elle est saisie, suffixe `/video/1` compris. Le lien reste valide sur X.
+La normalisation vers la forme canonique n'est pas faite ici ; `createMemeFromTwitterUrl`
+enregistre déjà la forme canonique reconstruite par `getTweetById`.
 
-- La bannière n'expose que « Personnaliser » et « Accepter ». La CNIL demande que refuser soit
-  aussi simple qu'accepter ; un bouton « Refuser » de même niveau serait à ajouter. Hors
-  périmètre de ce correctif.
+## Mise en place de Vitest (même commit)
+
+Le dépôt n'avait aucune infrastructure de test. Ce correctif en est un bon candidat
+d'amorçage : une fonction pure, un contrat clair, une régression réelle à verrouiller.
+
+- [x] `vitest@4.1.10` en dépendance de développement. La plage de pairs `vite` du paquet
+      est `^6 || ^7 || ^8`, satisfaite par le `vite@8.1.5` déjà installé, donc aucune
+      seconde copie de Vite et aucune dérogation à ajouter dans `pnpm.peerDependencyRules`.
+
+- [x] `vitest.config.ts` autonome, sans reprise de `vite.config.ts` : les tests unitaires
+      n'ont pas besoin de la chaîne TanStack Start, Nitro, Sentry, Paraglide et Tailwind,
+      dont le chargement coûterait plusieurs secondes par exécution. `resolve.tsconfigPaths`
+      (natif depuis Vite 8) résout l'alias `~/`. `include` est limité à `src/**/*.test.ts`
+      pour que `.output/` et `.vercel/` ne soient jamais parcourus.
+
+- [x] Scripts `test` (`vitest run`) et `test:watch` (`vitest`) dans `package.json`,
+      reportés dans la section Commands de `CLAUDE.md`.
+
+- [x] Préréglage `vitest` de `@viclafouch/oxc-config` activé. Il ne peut pas aller dans le
+      `extends` de premier niveau : il met toutes les catégories à `off`, ce qui
+      désarmerait `correctness`, `suspicious` et les autres pour tout le dépôt. Ses
+      `plugins` et ses `rules` sont donc étalés dans un `overrides` limité à
+      `**/*.test.ts`. `overrides` n'accepte pas `extends` dans le schéma oxlint, cet
+      étalement est la seule voie.
+
+- [x] Hook `pre-commit` (`.husky/pre-commit`) étendu :
+      `pnpm run lint && pnpm run format:check && pnpm run test`. Les tests passent en
+      dernier parce que Vitest transpile par esbuild sans contrôler les types : une erreur
+      de typage ne ferait pas tomber un test. Laisser `lint` en tête garantit que le code
+      est correctement typé avant qu'on tire une conclusion du résultat des tests.
+      Coût total du hook : 5,1 s, dont 88 ms pour les tests, `tsc` domine.
+
+- [x] Premier test : `src/helpers/tweet-url.test.ts`, 24 cas sur
+      `extractTweetIdFromUrl`. Structure BDD de `.claude/rules/testing.md` : un `describe`
+      par situation, une seule assertion par test, marqueurs `#when` et `#then`. Les
+      tableaux passent par `it.each`, ce qu'impose de toute façon la règle
+      `vitest/prefer-each` du préréglage.
+
+## Vérification
+
+`pnpm run test` : 24 tests, 1 fichier, au vert. `pnpm run lint:fix` passe.
+
+Test de mutation, la suite remise face à l'ancienne implémentation
+(`pathname.split('/').at(-1)`) : 18 des 24 cas tombent, dont exactement
+`/status/2081431421944471694/video/1`. La suite verrouille bien la régression.
+
+Le préréglage oxlint vérifié de la même manière : un `it.only` introduit volontairement
+déclenche `vitest(no-focused-tests)`, donc les règles s'appliquent réellement aux fichiers
+de test.
+
+Hook `pre-commit` vérifié dans les deux sens : sortie 0 sur la base saine, sortie 1 avec une
+assertion volontairement fausse. Il bloque donc réellement le commit.
+
+Chaîne complète contre l'API X réelle, pour `/status/2081431421944471694/video/1` et pour
+`/status/2081431421944471694` : `TWEET_LINK_SCHEMA` passe, `getTweetByUrl` retourne le même
+identifiant et la même URL vidéo, `getTweetMedia` télécharge 290 Ko de `video/mp4` et 36 Ko
+d'affiche.

@@ -16,6 +16,8 @@
     "prisma:reset-db:dev": "dotenv -e .env.development -- prisma migrate reset",
     "avatars:generate": "pnpm dlx tsx scripts/generate-avatars.ts",
     "postinstall": "paraglide-js compile --project ./project.inlang && node scripts/copy-ffmpeg.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "tsc && oxlint",
     "lint:fix": "tsc && oxlint --fix && pnpm run format",
     "format": "oxfmt",
@@ -124,7 +126,8 @@
     "prisma": "^7.9.0",
     "shadcn": "^4.15.0",
     "typescript": "^7.0.2",
-    "vite-node": "^6.0.0"
+    "vite-node": "^6.0.0",
+    "vitest": "^4.1.10"
   },
   "engines": {
     "node": ">=24.0.0"

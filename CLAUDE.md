@@ -20,6 +20,8 @@ Minimize costs on all external services (database, Algolia, Sentry, Vercel, etc.
 ```bash
 pnpm run build            # Production build (Vite + Nitro vercel preset)
 pnpm start                # Start production server
+pnpm run test             # Run the unit tests once (Vitest)
+pnpm run test:watch       # Unit tests in watch mode
 pnpm run lint             # TypeScript check + oxlint
 pnpm run lint:fix         # Auto-fix lint issues + format with oxfmt
 pnpm run format           # Format with oxfmt

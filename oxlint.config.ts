@@ -5,7 +5,8 @@ import {
   hooks,
   jsxA11y,
   imports,
-  tanstackQuery
+  tanstackQuery,
+  vitest
 } from '@viclafouch/oxc-config'
 
 export default defineConfig({
@@ -44,6 +45,14 @@ export default defineConfig({
     'typescript/restrict-template-expressions': 'off'
   },
   overrides: [
+    {
+      // The vitest preset silences every category, so it cannot go in `extends`
+      // without disarming the other presets. Spreading it into an override
+      // scoped to test files keeps its rules where they belong.
+      files: ['**/*.test.ts'],
+      plugins: vitest.plugins,
+      rules: vitest.rules
+    },
     {
       // react-email and entry point require default exports
       files: ['src/emails/**', 'src/server.ts'],

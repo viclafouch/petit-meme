@@ -1,11 +1,11 @@
 import { z } from 'zod'
-
-const TWITTER_REGEX_THAT_INCLUDES_ID =
-  /^https:\/\/(?:twitter\.com|x\.com)\/(?:[A-Za-z0-9_]+\/status\/\d+|i\/bookmarks\?post_id=\d+)/u
+import { extractTweetIdFromUrl } from '~/helpers/tweet-url'
 
 export const TWEET_LINK_SCHEMA = z
   .url({ protocol: /^https$/u, hostname: /^(twitter|x)\.com$/u })
-  .regex(TWITTER_REGEX_THAT_INCLUDES_ID, 'Invalid tweet URL')
+  .refine((url) => {
+    return extractTweetIdFromUrl(url) !== null
+  }, 'Invalid tweet URL')
 
 const YOUTUBE_REGEX =
   /^https:\/\/(?:(?:www\.)?youtube\.com\/watch\?v=[\w-]{11}|youtu\.be\/[\w-]{11})/u

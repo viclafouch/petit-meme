@@ -14,6 +14,7 @@ import {
 } from '~/constants/ai-search'
 import { getErrorMessage, matchIsRateLimitError } from '~/helpers/error'
 import { useAiSearchStages } from '~/hooks/use-ai-search-stages'
+import { snoozePremiumReminder } from '~/hooks/use-premium-reminder'
 import { getAiSearchQuotaQueryOpts } from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
 import { buildBreadcrumbJsonLd } from '~/lib/seo'
@@ -100,6 +101,7 @@ export const AiSearchPage = () => {
     }
 
     if (quotaQuery.data && !quotaQuery.data.canSearch) {
+      snoozePremiumReminder()
       showDialog('ai-search-upsell', {})
 
       return

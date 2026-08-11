@@ -12,19 +12,8 @@ import {
 import { Button } from '~/components/ui/button'
 import { PREMIUM_PLAN_PRICING } from '~/constants/plan'
 import { formatCentsToEuros } from '~/helpers/number'
-import { dismissPremiumReminder } from '~/hooks/use-premium-reminder'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
-
-const handleOpenChange = (
-  value: boolean,
-  onOpenChange: (open: boolean) => void
-) => {
-  if (!value) {
-    dismissPremiumReminder()
-  }
-  onOpenChange(value)
-}
 
 export const PremiumReminderDialog = ({
   open,
@@ -37,12 +26,7 @@ export const PremiumReminderDialog = ({
   )
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(value) => {
-        handleOpenChange(value, onOpenChange)
-      }}
-    >
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="max-w-sm overflow-hidden p-0"
         onOpenAutoFocus={(event) => {
@@ -82,7 +66,7 @@ export const PremiumReminderDialog = ({
                 ref={ctaRef}
                 to="/pricing"
                 onClick={() => {
-                  handleOpenChange(false, onOpenChange)
+                  onOpenChange(false)
                 }}
               >
                 <Crown className="size-4" aria-hidden="true" />
@@ -94,7 +78,7 @@ export const PremiumReminderDialog = ({
               size="lg"
               className="w-full text-muted-foreground"
               onClick={() => {
-                handleOpenChange(false, onOpenChange)
+                onOpenChange(false)
               }}
             >
               {m.common_not_now()}

@@ -6,7 +6,7 @@ import {
   getAuthUserQueryOpts
 } from '~/lib/queries'
 import { matchIsUserAdmin } from '~/lib/role'
-import { useShowDialog } from '~/stores/dialog.store'
+import { matchIsDialogOpen, useDialog } from '~/stores/dialog.store'
 
 const PREMIUM_REMINDER_STORAGE_KEY = 'premium-reminder-dismissed-at'
 const COOLDOWN_MS = 3 * DAY
@@ -16,16 +16,15 @@ type UsePremiumReminderParams = {
   enabled: boolean
 }
 
+export const snoozePremiumReminder = () => {
+  localStorage.setItem(PREMIUM_REMINDER_STORAGE_KEY, String(Date.now()))
+}
+
 export const usePremiumReminder = ({ enabled }: UsePremiumReminderParams) => {
   const queryClient = useQueryClient()
-  const showDialog = useShowDialog()
 
   React.useEffect(() => {
-    const matchShouldShow = () => {
-      if (!enabled) {
-        return false
-      }
-
+    const matchIsReminderRelevant = () => {
       const user = queryClient.getQueryData(getAuthUserQueryOpts().queryKey)
 
       if (user && matchIsUserAdmin(user)) {
@@ -40,25 +39,38 @@ export const usePremiumReminder = ({ enabled }: UsePremiumReminderParams) => {
         return false
       }
 
-      const dismissedAt = localStorage.getItem(PREMIUM_REMINDER_STORAGE_KEY)
+      const snoozedAt = localStorage.getItem(PREMIUM_REMINDER_STORAGE_KEY)
 
-      return !(dismissedAt && Date.now() - Number(dismissedAt) < COOLDOWN_MS)
+      return !(snoozedAt && Date.now() - Number(snoozedAt) < COOLDOWN_MS)
     }
 
-    const timeout = matchShouldShow()
-      ? setTimeout(() => {
-          showDialog('premium-reminder', {})
-        }, DISPLAY_DELAY_MS)
-      : null
+    let timeout: ReturnType<typeof setTimeout> | null = null
+
+    const showReminderWhenScreenIsFree = () => {
+      if (!matchIsReminderRelevant()) {
+        return
+      }
+
+      const dialogState = useDialog.getState()
+
+      if (matchIsDialogOpen(dialogState)) {
+        timeout = setTimeout(showReminderWhenScreenIsFree, DISPLAY_DELAY_MS)
+
+        return
+      }
+
+      snoozePremiumReminder()
+      dialogState.showDialog('premium-reminder', {})
+    }
+
+    if (enabled) {
+      timeout = setTimeout(showReminderWhenScreenIsFree, DISPLAY_DELAY_MS)
+    }
 
     return () => {
       if (timeout) {
         clearTimeout(timeout)
       }
     }
-  }, [enabled, queryClient, showDialog])
-}
-
-export const dismissPremiumReminder = () => {
-  localStorage.setItem(PREMIUM_REMINDER_STORAGE_KEY, String(Date.now()))
+  }, [enabled, queryClient])
 }

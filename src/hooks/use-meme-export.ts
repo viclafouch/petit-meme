@@ -2,6 +2,7 @@ import { toast } from 'sonner'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { MemeExportMode, MemeWithVideo } from '~/constants/meme'
 import { getErrorMessage } from '~/helpers/error'
+import { snoozePremiumReminder } from '~/hooks/use-premium-reminder'
 import {
   getActiveSubscriptionQueryOpts,
   getAuthUserQueryOpts
@@ -42,6 +43,7 @@ export const useMemeExport = ({ mode }: UseMemeExportParams) => {
   const mutation = useMutation({
     mutationFn: async (meme: Pick<MemeWithVideo, 'id' | 'title'>) => {
       if (!matchIsClientPremium()) {
+        snoozePremiumReminder()
         showDialog('watermark-upsell', { meme, mode })
 
         return

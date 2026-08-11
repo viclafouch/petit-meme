@@ -136,6 +136,12 @@ export const useDialog = create<
   }
 })
 
+type DialogState = ReturnType<typeof useDialog.getState>
+
+export const matchIsDialogOpen = (state: DialogState) => {
+  return state.componentProps?.open === true
+}
+
 export function useShowDialog() {
   return useDialog((state) => {
     return state.showDialog
@@ -143,9 +149,7 @@ export function useShowDialog() {
 }
 
 export function useIsDialogOpen() {
-  return useDialog((state) => {
-    return state.componentProps?.open === true
-  })
+  return useDialog(matchIsDialogOpen)
 }
 
 export const DialogProvider = ({ children }: { children: React.ReactNode }) => {

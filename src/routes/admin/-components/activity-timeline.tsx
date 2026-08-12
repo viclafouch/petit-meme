@@ -28,7 +28,6 @@ type ActivityTimelineParams = {
   error: Error | null
 }
 
-// oxlint-disable-next-line react/react-compiler -- useReactTable is flagged as incompatible library
 export const ActivityTimeline = ({
   rows,
   total,

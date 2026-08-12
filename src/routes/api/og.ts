@@ -112,8 +112,8 @@ export const Route = createFileRoute('/api/og')({
             {
               name: 'Bricolage Grotesque',
               data: () => {
-                return fetch(fontUrl).then((res) => {
-                  return res.arrayBuffer()
+                return fetch(fontUrl).then((response) => {
+                  return response.arrayBuffer()
                 })
               }
             }

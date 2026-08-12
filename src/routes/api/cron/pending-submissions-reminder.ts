@@ -53,7 +53,7 @@ const runPendingSubmissionsReminder = async () => {
   })
 
   if (error) {
-    log.error({ err: error }, 'Failed to send reminder email')
+    log.error({ error }, 'Failed to send reminder email')
 
     return { sent: false, count: submissions.length }
   }
@@ -78,7 +78,7 @@ export const Route = createFileRoute('/api/cron/pending-submissions-reminder')({
 
           return Response.json({ success: true, ...result })
         } catch (error) {
-          log.error({ err: error }, 'Pending submissions reminder cron failed')
+          log.error({ error }, 'Pending submissions reminder cron failed')
 
           return Response.json(
             { success: false, error: 'Internal error' },

@@ -61,7 +61,7 @@ export const Route = createFileRoute('/api/cron/sync-algolia')({
             indices: summary
           })
         } catch (error) {
-          log.error({ err: error }, 'Algolia sync cron failed')
+          log.error({ error }, 'Algolia sync cron failed')
 
           return Response.json(
             { success: false, error: 'Internal error' },

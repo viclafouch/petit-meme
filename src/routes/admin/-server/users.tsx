@@ -204,7 +204,7 @@ const cancelActiveSubscription = async (stripeCustomerId: string | null) => {
   } catch (error) {
     captureWithFeature(error, 'admin-ban')
     adminLogger.error(
-      { err: error, stripeCustomerId },
+      { error, stripeCustomerId },
       'Failed to cancel Stripe subscription on ban'
     )
 

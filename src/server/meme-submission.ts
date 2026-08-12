@@ -42,7 +42,7 @@ export const createMemeSubmission = createServerFn({ method: 'POST' })
         await getTweetByUrl(data.url)
       } catch (error) {
         submissionLogger.warn(
-          { userId, url: data.url, err: error },
+          { userId, url: data.url, error },
           'Tweet video verification failed'
         )
         setResponseStatus(422)

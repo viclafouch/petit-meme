@@ -177,7 +177,6 @@ export const Reel = React.memo(
   }
 )
 
-// oxlint-disable-next-line react/react-compiler -- useVirtualizer is flagged as incompatible library
 export const MemeReels = () => {
   const [currentIndex, setCurrentIndex] = React.useState(0)
   const [isPlaying, setIsPlaying] = React.useState(true)

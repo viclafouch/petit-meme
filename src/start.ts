@@ -7,11 +7,11 @@ import { customErrorAdapter } from '~/constants/error'
 import { observeCsrfBlock } from '~/utils/csrf-observer'
 
 const csrfMiddleware = createCsrfMiddleware({
-  filter: (ctx) => {
-    return ctx.handlerType === 'serverFn'
+  filter: (context) => {
+    return context.handlerType === 'serverFn'
   },
-  failureResponse: (ctx) => {
-    observeCsrfBlock(ctx.request)
+  failureResponse: (context) => {
+    observeCsrfBlock(context.request)
 
     return new Response('Forbidden', { status: 403 })
   }

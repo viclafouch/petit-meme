@@ -110,7 +110,6 @@ const StatCard = ({ label, value, icon }: StatCardParams) => {
   )
 }
 
-// oxlint-disable-next-line react/react-compiler -- useReactTable is flagged as incompatible library
 const RouteComponent = () => {
   const logsQuery = useSuspenseQuery(getAdminAiSearchLogsQueryOpts())
 

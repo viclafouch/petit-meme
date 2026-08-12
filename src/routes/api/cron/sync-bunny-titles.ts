@@ -104,7 +104,7 @@ export const Route = createFileRoute('/api/cron/sync-bunny-titles')({
 
           return Response.json({ success: true, totalProcessed })
         } catch (error) {
-          log.error({ err: error }, 'Bunny titles sync cron failed')
+          log.error({ error }, 'Bunny titles sync cron failed')
 
           return Response.json(
             { success: false, error: 'Internal error' },

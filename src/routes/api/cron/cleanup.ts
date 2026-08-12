@@ -267,7 +267,7 @@ const runUnverifiedCleanup = async () => {
       deletedCount += 1
     } else {
       log.error(
-        { err: result.reason, email: user.email },
+        { error: result.reason, email: user.email },
         'Failed to delete user'
       )
       errorCount += 1
@@ -295,7 +295,7 @@ export const Route = createFileRoute('/api/cron/cleanup')({
 
           return Response.json({ success: true, retention, unverified })
         } catch (error) {
-          log.error({ err: error }, 'Cleanup cron failed')
+          log.error({ error }, 'Cleanup cron failed')
 
           return Response.json(
             { success: false, error: 'Internal error' },

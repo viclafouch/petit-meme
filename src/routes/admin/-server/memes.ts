@@ -399,14 +399,14 @@ export const deleteMemeById = createServerFn({ method: 'POST' })
       deleteVideo(meme.video.bunnyId).catch((error: unknown) => {
         captureWithFeature(error, 'bunny-cleanup')
         bunnyLogger.error(
-          { err: error, bunnyId: meme.video.bunnyId },
+          { error, bunnyId: meme.video.bunnyId },
           'Failed to delete video from Bunny CDN'
         )
       }),
       deleteWatermarkedVideo(meme.video.bunnyId).catch((error: unknown) => {
         captureWithFeature(error, 'bunny-storage-cleanup')
         bunnyLogger.error(
-          { err: error, bunnyId: meme.video.bunnyId },
+          { error, bunnyId: meme.video.bunnyId },
           'Failed to delete watermarked video from Bunny Storage'
         )
       })
@@ -440,7 +440,7 @@ async function rollbackMemeCreation(memeId: string) {
       .delete({ where: { id: memeId } })
       .catch((cleanupError: unknown) => {
         adminLogger.error(
-          { err: cleanupError, memeId },
+          { error: cleanupError, memeId },
           'Failed to rollback meme from DB'
         )
       }),
@@ -485,7 +485,7 @@ async function createMemeWithVideo({
     await deleteVideo(videoId).catch((cleanupError: unknown) => {
       captureWithFeature(cleanupError, 'bunny-cleanup')
       bunnyLogger.error(
-        { err: cleanupError, bunnyVideoId: videoId },
+        { error: cleanupError, bunnyVideoId: videoId },
         'Failed to cleanup orphan Bunny video after DB error'
       )
     })
@@ -500,7 +500,7 @@ async function createMemeWithVideo({
   } catch (error) {
     captureWithFeature(error, 'admin-meme-edit')
     adminLogger.error(
-      { err: error, memeId: meme.id, bunnyVideoId: videoId },
+      { error, memeId: meme.id, bunnyVideoId: videoId },
       'Upload/Algolia failed after DB create, rolling back'
     )
     await rollbackMemeCreation(meme.id)

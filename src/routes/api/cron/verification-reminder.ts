@@ -54,7 +54,7 @@ const sendReminderToUser = async (
   })
 
   if (error) {
-    log.error({ err: error, email: user.email }, 'Failed to send reminder')
+    log.error({ error, email: user.email }, 'Failed to send reminder')
 
     return false
   }
@@ -105,7 +105,7 @@ const runVerificationReminders = async () => {
         errorCount += 1
       }
     } catch (error) {
-      log.error({ err: error, email: user.email }, 'Error processing user')
+      log.error({ error, email: user.email }, 'Error processing user')
       errorCount += 1
     }
   }
@@ -130,7 +130,7 @@ export const Route = createFileRoute('/api/cron/verification-reminder')({
 
           return Response.json({ success: true, ...result })
         } catch (error) {
-          log.error({ err: error }, 'Verification reminder cron failed')
+          log.error({ error }, 'Verification reminder cron failed')
 
           return Response.json(
             { success: false, error: 'Internal error' },

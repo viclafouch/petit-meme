@@ -37,7 +37,7 @@ export const cleanupUserData = createServerOnlyFn(
       } catch (error) {
         captureWithFeature(error, 'delete-account')
         authLogger.warn(
-          { err: error, stripeCustomerId: dbUser.stripeCustomerId, userId },
+          { error, stripeCustomerId: dbUser.stripeCustomerId, userId },
           'Failed to delete Stripe customer (may already be deleted)'
         )
       }

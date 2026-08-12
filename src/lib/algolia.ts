@@ -55,7 +55,7 @@ export async function safeAlgoliaOp<T>(promise: Promise<T>) {
   try {
     return await promise
   } catch (error) {
-    algoliaLogger.error({ err: error }, 'Algolia operation failed')
+    algoliaLogger.error({ error }, 'Algolia operation failed')
     Sentry.captureException(error)
 
     return null

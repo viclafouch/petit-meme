@@ -181,7 +181,7 @@ async function uploadVideoToGemini(memeId: string) {
       .delete({ name: uploadedFile.name })
       .catch((deleteError: unknown) => {
         adminLogger.error(
-          { err: deleteError, fileName: uploadedFile.name },
+          { error: deleteError, fileName: uploadedFile.name },
           'Failed to cleanup Gemini file after upload error'
         )
       })
@@ -292,7 +292,7 @@ export const translateMemeContent = createServerFn({ method: 'POST' })
     } catch (error) {
       captureWithFeature(error, 'ai-translation')
       adminLogger.error(
-        { err: error, sourceLocale: data.sourceLocale },
+        { error, sourceLocale: data.sourceLocale },
         'AI translation failed'
       )
       setResponseStatus(502)
@@ -354,17 +354,14 @@ export const aiAssistMemeContent = createServerFn({ method: 'POST' })
     } catch (error) {
       captureWithFeature(error, 'ai-generation')
       adminLogger.error(
-        { err: error, memeId: data.memeId },
+        { error, memeId: data.memeId },
         'AI assist content generation failed'
       )
       setResponseStatus(502)
       throw new Error(`AI Assist a échoué : ${getErrorMessage(error)}`)
     } finally {
       ai.files.delete({ name: fileName }).catch((error: unknown) => {
-        adminLogger.error(
-          { err: error, fileName },
-          'Failed to cleanup Gemini file'
-        )
+        adminLogger.error({ error, fileName }, 'Failed to cleanup Gemini file')
       })
     }
   })

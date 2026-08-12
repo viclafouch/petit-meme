@@ -130,7 +130,7 @@ const setDbCache = createServerOnlyFn(
         })
         .catch(() => {})
     } catch (error) {
-      algoliaLogger.warn({ err: error, key }, 'Failed to write recommend cache')
+      algoliaLogger.warn({ error, key }, 'Failed to write recommend cache')
     }
   }
 )
@@ -149,7 +149,7 @@ export const clearRecommendCache = createServerOnlyFn(async () => {
   try {
     await prismaClient.recommendCache.deleteMany()
   } catch (error) {
-    algoliaLogger.warn({ err: error }, 'Failed to clear recommend cache')
+    algoliaLogger.warn({ error }, 'Failed to clear recommend cache')
   }
 })
 

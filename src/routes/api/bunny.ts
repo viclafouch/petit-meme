@@ -26,7 +26,7 @@ export const Route = createFileRoute('/api/bunny')({
         try {
           data = await request.json()
         } catch (error) {
-          bunnyLogger.error({ err: error }, 'Invalid JSON in webhook body')
+          bunnyLogger.error({ error }, 'Invalid JSON in webhook body')
 
           return Response.json({ success: false }, { status: 400 })
         }
@@ -36,7 +36,7 @@ export const Route = createFileRoute('/api/bunny')({
         try {
           result = WEBHOOK_RESPONSE_SCHEMA.parse(data)
         } catch (error) {
-          bunnyLogger.error({ err: error, data }, 'Invalid webhook payload')
+          bunnyLogger.error({ error, data }, 'Invalid webhook payload')
 
           return Response.json({ success: false }, { status: 400 })
         }
@@ -73,7 +73,7 @@ export const Route = createFileRoute('/api/bunny')({
           return Response.json({ success: true })
         } catch (error) {
           bunnyLogger.error(
-            { err: error, videoId: result.VideoGuid, status: result.Status },
+            { error, videoId: result.VideoGuid, status: result.Status },
             'Video update failed'
           )
           captureWithFeature(error, 'bunny-webhook')

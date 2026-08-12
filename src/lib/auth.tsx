@@ -81,7 +81,7 @@ const handlePaymentFailed = async (event: Stripe.Event) => {
   } catch (error) {
     captureWithFeature(error, 'stripe-billing-portal')
     stripeLogger.error(
-      { err: error, customerId, eventId: event.id },
+      { error, customerId, eventId: event.id },
       'Failed to create billing portal session'
     )
 
@@ -110,7 +110,7 @@ const touchUserLastActive = async (session: { userId: string }) => {
         data: { lastActiveAt: new Date() }
       })
       .catch((error) => {
-        authLogger.error({ err: error }, 'Failed to update lastActiveAt')
+        authLogger.error({ error }, 'Failed to update lastActiveAt')
       })
   )
 }

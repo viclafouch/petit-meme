@@ -162,7 +162,6 @@ const columns = [
   })
 ]
 
-// oxlint-disable-next-line react/react-compiler
 const RouteComponent = () => {
   const { users } = Route.useLoaderData()
 

@@ -37,15 +37,12 @@ export const sendEmailAsync = ({
     })
     .then(({ error }) => {
       if (error) {
-        emailLogger.error({ err: error, subject, to }, 'Failed to send email')
+        emailLogger.error({ error, subject, to }, 'Failed to send email')
         captureWithFeature(error, 'resend-email')
       }
     })
     .catch((error: unknown) => {
-      emailLogger.error(
-        { err: error, subject, to },
-        'Network error sending email'
-      )
+      emailLogger.error({ error, subject, to }, 'Network error sending email')
       captureWithFeature(error, 'resend-email')
     })
 }

@@ -114,7 +114,7 @@ async function extractSearchKeywords(prompt: string, systemPrompt: string) {
   } catch (error) {
     captureWithFeature(error, 'ai-search')
     aiSearchLogger.error(
-      { err: error, prompt },
+      { error, prompt },
       'Haiku extraction failed, using raw prompt as fallback'
     )
 
@@ -200,10 +200,7 @@ export const aiSearchMemes = createServerFn({ method: 'POST' })
       )
     } catch (error) {
       captureWithFeature(error, 'ai-search')
-      aiSearchLogger.error(
-        { err: error, query, filters },
-        'Algolia search failed'
-      )
+      aiSearchLogger.error({ error, query, filters }, 'Algolia search failed')
       setResponseStatus(502)
       throw new Error('AI search failed')
     }
@@ -226,7 +223,7 @@ export const aiSearchMemes = createServerFn({ method: 'POST' })
         })
         .catch((error: unknown) => {
           captureWithFeature(error, 'ai-search')
-          aiSearchLogger.error({ err: error }, 'Failed to log AI search')
+          aiSearchLogger.error({ error }, 'Failed to log AI search')
         })
     )
 

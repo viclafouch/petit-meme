@@ -48,7 +48,7 @@ export const logAuditAction = async ({
     })
   } catch (error) {
     adminLogger.error(
-      { err: error, action, actingAdminId, targetId, targetType },
+      { error, action, actingAdminId, targetId, targetType },
       'Failed to write audit log'
     )
   }

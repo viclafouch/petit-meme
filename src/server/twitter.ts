@@ -16,7 +16,7 @@ export const getTweetFromUrl = createServerFn({ method: 'GET' })
     try {
       return await getTweetByUrl(url)
     } catch (error) {
-      adminLogger.error({ err: error, url }, 'Failed to get tweet from URL')
+      adminLogger.error({ error, url }, 'Failed to get tweet from URL')
       captureWithFeature(error, 'admin-downloader')
 
       setResponseStatus(502)
@@ -42,7 +42,7 @@ const fetchAsBase64 = async (url: string) => {
 
     return Buffer.from(buffer).toString('base64')
   } catch (error) {
-    adminLogger.error({ err: error, url }, 'Failed to fetch tweet media')
+    adminLogger.error({ error, url }, 'Failed to fetch tweet media')
     captureWithFeature(error, 'admin-downloader')
     setResponseStatus(502)
     throw new Error('Impossible de télécharger le média depuis Twitter')

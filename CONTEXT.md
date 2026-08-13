@@ -1,99 +1,167 @@
 # Petit Meme
 
-Plateforme de consultation et de partage de mèmes vidéo. Victor est le seul créateur de mèmes ; le public les regarde, les télécharge, les partage et peut en générer des versions personnalisées.
+A platform for watching and sharing video memes. Victor is the only creator of memes. The public watches them, downloads them, shares them, and can generate personalised versions of them.
+
+This file is the vocabulary of the project and the decisions the code cannot explain by itself. A term you coin and a constraint you discover both belong here, written the same way.
 
 ## Language
 
-### Acteurs
+### Actors
 
 **Visitor**:
-Quiconque agit sur le site, identifié par son adresse IP, qu'il possède un compte ou non.
-_Avoid_: Viewer, anonyme, internaute
+Anyone acting on the site, identified by their IP address, whether they own an account or not.
+_Avoid_: Viewer, anonymous, guest
 
 **User**:
-Un Visitor qui possède un compte. Correspond strictement au modèle Prisma `User`.
-_Avoid_: Membre, compte, client
+A Visitor who owns an account. Maps strictly to the Prisma `User` model.
+_Avoid_: Member, account, customer
 
 **Creator**:
-Victor, seul autorisé à publier des Memes. Ce qu'il fait sur le site relève de l'Audit, jamais de l'Activity : il n'est pas son propre public.
-_Avoid_: Auteur, admin (l'admin désigne le rôle technique, pas la personne)
+Victor, the only person allowed to publish Memes. What he does on the site belongs to the Audit, never to the Activity: he is not his own audience.
+_Avoid_: Author, admin (admin names the technical role, not the person)
 
-### Actions sur un Meme
+### Content
+
+**Meme**:
+The unit of content and the reason the site exists: one short video, its title, its description, its keywords and its Categories. A Meme always carries exactly one Video. It is what the public browses, searches and shares, and the only object the Creator publishes.
+_Avoid_: Post, clip, content, item
+
+**Video**:
+The video file itself, hosted and streamed by the CDN, referenced by its provider id. Distinct from the Meme: the Meme is the page and the metadata, the Video is what plays. A Video without a Meme is not visible anywhere.
+_Avoid_: Media, asset, file
+
+**Watermark**:
+The mark burned into the video before publication. It is an invariant, not a state to check: a Meme published in production necessarily carries it, and the admin form cannot publish a Meme without it.
+_Avoid_: Logo, overlay
+
+**Category**:
+A browsing axis for Memes, named by a slug and translated per locale. A Meme belongs to zero or more Categories.
+_Avoid_: Tag, theme, collection
+
+**ContentLocale**:
+The language spoken or written **inside** a Meme, one of French, English or Universal. It is not the locale of the Visitor and it is not the locale of the interface. Universal means the Meme carries no language and belongs to both audiences.
+_Avoid_: Language, locale on its own (ambiguous with the interface locale)
+
+**Translation**:
+The localized metadata of a Meme or a Category: title, description, keywords. It never translates the video, only what is written around it.
+_Avoid_: i18n, version
+
+### Surfaces
+
+**Studio**:
+The place where a User produces a Generation, that is the editor where they put their own text on a Meme.
+_Avoid_: Editor, generator
+
+**Reels**:
+The full screen vertical browsing mode, one Meme after another. A distinct way of consuming the same Memes, not a distinct kind of content.
+_Avoid_: Feed, stories, shorts
+
+**Admin**:
+The Creator's area: publication, moderation, figures. What happens there feeds the Audit, never the Activity.
+_Avoid_: Dashboard, back office
+
+### Actions on a Meme
 
 **Export**:
-La récupération par un Visitor du fichier vidéo watermarké d'un Meme. Se décline en deux intentions, Download et Share.
-_Avoid_: Partage (le mot désigne une seule des deux intentions)
+The retrieval by a Visitor of the watermarked video file of a Meme. It comes in two intents, Download and Share.
+_Avoid_: Sharing (the word names only one of the two intents)
 
 **Download**:
-Un Export dont l'intention est d'enregistrer le fichier sur l'appareil.
+An Export whose intent is to save the file on the device.
 
 **Share**:
-Un Export dont l'intention est le partage natif. Se mesure à deux endroits qui ne comptent pas la même chose. Le compteur d'Audience ne retient que les partages **aboutis**, seul le navigateur pouvant connaître l'issue. L'Event d'Activity retient l'**intention**, le serveur voyant passer le fichier sans jamais apprendre la suite. Un partage abandonné compte donc dans l'Activity et pas dans l'Audience.
-_Avoid_: Envoi, diffusion
+An Export whose intent is a native share. It is measured in two places that do not count the same thing. The Audience counter only keeps **completed** shares, since only the browser can know the outcome. The Activity Event keeps the **intent**, since the server sees the file go out and never learns what followed. An abandoned share therefore counts in the Activity and not in the Audience.
+_Avoid_: Send, distribution
 
 **Generation**:
-La création par un User d'une variante d'un Meme portant son propre texte.
-_Avoid_: Création, montage
+The creation by a User of a variant of a Meme carrying their own text.
+_Avoid_: Creation, editing
 
 **View**:
-La lecture effective d'un Meme par un Visitor, comptée une seule fois par Meme, Visitor et jour. Une lecture trop brève ne compte pas.
-_Avoid_: Visionnage, impression, affichage
+The effective playback of a Meme by a Visitor, counted once per Meme, Visitor and day. A playback that is too short does not count.
+_Avoid_: Watch, impression, display
+
+**Bookmark**:
+The link a User keeps towards a Meme in order to find it again. It belongs to the account, so a Visitor without an account has none. The free Plan caps how many a User can hold.
+_Avoid_: Favorite, like, save (parts of the interface still say favorite, the word to converge on is Bookmark)
+
+**Submission**:
+The proposal by a User of a source link, a tweet or a YouTube video, for the Creator to turn into a Meme. It is the only way the public influences the catalogue, and it never publishes anything by itself: the Creator approves or rejects it, and an approved Submission becomes a Meme he publishes. Proposing is not creating.
+_Avoid_: Upload, contribution, post
+
+**AiSearch**:
+A search phrased in natural language, answered by a model rather than by the search index. It costs money per call and is capped per Plan, unlike an ordinary search.
+_Avoid_: Smart search, prompt
+
+### Access
+
+**Plan**:
+What a User is entitled to: the number of Generations, of Bookmarks and of AiSearches. Free by default, lifted by Premium.
+_Avoid_: Tier, offer
+
+**Premium**:
+The state of a User whose Plan is paid and active. It is a state we read, never a flag we write by hand.
+_Avoid_: Pro, paid member, VIP
+
+**Subscription**:
+The billing record behind Premium, owned by the payment provider and mirrored locally. It carries the dates and the cancellation, not the entitlements.
+_Avoid_: Abonnement premium (mixes the state and the record), payment
 
 ### Observation
 
 **Event**:
-Un fait horodaté attribué à un Visitor : une View, un Export, une Generation, une inscription, un abonnement, une mise en favori. Son attribution est figée au moment où il se produit : un Visitor qui crée ensuite un compte ne récupère pas ses Events antérieurs.
-_Avoid_: Action (le mot désigne déjà un Export dans les compteurs), trace, log
+A timestamped fact attributed to a Visitor: a View, an Export, a Generation, a sign up, a subscription, a bookmark. Its attribution is frozen at the moment it happens: a Visitor who later creates an account does not recover their earlier Events.
+_Avoid_: Action (the word already names an Export in the counters), trace, log
 
 **Activity**:
-Le flux des Events, dans l'ordre où ils se sont produits.
-_Avoid_: Historique, journal (réservé à l'Audit)
+The stream of Events, in the order they happened.
+_Avoid_: History, journal (reserved for the Audit)
 
 **Audit**:
-La trace des actions du Creator sur le contenu, distincte de l'Activity qui ne concerne que le public.
-_Avoid_: Activité admin
+The trail of the Creator's actions on the content, distinct from the Activity which only concerns the public.
+_Avoid_: Admin activity
 
 **Audience**:
-L'agrégat quotidien des Views, conservé sur le long terme pour les courbes et le compteur public d'un Meme. Compte les Views selon la même règle que l'Activity, les deux chiffres concordent donc.
-_Avoid_: Statistiques, analytics
+The daily aggregate of Views, kept for the long term for the charts and the public counter of a Meme. It counts Views by the same rule as the Activity, so the two figures agree.
+_Avoid_: Statistics, analytics
 
-### Identité
+### Identity
 
 **Avatar**:
-L'image qui représente un User sur le site. Toujours définie, éventuellement par une valeur par défaut.
-_Avoid_: Photo de profil, image
+The image that represents a User on the site. Always defined, possibly by a default value.
+_Avoid_: Profile picture, image
 
 **ProviderAvatar**:
-L'Avatar fourni par Discord ou Twitter à l'inscription, figé à cet instant et jamais réécrit. Sert de choix par défaut et de retour arrière possible. Sa durée de vie n'est pas garantie : une URL Discord contient le hash de l'image, donc elle meurt le jour où la personne change sa photo. C'est un état connu, le repli est l'AvatarSlot dérivé de l'e-mail.
-_Avoid_: Photo SSO, avatar d'origine
+The Avatar supplied by Discord or Twitter at sign up, frozen at that instant and never rewritten. It serves as the default choice and as a possible way back. Its lifetime is not guaranteed: a Discord URL contains the hash of the image, so it dies the day the person changes their picture. This is a known state, and the fallback is the AvatarSlot derived from the email.
+_Avoid_: SSO picture, original avatar
 
 **AvatarSlot**:
-Un emplacement du catalogue d'Avatars, identifié par son rang et non par le dessin qu'il porte. Un User choisit un AvatarSlot, jamais un visage : redessiner le catalogue change ce que tout le monde voit sans changer ce que quiconque a choisi.
-_Avoid_: Preset, modèle, avatar par défaut
+A slot in the Avatar catalogue, identified by its rank and not by the drawing it carries. A User picks an AvatarSlot, never a face: redrawing the catalogue changes what everyone sees without changing what anyone picked.
+_Avoid_: Preset, template, default avatar
 
 **VisitorKey**:
-L'identifiant qui distingue deux Visitors sans les nommer. Dérivé de l'IP et renouvelé chaque jour, il permet de compter sans conserver de trace réidentifiable.
+The identifier that tells two Visitors apart without naming them. Derived from the IP and renewed every day, it allows counting without keeping a re-identifiable trace.
 _Avoid_: viewerKey, anonId, userToken
 
 **AlgoliaUserToken**:
-Le jeton stable transmis à Algolia pour la pertinence des recommandations. Distinct du VisitorKey et posé uniquement avec le consentement du Visitor.
-_Avoid_: userToken seul (ambigu : chez Algolia le mot désigne un anonyme)
+The stable token sent to Algolia for recommendation relevance. Distinct from the VisitorKey and set only with the Visitor's consent.
+_Avoid_: userToken alone (ambiguous: at Algolia the word names an anonymous visitor)
 
-## Contraintes
+## Constraints
 
-Des décisions qui se défont facilement de bonne foi, parce que le code seul ne dit pas pourquoi il est écrit ainsi.
+Decisions that come undone easily and in good faith, because the code alone does not say why it is written this way.
 
-**Le catalogue d'Avatars est append-only.**
-On n'efface ni ne renomme jamais un fichier de `public/avatars/`. Un User a choisi un rang, pas un visage : retirer un fichier casse son Avatar sans qu'il ait rien fait. Redessiner les 24 mêmes fichiers est en revanche sans danger.
+**The Avatar catalogue is append-only.**
+A file in `public/avatars/` is never deleted nor renamed. A User picked a rank, not a face: removing a file breaks their Avatar without them doing anything. Redrawing the same 24 files, on the other hand, is harmless.
 
-**DiceBear est généré localement et jamais appelé par son API.**
-`api.dicebear.com` est réservé à l'usage non commercial et le site vend des abonnements Stripe. `@dicebear/core` reste en `devDependencies` : il sert à `pnpm run avatars:generate`, jamais au runtime.
+**DiceBear is generated locally and never called through its API.**
+`api.dicebear.com` is reserved for non commercial use and the site sells Stripe subscriptions. `@dicebear/core` stays in `devDependencies`: it serves the avatar generation script, never the runtime.
 
-**Le style d'avatar porte une obligation d'attribution.**
-`AVATAR_STYLE_ID` vaut `adventurer-neutral`, publié en CC BY 4.0, ce qui impose le crédit visible de la section 8 des mentions légales. Changer de style oblige à reprendre cette section dans les deux locales : un style CC0 la rend inutile, un autre style CC BY en change le texte. Le texte exact est celui de `meta.license.text` du style, il ne se traduit pas.
+**The avatar style carries an attribution obligation.**
+`AVATAR_STYLE_ID` is `adventurer-neutral`, published under CC BY 4.0, which requires the visible credit in section 8 of the legal notice. Changing style means rewriting that section in both locales: a CC0 style makes it useless, another CC BY style changes its text. The exact text is the one in `meta.license.text` of the style, and it is not translated.
 
-**`/avatars/**` est servi en `max-age` d'une semaine, jamais en `immutable`.**
-Volontaire. Un changement de style réécrit les 24 mêmes fichiers sous les mêmes noms, et `immutable` figerait l'ancien dessin jusqu'à un an chez les visiteurs. Contrepartie acceptée : un changement met jusqu'à sept jours à se propager.
+**`/avatars/**` is served with a one week `max-age`, never as `immutable`.**
+This is deliberate. A style change rewrites the same 24 files under the same names, and `immutable` would freeze the old drawing for up to a year on visitors' devices. Accepted trade off: a change takes up to seven days to propagate.
 
-**Tout champ écrit à l'inscription doit être déclaré à better-auth.**
-`transformInput` construit la ligne insérée en bouclant sur les seuls champs connus du schema better-auth et jette le reste sans une erreur. Un champ renvoyé par le hook `user.create.before` mais absent de `USER_ADDITIONAL_FIELDS` n'est tout simplement jamais écrit. Ce piège a déjà coûté `provider_avatar`, puis les horodatages de consentement RGPD et la locale des e-mails.
+**Every field written at sign up must be declared to better-auth.**
+`transformInput` builds the inserted row by looping over the fields known to the better-auth schema only, and drops the rest without an error. A field returned by the `user.create.before` hook but missing from `USER_ADDITIONAL_FIELDS` is simply never written. This trap already cost `provider_avatar`, then the GDPR consent timestamps, then the email locale.

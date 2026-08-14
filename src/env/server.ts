@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { createEnv } from '@t3-oss/env-core'
+import { IS_PRODUCTION } from '~/constants/env'
 
 export const serverEnv = createEnv({
   server: {
@@ -26,6 +27,7 @@ export const serverEnv = createEnv({
     STRIPE_MONTHLY_PRICE_ID: z.string().startsWith('price_'),
     STRIPE_ANNUAL_PRICE_ID: z.string().startsWith('price_'),
     CRON_SECRET: z.string().min(16).optional(),
+    VERCEL_ENV: z.enum(['production', 'preview', 'development']).optional(),
     LOG_LEVEL: z
       .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace'])
       .optional()
@@ -33,3 +35,11 @@ export const serverEnv = createEnv({
   runtimeEnv: process.env,
   emptyStringAsUndefined: true
 })
+
+export const IS_PRODUCTION_DEPLOYMENT = serverEnv.VERCEL_ENV
+  ? serverEnv.VERCEL_ENV === 'production'
+  : IS_PRODUCTION
+
+export const IS_DEPLOYED = serverEnv.VERCEL_ENV
+  ? serverEnv.VERCEL_ENV !== 'development'
+  : IS_PRODUCTION

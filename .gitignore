@@ -8,6 +8,9 @@
 
 # testing
 /coverage
+e2e/.auth/
+e2e/.results/
+playwright-report/
 
 # production
 /build
@@ -24,6 +27,7 @@ yarn-error.log*
 
 # local env files
 .env.development
+.env.e2e
 .env.production
 
 # typescript

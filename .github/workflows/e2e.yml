@@ -1,0 +1,54 @@
+name: e2e
+
+on:
+  pull_request:
+    branches: [main]
+
+# The test database is shared, so two runs never overlap.
+concurrency:
+  group: e2e
+  cancel-in-progress: false
+
+jobs:
+  test:
+    # A pull request from a fork gets no secrets, so it would fail on boot.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+
+      # The whole e2e environment lives in one secret, same shape as any other
+      # env file of the project. Vite reads it through `--mode e2e`.
+      # `printf` through the environment, never `echo` of the interpolation:
+      # the shell would expand a `$` or a backtick sitting in a secret.
+      - name: Write the e2e environment file
+        env:
+          E2E_ENV_FILE: ${{ secrets.E2E_ENV_FILE }}
+        run: printf '%s\n' "$E2E_ENV_FILE" > .env.e2e
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm run prisma:migrate:e2e
+
+      - run: pnpm run build:e2e
+
+      - run: pnpm exec playwright install --with-deps chromium
+
+      - run: pnpm run test:e2e
+
+      # The repository is public: traces carry session cookies, so they only
+      # leave the runner when something failed, and not for long.
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 3

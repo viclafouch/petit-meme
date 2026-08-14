@@ -163,5 +163,11 @@ A file in `public/avatars/` is never deleted nor renamed. A User picked a rank, 
 **`/avatars/**` is served with a one week `max-age`, never as `immutable`.**
 This is deliberate. A style change rewrites the same 24 files under the same names, and `immutable` would freeze the old drawing for up to a year on visitors' devices. Accepted trade off: a change takes up to seven days to propagate.
 
+**`NODE_ENV` says how the code was built, never where it runs.**
+A preview deployment is a production build, so `NODE_ENV` cannot tell it from the live site. Anything that must behave differently there, error reporting, rate limiting, secure cookies, reads the deployment environment instead. `NODE_ENV` remains the right question for everything else.
+
+**The end to end suite owns the `test` branch of the database, and empties it.**
+Every run truncates every table before seeding. `.env.e2e` is loaded so that it wins over any exported variable, and the truncation refuses to run unless the connection string it sees is the one that file declares. That second check belongs next to the destruction, never at the call site.
+
 **Every field written at sign up must be declared to better-auth.**
 `transformInput` builds the inserted row by looping over the fields known to the better-auth schema only, and drops the rest without an error. A field returned by the `user.create.before` hook but missing from `USER_ADDITIONAL_FIELDS` is simply never written. This trap already cost `provider_avatar`, then the GDPR consent timestamps, then the email locale.

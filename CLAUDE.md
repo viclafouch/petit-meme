@@ -88,7 +88,9 @@ French, plain technical language, short sentences. The first line says the outco
 
 ## Scope
 
-The specification is what I asked for in the conversation. Plans live in the conversation too, this repository holds no plan file. Work that needs steps checks in between them.
+The specification is what I asked for in the conversation. Plans live in the conversation too, this repository holds no plan file for a feature. Work that needs steps checks in between them.
+
+`docs/` is the exception, and it holds the opposite kind of document: what outlives the feature that produced it. A test plan belongs there, a migration plan does not. `specs/` is the scratch area of the Playwright agents, never a place to keep anything.
 
 ## Git
 

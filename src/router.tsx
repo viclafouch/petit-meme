@@ -83,8 +83,8 @@ export function getRouter() {
     Sentry.init({
       dsn: clientEnv.VITE_SENTRY_DSN,
       tunnel: '/api/sentry-tunnel',
-      environment: process.env.NODE_ENV,
-      enabled: IS_PRODUCTION,
+      environment: clientEnv.VITE_VERCEL_ENV,
+      enabled: clientEnv.VITE_VERCEL_ENV === 'production',
       integrations: [
         Sentry.tanstackRouterBrowserTracingIntegration(router),
         Sentry.replayIntegration({

@@ -11,7 +11,10 @@ export const clientEnv = createEnv({
     VITE_ALGOLIA_APP_ID: z.string(),
     VITE_ALGOLIA_SEARCH_KEY: z.string(),
     VITE_ALGOLIA_INDEX: z.string(),
-    VITE_SENTRY_DSN: z.url()
+    VITE_SENTRY_DSN: z.url(),
+    VITE_VERCEL_ENV: z
+      .enum(['production', 'preview', 'development'])
+      .default('development')
   },
   runtimeEnv: import.meta.env,
   emptyStringAsUndefined: true

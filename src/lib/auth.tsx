@@ -17,7 +17,11 @@ import {
 import { ActivityEventType, UserLocale } from '~/db/generated/prisma/enums'
 import { emailSubjects } from '~/emails/subjects'
 import { clientEnv } from '~/env/client'
-import { IS_DEPLOYED, IS_PRODUCTION_DEPLOYMENT, serverEnv } from '~/env/server'
+import {
+  matchIsDeployed,
+  matchIsProductionDeployment,
+  serverEnv
+} from '~/env/server'
 import { getAvatarSlotIdForEmail, resolveAvatarPath } from '~/helpers/avatar'
 import { formatDate } from '~/helpers/date'
 import { formatCentsToEuros } from '~/helpers/number'
@@ -265,7 +269,7 @@ const getAuthConfig = createServerOnlyFn(() => {
       }
     },
     rateLimit: {
-      enabled: IS_PRODUCTION_DEPLOYMENT,
+      enabled: matchIsProductionDeployment(),
       window: 60,
       max: 100,
       storage: 'memory',
@@ -278,7 +282,7 @@ const getAuthConfig = createServerOnlyFn(() => {
       }
     },
     advanced: {
-      useSecureCookies: IS_DEPLOYED,
+      useSecureCookies: matchIsDeployed(),
       // Vercel-specific: keeps serverless function alive after response
       backgroundTasks: {
         handler: (promise) => {

@@ -13,7 +13,7 @@
     "build:e2e": "vite build --mode e2e",
     "start:e2e": "dotenv -e .env.e2e -- node .output/server/index.mjs",
     "prisma:migrate:dev": "dotenv -e .env.development -- prisma migrate deploy",
-    "prisma:migrate:e2e": "dotenv -e .env.e2e -- prisma migrate deploy",
+    "prisma:migrate:e2e": "dotenv -e .env.e2e -- prisma migrate deploy || dotenv -e .env.e2e -- prisma migrate deploy",
     "prisma:migrate:prod": "dotenv -e .env.production -- prisma migrate deploy",
     "prisma:seed:dev": "npx vite-node --mode development prisma/seed.ts",
     "prisma:reset-db:dev": "dotenv -e .env.development -- prisma migrate reset",

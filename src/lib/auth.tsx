@@ -9,7 +9,6 @@ import { createServerOnlyFn } from '@tanstack/react-start'
 import { waitUntil } from '@vercel/functions'
 import { prismaClient } from '~/db'
 import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '~/constants/auth'
-import { IS_PRODUCTION } from '~/constants/env'
 import {
   FIVE_MINUTES_IN_SECONDS,
   ONE_HOUR_IN_SECONDS,
@@ -18,7 +17,7 @@ import {
 import { ActivityEventType, UserLocale } from '~/db/generated/prisma/enums'
 import { emailSubjects } from '~/emails/subjects'
 import { clientEnv } from '~/env/client'
-import { serverEnv } from '~/env/server'
+import { IS_DEPLOYED, IS_PRODUCTION_DEPLOYMENT, serverEnv } from '~/env/server'
 import { getAvatarSlotIdForEmail, resolveAvatarPath } from '~/helpers/avatar'
 import { formatDate } from '~/helpers/date'
 import { formatCentsToEuros } from '~/helpers/number'
@@ -266,7 +265,7 @@ const getAuthConfig = createServerOnlyFn(() => {
       }
     },
     rateLimit: {
-      enabled: IS_PRODUCTION,
+      enabled: IS_PRODUCTION_DEPLOYMENT,
       window: 60,
       max: 100,
       storage: 'memory',
@@ -279,7 +278,7 @@ const getAuthConfig = createServerOnlyFn(() => {
       }
     },
     advanced: {
-      useSecureCookies: IS_PRODUCTION,
+      useSecureCookies: IS_DEPLOYED,
       // Vercel-specific: keeps serverless function alive after response
       backgroundTasks: {
         handler: (promise) => {

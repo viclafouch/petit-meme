@@ -8,11 +8,9 @@ import type {
   CategoryConfig,
   CookieConsentConfig
 } from '~/components/cookie-consent'
-import { CONSENT_COOKIE_KEY } from '~/constants/cookie'
+import { CONSENT_COOKIE_KEY, CONSENT_VERSION } from '~/constants/cookie'
 import { readClientCookie } from '~/helpers/cookie'
 import { m } from '~/paraglide/messages.js'
-
-const CONSENT_VERSION = '1.0.0'
 
 export function getCookieConsentConfig(): CookieConsentConfig {
   const categories = [

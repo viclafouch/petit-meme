@@ -1,5 +1,12 @@
 import * as Sentry from '@sentry/tanstackstart-react'
-import { IS_PRODUCTION } from '~/constants/env'
+
+// This file is imported before the app, so it reads the raw variable rather
+// than `serverEnv`: a missing variable elsewhere must not break Sentry itself.
+// Same fallback as `~/env/server`: when the platform says nothing, `NODE_ENV`
+// decides, so a system variable that is not exposed never silences production.
+const deploymentEnv =
+  process.env.VERCEL_ENV ??
+  (process.env.NODE_ENV === 'production' ? 'production' : 'development')
 
 const FULL_SAMPLE_RATE = 1.0
 const DROP_SAMPLE_RATE = 0
@@ -9,8 +16,8 @@ const SENSITIVE_HEADERS = ['authorization', 'cookie', 'set-cookie']
 
 Sentry.init({
   dsn: process.env.VITE_SENTRY_DSN,
-  environment: process.env.NODE_ENV ?? 'production',
-  enabled: IS_PRODUCTION,
+  environment: deploymentEnv,
+  enabled: deploymentEnv === 'production',
   dataCollection: {
     userInfo: false,
     httpBodies: [],

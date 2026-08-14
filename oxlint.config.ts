@@ -11,6 +11,7 @@ import {
 
 export default defineConfig({
   extends: [typescript, react, hooks, jsxA11y, imports, tanstackQuery],
+  jsPlugins: ['eslint-plugin-playwright'],
   options: {
     typeAware: true
   },
@@ -54,10 +55,21 @@ export default defineConfig({
       rules: vitest.rules
     },
     {
-      // react-email and entry point require default exports
-      files: ['src/emails/**', 'src/server.ts'],
+      // react-email, entry point and Playwright require default exports
+      files: ['src/emails/**', 'src/server.ts', 'playwright.config.ts'],
       rules: {
         'import/no-default-export': 'off'
+      }
+    },
+    {
+      files: ['e2e/**/*.ts'],
+      rules: {
+        'playwright/no-focused-test': 'error',
+        'playwright/no-wait-for-timeout': 'error',
+        'playwright/no-force-option': 'error',
+        'playwright/no-element-handle': 'error',
+        'playwright/no-page-pause': 'error',
+        'playwright/prefer-web-first-assertions': 'error'
       }
     },
     {

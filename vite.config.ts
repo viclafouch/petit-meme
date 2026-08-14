@@ -47,6 +47,12 @@ export default defineConfig(({ mode }) => {
   // and Object.assign merges them into process.env so server code can access them.
   Object.assign(process.env, loadEnv(mode, process.cwd(), ''))
 
+  // Vercel gives the build `VERCEL_ENV` but never gives it to the browser.
+  // Copying it into the VITE_ namespace, which Vite inlines, spares a second
+  // variable to declare by hand on every scope. Absent, the browser reads
+  // `development` and Sentry stays silent there.
+  process.env.VITE_VERCEL_ENV ??= process.env.VERCEL_ENV ?? 'development'
+
   return {
     resolve: {
       tsconfigPaths: true
@@ -98,7 +104,9 @@ export default defineConfig(({ mode }) => {
       }),
       react(),
       nitro({
-        preset: 'vercel',
+        // The e2e suite serves the build itself, so it needs `node-server`.
+        // Everything else ships to Vercel.
+        preset: mode === 'e2e' ? 'node-server' : 'vercel',
         sourcemap: true,
         // Nitro enables `unwasm` on every preset, which makes takumi-js resolve
         // `#backend` to WebAssembly at build time while Node resolves it to the

@@ -36,10 +36,23 @@ export const serverEnv = createEnv({
   emptyStringAsUndefined: true
 })
 
-export const IS_PRODUCTION_DEPLOYMENT = serverEnv.VERCEL_ENV
-  ? serverEnv.VERCEL_ENV === 'production'
-  : IS_PRODUCTION
+// `NODE_ENV` says how the code was built, never where it runs: a preview build
+// is a production build. Everything that must behave differently on a preview
+// than on the live site asks these instead. See docs/adr/0005.
+// When the platform says nothing, `NODE_ENV` decides: a missing variable must
+// never silently downgrade production.
+//
+// Functions, not constants: a constant would read `serverEnv` while the module
+// loads, and this module travels into client chunks. Reading it there throws,
+// and takes hydration down with it.
+export const matchIsProductionDeployment = () => {
+  return serverEnv.VERCEL_ENV
+    ? serverEnv.VERCEL_ENV === 'production'
+    : IS_PRODUCTION
+}
 
-export const IS_DEPLOYED = serverEnv.VERCEL_ENV
-  ? serverEnv.VERCEL_ENV !== 'development'
-  : IS_PRODUCTION
+export const matchIsDeployed = () => {
+  return serverEnv.VERCEL_ENV
+    ? serverEnv.VERCEL_ENV !== 'development'
+    : IS_PRODUCTION
+}

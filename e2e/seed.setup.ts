@@ -2,7 +2,6 @@
 import { hashPassword } from 'better-auth/crypto'
 import { test as setup } from '@playwright/test'
 import { prismaClient } from '~/db'
-import { stripeClient } from '~/lib/stripe'
 import { logEnvironmentInfo } from '../scripts/lib/env-guard'
 import { clearDatabase } from './clear-database'
 import { E2E_PASSWORD, E2E_ROLES, type E2eRole } from './constants'
@@ -36,39 +35,18 @@ const createUser = async (role: E2eRole) => {
   })
 }
 
-// Deleting a Stripe customer cancels its subscriptions, so the checkout User
-// starts every run without one. Scoped to the fixture emails, never a blind
-// sweep of the shared test account.
-const clearStripeCustomers = async () => {
-  const counts = await Promise.all(
-    Object.values(E2E_ROLES).map(async (role) => {
-      const { data } = await stripeClient.customers.list({ email: role.email })
-
-      await Promise.all(
-        data.map((customer) => {
-          return stripeClient.customers.del(customer.id)
-        })
-      )
-
-      return data.length
-    })
-  )
-
-  return counts.reduce((total, count) => {
-    return total + count
-  }, 0)
-}
-
 setup.afterAll(async () => {
   await prismaClient.$disconnect()
 })
 
+// Nothing is deleted at Stripe. A deleted customer leaves an id that outlives
+// it, and better-auth then hands that id to Stripe, which refuses it. Test mode
+// customers pile up instead, which costs nothing and breaks nothing.
 setup('seed the e2e environment', async () => {
   setup.setTimeout(SEED_TIMEOUT_MS)
   logEnvironmentInfo()
 
   await clearDatabase()
-  console.log(`  ${await clearStripeCustomers()} Stripe customers deleted`)
 
   await Promise.all(
     Object.values(E2E_ROLES).map((role) => {

@@ -6,6 +6,10 @@ const isCi = Boolean(process.env.CI)
 export default defineConfig({
   testDir: './e2e',
   outputDir: './e2e/.results',
+  // The checkout, the longest scenario, takes fifteen to twenty seconds: two
+  // page loads, a payment, and the redirect back. Three times that is tolerance
+  // for a slow runner, not room for a test to hang.
+  timeout: 60_000,
   forbidOnly: isCi,
   retries: isCi ? 2 : 0,
   workers: 1,

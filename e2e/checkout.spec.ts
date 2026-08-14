@@ -3,8 +3,8 @@ import { E2E_ROLES, STRIPE_TEST_CARD } from './constants'
 import { resolveStorageStatePath } from './env'
 import { expect, test } from './fixtures'
 
-const CHECKOUT_TIMEOUT_MS = 180_000
-const HYDRATION_RETRY_MS = 10_000
+const CLICK_ACKNOWLEDGED_MS = 3000
+const HYDRATION_GIVE_UP_MS = 20_000
 const SUBSCRIPTION_WRITE_TIMEOUT_MS = 15_000
 
 test.use({ storageState: resolveStorageStatePath('checkout') })
@@ -20,31 +20,46 @@ const findCheckoutSubscription = () => {
 }
 
 test('a paid checkout turns the User into a Premium', async ({ page }) => {
-  test.setTimeout(CHECKOUT_TIMEOUT_MS)
-
   await page.goto('/pricing')
 
   const premiumCard = page.getByTestId('pricing-card-premium')
 
   // The button is server rendered before React attaches its handler, so a click
   // that lands too early is simply lost, and Playwright has no way to know it.
-  // Retrying the pair until the navigation starts waits for hydration without
-  // betting on a delay.
+  // Retry until the request actually leaves, and never after: a second checkout
+  // call on the same User is refused, which is what a Visitor who double clicks
+  // gets too.
   await expect(async () => {
-    await premiumCard.getByRole('button').click()
-    await page.waitForURL(/checkout\.stripe\.com/u, {
-      timeout: HYDRATION_RETRY_MS
-    })
-  }).toPass({ timeout: CHECKOUT_TIMEOUT_MS / 2 })
+    await Promise.all([
+      page.waitForRequest(/subscription\/upgrade/u, {
+        timeout: CLICK_ACKNOWLEDGED_MS
+      }),
+      premiumCard.getByRole('button').click()
+    ])
+  }).toPass({ timeout: HYDRATION_GIVE_UP_MS })
 
-  // Locators owned by Stripe's hosted checkout, not by us.
-  await page.locator('#cardNumber').fill(STRIPE_TEST_CARD.number)
+  await page.waitForURL(/checkout\.stripe\.com/u)
+
+  // Locators owned by Stripe's hosted checkout, not by us. Its test ids are
+  // stable and say nothing about the language, unlike the labels.
+  const submitButton = page.getByTestId('hosted-payment-submit-button')
+  await submitButton.waitFor()
+
+  // Stripe folds the card form behind a payment method picker as soon as the
+  // browser offers a wallet, which a Mac does and the Linux runner does not.
+  const cardNumber = page.locator('#cardNumber')
+
+  if (!(await cardNumber.isVisible())) {
+    await page.getByTestId('card-accordion-item').click()
+  }
+
+  await cardNumber.fill(STRIPE_TEST_CARD.number)
   await page.locator('#cardExpiry').fill(STRIPE_TEST_CARD.expiry)
   await page.locator('#cardCvc').fill(STRIPE_TEST_CARD.cvc)
   await page.locator('#billingName').fill(E2E_ROLES.checkout.name)
-  await page.getByTestId('hosted-payment-submit-button').click()
+  await submitButton.click()
 
-  await page.waitForURL('**/checkout/success', { timeout: CHECKOUT_TIMEOUT_MS })
+  await page.waitForURL('**/checkout/success')
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
 
   await expect

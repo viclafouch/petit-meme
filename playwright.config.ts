@@ -9,7 +9,11 @@ export default defineConfig({
   forbidOnly: isCi,
   retries: isCi ? 2 : 0,
   workers: 1,
-  reporter: isCi ? [['html', { open: 'never' }], ['github']] : [['list']],
+  // `list` first even in CI: `github` only speaks at the end and `html` writes
+  // a file, so a run in progress would say nothing about where it is.
+  reporter: isCi
+    ? [['list'], ['html', { open: 'never' }], ['github']]
+    : [['list']],
   use: {
     baseURL: E2E_BASE_URL,
     trace: 'on-first-retry',
@@ -36,7 +40,9 @@ export default defineConfig({
     {
       name: 'chromium',
       testMatch: /.*\.spec\.ts/u,
-      use: { ...devices['Desktop Chrome'] },
+      // French is the base locale, and the runner would otherwise decide it
+      // through Accept-Language: a run must not change language with its host.
+      use: { ...devices['Desktop Chrome'], locale: 'fr-FR' },
       dependencies: ['auth']
     }
   ]

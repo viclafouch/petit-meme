@@ -3,7 +3,8 @@ import { E2E_ROLES, STRIPE_TEST_CARD } from './constants'
 import { resolveStorageStatePath } from './env'
 import { expect, test } from './fixtures'
 
-const CHECKOUT_TIMEOUT_MS = 120_000
+const CHECKOUT_TIMEOUT_MS = 180_000
+const HYDRATION_RETRY_MS = 10_000
 const SUBSCRIPTION_WRITE_TIMEOUT_MS = 15_000
 
 test.use({ storageState: resolveStorageStatePath('checkout') })
@@ -24,10 +25,19 @@ test('a paid checkout turns the User into a Premium', async ({ page }) => {
   await page.goto('/pricing')
 
   const premiumCard = page.getByTestId('pricing-card-premium')
-  await premiumCard.getByRole('button').click()
+
+  // The button is server rendered before React attaches its handler, so a click
+  // that lands too early is simply lost, and Playwright has no way to know it.
+  // Retrying the pair until the navigation starts waits for hydration without
+  // betting on a delay.
+  await expect(async () => {
+    await premiumCard.getByRole('button').click()
+    await page.waitForURL(/checkout\.stripe\.com/u, {
+      timeout: HYDRATION_RETRY_MS
+    })
+  }).toPass({ timeout: CHECKOUT_TIMEOUT_MS / 2 })
 
   // Locators owned by Stripe's hosted checkout, not by us.
-  await page.waitForURL(/checkout\.stripe\.com/u)
   await page.locator('#cardNumber').fill(STRIPE_TEST_CARD.number)
   await page.locator('#cardExpiry').fill(STRIPE_TEST_CARD.expiry)
   await page.locator('#cardCvc').fill(STRIPE_TEST_CARD.cvc)

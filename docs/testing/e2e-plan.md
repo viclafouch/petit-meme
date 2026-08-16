@@ -132,9 +132,9 @@ Le nom vient de l'application, pas d'une copie : `e2e/messages.ts` fixe la local
 
 Deux conséquences sur l'application. Le dialogue d'authentification garde ses deux panneaux montés pour animer la hauteur, donc le panneau inactif porte `inert` : sans lui un lecteur d'écran voyait les deux formulaires, le clavier tabulait dans le formulaire invisible, et `getByRole('tabpanel')` désignait deux éléments. Et une accroche a11y n'existe que si l'élément a un nom : un bouton sans libellé visible se règle par un vrai libellé, jamais par un identifiant de test.
 
-Une page est rendue sur le serveur avant que React ne s'y attache, et Playwright ne voit pas la différence : un clic est perdu, et une valeur saisie est effacée quand l'hydratation restaure l'input contrôlé. `e2e/helpers.ts` porte les deux seuls signaux disponibles, `repeatUntilVisible` et `repeatUntilRequested`. Ils ne valent que pour la première action d'une page fraîchement chargée, et seulement quand la répéter est sans conséquence.
+Une page est rendue sur le serveur avant que React ne s'y attache, et Playwright ne voit pas la différence : un clic est perdu, et une valeur saisie est effacée quand l'hydratation restaure l'input contrôlé. `e2e/hydration.ts` porte les deux seuls signaux disponibles, `repeatUntilVisible` et `repeatUntilRequested`. Ils ne valent que pour la première action d'une page fraîchement chargée, et seulement quand la répéter est sans conséquence.
 
-`timeout: 30_000` par test : au-delà, un test pend, il ne tourne plus. C'est un plafond serré, le checkout annuel mesure une vingtaine de secondes en local ; `retries: 2` est le coussin en intégration continue. `retries: 2` en intégration continue et `0` en local, `trace: 'on-first-retry'`, `forbidOnly` quand `CI` est défini. Les artefacts ne partent qu'en cas d'échec, avec une rétention de trois jours, parce que le dépôt est public.
+`timeout: 30_000` par test : au-delà, un test pend, il ne tourne plus. C'est un plafond serré, le checkout annuel mesure une vingtaine de secondes en local. `retries: 2` en intégration continue et `0` en local, ce qui sert aussi de coussin sur ce plafond, `trace: 'on-first-retry'`, `forbidOnly` quand `CI` est défini. Les artefacts ne partent qu'en cas d'échec, avec une rétention de trois jours, parce que le dépôt est public.
 
 ## Les agents
 
@@ -146,6 +146,8 @@ Un clone neuf n'a pas leur serveur MCP, qui vit dans `.mcp.json`, ignoré par gi
 
 ## Ce qui reste à faire à la main
 
-Ces étapes ne sont pas automatisables et appartiennent au Creator : désactiver l'endpoint webhook du mode test Stripe, qui livre aujourd'hui sur la production, écrire `.env.e2e` et le recopier dans le secret GitHub `E2E_ENV_FILE`, écrire le workflow de smoke post-déploiement, puis activer la protection de branche sur `main`.
+Ces étapes ne sont pas automatisables et appartiennent au Creator. Faites : l'endpoint webhook du mode test Stripe est désactivé, il ne livre plus sur la production ; `.env.e2e` est écrit et recopié dans le secret GitHub `E2E_ENV_FILE`.
 
-`e2e/env.ts` exige maintenant `BETTER_AUTH_SECRET`, pour forger le jeton de vérification, et `VITE_BUNNY_HOSTNAME`, pour l'affirmation sur les sitemaps, en plus de `VITE_SITE_URL` et `DATABASE_URL`. Une clé qui manque casse le run au chargement, avec son nom dans le message. Le secret `E2E_ENV_FILE` doit donc les porter.
+Restent : générer une clé de recherche Algolia restreinte au seul index `e2e`, parce que `VITE_ALGOLIA_SEARCH_KEY` vaut encore celle du développement et donne donc à un run l'accès en lecture aux index du développement ; écrire le workflow de smoke post-déploiement ; activer la protection de branche sur `main` dès le premier run vert.
+
+`e2e/env.ts` exige `BETTER_AUTH_SECRET`, pour forger le jeton de vérification, et `VITE_BUNNY_HOSTNAME`, pour l'affirmation sur les sitemaps, en plus de `VITE_SITE_URL` et `DATABASE_URL`. Une clé qui manque casse le run au chargement, avec son nom dans le message. Le secret `E2E_ENV_FILE` doit donc les porter.

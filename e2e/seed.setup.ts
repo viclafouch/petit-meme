@@ -16,7 +16,7 @@ const createUser = async (role: E2eRole) => {
       id: role.id,
       name: role.name,
       email: role.email,
-      emailVerified: true,
+      emailVerified: role.emailVerified,
       createdAt: now,
       updatedAt: now,
       termsAcceptedAt: now,

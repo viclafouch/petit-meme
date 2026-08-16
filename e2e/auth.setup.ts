@@ -6,6 +6,10 @@ import { resolveStorageStatePath } from './env'
 // is covered by its own test, every other test only needs the cookie. It also
 // proves the seeded rows are the ones better-auth expects.
 for (const [roleName, role] of Object.entries(E2E_ROLES)) {
+  if (!role.emailVerified) {
+    continue
+  }
+
   setup(`sign in as ${roleName}`, async ({ playwright, baseURL }) => {
     const context = await playwright.request.newContext({ baseURL })
 

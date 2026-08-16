@@ -1,4 +1,5 @@
 import { expect, test as base } from '@playwright/test'
+import { prismaClient } from '~/db'
 import type { ConsentState } from '~/components/cookie-consent/types'
 import { CONSENT_COOKIE_KEY, CONSENT_VERSION } from '~/constants/cookie'
 
@@ -9,6 +10,10 @@ const ACCEPTED_CONSENT = {
   lastUpdated: null
 } as const satisfies ConsentState
 
+type E2eWorkerFixtures = {
+  prismaConnection: typeof prismaClient
+}
+
 // Every test starts with the consent banner already answered. The banner has
 // its own test, and nothing else should have to walk past it.
 //
@@ -16,7 +21,7 @@ const ACCEPTED_CONSENT = {
 // kills hydration, which leaves buttons that look perfect and do nothing, and
 // surfaces minutes later as a timeout with no clue about the cause. Errors
 // raised by third party pages, Stripe above all, are not ours to judge.
-export const test = base.extend({
+export const test = base.extend<object, E2eWorkerFixtures>({
   context: async ({ context, baseURL }, provide) => {
     await context.addCookies([
       {
@@ -39,7 +44,17 @@ export const test = base.extend({
     await provide(context)
 
     expect(pageErrors, 'uncaught errors on our own pages').toEqual([])
-  }
+  },
+  // Specs read the database to check what a flow wrote. Closing the pool once
+  // per worker beats repeating an `afterAll` in every one of them.
+  prismaConnection: [
+    // oxlint-disable-next-line no-empty-pattern -- Playwright reads the destructuring to find a fixture's dependencies, and this one has none
+    async ({}, provide) => {
+      await provide(prismaClient)
+      await prismaClient.$disconnect()
+    },
+    { scope: 'worker', auto: true }
+  ]
 })
 
 export { expect } from '@playwright/test'

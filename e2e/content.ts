@@ -1,3 +1,5 @@
+import { MEMES_PER_PAGE } from '~/constants/meme'
+import { DAY, THIRTY_DAYS_MS } from '~/constants/time'
 import type {
   Category,
   CategoryTranslation,
@@ -233,3 +235,22 @@ export const E2E_MEMES: readonly E2eMeme[] = [
   ...Object.values(E2E_NAMED_MEMES),
   ...E2E_FILLER_MEMES
 ]
+
+// The news Category and the home announcement read the same window, so the
+// Memes that fall inside it are counted once, from the window the app itself
+// declares. Three in French, and no fixture sits near the edge.
+const NEWS_WINDOW_IN_DAYS = THIRTY_DAYS_MS / DAY
+
+export const E2E_RECENT_MEMES = E2E_MEMES.filter((meme) => {
+  return meme.publishedDaysAgo < NEWS_WINDOW_IN_DAYS
+})
+
+// The first page of `trending` falls back to the view counts when no Event
+// exists, so the thirty highest sit on it and the rest sit behind it. This is
+// what the distinct view counts above are for.
+const MEMES_BY_VIEW_COUNT = E2E_MEMES.toSorted((first, second) => {
+  return second.viewCount - first.viewCount
+})
+
+export const E2E_FIRST_PAGE_MEMES = MEMES_BY_VIEW_COUNT.slice(0, MEMES_PER_PAGE)
+export const E2E_SECOND_PAGE_MEMES = MEMES_BY_VIEW_COUNT.slice(MEMES_PER_PAGE)

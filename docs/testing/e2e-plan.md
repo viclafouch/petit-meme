@@ -8,7 +8,7 @@ Les décisions structurantes sont dans `docs/adr/0003`, `0004` et `0005`.
 
 Le niveau 1 est écrit, vingt quatre scénarios plus sept tests de préparation : `checkout`, `signup`, `signin`, `password-reset`, `account-deletion`, `http-contracts`, plus `seed.spec.ts` qui charge l'accueil connecté et sert de point de départ aux agents.
 
-La fondation du niveau 2 est posée : les Memes et les Categories sont semés, et l'index Algolia les voit. Les surfaces elles mêmes attendent d'être écrites, une par une, et le niveau 3 derrière.
+Du niveau 2, les trois surfaces de lecture sont écrites, onze scénarios : `home`, `memes-library` et `memes-category`. Les surfaces qui écrivent quelque chose, Export, Bookmark et Favorites, restent à faire, plus les Reels, la bannière de consentement et le rappel Premium, et le niveau 3 derrière.
 
 ## La règle
 
@@ -49,6 +49,8 @@ Le workflow applique les migrations sur la branche `test` avant de construire, c
 
 La branche Neon se suspend après quelques minutes d'inactivité, et la première connexion expire pendant son réveil. La migration est donc rejouée une fois, et la chaîne de connexion porte un `connect_timeout` de trente secondes.
 
+Ce filet n'attrape pas tout, et il y a deux `P1002` différents. Le réveil trop lent, qui se règle en relançant. Et le verrou consultatif, `Timed out trying to acquire a postgres advisory lock`, qui est structurel : `DATABASE_URL` désigne le point d'entrée `-pooler`, et `prisma migrate deploy` prend son verrou sur une session que PgBouncer partage et recycle. Deux tentatives de suite ont déjà échoué là dessus, puis la même commande est passée seule quelques minutes plus tard. La correction connue est une seconde URL, celle du point d'entrée direct, réservée aux migrations. Tant qu'elle n'existe pas, le job `e2e` d'une pull request peut échouer sans que rien ne soit cassé.
+
 Les runs sont sérialisés par un groupe de concurrence GitHub, et la suite tourne sur un seul worker : la base est unique, deux tests qui écrivent en même temps se marcheraient dessus.
 
 ## Les données
@@ -62,6 +64,10 @@ Le contenu vit dans `e2e/content.ts` : deux Categories et cinquante trois Memes.
 Deux Memes de remplissage sur trois sont Universels, et ce rapport est ce qui décide du sort du parcours anglais. La bibliothèque anglaise ne voit que les Memes anglais et universels : à ce compte elle en tient trente quatre, donc elle a sa deuxième page, alors qu'une proportion plus basse la laissait sous la barre des trente et rendait sa pagination intestable.
 
 Les vues sont toutes distinctes, ce qui rend l'ordre déterministe sans avoir à semer de l'Activity : la première page de `trending` se rabat sur le nombre de vues quand aucun Event n'existe. Les dates de publication sont posées en jours avant le run, de sorte que la catégorie `news`, qui coupe à trente jours, contienne exactement trois Memes en français et deux en anglais. La date de création est celle de la publication, faute de quoi elle serait l'instant d'une insertion parallèle et l'index trié dessus n'aurait aucun ordre à offrir.
+
+Ce déterminisme a une date de péremption. Une vue enregistrée sur une page Meme écrit une ligne `meme_view_daily`, et à partir de là la première page de `trending` sort du calcul pondéré et non plus des vues semées, avec un cache de douze heures posé dessus. Aucun test actuel n'ouvre une page Meme, donc rien ne bouge. Le premier qui le fera doit soit affirmer des ensembles et non des places, ce que font déjà les tests de pagination, soit passer avant ceux qui lisent `trending`. Un ordre qui dépend de l'ordre des tests est une régression, pas un réglage.
+
+Le nombre de jours de la fenêtre `news` n'est pas recopié dans les tests : `e2e/content.ts` dérive la liste des Memes récents de `THIRTY_DAYS_MS`, la constante que l'application applique elle même. Décaler la fenêtre déplace les deux ensemble.
 
 Le seed pousse ensuite ces Memes dans les index Algolia avec `replaceAllIndicesWithMemes`, le même chemin que la production. Ce n'est pas une commodité : hors de la première page de `trending`, la bibliothèque lit Algolia et jamais Postgres, donc un Meme resté en base seul est invisible pour presque toute la suite. `seed.spec.ts` affirme les deux chemins séparément pour cette raison.
 
@@ -103,9 +109,15 @@ L'affirmation porte sur les `<loc>` et non sur le corps entier : `sitemap-memes.
 
 ### Niveau 2, le produit
 
-**Accueil.** Rend, affiche des Memes, les liens principaux mènent où ils disent.
+Ces surfaces sont ouvertes à tout le monde, donc elles sont parcourues en Visitor anonyme. C'est la version la plus exigeante : ce qui passe sans compte passe avec.
 
-**Liste des Memes.** `/memes` rend, la recherche renvoie des résultats cohérents avec les fixtures, les filtres et la pagination changent le contenu.
+**Accueil.** Écrit. Rend, affiche ses douze Memes, et les trois liens qui partent de là mènent où ils disent : le héros vers la bibliothèque et vers les plans, la section Mèmes vers la bibliothèque. L'annonce compte les Memes publiés dans les trente derniers jours et mène à la catégorie `news`.
+
+Ces douze viennent de Recommend quand il a de quoi répondre, et du repli sur les vues les plus hautes sinon. Sur un index `e2e` sans Event, c'est toujours le repli, qui en rend douze exactement. Le jour où Recommend en renverrait moins, ce décompte tomberait sans qu'une régression soit en cause.
+
+**Liste des Memes.** Écrit. `/memes` redirige vers `trending` et remplit une page de trente. Un mot tapé dans le champ de recherche réduit la liste à son seul Meme. La deuxième page est affirmée Meme par Meme, les vingt trois attendus présents et les trente de la première absents : un décompte seul serait vrai de n'importe quels vingt trois, alors que nommer les deux côtés de la coupe prouve qu'elle tombe là où la taille de page le dit. Décocher le français retire un Meme français, garde le Meme anglais, et laisse une page pleine, faute de quoi un filtre qui ne renvoie rien satisferait les deux premières.
+
+Reste à ajouter : la vue en grille, dont le nombre de colonnes ne change ni les Memes ni leur ordre.
 
 **Page Meme.** Le lecteur est monté, la source est signée, aucune URL de vidéo brute n'apparaît dans le DOM. Un test canonique, sur Chromium seulement, vérifie que la lecture démarre réellement. Partout ailleurs, les segments vidéo sont bloqués par `page.route`.
 
@@ -113,15 +125,15 @@ L'affirmation porte sur les `<loc>` et non sur le corps entier : `sitemap-memes.
 
 **Bookmark.** Ajout, retrait, persistance après rechargement, plafond du plan gratuit, absence de Bookmark pour un Visitor anonyme.
 
-**Category.** `/memes/category/$slug` rend et ne montre que les Memes de la Category.
+**Category.** Écrit. `/memes/category/$slug` rend et ne montre que les Memes de la Category, la liste des Categories emmène d'une Category à l'autre et le contenu suit, la catégorie `news` coupe à trente jours, et un slug qui n'existe pas répond 404 et non un écran 404 sous un statut valide.
 
 **Reels et `/random`.** Répondent, affichent un Meme, la navigation suivante change de Meme. Les assertions s'arrêtent là, faute de pouvoir affirmer mieux sans devenir tautologiques.
 
 **Favorites.** `/favorites` liste ce qui a été mis en Bookmark et pousse vers la connexion pour un Visitor anonyme.
 
-**Bannière de consentement.** Apparaît à la première visite, ne bloque aucun clic, se referme, et le choix survit au rechargement.
+**Bannière de consentement.** Apparaît à la première visite, ne bloque aucun clic, se referme, et le choix survit au rechargement. Commence par effacer le cookie que `fixtures.ts` pose.
 
-**Rappel Premium.** Parle une fois, ne remplace pas un dialogue déjà ouvert, et accepte un refus.
+**Rappel Premium.** Parle une fois, ne remplace pas un dialogue déjà ouvert, et accepte un refus. Commence par effacer la mise en sommeil que `fixtures.ts` écrit dans `localStorage`.
 
 ### Niveau 3, le reste
 
@@ -147,7 +159,13 @@ Les points d'accroche sont des rôles et des noms accessibles, jamais des `data-
 
 Le nom vient de l'application, pas d'une copie : `e2e/messages.ts` fixe la locale du résolveur avec `overwriteGetLocale` puis réexporte `m`, et un test écrit `getByRole('button', { name: m.nav_sign_in() })`. Le site est bilingue et une locale ne décide pas si un test passe, elle décide seulement quelle chaîne est demandée. Le parcours EN sera le même code avec une autre locale.
 
-Deux conséquences sur l'application. Le dialogue d'authentification garde ses deux panneaux montés pour animer la hauteur, donc le panneau inactif porte `inert` : sans lui un lecteur d'écran voyait les deux formulaires, le clavier tabulait dans le formulaire invisible, et `getByRole('tabpanel')` désignait deux éléments. Et une accroche a11y n'existe que si l'élément a un nom : un bouton sans libellé visible se règle par un vrai libellé, jamais par un identifiant de test.
+Trois conséquences sur l'application. Le dialogue d'authentification garde ses deux panneaux montés pour animer la hauteur, donc le panneau inactif porte `inert` : sans lui un lecteur d'écran voyait les deux formulaires, le clavier tabulait dans le formulaire invisible, et `getByRole('tabpanel')` désignait deux éléments. Une accroche a11y n'existe que si l'élément a un nom : un bouton sans libellé visible se règle par un vrai libellé, jamais par un identifiant de test. Et le bouton de lecture d'une carte de Meme portait un libellé lecteur d'écran écrit en anglais en dur ; il passe par `m` comme le reste. Son voisin, le bouton des options, porte encore le sien : aucun test ne s'en sert, donc il attend le sien plutôt que de voyager dans ce lot.
+
+**Un nom accessible se compare par sous chaîne.** C'est le piège de cette suite, parce qu'il rend un test vert sans rien affirmer : chercher « 3 nouveaux mèmes » trouve « 53 nouveaux mèmes », et le titre du Meme de remplissage numéro 3 se trouve dans celui du numéro 31. Toute affirmation dont la valeur est le sujet du test porte donc `exact: true`, et `e2e/library.ts` le pose une fois pour toutes sur les liens de Meme.
+
+Ce même fichier compte les Memes affichés par les boutons de lecture, un par carte et un seul, parce qu'une carte porte plusieurs liens vers le même Meme.
+
+La bannière de consentement et le rappel Premium parlent d'eux mêmes, le second cinq secondes après l'arrivée sur une page `/memes`. Un dialogue qui s'ouvre au milieu d'un scénario vole le clic que ce scénario allait faire, donc `e2e/fixtures.ts` répond à la bannière par un cookie et met le rappel en sommeil par `localStorage`, pour tous les tests. Chacun garde le sien, qui commencera par défaire ce réglage.
 
 Une page est rendue sur le serveur avant que React ne s'y attache, et Playwright ne voit pas la différence : un clic est perdu, et une valeur saisie est effacée quand l'hydratation restaure l'input contrôlé. `e2e/hydration.ts` porte les deux seuls signaux disponibles, `repeatUntilVisible` et `repeatUntilRequested`. Ils ne valent que pour la première action d'une page fraîchement chargée, et seulement quand la répéter est sans conséquence.
 

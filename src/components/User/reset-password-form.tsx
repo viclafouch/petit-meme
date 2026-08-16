@@ -64,8 +64,8 @@ export const ResetPasswordForm = () => {
 
   const form = useForm({
     ...getResetPasswordFormOpts(),
-    onSubmit: async ({ value }) => {
-      return resetPasswordMutation.mutateAsync({ email: value.email })
+    onSubmit: ({ value }) => {
+      resetPasswordMutation.mutate({ email: value.email })
     }
   })
 
@@ -109,22 +109,13 @@ export const ResetPasswordForm = () => {
             )
           }}
         />
-        <form.Subscribe
-          selector={(state) => {
-            return state.isSubmitting
-          }}
-          children={(isSubmitting) => {
-            return (
-              <LoadingButton
-                isLoading={isSubmitting}
-                type="submit"
-                className="w-full"
-              >
-                {m.common_confirm()}
-              </LoadingButton>
-            )
-          }}
-        />
+        <LoadingButton
+          isLoading={resetPasswordMutation.isPending}
+          type="submit"
+          className="w-full"
+        >
+          {m.common_confirm()}
+        </LoadingButton>
         {resetPasswordMutation.error ? (
           <Alert
             ref={errorRef}

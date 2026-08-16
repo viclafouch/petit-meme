@@ -96,8 +96,8 @@ export const LoginForm = ({
 
   const form = useForm({
     ...getLoginFormOpts(),
-    onSubmit: async ({ value }) => {
-      return signInMutation.mutateAsync({
+    onSubmit: ({ value }) => {
+      signInMutation.mutate({
         email: value.email,
         password: value.password
       })
@@ -180,23 +180,14 @@ export const LoginForm = ({
           {m.auth_forgot_password()}
         </Link>
       </div>
-      <form.Subscribe
-        selector={(state) => {
-          return state.isSubmitting
-        }}
-        children={(isSubmitting) => {
-          return (
-            <LoadingButton
-              isLoading={isSubmitting}
-              type="submit"
-              className="w-full relative"
-            >
-              {m.nav_sign_in()}
-              {isLastLoginEmail ? <LastLoginBadge /> : null}
-            </LoadingButton>
-          )
-        }}
-      />
+      <LoadingButton
+        isLoading={signInMutation.isPending}
+        type="submit"
+        className="w-full relative"
+      >
+        {m.nav_sign_in()}
+        {isLastLoginEmail ? <LastLoginBadge /> : null}
+      </LoadingButton>
       {signInMutation.error && !matchIsEmailNotVerified ? (
         <Alert ref={errorRef} variant="destructive" role="alert" tabIndex={-1}>
           <CircleAlert aria-hidden="true" />

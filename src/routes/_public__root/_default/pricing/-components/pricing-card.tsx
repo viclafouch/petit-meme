@@ -113,7 +113,6 @@ export const PricingCard = ({
 
   return (
     <Card
-      data-testid={isExclusive ? 'pricing-card-premium' : 'pricing-card-free'}
       data-highlighted={isHighlighted || undefined}
       className={cn(
         'grid row-span-4 grid-rows-subgrid py-8',

@@ -118,3 +118,5 @@ export const getBillingPeriodLabel = (period: BillingPeriod) => {
 }
 
 export const ANNUAL_DISCOUNT_PERCENT = 37
+
+export const PREMIUM_REMINDER_STORAGE_KEY = 'premium-reminder-dismissed-at'

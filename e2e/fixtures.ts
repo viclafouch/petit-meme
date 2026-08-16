@@ -2,6 +2,7 @@ import { expect, test as base } from '@playwright/test'
 import { prismaClient } from '~/db'
 import type { ConsentState } from '~/components/cookie-consent/types'
 import { CONSENT_COOKIE_KEY, CONSENT_VERSION } from '~/constants/cookie'
+import { PREMIUM_REMINDER_STORAGE_KEY } from '~/constants/plan'
 
 const ACCEPTED_CONSENT = {
   hasConsented: true,
@@ -14,8 +15,11 @@ type E2eWorkerFixtures = {
   prismaConnection: typeof prismaClient
 }
 
-// Every test starts with the consent banner already answered. The banner has
-// its own test, and nothing else should have to walk past it.
+// Every test starts with the consent banner already answered, and with the
+// premium reminder snoozed. Both speak on their own, five seconds into a
+// `/memes` page for the reminder, and a dialog that opens itself in the middle
+// of a scenario steals the click that scenario was about to make. Each has its
+// own test, and nothing else should have to walk past them.
 //
 // Uncaught errors on our own pages fail the test that saw them. One of them
 // kills hydration, which leaves buttons that look perfect and do nothing, and
@@ -30,6 +34,10 @@ export const test = base.extend<object, E2eWorkerFixtures>({
         url: baseURL
       }
     ])
+
+    await context.addInitScript((storageKey) => {
+      localStorage.setItem(storageKey, String(Date.now()))
+    }, PREMIUM_REMINDER_STORAGE_KEY)
 
     const pageErrors: string[] = []
 

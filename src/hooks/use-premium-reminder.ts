@@ -1,5 +1,6 @@
 import React from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { PREMIUM_REMINDER_STORAGE_KEY } from '~/constants/plan'
 import { DAY } from '~/constants/time'
 import {
   getActiveSubscriptionQueryOpts,
@@ -8,7 +9,6 @@ import {
 import { matchIsUserAdmin } from '~/lib/role'
 import { matchIsDialogOpen, useDialog } from '~/stores/dialog.store'
 
-const PREMIUM_REMINDER_STORAGE_KEY = 'premium-reminder-dismissed-at'
 const COOLDOWN_MS = 3 * DAY
 const DISPLAY_DELAY_MS = 5000
 

@@ -182,7 +182,7 @@ export const MemeListItem = React.memo(
                 onPlayClick(meme, event.currentTarget)
               }}
             >
-              <div className="sr-only">Play</div>
+              <div className="sr-only">{m.meme_play_video()}</div>
               <div className="rounded-full text-white size-8 md:size-10 flex justify-center items-center bg-black/70 opacity-90 border border-muted-foreground md:opacity-0 group-hover:opacity-100 duration-300 transition-all group-focus-within:opacity-100">
                 <BunnyPlayIcon className="fill-white w-3.5 md:w-4.5" />
               </div>

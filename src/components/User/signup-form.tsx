@@ -99,8 +99,8 @@ export const SignupForm = () => {
 
   const form = useForm({
     ...getSignupFormOpts(),
-    onSubmit: async ({ value }) => {
-      return signupMutation.mutateAsync({
+    onSubmit: ({ value }) => {
+      signupMutation.mutate({
         email: value.email,
         password: value.password,
         name: value.name
@@ -270,22 +270,13 @@ export const SignupForm = () => {
           )
         }}
       />
-      <form.Subscribe
-        selector={(state) => {
-          return state.isSubmitting
-        }}
-        children={(isSubmitting) => {
-          return (
-            <LoadingButton
-              isLoading={isSubmitting}
-              type="submit"
-              className="w-full"
-            >
-              {m.auth_create_account()}
-            </LoadingButton>
-          )
-        }}
-      />
+      <LoadingButton
+        isLoading={signupMutation.isPending}
+        type="submit"
+        className="w-full"
+      >
+        {m.auth_create_account()}
+      </LoadingButton>
       {signupMutation.error ? (
         <Alert ref={errorRef} variant="destructive" role="alert" tabIndex={-1}>
           <CircleAlert aria-hidden="true" />
@@ -294,16 +285,7 @@ export const SignupForm = () => {
           </AlertDescription>
         </Alert>
       ) : null}
-      <form.Subscribe
-        selector={(state) => {
-          return state.isSubmitted
-        }}
-        children={(isSubmitted) => {
-          return isSubmitted && signupMutation.isSuccess ? (
-            <SignupSuccessAlert />
-          ) : null
-        }}
-      />
+      {signupMutation.isSuccess ? <SignupSuccessAlert /> : null}
     </form>
   )
 }

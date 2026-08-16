@@ -62,10 +62,8 @@ export const CreateNewPasswordForm = ({ token }: { token: string }) => {
 
   const form = useForm({
     ...getCreateNewPasswordFormOpts(),
-    onSubmit: async ({ value }) => {
-      return resetPasswordMutation.mutateAsync({
-        newPassword: value.password
-      })
+    onSubmit: ({ value }) => {
+      resetPasswordMutation.mutate({ newPassword: value.password })
     }
   })
 
@@ -135,22 +133,13 @@ export const CreateNewPasswordForm = ({ token }: { token: string }) => {
           )
         }}
       />
-      <form.Subscribe
-        selector={(state) => {
-          return state.isSubmitting
-        }}
-        children={(isSubmitting) => {
-          return (
-            <LoadingButton
-              isLoading={isSubmitting}
-              type="submit"
-              className="w-full"
-            >
-              {m.common_confirm()}
-            </LoadingButton>
-          )
-        }}
-      />
+      <LoadingButton
+        isLoading={resetPasswordMutation.isPending}
+        type="submit"
+        className="w-full"
+      >
+        {m.common_confirm()}
+      </LoadingButton>
       {resetPasswordMutation.error ? (
         <Alert ref={errorRef} variant="destructive" role="alert" tabIndex={-1}>
           <CircleAlert aria-hidden="true" />

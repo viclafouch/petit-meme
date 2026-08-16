@@ -1,6 +1,6 @@
 # Le filet e2e tourne dans le runner
 
-Le dépôt n'avait aucun test automatisé au-delà d'un fichier Vitest, et `main` se déploie tout seul. La suite Playwright tourne sur une pull request, dans le runner GitHub, qui construit l'application et la sert avant de la tester. Le check sera requis pour fusionner sur `main` dès le premier run vert. Une suite de smoke non destructive suivra chaque déploiement de production, pour couvrir ce que le runner ne peut pas voir.
+Le dépôt n'avait aucun test automatisé au-delà d'un fichier Vitest, et `main` se déploie tout seul. La suite Playwright tourne sur une pull request, dans le runner GitHub, qui construit l'application et la sert avant de la tester. Le check est requis pour fusionner sur `main`. Une suite de smoke non destructive suivra chaque déploiement de production, pour couvrir ce que le runner ne peut pas voir.
 
 ## Considered Options
 

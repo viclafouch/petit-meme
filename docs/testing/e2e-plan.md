@@ -24,7 +24,9 @@ La suite a son propre environnement, `e2e`, au même rang que `development` et `
 
 `pnpm run test:e2e` migre, construit et sert la suite lui même, avec le preset Nitro `node-server` au lieu de `vercel`. Rien à démarrer à la main. En intégration continue le workflow fait les deux premières étapes dans ses propres étapes, et Playwright ne fait plus que servir.
 
-Une pull request déclenche le workflow `e2e`, qui écrit `.env.e2e` depuis le secret `E2E_ENV_FILE`, migre, construit, puis lance la suite. Le check sera requis pour fusionner sur `main` dès le premier run vert.
+Une pull request déclenche le workflow `e2e`, qui écrit `.env.e2e` depuis le secret `E2E_ENV_FILE`, migre, construit, puis lance la suite. Fusionner sur `main` exige trois checks verts, `lint`, `unit` et `e2e`, plus un déploiement de preview Vercel réussi, et un historique linéaire. Les administrateurs ne sont pas contraints : le passage en force reste possible, et conscient.
+
+Les jobs portent trois noms distincts pour cette raison. Deux workflows avec un job nommé `test` donnaient un check requis qui ne disait pas lequel des deux il désignait.
 
 | Ressource | Valeur dans l'environnement `e2e` |
 |---|---|
@@ -150,7 +152,9 @@ Ces étapes ne sont pas automatisables et appartiennent au Creator. Faites : l'e
 
 Les deux clés Algolia sont restreintes à `e2e_*`, la clé de recherche et la clé d'administration. Un run lit `e2e_fr` et `e2e_en`, et se fait refuser `development_*` et `backup_*`.
 
-Restent : écrire le workflow de smoke post-déploiement, et activer la protection de branche sur `main` dès le premier run vert.
+La protection de `main` est active depuis le premier run vert.
+
+Reste : écrire le workflow de smoke post-déploiement, qui couvre ce que le runner ne voit pas, l'adaptateur Vercel et le scope de variables de production.
 
 Le niveau 2 en demandera une de plus : les index `e2e` n'ont pas encore leurs replicas de tri, alors que le code interroge `_replica_popular`, `_replica_recent` et `_replica_created`. Il faudra lancer `scripts/setup-algolia-indices.ts` contre l'environnement `e2e`, et se souvenir qu'une replica standard n'hérite pas de `attributesForFaceting`, ce que ce dépôt a déjà payé une fois.
 

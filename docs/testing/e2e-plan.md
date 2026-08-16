@@ -6,9 +6,9 @@ Les décisions structurantes sont dans `docs/adr/0003`, `0004` et `0005`.
 
 ## Ce qui existe
 
-Le niveau 1 est écrit, vingt deux scénarios plus sept tests de préparation : `checkout`, `signup`, `signin`, `password-reset`, `account-deletion`, `http-contracts`, plus `seed.spec.ts` qui charge l'accueil connecté et sert de point de départ aux agents.
+Le niveau 1 est écrit, vingt quatre scénarios plus sept tests de préparation : `checkout`, `signup`, `signin`, `password-reset`, `account-deletion`, `http-contracts`, plus `seed.spec.ts` qui charge l'accueil connecté et sert de point de départ aux agents.
 
-Les niveaux 2 et 3 attendent d'être écrits, surface par surface.
+La fondation du niveau 2 est posée : les Memes et les Categories sont semés, et l'index Algolia les voit. Les surfaces elles mêmes attendent d'être écrites, une par une, et le niveau 3 derrière.
 
 ## La règle
 
@@ -33,7 +33,8 @@ Les jobs portent trois noms distincts pour cette raison. Deux workflows avec un 
 | Base | branche Neon `test`, vidée à chaque run |
 | Stripe | mode test, sans endpoint webhook |
 | E-mails | tous redirigés par `EMAIL_OVERRIDE_TO` |
-| Algolia, Bunny | ressources propres à `e2e`, jamais écrites |
+| Algolia | index propres à `e2e`, réécrits par le seed à chaque run |
+| Bunny | library, collection et zone de stockage propres à `e2e`, écrites une fois |
 | Sentry, rate limiting | inactifs, `VERCEL_ENV=development` |
 
 **Aucune valeur de `.env.e2e` ne vaut celle de `.env.development`.** Un run doit être incapable d'atteindre une donnée de développement, et une variable oubliée doit pointer vers rien plutôt que vers quelque chose de réel.
@@ -42,7 +43,7 @@ Les ressources le sont : index Algolia, zone de stockage, bibliothèque et colle
 
 Trois valeurs restent partagées sans que cela pose problème. Les clés Stripe, parce qu'un compte Stripe n'a qu'un seul mode test. `BUNNY_STORAGE_HOSTNAME` et `VITE_ALGOLIA_APP_ID`, qui sont des points d'entrée de service et non des ressources. Et `TZ`, qui doit justement rester le même partout.
 
-Une reste à séparer : `VITE_ALGOLIA_SEARCH_KEY`. C'est une clé, pas un point d'entrée, et celle du développement porte les droits de lecture sur les index du développement. Une clé de recherche restreinte au seul index `e2e` se génère depuis le tableau de bord Algolia et ne coûte rien.
+`VITE_ALGOLIA_SEARCH_KEY`, elle, est bien séparée, parce que c'est une clé et non un point d'entrée. Vérifiée depuis `.env.e2e` : elle lit `e2e_fr` et se fait refuser `development_fr`.
 
 Le workflow applique les migrations sur la branche `test` avant de construire, ce qui fait qu'une migration cassée se voit en pull request et non après le déploiement.
 
@@ -56,7 +57,21 @@ Chaque run repart de zéro. Le projet `seed` tronque toutes les tables sauf l'hi
 
 Deux lignes protègent la base. `.env.e2e` est chargé en `override`, donc une variable exportée dans le terminal ne peut pas rediriger le seed, vérifié avec un `DATABASE_URL` hostile. Et la troncature elle même refuse de partir si le `DATABASE_URL` du processus n'est pas celui que le fichier déclare, garde posé contre la destruction et non au point d'appel. 
 
-Le contenu, Memes et Categories, arrivera avec les tests qui en ont besoin, avec la vidéo Bunny et l'indexation Algolia que cela suppose. Rien n'est semé tant que rien ne le lit.
+Le contenu vit dans `e2e/content.ts` : deux Categories et cinquante trois Memes. Cinq sont nommés et les tests les désignent par leur nom, le plus vu, la cible de recherche, un Meme anglais, un Universel et un publié récemment. Les quarante huit autres remplissent la liste, parce que la bibliothèque affiche trente Memes par page et qu'il en faut plus que ça pour avoir une deuxième page à visiter.
+
+Deux Memes de remplissage sur trois sont Universels, et ce rapport est ce qui décide du sort du parcours anglais. La bibliothèque anglaise ne voit que les Memes anglais et universels : à ce compte elle en tient trente quatre, donc elle a sa deuxième page, alors qu'une proportion plus basse la laissait sous la barre des trente et rendait sa pagination intestable.
+
+Les vues sont toutes distinctes, ce qui rend l'ordre déterministe sans avoir à semer de l'Activity : la première page de `trending` se rabat sur le nombre de vues quand aucun Event n'existe. Les dates de publication sont posées en jours avant le run, de sorte que la catégorie `news`, qui coupe à trente jours, contienne exactement trois Memes en français et deux en anglais. La date de création est celle de la publication, faute de quoi elle serait l'instant d'une insertion parallèle et l'index trié dessus n'aurait aucun ordre à offrir.
+
+Le seed pousse ensuite ces Memes dans les index Algolia avec `replaceAllIndicesWithMemes`, le même chemin que la production. Ce n'est pas une commodité : hors de la première page de `trending`, la bibliothèque lit Algolia et jamais Postgres, donc un Meme resté en base seul est invisible pour presque toute la suite. `seed.spec.ts` affirme les deux chemins séparément pour cette raison.
+
+Ce remplacement passe par un index temporaire et un déplacement, ce qui pose la question des replicas. Vérifié après un run, en interrogeant l'API Algolia : les six existent toujours, portent le même nombre d'enregistrements que leur primaire et ont gardé leur `attributesForFaceting`. Ce n'est pas une propriété qui se lit dans le dépôt, donc c'est une vérification à refaire le jour où une liste triée revient vide. Le seul reste possible est un index temporaire abandonné par un run interrompu.
+
+Cette réécriture est aussi la seule dépense récurrente de la suite chez Algolia : quatre vingt sept enregistrements sur deux index par run, en opérations d'écriture. Le palier gratuit compte les requêtes de recherche, dix mille par mois, et celles ci n'en sont pas. L'application Algolia est partagée avec le développement, seuls les index diffèrent.
+
+Bunny, lui, n'est jamais touché par le seed. La Video et son fichier watermarqué sont posés une fois et durent, ce qui est aussi la raison pour laquelle `E2E_VIDEO_BUNNY_ID` vit dans l'environnement et non dans les fixtures.
+
+Un seul Meme semé, le plus vu, porte une Video qui existe vraiment. Tous les autres ont un `bunnyId` inventé, ce qui suffit pour une liste, un emplacement de miniature et une page, et jamais pour lire ou Exporter.
 
 Un rôle par scénario qui laisse une marque sur son compte : partager un rôle entre un checkout et une suppression ferait dépendre le second de l'ordre du premier. Le rôle `unverified` porte `emailVerified: false`, ce qui est la seule chose que l'écran de connexion a à dire sur lui.
 
@@ -68,7 +83,7 @@ Un projet `auth` connecte ensuite chaque rôle vérifié par l'API HTTP et enreg
 
 Ce niveau bloque une pull request. C'est ce qui coûte de l'argent ou un compte quand il casse.
 
-**Checkout.** Écrit, mensuel et annuel. Depuis `/pricing`, jusqu'à la page Stripe en mode test, carte `4242`, retour. On affirme après la redirection : `/checkout/success` répond, la ligne `Subscription` porte `plan`, `status`, `billingInterval`, les deux identifiants Stripe et les deux dates de période, et la carte Premium apparaît comme le plan actif au rechargement. Reste à ajouter : la levée d'un plafond du plan gratuit, qui attend des Memes semés.
+**Checkout.** Écrit, mensuel et annuel. Depuis `/pricing`, jusqu'à la page Stripe en mode test, carte `4242`, retour. On affirme après la redirection : `/checkout/success` répond, la ligne `Subscription` porte `plan`, `status`, `billingInterval`, les deux identifiants Stripe et les deux dates de période, et la carte Premium apparaît comme le plan actif au rechargement. Reste à ajouter : la levée d'un plafond du plan gratuit, que les Memes semés rendent maintenant possible.
 
 **Inscription.** Écrit. Formulaire du dialogue d'authentification, URL de vérification, compte connecté ensuite. Vérifie au passage que les champs déclarés à better-auth sont bien écrits, `providerAvatar`, les horodatages de consentement, la locale.
 
@@ -82,9 +97,9 @@ Une adresse déjà prise reçoit exactement la même réponse qu'une adresse neu
 
 **Suppression de compte.** Écrit. Depuis `/settings`, jusqu'à la disparition du compte et au refus de la connexion suivante.
 
-**Contrats HTTP.** Écrit, sans navigateur : `/sitemap.xml` liste ses trois enfants, chacun est du XML et ne place que des pages à nous dans ses `<loc>`, `/robots.txt` répond et renvoie vers le sitemap, `/health` répond, `/manifest.json` est du JSON valide, `/api/og` renvoie une image.
+**Contrats HTTP.** Écrit, sans navigateur : `/sitemap.xml` liste ses trois enfants, chacun est du XML, porte des entrées et ne place que des pages à nous dans ses `<loc>`, `/robots.txt` répond et renvoie vers le sitemap, `/health` répond, `/manifest.json` est du JSON valide, `/api/og` renvoie une image.
 
-L'affirmation porte sur les `<loc>` et non sur le corps entier : `sitemap-memes.xml` publie volontairement une URL Bunny dans `video:content_loc`, c'est ce que Google lit pour indexer une vidéo. L'invariant est qu'une page n'est jamais une vidéo. Tant qu'aucun Meme n'est semé, cette affirmation est vraie sans rien couvrir.
+L'affirmation porte sur les `<loc>` et non sur le corps entier : `sitemap-memes.xml` publie volontairement une URL Bunny dans `video:content_loc`, c'est ce que Google lit pour indexer une vidéo. L'invariant est qu'une page n'est jamais une vidéo. Un sitemap vide rendrait cette affirmation vraie sans rien couvrir, donc le vide est un échec et non un cas prévu. C'est le contenu semé qui lui donne enfin de la matière.
 
 ### Niveau 2, le produit
 
@@ -94,7 +109,7 @@ L'affirmation porte sur les `<loc>` et non sur le corps entier : `sitemap-memes.
 
 **Page Meme.** Le lecteur est monté, la source est signée, aucune URL de vidéo brute n'apparaît dans le DOM. Un test canonique, sur Chromium seulement, vérifie que la lecture démarre réellement. Partout ailleurs, les segments vidéo sont bloqués par `page.route`.
 
-**Export.** Download produit un fichier non vide. Share déclenche l'intention de partage. Le plafond du plan gratuit s'applique, et le message qui l'explique s'affiche au lieu d'un bouton désactivé.
+**Export.** Download produit un fichier non vide, ce qui attend la library Bunny `e2e`. Share déclenche l'intention de partage. Le plafond du plan gratuit s'applique, et le message qui l'explique s'affiche au lieu d'un bouton désactivé.
 
 **Bookmark.** Ajout, retrait, persistance après rechargement, plafond du plan gratuit, absence de Bookmark pour un Visitor anonyme.
 
@@ -156,6 +171,16 @@ La protection de `main` est active depuis le premier run vert.
 
 Reste : écrire le workflow de smoke post-déploiement, qui couvre ce que le runner ne voit pas, l'adaptateur Vercel et le scope de variables de production.
 
-Le niveau 2 en demandera une de plus : les index `e2e` n'ont pas encore leurs replicas de tri, alors que le code interroge `_replica_popular`, `_replica_recent` et `_replica_created`. Il faudra lancer `scripts/setup-algolia-indices.ts` contre l'environnement `e2e`, et se souvenir qu'une replica standard n'hérite pas de `attributesForFaceting`, ce que ce dépôt a déjà payé une fois.
+Les index `e2e` sont configurés, primaires et replicas de tri, par `pnpm exec vite-node --mode e2e scripts/setup-algolia-indices.ts`. Cette commande est à rejouer chaque fois que les réglages d'index changent, et une replica standard n'hérite pas de `attributesForFaceting`, ce que ce dépôt a déjà payé une fois.
 
-`e2e/env.ts` exige `BETTER_AUTH_SECRET`, pour forger le jeton de vérification, et `VITE_BUNNY_HOSTNAME`, pour l'affirmation sur les sitemaps, en plus de `VITE_SITE_URL` et `DATABASE_URL`. Une clé qui manque casse le run au chargement, avec son nom dans le message. Le secret `E2E_ENV_FILE` doit donc les porter.
+Un index créé par une simple écriture n'a aucun réglage, et Algolia ne le dit pas. Un filtre sur un attribut qui n'est pas dans `attributesForFaceting` ne lève rien, il renvoie zéro résultat. La bibliothèque filtre toujours sur `status`, donc tant que les réglages manquaient, elle était vide alors que les enregistrements étaient là et se trouvaient à la recherche libre. Une liste vide se lit comme un seed raté, jamais comme un index mal réglé.
+
+La library Bunny Stream `e2e` et sa zone de stockage existent, et `public/videos/want-a-cookie.mp4` y est publiée sous `E2E_VIDEO_BUNNY_ID`. Sa version watermarquée est dans la zone, produite en local à partir du même fichier et avec la recette de `scripts/watermark-videos.ts` : ce script commence par télécharger `/original`, ce que le réglage ci dessous interdit, alors que la source était déjà dans le dépôt. Toutes les valeurs Bunny sont dans `.env.e2e`. Reste le réglage « Block Direct URL File Access » à désactiver sur la library.
+
+`.env.e2e` a donc changé, et le secret `E2E_ENV_FILE` porte encore l'ancien. Tant qu'il n'est pas recopié, le job `e2e` d'une pull request s'arrête au chargement sur `E2E_VIDEO_BUNNY_ID`.
+
+Ce réglage mérite d'être écrit, parce qu'il se rejoue à chaque library créée et qu'il ne se lit pas dans un message d'erreur. Il refuse toute requête sans en tête `Referer`, jeton ou pas : le même fichier répond 403 nu et 200 avec un référent quelconque. Un navigateur en envoie un, donc miniatures et lecture HLS marchent quand même, ce qui fait passer la library pour saine. Le serveur, lui, n'en envoie pas, et c'est lui qui va chercher `/original` pour l'Export d'un Premium et pour le Studio. La panne se voit donc uniquement là, et sur un chemin qui n'a rien à voir avec un réglage de CDN.
+
+`e2e/env.ts` exige `BETTER_AUTH_SECRET`, pour forger le jeton de vérification, `VITE_BUNNY_HOSTNAME`, pour l'affirmation sur les sitemaps, et `E2E_VIDEO_BUNNY_ID`, l'unique Video des fixtures qui existe vraiment chez Bunny, en plus de `VITE_SITE_URL` et `DATABASE_URL`. Une clé qui manque casse le run au chargement, avec son nom dans le message. Le secret `E2E_ENV_FILE` doit donc les porter.
+
+`E2E_VIDEO_BUNNY_ID` est dans l'environnement et non dans `e2e/content.ts` parce qu'il nomme une ressource de la library `e2e` : recréer la library lui donne un autre identifiant, alors que les fixtures, elles, ne bougent pas.

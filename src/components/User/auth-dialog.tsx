@@ -127,6 +127,8 @@ export const AuthDialog = ({ open, onOpenChange }: WithDialog<unknown>) => {
             <div className="grid [interpolate-size:allow-keywords] pt-4">
               <TabsContent
                 forceMount
+                inert={authType !== 'login'}
+                aria-hidden={authType !== 'login'}
                 value="login"
                 className={ANIMATED_TAB_CONTENT_CLASS}
               >
@@ -137,6 +139,8 @@ export const AuthDialog = ({ open, onOpenChange }: WithDialog<unknown>) => {
               </TabsContent>
               <TabsContent
                 forceMount
+                inert={authType !== 'signup'}
+                aria-hidden={authType !== 'signup'}
                 value="signup"
                 className={ANIMATED_TAB_CONTENT_CLASS}
               >

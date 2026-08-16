@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  test:
+  e2e:
     # A pull request from a fork gets no secrets, so it would fail on boot.
     if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest

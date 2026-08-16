@@ -148,6 +148,10 @@ Un clone neuf n'a pas leur serveur MCP, qui vit dans `.mcp.json`, ignoré par gi
 
 Ces étapes ne sont pas automatisables et appartiennent au Creator. Faites : l'endpoint webhook du mode test Stripe est désactivé, il ne livre plus sur la production ; `.env.e2e` est écrit et recopié dans le secret GitHub `E2E_ENV_FILE`.
 
-Restent : générer une clé de recherche Algolia restreinte au seul index `e2e`, parce que `VITE_ALGOLIA_SEARCH_KEY` vaut encore celle du développement et donne donc à un run l'accès en lecture aux index du développement ; écrire le workflow de smoke post-déploiement ; activer la protection de branche sur `main` dès le premier run vert.
+Les deux clés Algolia sont restreintes à `e2e_*`, la clé de recherche et la clé d'administration. Un run lit `e2e_fr` et `e2e_en`, et se fait refuser `development_*` et `backup_*`.
+
+Restent : écrire le workflow de smoke post-déploiement, et activer la protection de branche sur `main` dès le premier run vert.
+
+Le niveau 2 en demandera une de plus : les index `e2e` n'ont pas encore leurs replicas de tri, alors que le code interroge `_replica_popular`, `_replica_recent` et `_replica_created`. Il faudra lancer `scripts/setup-algolia-indices.ts` contre l'environnement `e2e`, et se souvenir qu'une replica standard n'hérite pas de `attributesForFaceting`, ce que ce dépôt a déjà payé une fois.
 
 `e2e/env.ts` exige `BETTER_AUTH_SECRET`, pour forger le jeton de vérification, et `VITE_BUNNY_HOSTNAME`, pour l'affirmation sur les sitemaps, en plus de `VITE_SITE_URL` et `DATABASE_URL`. Une clé qui manque casse le run au chargement, avec son nom dans le message. Le secret `E2E_ENV_FILE` doit donc les porter.

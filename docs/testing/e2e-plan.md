@@ -8,7 +8,7 @@ Les décisions structurantes sont dans `docs/adr/0003`, `0004` et `0005`.
 
 Le niveau 1 est écrit, vingt quatre scénarios plus sept tests de préparation : `checkout`, `signup`, `signin`, `password-reset`, `account-deletion`, `http-contracts`, plus `seed.spec.ts` qui charge l'accueil connecté et sert de point de départ aux agents.
 
-Du niveau 2, sept surfaces sont écrites, vingt et un scénarios : les quatre de lecture, `home`, `memes-library`, `memes-category` et `memes-page`, puis les trois qui écrivent, `meme-export`, `bookmark` et `favorites`. Restent les Reels, la bannière de consentement et le rappel Premium, et le niveau 3 derrière.
+Du niveau 2, neuf surfaces sont écrites, vingt quatre scénarios : les quatre de lecture, `home`, `memes-library`, `memes-category` et `memes-page`, les trois qui écrivent, `meme-export`, `bookmark` et `favorites`, puis les deux qui parlent d'eux mêmes, `consent-banner` et `premium-reminder`. Restent les Reels, et le niveau 3 derrière.
 
 ## La règle
 
@@ -157,9 +157,15 @@ Et le message du plafond n'est pas celui que le produit croit afficher. Le serve
 
 **Favorites.** Écrit. `/favorites` liste exactement les Memes que le rôle porte en Bookmark, et un troisième n'y est pas. Un Visitor anonyme n'est pas poussé vers la connexion, contrairement à ce que ce plan annonçait : la route le renvoie sur `/memes`, donc sur `trending`. C'est ce que fait le code, c'est ce qu'affirme le test.
 
-**Bannière de consentement.** Apparaît à la première visite, ne bloque aucun clic, se referme, et le choix survit au rechargement. Commence par effacer le cookie que `fixtures.ts` pose.
+**Bannière de consentement.** Écrit. Le test efface le cookie que `fixtures.ts` pose, attend le délai d'apparition, accepte, et retrouve son choix après un rechargement.
 
-**Rappel Premium.** Parle une fois, ne remplace pas un dialogue déjà ouvert, et accepte un refus. Commence par effacer la mise en sommeil que `fixtures.ts` écrit dans `localStorage`.
+Ce plan annonçait ici « ne bloque aucun clic ». Le code dit le contraire, et le fait exprès : la bannière pose un voile en `fixed inset-0` et se déclare `aria-modal`, donc elle tient l'écran tant qu'elle n'a pas de réponse, sauf si un dialogue est déjà ouvert. C'est l'interruption qui gagne sa place, et la contrainte est maintenant dans `CONTEXT.md`. Aucun test ne l'affirme pour l'instant ; un `click({ trial: true })` qui échoue sur un lien de la page le prouverait, et c'est la façon de le garder le jour où quelqu'un voudra alléger ce voile.
+
+La survie du choix n'est pas affirmée par une absence. Une bannière qui n'apparaît pas parce que la page n'est pas hydratée rendrait cette absence vraie sans rien couvrir. Le test rouvre donc les préférences par « Gérer les cookies » et lit l'interrupteur Analytique, qui porte la réponse donnée : le clic prouve l'hydratation et l'interrupteur prouve la persistance.
+
+**Rappel Premium.** Écrit, deux scénarios. Chacun commence par effacer la mise en sommeil que `fixtures.ts` écrit dans `localStorage`, par un script d'initialisation et non par un `evaluate` : le minuteur part à l'hydratation, et il ne se repose pas s'il trouve la mise en sommeil à son premier passage.
+
+Le rappel parle cinq secondes après l'arrivée sur une page `/memes`, un refus le referme, et il ne revient pas. Il ne parle qu'une fois parce qu'il pose lui même sa mise en sommeil au moment de s'afficher : le test le prouve en repassant par `/pricing` puis par la bibliothèque, en navigation client, seule façon de ne pas rejouer le script d'initialisation qui vient d'effacer cette mise en sommeil. Et il ne prend pas la place d'un dialogue déjà ouvert : le dialogue de connexion, ouvert par un Bookmark anonyme, est encore là après deux passages du minuteur.
 
 ### Niveau 3, le reste
 
@@ -194,6 +200,14 @@ Ce même fichier compte les Memes affichés par les boutons de lecture, un par c
 La bannière de consentement et le rappel Premium parlent d'eux mêmes, le second cinq secondes après l'arrivée sur une page `/memes`. Un dialogue qui s'ouvre au milieu d'un scénario vole le clic que ce scénario allait faire, donc `e2e/fixtures.ts` répond à la bannière par un cookie et met le rappel en sommeil par `localStorage`, pour tous les tests. Chacun garde le sien, qui commencera par défaire ce réglage.
 
 Une page est rendue sur le serveur avant que React ne s'y attache, et Playwright ne voit pas la différence : un clic est perdu, et une valeur saisie est effacée quand l'hydratation restaure l'input contrôlé. `e2e/hydration.ts` porte les deux seuls signaux disponibles, `repeatUntilVisible` et `repeatUntilRequested`. Ils ne valent que pour la première action d'une page fraîchement chargée, et seulement quand la répéter est sans conséquence.
+
+Affirmer qu'un écran reste muet demande de faire passer le temps, et `page.waitForTimeout` est refusé par la règle oxlint `playwright/no-wait-for-timeout`. C'est `page.clock` qui le fait, l'outil que Playwright désigne pour une fenêtre à retardement : installée avant la navigation, l'horloge fausse gèle le temps de la page, et `runFor` déclenche les minuteurs à la demande.
+
+Deux pièges, chacun payé d'un échec. Une horloge gelée fige aussi la fermeture d'un dialogue, qui garde son `data-state="closed"` en restant visible ; `resume()` n'y change rien, et cinq secondes d'horloge n'ont pas suffi là où dix passent. Un clic qui referme est donc suivi d'une avance large, avant d'affirmer la fermeture et avant de cliquer quoi que ce soit derrière. Et avancer l'horloge avant l'hydratation ne déclenche rien, puisque le minuteur n'est pas encore posé, d'où le `runFor` passé à `repeatUntilVisible`.
+
+La bannière de consentement, elle, garde le temps réel : elle n'a aucun silence à prouver, et une horloge gelée l'empêcherait d'ouvrir son panneau de préférences.
+
+Les deux délais viennent de l'application, `CONSENT_BANNER_DELAY_MS` et `PREMIUM_REMINDER_DELAY_MS`, sortis de leurs composants pour que les tests ne les recopient pas.
 
 Un seul test est connu instable, la recherche de la bibliothèque, qui a échoué une fois au premier essai et passé au retry. C'est le seul qui tape dans le champ et attend Algolia, donc le seul dont l'attente dépend d'un service tiers plutôt que de notre serveur. `repeatUntilVisible` couvre l'hydratation, pas cette latence. Les retries d'intégration continue l'absorbent, et rien n'est fait de plus tant qu'il ne devient pas régulier : élargir une fenêtre pour un échec unique cache le jour où la lenteur devient une panne.
 

@@ -169,6 +169,8 @@ La bannière de consentement et le rappel Premium parlent d'eux mêmes, le secon
 
 Une page est rendue sur le serveur avant que React ne s'y attache, et Playwright ne voit pas la différence : un clic est perdu, et une valeur saisie est effacée quand l'hydratation restaure l'input contrôlé. `e2e/hydration.ts` porte les deux seuls signaux disponibles, `repeatUntilVisible` et `repeatUntilRequested`. Ils ne valent que pour la première action d'une page fraîchement chargée, et seulement quand la répéter est sans conséquence.
 
+Un seul test est connu instable, la recherche de la bibliothèque, qui a échoué une fois au premier essai et passé au retry. C'est le seul qui tape dans le champ et attend Algolia, donc le seul dont l'attente dépend d'un service tiers plutôt que de notre serveur. `repeatUntilVisible` couvre l'hydratation, pas cette latence. Les retries d'intégration continue l'absorbent, et rien n'est fait de plus tant qu'il ne devient pas régulier : élargir une fenêtre pour un échec unique cache le jour où la lenteur devient une panne.
+
 `timeout: 30_000` par test : au-delà, un test pend, il ne tourne plus. C'est un plafond serré, le checkout annuel mesure une vingtaine de secondes en local. `retries: 2` en intégration continue et `0` en local, ce qui sert aussi de coussin sur ce plafond, `trace: 'on-first-retry'`, `forbidOnly` quand `CI` est défini. Les artefacts ne partent qu'en cas d'échec, avec une rétention de trois jours, parce que le dépôt est public.
 
 ## Les agents

@@ -6,6 +6,14 @@
 - **Prod** : `prisma migrate deploy` applique les migrations pendantes (safe, idempotent, jamais de perte de données)
 - **JAMAIS `prisma db push` en production** — aucun tracking, peut dropper des colonnes silencieusement
 
+### Connexion des migrations
+
+`prisma.config.ts` fait passer les commandes Prisma par `DIRECT_DATABASE_URL` quand la variable existe, et retombe sur `DATABASE_URL` sinon. L'application garde toujours `DATABASE_URL`, donc le pooler.
+
+Cette séparation n'est pas cosmétique. Prisma pose un verrou de session, `pg_advisory_lock(72707369)`, le temps de migrer. À travers pgbouncer, la connexion serveur qui porte ce verrou est recyclée sous lui : le verrou survit à qui l'a posé et bloque toutes les migrations suivantes, dix secondes chacune, avec un `P1002` qui accuse la base d'être injoignable alors qu'elle répond. Vu sur la branche `e2e` le 2026-08-21, en local comme en intégration continue.
+
+`DIRECT_DATABASE_URL` est le même hôte Neon sans le suffixe `-pooler`.
+
 ### Règles de sécurité (production)
 
 L'app est en production avec des utilisateurs et des données réelles.

@@ -49,9 +49,7 @@ Le workflow applique les migrations sur la branche `test` avant de construire, c
 
 La branche Neon se suspend après quelques minutes d'inactivité, et la première connexion expire pendant son réveil. La migration est donc rejouée une fois, et la chaîne de connexion porte un `connect_timeout` de trente secondes.
 
-Cette migration ne passe pas par le pooler. Prisma la garde derrière un verrou d'avis, `pg_advisory_lock(72707369)`, et pgbouncer recycle sous lui la connexion serveur qui le porte : le verrou survit à qui l'a posé, et les migrations suivantes expirent dessus, dix secondes chacune, run après run, avec un `P1002` qui accuse la base d'être injoignable alors qu'elle répond. C'est arrivé le même jour en local et en intégration continue. `DIRECT_DATABASE_URL` dans `.env.e2e` emmène donc les commandes Prisma sur l'hôte Neon sans `-pooler`, pendant que l'application garde `DATABASE_URL`.
-
-Si le symptôme revient, `pg_locks` joint à `pg_stat_activity` nomme le coupable en une requête, et `CI=1` fait servir la suite sans migrer, ce qui est exactement ce que fait l'intégration continue.
+Cette migration a un problème ouvert. Prisma la garde derrière un verrou d'avis de session, `pg_advisory_lock(72707369)`, et ce verrou reste pris longtemps après la fin de la migration : les suivantes expirent dessus, dix secondes chacune, avec un `P1002` qui accuse la base d'être injoignable alors qu'elle répond. `pg_locks` joint à `pg_stat_activity` montre le verrou tenu par un backend dont l'`application_name` est `pgbouncer`, parfois celui-là même qui exécute la requête d'observation. Passer sur l'hôte Neon sans `-pooler` ne change rien, la panne se reproduit à l'identique. La cause exacte et le correctif soutenu sont en cours de recherche ; en attendant, `CI=1` fait servir la suite sans migrer, ce qui est exactement ce que fait l'intégration continue.
 
 Les runs sont sérialisés par un groupe de concurrence GitHub, et la suite tourne sur un seul worker : la base est unique, deux tests qui écrivent en même temps se marcheraient dessus.
 

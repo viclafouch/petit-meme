@@ -1,3 +1,4 @@
+import type { Response } from '@playwright/test'
 import { E2E_NAMED_MEMES } from './content'
 import { resolveStorageStatePath } from './env'
 import { expect, test } from './fixtures'
@@ -6,6 +7,14 @@ import { m } from './messages'
 
 const BOOKMARKED_MEME_PATHNAME = `/memes/${E2E_NAMED_MEMES.mostViewed.id}`
 const UNBOOKMARKED_MEME_PATHNAME = `/memes/${E2E_NAMED_MEMES.universal.id}`
+const SERVER_FUNCTION_BASE = '/_serverFn/'
+
+const matchIsServerFunctionCall = (response: Response) => {
+  return (
+    response.request().method() === 'POST' &&
+    response.url().includes(SERVER_FUNCTION_BASE)
+  )
+}
 
 test.describe('a signed in User', () => {
   test.use({ storageState: resolveStorageStatePath('bookmark') })
@@ -20,19 +29,25 @@ test.describe('a signed in User', () => {
       name: m.meme_remove_favorite()
     })
 
+    const bookmarkWritten = page.waitForResponse(matchIsServerFunctionCall)
+
     await repeatUntilVisible(() => {
       return addButton.click()
     }, removeButton)
 
-    await repeatUntilVisible(() => {
-      return page.reload()
-    }, removeButton)
+    await bookmarkWritten
+    await page.reload()
+
+    await expect(removeButton).toBeVisible()
+
+    const bookmarkRemoved = page.waitForResponse(matchIsServerFunctionCall)
 
     await removeButton.click()
 
-    await repeatUntilVisible(() => {
-      return page.reload()
-    }, addButton)
+    await bookmarkRemoved
+    await page.reload()
+
+    await expect(addButton).toBeVisible()
   })
 })
 

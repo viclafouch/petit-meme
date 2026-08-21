@@ -1,7 +1,7 @@
 /* oxlint-disable no-console */
 import { hashPassword } from 'better-auth/crypto'
 import { test as setup } from '@playwright/test'
-import { prismaClient } from '~/db'
+import { DATABASE_POOL_MAX_CONNECTIONS, prismaClient } from '~/db'
 import { BUNNY_STATUS } from '~/constants/bunny'
 import { MEME_ALGOLIA_INCLUDE } from '~/constants/meme'
 import { DAY } from '~/constants/time'
@@ -24,6 +24,27 @@ import {
 // Wider than a test's thirty seconds on purpose: this one empties a database,
 // writes fifty three Memes and waits for Algolia to swap two indices.
 const SEED_TIMEOUT_MS = 180_000
+
+// Each write below nests its relations, so Prisma runs it in a transaction that
+// holds a connection for its whole duration. Asking for all fifty three at once
+// leaves forty eight of them queued on a pool of five, and that wait breaks the
+// five second acquisition timeout as soon as the runner sits further from the
+// database than a laptop does. Writing them by the poolful never queues.
+const createWithinPool = async <T>(
+  items: readonly T[],
+  create: (item: T) => Promise<void>
+) => {
+  for (
+    let index = 0;
+    index < items.length;
+    index += DATABASE_POOL_MAX_CONNECTIONS
+  ) {
+    const batch = items.slice(index, index + DATABASE_POOL_MAX_CONNECTIONS)
+
+    // oxlint-disable-next-line no-await-in-loop -- waiting is the point here, the parallel form the rule asks for is the bug
+    await Promise.all(batch.map(create))
+  }
+}
 
 const createUser = async (role: E2eRole) => {
   const now = new Date()
@@ -142,25 +163,13 @@ setup('seed the e2e environment', async () => {
 
   await clearDatabase()
 
-  await Promise.all(
-    Object.values(E2E_ROLES).map((role) => {
-      return createUser(role)
-    })
-  )
+  await createWithinPool(Object.values(E2E_ROLES), createUser)
   console.log(`  ${Object.keys(E2E_ROLES).length} users created`)
 
-  await Promise.all(
-    Object.values(E2E_CATEGORIES).map((category) => {
-      return createCategory(category)
-    })
-  )
+  await createWithinPool(Object.values(E2E_CATEGORIES), createCategory)
   console.log(`  ${Object.keys(E2E_CATEGORIES).length} categories created`)
 
-  await Promise.all(
-    E2E_MEMES.map((meme) => {
-      return createMeme(meme)
-    })
-  )
+  await createWithinPool(E2E_MEMES, createMeme)
   console.log(`  ${E2E_MEMES.length} memes created`)
 
   await indexMemes()

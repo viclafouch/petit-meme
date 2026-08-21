@@ -224,7 +224,7 @@ const buildFillerMeme = (rank: number): E2eMeme => {
   }
 }
 
-const E2E_FILLER_MEMES = Array.from(
+export const E2E_FILLER_MEMES = Array.from(
   { length: FILLER_MEME_COUNT },
   (_, index) => {
     return buildFillerMeme(index + 1)

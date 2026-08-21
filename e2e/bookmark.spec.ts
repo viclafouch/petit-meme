@@ -1,0 +1,71 @@
+import { E2E_NAMED_MEMES } from './content'
+import { resolveStorageStatePath } from './env'
+import { expect, test } from './fixtures'
+import { repeatUntilVisible } from './hydration'
+import { m } from './messages'
+
+const BOOKMARKED_MEME_PATHNAME = `/memes/${E2E_NAMED_MEMES.mostViewed.id}`
+const UNBOOKMARKED_MEME_PATHNAME = `/memes/${E2E_NAMED_MEMES.universal.id}`
+
+test.describe('a signed in User', () => {
+  test.use({ storageState: resolveStorageStatePath('bookmark') })
+
+  test('bookmarks a Meme, finds it again after a reload, and takes it back', async ({
+    page
+  }) => {
+    await page.goto(BOOKMARKED_MEME_PATHNAME)
+
+    const addButton = page.getByRole('button', { name: m.meme_add_favorite() })
+    const removeButton = page.getByRole('button', {
+      name: m.meme_remove_favorite()
+    })
+
+    await repeatUntilVisible(() => {
+      return addButton.click()
+    }, removeButton)
+
+    await repeatUntilVisible(() => {
+      return page.reload()
+    }, removeButton)
+
+    await removeButton.click()
+
+    await repeatUntilVisible(() => {
+      return page.reload()
+    }, addButton)
+  })
+})
+
+test.describe('a User who reached the free cap', () => {
+  test.use({ storageState: resolveStorageStatePath('bookmarkCapped') })
+
+  test('is refused one more Bookmark and told so', async ({ page }) => {
+    await page.goto(UNBOOKMARKED_MEME_PATHNAME)
+
+    const addButton = page.getByRole('button', { name: m.meme_add_favorite() })
+
+    await repeatUntilVisible(() => {
+      return addButton.click()
+    }, page.getByText(m.error_bookmark_update()))
+
+    await expect(addButton).toBeVisible()
+  })
+})
+
+test('an anonymous Visitor is asked to sign in before bookmarking', async ({
+  page
+}) => {
+  await page.goto(BOOKMARKED_MEME_PATHNAME)
+
+  const authDialog = page.getByRole('dialog')
+
+  await repeatUntilVisible(() => {
+    return page.getByRole('button', { name: m.meme_add_favorite() }).click()
+  }, authDialog)
+
+  await expect(
+    authDialog
+      .getByRole('tabpanel')
+      .getByRole('button', { name: m.nav_sign_in() })
+  ).toBeVisible()
+})

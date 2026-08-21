@@ -49,7 +49,9 @@ Le workflow applique les migrations sur la branche `test` avant de construire, c
 
 La branche Neon se suspend après quelques minutes d'inactivité, et la première connexion expire pendant son réveil. La migration est donc rejouée une fois, et la chaîne de connexion porte un `connect_timeout` de trente secondes.
 
-Cette migration passe par le pooler, et Prisma la garde derrière un verrou d'avis, `pg_advisory_lock(72707369)`. Vu une fois : une session pgbouncer restée `idle` tenait ce verrou après une requête applicative, et les migrations suivantes expiraient dessus, dix secondes chacune, run après run. Le symptôme est un `P1002` qui accuse la base d'être injoignable alors qu'elle répond. `pg_locks` joint à `pg_stat_activity` nomme le coupable en une requête. En attendant qu'il se recycle, `CI=1` fait servir la suite sans migrer, ce qui est exactement ce que fait l'intégration continue.
+Cette migration ne passe pas par le pooler. Prisma la garde derrière un verrou d'avis, `pg_advisory_lock(72707369)`, et pgbouncer recycle sous lui la connexion serveur qui le porte : le verrou survit à qui l'a posé, et les migrations suivantes expirent dessus, dix secondes chacune, run après run, avec un `P1002` qui accuse la base d'être injoignable alors qu'elle répond. C'est arrivé le même jour en local et en intégration continue. `DIRECT_DATABASE_URL` dans `.env.e2e` emmène donc les commandes Prisma sur l'hôte Neon sans `-pooler`, pendant que l'application garde `DATABASE_URL`.
+
+Si le symptôme revient, `pg_locks` joint à `pg_stat_activity` nomme le coupable en une requête, et `CI=1` fait servir la suite sans migrer, ce qui est exactement ce que fait l'intégration continue.
 
 Les runs sont sérialisés par un groupe de concurrence GitHub, et la suite tourne sur un seul worker : la base est unique, deux tests qui écrivent en même temps se marcheraient dessus.
 

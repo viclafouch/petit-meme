@@ -1,4 +1,5 @@
 import type { Response } from '@playwright/test'
+import { getAuthDialogSignInButton } from './auth-flows'
 import { E2E_NAMED_MEMES } from './content'
 import { resolveStorageStatePath } from './env'
 import { expect, test } from './fixtures'
@@ -72,15 +73,11 @@ test('an anonymous Visitor is asked to sign in before bookmarking', async ({
 }) => {
   await page.goto(BOOKMARKED_MEME_PATHNAME)
 
-  const authDialog = page.getByRole('dialog')
+  const signInButton = getAuthDialogSignInButton(page)
 
   await repeatUntilVisible(() => {
     return page.getByRole('button', { name: m.meme_add_favorite() }).click()
-  }, authDialog)
+  }, signInButton)
 
-  await expect(
-    authDialog
-      .getByRole('tabpanel')
-      .getByRole('button', { name: m.nav_sign_in() })
-  ).toBeVisible()
+  await expect(signInButton).toBeVisible()
 })

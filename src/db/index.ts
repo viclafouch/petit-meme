@@ -2,10 +2,14 @@ import { PrismaPg } from '@prisma/adapter-pg'
 import { IS_PRODUCTION } from '~/constants/env'
 import { PrismaClient } from './generated/prisma/client'
 
+// Neon bills compute time, so the pool stays small and lets the branch sleep.
+// A caller that opens more transactions at once than this queues on it.
+export const DATABASE_POOL_MAX_CONNECTIONS = 5
+
 const prismaClientSingleton = () => {
   const adapter = new PrismaPg({
     connectionString: process.env.DATABASE_URL,
-    max: 5,
+    max: DATABASE_POOL_MAX_CONNECTIONS,
     idleTimeoutMillis: 10_000,
     connectionTimeoutMillis: 5000
   })

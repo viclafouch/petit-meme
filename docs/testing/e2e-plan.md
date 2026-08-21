@@ -49,13 +49,13 @@ Le workflow applique les migrations sur la branche `test` avant de construire, c
 
 La branche Neon se suspend après quelques minutes d'inactivité, et la première connexion expire pendant son réveil. La migration est donc rejouée une fois, et la chaîne de connexion porte un `connect_timeout` de trente secondes.
 
-Ce filet n'attrape pas tout, et il y a deux `P1002` différents. Le réveil trop lent, qui se règle en relançant. Et le verrou consultatif, `Timed out trying to acquire a postgres advisory lock`, qui est structurel : `DATABASE_URL` désigne le point d'entrée `-pooler`, et `prisma migrate deploy` prend son verrou sur une session que PgBouncer partage et recycle. Deux tentatives de suite ont déjà échoué là dessus, puis la même commande est passée seule quelques minutes plus tard. La correction connue est une seconde URL, celle du point d'entrée direct, réservée aux migrations. Tant qu'elle n'existe pas, le job `e2e` d'une pull request peut échouer sans que rien ne soit cassé.
-
 Les runs sont sérialisés par un groupe de concurrence GitHub, et la suite tourne sur un seul worker : la base est unique, deux tests qui écrivent en même temps se marcheraient dessus.
 
 ## Les données
 
 Chaque run repart de zéro. Le projet `seed` tronque toutes les tables sauf l'historique des migrations, puis crée les Users déclarés dans `e2e/constants.ts`. Il ne touche à rien d'autre, ni Stripe, ni Algolia, ni Bunny. Le nettoyage a lieu **au début** du run, jamais à la fin, pour qu'un échec laisse un état inspectable.
+
+Le seed écrit par paquets de la taille du pool, et pas d'un seul `Promise.all`. Chaque création imbrique ses relations, donc Prisma la passe en transaction, donc elle tient une connexion pour toute sa durée. Cinquante trois demandes d'un coup en laissent quarante huit en file sur un pool de cinq, et cette attente dépasse les cinq secondes d'acquisition dès que le processus est plus loin de la base qu'un poste de travail. En local ça passait, en intégration continue non, et c'est le premier run CI à semer des Memes qui l'a dit. La taille du pool est exportée par `src/db`, pour que le seed ne puisse pas diverger de la valeur réelle.
 
 Deux lignes protègent la base. `.env.e2e` est chargé en `override`, donc une variable exportée dans le terminal ne peut pas rediriger le seed, vérifié avec un `DATABASE_URL` hostile. Et la troncature elle même refuse de partir si le `DATABASE_URL` du processus n'est pas celui que le fichier déclare, garde posé contre la destruction et non au point d'appel. 
 

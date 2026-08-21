@@ -1,6 +1,9 @@
 import React from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { PREMIUM_REMINDER_STORAGE_KEY } from '~/constants/plan'
+import {
+  PREMIUM_REMINDER_DELAY_MS,
+  PREMIUM_REMINDER_STORAGE_KEY
+} from '~/constants/plan'
 import { DAY } from '~/constants/time'
 import {
   getActiveSubscriptionQueryOpts,
@@ -10,7 +13,6 @@ import { matchIsUserAdmin } from '~/lib/role'
 import { matchIsDialogOpen, useDialog } from '~/stores/dialog.store'
 
 const COOLDOWN_MS = 3 * DAY
-const DISPLAY_DELAY_MS = 5000
 
 type UsePremiumReminderParams = {
   enabled: boolean
@@ -54,7 +56,10 @@ export const usePremiumReminder = ({ enabled }: UsePremiumReminderParams) => {
       const dialogState = useDialog.getState()
 
       if (matchIsDialogOpen(dialogState)) {
-        timeout = setTimeout(showReminderWhenScreenIsFree, DISPLAY_DELAY_MS)
+        timeout = setTimeout(
+          showReminderWhenScreenIsFree,
+          PREMIUM_REMINDER_DELAY_MS
+        )
 
         return
       }
@@ -64,7 +69,10 @@ export const usePremiumReminder = ({ enabled }: UsePremiumReminderParams) => {
     }
 
     if (enabled) {
-      timeout = setTimeout(showReminderWhenScreenIsFree, DISPLAY_DELAY_MS)
+      timeout = setTimeout(
+        showReminderWhenScreenIsFree,
+        PREMIUM_REMINDER_DELAY_MS
+      )
     }
 
     return () => {

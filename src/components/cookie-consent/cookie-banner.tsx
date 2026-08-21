@@ -3,13 +3,13 @@ import { Cookie } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Link } from '@tanstack/react-router'
 import { Button } from '~/components/ui/button'
+import { CONSENT_BANNER_DELAY_MS } from '~/constants/cookie'
 import { useIsMobile } from '~/hooks/use-mobile'
 import { useTimeout } from '~/hooks/use-timeout'
 import { m } from '~/paraglide/messages.js'
 import { useIsDialogOpen } from '~/stores/dialog.store'
 import { useCookieConsent } from './cookie-provider'
 
-const APPEAR_DELAY_MS = 3500
 const BANNER_VIDEO_SRC = '/videos/want-a-cookie.mp4'
 const BANNER_POSTER_SRC = '/images/want-a-cookie.webp'
 
@@ -68,7 +68,7 @@ export const CookieBanner = () => {
     callback: () => {
       setHasDelayElapsed(true)
     },
-    delayMs: APPEAR_DELAY_MS
+    delayMs: CONSENT_BANNER_DELAY_MS
   })
 
   const slideInitial = isMobile

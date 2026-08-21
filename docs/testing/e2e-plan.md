@@ -8,7 +8,7 @@ Les décisions structurantes sont dans `docs/adr/0003`, `0004` et `0005`.
 
 Le niveau 1 est écrit, vingt quatre scénarios plus sept tests de préparation : `checkout`, `signup`, `signin`, `password-reset`, `account-deletion`, `http-contracts`, plus `seed.spec.ts` qui charge l'accueil connecté et sert de point de départ aux agents.
 
-Du niveau 2, les trois surfaces de lecture sont écrites, onze scénarios : `home`, `memes-library` et `memes-category`. Les surfaces qui écrivent quelque chose, Export, Bookmark et Favorites, restent à faire, plus les Reels, la bannière de consentement et le rappel Premium, et le niveau 3 derrière.
+Du niveau 2, sept surfaces sont écrites, vingt et un scénarios : les quatre de lecture, `home`, `memes-library`, `memes-category` et `memes-page`, puis les trois qui écrivent, `meme-export`, `bookmark` et `favorites`. Restent les Reels, la bannière de consentement et le rappel Premium, et le niveau 3 derrière.
 
 ## La règle
 
@@ -49,6 +49,8 @@ Le workflow applique les migrations sur la branche `test` avant de construire, c
 
 La branche Neon se suspend après quelques minutes d'inactivité, et la première connexion expire pendant son réveil. La migration est donc rejouée une fois, et la chaîne de connexion porte un `connect_timeout` de trente secondes.
 
+Cette migration passe par le pooler, et Prisma la garde derrière un verrou d'avis, `pg_advisory_lock(72707369)`. Vu une fois : une session pgbouncer restée `idle` tenait ce verrou après une requête applicative, et les migrations suivantes expiraient dessus, dix secondes chacune, run après run. Le symptôme est un `P1002` qui accuse la base d'être injoignable alors qu'elle répond. `pg_locks` joint à `pg_stat_activity` nomme le coupable en une requête. En attendant qu'il se recycle, `CI=1` fait servir la suite sans migrer, ce qui est exactement ce que fait l'intégration continue.
+
 Les runs sont sérialisés par un groupe de concurrence GitHub, et la suite tourne sur un seul worker : la base est unique, deux tests qui écrivent en même temps se marcheraient dessus.
 
 ## Les données
@@ -65,7 +67,13 @@ Deux Memes de remplissage sur trois sont Universels, et ce rapport est ce qui d�
 
 Les vues sont toutes distinctes, ce qui rend l'ordre déterministe sans avoir à semer de l'Activity : la première page de `trending` se rabat sur le nombre de vues quand aucun Event n'existe. Les dates de publication sont posées en jours avant le run, de sorte que la catégorie `news`, qui coupe à trente jours, contienne exactement trois Memes en français et deux en anglais. La date de création est celle de la publication, faute de quoi elle serait l'instant d'une insertion parallèle et l'index trié dessus n'aurait aucun ordre à offrir.
 
-Ce déterminisme a une date de péremption. Une vue enregistrée sur une page Meme écrit une ligne `meme_view_daily`, et à partir de là la première page de `trending` sort du calcul pondéré et non plus des vues semées, avec un cache de douze heures posé dessus. Aucun test actuel n'ouvre une page Meme, donc rien ne bouge. Le premier qui le fera doit soit affirmer des ensembles et non des places, ce que font déjà les tests de pagination, soit passer avant ceux qui lisent `trending`. Un ordre qui dépend de l'ordre des tests est une régression, pas un réglage.
+Ce déterminisme a une date de péremption. Une vue enregistrée sur une page Meme écrit une ligne `meme_view_daily`, incrémente le `viewCount` du Meme une fois par visiteur et par jour, et fait sortir la première page de `trending` du repli sur les vues semées : elle vient alors du calcul pondéré, avec un cache de douze heures posé dessus.
+
+La vue n'est pas seule dans ce calcul : un Bookmark, un téléchargement et un partage y pèsent aussi, chacun sur une fenêtre de sept jours. **Tout test qui laisse un de ces signaux le laisse donc sur le Meme le plus vu**, celui qui occupe déjà la première place au compteur. Le calcul pondéré le remet en tête et complète par les vues, donc la première page de `trending` garde le même ensemble et le même ordre. C'est cette propriété qui protège les autres tests, pas l'ordre des fichiers, et un ordre qui dépend de l'ordre des tests est une régression, pas un réglage.
+
+Un Bookmark semé, lui, n'a pas cette échappatoire : vingt deux Bookmarks posés sur des Memes de remplissage décideraient de la première page de `trending` avant qu'un seul test ait tourné. Le seed les date donc hors de la fenêtre, un jour au-delà de `TRENDING_CATEGORY_DAYS`, constante lue chez l'application.
+
+Le corollaire tient en une ligne : aucun test n'affirme le nombre de vues affiché sur une page Meme, puisqu'il vaut la valeur semée ou celle-ci plus un selon ce qui a déjà tourné.
 
 Le nombre de jours de la fenêtre `news` n'est pas recopié dans les tests : `e2e/content.ts` dérive la liste des Memes récents de `THIRTY_DAYS_MS`, la constante que l'application applique elle même. Décaler la fenêtre déplace les deux ensemble.
 
@@ -80,6 +88,8 @@ Bunny, lui, n'est jamais touché par le seed. La Video et son fichier watermarqu
 Un seul Meme semé, le plus vu, porte une Video qui existe vraiment. Tous les autres ont un `bunnyId` inventé, ce qui suffit pour une liste, un emplacement de miniature et une page, et jamais pour lire ou Exporter.
 
 Un rôle par scénario qui laisse une marque sur son compte : partager un rôle entre un checkout et une suppression ferait dépendre le second de l'ordre du premier. Le rôle `unverified` porte `emailVerified: false`, ce qui est la seule chose que l'écran de connexion a à dire sur lui.
+
+Un rôle peut naître avec un état, déclaré à côté de lui dans `e2e/constants.ts` et posé par le seed. `premium` porte une ligne `subscription` active, écrite en base et non passée par Stripe : `listActiveSubscriptions` de better-auth ne lit que cette table, donc un abonnement semé suffit à ouvrir l'Export sans filigrane. Il n'a ni client ni abonnement Stripe, faute de quoi la suite promènerait des identifiants qui ne désignent rien ; le jour où un test ouvrira le portail de facturation, ce rôle ne fera pas l'affaire. `bookmarkCapped` porte les vingt Bookmarks du plafond gratuit, et `favorites` en porte deux, nommés.
 
 Un projet `auth` connecte ensuite chaque rôle vérifié par l'API HTTP et enregistre un `storageState`. Cette étape vaut vérification : si une ligne semée n'était pas celle que better-auth attend, la connexion échouerait. Un test qui aura besoin d'un compte jetable le créera avec sa propre adresse, sur le domaine `@e2e.petitmeme.invalid`.
 
@@ -119,17 +129,31 @@ Ces douze viennent de Recommend quand il a de quoi répondre, et du repli sur le
 
 Reste à ajouter : la vue en grille, dont le nombre de colonnes ne change ni les Memes ni leur ordre.
 
-**Page Meme.** Le lecteur est monté, la source est signée, aucune URL de vidéo brute n'apparaît dans le DOM. Un test canonique, sur Chromium seulement, vérifie que la lecture démarre réellement. Partout ailleurs, les segments vidéo sont bloqués par `page.route`.
+**Page Meme.** Écrit. La page répond, porte son titre en `h1`, sa description et son badge de langue, et le retour mène à la bibliothèque. Le lecteur porte la miniature de la Video du Meme, et la lecture démarre vraiment : le nom accessible de la surface de lecture passe de « Lire la vidéo » à « Mettre en pause », et le `currentTime` de la vidéo avance.
 
-**Export.** Download produit un fichier non vide, ce qui attend la library Bunny `e2e`. Share déclenche l'intention de partage. Le plafond du plan gratuit s'applique, et le message qui l'explique s'affiche au lieu d'un bouton désactivé.
+Cette lecture part toute seule, et le test ne clique rien. Playwright ne pose aucun `--autoplay-policy`, donc c'est la règle de Chrome qui décide, et elle laisse passer une vidéo sans piste audio comme si elle était `muted` : `want-a-cookie.mp4` n'en a pas. Cliquer la surface de lecture serait une course perdue d'avance, entre l'autoplay et le clic, et le nom du bouton bascule au milieu. Un Meme sonore, lui, serait bloqué, et ce test là ne serait plus le même.
 
-**Bookmark.** Ajout, retrait, persistance après rechargement, plafond du plan gratuit, absence de Bookmark pour un Visitor anonyme.
+Un seul Meme est jouable, le plus vu, le seul dont la Video existe chez Bunny, et le clip dure six secondes. Rien n'est bloqué par `page.route`, il n'y a pas de quoi.
+
+Deux affirmations que ce plan annonçait ici ont été retirées, le code dit autre chose. La source n'est pas signée : la page charge un `playlist.m3u8` nu, et la signature de cinq minutes ne sert qu'au serveur, pour l'Export, le Studio, l'AiSearch et le watermark. Et l'URL `/original` est bien dans le DOM, dans le `VideoObject` du JSON-LD, du même geste délibéré que `video:content_loc` dans `sitemap-memes.xml`. L'invariant « une page n'est jamais une vidéo » reste porté par `http-contracts`, et par lui seul.
+
+Un `<video>` n'a pas de rôle ARIA, et « Lire la vidéo » nomme aussi les boutons des cartes. Ce test est donc le seul à délimiter sa cible par un nom d'élément, `media-controller`. C'est le nom du composant du lecteur, pas un identifiant de test.
+
+**Export.** Écrit. Un Premium clique Télécharger et repart avec un fichier non vide, sans qu'on lui demande rien. Un User gratuit clique le même bouton et reçoit le dialogue du filigrane, qui vend Premium et lui laisse quand même le fichier watermarqué : la porte explique, elle ne ferme pas.
+
+Share n'est pas testé, et ce n'est pas un oubli. Le bouton est `md:hidden`, donc absent du format desktop, et `navigator.share` n'existe pas dans un Chromium de runner. Le tester demanderait un faux `navigator.share`, c'est à dire un mock, ce que cette suite ne fait pas. Il attend le format téléphone.
+
+**Bookmark.** Écrit. Un User ajoute un Bookmark, le retrouve après un rechargement, et le retire. Un User au plafond du plan gratuit se voit refuser le suivant et le sait par un message. Un Visitor anonyme, lui, reçoit le dialogue de connexion.
+
+Deux détails de ce scénario méritent d'être écrits. Le rechargement passe par `repeatUntilVisible` et non par un `page.reload()` sec : l'écran bascule sur la mise à jour optimiste avant que le serveur ait répondu, et recharger à cet instant coupe la requête en vol. Recharger jusqu'à ce que l'écran soit d'accord affirme la persistance au lieu de courir contre elle.
+
+Et le message du plafond n'est pas celui que le produit croit afficher. Le serveur refuse par un `StudioError` de code `PREMIUM_REQUIRED` sous un 403, mais le client ne le relit pas et retombe sur son message générique, « Erreur lors de la mise à jour du favori » au lieu de « Limite de favoris atteinte ». Le test affirme ce que le Visitor voit vraiment. Il deviendra rouge le jour où le code sera corrigé, ce qui est exactement le moment de le mettre à jour.
 
 **Category.** Écrit. `/memes/category/$slug` rend et ne montre que les Memes de la Category, la liste des Categories emmène d'une Category à l'autre et le contenu suit, la catégorie `news` coupe à trente jours, et un slug qui n'existe pas répond 404 et non un écran 404 sous un statut valide.
 
 **Reels et `/random`.** Répondent, affichent un Meme, la navigation suivante change de Meme. Les assertions s'arrêtent là, faute de pouvoir affirmer mieux sans devenir tautologiques.
 
-**Favorites.** `/favorites` liste ce qui a été mis en Bookmark et pousse vers la connexion pour un Visitor anonyme.
+**Favorites.** Écrit. `/favorites` liste exactement les Memes que le rôle porte en Bookmark, et un troisième n'y est pas. Un Visitor anonyme n'est pas poussé vers la connexion, contrairement à ce que ce plan annonçait : la route le renvoie sur `/memes`, donc sur `trending`. C'est ce que fait le code, c'est ce qu'affirme le test.
 
 **Bannière de consentement.** Apparaît à la première visite, ne bloque aucun clic, se referme, et le choix survit au rechargement. Commence par effacer le cookie que `fixtures.ts` pose.
 
@@ -155,7 +179,7 @@ Chromium seulement pour l'instant. WebKit sur format iPhone arrive avec le premi
 
 Les fichiers e2e portent l'extension `.spec.ts`, ce qui les distingue des `.test.ts` de Vitest, pour oxlint comme pour les règles d'écriture des tests.
 
-Les points d'accroche sont des rôles et des noms accessibles, jamais des `data-testid`. Un test nomme ce qu'il clique comme un lecteur d'écran l'annonce, ce qui le fait échouer quand l'accessibilité casse. La seule exception est la page Stripe, dont les identifiants ne nous appartiennent pas.
+Les points d'accroche sont des rôles et des noms accessibles, jamais des `data-testid`. Un test nomme ce qu'il clique comme un lecteur d'écran l'annonce, ce qui le fait échouer quand l'accessibilité casse. Deux exceptions : la page Stripe, dont les identifiants ne nous appartiennent pas, et le lecteur vidéo, qu'aucun rôle ne désigne.
 
 Le nom vient de l'application, pas d'une copie : `e2e/messages.ts` fixe la locale du résolveur avec `overwriteGetLocale` puis réexporte `m`, et un test écrit `getByRole('button', { name: m.nav_sign_in() })`. Le site est bilingue et une locale ne décide pas si un test passe, elle décide seulement quelle chaîne est demandée. Le parcours EN sera le même code avec une autre locale.
 
@@ -195,11 +219,9 @@ Les index `e2e` sont configurés, primaires et replicas de tri, par `pnpm exec v
 
 Un index créé par une simple écriture n'a aucun réglage, et Algolia ne le dit pas. Un filtre sur un attribut qui n'est pas dans `attributesForFaceting` ne lève rien, il renvoie zéro résultat. La bibliothèque filtre toujours sur `status`, donc tant que les réglages manquaient, elle était vide alors que les enregistrements étaient là et se trouvaient à la recherche libre. Une liste vide se lit comme un seed raté, jamais comme un index mal réglé.
 
-La library Bunny Stream `e2e` et sa zone de stockage existent, et `public/videos/want-a-cookie.mp4` y est publiée sous `E2E_VIDEO_BUNNY_ID`. Sa version watermarquée est dans la zone, produite en local à partir du même fichier et avec la recette de `scripts/watermark-videos.ts` : ce script commence par télécharger `/original`, ce que le réglage ci dessous interdit, alors que la source était déjà dans le dépôt. Toutes les valeurs Bunny sont dans `.env.e2e`. Reste le réglage « Block Direct URL File Access » à désactiver sur la library.
+La library Bunny Stream `e2e` et sa zone de stockage existent, et `public/videos/want-a-cookie.mp4` y est publiée sous `E2E_VIDEO_BUNNY_ID`. Sa version watermarquée est dans la zone, produite en local à partir du même fichier et avec la recette de `scripts/watermark-videos.ts` : ce script commence par télécharger `/original`, ce que le réglage ci dessous interdit, alors que la source était déjà dans le dépôt. Toutes les valeurs Bunny sont dans `.env.e2e`.
 
-`.env.e2e` a donc changé, et le secret `E2E_ENV_FILE` porte encore l'ancien. Tant qu'il n'est pas recopié, le job `e2e` d'une pull request s'arrête au chargement sur `E2E_VIDEO_BUNNY_ID`.
-
-Ce réglage mérite d'être écrit, parce qu'il se rejoue à chaque library créée et qu'il ne se lit pas dans un message d'erreur. Il refuse toute requête sans en tête `Referer`, jeton ou pas : le même fichier répond 403 nu et 200 avec un référent quelconque. Un navigateur en envoie un, donc miniatures et lecture HLS marchent quand même, ce qui fait passer la library pour saine. Le serveur, lui, n'en envoie pas, et c'est lui qui va chercher `/original` pour l'Export d'un Premium et pour le Studio. La panne se voit donc uniquement là, et sur un chemin qui n'a rien à voir avec un réglage de CDN.
+Une library Bunny naît avec « Block Direct URL File Access » actif, et il est à désactiver. Le réglage mérite d'être écrit, parce qu'il se rejoue à chaque library créée et qu'il ne se lit pas dans un message d'erreur. Il refuse toute requête sans en tête `Referer`, jeton ou pas : le même fichier répond 403 nu et 200 avec un référent quelconque. Un navigateur en envoie un, donc miniatures et lecture HLS marchent quand même, ce qui fait passer la library pour saine. Le serveur, lui, n'en envoie pas, et c'est lui qui va chercher `/original` pour l'Export d'un Premium et pour le Studio. La panne se voit donc uniquement là, et sur un chemin qui n'a rien à voir avec un réglage de CDN.
 
 `e2e/env.ts` exige `BETTER_AUTH_SECRET`, pour forger le jeton de vérification, `VITE_BUNNY_HOSTNAME`, pour l'affirmation sur les sitemaps, et `E2E_VIDEO_BUNNY_ID`, l'unique Video des fixtures qui existe vraiment chez Bunny, en plus de `VITE_SITE_URL` et `DATABASE_URL`. Une clé qui manque casse le run au chargement, avec son nom dans le message. Le secret `E2E_ENV_FILE` doit donc les porter.
 

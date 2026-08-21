@@ -12,6 +12,8 @@ End to end tests are `**/*.spec.ts` under `e2e/` and answer to `docs/testing/e2e
 instead: one scenario per test, a scenario carrying as many assertions as the flow needs,
 and no mocking, since the point is to exercise the real thing.
 
+An e2e assertion is taken on screen, never by polling the database to check that the test worked.
+
 ### Structure
 - Use BDD-style comments: #given, #when, #then
 - One logical assertion per test

@@ -3,8 +3,8 @@ import { hashPassword } from 'better-auth/crypto'
 import { test as setup } from '@playwright/test'
 import { DATABASE_POOL_MAX_CONNECTIONS, prismaClient } from '~/db'
 import { BUNNY_STATUS } from '~/constants/bunny'
-import { MEME_ALGOLIA_INCLUDE } from '~/constants/meme'
-import { DAY } from '~/constants/time'
+import { MEME_ALGOLIA_INCLUDE, TRENDING_CATEGORY_DAYS } from '~/constants/meme'
+import { DAY, THIRTY_DAYS_MS } from '~/constants/time'
 import { MemeStatus } from '~/db/generated/prisma/enums'
 import {
   replaceAllIndicesWithMemes,
@@ -46,6 +46,46 @@ const createWithinPool = async <T>(
   }
 }
 
+const BOOKMARK_DATE_OUTSIDE_TRENDING_WINDOW = new Date(
+  Date.now() - (TRENDING_CATEGORY_DAYS + 1) * DAY
+)
+
+const createSubscription = async (role: E2eRole) => {
+  if (!role.premiumPlan) {
+    return
+  }
+
+  const now = new Date()
+
+  await prismaClient.subscription.create({
+    data: {
+      id: `${role.id}-subscription`,
+      plan: role.premiumPlan,
+      referenceId: role.id,
+      status: 'active',
+      billingInterval: 'month',
+      periodStart: now,
+      periodEnd: new Date(now.getTime() + THIRTY_DAYS_MS)
+    }
+  })
+}
+
+const createBookmarks = async (role: E2eRole) => {
+  if (!role.bookmarkedMemeIds) {
+    return
+  }
+
+  await prismaClient.userBookmark.createMany({
+    data: role.bookmarkedMemeIds.map((memeId) => {
+      return {
+        userId: role.id,
+        memeId,
+        createdAt: BOOKMARK_DATE_OUTSIDE_TRENDING_WINDOW
+      }
+    })
+  })
+}
+
 const createUser = async (role: E2eRole) => {
   const now = new Date()
 
@@ -71,6 +111,8 @@ const createUser = async (role: E2eRole) => {
       }
     }
   })
+
+  await createSubscription(role)
 }
 
 const createCategory = async (category: E2eCategory) => {
@@ -171,6 +213,9 @@ setup('seed the e2e environment', async () => {
 
   await createWithinPool(E2E_MEMES, createMeme)
   console.log(`  ${E2E_MEMES.length} memes created`)
+
+  await createWithinPool(Object.values(E2E_ROLES), createBookmarks)
+  console.log(`  ${await prismaClient.userBookmark.count()} bookmarks created`)
 
   await indexMemes()
 })

@@ -5,7 +5,7 @@ import { DATABASE_POOL_MAX_CONNECTIONS, prismaClient } from '~/db'
 import { BUNNY_STATUS } from '~/constants/bunny'
 import { MEME_ALGOLIA_INCLUDE, TRENDING_CATEGORY_DAYS } from '~/constants/meme'
 import { DAY, THIRTY_DAYS_MS } from '~/constants/time'
-import { MemeStatus } from '~/db/generated/prisma/enums'
+import { MemeStatus, UserLocale } from '~/db/generated/prisma/enums'
 import {
   replaceAllIndicesWithMemes,
   resolveAlgoliaIndexName
@@ -102,6 +102,25 @@ const createBookmarks = async (role: E2eRole) => {
         userId: role.id,
         memeId,
         createdAt: BOOKMARK_DATE_OUTSIDE_TRENDING_WINDOW
+      }
+    })
+  })
+}
+
+const createAiSearchLogs = async (role: E2eRole) => {
+  if (!role.aiSearchCount) {
+    return
+  }
+
+  await prismaClient.aiSearchLog.createMany({
+    data: Array.from({ length: role.aiSearchCount }, (_, index) => {
+      return {
+        userId: role.id,
+        prompt: `e2e seeded ai search ${index + 1}`,
+        keywords: [],
+        memeIds: [],
+        locale: UserLocale.fr,
+        resultCount: 0
       }
     })
   })
@@ -240,6 +259,11 @@ setup('seed the e2e environment', async () => {
 
   await createWithinPool(Object.values(E2E_ROLES), createBookmarks)
   console.log(`  ${await prismaClient.userBookmark.count()} bookmarks created`)
+
+  await createWithinPool(Object.values(E2E_ROLES), createAiSearchLogs)
+  console.log(
+    `  ${await prismaClient.aiSearchLog.count()} ai search logs created`
+  )
 
   await indexMemes()
 })

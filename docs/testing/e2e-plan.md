@@ -10,7 +10,7 @@ Le niveau 1 est écrit, vingt quatre scénarios plus sept tests de préparation 
 
 Le niveau 2 est écrit en entier, onze surfaces et trente et un scénarios : les quatre de lecture, `home`, `memes-library`, `memes-category` et `memes-page`, les trois qui écrivent, `meme-export`, `bookmark` et `favorites`, les deux qui parlent d'eux mêmes, `consent-banner` et `premium-reminder`, puis les deux qui tirent au sort, `reels` et `random`.
 
-Du niveau 3, deux surfaces sont ouvertes. `studio`, deux scénarios : sa génération complète est écrite puis retirée, et la section qui la porte dit pourquoi. `settings`, dix scénarios, la page entière. Restent la Submission, l'AiSearch, les pages légales et le parcours EN.
+Du niveau 3, trois surfaces sont ouvertes. `studio`, deux scénarios : sa génération complète est écrite puis retirée, et la section qui la porte dit pourquoi. `settings`, dix scénarios, la page entière. `legal-pages`, dix scénarios, les quatre pages dans les deux locales. Restent la Submission, l'AiSearch et le parcours EN.
 
 ## La règle
 
@@ -236,7 +236,13 @@ Deux affirmations manquent ici et ce n'est pas un oubli. La date de renouvelleme
 
 **AiSearch.** La porte seulement : Visitor anonyme, User gratuit avec son quota, quota épuisé. Le modèle n'est jamais appelé.
 
-**Pages légales.** `/dmca`, `/mentions-legales`, `/privacy`, `/terms-of-use` répondent dans les deux locales, et la mention d'attribution du style d'avatar est présente.
+**Pages légales.** Écrit, dix scénarios. `/dmca`, `/mentions-legales`, `/privacy`, `/terms-of-use` répondent dans les deux locales, chacune avec son titre, et les mentions légales portent l'attribution du style d'avatar.
+
+Le titre attendu n'est pas recopié dans le test : il est lu dans le fichier markdown que la page sert elle même. La panne à attraper ici est une locale qui rend le markdown de l'autre, et une copie gardée dans le test resterait verte ce jour là, puisque les deux copies nomment la même page.
+
+C'est le premier fichier de la suite à visiter `/en/`, et il le fait sans changer la locale du navigateur, qui reste `fr-FR`. L'URL gagne sur `Accept-Language`, et c'est cette page anglaise rendue sous un navigateur français qui le prouve. Les chemins localisés viennent de `localizeUrl`, la fonction de l'application, plutôt que d'un préfixe recollé à la main : le parcours EN héritera du même geste.
+
+L'attribution, elle, est écrite en dur, et c'est le seul endroit de la suite où une valeur est recopiée volontairement. Le style d'avatar est un remix servi sous CC BY 4.0, licence qui ne tient que tant que le crédit et ses deux liens restent sur la page. Dériver ces chaînes du markdown rendrait le test vert le jour où le crédit disparaîtrait des deux côtés.
 
 **Parcours EN.** Le routage `/en/` et les métadonnées de chaque type de page, plus le parcours de checkout en entier, parce que les montants et les e-mails y sont localisés.
 

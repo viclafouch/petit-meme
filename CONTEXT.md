@@ -175,5 +175,11 @@ It lays a full screen veil and declares itself `aria-modal`, so nothing behind i
 **Every field written at sign up must be declared to better-auth.**
 `transformInput` builds the inserted row by looping over the fields known to the better-auth schema only, and drops the rest without an error. A field returned by the `user.create.before` hook but missing from `USER_ADDITIONAL_FIELDS` is simply never written. This trap already cost `provider_avatar`, then the GDPR consent timestamps, then the email locale.
 
+**The VisitorKey is a daily fingerprint, never the raw IP and never a stable one.**
+It is `sha256(ip + day + secret)`. The raw IP is out because the key is copied into a JavaScript readable cookie and sent to Algolia as a `userToken`, which would expose it in two forbidden places. A fingerprint stable over time is out too: the table keeps 90 days, so it would amount to a persistent identifier for a marginal analytics gain. The daily renewal is the whole point, and two Visitors behind one connection counting as one is the accepted price.
+
+**An Event is attributed at the instant it happens, and never re-attributed.**
+A Visitor who later creates an account does not recover the Events they produced before signing up. Attaching them afterwards, by address, would credit one person with what another did behind the same family or office connection. A User's history therefore starts at sign up; the road before it is only in the Activity, for the 30 days it is kept. Any model change that assumes an Event can be updated after the fact breaks this.
+
 **The locale is a cookie, and the cookie is read before the URL.**
 `cookie` comes first in the paraglide strategy, and paraglide writes `PARAGLIDE_LOCALE` on the first client render, not only when the language switcher is used. Two things follow. Walking once to `/en/` pins that browser to English, so a French road then redirects to its English twin instead of quietly undoing the choice. And a URL our router never builds still comes back in the right language: the `successUrl` handed to Stripe is a bare `/checkout/success`, and the cookie is the only thing that brings an English Visitor home in English. Putting `url` first would read as a simplification, and it would drop a paying Visitor back into French.

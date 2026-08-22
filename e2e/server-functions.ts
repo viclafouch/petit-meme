@@ -1,11 +1,14 @@
-import type { Response } from '@playwright/test'
+import type { Request, Response } from '@playwright/test'
 
-// A server function URL carries a hash of its body, nothing readable to match on.
 export const SERVER_FUNCTION_URL_PATTERN = /\/_serverFn\//u
 
-export const matchIsServerFunctionCall = (response: Response) => {
+export const matchIsServerFunctionRequest = (request: Request) => {
   return (
-    response.request().method() === 'POST' &&
-    SERVER_FUNCTION_URL_PATTERN.test(response.url())
+    request.method() === 'POST' &&
+    SERVER_FUNCTION_URL_PATTERN.test(request.url())
   )
+}
+
+export const matchIsServerFunctionCall = (response: Response) => {
+  return matchIsServerFunctionRequest(response.request())
 }

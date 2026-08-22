@@ -128,6 +128,12 @@ export const E2E_ROLES = {
       E2E_NAMED_MEMES.universal.id
     ]
   },
+  submission: {
+    id: 'e2e-user-submission',
+    name: 'E2E Submission',
+    email: `e2e-submission@${E2E_EMAIL_DOMAIN}`,
+    emailVerified: true
+  },
   aiSearch: {
     id: 'e2e-user-ai-search',
     name: 'E2E Ai Search',

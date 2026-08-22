@@ -1,21 +1,13 @@
-import type { Response } from '@playwright/test'
 import { getAuthDialogSignInButton } from './auth-flows'
 import { E2E_NAMED_MEMES } from './content'
 import { resolveStorageStatePath } from './env'
 import { expect, test } from './fixtures'
 import { repeatUntilVisible } from './hydration'
 import { m } from './messages'
+import { matchIsServerFunctionCall } from './server-functions'
 
 const BOOKMARKED_MEME_PATHNAME = `/memes/${E2E_NAMED_MEMES.mostViewed.id}`
 const UNBOOKMARKED_MEME_PATHNAME = `/memes/${E2E_NAMED_MEMES.universal.id}`
-const SERVER_FUNCTION_BASE = '/_serverFn/'
-
-const matchIsServerFunctionCall = (response: Response) => {
-  return (
-    response.request().method() === 'POST' &&
-    response.url().includes(SERVER_FUNCTION_BASE)
-  )
-}
 
 test.describe('a signed in User', () => {
   test.use({ storageState: resolveStorageStatePath('bookmark') })

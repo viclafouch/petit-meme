@@ -95,8 +95,8 @@ const UpdatePasswordForm = () => {
 
   const form = useForm({
     ...getUpdatePasswordFormOpts(),
-    onSubmit: async ({ value }) => {
-      return updatePasswordMutation.mutateAsync({
+    onSubmit: ({ value }) => {
+      updatePasswordMutation.mutate({
         currentPassword: value.currentPassword,
         newPassword: value.newPassword
       })
@@ -194,22 +194,13 @@ const UpdatePasswordForm = () => {
             )
           }}
         />
-        <form.Subscribe
-          selector={(state) => {
-            return state.isSubmitting
-          }}
-          children={(isSubmitting) => {
-            return (
-              <LoadingButton
-                isLoading={isSubmitting}
-                type="submit"
-                className="w-full"
-              >
-                {m.auth_update()}
-              </LoadingButton>
-            )
-          }}
-        />
+        <LoadingButton
+          isLoading={updatePasswordMutation.isPending}
+          type="submit"
+          className="w-full"
+        >
+          {m.auth_update()}
+        </LoadingButton>
         {updatePasswordMutation.error ? (
           <Alert
             ref={errorRef}
@@ -225,22 +216,15 @@ const UpdatePasswordForm = () => {
             </AlertDescription>
           </Alert>
         ) : null}
-        <form.Subscribe
-          selector={(state) => {
-            return state.isSubmitted
-          }}
-          children={(isSubmitted) => {
-            return isSubmitted && updatePasswordMutation.isSuccess ? (
-              <Alert variant="success" className="mt-4">
-                <CircleAlert aria-hidden="true" />
-                <AlertTitle>{m.auth_password_updated_title()}</AlertTitle>
-                <AlertDescription>
-                  {m.auth_password_updated_description()}
-                </AlertDescription>
-              </Alert>
-            ) : null
-          }}
-        />
+        {updatePasswordMutation.isSuccess ? (
+          <Alert variant="success" className="mt-4">
+            <CircleAlert aria-hidden="true" />
+            <AlertTitle>{m.auth_password_updated_title()}</AlertTitle>
+            <AlertDescription>
+              {m.auth_password_updated_description()}
+            </AlertDescription>
+          </Alert>
+        ) : null}
       </div>
     </form>
   )

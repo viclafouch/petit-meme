@@ -105,7 +105,7 @@ Ce niveau bloque une pull request. C'est ce qui coûte de l'argent ou un compte 
 
 **Checkout.** Écrit, mensuel et annuel. Depuis `/pricing`, jusqu'à la page Stripe en mode test, carte `4242`, retour. On affirme après la redirection : `/checkout/success` répond, la ligne `Subscription` porte `plan`, `status`, `billingInterval`, les deux identifiants Stripe et les deux dates de période, et la carte Premium apparaît comme le plan actif au rechargement.
 
-Le scénario mensuel va une étape plus loin et prend un Bookmark. Le rôle est semé au plafond du plan gratuit, vingt Bookmarks, et le vingt et unième dit que le paiement a changé le produit et pas seulement une ligne. Il est pris sur le Meme le plus vu, seul endroit où un signal frais ne déplace pas la première page de `trending`. C'est le scénario le plus long de la suite, un paiement, sa redirection et une écriture derrière, donc l'un des trois à porter `test.slow()`.
+Le scénario mensuel va une étape plus loin et prend un Bookmark. Le rôle est semé au plafond du plan gratuit, vingt Bookmarks, et le vingt et unième dit que le paiement a changé le produit et pas seulement une ligne. Il est pris sur le Meme le plus vu, seul endroit où un signal frais ne déplace pas la première page de `trending`. C'est le scénario le plus long de la suite, un paiement, sa redirection et une écriture derrière, donc le seul à porter `test.slow()`.
 
 **Inscription.** Écrit. Formulaire du dialogue d'authentification, URL de vérification, compte connecté ensuite. Vérifie au passage que les champs déclarés à better-auth sont bien écrits, `providerAvatar`, les horodatages de consentement, la locale.
 
@@ -183,7 +183,7 @@ Le second scénario dit la règle en entier : le rappel attend son tour. Le dial
 
 ### Niveau 3, le reste
 
-**Studio et Generation.** Écrit, trois scénarios sur Chromium. Un Premium et un User gratuit ouvrent `/memes/$memeId/studio`, saisissent un texte, génèrent, et repartent avec un fichier non vide. Le transcodage est réel : six secondes de vidéo, ffmpeg en WebAssembly sur un seul fil, un peu plus de quatre secondes en local. Les deux scénarios portent `test.slow()`, parce que le budget d'un test normal ne couvre pas une marge sur un runner plus lent.
+**Studio et Generation.** Écrit, trois scénarios sur Chromium. Un Premium et un User gratuit ouvrent `/memes/$memeId/studio`, saisissent un texte, génèrent, et repartent avec un fichier non vide. Le transcodage est réel : six secondes de vidéo, ffmpeg en WebAssembly sur un seul fil, un peu plus de quatre secondes en local. Ces quatre secondes tiennent largement dans le budget d'un test, donc les deux scénarios ne touchent pas au plafond. L'attente du transcodage porte sa propre borne, vingt secondes, pour qu'une génération qui ne finit pas le dise au lieu d'expirer ailleurs dans le scénario.
 
 Le troisième dit ce que le Studio demande avant de travailler. Un Visitor anonyme y entre sans compte, le bouton Générer sans texte lui répond « Veuillez saisir du texte », et rien ne part au traitement. C'est le seul garde-fou que cette surface porte vraiment.
 
@@ -247,7 +247,7 @@ Les deux délais viennent de l'application, `CONSENT_BANNER_DELAY_MS` et `PREMIU
 
 Un seul test est connu instable, la recherche de la bibliothèque, qui a échoué une fois au premier essai et passé au retry. C'est le seul qui tape dans le champ et attend Algolia, donc le seul dont l'attente dépend d'un service tiers plutôt que de notre serveur. `repeatUntilVisible` couvre l'hydratation, pas cette latence. Les retries d'intégration continue l'absorbent, et rien n'est fait de plus tant qu'il ne devient pas régulier : élargir une fenêtre pour un échec unique cache le jour où la lenteur devient une panne.
 
-`timeout: 30_000` par test : au-delà, un test pend, il ne tourne plus. C'est un plafond serré, le checkout annuel mesure une dizaine de secondes en local. Trois scénarios portent `test.slow()`, qui monte ce plafond à quatre vingt dix secondes : le checkout mensuel, qui prend un Bookmark après avoir payé, et les deux générations du Studio, qui transcodent. `retries: 2` en intégration continue et `0` en local, ce qui sert aussi de coussin sur ce plafond, `trace: 'on-first-retry'`, `forbidOnly` quand `CI` est défini. Les artefacts ne partent qu'en cas d'échec, avec une rétention de trois jours, parce que le dépôt est public.
+`timeout: 30_000` par test : au-delà, un test pend, il ne tourne plus. C'est un plafond serré, le checkout annuel mesure une dizaine de secondes en local. Le checkout mensuel, qui prend un Bookmark après avoir payé, porte `test.slow()` : le plafond y devient quatre vingt dix secondes, et c'est le seul endroit où il bouge. `retries: 2` en intégration continue et `0` en local, ce qui sert aussi de coussin sur ce plafond, `trace: 'on-first-retry'`, `forbidOnly` quand `CI` est défini. Les artefacts ne partent qu'en cas d'échec, avec une rétention de trois jours, parce que le dépôt est public.
 
 ## Les agents
 

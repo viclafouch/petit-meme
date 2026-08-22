@@ -15,3 +15,9 @@ export const getMemePlayButtons = (page: Page) => {
 export const getMemeLink = (page: Page, meme: E2eMeme) => {
   return page.getByRole('link', { name: meme.title, exact: true })
 }
+
+export const getMemeTitleLinks = (page: Page) => {
+  return page
+    .getByRole('list', { name: m.meme_list_label(), exact: true })
+    .getByRole('link')
+}

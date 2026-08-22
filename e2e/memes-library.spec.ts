@@ -7,12 +7,14 @@ import {
 } from './content'
 import { expect, test } from './fixtures'
 import { repeatUntilVisible } from './hydration'
-import { getMemeLink, getMemePlayButtons } from './library'
+import { getMemeLink, getMemePlayButtons, getMemeTitleLinks } from './library'
 import { m } from './messages'
 
 // The library is open to everyone, so it is walked as an anonymous Visitor.
 
 const SECOND_PAGE_NUMBER = '2'
+
+const WIDEST_GRID_COLUMN_COUNT = '6'
 
 // Dropping French leaves the English and the Universal Memes, thirty four of
 // them, so the page stays full. A filter that answered nothing would satisfy
@@ -81,6 +83,39 @@ test('the second page holds exactly what the first one left out', async ({
       return expect(getMemeLink(page, meme)).toBeHidden()
     })
   ])
+})
+
+test('widening the grid changes neither the Memes nor their order', async ({
+  page
+}) => {
+  await page.goto('/memes/category/trending')
+
+  const memeTitleLinks = getMemeTitleLinks(page)
+
+  await expect(memeTitleLinks).toHaveCount(MEMES_PER_PAGE)
+
+  const titlesBeforeWidening = await memeTitleLinks.allTextContents()
+
+  const gridColumns = page.getByRole('radiogroup', {
+    name: m.meme_grid_columns()
+  })
+  const widestGrid = gridColumns.getByRole('radio', {
+    name: WIDEST_GRID_COLUMN_COUNT,
+    exact: true
+  })
+
+  await repeatUntilVisible(
+    () => {
+      return widestGrid.click()
+    },
+    gridColumns.getByRole('radio', {
+      name: WIDEST_GRID_COLUMN_COUNT,
+      exact: true,
+      checked: true
+    })
+  )
+
+  await expect(memeTitleLinks).toHaveText(titlesBeforeWidening)
 })
 
 test('dropping French from the filter leaves the rest of the library', async ({

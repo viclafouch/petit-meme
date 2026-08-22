@@ -3,13 +3,6 @@ import { ExternalLink, Inbox } from 'lucide-react'
 import { z } from 'zod'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import {
-  createColumnHelper,
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable
-} from '@tanstack/react-table'
 import { XTwitterIcon, YoutubeIcon } from '~/components/icon'
 import { CONTENT_LOCALE_FLAGS, FLAG_ICON_CLASS } from '~/components/icon/flags'
 import { PageHeader } from '~/components/page-header'
@@ -19,13 +12,14 @@ import { UserAvatar } from '~/components/user-avatar'
 import { SUBMISSION_STATUS_BADGE_VARIANT } from '~/constants/meme-submission'
 import { MemeSubmissionStatus } from '~/db/generated/prisma/enums'
 import type { MemeSubmissionUrlType } from '~/db/generated/prisma/enums'
-import {
-  AdminTable,
-  getRowId,
-  PAGE_SIZE
-} from '~/routes/admin/-components/admin-table'
+import { AdminTable } from '~/routes/admin/-components/admin-table'
 import { RelativeDateTooltip } from '~/routes/admin/-components/relative-date-tooltip'
 import { getAdminSubmissionsQueryOpts } from '~/routes/admin/-lib/queries'
+import {
+  createAppColumnHelper,
+  INITIAL_PAGINATION,
+  useAppTable
+} from '~/routes/admin/-lib/table'
 import type { AdminSubmission } from '~/routes/admin/-server/submissions'
 import { SubmissionActionsCell } from './-components/submission-actions-cell'
 
@@ -55,9 +49,9 @@ const STATUS_FILTER_OPTIONS = [
   { value: MemeSubmissionStatus.REJECTED, label: 'Rejetées' }
 ] as const
 
-const columnHelper = createColumnHelper<AdminSubmission>()
+const columnHelper = createAppColumnHelper<AdminSubmission>()
 
-const columns = [
+const columns = columnHelper.columns([
   columnHelper.accessor('user', {
     header: 'Utilisateur',
     enableSorting: false,
@@ -143,7 +137,7 @@ const columns = [
       return <SubmissionActionsCell submission={info.row.original} />
     }
   })
-]
+])
 
 type StatusFilterTabsParams = {
   currentStatus: string
@@ -209,18 +203,12 @@ const RouteComponent = () => {
     statusCounts[MemeSubmissionStatus.APPROVED] +
     statusCounts[MemeSubmissionStatus.REJECTED]
 
-  const table = useReactTable({
+  const table = useAppTable({
     data: submissionsQuery.data.submissions,
     columns,
-    getRowId,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     initialState: {
       sorting: [{ id: 'createdAt', desc: true }],
-      pagination: {
-        pageSize: PAGE_SIZE
-      }
+      pagination: INITIAL_PAGINATION
     }
   })
 

@@ -8,7 +8,7 @@ Les décisions structurantes sont dans `docs/adr/0003`, `0004` et `0005`.
 
 Le niveau 1 est écrit, vingt quatre scénarios plus sept tests de préparation : `checkout`, `signup`, `signin`, `password-reset`, `account-deletion`, `http-contracts`, plus `seed.spec.ts` qui charge l'accueil connecté et sert de point de départ aux agents.
 
-Du niveau 2, neuf surfaces sont écrites, vingt quatre scénarios : les quatre de lecture, `home`, `memes-library`, `memes-category` et `memes-page`, les trois qui écrivent, `meme-export`, `bookmark` et `favorites`, puis les deux qui parlent d'eux mêmes, `consent-banner` et `premium-reminder`. Restent les Reels, et le niveau 3 derrière.
+Le niveau 2 est écrit en entier, onze surfaces et trente et un scénarios : les quatre de lecture, `home`, `memes-library`, `memes-category` et `memes-page`, les trois qui écrivent, `meme-export`, `bookmark` et `favorites`, les deux qui parlent d'eux mêmes, `consent-banner` et `premium-reminder`, puis les deux qui tirent au sort, `reels` et `random`. Reste le niveau 3.
 
 ## La règle
 
@@ -91,7 +91,7 @@ Un seul Meme semé, le plus vu, porte une Video qui existe vraiment. Tous les au
 
 Un rôle par scénario qui laisse une marque sur son compte : partager un rôle entre un checkout et une suppression ferait dépendre le second de l'ordre du premier. Le rôle `unverified` porte `emailVerified: false`, ce qui est la seule chose que l'écran de connexion a à dire sur lui.
 
-Un rôle peut naître avec un état, déclaré à côté de lui dans `e2e/constants.ts` et posé par le seed. `premium` porte une ligne `subscription` active, écrite en base et non passée par Stripe : `listActiveSubscriptions` de better-auth ne lit que cette table, donc un abonnement semé suffit à ouvrir l'Export sans filigrane. Il n'a ni client ni abonnement Stripe, faute de quoi la suite promènerait des identifiants qui ne désignent rien ; le jour où un test ouvrira le portail de facturation, ce rôle ne fera pas l'affaire. `bookmarkCapped` porte les vingt Bookmarks du plafond gratuit, et `favorites` en porte deux, nommés.
+Un rôle peut naître avec un état, déclaré à côté de lui dans `e2e/constants.ts` et posé par le seed. `premium` porte une ligne `subscription` active, écrite en base et non passée par Stripe : `listActiveSubscriptions` de better-auth ne lit que cette table, donc un abonnement semé suffit à ouvrir l'Export sans filigrane. Il n'a ni client ni abonnement Stripe, faute de quoi la suite promènerait des identifiants qui ne désignent rien ; le jour où un test ouvrira le portail de facturation, ce rôle ne fera pas l'affaire. `bookmarkCapped` et `checkout` portent les vingt Bookmarks du plafond gratuit, l'un pour se voir refuser le suivant et l'autre pour l'obtenir en payant, et `favorites` en porte deux, nommés.
 
 Un projet `auth` connecte ensuite chaque rôle vérifié par l'API HTTP et enregistre un `storageState`. Cette étape vaut vérification : si une ligne semée n'était pas celle que better-auth attend, la connexion échouerait. Un test qui aura besoin d'un compte jetable le créera avec sa propre adresse, sur le domaine `@e2e.petitmeme.invalid`.
 
@@ -101,7 +101,9 @@ Un projet `auth` connecte ensuite chaque rôle vérifié par l'API HTTP et enreg
 
 Ce niveau bloque une pull request. C'est ce qui coûte de l'argent ou un compte quand il casse.
 
-**Checkout.** Écrit, mensuel et annuel. Depuis `/pricing`, jusqu'à la page Stripe en mode test, carte `4242`, retour. On affirme après la redirection : `/checkout/success` répond, la ligne `Subscription` porte `plan`, `status`, `billingInterval`, les deux identifiants Stripe et les deux dates de période, et la carte Premium apparaît comme le plan actif au rechargement. Reste à ajouter : la levée d'un plafond du plan gratuit, que les Memes semés rendent maintenant possible.
+**Checkout.** Écrit, mensuel et annuel. Depuis `/pricing`, jusqu'à la page Stripe en mode test, carte `4242`, retour. On affirme après la redirection : `/checkout/success` répond, la ligne `Subscription` porte `plan`, `status`, `billingInterval`, les deux identifiants Stripe et les deux dates de période, et la carte Premium apparaît comme le plan actif au rechargement.
+
+Le scénario mensuel va une étape plus loin et prend un Bookmark. Le rôle est semé au plafond du plan gratuit, vingt Bookmarks, et le vingt et unième dit que le paiement a changé le produit et pas seulement une ligne. Il est pris sur le Meme le plus vu, seul endroit où un signal frais ne déplace pas la première page de `trending`. C'est le scénario le plus long de la suite, un paiement, sa redirection et une écriture derrière, donc le seul à porter `test.slow()`.
 
 **Inscription.** Écrit. Formulaire du dialogue d'authentification, URL de vérification, compte connecté ensuite. Vérifie au passage que les champs déclarés à better-auth sont bien écrits, `providerAvatar`, les horodatages de consentement, la locale.
 
@@ -129,7 +131,7 @@ Ces douze viennent de Recommend quand il a de quoi répondre, et du repli sur le
 
 **Liste des Memes.** Écrit. `/memes` redirige vers `trending` et remplit une page de trente. Un mot tapé dans le champ de recherche réduit la liste à son seul Meme. La deuxième page est affirmée Meme par Meme, les vingt trois attendus présents et les trente de la première absents : un décompte seul serait vrai de n'importe quels vingt trois, alors que nommer les deux côtés de la coupe prouve qu'elle tombe là où la taille de page le dit. Décocher le français retire un Meme français, garde le Meme anglais, et laisse une page pleine, faute de quoi un filtre qui ne renvoie rien satisferait les deux premières.
 
-Reste à ajouter : la vue en grille, dont le nombre de colonnes ne change ni les Memes ni leur ordre.
+Passer la grille de cinq à six colonnes ne change ni les Memes ni leur ordre. La liste attendue est lue à l'écran avant le clic et non dans les fixtures : le sujet est ce que la grille fait de la liste qu'on lui a donnée, pas l'ordre dans lequel on la lui a donnée. Et c'est l'interrupteur coché qui prouve que le clic a porté, faute de quoi un clic perdu rendrait les deux listes identiques sans rien affirmer.
 
 **Page Meme.** Écrit. La page répond, porte son titre en `h1`, sa description et son badge de langue, et le retour mène à la bibliothèque. Le lecteur porte la miniature de la Video du Meme, et la lecture démarre vraiment : le nom accessible de la surface de lecture passe de « Lire la vidéo » à « Mettre en pause », et le `currentTime` de la vidéo avance.
 
@@ -147,19 +149,27 @@ Share n'est pas testé, et ce n'est pas un oubli. Le bouton est `md:hidden`, don
 
 **Bookmark.** Écrit. Un User ajoute un Bookmark, le retrouve après un rechargement, et le retire. Un User au plafond du plan gratuit se voit refuser le suivant et le sait par un message. Un Visitor anonyme, lui, reçoit le dialogue de connexion.
 
-Deux détails de ce scénario méritent d'être écrits. Le rechargement passe par `repeatUntilVisible` et non par un `page.reload()` sec : l'écran bascule sur la mise à jour optimiste avant que le serveur ait répondu, et recharger à cet instant coupe la requête en vol. Recharger jusqu'à ce que l'écran soit d'accord affirme la persistance au lieu de courir contre elle.
+Deux détails de ce scénario méritent d'être écrits. Le clic passe par `repeatUntilVisible` et le rechargement attend la réponse du serveur : l'écran bascule sur la mise à jour optimiste avant que le serveur ait répondu, et recharger à cet instant coupe la requête en vol. Cette réponse se reconnaît à sa méthode et à `/_serverFn/`, jamais à son nom, parce que l'URL d'une fonction serveur porte une empreinte de son corps et rien de lisible. `e2e/server-functions.ts` la reconnaît une fois pour toute la suite, ici et sur le Bookmark du checkout.
 
 Et le message du plafond n'est pas celui que le produit croit afficher. Le serveur refuse par un `StudioError` de code `PREMIUM_REQUIRED` sous un 403, mais le client ne le relit pas et retombe sur son message générique, « Erreur lors de la mise à jour du favori » au lieu de « Limite de favoris atteinte ». Le test affirme ce que le Visitor voit vraiment. Il deviendra rouge le jour où le code sera corrigé, ce qui est exactement le moment de le mettre à jour.
 
 **Category.** Écrit. `/memes/category/$slug` rend et ne montre que les Memes de la Category, la liste des Categories emmène d'une Category à l'autre et le contenu suit, la catégorie `news` coupe à trente jours, et un slug qui n'existe pas répond 404 et non un écran 404 sous un statut valide.
 
-**Reels et `/random`.** Répondent, affichent un Meme, la navigation suivante change de Meme. Les assertions s'arrêtent là, faute de pouvoir affirmer mieux sans devenir tautologiques.
+**Reels et `/random`.** Écrits, deux scénarios chacun. Les deux surfaces tirent leur Meme au sort, donc aucun test ne peut le nommer d'avance. Ce qu'il affirme est que le Meme à l'écran est un Meme semé : le titre est cherché dans les fixtures au lieu d'être comparé à l'une d'elles.
+
+Les Reels répondent, le premier reel occupe l'écran, et la flèche du bas donne sa place au suivant. Le passage est affirmé des deux côtés, celui qui arrive et celui qui part, chacun à la moitié de l'écran : un reel fait exactement une hauteur de fenêtre, donc la moitié est loin de l'arrondi d'un défilement et loin du reel voisin.
+
+Rien n'attend l'hydratation ici, et c'est la route qui le permet : `/reels` est en `ssr: 'data-only'`, donc le composant ne rend que sur le client et un fil à l'écran est déjà une page hydratée. Les vingt Memes du premier lot portent des `bunnyId` inventés, sauf un : hls.js échoue sur chacun sans lever d'erreur non capturée, ce que la garde `weberror` de `fixtures.ts` confirme run après run.
+
+`/random` redirige vers une page Meme, et le bouton Aléatoire de cette page en amène une autre. Le second est déterministe sans tirage chanceux : la requête passe l'identifiant courant en `exceptId`, donc la page d'arrivée n'est jamais celle de départ.
 
 **Favorites.** Écrit. `/favorites` liste exactement les Memes que le rôle porte en Bookmark, et un troisième n'y est pas. Un Visitor anonyme n'est pas poussé vers la connexion, contrairement à ce que ce plan annonçait : la route le renvoie sur `/memes`, donc sur `trending`. C'est ce que fait le code, c'est ce qu'affirme le test.
 
-**Bannière de consentement.** Écrit. Le test efface le cookie que `fixtures.ts` pose, attend le délai d'apparition, accepte, et retrouve son choix après un rechargement.
+**Bannière de consentement.** Écrit, deux scénarios. Le premier efface le cookie que `fixtures.ts` pose, attend le délai d'apparition, accepte, et retrouve son choix après un rechargement.
 
-Ce plan annonçait ici « ne bloque aucun clic ». Le code dit le contraire, et le fait exprès : la bannière pose un voile en `fixed inset-0` et se déclare `aria-modal`, donc elle tient l'écran tant qu'elle n'a pas de réponse, sauf si un dialogue est déjà ouvert. C'est l'interruption qui gagne sa place, et la contrainte est maintenant dans `CONTEXT.md`. Aucun test ne l'affirme pour l'instant ; un `click({ trial: true })` qui échoue sur un lien de la page le prouverait, et c'est la façon de le garder le jour où quelqu'un voudra alléger ce voile.
+Ce plan annonçait ici « ne bloque aucun clic ». Le code dit le contraire, et le fait exprès : la bannière pose un voile en `fixed inset-0` et se déclare `aria-modal`, donc elle tient l'écran tant qu'elle n'a pas de réponse, sauf si un dialogue est déjà ouvert. C'est l'interruption qui gagne sa place, et la contrainte est dans `CONTEXT.md`.
+
+Le second scénario la garde, dans les deux sens. Un `click({ trial: true })` sur le lien du héros est refusé tant que le voile est là, et le même clic passe une fois la bannière acceptée. Le clic d'essai joue toutes les vérifications d'un vrai clic et n'en exécute aucune, donc il dit exactement ce qu'un Visitor peut atteindre. Il porte un délai court, deux secondes : celui-là est attendu en échec, et lui laisser le budget du test serait attendre pour rien.
 
 La survie du choix n'est pas affirmée par une absence. Une bannière qui n'apparaît pas parce que la page n'est pas hydratée rendrait cette absence vraie sans rien couvrir. Le test rouvre donc les préférences par « Gérer les cookies » et lit l'interrupteur Analytique, qui porte la réponse donnée : le clic prouve l'hydratation et l'interrupteur prouve la persistance.
 
@@ -193,7 +203,9 @@ Les points d'accroche sont des rôles et des noms accessibles, jamais des `data-
 
 Le nom vient de l'application, pas d'une copie : `e2e/messages.ts` fixe la locale du résolveur avec `overwriteGetLocale` puis réexporte `m`, et un test écrit `getByRole('button', { name: m.nav_sign_in() })`. Le site est bilingue et une locale ne décide pas si un test passe, elle décide seulement quelle chaîne est demandée. Le parcours EN sera le même code avec une autre locale.
 
-Trois conséquences sur l'application. Le dialogue d'authentification garde ses deux panneaux montés pour animer la hauteur, donc le panneau inactif porte `inert` : sans lui un lecteur d'écran voyait les deux formulaires, le clavier tabulait dans le formulaire invisible, et `getByRole('tabpanel')` désignait deux éléments. Une accroche a11y n'existe que si l'élément a un nom : un bouton sans libellé visible se règle par un vrai libellé, jamais par un identifiant de test. Et le bouton de lecture d'une carte de Meme portait un libellé lecteur d'écran écrit en anglais en dur ; il passe par `m` comme le reste. Son voisin, le bouton des options, porte encore le sien : aucun test ne s'en sert, donc il attend le sien plutôt que de voyager dans ce lot.
+Cinq conséquences sur l'application, et chacune est une accroche a11y qui manquait. La grille de Memes se déclare `role="list"`, ses cartes `role="listitem"`, et la liste porte un nom : trente cartes annoncées une par une valent mieux que trente `div`, et c'est ce qui donne au test des colonnes la liste des Memes dans l'ordre où la grille les pose. Le groupe de colonnes, lui, est un `radiogroup` dont les options s'appellent « 4 », « 5 » et « 6 » : sans nom sur le groupe, ces trois chiffres ne veulent rien dire, ni pour un lecteur d'écran ni pour un test.
+
+Le dialogue d'authentification garde ses deux panneaux montés pour animer la hauteur, donc le panneau inactif porte `inert` : sans lui un lecteur d'écran voyait les deux formulaires, le clavier tabulait dans le formulaire invisible, et `getByRole('tabpanel')` désignait deux éléments. Une accroche a11y n'existe que si l'élément a un nom : un bouton sans libellé visible se règle par un vrai libellé, jamais par un identifiant de test. Et le bouton de lecture d'une carte de Meme portait un libellé lecteur d'écran écrit en anglais en dur ; il passe par `m` comme le reste. Son voisin, le bouton des options, porte encore le sien : aucun test ne s'en sert, donc il attend le sien plutôt que de voyager dans ce lot.
 
 **Un nom accessible se compare par sous chaîne.** C'est le piège de cette suite, parce qu'il rend un test vert sans rien affirmer : chercher « 3 nouveaux mèmes » trouve « 53 nouveaux mèmes », et le titre du Meme de remplissage numéro 3 se trouve dans celui du numéro 31. Toute affirmation dont la valeur est le sujet du test porte donc `exact: true`, et `e2e/library.ts` le pose une fois pour toutes sur les liens de Meme.
 
@@ -201,7 +213,9 @@ Ce même fichier compte les Memes affichés par les boutons de lecture, un par c
 
 La bannière de consentement et le rappel Premium parlent d'eux mêmes, le second cinq secondes après l'arrivée sur une page `/memes`. Un dialogue qui s'ouvre au milieu d'un scénario vole le clic que ce scénario allait faire, donc `e2e/fixtures.ts` répond à la bannière par un cookie et met le rappel en sommeil par `localStorage`, pour tous les tests. Chacun garde le sien, qui commencera par défaire ce réglage.
 
-Une page est rendue sur le serveur avant que React ne s'y attache, et Playwright ne voit pas la différence : un clic est perdu, et une valeur saisie est effacée quand l'hydratation restaure l'input contrôlé. `e2e/hydration.ts` porte les deux seuls signaux disponibles, `repeatUntilVisible` et `repeatUntilRequested`. Ils ne valent que pour la première action d'une page fraîchement chargée, et seulement quand la répéter est sans conséquence.
+Une page est rendue sur le serveur avant que React ne s'y attache, et Playwright ne voit pas la différence : un clic est perdu, et une valeur saisie est effacée quand l'hydratation restaure l'input contrôlé. `e2e/hydration.ts` porte les trois seuls signaux disponibles, `repeatUntilVisible`, `repeatUntilNavigated` et `repeatUntilRequested`. Ils ne valent que pour la première action d'une page fraîchement chargée, et seulement quand la répéter est sans conséquence.
+
+Le deuxième est celui du bouton Aléatoire, dont la destination n'a pas de nom : il lit la page qu'il quitte et non celle qu'il atteint, et ne reclique que tant qu'elle est encore là. Un clic qui a porté n'est donc jamais rejoué.
 
 Affirmer qu'un écran reste muet demande de faire passer le temps, et `page.waitForTimeout` est refusé par la règle oxlint `playwright/no-wait-for-timeout`. C'est `page.clock` qui le fait, l'outil que Playwright désigne pour une fenêtre à retardement : installée avant la navigation, l'horloge fausse gèle le temps de la page, et `runFor` déclenche les minuteurs à la demande.
 
@@ -219,7 +233,7 @@ Les deux délais viennent de l'application, `CONSENT_BANNER_DELAY_MS` et `PREMIU
 
 Un seul test est connu instable, la recherche de la bibliothèque, qui a échoué une fois au premier essai et passé au retry. C'est le seul qui tape dans le champ et attend Algolia, donc le seul dont l'attente dépend d'un service tiers plutôt que de notre serveur. `repeatUntilVisible` couvre l'hydratation, pas cette latence. Les retries d'intégration continue l'absorbent, et rien n'est fait de plus tant qu'il ne devient pas régulier : élargir une fenêtre pour un échec unique cache le jour où la lenteur devient une panne.
 
-`timeout: 30_000` par test : au-delà, un test pend, il ne tourne plus. C'est un plafond serré, le checkout annuel mesure une vingtaine de secondes en local. `retries: 2` en intégration continue et `0` en local, ce qui sert aussi de coussin sur ce plafond, `trace: 'on-first-retry'`, `forbidOnly` quand `CI` est défini. Les artefacts ne partent qu'en cas d'échec, avec une rétention de trois jours, parce que le dépôt est public.
+`timeout: 30_000` par test : au-delà, un test pend, il ne tourne plus. C'est un plafond serré, le checkout annuel mesure une dizaine de secondes en local. Le checkout mensuel, qui prend un Bookmark après avoir payé, porte `test.slow()` : le plafond y devient quatre vingt dix secondes, et c'est le seul endroit où il bouge. `retries: 2` en intégration continue et `0` en local, ce qui sert aussi de coussin sur ce plafond, `trace: 'on-first-retry'`, `forbidOnly` quand `CI` est défini. Les artefacts ne partent qu'en cas d'échec, avec une rétention de trois jours, parce que le dépôt est public.
 
 ## Les agents
 

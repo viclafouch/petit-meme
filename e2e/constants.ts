@@ -10,7 +10,14 @@ export const E2E_WRONG_PASSWORD = 'not-the-e2e-password'
 export type E2eRole = Pick<User, 'id' | 'name' | 'email' | 'emailVerified'> & {
   premiumPlan?: BetterAuthPlanName
   bookmarkedMemeIds?: readonly Meme['id'][]
+  providerAvatar?: NonNullable<User['providerAvatar']>
+  hasStripeCustomer?: boolean
 }
+
+// A file this repository serves, so the ProviderAvatar tile renders without
+// leaving for a provider CDN. Never a catalogue path: the picker tells the two
+// apart by comparing them to the image the User carries.
+export const E2E_PROVIDER_AVATAR_PATH = '/apple-touch-icon.png'
 
 const CAPPED_BOOKMARK_MEME_IDS = E2E_FILLER_MEMES.slice(
   0,
@@ -79,6 +86,35 @@ export const E2E_ROLES = {
     email: `e2e-bookmark-capped@${E2E_EMAIL_DOMAIN}`,
     emailVerified: true,
     bookmarkedMemeIds: CAPPED_BOOKMARK_MEME_IDS
+  },
+  avatar: {
+    id: 'e2e-user-avatar',
+    name: 'E2E Avatar',
+    email: `e2e-avatar@${E2E_EMAIL_DOMAIN}`,
+    emailVerified: true
+  },
+  avatarProvider: {
+    id: 'e2e-user-avatar-provider',
+    name: 'E2E Avatar Provider',
+    email: `e2e-avatar-provider@${E2E_EMAIL_DOMAIN}`,
+    emailVerified: true,
+    providerAvatar: E2E_PROVIDER_AVATAR_PATH
+  },
+  passwordUpdate: {
+    id: 'e2e-user-password-update',
+    name: 'E2E Password Update',
+    email: `e2e-password-update@${E2E_EMAIL_DOMAIN}`,
+    emailVerified: true
+  },
+  // The only role born with a real Stripe customer: a billing portal session is
+  // created against one, and an invented id would be refused.
+  billingPortal: {
+    id: 'e2e-user-billing-portal',
+    name: 'E2E Billing Portal',
+    email: `e2e-billing-portal@${E2E_EMAIL_DOMAIN}`,
+    emailVerified: true,
+    premiumPlan: 'premium',
+    hasStripeCustomer: true
   },
   favorites: {
     id: 'e2e-user-favorites',

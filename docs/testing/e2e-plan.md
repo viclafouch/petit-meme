@@ -10,7 +10,7 @@ Le niveau 1 est écrit, vingt quatre scénarios plus sept tests de préparation 
 
 Le niveau 2 est écrit en entier, onze surfaces et trente et un scénarios : les quatre de lecture, `home`, `memes-library`, `memes-category` et `memes-page`, les trois qui écrivent, `meme-export`, `bookmark` et `favorites`, les deux qui parlent d'eux mêmes, `consent-banner` et `premium-reminder`, puis les deux qui tirent au sort, `reels` et `random`.
 
-Du niveau 3, une surface est entamée, `studio`, deux scénarios. Sa génération complète est écrite puis retirée, et la section qui la porte dit pourquoi. Restent la Submission, les Settings, l'AiSearch, les pages légales et le parcours EN.
+Du niveau 3, deux surfaces sont ouvertes. `studio`, deux scénarios : sa génération complète est écrite puis retirée, et la section qui la porte dit pourquoi. `settings`, dix scénarios, la page entière. Restent la Submission, l'AiSearch, les pages légales et le parcours EN.
 
 ## La règle
 
@@ -61,7 +61,7 @@ Ce groupe est global et non par branche, pour cette raison même, et il annule c
 
 ## Les données
 
-Chaque run repart de zéro. Le projet `seed` tronque toutes les tables sauf l'historique des migrations, puis crée les Users déclarés dans `e2e/constants.ts`. Il ne touche à rien d'autre, ni Stripe, ni Algolia, ni Bunny. Le nettoyage a lieu **au début** du run, jamais à la fin, pour qu'un échec laisse un état inspectable.
+Chaque run repart de zéro. Le projet `seed` tronque toutes les tables sauf l'historique des migrations, puis crée les Users déclarés dans `e2e/constants.ts`. Cette troncature ne touche à rien d'autre, ni Stripe, ni Algolia, ni Bunny. Le nettoyage a lieu **au début** du run, jamais à la fin, pour qu'un échec laisse un état inspectable.
 
 Le seed écrit par paquets de la taille du pool, et pas d'un seul `Promise.all`. Chaque création imbrique ses relations, donc Prisma la passe en transaction, donc elle tient une connexion pour toute sa durée. Cinquante trois demandes d'un coup en laissent quarante huit en file sur un pool de cinq, et cette attente dépasse les cinq secondes d'acquisition dès que le processus est plus loin de la base qu'un poste de travail. En local ça passait, en intégration continue non, et c'est le premier run CI à semer des Memes qui l'a dit. La taille du pool est exportée par `src/db`, pour que le seed ne puisse pas diverger de la valeur réelle.
 
@@ -95,7 +95,11 @@ Un seul Meme semé, le plus vu, porte une Video qui existe vraiment. Tous les au
 
 Un rôle par scénario qui laisse une marque sur son compte : partager un rôle entre un checkout et une suppression ferait dépendre le second de l'ordre du premier. Le rôle `unverified` porte `emailVerified: false`, ce qui est la seule chose que l'écran de connexion a à dire sur lui.
 
-Un rôle peut naître avec un état, déclaré à côté de lui dans `e2e/constants.ts` et posé par le seed. `premium` porte une ligne `subscription` active, écrite en base et non passée par Stripe : `listActiveSubscriptions` de better-auth ne lit que cette table, donc un abonnement semé suffit à ouvrir l'Export sans filigrane. Il n'a ni client ni abonnement Stripe, faute de quoi la suite promènerait des identifiants qui ne désignent rien ; le jour où un test ouvrira le portail de facturation, ce rôle ne fera pas l'affaire. `bookmarkCapped` et `checkout` portent les vingt Bookmarks du plafond gratuit, l'un pour se voir refuser le suivant et l'autre pour l'obtenir en payant, et `favorites` en porte deux, nommés.
+Un rôle peut naître avec un état, déclaré à côté de lui dans `e2e/constants.ts` et posé par le seed. `premium` porte une ligne `subscription` active, écrite en base et non passée par Stripe : `listActiveSubscriptions` de better-auth ne lit que cette table, donc un abonnement semé suffit à ouvrir l'Export sans filigrane. Il n'a ni client ni abonnement Stripe, faute de quoi la suite promènerait des identifiants qui ne désignent rien.
+
+Ce jour est venu avec le portail de facturation, et c'est `billingPortal` qui le porte, seul rôle à naître avec un vrai client Stripe. Le seed le crée en mode test, puis pose son identifiant sur le User et sur la ligne `subscription`, les deux endroits où better-auth le cherche, dans cet ordre. C'est le seul appel Stripe du seed.
+
+`bookmarkCapped` et `checkout` portent les vingt Bookmarks du plafond gratuit, l'un pour se voir refuser le suivant et l'autre pour l'obtenir en payant, et `favorites` en porte deux, nommés. `avatarProvider` porte un ProviderAvatar, seule façon de voir la tuile qui y ramène : c'est un fichier de `public/`, pour que la tuile s'affiche sans partir chez un fournisseur, et jamais un chemin du catalogue, que le sélecteur confondrait avec un AvatarSlot.
 
 Un projet `auth` connecte ensuite chaque rôle vérifié par l'API HTTP et enregistre un `storageState`. Cette étape vaut vérification : si une ligne semée n'était pas celle que better-auth attend, la connexion échouerait. Un test qui aura besoin d'un compte jetable le créera avec sa propre adresse, sur le domaine `@e2e.petitmeme.invalid`.
 
@@ -218,7 +222,17 @@ Sous WebKit, ouverture du Studio et présence de l'aperçu seulement. Pas encore
 
 **Submission.** Envoi d'un lien, apparition dans l'historique, refus d'un lien invalide.
 
-**Settings.** Choix d'un AvatarSlot, retour à l'Avatar du fournisseur, changement de mot de passe, et pour un Premium le lien du portail de facturation qui renvoie une URL Stripe pour le bon client. Le portail lui-même n'est pas traversé.
+**Settings.** Écrit, dix scénarios. Un gratuit voit son nom, son adresse, son badge et son plan, et le bouton qui l'emmène aux plans y mène. Il repart avec l'export JSON de ses données, nommé et non vide. Un AvatarSlot choisi survit à un rechargement, et le rôle qui porte un ProviderAvatar en choisit un puis revient au sien. Un mot de passe changé sert à se reconnecter, et deux refus l'encadrent, la confirmation qui ne correspond pas et le mot de passe actuel faux. Un Premium voit son badge et se fait ouvrir le portail de facturation. Un Premium dont l'abonnement tourne encore se voit refuser la suppression de son compte tant qu'il ne l'a pas annulé. Un Visitor anonyme est renvoyé sur l'accueil.
+
+Le portail de facturation n'est pas traversé : la route vers `billing.stripe.com` est avortée, et l'affirmation porte sur l'URL que `/subscription/billing-portal` renvoie. Cette session se crée contre un vrai client Stripe, donc le rôle `billingPortal` naît avec un client du mode test, écrit par le seed. C'est le seul appel Stripe du seed, et un client de mode test ne coûte rien.
+
+Le rôle `premium`, lui, garde son abonnement semé sans client Stripe, et c'est celui qui garde le refus de suppression : la porte est côté client, elle ne demande rien à Stripe.
+
+Le choix d'un AvatarSlot n'attend ni l'écran ni la fonction serveur, mais la session qui suit. L'écran bascule sur la mise à jour optimiste, donc l'attendre laisserait l'écriture en vol, et better-auth garde une session en cache dans un cookie signé pendant cinq minutes : un rechargement avant ce rafraîchissement relit l'Avatar d'avant le clic. C'est `getSession`, appelé par le `onSuccess` de la mutation, qui dit que tout est posé.
+
+Le mot de passe faux a coûté un correctif d'application avant de passer. Le dialogue soumettait par `mutateAsync` dans un `onSubmit`, seul formulaire du dépôt à le faire, donc le refus du serveur remontait jusqu'au `void form.handleSubmit()` et finissait en rejet non traité. La garde `weberror` de `fixtures.ts` l'a vu ; le dialogue est repassé sur `mutate` et sur `isPending`, comme les autres.
+
+Deux affirmations manquent ici et ce n'est pas un oubli. La date de renouvellement affichée n'est pas lue, parce qu'elle vaut l'instant du seed plus trente jours et que la recopier ne dirait rien de plus que le badge. Et la branche « Fin le » de cette même ligne demande un `cancelAtPeriodEnd` vrai, qui ne s'obtient qu'en traversant le portail.
 
 **AiSearch.** La porte seulement : Visitor anonyme, User gratuit avec son quota, quota épuisé. Le modèle n'est jamais appelé.
 

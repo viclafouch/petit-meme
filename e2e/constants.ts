@@ -1,3 +1,4 @@
+import { FREE_PLAN_MAX_AI_SEARCHES } from '~/constants/ai-search'
 import type { BetterAuthPlanName } from '~/constants/plan'
 import { FREE_PLAN_MAX_FAVORITES } from '~/constants/plan'
 import type { Meme, User } from '~/db/generated/prisma/client'
@@ -12,6 +13,7 @@ export type E2eRole = Pick<User, 'id' | 'name' | 'email' | 'emailVerified'> & {
   bookmarkedMemeIds?: readonly Meme['id'][]
   providerAvatar?: NonNullable<User['providerAvatar']>
   hasStripeCustomer?: boolean
+  aiSearchCount?: number
 }
 
 // A file this repository serves, so the ProviderAvatar tile renders without
@@ -125,6 +127,33 @@ export const E2E_ROLES = {
       E2E_NAMED_MEMES.english.id,
       E2E_NAMED_MEMES.universal.id
     ]
+  },
+  aiSearch: {
+    id: 'e2e-user-ai-search',
+    name: 'E2E Ai Search',
+    email: `e2e-ai-search@${E2E_EMAIL_DOMAIN}`,
+    emailVerified: true
+  },
+  aiSearchNoResults: {
+    id: 'e2e-user-ai-search-no-results',
+    name: 'E2E Ai Search No Results',
+    email: `e2e-ai-search-no-results@${E2E_EMAIL_DOMAIN}`,
+    emailVerified: true
+  },
+  aiSearchCapped: {
+    id: 'e2e-user-ai-search-capped',
+    name: 'E2E Ai Search Capped',
+    email: `e2e-ai-search-capped@${E2E_EMAIL_DOMAIN}`,
+    emailVerified: true,
+    aiSearchCount: FREE_PLAN_MAX_AI_SEARCHES
+  },
+  aiSearchPremium: {
+    id: 'e2e-user-ai-search-premium',
+    name: 'E2E Ai Search Premium',
+    email: `e2e-ai-search-premium@${E2E_EMAIL_DOMAIN}`,
+    emailVerified: true,
+    premiumPlan: 'premium',
+    aiSearchCount: FREE_PLAN_MAX_AI_SEARCHES
   },
   // Never signed in, so it gets no storage state: the login screen is the only
   // place that has something to say about an unverified account.

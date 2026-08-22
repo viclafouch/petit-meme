@@ -10,7 +10,7 @@ Le niveau 1 est écrit, vingt quatre scénarios plus sept tests de préparation 
 
 Le niveau 2 est écrit en entier, onze surfaces et trente et un scénarios : les quatre de lecture, `home`, `memes-library`, `memes-category` et `memes-page`, les trois qui écrivent, `meme-export`, `bookmark` et `favorites`, les deux qui parlent d'eux mêmes, `consent-banner` et `premium-reminder`, puis les deux qui tirent au sort, `reels` et `random`.
 
-Du niveau 3, trois surfaces sont ouvertes. `studio`, deux scénarios : sa génération complète est écrite puis retirée, et la section qui la porte dit pourquoi. `settings`, dix scénarios, la page entière. `legal-pages`, dix scénarios, les quatre pages dans les deux locales. Restent la Submission, l'AiSearch et le parcours EN.
+Du niveau 3, quatre surfaces sont ouvertes. `studio`, deux scénarios : sa génération complète est écrite puis retirée, et la section qui la porte dit pourquoi. `settings`, dix scénarios, la page entière. `legal-pages`, dix scénarios, les quatre pages dans les deux locales. `ai-search`, six scénarios, les portes, les deux plans et les deux façons dont une recherche ne rend rien. Restent la Submission et le parcours EN.
 
 ## La règle
 
@@ -37,6 +37,7 @@ Les jobs portent trois noms distincts pour cette raison. Deux workflows avec un 
 | E-mails | tous redirigés par `EMAIL_OVERRIDE_TO` |
 | Algolia | index propres à `e2e`, réécrits par le seed à chaque run |
 | Bunny | library, collection et zone de stockage propres à `e2e`, écrites une fois |
+| Anthropic, Gemini | clés mortes, l'appel échoue et l'AiSearch retombe sur le prompt brut |
 | Sentry, rate limiting | inactifs, `VERCEL_ENV=development` |
 
 **Aucune valeur de `.env.e2e` ne vaut celle de `.env.development`.** Un run doit être incapable d'atteindre une donnée de développement, et une variable oubliée doit pointer vers rien plutôt que vers quelque chose de réel.
@@ -99,7 +100,7 @@ Un rôle peut naître avec un état, déclaré à côté de lui dans `e2e/consta
 
 Ce jour est venu avec le portail de facturation, et c'est `billingPortal` qui le porte, seul rôle à naître avec un vrai client Stripe. Le seed le crée en mode test, puis pose son identifiant sur le User et sur la ligne `subscription`, les deux endroits où better-auth le cherche, dans cet ordre. C'est le seul appel Stripe du seed.
 
-`bookmarkCapped` et `checkout` portent les vingt Bookmarks du plafond gratuit, l'un pour se voir refuser le suivant et l'autre pour l'obtenir en payant, et `favorites` en porte deux, nommés. `avatarProvider` porte un ProviderAvatar, seule façon de voir la tuile qui y ramène : c'est un fichier de `public/`, pour que la tuile s'affiche sans partir chez un fournisseur, et jamais un chemin du catalogue, que le sélecteur confondrait avec un AvatarSlot.
+`bookmarkCapped` et `checkout` portent les vingt Bookmarks du plafond gratuit, l'un pour se voir refuser le suivant et l'autre pour l'obtenir en payant, et `favorites` en porte deux, nommés. `aiSearchCapped` et `aiSearchPremium` portent de la même façon les trois recherches IA du mois. `avatarProvider` porte un ProviderAvatar, seule façon de voir la tuile qui y ramène : c'est un fichier de `public/`, pour que la tuile s'affiche sans partir chez un fournisseur, et jamais un chemin du catalogue, que le sélecteur confondrait avec un AvatarSlot.
 
 Un projet `auth` connecte ensuite chaque rôle vérifié par l'API HTTP et enregistre un `storageState`. Cette étape vaut vérification : si une ligne semée n'était pas celle que better-auth attend, la connexion échouerait. Un test qui aura besoin d'un compte jetable le créera avec sa propre adresse, sur le domaine `@e2e.petitmeme.invalid`.
 
@@ -234,7 +235,27 @@ Le mot de passe faux a coûté un correctif d'application avant de passer. Le di
 
 Deux affirmations manquent ici et ce n'est pas un oubli. La date de renouvellement affichée n'est pas lue, parce qu'elle vaut l'instant du seed plus trente jours et que la recopier ne dirait rien de plus que le badge. Et la branche « Fin le » de cette même ligne demande un `cancelAtPeriodEnd` vrai, qui ne s'obtient qu'en traversant le portail.
 
-**AiSearch.** La porte seulement : Visitor anonyme, User gratuit avec son quota, quota épuisé. Le modèle n'est jamais appelé.
+**AiSearch.** Écrit, six scénarios. Un Visitor anonyme soumet et reçoit le dialogue de connexion, retrouve son prompt en revenant, et se voit refuser un prompt vide sans un mot. Un User gratuit voit ses trois recherches, en dépense une, et retrouve son Meme. Une recherche que l'index ne sait pas répondre affiche l'invitation à reformuler, et une recherche qui n'atteint pas le serveur affiche le message d'échec et rend le formulaire. Un User gratuit au plafond reçoit le dialogue qui vend Premium, et son bouton mène aux plans. Un Premium qui porte autant de recherches que le plan gratuit en autorise n'a ni compteur ni refus.
+
+Le modèle ne tourne jamais, et ce n'est pas un mock. `.env.e2e` porte une clé Anthropic morte : l'API répond 401 en deux cent trente millisecondes sans rien facturer, et `extractSearchKeywords` attrape l'erreur et retombe sur le prompt brut. La requête part donc chez Algolia telle quelle, et tout le reste du chemin est le vrai, le quota, l'index et les résultats à l'écran. Le log, lui, n'est vu qu'à travers le compteur qu'il alimente. Le serveur crie un `anthropic.chatStream fatal` à chaque recherche, et c'est le repli qui parle.
+
+Deux conséquences. Le prompt est un mot et non une phrase, puisqu'une phrase enverrait ses mots de remplissage à Algolia. Les deux mots employés sont vérifiés contre l'index : le mot des fixtures rend exactement un Meme, et le mot de charabia rend zéro, sans que `removeWordsIfNoResults` rabatte sur la bibliothèque entière. C'est ce zéro qui rend l'écran vide atteignable. Et un test vert ne dit rien de l'extraction de mots-clés, ce qui est le périmètre voulu. **La clé doit rester morte**, sinon la suite se met à payer à chaque run.
+
+Le message d'échec, lui, s'obtient en coupant le fil et non en écrivant une réponse à la place du serveur : `route.abort` sur la fonction serveur, le même geste que le portail Stripe et que les boutons de fournisseur. Il est posé une fois le quota chargé, parce que le quota voyage sur une URL de la même forme.
+
+Il y a trois portes et non deux. Les deux premières sont côté client : la page ouvre le dialogue de connexion quand personne n'est connecté, et le dialogue d'upsell quand le quota mensuel est épuisé, sans rien demander au serveur. Le serveur refuse aussi ce quota là, par un 429, mais aucun navigateur ne l'atteint, et ce refus doublé appartient aux tests d'intégration.
+
+La troisième, elle, n'a pas de miroir client : `DAILY_GLOBAL_AI_SEARCH_CAP` coupe à cinq cents recherches par jour, tous Users confondus, et un navigateur l'atteint pour de bon. Elle ne se distingue alors de n'importe quelle panne par rien du tout, puisque le client ne relit pas le code du refus et affiche son message générique. C'est ce message que le scénario du fil coupé affirme, et cette porte n'a pas de test à elle : la mettre en scène demanderait cinq cents lignes semées pour une assertion déjà prise.
+
+Le quota est mensuel et compté sur les lignes `AiSearchLog`, donc trois rôles naissent avec l'état qu'il leur faut plutôt que de le dépenser à l'écran. `aiSearchPremium` porte les trois recherches du plan gratuit en étant Premium : le plafond est ce qu'il prouve ne pas rencontrer.
+
+Le retour du Visitor anonyme a coûté un correctif d'application avant de passer, et c'est la panne que ce scénario a rapportée. Le prompt mis de côté était relu dans l'initialisateur d'un `useState`, donc pendant le rendu, que le serveur joue aussi : les deux rendus divergeaient, React jetait l'arbre et rejouait cet initialisateur sur une clé que le premier passage venait d'effacer. Le Visitor retrouvait un champ vide, derrière une erreur d'hydratation que la garde `weberror` de `fixtures.ts` a vue. La lecture vit maintenant dans un effet, `src/hooks/use-ai-search-prompt.ts`, qui porte les deux bouts du relais.
+
+La recherche dépensée est affirmée après un rechargement, et c'est un décalage du produit, pas une commodité du test. Le serveur rend sa réponse avant d'écrire son `AiSearchLog`, que `waitUntil` emporte de son côté, donc le compteur que la page rafraîchit au succès relit le compte d'avant. Il annonce trois recherches restantes après en avoir dépensé une, jusqu'à ce que la requête périme, une minute plus tard.
+
+L'attente des résultats est arithmétique et non devinée. Les trois étapes affichées marchent sur leurs propres minuteurs et retiennent les résultats jusqu'à la dernière, donc leurs clés et leurs délais sortent du hook vers `src/constants/ai-search.ts`, du même geste que les deux délais de la bannière et du rappel.
+
+Deux `status` cohabitent sur cette page, et c'est une conséquence a11y de plus. Le compteur de quota en porte un, parce qu'un décompte qui change après une recherche mérite d'être annoncé, et c'est ce qui donne au test l'élément plutôt qu'une de ses valeurs : affirmer l'absence de « 0 recherche restante » laisserait passer un compteur qui en annoncerait trois. Les étapes portent l'autre, dans la région des résultats, ce qui les distingue sans qu'aucun test ait à nommer un conteneur.
 
 **Pages légales.** Écrit, dix scénarios. `/dmca`, `/mentions-legales`, `/privacy`, `/terms-of-use` répondent dans les deux locales, chacune avec son titre, et les mentions légales portent l'attribution du style d'avatar.
 

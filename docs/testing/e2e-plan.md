@@ -10,7 +10,7 @@ Le niveau 1 est écrit, vingt quatre scénarios plus sept tests de préparation 
 
 Le niveau 2 est écrit en entier, onze surfaces et trente et un scénarios : les quatre de lecture, `home`, `memes-library`, `memes-category` et `memes-page`, les trois qui écrivent, `meme-export`, `bookmark` et `favorites`, les deux qui parlent d'eux mêmes, `consent-banner` et `premium-reminder`, puis les deux qui tirent au sort, `reels` et `random`.
 
-Du niveau 3, une surface est écrite, `studio`, trois scénarios. Restent la Submission, les Settings, l'AiSearch, les pages légales et le parcours EN.
+Du niveau 3, une surface est entamée, `studio`, deux scénarios. Sa génération complète est écrite puis retirée, et la section qui la porte dit pourquoi. Restent la Submission, les Settings, l'AiSearch, les pages légales et le parcours EN.
 
 ## La règle
 
@@ -107,7 +107,7 @@ Ce niveau bloque une pull request. C'est ce qui coûte de l'argent ou un compte 
 
 **Checkout.** Écrit, mensuel et annuel. Depuis `/pricing`, jusqu'à la page Stripe en mode test, carte `4242`, retour. On affirme après la redirection : `/checkout/success` répond, la ligne `Subscription` porte `plan`, `status`, `billingInterval`, les deux identifiants Stripe et les deux dates de période, et la carte Premium apparaît comme le plan actif au rechargement.
 
-Le scénario mensuel va une étape plus loin et prend un Bookmark. Le rôle est semé au plafond du plan gratuit, vingt Bookmarks, et le vingt et unième dit que le paiement a changé le produit et pas seulement une ligne. Il est pris sur le Meme le plus vu, seul endroit où un signal frais ne déplace pas la première page de `trending`. C'est un paiement, sa redirection et une écriture derrière, donc l'un des deux à porter `test.slow()`.
+Le scénario mensuel va une étape plus loin et prend un Bookmark. Le rôle est semé au plafond du plan gratuit, vingt Bookmarks, et le vingt et unième dit que le paiement a changé le produit et pas seulement une ligne. Il est pris sur le Meme le plus vu, seul endroit où un signal frais ne déplace pas la première page de `trending`. C'est le scénario le plus long de la suite, un paiement, sa redirection et une écriture derrière, donc le seul à porter `test.slow()`.
 
 **Inscription.** Écrit. Formulaire du dialogue d'authentification, URL de vérification, compte connecté ensuite. Vérifie au passage que les champs déclarés à better-auth sont bien écrits, `providerAvatar`, les horodatages de consentement, la locale.
 
@@ -185,19 +185,34 @@ Le second scénario dit la règle en entier : le rappel attend son tour. Le dial
 
 ### Niveau 3, le reste
 
-**Studio et Generation.** Écrit, trois scénarios sur Chromium, et **un seul transcode**. Un Premium ouvre `/memes/$memeId/studio`, saisit un texte, génère et repart avec un fichier non vide. C'est la seule traversée complète de la chaîne : la Video source chez Bunny, ffmpeg dans le navigateur, un fichier au bout.
+**Studio et Generation.** Écrit, deux scénarios sur Chromium, et **aucun ne transcode**. Un User gratuit ouvre `/memes/$memeId/studio` et n'y trouve rien qui lui barre la route : le champ de texte est éditable, le bouton Générer est actif, et le dialogue qui vend Premium à l'Export n'apparaît pas ici. Un Visitor anonyme y entre sans compte, et le bouton Générer sans texte lui répond « Veuillez saisir du texte ». C'est le seul garde-fou que cette surface porte vraiment.
 
-Le User gratuit s'arrête avant. Il emprunte exactement le même code, donc transcoder une deuxième fois ne prouverait rien de plus et coûterait une minute de runner. Ce que son scénario affirme est ce que le sien a de particulier : rien ne lui barre la route. Le champ de texte est éditable, le bouton Générer est actif, et le dialogue qui vend Premium à l'Export n'apparaît pas ici.
+**Ce plan annonçait ici « les plafonds et la porte Premium ». Le code n'a ni l'un ni l'autre**, et c'est ce que le scénario du gratuit affirme. Le Studio n'a aucune porte : sa route ne pose pas de garde, `shareMeme` en mode `studio` sert la vidéo watermarquée à tout le monde sauf au Premium, à qui elle sert l'originale, et cette différence est côté serveur, invisible à un navigateur. Le plafond de trois générations du plan gratuit, lui, est compté et jamais lu : `incrementGenerationCount` incrémente après chaque succès, et `checkGeneration`, la fonction serveur qui refuserait la quatrième sous un 403, n'est appelée de nulle part. Le plan gratuit annonce pourtant « 3 max » sur la page des plans. C'est un correctif produit, pas un test.
 
-Le troisième dit ce que le Studio demande avant de travailler. Un Visitor anonyme y entre sans compte, le bouton Générer sans texte lui répond « Veuillez saisir du texte », et rien ne part au traitement. C'est le seul garde-fou que cette surface porte vraiment.
+### La génération, et pourquoi elle n'est pas ici
 
-Le budget du transcodage est une leçon payée deux fois. Quatre secondes en local, plus de trente sur un runner : deux cœurs qui instancient un cœur WebAssembly de trente deux mégaoctets, puis six secondes de vidéo sur un seul fil. Le premier run vert en local a fait retirer le `test.slow()` posé d'avance, et le premier run rouge en intégration continue l'a remis. Le chiffre du runner est donc écrit à côté, pour qu'une mesure locale ne le fasse pas retirer une troisième fois. L'attente du transcodage garde sa propre borne, soixante secondes sous le plafond de quatre vingt dix, pour qu'une génération qui ne finit pas le dise au lieu d'expirer ailleurs dans le scénario.
+Elle a été écrite, elle est verte en local, et elle est retirée. Le récit vaut d'être gardé, parce que la prochaine tentative le rejouerait sinon.
 
-**Ce plan annonçait ici « les plafonds et la porte Premium ». Le code n'a ni l'un ni l'autre**, et c'est écrit dans le test du gratuit. Le Studio n'a aucune porte : sa route ne pose pas de garde, `shareMeme` en mode `studio` sert la vidéo watermarquée à tout le monde sauf au Premium, à qui elle sert l'originale, et cette différence est côté serveur, invisible à un navigateur. Le plafond de trois générations du plan gratuit, lui, est compté et jamais lu : `incrementGenerationCount` incrémente après chaque succès, et `checkGeneration`, la fonction serveur qui refuserait la quatrième sous un 403, n'est appelée de nulle part. Le plan gratuit annonce pourtant « 3 max » sur la page des plans. C'est un correctif produit, pas un test, et il a sa propre branche.
+Le scénario ouvrait le Studio, saisissait un texte, attendait la fin du traitement et téléchargeait. En local il passait en quatre secondes. Sur le runner il échouait deux fois puis passait au troisième essai, ce qui rendait le run vert et n'enlevait rien au problème : un test qui a besoin de ses reprises n'affirme plus rien.
 
-La preuve d'un fichier est son octet, pas sa forme : le test affirme un téléchargement non vide, comme celui de l'Export. Vérifié une fois hors suite pour savoir ce que cette affirmation recouvre, la sortie fait six mégaoctets, cent quatre vingts images, et 600 × 810 contre 600 × 710 à la source, soit les cent pixels de bande que `STUDIO_DEFAULT_BAND_HEIGHT` déclare. Cette hauteur n'est pas affirmée dans le test : celle de la source vit chez Bunny et non dans les fixtures, donc il n'y a rien dont la dériver.
+Trois corrections successives sont passées à côté. Remonter le plafond du test, le redescendre, le remonter : le budget n'était pas le sujet. La sonde qui devait le prouver ne prouvait rien non plus, parce que `Emulation.setCPUThrottlingRate` ne freine que le fil principal et que ffmpeg tourne dans un Web Worker.
 
-L'état de traitement ne porte qu'un seul nom qui dure, celui du bouton Annuler. Son badge et sa barre de progression épellent tous les deux un pourcentage qui bouge, donc aucun des deux n'a de nom stable à viser. Le test attend ce bouton, puis attend sa disparition. Et rien n'attend l'hydratation, pour la même raison que les Reels : la route est en `ssr: 'data-only'`.
+Le log du runner a fini par le dire, et l'échec n'était nulle part où on le cherchait :
+
+```
+Error: page.waitForEvent: Test timeout of 30000ms exceeded.
+    at downloadGeneratedVideo (e2e/studio.spec.ts:46:32)
+```
+
+Le transcodage se terminait. C'est le téléchargement qui ne partait jamais. Deux causes tiennent debout, et le scénario ne savait pas les distinguer, ce qui était son vrai défaut. Soit `downloadBlob` perd la course, `src/utils/download.ts` révoque l'URL de l'objet dans la foulée du clic et six mégaoctets mettent plus longtemps à démarrer que les huit cents kilo-octets de l'Export, qui passe sur le même runner avec le même helper. Soit la génération échoue vraiment : `mutation.onError` cache le bouton Annuler exactement comme un succès, `processedData` reste nul, et le bouton Télécharger se contente d'un toast.
+
+Trois choses à faire avant de la réécrire, dans cet ordre.
+
+D'abord trancher entre les deux causes, et corriger `downloadBlob` si c'est la première. Ce n'est pas une concession au test : Safari sur iPhone est le pire client connu de ce motif, et une vidéo générée qui ne se télécharge pas sur un téléphone lent est une panne produit.
+
+Ensuite donner au scénario une affirmation sur le succès de la génération, et pas seulement sur la fin du traitement. Un `onError` qui range l'écran comme un `onSuccess` doit faire échouer le test à cet endroit là, pas trente secondes plus loin sur un téléchargement absent.
+
+Enfin passer l'upload d'artefacts de `if: failure()` à `if: !cancelled()` dans `e2e.yml`. Ce run là a fini vert grâce à ses reprises, donc il n'a laissé ni trace ni capture, et c'est ce qui a coûté le tour le plus long.
 
 Sous WebKit, ouverture du Studio et présence de l'aperçu seulement. Pas encore écrit : un navigateur de plus se télécharge à chaque run, et cette suite n'en ajoute un que le jour où elle a quelque chose à dire sur Safari.
 
@@ -253,7 +268,7 @@ Les deux délais viennent de l'application, `CONSENT_BANNER_DELAY_MS` et `PREMIU
 
 Un seul test est connu instable, la recherche de la bibliothèque, qui a échoué une fois au premier essai et passé au retry. C'est le seul qui tape dans le champ et attend Algolia, donc le seul dont l'attente dépend d'un service tiers plutôt que de notre serveur. `repeatUntilVisible` couvre l'hydratation, pas cette latence. Les retries d'intégration continue l'absorbent, et rien n'est fait de plus tant qu'il ne devient pas régulier : élargir une fenêtre pour un échec unique cache le jour où la lenteur devient une panne.
 
-`timeout: 30_000` par test : au-delà, un test pend, il ne tourne plus. C'est un plafond serré, le checkout annuel mesure une dizaine de secondes en local. Deux scénarios portent `test.slow()`, qui monte ce plafond à quatre vingt dix secondes : le checkout mensuel, qui prend un Bookmark après avoir payé, et la génération du Studio, qui transcode. `retries: 2` en intégration continue et `0` en local, ce qui sert aussi de coussin sur ce plafond, `trace: 'on-first-retry'`, `forbidOnly` quand `CI` est défini. Les artefacts ne partent qu'en cas d'échec, avec une rétention de trois jours, parce que le dépôt est public.
+`timeout: 30_000` par test : au-delà, un test pend, il ne tourne plus. C'est un plafond serré, le checkout annuel mesure une dizaine de secondes en local. Le checkout mensuel, qui prend un Bookmark après avoir payé, porte `test.slow()` : le plafond y devient quatre vingt dix secondes, et c'est le seul endroit où il bouge. `retries: 2` en intégration continue et `0` en local, ce qui sert aussi de coussin sur ce plafond, `trace: 'on-first-retry'`, `forbidOnly` quand `CI` est défini. Les artefacts ne partent qu'en cas d'échec, avec une rétention de trois jours, parce que le dépôt est public.
 
 ## Les agents
 

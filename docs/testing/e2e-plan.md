@@ -8,7 +8,9 @@ Les décisions structurantes sont dans `docs/adr/0003`, `0004` et `0005`.
 
 Le niveau 1 est écrit, vingt quatre scénarios plus sept tests de préparation : `checkout`, `signup`, `signin`, `password-reset`, `account-deletion`, `http-contracts`, plus `seed.spec.ts` qui charge l'accueil connecté et sert de point de départ aux agents.
 
-Le niveau 2 est écrit en entier, onze surfaces et trente et un scénarios : les quatre de lecture, `home`, `memes-library`, `memes-category` et `memes-page`, les trois qui écrivent, `meme-export`, `bookmark` et `favorites`, les deux qui parlent d'eux mêmes, `consent-banner` et `premium-reminder`, puis les deux qui tirent au sort, `reels` et `random`. Reste le niveau 3.
+Le niveau 2 est écrit en entier, onze surfaces et trente et un scénarios : les quatre de lecture, `home`, `memes-library`, `memes-category` et `memes-page`, les trois qui écrivent, `meme-export`, `bookmark` et `favorites`, les deux qui parlent d'eux mêmes, `consent-banner` et `premium-reminder`, puis les deux qui tirent au sort, `reels` et `random`.
+
+Du niveau 3, une surface est écrite, `studio`, trois scénarios. Restent la Submission, les Settings, l'AiSearch, les pages légales et le parcours EN.
 
 ## La règle
 
@@ -103,7 +105,7 @@ Ce niveau bloque une pull request. C'est ce qui coûte de l'argent ou un compte 
 
 **Checkout.** Écrit, mensuel et annuel. Depuis `/pricing`, jusqu'à la page Stripe en mode test, carte `4242`, retour. On affirme après la redirection : `/checkout/success` répond, la ligne `Subscription` porte `plan`, `status`, `billingInterval`, les deux identifiants Stripe et les deux dates de période, et la carte Premium apparaît comme le plan actif au rechargement.
 
-Le scénario mensuel va une étape plus loin et prend un Bookmark. Le rôle est semé au plafond du plan gratuit, vingt Bookmarks, et le vingt et unième dit que le paiement a changé le produit et pas seulement une ligne. Il est pris sur le Meme le plus vu, seul endroit où un signal frais ne déplace pas la première page de `trending`. C'est le scénario le plus long de la suite, un paiement, sa redirection et une écriture derrière, donc le seul à porter `test.slow()`.
+Le scénario mensuel va une étape plus loin et prend un Bookmark. Le rôle est semé au plafond du plan gratuit, vingt Bookmarks, et le vingt et unième dit que le paiement a changé le produit et pas seulement une ligne. Il est pris sur le Meme le plus vu, seul endroit où un signal frais ne déplace pas la première page de `trending`. C'est le scénario le plus long de la suite, un paiement, sa redirection et une écriture derrière, donc l'un des trois à porter `test.slow()`.
 
 **Inscription.** Écrit. Formulaire du dialogue d'authentification, URL de vérification, compte connecté ensuite. Vérifie au passage que les champs déclarés à better-auth sont bien écrits, `providerAvatar`, les horodatages de consentement, la locale.
 
@@ -181,7 +183,17 @@ Le second scénario dit la règle en entier : le rappel attend son tour. Le dial
 
 ### Niveau 3, le reste
 
-**Studio et Generation.** Sur Chromium, une génération complète à partir d'un Meme fixture court, jusqu'au téléchargement du fichier. Sous WebKit, ouverture du Studio et présence de l'aperçu seulement. Les plafonds et la porte Premium se testent sans transcoder.
+**Studio et Generation.** Écrit, trois scénarios sur Chromium. Un Premium et un User gratuit ouvrent `/memes/$memeId/studio`, saisissent un texte, génèrent, et repartent avec un fichier non vide. Le transcodage est réel : six secondes de vidéo, ffmpeg en WebAssembly sur un seul fil, un peu plus de quatre secondes en local. Les deux scénarios portent `test.slow()`, parce que le budget d'un test normal ne couvre pas une marge sur un runner plus lent.
+
+Le troisième dit ce que le Studio demande avant de travailler. Un Visitor anonyme y entre sans compte, le bouton Générer sans texte lui répond « Veuillez saisir du texte », et rien ne part au traitement. C'est le seul garde-fou que cette surface porte vraiment.
+
+**Ce plan annonçait ici « les plafonds et la porte Premium ». Le code n'a ni l'un ni l'autre**, et c'est écrit dans le test du gratuit. Le Studio n'a aucune porte : sa route ne pose pas de garde, `shareMeme` en mode `studio` sert la vidéo watermarquée à tout le monde sauf au Premium, à qui elle sert l'originale, et cette différence est côté serveur, invisible à un navigateur. Le plafond de trois générations du plan gratuit, lui, est compté et jamais lu : `incrementGenerationCount` incrémente après chaque succès, et `checkGeneration`, la fonction serveur qui refuserait la quatrième sous un 403, n'est appelée de nulle part. Le plan gratuit annonce pourtant « 3 max » sur la page des plans. C'est un correctif produit, pas un test, et il a sa propre branche.
+
+La preuve d'un fichier est son octet, pas sa forme : le test affirme un téléchargement non vide, comme celui de l'Export. Vérifié une fois hors suite pour savoir ce que cette affirmation recouvre, la sortie fait six mégaoctets, cent quatre vingts images, et 600 × 810 contre 600 × 710 à la source, soit les cent pixels de bande que `STUDIO_DEFAULT_BAND_HEIGHT` déclare. Cette hauteur n'est pas affirmée dans le test : celle de la source vit chez Bunny et non dans les fixtures, donc il n'y a rien dont la dériver.
+
+L'état de traitement ne porte qu'un seul nom qui dure, celui du bouton Annuler. Son badge et sa barre de progression épellent tous les deux un pourcentage qui bouge, donc aucun des deux n'a de nom stable à viser. Le test attend ce bouton, puis attend sa disparition. Et rien n'attend l'hydratation, pour la même raison que les Reels : la route est en `ssr: 'data-only'`.
+
+Sous WebKit, ouverture du Studio et présence de l'aperçu seulement. Pas encore écrit : un navigateur de plus se télécharge à chaque run, et cette suite n'en ajoute un que le jour où elle a quelque chose à dire sur Safari.
 
 **Submission.** Envoi d'un lien, apparition dans l'historique, refus d'un lien invalide.
 
@@ -209,6 +221,8 @@ Le dialogue d'authentification garde ses deux panneaux montés pour animer la ha
 
 **Un nom accessible se compare par sous chaîne.** C'est le piège de cette suite, parce qu'il rend un test vert sans rien affirmer : chercher « 3 nouveaux mèmes » trouve « 53 nouveaux mèmes », et le titre du Meme de remplissage numéro 3 se trouve dans celui du numéro 31. Toute affirmation dont la valeur est le sujet du test porte donc `exact: true`, et `e2e/library.ts` le pose une fois pour toutes sur les liens de Meme.
 
+Un libellé de champ se compare de la même façon, et le Studio en porte le cas : son panneau de bureau étiquette son champ « Texte », et la barre du téléphone met « Texte à ajouter sur la vidéo » sur le sien. Le premier est un préfixe du second, donc le `getByLabel` du test porte `exact: true`, faute de quoi il en désignerait deux.
+
 Ce même fichier compte les Memes affichés par les boutons de lecture, un par carte et un seul, parce qu'une carte porte plusieurs liens vers le même Meme.
 
 La bannière de consentement et le rappel Premium parlent d'eux mêmes, le second cinq secondes après l'arrivée sur une page `/memes`. Un dialogue qui s'ouvre au milieu d'un scénario vole le clic que ce scénario allait faire, donc `e2e/fixtures.ts` répond à la bannière par un cookie et met le rappel en sommeil par `localStorage`, pour tous les tests. Chacun garde le sien, qui commencera par défaire ce réglage.
@@ -233,7 +247,7 @@ Les deux délais viennent de l'application, `CONSENT_BANNER_DELAY_MS` et `PREMIU
 
 Un seul test est connu instable, la recherche de la bibliothèque, qui a échoué une fois au premier essai et passé au retry. C'est le seul qui tape dans le champ et attend Algolia, donc le seul dont l'attente dépend d'un service tiers plutôt que de notre serveur. `repeatUntilVisible` couvre l'hydratation, pas cette latence. Les retries d'intégration continue l'absorbent, et rien n'est fait de plus tant qu'il ne devient pas régulier : élargir une fenêtre pour un échec unique cache le jour où la lenteur devient une panne.
 
-`timeout: 30_000` par test : au-delà, un test pend, il ne tourne plus. C'est un plafond serré, le checkout annuel mesure une dizaine de secondes en local. Le checkout mensuel, qui prend un Bookmark après avoir payé, porte `test.slow()` : le plafond y devient quatre vingt dix secondes, et c'est le seul endroit où il bouge. `retries: 2` en intégration continue et `0` en local, ce qui sert aussi de coussin sur ce plafond, `trace: 'on-first-retry'`, `forbidOnly` quand `CI` est défini. Les artefacts ne partent qu'en cas d'échec, avec une rétention de trois jours, parce que le dépôt est public.
+`timeout: 30_000` par test : au-delà, un test pend, il ne tourne plus. C'est un plafond serré, le checkout annuel mesure une dizaine de secondes en local. Trois scénarios portent `test.slow()`, qui monte ce plafond à quatre vingt dix secondes : le checkout mensuel, qui prend un Bookmark après avoir payé, et les deux générations du Studio, qui transcodent. `retries: 2` en intégration continue et `0` en local, ce qui sert aussi de coussin sur ce plafond, `trace: 'on-first-retry'`, `forbidOnly` quand `CI` est défini. Les artefacts ne partent qu'en cas d'échec, avec une rétention de trois jours, parce que le dépôt est public.
 
 ## Les agents
 

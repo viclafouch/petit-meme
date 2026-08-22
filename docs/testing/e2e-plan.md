@@ -165,7 +165,9 @@ La survie du choix n'est pas affirmée par une absence. Une bannière qui n'appa
 
 **Rappel Premium.** Écrit, deux scénarios. Chacun commence par effacer la mise en sommeil que `fixtures.ts` écrit dans `localStorage`, par un script d'initialisation et non par un `evaluate` : le minuteur part à l'hydratation, et il ne se repose pas s'il trouve la mise en sommeil à son premier passage.
 
-Le rappel parle cinq secondes après l'arrivée sur une page `/memes`, un refus le referme, et il ne revient pas. Il ne parle qu'une fois parce qu'il pose lui même sa mise en sommeil au moment de s'afficher : le test le prouve en repassant par `/pricing` puis par la bibliothèque, en navigation client, seule façon de ne pas rejouer le script d'initialisation qui vient d'effacer cette mise en sommeil. Et il ne prend pas la place d'un dialogue déjà ouvert : le dialogue de connexion, ouvert par un Bookmark anonyme, est encore là après deux passages du minuteur.
+Le rappel parle cinq secondes après l'arrivée sur une page `/memes`, un refus le referme, et il ne revient pas. Il ne parle qu'une fois parce qu'il pose lui même sa mise en sommeil au moment de s'afficher : le test le prouve en repassant par `/pricing` puis par la bibliothèque, en navigation client, seule façon de ne pas rejouer le script d'initialisation qui vient d'effacer cette mise en sommeil.
+
+Le second scénario dit la règle en entier : le rappel attend son tour. Le dialogue de connexion, ouvert par un Bookmark anonyme, est encore là après deux passages du minuteur, et le rappel parle dès qu'`Échap` libère l'écran.
 
 ### Niveau 3, le reste
 
@@ -203,7 +205,13 @@ Une page est rendue sur le serveur avant que React ne s'y attache, et Playwright
 
 Affirmer qu'un écran reste muet demande de faire passer le temps, et `page.waitForTimeout` est refusé par la règle oxlint `playwright/no-wait-for-timeout`. C'est `page.clock` qui le fait, l'outil que Playwright désigne pour une fenêtre à retardement : installée avant la navigation, l'horloge fausse gèle le temps de la page, et `runFor` déclenche les minuteurs à la demande.
 
-Deux pièges, chacun payé d'un échec. Une horloge gelée fige aussi la fermeture d'un dialogue, qui garde son `data-state="closed"` en restant visible ; `resume()` n'y change rien, et cinq secondes d'horloge n'ont pas suffi là où dix passent. Un clic qui referme est donc suivi d'une avance large, avant d'affirmer la fermeture et avant de cliquer quoi que ce soit derrière. Et avancer l'horloge avant l'hydratation ne déclenche rien, puisque le minuteur n'est pas encore posé, d'où le `runFor` passé à `repeatUntilVisible`.
+Trois pièges, chacun payé d'un échec.
+
+Une horloge gelée ouvre un dialogue mais ne le referme jamais : il garde son `data-state="closed"` en restant visible. Ni `resume()`, ni une avance plus large n'y changent quoi que ce soit, et c'est le piège coûteux, parce qu'il se déguise en réglage : cinq secondes d'horloge échouaient, dix passaient en local, et les dix ont rechuté sur le runner. Un scénario qui affirme une fermeture garde donc le temps réel de bout en bout, et n'installe l'horloge qu'après, une fois le dialogue parti. `install()` accepte d'arriver là, en cours de route : ce qui compte est que le minuteur à observer soit posé après elle, ici par la navigation suivante.
+
+Avancer l'horloge avant l'hydratation ne déclenche rien, puisque le minuteur n'est pas encore posé, d'où le `runFor` passé à `repeatUntilVisible`.
+
+Enfin, un silence prouvé par une horloge qui ne tourne pas est un test vert qui n'affirme rien. Le scénario du dialogue déjà ouvert porte donc la preuve du contraire, dans le même fichier : `Échap` libère l'écran, le `runFor` suivant fait parler le rappel. Si l'horloge ne déclenchait rien, celui-ci tomberait.
 
 La bannière de consentement, elle, garde le temps réel : elle n'a aucun silence à prouver, et une horloge gelée l'empêcherait d'ouvrir son panneau de préférences.
 

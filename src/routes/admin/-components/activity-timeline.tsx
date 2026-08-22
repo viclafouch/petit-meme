@@ -1,5 +1,4 @@
 import type { OnChangeFn, PaginationState } from '@tanstack/react-table'
-import { getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { LoadingSpinner } from '~/components/ui/spinner'
 import { getErrorMessage } from '~/helpers/error'
 import type { ActivityTimelineScope } from '~/routes/admin/-components/activity-columns'
@@ -7,11 +6,9 @@ import {
   ACTIVITY_COLUMNS,
   ACTIVITY_TIMELINE_SCOPES
 } from '~/routes/admin/-components/activity-columns'
-import {
-  AdminTable,
-  getRowId,
-  PAGE_SIZE
-} from '~/routes/admin/-components/admin-table'
+import { AdminTable } from '~/routes/admin/-components/admin-table'
+import { PAGE_SIZE } from '~/routes/admin/-lib/constants'
+import { useAppTable } from '~/routes/admin/-lib/table'
 import type { AdminActivityRow } from '~/routes/admin/-server/activity'
 
 const EMPTY_ROWS: AdminActivityRow[] = []
@@ -47,11 +44,9 @@ export const ActivityTimeline = ({
     onPageChange(nextPagination.pageIndex + 1)
   }
 
-  const table = useReactTable({
+  const table = useAppTable({
     data: rows ?? EMPTY_ROWS,
     columns: ACTIVITY_COLUMNS,
-    getRowId,
-    getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
     pageCount: Math.ceil(total / PAGE_SIZE),
     state: {

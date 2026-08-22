@@ -38,7 +38,7 @@ export const serverEnv = createEnv({
 
 // `NODE_ENV` says how the code was built, never where it runs: a preview build
 // is a production build. Everything that must behave differently on a preview
-// than on the live site asks these instead. See docs/adr/0005.
+// than on the live site asks these instead.
 // When the platform says nothing, `NODE_ENV` decides: a missing variable must
 // never silently downgrade production.
 //

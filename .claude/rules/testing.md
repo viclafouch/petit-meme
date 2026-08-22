@@ -8,9 +8,9 @@ paths:
 
 These rules cover the unit and integration tests run by Vitest, `**/*.test.ts`.
 
-End to end tests are `**/*.spec.ts` under `e2e/` and answer to `docs/testing/e2e-plan.md`
-instead: one scenario per test, a scenario carrying as many assertions as the flow needs,
-and no mocking, since the point is to exercise the real thing.
+End to end tests are `**/*.spec.ts` under `e2e/` and answer to different rules: one scenario
+per test, a scenario carrying as many assertions as the flow needs, and no mocking, since the
+point is to exercise the real thing. The suite itself is the record of what is covered.
 
 An e2e assertion is taken on screen, never by polling the database to check that the test worked.
 

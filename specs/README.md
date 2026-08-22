@@ -2,7 +2,7 @@
 
 Working area for the Playwright agents. The planner writes a Markdown plan here, the generator turns it into a test.
 
-What to test, in which order, and what stays out of the e2e suite is decided in [`docs/testing/e2e-plan.md`](../docs/testing/e2e-plan.md). A plan written here covers one surface of that document, it never redefines the perimeter.
+What to test and what stays out is decided in the conversation, and the suite in `e2e/` is the record of it. Read the specs next to the one you are adding before writing: they carry the conventions.
 
 Generated tests go to `e2e/`, next to the existing suite, with the `.spec.ts` extension.
 

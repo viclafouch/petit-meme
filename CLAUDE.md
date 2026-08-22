@@ -90,7 +90,7 @@ French, plain technical language, short sentences. The first line says the outco
 
 The specification is what I asked for in the conversation. Plans live in the conversation too, this repository holds no plan file for a feature. Work that needs steps checks in between them.
 
-`docs/` is the exception, and it holds the opposite kind of document: what outlives the feature that produced it. A test plan belongs there, a migration plan does not. `specs/` is the scratch area of the Playwright agents, never a place to keep anything.
+There is no `docs/` directory, and adding one is a conversation to have first. Prose about the code goes stale the day the code moves, and I will move the code without moving the prose. What outlives a feature belongs in one of three places instead: a constraint in `CONTEXT.md`, a rule in `.claude/rules/`, or a GitHub issue for anything still to do. `specs/` is the scratch area of the Playwright agents, never a place to keep anything.
 
 ## Git
 

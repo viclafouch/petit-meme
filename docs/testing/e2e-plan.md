@@ -10,7 +10,7 @@ Le niveau 1 est écrit, vingt quatre scénarios plus sept tests de préparation 
 
 Le niveau 2 est écrit en entier, onze surfaces et trente et un scénarios : les quatre de lecture, `home`, `memes-library`, `memes-category` et `memes-page`, les trois qui écrivent, `meme-export`, `bookmark` et `favorites`, les deux qui parlent d'eux mêmes, `consent-banner` et `premium-reminder`, puis les deux qui tirent au sort, `reels` et `random`.
 
-Du niveau 3, quatre surfaces sont ouvertes. `studio`, deux scénarios : sa génération complète est écrite puis retirée, et la section qui la porte dit pourquoi. `settings`, dix scénarios, la page entière. `legal-pages`, dix scénarios, les quatre pages dans les deux locales. `ai-search`, six scénarios, les portes, les deux plans et les deux façons dont une recherche ne rend rien. Restent la Submission et le parcours EN.
+Du niveau 3, cinq surfaces sont ouvertes. `studio`, deux scénarios : sa génération complète est écrite puis retirée, et la section qui la porte dit pourquoi. `settings`, dix scénarios, la page entière. `legal-pages`, dix scénarios, les quatre pages dans les deux locales. `ai-search`, six scénarios, les portes, les deux plans et les deux façons dont une recherche ne rend rien. `submission`, trois scénarios, l'envoi, l'historique et les deux refus du formulaire. Reste le parcours EN.
 
 ## La règle
 
@@ -158,7 +158,9 @@ Share n'est pas testé, et ce n'est pas un oubli. Le bouton est `md:hidden`, don
 
 **Bookmark.** Écrit. Un User ajoute un Bookmark, le retrouve après un rechargement, et le retire. Un User au plafond du plan gratuit se voit refuser le suivant et le sait par un message. Un Visitor anonyme, lui, reçoit le dialogue de connexion.
 
-Deux détails de ce scénario méritent d'être écrits. Le clic passe par `repeatUntilVisible` et le rechargement attend la réponse du serveur : l'écran bascule sur la mise à jour optimiste avant que le serveur ait répondu, et recharger à cet instant coupe la requête en vol. Cette réponse se reconnaît à sa méthode et à `/_serverFn/`, jamais à son nom, parce que l'URL d'une fonction serveur porte une empreinte de son corps et rien de lisible. `e2e/server-functions.ts` la reconnaît une fois pour toute la suite, ici et sur le Bookmark du checkout.
+Deux détails de ce scénario méritent d'être écrits. Le clic passe par `repeatUntilVisible` et le rechargement attend la réponse du serveur : l'écran bascule sur la mise à jour optimiste avant que le serveur ait répondu, et recharger à cet instant coupe la requête en vol. Cette réponse se reconnaît à sa méthode et à `/_serverFn/`, jamais à son nom. `createServerRpc` construit l'URL par `"/_serverFn/" + serverFnMeta.id`, et cet identifiant est une empreinte : `createMemeSubmission` s'appelle `/_serverFn/f40438954ee9b2…`. Le nom et le fichier vivent bien à côté dans le bundle, hors de l'URL, donc hors de portée d'un test. `e2e/server-functions.ts` porte ce motif une fois pour toute la suite, ici, sur le Bookmark du checkout, sur le fil coupé de l'AiSearch, sur l'Avatar des Settings et sur le refus de la Submission.
+
+Ce motif ne distingue pas une fonction serveur d'une autre, et c'est sa limite à connaître. Attendre « n'importe quel POST `_serverFn` » ne dit ce qu'on croit que sur une page qui n'en tire qu'un, ce qui est le cas ici et sur le checkout. Une page qui en tirerait deux résoudrait l'attente sur le mauvais, sans rien dire.
 
 Et le message du plafond n'est pas celui que le produit croit afficher. Le serveur refuse par un `StudioError` de code `PREMIUM_REQUIRED` sous un 403, mais le client ne le relit pas et retombe sur son message générique, « Erreur lors de la mise à jour du favori » au lieu de « Limite de favoris atteinte ». Le test affirme ce que le Visitor voit vraiment. Il deviendra rouge le jour où le code sera corrigé, ce qui est exactement le moment de le mettre à jour.
 
@@ -221,7 +223,19 @@ Enfin passer l'upload d'artefacts de `if: failure()` à `if: !cancelled()` dans 
 
 Sous WebKit, ouverture du Studio et présence de l'aperçu seulement. Pas encore écrit : un navigateur de plus se télécharge à chaque run, et cette suite n'en ajoute un que le jour où elle a quelque chose à dire sur Safari.
 
-**Submission.** Envoi d'un lien, apparition dans l'historique, refus d'un lien invalide.
+**Submission.** Écrit, trois scénarios. Un User propose un lien, le retrouve dans son historique avec son statut En attente, et voit le compteur des soumissions restantes descendre d'un cran. Un lien qui n'est ni un tweet ni une vidéo YouTube est refusé, la case des conditions décochée l'est aussi, et rien ne part au serveur. Un Visitor anonyme n'a pas de formulaire du tout, la page lui offre la connexion.
+
+Le lien proposé est une vidéo YouTube et jamais un tweet. `createMemeSubmission` appelle Twitter pour vérifier qu'un tweet porte bien une vidéo, ce qui ferait dépendre le run d'un tiers, alors qu'un lien YouTube est accepté sur sa seule forme. Le lien refusé, lui, est une URL https parfaitement valide chez un troisième hébergeur : le refus doit venir de la forme du lien et non de l'analyseur d'URL.
+
+L'historique n'est pas affirmé sur une mise à jour optimiste. Le succès invalide la requête des soumissions, donc ce qui s'affiche revient du serveur, et le compteur qui suit est le compte du serveur. Le champ Titre vidé au passage est ce qui prouve le `form.reset()`.
+
+Une seule affirmation de cette surface est prise en base plutôt qu'à l'écran, et c'est parce qu'elle n'a pas d'écran. `detectUrlType` décide côté serveur qu'un lien est un `YOUTUBE` ou un `TWEET`, et l'historique ne montre jamais ce type : un lien YouTube rangé en `TWEET` passerait les trois scénarios sans broncher. La règle reste l'écran, la base sert ce qui n'y est pas, du même geste que les champs better-auth de l'inscription et la ligne `subscription` du checkout.
+
+Ce même compteur ne dit rien du tout dans le scénario du refus, et il n'y est pas affirmé. `getUserSubmissionsQueryOpts` porte cinq minutes de fraîcheur et n'est invalidé qu'au succès, donc il annonce trois soumissions restantes que le serveur ait écrit ou non. Ce que le refus a à prouver est qu'aucun appel n'est parti, et il le prouve en comptant les POST vers `/_serverFn/`, à zéro. Une absence à l'écran ne l'aurait pas dit : le toast de succès n'apparaît qu'après la réponse, donc il est absent aussi pendant qu'une requête est en vol.
+
+Ce formulaire est le seul de la suite à vivre sur une page plutôt que dans un dialogue, donc il lui faut un signal d'hydratation à lui. Ce ne peut pas être le bouton Soumettre : cliqué avant que React ne s'attache, il part en soumission native et le scénario se retrouve sur un `/submit?title=` de sa fabrication. C'est la case des conditions qui le porte, puisque seul Radix peut la cocher et qu'elle ne navigue nulle part. Une case est une bascule, donc l'action répétée lit son état avant de cliquer et ne la décoche jamais : `repeatUntilVisible` ne vaut que pour une action sans conséquence à rejouer, et c'est cette lecture qui la rend telle.
+
+Le plafond de trois soumissions en attente n'a pas de test. Il est réel des deux côtés, le serveur le refuse et le client remplace le formulaire par son message, mais le mettre en scène demande un rôle semé de trois soumissions, et il attend qu'on le lui donne.
 
 **Settings.** Écrit, dix scénarios. Un gratuit voit son nom, son adresse, son badge et son plan, et le bouton qui l'emmène aux plans y mène. Il repart avec l'export JSON de ses données, nommé et non vide. Un AvatarSlot choisi survit à un rechargement, et le rôle qui porte un ProviderAvatar en choisit un puis revient au sien. Un mot de passe changé sert à se reconnecter, et deux refus l'encadrent, la confirmation qui ne correspond pas et le mot de passe actuel faux. Un Premium voit son badge et se fait ouvrir le portail de facturation. Un Premium dont l'abonnement tourne encore se voit refuser la suppression de son compte tant qu'il ne l'a pas annulé. Un Visitor anonyme est renvoyé sur l'accueil.
 

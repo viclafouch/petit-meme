@@ -8,11 +8,9 @@ import { MemesList } from '~/components/Meme/memes-list'
 import { Button } from '~/components/ui/button'
 import { Separator } from '~/components/ui/separator'
 import { Textarea } from '~/components/ui/textarea'
-import {
-  AI_SEARCH_PROMPT_STORAGE_KEY,
-  MAX_PROMPT_LENGTH
-} from '~/constants/ai-search'
+import { MAX_PROMPT_LENGTH } from '~/constants/ai-search'
 import { getErrorMessage, matchIsRateLimitError } from '~/helpers/error'
+import { useAiSearchPrompt } from '~/hooks/use-ai-search-prompt'
 import { useAiSearchStages } from '~/hooks/use-ai-search-stages'
 import { snoozePremiumReminder } from '~/hooks/use-premium-reminder'
 import { getAiSearchQuotaQueryOpts } from '~/lib/queries'
@@ -43,16 +41,7 @@ export const AiSearchPage = () => {
   const { user } = useRouteContext({ from: '__root__' })
   const showDialog = useShowDialog()
   const queryClient = useQueryClient()
-  const [prompt, setPrompt] = React.useState(() => {
-    if (typeof window === 'undefined') {
-      return ''
-    }
-
-    const saved = sessionStorage.getItem(AI_SEARCH_PROMPT_STORAGE_KEY)
-    sessionStorage.removeItem(AI_SEARCH_PROMPT_STORAGE_KEY)
-
-    return saved ?? ''
-  })
+  const { prompt, setPrompt, handOverPrompt } = useAiSearchPrompt()
 
   const quotaQuery = useQuery({
     ...getAiSearchQuotaQueryOpts(),
@@ -94,7 +83,7 @@ export const AiSearchPage = () => {
     }
 
     if (!user) {
-      sessionStorage.setItem(AI_SEARCH_PROMPT_STORAGE_KEY, trimmed)
+      handOverPrompt(trimmed)
       showDialog('auth', {})
 
       return

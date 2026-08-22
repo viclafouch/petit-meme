@@ -1,11 +1,11 @@
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 import type {
   Header,
+  ReactTable,
   RowData,
-  SortDirection,
-  Table as TableType
+  SortDirection
 } from '@tanstack/react-table'
-import { flexRender } from '@tanstack/react-table'
+import { FlexRender } from '@tanstack/react-table'
 import { Button } from '~/components/ui/button'
 import {
   Table,
@@ -16,8 +16,7 @@ import {
   TableHeader,
   TableRow
 } from '~/components/ui/table'
-
-const PAGE_SIZE = 20
+import type { AdminTableFeatures } from '~/routes/admin/-lib/table'
 
 type SortIconParams = {
   direction: SortDirection | false
@@ -41,7 +40,7 @@ const SORT_ARIA_MAP = {
 } as const satisfies Record<SortDirection, string>
 
 function getAriaSortValue<TData extends RowData>(
-  header: Header<TData, unknown>
+  header: Header<AdminTableFeatures, TData>
 ): 'ascending' | 'descending' | 'none' | undefined {
   const sortDirection = header.column.getIsSorted()
 
@@ -53,7 +52,7 @@ function getAriaSortValue<TData extends RowData>(
 }
 
 type SortableHeaderParams<TData extends RowData> = {
-  header: Header<TData, unknown>
+  header: Header<AdminTableFeatures, TData>
 }
 
 const SortableHeader = <TData extends RowData>({
@@ -62,7 +61,7 @@ const SortableHeader = <TData extends RowData>({
   const canSort = header.column.getCanSort()
 
   if (!canSort) {
-    return flexRender(header.column.columnDef.header, header.getContext())
+    return <FlexRender header={header} />
   }
 
   const sortDirection = header.column.getIsSorted()
@@ -74,20 +73,20 @@ const SortableHeader = <TData extends RowData>({
       onClick={header.column.getToggleSortingHandler()}
       aria-label={`Trier par ${typeof header.column.columnDef.header === 'string' ? header.column.columnDef.header : header.column.id}`}
     >
-      {flexRender(header.column.columnDef.header, header.getContext())}
+      <FlexRender header={header} />
       <SortIcon direction={sortDirection} />
     </button>
   )
 }
 
 type PaginationFooterParams<TData extends RowData> = {
-  table: TableType<TData>
+  table: ReactTable<AdminTableFeatures, TData>
 }
 
 const PaginationFooter = <TData extends RowData>({
   table
 }: PaginationFooterParams<TData>) => {
-  const currentPage = table.getState().pagination.pageIndex + 1
+  const currentPage = table.state.pagination.pageIndex + 1
   const totalPages = table.getPageCount()
 
   return (
@@ -134,7 +133,7 @@ const PaginationFooter = <TData extends RowData>({
 }
 
 type AdminTableParams<TData extends RowData> = {
-  table: TableType<TData>
+  table: ReactTable<AdminTableFeatures, TData>
   caption?: string
 }
 
@@ -176,10 +175,7 @@ export const AdminTable = <TData extends RowData>({
                   {row.getVisibleCells().map((cell) => {
                     return (
                       <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
+                        <FlexRender cell={cell} />
                       </TableCell>
                     )
                   })}
@@ -202,9 +198,3 @@ export const AdminTable = <TData extends RowData>({
     </div>
   )
 }
-
-function getRowId(row: { id: string }) {
-  return row.id
-}
-
-export { getRowId, PAGE_SIZE }

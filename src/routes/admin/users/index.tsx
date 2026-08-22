@@ -1,12 +1,5 @@
 import { Minus } from 'lucide-react'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import {
-  createColumnHelper,
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable
-} from '@tanstack/react-table'
 import { PageHeader } from '~/components/page-header'
 import { Badge } from '~/components/ui/badge'
 import { Container } from '~/components/ui/container'
@@ -16,13 +9,11 @@ import {
   TooltipTrigger
 } from '~/components/ui/tooltip'
 import { UserAvatar } from '~/components/user-avatar'
-import {
-  AdminTable,
-  getRowId,
-  PAGE_SIZE
-} from '~/routes/admin/-components/admin-table'
+import { AdminTable } from '~/routes/admin/-components/admin-table'
 import { EmptyCell } from '~/routes/admin/-components/empty-cell'
 import { RelativeDateTooltip } from '~/routes/admin/-components/relative-date-tooltip'
+import { INITIAL_PAGINATION } from '~/routes/admin/-lib/constants'
+import { createAppColumnHelper, useAppTable } from '~/routes/admin/-lib/table'
 import type { EnrichedUser } from '~/routes/admin/-server/users'
 import { getListUsers } from '~/routes/admin/-server/users'
 import { UserActionsCell } from './-components/user-actions-cell'
@@ -32,9 +23,9 @@ import {
   UserStatusBadges
 } from './-components/user-badges'
 
-const columnHelper = createColumnHelper<EnrichedUser>()
+const columnHelper = createAppColumnHelper<EnrichedUser>()
 
-const columns = [
+const columns = columnHelper.columns([
   columnHelper.accessor('name', {
     header: 'Utilisateur',
     cell: (info) => {
@@ -160,23 +151,17 @@ const columns = [
       return <UserActionsCell user={info.row.original} />
     }
   })
-]
+])
 
 const RouteComponent = () => {
   const { users } = Route.useLoaderData()
 
-  const table = useReactTable({
+  const table = useAppTable({
     data: users,
     columns,
-    getRowId,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     initialState: {
       sorting: [{ id: 'lastActiveAt', desc: true }],
-      pagination: {
-        pageSize: PAGE_SIZE
-      }
+      pagination: INITIAL_PAGINATION
     }
   })
 

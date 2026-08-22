@@ -1,29 +1,20 @@
 import { Plus } from 'lucide-react'
 import { createFileRoute } from '@tanstack/react-router'
-import {
-  createColumnHelper,
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable
-} from '@tanstack/react-table'
 import { PageHeader } from '~/components/page-header'
 import { Badge } from '~/components/ui/badge'
 import { Container } from '~/components/ui/container'
 import { formatDate } from '~/helpers/date'
 import { baseLocale, getLocale } from '~/paraglide/runtime'
-import {
-  AdminTable,
-  getRowId,
-  PAGE_SIZE
-} from '~/routes/admin/-components/admin-table'
+import { AdminTable } from '~/routes/admin/-components/admin-table'
+import { INITIAL_PAGINATION } from '~/routes/admin/-lib/constants'
+import { createAppColumnHelper, useAppTable } from '~/routes/admin/-lib/table'
 import { AddCategoryButton } from '~/routes/admin/categories/-components/add-category-button'
 import { CategoryDropdown } from '~/routes/admin/categories/-components/category-dropdown'
 import { type EnrichedCategory, getCategories } from '~/server/categories'
 
-const columnHelper = createColumnHelper<EnrichedCategory>()
+const columnHelper = createAppColumnHelper<EnrichedCategory>()
 
-const columns = [
+const columns = columnHelper.columns([
   columnHelper.accessor('title', {
     header: 'Titre'
   }),
@@ -84,23 +75,17 @@ const columns = [
       return <CategoryDropdown category={info.row.original} />
     }
   })
-]
+])
 
 const RouteComponent = () => {
   const { categories } = Route.useLoaderData()
 
-  const table = useReactTable({
+  const table = useAppTable({
     data: categories,
     columns,
-    getRowId,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     initialState: {
       sorting: [{ id: 'createdAt', desc: true }],
-      pagination: {
-        pageSize: PAGE_SIZE
-      }
+      pagination: INITIAL_PAGINATION
     }
   })
 

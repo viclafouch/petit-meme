@@ -2,30 +2,21 @@ import React from 'react'
 import { Activity, Hash, Search, XCircle } from 'lucide-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import {
-  createColumnHelper,
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable
-} from '@tanstack/react-table'
 import { FLAG_ICON_CLASS, LOCALE_FLAGS } from '~/components/icon/flags'
 import { PageHeader } from '~/components/page-header'
 import { Badge } from '~/components/ui/badge'
 import { Container } from '~/components/ui/container'
 import { UserAvatar } from '~/components/user-avatar'
-import {
-  AdminTable,
-  getRowId,
-  PAGE_SIZE
-} from '~/routes/admin/-components/admin-table'
+import { AdminTable } from '~/routes/admin/-components/admin-table'
 import { RelativeDateTooltip } from '~/routes/admin/-components/relative-date-tooltip'
+import { INITIAL_PAGINATION } from '~/routes/admin/-lib/constants'
 import { getAdminAiSearchLogsQueryOpts } from '~/routes/admin/-lib/queries'
+import { createAppColumnHelper, useAppTable } from '~/routes/admin/-lib/table'
 import type { AdminAiSearchLog } from '~/routes/admin/-server/ai-search-logs'
 
-const columnHelper = createColumnHelper<AdminAiSearchLog>()
+const columnHelper = createAppColumnHelper<AdminAiSearchLog>()
 
-const columns = [
+const columns = columnHelper.columns([
   columnHelper.accessor('user', {
     header: 'Utilisateur',
     enableSorting: false,
@@ -90,7 +81,7 @@ const columns = [
       return <RelativeDateTooltip date={new Date(info.getValue())} />
     }
   })
-]
+])
 
 type StatCardParams = {
   label: string
@@ -113,16 +104,12 @@ const StatCard = ({ label, value, icon }: StatCardParams) => {
 const RouteComponent = () => {
   const logsQuery = useSuspenseQuery(getAdminAiSearchLogsQueryOpts())
 
-  const table = useReactTable({
+  const table = useAppTable({
     data: logsQuery.data.logs,
     columns,
-    getRowId,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     initialState: {
       sorting: [{ id: 'createdAt', desc: true }],
-      pagination: { pageSize: PAGE_SIZE }
+      pagination: INITIAL_PAGINATION
     }
   })
 

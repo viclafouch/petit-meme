@@ -4,8 +4,7 @@ import { ACTIVITY_FILTERS_SCHEMA } from '~/constants/activity'
 import type { ActivityFilters, ActivityScope } from '~/constants/activity'
 import type { Prisma } from '~/db/generated/prisma/client'
 import { ActivityEventType } from '~/db/generated/prisma/enums'
-import { PAGE_SIZE } from '~/routes/admin/-components/admin-table'
-import { DASHBOARD_FEED_SIZE } from '~/routes/admin/-lib/constants'
+import { DASHBOARD_FEED_SIZE, PAGE_SIZE } from '~/routes/admin/-lib/constants'
 import { adminRequiredMiddleware } from '~/server/user-auth'
 
 const ACTIVITY_ROW_SELECT = {

@@ -1,6 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import type { VisibilityState } from '@tanstack/react-table'
-import { createColumnHelper } from '@tanstack/react-table'
+import type { ColumnVisibilityState } from '@tanstack/react-table'
 import { Badge } from '~/components/ui/badge'
 import {
   Tooltip,
@@ -17,6 +16,7 @@ import {
   ACTIVITY_TYPE_DISPLAY,
   ActivityTypeIcon
 } from '~/routes/admin/-helpers/activity'
+import { createAppColumnHelper } from '~/routes/admin/-lib/table'
 import type { AdminActivityRow } from '~/routes/admin/-server/activity'
 
 function getMissingIpReason(createdAt: AdminActivityRow['createdAt']) {
@@ -29,9 +29,9 @@ function getMissingIpReason(createdAt: AdminActivityRow['createdAt']) {
   return 'Aucune IP collectée pour cet événement'
 }
 
-const columnHelper = createColumnHelper<AdminActivityRow>()
+const columnHelper = createAppColumnHelper<AdminActivityRow>()
 
-export const ACTIVITY_COLUMNS = [
+export const ACTIVITY_COLUMNS = columnHelper.columns([
   columnHelper.accessor('type', {
     header: 'Type',
     enableSorting: false,
@@ -139,12 +139,12 @@ export const ACTIVITY_COLUMNS = [
       return <RelativeDateTooltip date={new Date(info.getValue())} />
     }
   })
-]
+])
 
 export const ACTIVITY_TIMELINE_SCOPES = {
   global: {},
   user: { visitor: false },
   visitor: { ipAddress: false }
-} as const satisfies Record<string, VisibilityState>
+} as const satisfies Record<string, ColumnVisibilityState>
 
 export type ActivityTimelineScope = keyof typeof ACTIVITY_TIMELINE_SCOPES

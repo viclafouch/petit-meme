@@ -1,13 +1,15 @@
 /* oxlint-disable react/react-compiler -- timer-based animation hook with intentional setState in effects */
 import React from 'react'
+import {
+  AI_SEARCH_STAGE_KEYS,
+  AI_SEARCH_STAGE_LINGER_MS,
+  AI_SEARCH_STAGE_MAX_DELAY_MS,
+  AI_SEARCH_STAGE_MIN_DELAY_MS
+} from '~/constants/ai-search'
 import { getRandomFloatInRange } from '~/helpers/number'
 
-const STAGE_MIN_DELAY_MS = 1500
-const STAGE_MAX_DELAY_MS = 2500
-const COMPLETED_LINGER_MS = 600
-
 export type Stage = {
-  key: 'context' | 'keywords' | 'search'
+  key: (typeof AI_SEARCH_STAGE_KEYS)[number]
   status: 'pending' | 'active' | 'completed'
 }
 
@@ -18,11 +20,9 @@ type StagesState = {
   reset: () => void
 }
 
-const INITIAL_STAGES = [
-  { key: 'context', status: 'pending' },
-  { key: 'keywords', status: 'pending' },
-  { key: 'search', status: 'pending' }
-] as const satisfies readonly Stage[]
+const INITIAL_STAGES: readonly Stage[] = AI_SEARCH_STAGE_KEYS.map((key) => {
+  return { key, status: 'pending' }
+})
 
 function buildStages(activeIndex: number): readonly Stage[] {
   return INITIAL_STAGES.map((stage, index) => {
@@ -39,7 +39,10 @@ function buildStages(activeIndex: number): readonly Stage[] {
 }
 
 function getRandomStageDelay() {
-  return getRandomFloatInRange(STAGE_MIN_DELAY_MS, STAGE_MAX_DELAY_MS)
+  return getRandomFloatInRange(
+    AI_SEARCH_STAGE_MIN_DELAY_MS,
+    AI_SEARCH_STAGE_MAX_DELAY_MS
+  )
 }
 
 export function useAiSearchStages(isPending: boolean): StagesState {
@@ -103,7 +106,7 @@ export function useAiSearchStages(isPending: boolean): StagesState {
     hideTimerRef.current = setTimeout(() => {
       activeIndexRef.current = -1
       setActiveIndex(-1)
-    }, COMPLETED_LINGER_MS)
+    }, AI_SEARCH_STAGE_LINGER_MS)
   }
 
   function scheduleNextStage() {

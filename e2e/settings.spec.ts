@@ -17,25 +17,26 @@ const BILLING_PORTAL_URL_PATTERN = /subscription\/billing-portal/u
 // one would answer the origin alone.
 const STRIPE_PORTAL_SESSION_PATH = '/p/session'
 
-// The upgrade button and the manage subscription button are also carried by the
-// header dropdown and by the phone navigation, so the page's own copy is looked
-// for inside the main landmark.
+// The header dropdown, the phone navigation and the dialogs of this page carry
+// the same names as the buttons of the page itself, so every hook of this file
+// is looked for inside the main landmark.
 const getSettingsButton = (page: Page, name: string) => {
   return page.getByRole('main').getByRole('button', { name })
 }
 
-const openAvatarPicker = async (page: Page) => {
-  const dialog = page.getByRole('dialog', { name: m.settings_avatar_change() })
+// Each dialog of this page is opened by a button that carries its own title.
+const openSettingsDialog = async (page: Page, name: string) => {
+  const dialog = page.getByRole('dialog', { name })
 
   await repeatUntilVisible(async () => {
-    await page.getByRole('button', { name: m.settings_avatar_change() }).click()
+    await getSettingsButton(page, name).click()
   }, dialog)
 
   return dialog
 }
 
-// Slot twenty three answers to a name that contains slot two's, so the value
-// under test carries the whole assertion only when it is compared exactly.
+// The name of slot one is a prefix of the names of slots ten to nineteen, so
+// whatever number this helper is handed is compared exactly.
 const getAvatarSlot = (dialog: Locator, number: string) => {
   return dialog.getByRole('radio', {
     name: m.settings_avatar_slot_label({ number }),
@@ -47,27 +48,13 @@ const getAvatarSlot = (dialog: Locator, number: string) => {
 // write in flight. The session that follows is the real signal: better-auth
 // caches a session in a signed cookie for five minutes, and a reload before
 // that refresh reads the Avatar the User had before the click.
-const pickAvatar = async (page: Page, tile: Locator) => {
-  const sessionRefreshed = page.waitForResponse(SESSION_URL_PATTERN)
+const pickAvatar = async (tile: Locator) => {
+  const sessionRefreshed = tile.page().waitForResponse(SESSION_URL_PATTERN)
 
   await tile.click()
   await sessionRefreshed
 
   await expect(tile).toBeChecked()
-}
-
-const openUpdatePasswordDialog = async (page: Page) => {
-  const dialog = page.getByRole('dialog', {
-    name: m.settings_change_password()
-  })
-
-  await repeatUntilVisible(async () => {
-    await page
-      .getByRole('button', { name: m.settings_change_password() })
-      .click()
-  }, dialog)
-
-  return dialog
 }
 
 type SubmitPasswordUpdateParams = {
@@ -145,7 +132,7 @@ test.describe('a free User', () => {
   }) => {
     await page.goto('/settings')
 
-    const dialog = await openUpdatePasswordDialog(page)
+    const dialog = await openSettingsDialog(page, m.settings_change_password())
 
     await submitPasswordUpdate({
       dialog,
@@ -165,7 +152,7 @@ test.describe('a free User', () => {
   }) => {
     await page.goto('/settings')
 
-    const dialog = await openUpdatePasswordDialog(page)
+    const dialog = await openSettingsDialog(page, m.settings_change_password())
 
     await submitPasswordUpdate({
       dialog,
@@ -187,13 +174,16 @@ test.describe('a User who picks an AvatarSlot', () => {
   test('keeps the slot they picked after a reload', async ({ page }) => {
     await page.goto('/settings')
 
-    const dialog = await openAvatarPicker(page)
+    const dialog = await openSettingsDialog(page, m.settings_avatar_change())
 
-    await pickAvatar(page, getAvatarSlot(dialog, AVATAR_SLOT_NUMBER))
+    await pickAvatar(getAvatarSlot(dialog, AVATAR_SLOT_NUMBER))
 
     await page.reload()
 
-    const reloadedDialog = await openAvatarPicker(page)
+    const reloadedDialog = await openSettingsDialog(
+      page,
+      m.settings_avatar_change()
+    )
 
     await expect(
       getAvatarSlot(reloadedDialog, AVATAR_SLOT_NUMBER)
@@ -209,14 +199,14 @@ test.describe('a User who arrived with a ProviderAvatar', () => {
   }) => {
     await page.goto('/settings')
 
-    const dialog = await openAvatarPicker(page)
+    const dialog = await openSettingsDialog(page, m.settings_avatar_change())
     const slot = getAvatarSlot(dialog, AVATAR_SLOT_NUMBER)
     const providerTile = dialog.getByRole('radio', {
       name: m.settings_avatar_provider_label()
     })
 
-    await pickAvatar(page, slot)
-    await pickAvatar(page, providerTile)
+    await pickAvatar(slot)
+    await pickAvatar(providerTile)
 
     await expect(slot).not.toBeChecked()
   })
@@ -228,7 +218,7 @@ test.describe('a User who changes their password', () => {
   test('signs in again with the new one', async ({ page }) => {
     await page.goto('/settings')
 
-    const dialog = await openUpdatePasswordDialog(page)
+    const dialog = await openSettingsDialog(page, m.settings_change_password())
 
     await submitPasswordUpdate({
       dialog,

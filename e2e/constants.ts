@@ -17,7 +17,7 @@ export type E2eRole = Pick<User, 'id' | 'name' | 'email' | 'emailVerified'> & {
 // A file this repository serves, so the ProviderAvatar tile renders without
 // leaving for a provider CDN. Never a catalogue path: the picker tells the two
 // apart by comparing them to the image the User carries.
-export const E2E_PROVIDER_AVATAR_PATH = '/apple-touch-icon.png'
+const E2E_PROVIDER_AVATAR_PATH = '/apple-touch-icon.png'
 
 const CAPPED_BOOKMARK_MEME_IDS = E2E_FILLER_MEMES.slice(
   0,

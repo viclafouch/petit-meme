@@ -33,7 +33,8 @@ export const E2E_ROLES = {
     id: 'e2e-user-checkout',
     name: 'E2E Checkout',
     email: `e2e-checkout@${E2E_EMAIL_DOMAIN}`,
-    emailVerified: true
+    emailVerified: true,
+    bookmarkedMemeIds: CAPPED_BOOKMARK_MEME_IDS
   },
   checkoutAnnual: {
     id: 'e2e-user-checkout-annual',

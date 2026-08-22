@@ -1,12 +1,17 @@
 import type { Page } from '@playwright/test'
 import { prismaClient } from '~/db'
 import { E2E_ROLES, STRIPE_TEST_CARD } from './constants'
+import { E2E_NAMED_MEMES } from './content'
 import { resolveStorageStatePath } from './env'
 import { expect, test } from './fixtures'
 import { repeatUntilRequested, repeatUntilVisible } from './hydration'
 import { m } from './messages'
+import { matchIsServerFunctionCall } from './server-functions'
 
 const SUBSCRIPTION_WRITE_TIMEOUT_MS = 15_000
+
+// The most viewed Meme is the one a fresh Bookmark cannot move out of trending.
+const CAP_LIFT_MEME_PATHNAME = `/memes/${E2E_NAMED_MEMES.mostViewed.id}`
 
 const findSubscription = (referenceId: string) => {
   return prismaClient.subscription.findFirst({ where: { referenceId } })
@@ -49,6 +54,24 @@ const payWithTestCard = async (page: Page, cardholderName: string) => {
   await page.waitForURL('**/checkout/success')
 }
 
+const bookmarkTheMemeOverTheFreeCap = async (page: Page) => {
+  await page.goto(CAP_LIFT_MEME_PATHNAME)
+
+  const removeBookmarkButton = page.getByRole('button', {
+    name: m.meme_remove_favorite()
+  })
+  const bookmarkWritten = page.waitForResponse(matchIsServerFunctionCall)
+
+  await repeatUntilVisible(() => {
+    return page.getByRole('button', { name: m.meme_add_favorite() }).click()
+  }, removeBookmarkButton)
+
+  await bookmarkWritten
+  await page.reload()
+
+  await expect(removeBookmarkButton).toBeVisible()
+}
+
 const expectActiveSubscription = async (referenceId: string) => {
   await expect
     .poll(
@@ -65,7 +88,11 @@ const expectActiveSubscription = async (referenceId: string) => {
 test.describe('a monthly checkout', () => {
   test.use({ storageState: resolveStorageStatePath('checkout') })
 
-  test('turns the User into a Premium', async ({ page }) => {
+  test.slow()
+
+  test('turns the User into a Premium and lifts the free cap', async ({
+    page
+  }) => {
     await page.goto('/pricing')
     await startCheckout(page)
     await payWithTestCard(page, E2E_ROLES.checkout.name)
@@ -87,6 +114,8 @@ test.describe('a monthly checkout', () => {
     await expect(
       page.getByRole('button', { name: m.pricing_active_plan_sr() })
     ).toBeVisible()
+
+    await bookmarkTheMemeOverTheFreeCap(page)
   })
 })
 

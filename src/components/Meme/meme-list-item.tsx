@@ -166,6 +166,7 @@ export const MemeListItem = React.memo(
       <motion.div
         className="relative flex w-full flex-col gap-2 text-sm sm:min-w-0 group"
         layoutId={`${layoutContext}-item-${meme.id}`}
+        role="listitem"
       >
         <motion.div className="group relative aspect-video w-full text-sm overflow-hidden rounded-lg border border-white/10">
           <MemeVideoThumbnail

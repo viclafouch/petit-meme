@@ -1,5 +1,6 @@
 import React from 'react'
 import { ToggleGroup, ToggleGroupItem } from '~/components/ui/toggle-group'
+import { m } from '~/paraglide/messages.js'
 
 const defaultValues = [4, 5, 6]
 
@@ -23,6 +24,7 @@ const MemesToggleGrid = ({
       size="default"
       variant="outline"
       type="single"
+      aria-label={m.meme_grid_columns()}
       value={columnValue.toString()}
       onValueChange={handleChange}
     >

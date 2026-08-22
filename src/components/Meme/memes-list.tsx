@@ -111,6 +111,8 @@ export const MemesList = ({
           } as React.CSSProperties
         }
         className="grid gap-5 grid-cols-2 lg:grid-cols-(--cols)"
+        role="list"
+        aria-label={m.meme_list_label()}
       >
         {memes.map((meme, index) => {
           return (

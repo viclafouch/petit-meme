@@ -280,8 +280,10 @@
   "meme_exit_fullscreen": "Quitter le plein écran",
   "meme_filter_languages": "Langues",
   "meme_fullscreen": "Plein écran",
+  "meme_grid_columns": "Colonnes de la grille",
   "meme_link_copied": "Lien copié",
   "meme_link_copy_error": "Impossible de copier le lien",
+  "meme_list_label": "Mèmes",
   "meme_minutes": [
     {
       "declarations": [

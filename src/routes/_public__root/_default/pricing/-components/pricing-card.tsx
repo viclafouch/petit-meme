@@ -16,6 +16,7 @@ import {
   getBillingPeriodLabel,
   type Plan
 } from '~/constants/plan'
+import { MONTHS_IN_YEAR } from '~/constants/time'
 import { convertCentsToEuros, formatCentsToEuros } from '~/helpers/number'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
@@ -48,8 +49,6 @@ const getFeatureStatusSrLabel = (
 
   return m.pricing_sr_not_included()
 }
-
-const MONTHS_IN_YEAR = 12
 
 const EURO_FORMAT_OPTIONS = {
   style: 'currency',

@@ -1,58 +1,20 @@
 import type { Page } from '@playwright/test'
-import { prismaClient } from '~/db'
-import { E2E_ROLES, STRIPE_TEST_CARD } from './constants'
+import {
+  expectActiveSubscription,
+  findSubscription,
+  payWithTestCard,
+  startCheckout
+} from './checkout-flow'
+import { E2E_ROLES } from './constants'
 import { E2E_NAMED_MEMES } from './content'
 import { resolveStorageStatePath } from './env'
 import { expect, test } from './fixtures'
-import { repeatUntilRequested, repeatUntilVisible } from './hydration'
+import { repeatUntilVisible } from './hydration'
 import { m } from './messages'
 import { matchIsServerFunctionCall } from './server-functions'
 
-const SUBSCRIPTION_WRITE_TIMEOUT_MS = 15_000
-
 // The most viewed Meme is the one a fresh Bookmark cannot move out of trending.
 const CAP_LIFT_MEME_PATHNAME = `/memes/${E2E_NAMED_MEMES.mostViewed.id}`
-
-const findSubscription = (referenceId: string) => {
-  return prismaClient.subscription.findFirst({ where: { referenceId } })
-}
-
-// A second upgrade call on the same User is refused, which is also what a
-// Visitor who double clicks gets, so the click is repeated only until the
-// request leaves and never after.
-const startCheckout = async (page: Page) => {
-  await repeatUntilRequested(
-    async () => {
-      await page.getByRole('button', { name: m.nav_upgrade_premium() }).click()
-    },
-    { page, urlPattern: /subscription\/upgrade/u }
-  )
-
-  await page.waitForURL(/checkout\.stripe\.com/u)
-}
-
-// Locators owned by Stripe's hosted checkout, not by us. Its test ids are
-// stable and say nothing about the language, unlike the labels.
-const payWithTestCard = async (page: Page, cardholderName: string) => {
-  const submitButton = page.getByTestId('hosted-payment-submit-button')
-  await submitButton.waitFor()
-
-  // Stripe folds the card form behind a payment method picker as soon as the
-  // browser offers a wallet, which a Mac does and the Linux runner does not.
-  const cardNumber = page.locator('#cardNumber')
-
-  if (!(await cardNumber.isVisible())) {
-    await page.getByTestId('card-accordion-item').click()
-  }
-
-  await cardNumber.fill(STRIPE_TEST_CARD.number)
-  await page.locator('#cardExpiry').fill(STRIPE_TEST_CARD.expiry)
-  await page.locator('#cardCvc').fill(STRIPE_TEST_CARD.cvc)
-  await page.locator('#billingName').fill(cardholderName)
-  await submitButton.click()
-
-  await page.waitForURL('**/checkout/success')
-}
 
 const bookmarkTheMemeOverTheFreeCap = async (page: Page) => {
   await page.goto(CAP_LIFT_MEME_PATHNAME)
@@ -70,19 +32,6 @@ const bookmarkTheMemeOverTheFreeCap = async (page: Page) => {
   await page.reload()
 
   await expect(removeBookmarkButton).toBeVisible()
-}
-
-const expectActiveSubscription = async (referenceId: string) => {
-  await expect
-    .poll(
-      async () => {
-        const subscription = await findSubscription(referenceId)
-
-        return subscription?.status ?? null
-      },
-      { timeout: SUBSCRIPTION_WRITE_TIMEOUT_MS }
-    )
-    .toBe('active')
 }
 
 test.describe('a monthly checkout', () => {

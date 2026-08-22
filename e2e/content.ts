@@ -8,8 +8,13 @@ import type {
   Video
 } from '~/db/generated/prisma/client'
 import { MemeContentLocale } from '~/db/generated/prisma/enums'
+import {
+  findTranslationByLocale,
+  VISIBLE_CONTENT_LOCALES
+} from '~/helpers/i18n-content'
 import type { Locale } from '~/paraglide/runtime'
 import { E2E_VIDEO_BUNNY_ID } from './env'
+import { E2E_ENGLISH_LOCALE } from './locales'
 
 export const E2E_VIDEO_DURATION = 6
 
@@ -248,9 +253,57 @@ export const E2E_RECENT_MEMES = E2E_MEMES.filter((meme) => {
 // The first page of `trending` falls back to the view counts when no Event
 // exists, so the thirty highest sit on it and the rest sit behind it. This is
 // what the distinct view counts above are for.
-const MEMES_BY_VIEW_COUNT = E2E_MEMES.toSorted((first, second) => {
-  return second.viewCount - first.viewCount
-})
+const sortByViewCount = (memes: readonly E2eMeme[]) => {
+  return memes.toSorted((first, second) => {
+    return second.viewCount - first.viewCount
+  })
+}
+
+const MEMES_BY_VIEW_COUNT = sortByViewCount(E2E_MEMES)
 
 export const E2E_FIRST_PAGE_MEMES = MEMES_BY_VIEW_COUNT.slice(0, MEMES_PER_PAGE)
 export const E2E_SECOND_PAGE_MEMES = MEMES_BY_VIEW_COUNT.slice(MEMES_PER_PAGE)
+
+export const localizeE2eMeme = (meme: E2eMeme, locale: Locale): E2eMeme => {
+  const translation = findTranslationByLocale([...meme.translations], locale)
+
+  if (!translation) {
+    throw new Error(`Meme ${meme.id} carries no ${locale} translation.`)
+  }
+
+  return {
+    ...meme,
+    title: translation.title,
+    description: translation.description
+  }
+}
+
+export const getE2eCategoryTitle = (category: E2eCategory, locale: Locale) => {
+  const translation = findTranslationByLocale(
+    [...category.translations],
+    locale
+  )
+
+  if (!translation) {
+    throw new Error(`Category ${category.slug} carries no ${locale} title.`)
+  }
+
+  return translation.title
+}
+
+const ENGLISH_MEMES_BY_VIEW_COUNT = sortByViewCount(
+  E2E_MEMES.filter((meme) => {
+    return VISIBLE_CONTENT_LOCALES[E2E_ENGLISH_LOCALE].includes(
+      meme.contentLocale
+    )
+  })
+).map((meme) => {
+  return localizeE2eMeme(meme, E2E_ENGLISH_LOCALE)
+})
+
+export const E2E_ENGLISH_FIRST_PAGE_MEMES = ENGLISH_MEMES_BY_VIEW_COUNT.slice(
+  0,
+  MEMES_PER_PAGE
+)
+export const E2E_ENGLISH_SECOND_PAGE_MEMES =
+  ENGLISH_MEMES_BY_VIEW_COUNT.slice(MEMES_PER_PAGE)

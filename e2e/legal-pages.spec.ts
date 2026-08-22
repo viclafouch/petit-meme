@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs'
-import { baseLocale, localizeUrl, locales } from '~/paraglide/runtime'
+import { baseLocale, locales } from '~/paraglide/runtime'
 import type { Locale } from '~/paraglide/runtime'
-import { E2E_BASE_URL } from './env'
 import { expect, test } from './fixtures'
+import { localizePathname } from './urls'
 
 // Legal pages are open to everyone, so they are walked as an anonymous
 // Visitor. Their body is markdown, one file per locale, and the route picks
@@ -48,10 +48,6 @@ const AVATAR_STYLE_CREDIT = {
   licenceName: '„CC BY 4.0”',
   licenceUrl: 'https://creativecommons.org/licenses/by/4.0/'
 } as const satisfies Record<string, string>
-
-const localizePathname = (pathname: string, locale: Locale) => {
-  return localizeUrl(new URL(pathname, E2E_BASE_URL), { locale }).pathname
-}
 
 for (const locale of locales) {
   const localeName = locale === baseLocale ? `${locale}, base` : locale

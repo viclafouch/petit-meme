@@ -51,6 +51,12 @@ export const E2E_ROLES = {
     email: `e2e-checkout-annual@${E2E_EMAIL_DOMAIN}`,
     emailVerified: true
   },
+  checkoutEnglish: {
+    id: 'e2e-user-checkout-english',
+    name: 'E2E Checkout English',
+    email: `e2e-checkout-english@${E2E_EMAIL_DOMAIN}`,
+    emailVerified: true
+  },
   passwordReset: {
     id: 'e2e-user-password-reset',
     name: 'E2E Password Reset',

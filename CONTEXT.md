@@ -174,3 +174,6 @@ It lays a full screen veil and declares itself `aria-modal`, so nothing behind i
 
 **Every field written at sign up must be declared to better-auth.**
 `transformInput` builds the inserted row by looping over the fields known to the better-auth schema only, and drops the rest without an error. A field returned by the `user.create.before` hook but missing from `USER_ADDITIONAL_FIELDS` is simply never written. This trap already cost `provider_avatar`, then the GDPR consent timestamps, then the email locale.
+
+**The locale is a cookie, and the cookie is read before the URL.**
+`cookie` comes first in the paraglide strategy, and paraglide writes `PARAGLIDE_LOCALE` on the first client render, not only when the language switcher is used. Two things follow. Walking once to `/en/` pins that browser to English, so a French road then redirects to its English twin instead of quietly undoing the choice. And a URL our router never builds still comes back in the right language: the `successUrl` handed to Stripe is a bare `/checkout/success`, and the cookie is the only thing that brings an English Visitor home in English. Putting `url` first would read as a simplification, and it would drop a paying Visitor back into French.

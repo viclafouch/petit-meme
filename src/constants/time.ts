@@ -11,3 +11,5 @@ export const ONE_YEAR_IN_SECONDS = 365 * ONE_DAY_IN_SECONDS
 
 export const ONE_HOUR_MS = HOUR
 export const THIRTY_DAYS_MS = 30 * DAY
+
+export const MONTHS_IN_YEAR = 12

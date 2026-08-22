@@ -18,7 +18,7 @@ import type {
 } from 'schema-dts'
 import type { AnyRouteMatch } from '@tanstack/react-router'
 import type { FaqItem } from '~/components/faq-section'
-import { LOGO_PATH } from '~/constants/branding'
+import { LOGO_PATH, SITE_NAME } from '~/constants/branding'
 import type { MemeWithCategories, MemeWithVideo } from '~/constants/meme'
 import { OG_IMAGE_HEIGHT, OG_IMAGE_WIDTH } from '~/constants/og'
 import type { Plan } from '~/constants/plan'
@@ -92,10 +92,16 @@ export const buildOgImageUrl = ({
   return url.href
 }
 
-const OG_LOCALE_MAP = {
+export const OG_LOCALE_MAP = {
   fr: 'fr_FR',
   en: 'en_US'
 } as const satisfies Record<Locale, string>
+
+const ADMIN_SITE_NAME = `Admin ${SITE_NAME}`
+
+export const buildPageTitle = (title: string, siteName = SITE_NAME) => {
+  return `${siteName} - ${title}`
+}
 
 export const buildUrl = (pathname: string, locale?: Locale): string => {
   try {
@@ -147,8 +153,8 @@ export const seo = ({
 }: SeoParams): SeoResult => {
   const locale = getLocale()
   const titlePrefixed = isAdmin
-    ? `Admin Petit Meme - ${title}`
-    : `Petit Meme - ${title}`
+    ? buildPageTitle(title, ADMIN_SITE_NAME)
+    : buildPageTitle(title)
 
   const canonicalBase = canonicalPathname ?? pathname
   const canonicalUrl = buildUrl(canonicalBase, locale)
@@ -164,7 +170,7 @@ export const seo = ({
     { name: 'twitter:creator', content: '@TrustedSheriff' },
     { name: 'twitter:site', content: '@TrustedSheriff' },
     { property: 'og:type', content: ogType },
-    { property: 'og:site_name', content: 'Petit Meme' },
+    { property: 'og:site_name', content: SITE_NAME },
     { property: 'og:title', content: titlePrefixed },
     { property: 'og:url', content: canonicalUrl },
     { property: 'og:locale', content: OG_LOCALE_MAP[locale] },
@@ -431,7 +437,7 @@ export const buildHomeJsonLd = ({
         '@type': 'WebSite',
         '@id': websiteId,
         url: websiteOrigin,
-        name: 'Petit Meme',
+        name: SITE_NAME,
         publisher: { '@id': `${websiteOrigin}/#organization` },
         // oxlint-disable-next-line typescript/consistent-type-assertions -- query-input not in SearchAction type
         potentialAction: {
@@ -446,7 +452,7 @@ export const buildHomeJsonLd = ({
       {
         '@type': 'Organization',
         '@id': `${websiteOrigin}/#organization`,
-        name: 'Petit Meme',
+        name: SITE_NAME,
         url: websiteOrigin,
         logo: `${websiteOrigin}${LOGO_PATH}`,
         description: m.seo_home_description()

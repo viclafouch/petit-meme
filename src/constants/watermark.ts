@@ -1,7 +1,6 @@
 // Path to the watermark PNG asset (logo + "petit-meme.io" on semi-transparent dark background)
 export const WATERMARK_ASSET_PATH = '/images/watermark.png'
 
-// Overall watermark opacity applied on top of the video (0 = invisible, 1 = fully opaque)
 export const WATERMARK_OPACITY = 0.6
 
 // Watermark width as a fraction of the video width (0.21 = 21% — visible on portrait 9:16 videos)

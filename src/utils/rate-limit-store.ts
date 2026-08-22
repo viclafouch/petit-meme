@@ -53,8 +53,6 @@ export const checkRateLimit = (
   const now = Date.now()
   const existing = store.get(key)
 
-  // No prior entry, or the previous window has fully elapsed: start fresh.
-  // Otherwise keep the same window start and increment the counter.
   const isWindowExpired =
     !existing || existing.windowStart < now - config.windowMs
   const entry: RateLimitEntry = isWindowExpired

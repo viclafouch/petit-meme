@@ -57,6 +57,8 @@ Un verrou déjà échoué ne se libère pas en changeant d'URL : seul `pg_termin
 
 Les runs sont sérialisés par un groupe de concurrence GitHub, et la suite tourne sur un seul worker : la base est unique, deux tests qui écrivent en même temps se marcheraient dessus.
 
+Ce groupe est global et non par branche, pour cette raison même, et il annule ce qu'il remplace. Deux pushs à une minute d'intervalle donnent donc un seul run, le dernier, reparti de zéro : la suite resème la base à chaque fois, il n'y a rien à reprendre. Un run tué en cours peut laisser un index Algolia temporaire derrière lui, que le seed suivant remplace. La contrepartie est le prix du groupe global : un push sur une autre branche annule le run en cours, et le remettre en marche est un `gh run rerun`.
+
 ## Les données
 
 Chaque run repart de zéro. Le projet `seed` tronque toutes les tables sauf l'historique des migrations, puis crée les Users déclarés dans `e2e/constants.ts`. Il ne touche à rien d'autre, ni Stripe, ni Algolia, ni Bunny. Le nettoyage a lieu **au début** du run, jamais à la fin, pour qu'un échec laisse un état inspectable.

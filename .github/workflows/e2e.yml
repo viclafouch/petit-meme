@@ -4,10 +4,14 @@ on:
   pull_request:
     branches: [main]
 
-# The test database is shared, so two runs never overlap.
+# The test database is shared, so the group stays global: two runs never
+# overlap, whatever branch they come from. The newest one wins, and the runs it
+# supersedes stop where they are rather than pay for a verdict nobody reads.
+# A run killed mid flight can leave a temporary Algolia index behind, which the
+# next seed replaces.
 concurrency:
   group: e2e
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   e2e:

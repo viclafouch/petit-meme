@@ -12,11 +12,8 @@ import { UserAvatar } from '~/components/user-avatar'
 import { AdminTable } from '~/routes/admin/-components/admin-table'
 import { EmptyCell } from '~/routes/admin/-components/empty-cell'
 import { RelativeDateTooltip } from '~/routes/admin/-components/relative-date-tooltip'
-import {
-  createAppColumnHelper,
-  INITIAL_PAGINATION,
-  useAppTable
-} from '~/routes/admin/-lib/table'
+import { INITIAL_PAGINATION } from '~/routes/admin/-lib/constants'
+import { createAppColumnHelper, useAppTable } from '~/routes/admin/-lib/table'
 import type { EnrichedUser } from '~/routes/admin/-server/users'
 import { getListUsers } from '~/routes/admin/-server/users'
 import { UserActionsCell } from './-components/user-actions-cell'

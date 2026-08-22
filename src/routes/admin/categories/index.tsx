@@ -6,11 +6,8 @@ import { Container } from '~/components/ui/container'
 import { formatDate } from '~/helpers/date'
 import { baseLocale, getLocale } from '~/paraglide/runtime'
 import { AdminTable } from '~/routes/admin/-components/admin-table'
-import {
-  createAppColumnHelper,
-  INITIAL_PAGINATION,
-  useAppTable
-} from '~/routes/admin/-lib/table'
+import { INITIAL_PAGINATION } from '~/routes/admin/-lib/constants'
+import { createAppColumnHelper, useAppTable } from '~/routes/admin/-lib/table'
 import { AddCategoryButton } from '~/routes/admin/categories/-components/add-category-button'
 import { CategoryDropdown } from '~/routes/admin/categories/-components/category-dropdown'
 import { type EnrichedCategory, getCategories } from '~/server/categories'

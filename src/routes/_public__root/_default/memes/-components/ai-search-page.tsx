@@ -185,7 +185,7 @@ type RemainingSearchesProps = {
 
 const RemainingSearches = ({ remainingSearches }: RemainingSearchesProps) => {
   return (
-    <p className="text-muted-foreground text-sm">
+    <p role="status" className="text-muted-foreground text-sm">
       {m.ai_search_remaining_searches({
         count: Math.max(0, remainingSearches)
       })}

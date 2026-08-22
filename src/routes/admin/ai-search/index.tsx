@@ -9,12 +9,9 @@ import { Container } from '~/components/ui/container'
 import { UserAvatar } from '~/components/user-avatar'
 import { AdminTable } from '~/routes/admin/-components/admin-table'
 import { RelativeDateTooltip } from '~/routes/admin/-components/relative-date-tooltip'
+import { INITIAL_PAGINATION } from '~/routes/admin/-lib/constants'
 import { getAdminAiSearchLogsQueryOpts } from '~/routes/admin/-lib/queries'
-import {
-  createAppColumnHelper,
-  INITIAL_PAGINATION,
-  useAppTable
-} from '~/routes/admin/-lib/table'
+import { createAppColumnHelper, useAppTable } from '~/routes/admin/-lib/table'
 import type { AdminAiSearchLog } from '~/routes/admin/-server/ai-search-logs'
 
 const columnHelper = createAppColumnHelper<AdminAiSearchLog>()

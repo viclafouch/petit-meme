@@ -1,4 +1,3 @@
-import type { PaginationState } from '@tanstack/react-table'
 import {
   columnVisibilityFeature,
   createPaginatedRowModel,
@@ -6,21 +5,23 @@ import {
   createTableHook,
   rowPaginationFeature,
   rowSortingFeature,
+  sortFn_alphanumeric,
+  sortFn_datetime,
+  sortFn_text,
   tableFeatures
 } from '@tanstack/react-table'
-import { PAGE_SIZE } from '~/routes/admin/-lib/constants'
-
-export const INITIAL_PAGINATION = {
-  pageIndex: 0,
-  pageSize: PAGE_SIZE
-} as const satisfies PaginationState
 
 const ADMIN_TABLE_FEATURES = tableFeatures({
   columnVisibilityFeature,
   rowPaginationFeature,
   rowSortingFeature,
   paginatedRowModel: createPaginatedRowModel(),
-  sortedRowModel: createSortedRowModel()
+  sortedRowModel: createSortedRowModel(),
+  sortFns: {
+    alphanumeric: sortFn_alphanumeric,
+    datetime: sortFn_datetime,
+    text: sortFn_text
+  }
 })
 
 export type AdminTableFeatures = typeof ADMIN_TABLE_FEATURES

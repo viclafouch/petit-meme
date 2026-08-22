@@ -14,12 +14,9 @@ import { MemeSubmissionStatus } from '~/db/generated/prisma/enums'
 import type { MemeSubmissionUrlType } from '~/db/generated/prisma/enums'
 import { AdminTable } from '~/routes/admin/-components/admin-table'
 import { RelativeDateTooltip } from '~/routes/admin/-components/relative-date-tooltip'
+import { INITIAL_PAGINATION } from '~/routes/admin/-lib/constants'
 import { getAdminSubmissionsQueryOpts } from '~/routes/admin/-lib/queries'
-import {
-  createAppColumnHelper,
-  INITIAL_PAGINATION,
-  useAppTable
-} from '~/routes/admin/-lib/table'
+import { createAppColumnHelper, useAppTable } from '~/routes/admin/-lib/table'
 import type { AdminSubmission } from '~/routes/admin/-server/submissions'
 import { SubmissionActionsCell } from './-components/submission-actions-cell'
 

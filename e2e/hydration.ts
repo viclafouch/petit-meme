@@ -20,6 +20,21 @@ export const repeatUntilVisible = async (
   }).toPass({ timeout: HYDRATION_GIVE_UP_MS })
 }
 
+type RepeatUntilNavigatedParams = {
+  page: Page
+  from: string
+}
+
+export const repeatUntilNavigated = async (
+  act: () => Promise<unknown>,
+  { page, from }: RepeatUntilNavigatedParams
+) => {
+  await expect(async () => {
+    await act()
+    await expect(page).not.toHaveURL(from, { timeout: HYDRATED_ACTION_MS })
+  }).toPass({ timeout: HYDRATION_GIVE_UP_MS })
+}
+
 type RepeatUntilRequestedParams = {
   page: Page
   urlPattern: RegExp

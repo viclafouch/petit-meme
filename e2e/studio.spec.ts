@@ -13,9 +13,10 @@ const STUDIO_PATHNAME = `/memes/${GENERATED_MEME.id}/studio`
 const CAPTION_TEXT = 'Le e2e a parlé'
 
 // Fetching the source Video from our server, then transcoding six seconds of it
-// in WebAssembly on a single thread. It runs well past the thirty seconds a
-// test normally gets, hence the `test.slow()` on each scenario that waits here.
-const TRANSCODE_TIMEOUT_MS = 60_000
+// in WebAssembly on a single thread. Four seconds on a laptop, and this bound
+// sits under the thirty a test gets so that a generation that never finishes
+// says so, instead of expiring somewhere in the scenario.
+const TRANSCODE_TIMEOUT_MS = 20_000
 
 // `studio_text_label` is « Texte », a substring of the « Texte à ajouter sur la
 // vidéo » the phone bar puts on its own input.
@@ -55,8 +56,6 @@ test.describe('a Premium', () => {
   test('captions a Meme in the Studio and leaves with the file', async ({
     page
   }) => {
-    test.slow()
-
     await page.goto(STUDIO_PATHNAME)
 
     await generateVideo(page)
@@ -74,8 +73,6 @@ test.describe('a free User', () => {
   test('captions the same Meme without being asked anything', async ({
     page
   }) => {
-    test.slow()
-
     await page.goto(STUDIO_PATHNAME)
 
     await generateVideo(page)

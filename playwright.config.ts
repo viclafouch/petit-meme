@@ -6,15 +6,10 @@ const isCi = Boolean(process.env.CI)
 export default defineConfig({
   testDir: './e2e',
   outputDir: './e2e/.results',
-  // The checkout, the longest scenario, takes fifteen to twenty seconds: two
-  // page loads, a payment, and the redirect back. Past thirty seconds a test is
-  // hanging, not running.
   timeout: 30_000,
   forbidOnly: isCi,
   retries: isCi ? 2 : 0,
   workers: 1,
-  // `list` first even in CI: `github` only speaks at the end and `html` writes
-  // a file, so a run in progress would say nothing about where it is.
   reporter: isCi
     ? [['list'], ['html', { open: 'never' }], ['github']]
     : [['list']],
@@ -44,9 +39,14 @@ export default defineConfig({
     {
       name: 'chromium',
       testMatch: /.*\.spec\.ts/u,
-      // French is the base locale, and the runner would otherwise decide it
-      // through Accept-Language: a run must not change language with its host.
+      testIgnore: /.*\.mobile\.spec\.ts/u,
       use: { ...devices['Desktop Chrome'], locale: 'fr-FR' },
+      dependencies: ['auth']
+    },
+    {
+      name: 'mobile-safari',
+      testMatch: /.*\.mobile\.spec\.ts/u,
+      use: { ...devices['iPhone 15'], locale: 'fr-FR' },
       dependencies: ['auth']
     }
   ]

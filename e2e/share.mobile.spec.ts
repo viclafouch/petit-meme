@@ -49,6 +49,10 @@ test.describe('a Premium', () => {
       },
       { page, urlPattern: SERVER_FUNCTION_URL_PATTERN }
     )
+
+    await expect(
+      page.getByRole('dialog', { name: m.watermark_upsell_title_share() })
+    ).toBeHidden()
   })
 })
 

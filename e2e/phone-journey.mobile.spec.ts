@@ -42,7 +42,10 @@ test('a tap on a Meme of the home page opens the player', async ({ page }) => {
   await expect(playerDialog.locator('media-controller')).toBeVisible()
 })
 
-test('a Meme page plays its Video on Safari', async ({ page }) => {
+// What is asserted is the stream reaching WebKit, never the video starting on
+// its own: Safari refuses an unmuted autoplay, and Playwright allows it, so a
+// running video would prove the runner and not the phone.
+test('a Meme page loads its Video on Safari', async ({ page }) => {
   await page.goto(PLAYABLE_MEME_PATHNAME)
 
   const video = page.locator('media-controller video')
@@ -50,7 +53,7 @@ test('a Meme page plays its Video on Safari', async ({ page }) => {
   await expect
     .poll(() => {
       return video.evaluate((element: HTMLVideoElement) => {
-        return element.currentTime
+        return element.duration
       })
     })
     .toBeGreaterThan(0)

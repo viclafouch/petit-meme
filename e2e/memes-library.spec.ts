@@ -6,11 +6,13 @@ import {
   E2E_SECOND_PAGE_MEMES
 } from './content'
 import { expect, test } from './fixtures'
-import { repeatUntilVisible } from './hydration'
+import { repeatUntilNavigated, repeatUntilVisible } from './hydration'
 import { getMemeLink, getMemePlayButtons, getMemeTitleLinks } from './library'
 import { m } from './messages'
 
 // The library is open to everyone, so it is walked as an anonymous Visitor.
+
+const LIBRARY_PATHNAME = '/memes/category/all'
 
 const SECOND_PAGE_NUMBER = '2'
 
@@ -37,20 +39,26 @@ test('the library opens on the trending Category and fills a page', async ({
 test('a word typed in the search field narrows the library to what matches', async ({
   page
 }) => {
-  await page.goto('/memes/category/all')
+  await page.goto(LIBRARY_PATHNAME)
 
   const searchField = page.getByRole('searchbox', {
     name: m.meme_search_placeholder()
   })
 
-  await repeatUntilVisible(
-    () => {
-      return searchField.fill(E2E_SEARCH_WORD)
+  // The searched Meme is the second most viewed, so the unfiltered page already
+  // carries it and waiting for it proves nothing. The query reaching the URL is
+  // what says the word was typed into a live page, and the field is emptied
+  // first so that a repeat has a change to fire.
+  await repeatUntilNavigated(
+    async () => {
+      await searchField.clear()
+      await searchField.fill(E2E_SEARCH_WORD)
     },
-    getMemeLink(page, E2E_NAMED_MEMES.searchTarget)
+    { page, from: LIBRARY_PATHNAME }
   )
 
   await expect(getMemePlayButtons(page)).toHaveCount(1)
+  await expect(getMemeLink(page, E2E_NAMED_MEMES.searchTarget)).toBeVisible()
   await expect(getMemeLink(page, E2E_NAMED_MEMES.mostViewed)).toBeHidden()
 })
 

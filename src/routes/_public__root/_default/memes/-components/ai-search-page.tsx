@@ -52,10 +52,11 @@ export const AiSearchPage = () => {
     mutationFn: (data: { prompt: string }) => {
       return aiSearchMemes({ data })
     },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: getAiSearchQuotaQueryOpts.all
-      })
+    onSuccess: (result) => {
+      queryClient.setQueryData(
+        getAiSearchQuotaQueryOpts().queryKey,
+        result.quota
+      )
     },
     onError: (error) => {
       searchStagesResetRef.current()
@@ -186,9 +187,7 @@ type RemainingSearchesProps = {
 const RemainingSearches = ({ remainingSearches }: RemainingSearchesProps) => {
   return (
     <p role="status" className="text-muted-foreground text-sm">
-      {m.ai_search_remaining_searches({
-        count: Math.max(0, remainingSearches)
-      })}
+      {m.ai_search_remaining_searches({ count: remainingSearches })}
     </p>
   )
 }

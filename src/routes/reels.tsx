@@ -1,7 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { DefaultLoading } from '~/components/default-loading'
 import { MemeReels } from '~/components/Meme/meme-reels'
-import { getInfiniteReelsQueryOpts } from '~/lib/queries'
+import {
+  getActiveSubscriptionQueryOpts,
+  getInfiniteReelsQueryOpts
+} from '~/lib/queries'
 import { buildOgImageUrl, seo } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
@@ -36,6 +39,10 @@ export const Route = createFileRoute('/reels')({
     })
   },
   loader: async ({ context }) => {
+    if (context.user) {
+      void context.queryClient.ensureQueryData(getActiveSubscriptionQueryOpts())
+    }
+
     await context.queryClient.ensureInfiniteQueryData(
       getInfiniteReelsQueryOpts()
     )

@@ -222,7 +222,7 @@ export const MemeListItem = React.memo(
             <DropdownMenu>
               <DropdownMenuTrigger>
                 <EllipsisVertical className={cn(sizes[size].icon)} />
-                <span className="sr-only">Open options</span>
+                <span className="sr-only">{m.meme_open_options()}</span>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem asChild>

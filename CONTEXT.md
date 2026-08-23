@@ -99,6 +99,10 @@ _Avoid_: Smart search, prompt
 What a User is entitled to: the number of Generations, of Bookmarks and of AiSearches. Free by default, lifted by Premium.
 _Avoid_: Tier, offer
 
+**Quota**:
+What is left of a Plan's cap for a User, read at a given instant: the AiSearches already spent this month against `maxAiSearchesCount`. It names the figure and what remains of it, never the entitlement itself, which is the Plan. Only the AiSearch carries one today, the Generation and the Bookmark check their cap without ever naming the count.
+_Avoid_: Limit, credits, allowance
+
 **Premium**:
 The state of a User whose Plan is paid and active. It is a state we read, never a flag we write by hand.
 _Avoid_: Pro, paid member, VIP

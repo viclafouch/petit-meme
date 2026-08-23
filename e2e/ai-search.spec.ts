@@ -69,6 +69,9 @@ test.describe('a free User with searches left', () => {
     await expect(
       page.getByText(m.ai_search_result_count({ count: 1 }), { exact: true })
     ).toBeVisible()
+    await expect(getQuotaCounter(page)).toHaveText(
+      m.ai_search_remaining_searches({ count: FREE_PLAN_MAX_AI_SEARCHES - 1 })
+    )
 
     await page.reload()
 

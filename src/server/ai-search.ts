@@ -21,6 +21,7 @@ import {
 } from '~/db/generated/prisma/enums'
 import type { MemeContentLocale } from '~/db/generated/prisma/enums'
 import { serverEnv } from '~/env/server'
+import { buildAiSearchQuota } from '~/helpers/ai-search'
 import { truncateToUtcDay, truncateToUtcMonth } from '~/helpers/date'
 import { contentLocalesWithUniversal } from '~/helpers/i18n-content'
 import { withTimeout } from '~/helpers/promise'
@@ -243,12 +244,18 @@ export const aiSearchMemes = createServerFn({ method: 'POST' })
       'AI search completed'
     )
 
+    const monthlyCountWithCurrentSearch = monthlyCount + 1
+
     return {
       memes: response.hits.map((hit) => {
         return normalizeAlgoliaHit(hit)
       }),
       keywords,
-      queryID: response.queryID
+      queryID: response.queryID,
+      quota: buildAiSearchQuota({
+        monthlyCount: monthlyCountWithCurrentSearch,
+        isPremium
+      })
     }
   })
 
@@ -266,13 +273,5 @@ export const checkAiSearchQuota = createServerFn({ method: 'GET' })
       matchIsUserPremium(context.user)
     ])
 
-    const remainingSearches = isPremium
-      ? null
-      : FREE_PLAN_MAX_AI_SEARCHES - monthlyCount
-
-    return {
-      canSearch: isPremium || monthlyCount < FREE_PLAN_MAX_AI_SEARCHES,
-      remainingSearches,
-      isPremium
-    }
+    return buildAiSearchQuota({ monthlyCount, isPremium })
   })

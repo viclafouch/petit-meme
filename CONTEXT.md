@@ -173,6 +173,9 @@ A preview deployment is a production build, so `NODE_ENV` cannot tell it from th
 **The end to end suite owns the `test` branch of the database, and empties it.**
 Every run truncates every table before seeding. `.env.e2e` is loaded so that it wins over any exported variable, and the truncation refuses to run unless the connection string it sees is the one that file declares. That second check belongs next to the destruction, never at the call site.
 
+**A Premium is only recognised where the subscription is in the query cache.**
+`useMemeExport` reads the cache and never fetches: an Export from a route that did not load the subscription sells Premium to someone who already bought it, and hands them a watermarked video. The `_default` layout loads it for everything under it, and any route outside that layout, `/reels` first, has to load it itself.
+
 **The consent banner is the one prompt allowed to hold the screen.**
 It lays a full screen veil and declares itself `aria-modal`, so nothing behind it is clickable while it is up. That contradicts the shortest path to the video on purpose: consent has to be a choice, not something collected while the Visitor is aiming at a play button. It still steps aside for a dialog that is already open, and every other prompt, the Premium reminder above all, waits its turn the same way.
 

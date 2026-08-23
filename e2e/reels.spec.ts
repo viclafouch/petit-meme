@@ -1,19 +1,12 @@
-import type { Page } from '@playwright/test'
 import { E2E_MEMES } from './content'
 import { expect, test } from './fixtures'
-import { m } from './messages'
+import { getReels } from './library'
 
 const E2E_MEME_TITLES = E2E_MEMES.map((meme) => {
   return meme.title
 })
 
 const REEL_ON_SCREEN_RATIO = 0.5
-
-const getReels = (page: Page) => {
-  return page
-    .getByRole('feed', { name: m.meme_video_feed() })
-    .getByRole('article')
-}
 
 test('Reels opens on a Meme', async ({ page }) => {
   const response = await page.goto('/reels')

@@ -173,6 +173,9 @@ A preview deployment is a production build, so `NODE_ENV` cannot tell it from th
 **The end to end suite owns the `test` branch of the database, and empties it.**
 Every run truncates every table before seeding. `.env.e2e` is loaded so that it wins over any exported variable, and the truncation refuses to run unless the connection string it sees is the one that file declares. That second check belongs next to the destruction, never at the call site.
 
+**The phone has its own end to end project, and it runs the phone alone.**
+`mobile-safari` is a WebKit on an iPhone viewport, and it takes the `*.mobile.spec.ts` files only. What the app hides past `md`, the Share button above all, has no other cover. Replaying the whole suite there is not an option: the roles that leave a mark on their account would be spent twice and a second checkout would be paid. The Web Share API is the one thing no runner can answer, since the sheet belongs to the operating system, so `navigator.share`, absent from Playwright's WebKit exactly as it is from a desktop browser, is replaced by a recorder in the spec that needs it. What the page hands over is the whole of what the site is responsible for.
+
 **A Premium is only recognised where the subscription is in the query cache.**
 `useMemeExport` reads the cache and never fetches: an Export from a route that did not load the subscription sells Premium to someone who already bought it, and hands them a watermarked video. The `_default` layout loads it for everything under it, and any route outside that layout, `/reels` first, has to load it itself.
 

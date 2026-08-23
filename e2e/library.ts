@@ -23,3 +23,9 @@ export const getMemeTitleLinks = (page: Page) => {
     .getByRole('list', { name: m.meme_list_label(), exact: true })
     .getByRole('link')
 }
+
+export const getReels = (page: Page) => {
+  return page
+    .getByRole('feed', { name: m.meme_video_feed() })
+    .getByRole('article')
+}

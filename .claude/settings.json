@@ -3,18 +3,5 @@
     "context7@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true,
     "chrome-devtools-mcp@chrome-devtools-plugins": true
-  },
-  "hooks": {
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "afplay -v 0.1 .claude/sounds/finish.mp3 &",
-            "timeout": 10
-          }
-        ]
-      }
-    ]
   }
 }

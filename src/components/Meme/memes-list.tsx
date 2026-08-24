@@ -1,5 +1,4 @@
 import React from 'react'
-import { useHotkeys } from 'react-hotkeys-hook'
 import { AnimatePresence } from 'motion/react'
 import { useRouteContext } from '@tanstack/react-router'
 import { MemeListItem } from '~/components/Meme/meme-list-item'
@@ -52,35 +51,6 @@ export const MemesList = ({
     // oxlint-disable-next-line react/exhaustive-deps
   }, [memeIdsKey, authenticatedUserToken])
 
-  useHotkeys(
-    'escape',
-    () => {
-      return setSelectedId(null)
-    },
-    {
-      enabled: selectedId !== null
-    },
-    [selectedId]
-  )
-
-  React.useEffect(() => {
-    if (!selectedId) {
-      return () => {}
-    }
-
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type === 'escapeKey') {
-        setSelectedId(null)
-      }
-    }
-
-    window.addEventListener('message', handleMessage, false)
-
-    return () => {
-      window.removeEventListener('message', handleMessage, false)
-    }
-  }, [selectedId])
-
   if (memes.length === 0) {
     return <p className="text-muted-foreground">{m.common_no_results()}</p>
   }
@@ -91,9 +61,9 @@ export const MemesList = ({
   }
 
   const handleDeselect = () => {
-    setSelectedId(null)
     triggerRef.current?.focus()
     triggerRef.current = null
+    setSelectedId(null)
   }
 
   const selectedMeme = memes.find((meme) => {

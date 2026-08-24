@@ -54,7 +54,7 @@ test.describe('a User who reached the free cap', () => {
 
     await repeatUntilVisible(() => {
       return addButton.click()
-    }, page.getByText(m.error_bookmark_update()))
+    }, page.getByText(m.error_bookmark_limit()))
 
     await expect(addButton).toBeVisible()
   })

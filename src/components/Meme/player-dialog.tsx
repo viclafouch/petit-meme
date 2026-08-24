@@ -8,6 +8,7 @@ import { Link, useLinkProps } from '@tanstack/react-router'
 import { MemeVideoPlayer } from '~/components/Meme/meme-video-player'
 import { Button, buttonVariants } from '~/components/ui/button'
 import type { MemeWithVideo } from '~/constants/meme'
+import { useInertBackground } from '~/hooks/use-inert-background'
 import { useMemeExport } from '~/hooks/use-meme-export'
 import { useMemeHls } from '~/hooks/use-meme-hls'
 import { useRegisterMemeView } from '~/hooks/use-register-meme-view'
@@ -26,6 +27,10 @@ type PlayerDialogParams = {
   authenticatedUserToken?: string
 }
 
+const handleUnmountAutoFocus = (event: Event) => {
+  event.preventDefault()
+}
+
 export const PlayerDialog = ({
   meme,
   layoutContext,
@@ -34,6 +39,7 @@ export const PlayerDialog = ({
   authenticatedUserToken
 }: PlayerDialogParams) => {
   const { videoRef } = useMemeHls({ bunnyId: meme.video.bunnyId })
+  const { dialogRef, letFocusLeave } = useInertBackground()
   const isReducedMotion = useReducedMotion()
   const shareMutation = useMemeExport({ mode: 'share' })
   const downloadMutation = useMemeExport({ mode: 'download' })
@@ -82,6 +88,7 @@ export const PlayerDialog = ({
 
   const handleClose = () => {
     pauseVideo()
+    letFocusLeave()
     onClose()
   }
 
@@ -139,7 +146,12 @@ export const PlayerDialog = ({
   }
 
   return (
-    <FocusScope trapped loop>
+    <FocusScope
+      ref={dialogRef}
+      trapped
+      loop
+      onUnmountAutoFocus={handleUnmountAutoFocus}
+    >
       <div
         className="fixed inset-0 flex items-center justify-center z-50 overflow-hidden dark"
         role="dialog"

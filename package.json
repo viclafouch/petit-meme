@@ -72,6 +72,7 @@
     "@tanstack/react-table": "^9.1.2",
     "@tanstack/react-virtual": "^3.14.8",
     "@vercel/functions": "^3.7.6",
+    "aria-hidden": "^1.2.6",
     "better-auth": "^1.6.25",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",

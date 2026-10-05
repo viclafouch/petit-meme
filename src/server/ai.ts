@@ -1,5 +1,4 @@
-import zodToJsonSchema from 'zod-to-json-schema'
-import { z } from 'zod/v3'
+import { z } from 'zod'
 import {
   createPartFromUri,
   createUserContent,
@@ -63,7 +62,7 @@ async function waitForFileActive(fileName: string) {
   )
 }
 
-function buildLocalizedResponseSchema<T extends z.ZodTypeAny>(
+function buildLocalizedResponseSchema<T extends z.ZodType>(
   targetLocales: readonly Locale[],
   itemSchema: T
 ) {
@@ -269,7 +268,9 @@ export const translateMemeContent = createServerFn({ method: 'POST' })
           contents: prompt,
           config: {
             responseMimeType: 'application/json',
-            responseJsonSchema: zodToJsonSchema(responseSchema)
+            responseJsonSchema: z.toJSONSchema(responseSchema, {
+              target: 'draft-07'
+            })
           }
         }),
         GEMINI_TIMEOUT_MS,
@@ -305,7 +306,7 @@ export const aiAssistMemeContent = createServerFn({ method: 'POST' })
   .validator((data) => {
     return z
       .object({
-        memeId: z.string().cuid(),
+        memeId: z.string(),
         customPrompt: z.string().max(500),
         targetLocale: z.enum(locales)
       })
@@ -331,7 +332,9 @@ export const aiAssistMemeContent = createServerFn({ method: 'POST' })
           contents: userContent,
           config: {
             responseMimeType: 'application/json',
-            responseJsonSchema: zodToJsonSchema(aiAssistResultSchema)
+            responseJsonSchema: z.toJSONSchema(aiAssistResultSchema, {
+              target: 'draft-07'
+            })
           }
         }),
         GEMINI_TIMEOUT_MS,

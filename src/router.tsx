@@ -116,7 +116,6 @@ export function getRouter() {
   return router
 }
 
-// oxfmt-ignore
 declare module '@tanstack/react-router' {
   // oxlint-disable-next-line consistent-type-definitions -- TS module augmentation requires interface
   interface Register {

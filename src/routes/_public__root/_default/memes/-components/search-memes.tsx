@@ -1,7 +1,7 @@
 import React from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import type { FallbackProps } from 'react-error-boundary'
-import { AlertTriangleIcon, RefreshCw } from 'lucide-react'
+import { TriangleAlertIcon, RefreshCw } from 'lucide-react'
 import {
   QueryErrorResetBoundary,
   useSuspenseQuery
@@ -118,7 +118,7 @@ const MemesListErrorFallback = ({
       role="alert"
       className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed p-12"
     >
-      <AlertTriangleIcon
+      <TriangleAlertIcon
         className="size-6 text-muted-foreground"
         aria-hidden="true"
       />

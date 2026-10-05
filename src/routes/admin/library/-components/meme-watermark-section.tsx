@@ -1,8 +1,8 @@
 import {
-  AlertTriangle,
-  CheckCircle,
+  TriangleAlert,
+  CircleCheckBig,
   Eye,
-  Loader2,
+  LoaderCircle,
   RefreshCw,
   Upload
 } from 'lucide-react'
@@ -35,7 +35,7 @@ const WatermarkStatusBadge = ({
   if (isChecking) {
     return (
       <Badge variant="secondary">
-        <Loader2 className="animate-spin" aria-hidden />
+        <LoaderCircle className="animate-spin" aria-hidden />
         Vérification...
       </Badge>
     )
@@ -44,7 +44,7 @@ const WatermarkStatusBadge = ({
   if (watermarkExists) {
     return (
       <Badge variant="default">
-        <CheckCircle aria-hidden />
+        <CircleCheckBig aria-hidden />
         Prêt
       </Badge>
     )
@@ -52,7 +52,7 @@ const WatermarkStatusBadge = ({
 
   return (
     <Badge variant="warning">
-      <AlertTriangle aria-hidden />
+      <TriangleAlert aria-hidden />
       Manquant
     </Badge>
   )
@@ -70,7 +70,7 @@ const GenerateButtonContent = ({
   if (isGenerating) {
     return (
       <>
-        <Loader2 className="animate-spin" aria-hidden />
+        <LoaderCircle className="animate-spin" aria-hidden />
         Génération...
       </>
     )
@@ -146,7 +146,7 @@ const WatermarkPreviewDialog = ({
             >
               {isUploading ? (
                 <>
-                  <Loader2 className="animate-spin" aria-hidden />
+                  <LoaderCircle className="animate-spin" aria-hidden />
                   Upload...
                 </>
               ) : (
@@ -217,7 +217,7 @@ export const MemeWatermarkSection = ({
               }}
             >
               {isFetchingExisting ? (
-                <Loader2 className="animate-spin" aria-hidden />
+                <LoaderCircle className="animate-spin" aria-hidden />
               ) : (
                 <Eye aria-hidden />
               )}

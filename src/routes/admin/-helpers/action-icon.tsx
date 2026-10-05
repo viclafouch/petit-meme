@@ -1,11 +1,11 @@
 import React from 'react'
 import {
   Ban,
-  Edit,
+  SquarePen,
   FilePlus,
   RefreshCw,
   ShieldOff,
-  Trash2,
+  Trash,
   Upload
 } from 'lucide-react'
 import type { AuditAction } from '~/server/audit'
@@ -17,11 +17,11 @@ export function getActionIcon(action: AuditAction) {
     }
 
     case 'edit': {
-      return <Edit className="size-4" aria-hidden />
+      return <SquarePen className="size-4" aria-hidden />
     }
 
     case 'delete': {
-      return <Trash2 className="size-4" aria-hidden />
+      return <Trash className="size-4" aria-hidden />
     }
 
     case 'ban': {
@@ -41,7 +41,7 @@ export function getActionIcon(action: AuditAction) {
     }
 
     default: {
-      return <Edit className="size-4" aria-hidden />
+      return <SquarePen className="size-4" aria-hidden />
     }
   }
 }

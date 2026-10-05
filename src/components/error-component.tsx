@@ -1,5 +1,5 @@
 import React from 'react'
-import { AlertTriangleIcon } from 'lucide-react'
+import { TriangleAlertIcon } from 'lucide-react'
 import * as Sentry from '@sentry/tanstackstart-react'
 import { useQueryErrorResetBoundary } from '@tanstack/react-query'
 import type { ErrorComponentProps } from '@tanstack/react-router'
@@ -34,7 +34,7 @@ export const ErrorComponent = ({
     <div className="mt-8 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <Alert variant="destructive">
-          <AlertTriangleIcon className="size-4" />
+          <TriangleAlertIcon className="size-4" />
           <AlertTitle>{m.error_title()}</AlertTitle>
           <AlertDescription>{m.error_description()}</AlertDescription>
         </Alert>

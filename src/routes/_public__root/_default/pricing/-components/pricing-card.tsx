@@ -1,5 +1,5 @@
 import type React from 'react'
-import { CheckCircle2, MinusCircle, XCircle } from 'lucide-react'
+import { CircleCheck, CircleMinus, CircleX } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import NumberFlow from '@number-flow/react'
 import { Button } from '~/components/ui/button'
@@ -28,9 +28,9 @@ type FeatureStatusStaticConfig = {
 }
 
 const FEATURE_STATUS_STATIC_CONFIG = {
-  included: { icon: CheckCircle2, className: 'text-success-foreground' },
-  limited: { icon: MinusCircle, className: 'text-warning-foreground' },
-  not_included: { icon: XCircle, className: 'text-destructive' }
+  included: { icon: CircleCheck, className: 'text-success-foreground' },
+  limited: { icon: CircleMinus, className: 'text-warning-foreground' },
+  not_included: { icon: CircleX, className: 'text-destructive' }
 } as const satisfies Record<
   Plan['features'][number]['status'],
   FeatureStatusStaticConfig

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Activity, Hash, Search, XCircle } from 'lucide-react'
+import { Activity, Hash, Search, CircleX } from 'lucide-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { FLAG_ICON_CLASS, LOCALE_FLAGS } from '~/components/icon/flags'
@@ -136,7 +136,7 @@ const RouteComponent = () => {
           <StatCard
             label="0 résultat"
             value={logsQuery.data.stats.zeroResultCount}
-            icon={<XCircle className="size-5" aria-hidden="true" />}
+            icon={<CircleX className="size-5" aria-hidden="true" />}
           />
         </div>
         <AdminTable table={table} caption="Logs de recherche IA" />

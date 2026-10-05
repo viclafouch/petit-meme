@@ -213,9 +213,13 @@ export const TrendsChart = ({ data, period }: TrendsChartParams) => {
                 content={
                   <ChartTooltipContent
                     className="min-w-48"
-                    labelFormatter={(value) => {
+                    labelFormatter={(label) => {
+                      if (typeof label !== 'string') {
+                        return label
+                      }
+
                       return formatDate(
-                        new Date(String(value)),
+                        new Date(label),
                         locale,
                         DATE_LONG_OPTIONS
                       )

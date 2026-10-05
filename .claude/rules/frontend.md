@@ -31,6 +31,7 @@ paths: ["src/**/*.{ts,tsx}"]
 - Use `mutation.isPending`, `mutation.isError`, `mutation.error` - never `useState` for loading/error
 - Always display `mutation.error` with `getErrorMessage()` helper
 - Name: `*Mutation` suffix
+- **A middleware refuses by throwing an `Error`, never a `Response`**. `executeMiddleware` catches every throw into `{ ...ctx, error }`. A `Response` there is flagged `X-TSS-Raw-Response` and handed back to the client as a resolved value, so the mutation succeeds silently and `onError` never fires. An `Error` travels in the serialized envelope, which the client chain unwraps with `if (result.error) throw result.error`. Set the status and the headers with `setResponseStatus` and `setResponseHeader` before the throw.
 
 ### Execution Boundaries (TanStack Start)
 - **`createServerOnlyFn`** for utility functions accessing DB, env vars, or server-only APIs - crashes if called from client

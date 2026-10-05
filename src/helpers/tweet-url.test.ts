@@ -35,30 +35,24 @@ const URLS_WITHOUT_TWEET_ID = [
 describe('extractTweetIdFromUrl', () => {
   describe('given a URL that carries a tweet ID', () => {
     it.each(URLS_WITH_TWEET_ID)('should extract it from %s', (url) => {
-      // #when
       const tweetId = extractTweetIdFromUrl(url)
 
-      // #then
       expect(tweetId).toBe(TWEET_ID)
     })
   })
 
   describe('given a URL that carries no tweet ID', () => {
     it.each(URLS_WITHOUT_TWEET_ID)('should return null for %s', (url) => {
-      // #when
       const tweetId = extractTweetIdFromUrl(url)
 
-      // #then
       expect(tweetId).toBeNull()
     })
   })
 
   describe('given an empty string', () => {
     it('should return null', () => {
-      // #when
       const tweetId = extractTweetIdFromUrl('')
 
-      // #then
       expect(tweetId).toBeNull()
     })
   })

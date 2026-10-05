@@ -205,3 +205,6 @@ The `AiSearchLog` the count reads is written with `waitUntil`, so it lands after
 
 **The rate limit is a soft cap, counted in the memory of one instance.**
 `rate-limit-store` keeps its counters in a `Map` that no other serverless instance sees, so a Visitor whose requests spread over several instances gets past the cap. The window is fixed, not sliding: the first request starts the clock, and the count resets only once the whole window has passed. It is simpler and cheaper than a sliding window, and it allows a burst across the boundary of two windows. Past `MAX_STORE_SIZE` keys the store drops the oldest inserted ones, an active key included. Each of these reads like a gap to close, and each is accepted because the cap is soft.
+
+**The Watermark has one geometry and two filters.**
+`scripts/watermark-videos.ts` burns it with the ffmpeg command line, and the Admin burns it in the browser with ffmpeg.wasm. Both read their figures from `~/constants/watermark`. The width is 21% of the shortest side of the video, so the mark stays visible on a portrait 9:16 Meme. The margin is 3% of that side, capped at 20 pixels so a large video keeps the mark close to its corner. The command line filter measures the video through the `rw` and `rh` variables of `scale`, so the script needs ffmpeg 8 or later. The browser filter computes the same figures in JavaScript.

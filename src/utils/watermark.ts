@@ -10,7 +10,7 @@ import {
   FFMPEG_ENCODING_ARGS,
   FFMPEG_INPUT_FILE,
   FFMPEG_WATERMARK_FILE,
-  readFFmpegOutput
+  readAndDeleteFFmpegOutput
 } from '~/utils/ffmpeg'
 
 type ApplyWatermarkParams = {
@@ -147,7 +147,7 @@ export const applyWatermark = async ({
       )
     }
 
-    return await readFFmpegOutput(ffmpeg)
+    return await readAndDeleteFFmpegOutput(ffmpeg)
   } finally {
     ffmpeg.off('log', handleLog)
     await Promise.all([

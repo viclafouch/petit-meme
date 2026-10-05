@@ -239,9 +239,10 @@ export const Route = createFileRoute('/admin/submissions/')({
     return { submissionStatus: search.submissionStatus }
   },
   loader: async ({ deps, context }) => {
-    await context.queryClient.ensureQueryData(
-      getAdminSubmissionsQueryOpts(deps.submissionStatus)
-    )
+    await context.queryClient.query({
+      ...getAdminSubmissionsQueryOpts(deps.submissionStatus),
+      staleTime: 'static'
+    })
 
     return {
       crumb: 'Soumissions'

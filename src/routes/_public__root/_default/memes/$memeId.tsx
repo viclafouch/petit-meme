@@ -312,9 +312,10 @@ export const Route = createFileRoute('/_public__root/_default/memes/$memeId')({
   component: RouteComponent,
   pendingMs: 1000,
   loader: async ({ params, context }) => {
-    const meme = await context.queryClient.ensureQueryData(
-      getMemeByIdQueryOpts(params.memeId)
-    )
+    const meme = await context.queryClient.query({
+      ...getMemeByIdQueryOpts(params.memeId),
+      staleTime: 'static'
+    })
 
     const originalUrl = buildVideoOriginalUrl(meme.video.bunnyId)
 

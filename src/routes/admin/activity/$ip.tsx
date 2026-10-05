@@ -161,9 +161,10 @@ export const Route = createFileRoute('/admin/activity/$ip')({
   component: RouteComponent,
   validateSearch: ACTIVITY_PAGE_SCHEMA,
   loader: async ({ params, context }) => {
-    await context.queryClient.ensureQueryData(
-      getAdminVisitorDetailQueryOpts(params.ip)
-    )
+    await context.queryClient.query({
+      ...getAdminVisitorDetailQueryOpts(params.ip),
+      staleTime: 'static'
+    })
 
     return { crumb: params.ip }
   },

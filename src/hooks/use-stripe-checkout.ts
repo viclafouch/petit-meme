@@ -52,7 +52,7 @@ export const useStripeCheckout = () => {
       const promise = new Promise((resolve) => {
         setTimeout(resolve, 1)
       }).then(async () => {
-        const activeSubscription = await queryClient.fetchQuery(
+        const activeSubscription = await queryClient.query(
           getActiveSubscriptionQueryOpts()
         )
 

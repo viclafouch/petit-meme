@@ -150,9 +150,10 @@ export const Route = createFileRoute('/admin/users/$userId')({
   component: RouteComponent,
   validateSearch: ACTIVITY_PAGE_SCHEMA,
   loader: async ({ params, context }) => {
-    const detail = await context.queryClient.ensureQueryData(
-      getAdminUserDetailQueryOpts(params.userId)
-    )
+    const detail = await context.queryClient.query({
+      ...getAdminUserDetailQueryOpts(params.userId),
+      staleTime: 'static'
+    })
 
     return { crumb: detail.user.name }
   },

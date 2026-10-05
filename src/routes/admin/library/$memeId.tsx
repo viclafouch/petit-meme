@@ -100,9 +100,10 @@ const RouteComponent = () => {
 export const Route = createFileRoute('/admin/library/$memeId')({
   component: RouteComponent,
   loader: async ({ params, context }) => {
-    const meme = await context.queryClient.ensureQueryData(
-      getAdminMemeByIdQueryOpts(params.memeId)
-    )
+    const meme = await context.queryClient.query({
+      ...getAdminMemeByIdQueryOpts(params.memeId),
+      staleTime: 'static'
+    })
 
     return { meme }
   },

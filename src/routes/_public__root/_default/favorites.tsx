@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { noop, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { MemesList } from '~/components/Meme/memes-list'
 import { getFavoritesMemesQueryOpts } from '~/lib/queries'
@@ -43,6 +43,11 @@ export const Route = createFileRoute('/_public__root/_default/favorites')({
     }
   },
   loader: async ({ context }) => {
-    void context.queryClient.ensureQueryData(getFavoritesMemesQueryOpts())
+    void context.queryClient
+      .query({
+        ...getFavoritesMemesQueryOpts(),
+        staleTime: 'static'
+      })
+      .catch(noop)
   }
 })

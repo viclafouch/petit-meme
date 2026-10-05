@@ -151,7 +151,10 @@ export const Route = createFileRoute('/admin/ai-search/')({
     return { meta: [{ title: 'Admin Petit Meme - Recherche IA' }] }
   },
   loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(getAdminAiSearchLogsQueryOpts())
+    await context.queryClient.query({
+      ...getAdminAiSearchLogsQueryOpts(),
+      staleTime: 'static'
+    })
 
     return { crumb: 'Recherche IA' }
   }

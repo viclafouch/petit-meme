@@ -26,9 +26,10 @@ export const Route = createFileRoute(
       return { category: virtualCategory }
     }
 
-    const categories = await context.queryClient.ensureQueryData(
-      getCategoriesListQueryOpts(getLocale())
-    )
+    const categories = await context.queryClient.query({
+      ...getCategoriesListQueryOpts(getLocale()),
+      staleTime: 'static'
+    })
 
     const category = categories.find((item) => {
       return item.slug === params.slug

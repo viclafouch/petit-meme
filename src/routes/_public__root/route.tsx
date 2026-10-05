@@ -1,4 +1,5 @@
 import React from 'react'
+import { noop } from '@tanstack/react-query'
 import { createFileRoute, Outlet, useMatchRoute } from '@tanstack/react-router'
 import { StarsBackground } from '~/components/animate-ui/backgrounds/stars'
 import { Footer } from '~/components/footer'
@@ -40,7 +41,7 @@ const RouteComponent = () => {
 
 export const Route = createFileRoute('/_public__root')({
   loader: ({ context }) => {
-    void context.queryClient.prefetchQuery(getMemesListQueryOpts({}))
+    void context.queryClient.query(getMemesListQueryOpts({})).catch(noop)
 
     return {
       _localeBannerDismissed: getLocaleBannerDismissed()

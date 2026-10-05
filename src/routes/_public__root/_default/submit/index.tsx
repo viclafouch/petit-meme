@@ -1,5 +1,5 @@
 import { LogIn } from 'lucide-react'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { noop, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, useRouteContext } from '@tanstack/react-router'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
@@ -124,7 +124,12 @@ export const Route = createFileRoute('/_public__root/_default/submit/')({
   },
   loader: ({ context }) => {
     if (context.user) {
-      void context.queryClient.ensureQueryData(getUserSubmissionsQueryOpts())
+      void context.queryClient
+        .query({
+          ...getUserSubmissionsQueryOpts(),
+          staleTime: 'static'
+        })
+        .catch(noop)
     }
   }
 })

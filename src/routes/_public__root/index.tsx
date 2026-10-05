@@ -64,10 +64,19 @@ export const Route = createFileRoute('/_public__root/')({
   },
   loader: async ({ context }) => {
     await Promise.all([
-      context.queryClient.ensureQueryData(getTrendingMemesQueryOpts()),
-      context.queryClient.ensureQueryData(getRecentCountMemesQueryOpts()),
+      context.queryClient.query({
+        ...getTrendingMemesQueryOpts(),
+        staleTime: 'static'
+      }),
+      context.queryClient.query({
+        ...getRecentCountMemesQueryOpts(),
+        staleTime: 'static'
+      }),
       context.user
-        ? context.queryClient.ensureQueryData(getFavoritesMemesQueryOpts())
+        ? context.queryClient.query({
+            ...getFavoritesMemesQueryOpts(),
+            staleTime: 'static'
+          })
         : undefined
     ])
   }

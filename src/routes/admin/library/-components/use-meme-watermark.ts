@@ -61,7 +61,10 @@ export function useMemeWatermark(memeId: Meme['id']) {
 
       try {
         const [videoBlob, watermarkResponse] = await Promise.all([
-          queryClient.ensureQueryData(getAdminVideoBlobQueryOpts(memeId)),
+          queryClient.query({
+            ...getAdminVideoBlobQueryOpts(memeId),
+            staleTime: 'static'
+          }),
           fetch(WATERMARK_ASSET_PATH)
         ])
 

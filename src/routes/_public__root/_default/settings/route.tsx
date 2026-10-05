@@ -12,9 +12,10 @@ export const Route = createFileRoute('/_public__root/_default/settings')({
       throw redirect({ to: '/' })
     }
 
-    const activeSubscription = await context.queryClient.ensureQueryData(
-      getActiveSubscriptionQueryOpts()
-    )
+    const activeSubscription = await context.queryClient.query({
+      ...getActiveSubscriptionQueryOpts(),
+      staleTime: 'static'
+    })
 
     return { user: context.user, activeSubscription }
   }

@@ -296,7 +296,10 @@ export const useVideoPreloader = (ffmpeg: FFmpeg, memeId: string) => {
       const defaultFont = resolveFont('arial')
 
       const [videoBlob] = await Promise.all([
-        queryClient.ensureQueryData(getVideoBlobQueryOpts(memeId)),
+        queryClient.query({
+          ...getVideoBlobQueryOpts(memeId),
+          staleTime: 'static'
+        }),
         ensureFontFile(ffmpeg, defaultFont)
       ])
 
@@ -350,9 +353,10 @@ export const useVideoProcessor = (
       ffmpeg.on('progress', handleProgress)
     },
     mutationFn: async ({ meme, ...processingOptions }: ProcessVideoParams) => {
-      const videoBlob = await queryClient.ensureQueryData(
-        getVideoBlobQueryOpts(meme.id)
-      )
+      const videoBlob = await queryClient.query({
+        ...getVideoBlobQueryOpts(meme.id),
+        staleTime: 'static'
+      })
       const blob = await addTextToVideo(ffmpeg, {
         videoBlob,
         memeId: meme.id,

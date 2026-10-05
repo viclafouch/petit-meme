@@ -42,9 +42,10 @@ export const Route = createFileRoute('/_studio/memes/$memeId/studio')({
   pendingComponent: StudioLoadingFallback,
   ssr: 'data-only',
   loader: async ({ params, context }) => {
-    const meme = await context.queryClient.ensureQueryData(
-      getMemeByIdQueryOpts(params.memeId)
-    )
+    const meme = await context.queryClient.query({
+      ...getMemeByIdQueryOpts(params.memeId),
+      staleTime: 'static'
+    })
 
     const relatedMemesPromise = getRelatedMemes({
       data: { memeId: meme.id, title: meme.title }

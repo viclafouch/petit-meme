@@ -1,3 +1,4 @@
+import { noop } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { DefaultLoading } from '~/components/default-loading'
 import { MemeReels } from '~/components/Meme/meme-reels'
@@ -40,11 +41,17 @@ export const Route = createFileRoute('/reels')({
   },
   loader: async ({ context }) => {
     if (context.user) {
-      void context.queryClient.ensureQueryData(getActiveSubscriptionQueryOpts())
+      void context.queryClient
+        .query({
+          ...getActiveSubscriptionQueryOpts(),
+          staleTime: 'static'
+        })
+        .catch(noop)
     }
 
-    await context.queryClient.ensureInfiniteQueryData(
-      getInfiniteReelsQueryOpts()
-    )
+    await context.queryClient.infiniteQuery({
+      ...getInfiniteReelsQueryOpts(),
+      staleTime: 'static'
+    })
   }
 })

@@ -45,10 +45,6 @@ test('a word typed in the search field narrows the library to what matches', asy
     name: m.meme_search_placeholder()
   })
 
-  // The searched Meme is the second most viewed, so the unfiltered page already
-  // carries it and waiting for it proves nothing. The query reaching the URL is
-  // what says the word was typed into a live page, and the field is emptied
-  // first so that a repeat has a change to fire.
   await repeatUntilNavigated(
     async () => {
       await searchField.clear()

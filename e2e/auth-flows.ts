@@ -8,8 +8,6 @@ import { m } from './messages'
 export const openAuthDialog = async (page: Page) => {
   const dialog = page.getByRole('dialog')
 
-  // Scoped to the header: once the dialog is open, its own submit button
-  // carries the same name.
   await repeatUntilVisible(async () => {
     await page
       .getByRole('banner')
@@ -20,8 +18,6 @@ export const openAuthDialog = async (page: Page) => {
   return dialog
 }
 
-// The dialog keeps both panels mounted to animate its height, so the sign in
-// button has to be looked for inside the active panel.
 export const getAuthDialogSignInButton = (page: Page) => {
   return page
     .getByRole('dialog')

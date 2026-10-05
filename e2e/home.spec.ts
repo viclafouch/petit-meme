@@ -43,8 +43,6 @@ test('the announcement counts what was published lately and leads to it', async 
 }) => {
   await page.goto('/')
 
-  // `exact` carries the whole assertion. A name is compared by substring by
-  // default, so a count of fifty three would answer for a count of three.
   const announcement = page.getByRole('link', {
     name: m.home_hero_announcement({ count: String(E2E_RECENT_MEMES.length) }),
     exact: true

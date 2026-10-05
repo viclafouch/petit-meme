@@ -7,8 +7,6 @@ import { m } from './messages'
 const STUDIO_MEME = E2E_NAMED_MEMES.mostViewed
 const STUDIO_PATHNAME = `/memes/${STUDIO_MEME.id}/studio`
 
-// `studio_text_label` is « Texte », a substring of the « Texte à ajouter sur la
-// vidéo » the phone bar puts on its own input.
 const getCaptionInput = (page: Page) => {
   return page.getByLabel(m.studio_text_label(), { exact: true })
 }

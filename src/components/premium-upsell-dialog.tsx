@@ -1,4 +1,4 @@
-import { CheckCircle2, Sparkles } from 'lucide-react'
+import { CircleCheck, Sparkles } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import type { WithDialog } from '~/@types/dialog'
 import {
@@ -64,7 +64,7 @@ export const PremiumUpsellDialog = ({
             {premiumPlan.features.map((feature) => {
               return (
                 <li key={feature.label} className="flex items-center gap-2.5">
-                  <CheckCircle2
+                  <CircleCheck
                     size={16}
                     className="text-success-foreground shrink-0"
                     aria-hidden="true"

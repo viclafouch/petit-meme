@@ -1,5 +1,5 @@
 import React from 'react'
-import { Stars } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 import { useMutation } from '@tanstack/react-query'
 import { Button } from '~/components/ui/button'
@@ -182,7 +182,7 @@ export const AiAssistDialog = ({
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Stars className="size-5" aria-hidden />
+            <Sparkles className="size-5" aria-hidden />
             AI Assist
           </DialogTitle>
           <DialogDescription>
@@ -224,7 +224,7 @@ export const AiAssistDialog = ({
                   analysisMutation.mutate()
                 }}
               >
-                <Stars aria-hidden />
+                <Sparkles aria-hidden />
                 Analyser
               </LoadingButton>
             </div>

@@ -1,4 +1,4 @@
-import { Clock, Crown, FileVideo, Users } from 'lucide-react'
+import { Clock, Crown, FilePlay, Users } from 'lucide-react'
 import { StatTiles } from '~/routes/admin/-components/stat-tiles'
 import type { DashboardTotals } from '~/routes/admin/-server/dashboard'
 import type { IconConfig } from './types'
@@ -7,7 +7,7 @@ const TOTAL_CONFIGS = [
   {
     key: 'publishedMemes',
     label: 'Memes publiés',
-    icon: <FileVideo className="size-4" aria-hidden />
+    icon: <FilePlay className="size-4" aria-hidden />
   },
   {
     key: 'pendingMemes',

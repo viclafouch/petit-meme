@@ -4,7 +4,7 @@ import {
   EllipsisVertical,
   ExternalLink,
   Eye,
-  Trash2,
+  Trash,
   X
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -209,7 +209,7 @@ export const SubmissionActionsCell = ({
               setActiveDialog('delete')
             }}
           >
-            <Trash2 className="size-4" aria-hidden="true" />
+            <Trash className="size-4" aria-hidden="true" />
             Supprimer
           </DropdownMenuItem>
         </DropdownMenuContent>

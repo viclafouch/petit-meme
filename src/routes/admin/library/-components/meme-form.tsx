@@ -1,5 +1,5 @@
 import React from 'react'
-import { Stars } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
 import { FormFooter } from '~/components/form-footer'
 import { CONTENT_LOCALE_FLAGS, FLAG_ICON_CLASS } from '~/components/icon/flags'
 import { Button } from '~/components/ui/button'
@@ -110,7 +110,7 @@ export const MemeForm = ({ meme, onSuccess }: MemeFormParams) => {
                       setIsAiAssistOpen(true)
                     }}
                   >
-                    <Stars aria-hidden />
+                    <Sparkles aria-hidden />
                     AI Assist
                   </Button>
                 </div>

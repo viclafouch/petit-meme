@@ -6,7 +6,7 @@ import {
   Share2,
   Sparkles,
   UserPlus,
-  Wand2
+  WandSparkles
 } from 'lucide-react'
 import { z } from 'zod'
 import { ActivityEventType } from '~/db/generated/prisma/enums'
@@ -42,7 +42,7 @@ export const ACTIVITY_TYPE_DISPLAY = {
   [ActivityEventType.GENERATION]: {
     label: 'Génération',
     pluralLabel: 'Générations',
-    icon: Wand2
+    icon: WandSparkles
   },
   [ActivityEventType.AI_SEARCH]: {
     label: 'Recherche IA',

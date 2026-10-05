@@ -1,6 +1,6 @@
 import React from 'react'
 import type { User } from 'better-auth'
-import { CreditCard, Download, Key, Stars, Trash2 } from 'lucide-react'
+import { CreditCard, Download, Key, Sparkles, Trash } from 'lucide-react'
 import { toast } from 'sonner'
 import { useMutation } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
@@ -142,7 +142,7 @@ export const ProfileContent = ({
                   className="border-amber-400/30 bg-amber-400/15 text-amber-400 hover:bg-amber-400/25"
                 >
                   <Link to="/pricing">
-                    <Stars />
+                    <Sparkles />
                     {m.nav_upgrade_premium()}
                   </Link>
                 </Button>
@@ -219,7 +219,7 @@ export const ProfileContent = ({
                   setIsDeleteAccountOpened(true)
                 }}
               >
-                <Trash2 />
+                <Trash />
                 {m.settings_delete_account()}
               </Button>
             </div>

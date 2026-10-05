@@ -1,7 +1,7 @@
 import React from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import type { FallbackProps } from 'react-error-boundary'
-import { AlertTriangle, ArrowRight, RefreshCw } from 'lucide-react'
+import { TriangleAlert, ArrowRight, RefreshCw } from 'lucide-react'
 import { z } from 'zod'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
@@ -38,7 +38,7 @@ const SectionErrorFallback = ({
 }: Pick<FallbackProps, 'resetErrorBoundary'>) => {
   return (
     <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed p-6">
-      <AlertTriangle className="size-5 text-muted-foreground" aria-hidden />
+      <TriangleAlert className="size-5 text-muted-foreground" aria-hidden />
       <p className="text-sm text-muted-foreground">
         Impossible de charger les données
       </p>

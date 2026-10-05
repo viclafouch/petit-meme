@@ -6,7 +6,7 @@ import {
   MessageSquarePlus,
   SparklesIcon,
   SquareLibrary,
-  Users2,
+  UsersRound,
   Video
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
@@ -107,7 +107,7 @@ export const AdminSidebar = ({
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <Link to="/admin/users">
-                    <Users2 />
+                    <UsersRound />
                     <span>Utilisateurs</span>
                   </Link>
                 </SidebarMenuButton>

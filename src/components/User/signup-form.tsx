@@ -1,4 +1,4 @@
-import { CheckCircle, CircleAlert } from 'lucide-react'
+import { CircleCheckBig, CircleAlert } from 'lucide-react'
 import { z } from 'zod'
 import { formOptions, useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
@@ -58,7 +58,7 @@ const getSignupFormOpts = () => {
 const SignupSuccessAlert = () => {
   return (
     <Alert variant="success" className="mt-4">
-      <CheckCircle aria-hidden="true" />
+      <CircleCheckBig aria-hidden="true" />
       <AlertTitle>{m.auth_signup_success_title()}</AlertTitle>
       <AlertDescription>{m.auth_signup_success_description()}</AlertDescription>
     </Alert>

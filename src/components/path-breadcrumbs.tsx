@@ -1,5 +1,5 @@
 import React from 'react'
-import { Home } from 'lucide-react'
+import { House } from 'lucide-react'
 import { isMatch, Link, useMatches } from '@tanstack/react-router'
 import {
   Breadcrumb,
@@ -35,7 +35,7 @@ export const PathBreadcrumbs = () => {
         <BreadcrumbItem className="shrink-0">
           <BreadcrumbLink asChild>
             <Link to="/admin">
-              <Home className="size-4" />
+              <House className="size-4" />
             </Link>
           </BreadcrumbLink>
         </BreadcrumbItem>

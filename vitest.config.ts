@@ -5,7 +5,6 @@ export default defineConfig({
     tsconfigPaths: true
   },
   test: {
-    // Scoped to `src` so build outputs (`.output`, `.vercel`) are never scanned.
     include: ['src/**/*.test.ts']
   }
 })

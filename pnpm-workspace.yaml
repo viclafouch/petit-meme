@@ -1,6 +1,7 @@
 trustPolicy: no-downgrade
 trustPolicyExclude:
   - 'chokidar'
+  - 'semver@6.3.1'
 
 strictDepBuilds: true
 allowBuilds:

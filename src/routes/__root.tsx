@@ -174,7 +174,7 @@ const RootErrorComponent = ({ error, reset }: ErrorComponentProps) => {
               {m.error_back_to_site()}
             </a>
           </div>
-          {!IS_PRODUCTION ? (
+          {!IS_PRODUCTION && Error.isError(error) ? (
             <pre
               style={{
                 marginTop: '2rem',

@@ -113,6 +113,13 @@ export default defineConfig(({ mode }) => {
         // native addon at runtime. Negating the condition keeps both on native.
         exportConditions: ['!unwasm'],
         traceDeps: ['takumi-js', '@takumi-rs/core'],
+        rolldownConfig: {
+          onLog: (level, log, handler) => {
+            if (log.code !== 'MODULE_LEVEL_DIRECTIVE') {
+              handler(level, log)
+            }
+          }
+        },
         vercel: {},
         routeRules: {
           '/**': {

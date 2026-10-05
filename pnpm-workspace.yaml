@@ -3,6 +3,10 @@ trustPolicyExclude:
   - 'chokidar'
   - 'semver@6.3.1'
   - 'prisma@7.10.0'
+  - '@vercel/functions@3.9.11'
+  - '@vercel/oidc@4.0.0'
+  - '@vercel/cli-config@0.3.1'
+  - '@vercel/cli-exec@1.0.1'
 
 blockExoticSubdeps: true
 strictPeerDependencies: true

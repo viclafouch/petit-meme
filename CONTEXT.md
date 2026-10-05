@@ -167,6 +167,9 @@ A file in `public/avatars/` is never deleted nor renamed. A User picked a rank, 
 **`/avatars/**` is served with a one week `max-age`, never as `immutable`.**
 This is deliberate. A style change rewrites the same 24 files under the same names, and `immutable` would freeze the old drawing for up to a year on visitors' devices. Accepted trade off: a change takes up to seven days to propagate.
 
+**The `@vercel/*` entries of `trustPolicyExclude` name exact versions, and they are temporary.**
+`trustPolicy: no-downgrade` rejects a version that carries weaker trust evidence than the versions before it. Vercel now publishes its packages through a trusted publisher without a provenance attestation, and pnpm counts a trusted publisher only with one, so `@vercel/functions` and the packages it pulls in read as a possible takeover on every install. Each entry names one exact version, so no other version gets past the policy. Every upgrade of `@vercel/functions` needs its new versions listed the same way until Vercel publishes with provenance again, and the entries go as soon as it does.
+
 **`NODE_ENV` says how the code was built, never where it runs.**
 A preview deployment is a production build, so `NODE_ENV` cannot tell it from the live site. Anything that must behave differently there, error reporting, rate limiting, secure cookies, reads the deployment environment instead. `NODE_ENV` remains the right question for everything else.
 

@@ -1,5 +1,6 @@
 import React from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
+import type { FallbackProps } from 'react-error-boundary'
 import { AlertTriangleIcon, RefreshCw } from 'lucide-react'
 import {
   QueryErrorResetBoundary,
@@ -111,9 +112,7 @@ const MemesListWrapper = ({ columnGridCount }: { columnGridCount: number }) => {
 
 const MemesListErrorFallback = ({
   resetErrorBoundary
-}: {
-  resetErrorBoundary: () => void
-}) => {
+}: Pick<FallbackProps, 'resetErrorBoundary'>) => {
   return (
     <div
       role="alert"

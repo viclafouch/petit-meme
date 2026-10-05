@@ -14,6 +14,7 @@ import type {
   VideoObject,
   WebPage,
   WebSite,
+  WithActionConstraints,
   WithContext
 } from 'schema-dts'
 import type { AnyRouteMatch } from '@tanstack/react-router'
@@ -41,6 +42,15 @@ import type { Locale } from '~/paraglide/runtime'
 
 export const websiteOrigin = clientEnv.VITE_SITE_URL
 const websiteId = `${websiteOrigin}/#website`
+
+const websiteSearchAction = {
+  '@type': 'SearchAction',
+  target: {
+    '@type': 'EntryPoint',
+    urlTemplate: `${websiteOrigin}/memes?query={search_term_string}`
+  },
+  'query-input': 'required name=search_term_string'
+} satisfies WithActionConstraints<SearchAction>
 
 const OG_VERSION = 2
 
@@ -394,10 +404,6 @@ export const buildCategoryJsonLd = (
   }
 }
 
-type QueryAction = SearchAction & {
-  'query-input': string
-}
-
 type BuildFaqPageJsonLdParams = {
   faqItems: readonly FaqItem[]
   pageUrl: string
@@ -439,15 +445,7 @@ export const buildHomeJsonLd = ({
         url: websiteOrigin,
         name: SITE_NAME,
         publisher: { '@id': `${websiteOrigin}/#organization` },
-        // oxlint-disable-next-line typescript/consistent-type-assertions -- query-input not in SearchAction type
-        potentialAction: {
-          '@type': 'SearchAction',
-          target: {
-            '@type': 'EntryPoint',
-            urlTemplate: `${websiteOrigin}/memes?query={search_term_string}`
-          },
-          'query-input': 'required name=search_term_string'
-        } as QueryAction
+        potentialAction: websiteSearchAction
       } satisfies WebSite,
       {
         '@type': 'Organization',

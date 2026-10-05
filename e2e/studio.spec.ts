@@ -18,12 +18,6 @@ const getGenerateButton = (page: Page) => {
 test.describe('a free User', () => {
   test.use({ storageState: resolveStorageStatePath('free') })
 
-  // Nothing stands between a free User and a generation. The plan announced a
-  // Premium gate and a free cap of three here, and the code has neither: the
-  // Studio serves everyone the watermarked source, and `checkGeneration`, the
-  // server function that would refuse a fourth generation, is called from
-  // nowhere. Where the Export meets a dialog that sells Premium, this surface
-  // meets nothing at all.
   test('reaches the Studio with nothing in the way', async ({ page }) => {
     await page.goto(STUDIO_PATHNAME)
 

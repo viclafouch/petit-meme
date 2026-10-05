@@ -221,6 +221,9 @@ The `AiSearchLog` the count reads is written with `waitUntil`, so it lands after
 **Changing what an OG image draws means bumping `OG_VERSION`.**
 `/api/og` answers with an immutable one year `Cache-Control`, so a URL that was already scraped is never fetched again. `OG_VERSION` sits in the query string of every URL `buildOgImageUrl` builds, and bumping it in `~/lib/seo` is the only way to get the new drawing served. Any edit to a template under `components/og/`, the backdrop included, needs it.
 
+**The OG image fetch cache is shared by every render, and never empties.**
+takumi-js fetches every remote image a template references on each render. `OG_IMAGE_FETCH_CACHE` sits at module scope so that every render reads the same one: measured on the home template, it took the fetches of a render from seven to none once warm, and it folds concurrent fetches of one URL into one. It is a plain `Map` with no eviction because the templates only reference fixed assets of the site. Moving it into the handler reads like a fix for a leak, and it brings every fetch back.
+
 **The database pool stays small, so the e2e seed writes by the poolful.**
 Neon bills compute time, so the pool stays small and lets the branch sleep. A caller that opens more transactions at once than `DATABASE_POOL_MAX_CONNECTIONS` queues on the pool, and a wait longer than its `connectionTimeoutMillis` fails. The e2e seed is that caller. Each write of `seed.setup.ts` nests its relations, so Prisma runs it in a transaction that holds a connection for its whole duration. Asking for every Meme at once leaves all but a poolful of them queued, and that wait breaks the timeout as soon as the runner sits further from the database than a laptop does. `createWithinPool` writes `DATABASE_POOL_MAX_CONNECTIONS` at a time, so nothing queues. A single `Promise.all` reads like a speed up and brings the timeout back.
 

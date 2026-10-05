@@ -211,3 +211,6 @@ The `AiSearchLog` the count reads is written with `waitUntil`, so it lands after
 
 **Changing what an OG image draws means bumping `OG_VERSION`.**
 `/api/og` answers with an immutable one year `Cache-Control`, so a URL that was already scraped is never fetched again. `OG_VERSION` sits in the query string of every URL `buildOgImageUrl` builds, and bumping it in `~/lib/seo` is the only way to get the new drawing served. Any edit to a template under `components/og/`, the backdrop included, needs it.
+
+**The database pool holds five connections.**
+Neon bills compute time, so the pool stays small and lets the branch sleep. A caller that opens more transactions at once than `DATABASE_POOL_MAX_CONNECTIONS` queues on the pool, and a wait longer than the five second `connectionTimeoutMillis` fails. The end to end seed cuts its writes into batches of that size for this reason.

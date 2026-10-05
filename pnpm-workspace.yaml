@@ -4,6 +4,9 @@ trustPolicyExclude:
   - 'semver@6.3.1'
   - 'prisma@7.10.0'
 
+blockExoticSubdeps: true
+strictPeerDependencies: true
+
 strictDepBuilds: true
 allowBuilds:
   '@google/genai': true
@@ -14,3 +17,21 @@ allowBuilds:
   protobufjs: true
   msw: true
   sharp: true
+
+publicHoistPattern:
+  - '*import-in-the-middle*'
+  - '*require-in-the-middle*'
+  - '@sentry/*'
+  - '@takumi-rs/core-*'
+
+overrides:
+  require-in-the-middle: 7.4.0
+  next: ^16.3.8
+
+peerDependencyRules:
+  allowedVersions:
+    '@tanstack/eslint-plugin-query>typescript': '7'
+    '@typescript-eslint/utils>typescript': '7'
+    '@typescript-eslint/typescript-estree>typescript': '7'
+    '@typescript-eslint/project-service>typescript': '7'
+    '@typescript-eslint/tsconfig-utils>typescript': '7'

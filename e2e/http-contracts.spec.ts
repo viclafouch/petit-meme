@@ -1,11 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { E2E_BASE_URL, E2E_BUNNY_HOSTNAME } from './env'
 
-// No browser here: these routes answer machines, not Visitors.
-//
-// Each one is expected to carry entries. An empty sitemap would make the leak
-// assertion below pass without covering anything, so emptiness is a failure
-// rather than a case to allow for.
 const CHILD_SITEMAPS = [
   '/sitemap-static.xml',
   '/sitemap-categories.xml',

@@ -4,9 +4,6 @@ import { expect, test } from './fixtures'
 import { getMemePlayButtons } from './library'
 import { m } from './messages'
 
-// The home page belongs to everyone, so it is walked as an anonymous Visitor:
-// nothing here is supposed to ask for an account.
-
 test('the home page opens on Memes', async ({ page }) => {
   const response = await page.goto('/')
 

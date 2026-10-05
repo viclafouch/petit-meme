@@ -35,9 +35,25 @@ Count the Memes on screen by their play buttons, with `getMemePlayButtons`. Ever
 
 A spec that needs a signed in User, and is not about signing in, starts from the storage state `auth.setup.ts` writes for its role. That setup signs every verified role in over the HTTP API rather than through the dialog: the login screen has its own specs, every other spec only needs the cookie, and the sign in also proves the seeded rows are the ones better-auth expects. The unverified role is never signed in and gets no storage state, since only the login screen has something to say about it.
 
+The suite mints the email verification link, and reads the password reset token back. better-auth signs the email verification token as a JWT and stores nothing. The password reset token does leave a `verification` row: the token is the tail of its identifier, and its value names the User. With no verification token to read back, `buildEmailVerificationUrl` signs the one the email would have carried with the e2e secret, and everything that URL then triggers is the real route.
+
 A scenario that leaves a mark on its account gets its own role in `E2E_ROLES`. Sharing one between a checkout and a deletion would make the second test depend on the order of the first.
 
 A page that belongs to a third party, the Stripe billing portal or an OAuth provider, is never crossed. Route its origin to `abort()`, stop at the door and check that the door is the right one: the request that leaves names a billing portal session by its path, since any Stripe page answers the origin alone, and an OAuth request carries the way back to our own callback rather than to whatever origin the run happens to use.
+
+### Fixtures
+
+Every test starts with the prompts that open on their own already answered. `fixtures.ts` answers the consent banner, snoozes the Premium reminder and dismisses the locale banner before the first page loads. All three speak on their own, `PREMIUM_REMINDER_DELAY_MS` into a `/memes` page for the reminder and on sight of an `/en/` page for the locale banner, and a prompt that opens in the middle of a scenario steals the click that scenario was about to make. Each has its own spec, and no other spec should have to walk past them.
+
+An uncaught error on one of our pages fails the test that saw it. One such error kills hydration, which leaves buttons that look perfect and do nothing, and it surfaces minutes later as a timeout with no clue about the cause. Errors raised by third party pages, Stripe above all, are not ours to judge, so `fixtures.ts` only collects the ones whose page sits under the base URL.
+
+### Seeded content
+
+The content is sized by the counts the suite asserts. The library shows `MEMES_PER_PAGE` Memes per page, and both locales need a second page to walk to. `content.ts` seeds `FILLER_MEME_COUNT` fillers, most of them Universal, because the English library only sees English and Universal Memes and holds fewer than the French one. The first page of `trending` falls back on view counts when no Event exists, so every fixture carries a distinct view count and the named Memes hold the highest, which keeps them on that page whatever the fillers do. Every other page of the library reads Algolia, so the seed indexes every Meme it writes: a Meme left in the database alone is invisible to most of the suite.
+
+The content is dated so that no order depends on the run. A seeded Meme is created at the instant it was published. Left to its default, `createdAt` would be the instant of a parallel insert, which gives the index sorted on it no stable order. The news Category and the home announcement read the same window, `THIRTY_DAYS_MS`, and `E2E_RECENT_MEMES` counts the Memes inside it from that same constant, with no fixture near its edge. Seeded Bookmarks are dated outside the trending window, and a test that adds one puts it on the most viewed Meme, the one a fresh Bookmark cannot move out of trending.
+
+One Meme alone carries a Video that exists at Bunny. `E2E_NAMED_MEMES.mostViewed` points at the one Video of the `e2e` Bunny library. Every other fixture carries a made up id, which is enough for a list, a thumbnail slot and a page, and never enough to play or to Export. That id is `E2E_VIDEO_BUNNY_ID` in `.env.e2e` rather than a literal in `content.ts`, because it names a resource of that library and recreating the library gives it another one. A spec that needs a real file, the Studio first, uses that Meme. A spec that cannot pick its Meme, Reels and its random order, asserts that the request for the file leaves: a Premium taken for a free User gets the upsell dialog instead, and nothing goes out.
 
 ### Public surfaces
 

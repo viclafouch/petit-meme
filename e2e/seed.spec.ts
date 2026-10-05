@@ -1,4 +1,4 @@
-import { E2E_NAMED_MEMES, E2E_SEARCH_WORD } from './content'
+import { E2E_NAMED_MEMES, E2E_UNIQUE_SEARCH_WORD } from './content'
 import { resolveStorageStatePath } from './env'
 import { expect, test } from './fixtures'
 
@@ -23,7 +23,7 @@ test('the seeded Memes reach the library', async ({ page }) => {
 })
 
 test('the seeded Memes reach the search index', async ({ page }) => {
-  const search = new URLSearchParams({ query: E2E_SEARCH_WORD })
+  const search = new URLSearchParams({ query: E2E_UNIQUE_SEARCH_WORD })
 
   await page.goto(`/memes/category/all?${search}`)
 

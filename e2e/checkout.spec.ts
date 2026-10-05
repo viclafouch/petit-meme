@@ -13,7 +13,6 @@ import { repeatUntilVisible } from './hydration'
 import { m } from './messages'
 import { matchIsServerFunctionCall } from './server-functions'
 
-// The most viewed Meme is the one a fresh Bookmark cannot move out of trending.
 const CAP_LIFT_MEME_PATHNAME = `/memes/${E2E_NAMED_MEMES.mostViewed.id}`
 
 const bookmarkTheMemeOverTheFreeCap = async (page: Page) => {

@@ -6,7 +6,7 @@ import {
   FREE_PLAN_MAX_AI_SEARCHES
 } from '~/constants/ai-search'
 import { getAuthDialogSignInButton } from './auth-flows'
-import { E2E_NAMED_MEMES, E2E_SEARCH_WORD } from './content'
+import { E2E_NAMED_MEMES, E2E_UNIQUE_SEARCH_WORD } from './content'
 import { resolveStorageStatePath } from './env'
 import { expect, test } from './fixtures'
 import { repeatUntilVisible } from './hydration'
@@ -61,7 +61,7 @@ test.describe('a free User with searches left', () => {
       m.ai_search_remaining_searches({ count: FREE_PLAN_MAX_AI_SEARCHES })
     )
 
-    await submitPrompt(page, E2E_SEARCH_WORD)
+    await submitPrompt(page, E2E_UNIQUE_SEARCH_WORD)
 
     await expect(getMemeLink(page, E2E_NAMED_MEMES.searchTarget)).toBeVisible({
       timeout: RESULTS_TIMEOUT_MS
@@ -115,7 +115,7 @@ test.describe('a free User whose search never reaches the server', () => {
       return route.abort()
     })
 
-    await submitPrompt(page, E2E_SEARCH_WORD)
+    await submitPrompt(page, E2E_UNIQUE_SEARCH_WORD)
 
     await expect(page.getByText(m.ai_search_error_generic())).toBeVisible()
     await expect(getStagesStatus(page)).toBeHidden()
@@ -132,7 +132,7 @@ test.describe('a free User whose monthly searches are spent', () => {
       m.ai_search_remaining_searches({ count: 0 })
     )
 
-    await submitPrompt(page, E2E_SEARCH_WORD)
+    await submitPrompt(page, E2E_UNIQUE_SEARCH_WORD)
 
     const dialog = page.getByRole('dialog', {
       name: m.ai_search_upsell_title()
@@ -156,7 +156,7 @@ test.describe('a Premium who is past the free cap', () => {
     await expect(getSubmitButton(page)).toBeEnabled()
     await expect(getQuotaCounter(page)).toBeHidden()
 
-    await submitPrompt(page, E2E_SEARCH_WORD)
+    await submitPrompt(page, E2E_UNIQUE_SEARCH_WORD)
 
     await expect(getMemeLink(page, E2E_NAMED_MEMES.searchTarget)).toBeVisible({
       timeout: RESULTS_TIMEOUT_MS
@@ -175,7 +175,7 @@ test('an anonymous Visitor is sent to sign in, keeps their prompt, and is refuse
   const dialog = page.getByRole('dialog')
 
   await repeatUntilVisible(async () => {
-    await submitPrompt(page, E2E_SEARCH_WORD)
+    await submitPrompt(page, E2E_UNIQUE_SEARCH_WORD)
   }, dialog)
 
   await expect(getAuthDialogSignInButton(page)).toBeVisible()
@@ -184,7 +184,7 @@ test('an anonymous Visitor is sent to sign in, keeps their prompt, and is refuse
   await page.keyboard.press('Escape')
   await page.reload()
 
-  await expect(getPromptField(page)).toHaveValue(E2E_SEARCH_WORD)
+  await expect(getPromptField(page)).toHaveValue(E2E_UNIQUE_SEARCH_WORD)
 
   await getPromptField(page).fill('')
   await getSubmitButton(page).click()

@@ -30,10 +30,6 @@ test.describe('a Premium', () => {
     await expectVideoWasShared({ page, title: SHARED_MEME.title })
   })
 
-  // Reels serves its Memes in a random order and one fixture alone carries a
-  // Video that exists at Bunny, so a reel is asked for its file and never for
-  // the file itself. The request leaving at all is the assertion: a Visitor
-  // taken for a free one gets the upsell dialog instead, and nothing goes out.
   test('asks for the Video of the Meme Reels is showing', async ({ page }) => {
     await page.goto('/reels')
 

@@ -4,8 +4,6 @@ import { resolveStorageStatePath } from './env'
 import { expect, test } from './fixtures'
 import { m } from './messages'
 
-// The only Meme whose Video exists at Bunny, so the only one the Studio has
-// anything to read.
 const STUDIO_MEME = E2E_NAMED_MEMES.mostViewed
 const STUDIO_PATHNAME = `/memes/${STUDIO_MEME.id}/studio`
 

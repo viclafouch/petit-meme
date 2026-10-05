@@ -2,10 +2,6 @@
 import { prismaClient } from '~/db'
 import { E2E_DATABASE_URL } from './env'
 
-// Truncating every table but the migration history, rather than a hand written
-// list that drifts each time a model appears. CASCADE covers the foreign keys.
-// The guard lives here, next to the destruction, and not at the call site: the
-// only question that matters is whether this database belongs to the suite.
 export const clearDatabase = async () => {
   if (process.env.DATABASE_URL !== E2E_DATABASE_URL) {
     throw new Error(

@@ -71,16 +71,8 @@ export const E2E_CATEGORIES = {
   }
 } as const satisfies Record<string, E2eCategory>
 
-// The word a search test looks for. It appears in one Meme and nowhere else,
-// neither in the filler titles nor in the Category names.
-export const E2E_SEARCH_WORD = 'ornithorynque'
+export const E2E_UNIQUE_SEARCH_WORD = 'ornithorynque'
 
-// The Memes a test names. Their view counts are the highest of the set, so they
-// all sit on the first page whatever the filler does.
-//
-// Only the most viewed one carries a Video that exists at Bunny. Everything
-// else has a made up id, which is enough for a list, a thumbnail slot and a
-// page, and never enough to play or to Export.
 export const E2E_NAMED_MEMES = {
   mostViewed: {
     id: 'e2e-meme-most-viewed',
@@ -103,9 +95,9 @@ export const E2E_NAMED_MEMES = {
   },
   searchTarget: {
     id: 'e2e-meme-search-target',
-    title: `L'${E2E_SEARCH_WORD} perplexe`,
+    title: `L'${E2E_UNIQUE_SEARCH_WORD} perplexe`,
     description: 'Il ne comprend pas non plus.',
-    keywords: [E2E_SEARCH_WORD],
+    keywords: [E2E_UNIQUE_SEARCH_WORD],
     contentLocale: MemeContentLocale.FR,
     viewCount: 8000,
     bunnyId: 'e2e-video-search-target',
@@ -114,9 +106,9 @@ export const E2E_NAMED_MEMES = {
     translations: [
       {
         locale: 'fr',
-        title: `L'${E2E_SEARCH_WORD} perplexe`,
+        title: `L'${E2E_UNIQUE_SEARCH_WORD} perplexe`,
         description: 'Il ne comprend pas non plus.',
-        keywords: [E2E_SEARCH_WORD]
+        keywords: [E2E_UNIQUE_SEARCH_WORD]
       }
     ]
   },
@@ -185,10 +177,6 @@ export const E2E_NAMED_MEMES = {
   }
 } as const satisfies Record<string, E2eMeme>
 
-// The library shows thirty Memes per page, and both locales need a second page
-// to walk to. Two fillers in three are Universal, because the English library
-// only sees English and Universal: at this count it holds thirty four Memes,
-// against fifty three for the French one.
 const FILLER_MEME_COUNT = 48
 
 const buildFillerMeme = (rank: number): E2eMeme => {
@@ -241,18 +229,12 @@ export const E2E_MEMES: readonly E2eMeme[] = [
   ...E2E_FILLER_MEMES
 ]
 
-// The news Category and the home announcement read the same window, so the
-// Memes that fall inside it are counted once, from the window the app itself
-// declares. Three in French, and no fixture sits near the edge.
 const NEWS_WINDOW_IN_DAYS = THIRTY_DAYS_MS / DAY
 
 export const E2E_RECENT_MEMES = E2E_MEMES.filter((meme) => {
   return meme.publishedDaysAgo < NEWS_WINDOW_IN_DAYS
 })
 
-// The first page of `trending` falls back to the view counts when no Event
-// exists, so the thirty highest sit on it and the rest sit behind it. This is
-// what the distinct view counts above are for.
 const sortByViewCount = (memes: readonly E2eMeme[]) => {
   return memes.toSorted((first, second) => {
     return second.viewCount - first.viewCount

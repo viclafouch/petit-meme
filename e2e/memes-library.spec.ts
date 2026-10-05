@@ -2,7 +2,7 @@ import { MEMES_PER_PAGE } from '~/constants/meme'
 import {
   E2E_FIRST_PAGE_MEMES,
   E2E_NAMED_MEMES,
-  E2E_SEARCH_WORD,
+  E2E_UNIQUE_SEARCH_WORD,
   E2E_SECOND_PAGE_MEMES
 } from './content'
 import { expect, test } from './fixtures'
@@ -52,7 +52,7 @@ test('a word typed in the search field narrows the library to what matches', asy
   await repeatUntilNavigated(
     async () => {
       await searchField.clear()
-      await searchField.fill(E2E_SEARCH_WORD)
+      await searchField.fill(E2E_UNIQUE_SEARCH_WORD)
     },
     { page, from: LIBRARY_PATHNAME }
   )

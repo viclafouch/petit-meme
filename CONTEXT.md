@@ -174,10 +174,22 @@ A preview deployment is a production build, so `NODE_ENV` cannot tell it from th
 `instrument-server.ts` is imported before the app. `serverEnv` validates every server variable at once and throws when one is missing, so going through it would let a missing variable anywhere else take Sentry down with it.
 
 **The end to end suite owns the `test` branch of the database, and empties it.**
-Every run truncates every table before seeding. `.env.e2e` is loaded so that it wins over any exported variable, and the truncation refuses to run unless the connection string it sees is the one that file declares. That second check belongs next to the destruction, never at the call site.
+Every run truncates every table but the migration history before seeding, listed from `pg_tables` rather than by hand, since a hand written list drifts each time a model appears. `.env.e2e` is loaded so that it wins over any exported variable, and the truncation refuses to run unless the connection string it sees is the one that file declares. That second check belongs next to the destruction, never at the call site.
 
 **The phone has its own end to end project, and it runs the phone alone.**
 `mobile-safari` is a WebKit on an iPhone viewport, and it takes the `*.mobile.spec.ts` files only. What the app hides past `md`, the Share button above all, has no other cover. Replaying the whole suite there is not an option: the roles that leave a mark on their account would be spent twice and a second checkout would be paid. The Web Share API is the one thing no runner can answer, since the sheet belongs to the operating system, so `navigator.share`, absent from Playwright's WebKit exactly as it is from a desktop browser, is replaced by a recorder in the spec that needs it. What the page hands over is the whole of what the site is responsible for.
+
+**The e2e suite never deletes anything at Stripe.**
+A deleted customer leaves an id that outlives it, and better-auth then hands that id to Stripe, which refuses it. Test mode customers pile up instead, which costs nothing and breaks nothing. The `billingPortal` role is the only one born with a real test mode customer: a billing portal session is created against one, and an invented id would be refused.
+
+**One e2e Meme alone carries a Video that exists at Bunny.**
+`E2E_NAMED_MEMES.mostViewed` points at the one Video of the `e2e` Bunny library. Every other fixture carries a made up id, which is enough for a list, a thumbnail slot and a page, and never enough to play or to Export. That id is `E2E_VIDEO_BUNNY_ID` in `.env.e2e` rather than a literal in `content.ts`, because it names a resource of that library and recreating the library gives it another one. A spec that needs a real file, the Studio first, uses that Meme. A spec that cannot pick its Meme, Reels and its random order, asserts that the request for the file leaves: a Premium taken for a free User gets the upsell dialog instead, and nothing goes out.
+
+**The e2e content is sized by the counts the suite asserts.**
+The library shows thirty Memes per page, and both locales need a second page to walk to. `content.ts` seeds forty eight fillers, two in three Universal, because the English library only sees English and Universal Memes: it holds thirty four of them, against fifty three for the French one. The first page of `trending` falls back on view counts when no Event exists, so every fixture carries a distinct view count and the named Memes hold the highest, which keeps them on that page whatever the fillers do. Every other page of the library reads Algolia, so the seed indexes every Meme it writes: a Meme left in the database alone is invisible to most of the suite.
+
+**The e2e content is dated so that no order depends on the run.**
+A seeded Meme is created at the instant it was published. Left to its default, `createdAt` would be the instant of a parallel insert, which gives the index sorted on it no stable order. The news Category and the home announcement read the same thirty day window, and the suite counts the Memes inside it from that same constant: three in French, and no fixture sits near its edge. Seeded Bookmarks are dated outside the trending window, and a test that adds one puts it on the most viewed Meme, the one a fresh Bookmark cannot move out of trending.
 
 **A Premium is only recognised where the subscription is in the query cache.**
 `useMemeExport` reads the cache and never fetches: an Export from a route that did not load the subscription sells Premium to someone who already bought it, and hands them a watermarked video. The `_default` layout loads it for everything under it, and any route outside that layout, `/reels` first, has to load it itself.
@@ -212,8 +224,8 @@ The `AiSearchLog` the count reads is written with `waitUntil`, so it lands after
 **Changing what an OG image draws means bumping `OG_VERSION`.**
 `/api/og` answers with an immutable one year `Cache-Control`, so a URL that was already scraped is never fetched again. `OG_VERSION` sits in the query string of every URL `buildOgImageUrl` builds, and bumping it in `~/lib/seo` is the only way to get the new drawing served. Any edit to a template under `components/og/`, the backdrop included, needs it.
 
-**The database pool holds five connections.**
-Neon bills compute time, so the pool stays small and lets the branch sleep. A caller that opens more transactions at once than `DATABASE_POOL_MAX_CONNECTIONS` queues on the pool, and a wait longer than the five second `connectionTimeoutMillis` fails. The end to end seed cuts its writes into batches of that size for this reason.
+**The database pool holds five connections, so the e2e seed writes by the poolful.**
+Neon bills compute time, so the pool stays small and lets the branch sleep. A caller that opens more transactions at once than `DATABASE_POOL_MAX_CONNECTIONS` queues on the pool, and a wait longer than the five second `connectionTimeoutMillis` fails. The e2e seed is that caller. Each write of `seed.setup.ts` nests its relations, so Prisma runs it in a transaction that holds a connection for its whole duration. Asking for the fifty three Memes at once leaves forty eight of them queued, and that wait breaks the timeout as soon as the runner sits further from the database than a laptop does. `createWithinPool` writes `DATABASE_POOL_MAX_CONNECTIONS` at a time, so nothing queues. A single `Promise.all` reads like a speed up and brings the timeout back.
 
 **Bunny Storage is probed with a one byte GET, never a HEAD.**
 Bunny Storage answers 401 to a HEAD request. `checkWatermarkExists` therefore sends a GET with `Range: bytes=0-0` and reads a 200 or a 206 as present. Going back to HEAD reads like a saving, and it reports every watermarked Video as missing.

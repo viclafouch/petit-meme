@@ -15,7 +15,7 @@ point is to exercise the real thing. The suite itself is the record of what is c
 An e2e assertion is taken on screen, never by polling the database to check that the test worked.
 
 ### Structure
-- Use BDD-style comments: #given, #when, #then
+- Lay each test out as given, when, then: three blocks separated by a blank line, with no comment to label them
 - One logical assertion per test
 - Descriptive test names that explain the scenario
 
@@ -35,14 +35,11 @@ An e2e assertion is taken on screen, never by polling the database to check that
 describe("UserService", () => {
   describe("getUser", () => {
     it("should return user when found", async () => {
-      // #given
       const mockUser = { id: "1", name: "Test" }
       mockDb.findById.mockResolvedValue(mockUser)
 
-      // #when
       const result = await userService.getUser("1")
 
-      // #then
       expect(result).toEqual(mockUser)
     })
   })

@@ -4,13 +4,10 @@ import { buildAiSearchQuota } from '~/helpers/ai-search'
 
 describe('buildAiSearchQuota', () => {
   it('should count no search against a Premium', () => {
-    // #given
     const monthlyCount = FREE_PLAN_MAX_AI_SEARCHES + 10
 
-    // #when
     const quota = buildAiSearchQuota({ monthlyCount, isPremium: true })
 
-    // #then
     expect(quota).toStrictEqual({
       canSearch: true,
       remainingSearches: null,
@@ -19,13 +16,10 @@ describe('buildAiSearchQuota', () => {
   })
 
   it('should leave a free User their whole allowance before any search', () => {
-    // #given
     const monthlyCount = 0
 
-    // #when
     const quota = buildAiSearchQuota({ monthlyCount, isPremium: false })
 
-    // #then
     expect(quota).toStrictEqual({
       canSearch: true,
       remainingSearches: FREE_PLAN_MAX_AI_SEARCHES,
@@ -34,13 +28,10 @@ describe('buildAiSearchQuota', () => {
   })
 
   it('should refuse a free User whose allowance is spent', () => {
-    // #given
     const monthlyCount = FREE_PLAN_MAX_AI_SEARCHES
 
-    // #when
     const quota = buildAiSearchQuota({ monthlyCount, isPremium: false })
 
-    // #then
     expect(quota).toStrictEqual({
       canSearch: false,
       remainingSearches: 0,
@@ -49,13 +40,10 @@ describe('buildAiSearchQuota', () => {
   })
 
   it('should never announce a negative count to a User past the free cap', () => {
-    // #given
     const monthlyCount = FREE_PLAN_MAX_AI_SEARCHES + 7
 
-    // #when
     const quota = buildAiSearchQuota({ monthlyCount, isPremium: false })
 
-    // #then
     expect(quota.remainingSearches).toBe(0)
   })
 })

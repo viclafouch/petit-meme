@@ -143,6 +143,13 @@
   * {
     @apply border-border outline-ring/50 min-w-0;
   }
+  html {
+    overscroll-behavior-y: none;
+
+    @media (any-pointer: coarse) {
+      overscroll-behavior-y: auto;
+    }
+  }
   body {
     @apply bg-background text-foreground;
   }

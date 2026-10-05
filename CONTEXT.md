@@ -185,24 +185,6 @@ The player is not a Radix dialog, so nothing does it on its own. A focus trap ke
 **The e2e suite never deletes anything at Stripe.**
 A deleted customer leaves an id that outlives it, and better-auth then hands that id to Stripe, which refuses it. Test mode customers pile up instead, which costs nothing and breaks nothing. The `billingPortal` role is the only one born with a real test mode customer: a billing portal session is created against one, and an invented id would be refused.
 
-**One e2e Meme alone carries a Video that exists at Bunny.**
-`E2E_NAMED_MEMES.mostViewed` points at the one Video of the `e2e` Bunny library. Every other fixture carries a made up id, which is enough for a list, a thumbnail slot and a page, and never enough to play or to Export. That id is `E2E_VIDEO_BUNNY_ID` in `.env.e2e` rather than a literal in `content.ts`, because it names a resource of that library and recreating the library gives it another one. A spec that needs a real file, the Studio first, uses that Meme. A spec that cannot pick its Meme, Reels and its random order, asserts that the request for the file leaves: a Premium taken for a free User gets the upsell dialog instead, and nothing goes out.
-
-**The e2e content is sized by the counts the suite asserts.**
-The library shows `MEMES_PER_PAGE` Memes per page, and both locales need a second page to walk to. `content.ts` seeds `FILLER_MEME_COUNT` fillers, most of them Universal, because the English library only sees English and Universal Memes and holds fewer than the French one. The first page of `trending` falls back on view counts when no Event exists, so every fixture carries a distinct view count and the named Memes hold the highest, which keeps them on that page whatever the fillers do. Every other page of the library reads Algolia, so the seed indexes every Meme it writes: a Meme left in the database alone is invisible to most of the suite.
-
-**The e2e content is dated so that no order depends on the run.**
-A seeded Meme is created at the instant it was published. Left to its default, `createdAt` would be the instant of a parallel insert, which gives the index sorted on it no stable order. The news Category and the home announcement read the same window, `THIRTY_DAYS_MS`, and `E2E_RECENT_MEMES` counts the Memes inside it from that same constant, with no fixture near its edge. Seeded Bookmarks are dated outside the trending window, and a test that adds one puts it on the most viewed Meme, the one a fresh Bookmark cannot move out of trending.
-
-**Every e2e test starts with the prompts that open on their own already answered.**
-`fixtures.ts` answers the consent banner, snoozes the Premium reminder and dismisses the locale banner before the first page loads. All three speak on their own, `PREMIUM_REMINDER_DELAY_MS` into a `/memes` page for the reminder and on sight of an `/en/` page for the locale banner, and a prompt that opens in the middle of a scenario steals the click that scenario was about to make. Each has its own spec, and no other spec should have to walk past them.
-
-**An uncaught error on one of our pages fails the e2e test that saw it.**
-One such error kills hydration, which leaves buttons that look perfect and do nothing, and it surfaces minutes later as a timeout with no clue about the cause. Errors raised by third party pages, Stripe above all, are not ours to judge, so `fixtures.ts` only collects the ones whose page sits under the base URL.
-
-**The e2e suite mints the email verification link, and reads the password reset token back.**
-better-auth signs the email verification token as a JWT and stores nothing. The password reset token does leave a `verification` row: the token is the tail of its identifier, and its value names the User. With no verification token to read back, `buildEmailVerificationUrl` signs the one the email would have carried with the e2e secret, and everything that URL then triggers is the real route.
-
 **A Premium is only recognised where the subscription is in the query cache.**
 `useMemeExport` reads the cache and never fetches: an Export from a route that did not load the subscription sells Premium to someone who already bought it, and hands them a watermarked video. The `_default` layout loads it for everything under it, and any route outside that layout, `/reels` first, has to load it itself.
 

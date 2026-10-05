@@ -22,7 +22,7 @@ export default defineConfig({
     command: isCi
       ? 'pnpm run start:e2e'
       : 'pnpm run prisma:migrate:e2e && pnpm run build:e2e && pnpm run start:e2e',
-    url: E2E_BASE_URL,
+    url: new URL('/health', E2E_BASE_URL).href,
     reuseExistingServer: false,
     timeout: 300_000
   },

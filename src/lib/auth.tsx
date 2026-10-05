@@ -285,9 +285,7 @@ const getAuthConfig = createServerOnlyFn(() => {
       useSecureCookies: matchIsDeployed(),
       // Vercel-specific: keeps serverless function alive after response
       backgroundTasks: {
-        handler: (promise) => {
-          waitUntil(promise)
-        }
+        handler: waitUntil
       }
     },
     databaseHooks: {

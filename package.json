@@ -31,9 +31,9 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@algolia/client-insights": "^5.56.0",
-    "@algolia/client-search": "^5.56.0",
-    "@algolia/recommend": "^5.56.0",
+    "@algolia/client-insights": "^5.59.0",
+    "@algolia/client-search": "^5.59.0",
+    "@algolia/recommend": "^5.59.0",
     "@better-auth/prisma-adapter": "^1.6.25",
     "@better-auth/stripe": "^1.6.25",
     "@ffmpeg/core": "0.12.10",
@@ -88,7 +88,7 @@
     "radix-ui": "^1.6.7",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
-    "react-email": "^6.9.1",
+    "react-email": "6.11.0",
     "react-error-boundary": "^6.1.6",
     "react-hotkeys-hook": "^5.3.3",
     "react-markdown": "^10.1.0",
@@ -113,9 +113,9 @@
   "devDependencies": {
     "@dicebear/core": "10.3.0",
     "@dicebear/styles": "10.2.0",
-    "@inlang/paraglide-js": "2.23.0",
+    "@inlang/paraglide-js": "2.23.2",
     "@playwright/test": "^1.63.0",
-    "@react-email/ui": "6.9.1",
+    "@react-email/ui": "6.11.0",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/eslint-plugin-query": "^5.101.4",
     "@types/node": "^26.6.4",
@@ -144,7 +144,7 @@
   "pnpm": {
     "overrides": {
       "require-in-the-middle": "7.4.0",
-      "next": "^16.2.11"
+      "next": "^16.3.8"
     },
     "peerDependencyRules": {
       "allowedVersions": {

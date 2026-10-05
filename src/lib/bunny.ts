@@ -246,7 +246,6 @@ export const checkWatermarkExists = createServerOnlyFn(
     const timeout = withStorageTimeout()
 
     try {
-      // Bunny Storage returns 401 on HEAD requests — use GET with Range instead
       const headers = getStorageHeaders()
       headers.set('Range', 'bytes=0-0')
 

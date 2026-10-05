@@ -139,21 +139,5 @@
   "engines": {
     "node": ">=24.0.0"
   },
-  "packageManager": "pnpm@10.30.3",
-  "pnpm": {
-    "overrides": {
-      "require-in-the-middle": "7.4.0",
-      "next": "^16.3.8"
-    },
-    "peerDependencyRules": {
-      "allowedVersions": {
-        "vitefu>vite": "8",
-        "@tanstack/eslint-plugin-query>typescript": "7",
-        "@typescript-eslint/utils>typescript": "7",
-        "@typescript-eslint/typescript-estree>typescript": "7",
-        "@typescript-eslint/project-service>typescript": "7",
-        "@typescript-eslint/tsconfig-utils>typescript": "7"
-      }
-    }
-  }
+  "packageManager": "pnpm@10.34.6"
 }

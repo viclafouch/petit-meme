@@ -116,7 +116,7 @@ export const CookieBanner = () => {
           >
             <div
               className="flex max-h-dvh flex-col overflow-hidden bg-card shadow-2xl sm:max-h-[calc(100dvh-2.5rem)] sm:rounded-(--banner-radius) sm:ring-1 sm:ring-border/30"
-              style={{ '--banner-radius': '1.5rem' } as React.CSSProperties}
+              style={{ '--banner-radius': '1.5rem' }}
             >
               <BannerMedia isMobile={isMobile} />
               <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-7 pb-5 pt-1">

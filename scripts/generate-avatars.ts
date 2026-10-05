@@ -11,9 +11,6 @@ import {
 
 const STYLE_DEFINITION_SPECIFIER = `@dicebear/styles/${AVATAR_STYLE_ID}.json`
 
-const STYLE_LICENSE =
-  'Remix of „Adventurer Neutral” (https://www.figma.com/community/file/1184595184137881796) by „Lisa Wischofsky”, licensed under „CC BY 4.0” (https://creativecommons.org/licenses/by/4.0/)'
-
 const OUTPUT_DIRECTORY = path.resolve(`public${AVATAR_DIRECTORY}`)
 
 const loadStyle = async () => {
@@ -49,7 +46,7 @@ const writeCatalogAvatars = async () => {
   )
   console.log(`Style : ${AVATAR_STYLE_ID}`)
   console.log(`Palette : ${AVATAR_BACKGROUND_PALETTE.join(' ')}`)
-  console.log(`Licence : ${STYLE_LICENSE}`)
+  console.log(`Licence : ${style.meta().license().text()}`)
 }
 
 void writeCatalogAvatars()

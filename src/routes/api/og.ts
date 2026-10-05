@@ -105,9 +105,6 @@ export const Route = createFileRoute('/api/og')({
           width: OG_IMAGE_WIDTH,
           height: OG_IMAGE_HEIGHT,
           images: { fetchCache: OG_IMAGE_FETCH_CACHE },
-          // `fonts` is honoured at runtime but absent from takumi-js v2 public
-          // types, so a typo here silently falls back to the embedded Geist
-          // instead of failing the build.
           fonts: [
             {
               name: 'Bricolage Grotesque',

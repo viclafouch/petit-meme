@@ -75,11 +75,7 @@ export const MemesList = ({
   return (
     <div className="w-full">
       <div
-        style={
-          {
-            '--cols': `repeat(${columnGridCount}, 1fr)`
-          } as React.CSSProperties
-        }
+        style={{ '--cols': `repeat(${columnGridCount}, 1fr)` }}
         className="grid gap-5 grid-cols-2 lg:grid-cols-(--cols)"
         role="list"
         aria-label={m.meme_list_label()}

@@ -35,8 +35,6 @@ test.describe('a free User', () => {
   })
 })
 
-// The Studio route carries no guard, so this also says it opens without an
-// account, which is what the free library promises.
 test('an anonymous Visitor is asked for text before anything is generated', async ({
   page
 }) => {

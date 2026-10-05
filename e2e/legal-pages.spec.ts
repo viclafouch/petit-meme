@@ -4,10 +4,6 @@ import type { Locale } from '~/paraglide/runtime'
 import { expect, test } from './fixtures'
 import { localizePathname } from './urls'
 
-// Legal pages are open to everyone, so they are walked as an anonymous
-// Visitor. Their body is markdown, one file per locale, and the route picks
-// the file from the locale of the URL.
-
 const LEGAL_PATHNAMES = [
   '/dmca',
   '/mentions-legales',
@@ -19,10 +15,6 @@ const LEGAL_NOTICE_PATHNAME = '/mentions-legales'
 
 const MARKDOWN_TITLE_PATTERN = /^# (.+)$/mu
 
-// The expected heading is read from the very file the page serves, because the
-// failure to catch here is a locale serving the other one's markdown. A copy
-// kept in this file would still be green that day, since both copies would
-// name the same page.
 const readMarkdownTitle = (
   pathname: (typeof LEGAL_PATHNAMES)[number],
   locale: Locale
@@ -37,10 +29,6 @@ const readMarkdownTitle = (
   return title
 }
 
-// The avatar style is a remix used under CC BY 4.0, and that licence holds
-// only as long as the credit and its two links stay on the page. This is the
-// one assertion of the suite whose value is a legal obligation rather than a
-// product choice, so it is written here rather than read from the markdown.
 const AVATAR_STYLE_CREDIT = {
   styleName: '„Adventurer Neutral”',
   styleUrl: 'https://www.figma.com/community/file/1184595184137881796',

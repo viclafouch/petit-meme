@@ -38,3 +38,19 @@ A spec that needs a signed in User, and is not about signing in, starts from the
 A scenario that leaves a mark on its account gets its own role in `E2E_ROLES`. Sharing one between a checkout and a deletion would make the second test depend on the order of the first.
 
 A page that belongs to a third party, the Stripe billing portal or an OAuth provider, is never crossed. Route its origin to `abort()`, stop at the door and check that the door is the right one: the request that leaves names a billing portal session by its path, since any Stripe page answers the origin alone, and an OAuth request carries the way back to our own callback rather than to whatever origin the run happens to use.
+
+### Public surfaces
+
+A surface open to everyone, the home page, the library, a Category, a legal page, is walked as an anonymous Visitor with no storage state: nothing there is supposed to ask for an account. A surface that also serves signed in Users, the Studio for one, keeps at least one anonymous test, which proves it opens without an account as the free library promises. A route that answers machines rather than Visitors, a sitemap, `robots.txt`, the manifest, is checked through `request`, with no browser.
+
+### Assertions
+
+An assertion has to be able to fail.
+
+- An absence is asserted on something that would be there otherwise: a Meme of the other Category, whose view count would put it on any first page.
+- A check over a list comes with a check that the list is not empty. An empty sitemap would let the leak check pass without covering anything.
+- A filter is checked on a page that stays full after it. Dropping French still leaves a page of English and Universal Memes, while a filter that answered nothing would satisfy every other assertion.
+- A page cut names the Memes on both sides of it, since the count alone would hold for any Memes.
+- A page that does not exist is checked for its 404 status, since a soft 404 offers Google an empty page to index under a real status.
+
+The expected value comes from the source the page serves, never from a copy kept in the spec: a copy stays green the day a locale serves the other one's text. Strings come from `m`. The title of a legal page comes from its markdown file, one per locale, which the route picks from the locale of the URL. The avatar style credit is the one exception. Its value is a legal obligation rather than a product choice, the credit and its two links, so the spec writes it out instead of reading it from the markdown.

@@ -10,17 +10,12 @@ import { repeatUntilNavigated, repeatUntilVisible } from './hydration'
 import { getMemeLink, getMemePlayButtons, getMemeTitleLinks } from './library'
 import { m } from './messages'
 
-// The library is open to everyone, so it is walked as an anonymous Visitor.
-
 const LIBRARY_PATHNAME = '/memes/category/all'
 
 const SECOND_PAGE_NUMBER = '2'
 
 const WIDEST_GRID_COLUMN_COUNT = '6'
 
-// Dropping French leaves the English and the Universal Memes, thirty four of
-// them, so the page stays full. A filter that answered nothing would satisfy
-// every other assertion of that test.
 const FILTERED_FIRST_PAGE_COUNT = MEMES_PER_PAGE
 
 test('the library opens on the trending Category and fills a page', async ({
@@ -77,8 +72,6 @@ test('the second page holds exactly what the first one left out', async ({
     E2E_SECOND_PAGE_MEMES.length
   )
 
-  // The count alone would hold for any twenty three Memes. Naming both sides of
-  // the cut is what proves the cut sits where the page size says.
   await Promise.all([
     ...E2E_SECOND_PAGE_MEMES.map((meme) => {
       return expect(getMemeLink(page, meme)).toBeVisible()

@@ -9,8 +9,6 @@ import type { E2eCategory } from './content'
 import { expect, test } from './fixtures'
 import { getMemeLink, getMemePlayButtons } from './library'
 
-// A Category is open to everyone, so it is walked as an anonymous Visitor.
-
 const CATS_CATEGORY = E2E_CATEGORIES.chats
 const POLITICS_CATEGORY = E2E_CATEGORIES.politique
 
@@ -32,8 +30,6 @@ test('a Category shows its own Memes and nothing else', async ({ page }) => {
   )
   await expect(getMemeLink(page, E2E_NAMED_MEMES.mostViewed)).toBeVisible()
   await expect(getMemeLink(page, E2E_NAMED_MEMES.english)).toBeVisible()
-  // Seeded under the other Category, and its view count would otherwise put it
-  // on any first page.
   await expect(
     getMemeLink(page, E2E_NAMED_MEMES.recentlyPublished)
   ).toBeHidden()
@@ -77,7 +73,6 @@ test('a Category that does not exist is a not found', async ({ page }) => {
     '/memes/category/aucune-categorie-ne-porte-ce-slug'
   )
 
-  // A soft 404 would offer Google an empty page to index under a real status.
   expect(response?.status()).toBe(404)
   await expect(page.getByRole('heading', { name: '404' })).toBeVisible()
   await expect(getMemePlayButtons(page)).toHaveCount(0)

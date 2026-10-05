@@ -5,7 +5,6 @@ import type Stripe from 'stripe'
 import { prismaAdapter } from '@better-auth/prisma-adapter'
 import { stripe } from '@better-auth/stripe'
 import { createServerOnlyFn } from '@tanstack/react-start'
-// Vercel-specific: replace with platform equivalent if migrating (e.g. Railway)
 import { waitUntil } from '@vercel/functions'
 import { prismaClient } from '~/db'
 import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '~/constants/auth'
@@ -283,7 +282,6 @@ const getAuthConfig = createServerOnlyFn(() => {
     },
     advanced: {
       useSecureCookies: matchIsDeployed(),
-      // Vercel-specific: keeps serverless function alive after response
       backgroundTasks: {
         handler: waitUntil
       }

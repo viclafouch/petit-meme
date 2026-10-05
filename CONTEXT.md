@@ -168,13 +168,22 @@ A file in `public/avatars/` is never deleted nor renamed. A User picked a rank, 
 This is deliberate. A style change rewrites the same 24 files under the same names, and `immutable` would freeze the old drawing for up to a year on visitors' devices. Accepted trade off: a change takes up to seven days to propagate.
 
 **`NODE_ENV` says how the code was built, never where it runs.**
-A preview deployment is a production build, so `NODE_ENV` cannot tell it from the live site. Anything that must behave differently there, error reporting, rate limiting, secure cookies, reads the deployment environment instead. `NODE_ENV` remains the right question for everything else.
+A preview deployment is a production build, so `NODE_ENV` cannot tell it from the live site. Anything that must behave differently there, error reporting, rate limiting, secure cookies, reads the deployment environment instead. `NODE_ENV` remains the right question for everything else. On the server, when the platform does not say where the code runs, `NODE_ENV` decides after all, so a missing variable never silently downgrades production. `matchIsProductionDeployment`, `matchIsDeployed` and the Sentry server setup all fall back that way. The browser never sees `VERCEL_ENV`, which Vercel hands to the build only, so `vite.config.ts` copies it into `VITE_VERCEL_ENV`, a name Vite inlines. That spares a second variable to declare by hand on every Vercel scope. The browser does not share the server fallback: when the build has no `VERCEL_ENV`, it reads `development`, and Sentry stays silent there.
+
+**The Sentry server setup reads `process.env`, never `serverEnv`.**
+`instrument-server.ts` is imported before the app. `serverEnv` validates every server variable at once and throws when one is missing, so going through it would let a missing variable anywhere else take Sentry down with it.
 
 **The end to end suite owns the `test` branch of the database, and empties it.**
-Every run truncates every table before seeding. `.env.e2e` is loaded so that it wins over any exported variable, and the truncation refuses to run unless the connection string it sees is the one that file declares. That second check belongs next to the destruction, never at the call site.
+Every run truncates every table but the migration history before seeding, listed from `pg_tables` rather than by hand, since a hand written list drifts each time a model appears. `.env.e2e` is loaded so that it wins over any exported variable, and the truncation refuses to run unless the connection string it sees is the one that file declares. That second check belongs next to the destruction, never at the call site.
 
 **The phone has its own end to end project, and it runs the phone alone.**
-`mobile-safari` is a WebKit on an iPhone viewport, and it takes the `*.mobile.spec.ts` files only. What the app hides past `md`, the Share button above all, has no other cover. Replaying the whole suite there is not an option: the roles that leave a mark on their account would be spent twice and a second checkout would be paid. The Web Share API is the one thing no runner can answer, since the sheet belongs to the operating system, so `navigator.share`, absent from Playwright's WebKit exactly as it is from a desktop browser, is replaced by a recorder in the spec that needs it. What the page hands over is the whole of what the site is responsible for.
+`mobile-safari` is a WebKit on an iPhone viewport, and it takes the `*.mobile.spec.ts` files only. What the app hides past `md`, the Share button above all, has no other cover. Replaying the whole suite there is not an option: the roles that leave a mark on their account would be spent twice and a second checkout would be paid. The Web Share API is the one thing no runner can answer, since the sheet belongs to the operating system, so `navigator.share`, absent from Playwright's WebKit exactly as it is from a desktop browser, is replaced by a recorder in the spec that needs it. What the page hands over is the whole of what the site is responsible for. Autoplay is the other thing the runner gets wrong: Safari refuses an unmuted autoplay that Playwright's WebKit allows, so a running video would prove the runner and not the phone. The phone spec asserts the stream reaching WebKit, never the video starting on its own.
+
+**The player puts the rest of the page out of reach with `inert`.**
+The player is not a Radix dialog, so nothing does it on its own. A focus trap keeps the Tab key inside and leaves the library announced, clickable and swipeable to everyone who is not tabbing, so `inert` on everything else is the whole of it, and it is what the e2e assertions read. Escape belongs to the player alone: the library used to answer it too, on a path that closed the player without handing focus back. Safari does not focus a button when it is tapped, so the card the player was opened from is handed to it, and handing focus back to that card is the only thing that keeps a VoiceOver cursor where the Visitor left it. Only the phone project proves that last part, since Chrome focuses the card on the tap by itself.
+
+**The e2e suite never deletes anything at Stripe.**
+A deleted customer leaves an id that outlives it, and better-auth then hands that id to Stripe, which refuses it. Test mode customers pile up instead, which costs nothing and breaks nothing. The `billingPortal` role is the only one born with a real test mode customer: a billing portal session is created against one, and an invented id would be refused.
 
 **A Premium is only recognised where the subscription is in the query cache.**
 `useMemeExport` reads the cache and never fetches: an Export from a route that did not load the subscription sells Premium to someone who already bought it, and hands them a watermarked video. The `_default` layout loads it for everything under it, and any route outside that layout, `/reels` first, has to load it itself.
@@ -183,7 +192,10 @@ Every run truncates every table before seeding. `.env.e2e` is loaded so that it 
 It lays a full screen veil and declares itself `aria-modal`, so nothing behind it is clickable while it is up. That contradicts the shortest path to the video on purpose: consent has to be a choice, not something collected while the Visitor is aiming at a play button. It still steps aside for a dialog that is already open, and every other prompt, the Premium reminder above all, waits its turn the same way.
 
 **Every field written at sign up must be declared to better-auth.**
-`transformInput` builds the inserted row by looping over the fields known to the better-auth schema only, and drops the rest without an error. A field returned by the `user.create.before` hook but missing from `USER_ADDITIONAL_FIELDS` is simply never written. This trap already cost `provider_avatar`, then the GDPR consent timestamps, then the email locale.
+`transformInput` builds the inserted row by looping over the fields known to the better-auth schema only, and drops the rest without an error. A field returned by the `user.create.before` hook but missing from `USER_ADDITIONAL_FIELDS` is simply never written. This trap already cost `provider_avatar`, then the GDPR consent timestamps, then the email locale. A Prisma model one version behind drops them just as silently, and `signup.spec.ts` checks each of them.
+
+**Sign up never says whether an address already has an account.**
+`requireEmailVerification` makes better-auth answer a sign up on a taken address exactly as it answers a new one, and write nothing. Turning that option off turns the signup form into a way to ask whether someone has an account here. `signup.spec.ts` carries a test whose only job is to notice.
 
 **The VisitorKey is a daily fingerprint, never the raw IP and never a stable one.**
 It is `sha256(ip + day + secret)`. The raw IP is out because the key is copied into a JavaScript readable cookie and sent to Algolia as a `userToken`, which would expose it in two forbidden places. A fingerprint stable over time is out too: the table keeps 90 days, so it would amount to a persistent identifier for a marginal analytics gain. The daily renewal is the whole point, and two Visitors behind one connection counting as one is the accepted price.
@@ -199,3 +211,36 @@ The `AiSearchLog` the count reads is written with `waitUntil`, so it lands after
 
 **The client entry hydrates with `StartClient`, never with the router alone.**
 `StartClient` is the only thing that publishes the options of `createStart` to the browser, and `serializationAdapters` is among them. Without it a server function still answers, but its payload comes back with a tag no one on the client can read, so a refusal that carries a `StudioErrorCode` arrives as a bare seroval error and every caller falls back on its generic message. `RouterClient`, from the router alone, hydrates the page correctly and reads exactly like the right entry: it is the one that already cost the Bookmark cap its own message.
+
+**The rate limit is a soft cap, counted in the memory of one instance.**
+`rate-limit-store` keeps its counters in a `Map` that no other serverless instance sees, so a Visitor whose requests spread over several instances gets past the cap. The window is fixed, not sliding: the first request starts the clock, and the count resets only once the whole window has passed. It is simpler and cheaper than a sliding window, and it allows a burst across the boundary of two windows. Past `MAX_STORE_SIZE` keys the store drops the oldest inserted ones, an active key included. Each of these reads like a gap to close, and each is accepted because the cap is soft.
+
+**The Watermark has one geometry and two filters.**
+`scripts/watermark-videos.ts` burns it with the ffmpeg command line, and the Admin burns it in the browser with ffmpeg.wasm. Both read their figures from `~/constants/watermark`. `WATERMARK_WIDTH_RATIO` is a share of the shortest side of the video, so the mark stays visible on a portrait 9:16 Meme. `WATERMARK_MARGIN_RATIO` is a share of that same side, capped at `WATERMARK_MAX_MARGIN_IN_PIXELS` so a large video keeps the mark close to its corner. The command line filter measures the video through the `rw` and `rh` variables of `scale`, so the script needs ffmpeg 8 or later.
+
+**Changing what an OG image draws means bumping `OG_VERSION`.**
+`/api/og` answers with an immutable one year `Cache-Control`, so a URL that was already scraped is never fetched again. `OG_VERSION` sits in the query string of every URL `buildOgImageUrl` builds, and bumping it in `~/lib/seo` is the only way to get the new drawing served. Any edit to a template under `components/og/`, the backdrop included, needs it.
+
+**The OG image fetch cache is shared by every render, and never empties.**
+takumi-js fetches every remote image a template references on each render. `OG_IMAGE_FETCH_CACHE` sits at module scope so that every render reads the same one: measured on the home template, it took the fetches of a render from seven to none once warm, and it folds concurrent fetches of one URL into one. It is a plain `Map` with no eviction because the templates only reference fixed assets of the site. Moving it into the handler reads like a fix for a leak, and it brings every fetch back.
+
+**The database pool stays small, so the e2e seed writes by the poolful.**
+Neon bills compute time, so the pool stays small and lets the branch sleep. A caller that opens more transactions at once than `DATABASE_POOL_MAX_CONNECTIONS` queues on the pool, and a wait longer than its `connectionTimeoutMillis` fails. The e2e seed is that caller. Each write of `seed.setup.ts` nests its relations, so Prisma runs it in a transaction that holds a connection for its whole duration. Asking for every Meme at once leaves all but a poolful of them queued, and that wait breaks the timeout as soon as the runner sits further from the database than a laptop does. `createWithinPool` writes `DATABASE_POOL_MAX_CONNECTIONS` at a time, so nothing queues. A single `Promise.all` reads like a speed up and brings the timeout back.
+
+**Bunny Storage is probed with a one byte GET, never a HEAD.**
+Bunny Storage answers 401 to a HEAD request. `checkWatermarkExists` therefore sends a GET with `Range: bytes=0-0` and reads any 2xx as present. Going back to HEAD reads like a saving, and it reports every watermarked Video as missing.
+
+**The build copies every variable of its env file into `process.env`.**
+Vite hands `.env.[mode]` to `import.meta.env` only, filtered on `VITE_`, and never fills `process.env` from it. Nitro, the Sentry plugin and the rest of the server side read `process.env`. `vite.config.ts` therefore calls `loadEnv` without a prefix filter, which loads every variable of the mode, and merges the result into `process.env`. The line reads like a leftover, and removing it leaves the server side without the variables the file declares.
+
+**takumi-js runs on its native addon, at build time as at runtime.**
+Nitro adds the `wasm` and `unwasm` export conditions on every preset. Under `unwasm`, takumi-js resolves `#backend` to WebAssembly at build time, while Node resolves it to the native addon at runtime, so the OG image would be built against one backend and run on the other. `exportConditions: ['!unwasm']` negates that one condition and keeps both on native. It reads like a stray setting.
+
+**A route rule header wins over the header a handler sets.**
+The `/**` rule answers `Cache-Control: no-cache` for every route. `/api/og` sets its own immutable header, and still needs a rule of its own in `vite.config.ts` that repeats it, or `/**` downgrades the OG image to `no-cache`. That rule reads like a duplicate of the handler.
+
+**A Video URL reaches the sitemap inside the video tags only, never in a `<loc>`.**
+The memes sitemap hands each Video to Google through `<video:content_loc>`, the tag Google reads to index a video. A video host in a `<loc>` would offer Google a raw file where a page is expected, so `http-contracts.spec.ts` fails as soon as a `<loc>` of any sitemap names it.
+
+**The vitest lint preset sits in an override, never in `extends`.**
+The `vitest` preset of `@viclafouch/oxc-config` turns every category `off`, and oxlint merges `extends` from the first config to the last, so that preset placed there turns off the categories the presets before it turned on, across the whole repository. `oxlint.config.ts` spreads only its plugins and its rules into an override scoped to `**/*.test.ts`. The package README puts it in `extends`, which makes the override read like a mistake.

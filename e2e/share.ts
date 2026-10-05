@@ -13,11 +13,6 @@ declare global {
   }
 }
 
-// The Web Share API is the one thing a runner cannot answer: the sheet belongs
-// to the operating system. `navigator.share` is undefined in the WebKit
-// Playwright ships, exactly as it is on a desktop browser, so the button would
-// throw instead of sharing. The stub takes its place and writes down what the
-// page handed over, which is the whole of what the site is responsible for.
 export const recordShares = async (page: Page) => {
   await page.addInitScript(() => {
     window.e2eRecordedShares = []
@@ -42,9 +37,7 @@ type ExpectVideoWasSharedParams = {
   title: string
 }
 
-// The share only reaches the stub once the server has proxied the whole file
-// from Bunny, which takes seconds rather than milliseconds.
-const SHARE_GIVE_UP_MS = 15_000
+const WHOLE_FILE_PROXY_GIVE_UP_MS = 15_000
 
 export const expectVideoWasShared = async ({
   page,
@@ -57,7 +50,7 @@ export const expectVideoWasShared = async ({
           return window.e2eRecordedShares
         })
       },
-      { timeout: SHARE_GIVE_UP_MS }
+      { timeout: WHOLE_FILE_PROXY_GIVE_UP_MS }
     )
     .toEqual([{ title, fileName: `${title}.mp4`, isEmpty: false }])
 }

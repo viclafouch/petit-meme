@@ -9,12 +9,8 @@ import { m } from './messages'
 const NEW_PASSWORD = 'e2e-reset-password-2026'
 const RESET_IDENTIFIER_PREFIX = 'reset-password:'
 
-// Signed in on purpose: the flow has to say something about the sessions that
-// already existed when the password changed.
 test.use({ storageState: resolveStorageStatePath('passwordReset') })
 
-// The token better-auth mails is the tail of the verification identifier, and
-// the row points back at the User through its value.
 const readResetToken = async () => {
   const verification = await prismaClient.verification.findFirstOrThrow({
     where: {

@@ -38,10 +38,6 @@ test('a tap on a Meme of the home page opens the player', async ({ page }) => {
   await expect(playerDialog.locator('media-controller')).toBeVisible()
 })
 
-// Safari does not focus a button when it is tapped, so the player has nothing
-// to fall back on: the card it was opened from is handed to it, and handing it
-// back is the only thing that keeps a VoiceOver cursor where the Visitor left
-// it. On Chrome the tap focuses the card by itself and this proves nothing.
 test('closing the player hands focus back to the card it came from', async ({
   page
 }) => {
@@ -56,9 +52,6 @@ test('closing the player hands focus back to the card it came from', async ({
   await expect(playButton).toBeFocused()
 })
 
-// What is asserted is the stream reaching WebKit, never the video starting on
-// its own: Safari refuses an unmuted autoplay, and Playwright allows it, so a
-// running video would prove the runner and not the phone.
 test('a Meme page loads its Video on Safari', async ({ page }) => {
   await page.goto(PLAYABLE_MEME_PATHNAME)
 

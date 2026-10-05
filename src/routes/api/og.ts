@@ -57,11 +57,6 @@ const resolvePageTitle = (query: OgPageQuery) => {
   return query.title ?? OG_DEFAULT_TITLES[query.locale][query.type]
 }
 
-/**
- * Every remote asset a template references is fetched over HTTP on each render.
- * Sharing one cache across renders drops the home template from 7 requests to 0
- * once warm, and coalesces concurrent requests for the same URL.
- */
 const OG_IMAGE_FETCH_CACHE = new Map<string, Promise<ArrayBuffer>>()
 
 export const Route = createFileRoute('/api/og')({

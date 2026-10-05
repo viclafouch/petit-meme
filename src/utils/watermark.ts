@@ -2,7 +2,7 @@ import type { FFmpeg, LogEvent } from '@ffmpeg/ffmpeg'
 import { fetchFile } from '@ffmpeg/util'
 import {
   WATERMARK_MARGIN_RATIO,
-  WATERMARK_MAX_MARGIN,
+  WATERMARK_MAX_MARGIN_IN_PIXELS,
   WATERMARK_OPACITY,
   WATERMARK_WIDTH_RATIO
 } from '~/constants/watermark'
@@ -10,7 +10,7 @@ import {
   FFMPEG_ENCODING_ARGS,
   FFMPEG_INPUT_FILE,
   FFMPEG_WATERMARK_FILE,
-  readFFmpegOutput
+  readAndDeleteFFmpegOutput
 } from '~/utils/ffmpeg'
 
 type ApplyWatermarkParams = {
@@ -84,7 +84,7 @@ const buildWasmWatermarkFilter = ({
   )
   const margin = Math.min(
     Math.round(minSide * WATERMARK_MARGIN_RATIO),
-    WATERMARK_MAX_MARGIN
+    WATERMARK_MAX_MARGIN_IN_PIXELS
   )
   const posX = video.width - targetWidth - margin
   const posY = video.height - targetHeight - margin
@@ -147,7 +147,7 @@ export const applyWatermark = async ({
       )
     }
 
-    return await readFFmpegOutput(ffmpeg)
+    return await readAndDeleteFFmpegOutput(ffmpeg)
   } finally {
     ffmpeg.off('log', handleLog)
     await Promise.all([

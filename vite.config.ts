@@ -39,18 +39,14 @@ const staticAssetRouteRules = Object.fromEntries(
   })
 )
 
-export default defineConfig(({ mode }) => {
-  // Vite only exposes VITE_* vars to import.meta.env (client-safe).
-  // Server-side code (Nitro, Sentry plugin, etc.) reads from process.env,
-  // which Vite does NOT populate from .env files by default.
-  // loadEnv with an empty prefix ('') loads ALL vars from .env.{mode},
-  // and Object.assign merges them into process.env so server code can access them.
-  Object.assign(process.env, loadEnv(mode, process.cwd(), ''))
+const WITHOUT_PREFIX_FILTER = ''
 
-  // Vercel gives the build `VERCEL_ENV` but never gives it to the browser.
-  // Copying it into the VITE_ namespace, which Vite inlines, spares a second
-  // variable to declare by hand on every scope. Absent, the browser reads
-  // `development` and Sentry stays silent there.
+export default defineConfig(({ mode }) => {
+  Object.assign(
+    process.env,
+    loadEnv(mode, process.cwd(), WITHOUT_PREFIX_FILTER)
+  )
+
   process.env.VITE_VERCEL_ENV ??= process.env.VERCEL_ENV ?? 'development'
 
   return {
@@ -104,13 +100,8 @@ export default defineConfig(({ mode }) => {
       }),
       react(),
       nitro({
-        // The e2e suite serves the build itself, so it needs `node-server`.
-        // Everything else ships to Vercel.
         preset: mode === 'e2e' ? 'node-server' : 'vercel',
         sourcemap: true,
-        // Nitro enables `unwasm` on every preset, which makes takumi-js resolve
-        // `#backend` to WebAssembly at build time while Node resolves it to the
-        // native addon at runtime. Negating the condition keeps both on native.
         exportConditions: ['!unwasm'],
         traceDeps: ['takumi-js', '@takumi-rs/core'],
         rolldownConfig: {
@@ -132,7 +123,6 @@ export default defineConfig(({ mode }) => {
           '/avatars/**': {
             headers: AVATAR_ASSET_HEADERS
           },
-          // Keeps `/**` from downgrading the handler's own header to no-cache.
           '/api/og': {
             headers: IMMUTABLE_ASSET_HEADERS
           },

@@ -8,8 +8,6 @@ import { m } from './messages'
 export const openAuthDialog = async (page: Page) => {
   const dialog = page.getByRole('dialog')
 
-  // Scoped to the header: once the dialog is open, its own submit button
-  // carries the same name.
   await repeatUntilVisible(async () => {
     await page
       .getByRole('banner')
@@ -20,8 +18,6 @@ export const openAuthDialog = async (page: Page) => {
   return dialog
 }
 
-// The dialog keeps both panels mounted to animate its height, so the sign in
-// button has to be looked for inside the active panel.
 export const getAuthDialogSignInButton = (page: Page) => {
   return page
     .getByRole('dialog')
@@ -29,10 +25,6 @@ export const getAuthDialogSignInButton = (page: Page) => {
     .getByRole('button', { name: m.nav_sign_in() })
 }
 
-// better-auth signs the email verification token as a JWT and stores nothing,
-// unlike the password reset token which does leave a `verification` row. There
-// is no token to read back, so the suite mints the one the email would have
-// carried. Everything that URL then triggers is the real route.
 export const buildEmailVerificationUrl = async (email: string) => {
   const token = await signJWT(
     { email: email.toLowerCase() },

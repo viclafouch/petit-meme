@@ -16,10 +16,7 @@ export type E2eRole = Pick<User, 'id' | 'name' | 'email' | 'emailVerified'> & {
   aiSearchCount?: number
 }
 
-// A file this repository serves, so the ProviderAvatar tile renders without
-// leaving for a provider CDN. Never a catalogue path: the picker tells the two
-// apart by comparing them to the image the User carries.
-const E2E_PROVIDER_AVATAR_PATH = '/apple-touch-icon.png'
+const SELF_SERVED_NON_CATALOGUE_AVATAR_PATH = '/apple-touch-icon.png'
 
 const CAPPED_BOOKMARK_MEME_IDS = E2E_FILLER_MEMES.slice(
   0,
@@ -28,9 +25,6 @@ const CAPPED_BOOKMARK_MEME_IDS = E2E_FILLER_MEMES.slice(
   return meme.id
 })
 
-// One role per scenario that leaves a mark on its own account. Sharing a role
-// between a checkout and a deletion would make the second test depend on the
-// order of the first.
 export const E2E_ROLES = {
   free: {
     id: 'e2e-user-free',
@@ -106,7 +100,7 @@ export const E2E_ROLES = {
     name: 'E2E Avatar Provider',
     email: `e2e-avatar-provider@${E2E_EMAIL_DOMAIN}`,
     emailVerified: true,
-    providerAvatar: E2E_PROVIDER_AVATAR_PATH
+    providerAvatar: SELF_SERVED_NON_CATALOGUE_AVATAR_PATH
   },
   passwordUpdate: {
     id: 'e2e-user-password-update',
@@ -114,8 +108,6 @@ export const E2E_ROLES = {
     email: `e2e-password-update@${E2E_EMAIL_DOMAIN}`,
     emailVerified: true
   },
-  // The only role born with a real Stripe customer: a billing portal session is
-  // created against one, and an invented id would be refused.
   billingPortal: {
     id: 'e2e-user-billing-portal',
     name: 'E2E Billing Portal',
@@ -167,8 +159,6 @@ export const E2E_ROLES = {
     premiumPlan: 'premium',
     aiSearchCount: FREE_PLAN_MAX_AI_SEARCHES
   },
-  // Never signed in, so it gets no storage state: the login screen is the only
-  // place that has something to say about an unverified account.
   unverified: {
     id: 'e2e-user-unverified',
     name: 'E2E Unverified',
@@ -179,7 +169,6 @@ export const E2E_ROLES = {
 
 export type E2eRoleName = keyof typeof E2E_ROLES
 
-// https://docs.stripe.com/testing
 export const STRIPE_TEST_CARD = {
   number: '4242424242424242',
   expiry: '12/34',

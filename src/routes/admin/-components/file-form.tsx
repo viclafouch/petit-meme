@@ -31,7 +31,6 @@ type FileFormParams = {
 
 const formOpts = formOptions({
   defaultValues: {
-    // See https://github.com/TanStack/form/issues/1583#issuecomment-2980179941
     video: undefined as unknown as File
   },
   validators: {

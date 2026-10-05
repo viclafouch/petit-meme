@@ -13,18 +13,12 @@ const AVATAR_SLOT_NUMBER = '3'
 const SESSION_URL_PATTERN = /auth\/get-session/u
 const STRIPE_BILLING_PORTAL_ORIGIN = 'https://billing.stripe.com'
 const BILLING_PORTAL_URL_PATTERN = /subscription\/billing-portal/u
-// A billing portal session lives under this path, and a Stripe page that is not
-// one would answer the origin alone.
 const STRIPE_PORTAL_SESSION_PATH = '/p/session'
 
-// The header dropdown, the phone navigation and the dialogs of this page carry
-// the same names as the buttons of the page itself, so every hook of this file
-// is looked for inside the main landmark.
 const getSettingsButton = (page: Page, name: string) => {
   return page.getByRole('main').getByRole('button', { name })
 }
 
-// Each dialog of this page is opened by a button that carries its own title.
 const openSettingsDialog = async (page: Page, name: string) => {
   const dialog = page.getByRole('dialog', { name })
 
@@ -35,8 +29,6 @@ const openSettingsDialog = async (page: Page, name: string) => {
   return dialog
 }
 
-// The name of slot one is a prefix of the names of slots ten to nineteen, so
-// whatever number this helper is handed is compared exactly.
 const getAvatarSlot = (dialog: Locator, number: string) => {
   return dialog.getByRole('radio', {
     name: m.settings_avatar_slot_label({ number }),
@@ -44,10 +36,6 @@ const getAvatarSlot = (dialog: Locator, number: string) => {
   })
 }
 
-// The screen turns on the optimistic update, so waiting for it would leave the
-// write in flight. The session that follows is the real signal: better-auth
-// caches a session in a signed cookie for five minutes, and a reload before
-// that refresh reads the Avatar the User had before the click.
 const pickAvatar = async (tile: Locator) => {
   const sessionRefreshed = tile.page().waitForResponse(SESSION_URL_PATTERN)
 
@@ -74,8 +62,6 @@ const submitPasswordUpdate = async ({
   await dialog.getByLabel(m.auth_new_password()).fill(newPassword)
   await dialog.getByLabel(m.auth_confirm_password()).fill(confirmPassword)
 
-  // The trigger of this dialog is named « Modifier mon mot de passe », which
-  // contains the name of the submit button.
   await dialog
     .getByRole('button', { name: m.auth_update(), exact: true })
     .click()
@@ -255,8 +241,6 @@ test.describe('a Premium', () => {
   test('sees their Premium plan and is handed over to the Stripe portal', async ({
     page
   }) => {
-    // The portal belongs to Stripe and is never crossed: the run stops at the
-    // door and only checks that the door is the right one.
     await page.route(`${STRIPE_BILLING_PORTAL_ORIGIN}/**`, (route) => {
       return route.abort()
     })

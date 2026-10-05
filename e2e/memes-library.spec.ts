@@ -2,7 +2,7 @@ import { MEMES_PER_PAGE } from '~/constants/meme'
 import {
   E2E_FIRST_PAGE_MEMES,
   E2E_NAMED_MEMES,
-  E2E_SEARCH_WORD,
+  E2E_UNIQUE_SEARCH_WORD,
   E2E_SECOND_PAGE_MEMES
 } from './content'
 import { expect, test } from './fixtures'
@@ -10,17 +10,12 @@ import { repeatUntilNavigated, repeatUntilVisible } from './hydration'
 import { getMemeLink, getMemePlayButtons, getMemeTitleLinks } from './library'
 import { m } from './messages'
 
-// The library is open to everyone, so it is walked as an anonymous Visitor.
-
 const LIBRARY_PATHNAME = '/memes/category/all'
 
 const SECOND_PAGE_NUMBER = '2'
 
 const WIDEST_GRID_COLUMN_COUNT = '6'
 
-// Dropping French leaves the English and the Universal Memes, thirty four of
-// them, so the page stays full. A filter that answered nothing would satisfy
-// every other assertion of that test.
 const FILTERED_FIRST_PAGE_COUNT = MEMES_PER_PAGE
 
 test('the library opens on the trending Category and fills a page', async ({
@@ -45,14 +40,10 @@ test('a word typed in the search field narrows the library to what matches', asy
     name: m.meme_search_placeholder()
   })
 
-  // The searched Meme is the second most viewed, so the unfiltered page already
-  // carries it and waiting for it proves nothing. The query reaching the URL is
-  // what says the word was typed into a live page, and the field is emptied
-  // first so that a repeat has a change to fire.
   await repeatUntilNavigated(
     async () => {
       await searchField.clear()
-      await searchField.fill(E2E_SEARCH_WORD)
+      await searchField.fill(E2E_UNIQUE_SEARCH_WORD)
     },
     { page, from: LIBRARY_PATHNAME }
   )
@@ -81,8 +72,6 @@ test('the second page holds exactly what the first one left out', async ({
     E2E_SECOND_PAGE_MEMES.length
   )
 
-  // The count alone would hold for any twenty three Memes. Naming both sides of
-  // the cut is what proves the cut sits where the page size says.
   await Promise.all([
     ...E2E_SECOND_PAGE_MEMES.map((meme) => {
       return expect(getMemeLink(page, meme)).toBeVisible()

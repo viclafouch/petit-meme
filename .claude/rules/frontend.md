@@ -31,15 +31,18 @@ paths: ["src/**/*.{ts,tsx}"]
 - Use `mutation.isPending`, `mutation.isError`, `mutation.error` - never `useState` for loading/error
 - Always display `mutation.error` with `getErrorMessage()` helper
 - Name: `*Mutation` suffix
+- **A middleware refuses by throwing an `Error`, never a `Response`**. `executeMiddleware` catches every throw into `{ ...ctx, error }`. A `Response` there is flagged `X-TSS-Raw-Response` and handed back to the client as a resolved value, so the mutation succeeds silently and `onError` never fires. An `Error` travels in the serialized envelope, which the client chain unwraps with `if (result.error) throw result.error`. Set the status and the headers with `setResponseStatus` and `setResponseHeader` before the throw.
 
 ### Execution Boundaries (TanStack Start)
 - **`createServerOnlyFn`** for utility functions accessing DB, env vars, or server-only APIs - crashes if called from client
 - **`createClientOnlyFn`** for utility functions using `window`, `localStorage`, or browser-only APIs - crashes if called from server
 - **`createServerFn`** for RPC calls (client can call, executes on server via network request)
 - Place server-only utilities in `src/utils/` wrapped with `createServerOnlyFn`
+- **Read `serverEnv` inside a function, never at module scope**, in any module a client chunk can import, `~/env/server` included. A constant reads it while the module loads, and reading a server variable in the browser throws and takes hydration down with it. This is why `matchIsProductionDeployment` and `matchIsDeployed` are functions.
 
 ### Forms
 - **TanStack Form** + **Zod** + **useMutation** for submission
+- **A `File` field starts at `undefined as unknown as File`**. TanStack Form infers the form values from `defaultValues` and `validators` together ([TanStack/form#1583](https://github.com/TanStack/form/issues/1583#issuecomment-2980179941)), so a default has to match the schema input, and an empty file field has no `File` to start from. The runtime value stays `undefined` until a file is picked: guard it, with an `oxlint-disable-next-line typescript/no-unnecessary-condition` that names this cast
 
 ### Accessibility (WCAG 2.1 AA)
 - Keyboard navigation support

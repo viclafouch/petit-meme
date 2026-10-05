@@ -1,11 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { E2E_BASE_URL, E2E_BUNNY_HOSTNAME } from './env'
 
-// No browser here: these routes answer machines, not Visitors.
-//
-// Each one is expected to carry entries. An empty sitemap would make the leak
-// assertion below pass without covering anything, so emptiness is a failure
-// rather than a case to allow for.
 const CHILD_SITEMAPS = [
   '/sitemap-static.xml',
   '/sitemap-categories.xml',
@@ -55,9 +50,6 @@ for (const pathname of CHILD_SITEMAPS) {
 
     expect(locations.length).toBeGreaterThan(0)
 
-    // A video host in a <loc> would offer Google a raw file where a page is
-    // expected. The memes sitemap does carry video URLs, but only inside the
-    // video tags Google reads for indexing.
     for (const location of locations) {
       expect(location.startsWith(E2E_BASE_URL)).toBe(true)
       expect(location).not.toContain(E2E_BUNNY_HOSTNAME)

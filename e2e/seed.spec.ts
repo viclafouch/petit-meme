@@ -1,10 +1,7 @@
-import { E2E_NAMED_MEMES, E2E_SEARCH_WORD } from './content'
+import { E2E_NAMED_MEMES, E2E_UNIQUE_SEARCH_WORD } from './content'
 import { resolveStorageStatePath } from './env'
 import { expect, test } from './fixtures'
 
-// Entry point for the Playwright agents: it puts the browser in the state every
-// scenario starts from, a signed in free User with the consent banner answered.
-// The database itself is seeded by `seed.setup.ts`.
 test.use({ storageState: resolveStorageStatePath('free') })
 
 test('a signed in Visitor lands on the home page', async ({ page }) => {
@@ -23,7 +20,7 @@ test('the seeded Memes reach the library', async ({ page }) => {
 })
 
 test('the seeded Memes reach the search index', async ({ page }) => {
-  const search = new URLSearchParams({ query: E2E_SEARCH_WORD })
+  const search = new URLSearchParams({ query: E2E_UNIQUE_SEARCH_WORD })
 
   await page.goto(`/memes/category/all?${search}`)
 

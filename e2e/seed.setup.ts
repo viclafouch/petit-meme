@@ -22,15 +22,8 @@ import {
   type E2eMeme
 } from './content'
 
-// Wider than a test's thirty seconds on purpose: this one empties a database,
-// writes fifty three Memes and waits for Algolia to swap two indices.
 const SEED_TIMEOUT_MS = 180_000
 
-// Each write below nests its relations, so Prisma runs it in a transaction that
-// holds a connection for its whole duration. Asking for all fifty three at once
-// leaves forty eight of them queued on a pool of five, and that wait breaks the
-// five second acquisition timeout as soon as the runner sits further from the
-// database than a laptop does. Writing them by the poolful never queues.
 const createWithinPool = async <T>(
   items: readonly T[],
   create: (item: T) => Promise<void>
@@ -51,9 +44,6 @@ const BOOKMARK_DATE_OUTSIDE_TRENDING_WINDOW = new Date(
   Date.now() - (TRENDING_CATEGORY_DAYS + 1) * DAY
 )
 
-// A billing portal session is created against a real Stripe customer, so the
-// role that opens one is born with a test mode customer rather than with an id
-// that designates nothing.
 const createStripeCustomer = async (role: E2eRole) => {
   if (!role.hasStripeCustomer) {
     return null
@@ -179,9 +169,6 @@ const createCategory = async (category: E2eCategory) => {
 }
 
 const createMeme = async (meme: E2eMeme) => {
-  // Publication stands in for creation. Left to its default, `createdAt` would
-  // be the instant of a parallel insert, which gives the index sorted on it no
-  // stable order to speak of.
   const publishedAt = new Date(Date.now() - meme.publishedDaysAgo * DAY)
 
   await prismaClient.meme.create({
@@ -221,8 +208,6 @@ const createMeme = async (meme: E2eMeme) => {
   })
 }
 
-// The library reads Algolia for everything but the first trending page, so a
-// Meme that stays in the database alone is invisible to most of the suite.
 const indexMemes = async () => {
   const memes = await prismaClient.meme.findMany({
     include: MEME_ALGOLIA_INCLUDE
@@ -239,9 +224,6 @@ setup.afterAll(async () => {
   await prismaClient.$disconnect()
 })
 
-// Nothing is deleted at Stripe. A deleted customer leaves an id that outlives
-// it, and better-auth then hands that id to Stripe, which refuses it. Test mode
-// customers pile up instead, which costs nothing and breaks nothing.
 setup('seed the e2e environment', async () => {
   setup.setTimeout(SEED_TIMEOUT_MS)
   logEnvironmentInfo()

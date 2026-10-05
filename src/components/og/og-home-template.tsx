@@ -185,7 +185,7 @@ export const OgHomeTemplate = ({
         <div
           tw="flex items-center justify-center mt-6"
           style={{
-            border: '1.5px solid rgba(255,255,255,0.25)',
+            border: '1px solid rgba(255,255,255,0.25)',
             borderRadius: '9999px',
             padding: '10px 32px',
             backgroundColor: 'rgba(255,255,255,0.05)'

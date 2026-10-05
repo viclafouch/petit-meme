@@ -23,13 +23,7 @@ const RouteComponent = () => {
   }, [setTheme])
 
   return (
-    <SidebarProvider
-      style={
-        {
-          '--sidebar-width': 'calc(var(--spacing) * 72)'
-        } as React.CSSProperties
-      }
-    >
+    <SidebarProvider style={{ '--sidebar-width': 'calc(var(--spacing) * 72)' }}>
       <AdminSidebar variant="inset" />
       <SidebarInset>
         <Container>

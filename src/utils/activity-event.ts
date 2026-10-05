@@ -1,5 +1,4 @@
 import { createServerOnlyFn } from '@tanstack/react-start'
-// Vercel-specific: replace with platform equivalent if migrating (e.g. Railway)
 import { waitUntil } from '@vercel/functions'
 import { prismaClient } from '~/db'
 import type { Prisma } from '~/db/generated/prisma/client'

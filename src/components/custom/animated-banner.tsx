@@ -1,4 +1,3 @@
-// Keep this component even if unused — reusable banner for site-wide announcements
 import type React from 'react'
 
 type AnimatedBannerProps = {

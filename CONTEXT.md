@@ -167,6 +167,9 @@ A file in `public/avatars/` is never deleted nor renamed. A User picked a rank, 
 **`/avatars/**` is served with a one week `max-age`, never as `immutable`.**
 This is deliberate. A style change rewrites the same 24 files under the same names, and `immutable` would freeze the old drawing for up to a year on visitors' devices. Accepted trade off: a change takes up to seven days to propagate.
 
+**Every install runs the project's own `postinstall`, even when nothing changed.**
+`optimisticRepeatInstall` is `false` in `pnpm-workspace.yaml`. `public/ffmpeg/` is gitignored and only the root `postinstall` writes it. Vercel restores `node_modules` from its build cache, so a deployment without a dependency change finds nothing to install, and with `optimisticRepeatInstall` at its default, pnpm then skips the project's own scripts too. The build ships without the ffmpeg core and the Studio breaks at runtime, with nothing in the build log. Turning the setting back on reads like a free speedup and takes that file out of production.
+
 **The `@vercel/*` entries of `trustPolicyExclude` name exact versions, and they are temporary.**
 `trustPolicy: no-downgrade` rejects a version that carries weaker trust evidence than the versions before it. Vercel now publishes its packages through a trusted publisher without a provenance attestation, and pnpm counts a trusted publisher only with one, so `@vercel/functions` and the packages it pulls in read as a possible takeover on every install. Each entry names one exact version, so no other version gets past the policy. Every upgrade of `@vercel/functions` needs its new versions listed the same way until Vercel publishes with provenance again, and the entries go as soon as it does.
 

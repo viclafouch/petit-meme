@@ -11,6 +11,7 @@ trustPolicyExclude:
 blockExoticSubdeps: true
 strictPeerDependencies: true
 
+optimisticRepeatInstall: false
 strictDepBuilds: true
 allowBuilds:
   '@google/genai': true

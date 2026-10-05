@@ -16,20 +16,9 @@ const ACCEPTED_CONSENT = {
 } as const satisfies ConsentState
 
 type E2eWorkerFixtures = {
-  prismaConnection: typeof prismaClient
+  prismaClosedOncePerWorker: typeof prismaClient
 }
 
-// Every test starts with the consent banner already answered, the premium
-// reminder snoozed and the locale banner dismissed. All three speak on their
-// own, five seconds into a `/memes` page for the reminder and on sight of an
-// `/en/` page for the locale banner, and something that opens itself in the
-// middle of a scenario steals the click that scenario was about to make. Each
-// has its own test, and nothing else should have to walk past them.
-//
-// Uncaught errors on our own pages fail the test that saw them. One of them
-// kills hydration, which leaves buttons that look perfect and do nothing, and
-// surfaces minutes later as a timeout with no clue about the cause. Errors
-// raised by third party pages, Stripe above all, are not ours to judge.
 export const test = base.extend<object, E2eWorkerFixtures>({
   context: async ({ context, baseURL }, provide) => {
     await context.addCookies([
@@ -63,9 +52,7 @@ export const test = base.extend<object, E2eWorkerFixtures>({
 
     expect(pageErrors, 'uncaught errors on our own pages').toEqual([])
   },
-  // Specs read the database to check what a flow wrote. Closing the pool once
-  // per worker beats repeating an `afterAll` in every one of them.
-  prismaConnection: [
+  prismaClosedOncePerWorker: [
     // oxlint-disable-next-line no-empty-pattern -- Playwright reads the destructuring to find a fixture's dependencies, and this one has none
     async ({}, provide) => {
       await provide(prismaClient)

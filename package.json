@@ -131,7 +131,7 @@
     "oxlint-tsgolint": "^7.0.2001",
     "pino-pretty": "^13.2.0",
     "prisma": "^7.10.0",
-    "shadcn": "^4.15.0",
+    "shadcn": "^4.21.2",
     "typescript": "^7.0.2",
     "vite-node": "^6.0.0",
     "vitest": "^4.1.11"

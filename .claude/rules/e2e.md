@@ -55,6 +55,8 @@ The content is dated so that no order depends on the run. A seeded Meme is creat
 
 One Meme alone carries a Video that exists at Bunny. `E2E_NAMED_MEMES.mostViewed` points at the one Video of the `e2e` Bunny library. Every other fixture carries a made up id, which is enough for a list, a thumbnail slot and a page, and never enough to play or to Export. That id is `E2E_VIDEO_BUNNY_ID` in `.env.e2e` rather than a literal in `content.ts`, because it names a resource of that library and recreating the library gives it another one. A spec that needs a real file, the Studio first, uses that Meme. A spec that cannot pick its Meme, Reels and its random order, asserts that the request for the file leaves: a Premium taken for a free User gets the upsell dialog instead, and nothing goes out.
 
+The seed sets its own timeout, `SEED_TIMEOUT_MS`, wider than the one `playwright.config.ts` gives a test: it empties a database, writes every Meme and waits for Algolia to swap the index of each locale.
+
 ### Public surfaces
 
 A surface open to everyone, the home page, the library, a Category, a legal page, is walked as an anonymous Visitor with no storage state: nothing there is supposed to ask for an account. A surface that also serves signed in Users, the Studio for one, keeps at least one anonymous test, which proves it opens without an account as the free library promises. A route that answers machines rather than Visitors, a sitemap, `robots.txt`, the manifest, is checked through `request`, with no browser.

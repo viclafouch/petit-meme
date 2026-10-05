@@ -199,3 +199,6 @@ The `AiSearchLog` the count reads is written with `waitUntil`, so it lands after
 
 **The client entry hydrates with `StartClient`, never with the router alone.**
 `StartClient` is the only thing that publishes the options of `createStart` to the browser, and `serializationAdapters` is among them. Without it a server function still answers, but its payload comes back with a tag no one on the client can read, so a refusal that carries a `StudioErrorCode` arrives as a bare seroval error and every caller falls back on its generic message. `RouterClient`, from the router alone, hydrates the page correctly and reads exactly like the right entry: it is the one that already cost the Bookmark cap its own message.
+
+**The rate limit is a soft cap, counted in the memory of one instance.**
+`rate-limit-store` keeps its counters in a `Map` that no other serverless instance sees, so a Visitor whose requests spread over several instances gets past the cap. The window is fixed, not sliding: the first request starts the clock, and the count resets only once the whole window has passed. It is simpler and cheaper than a sliding window, and it allows a burst across the boundary of two windows. Past `MAX_STORE_SIZE` keys the store drops the oldest inserted ones, an active key included. Each of these reads like a gap to close, and each is accepted because the cap is soft.

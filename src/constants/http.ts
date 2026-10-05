@@ -1,4 +1,4 @@
-import { ONE_YEAR_IN_SECONDS, SEVEN_DAYS_IN_SECONDS } from './time'
+import { ONE_YEAR_IN_SECONDS, SEVEN_DAYS_IN_SECONDS } from './time.ts'
 
 export const IMMUTABLE_CACHE_CONTROL = `public, max-age=${ONE_YEAR_IN_SECONDS}, immutable`
 

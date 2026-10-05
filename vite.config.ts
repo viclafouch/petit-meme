@@ -8,7 +8,7 @@ import react from '@vitejs/plugin-react'
 import {
   IMMUTABLE_CACHE_CONTROL,
   WEEKLY_CACHE_CONTROL
-} from './src/constants/http'
+} from './src/constants/http.ts'
 
 const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',

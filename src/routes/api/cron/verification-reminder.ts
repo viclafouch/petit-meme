@@ -2,6 +2,7 @@
 import { randomBytes, randomUUID } from 'node:crypto'
 import { createFileRoute } from '@tanstack/react-router'
 import { prismaClient } from '~/db'
+import { PLACEHOLDER_EMAIL_DOMAIN } from '~/constants/auth'
 import { DAY, HOUR } from '~/constants/time'
 import type { UserLocale } from '~/db/generated/prisma/client'
 import { emailSubjects } from '~/emails/subjects'
@@ -78,6 +79,7 @@ const runVerificationReminders = async () => {
     where: {
       emailVerified: false,
       verificationReminderSent: false,
+      email: { not: { endsWith: `.${PLACEHOLDER_EMAIL_DOMAIN}` } },
       createdAt: {
         gte: oldestCreatedAt,
         lte: newestCreatedAt

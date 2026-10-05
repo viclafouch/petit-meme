@@ -42,6 +42,7 @@ paths: ["src/**/*.{ts,tsx}"]
 
 ### Forms
 - **TanStack Form** + **Zod** + **useMutation** for submission
+- **A `File` field starts at `undefined as unknown as File`**. TanStack Form infers the form values from `defaultValues` and `validators` together ([TanStack/form#1583](https://github.com/TanStack/form/issues/1583#issuecomment-2980179941)), so a default has to match the schema input, and an empty file field has no `File` to start from. The runtime value stays `undefined` until a file is picked: guard it, with an `oxlint-disable-next-line typescript/no-unnecessary-condition` that names this cast
 
 ### Accessibility (WCAG 2.1 AA)
 - Keyboard navigation support

@@ -1,9 +1,5 @@
 import * as Sentry from '@sentry/tanstackstart-react'
 
-// This file is imported before the app, so it reads the raw variable rather
-// than `serverEnv`: a missing variable elsewhere must not break Sentry itself.
-// Same fallback as `~/env/server`: when the platform says nothing, `NODE_ENV`
-// decides, so a system variable that is not exposed never silences production.
 const deploymentEnv =
   process.env.VERCEL_ENV ??
   (process.env.NODE_ENV === 'production' ? 'production' : 'development')

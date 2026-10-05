@@ -41,6 +41,8 @@ A scenario that leaves a mark on its account gets its own role in `E2E_ROLES`. S
 
 A page that belongs to a third party, the Stripe billing portal or an OAuth provider, is never crossed. Route its origin to `abort()`, stop at the door and check that the door is the right one: the request that leaves names a billing portal session by its path, since any Stripe page answers the origin alone, and an OAuth request carries the way back to our own callback rather than to whatever origin the run happens to use.
 
+A checkout pays with `STRIPE_TEST_CARD`, the Visa that [Stripe lists for testing](https://docs.stripe.com/testing). It is not enrolled in 3D Secure, so no authentication step stands between the payment and the way back to the site.
+
 ### Fixtures
 
 Every test starts with the prompts that open on their own already answered. `fixtures.ts` answers the consent banner, snoozes the Premium reminder and dismisses the locale banner before the first page loads. All three speak on their own, `PREMIUM_REMINDER_DELAY_MS` into a `/memes` page for the reminder and on sight of an `/en/` page for the locale banner, and a prompt that opens in the middle of a scenario steals the click that scenario was about to make. Each has its own spec, and no other spec should have to walk past them.

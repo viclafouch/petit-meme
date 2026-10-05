@@ -1,7 +1,3 @@
-/** Merge multiple refs into a single one.
- *
- * Taken from https://www.davedrinks.coffee/how-do-i-use-two-react-refs/, type-hints by us
- */
 export function mergeRefs<T>(
   ...refs: (React.RefObject<T> | React.Ref<T> | undefined)[]
 ): React.Ref<T> | null {

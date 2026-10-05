@@ -124,11 +124,7 @@ export const CookieConsentProvider = ({
     // oxlint-disable-next-line react/exhaustive-deps -- stable config object, functions use latest state via closure
   }, [state, isBannerVisible, isSettingsOpen, config])
 
-  return (
-    <CookieConsentContext.Provider value={value}>
-      {children}
-    </CookieConsentContext.Provider>
-  )
+  return <CookieConsentContext value={value}>{children}</CookieConsentContext>
 }
 
 export function useCookieConsent() {

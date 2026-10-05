@@ -79,13 +79,13 @@ export const PageHeading2 = ({
   )
 }
 
-export const PageDescription = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLParagraphElement>
->(({ className, children, ...props }, ref) => {
+export const PageDescription = ({
+  className,
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLParagraphElement>) => {
   return (
     <p
-      ref={ref}
       className={cn(
         'text-muted-foreground max-w-2xl text-center font-medium text-balance md:text-lg lg:text-xl mx-auto',
         className
@@ -95,9 +95,7 @@ export const PageDescription = React.forwardRef<
       {children}
     </p>
   )
-})
-
-PageDescription.displayName = 'PageDescription'
+}
 
 export const PageActions = ({
   className,

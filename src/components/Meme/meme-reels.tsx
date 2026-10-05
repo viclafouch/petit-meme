@@ -183,9 +183,9 @@ export const MemeReels = () => {
   const [isMuted, setIsMuted] = React.useState(true)
   const parentRef = React.useRef<HTMLDivElement>(null)
 
-  const infiniteReels = useInfiniteQuery(getInfiniteReelsQueryOpts())
+  const reelsFragmentRef = React.useRef<React.FragmentInstance>(null)
 
-  const observerRef = React.useRef<IntersectionObserver | null>(null)
+  const infiniteReels = useInfiniteQuery(getInfiniteReelsQueryOpts())
 
   const setActiveDebouncer = useDebouncer(
     (index: number) => {
@@ -195,38 +195,13 @@ export const MemeReels = () => {
     { wait: 300 }
   )
 
-  const refsMapRef = React.useRef(
-    new Map<string, React.RefObject<HTMLDivElement | null>>()
-  )
-
-  const memesWithRefs = React.useMemo(() => {
-    const refsMap = refsMapRef.current
-
-    return (
-      infiniteReels.data?.pages
-        .flatMap(({ memes }) => {
-          return memes
-        })
-        .map((meme, index) => {
-          let ref = refsMap.get(meme.id)
-
-          if (!ref) {
-            ref = React.createRef<HTMLDivElement | null>()
-            refsMap.set(meme.id, ref)
-          }
-
-          return {
-            data: meme,
-            id: meme.id,
-            ref,
-            index
-          }
-        }) ?? []
-    )
-  }, [infiniteReels.data])
+  const memes =
+    infiniteReels.data?.pages.flatMap((page) => {
+      return page.memes
+    }) ?? []
 
   const rowVirtualizer = useVirtualizer({
-    count: memesWithRefs.length,
+    count: memes.length,
     getScrollElement: () => {
       return parentRef.current
     },
@@ -244,6 +219,12 @@ export const MemeReels = () => {
     .join(',')
 
   React.useEffect(() => {
+    const reelsFragment = reelsFragmentRef.current
+
+    if (!reelsFragment) {
+      return () => {}
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
@@ -258,24 +239,16 @@ export const MemeReels = () => {
       { threshold: 0.7 }
     )
 
-    observerRef.current = observer
-
-    for (const virtualRow of rowVirtualizer.getVirtualItems()) {
-      const item = memesWithRefs[virtualRow.index]
-
-      if (item?.ref.current) {
-        observer.observe(item.ref.current)
-      }
-    }
+    reelsFragment.observeUsing(observer)
 
     return () => {
-      observer.disconnect()
+      reelsFragment.unobserveUsing(observer)
     }
-  }, [memesWithRefs, virtualItemsKey, setActiveDebouncer, rowVirtualizer])
+  }, [setActiveDebouncer])
 
   useHotkeys('down, pagedown', (event) => {
     event.preventDefault()
-    const nextIndex = Math.min(currentIndex + 1, memesWithRefs.length - 1)
+    const nextIndex = Math.min(currentIndex + 1, memes.length - 1)
     rowVirtualizer.scrollToIndex(nextIndex, { align: 'start' })
   })
 
@@ -296,7 +269,7 @@ export const MemeReels = () => {
     }
 
     if (
-      memesWithRefs.length - 3 < lastItem.index &&
+      memes.length - 3 < lastItem.index &&
       hasNextPage &&
       !isFetchingNextPage
     ) {
@@ -305,7 +278,7 @@ export const MemeReels = () => {
   }, [
     hasNextPage,
     fetchNextPage,
-    memesWithRefs.length,
+    memes.length,
     isFetchingNextPage,
     virtualItemsKey,
     rowVirtualizer
@@ -326,45 +299,46 @@ export const MemeReels = () => {
           role="feed"
           aria-label={m.meme_video_feed()}
         >
-          {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-            const item = memesWithRefs[virtualRow.index]
+          {/* oxlint-disable-next-line react/jsx-no-useless-fragment -- a Fragment ref is not useless, fixed in oxlint 1.83 (oxc#26571) */}
+          <React.Fragment ref={reelsFragmentRef}>
+            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+              const { index } = virtualRow
+              const meme = memes[index]
 
-            if (!item) {
-              return null
-            }
+              if (!meme) {
+                return null
+              }
 
-            const { data, ref, index } = item
-
-            return (
-              <div
-                className="snap-start absolute top-0 left-0 w-full h-dvh overflow-hidden"
-                style={{
-                  transform: `translateY(${virtualRow.start}px)`,
-                  display:
-                    rowVirtualizer.isScrolling &&
-                    (index > currentIndex + 1 || index < currentIndex - 1)
-                      ? 'none'
-                      : 'block'
-                }}
-                data-index={index}
-                ref={ref}
-                key={data.id}
-                role="article"
-                aria-label={data.title}
-                aria-setsize={-1}
-                aria-posinset={index + 1}
-              >
-                <Reel
-                  meme={data}
-                  setIsPlaying={setIsPlaying}
-                  setIsMuted={setIsMuted}
-                  isPlaying={isPlaying}
-                  isActive={currentIndex === index}
-                  isMuted={isMuted}
-                />
-              </div>
-            )
-          })}
+              return (
+                <div
+                  className="snap-start absolute top-0 left-0 w-full h-dvh overflow-hidden"
+                  style={{
+                    transform: `translateY(${virtualRow.start}px)`,
+                    display:
+                      rowVirtualizer.isScrolling &&
+                      (index > currentIndex + 1 || index < currentIndex - 1)
+                        ? 'none'
+                        : 'block'
+                  }}
+                  data-index={index}
+                  key={meme.id}
+                  role="article"
+                  aria-label={meme.title}
+                  aria-setsize={-1}
+                  aria-posinset={index + 1}
+                >
+                  <Reel
+                    meme={meme}
+                    setIsPlaying={setIsPlaying}
+                    setIsMuted={setIsMuted}
+                    isPlaying={isPlaying}
+                    isActive={currentIndex === index}
+                    isMuted={isMuted}
+                  />
+                </div>
+              )
+            })}
+          </React.Fragment>
         </div>
       </div>
     </div>

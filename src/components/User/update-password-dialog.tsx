@@ -37,7 +37,7 @@ const getUpdatePasswordSchema = () => {
 
   return z
     .object({
-      currentPassword: z.string().min(1, { message: m.validation_required() }),
+      currentPassword: z.string().min(1, { error: m.validation_required() }),
       newPassword: passwordField,
       confirmPassword: passwordField
     })
@@ -46,7 +46,7 @@ const getUpdatePasswordSchema = () => {
         return data.newPassword === data.confirmPassword
       },
       {
-        message: m.validation_passwords_dont_match(),
+        error: m.validation_passwords_dont_match(),
         path: ['confirmPassword']
       }
     )

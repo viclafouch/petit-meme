@@ -31,10 +31,10 @@ import { localizeHref } from '~/paraglide/runtime'
 const getSignupSchema = () => {
   return z
     .object({
-      name: z.string().min(1, { message: m.validation_name_required() }),
+      name: z.string().min(1, { error: m.validation_name_required() }),
       email: getEmailSchema(),
       acceptTerms: z.literal(true, {
-        message: m.validation_accept_terms()
+        error: m.validation_accept_terms()
       })
     })
     .and(getPasswordWithConfirmationSchema())

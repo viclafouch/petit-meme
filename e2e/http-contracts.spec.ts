@@ -50,9 +50,6 @@ for (const pathname of CHILD_SITEMAPS) {
 
     expect(locations.length).toBeGreaterThan(0)
 
-    // A video host in a <loc> would offer Google a raw file where a page is
-    // expected. The memes sitemap does carry video URLs, but only inside the
-    // video tags Google reads for indexing.
     for (const location of locations) {
       expect(location.startsWith(E2E_BASE_URL)).toBe(true)
       expect(location).not.toContain(E2E_BUNNY_HOSTNAME)

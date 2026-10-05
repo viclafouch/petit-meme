@@ -36,7 +36,7 @@ import {
   FFMPEG_INPUT_FILE,
   FFMPEG_TEXT_FILE,
   loadFFmpeg,
-  readFFmpegOutput
+  readAndDeleteFFmpegOutput
 } from '~/utils/ffmpeg'
 
 type VideoProcessingParams = {
@@ -252,7 +252,7 @@ const addTextToVideo = async (
     throw new Error('FFmpeg error')
   }
 
-  const blob = await readFFmpegOutput(ffmpeg)
+  const blob = await readAndDeleteFFmpegOutput(ffmpeg)
   await ffmpeg.deleteFile(FFMPEG_TEXT_FILE).catch(() => {})
 
   return blob

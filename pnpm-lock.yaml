@@ -240,9 +240,6 @@ importers:
       zod:
         specifier: ^4.6.5
         version: 4.6.5
-      zod-to-json-schema:
-        specifier: ^3.25.2
-        version: 3.25.2(zod@4.6.5)
       zustand:
         specifier: ^5.0.15
         version: 5.0.15(@types/react@19.3.0)(immer@11.1.21)(react@19.3.0)(use-sync-external-store@1.6.0(react@19.3.0))
@@ -14663,6 +14660,7 @@ snapshots:
   zod-to-json-schema@3.25.2(zod@4.6.5):
     dependencies:
       zod: 4.6.5
+    optional: true
 
   zod@3.25.76: {}
 

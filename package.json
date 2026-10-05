@@ -107,7 +107,6 @@
     "vaul": "^1.1.2",
     "vite": "^8.1.5",
     "zod": "^4.6.5",
-    "zod-to-json-schema": "^3.25.2",
     "zustand": "^5.0.15"
   },
   "devDependencies": {

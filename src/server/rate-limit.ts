@@ -38,12 +38,6 @@ const throwRateLimitExceeded = ({
     'scraping-detection'
   )
 
-  // Throw an Error, never a Response. `executeMiddleware` catches every throw
-  // into `{ ...ctx, error }`, and a Response there is flagged
-  // `X-TSS-Raw-Response` and handed back to the client as a resolved value:
-  // the mutation would succeed silently and `onError` would never fire.
-  // An Error goes through the serialized envelope instead, which the client
-  // chain unwraps with `if (result.error) throw result.error`.
   setResponseStatus(429)
   setResponseHeader('Retry-After', String(result.retryAfterSeconds))
 

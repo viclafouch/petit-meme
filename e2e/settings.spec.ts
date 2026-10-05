@@ -13,8 +13,6 @@ const AVATAR_SLOT_NUMBER = '3'
 const SESSION_URL_PATTERN = /auth\/get-session/u
 const STRIPE_BILLING_PORTAL_ORIGIN = 'https://billing.stripe.com'
 const BILLING_PORTAL_URL_PATTERN = /subscription\/billing-portal/u
-// A billing portal session lives under this path, and a Stripe page that is not
-// one would answer the origin alone.
 const STRIPE_PORTAL_SESSION_PATH = '/p/session'
 
 const getSettingsButton = (page: Page, name: string) => {
@@ -243,8 +241,6 @@ test.describe('a Premium', () => {
   test('sees their Premium plan and is handed over to the Stripe portal', async ({
     page
   }) => {
-    // The portal belongs to Stripe and is never crossed: the run stops at the
-    // door and only checks that the door is the right one.
     await page.route(`${STRIPE_BILLING_PORTAL_ORIGIN}/**`, (route) => {
       return route.abort()
     })

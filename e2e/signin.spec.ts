@@ -85,8 +85,6 @@ for (const provider of SOCIAL_PROVIDERS) {
   test(`the ${provider.id} button hands the Visitor over to ${provider.id}`, async ({
     page
   }) => {
-    // The provider screen belongs to a third party and is never crossed: the
-    // run stops at the door and only checks it is the right one.
     await page.route(`${provider.authorizeOrigin}/**`, (route) => {
       return route.abort()
     })
@@ -105,8 +103,6 @@ for (const provider of SOCIAL_PROVIDERS) {
       providerButton.click()
     ])
 
-    // The browser really left for the provider, and it carries the way back to
-    // our own callback rather than to whatever origin the run happens to use.
     const redirectUri = new URL(authorizeRequest.url()).searchParams.get(
       'redirect_uri'
     )

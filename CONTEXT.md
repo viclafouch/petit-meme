@@ -197,6 +197,9 @@ A seeded Meme is created at the instant it was published. Left to its default, `
 **An uncaught error on one of our pages fails the e2e test that saw it.**
 One such error kills hydration, which leaves buttons that look perfect and do nothing, and it surfaces minutes later as a timeout with no clue about the cause. Errors raised by third party pages, Stripe above all, are not ours to judge, so `fixtures.ts` only collects the ones whose page sits under the base URL.
 
+**The e2e suite mints the email verification link, and reads the password reset token back.**
+better-auth signs the email verification token as a JWT and stores nothing. The password reset token does leave a `verification` row: the token is the tail of its identifier, and its value names the User. With no verification token to read back, `buildEmailVerificationUrl` signs the one the email would have carried with the e2e secret, and everything that URL then triggers is the real route.
+
 **A Premium is only recognised where the subscription is in the query cache.**
 `useMemeExport` reads the cache and never fetches: an Export from a route that did not load the subscription sells Premium to someone who already bought it, and hands them a watermarked video. The `_default` layout loads it for everything under it, and any route outside that layout, `/reels` first, has to load it itself.
 
@@ -204,7 +207,10 @@ One such error kills hydration, which leaves buttons that look perfect and do no
 It lays a full screen veil and declares itself `aria-modal`, so nothing behind it is clickable while it is up. That contradicts the shortest path to the video on purpose: consent has to be a choice, not something collected while the Visitor is aiming at a play button. It still steps aside for a dialog that is already open, and every other prompt, the Premium reminder above all, waits its turn the same way.
 
 **Every field written at sign up must be declared to better-auth.**
-`transformInput` builds the inserted row by looping over the fields known to the better-auth schema only, and drops the rest without an error. A field returned by the `user.create.before` hook but missing from `USER_ADDITIONAL_FIELDS` is simply never written. This trap already cost `provider_avatar`, then the GDPR consent timestamps, then the email locale.
+`transformInput` builds the inserted row by looping over the fields known to the better-auth schema only, and drops the rest without an error. A field returned by the `user.create.before` hook but missing from `USER_ADDITIONAL_FIELDS` is simply never written. This trap already cost `provider_avatar`, then the GDPR consent timestamps, then the email locale. A Prisma model one version behind drops them just as silently, and nothing on screen shows these fields, so `signup.spec.ts` reads the new row back and checks each of them.
+
+**Sign up never says whether an address already has an account.**
+`requireEmailVerification` makes better-auth answer a sign up on a taken address exactly as it answers a new one, and write nothing. Turning that option off turns the signup form into a way to ask whether someone has an account here. `signup.spec.ts` carries a test whose only job is to notice.
 
 **The VisitorKey is a daily fingerprint, never the raw IP and never a stable one.**
 It is `sha256(ip + day + secret)`. The raw IP is out because the key is copied into a JavaScript readable cookie and sent to Algolia as a `userToken`, which would expose it in two forbidden places. A fingerprint stable over time is out too: the table keeps 90 days, so it would amount to a persistent identifier for a marginal analytics gain. The daily renewal is the whole point, and two Visitors behind one connection counting as one is the accepted price.

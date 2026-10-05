@@ -49,8 +49,6 @@ test('a Visitor signs up, verifies their email and comes back signed in', async 
     signupPanel.getByText(m.auth_signup_success_title())
   ).toBeVisible()
 
-  // The fields our own hooks add on top of better-auth. A Prisma model one
-  // version behind drops them without saying anything.
   const createdUser = await findSignupUser()
 
   expect(createdUser).toMatchObject({
@@ -71,10 +69,6 @@ test('a Visitor signs up, verifies their email and comes back signed in', async 
   expect(await findSignupUser()).toMatchObject({ emailVerified: true })
 })
 
-// Because `requireEmailVerification` is on, better-auth answers a sign up on a
-// taken address exactly as it answers a new one, and writes nothing. Turning
-// that option off would turn the signup form into a way to ask whether someone
-// has an account here, which is the thing this test is here to notice.
 test('an address that already has an account gives nothing away', async ({
   page
 }) => {

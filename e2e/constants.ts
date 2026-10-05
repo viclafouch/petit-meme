@@ -25,9 +25,6 @@ const CAPPED_BOOKMARK_MEME_IDS = E2E_FILLER_MEMES.slice(
   return meme.id
 })
 
-// One role per scenario that leaves a mark on its own account. Sharing a role
-// between a checkout and a deletion would make the second test depend on the
-// order of the first.
 export const E2E_ROLES = {
   free: {
     id: 'e2e-user-free',
@@ -162,8 +159,6 @@ export const E2E_ROLES = {
     premiumPlan: 'premium',
     aiSearchCount: FREE_PLAN_MAX_AI_SEARCHES
   },
-  // Never signed in, so it gets no storage state: the login screen is the only
-  // place that has something to say about an unverified account.
   unverified: {
     id: 'e2e-user-unverified',
     name: 'E2E Unverified',

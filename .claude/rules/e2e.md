@@ -30,3 +30,11 @@ An accessible name matches by substring unless `exact: true` says otherwise. Pas
 When the same name appears in several places, scope the locator to the landmark or panel that holds the one you mean. The Settings page looks inside `main`, since its header dropdown, its phone navigation and its dialogs repeat the names of its buttons. The header sign in button is looked for inside `banner`, since the submit button of the open dialog carries the same name. The auth dialog keeps both panels mounted to animate its height, so its buttons are looked for inside the active `tabpanel`.
 
 Count the Memes on screen by their play buttons, with `getMemePlayButtons`. Every card carries exactly one and nothing else on the page does, while a card holds several links to the same Meme.
+
+### Accounts and third parties
+
+A spec that needs a signed in User, and is not about signing in, starts from the storage state `auth.setup.ts` writes for its role. That setup signs every verified role in over the HTTP API rather than through the dialog: the login screen has its own specs, every other spec only needs the cookie, and the sign in also proves the seeded rows are the ones better-auth expects. The unverified role is never signed in and gets no storage state, since only the login screen has something to say about it.
+
+A scenario that leaves a mark on its account gets its own role in `E2E_ROLES`. Sharing one between a checkout and a deletion would make the second test depend on the order of the first.
+
+A page that belongs to a third party, the Stripe billing portal or an OAuth provider, is never crossed. Route its origin to `abort()`, stop at the door and check that the door is the right one: the request that leaves names a billing portal session by its path, since any Stripe page answers the origin alone, and an OAuth request carries the way back to our own callback rather than to whatever origin the run happens to use.

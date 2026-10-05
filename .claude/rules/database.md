@@ -24,7 +24,7 @@ L'app est en production avec des utilisateurs et des données réelles.
 
 #### 2. Créer la migration
 
-**Important** : Prisma lit `DATABASE_URL` depuis l'environnement. Le fichier `prisma/prisma.config.ts` ne charge pas `.env` automatiquement. Il faut toujours préfixer avec `dotenv -e` pour injecter les variables.
+**Important** : Prisma lit `DATABASE_URL` depuis l'environnement. Le fichier `prisma.config.ts`, à la racine, charge seulement un `.env` à la racine, et le projet n'en a pas. Il faut toujours préfixer avec `dotenv -e` pour injecter les variables.
 
 ```bash
 pnpm exec dotenv -e .env.development -- pnpm exec prisma migrate dev --name <nom_descriptif>

@@ -37,7 +37,7 @@ type LoginFormParams = {
 const getLoginSchema = () => {
   return z.object({
     email: getEmailSchema(),
-    password: z.string().min(1, { message: m.validation_required() })
+    password: z.string().min(1, { error: m.validation_required() })
   })
 }
 

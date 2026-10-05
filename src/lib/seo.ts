@@ -54,7 +54,6 @@ const websiteSearchAction = {
 
 const OG_VERSION = 2
 
-/** Types whose title is resolved server-side from the requested locale. */
 export const OG_DEFAULTED_TYPE_VALUES = [
   'ai-search',
   'pricing',
@@ -62,7 +61,6 @@ export const OG_DEFAULTED_TYPE_VALUES = [
   'submit'
 ] as const satisfies readonly string[]
 
-/** Types whose title is content-driven and must always be supplied. */
 export const OG_TITLED_TYPE_VALUES = [
   'category',
   'legal'

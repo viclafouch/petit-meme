@@ -1,10 +1,5 @@
 import { STAR_SHADOWS } from './og-stars'
 
-/**
- * Changing anything an OG template renders means bumping `OG_VERSION` in
- * `~/lib/seo`: generated images are cached immutably for a year, so already
- * scraped URLs never refetch otherwise.
- */
 export const OgBackdrop = () => {
   return (
     <>

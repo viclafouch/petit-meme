@@ -208,3 +208,6 @@ The `AiSearchLog` the count reads is written with `waitUntil`, so it lands after
 
 **The Watermark has one geometry and two filters.**
 `scripts/watermark-videos.ts` burns it with the ffmpeg command line, and the Admin burns it in the browser with ffmpeg.wasm. Both read their figures from `~/constants/watermark`. The width is 21% of the shortest side of the video, so the mark stays visible on a portrait 9:16 Meme. The margin is 3% of that side, capped at 20 pixels so a large video keeps the mark close to its corner. The command line filter measures the video through the `rw` and `rh` variables of `scale`, so the script needs ffmpeg 8 or later. The browser filter computes the same figures in JavaScript.
+
+**Changing what an OG image draws means bumping `OG_VERSION`.**
+`/api/og` answers with an immutable one year `Cache-Control`, so a URL that was already scraped is never fetched again. `OG_VERSION` sits in the query string of every URL `buildOgImageUrl` builds, and bumping it in `~/lib/seo` is the only way to get the new drawing served. Any edit to a template under `components/og/`, the backdrop included, needs it.

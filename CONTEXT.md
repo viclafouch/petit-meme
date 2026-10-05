@@ -191,6 +191,12 @@ The library shows thirty Memes per page, and both locales need a second page to 
 **The e2e content is dated so that no order depends on the run.**
 A seeded Meme is created at the instant it was published. Left to its default, `createdAt` would be the instant of a parallel insert, which gives the index sorted on it no stable order. The news Category and the home announcement read the same thirty day window, and the suite counts the Memes inside it from that same constant: three in French, and no fixture sits near its edge. Seeded Bookmarks are dated outside the trending window, and a test that adds one puts it on the most viewed Meme, the one a fresh Bookmark cannot move out of trending.
 
+**Every e2e test starts with the prompts that open on their own already answered.**
+`fixtures.ts` answers the consent banner, snoozes the Premium reminder and dismisses the locale banner before the first page loads. All three speak on their own, five seconds into a `/memes` page for the reminder and on sight of an `/en/` page for the locale banner, and a prompt that opens in the middle of a scenario steals the click that scenario was about to make. Each has its own spec, and no other spec should have to walk past them.
+
+**An uncaught error on one of our pages fails the e2e test that saw it.**
+One such error kills hydration, which leaves buttons that look perfect and do nothing, and it surfaces minutes later as a timeout with no clue about the cause. Errors raised by third party pages, Stripe above all, are not ours to judge, so `fixtures.ts` only collects the ones whose page sits under the base URL.
+
 **A Premium is only recognised where the subscription is in the query cache.**
 `useMemeExport` reads the cache and never fetches: an Export from a route that did not load the subscription sells Premium to someone who already bought it, and hands them a watermarked video. The `_default` layout loads it for everything under it, and any route outside that layout, `/reels` first, has to load it itself.
 

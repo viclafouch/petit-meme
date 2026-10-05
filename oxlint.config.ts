@@ -9,6 +9,8 @@ import {
   vitest
 } from '@viclafouch/oxc-config'
 
+const TAKUMI_TAILWIND_PROP = 'tw'
+
 export default defineConfig({
   extends: [typescript, react, hooks, jsxA11y, imports, tanstackQuery],
   jsPlugins: ['eslint-plugin-playwright'],
@@ -47,15 +49,11 @@ export default defineConfig({
   },
   overrides: [
     {
-      // The vitest preset silences every category, so it cannot go in `extends`
-      // without disarming the other presets. Spreading it into an override
-      // scoped to test files keeps its rules where they belong.
       files: ['**/*.test.ts'],
       plugins: vitest.plugins,
       rules: vitest.rules
     },
     {
-      // react-email, entry point and Playwright require default exports
       files: ['src/emails/**', 'src/server.ts', 'playwright.config.ts'],
       rules: {
         'import/no-default-export': 'off'
@@ -73,12 +71,12 @@ export default defineConfig({
       }
     },
     {
-      // `tw` is Takumi's built-in Tailwind prop, not a DOM attribute. Ignoring
-      // it keeps the rule live for genuine typos, which an OG template cannot
-      // reveal by inspection.
       files: ['src/components/og/**'],
       rules: {
-        'react/no-unknown-property': ['error', { ignore: ['tw'] }]
+        'react/no-unknown-property': [
+          'error',
+          { ignore: [TAKUMI_TAILWIND_PROP] }
+        ]
       }
     }
   ]

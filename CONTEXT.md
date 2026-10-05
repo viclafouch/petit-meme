@@ -256,3 +256,6 @@ The `/**` rule answers `Cache-Control: no-cache` for every route. `/api/og` sets
 
 **A Video URL reaches the sitemap inside the video tags only, never in a `<loc>`.**
 The memes sitemap hands each Video to Google through `<video:content_loc>`, the tag Google reads to index a video. A video host in a `<loc>` would offer Google a raw file where a page is expected, so `http-contracts.spec.ts` fails as soon as a `<loc>` of any sitemap names it.
+
+**The vitest lint preset sits in an override, never in `extends`.**
+The `vitest` preset of `@viclafouch/oxc-config` turns every category `off`, and oxlint merges `extends` from the first config to the last, so that preset placed there turns off the categories the presets before it turned on, across the whole repository. `oxlint.config.ts` spreads only its plugins and its rules into an override scoped to `**/*.test.ts`. The package README puts it in `extends`, which makes the override read like a mistake.

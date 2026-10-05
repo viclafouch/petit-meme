@@ -253,3 +253,6 @@ Nitro adds the `wasm` and `unwasm` export conditions on every preset. Under `unw
 
 **A route rule header wins over the header a handler sets.**
 The `/**` rule answers `Cache-Control: no-cache` for every route. `/api/og` sets its own immutable header, and still needs a rule of its own in `vite.config.ts` that repeats it, or `/**` downgrades the OG image to `no-cache`. That rule reads like a duplicate of the handler.
+
+**A Video URL reaches the sitemap inside the video tags only, never in a `<loc>`.**
+The memes sitemap hands each Video to Google through `<video:content_loc>`, the tag Google reads to index a video. A video host in a `<loc>` would offer Google a raw file where a page is expected, so `http-contracts.spec.ts` fails as soon as a `<loc>` of any sitemap names it.

@@ -12,7 +12,7 @@ End to end tests are `**/*.spec.ts` under `e2e/` and answer to different rules: 
 per test, a scenario carrying as many assertions as the flow needs, and no mocking, since the
 point is to exercise the real thing. The suite itself is the record of what is covered.
 
-An e2e assertion is taken on screen, never by polling the database to check that the test worked.
+An e2e assertion is taken on screen, never by polling the database to check that the test worked. The one exception is a state no screen shows, read once the screen has answered, such as the fields written at sign up or the sessions a password reset revokes.
 
 ### Structure
 - Lay each test out as given, when, then: three blocks separated by a blank line, with no comment to label them

@@ -37,8 +37,8 @@ importers:
         specifier: ^0.12.2
         version: 0.12.2
       '@google/genai':
-        specifier: ^2.13.0
-        version: 2.13.0(@modelcontextprotocol/sdk@1.27.1(zod@4.6.5))
+        specifier: ^2.27.0
+        version: 2.27.0(@modelcontextprotocol/sdk@1.27.1(zod@4.6.5))
       '@number-flow/react':
         specifier: ^0.6.2
         version: 0.6.2(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -103,11 +103,11 @@ importers:
         specifier: ^0.13.11
         version: 0.13.11(typescript@7.0.2)(valibot@1.4.2(typescript@7.0.2))(zod@4.6.5)
       '@tanstack/ai':
-        specifier: ^0.42.0
-        version: 0.42.0(@opentelemetry/api@1.9.1)
+        specifier: ^0.64.1
+        version: 0.64.1(@opentelemetry/api@1.9.1)(zod@4.6.5)
       '@tanstack/ai-anthropic':
-        specifier: ^0.16.3
-        version: 0.16.3(@tanstack/ai@0.42.0(@opentelemetry/api@1.9.1))(zod@4.6.5)
+        specifier: ^0.19.4
+        version: 0.19.4(@tanstack/ai@0.64.1(@opentelemetry/api@1.9.1)(zod@4.6.5))(zod@4.6.5)
       '@tanstack/react-form':
         specifier: ^1.33.5
         version: 1.33.5(@tanstack/react-start@1.168.60(crossws@0.4.6(srvx@0.11.16))(esbuild@0.28.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rolldown@1.1.5)(vite@8.1.5(@types/node@26.6.4)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.21.0)))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -322,8 +322,13 @@ importers:
 
 packages:
 
-  '@ag-ui/core@0.0.52':
-    resolution: {integrity: sha512-Xo0bUaNV56EqylzcrAuhUkQX7et7+SZIrqZZtEByGwEq/I1EHny6ZMkWHLkKR7UNi0FJZwJyhKYmKJS3B2SEgA==}
+  '@ag-ui/core@1.0.0':
+    resolution: {integrity: sha512-yCRhsQvb4+lmGMrDsi4TOJxqKpm/kb3H64wwL+Z90jNVrkhy17RErfzsNgybfbjNKLM0nenEDYDVJsZHJJSigQ==}
+    peerDependencies:
+      zod: ^3.25.18 || ^4.0.0
+    peerDependenciesMeta:
+      zod:
+        optional: true
 
   '@algolia/client-common@5.59.0':
     resolution: {integrity: sha512-PC8ipLOYFKRTfIUY1J3FJxS6ryzWziaXmIX9/sNMoUR8L+XhF7hX2QAeUI87YVl5zujvlYTSOb+HAIqKXDjyHQ==}
@@ -1086,8 +1091,8 @@ packages:
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
 
-  '@google/genai@2.13.0':
-    resolution: {integrity: sha512-GM7C8Kaomvjz05x5JEO6+l3d/pciL9LxAG9dUjJLD7nTPZ9X0Cfsf2Z7eET6UjgWyUmxXCHtYnQoQ77F9+ZIOQ==}
+  '@google/genai@2.27.0':
+    resolution: {integrity: sha512-W6F9Y9d4h7cVQNa85IPCOVVP9PiUzve/ZQPBvQnBmnBJcLvxstEw+R2X/RyCH0SOe0HVDQzeKDpDUf6ZRtbmdQ==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
       '@modelcontextprotocol/sdk': ^1.25.2
@@ -3275,20 +3280,23 @@ packages:
       csstype:
         optional: true
 
-  '@tanstack/ai-anthropic@0.16.3':
-    resolution: {integrity: sha512-vDRe9IQguNQSd+tya34k1+h3alak37A7ZXHJXOCiNNKQxUdqUyJ1srh0I8x5xF7lb3T3M9d3UsMe78Zbe5TL1w==}
+  '@tanstack/ai-anthropic@0.19.4':
+    resolution: {integrity: sha512-4D6+UWfHp3ER2qXXEYGp2T9oGShsewXYscZ0w73bVPEQbkOUqX54w+EiuPBNAlkA+qsx4QsTcB67N+YmwGoZCw==}
     peerDependencies:
-      '@tanstack/ai': ^0.42.0
-      zod: ^4.0.0
+      '@anthropic-ai/vertex-sdk': ^0.19.0
+      '@tanstack/ai': ^0.64.0
+    peerDependenciesMeta:
+      '@anthropic-ai/vertex-sdk':
+        optional: true
 
-  '@tanstack/ai-event-client@0.6.8':
-    resolution: {integrity: sha512-h7/HLz9u2LF9ba6uKFMnSZkFlkzQONJ5u3Hi+4qGxpsHyvcGRtW6v186jaFLoklndhEwyC49ytkC4eafi7Qq8w==}
+  '@tanstack/ai-event-client@0.13.0':
+    resolution: {integrity: sha512-qGN7saScQHqDd06DE5CNG+wl1O9v6anwsGCCeP4N7zFbZd5k9/2C1u4cdJ2+Qxl2aA8drusLFZMhY/ljhBJqLQ==}
 
-  '@tanstack/ai-utils@0.3.1':
-    resolution: {integrity: sha512-fgbjd5DohL3k5rTWr/KInauLVYMiHVm0cnmTsNrzL3cr4wWhEld5vmFSrjiwUWACAuONjZa+uBXuS+ZSO8fwDQ==}
+  '@tanstack/ai-utils@0.4.1':
+    resolution: {integrity: sha512-B3PGn2WYiRtivZCt7MUN2iXeoK9fwZhgdbrPIz5hPqVR8r8sNDZMmMqtiOkp7sxzPvVlCBItFVHw7QpZ9g6e9w==}
 
-  '@tanstack/ai@0.42.0':
-    resolution: {integrity: sha512-OyUA1tl6Oj93jjdyDofMb53tf3GhHgLWJ376h/5qjdwtUG1YOr6134khd1Aq2lfIZbmj2HR+y3XqD9UMXSjk1A==}
+  '@tanstack/ai@0.64.1':
+    resolution: {integrity: sha512-ohCqVVd6mbD6KzFfgOBjAIl5ftIkehiTpWlg9uLfv6qGiXyf7vZhNVCJ5LNiwfNnj6Mz+TzK3IO0ztBrhV0Rgw==}
     engines: {node: '>=18'}
     peerDependencies:
       '@opentelemetry/api': '>=1.9.0'
@@ -7552,9 +7560,9 @@ packages:
 
 snapshots:
 
-  '@ag-ui/core@0.0.52':
-    dependencies:
-      zod: 3.25.76
+  '@ag-ui/core@1.0.0(zod@4.6.5)':
+    optionalDependencies:
+      zod: 4.6.5
 
   '@algolia/client-common@5.59.0': {}
 
@@ -8251,7 +8259,7 @@ snapshots:
 
   '@floating-ui/utils@0.2.10': {}
 
-  '@google/genai@2.13.0(@modelcontextprotocol/sdk@1.27.1(zod@4.6.5))':
+  '@google/genai@2.27.0(@modelcontextprotocol/sdk@1.27.1(zod@4.6.5))':
     dependencies:
       google-auth-library: 10.5.0
       p-retry: 4.6.2
@@ -10212,28 +10220,31 @@ snapshots:
       - preact
       - react
 
-  '@tanstack/ai-anthropic@0.16.3(@tanstack/ai@0.42.0(@opentelemetry/api@1.9.1))(zod@4.6.5)':
+  '@tanstack/ai-anthropic@0.19.4(@tanstack/ai@0.64.1(@opentelemetry/api@1.9.1)(zod@4.6.5))(zod@4.6.5)':
     dependencies:
       '@anthropic-ai/sdk': 0.97.1(zod@4.6.5)
-      '@tanstack/ai': 0.42.0(@opentelemetry/api@1.9.1)
-      '@tanstack/ai-utils': 0.3.1
-      zod: 4.6.5
+      '@tanstack/ai': 0.64.1(@opentelemetry/api@1.9.1)(zod@4.6.5)
+      '@tanstack/ai-utils': 0.4.1
+    transitivePeerDependencies:
+      - zod
 
-  '@tanstack/ai-event-client@0.6.8':
+  '@tanstack/ai-event-client@0.13.0':
     dependencies:
       '@tanstack/devtools-event-client': 0.4.3
 
-  '@tanstack/ai-utils@0.3.1': {}
+  '@tanstack/ai-utils@0.4.1': {}
 
-  '@tanstack/ai@0.42.0(@opentelemetry/api@1.9.1)':
+  '@tanstack/ai@0.64.1(@opentelemetry/api@1.9.1)(zod@4.6.5)':
     dependencies:
-      '@ag-ui/core': 0.0.52
+      '@ag-ui/core': 1.0.0(zod@4.6.5)
       '@standard-schema/spec': 1.1.0
-      '@tanstack/ai-event-client': 0.6.8
-      '@tanstack/ai-utils': 0.3.1
+      '@tanstack/ai-event-client': 0.13.0
+      '@tanstack/ai-utils': 0.4.1
       partial-json: 0.1.7
     optionalDependencies:
       '@opentelemetry/api': 1.9.1
+    transitivePeerDependencies:
+      - zod
 
   '@tanstack/devtools-event-client@0.4.3': {}
 

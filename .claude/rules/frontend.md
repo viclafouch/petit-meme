@@ -38,6 +38,7 @@ paths: ["src/**/*.{ts,tsx}"]
 - **`createClientOnlyFn`** for utility functions using `window`, `localStorage`, or browser-only APIs - crashes if called from server
 - **`createServerFn`** for RPC calls (client can call, executes on server via network request)
 - Place server-only utilities in `src/utils/` wrapped with `createServerOnlyFn`
+- **Read `serverEnv` inside a function, never at module scope**, in any module a client chunk can import, `~/env/server` included. A constant reads it while the module loads, and reading a server variable in the browser throws and takes hydration down with it. This is why `matchIsProductionDeployment` and `matchIsDeployed` are functions.
 
 ### Forms
 - **TanStack Form** + **Zod** + **useMutation** for submission

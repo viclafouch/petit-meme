@@ -214,3 +214,6 @@ The `AiSearchLog` the count reads is written with `waitUntil`, so it lands after
 
 **The database pool holds five connections.**
 Neon bills compute time, so the pool stays small and lets the branch sleep. A caller that opens more transactions at once than `DATABASE_POOL_MAX_CONNECTIONS` queues on the pool, and a wait longer than the five second `connectionTimeoutMillis` fails. The end to end seed cuts its writes into batches of that size for this reason.
+
+**Bunny Storage is probed with a one byte GET, never a HEAD.**
+Bunny Storage answers 401 to a HEAD request. `checkWatermarkExists` therefore sends a GET with `Range: bytes=0-0` and reads a 200 or a 206 as present. Going back to HEAD reads like a saving, and it reports every watermarked Video as missing.

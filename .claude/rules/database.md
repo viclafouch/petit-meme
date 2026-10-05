@@ -33,7 +33,8 @@ pnpm exec dotenv -e .env.development -- pnpm exec prisma migrate dev --name <nom
 Cela :
 - Crée le fichier SQL dans `prisma/migrations/<timestamp>_<nom>/migration.sql`
 - Applique la migration à la DB locale
-- Régénère le Prisma Client
+
+Puis régénérer le client (voir « Client Prisma généré »).
 
 Conventions de nommage : `add_rate_limit`, `add_user_avatar`, `add_index_meme_status` (snake_case, descriptif).
 
@@ -63,12 +64,26 @@ Le script `prisma:migrate:prod` utilise `dotenv -e .env.production -- prisma mig
 
 **Toujours tirer `.env.production` avant d'appliquer** pour avoir la `DATABASE_URL` à jour.
 
+### Client Prisma généré
+
+Le dépôt contient le client généré, dans `src/db/generated/prisma` (`output` du bloc `generator client`). Rien ne le régénère seul : ni `postinstall`, ni `migrate dev`, qui ne lance plus `prisma generate` depuis Prisma 7.
+
+Après chaque modification de `prisma/schema.prisma` et après chaque montée de version de `prisma` ou `@prisma/client` :
+
+```bash
+pnpm exec dotenv -e .env.development -- pnpm exec prisma generate
+```
+
+Puis inclure `src/db/generated` dans le commit du changement. Sans cela, le déploiement embarque un client construit par l'ancien schema ou l'ancienne version (`clientVersion` dans `src/db/generated/prisma/internal/class.ts`).
+
+`generate` ne touche pas la base. Mais `prisma.config.ts` lit `DIRECT_URL`, sinon `DATABASE_URL`, au chargement. Ce fichier importe `dotenv/config`, qui charge seulement le fichier `.env` du dossier courant. Le projet n'a pas de `.env` à la racine. Sans `dotenv -e`, ces variables manquent et la commande échoue.
+
 ### Commandes de référence
 
 | Commande | Environnement | Usage |
 |----------|--------------|-------|
 | `pnpm exec dotenv -e .env.development -- pnpm exec prisma migrate dev --name <nom>` | Local | Créer + appliquer une migration |
-| `pnpm exec dotenv -e .env.development -- pnpm exec prisma generate` | Local | Régénérer le client (aussi dans `postinstall`) |
+| `pnpm exec dotenv -e .env.development -- pnpm exec prisma generate` | Local | Régénérer le client, puis inclure `src/db/generated` dans le commit |
 | `pnpm run prisma:migrate:dev` | Local | Appliquer les migrations pendantes (via `.env.development`) |
 | `vercel env pull --environment=production .env.production` | — | Tirer les env de prod depuis Vercel |
 | `pnpm run prisma:migrate:prod` | Production | Appliquer les migrations pendantes (via `.env.production`) |

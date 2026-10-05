@@ -168,7 +168,7 @@ A file in `public/avatars/` is never deleted nor renamed. A User picked a rank, 
 This is deliberate. A style change rewrites the same 24 files under the same names, and `immutable` would freeze the old drawing for up to a year on visitors' devices. Accepted trade off: a change takes up to seven days to propagate.
 
 **`NODE_ENV` says how the code was built, never where it runs.**
-A preview deployment is a production build, so `NODE_ENV` cannot tell it from the live site. Anything that must behave differently there, error reporting, rate limiting, secure cookies, reads the deployment environment instead. `NODE_ENV` remains the right question for everything else. When the platform does not say where the code runs, `NODE_ENV` decides after all, so a missing variable never silently downgrades production. `matchIsProductionDeployment`, `matchIsDeployed` and the Sentry server setup all fall back that way.
+A preview deployment is a production build, so `NODE_ENV` cannot tell it from the live site. Anything that must behave differently there, error reporting, rate limiting, secure cookies, reads the deployment environment instead. `NODE_ENV` remains the right question for everything else. On the server, when the platform does not say where the code runs, `NODE_ENV` decides after all, so a missing variable never silently downgrades production. `matchIsProductionDeployment`, `matchIsDeployed` and the Sentry server setup all fall back that way. The browser never sees `VERCEL_ENV`, which Vercel hands to the build only, so `vite.config.ts` copies it into `VITE_VERCEL_ENV`, a name Vite inlines. That spares a second variable to declare by hand on every Vercel scope. The browser does not share the server fallback: when the build has no `VERCEL_ENV`, it reads `development`, and Sentry stays silent there.
 
 **The Sentry server setup reads `process.env`, never `serverEnv`.**
 `instrument-server.ts` is imported before the app. `serverEnv` validates every server variable at once and throws when one is missing, so going through it would let a missing variable anywhere else take Sentry down with it.
@@ -217,3 +217,12 @@ Neon bills compute time, so the pool stays small and lets the branch sleep. A ca
 
 **Bunny Storage is probed with a one byte GET, never a HEAD.**
 Bunny Storage answers 401 to a HEAD request. `checkWatermarkExists` therefore sends a GET with `Range: bytes=0-0` and reads a 200 or a 206 as present. Going back to HEAD reads like a saving, and it reports every watermarked Video as missing.
+
+**The build copies every variable of its env file into `process.env`.**
+Vite hands `.env.[mode]` to `import.meta.env` only, filtered on `VITE_`, and never fills `process.env` from it. Nitro, the Sentry plugin and the rest of the server side read `process.env`. `vite.config.ts` therefore calls `loadEnv` without a prefix filter, which loads every variable of the mode, and merges the result into `process.env`. The line reads like a leftover, and removing it leaves the server side without the variables the file declares.
+
+**takumi-js runs on its native addon, at build time as at runtime.**
+Nitro adds the `wasm` and `unwasm` export conditions on every preset. Under `unwasm`, takumi-js resolves `#backend` to WebAssembly at build time, while Node resolves it to the native addon at runtime, so the OG image would be built against one backend and run on the other. `exportConditions: ['!unwasm']` negates that one condition and keeps both on native. It reads like a stray setting.
+
+**A route rule header wins over the header a handler sets.**
+The `/**` rule answers `Cache-Control: no-cache` for every route. `/api/og` sets its own immutable header, and still needs a rule of its own in `vite.config.ts` that repeats it, or `/**` downgrades the OG image to `no-cache`. That rule reads like a duplicate of the handler.

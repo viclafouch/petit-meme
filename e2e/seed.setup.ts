@@ -1,4 +1,3 @@
-/* oxlint-disable no-console */
 import { hashPassword } from 'better-auth/crypto'
 import { test as setup } from '@playwright/test'
 import { DATABASE_POOL_MAX_CONNECTIONS, prismaClient } from '~/db'
@@ -6,12 +5,8 @@ import { BUNNY_STATUS } from '~/constants/bunny'
 import { MEME_ALGOLIA_INCLUDE, TRENDING_CATEGORY_DAYS } from '~/constants/meme'
 import { DAY, THIRTY_DAYS_MS } from '~/constants/time'
 import { MemeStatus, UserLocale } from '~/db/generated/prisma/enums'
-import {
-  replaceAllIndicesWithMemes,
-  resolveAlgoliaIndexName
-} from '~/lib/algolia'
+import { replaceAllIndicesWithMemes } from '~/lib/algolia'
 import { stripeClient } from '~/lib/stripe'
-import { logEnvironmentInfo } from '../scripts/lib/env-guard'
 import { clearDatabase } from './clear-database'
 import { E2E_PASSWORD, E2E_ROLES, type E2eRole } from './constants'
 import {
@@ -213,11 +208,7 @@ const indexMemes = async () => {
     include: MEME_ALGOLIA_INCLUDE
   })
 
-  const results = await replaceAllIndicesWithMemes(memes)
-
-  for (const { locale, count } of results) {
-    console.log(`  ${resolveAlgoliaIndexName(locale)}: ${count} records`)
-  }
+  await replaceAllIndicesWithMemes(memes)
 }
 
 setup.afterAll(async () => {
@@ -226,26 +217,14 @@ setup.afterAll(async () => {
 
 setup('seed the e2e environment', async () => {
   setup.setTimeout(SEED_TIMEOUT_MS)
-  logEnvironmentInfo()
 
   await clearDatabase()
 
   await createWithinPool(Object.values(E2E_ROLES), createUser)
-  console.log(`  ${Object.keys(E2E_ROLES).length} users created`)
-
   await createWithinPool(Object.values(E2E_CATEGORIES), createCategory)
-  console.log(`  ${Object.keys(E2E_CATEGORIES).length} categories created`)
-
   await createWithinPool(E2E_MEMES, createMeme)
-  console.log(`  ${E2E_MEMES.length} memes created`)
-
   await createWithinPool(Object.values(E2E_ROLES), createBookmarks)
-  console.log(`  ${await prismaClient.userBookmark.count()} bookmarks created`)
-
   await createWithinPool(Object.values(E2E_ROLES), createAiSearchLogs)
-  console.log(
-    `  ${await prismaClient.aiSearchLog.count()} ai search logs created`
-  )
 
   await indexMemes()
 })

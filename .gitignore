@@ -10,6 +10,7 @@
 /coverage
 e2e/.auth/
 e2e/.results/
+e2e/.logs/
 playwright-report/
 
 # production

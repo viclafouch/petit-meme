@@ -30,7 +30,11 @@ Sentry.init({
       return FULL_SAMPLE_RATE
     }
 
-    if (urlPath.includes('/health') || urlPath.includes('/favicon')) {
+    if (
+      urlPath.startsWith('/_vercel/') ||
+      urlPath.includes('/health') ||
+      urlPath.includes('/favicon')
+    ) {
       return DROP_SAMPLE_RATE
     }
 

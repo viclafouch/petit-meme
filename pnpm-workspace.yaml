@@ -14,7 +14,6 @@ optimisticRepeatInstall: false
 allowBuilds:
   '@google/genai': true
   '@prisma/engines': true
-  '@sentry/cli': true
   esbuild: true
   prisma: true
   protobufjs: true
@@ -22,13 +21,9 @@ allowBuilds:
   sharp: true
 
 publicHoistPattern:
-  - '*import-in-the-middle*'
-  - '*require-in-the-middle*'
-  - '@sentry/*'
   - '@takumi-rs/core-*'
 
 overrides:
-  require-in-the-middle: 7.4.0
   next: ^16.3.8
 
 peerDependencyRules:

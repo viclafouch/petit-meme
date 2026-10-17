@@ -1,4 +1,3 @@
-import type { FeedbackInternalOptions } from '@sentry/core'
 import * as Sentry from '@sentry/tanstackstart-react'
 import { wrapMiddlewaresWithSentry } from '@sentry/tanstackstart-react'
 import { IS_DEVELOPMENT } from '~/constants/env'
@@ -67,12 +66,9 @@ export const wrapMiddlewareWithSentry = <TMiddleware extends SentryMiddleware>(
   return wrappedMiddleware
 }
 
-type FeedbackOptions = Partial<
-  Omit<FeedbackInternalOptions, 'themeLight' | 'themeDark'>
-> & {
-  themeLight?: Partial<FeedbackInternalOptions['themeLight']>
-  themeDark?: Partial<FeedbackInternalOptions['themeDark']>
-}
+type FeedbackOptions = NonNullable<
+  Parameters<typeof Sentry.feedbackIntegration>[0]
+>
 
 const SENSITIVE_API_PATHS = [
   '/api/auth/',

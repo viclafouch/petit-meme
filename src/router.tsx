@@ -7,14 +7,7 @@ import { ErrorComponent } from '~/components/error-component'
 import { NotFound } from '~/components/not-found'
 import { IS_PRODUCTION } from '~/constants/env'
 import { SECOND, FIVE_MINUTES_MS } from '~/constants/time'
-import { clientEnv } from '~/env/client'
 import { matchIsRateLimitError } from '~/helpers/error'
-import {
-  getFeedbackOptions,
-  scrubSensitiveBreadcrumbs,
-  scrubUserPii,
-  SENSITIVE_API_PATTERNS
-} from '~/lib/sentry'
 import {
   deLocalizeUrl,
   isExcludedByRouteStrategy,
@@ -87,32 +80,9 @@ export function getRouter() {
   })
 
   if (!router.isServer) {
-    Sentry.init({
-      dsn: clientEnv.VITE_SENTRY_DSN,
-      tunnel: '/api/sentry-tunnel',
-      environment: clientEnv.VITE_VERCEL_ENV,
-      enabled: clientEnv.VITE_VERCEL_ENV === 'production',
-      integrations: [
-        Sentry.tanstackRouterBrowserTracingIntegration(router),
-        Sentry.replayIntegration({
-          maskAllText: false,
-          blockAllMedia: false,
-          networkDetailDenyUrls: SENSITIVE_API_PATTERNS
-        }),
-        Sentry.feedbackIntegration(getFeedbackOptions())
-      ],
-      tracesSampleRate: 0.2,
-      replaysSessionSampleRate: 0,
-      replaysOnErrorSampleRate: 1,
-      denyUrls: [
-        /extensions\//iu,
-        /^chrome:\/\//iu,
-        /^chrome-extension:\/\//iu
-      ],
-      ignoreErrors: [/Unreachable hosts/u],
-      beforeSend: scrubUserPii,
-      beforeBreadcrumb: scrubSensitiveBreadcrumbs
-    })
+    Sentry.addIntegration(
+      Sentry.tanstackRouterBrowserTracingIntegration(router)
+    )
   }
 
   setupRouterSsrQueryIntegration({

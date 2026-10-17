@@ -9,6 +9,7 @@ import {
   IMMUTABLE_CACHE_CONTROL,
   WEEKLY_CACHE_CONTROL
 } from './src/constants/http.ts'
+import { SENTRY_APPLICATION_KEY } from './src/constants/sentry.ts'
 
 const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
@@ -141,13 +142,15 @@ export default defineConfig(({ mode }) => {
       sentryTanstackStart({
         org: 'viclafouch',
         project: 'petit-meme',
+        applicationKey: SENTRY_APPLICATION_KEY,
         authToken: processEnvironment.SENTRY_AUTH_TOKEN,
         release: {
           name: processEnvironment.VERCEL_GIT_COMMIT_SHA
         },
         sourcemaps: {
           filesToDeleteAfterUpload: ['.vercel/output/**/*.map']
-        }
+        },
+        tunnelRoute: true
       })
     ]
   }

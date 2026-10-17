@@ -1,3 +1,5 @@
+// oxlint-disable-next-line import/no-unassigned-import -- Sentry init must run before any other module
+import '~/instrument.client'
 import { hydrateRoot } from 'react-dom/client'
 import { z } from 'zod'
 import { StartClient } from '@tanstack/react-start/client'

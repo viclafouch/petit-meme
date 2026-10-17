@@ -115,7 +115,7 @@
     "@dicebear/core": "10.7.0",
     "@dicebear/styles": "10.6.0",
     "@inlang/paraglide-js": "2.23.2",
-    "@playwright/test": "^1.63.0",
+    "@playwright/test": "1.63.0",
     "@react-email/ui": "6.11.0",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/eslint-plugin-query": "^5.101.4",

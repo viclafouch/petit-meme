@@ -52,7 +52,7 @@ Available in **French** and **English**.
 ## Prerequisites
 
 - Node.js 24+
-- pnpm 10+
+- pnpm 12
 - A PostgreSQL database
 - Stripe account (test or live)
 - Bunny CDN account with a video library

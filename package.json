@@ -15,7 +15,7 @@
     "prisma:migrate:dev": "dotenv -e .env.development -- prisma migrate deploy",
     "prisma:migrate:e2e": "dotenv -e .env.e2e -- prisma migrate deploy || dotenv -e .env.e2e -- prisma migrate deploy",
     "prisma:migrate:prod": "dotenv -e .env.production -- prisma migrate deploy",
-    "prisma:seed:dev": "npx vite-node --mode development prisma/seed.ts",
+    "prisma:seed:dev": "vite-node --mode development prisma/seed.ts",
     "prisma:reset-db:dev": "dotenv -e .env.development -- prisma migrate reset",
     "avatars:generate": "pnpm dlx tsx scripts/generate-avatars.ts",
     "postinstall": "paraglide-js compile --project ./project.inlang && node scripts/copy-ffmpeg.js",
@@ -134,13 +134,19 @@
     "pino-pretty": "^13.2.0",
     "prisma": "^7.10.0",
     "shadcn": "^4.21.2",
-    "turbo": "^2.11.9",
+    "turbo": "^2.11.8",
     "typescript": "^7.0.2",
     "vite-node": "^6.0.0",
     "vitest": "^4.1.11"
   },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.14.0",
+      "onFail": "download"
+    }
+  },
   "engines": {
     "node": ">=24.0.0"
-  },
-  "packageManager": "pnpm@10.34.6"
+  }
 }

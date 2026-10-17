@@ -22,12 +22,10 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: pnpm/action-setup@v6
-
-      - uses: actions/setup-node@v5
+      - uses: pnpm/setup@v3
         with:
-          node-version: 24
-          cache: pnpm
+          runtime: node@24
+          cache: true
 
       # The whole e2e environment lives in one secret, same shape as any other
       # env file of the project. Vite reads it through `--mode e2e`.
@@ -37,8 +35,6 @@ jobs:
         env:
           E2E_ENV_FILE: ${{ secrets.E2E_ENV_FILE }}
         run: printf '%s\n' "$E2E_ENV_FILE" > .env.e2e
-
-      - run: pnpm install --frozen-lockfile
 
       - run: pnpm run prisma:migrate:e2e
 

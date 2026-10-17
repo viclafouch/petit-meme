@@ -1,12 +1,12 @@
 trustPolicy: no-downgrade
+trustPolicyExcludePrune: true
 trustPolicyExclude:
-  - 'chokidar'
-  - 'semver@6.3.1'
-  - 'prisma@7.10.0'
-  - '@vercel/functions@3.9.11'
-  - '@vercel/oidc@4.0.0'
   - '@vercel/cli-config@0.3.1'
   - '@vercel/cli-exec@1.0.1'
+  - '@vercel/functions@3.10.1'
+  - '@vercel/oidc@4.0.1'
+  - 'prisma@7.10.1'
+  - 'semver@6.3.1'
 
 strictPeerDependencies: true
 optimisticRepeatInstall: false
@@ -23,15 +23,12 @@ allowBuilds:
 publicHoistPattern:
   - '@takumi-rs/core-*'
 
-overrides:
-  next: ^16.3.8
-
 peerDependencyRules:
   allowedVersions:
-    '@tanstack/eslint-plugin-query>typescript': '7'
     '@typescript-eslint/utils>typescript': '7'
     '@typescript-eslint/typescript-estree>typescript': '7'
     '@typescript-eslint/project-service>typescript': '7'
     '@typescript-eslint/tsconfig-utils>typescript': '7'
+
 minimumReleaseAgeExclude:
-  - '@viclafouch/oxc-config@1.1.0'
+  - '@viclafouch/*'

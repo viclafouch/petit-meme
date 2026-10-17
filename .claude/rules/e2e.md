@@ -41,6 +41,8 @@ A scenario that leaves a mark on its account gets its own role in `E2E_ROLES`. S
 
 A page that belongs to a third party, the Stripe billing portal or an OAuth provider, is never crossed. Route its origin to `abort()`, stop at the door and check that the door is the right one: the request that leaves names a billing portal session by its path, since any Stripe page answers the origin alone, and an OAuth request carries the way back to our own callback rather than to whatever origin the run happens to use.
 
+A third party billed per call is never called. Anthropic is replaced by `e2e/fake-anthropic.ts`, a server Playwright starts next to the app, which the SDK reaches through `ANTHROPIC_BASE_URL`. The application code stays untouched.
+
 A checkout pays with `STRIPE_TEST_CARD`, the Visa that [Stripe lists for testing](https://docs.stripe.com/testing). It is not enrolled in 3D Secure, so no authentication step stands between the payment and the way back to the site.
 
 ### Fixtures

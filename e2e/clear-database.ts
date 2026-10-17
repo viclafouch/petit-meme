@@ -1,4 +1,3 @@
-/* oxlint-disable no-console */
 import { prismaClient } from '~/db'
 import { E2E_DATABASE_URL } from './env'
 
@@ -23,6 +22,4 @@ export const clearDatabase = async () => {
   await prismaClient.$executeRawUnsafe(
     `TRUNCATE TABLE ${quoted} RESTART IDENTITY CASCADE`
   )
-
-  console.log(`  ${tables.length} tables cleared`)
 }

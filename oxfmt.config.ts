@@ -7,7 +7,6 @@ export default defineConfig({
     'src/routeTree.gen.ts',
     '**/db/generated/**',
     '**/paraglide/**',
-    '.agents/**',
     'messages/**',
     '.claude/**',
     '**/*.md'

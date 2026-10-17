@@ -6,19 +6,19 @@
   "tasks": {
     "typecheck": {
       "description": "Checks the types of the whole repository with tsc",
-      "inputs": ["$TURBO_DEFAULT$", "!**/*.md", "!.claude/**", "!.agents/**"]
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.md", "!.claude/**"]
     },
     "lint": {
       "description": "Lints the whole repository with type-aware oxlint",
-      "inputs": ["$TURBO_DEFAULT$", "!**/*.md", "!.claude/**", "!.agents/**"]
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.md", "!.claude/**"]
     },
     "test": {
       "description": "Runs the Vitest unit tests",
-      "inputs": ["$TURBO_DEFAULT$", "!**/*.md", "!.claude/**", "!.agents/**"]
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.md", "!.claude/**"]
     },
     "format:check": {
       "description": "Checks the formatting with oxfmt",
-      "inputs": ["$TURBO_DEFAULT$", "!**/*.md", "!.claude/**", "!.agents/**"]
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.md", "!.claude/**"]
     }
   }
 }

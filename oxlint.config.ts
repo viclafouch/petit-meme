@@ -27,7 +27,6 @@ export default defineConfig({
     '**/components/animate-ui/**',
     'public/ffmpeg/**',
     '**/paraglide/**',
-    '.agents/**',
     'src/routeTree.gen.ts'
   ],
   rules: {

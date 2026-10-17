@@ -2,6 +2,8 @@ import { expect, test as setup } from '@playwright/test'
 import { E2E_PASSWORD, E2E_ROLES, type E2eRoleName } from './constants'
 import { resolveStorageStatePath } from './env'
 
+setup.describe.configure({ mode: 'parallel' })
+
 for (const [roleName, role] of Object.entries(E2E_ROLES)) {
   if (!role.emailVerified) {
     continue

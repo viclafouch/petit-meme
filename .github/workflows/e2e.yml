@@ -18,9 +18,6 @@ jobs:
     # A pull request from a fork gets no secrets, so it would fail on boot.
     if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
-    container:
-      image: mcr.microsoft.com/playwright:v1.63.0-noble
-      options: --user 1001
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v5
@@ -46,6 +43,8 @@ jobs:
       - run: pnpm run prisma:migrate:e2e
 
       - run: pnpm run build:e2e
+
+      - run: pnpm exec playwright install --with-deps chromium webkit
 
       - run: pnpm run test:e2e
 

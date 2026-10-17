@@ -1,0 +1,24 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "ui": "tui",
+  "agentGuidance": true,
+  "cacheMaxAge": "7d",
+  "tasks": {
+    "typecheck": {
+      "description": "Checks the types of the whole repository with tsc",
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.md", "!.claude/**", "!.agents/**"]
+    },
+    "lint": {
+      "description": "Lints the whole repository with type-aware oxlint",
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.md", "!.claude/**", "!.agents/**"]
+    },
+    "test": {
+      "description": "Runs the Vitest unit tests",
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.md", "!.claude/**", "!.agents/**"]
+    },
+    "format:check": {
+      "description": "Checks the formatting with oxfmt",
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.md", "!.claude/**", "!.agents/**"]
+    }
+  }
+}

@@ -151,7 +151,9 @@ The CLI outputs a webhook signing secret (`whsec_...`). Add it to your `.env.dev
 | `pnpm run dev` | Start development server |
 | `pnpm run build` | Build for production |
 | `pnpm start` | Start production server |
-| `pnpm run lint` | TypeScript check + ESLint |
+| `pnpm run check` | Typecheck, lint, unit tests and format check, cached by Turbo |
+| `pnpm run typecheck` | TypeScript check |
+| `pnpm run lint` | oxlint |
 | `pnpm run lint:fix` | Auto-fix lint issues |
 | `pnpm run prisma:migrate:dev` | Apply pending migrations (via `.env.development`) |
 | `pnpm run prisma:migrate:prod` | Apply pending migrations (via `.env.production`) |

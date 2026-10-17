@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 import { prismaClient } from '~/db'
 import { CATEGORY_SLUG_REGEX } from '~/constants/meme'
+import { DAY } from '~/constants/time'
 import type { Prisma } from '~/db/generated/prisma/client'
 import { MemeStatus } from '~/db/generated/prisma/enums'
 import {
@@ -13,9 +14,19 @@ import { baseLocale, type Locale, locales } from '~/paraglide/runtime'
 import { logAuditAction } from '~/server/audit'
 import { adminRequiredMiddleware } from '~/server/user-auth'
 
+const CATEGORY_TITLE_MIN_LENGTH = 3
+const CATEGORY_TITLE_MAX_LENGTH = 100
+const CATEGORY_KEYWORD_MAX_LENGTH = 50
+const CATEGORY_KEYWORDS_MAX_COUNT = 20
+
 export const CATEGORY_TRANSLATION_SCHEMA = z.object({
-  title: z.string().min(3).max(100),
-  keywords: z.array(z.string().max(50)).max(20)
+  title: z
+    .string()
+    .min(CATEGORY_TITLE_MIN_LENGTH)
+    .max(CATEGORY_TITLE_MAX_LENGTH),
+  keywords: z
+    .array(z.string().max(CATEGORY_KEYWORD_MAX_LENGTH))
+    .max(CATEGORY_KEYWORDS_MAX_COUNT)
 })
 
 export const CATEGORY_FORM_SCHEMA = z.object({
@@ -63,7 +74,7 @@ function buildCategoryTranslationUpserts({
   })
 }
 
-const CATEGORIES_CACHE_TTL_MS = 24 * 60 * 60 * 1000
+const CATEGORIES_CACHE_TTL_MS = DAY
 
 const CATEGORIES_INCLUDE = {
   translations: true,

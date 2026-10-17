@@ -6,7 +6,7 @@ import { DefaultLoading } from '~/components/default-loading'
 import { ErrorComponent } from '~/components/error-component'
 import { NotFound } from '~/components/not-found'
 import { IS_PRODUCTION } from '~/constants/env'
-import { MINUTE, SECOND } from '~/constants/time'
+import { SECOND, FIVE_MINUTES_MS } from '~/constants/time'
 import { clientEnv } from '~/env/client'
 import { matchIsRateLimitError } from '~/helpers/error'
 import {
@@ -22,26 +22,33 @@ import {
 } from './paraglide/runtime'
 import { routeTree } from './routeTree.gen'
 
+const QUERY_STALE_TIME_MS = 30_000
+const RATE_LIMIT_MAX_RETRIES = 3
+const MAX_RETRY_DELAY_MS = 10_000
+
 export function getRouter() {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 30 * SECOND,
-        gcTime: 5 * MINUTE,
+        staleTime: QUERY_STALE_TIME_MS,
+        gcTime: FIVE_MINUTES_MS,
         refetchOnWindowFocus: IS_PRODUCTION,
         retry: (failureCount, error) => {
-          return matchIsRateLimitError(error) && failureCount < 3
+          return (
+            matchIsRateLimitError(error) &&
+            failureCount < RATE_LIMIT_MAX_RETRIES
+          )
         },
         retryDelay: (attemptIndex) => {
           return Math.min(
             SECOND * 2 ** attemptIndex + Math.random() * SECOND,
-            10 * SECOND
+            MAX_RETRY_DELAY_MS
           )
         }
       },
       mutations: {
         retry: false,
-        gcTime: 5 * MINUTE
+        gcTime: FIVE_MINUTES_MS
       }
     }
   })
@@ -96,7 +103,7 @@ export function getRouter() {
       ],
       tracesSampleRate: 0.2,
       replaysSessionSampleRate: 0,
-      replaysOnErrorSampleRate: 1.0,
+      replaysOnErrorSampleRate: 1,
       denyUrls: [
         /extensions\//iu,
         /^chrome:\/\//iu,

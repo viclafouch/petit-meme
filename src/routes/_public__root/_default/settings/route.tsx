@@ -1,12 +1,7 @@
-import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import { getActiveSubscriptionQueryOpts } from '~/lib/queries'
 
-const RouteComponent = () => {
-  return <Outlet />
-}
-
 export const Route = createFileRoute('/_public__root/_default/settings')({
-  component: RouteComponent,
   beforeLoad: async ({ context }) => {
     if (!context.user) {
       throw redirect({ to: '/' })

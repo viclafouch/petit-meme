@@ -12,7 +12,8 @@ import {
 import { matchIsUserAdmin } from '~/lib/role'
 import { matchIsDialogOpen, useDialog } from '~/stores/dialog.store'
 
-const COOLDOWN_MS = 3 * DAY
+const COOLDOWN_DAYS = 3
+const COOLDOWN_MS = COOLDOWN_DAYS * DAY
 
 type UsePremiumReminderParams = {
   enabled: boolean
@@ -43,7 +44,10 @@ export const usePremiumReminder = ({ enabled }: UsePremiumReminderParams) => {
 
       const snoozedAt = localStorage.getItem(PREMIUM_REMINDER_STORAGE_KEY)
 
-      return !(snoozedAt && Date.now() - Number(snoozedAt) < COOLDOWN_MS)
+      const isSnoozed =
+        snoozedAt !== null && Date.now() - Number(snoozedAt) < COOLDOWN_MS
+
+      return !isSnoozed
     }
 
     let timeout: ReturnType<typeof setTimeout> | null = null

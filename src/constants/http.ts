@@ -3,3 +3,17 @@ import { ONE_YEAR_IN_SECONDS, SEVEN_DAYS_IN_SECONDS } from './time.ts'
 export const IMMUTABLE_CACHE_CONTROL = `public, max-age=${ONE_YEAR_IN_SECONDS}, immutable`
 
 export const WEEKLY_CACHE_CONTROL = `public, max-age=${SEVEN_DAYS_IN_SECONDS}`
+
+export const HTTP_STATUS = {
+  OK: 200,
+  PARTIAL_CONTENT: 206,
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  CONFLICT: 409,
+  UNPROCESSABLE_CONTENT: 422,
+  TOO_MANY_REQUESTS: 429,
+  INTERNAL_SERVER_ERROR: 500,
+  BAD_GATEWAY: 502
+} as const satisfies Record<string, number>

@@ -3,11 +3,11 @@ import { formatAuditEntry } from '~/routes/admin/-helpers/audit'
 import type { AuditLogEntry } from '~/routes/admin/-server/dashboard'
 import { DashboardFeed, FeedActor } from './dashboard-feed'
 
-type AuditFeedParams = {
+type AuditFeedProps = {
   entries: AuditLogEntry[]
 }
 
-export const AuditFeed = ({ entries }: AuditFeedParams) => {
+export const AuditFeed = ({ entries }: AuditFeedProps) => {
   return (
     <DashboardFeed
       emptyLabel="Aucune action récente"

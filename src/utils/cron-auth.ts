@@ -4,7 +4,7 @@ import { cronLogger } from '~/lib/logger'
 export const verifyCronSecret = (request: Request): Response | null => {
   const secret = serverEnv.CRON_SECRET
 
-  if (!secret) {
+  if (secret === undefined) {
     cronLogger.warn('CRON_SECRET not set — skipping auth check')
 
     return null

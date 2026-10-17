@@ -1,8 +1,7 @@
 import { hydrateRoot } from 'react-dom/client'
 import { z } from 'zod'
 import { StartClient } from '@tanstack/react-start/client'
-import { getLocale } from '~/paraglide/runtime'
-import type { Locale } from '~/paraglide/runtime'
+import { getLocale, type Locale } from '~/paraglide/runtime'
 
 const ZOD_LOCALE_IMPORTS = {
   fr: () => {

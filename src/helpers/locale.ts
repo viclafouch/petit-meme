@@ -25,7 +25,7 @@ export const getSuggestedLocale = ({
       return available === languagePrefix
     })
 
-    if (match) {
+    if (match !== undefined) {
       return match !== currentLocale ? match : null
     }
   }

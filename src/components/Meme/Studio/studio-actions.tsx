@@ -3,24 +3,25 @@ import { motion, useReducedMotion } from 'motion/react'
 import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
 import { LoadingButton } from '~/components/ui/loading-button'
+import { EASE_OUT } from '~/constants/motion'
 import type { ProcessedData } from '~/hooks/use-video-processor'
 import { m } from '~/paraglide/messages.js'
 import { downloadBlob, shareBlob } from '~/utils/download'
 
-type StudioMobileActionsParams = {
+type StudioMobileActionsProps = {
   processedData: ProcessedData
 }
 
 export const StudioMobileActions = ({
   processedData
-}: StudioMobileActionsParams) => {
-  const shouldReduceMotion = useReducedMotion()
+}: StudioMobileActionsProps) => {
+  const isReducedMotion = useReducedMotion()
 
   return (
     <motion.div
-      initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
+      initial={isReducedMotion ? false : { opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+      transition={{ duration: 0.3, ease: EASE_OUT }}
       className="flex gap-2.5"
     >
       <Button
@@ -46,7 +47,7 @@ export const StudioMobileActions = ({
   )
 }
 
-type StudioActionsParams = {
+type StudioActionsProps = {
   isProcessing: boolean
   processedData: ProcessedData | null
   onGenerate: () => void
@@ -56,7 +57,7 @@ export const StudioActions = ({
   isProcessing,
   processedData,
   onGenerate
-}: StudioActionsParams) => {
+}: StudioActionsProps) => {
   const handleShareClick = () => {
     if (processedData === null) {
       toast.error(m.studio_generate_first())

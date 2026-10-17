@@ -11,40 +11,26 @@ import {
   TooltipContent,
   TooltipTrigger
 } from '~/components/ui/tooltip'
+import { SECONDS_PER_MINUTE } from '~/constants/time'
 import { m } from '~/paraglide/messages.js'
 
 const OVERLAY_BUTTON_CLASS =
   'rounded-full bg-black/50 hover:bg-black/70 text-white size-9 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/50'
 
 const formatVideoDuration = (seconds: number) => {
-  const minutes = Math.floor(seconds / 60)
-  const remainingSeconds = Math.floor(seconds % 60)
+  const minutes = Math.floor(seconds / SECONDS_PER_MINUTE)
+  const remainingSeconds = Math.floor(seconds % SECONDS_PER_MINUTE)
 
   return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`
 }
 
-const RemainingTimeBadge = () => {
-  const duration = useMediaSelector((state) => {
-    return state.mediaDuration
-  })
-  const currentTime = useMediaSelector((state) => {
-    return state.mediaCurrentTime
-  })
+type RemainingTimeBadgeProps = {
+  remainingTime: number
+}
 
-  const hasFiniteTimeData =
-    duration !== undefined &&
-    currentTime !== undefined &&
-    Number.isFinite(duration) &&
-    Number.isFinite(currentTime)
-  const remainingTime = hasFiniteTimeData ? duration - currentTime : 0
-
-  if (remainingTime <= 0) {
-    // eslint-disable-next-line react/jsx-no-useless-fragment -- perf: isolated component to avoid re-rendering parent on every frame
-    return <></>
-  }
-
-  const remainingMinutes = Math.floor(remainingTime / 60)
-  const remainingSeconds = Math.floor(remainingTime % 60)
+const RemainingTimeBadge = ({ remainingTime }: RemainingTimeBadgeProps) => {
+  const remainingMinutes = Math.floor(remainingTime / SECONDS_PER_MINUTE)
+  const remainingSeconds = Math.floor(remainingTime % SECONDS_PER_MINUTE)
   const ariaLabel = m.meme_time_remaining({
     minutes: remainingMinutes,
     minuteUnit: m.meme_minutes({ count: remainingMinutes }),
@@ -62,13 +48,33 @@ const RemainingTimeBadge = () => {
   )
 }
 
-type VideoOverlayParams = {
+const RemainingTime = () => {
+  const duration = useMediaSelector((state) => {
+    return state.mediaDuration
+  })
+  const currentTime = useMediaSelector((state) => {
+    return state.mediaCurrentTime
+  })
+
+  const hasFiniteTimeData =
+    duration !== undefined &&
+    currentTime !== undefined &&
+    Number.isFinite(duration) &&
+    Number.isFinite(currentTime)
+  const remainingTime = hasFiniteTimeData ? duration - currentTime : 0
+
+  return remainingTime > 0 ? (
+    <RemainingTimeBadge remainingTime={remainingTime} />
+  ) : null
+}
+
+type VideoOverlayProps = {
   showRemainingTime?: boolean
 }
 
 export const VideoOverlay = ({
   showRemainingTime = false
-}: VideoOverlayParams) => {
+}: VideoOverlayProps) => {
   const dispatch = useMediaDispatch()
   const isPaused = useMediaSelector((state) => {
     return state.mediaPaused
@@ -108,32 +114,26 @@ export const VideoOverlay = ({
     })
   }
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault()
-      handleOverlayClick()
-    }
-  }
-
   const fullscreenLabel = isFullscreen
     ? m.meme_exit_fullscreen()
     : m.meme_fullscreen()
   const muteLabel = isMuted ? m.meme_unmute() : m.meme_mute()
 
   return (
-    <div
-      className="absolute inset-0 flex items-center justify-center cursor-pointer z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-inset"
-      onClick={handleOverlayClick}
-      onKeyDown={handleKeyDown}
-      role="button"
-      tabIndex={0}
-      aria-label={isPaused ? m.meme_play_video() : m.meme_pause_video()}
-    >
-      {isPaused ? (
-        <div className="size-16 rounded-full bg-black/50 flex items-center justify-center">
-          <Play className="size-8 text-white fill-white ml-1" />
-        </div>
-      ) : null}
+    <div className="absolute inset-0 z-10">
+      <button
+        type="button"
+        className="absolute inset-0 flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-inset"
+        onClick={handleOverlayClick}
+        aria-label={isPaused ? m.meme_play_video() : m.meme_pause_video()}
+      >
+        {isPaused ? (
+          <span className="size-16 rounded-full bg-black/50 flex items-center justify-center">
+            <Play className="size-8 text-white fill-white ml-1" />
+          </span>
+        ) : null}
+        {showRemainingTime ? <RemainingTime /> : null}
+      </button>
       <div className="absolute bottom-3 right-3 flex flex-col gap-2">
         <Tooltip>
           <TooltipTrigger asChild>
@@ -170,7 +170,6 @@ export const VideoOverlay = ({
           <TooltipContent side="left">{muteLabel}</TooltipContent>
         </Tooltip>
       </div>
-      {showRemainingTime ? <RemainingTimeBadge /> : null}
     </div>
   )
 }

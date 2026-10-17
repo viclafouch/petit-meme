@@ -3,7 +3,7 @@ import type { MemeContentLocale } from '~/db/generated/prisma/enums'
 import { getContentLocaleLabel } from '~/helpers/i18n-content'
 import { m } from '~/paraglide/messages.js'
 
-type MemeLanguageBadgeParams = {
+type MemeLanguageBadgeProps = {
   contentLocale: Exclude<MemeContentLocale, 'UNIVERSAL'>
   showLabel?: boolean
 }
@@ -11,7 +11,7 @@ type MemeLanguageBadgeParams = {
 export const MemeLanguageBadge = ({
   contentLocale,
   showLabel = false
-}: MemeLanguageBadgeParams) => {
+}: MemeLanguageBadgeProps) => {
   const label = getContentLocaleLabel(contentLocale)
   const ariaLabel = m.meme_audio_language({ language: label })
   const Flag = CONTENT_LOCALE_FLAGS[contentLocale]

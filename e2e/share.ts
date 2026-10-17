@@ -52,5 +52,5 @@ export const expectVideoWasShared = async ({
       },
       { timeout: WHOLE_FILE_PROXY_GIVE_UP_MS }
     )
-    .toEqual([{ title, fileName: `${title}.mp4`, isEmpty: false }])
+    .toStrictEqual([{ title, fileName: `${title}.mp4`, isEmpty: false }])
 }

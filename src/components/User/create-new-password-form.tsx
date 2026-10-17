@@ -35,7 +35,13 @@ const getCreateNewPasswordFormOpts = () => {
   })
 }
 
-export const CreateNewPasswordForm = ({ token }: { token: string }) => {
+type CreateNewPasswordFormProps = {
+  token: string
+}
+
+export const CreateNewPasswordForm = ({
+  token
+}: CreateNewPasswordFormProps) => {
   const router = useRouter()
 
   const resetPasswordMutation = useMutation({
@@ -97,7 +103,7 @@ export const CreateNewPasswordForm = ({ token }: { token: string }) => {
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(event) => {
-                    return field.handleChange(event.target.value)
+                    field.handleChange(event.target.value)
                   }}
                 />
               </FormControl>
@@ -124,7 +130,7 @@ export const CreateNewPasswordForm = ({ token }: { token: string }) => {
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(event) => {
-                    return field.handleChange(event.target.value)
+                    field.handleChange(event.target.value)
                   }}
                 />
               </FormControl>

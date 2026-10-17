@@ -1,5 +1,9 @@
-import { getStudioTemplates, STUDIO_FONTS } from '~/constants/studio'
-import type { StudioTemplate } from '~/constants/studio'
+import { RadioGroup } from 'radix-ui'
+import {
+  getStudioTemplates,
+  STUDIO_FONTS,
+  type StudioTemplate
+} from '~/constants/studio'
 import { SELECTED_TILE_RING_CLASS_NAME } from '~/constants/ui'
 import { buildVideoImageUrl } from '~/lib/bunny'
 import { cn } from '~/lib/utils'
@@ -7,6 +11,7 @@ import { m } from '~/paraglide/messages.js'
 import { useStudioStore } from '~/stores/studio.store'
 
 const PREVIEW_FONT_SIZE = 14
+const PERCENT = 100
 
 const buildBandStyle = (template: StudioTemplate) => {
   const font = STUDIO_FONTS.find((entry) => {
@@ -15,7 +20,7 @@ const buildBandStyle = (template: StudioTemplate) => {
 
   const backgroundColor =
     template.bandOpacity < 1
-      ? `color-mix(in srgb, ${template.bandColor} ${Math.round(template.bandOpacity * 100)}%, transparent)`
+      ? `color-mix(in srgb, ${template.bandColor} ${Math.round(template.bandOpacity * PERCENT)}%, transparent)`
       : template.bandColor
 
   return {
@@ -30,19 +35,21 @@ const buildBandStyle = (template: StudioTemplate) => {
 const BUTTON_BASE_CLASSES =
   'flex-1 rounded-lg border border-border overflow-hidden cursor-pointer transition-shadow'
 
-type TemplateCardParams = {
+type CaptionTemplateCardProps = {
   template: StudioTemplate
   thumbnailUrl: string
   isSelected: boolean
   onSelect: () => void
 }
 
+type OverlayTemplateCardProps = CaptionTemplateCardProps
+
 const CaptionTemplateCard = ({
   template,
   thumbnailUrl,
   isSelected,
   onSelect
-}: TemplateCardParams) => {
+}: CaptionTemplateCardProps) => {
   const bandElement = (
     <div
       className="py-1 text-center"
@@ -54,10 +61,8 @@ const CaptionTemplateCard = ({
   )
 
   return (
-    <button
-      type="button"
-      role="radio"
-      aria-checked={isSelected}
+    <RadioGroup.Item
+      value={template.id}
       aria-label={template.label}
       data-active={isSelected || undefined}
       className={cn(
@@ -77,7 +82,7 @@ const CaptionTemplateCard = ({
         decoding="async"
       />
       {template.textPosition === 'bottom' ? bandElement : null}
-    </button>
+    </RadioGroup.Item>
   )
 }
 
@@ -86,12 +91,10 @@ const OverlayTemplateCard = ({
   thumbnailUrl,
   isSelected,
   onSelect
-}: TemplateCardParams) => {
+}: OverlayTemplateCardProps) => {
   return (
-    <button
-      type="button"
-      role="radio"
-      aria-checked={isSelected}
+    <RadioGroup.Item
+      value={template.id}
       aria-label={template.label}
       data-active={isSelected || undefined}
       className={cn(
@@ -119,15 +122,15 @@ const OverlayTemplateCard = ({
       >
         Abc
       </div>
-    </button>
+    </RadioGroup.Item>
   )
 }
 
-type StudioTemplatesParams = {
+type StudioTemplatesProps = {
   bunnyId: string
 }
 
-export const StudioTemplates = ({ bunnyId }: StudioTemplatesParams) => {
+export const StudioTemplates = ({ bunnyId }: StudioTemplatesProps) => {
   const activeTemplateId = useStudioStore((state) => {
     return state.activeTemplateId
   })
@@ -139,9 +142,9 @@ export const StudioTemplates = ({ bunnyId }: StudioTemplatesParams) => {
   const templates = getStudioTemplates()
 
   return (
-    <div
+    <RadioGroup.Root
+      value={activeTemplateId ?? ''}
       className="flex gap-2"
-      role="radiogroup"
       aria-label={m.studio_templates()}
     >
       {templates.map((template) => {
@@ -169,6 +172,6 @@ export const StudioTemplates = ({ bunnyId }: StudioTemplatesParams) => {
           />
         )
       })}
-    </div>
+    </RadioGroup.Root>
   )
 }

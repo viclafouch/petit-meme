@@ -1,11 +1,11 @@
-import type { Page } from '@playwright/test'
+import { expect, type Page } from '@playwright/test'
 import { prismaClient } from '~/db'
+import { m } from '~/paraglide/messages.js'
 import { openAuthDialog } from './auth-flows'
 import { E2E_PASSWORD, E2E_ROLES, E2E_WRONG_PASSWORD } from './constants'
 import { resolveStorageStatePath } from './env'
-import { expect, test } from './fixtures'
+import { test } from './fixtures'
 import { repeatUntilVisible } from './hydration'
-import { m } from './messages'
 
 const openDeleteAccountDialog = async (page: Page) => {
   await page.goto('/settings')
@@ -76,10 +76,11 @@ test.describe('a deletion without the password', () => {
       dialog.getByText(m.auth_error_invalid_password())
     ).toBeVisible()
 
-    expect(
-      await prismaClient.user.count({
-        where: { id: E2E_ROLES.deletionRefused.id }
-      })
-    ).toBe(1)
+    const keptUser = await prismaClient.user.findUnique({
+      where: { id: E2E_ROLES.deletionRefused.id },
+      select: { id: true }
+    })
+
+    expect(keptUser).toStrictEqual({ id: E2E_ROLES.deletionRefused.id })
   })
 })

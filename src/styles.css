@@ -244,6 +244,95 @@
 @utility amber-badge {
   @apply rounded-full bg-amber-700/10 text-xs font-semibold text-amber-700 dark:bg-amber-400/15 dark:text-amber-400;
 }
+@utility max-h-dvh-* {
+  max-height: calc(--value(integer) * 1dvh);
+}
+@utility max-h-vh-* {
+  max-height: calc(--value(integer) * 1vh);
+}
+@utility max-w-vw-* {
+  max-width: calc(--value(integer) * 1vw);
+}
+@utility max-h-dialog {
+  max-height: calc(100dvh - 2rem);
+}
+@utility max-h-sticky-aside {
+  max-height: calc(100vh - 5rem);
+}
+@utility grid-cols-submit {
+  grid-template-columns: 7fr 3fr;
+}
+@utility grid-cols-meme-page {
+  grid-template-columns: auto 300px;
+}
+@utility leading-display {
+  --tw-leading: 1.1;
+  line-height: 1.1;
+}
+@utility leading-heading {
+  --tw-leading: 1.2;
+  line-height: 1.2;
+}
+@utility text-caption {
+  font-size: 11px;
+}
+@utility rounded-swatch {
+  border-radius: 2px;
+}
+@utility interpolate-size-keywords {
+  interpolate-size: allow-keywords;
+}
+@utility video-filter-transition {
+  & video {
+    transition-property: filter;
+    transition-timing-function: var(
+      --tw-ease,
+      var(--default-transition-timing-function)
+    );
+    transition-duration: var(--tw-duration, var(--default-transition-duration));
+  }
+}
+@utility shine-gradient-light {
+  background-image: linear-gradient(110deg, #fff, 45%, #fffbeb, 55%, #fff);
+}
+@utility shine-gradient-dark {
+  background-image: linear-gradient(
+    110deg,
+    #000103,
+    45%,
+    #1e2631,
+    55%,
+    #000103
+  );
+}
+@utility shine-size {
+  background-size: 200% 100%;
+}
+@utility banner-gap {
+  --banner-gap: 0.625rem;
+}
+@utility w-banner {
+  width: 24rem;
+}
+@utility max-h-banner {
+  max-height: calc(100dvh - 2.5rem);
+}
+@utility text-banner {
+  font-size: 0.8125rem;
+}
+@utility pb-banner-safe {
+  padding-bottom: calc(var(--banner-gap) + env(safe-area-inset-bottom));
+}
+@utility rounded-bl-banner {
+  border-bottom-left-radius: calc(
+    var(--banner-radius, 1.5rem) - var(--banner-gap, 0.625rem)
+  );
+}
+@utility rounded-br-banner {
+  border-bottom-right-radius: calc(
+    var(--banner-radius, 1.5rem) - var(--banner-gap, 0.625rem)
+  );
+}
 
 @layer components {
   .auth-tabs-list {

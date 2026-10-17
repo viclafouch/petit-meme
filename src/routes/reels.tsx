@@ -1,7 +1,4 @@
-import { noop } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { DefaultLoading } from '~/components/default-loading'
-import { MemeReels } from '~/components/Meme/meme-reels'
 import {
   getActiveSubscriptionQueryOpts,
   getInfiniteReelsQueryOpts
@@ -9,21 +6,12 @@ import {
 import { buildOgImageUrl, seo } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
-
-const RouteComponent = () => {
-  return (
-    <div className="bg-primary-foreground dark">
-      <MemeReels />
-    </div>
-  )
-}
+import { ReelsPage, ReelsPending } from './-components/reels-page'
 
 export const Route = createFileRoute('/reels')({
-  component: RouteComponent,
+  component: ReelsPage,
   ssr: 'data-only',
-  pendingComponent: () => {
-    return <DefaultLoading className="bg-primary-foreground dark h-screen" />
-  },
+  pendingComponent: ReelsPending,
   head: () => {
     const locale = getLocale()
 
@@ -41,12 +29,12 @@ export const Route = createFileRoute('/reels')({
   },
   loader: async ({ context }) => {
     if (context.user) {
-      void context.queryClient
-        .query({
+      void Promise.allSettled([
+        context.queryClient.query({
           ...getActiveSubscriptionQueryOpts(),
           staleTime: 'static'
         })
-        .catch(noop)
+      ])
     }
 
     await context.queryClient.infiniteQuery({

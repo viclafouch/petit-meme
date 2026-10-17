@@ -135,7 +135,7 @@ export const SignupForm = () => {
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(event) => {
-                    return field.handleChange(event.target.value)
+                    field.handleChange(event.target.value)
                   }}
                 />
               </FormControl>
@@ -162,7 +162,7 @@ export const SignupForm = () => {
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(event) => {
-                    return field.handleChange(event.target.value)
+                    field.handleChange(event.target.value)
                   }}
                 />
               </FormControl>
@@ -189,7 +189,7 @@ export const SignupForm = () => {
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(event) => {
-                    return field.handleChange(event.target.value)
+                    field.handleChange(event.target.value)
                   }}
                 />
               </FormControl>
@@ -216,7 +216,7 @@ export const SignupForm = () => {
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(event) => {
-                    return field.handleChange(event.target.value)
+                    field.handleChange(event.target.value)
                   }}
                 />
               </FormControl>
@@ -235,9 +235,9 @@ export const SignupForm = () => {
               <div className="flex items-start gap-x-2">
                 <Checkbox
                   id="acceptTerms"
-                  checked={field.state.value === true}
+                  checked={field.state.value}
                   onCheckedChange={(checked) => {
-                    return field.handleChange(checked === true)
+                    field.handleChange(checked === true)
                   }}
                   onBlur={field.handleBlur}
                 />

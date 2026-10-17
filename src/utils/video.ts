@@ -1,3 +1,4 @@
+// oxlint-disable-next-line import/no-named-as-default -- hls.js 1.7 types declare the default export only, the named Hls export is missing from them
 import Hls from 'hls.js'
 import { BUNNY_STATUS, HLS_MIME_TYPE } from '~/constants/bunny'
 
@@ -27,7 +28,7 @@ export const attachHlsSource = ({ video, videoSrc }: AttachHlsSourceParams) => {
     return () => {}
   }
 
-  // oxlint-disable-next-line import/no-named-as-default-member -- isSupported is a static method, not a named export in hls.js types
+  // oxlint-disable-next-line import/no-named-as-default-member -- hls.js 1.7 types declare isSupported as a static method only, not as a named export
   if (!Hls.isSupported()) {
     return () => {}
   }
@@ -38,5 +39,15 @@ export const attachHlsSource = ({ video, videoSrc }: AttachHlsSourceParams) => {
 
   return () => {
     hls.destroy()
+  }
+}
+
+export const tryPlayVideo = async (video: HTMLVideoElement) => {
+  try {
+    await video.play()
+
+    return true
+  } catch {
+    return false
   }
 }

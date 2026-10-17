@@ -11,17 +11,18 @@ import {
 import {
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent
+  ChartTooltipContent,
+  type ChartConfig
 } from '~/components/ui/chart'
-import type { ChartConfig } from '~/components/ui/chart'
 import { formatDate } from '~/helpers/date'
-import { getLocale } from '~/paraglide/runtime'
-import type { Locale } from '~/paraglide/runtime'
+import { getLocale, type Locale } from '~/paraglide/runtime'
 import type {
   ChartDataPoint,
   DashboardPeriod
 } from '~/routes/admin/-server/dashboard'
 import type { IconConfig } from './types'
+
+const HIDDEN_METRIC_OPACITY = 0.35
 
 type MetricKey = keyof Omit<ChartDataPoint, 'date'>
 
@@ -71,17 +72,23 @@ const METRIC_SUMMARIES = [
   }
 ] as const satisfies readonly IconConfig<MetricKey>[]
 
-function computeMetricTotals(data: ChartDataPoint[]) {
-  return Object.fromEntries(
-    METRIC_KEYS.map((key) => {
-      return [
-        key,
-        data.reduce((sum, point) => {
-          return sum + point[key]
-        }, 0)
-      ]
-    })
-  ) as Record<MetricKey, number>
+function computeMetricTotals(
+  data: ChartDataPoint[]
+): Record<MetricKey, number> {
+  const sumOf = (key: MetricKey) => {
+    return data.reduce((sum, point) => {
+      return sum + point[key]
+    }, 0)
+  }
+
+  return {
+    views: sumOf('views'),
+    studioGenerations: sumOf('studioGenerations'),
+    shares: sumOf('shares'),
+    downloads: sumOf('downloads'),
+    signups: sumOf('signups'),
+    aiSearches: sumOf('aiSearches')
+  }
 }
 
 const PERIOD_DESCRIPTIONS = {
@@ -124,12 +131,12 @@ function formatXAxisDate(
   return formatDate(date, locale, DAY_MONTH_OPTIONS)
 }
 
-type TrendsChartParams = {
+type TrendsChartProps = {
   data: ChartDataPoint[]
   period: DashboardPeriod
 }
 
-export const TrendsChart = ({ data, period }: TrendsChartParams) => {
+export const TrendsChart = ({ data, period }: TrendsChartProps) => {
   const locale = getLocale()
   const [hiddenMetrics, setHiddenMetrics] = React.useState<Set<MetricKey>>(
     new Set()
@@ -159,9 +166,8 @@ export const TrendsChart = ({ data, period }: TrendsChartParams) => {
           <CardDescription>{PERIOD_DESCRIPTIONS[period]}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div
-            className="flex flex-wrap items-center gap-x-4 gap-y-2 pb-4"
-            role="group"
+          <fieldset
+            className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2 pb-4"
             aria-label="Filtres de métriques du graphique"
           >
             {METRIC_KEYS.map((key) => {
@@ -172,7 +178,7 @@ export const TrendsChart = ({ data, period }: TrendsChartParams) => {
                   key={key}
                   type="button"
                   className="flex items-center gap-1.5 text-xs transition-opacity"
-                  style={{ opacity: isHidden ? 0.35 : 1 }}
+                  style={{ opacity: isHidden ? HIDDEN_METRIC_OPACITY : 1 }}
                   onClick={() => {
                     handleLegendClick(key)
                   }}
@@ -180,21 +186,20 @@ export const TrendsChart = ({ data, period }: TrendsChartParams) => {
                   aria-pressed={!isHidden}
                 >
                   <span
-                    className="size-2 shrink-0 rounded-[2px]"
+                    className="size-2 shrink-0 rounded-swatch"
                     style={{ backgroundColor: CHART_CONFIG[key].color }}
                   />
                   {CHART_CONFIG[key].label}
                 </button>
               )
             })}
-          </div>
+          </fieldset>
           <ChartContainer
             config={CHART_CONFIG}
             className="aspect-auto h-62.5 w-full"
-            role="img"
-            aria-label={`Graphique des tendances — ${PERIOD_DESCRIPTIONS[period]}`}
           >
             <LineChart
+              aria-label={`Graphique des tendances — ${PERIOD_DESCRIPTIONS[period]}`}
               data={data}
               margin={{ top: 0, right: 12, bottom: 0, left: 12 }}
             >

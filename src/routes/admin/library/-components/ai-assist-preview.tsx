@@ -10,7 +10,7 @@ import { MEME_DESCRIPTION_MAX_LENGTH } from '~/routes/admin/-server/memes'
 import type { AiAssistResult } from '~/server/ai'
 import type { AiAssistFieldSelection } from './ai-assist-dialog'
 
-type AiAssistPreviewParams = {
+type AiAssistPreviewProps = {
   currentValues: AiAssistResult
   selectedFields: AiAssistFieldSelection
   editedTitle: string
@@ -22,11 +22,11 @@ type AiAssistPreviewParams = {
   onDescriptionChange: (value: string) => void
 }
 
-type CurrentValueParams = {
+type CurrentValueProps = {
   value: string
 }
 
-const CurrentValue = ({ value }: CurrentValueParams) => {
+const CurrentValue = ({ value }: CurrentValueProps) => {
   return (
     <p className="rounded-sm bg-muted/50 px-2.5 py-1.5 text-xs text-muted-foreground">
       {value}
@@ -44,7 +44,7 @@ export const AiAssistPreview = ({
   onToggleField,
   onTitleChange,
   onDescriptionChange
-}: AiAssistPreviewParams) => {
+}: AiAssistPreviewProps) => {
   return (
     <div className="flex flex-col gap-4 border-t pt-4">
       <div
@@ -72,9 +72,9 @@ export const AiAssistPreview = ({
             onTitleChange(event.target.value)
           }}
         />
-        {currentValues.title ? (
+        {currentValues.title === '' ? null : (
           <CurrentValue value={currentValues.title} />
-        ) : null}
+        )}
       </div>
       <div
         className={cn(
@@ -101,17 +101,16 @@ export const AiAssistPreview = ({
               onDescriptionChange(event.target.value)
             }}
           />
-          <span
+          <output
             className="self-end text-xs text-muted-foreground"
-            role="status"
             aria-live="polite"
           >
             {editedDescription.length}/{MEME_DESCRIPTION_MAX_LENGTH}
-          </span>
+          </output>
         </div>
-        {currentValues.description ? (
+        {currentValues.description === '' ? null : (
           <CurrentValue value={currentValues.description} />
-        ) : null}
+        )}
       </div>
       <div
         className={cn(

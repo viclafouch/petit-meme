@@ -2,10 +2,12 @@ import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 import { LoadingSpinner } from './ui/spinner'
 
+type DefaultLoadingProps = React.ComponentProps<'div'>
+
 export const DefaultLoading = ({
   className,
   ...restProps
-}: React.ComponentProps<'div'>) => {
+}: DefaultLoadingProps) => {
   return (
     <div
       className={cn(

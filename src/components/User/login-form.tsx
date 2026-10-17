@@ -29,9 +29,9 @@ import { captureWithFeature } from '~/lib/sentry'
 import { getFieldErrorMessage } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 
-type LoginFormParams = {
-  onOpenChange?: (open: boolean) => void
+type LoginFormProps = {
   lastLoginMethod: string | null
+  onOpenChange?: (open: boolean) => void
 }
 
 const getLoginSchema = () => {
@@ -56,7 +56,7 @@ const getLoginFormOpts = () => {
 export const LoginForm = ({
   onOpenChange,
   lastLoginMethod
-}: LoginFormParams) => {
+}: LoginFormProps) => {
   const router = useRouter()
   const queryClient = useQueryClient()
 
@@ -91,7 +91,7 @@ export const LoginForm = ({
 
   const errorRef = useErrorFocus(signInMutation.error)
 
-  const matchIsEmailNotVerified =
+  const isEmailNotVerified =
     signInMutation.error?.message === 'EMAIL_NOT_VERIFIED'
 
   const form = useForm({
@@ -133,7 +133,7 @@ export const LoginForm = ({
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(event) => {
-                    return field.handleChange(event.target.value)
+                    field.handleChange(event.target.value)
                   }}
                 />
               </FormControl>
@@ -160,7 +160,7 @@ export const LoginForm = ({
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(event) => {
-                    return field.handleChange(event.target.value)
+                    field.handleChange(event.target.value)
                   }}
                 />
               </FormControl>
@@ -188,7 +188,7 @@ export const LoginForm = ({
         {m.nav_sign_in()}
         {isLastLoginEmail ? <LastLoginBadge /> : null}
       </LoadingButton>
-      {signInMutation.error && !matchIsEmailNotVerified ? (
+      {signInMutation.error && !isEmailNotVerified ? (
         <Alert ref={errorRef} variant="destructive" role="alert" tabIndex={-1}>
           <CircleAlert aria-hidden="true" />
           <AlertDescription>
@@ -196,7 +196,7 @@ export const LoginForm = ({
           </AlertDescription>
         </Alert>
       ) : null}
-      {matchIsEmailNotVerified ? (
+      {isEmailNotVerified ? (
         <Alert variant="destructive" role="alert">
           <CircleAlert aria-hidden="true" />
           <AlertTitle>{m.auth_email_not_verified_title()}</AlertTitle>

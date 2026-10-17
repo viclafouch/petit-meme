@@ -1,4 +1,4 @@
-import { MINUTE } from '~/constants/time'
+import { TEN_MINUTES_MS } from '~/constants/time'
 import { extractClientCountry, extractClientIp } from '~/helpers/request'
 import { captureWithFeature } from '~/lib/sentry'
 import { checkRateLimit } from '~/utils/rate-limit-store'
@@ -6,7 +6,7 @@ import { checkRateLimit } from '~/utils/rate-limit-store'
 const CSRF_SAMPLE_CONFIG = {
   action: 'csrf-block',
   maxRequests: 1,
-  windowMs: 10 * MINUTE
+  windowMs: TEN_MINUTES_MS
 }
 
 export const observeCsrfBlock = (request: Request) => {

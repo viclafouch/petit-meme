@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { MemeExportMode, MemeWithVideo } from '~/constants/meme'
 import { getErrorMessage } from '~/helpers/error'
 import { snoozePremiumReminder } from '~/hooks/use-premium-reminder'
+import { useShowDialog } from '~/hooks/use-show-dialog'
 import {
   getActiveSubscriptionQueryOpts,
   getAuthUserQueryOpts
@@ -11,7 +12,6 @@ import { matchIsUserAdmin } from '~/lib/role'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
 import { shareMeme, trackMemeAction } from '~/server/meme'
-import { useShowDialog } from '~/stores/dialog.store'
 import { downloadBlob, shareBlob } from '~/utils/download'
 
 type UseMemeExportParams = {
@@ -40,7 +40,7 @@ export const useMemeExport = ({ mode }: UseMemeExportParams) => {
     return Boolean(subscription)
   }
 
-  const mutation = useMutation({
+  const exportMutation = useMutation({
     mutationFn: async (meme: Pick<MemeWithVideo, 'id' | 'title'>) => {
       if (!matchIsClientPremium()) {
         snoozePremiumReminder()
@@ -49,11 +49,15 @@ export const useMemeExport = ({ mode }: UseMemeExportParams) => {
         return
       }
 
-      const blobPromise = shareMeme({
-        data: { memeId: meme.id, mode }
-      }).then((response) => {
+      const fetchMemeBlob = async () => {
+        const response = await shareMeme({
+          data: { memeId: meme.id, mode }
+        })
+
         return response.blob()
-      })
+      }
+
+      const blobPromise = fetchMemeBlob()
 
       toast.promise(blobPromise, {
         loading: m.common_loading(),
@@ -81,15 +85,15 @@ export const useMemeExport = ({ mode }: UseMemeExportParams) => {
   })
 
   const trigger = (meme: Pick<MemeWithVideo, 'id' | 'title'>) => {
-    if (mutation.isPending) {
+    if (exportMutation.isPending) {
       return
     }
 
-    mutation.mutate(meme)
+    exportMutation.mutate(meme)
   }
 
   return {
     trigger,
-    isPending: mutation.isPending
+    isPending: exportMutation.isPending
   }
 }

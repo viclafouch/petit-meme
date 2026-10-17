@@ -17,11 +17,7 @@ import { LoadingButton } from '~/components/ui/loading-button'
 import { Separator } from '~/components/ui/separator'
 import { DeleteAccountDialog } from '~/components/User/delete-account-dialog'
 import { UpdatePasswordDialog } from '~/components/User/update-password-dialog'
-import {
-  type BetterAuthPlanName,
-  getFreePlan,
-  getPremiumPlan
-} from '~/constants/plan'
+import { getFreePlan, getPremiumPlan } from '~/constants/plan'
 import { formatDate } from '~/helpers/date'
 import { getSubscriptionDisplayInfo } from '~/helpers/subscription'
 import { useStripeCheckout } from '~/hooks/use-stripe-checkout'
@@ -35,7 +31,7 @@ import { downloadBlob } from '~/utils/download'
 const SETTINGS_ROW_CLASS_NAME =
   'flex md:items-center justify-between gap-6 flex-col md:flex-row'
 
-type ProfileContentParams = {
+type ProfileContentProps = {
   user: User
   activeSubscription: ActiveSubscription | null
 }
@@ -43,7 +39,7 @@ type ProfileContentParams = {
 export const ProfileContent = ({
   user,
   activeSubscription
-}: ProfileContentParams) => {
+}: ProfileContentProps) => {
   const [isUpdatePasswordOpened, setIsUpdatePasswordOpened] =
     React.useState(false)
   const [isDeleteAccountOpened, setIsDeleteAccountOpened] =
@@ -104,7 +100,7 @@ export const ProfileContent = ({
                     {getPremiumPlan().title} -{' '}
                     {
                       getSubscriptionDisplayInfo({
-                        planName: activeSubscription.plan as BetterAuthPlanName,
+                        planName: activeSubscription.plan,
                         locale: getLocale()
                       }).displayPrice
                     }{' '}

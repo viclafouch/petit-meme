@@ -1,18 +1,18 @@
 import React from 'react'
 import { LayoutGroup, motion, useReducedMotion } from 'motion/react'
+import { RadioGroup } from 'radix-ui'
 import { ANNUAL_DISCOUNT_PERCENT, type BillingPeriod } from '~/constants/plan'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 
-type BillingToggleParams = {
+type BillingToggleProps = {
   billingPeriod: BillingPeriod
   onBillingPeriodChange: (period: BillingPeriod) => void
 }
 
-const OPPOSITE_PERIOD = {
-  monthly: 'yearly',
-  yearly: 'monthly'
-} as const satisfies Record<BillingPeriod, BillingPeriod>
+const BADGE_PULSE_SCALE = 1.1
+const BADGE_PULSE_DURATION = 0.3
+const BADGE_PULSE_DELAY = 0.15
 
 type ToggleOption = {
   value: BillingPeriod
@@ -29,28 +29,15 @@ const getToggleOptions = (): ToggleOption[] => {
 export const BillingToggle = ({
   billingPeriod,
   onBillingPeriodChange
-}: BillingToggleParams) => {
-  const prefersReducedMotion = useReducedMotion()
+}: BillingToggleProps) => {
+  const isReducedMotion = useReducedMotion()
   const [hasInteracted, setHasInteracted] = React.useState(false)
-
-  const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (
-      event.key === 'ArrowRight' ||
-      event.key === 'ArrowDown' ||
-      event.key === 'ArrowLeft' ||
-      event.key === 'ArrowUp'
-    ) {
-      event.preventDefault()
-      setHasInteracted(true)
-      onBillingPeriodChange(OPPOSITE_PERIOD[billingPeriod])
-    }
-  }
 
   return (
     <LayoutGroup>
-      <div
+      <RadioGroup.Root
+        value={billingPeriod}
         className="relative flex rounded-full bg-muted p-1"
-        role="radiogroup"
         aria-label={m.pricing_billing_period()}
       >
         {getToggleOptions().map((option) => {
@@ -58,17 +45,13 @@ export const BillingToggle = ({
           const isYearly = option.value === 'yearly'
 
           return (
-            <button
+            <RadioGroup.Item
               key={option.value}
-              type="button"
-              role="radio"
-              aria-checked={isSelected}
-              tabIndex={isSelected ? 0 : -1}
+              value={option.value}
               onClick={() => {
                 setHasInteracted(true)
                 onBillingPeriodChange(option.value)
               }}
-              onKeyDown={handleKeyDown}
               className={cn(
                 'relative z-10 min-h-11 cursor-pointer rounded-full px-5 py-2.5 text-sm font-medium outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-muted',
                 isSelected
@@ -81,7 +64,7 @@ export const BillingToggle = ({
                   layoutId="billing-pill"
                   className="absolute inset-0 rounded-full bg-background shadow-sm"
                   transition={
-                    prefersReducedMotion
+                    isReducedMotion
                       ? { duration: 0 }
                       : { type: 'spring', stiffness: 400, damping: 30 }
                   }
@@ -94,23 +77,23 @@ export const BillingToggle = ({
                     className="amber-badge px-2 py-0.5"
                     animate={{
                       scale:
-                        isSelected && !prefersReducedMotion && hasInteracted
-                          ? [1, 1.1, 1]
+                        isSelected && !isReducedMotion && hasInteracted
+                          ? [1, BADGE_PULSE_SCALE, 1]
                           : 1
                     }}
                     transition={{
-                      duration: prefersReducedMotion ? 0 : 0.3,
-                      delay: prefersReducedMotion ? 0 : 0.15
+                      duration: isReducedMotion ? 0 : BADGE_PULSE_DURATION,
+                      delay: isReducedMotion ? 0 : BADGE_PULSE_DELAY
                     }}
                   >
                     -{ANNUAL_DISCOUNT_PERCENT}%
                   </motion.span>
                 ) : null}
               </span>
-            </button>
+            </RadioGroup.Item>
           )
         })}
-      </div>
+      </RadioGroup.Root>
     </LayoutGroup>
   )
 }

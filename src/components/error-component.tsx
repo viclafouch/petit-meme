@@ -2,8 +2,11 @@ import React from 'react'
 import { TriangleAlertIcon } from 'lucide-react'
 import * as Sentry from '@sentry/tanstackstart-react'
 import { useQueryErrorResetBoundary } from '@tanstack/react-query'
-import type { ErrorComponentProps } from '@tanstack/react-router'
-import { Link, useRouter } from '@tanstack/react-router'
+import {
+  type ErrorComponentProps as RouterErrorComponentProps,
+  Link,
+  useRouter
+} from '@tanstack/react-router'
 import {
   Accordion,
   AccordionContent,
@@ -15,9 +18,9 @@ import { Button } from '~/components/ui/button'
 import { IS_PRODUCTION } from '~/constants/env'
 import { m } from '~/paraglide/messages.js'
 
-export const ErrorComponent = ({
-  error
-}: Pick<ErrorComponentProps, 'error'>) => {
+type ErrorComponentProps = Pick<RouterErrorComponentProps, 'error'>
+
+export const ErrorComponent = ({ error }: ErrorComponentProps) => {
   const router = useRouter()
 
   const queryErrorResetBoundary = useQueryErrorResetBoundary()

@@ -1,5 +1,6 @@
 import { CheckIcon, LoaderCircleIcon } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { EASE_OUT } from '~/constants/motion'
 import type { Stage } from '~/hooks/use-ai-search-stages'
 import { m } from '~/paraglide/messages.js'
 
@@ -42,9 +43,9 @@ export const AiSearchStages = ({ stages }: AiSearchStagesProps) => {
       transition={{ duration: 0.3 }}
       className="flex flex-col items-center gap-y-3"
     >
-      <span className="sr-only" role="status">
+      <output className="sr-only">
         {STAGE_LABELS[getActiveStageKey(stages)]()}
-      </span>
+      </output>
       {stages.map((stage) => {
         const isVisible =
           stage.status === 'active' || stage.status === 'completed'
@@ -52,10 +53,7 @@ export const AiSearchStages = ({ stages }: AiSearchStagesProps) => {
         return (
           <AnimatePresence key={stage.key}>
             {isVisible ? (
-              <StageItem
-                stage={stage}
-                isReducedMotion={isReducedMotion ?? false}
-              />
+              <StageItem stage={stage} isReducedMotion={isReducedMotion} />
             ) : null}
           </AnimatePresence>
         )
@@ -66,7 +64,7 @@ export const AiSearchStages = ({ stages }: AiSearchStagesProps) => {
 
 type StageItemProps = {
   stage: Stage
-  isReducedMotion: boolean
+  isReducedMotion: ReturnType<typeof useReducedMotion>
 }
 
 const StageItem = ({ stage, isReducedMotion }: StageItemProps) => {
@@ -78,7 +76,7 @@ const StageItem = ({ stage, isReducedMotion }: StageItemProps) => {
         isReducedMotion ? false : { opacity: 0, y: 6, filter: 'blur(4px)' }
       }
       animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-      transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+      transition={{ duration: 0.4, ease: EASE_OUT }}
       className="flex items-center gap-2.5"
     >
       <AnimatePresence mode="wait" initial={false}>

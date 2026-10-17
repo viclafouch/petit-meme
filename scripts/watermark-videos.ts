@@ -1,13 +1,11 @@
 /* oxlint-disable no-console */
 import { execFile } from 'node:child_process'
-import { createWriteStream } from 'node:fs'
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
-import { Readable } from 'node:stream'
-import { pipeline } from 'node:stream/promises'
 import { promisify } from 'node:util'
 import { prismaClient } from '~/db'
+import { BYTES_PER_KILOBYTE } from '~/constants/number'
 import {
   WATERMARK_ASSET_PATH,
   WATERMARK_FFMPEG_FILTER
@@ -22,6 +20,7 @@ import {
 } from '~/lib/bunny'
 import { logEnvironmentInfo } from './lib/env-guard'
 
+// oxlint-disable-next-line typescript/strict-void-return -- util.promisify picks execFile's custom promisified form, not the callback overload the rule compares against
 const execFileAsync = promisify(execFile)
 
 const OUTPUT_DIR = path.resolve('watermarked')
@@ -29,7 +28,9 @@ const WATERMARK_PATH = path.resolve(`public${WATERMARK_ASSET_PATH}`)
 const CONCURRENCY = 3
 const FETCH_TIMEOUT_MS = 30_000
 const FFMPEG_TIMEOUT_MS = 120_000
-const FFMPEG_MAX_BUFFER = 10 * 1024 * 1024
+const FFMPEG_MAX_BUFFER_MB = 10
+const BYTES_PER_MEGABYTE = BYTES_PER_KILOBYTE * BYTES_PER_KILOBYTE
+const FFMPEG_MAX_BUFFER = FFMPEG_MAX_BUFFER_MB * BYTES_PER_MEGABYTE
 
 const MEME_VIDEO_SELECT = {
   id: true,
@@ -47,10 +48,12 @@ type ParsedOptions = {
   upload: boolean
 }
 
+type FetchMemesParams = Pick<ParsedOptions, 'limit' | 'memeId'>
+
 const fetchMemes = async ({
   limit,
   memeId
-}: ParsedOptions): Promise<MemeVideo[]> => {
+}: FetchMemesParams): Promise<MemeVideo[]> => {
   if (memeId) {
     const meme = await prismaClient.meme.findUnique({
       where: { id: memeId, status: MemeStatus.PUBLISHED },
@@ -68,7 +71,7 @@ const fetchMemes = async ({
     where: { status: MemeStatus.PUBLISHED },
     select: MEME_VIDEO_SELECT,
     orderBy: { createdAt: 'asc' },
-    ...(limit ? { take: limit } : {})
+    ...(limit === undefined || limit === 0 ? {} : { take: limit })
   })
 }
 
@@ -76,7 +79,7 @@ const downloadVideo = async (bunnyId: string, destPath: string) => {
   const url = await signOriginalUrl(bunnyId)
   const controller = new AbortController()
   const timeout = setTimeout(() => {
-    return controller.abort()
+    controller.abort()
   }, FETCH_TIMEOUT_MS)
 
   try {
@@ -90,10 +93,7 @@ const downloadVideo = async (bunnyId: string, destPath: string) => {
       throw new Error('Empty response body')
     }
 
-    await pipeline(
-      Readable.fromWeb(response.body as never),
-      createWriteStream(destPath)
-    )
+    await fs.writeFile(destPath, Buffer.from(await response.arrayBuffer()))
   } finally {
     clearTimeout(timeout)
   }
@@ -174,10 +174,10 @@ const processMeme = async (
   }
 }
 
-const processWithConcurrency = async <T, TResult extends string>(
-  items: T[],
+const processWithConcurrency = async <TItem, TResult extends string>(
+  items: TItem[],
   concurrency: number,
-  fn: (item: T, index: number) => Promise<TResult>
+  fn: (item: TItem, index: number) => Promise<TResult>
 ) => {
   const results: TResult[] = []
   let nextIndex = 0
@@ -188,7 +188,7 @@ const processWithConcurrency = async <T, TResult extends string>(
       nextIndex += 1
       const item = items[index]
 
-      if (item) {
+      if (item !== undefined) {
         // oxlint-disable-next-line no-await-in-loop -- intentional sequential processing within each concurrent worker
         results[index] = await fn(item, index)
       }
@@ -281,13 +281,13 @@ const computeTotalSize = async () => {
     totalBytes += stat.size
   }
 
-  const totalMB = (totalBytes / (1024 * 1024)).toFixed(1)
+  const totalMB = (totalBytes / BYTES_PER_MEGABYTE).toFixed(1)
 
   return { totalMB, fileCount: mp4Files.length }
 }
 
-const countResults = <T extends string>(results: T[]) => {
-  const counts: Partial<Record<T, number>> = {}
+const countResults = <TResult extends string>(results: TResult[]) => {
+  const counts: Partial<Record<TResult, number>> = {}
 
   for (const result of results) {
     counts[result] = (counts[result] ?? 0) + 1

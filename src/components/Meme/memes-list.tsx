@@ -1,19 +1,24 @@
 import React from 'react'
 import { AnimatePresence } from 'motion/react'
 import { useRouteContext } from '@tanstack/react-router'
-import { MemeListItem } from '~/components/Meme/meme-list-item'
-import type { MemeListItemParams } from '~/components/Meme/meme-list-item'
+import {
+  MemeListItem,
+  type MemeListItemProps
+} from '~/components/Meme/meme-list-item'
 import { PlayerDialog } from '~/components/Meme/player-dialog'
-import { MEMES_PER_PAGE } from '~/constants/meme'
-import type { MemeWithVideo } from '~/constants/meme'
+import {
+  MEME_GRID_COLUMNS,
+  MEMES_PER_PAGE,
+  type MemeWithVideo
+} from '~/constants/meme'
 import { sendViewEvent } from '~/lib/algolia-insights'
-import * as m from '~/paraglide/messages'
+import { m } from '~/paraglide/messages.js'
 
 type MemeWithHighlight = MemeWithVideo & {
   highlightedTitle?: string
 }
 
-type MemesListParams = {
+type MemesListProps = {
   memes: MemeWithHighlight[]
   layoutContext: string
   columnGridCount?: number
@@ -21,34 +26,38 @@ type MemesListParams = {
   page?: number
 }
 
+const MEME_IDS_KEY_SEPARATOR = ','
+
 export const MemesList = ({
   memes,
   layoutContext,
   columnGridCount = 4,
   queryID,
   page = 0
-}: MemesListParams) => {
+}: MemesListProps) => {
   const { user } = useRouteContext({ from: '__root__' })
   const [selectedId, setSelectedId] = React.useState<string | null>(null)
   const triggerRef = React.useRef<HTMLButtonElement | null>(null)
 
   const authenticatedUserToken = user?.id
 
-  const memeIds = memes.map((meme) => {
-    return meme.id
-  })
-
-  const memeIdsKey = memeIds.join(',')
+  const memeIdsKey = memes
+    .map((meme) => {
+      return meme.id
+    })
+    .join(MEME_IDS_KEY_SEPARATOR)
 
   React.useEffect(() => {
-    if (memeIds.length === 0) {
+    if (memeIdsKey === '') {
       return () => {}
     }
 
-    sendViewEvent({ objectIDs: memeIds, authenticatedUserToken })
+    sendViewEvent({
+      objectIDs: memeIdsKey.split(MEME_IDS_KEY_SEPARATOR),
+      authenticatedUserToken
+    })
 
     return () => {}
-    // oxlint-disable-next-line react/exhaustive-deps
   }, [memeIdsKey, authenticatedUserToken])
 
   if (memes.length === 0) {
@@ -70,14 +79,14 @@ export const MemesList = ({
     return meme.id === selectedId
   })
 
-  const size: MemeListItemParams['size'] = columnGridCount < 5 ? 'md' : 'sm'
+  const size: MemeListItemProps['size'] =
+    columnGridCount < MEME_GRID_COLUMNS.MEDIUM ? 'md' : 'sm'
 
   return (
     <div className="w-full">
-      <div
+      <ul
         style={{ '--cols': `repeat(${columnGridCount}, 1fr)` }}
         className="grid gap-5 grid-cols-2 lg:grid-cols-(--cols)"
-        role="list"
         aria-label={m.meme_list_label()}
       >
         {memes.map((meme, index) => {
@@ -95,7 +104,7 @@ export const MemesList = ({
             />
           )
         })}
-      </div>
+      </ul>
       <AnimatePresence>
         {selectedMeme ? (
           <PlayerDialog

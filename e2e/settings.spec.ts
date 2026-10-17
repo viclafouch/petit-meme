@@ -1,11 +1,12 @@
-import type { Locator, Page } from '@playwright/test'
+import { expect, type Locator, type Page } from '@playwright/test'
+import { HTTP_STATUS } from '~/constants/http'
+import { m } from '~/paraglide/messages.js'
 import { openAuthDialog } from './auth-flows'
 import { E2E_PASSWORD, E2E_ROLES, E2E_WRONG_PASSWORD } from './constants'
 import { expectDownloadIsNotEmpty } from './downloads'
 import { resolveStorageStatePath } from './env'
-import { expect, test } from './fixtures'
+import { test } from './fixtures'
 import { repeatUntilRequested, repeatUntilVisible } from './hydration'
-import { m } from './messages'
 import { SERVER_FUNCTION_URL_PATTERN } from './server-functions'
 
 const NEW_PASSWORD = 'e2e-settings-password-2026'
@@ -70,12 +71,10 @@ const submitPasswordUpdate = async ({
 test.describe('a free User', () => {
   test.use({ storageState: resolveStorageStatePath('free') })
 
-  test('sees their account, their free plan and the way to Premium', async ({
-    page
-  }) => {
+  test('sees their account and their free plan', async ({ page }) => {
     const response = await page.goto('/settings')
 
-    expect(response?.status()).toBe(200)
+    expect(response?.status()).toBe(HTTP_STATUS.OK)
     await expect(
       page.getByRole('heading', { level: 1, name: E2E_ROLES.free.name })
     ).toBeVisible()
@@ -84,6 +83,10 @@ test.describe('a free User', () => {
     await expect(
       page.getByText(m.settings_current_subscription())
     ).toBeVisible()
+  })
+
+  test('finds the way to Premium', async ({ page }) => {
+    await page.goto('/settings')
 
     await page
       .getByRole('main')
@@ -283,8 +286,10 @@ test.describe('a Premium whose subscription still runs', () => {
   })
 })
 
-test('an anonymous Visitor is sent back to the home page', async ({ page }) => {
-  await page.goto('/settings')
+test.describe('an anonymous Visitor', () => {
+  test('is sent back to the home page', async ({ page }) => {
+    await page.goto('/settings')
 
-  await expect(page).toHaveURL('/')
+    await expect(page).toHaveURL('/')
+  })
 })

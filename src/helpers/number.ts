@@ -1,3 +1,4 @@
+import { CENTS_PER_EURO, PERCENT_SCALE } from '~/constants/number'
 import type { Locale } from '~/paraglide/runtime'
 
 type FormatCurrencyParams = {
@@ -10,9 +11,10 @@ const DEFAULT_CURRENCY_OPTIONS = {
   currency: 'EUR'
 } as const satisfies Intl.NumberFormatOptions
 
-function formatEuros(euros: number, params: FormatCurrencyParams) {
-  const { locale, ...options } = params
-
+function formatEuros(
+  euros: number,
+  { locale, ...options }: FormatCurrencyParams
+) {
   return euros.toLocaleString(locale, {
     ...DEFAULT_CURRENCY_OPTIONS,
     ...options
@@ -28,11 +30,11 @@ export function computePercentChange(current: number, previous: number) {
     return null
   }
 
-  return Math.round(((current - previous) / previous) * 100)
+  return Math.round(((current - previous) / previous) * PERCENT_SCALE)
 }
 
 export function convertCentsToEuros(cents: number) {
-  return cents / 100
+  return cents / CENTS_PER_EURO
 }
 
 export function formatCentsToEuros(

@@ -1,7 +1,7 @@
 import type { Locale } from '~/paraglide/runtime'
 import { OgBackdrop } from './og-backdrop'
 
-type OgHomeTemplateParams = {
+type OgHomeTemplateProps = {
   locale: Locale
   siteUrl: string
   hostname: string
@@ -94,7 +94,7 @@ export const OgHomeTemplate = ({
   siteUrl,
   hostname,
   logoUrl
-}: OgHomeTemplateParams) => {
+}: OgHomeTemplateProps) => {
   const lines = TITLE_LINES[locale]
   const content = HOME_CONTENT[locale]
 

@@ -4,9 +4,9 @@ import type { badgeVariants } from '~/components/ui/badge'
 import { TWEET_LINK_SCHEMA, YOUTUBE_LINK_SCHEMA } from '~/constants/url'
 import {
   MemeContentLocale,
-  MemeSubmissionUrlType
+  MemeSubmissionUrlType,
+  type MemeSubmissionStatus
 } from '~/db/generated/prisma/enums'
-import type { MemeSubmissionStatus } from '~/db/generated/prisma/enums'
 
 const detectUrlType = (url: string): MemeSubmissionUrlType | null => {
   if (TWEET_LINK_SCHEMA.safeParse(url).success) {
@@ -20,11 +20,14 @@ const detectUrlType = (url: string): MemeSubmissionUrlType | null => {
   return null
 }
 
+const SUBMISSION_TITLE_MIN_LENGTH = 3
+const SUBMISSION_TITLE_MAX_LENGTH = 100
+
 const SUBMISSION_TITLE_SCHEMA = z
   .string()
   .trim()
-  .min(3, { error: 'titleTooShort' })
-  .max(100)
+  .min(SUBMISSION_TITLE_MIN_LENGTH, { error: 'titleTooShort' })
+  .max(SUBMISSION_TITLE_MAX_LENGTH)
 
 export const CREATE_MEME_SUBMISSION_SCHEMA = z
   .object({
@@ -36,7 +39,7 @@ export const CREATE_MEME_SUBMISSION_SCHEMA = z
   .transform((data, context) => {
     const urlType = detectUrlType(data.url)
 
-    if (!urlType) {
+    if (urlType === null) {
       context.addIssue({
         code: 'custom',
         message: 'invalidSubmissionUrl',

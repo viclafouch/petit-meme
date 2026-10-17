@@ -2,6 +2,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { setResponseStatus } from '@tanstack/react-start/server'
 import { prismaClient } from '~/db'
 import { StudioError } from '~/constants/error'
+import { HTTP_STATUS } from '~/constants/http'
 import {
   CREATE_MEME_SUBMISSION_SCHEMA,
   MAX_PENDING_SUBMISSIONS
@@ -45,7 +46,7 @@ export const createMemeSubmission = createServerFn({ method: 'POST' })
           { userId, url: data.url, error },
           'Tweet video verification failed'
         )
-        setResponseStatus(422)
+        setResponseStatus(HTTP_STATUS.UNPROCESSABLE_CONTENT)
 
         const isTweetNoVideo = error instanceof TweetNoVideoError
 
@@ -71,7 +72,7 @@ export const createMemeSubmission = createServerFn({ method: 'POST' })
             { userId, pendingCount },
             'Submission limit reached'
           )
-          setResponseStatus(422)
+          setResponseStatus(HTTP_STATUS.UNPROCESSABLE_CONTENT)
           throw new StudioError('submission_limit_reached', {
             code: 'SUBMISSION_LIMIT_REACHED'
           })
@@ -108,7 +109,7 @@ export const createMemeSubmission = createServerFn({ method: 'POST' })
           { userId, url: data.url },
           'Duplicate URL submitted'
         )
-        setResponseStatus(409)
+        setResponseStatus(HTTP_STATUS.CONFLICT)
         throw new StudioError('duplicate_url', { code: 'DUPLICATE_URL' })
       }
 

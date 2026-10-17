@@ -1,4 +1,4 @@
-export type WithDialog<T> = T & {
+export type WithDialog<TProps> = TProps & {
   open: boolean
   onOpenChange: (open: boolean) => void
 }

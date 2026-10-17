@@ -21,7 +21,10 @@ export const useInertBackground = () => {
 
     restoreBackgroundRef.current = inertOthers([dialog, ...liveRegions])
 
-    return restoreBackground
+    return () => {
+      restoreBackgroundRef.current?.()
+      restoreBackgroundRef.current = null
+    }
   }, [])
 
   const letFocusLeave = () => {

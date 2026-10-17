@@ -1,6 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { prismaClient } from '~/db'
-/* oxlint-disable no-await-in-loop */
 import { MEME_ALGOLIA_INCLUDE, type MemeAlgoliaData } from '~/constants/meme'
 import { replaceAllIndicesWithMemes } from '~/lib/algolia'
 import { cronLogger } from '~/lib/logger'
@@ -9,6 +8,32 @@ import { verifyCronSecret } from '~/utils/cron-auth'
 const log = cronLogger.child({ job: 'sync-algolia' })
 
 const BATCH_SIZE = 500
+
+type FetchAllMemesParams = {
+  memes: MemeAlgoliaData[]
+  cursor?: string
+}
+
+const fetchAllMemes = async ({
+  memes,
+  cursor
+}: FetchAllMemesParams): Promise<MemeAlgoliaData[]> => {
+  const batch = await prismaClient.meme.findMany({
+    take: BATCH_SIZE,
+    ...(cursor === undefined ? {} : { skip: 1, cursor: { id: cursor } }),
+    orderBy: { id: 'asc' },
+    include: MEME_ALGOLIA_INCLUDE
+  })
+
+  if (batch.length === 0) {
+    return memes
+  }
+
+  return fetchAllMemes({
+    memes: [...memes, ...batch],
+    cursor: batch.at(-1)?.id
+  })
+}
 
 export const Route = createFileRoute('/api/cron/sync-algolia')({
   server: {
@@ -21,26 +46,7 @@ export const Route = createFileRoute('/api/cron/sync-algolia')({
         }
 
         try {
-          const allMemes: MemeAlgoliaData[] = []
-          let cursor: string | undefined
-
-          // oxlint-disable-next-line typescript/no-unnecessary-condition -- cursor-based pagination loop
-          while (true) {
-            const memes = await prismaClient.meme.findMany({
-              take: BATCH_SIZE,
-              ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
-              orderBy: { id: 'asc' },
-              include: MEME_ALGOLIA_INCLUDE
-            })
-
-            if (memes.length === 0) {
-              break
-            }
-
-            allMemes.push(...memes)
-
-            cursor = memes.at(-1)?.id
-          }
+          const allMemes = await fetchAllMemes({ memes: [] })
 
           const results = await replaceAllIndicesWithMemes(allMemes)
 

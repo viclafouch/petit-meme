@@ -1,9 +1,9 @@
 import { signJWT } from 'better-auth/crypto'
 import type { Page } from '@playwright/test'
 import { ONE_HOUR_IN_SECONDS } from '~/constants/time'
+import { m } from '~/paraglide/messages.js'
 import { E2E_AUTH_SECRET } from './env'
 import { repeatUntilVisible } from './hydration'
-import { m } from './messages'
 
 export const openAuthDialog = async (page: Page) => {
   const dialog = page.getByRole('dialog')

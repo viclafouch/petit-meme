@@ -50,8 +50,8 @@ export const getInfiniteReels = createServerFn({ method: 'POST' })
       })
     })
 
-    const memeIds = rawMemes.map((m) => {
-      return m.id
+    const memeIds = rawMemes.map((rawMeme) => {
+      return rawMeme.id
     })
 
     const translations =
@@ -86,8 +86,8 @@ export const getInfiniteReels = createServerFn({ method: 'POST' })
 
     const newExcludedIds = [
       ...excludedIds.slice(-Math.floor(excludedIds.length / 2)),
-      ...memes.map((m) => {
-        return m.id
+      ...memes.map((meme) => {
+        return meme.id
       })
     ]
 

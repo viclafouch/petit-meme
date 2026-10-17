@@ -17,11 +17,11 @@ import {
   SelectValue
 } from '~/components/ui/select'
 import type { MemeFullData } from '~/constants/meme'
-import type { MemeContentLocale } from '~/db/generated/prisma/enums'
 import {
   CONTENT_LOCALE_TO_LOCALE,
   getContentLocaleOptions,
-  getRequiredLocales
+  getRequiredLocales,
+  matchIsMemeContentLocale
 } from '~/helpers/i18n-content'
 import { getFieldErrorMessage } from '~/lib/utils'
 import { type Locale, locales } from '~/paraglide/runtime'
@@ -31,12 +31,12 @@ import { MemeFormMetadataFields } from './meme-form-metadata-fields'
 import { MemeTranslationSection } from './meme-translation-section'
 import { useMemeForm } from './use-meme-form'
 
-type MemeFormParams = {
+type MemeFormProps = {
   meme: MemeFullData
   onSuccess?: () => void
 }
 
-export const MemeForm = ({ meme, onSuccess }: MemeFormParams) => {
+export const MemeForm = ({ meme, onSuccess }: MemeFormProps) => {
   const {
     form,
     keywordsFields,
@@ -138,7 +138,9 @@ export const MemeForm = ({ meme, onSuccess }: MemeFormParams) => {
                   <Select
                     value={field.state.value}
                     onValueChange={(value) => {
-                      return field.handleChange(value as MemeContentLocale)
+                      if (matchIsMemeContentLocale(value)) {
+                        field.handleChange(value)
+                      }
                     }}
                   >
                     <SelectTrigger className="w-full">
@@ -211,7 +213,7 @@ export const MemeForm = ({ meme, onSuccess }: MemeFormParams) => {
                                               : false
                                           }
                                           onTranslate={() => {
-                                            return translateContentMutation.mutate(
+                                            translateContentMutation.mutate(
                                               locale
                                             )
                                           }}
@@ -263,9 +265,9 @@ export const MemeForm = ({ meme, onSuccess }: MemeFormParams) => {
       </div>
       <form.Subscribe
         selector={(state) => {
-          return [state.canSubmit, state.isSubmitting]
+          return [state.canSubmit, state.isSubmitting] as const
         }}
-        children={([canSubmit = false, isSubmitting = false]) => {
+        children={([canSubmit, isSubmitting]) => {
           return (
             <FormFooter
               canSubmit={canSubmit}

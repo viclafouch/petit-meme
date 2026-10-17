@@ -1,4 +1,13 @@
-import { DAY, HOUR, MINUTE, SECOND } from '~/constants/time'
+import {
+  DAY,
+  DAYS_PER_WEEK,
+  HOUR,
+  MINUTE,
+  MONTHS_IN_YEAR,
+  ONE_YEAR_MS,
+  SECOND,
+  THIRTY_DAYS_MS
+} from '~/constants/time'
 import type { Locale } from '~/paraglide/runtime'
 
 export type ChartGranularity = 'day' | 'week' | 'month'
@@ -28,13 +37,15 @@ export function formatDate(
   }).format(date)
 }
 
+const DAILY_GRANULARITY_MAX_DAYS = 30
+
 const RELATIVE_TIME_THRESHOLDS = [
   { max: MINUTE, divisor: SECOND, unit: 'second' },
   { max: HOUR, divisor: MINUTE, unit: 'minute' },
   { max: DAY, divisor: HOUR, unit: 'hour' },
-  { max: 30 * DAY, divisor: DAY, unit: 'day' },
-  { max: 365 * DAY, divisor: 30 * DAY, unit: 'month' },
-  { max: Number.POSITIVE_INFINITY, divisor: 365 * DAY, unit: 'year' }
+  { max: THIRTY_DAYS_MS, divisor: DAY, unit: 'day' },
+  { max: ONE_YEAR_MS, divisor: THIRTY_DAYS_MS, unit: 'month' },
+  { max: Number.POSITIVE_INFINITY, divisor: ONE_YEAR_MS, unit: 'year' }
 ] as const satisfies readonly {
   max: number
   divisor: number
@@ -63,7 +74,7 @@ export function formatRelativeTime(date: Date, locale: Locale) {
 
 export function differenceInMonths(dateA: Date, dateB: Date) {
   return (
-    (dateA.getFullYear() - dateB.getFullYear()) * 12 +
+    (dateA.getFullYear() - dateB.getFullYear()) * MONTHS_IN_YEAR +
     dateA.getMonth() -
     dateB.getMonth()
   )
@@ -92,7 +103,7 @@ export function getChartGranularity(days: number | null): ChartGranularity {
     return 'month'
   }
 
-  if (days <= 30) {
+  if (days <= DAILY_GRANULARITY_MAX_DAYS) {
     return 'day'
   }
 
@@ -122,7 +133,10 @@ export function truncateToGranularity(
     case 'week': {
       const utcDate = new Date(Date.UTC(year, month, day))
       const dayOfWeek = utcDate.getUTCDay()
-      const monday = new Date(utcDate.getTime() - ((dayOfWeek + 6) % 7) * DAY)
+      const monday = new Date(
+        utcDate.getTime() -
+          ((dayOfWeek + DAYS_PER_WEEK - 1) % DAYS_PER_WEEK) * DAY
+      )
 
       return formatUtcDateKey(
         monday.getUTCFullYear(),
@@ -163,7 +177,7 @@ function advanceDate(timestamp: number, granularity: ChartGranularity) {
       return Date.UTC(
         date.getUTCFullYear(),
         date.getUTCMonth(),
-        date.getUTCDate() + 7
+        date.getUTCDate() + DAYS_PER_WEEK
       )
     }
 
@@ -201,4 +215,8 @@ export function generateDateSeries({
   }
 
   return series
+}
+
+export const getCurrentYear = () => {
+  return new Date().getFullYear()
 }

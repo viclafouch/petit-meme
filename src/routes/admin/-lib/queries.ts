@@ -9,8 +9,8 @@ import {
   getAdminRecentActivityEvents
 } from '~/routes/admin/-server/activity'
 import { getAdminAiSearchLogs } from '~/routes/admin/-server/ai-search-logs'
-import type { DashboardPeriod } from '~/routes/admin/-server/dashboard'
 import {
+  type DashboardPeriod,
   getAdminChartData,
   getAdminDashboardTotals,
   getAdminRecentAudit,
@@ -21,13 +21,13 @@ import {
   getAdminPendingSubmissionCount,
   getAdminSubmissions
 } from '~/routes/admin/-server/submissions'
-import type { AdminUserActivityFilters } from '~/routes/admin/-server/user-detail'
 import {
+  type AdminUserActivityFilters,
   getAdminUserActivity,
   getAdminUserDetail
 } from '~/routes/admin/-server/user-detail'
-import type { AdminVisitorActivityFilters } from '~/routes/admin/-server/visitor'
 import {
+  type AdminVisitorActivityFilters,
   getAdminVisitorActivity,
   getAdminVisitorDetail
 } from '~/routes/admin/-server/visitor'
@@ -35,6 +35,9 @@ import {
   checkMemeWatermark,
   fetchAdminVideoBlob
 } from '~/routes/admin/-server/watermark'
+
+const DASHBOARD_STALE_MINUTES = 10
+const BACKGROUND_STALE_MINUTES = 5
 
 export const getAdminMemeByIdQueryOpts = (memeId: Meme['id']) => {
   return queryOptions({
@@ -66,7 +69,7 @@ export const getAdminDashboardTotalsQueryOpts = () => {
     queryFn: () => {
       return getAdminDashboardTotals()
     },
-    staleTime: 10 * MINUTE
+    staleTime: DASHBOARD_STALE_MINUTES * MINUTE
   })
 }
 
@@ -78,7 +81,7 @@ export const getAdminChartDataQueryOpts = (period: DashboardPeriod) => {
     queryFn: () => {
       return getAdminChartData({ data: period })
     },
-    staleTime: 10 * MINUTE
+    staleTime: DASHBOARD_STALE_MINUTES * MINUTE
   })
 }
 
@@ -90,7 +93,7 @@ export const getAdminRecentAuditQueryOpts = () => {
     queryFn: () => {
       return getAdminRecentAudit()
     },
-    staleTime: 10 * MINUTE
+    staleTime: DASHBOARD_STALE_MINUTES * MINUTE
   })
 }
 
@@ -115,7 +118,7 @@ export const getAdminRecentActivityEventsQueryOpts = () => {
     queryFn: () => {
       return getAdminRecentActivityEvents()
     },
-    staleTime: 10 * MINUTE
+    staleTime: DASHBOARD_STALE_MINUTES * MINUTE
   })
 }
 
@@ -183,7 +186,7 @@ export const getAdminTrendingMemesQueryOpts = () => {
     queryFn: () => {
       return getAdminTrendingMemes()
     },
-    staleTime: 10 * MINUTE
+    staleTime: DASHBOARD_STALE_MINUTES * MINUTE
   })
 }
 
@@ -209,7 +212,7 @@ export const getAdminPendingSubmissionCountQueryOpts = () => {
     queryFn: () => {
       return getAdminPendingSubmissionCount()
     },
-    staleTime: 5 * MINUTE
+    staleTime: BACKGROUND_STALE_MINUTES * MINUTE
   })
 }
 
@@ -223,7 +226,7 @@ export const getAdminMemeWatermarkQueryOpts = (memeId: Meme['id']) => {
     queryFn: () => {
       return checkMemeWatermark({ data: memeId })
     },
-    staleTime: 5 * MINUTE
+    staleTime: BACKGROUND_STALE_MINUTES * MINUTE
   })
 }
 

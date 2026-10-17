@@ -1,11 +1,9 @@
-import Markdown from 'react-markdown'
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { BASE_MARKDOWN_COMPONENTS } from '~/constants/markdown'
 import { buildOgImageUrl, seo } from '~/lib/seo'
 import { m } from '~/paraglide/messages'
-import { getLocale } from '~/paraglide/runtime'
-import type { Locale } from '~/paraglide/runtime'
+import { getLocale, type Locale } from '~/paraglide/runtime'
+import { TermsOfUsePage } from './-components/legal-pages'
 
 const MARKDOWN_LOADERS = {
   fr: () => {
@@ -22,18 +20,8 @@ const loadMarkdown = createServerFn({ method: 'GET' }).handler(async () => {
   return module.default
 })
 
-const RouteComponent = () => {
-  const md = Route.useLoaderData()
-
-  return (
-    <div>
-      <Markdown components={BASE_MARKDOWN_COMPONENTS}>{md}</Markdown>
-    </div>
-  )
-}
-
 export const Route = createFileRoute('/_public__root/_default/terms-of-use')({
-  component: RouteComponent,
+  component: TermsOfUsePage,
   staleTime: Infinity,
   loader: () => {
     return loadMarkdown()

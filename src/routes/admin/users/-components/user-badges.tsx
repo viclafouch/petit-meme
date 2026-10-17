@@ -1,5 +1,6 @@
 import { Crown, Mail } from 'lucide-react'
-import { DiscordIcon, XTwitterIcon } from '~/components/icon'
+import { DiscordIcon } from '~/components/icon/discord'
+import { XTwitterIcon } from '~/components/icon/x-twitter'
 import { Badge } from '~/components/ui/badge'
 import {
   Tooltip,
@@ -7,21 +8,21 @@ import {
   TooltipTrigger
 } from '~/components/ui/tooltip'
 import type { AuthProviderId } from '~/constants/auth'
-import { differenceInMonths, formatDate } from '~/helpers/date'
+import { formatDate } from '~/helpers/date'
 import { getLocale } from '~/paraglide/runtime'
 import type {
   EnrichedUser,
   SubscriptionInfo
 } from '~/routes/admin/-server/users'
 
-type UserStatusBadgesParams = Pick<EnrichedUser, 'banned' | 'emailVerified'>
+type UserStatusBadgesProps = Pick<EnrichedUser, 'banned' | 'emailVerified'>
 
 export const UserStatusBadges = ({
   banned,
   emailVerified
-}: UserStatusBadgesParams) => {
+}: UserStatusBadgesProps) => {
   const isBanned = banned === true
-  const isUnverified = emailVerified === false
+  const isUnverified = !emailVerified
 
   return (
     <div className="flex flex-wrap gap-1">
@@ -68,11 +69,11 @@ const AUTH_PROVIDER_DISPLAY = {
   }
 } as const satisfies Record<AuthProviderId, ProviderDisplayConfig>
 
-type AuthProviderBadgeParams = {
+type AuthProviderBadgeProps = {
   provider: AuthProviderId
 }
 
-export const AuthProviderBadge = ({ provider }: AuthProviderBadgeParams) => {
+export const AuthProviderBadge = ({ provider }: AuthProviderBadgeProps) => {
   const { label, icon: Icon, variant } = AUTH_PROVIDER_DISPLAY[provider]
 
   return (
@@ -83,25 +84,21 @@ export const AuthProviderBadge = ({ provider }: AuthProviderBadgeParams) => {
   )
 }
 
-type SubscriptionBadgeParams = {
+type SubscriptionBadgeProps = {
   isActive: boolean
-  startedAt: SubscriptionInfo['startedAt']
+  monthCount: SubscriptionInfo['monthCount']
   endsAt: SubscriptionInfo['endsAt']
 }
 
 export const SubscriptionBadge = ({
   isActive,
-  startedAt,
+  monthCount,
   endsAt
-}: SubscriptionBadgeParams) => {
+}: SubscriptionBadgeProps) => {
   const locale = getLocale()
 
-  const months = startedAt
-    ? Math.max(1, differenceInMonths(new Date(), new Date(startedAt)))
-    : 1
-
   const tooltipLines = [
-    `${months} mois d'abonnement`,
+    `${monthCount} mois d'abonnement`,
     endsAt ? `Fin : ${formatDate(new Date(endsAt), locale)}` : null
   ]
     .filter(Boolean)

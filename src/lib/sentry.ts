@@ -1,6 +1,7 @@
 import type { FeedbackInternalOptions } from '@sentry/core'
 import * as Sentry from '@sentry/tanstackstart-react'
 import { wrapMiddlewaresWithSentry } from '@sentry/tanstackstart-react'
+import { IS_DEVELOPMENT } from '~/constants/env'
 import { m } from '~/paraglide/messages.js'
 
 export type SentryFeature =
@@ -46,8 +47,7 @@ export type SentryFeature =
   | 'og-image'
 
 export const captureWithFeature = (error: unknown, feature: SentryFeature) => {
-  if (process.env.NODE_ENV === 'development') {
-    // oxlint-disable-next-line no-console -- dev debugging: errors are otherwise only visible in Sentry
+  if (IS_DEVELOPMENT) {
     console.error(`[${feature}]`, error)
   }
 
@@ -56,11 +56,15 @@ export const captureWithFeature = (error: unknown, feature: SentryFeature) => {
 
 type SentryMiddleware = Parameters<typeof wrapMiddlewaresWithSentry>[0][string]
 
-export const wrapMiddlewareWithSentry = <T extends SentryMiddleware>(
+export const wrapMiddlewareWithSentry = <TMiddleware extends SentryMiddleware>(
   name: string,
-  middleware: T
-): T => {
-  return wrapMiddlewaresWithSentry({ [name]: middleware })[0] as T
+  middleware: TMiddleware
+): TMiddleware => {
+  const [wrappedMiddleware = middleware] = wrapMiddlewaresWithSentry({
+    [name]: middleware
+  })
+
+  return wrappedMiddleware
 }
 
 type FeedbackOptions = Partial<
@@ -121,8 +125,7 @@ const matchIsSensitiveApiUrl = (url: string) => {
   })
 }
 
-export const scrubUserPii = (event: Sentry.ErrorEvent) => {
-  // oxlint-disable-next-line typescript/no-unnecessary-condition -- event.type can be 'feedback' at runtime despite Sentry type definition
+export const scrubUserPii = <TEvent extends Sentry.Event>(event: TEvent) => {
   if (!event.user || event.type === 'feedback') {
     return event
   }
@@ -144,17 +147,15 @@ export const scrubSensitiveBreadcrumbs = (breadcrumb: Sentry.Breadcrumb) => {
     return breadcrumb
   }
 
-  const url = breadcrumb.data?.url ?? ''
+  const breadcrumbData: Record<string, unknown> = breadcrumb.data ?? {}
+  const { url, method } = breadcrumbData
 
-  if (!matchIsSensitiveApiUrl(url)) {
+  if (typeof url !== 'string' || !matchIsSensitiveApiUrl(url)) {
     return breadcrumb
   }
 
   return {
     ...breadcrumb,
-    data: {
-      url: breadcrumb.data?.url,
-      method: breadcrumb.data?.method
-    }
+    data: { url, method }
   }
 }

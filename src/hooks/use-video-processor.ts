@@ -10,6 +10,7 @@ import {
 } from '@tanstack/react-query'
 import { getStudioErrorCode } from '~/constants/error'
 import type { MemeWithVideo } from '~/constants/meme'
+import { PERCENT_SCALE } from '~/constants/number'
 import {
   STUDIO_BASELINE_RATIO,
   STUDIO_DEFAULT_BAND_HEIGHT,
@@ -17,20 +18,18 @@ import {
   STUDIO_DEFAULT_FONT_SIZE,
   STUDIO_DEFAULT_MAX_CHARS_PER_LINE,
   STUDIO_FONTS,
-  STUDIO_LINE_SPACING
+  STUDIO_LINE_SPACING,
+  type StudioBandColorValue,
+  type StudioFontColorValue,
+  type StudioFontFamilyId,
+  type StudioFontSizeValue,
+  type StudioTextPosition
 } from '~/constants/studio'
-import type {
-  StudioBandColorValue,
-  StudioFontColorValue,
-  StudioFontFamilyId,
-  StudioFontSizeValue,
-  StudioTextPosition
-} from '~/constants/studio'
+import { useShowDialog } from '~/hooks/use-show-dialog'
 import { getAuthUserQueryOpts, getVideoBlobQueryOpts } from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
 import { incrementGenerationCount } from '~/server/user'
-import { useShowDialog } from '~/stores/dialog.store'
 import {
   FFMPEG_ENCODING_ARGS,
   FFMPEG_INPUT_FILE,
@@ -71,7 +70,7 @@ const wrapText = (text: string, maxLength: number) => {
 
   for (const word of text.split(' ')) {
     const lastLine = lines.at(-1) ?? ''
-    const currentLine = lastLine ? `${lastLine} ${word}` : word
+    const currentLine = lastLine === '' ? word : `${lastLine} ${word}`
 
     if (lines.length > 0 && currentLine.length <= maxLength) {
       lines[lines.length - 1] = currentLine
@@ -272,24 +271,20 @@ const getVideoInitQueryOpts = () => {
 getVideoInitQueryOpts.all = ['video-processor-init'] as const
 
 export const useVideoInitializer = () => {
-  const query = useSuspenseQuery(getVideoInitQueryOpts())
+  const videoInitQuery = useSuspenseQuery(getVideoInitQueryOpts())
 
   React.useEffect(() => {
     return () => {
-      query.data.terminate()
+      videoInitQuery.data.terminate()
     }
-  }, [query.data])
+  }, [videoInitQuery.data])
 
-  return query
+  return videoInitQuery
 }
 
 export const useVideoPreloader = (ffmpeg: FFmpeg, memeId: string) => {
   const queryClient = useQueryClient()
-  const hasTriggeredRef = React.useRef(false)
-
-  React.useEffect(() => {
-    hasTriggeredRef.current = false
-  }, [memeId])
+  const preloadedMemeIdRef = React.useRef<string | null>(null)
 
   const preloadAssets = async () => {
     try {
@@ -304,15 +299,17 @@ export const useVideoPreloader = (ffmpeg: FFmpeg, memeId: string) => {
       ])
 
       await ensureVideoFile(ffmpeg, { videoBlob, memeId })
-    } catch {}
+    } catch {
+      preloadedMemeIdRef.current = null
+    }
   }
 
   const triggerPreload = () => {
-    if (hasTriggeredRef.current) {
+    if (preloadedMemeIdRef.current === memeId) {
       return
     }
 
-    hasTriggeredRef.current = true
+    preloadedMemeIdRef.current = memeId
     void preloadAssets()
   }
 
@@ -340,12 +337,12 @@ export const useVideoProcessor = (
         return
       }
 
-      setProgress(Math.round(progressValue * 100))
+      setProgress(Math.round(progressValue * PERCENT_SCALE))
     },
     []
   )
 
-  const mutation = useMutation({
+  const processVideoMutation = useMutation({
     onMutate: () => {
       ffmpeg.off('progress', handleProgress)
       setProgress(0)
@@ -363,7 +360,7 @@ export const useVideoProcessor = (
         ...processingOptions
       })
 
-      if (objectUrlRef.current) {
+      if (objectUrlRef.current !== null) {
         URL.revokeObjectURL(objectUrlRef.current)
       }
 
@@ -410,42 +407,38 @@ export const useVideoProcessor = (
 
   React.useEffect(() => {
     return () => {
-      if (objectUrlRef.current) {
+      if (objectUrlRef.current !== null) {
         URL.revokeObjectURL(objectUrlRef.current)
       }
 
-      try {
-        ffmpeg.terminate()
-      } catch {}
+      ffmpeg.terminate()
     }
   }, [ffmpeg])
 
   const cancel = () => {
-    try {
-      ffmpeg.terminate()
-    } catch {}
+    ffmpeg.terminate()
 
-    mutation.reset()
+    processVideoMutation.reset()
     setProgress(0)
     void queryClient.invalidateQueries(getVideoInitQueryOpts())
   }
 
   const reset = () => {
-    if (objectUrlRef.current) {
+    if (objectUrlRef.current !== null) {
       URL.revokeObjectURL(objectUrlRef.current)
       objectUrlRef.current = null
     }
 
-    mutation.reset()
+    processVideoMutation.reset()
     setProgress(0)
   }
 
   return {
-    processVideo: mutation.mutate,
+    processVideo: processVideoMutation.mutate,
     progress,
-    isProcessing: mutation.isPending,
-    error: mutation.error,
-    processedData: mutation.data ?? null,
+    isProcessing: processVideoMutation.isPending,
+    error: processVideoMutation.error,
+    processedData: processVideoMutation.data ?? null,
     cancel,
     reset
   }

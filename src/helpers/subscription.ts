@@ -1,5 +1,4 @@
 import {
-  type BetterAuthPlanName,
   type BillingPeriod,
   getBillingPeriodLabel,
   PREMIUM_PLAN_PRICING
@@ -7,9 +6,7 @@ import {
 import { formatCentsToEuros } from '~/helpers/number'
 import type { Locale } from '~/paraglide/runtime'
 
-export const getBillingPeriodFromPlan = (
-  planName: BetterAuthPlanName
-): BillingPeriod => {
+export const getBillingPeriodFromPlan = (planName: string): BillingPeriod => {
   if (planName === PREMIUM_PLAN_PRICING.yearly.betterAuthPlanName) {
     return 'yearly'
   }
@@ -18,7 +15,7 @@ export const getBillingPeriodFromPlan = (
 }
 
 type SubscriptionDisplayInfoParams = {
-  planName: BetterAuthPlanName
+  planName: string
   locale: Locale
 }
 

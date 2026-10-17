@@ -9,13 +9,11 @@ import {
 import { UserAvatar } from '~/components/user-avatar'
 import { ACTIVITY_IP_RETENTION_DAYS } from '~/constants/activity'
 import { DAY } from '~/constants/time'
+import { ActivityTypeIcon } from '~/routes/admin/-components/activity-type-icon'
 import { EmptyCell } from '~/routes/admin/-components/empty-cell'
 import { RelativeDateTooltip } from '~/routes/admin/-components/relative-date-tooltip'
 import { VisitorIpLink } from '~/routes/admin/-components/visitor-ip-link'
-import {
-  ACTIVITY_TYPE_DISPLAY,
-  ActivityTypeIcon
-} from '~/routes/admin/-helpers/activity'
+import { ACTIVITY_TYPE_DISPLAY } from '~/routes/admin/-helpers/activity'
 import { createAppColumnHelper } from '~/routes/admin/-lib/table'
 import type { AdminActivityRow } from '~/routes/admin/-server/activity'
 

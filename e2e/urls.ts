@@ -1,5 +1,4 @@
-import { localizeUrl } from '~/paraglide/runtime'
-import type { Locale } from '~/paraglide/runtime'
+import { localizeUrl, type Locale } from '~/paraglide/runtime'
 import { E2E_BASE_URL } from './env'
 
 export const localizePathname = (pathname: string, locale: Locale) => {

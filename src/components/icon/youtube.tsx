@@ -1,6 +1,8 @@
 import React from 'react'
 
-export const YoutubeIcon = (props: React.ComponentProps<'svg'>) => {
+type YoutubeIconProps = React.ComponentProps<'svg'>
+
+export const YoutubeIcon = (props: YoutubeIconProps) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

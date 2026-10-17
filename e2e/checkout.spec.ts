@@ -1,4 +1,5 @@
-import type { Page } from '@playwright/test'
+import { expect, type Page } from '@playwright/test'
+import { m } from '~/paraglide/messages.js'
 import {
   expectActiveSubscription,
   findSubscription,
@@ -8,10 +9,11 @@ import {
 import { E2E_ROLES } from './constants'
 import { E2E_NAMED_MEMES } from './content'
 import { resolveStorageStatePath } from './env'
-import { expect, test } from './fixtures'
+import { test } from './fixtures'
 import { repeatUntilVisible } from './hydration'
-import { m } from './messages'
 import { matchIsServerFunctionCall } from './server-functions'
+
+const CHECKOUT_TIMEOUT_MS = 90_000
 
 const CAP_LIFT_MEME_PATHNAME = `/memes/${E2E_NAMED_MEMES.mostViewed.id}`
 
@@ -36,7 +38,7 @@ const bookmarkTheMemeOverTheFreeCap = async (page: Page) => {
 test.describe('a monthly checkout', () => {
   test.use({ storageState: resolveStorageStatePath('checkout') })
 
-  test.slow()
+  test.describe.configure({ timeout: CHECKOUT_TIMEOUT_MS })
 
   test('turns the User into a Premium and lifts the free cap', async ({
     page

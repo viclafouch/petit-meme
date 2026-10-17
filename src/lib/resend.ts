@@ -4,10 +4,19 @@ import { serverEnv } from '~/env/server'
 import { emailLogger } from '~/lib/logger'
 import { captureWithFeature } from '~/lib/sentry'
 
-export const resend = new Resend(serverEnv.RESEND_API_KEY)
+const DEFAULT_EMAIL_FROM = 'Petit Meme <noreply@petit-meme.io>'
 
-export const EMAIL_FROM =
-  serverEnv.EMAIL_OVERRIDE_FROM ?? 'Petit Meme <noreply@petit-meme.io>'
+let resendClient: Resend | null = null
+
+export const getResendClient = () => {
+  resendClient ??= new Resend(serverEnv.RESEND_API_KEY)
+
+  return resendClient
+}
+
+export const getEmailFrom = () => {
+  return serverEnv.EMAIL_OVERRIDE_FROM ?? DEFAULT_EMAIL_FROM
+}
 
 export const getEmailRecipient = (email: string) => {
   return serverEnv.EMAIL_OVERRIDE_TO ?? email
@@ -20,6 +29,27 @@ type SendEmailAsyncParams = {
   logMessage: string
 }
 
+type SendEmailParams = Omit<SendEmailAsyncParams, 'logMessage'>
+
+const sendEmail = async ({ to, subject, react }: SendEmailParams) => {
+  try {
+    const { error } = await getResendClient().emails.send({
+      from: getEmailFrom(),
+      to: getEmailRecipient(to),
+      subject,
+      react
+    })
+
+    if (error) {
+      emailLogger.error({ error, subject, to }, 'Failed to send email')
+      captureWithFeature(error, 'resend-email')
+    }
+  } catch (error) {
+    emailLogger.error({ error, subject, to }, 'Network error sending email')
+    captureWithFeature(error, 'resend-email')
+  }
+}
+
 export const sendEmailAsync = ({
   to,
   subject,
@@ -28,21 +58,5 @@ export const sendEmailAsync = ({
 }: SendEmailAsyncParams) => {
   emailLogger.info({ to, subject }, logMessage)
 
-  resend.emails
-    .send({
-      from: EMAIL_FROM,
-      to: getEmailRecipient(to),
-      subject,
-      react
-    })
-    .then(({ error }) => {
-      if (error) {
-        emailLogger.error({ error, subject, to }, 'Failed to send email')
-        captureWithFeature(error, 'resend-email')
-      }
-    })
-    .catch((error: unknown) => {
-      emailLogger.error({ error, subject, to }, 'Network error sending email')
-      captureWithFeature(error, 'resend-email')
-    })
+  void sendEmail({ to, subject, react })
 }

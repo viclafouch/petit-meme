@@ -1,20 +1,27 @@
 import React from 'react'
 import { ToggleGroup, ToggleGroupItem } from '~/components/ui/toggle-group'
+import { MEME_GRID_COLUMNS } from '~/constants/meme'
 import { m } from '~/paraglide/messages.js'
 
-const defaultValues = [4, 5, 6]
+const DEFAULT_COLUMN_VALUES = [
+  MEME_GRID_COLUMNS.SMALL,
+  MEME_GRID_COLUMNS.MEDIUM,
+  MEME_GRID_COLUMNS.LARGE
+] as const satisfies readonly number[]
+
+type MemesToggleGridProps = {
+  columnValue: number
+  onColumnValueChange: (value: number) => void
+  values?: readonly number[]
+}
 
 const MemesToggleGrid = ({
   columnValue,
-  values = defaultValues,
+  values = DEFAULT_COLUMN_VALUES,
   onColumnValueChange
-}: {
-  columnValue: number
-  values?: number[]
-  onColumnValueChange: (value: number) => void
-}) => {
+}: MemesToggleGridProps) => {
   const handleChange = (value: string) => {
-    if (value) {
+    if (value !== '') {
       onColumnValueChange(Math.trunc(Number(value)))
     }
   }

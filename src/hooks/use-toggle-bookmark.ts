@@ -32,7 +32,7 @@ export function useToggleBookmark({
   const toggleMutation = useMutation({
     mutationFn: toggleBookmarkByMemeId,
     onMutate: async () => {
-      const newValue = !isMemeBookmarked
+      const isBookmarkedAfterToggle = !isMemeBookmarked
 
       await queryClient.cancelQueries({
         queryKey: getFavoritesMemesQueryOpts.all
@@ -43,8 +43,7 @@ export function useToggleBookmark({
           return old
         }
 
-        // oxlint-disable-next-line typescript/consistent-return -- early return for empty cache is valid, setQueryData accepts undefined
-        return newValue
+        return isBookmarkedAfterToggle
           ? {
               bookmarks: [meme, ...old.bookmarks],
               count: old.count + 1

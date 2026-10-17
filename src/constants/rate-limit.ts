@@ -1,4 +1,4 @@
-import { DAY, HOUR, MINUTE } from '~/constants/time'
+import { DAY, HOUR, MINUTE, FIVE_MINUTES_MS } from '~/constants/time'
 
 export type RateLimitConfig = {
   action: string
@@ -11,19 +11,19 @@ export const RATE_LIMIT_ERROR_MESSAGE = 'Too Many Requests'
 export const RATE_LIMIT_DOWNLOAD = {
   action: 'download',
   maxRequests: 10,
-  windowMs: 5 * MINUTE
+  windowMs: FIVE_MINUTES_MS
 } as const satisfies RateLimitConfig
 
 export const RATE_LIMIT_VIEW = {
   action: 'view',
   maxRequests: 60,
-  windowMs: 5 * MINUTE
+  windowMs: FIVE_MINUTES_MS
 } as const satisfies RateLimitConfig
 
 export const RATE_LIMIT_TRACK = {
   action: 'track',
   maxRequests: 30,
-  windowMs: 5 * MINUTE
+  windowMs: FIVE_MINUTES_MS
 } as const satisfies RateLimitConfig
 
 export const RATE_LIMIT_SUBMIT_MEME = {

@@ -11,11 +11,13 @@ import { m } from '~/paraglide/messages.js'
 import { getLocale, locales, setLocale } from '~/paraglide/runtime'
 import { updateUserLocale } from '~/server/user-locale'
 
-type LocaleBannerProps = {
+type LocaleBannerContentProps = {
   isInitiallyDismissed: boolean
 }
 
-const LocaleBannerContent = ({ isInitiallyDismissed }: LocaleBannerProps) => {
+const LocaleBannerContent = ({
+  isInitiallyDismissed
+}: LocaleBannerContentProps) => {
   const isReducedMotion = useReducedMotion()
   const currentLocale = getLocale()
 
@@ -33,7 +35,7 @@ const LocaleBannerContent = ({ isInitiallyDismissed }: LocaleBannerProps) => {
   }
 
   const handleSwitch = () => {
-    if (!suggestedLocale) {
+    if (suggestedLocale === null) {
       return
     }
 
@@ -42,14 +44,16 @@ const LocaleBannerContent = ({ isInitiallyDismissed }: LocaleBannerProps) => {
     void setLocale(suggestedLocale)
   }
 
-  const displayName = suggestedLocale
-    ? getLocaleDisplayName(suggestedLocale, currentLocale)
-    : null
-  const SuggestedFlag = suggestedLocale ? LOCALE_FLAGS[suggestedLocale] : null
+  const displayName =
+    suggestedLocale === null
+      ? null
+      : getLocaleDisplayName(suggestedLocale, currentLocale)
+  const SuggestedFlag =
+    suggestedLocale === null ? null : LOCALE_FLAGS[suggestedLocale]
 
   return (
     <AnimatePresence>
-      {!isDismissed && suggestedLocale && displayName ? (
+      {!isDismissed && suggestedLocale !== null && displayName !== null ? (
         <motion.div
           initial={isReducedMotion ? false : { height: 0, opacity: 0 }}
           animate={{
@@ -112,6 +116,8 @@ const LocaleBannerContent = ({ isInitiallyDismissed }: LocaleBannerProps) => {
     </AnimatePresence>
   )
 }
+
+type LocaleBannerProps = LocaleBannerContentProps
 
 export const LocaleBanner = ({ isInitiallyDismissed }: LocaleBannerProps) => {
   return (

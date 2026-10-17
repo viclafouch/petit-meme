@@ -4,14 +4,19 @@ import {
   setResponseHeader,
   setResponseStatus
 } from '@tanstack/react-start/server'
-import { RATE_LIMIT_ERROR_MESSAGE } from '~/constants/rate-limit'
-import type { RateLimitConfig } from '~/constants/rate-limit'
+import { HTTP_STATUS } from '~/constants/http'
+import {
+  RATE_LIMIT_ERROR_MESSAGE,
+  type RateLimitConfig
+} from '~/constants/rate-limit'
 import { extractClientIp } from '~/helpers/request'
 import { logger } from '~/lib/logger'
 import { captureWithFeature, wrapMiddlewareWithSentry } from '~/lib/sentry'
 import { authUserRequiredMiddleware } from '~/server/user-auth'
-import { checkRateLimit } from '~/utils/rate-limit-store'
-import type { RateLimitCheckResult } from '~/utils/rate-limit-store'
+import {
+  checkRateLimit,
+  type RateLimitCheckResult
+} from '~/utils/rate-limit-store'
 
 const rateLimitLogger = logger.child({ module: 'rate-limit' })
 
@@ -38,7 +43,7 @@ const throwRateLimitExceeded = ({
     'scraping-detection'
   )
 
-  setResponseStatus(429)
+  setResponseStatus(HTTP_STATUS.TOO_MANY_REQUESTS)
   setResponseHeader('Retry-After', String(result.retryAfterSeconds))
 
   throw new Error(RATE_LIMIT_ERROR_MESSAGE)

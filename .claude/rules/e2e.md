@@ -23,7 +23,7 @@ After an optimistic update, wait on the response that settles the write, never o
 
 ### Locators
 
-Name what a test clicks the way a screen reader announces it, with `m` from `e2e/messages.ts`, never with a copy of the string. That module pins the message resolver on the e2e locale, since the test process has no request to read it from, and it is the locale the Playwright project pins on the browser.
+Name what a test clicks the way a screen reader announces it. The test process has no request, no cookie and no window, so Paraglide resolves the base locale, which is `E2E_LOCALE` and the locale the Playwright project pins on the browser.
 
 An accessible name matches by substring unless `exact: true` says otherwise. Pass it whenever a name can sit inside another one on the page: two filler titles that differ by a number, avatar slot one inside slots ten to nineteen, « Texte » inside the label of the Studio phone bar, « Modifier » inside « Modifier mon mot de passe », an announcement of three Memes inside one of fifty three. When the name carries the assertion, `exact` is what makes it mean something.
 

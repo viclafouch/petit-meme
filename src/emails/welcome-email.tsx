@@ -1,6 +1,7 @@
 import { Button, Section, Text } from 'react-email'
 import type { Locale } from '~/paraglide/runtime'
-import { BUTTON_CLASS, EmailLayout, SITE_URL } from './email-layout'
+import { BUTTON_CLASS, SITE_URL } from './constants'
+import { EmailLayout } from './email-layout'
 
 const translations = {
   fr: {
@@ -58,12 +59,14 @@ WelcomeEmail.PreviewProps = {
   locale: 'fr'
 } satisfies WelcomeEmailProps
 
-export const WelcomeEmailEN = (props: Omit<WelcomeEmailProps, 'locale'>) => {
+type WelcomeEmailENProps = Omit<WelcomeEmailProps, 'locale'>
+
+export const WelcomeEmailEN = (props: WelcomeEmailENProps) => {
   return <WelcomeEmail {...props} locale="en" />
 }
 
 WelcomeEmailEN.PreviewProps = {
   username: 'Alan'
-} satisfies Omit<WelcomeEmailProps, 'locale'>
+} satisfies WelcomeEmailENProps
 
 export default WelcomeEmail

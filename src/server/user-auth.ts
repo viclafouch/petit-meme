@@ -3,6 +3,7 @@ import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
 import { waitUntil } from '@vercel/functions'
 import { prismaClient } from '~/db'
 import { StudioError } from '~/constants/error'
+import { HTTP_STATUS } from '~/constants/http'
 import { auth } from '~/lib/auth'
 import { authLogger } from '~/lib/logger'
 import { wrapMiddlewareWithSentry } from '~/lib/sentry'
@@ -39,13 +40,13 @@ const rawAuthUserRequiredMiddleware = createMiddleware({
 
   if (!session) {
     authLogger.debug('Unauthenticated access attempt')
-    setResponseStatus(401)
+    setResponseStatus(HTTP_STATUS.UNAUTHORIZED)
     throw new StudioError('unauthorized', { code: 'UNAUTHORIZED' })
   }
 
   if (session.user.banned === true) {
     authLogger.warn({ userId: session.user.id }, 'Banned user access attempt')
-    setResponseStatus(403)
+    setResponseStatus(HTTP_STATUS.FORBIDDEN)
     throw new StudioError('banned_user', { code: 'BANNED_USER' })
   }
 
@@ -66,7 +67,7 @@ const rawAdminRequiredMiddleware = createMiddleware({
 
     if (user.role !== 'admin') {
       authLogger.warn({ userId: user.id }, 'Non-admin access attempt')
-      setResponseStatus(401)
+      setResponseStatus(HTTP_STATUS.UNAUTHORIZED)
       throw new StudioError('unauthorized', { code: 'UNAUTHORIZED' })
     }
 

@@ -31,15 +31,15 @@ import {
   getAdminSubmissionsQueryOpts
 } from '~/routes/admin/-lib/queries'
 import { createMemeFromTwitterUrl } from '~/routes/admin/-server/memes'
-import type { AdminSubmission } from '~/routes/admin/-server/submissions'
 import {
+  type AdminSubmission,
   deleteSubmission,
   updateSubmissionStatus
 } from '~/routes/admin/-server/submissions'
 
 type DialogType = 'reject' | 'delete' | 'approve-tweet'
 
-type SubmissionActionsCellParams = {
+type SubmissionActionsCellProps = {
   submission: AdminSubmission
 }
 
@@ -49,7 +49,7 @@ const handleMutationError = (error: Error) => {
 
 export const SubmissionActionsCell = ({
   submission
-}: SubmissionActionsCellParams) => {
+}: SubmissionActionsCellProps) => {
   const [activeDialog, setActiveDialog] = React.useState<DialogType | null>(
     null
   )
@@ -79,11 +79,12 @@ export const SubmissionActionsCell = ({
 
   const rejectMutation = useMutation({
     mutationFn: async () => {
+      const trimmedAdminNote = adminNote.trim()
       const promise = updateSubmissionStatus({
         data: {
           submissionId: submission.id,
           status: MemeSubmissionStatus.REJECTED,
-          adminNote: adminNote.trim() || undefined
+          adminNote: trimmedAdminNote === '' ? undefined : trimmedAdminNote
         }
       })
       toast.promise(promise, {
@@ -168,7 +169,7 @@ export const SubmissionActionsCell = ({
               Ouvrir le lien
             </a>
           </DropdownMenuItem>
-          {isApproved && submission.memeId ? (
+          {isApproved && submission.memeId !== null ? (
             <DropdownMenuItem asChild>
               <Link
                 to="/admin/library/$memeId"

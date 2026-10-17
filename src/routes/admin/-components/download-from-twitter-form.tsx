@@ -36,17 +36,17 @@ export const DownloadFromTwitterForm = () => {
   const form = useForm({
     ...formOpts,
     onSubmit: async ({ value }) => {
-      if (downloadFileFromTweet.isPending) {
+      if (downloadFileFromTweetMutation.isPending) {
         return
       }
 
-      await downloadFileFromTweet.mutateAsync({
+      await downloadFileFromTweetMutation.mutateAsync({
         url: value.url
       })
     }
   })
 
-  const downloadFileFromTweet = useMutation({
+  const downloadFileFromTweetMutation = useMutation({
     mutationKey: ['download-file-from-tweet'],
     mutationFn: async (body: { url: string }) => {
       const tweet = await getTweetFromUrl({ data: body.url })
@@ -94,10 +94,10 @@ export const DownloadFromTwitterForm = () => {
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChange={(event) => {
-                        return field.handleChange(event.target.value)
+                        field.handleChange(event.target.value)
                       }}
                       onClipboardPaste={(text) => {
-                        return field.handleChange(text)
+                        field.handleChange(text)
                       }}
                     />
                     <FormMessage />
@@ -110,9 +110,9 @@ export const DownloadFromTwitterForm = () => {
         <CardFooter>
           <form.Subscribe
             selector={(state) => {
-              return [state.canSubmit, state.isSubmitting]
+              return [state.canSubmit, state.isSubmitting] as const
             }}
-            children={([canSubmit, isSubmitting = false]) => {
+            children={([canSubmit, isSubmitting]) => {
               return (
                 <LoadingButton isLoading={isSubmitting} disabled={!canSubmit}>
                   Extraire et télécharger

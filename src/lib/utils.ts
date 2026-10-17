@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import type { ZodType } from 'zod'
+import { IS_DEVELOPMENT } from '~/constants/env'
 import { logger } from '~/lib/logger'
 
 export function cn(...inputs: ClassValue[]) {
@@ -13,17 +14,23 @@ type FieldMeta = {
   errors: ({ message: string } | undefined)[]
 }
 
-export type FormFieldApi<T> = {
+export type FormFieldApi<TValue> = {
   state: {
-    value: T
+    value: TValue
     meta: FieldMeta
   }
   name: string
   handleBlur: () => void
-  handleChange: (value: T) => void
+  handleChange: (value: TValue) => void
 }
 
-export function getFieldErrorMessage<T>({ field }: { field: FormFieldApi<T> }) {
+type GetFieldErrorMessageParams<TValue> = {
+  field: FormFieldApi<TValue>
+}
+
+export function getFieldErrorMessage<TValue>({
+  field
+}: GetFieldErrorMessageParams<TValue>) {
   return field.state.meta.isTouched && !field.state.meta.isValid
     ? (field.state.meta.errors[0]?.message ?? '')
     : ''
@@ -31,19 +38,33 @@ export function getFieldErrorMessage<T>({ field }: { field: FormFieldApi<T> }) {
 
 const DEFAULT_FETCH_TIMEOUT_MS = 15_000
 
+const matchHasMessage = (value: unknown): value is { message: unknown } => {
+  return typeof value === 'object' && value !== null && 'message' in value
+}
+
+const readErrorBodyMessage = async (response: Response) => {
+  try {
+    const errorBody: unknown = await response.json()
+
+    return matchHasMessage(errorBody) ? String(errorBody.message) : null
+  } catch {
+    return null
+  }
+}
+
 type FetchWithZodInit = RequestInit & {
   timeoutMs?: number
 }
 
-export async function fetchWithZod<T>(
-  schema: ZodType<T>,
+export async function fetchWithZod<TValue>(
+  schema: ZodType<TValue>,
   input: Parameters<typeof fetch>[0],
   init?: FetchWithZodInit
-): Promise<T> {
+): Promise<TValue> {
   const { timeoutMs = DEFAULT_FETCH_TIMEOUT_MS, ...fetchInit } = init ?? {}
   const controller = new AbortController()
   const timeoutId = setTimeout(() => {
-    return controller.abort()
+    controller.abort()
   }, timeoutMs)
 
   try {
@@ -53,23 +74,23 @@ export async function fetchWithZod<T>(
     })
 
     if (!response.ok) {
-      let message = `Fetch failed with status ${response.status}`
-
-      try {
-        const error = await response.json()
-        message = `${message}: ${error.message}`
-      } catch {}
+      const statusMessage = `Fetch failed with status ${response.status}`
+      const errorBodyMessage = await readErrorBodyMessage(response)
+      const message =
+        errorBodyMessage === null
+          ? statusMessage
+          : `${statusMessage}: ${errorBodyMessage}`
 
       logger.error({ url: input, status: response.status }, message)
       throw new Error(message)
     }
 
-    const result = await response.json()
+    const result: unknown = await response.json()
 
     logger.debug({ url: response.url }, 'Fetch response')
 
     return schema.parse(result, {
-      reportInput: process.env.NODE_ENV === 'development'
+      reportInput: IS_DEVELOPMENT
     })
   } finally {
     clearTimeout(timeoutId)

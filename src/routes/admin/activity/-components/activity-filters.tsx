@@ -9,8 +9,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '~/components/ui/dropdown-menu'
-import { ACTIVITY_SCOPES } from '~/constants/activity'
-import type { ActivityFilters, ActivityScope } from '~/constants/activity'
+import {
+  ACTIVITY_SCOPES,
+  type ActivityFilters,
+  type ActivityScope
+} from '~/constants/activity'
 import type { ActivityEventType } from '~/db/generated/prisma/enums'
 import {
   ACTIVITY_TYPE_DISPLAY,
@@ -23,7 +26,7 @@ const SCOPE_LABELS = {
   anonymous: 'Anonymes'
 } as const satisfies Record<ActivityScope, string>
 
-type ActivityScopeToggleParams = {
+type ActivityScopeToggleProps = {
   scope: ActivityScope
   onScopeChange: (scope: ActivityScope) => void
 }
@@ -31,11 +34,10 @@ type ActivityScopeToggleParams = {
 const ActivityScopeToggle = ({
   scope,
   onScopeChange
-}: ActivityScopeToggleParams) => {
+}: ActivityScopeToggleProps) => {
   return (
-    <div
-      className="flex gap-1.5"
-      role="group"
+    <fieldset
+      className="flex min-w-0 gap-1.5"
       aria-label="Filtrer par visiteur"
     >
       {ACTIVITY_SCOPES.map((option) => {
@@ -56,11 +58,11 @@ const ActivityScopeToggle = ({
           </Button>
         )
       })}
-    </div>
+    </fieldset>
   )
 }
 
-type ActivityTypeFilterParams = {
+type ActivityTypeFilterProps = {
   types: ActivityEventType[]
   onTypesChange: (types?: ActivityFilters['types']) => void
 }
@@ -68,7 +70,7 @@ type ActivityTypeFilterParams = {
 const ActivityTypeFilter = ({
   types,
   onTypesChange
-}: ActivityTypeFilterParams) => {
+}: ActivityTypeFilterProps) => {
   const selectedTypes = new Set(types)
 
   const handleToggle = (type: ActivityEventType, isChecked: boolean) => {
@@ -132,7 +134,7 @@ const ActivityTypeFilter = ({
   )
 }
 
-type ActivityFilterBarParams = {
+type ActivityFilterBarProps = {
   filters: ActivityFilters
   onFiltersChange: (nextFilters: Partial<ActivityFilters>) => void
 }
@@ -140,7 +142,7 @@ type ActivityFilterBarParams = {
 export const ActivityFilterBar = ({
   filters,
   onFiltersChange
-}: ActivityFilterBarParams) => {
+}: ActivityFilterBarProps) => {
   const handleSearchChange = (value: string) => {
     onFiltersChange({ search: value.length > 0 ? value : undefined })
   }

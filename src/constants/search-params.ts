@@ -1,0 +1,2 @@
+export const SEARCH_PARAM_MAX_PAGE = 1000
+export const SEARCH_QUERY_MAX_LENGTH = 200

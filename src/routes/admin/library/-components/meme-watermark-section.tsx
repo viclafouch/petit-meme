@@ -19,11 +19,11 @@ import {
 import type { Meme } from '~/db/generated/prisma/client'
 import { useMemeWatermark } from './use-meme-watermark'
 
-type MemeWatermarkSectionParams = {
+type MemeWatermarkSectionProps = {
   memeId: Meme['id']
 }
 
-type WatermarkStatusBadgeParams = {
+type WatermarkStatusBadgeProps = {
   isChecking: boolean
   watermarkExists: boolean
 }
@@ -31,7 +31,7 @@ type WatermarkStatusBadgeParams = {
 const WatermarkStatusBadge = ({
   isChecking,
   watermarkExists
-}: WatermarkStatusBadgeParams) => {
+}: WatermarkStatusBadgeProps) => {
   if (isChecking) {
     return (
       <Badge variant="secondary">
@@ -58,7 +58,7 @@ const WatermarkStatusBadge = ({
   )
 }
 
-type GenerateButtonContentParams = {
+type GenerateButtonContentProps = {
   isGenerating: boolean
   watermarkExists: boolean
 }
@@ -66,7 +66,7 @@ type GenerateButtonContentParams = {
 const GenerateButtonContent = ({
   isGenerating,
   watermarkExists
-}: GenerateButtonContentParams) => {
+}: GenerateButtonContentProps) => {
   if (isGenerating) {
     return (
       <>
@@ -88,7 +88,7 @@ const GenerateButtonContent = ({
   return <>Générer le watermark</>
 }
 
-type WatermarkPreviewDialogParams = {
+type WatermarkPreviewDialogProps = {
   previewUrl: string | null
   isGenerated: boolean
   isUploading: boolean
@@ -104,7 +104,7 @@ const WatermarkPreviewDialog = ({
   onGenerate,
   onUpload,
   onDismiss
-}: WatermarkPreviewDialogParams) => {
+}: WatermarkPreviewDialogProps) => {
   return (
     <Dialog
       open={Boolean(previewUrl)}
@@ -128,7 +128,7 @@ const WatermarkPreviewDialog = ({
             <video
               src={previewUrl}
               controls
-              className="mx-auto max-h-[70vh] w-auto"
+              className="mx-auto max-h-vh-70 w-auto"
               aria-label="Prévisualisation du watermark"
             />
           </div>
@@ -141,7 +141,7 @@ const WatermarkPreviewDialog = ({
               disabled={isUploading}
               aria-busy={isUploading}
               onClick={() => {
-                return onUpload()
+                onUpload()
               }}
             >
               {isUploading ? (
@@ -163,7 +163,7 @@ const WatermarkPreviewDialog = ({
             className="w-full"
             disabled={isUploading}
             onClick={() => {
-              return onGenerate()
+              onGenerate()
             }}
           >
             <RefreshCw aria-hidden />
@@ -175,9 +175,7 @@ const WatermarkPreviewDialog = ({
   )
 }
 
-export const MemeWatermarkSection = ({
-  memeId
-}: MemeWatermarkSectionParams) => {
+export const MemeWatermarkSection = ({ memeId }: MemeWatermarkSectionProps) => {
   const {
     watermarkExists,
     isChecking,
@@ -213,7 +211,7 @@ export const MemeWatermarkSection = ({
               disabled={isFetchingExisting}
               aria-label="Prévisualiser le watermark"
               onClick={() => {
-                return fetchExisting()
+                fetchExisting()
               }}
             >
               {isFetchingExisting ? (
@@ -231,7 +229,7 @@ export const MemeWatermarkSection = ({
           disabled={isGenerating || isChecking || isUploading}
           aria-busy={isGenerating}
           onClick={() => {
-            return generate()
+            generate()
           }}
         >
           <GenerateButtonContent
@@ -241,10 +239,10 @@ export const MemeWatermarkSection = ({
         </Button>
       </div>
       {isGenerating ? (
-        <div className="flex flex-col gap-1.5" role="status" aria-live="polite">
+        <output className="flex flex-col gap-1.5" aria-live="polite">
           <Progress value={progress} aria-label="Progression du watermark" />
           <span className="text-xs text-muted-foreground">{progress}%</span>
-        </div>
+        </output>
       ) : null}
       <WatermarkPreviewDialog
         previewUrl={previewUrl}

@@ -1,7 +1,11 @@
 import React from 'react'
 import { Eye, MonitorSmartphone } from 'lucide-react'
-import type { Variants } from 'motion/react'
-import { motion, useInView, useReducedMotion } from 'motion/react'
+import {
+  type Variants,
+  motion,
+  useInView,
+  useReducedMotion
+} from 'motion/react'
 import { Badge } from '~/components/ui/badge'
 import {
   VideoPlayer,
@@ -91,9 +95,11 @@ export const Responsive = () => {
 
   React.useEffect(() => {
     if (isInView) {
-      tabletVideoRef.current?.play().catch(() => {})
-      mobileVideoRef.current?.play().catch(() => {})
-      desktopVideoRef.current?.play().catch(() => {})
+      void Promise.allSettled([
+        tabletVideoRef.current?.play(),
+        mobileVideoRef.current?.play(),
+        desktopVideoRef.current?.play()
+      ])
     }
   }, [isInView])
 
@@ -109,7 +115,7 @@ export const Responsive = () => {
         </p>
       </div>
       <motion.div
-        className="relative mx-auto max-w-5xl lg:[&_video]:blur-sm max-lg:[&_video+div]:hidden [&:not(:has(video:hover))]:[&>:first-child_video]:blur-none [&_video]:hover:blur-none [&_video:hover]:[&+div]:scale-0 [&_video]:transition-[filter] [&_video]:duration-500 [&:not(:has(video:hover))]:[&>:first-child_video+div]:scale-0"
+        className="relative mx-auto max-w-5xl lg:[&_video]:blur-sm max-lg:[&_video+div]:hidden [&:not(:has(video:hover))]:[&>:first-child_video]:blur-none [&_video]:hover:blur-none [&_video:hover]:[&+div]:scale-0 video-filter-transition [&_video]:duration-500 [&:not(:has(video:hover))]:[&>:first-child_video+div]:scale-0"
         initial={isReducedMotion ? false : 'offscreen'}
         whileInView="onscreen"
         viewport={{ amount: 0.4, once: true }}

@@ -1,6 +1,7 @@
 import { Section, Text } from 'react-email'
 import type { Locale } from '~/paraglide/runtime'
-import { BoldText, CONTACT_EMAIL, EmailLayout } from './email-layout'
+import { CONTACT_EMAIL } from './constants'
+import { BoldText, EmailLayout } from './email-layout'
 
 const translations = {
   fr: {
@@ -85,9 +86,9 @@ AccountBannedEmail.PreviewProps = {
   locale: 'fr'
 } satisfies AccountBannedEmailProps
 
-export const AccountBannedEmailEN = (
-  props: Omit<AccountBannedEmailProps, 'locale'>
-) => {
+type AccountBannedEmailENProps = Omit<AccountBannedEmailProps, 'locale'>
+
+export const AccountBannedEmailEN = (props: AccountBannedEmailENProps) => {
   return <AccountBannedEmail {...props} locale="en" />
 }
 
@@ -95,6 +96,6 @@ AccountBannedEmailEN.PreviewProps = {
   username: 'Alan',
   banReason: 'Spam',
   hasActiveSubscription: true
-} satisfies Omit<AccountBannedEmailProps, 'locale'>
+} satisfies AccountBannedEmailENProps
 
 export default AccountBannedEmail

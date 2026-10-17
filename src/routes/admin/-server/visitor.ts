@@ -14,7 +14,9 @@ import { adminRequiredMiddleware } from '~/server/user-auth'
 
 const VISITOR_LIST_SIZE = 8
 
-const IP_ADDRESS_SCHEMA = z.string().min(1).max(45)
+const IP_ADDRESS_MAX_LENGTH = 45
+
+const IP_ADDRESS_SCHEMA = z.string().min(1).max(IP_ADDRESS_MAX_LENGTH)
 
 function buildVisitorWhere(ipAddress: string) {
   return {
@@ -62,13 +64,13 @@ export const getAdminVisitorDetail = createServerFn({ method: 'GET' })
       ])
 
     const memeCounts = memeGroups.flatMap((group) => {
-      return group.memeId
+      return group.memeId !== null
         ? [{ memeId: group.memeId, eventCount: group._count._all }]
         : []
     })
 
     const userCounts = userGroups.flatMap((group) => {
-      return group.userId
+      return group.userId !== null
         ? [
             {
               userId: group.userId,

@@ -1,11 +1,7 @@
 import { Button, Section, Text } from 'react-email'
 import type { Locale } from '~/paraglide/runtime'
-import {
-  BoldText,
-  BUTTON_CLASS,
-  EmailFallbackLink,
-  EmailLayout
-} from './email-layout'
+import { BUTTON_CLASS } from './constants'
+import { BoldText, EmailFallbackLink, EmailLayout } from './email-layout'
 
 const translations = {
   fr: {
@@ -83,8 +79,13 @@ VerificationReminderEmail.PreviewProps = {
   locale: 'fr'
 } satisfies VerificationReminderEmailProps
 
+type VerificationReminderEmailENProps = Omit<
+  VerificationReminderEmailProps,
+  'locale'
+>
+
 export const VerificationReminderEmailEN = (
-  props: Omit<VerificationReminderEmailProps, 'locale'>
+  props: VerificationReminderEmailENProps
 ) => {
   return <VerificationReminderEmail {...props} locale="en" />
 }
@@ -92,6 +93,6 @@ export const VerificationReminderEmailEN = (
 VerificationReminderEmailEN.PreviewProps = {
   username: 'Alan',
   verificationUrl: 'https://petit-meme.io/api/auth/verify-email?token=abc123'
-} satisfies Omit<VerificationReminderEmailProps, 'locale'>
+} satisfies VerificationReminderEmailENProps
 
 export default VerificationReminderEmail

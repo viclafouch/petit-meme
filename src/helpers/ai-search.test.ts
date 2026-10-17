@@ -2,9 +2,12 @@ import { describe, expect, it } from 'vitest'
 import { FREE_PLAN_MAX_AI_SEARCHES } from '~/constants/ai-search'
 import { buildAiSearchQuota } from '~/helpers/ai-search'
 
+const SEARCHES_FAR_OVER_ALLOWANCE = 10
+const SEARCHES_OVER_ALLOWANCE = 7
+
 describe('buildAiSearchQuota', () => {
   it('should count no search against a Premium', () => {
-    const monthlyCount = FREE_PLAN_MAX_AI_SEARCHES + 10
+    const monthlyCount = FREE_PLAN_MAX_AI_SEARCHES + SEARCHES_FAR_OVER_ALLOWANCE
 
     const quota = buildAiSearchQuota({ monthlyCount, isPremium: true })
 
@@ -40,7 +43,7 @@ describe('buildAiSearchQuota', () => {
   })
 
   it('should never announce a negative count to a User past the free cap', () => {
-    const monthlyCount = FREE_PLAN_MAX_AI_SEARCHES + 7
+    const monthlyCount = FREE_PLAN_MAX_AI_SEARCHES + SEARCHES_OVER_ALLOWANCE
 
     const quota = buildAiSearchQuota({ monthlyCount, isPremium: false })
 

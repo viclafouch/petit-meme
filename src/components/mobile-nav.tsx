@@ -16,8 +16,7 @@ import {
   getActiveSubscriptionQueryOpts,
   getFavoritesMemesQueryOpts
 } from '~/lib/queries'
-import { matchIsUserAdmin } from '~/lib/role'
-import type { SessionUser } from '~/lib/role'
+import { matchIsUserAdmin, type SessionUser } from '~/lib/role'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 
@@ -83,6 +82,7 @@ export const MobileNav = ({ links, user }: MobileNavProps) => {
       </PopoverTrigger>
       <PopoverContent
         data-mobile-nav
+        data-testid="mobile-nav"
         className="bg-background/90 h-(--radix-popover-content-available-height) w-(--radix-popover-content-available-width) rounded-none border-none p-0 shadow-none backdrop-blur duration-100"
         align="start"
         side="bottom"

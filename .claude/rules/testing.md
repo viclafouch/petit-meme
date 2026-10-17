@@ -15,7 +15,7 @@ point is to exercise the real thing. The suite itself is the record of what is c
 An e2e assertion is taken on screen, never by polling the database to check that the test worked. The one exception is a state no screen shows, read once the screen has answered, such as the fields written at sign up or the sessions a password reset revokes.
 
 ### Structure
-- Lay each test out as given, when, then: blocks separated by a blank line, with no comment to label them. A test with no setup has no given block
+- Lay each test out as given, when, then: blocks separated by a blank line. A test with no setup has no given block
 - One logical assertion per test
 - Descriptive test names that explain the scenario
 
@@ -40,7 +40,7 @@ describe("UserService", () => {
 
       const result = await userService.getUser("1")
 
-      expect(result).toEqual(mockUser)
+      expect(result).toStrictEqual(mockUser)
     })
   })
 })

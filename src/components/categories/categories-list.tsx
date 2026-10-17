@@ -1,11 +1,14 @@
 import React from 'react'
-import type { Transition } from 'motion/react'
-import { LayoutGroup, motion, useReducedMotion } from 'motion/react'
+import {
+  type Transition,
+  LayoutGroup,
+  motion,
+  useReducedMotion
+} from 'motion/react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link, useParams, useSearch } from '@tanstack/react-router'
 import { buttonVariants } from '~/components/ui/button'
-import { getVirtualCategories } from '~/constants/meme'
-import type { MemesFilters } from '~/constants/meme'
+import { getVirtualCategories, type MemesFilters } from '~/constants/meme'
 import { getCategoriesListQueryOpts } from '~/lib/queries'
 import { cn } from '~/lib/utils'
 import { getLocale } from '~/paraglide/runtime'
@@ -32,7 +35,7 @@ export const CategoriesList = () => {
   const { slug: activeSlug } = useParams({ strict: false })
   const { query } = useSearch({ strict: false })
   const hasSearchQuery = Boolean(query)
-  const prefersReducedMotion = useReducedMotion()
+  const isReducedMotion = useReducedMotion()
   const [hasInteracted, setHasInteracted] = React.useState(false)
 
   const categories = React.useMemo(() => {
@@ -40,7 +43,7 @@ export const CategoriesList = () => {
   }, [categoriesQuery.data])
 
   const bubbleTransition =
-    prefersReducedMotion || !hasInteracted
+    isReducedMotion || !hasInteracted
       ? BUBBLE_TRANSITION_INSTANT
       : BUBBLE_TRANSITION_SPRING
 

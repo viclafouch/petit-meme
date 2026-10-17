@@ -21,12 +21,12 @@ const formOpts = formOptions({
   }
 })
 
-type TwitterFormParams = {
-  onSuccess?: ({ memeId }: { memeId: string }) => void
+type TwitterFormProps = {
   closeDialog: () => void
+  onSuccess?: ({ memeId }: { memeId: string }) => void
 }
 
-export const TwitterForm = ({ onSuccess, closeDialog }: TwitterFormParams) => {
+export const TwitterForm = ({ onSuccess, closeDialog }: TwitterFormProps) => {
   const form = useForm({
     ...formOpts,
     onSubmit: async ({ value }) => {
@@ -85,10 +85,10 @@ export const TwitterForm = ({ onSuccess, closeDialog }: TwitterFormParams) => {
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(event) => {
-                    return field.handleChange(event.target.value)
+                    field.handleChange(event.target.value)
                   }}
                   onClipboardPaste={(text) => {
-                    return field.handleChange(text)
+                    field.handleChange(text)
                   }}
                 />
                 <FormMessage />
@@ -99,9 +99,9 @@ export const TwitterForm = ({ onSuccess, closeDialog }: TwitterFormParams) => {
       </div>
       <form.Subscribe
         selector={(state) => {
-          return [state.canSubmit, state.isSubmitting]
+          return [state.canSubmit, state.isSubmitting] as const
         }}
-        children={([canSubmit = false, isSubmitting = false]) => {
+        children={([canSubmit, isSubmitting]) => {
           return (
             <FormFooter
               canSubmit={canSubmit}

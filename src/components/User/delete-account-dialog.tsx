@@ -52,7 +52,11 @@ const deleteAccountFormOpts = formOptions({
   }
 })
 
-const DeleteAccountForm = ({ onCancel }: { onCancel: () => void }) => {
+type DeleteAccountFormProps = {
+  onCancel: () => void
+}
+
+const DeleteAccountForm = ({ onCancel }: DeleteAccountFormProps) => {
   const router = useRouter()
   const queryClient = useQueryClient()
 
@@ -164,7 +168,7 @@ const DeleteAccountForm = ({ onCancel }: { onCancel: () => void }) => {
                             value={field.state.value}
                             onBlur={field.handleBlur}
                             onChange={(event) => {
-                              return field.handleChange(event.target.value)
+                              field.handleChange(event.target.value)
                             }}
                           />
                         </FormControl>
@@ -185,10 +189,12 @@ const DeleteAccountForm = ({ onCancel }: { onCancel: () => void }) => {
   )
 }
 
+type DeleteAccountDialogProps = WithDialog<{ user: User }>
+
 export const DeleteAccountDialog = ({
   open,
   onOpenChange
-}: WithDialog<{ user: User }>) => {
+}: DeleteAccountDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
@@ -199,7 +205,7 @@ export const DeleteAccountDialog = ({
         <div>
           <DeleteAccountForm
             onCancel={() => {
-              return onOpenChange(false)
+              onOpenChange(false)
             }}
           />
         </div>

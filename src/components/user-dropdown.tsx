@@ -27,15 +27,14 @@ import {
   getActiveSubscriptionQueryOpts,
   getFavoritesMemesQueryOpts
 } from '~/lib/queries'
-import { matchIsUserAdmin } from '~/lib/role'
-import type { SessionUser } from '~/lib/role'
+import { matchIsUserAdmin, type SessionUser } from '~/lib/role'
 import { m } from '~/paraglide/messages.js'
 
-type UserDropdownParams = {
+type UserDropdownProps = {
   user: SessionUser
 }
 
-export const UserDropdown = ({ user }: UserDropdownParams) => {
+export const UserDropdown = ({ user }: UserDropdownProps) => {
   const [isOpen, setIsOpen] = React.useState(false)
   const { goToBillingPortal } = useStripeCheckout()
   const { signOut } = useSignOut()

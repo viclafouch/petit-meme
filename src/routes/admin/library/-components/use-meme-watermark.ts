@@ -18,6 +18,9 @@ import {
 import { loadFFmpeg } from '~/utils/ffmpeg'
 import { applyWatermark } from '~/utils/watermark'
 
+const PERCENT_SCALE = 100
+const WATERMARK_UPLOAD_TIMEOUT_MS = 120_000
+
 export function useMemeWatermark(memeId: Meme['id']) {
   const queryClient = useQueryClient()
   const [progress, setProgress] = React.useState(0)
@@ -40,6 +43,12 @@ export function useMemeWatermark(memeId: Meme['id']) {
     setPreview(null)
   }
 
+  const handleProgress = ({ progress: progressValue }: ProgressEvent) => {
+    if (progressValue >= 0 && progressValue <= 1) {
+      setProgress(Math.round(progressValue * PERCENT_SCALE))
+    }
+  }
+
   const generateMutation = useMutation({
     mutationKey: ['generate-watermark', memeId],
     onMutate: () => {
@@ -50,12 +59,6 @@ export function useMemeWatermark(memeId: Meme['id']) {
       ffmpegRef.current ??= await loadFFmpeg('FFmpeg loading timeout')
 
       const ffmpeg = ffmpegRef.current
-
-      const handleProgress = ({ progress: progressValue }: ProgressEvent) => {
-        if (progressValue >= 0 && progressValue <= 1) {
-          setProgress(Math.round(progressValue * 100))
-        }
-      }
 
       ffmpeg.on('progress', handleProgress)
 
@@ -110,7 +113,7 @@ export function useMemeWatermark(memeId: Meme['id']) {
           'Content-Type': 'application/octet-stream'
         },
         body: preview.blob,
-        signal: AbortSignal.timeout(120_000)
+        signal: AbortSignal.timeout(WATERMARK_UPLOAD_TIMEOUT_MS)
       })
 
       if (!uploadResponse.ok) {

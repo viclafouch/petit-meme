@@ -4,7 +4,7 @@ const HYDRATED_ACTION_MS = 5000
 const HYDRATION_GIVE_UP_MS = 20_000
 
 export const repeatUntilVisible = async (
-  act: () => Promise<unknown>,
+  act: () => Promise<void>,
   target: Locator
 ) => {
   await expect(async () => {
@@ -19,7 +19,7 @@ type RepeatUntilNavigatedParams = {
 }
 
 export const repeatUntilNavigated = async (
-  act: () => Promise<unknown>,
+  act: () => Promise<void>,
   { page, from }: RepeatUntilNavigatedParams
 ) => {
   await expect(async () => {
@@ -34,7 +34,7 @@ type RepeatUntilRequestedParams = {
 }
 
 export const repeatUntilRequested = async (
-  act: () => Promise<unknown>,
+  act: () => Promise<void>,
   { page, urlPattern }: RepeatUntilRequestedParams
 ) => {
   await expect(async () => {

@@ -1,9 +1,9 @@
-type SectionHeadingParams = {
+type SectionHeadingProps = {
   title: string
   action?: React.ReactNode
 }
 
-export const SectionHeading = ({ title, action }: SectionHeadingParams) => {
+export const SectionHeading = ({ title, action }: SectionHeadingProps) => {
   return (
     <div className="mb-3 flex min-h-8 items-center justify-between gap-2">
       <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
@@ -14,11 +14,11 @@ export const SectionHeading = ({ title, action }: SectionHeadingParams) => {
   )
 }
 
-type SectionCardParams = SectionHeadingParams & {
+type SectionCardProps = SectionHeadingProps & {
   children: React.ReactNode
 }
 
-export const SectionCard = ({ title, action, children }: SectionCardParams) => {
+export const SectionCard = ({ title, action, children }: SectionCardProps) => {
   return (
     <section aria-label={title}>
       <SectionHeading title={title} action={action} />

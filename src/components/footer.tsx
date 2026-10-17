@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
-import { CookieTrigger, useCookieConsent } from '~/components/cookie-consent'
+import { CookieTrigger } from '~/components/cookie-consent/cookie-trigger'
+import { useCookieConsent } from '~/components/cookie-consent/use-cookie-consent'
 import { getLegalLinks } from '~/constants/navigation'
 
 export const Footer = () => {

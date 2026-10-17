@@ -1,12 +1,12 @@
 import { hashPassword } from 'better-auth/crypto'
-import { test as setup } from '@playwright/test'
+import { expect, test as setup } from '@playwright/test'
 import { DATABASE_POOL_MAX_CONNECTIONS, prismaClient } from '~/db'
 import { BUNNY_STATUS } from '~/constants/bunny'
 import { MEME_ALGOLIA_INCLUDE, TRENDING_CATEGORY_DAYS } from '~/constants/meme'
 import { DAY, THIRTY_DAYS_MS } from '~/constants/time'
 import { MemeStatus, UserLocale } from '~/db/generated/prisma/enums'
 import { replaceAllIndicesWithMemes } from '~/lib/algolia'
-import { stripeClient } from '~/lib/stripe'
+import { getStripeClient } from '~/lib/stripe'
 import { clearDatabase } from './clear-database'
 import { E2E_PASSWORD, E2E_ROLES, type E2eRole } from './constants'
 import {
@@ -19,9 +19,9 @@ import {
 
 const SEED_TIMEOUT_MS = 180_000
 
-const createWithinPool = async <T>(
-  items: readonly T[],
-  create: (item: T) => Promise<void>
+const createWithinPool = async <TItem>(
+  items: readonly TItem[],
+  create: (item: TItem) => Promise<void>
 ) => {
   for (
     let index = 0;
@@ -44,7 +44,7 @@ const createStripeCustomer = async (role: E2eRole) => {
     return null
   }
 
-  const { id } = await stripeClient.customers.create({
+  const { id } = await getStripeClient().customers.create({
     email: role.email,
     name: role.name
   })
@@ -56,7 +56,7 @@ const createSubscription = async (
   role: E2eRole,
   stripeCustomerId: string | null
 ) => {
-  if (!role.premiumPlan) {
+  if (role.premiumPlan === undefined) {
     return
   }
 
@@ -93,7 +93,7 @@ const createBookmarks = async (role: E2eRole) => {
 }
 
 const createAiSearchLogs = async (role: E2eRole) => {
-  if (!role.aiSearchCount) {
+  if (role.aiSearchCount === undefined || role.aiSearchCount === 0) {
     return
   }
 
@@ -209,22 +209,36 @@ const indexMemes = async () => {
   })
 
   await replaceAllIndicesWithMemes(memes)
+
+  return memes
 }
 
-setup.afterAll(async () => {
-  await prismaClient.$disconnect()
-})
+const toMemeIds = (memes: readonly { id: string }[]) => {
+  return new Set(
+    memes.map((meme) => {
+      return meme.id
+    })
+  )
+}
 
-setup('seed the e2e environment', async () => {
-  setup.setTimeout(SEED_TIMEOUT_MS)
+setup.describe('the e2e environment', () => {
+  setup.afterAll(async () => {
+    await prismaClient.$disconnect()
+  })
 
-  await clearDatabase()
+  setup('is seeded', async () => {
+    setup.setTimeout(SEED_TIMEOUT_MS)
 
-  await createWithinPool(Object.values(E2E_ROLES), createUser)
-  await createWithinPool(Object.values(E2E_CATEGORIES), createCategory)
-  await createWithinPool(E2E_MEMES, createMeme)
-  await createWithinPool(Object.values(E2E_ROLES), createBookmarks)
-  await createWithinPool(Object.values(E2E_ROLES), createAiSearchLogs)
+    await clearDatabase()
 
-  await indexMemes()
+    await createWithinPool(Object.values(E2E_ROLES), createUser)
+    await createWithinPool(Object.values(E2E_CATEGORIES), createCategory)
+    await createWithinPool(E2E_MEMES, createMeme)
+    await createWithinPool(Object.values(E2E_ROLES), createBookmarks)
+    await createWithinPool(Object.values(E2E_ROLES), createAiSearchLogs)
+
+    const indexedMemes = await indexMemes()
+
+    expect(toMemeIds(indexedMemes)).toStrictEqual(toMemeIds(E2E_MEMES))
+  })
 })

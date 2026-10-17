@@ -13,6 +13,8 @@ import { adminLogger } from '~/lib/logger'
 import { logAuditAction } from '~/server/audit'
 import { adminRequiredMiddleware } from '~/server/user-auth'
 
+const ORIGINAL_DOWNLOAD_TIMEOUT_MS = 15_000
+
 const MEME_BUNNY_ID_SELECT = {
   video: { select: { bunnyId: true } }
 } as const satisfies Prisma.MemeSelect
@@ -94,8 +96,8 @@ export const fetchAdminVideoBlob = createServerFn({ method: 'GET' })
 
     const controller = new AbortController()
     const timeoutId = setTimeout(() => {
-      return controller.abort()
-    }, 15_000)
+      controller.abort()
+    }, ORIGINAL_DOWNLOAD_TIMEOUT_MS)
 
     try {
       const response = await fetch(originalUrl, {

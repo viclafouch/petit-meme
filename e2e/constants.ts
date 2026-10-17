@@ -1,6 +1,8 @@
 import { FREE_PLAN_MAX_AI_SEARCHES } from '~/constants/ai-search'
-import type { BetterAuthPlanName } from '~/constants/plan'
-import { FREE_PLAN_MAX_FAVORITES } from '~/constants/plan'
+import {
+  type BetterAuthPlanName,
+  FREE_PLAN_MAX_FAVORITES
+} from '~/constants/plan'
 import type { Meme, User } from '~/db/generated/prisma/client'
 import { E2E_FILLER_MEMES, E2E_NAMED_MEMES } from './content'
 
@@ -169,8 +171,12 @@ export const E2E_ROLES = {
 
 export type E2eRoleName = keyof typeof E2E_ROLES
 
+export const matchIsE2eRoleName = (name: string): name is E2eRoleName => {
+  return Object.hasOwn(E2E_ROLES, name)
+}
+
 export const STRIPE_TEST_CARD = {
   number: '4242424242424242',
   expiry: '12/34',
   cvc: '123'
-} as const
+} as const satisfies Record<string, string>

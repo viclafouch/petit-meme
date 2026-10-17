@@ -1,44 +1,13 @@
-import React from 'react'
-import { ErrorBoundary } from 'react-error-boundary'
-import * as Sentry from '@sentry/tanstackstart-react'
-import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import {
-  StudioErrorFallback,
-  StudioLoadingFallback
-} from '~/components/Meme/studio-fallbacks'
-import { StudioPage } from '~/components/Meme/Studio/studio-page'
+import { StudioLoadingFallback } from '~/components/Meme/studio-fallbacks'
 import { buildVideoImageUrl } from '~/lib/bunny'
 import { getMemeByIdQueryOpts } from '~/lib/queries'
 import { buildMemeSeo } from '~/lib/seo'
 import { getRelatedMemes } from '~/server/meme'
-
-const RouteComponent = () => {
-  const { memeId } = Route.useParams()
-  const { relatedMemesPromise } = Route.useLoaderData()
-  const memeQuery = useSuspenseQuery(getMemeByIdQueryOpts(memeId))
-
-  return (
-    <ErrorBoundary
-      FallbackComponent={StudioErrorFallback}
-      onError={(error) => {
-        Sentry.captureException(error, {
-          tags: { feature: 'studio' }
-        })
-      }}
-    >
-      <React.Suspense fallback={<StudioLoadingFallback />}>
-        <StudioPage
-          meme={memeQuery.data}
-          relatedMemesPromise={relatedMemesPromise}
-        />
-      </React.Suspense>
-    </ErrorBoundary>
-  )
-}
+import { MemeStudioRoutePage } from './-components/meme-studio-route-page'
 
 export const Route = createFileRoute('/_studio/memes/$memeId/studio')({
-  component: RouteComponent,
+  component: MemeStudioRoutePage,
   pendingComponent: StudioLoadingFallback,
   ssr: 'data-only',
   loader: async ({ params, context }) => {

@@ -1,7 +1,7 @@
 import { Link, Section, Text } from 'react-email'
 import type { Locale } from '~/paraglide/runtime'
-import { buildEmailUrl } from './constants'
-import { BoldText, BUTTON_CLASS, EmailLayout } from './email-layout'
+import { buildEmailUrl, BUTTON_CLASS } from './constants'
+import { BoldText, EmailLayout } from './email-layout'
 
 const translations = {
   fr: {
@@ -76,8 +76,13 @@ SubmissionApprovedEmail.PreviewProps = {
   locale: 'fr'
 } satisfies SubmissionApprovedEmailProps
 
+type SubmissionApprovedEmailENProps = Omit<
+  SubmissionApprovedEmailProps,
+  'locale'
+>
+
 export const SubmissionApprovedEmailEN = (
-  props: Omit<SubmissionApprovedEmailProps, 'locale'>
+  props: SubmissionApprovedEmailENProps
 ) => {
   return <SubmissionApprovedEmail {...props} locale="en" />
 }
@@ -86,6 +91,6 @@ SubmissionApprovedEmailEN.PreviewProps = {
   username: 'Alan',
   memeTitle: 'The dancing cat',
   memeId: 'clx1234567890'
-} satisfies Omit<SubmissionApprovedEmailProps, 'locale'>
+} satisfies SubmissionApprovedEmailENProps
 
 export default SubmissionApprovedEmail

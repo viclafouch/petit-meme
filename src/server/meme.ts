@@ -9,6 +9,7 @@ import {
 } from '@tanstack/react-start/server'
 import { prismaClient } from '~/db'
 import { COOKIE_ALGOLIA_USER_TOKEN_KEY } from '~/constants/cookie'
+import { HTTP_STATUS } from '~/constants/http'
 import {
   MEME_EXPORT_MODES,
   MEME_FULL_INCLUDE,
@@ -29,9 +30,9 @@ import {
   TRENDING_CATEGORY_SLUG,
   TRENDING_MEMES_COUNT,
   TRENDING_WEIGHTS,
-  VIRTUAL_CATEGORY_SLUGS
+  VIRTUAL_CATEGORY_SLUGS,
+  type MemeVideoIntent
 } from '~/constants/meme'
-import type { MemeVideoIntent } from '~/constants/meme'
 import {
   RATE_LIMIT_DOWNLOAD,
   RATE_LIMIT_TRACK,
@@ -42,11 +43,9 @@ import { Prisma } from '~/db/generated/prisma/client'
 import {
   ActivityEventType as ActivityEventTypeEnum,
   MemeContentLocale as MemeContentLocaleEnum,
-  MemeStatus
-} from '~/db/generated/prisma/enums'
-import type {
-  ActivityEventType,
-  MemeContentLocale
+  MemeStatus,
+  type ActivityEventType,
+  type MemeContentLocale
 } from '~/db/generated/prisma/enums'
 import { clientEnv } from '~/env/client'
 import { serverEnv } from '~/env/server'
@@ -68,13 +67,14 @@ import {
   algoliaSearchClient,
   getHighlightedTitle,
   normalizeAlgoliaHit,
+  parseAlgoliaMemeHits,
   resolveAlgoliaIndexName,
   resolveAlgoliaReplicaPopular,
   resolveAlgoliaReplicaRecent,
   safeAlgoliaOp,
-  withAlgoliaCache
+  createAlgoliaCache,
+  type AlgoliaMemeRecord
 } from '~/lib/algolia'
-import type { AlgoliaMemeRecord } from '~/lib/algolia'
 import { auth } from '~/lib/auth'
 import { buildSignedOriginalUrl, fetchWatermarkedVideo } from '~/lib/bunny'
 import { matchIsAnalyticsConsentGiven } from '~/lib/cookie-consent'
@@ -89,10 +89,18 @@ import { recordActivityEvent } from '~/utils/activity-event'
 import { ensureAlgoliaUserToken } from '~/utils/tracking-cookies'
 import { getVisitorKey } from '~/utils/visitor-key'
 
-const serverInsightsClient = createInsightsClient(
-  clientEnv.VITE_ALGOLIA_APP_ID,
-  serverEnv.ALGOLIA_ADMIN_KEY
-)
+const ORIGINAL_VIDEO_FETCH_TIMEOUT_MS = 15_000
+
+let serverInsightsClient: ReturnType<typeof createInsightsClient> | null = null
+
+const getServerInsightsClient = () => {
+  serverInsightsClient ??= createInsightsClient(
+    clientEnv.VITE_ALGOLIA_APP_ID,
+    serverEnv.ALGOLIA_ADMIN_KEY
+  )
+
+  return serverInsightsClient
+}
 
 type SetDbCacheParams = {
   key: string
@@ -113,6 +121,16 @@ const getDbCache = createServerOnlyFn(async (key: string) => {
   return cached.data
 })
 
+const deleteExpiredDbCache = async () => {
+  try {
+    await prismaClient.recommendCache.deleteMany({
+      where: { expiresAt: { lt: new Date() } }
+    })
+  } catch (error) {
+    algoliaLogger.warn({ error }, 'Failed to delete expired recommend cache')
+  }
+}
+
 const setDbCache = createServerOnlyFn(
   async ({ key, data, ttl }: SetDbCacheParams) => {
     try {
@@ -124,11 +142,7 @@ const setDbCache = createServerOnlyFn(
         create: { key, data, expiresAt }
       })
 
-      void prismaClient.recommendCache
-        .deleteMany({
-          where: { expiresAt: { lt: new Date() } }
-        })
-        .catch(() => {})
+      void deleteExpiredDbCache()
     } catch (error) {
       algoliaLogger.warn({ error, key }, 'Failed to write recommend cache')
     }
@@ -137,12 +151,11 @@ const setDbCache = createServerOnlyFn(
 
 async function getAlgoliaRecommendCache(key: string) {
   const data = await getDbCache(key)
-
-  if (!data) {
+  if (!Array.isArray(data)) {
     return null
   }
 
-  return (data as unknown as AlgoliaMemeRecord[]).map(normalizeAlgoliaHit)
+  return parseAlgoliaMemeHits(data).map(normalizeAlgoliaHit)
 }
 
 export const clearRecommendCache = createServerOnlyFn(async () => {
@@ -291,12 +304,15 @@ const MEME_WITH_VIDEO_AND_TRANSLATIONS_INCLUDE = {
   translations: { select: MEME_TRANSLATION_SELECT }
 } as const satisfies Prisma.MemeInclude
 
+const CACHED_MEME_IDS_SCHEMA = z.array(z.string())
+
 async function getCachedTrendingMemeIds(visibleLocales: MemeContentLocale[]) {
   const cacheKey = `trending-category:${visibleLocales.join(',')}`
   const cached = await getDbCache(cacheKey)
+  const parsedCachedIds = CACHED_MEME_IDS_SCHEMA.safeParse(cached)
 
-  if (cached) {
-    return cached as unknown as string[]
+  if (parsedCachedIds.success) {
+    return parsedCachedIds.data
   }
 
   const memeIds = await fetchTrendingCategoryMemeIds(visibleLocales)
@@ -451,14 +467,132 @@ export const getVideoStatusById = createServerFn({ method: 'GET' })
     }
   })
 
+type FetchTrendingMemesPageParams = {
+  indexName: string
+  algoliaPage: number
+  algoliaFilters: string
+  userToken: string | undefined
+  query: string | undefined
+}
+
+const fetchTrendingMemesPage = async ({
+  indexName,
+  algoliaPage,
+  algoliaFilters,
+  userToken,
+  query
+}: FetchTrendingMemesPageParams) => {
+  const response =
+    await algoliaSearchClient.searchSingleIndex<AlgoliaMemeRecord>({
+      indexName,
+      searchParams: {
+        query: '',
+        page: algoliaPage,
+        hitsPerPage: MEMES_PER_PAGE,
+        filters: algoliaFilters,
+        clickAnalytics: true,
+        userToken,
+        ...ALGOLIA_SEARCH_PARAMS_BASE
+      }
+    })
+
+  return {
+    memes: response.hits.map(normalizeAlgoliaHit),
+    query,
+    queryID: response.queryID,
+    page: (response.page ?? 0) + 1,
+    totalPages: 1 + (response.nbPages ?? 0)
+  }
+}
+
+const readTrendingMemesPage = createAlgoliaCache(fetchTrendingMemesPage)
+
+type FetchSearchMemesPageParams = {
+  indexName: string
+  category: string | undefined
+  contentLocales: MemeContentLocale[] | undefined
+  query: string | undefined
+  page: number | undefined
+  userToken: string | undefined
+  hasQuery: boolean
+}
+
+const fetchSearchMemesPage = async ({
+  indexName,
+  category,
+  contentLocales,
+  query,
+  page,
+  userToken,
+  hasQuery
+}: FetchSearchMemesPageParams) => {
+  const thirtyDaysAgo = Date.now() - THIRTY_DAYS_MS
+  const filters = buildMemeFilters({
+    category,
+    thirtyDaysAgo,
+    contentLocales
+  })
+
+  const response =
+    await algoliaSearchClient.searchSingleIndex<AlgoliaMemeRecord>({
+      indexName,
+      searchParams: {
+        query,
+        page: page === undefined || page === 0 ? 0 : page - 1,
+        hitsPerPage: MEMES_PER_PAGE,
+        filters,
+        clickAnalytics: true,
+        userToken,
+        ...ALGOLIA_SEARCH_PARAMS_BASE
+      }
+    })
+
+  return {
+    memes: response.hits.map((hit) => {
+      return {
+        ...normalizeAlgoliaHit(hit),
+        highlightedTitle: hasQuery ? getHighlightedTitle(hit) : undefined
+      }
+    }),
+    query,
+    queryID: response.queryID,
+    page: response.page,
+    totalPages: response.nbPages
+  }
+}
+
+const readSearchMemesPage = createAlgoliaCache(fetchSearchMemesPage)
+
+const fetchRecentMemesCount = async (locale: Locale) => {
+  const thirtyDaysAgo = Date.now() - THIRTY_DAYS_MS
+
+  const countResult = await algoliaSearchClient.searchSingleIndex({
+    indexName: resolveAlgoliaIndexName(locale),
+    searchParams: {
+      filters: [
+        `status:${MemeStatus.PUBLISHED}`,
+        `publishedAtTime >= ${thirtyDaysAgo}`
+      ].join(' AND '),
+      hitsPerPage: 0,
+      attributesToRetrieve: [],
+      attributesToHighlight: [],
+      attributesToSnippet: []
+    }
+  })
+
+  return countResult.nbHits ?? 0
+}
+
+const readRecentMemesCount = createAlgoliaCache(fetchRecentMemesCount)
+
 export const getMemes = createServerFn({ method: 'GET' })
   .validator(MEMES_FILTERS_SCHEMA)
   .handler(async ({ data }) => {
     const locale = getLocale()
     const hasQuery = Boolean(data.query)
-    const contentLocales = data.contentLocales
-      ? parseContentLocalesParam(data.contentLocales, locale)
-      : undefined
+    const contentLocales = !data.contentLocales
+      ? undefined
+      : parseContentLocalesParam(data.contentLocales, locale)
 
     if (data.category === TRENDING_CATEGORY_SLUG && !hasQuery) {
       const visibleLocales = resolveVisibleContentLocales(
@@ -519,27 +653,14 @@ export const getMemes = createServerFn({ method: 'GET' })
       const algoliaPage = requestedPage - 2
       const cacheKey = `trending-page:${indexName}:${requestedPage}:${data.contentLocales ?? ''}`
 
-      return withAlgoliaCache(cacheKey, async () => {
-        const response =
-          await algoliaSearchClient.searchSingleIndex<AlgoliaMemeRecord>({
-            indexName,
-            searchParams: {
-              query: '',
-              page: algoliaPage,
-              hitsPerPage: MEMES_PER_PAGE,
-              filters: algoliaFilters,
-              clickAnalytics: true,
-              userToken,
-              ...ALGOLIA_SEARCH_PARAMS_BASE
-            }
-          })
-
-        return {
-          memes: response.hits.map(normalizeAlgoliaHit),
-          query: data.query,
-          queryID: response.queryID,
-          page: (response.page ?? 0) + 1,
-          totalPages: 1 + (response.nbPages ?? 0)
+      return readTrendingMemesPage({
+        key: cacheKey,
+        params: {
+          indexName,
+          algoliaPage,
+          algoliaFilters,
+          userToken,
+          query: data.query
         }
       })
     }
@@ -556,39 +677,16 @@ export const getMemes = createServerFn({ method: 'GET' })
       ? getCookie(COOKIE_ALGOLIA_USER_TOKEN_KEY)
       : undefined
 
-    return withAlgoliaCache(cacheKey, async () => {
-      const thirtyDaysAgo = Date.now() - THIRTY_DAYS_MS
-      const filters = buildMemeFilters({
+    return readSearchMemesPage({
+      key: cacheKey,
+      params: {
+        indexName,
         category: data.category,
-        thirtyDaysAgo,
-        contentLocales
-      })
-
-      const response =
-        await algoliaSearchClient.searchSingleIndex<AlgoliaMemeRecord>({
-          indexName,
-          searchParams: {
-            query: data.query,
-            page: data.page ? data.page - 1 : 0,
-            hitsPerPage: MEMES_PER_PAGE,
-            filters,
-            clickAnalytics: true,
-            userToken,
-            ...ALGOLIA_SEARCH_PARAMS_BASE
-          }
-        })
-
-      return {
-        memes: response.hits.map((hit) => {
-          return {
-            ...normalizeAlgoliaHit(hit),
-            highlightedTitle: hasQuery ? getHighlightedTitle(hit) : undefined
-          }
-        }),
+        contentLocales,
         query: data.query,
-        queryID: response.queryID,
-        page: response.page,
-        totalPages: response.nbPages
+        page: data.page,
+        userToken,
+        hasQuery
       }
     })
   })
@@ -597,24 +695,9 @@ export const getRecentCountMemes = createServerFn({ method: 'GET' }).handler(
   async () => {
     const locale = getLocale()
 
-    return withAlgoliaCache(`recent-count:${locale}`, async () => {
-      const thirtyDaysAgo = Date.now() - THIRTY_DAYS_MS
-
-      const countResult = await algoliaSearchClient.searchSingleIndex({
-        indexName: resolveAlgoliaIndexName(locale),
-        searchParams: {
-          filters: [
-            `status:${MemeStatus.PUBLISHED}`,
-            `publishedAtTime >= ${thirtyDaysAgo}`
-          ].join(' AND '),
-          hitsPerPage: 0,
-          attributesToRetrieve: [],
-          attributesToHighlight: [],
-          attributesToSnippet: []
-        }
-      })
-
-      return countResult.nbHits ?? 0
+    return readRecentMemesCount({
+      key: `recent-count:${locale}`,
+      params: locale
     })
   }
 )
@@ -676,7 +759,7 @@ export const getRelatedMemes = createServerFn({ method: 'GET' })
         ]
       })
 
-      const hits = (response.results[0]?.hits ?? []) as AlgoliaMemeRecord[]
+      const hits = parseAlgoliaMemeHits(response.results[0]?.hits ?? [])
       const normalized = hits.map(normalizeAlgoliaHit)
 
       if (normalized.length > 0) {
@@ -726,7 +809,7 @@ export const getTrendingMemes = createServerFn({ method: 'GET' }).handler(
         ]
       })
 
-      const hits = (response.results[0]?.hits ?? []) as AlgoliaMemeRecord[]
+      const hits = parseAlgoliaMemeHits(response.results[0]?.hits ?? [])
       const normalized = hits.map(normalizeAlgoliaHit)
 
       if (normalized.length > 0) {
@@ -761,16 +844,16 @@ export const getRandomMeme = createServerFn({ method: 'GET' })
   })
   .handler(async ({ data }) => {
     const locale = getLocale()
-    const parsedContentLocales = data.contentLocales
-      ? parseContentLocalesParam(data.contentLocales, locale)
-      : undefined
+    const parsedContentLocales = !data.contentLocales
+      ? undefined
+      : parseContentLocalesParam(data.contentLocales, locale)
 
     const whereCondition = {
       status: MemeStatus.PUBLISHED,
       contentLocale: {
         in: resolveVisibleContentLocales(locale, parsedContentLocales)
       },
-      ...(data.exceptId ? { id: { not: data.exceptId } } : {})
+      ...(!data.exceptId ? {} : { id: { not: data.exceptId } })
     }
 
     const count = await prismaClient.meme.count({ where: whereCondition })
@@ -864,7 +947,7 @@ export const shareMeme = createServerFn({ method: 'GET' })
 
     const activityEventType = ACTIVITY_EVENT_TYPE_BY_VIDEO_INTENT[mode]
 
-    if (activityEventType) {
+    if (activityEventType !== null) {
       recordActivityEvent({
         type: activityEventType,
         actor: session?.user,
@@ -890,8 +973,8 @@ export const shareMeme = createServerFn({ method: 'GET' })
     const originalUrl = await buildSignedOriginalUrl(bunnyId)
     const controller = new AbortController()
     const timeoutId = setTimeout(() => {
-      return controller.abort()
-    }, 15_000)
+      controller.abort()
+    }, ORIGINAL_VIDEO_FETCH_TIMEOUT_MS)
 
     try {
       const response = await fetch(originalUrl, {
@@ -899,7 +982,7 @@ export const shareMeme = createServerFn({ method: 'GET' })
       })
 
       if (!response.ok) {
-        setResponseStatus(502)
+        setResponseStatus(HTTP_STATUS.BAD_GATEWAY)
         throw new Error(`Bunny CDN responded with status ${response.status}`)
       }
 
@@ -996,7 +1079,7 @@ export const registerMemeView = createServerFn({ method: 'POST' })
       const indexName = resolveAlgoliaIndexName(getLocale())
 
       void safeAlgoliaOp(
-        serverInsightsClient.pushEvents({
+        getServerInsightsClient().pushEvents({
           events: [
             {
               eventType: 'view',

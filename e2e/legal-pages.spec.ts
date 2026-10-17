@@ -1,7 +1,8 @@
 import { readFileSync } from 'node:fs'
-import { baseLocale, locales } from '~/paraglide/runtime'
-import type { Locale } from '~/paraglide/runtime'
-import { expect, test } from './fixtures'
+import { expect } from '@playwright/test'
+import { HTTP_STATUS } from '~/constants/http'
+import { baseLocale, locales, type Locale } from '~/paraglide/runtime'
+import { test } from './fixtures'
 import { localizePathname } from './urls'
 
 const LEGAL_PATHNAMES = [
@@ -37,43 +38,45 @@ const AVATAR_STYLE_CREDIT = {
   licenceUrl: 'https://creativecommons.org/licenses/by/4.0/'
 } as const satisfies Record<string, string>
 
-for (const locale of locales) {
-  const localeName = locale === baseLocale ? `${locale}, base` : locale
+test.describe('the legal pages', () => {
+  for (const locale of locales) {
+    const localeName = locale === baseLocale ? `${locale}, base` : locale
 
-  for (const pathname of LEGAL_PATHNAMES) {
-    test(`${pathname} answers in its own words (${localeName})`, async ({
+    for (const pathname of LEGAL_PATHNAMES) {
+      test(`${pathname} answers in its own words (${localeName})`, async ({
+        page
+      }) => {
+        const response = await page.goto(localizePathname(pathname, locale))
+
+        expect(response?.status()).toBe(HTTP_STATUS.OK)
+        await expect(
+          page.getByRole('heading', {
+            level: 1,
+            name: readMarkdownTitle(pathname, locale),
+            exact: true
+          })
+        ).toBeVisible()
+      })
+    }
+
+    test(`the legal notice credits the avatar style (${localeName})`, async ({
       page
     }) => {
-      const response = await page.goto(localizePathname(pathname, locale))
+      await page.goto(localizePathname(LEGAL_NOTICE_PATHNAME, locale))
 
-      expect(response?.status()).toBe(200)
       await expect(
-        page.getByRole('heading', {
-          level: 1,
-          name: readMarkdownTitle(pathname, locale),
+        page.getByRole('link', {
+          name: AVATAR_STYLE_CREDIT.styleName,
           exact: true
         })
-      ).toBeVisible()
+      ).toHaveAttribute('href', AVATAR_STYLE_CREDIT.styleUrl)
+      await expect(
+        page.getByRole('link', {
+          name: AVATAR_STYLE_CREDIT.licenceName,
+          exact: true
+        })
+      ).toHaveAttribute('href', AVATAR_STYLE_CREDIT.licenceUrl)
+      await expect(page.getByText(AVATAR_STYLE_CREDIT.author)).toBeVisible()
     })
   }
-
-  test(`the legal notice credits the avatar style (${localeName})`, async ({
-    page
-  }) => {
-    await page.goto(localizePathname(LEGAL_NOTICE_PATHNAME, locale))
-
-    await expect(
-      page.getByRole('link', {
-        name: AVATAR_STYLE_CREDIT.styleName,
-        exact: true
-      })
-    ).toHaveAttribute('href', AVATAR_STYLE_CREDIT.styleUrl)
-    await expect(
-      page.getByRole('link', {
-        name: AVATAR_STYLE_CREDIT.licenceName,
-        exact: true
-      })
-    ).toHaveAttribute('href', AVATAR_STYLE_CREDIT.licenceUrl)
-    await expect(page.getByText(AVATAR_STYLE_CREDIT.author)).toBeVisible()
-  })
-}
+})

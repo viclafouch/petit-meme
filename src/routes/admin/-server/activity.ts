@@ -1,7 +1,10 @@
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 import { prismaClient } from '~/db'
-import { ACTIVITY_FILTERS_SCHEMA } from '~/constants/activity'
-import type { ActivityFilters, ActivityScope } from '~/constants/activity'
+import {
+  ACTIVITY_FILTERS_SCHEMA,
+  type ActivityFilters,
+  type ActivityScope
+} from '~/constants/activity'
 import type { Prisma } from '~/db/generated/prisma/client'
 import { ActivityEventType } from '~/db/generated/prisma/enums'
 import { DASHBOARD_FEED_SIZE, PAGE_SIZE } from '~/routes/admin/-lib/constants'
@@ -79,11 +82,22 @@ export const fetchActivitySummary = createServerOnlyFn(
       })
     )
 
-    const totals = Object.fromEntries(
-      Object.values(ActivityEventType).map((type) => {
-        return [type, countByType.get(type) ?? 0] as const
-      })
-    ) as ActivityTotals
+    const countOf = (type: ActivityEventType) => {
+      return countByType.get(type) ?? 0
+    }
+
+    const totals: ActivityTotals = {
+      [ActivityEventType.VIEW]: countOf(ActivityEventType.VIEW),
+      [ActivityEventType.DOWNLOAD]: countOf(ActivityEventType.DOWNLOAD),
+      [ActivityEventType.SHARE]: countOf(ActivityEventType.SHARE),
+      [ActivityEventType.GENERATION]: countOf(ActivityEventType.GENERATION),
+      [ActivityEventType.AI_SEARCH]: countOf(ActivityEventType.AI_SEARCH),
+      [ActivityEventType.BOOKMARK_ADDED]: countOf(
+        ActivityEventType.BOOKMARK_ADDED
+      ),
+      [ActivityEventType.SIGNUP]: countOf(ActivityEventType.SIGNUP),
+      [ActivityEventType.SUBSCRIPTION]: countOf(ActivityEventType.SUBSCRIPTION)
+    }
 
     return {
       totals,

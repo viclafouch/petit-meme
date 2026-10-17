@@ -1,6 +1,7 @@
 import { Section, Text } from 'react-email'
 import type { Locale } from '~/paraglide/runtime'
-import { BoldText, CONTACT_EMAIL, EmailLayout } from './email-layout'
+import { CONTACT_EMAIL } from './constants'
+import { BoldText, EmailLayout } from './email-layout'
 
 const translations = {
   fr: {
@@ -80,8 +81,13 @@ SubmissionRejectedEmail.PreviewProps = {
   locale: 'fr'
 } satisfies SubmissionRejectedEmailProps
 
+type SubmissionRejectedEmailENProps = Omit<
+  SubmissionRejectedEmailProps,
+  'locale'
+>
+
 export const SubmissionRejectedEmailEN = (
-  props: Omit<SubmissionRejectedEmailProps, 'locale'>
+  props: SubmissionRejectedEmailENProps
 ) => {
   return <SubmissionRejectedEmail {...props} locale="en" />
 }
@@ -89,6 +95,6 @@ export const SubmissionRejectedEmailEN = (
 SubmissionRejectedEmailEN.PreviewProps = {
   username: 'Alan',
   memeTitle: 'The dancing cat'
-} satisfies Omit<SubmissionRejectedEmailProps, 'locale'>
+} satisfies SubmissionRejectedEmailENProps
 
 export default SubmissionRejectedEmail

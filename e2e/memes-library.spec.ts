@@ -1,14 +1,16 @@
+import { expect } from '@playwright/test'
+import { HTTP_STATUS } from '~/constants/http'
 import { MEMES_PER_PAGE } from '~/constants/meme'
+import { m } from '~/paraglide/messages.js'
 import {
   E2E_FIRST_PAGE_MEMES,
   E2E_NAMED_MEMES,
   E2E_UNIQUE_SEARCH_WORD,
   E2E_SECOND_PAGE_MEMES
 } from './content'
-import { expect, test } from './fixtures'
+import { test } from './fixtures'
 import { repeatUntilNavigated, repeatUntilVisible } from './hydration'
 import { getMemeLink, getMemePlayButtons, getMemeTitleLinks } from './library'
-import { m } from './messages'
 
 const LIBRARY_PATHNAME = '/memes/category/all'
 
@@ -18,121 +20,127 @@ const WIDEST_GRID_COLUMN_COUNT = '6'
 
 const FILTERED_FIRST_PAGE_COUNT = MEMES_PER_PAGE
 
-test('the library opens on the trending Category and fills a page', async ({
-  page
-}) => {
-  const response = await page.goto('/memes')
+test.describe('the library', () => {
+  test('the library opens on the trending Category and fills a page', async ({
+    page
+  }) => {
+    const response = await page.goto('/memes')
 
-  expect(response?.status()).toBe(200)
-  await expect(page).toHaveURL('/memes/category/trending')
-  await expect(
-    page.getByRole('heading', { name: m.meme_category_trending() })
-  ).toBeVisible()
-  await expect(getMemePlayButtons(page)).toHaveCount(MEMES_PER_PAGE)
-})
-
-test('a word typed in the search field narrows the library to what matches', async ({
-  page
-}) => {
-  await page.goto(LIBRARY_PATHNAME)
-
-  const searchField = page.getByRole('searchbox', {
-    name: m.meme_search_placeholder()
+    expect(response?.status()).toBe(HTTP_STATUS.OK)
+    await expect(page).toHaveURL('/memes/category/trending')
+    await expect(
+      page.getByRole('heading', { name: m.meme_category_trending() })
+    ).toBeVisible()
+    await expect(getMemePlayButtons(page)).toHaveCount(MEMES_PER_PAGE)
   })
 
-  await repeatUntilNavigated(
-    async () => {
-      await searchField.clear()
-      await searchField.fill(E2E_UNIQUE_SEARCH_WORD)
-    },
-    { page, from: LIBRARY_PATHNAME }
-  )
+  test('a word typed in the search field narrows the library to what matches', async ({
+    page
+  }) => {
+    await page.goto(LIBRARY_PATHNAME)
 
-  await expect(getMemePlayButtons(page)).toHaveCount(1)
-  await expect(getMemeLink(page, E2E_NAMED_MEMES.searchTarget)).toBeVisible()
-  await expect(getMemeLink(page, E2E_NAMED_MEMES.mostViewed)).toBeHidden()
-})
-
-test('the second page holds exactly what the first one left out', async ({
-  page
-}) => {
-  await page.goto('/memes/category/trending')
-
-  await expect(getMemeLink(page, E2E_NAMED_MEMES.mostViewed)).toBeVisible()
-
-  await page
-    .getByRole('navigation', { name: m.common_pagination() })
-    .getByRole('link', { name: SECOND_PAGE_NUMBER, exact: true })
-    .click()
-
-  await expect(page).toHaveURL(
-    `/memes/category/trending?page=${SECOND_PAGE_NUMBER}`
-  )
-  await expect(getMemePlayButtons(page)).toHaveCount(
-    E2E_SECOND_PAGE_MEMES.length
-  )
-
-  await Promise.all([
-    ...E2E_SECOND_PAGE_MEMES.map((meme) => {
-      return expect(getMemeLink(page, meme)).toBeVisible()
-    }),
-    ...E2E_FIRST_PAGE_MEMES.map((meme) => {
-      return expect(getMemeLink(page, meme)).toBeHidden()
+    const searchField = page.getByRole('searchbox', {
+      name: m.meme_search_placeholder()
     })
-  ])
-})
 
-test('widening the grid changes neither the Memes nor their order', async ({
-  page
-}) => {
-  await page.goto('/memes/category/trending')
+    await repeatUntilNavigated(
+      async () => {
+        await searchField.clear()
+        await searchField.fill(E2E_UNIQUE_SEARCH_WORD)
+      },
+      { page, from: LIBRARY_PATHNAME }
+    )
 
-  const memeTitleLinks = getMemeTitleLinks(page)
-
-  await expect(memeTitleLinks).toHaveCount(MEMES_PER_PAGE)
-
-  const titlesBeforeWidening = await memeTitleLinks.allTextContents()
-
-  const gridColumns = page.getByRole('radiogroup', {
-    name: m.meme_grid_columns()
-  })
-  const widestGrid = gridColumns.getByRole('radio', {
-    name: WIDEST_GRID_COLUMN_COUNT,
-    exact: true
+    await expect(getMemePlayButtons(page)).toHaveCount(1)
+    await expect(getMemeLink(page, E2E_NAMED_MEMES.searchTarget)).toBeVisible()
+    await expect(getMemeLink(page, E2E_NAMED_MEMES.mostViewed)).toBeHidden()
   })
 
-  await repeatUntilVisible(
-    () => {
-      return widestGrid.click()
-    },
-    gridColumns.getByRole('radio', {
+  test('the second page holds exactly what the first one left out', async ({
+    page
+  }) => {
+    await page.goto('/memes/category/trending')
+
+    await expect(getMemeLink(page, E2E_NAMED_MEMES.mostViewed)).toBeVisible()
+
+    await page
+      .getByRole('navigation', { name: m.common_pagination() })
+      .getByRole('link', { name: SECOND_PAGE_NUMBER, exact: true })
+      .click()
+
+    await expect(page).toHaveURL(
+      `/memes/category/trending?page=${SECOND_PAGE_NUMBER}`
+    )
+    await expect(getMemePlayButtons(page)).toHaveCount(
+      E2E_SECOND_PAGE_MEMES.length
+    )
+
+    await Promise.all([
+      ...E2E_SECOND_PAGE_MEMES.map((meme) => {
+        return expect(getMemeLink(page, meme)).toBeVisible()
+      }),
+      ...E2E_FIRST_PAGE_MEMES.map((meme) => {
+        return expect(getMemeLink(page, meme)).toBeHidden()
+      })
+    ])
+  })
+
+  test('widening the grid changes neither the Memes nor their order', async ({
+    page
+  }) => {
+    await page.goto('/memes/category/trending')
+
+    const memeTitleLinks = getMemeTitleLinks(page)
+
+    await expect(memeTitleLinks).toHaveCount(MEMES_PER_PAGE)
+
+    const titlesBeforeWidening = await memeTitleLinks.allTextContents()
+
+    const gridColumns = page.getByRole('radiogroup', {
+      name: m.meme_grid_columns()
+    })
+    const widestGrid = gridColumns.getByRole('radio', {
       name: WIDEST_GRID_COLUMN_COUNT,
-      exact: true,
-      checked: true
+      exact: true
     })
-  )
 
-  await expect(memeTitleLinks).toHaveText(titlesBeforeWidening)
-})
+    await repeatUntilVisible(
+      () => {
+        return widestGrid.click()
+      },
+      gridColumns.getByRole('radio', {
+        name: WIDEST_GRID_COLUMN_COUNT,
+        exact: true,
+        checked: true
+      })
+    )
 
-test('dropping French from the filter leaves the rest of the library', async ({
-  page
-}) => {
-  await page.goto('/memes/category/trending')
-
-  const frenchCheckbox = page.getByRole('checkbox', {
-    name: m.meme_content_locale_FR()
+    await expect(memeTitleLinks).toHaveText(titlesBeforeWidening)
   })
 
-  await repeatUntilVisible(() => {
-    return page.getByRole('button', { name: m.meme_filter_languages() }).click()
-  }, frenchCheckbox)
+  test('dropping French from the filter leaves the rest of the library', async ({
+    page
+  }) => {
+    await page.goto('/memes/category/trending')
 
-  await frenchCheckbox.uncheck()
+    const frenchCheckbox = page.getByRole('checkbox', {
+      name: m.meme_content_locale_FR()
+    })
 
-  await expect(
-    getMemeLink(page, E2E_NAMED_MEMES.recentlyPublished)
-  ).toBeHidden()
-  await expect(getMemeLink(page, E2E_NAMED_MEMES.english)).toBeVisible()
-  await expect(getMemePlayButtons(page)).toHaveCount(FILTERED_FIRST_PAGE_COUNT)
+    await repeatUntilVisible(() => {
+      return page
+        .getByRole('button', { name: m.meme_filter_languages() })
+        .click()
+    }, frenchCheckbox)
+
+    await frenchCheckbox.uncheck()
+
+    await expect(
+      getMemeLink(page, E2E_NAMED_MEMES.recentlyPublished)
+    ).toBeHidden()
+    await expect(getMemeLink(page, E2E_NAMED_MEMES.english)).toBeVisible()
+    await expect(getMemePlayButtons(page)).toHaveCount(
+      FILTERED_FIRST_PAGE_COUNT
+    )
+  })
 })

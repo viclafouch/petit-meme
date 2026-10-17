@@ -1,19 +1,28 @@
-/* oxlint-disable jsx-a11y/anchor-has-content */
-/* oxlint-disable jsx-a11y/heading-has-content */
-/* oxlint-disable id-length */
 import type { Components } from 'react-markdown'
 import { Separator } from '~/components/ui/separator'
 import { baseLocale, getLocale } from '~/paraglide/runtime'
 
 export const BASE_MARKDOWN_COMPONENTS = {
-  h1: (props) => {
-    return <h1 className="text-2xl font-bold text-primary" {...props} />
+  h1: ({ children, ...props }) => {
+    return (
+      <h1 className="text-2xl font-bold text-primary" {...props}>
+        {children}
+      </h1>
+    )
   },
-  h2: (props) => {
-    return <h2 className="text-xl font-bold text-primary" {...props} />
+  h2: ({ children, ...props }) => {
+    return (
+      <h2 className="text-xl font-bold text-primary" {...props}>
+        {children}
+      </h2>
+    )
   },
-  h3: (props) => {
-    return <h3 className="text-lg font-semibold text-primary" {...props} />
+  h3: ({ children, ...props }) => {
+    return (
+      <h3 className="text-lg font-semibold text-primary" {...props}>
+        {children}
+      </h3>
+    )
   },
   p: (props) => {
     return <p className="my-3" {...props} />
@@ -53,13 +62,15 @@ export const BASE_MARKDOWN_COMPONENTS = {
   hr: () => {
     return <Separator className="my-4" />
   },
-  a: ({ href, ...props }) => {
+  a: ({ href, children, ...props }) => {
     if (href?.startsWith('/')) {
       const locale = getLocale()
       const localizedHref = locale === baseLocale ? href : `/${locale}${href}`
 
       return (
-        <a className="text-info underline" href={localizedHref} {...props} />
+        <a className="text-info underline" href={localizedHref} {...props}>
+          {children}
+        </a>
       )
     }
 
@@ -70,7 +81,9 @@ export const BASE_MARKDOWN_COMPONENTS = {
         rel="noopener noreferrer"
         href={href}
         {...props}
-      />
+      >
+        {children}
+      </a>
     )
   }
 } as const satisfies Components

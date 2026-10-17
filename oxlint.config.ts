@@ -6,14 +6,15 @@ import {
   jsxA11y,
   imports,
   tanstackQuery,
-  vitest
+  vitest,
+  playwright
 } from '@viclafouch/oxc-config'
 
 const TAKUMI_TAILWIND_PROP = 'tw'
 
 export default defineConfig({
   extends: [typescript, react, hooks, jsxA11y, imports, tanstackQuery],
-  jsPlugins: ['eslint-plugin-playwright'],
+  jsPlugins: [{ name: 'petit-meme', specifier: './lint/petit-meme/index.ts' }],
   options: {
     typeAware: true
   },
@@ -31,42 +32,113 @@ export default defineConfig({
   ],
   rules: {
     'react/no-children-prop': 'off',
-    'react/react-compiler': ['error', { reportAllBailouts: false }],
-    'id-length': ['error', { exceptions: ['R', '_', 'm', 'x', 'y', 'T'] }],
-    'typescript/prefer-readonly-parameter-types': 'off',
-    'typescript/strict-boolean-expressions': 'off',
-    'typescript/no-confusing-void-expression': 'off',
-    'typescript/no-unsafe-type-assertion': 'off',
-    'typescript/only-throw-error': 'off',
-    'typescript/no-unsafe-assignment': 'off',
-    'typescript/no-unsafe-call': 'off',
-    'typescript/no-unsafe-member-access': 'off',
-    'typescript/no-unsafe-argument': 'off',
-    'typescript/no-unnecessary-boolean-literal-compare': 'off',
-    'typescript/use-unknown-in-catch-callback-variable': 'off',
-    'typescript/restrict-template-expressions': 'off'
+    'petit-meme/comment-policy': 'error',
+    'petit-meme/utf8-literal': 'error',
+    'petit-meme/jsx-blank-line': 'error',
+    'petit-meme/no-re-export': 'error',
+    'petit-meme/params-type-name': 'error',
+    'petit-meme/optional-last': 'error',
+    'petit-meme/destructure-in-signature': 'error',
+    'petit-meme/boolean-name': 'error',
+    'petit-meme/boolean-function-name': 'error',
+    'petit-meme/functional-update': 'error',
+    'petit-meme/hook-file-name': 'error',
+    'petit-meme/query-naming': 'error',
+    'petit-meme/no-throw-response': 'error',
+    'petit-meme/server-env-scope': 'error',
+    'petit-meme/external-link': 'error',
+    'petit-meme/tailwind-classes': 'error',
+    'petit-meme/route-head': 'error',
+    'petit-meme/as-const-satisfies': 'error',
+    'petit-meme/e2e-names': 'error',
+    'petit-meme/icon-margin': 'error',
+    'petit-meme/child-returns-null': 'error',
+    'react/jsx-handler-names': [
+      'error',
+      { eventHandlerPrefix: 'handle', eventHandlerPropPrefix: 'on' }
+    ],
+    'no-magic-numbers': [
+      'error',
+      {
+        ignore: [-1, 0, 1, 2],
+        ignoreArrayIndexes: true,
+        ignoreDefaultValues: true,
+        ignoreClassFieldInitialValues: true,
+        ignoreEnums: true,
+        ignoreNumericLiteralTypes: true,
+        ignoreReadonlyClassProperties: true,
+        ignoreTypeIndexes: true,
+        enforceConst: true,
+        detectObjects: false
+      }
+    ],
+    'react/forbid-elements': [
+      'error',
+      {
+        forbid: [
+          { element: 'input', message: 'Use the shadcn `Input`.' },
+          { element: 'textarea', message: 'Use the shadcn `Textarea`.' },
+          { element: 'select', message: 'Use the shadcn `Select`.' }
+        ]
+      }
+    ],
+    'typescript/no-inferrable-types': [
+      'error',
+      { ignoreParameters: false, ignoreProperties: false }
+    ],
+    'typescript/strict-boolean-expressions': [
+      'error',
+      {
+        allowAny: false,
+        allowNullableBoolean: true,
+        allowNullableEnum: false,
+        allowNullableNumber: false,
+        allowNullableObject: true,
+        allowNullableString: true,
+        allowNumber: false,
+        allowString: false
+      }
+    ],
+    'typescript/only-throw-error': [
+      'error',
+      {
+        allow: [
+          {
+            from: 'package',
+            package: '@tanstack/router-core',
+            name: ['Redirect', 'NotFoundError']
+          }
+        ],
+        allowRethrowing: true,
+        allowThrowingAny: false,
+        allowThrowingUnknown: false
+      }
+    ]
   },
   overrides: [
+    ...vitest.overrides,
     {
-      files: ['**/*.test.ts'],
-      plugins: vitest.plugins,
-      rules: vitest.rules
+      files: ['lint/**/*.test.ts'],
+      plugins: ['vitest'],
+      rules: {
+        'vitest/require-hook': ['error', { allowedFunctionCalls: ['testRule'] }]
+      }
     },
     {
-      files: ['src/emails/**', 'src/server.ts', 'playwright.config.ts'],
+      files: ['src/emails/**', 'src/server.ts', 'lint/petit-meme/index.ts'],
       rules: {
         'import/no-default-export': 'off'
       }
     },
     {
       files: ['e2e/**/*.ts'],
+      jsPlugins: playwright.jsPlugins,
       rules: {
-        'playwright/no-focused-test': 'error',
-        'playwright/no-wait-for-timeout': 'error',
-        'playwright/no-force-option': 'error',
-        'playwright/no-element-handle': 'error',
-        'playwright/no-page-pause': 'error',
-        'playwright/prefer-web-first-assertions': 'error'
+        ...playwright.rules,
+        'playwright/expect-expect': [
+          'error',
+          { assertFunctionNames: [], assertFunctionPatterns: ['^expect[A-Z]'] }
+        ]
       }
     },
     {

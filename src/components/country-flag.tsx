@@ -10,15 +10,12 @@ const COUNTRY_FLAG_SIZE_CLASSES = {
   md: 'h-4.5 w-6'
 } as const satisfies Record<CountryFlagSize, string>
 
-type CountryFlagParams = {
+type CountryFlagProps = {
   countryCode: string
   size?: CountryFlagSize
 }
 
-export const CountryFlag = ({
-  countryCode,
-  size = 'sm'
-}: CountryFlagParams) => {
+export const CountryFlag = ({ countryCode, size = 'sm' }: CountryFlagProps) => {
   const countryName = getCountryName(countryCode, getLocale())
   const label = countryName ?? `Pays inconnu (${countryCode})`
   const boxClassName = cn(
@@ -28,7 +25,7 @@ export const CountryFlag = ({
 
   return (
     <span className="inline-flex items-center" title={label}>
-      {countryName ? (
+      {countryName !== null ? (
         <img
           src={getCountryFlagUrl(countryCode)}
           alt=""

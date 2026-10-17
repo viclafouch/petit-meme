@@ -1,12 +1,12 @@
 import { createServerOnlyFn } from '@tanstack/react-start'
 import { prismaClient } from '~/db'
+import { AccountDeletedEmail } from '~/emails/account-deleted-email'
 import { emailSubjects } from '~/emails/subjects'
 import { authLogger } from '~/lib/logger'
 import { sendEmailAsync } from '~/lib/resend'
 import { captureWithFeature } from '~/lib/sentry'
-import { stripeClient } from '~/lib/stripe'
+import { getStripeClient } from '~/lib/stripe'
 import type { Locale } from '~/paraglide/runtime'
-import AccountDeletedEmail from '../emails/account-deleted-email'
 
 type CleanupUserDataParams = {
   userId: string
@@ -33,7 +33,7 @@ export const cleanupUserData = createServerOnlyFn(
 
     if (dbUser?.stripeCustomerId) {
       try {
-        await stripeClient.customers.del(dbUser.stripeCustomerId)
+        await getStripeClient().customers.del(dbUser.stripeCustomerId)
       } catch (error) {
         captureWithFeature(error, 'delete-account')
         authLogger.warn(

@@ -1,8 +1,10 @@
+import { expect } from '@playwright/test'
+import { HTTP_STATUS } from '~/constants/http'
+import { m } from '~/paraglide/messages.js'
 import { E2E_NAMED_MEMES } from './content'
 import { resolveStorageStatePath } from './env'
-import { expect, test } from './fixtures'
+import { test } from './fixtures'
 import { getMemeLink, getMemePlayButtons } from './library'
-import { m } from './messages'
 
 const BOOKMARKED_MEMES = [E2E_NAMED_MEMES.english, E2E_NAMED_MEMES.universal]
 
@@ -14,7 +16,7 @@ test.describe('a signed in User', () => {
   }) => {
     const response = await page.goto('/favorites')
 
-    expect(response?.status()).toBe(200)
+    expect(response?.status()).toBe(HTTP_STATUS.OK)
     await expect(
       page.getByRole('heading', { name: m.settings_favorites_heading() })
     ).toBeVisible()
@@ -30,8 +32,10 @@ test.describe('a signed in User', () => {
   })
 })
 
-test('an anonymous Visitor is sent back to the library', async ({ page }) => {
-  await page.goto('/favorites')
+test.describe('an anonymous Visitor', () => {
+  test('is sent back to the library', async ({ page }) => {
+    await page.goto('/favorites')
 
-  await expect(page).toHaveURL('/memes/category/trending')
+    await expect(page).toHaveURL('/memes/category/trending')
+  })
 })

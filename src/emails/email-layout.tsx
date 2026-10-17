@@ -14,6 +14,7 @@ import {
   Tailwind,
   Text
 } from 'react-email'
+import { getCurrentYear } from '~/helpers/date'
 import type { Locale } from '~/paraglide/runtime'
 import { CONTACT_EMAIL, LOGO_URL, SITE_URL, TAILWIND_CONFIG } from './constants'
 
@@ -36,10 +37,11 @@ type EmailLayoutProps = {
   children: React.ReactNode
 }
 
-export { BUTTON_CLASS } from './constants'
-export { CONTACT_EMAIL, LOGO_URL, SITE_URL }
+type BoldTextProps = {
+  text: string
+}
 
-export const BoldText = ({ text }: { text: string }) => {
+export const BoldText = ({ text }: BoldTextProps) => {
   const parts = text.split('**')
 
   return (
@@ -135,7 +137,7 @@ export const EmailLayout = ({
               </Text>
               <Hr className="mx-auto my-4 w-10 border-brand-border" />
               <Text className="m-0 text-xs leading-5 text-brand-muted">
-                © {new Date().getFullYear()} Petit Meme. {tr.allRightsReserved}
+                © {getCurrentYear()} Petit Meme. {tr.allRightsReserved}
               </Text>
             </Section>
           </Container>

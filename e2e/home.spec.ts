@@ -1,52 +1,60 @@
+import { expect } from '@playwright/test'
+import { HTTP_STATUS } from '~/constants/http'
 import { TRENDING_MEMES_COUNT } from '~/constants/meme'
+import { m } from '~/paraglide/messages.js'
 import { E2E_RECENT_MEMES } from './content'
-import { expect, test } from './fixtures'
-import { getMemePlayButtons } from './library'
-import { m } from './messages'
+import { test } from './fixtures'
+import { getFirstMemePlayButton, getMemePlayButtons } from './library'
 
-test('the home page opens on Memes', async ({ page }) => {
-  const response = await page.goto('/')
+test.describe('the home page', () => {
+  test('opens on Memes', async ({ page }) => {
+    const response = await page.goto('/')
 
-  expect(response?.status()).toBe(200)
-  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
-  await expect(page.getByText(m.home_best_subtitle())).toBeVisible()
-  await expect(getMemePlayButtons(page)).toHaveCount(TRENDING_MEMES_COUNT)
-})
-
-test('the hero leads to the library and to the plans', async ({ page }) => {
-  await page.goto('/')
-
-  await page.getByRole('link', { name: m.home_hero_cta_discover() }).click()
-
-  await expect(page).toHaveURL('/memes/category/trending')
-
-  await page.goBack()
-  await page.getByRole('link', { name: m.home_hero_cta_premium() }).click()
-
-  await expect(page).toHaveURL('/pricing')
-})
-
-test('the Memes section hands over to the whole library', async ({ page }) => {
-  await page.goto('/')
-
-  await page.getByRole('link', { name: m.home_best_browse_all() }).click()
-
-  await expect(page).toHaveURL('/memes/category/trending')
-  await expect(getMemePlayButtons(page).first()).toBeVisible()
-})
-
-test('the announcement counts what was published lately and leads to it', async ({
-  page
-}) => {
-  await page.goto('/')
-
-  const announcement = page.getByRole('link', {
-    name: m.home_hero_announcement({ count: String(E2E_RECENT_MEMES.length) }),
-    exact: true
+    expect(response?.status()).toBe(HTTP_STATUS.OK)
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+    await expect(page.getByText(m.home_best_subtitle())).toBeVisible()
+    await expect(getMemePlayButtons(page)).toHaveCount(TRENDING_MEMES_COUNT)
   })
 
-  await expect(announcement).toBeVisible()
-  await announcement.click()
+  test('the hero leads to the library and to the plans', async ({ page }) => {
+    await page.goto('/')
 
-  await expect(page).toHaveURL('/memes/category/news')
+    await page.getByRole('link', { name: m.home_hero_cta_discover() }).click()
+
+    await expect(page).toHaveURL('/memes/category/trending')
+
+    await page.goBack()
+    await page.getByRole('link', { name: m.home_hero_cta_premium() }).click()
+
+    await expect(page).toHaveURL('/pricing')
+  })
+
+  test('the Memes section hands over to the whole library', async ({
+    page
+  }) => {
+    await page.goto('/')
+
+    await page.getByRole('link', { name: m.home_best_browse_all() }).click()
+
+    await expect(page).toHaveURL('/memes/category/trending')
+    await expect(getFirstMemePlayButton(page)).toBeVisible()
+  })
+
+  test('the announcement counts what was published lately and leads to it', async ({
+    page
+  }) => {
+    await page.goto('/')
+
+    const announcement = page.getByRole('link', {
+      name: m.home_hero_announcement({
+        count: String(E2E_RECENT_MEMES.length)
+      }),
+      exact: true
+    })
+
+    await expect(announcement).toBeVisible()
+    await announcement.click()
+
+    await expect(page).toHaveURL('/memes/category/news')
+  })
 })

@@ -36,7 +36,7 @@ export type AiAssistFieldSelection = {
   keywords: boolean
 }
 
-type AiAssistDialogParams = {
+type AiAssistDialogProps = {
   memeId: Meme['id']
   contentLocale: MemeContentLocale
   currentValues: AiAssistResult
@@ -62,7 +62,7 @@ export const AiAssistDialog = ({
   isOpen,
   onOpenChange,
   onApply
-}: AiAssistDialogParams) => {
+}: AiAssistDialogProps) => {
   const [customPrompt, setCustomPrompt] = React.useState('')
   const [editedTitle, setEditedTitle] = React.useState('')
   const [editedDescription, setEditedDescription] = React.useState('')
@@ -179,7 +179,7 @@ export const AiAssistDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-xl">
+      <DialogContent className="max-h-dialog overflow-y-auto sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="size-5" aria-hidden />

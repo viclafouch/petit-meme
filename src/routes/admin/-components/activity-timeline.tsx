@@ -1,8 +1,8 @@
 import type { OnChangeFn, PaginationState } from '@tanstack/react-table'
 import { LoadingSpinner } from '~/components/ui/spinner'
 import { getErrorMessage } from '~/helpers/error'
-import type { ActivityTimelineScope } from '~/routes/admin/-components/activity-columns'
 import {
+  type ActivityTimelineScope,
   ACTIVITY_COLUMNS,
   ACTIVITY_TIMELINE_SCOPES
 } from '~/routes/admin/-components/activity-columns'
@@ -13,7 +13,7 @@ import type { AdminActivityRow } from '~/routes/admin/-server/activity'
 
 const EMPTY_ROWS: AdminActivityRow[] = []
 
-type ActivityTimelineParams = {
+type ActivityTimelineProps = {
   rows: AdminActivityRow[] | undefined
   total: number
   page: number
@@ -35,7 +35,7 @@ export const ActivityTimeline = ({
   isPending,
   isError,
   error
-}: ActivityTimelineParams) => {
+}: ActivityTimelineProps) => {
   const handlePaginationChange: OnChangeFn<PaginationState> = (updater) => {
     const currentPagination = { pageIndex: page - 1, pageSize: PAGE_SIZE }
     const nextPagination =
@@ -66,13 +66,9 @@ export const ActivityTimeline = ({
 
   if (isPending) {
     return (
-      <div
-        role="status"
-        aria-label={`Chargement — ${caption}`}
-        className="py-10"
-      >
+      <output aria-label={`Chargement — ${caption}`} className="block py-10">
         <LoadingSpinner />
-      </div>
+      </output>
     )
   }
 

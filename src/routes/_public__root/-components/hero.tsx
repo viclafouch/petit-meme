@@ -1,6 +1,5 @@
 import { ErrorBoundary } from 'react-error-boundary'
-import type { Variants } from 'motion/react'
-import { motion, useReducedMotion } from 'motion/react'
+import { type Variants, motion, useReducedMotion } from 'motion/react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { buttonVariants } from '~/components/ui/button'
@@ -18,6 +17,8 @@ import {
   PageHeader,
   PageHeading
 } from './page-headers'
+
+const DEFAULT_ENTRANCE_DURATION = 0.6
 
 const h1Transition = {
   delay: 0,
@@ -38,7 +39,7 @@ const variants = {
       filter: 'blur(0px)',
       transition: {
         delay: custom.delay ?? 0,
-        duration: custom.duration ?? 0.6
+        duration: custom.duration ?? DEFAULT_ENTRANCE_DURATION
       }
     }
   }

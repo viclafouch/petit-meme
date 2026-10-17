@@ -1,7 +1,7 @@
 import { Badge } from '~/components/ui/badge'
 import { buildVideoImageUrl, buildVideoPreviewUrl } from '~/lib/bunny'
 
-type MemeVideoThumbnailParams = {
+type MemeVideoThumbnailProps = {
   bunnyId: string
   alt: string
   duration: number
@@ -13,7 +13,7 @@ export const MemeVideoThumbnail = ({
   alt,
   duration,
   children
-}: MemeVideoThumbnailParams) => {
+}: MemeVideoThumbnailProps) => {
   return (
     <div className="relative size-full isolate">
       <img

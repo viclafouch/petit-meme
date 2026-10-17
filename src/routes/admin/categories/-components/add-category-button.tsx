@@ -13,9 +13,11 @@ import {
 import { getCategoriesListQueryOpts } from '~/lib/queries'
 import { CategoryForm } from '~/routes/admin/categories/-components/category-form'
 
+type AddCategoryButtonProps = Partial<React.ComponentProps<typeof Button>>
+
 export const AddCategoryButton = ({
   ...restButtonProps
-}: Partial<React.ComponentProps<typeof Button>>) => {
+}: AddCategoryButtonProps) => {
   const [isOpen, setIsOpen] = React.useState(false)
   const queryClient = useQueryClient()
   const router = useRouter()

@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { createServerFn } from '@tanstack/react-start'
 import { setResponseStatus } from '@tanstack/react-start/server'
+import { HTTP_STATUS } from '~/constants/http'
 import { TWEET_LINK_SCHEMA } from '~/constants/url'
 import { adminLogger } from '~/lib/logger'
 import { getTweetByUrl } from '~/lib/react-tweet'
@@ -19,8 +20,8 @@ export const getTweetFromUrl = createServerFn({ method: 'GET' })
       adminLogger.error({ error, url }, 'Failed to get tweet from URL')
       captureWithFeature(error, 'admin-downloader')
 
-      setResponseStatus(502)
-      throw new Error('Impossible de récupérer le tweet')
+      setResponseStatus(HTTP_STATUS.BAD_GATEWAY)
+      throw new Error('Impossible de récupérer le tweet', { cause: error })
     }
   })
 
@@ -44,8 +45,10 @@ const fetchAsBase64 = async (url: string) => {
   } catch (error) {
     adminLogger.error({ error, url }, 'Failed to fetch tweet media')
     captureWithFeature(error, 'admin-downloader')
-    setResponseStatus(502)
-    throw new Error('Impossible de télécharger le média depuis Twitter')
+    setResponseStatus(HTTP_STATUS.BAD_GATEWAY)
+    throw new Error('Impossible de télécharger le média depuis Twitter', {
+      cause: error
+    })
   }
 }
 

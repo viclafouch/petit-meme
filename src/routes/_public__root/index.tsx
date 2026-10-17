@@ -8,35 +8,15 @@ import {
 import { buildHomeJsonLd, buildOgImageUrl, seo } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
-import { Faq, getHomeFaqItems } from '~/routes/_public__root/-components/faq'
-import { Responsive } from '~/routes/_public__root/-components/responsive'
-import { BestMemes } from './-components/best-memes'
-import { Hero } from './-components/hero'
-import { PageContainer } from './-components/page-headers'
+import { getHomeFaqItems } from './-components/faq-items'
+import { HomePage } from './-components/home-page'
 
-const RouteComponent = () => {
-  return (
-    <PageContainer>
-      <section className="flex w-full flex-col py-30 pb-10 sm:pt-42">
-        <Hero />
-        <div className="container lg:mt-36 mt-24">
-          <BestMemes />
-          <div className="mt-16">
-            <Responsive />
-          </div>
-          <div className="mt-16 lg:mt-40">
-            <Faq />
-          </div>
-        </div>
-      </section>
-    </PageContainer>
-  )
-}
+const HOME_STALE_MINUTES = 10
 
 export const Route = createFileRoute('/_public__root/')({
-  component: RouteComponent,
+  component: HomePage,
   pendingMs: 3000,
-  staleTime: 10 * MINUTE,
+  staleTime: HOME_STALE_MINUTES * MINUTE,
   head: () => {
     const locale = getLocale()
     const description = m.seo_home_description()

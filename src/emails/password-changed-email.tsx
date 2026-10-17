@@ -1,6 +1,7 @@
 import { Section, Text } from 'react-email'
 import type { Locale } from '~/paraglide/runtime'
-import { BoldText, CONTACT_EMAIL, EmailLayout } from './email-layout'
+import { CONTACT_EMAIL } from './constants'
+import { BoldText, EmailLayout } from './email-layout'
 
 const translations = {
   fr: {
@@ -72,15 +73,15 @@ PasswordChangedEmail.PreviewProps = {
   locale: 'fr'
 } satisfies PasswordChangedEmailProps
 
-export const PasswordChangedEmailEN = (
-  props: Omit<PasswordChangedEmailProps, 'locale'>
-) => {
+type PasswordChangedEmailENProps = Omit<PasswordChangedEmailProps, 'locale'>
+
+export const PasswordChangedEmailEN = (props: PasswordChangedEmailENProps) => {
   return <PasswordChangedEmail {...props} locale="en" />
 }
 
 PasswordChangedEmailEN.PreviewProps = {
   username: 'Alan',
   changedAt: 'February 21, 2026 at 2:30 PM'
-} satisfies Omit<PasswordChangedEmailProps, 'locale'>
+} satisfies PasswordChangedEmailENProps
 
 export default PasswordChangedEmail

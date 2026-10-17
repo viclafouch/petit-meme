@@ -1,38 +1,39 @@
-import { expect, test } from './fixtures'
+import { expect } from '@playwright/test'
+import { m } from '~/paraglide/messages.js'
+import { test } from './fixtures'
 import { getMemeList, openMemePlayer } from './library'
-import { m } from './messages'
 
 const LIBRARY_PATHNAME = '/memes/category/trending'
 
-test('the player puts the library out of reach and gives it back', async ({
-  page
-}) => {
-  await page.goto(LIBRARY_PATHNAME)
+test.describe('the player', () => {
+  test('puts the library out of reach and gives it back', async ({ page }) => {
+    await page.goto(LIBRARY_PATHNAME)
 
-  const memeList = getMemeList(page)
+    const memeList = getMemeList(page)
 
-  await expect(memeList).not.toHaveAttribute('inert')
+    await expect(memeList).not.toHaveAttribute('inert')
 
-  const playerDialog = await openMemePlayer(page)
+    const playerDialog = await openMemePlayer(page)
 
-  await expect(memeList).toHaveAttribute('inert')
+    await expect(memeList).toHaveAttribute('inert')
 
-  await playerDialog.getByRole('button', { name: m.common_close() }).click()
+    await playerDialog.getByRole('button', { name: m.common_close() }).click()
 
-  await expect(playerDialog).toBeHidden()
-  await expect(memeList).not.toHaveAttribute('inert')
-})
+    await expect(playerDialog).toBeHidden()
+    await expect(memeList).not.toHaveAttribute('inert')
+  })
 
-test('escape closes the player and gives the library back', async ({
-  page
-}) => {
-  await page.goto(LIBRARY_PATHNAME)
+  test('escape closes the player and gives the library back', async ({
+    page
+  }) => {
+    await page.goto(LIBRARY_PATHNAME)
 
-  const memeList = getMemeList(page)
-  const playerDialog = await openMemePlayer(page)
+    const memeList = getMemeList(page)
+    const playerDialog = await openMemePlayer(page)
 
-  await page.keyboard.press('Escape')
+    await page.keyboard.press('Escape')
 
-  await expect(playerDialog).toBeHidden()
-  await expect(memeList).not.toHaveAttribute('inert')
+    await expect(playerDialog).toBeHidden()
+    await expect(memeList).not.toHaveAttribute('inert')
+  })
 })

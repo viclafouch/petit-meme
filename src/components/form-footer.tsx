@@ -1,11 +1,11 @@
 import { Button } from '~/components/ui/button'
 import { LoadingButton } from '~/components/ui/loading-button'
 
-type FormFooterParams = {
+type FormFooterProps = {
   canSubmit: boolean
   isSubmitting: boolean
-  onCancel?: () => void
   submitLabel: string
+  onCancel?: () => void
   isLoadingButton?: boolean
   formId?: string
 }
@@ -17,7 +17,7 @@ export const FormFooter = ({
   submitLabel,
   isLoadingButton = false,
   formId
-}: FormFooterParams) => {
+}: FormFooterProps) => {
   return (
     <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
       {onCancel ? (

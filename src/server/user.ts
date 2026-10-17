@@ -10,6 +10,7 @@ import {
   type AvatarSelection
 } from '~/constants/avatar'
 import { StudioError } from '~/constants/error'
+import { HTTP_STATUS } from '~/constants/http'
 import { MEME_TRANSLATION_SELECT, MEME_VIDEO_INCLUDE } from '~/constants/meme'
 import {
   FREE_PLAN_MAX_FAVORITES,
@@ -98,7 +99,7 @@ export const checkGeneration = createServerFn({ method: 'POST' })
         { userId: context.user.id, generationCount },
         'Generation limit reached'
       )
-      setResponseStatus(403)
+      setResponseStatus(HTTP_STATUS.FORBIDDEN)
       throw new StudioError('unauthorized', { code: 'UNAUTHORIZED' })
     }
 
@@ -137,7 +138,7 @@ const toggleBookmark = createServerOnlyFn(
 
           if (!activeSubscription) {
             authLogger.warn({ userId }, 'Bookmark limit reached')
-            setResponseStatus(403)
+            setResponseStatus(HTTP_STATUS.FORBIDDEN)
             throw new StudioError('premium_required', {
               code: 'PREMIUM_REQUIRED'
             })
@@ -217,7 +218,7 @@ const resolveNextAvatar = ({
   const nextImage = resolveAvatar({ selection, providerAvatar })
 
   if (nextImage === null) {
-    setResponseStatus(400)
+    setResponseStatus(HTTP_STATUS.BAD_REQUEST)
 
     throw new Error(PROVIDER_AVATAR_UNAVAILABLE_MESSAGE)
   }
@@ -255,9 +256,9 @@ export const updateUserAvatar = createServerFn({ method: 'POST' })
       where: { id: context.user.id },
       data: {
         image: nextImage,
-        ...(recoveredProviderAvatar
-          ? { providerAvatar: recoveredProviderAvatar }
-          : {})
+        ...(!recoveredProviderAvatar
+          ? {}
+          : { providerAvatar: recoveredProviderAvatar })
       }
     })
 

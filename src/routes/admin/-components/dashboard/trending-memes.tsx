@@ -58,11 +58,11 @@ function matchIsPodiumRank(rank: number): rank is keyof typeof PODIUM_CONFIGS {
   return rank in PODIUM_CONFIGS
 }
 
-type TrendingMemesParams = {
+type TrendingMemesProps = {
   entries: TrendingMeme[]
 }
 
-export const TrendingMemes = ({ entries }: TrendingMemesParams) => {
+export const TrendingMemes = ({ entries }: TrendingMemesProps) => {
   if (entries.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">

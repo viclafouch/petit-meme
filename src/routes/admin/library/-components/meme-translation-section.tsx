@@ -18,7 +18,7 @@ import { MEME_DESCRIPTION_MAX_LENGTH } from '~/routes/admin/-server/memes'
 
 const MIN_TITLE_LENGTH = 3
 
-type MemeTranslationSectionParams = {
+type MemeTranslationSectionProps = {
   locale: Locale
   titleField: FormFieldApi<string>
   descriptionField: FormFieldApi<string>
@@ -38,7 +38,7 @@ export const MemeTranslationSection = ({
   isTranslateVisible,
   isTranslating,
   onTranslate
-}: MemeTranslationSectionParams) => {
+}: MemeTranslationSectionProps) => {
   const titleError = getFieldErrorMessage({ field: titleField })
   const descriptionError = getFieldErrorMessage({ field: descriptionField })
   const meta = LOCALE_META[locale]
@@ -65,7 +65,7 @@ export const MemeTranslationSection = ({
             value={titleField.state.value}
             onBlur={titleField.handleBlur}
             onChange={(event) => {
-              return titleField.handleChange(event.target.value)
+              titleField.handleChange(event.target.value)
             }}
           />
         </FormControl>
@@ -79,7 +79,7 @@ export const MemeTranslationSection = ({
             onBlur={descriptionField.handleBlur}
             value={descriptionField.state.value}
             onChange={(event) => {
-              return descriptionField.handleChange(event.target.value)
+              descriptionField.handleChange(event.target.value)
             }}
           />
         </FormControl>

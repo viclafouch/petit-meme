@@ -1,6 +1,9 @@
 import { useNavigate } from '@tanstack/react-router'
 import { ToggleGroup, ToggleGroupItem } from '~/components/ui/toggle-group'
-import type { DashboardPeriod } from '~/routes/admin/-server/dashboard'
+import {
+  type DashboardPeriod,
+  PERIOD_SCHEMA
+} from '~/routes/admin/-server/dashboard'
 
 const PERIOD_OPTIONS = [
   { value: '7d', label: '7j' },
@@ -9,21 +12,23 @@ const PERIOD_OPTIONS = [
   { value: 'all', label: 'Tout' }
 ] as const satisfies readonly { value: DashboardPeriod; label: string }[]
 
-type PeriodSelectorParams = {
+type PeriodSelectorProps = {
   period: DashboardPeriod
 }
 
-export const PeriodSelector = ({ period }: PeriodSelectorParams) => {
+export const PeriodSelector = ({ period }: PeriodSelectorProps) => {
   const navigate = useNavigate()
 
   const handleValueChange = (value: string) => {
-    if (!value) {
+    const result = PERIOD_SCHEMA.safeParse(value)
+
+    if (!result.success) {
       return
     }
 
     void navigate({
       to: '/admin',
-      search: { period: value as DashboardPeriod }
+      search: { period: result.data }
     })
   }
 

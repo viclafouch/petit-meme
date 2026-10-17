@@ -1,11 +1,19 @@
 import React from 'react'
+import { subscribeToNothing } from '~/helpers/external-store'
 import { authClient } from '~/lib/auth-client'
 
-export const useLastLoginMethod = () => {
-  // oxlint-disable-next-line react/hook-use-state -- no setter needed, useState used as one-time initializer
-  const [lastMethod] = React.useState(() => {
-    return authClient.getLastUsedLoginMethod() ?? null
-  })
+const getLastLoginMethodSnapshot = () => {
+  return authClient.getLastUsedLoginMethod() ?? null
+}
 
-  return lastMethod
+const getServerLastLoginMethodSnapshot = () => {
+  return null
+}
+
+export const useLastLoginMethod = () => {
+  return React.useSyncExternalStore(
+    subscribeToNothing,
+    getLastLoginMethodSnapshot,
+    getServerLastLoginMethodSnapshot
+  )
 }

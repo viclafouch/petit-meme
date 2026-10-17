@@ -1,8 +1,8 @@
 import { prismaClient } from '~/db'
-import { E2E_DATABASE_URL } from './env'
+import { matchIsE2eDatabaseInUse } from './env'
 
 export const clearDatabase = async () => {
-  if (process.env.DATABASE_URL !== E2E_DATABASE_URL) {
+  if (!matchIsE2eDatabaseInUse()) {
     throw new Error(
       'DATABASE_URL does not come from .env.e2e: refusing to empty a database the suite does not own.'
     )

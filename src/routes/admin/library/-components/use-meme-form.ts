@@ -13,7 +13,7 @@ import {
 import { useKeywordsField } from '~/hooks/use-keywords-field'
 import { getCategoriesListQueryOpts } from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
-import { baseLocale, type Locale } from '~/paraglide/runtime'
+import { baseLocale, isLocale, type Locale } from '~/paraglide/runtime'
 import { editMeme, MEME_FORM_SCHEMA } from '~/routes/admin/-server/memes'
 import { translateMemeContent } from '~/server/ai'
 
@@ -94,13 +94,13 @@ export function useMemeForm({ meme, onSuccess }: UseMemeFormParams) {
 
   const frKeywordsField = useKeywordsField({
     setKeywordsValue: (updater) => {
-      return form.setFieldValue('translations.fr.keywords', updater)
+      form.setFieldValue('translations.fr.keywords', updater)
     }
   })
 
   const enKeywordsField = useKeywordsField({
     setKeywordsValue: (updater) => {
-      return form.setFieldValue('translations.en.keywords', updater)
+      form.setFieldValue('translations.en.keywords', updater)
     }
   })
 
@@ -137,18 +137,18 @@ export function useMemeForm({ meme, onSuccess }: UseMemeFormParams) {
       })
     },
     onSuccess: (result) => {
-      for (const locale of Object.keys(result) as Locale[]) {
-        const translation = result[locale]
-
-        form.setFieldValue(`translations.${locale}.title`, translation.title)
-        form.setFieldValue(
-          `translations.${locale}.description`,
-          translation.description
-        )
-        form.setFieldValue(
-          `translations.${locale}.keywords`,
-          translation.keywords
-        )
+      for (const [locale, translation] of Object.entries(result)) {
+        if (isLocale(locale)) {
+          form.setFieldValue(`translations.${locale}.title`, translation.title)
+          form.setFieldValue(
+            `translations.${locale}.description`,
+            translation.description
+          )
+          form.setFieldValue(
+            `translations.${locale}.keywords`,
+            translation.keywords
+          )
+        }
       }
 
       toast.success('Traduction terminée !')

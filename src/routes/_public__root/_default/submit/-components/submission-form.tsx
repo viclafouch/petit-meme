@@ -22,15 +22,17 @@ import {
   SelectTrigger,
   SelectValue
 } from '~/components/ui/select'
-import { getStudioErrorCode } from '~/constants/error'
-import type { StudioErrorCode } from '~/constants/error'
+import { getStudioErrorCode, type StudioErrorCode } from '~/constants/error'
 import {
   CREATE_MEME_SUBMISSION_SCHEMA,
   MAX_PENDING_SUBMISSIONS
 } from '~/constants/meme-submission'
 import { MemeContentLocale } from '~/db/generated/prisma/enums'
 import { getErrorMessage, matchIsRateLimitError } from '~/helpers/error'
-import { getContentLocaleOptions } from '~/helpers/i18n-content'
+import {
+  getContentLocaleOptions,
+  matchIsMemeContentLocale
+} from '~/helpers/i18n-content'
 import { useErrorFocus } from '~/hooks/use-error-focus'
 import { getUserSubmissionsQueryOpts } from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
@@ -38,7 +40,7 @@ import { getFieldErrorMessage } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
 import { createMemeSubmission } from '~/server/meme-submission'
 
-const SUBMISSION_FIELD_ERRORS: Record<string, () => string> = {
+const SUBMISSION_FIELD_ERRORS = {
   titleTooShort: () => {
     return m.submit_error_title_too_short()
   },
@@ -51,23 +53,38 @@ const SUBMISSION_FIELD_ERRORS: Record<string, () => string> = {
   acceptTermsRequired: () => {
     return m.validation_accept_terms()
   }
+} satisfies Record<string, () => string>
+
+const matchIsSubmissionFieldError = (
+  errorMessage: string
+): errorMessage is keyof typeof SUBMISSION_FIELD_ERRORS => {
+  return Object.hasOwn(SUBMISSION_FIELD_ERRORS, errorMessage)
 }
 
 const getDisplayError = (errorMessage: string) => {
-  const mapper = SUBMISSION_FIELD_ERRORS[errorMessage]
+  if (matchIsSubmissionFieldError(errorMessage)) {
+    return SUBMISSION_FIELD_ERRORS[errorMessage]()
+  }
 
-  return mapper ? mapper() : errorMessage
+  return errorMessage
+}
+
+type SubmissionFormValues = {
+  title: string
+  url: string
+  contentLocale: MemeContentLocale
+  acceptTerms: boolean
+}
+
+const SUBMISSION_FORM_DEFAULT_VALUES: SubmissionFormValues = {
+  title: '',
+  url: '',
+  contentLocale: MemeContentLocale.FR,
+  acceptTerms: false
 }
 
 const submissionFormOpts = formOptions({
-  defaultValues: {
-    title: '',
-    url: '',
-    // oxlint-disable-next-line typescript/no-unnecessary-type-assertion -- widen literal to union so TanStack Form infers MemeContentLocale, not "FR"
-    contentLocale: MemeContentLocale.FR as MemeContentLocale,
-    // oxlint-disable-next-line typescript/no-unnecessary-type-assertion -- widen literal to boolean so TanStack Form infers boolean, not false
-    acceptTerms: false as boolean
-  },
+  defaultValues: SUBMISSION_FORM_DEFAULT_VALUES,
   validators: {
     onSubmit: CREATE_MEME_SUBMISSION_SCHEMA
   }
@@ -92,7 +109,8 @@ const SUBMISSION_ERROR_MESSAGES: Partial<
 
 const getSubmissionErrorMessage = (error: Error) => {
   const code = getStudioErrorCode(error)
-  const mapper = code ? SUBMISSION_ERROR_MESSAGES[code] : undefined
+  const mapper =
+    code === undefined ? undefined : SUBMISSION_ERROR_MESSAGES[code]
 
   if (mapper) {
     return mapper()
@@ -105,11 +123,11 @@ const getSubmissionErrorMessage = (error: Error) => {
   return getErrorMessage(error)
 }
 
-type SubmissionFormParams = {
+type SubmissionFormProps = {
   pendingCount: number
 }
 
-export const SubmissionForm = ({ pendingCount }: SubmissionFormParams) => {
+export const SubmissionForm = ({ pendingCount }: SubmissionFormProps) => {
   const queryClient = useQueryClient()
   const remaining = MAX_PENDING_SUBMISSIONS - pendingCount
 
@@ -170,7 +188,7 @@ export const SubmissionForm = ({ pendingCount }: SubmissionFormParams) => {
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(event) => {
-                    return field.handleChange(event.target.value)
+                    field.handleChange(event.target.value)
                   }}
                 />
               </FormControl>
@@ -195,10 +213,10 @@ export const SubmissionForm = ({ pendingCount }: SubmissionFormParams) => {
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(event) => {
-                  return field.handleChange(event.target.value)
+                  field.handleChange(event.target.value)
                 }}
                 onClipboardPaste={(text) => {
-                  return field.handleChange(text)
+                  field.handleChange(text)
                 }}
               />
               <FormMessage />
@@ -217,7 +235,9 @@ export const SubmissionForm = ({ pendingCount }: SubmissionFormParams) => {
               <Select
                 value={field.state.value}
                 onValueChange={(value) => {
-                  return field.handleChange(value as MemeContentLocale)
+                  if (matchIsMemeContentLocale(value)) {
+                    field.handleChange(value)
+                  }
                 }}
               >
                 <FormControl>
@@ -251,9 +271,9 @@ export const SubmissionForm = ({ pendingCount }: SubmissionFormParams) => {
                 <FormControl>
                   <Checkbox
                     id="acceptTermsSubmit"
-                    checked={field.state.value === true}
+                    checked={field.state.value}
                     onCheckedChange={(checked) => {
-                      return field.handleChange(checked === true)
+                      field.handleChange(checked === true)
                     }}
                     onBlur={field.handleBlur}
                   />

@@ -3,16 +3,16 @@ import { EmptyMessage } from '~/routes/admin/-components/empty-message'
 type DetailListRow = {
   id: string
   content: React.ReactNode
-  subtitle?: React.ReactNode
+  subtitle?: string
   trailing: React.ReactNode
 }
 
-type DetailListParams = {
+type DetailListProps = {
   rows: DetailListRow[]
   emptyLabel: string
 }
 
-export const DetailList = ({ rows, emptyLabel }: DetailListParams) => {
+export const DetailList = ({ rows, emptyLabel }: DetailListProps) => {
   if (rows.length === 0) {
     return <EmptyMessage>{emptyLabel}</EmptyMessage>
   }

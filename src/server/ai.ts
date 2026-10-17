@@ -8,6 +8,7 @@ import {
 import { createServerFn } from '@tanstack/react-start'
 import { setResponseStatus } from '@tanstack/react-start/server'
 import { prismaClient } from '~/db'
+import { HTTP_STATUS } from '~/constants/http'
 import { serverEnv } from '~/env/server'
 import { getErrorMessage } from '~/helpers/error'
 import { LOCALE_META } from '~/helpers/i18n-content'
@@ -18,6 +19,8 @@ import { captureWithFeature } from '~/lib/sentry'
 import { type Locale, locales } from '~/paraglide/runtime'
 import { adminRequiredMiddleware } from '~/server/user-auth'
 
+const CUSTOM_PROMPT_MAX_LENGTH = 500
+
 const translationSchema = z.object({
   description: z
     .string()
@@ -27,7 +30,13 @@ const translationSchema = z.object({
   keywords: z.array(z.string()).describe('Mots clefs de la vidéo')
 })
 
-const ai = new GoogleGenAI({ apiKey: serverEnv.GEMINI_API_KEY })
+let geminiClient: GoogleGenAI | null = null
+
+const getGeminiClient = () => {
+  geminiClient ??= new GoogleGenAI({ apiKey: serverEnv.GEMINI_API_KEY })
+
+  return geminiClient
+}
 
 const GEMINI_MODEL = 'gemini-3-flash-preview'
 const GEMINI_TIMEOUT_MS = 100_000
@@ -39,7 +48,7 @@ async function waitForFileActive(fileName: string) {
 
   while (retries < GEMINI_FILE_MAX_RETRIES) {
     // oxlint-disable-next-line no-await-in-loop -- sequential polling required
-    const file = await ai.files.get({ name: fileName })
+    const file = await getGeminiClient().files.get({ name: fileName })
 
     if (file.state === FileState.ACTIVE) {
       return file
@@ -59,19 +68,6 @@ async function waitForFileActive(fileName: string) {
 
   throw new Error(
     `Gemini file not ACTIVE after ${GEMINI_FILE_MAX_RETRIES} retries: ${fileName}`
-  )
-}
-
-function buildLocalizedResponseSchema<T extends z.ZodType>(
-  targetLocales: readonly Locale[],
-  itemSchema: T
-) {
-  return z.object(
-    Object.fromEntries(
-      targetLocales.map((locale) => {
-        return [locale, itemSchema]
-      })
-    ) as Record<Locale, T>
   )
 }
 
@@ -110,9 +106,10 @@ function buildAiAssistPrompt({
       ? 'Découvrez et téléchargez ce mème de'
       : 'Discover and download this meme of'
 
-  const contextBlock = customPrompt.trim()
-    ? `\nContexte fourni par l'admin : "${customPrompt.trim()}"\n`
-    : ''
+  const contextBlock =
+    customPrompt.trim() !== ''
+      ? `\nContexte fourni par l'admin : "${customPrompt.trim()}"\n`
+      : ''
 
   return `Tu es un expert en mèmes internet et en SEO.
 
@@ -129,6 +126,14 @@ Génère en ${label} :
 Identifie le template/la référence si possible.`
 }
 
+async function deleteGeminiFile(fileName: string, failureMessage: string) {
+  try {
+    await getGeminiClient().files.delete({ name: fileName })
+  } catch (error) {
+    adminLogger.error({ error, fileName }, failureMessage)
+  }
+}
+
 async function uploadVideoToGemini(memeId: string) {
   const meme = await prismaClient.meme.findUnique({
     where: { id: memeId },
@@ -137,7 +142,7 @@ async function uploadVideoToGemini(memeId: string) {
 
   if (!meme) {
     adminLogger.warn({ memeId }, 'Meme not found for AI generation')
-    setResponseStatus(404)
+    setResponseStatus(HTTP_STATUS.NOT_FOUND)
     throw new Error('Mème introuvable')
   }
 
@@ -145,20 +150,20 @@ async function uploadVideoToGemini(memeId: string) {
   const videoResponse = await fetch(originalUrl)
 
   if (!videoResponse.ok) {
-    setResponseStatus(502)
+    setResponseStatus(HTTP_STATUS.BAD_GATEWAY)
     throw new Error(
       `Impossible de récupérer la vidéo depuis Bunny (${videoResponse.status})`
     )
   }
 
   const videoBlob = await videoResponse.blob()
-  const uploadedFile = await ai.files.upload({
+  const uploadedFile = await getGeminiClient().files.upload({
     file: videoBlob,
     config: { mimeType: 'video/mp4' }
   })
 
   if (!uploadedFile.name || !uploadedFile.mimeType) {
-    setResponseStatus(502)
+    setResponseStatus(HTTP_STATUS.BAD_GATEWAY)
     throw new Error('Upload Gemini Files API échoué : fichier invalide')
   }
 
@@ -166,7 +171,7 @@ async function uploadVideoToGemini(memeId: string) {
     const activeFile = await waitForFileActive(uploadedFile.name)
 
     if (!activeFile.uri) {
-      setResponseStatus(502)
+      setResponseStatus(HTTP_STATUS.BAD_GATEWAY)
       throw new Error('Upload Gemini Files API échoué : URI manquante')
     }
 
@@ -176,14 +181,10 @@ async function uploadVideoToGemini(memeId: string) {
       fileName: uploadedFile.name
     }
   } catch (error) {
-    ai.files
-      .delete({ name: uploadedFile.name })
-      .catch((deleteError: unknown) => {
-        adminLogger.error(
-          { error: deleteError, fileName: uploadedFile.name },
-          'Failed to cleanup Gemini file after upload error'
-        )
-      })
+    void deleteGeminiFile(
+      uploadedFile.name,
+      'Failed to cleanup Gemini file after upload error'
+    )
     throw error
   }
 }
@@ -191,6 +192,21 @@ async function uploadVideoToGemini(memeId: string) {
 const memeTranslateResultSchema = translationSchema.extend({
   title: z.string().describe('Titre traduit (100 caractères max)')
 })
+
+const LOCALIZED_TRANSLATION_SCHEMA = z.object({
+  fr: memeTranslateResultSchema,
+  en: memeTranslateResultSchema
+} satisfies Record<Locale, typeof memeTranslateResultSchema>)
+
+function buildTranslationResponseSchema(targetLocales: readonly Locale[]) {
+  const targetLocalesMask: Partial<Record<Locale, true>> = Object.fromEntries(
+    targetLocales.map((locale) => {
+      return [locale, true]
+    })
+  )
+
+  return LOCALIZED_TRANSLATION_SCHEMA.pick(targetLocalesMask)
+}
 
 type BuildTranslatePromptParams = {
   sourceLabel: string
@@ -249,10 +265,7 @@ export const translateMemeContent = createServerFn({ method: 'POST' })
   })
   .handler(async ({ data }) => {
     const sourceLabel = LOCALE_META[data.sourceLocale].label
-    const responseSchema = buildLocalizedResponseSchema(
-      data.targetLocales,
-      memeTranslateResultSchema
-    )
+    const responseSchema = buildTranslationResponseSchema(data.targetLocales)
     const prompt = buildTranslatePrompt({
       sourceLabel,
       targetLocales: data.targetLocales,
@@ -263,7 +276,7 @@ export const translateMemeContent = createServerFn({ method: 'POST' })
 
     try {
       const result = await withTimeout(
-        ai.models.generateContent({
+        getGeminiClient().models.generateContent({
           model: GEMINI_MODEL,
           contents: prompt,
           config: {
@@ -278,7 +291,7 @@ export const translateMemeContent = createServerFn({ method: 'POST' })
       )
 
       if (!result.text) {
-        setResponseStatus(502)
+        setResponseStatus(HTTP_STATUS.BAD_GATEWAY)
         throw new Error('La traduction AI a échoué : réponse vide')
       }
 
@@ -296,8 +309,10 @@ export const translateMemeContent = createServerFn({ method: 'POST' })
         { error, sourceLocale: data.sourceLocale },
         'AI translation failed'
       )
-      setResponseStatus(502)
-      throw new Error(`La traduction AI a échoué : ${getErrorMessage(error)}`)
+      setResponseStatus(HTTP_STATUS.BAD_GATEWAY)
+      throw new Error(`La traduction AI a échoué : ${getErrorMessage(error)}`, {
+        cause: error
+      })
     }
   })
 
@@ -307,7 +322,7 @@ export const aiAssistMemeContent = createServerFn({ method: 'POST' })
     return z
       .object({
         memeId: z.string(),
-        customPrompt: z.string().max(500),
+        customPrompt: z.string().max(CUSTOM_PROMPT_MAX_LENGTH),
         targetLocale: z.enum(locales)
       })
       .parse(data)
@@ -327,7 +342,7 @@ export const aiAssistMemeContent = createServerFn({ method: 'POST' })
       const userContent = createUserContent([filePart, prompt])
 
       const result = await withTimeout(
-        ai.models.generateContent({
+        getGeminiClient().models.generateContent({
           model: GEMINI_MODEL,
           contents: userContent,
           config: {
@@ -342,7 +357,7 @@ export const aiAssistMemeContent = createServerFn({ method: 'POST' })
       )
 
       if (!result.text) {
-        setResponseStatus(502)
+        setResponseStatus(HTTP_STATUS.BAD_GATEWAY)
         throw new Error('AI Assist a échoué : réponse vide')
       }
 
@@ -360,11 +375,11 @@ export const aiAssistMemeContent = createServerFn({ method: 'POST' })
         { error, memeId: data.memeId },
         'AI assist content generation failed'
       )
-      setResponseStatus(502)
-      throw new Error(`AI Assist a échoué : ${getErrorMessage(error)}`)
-    } finally {
-      ai.files.delete({ name: fileName }).catch((error: unknown) => {
-        adminLogger.error({ error, fileName }, 'Failed to cleanup Gemini file')
+      setResponseStatus(HTTP_STATUS.BAD_GATEWAY)
+      throw new Error(`AI Assist a échoué : ${getErrorMessage(error)}`, {
+        cause: error
       })
+    } finally {
+      void deleteGeminiFile(fileName, 'Failed to cleanup Gemini file')
     }
   })

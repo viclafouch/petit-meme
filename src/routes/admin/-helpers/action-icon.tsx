@@ -8,9 +8,8 @@ import {
   Trash,
   Upload
 } from 'lucide-react'
-import type { AuditAction } from '~/server/audit'
 
-export function getActionIcon(action: AuditAction) {
+export function getActionIcon(action: string) {
   switch (action) {
     case 'create': {
       return <FilePlus className="size-4" aria-hidden />

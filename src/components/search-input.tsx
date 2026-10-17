@@ -2,14 +2,14 @@ import React from 'react'
 import { Input } from '~/components/ui/input'
 import { useSyncedInputValue } from '~/hooks/use-synced-input-value'
 
-type SearchInputParams = {
+type SearchInputProps = {
   value: string
   placeholder: string
   onValueChange: (value: string) => void
 }
 
 export const SearchInput = React.memo(
-  ({ value, placeholder, onValueChange }: SearchInputParams) => {
+  ({ value, placeholder, onValueChange }: SearchInputProps) => {
     const { inputRef, defaultValue, handleChange } = useSyncedInputValue({
       externalValue: value,
       onValueChange

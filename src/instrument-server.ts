@@ -1,17 +1,20 @@
 import * as Sentry from '@sentry/tanstackstart-react'
 
-const deploymentEnv =
-  process.env.VERCEL_ENV ??
-  (process.env.NODE_ENV === 'production' ? 'production' : 'development')
+// oxlint-disable-next-line node/no-process-env -- loaded before the app, the Sentry server setup reads the raw environment so a missing app variable never takes it down
+const processEnvironment = process.env
 
-const FULL_SAMPLE_RATE = 1.0
+const deploymentEnv =
+  processEnvironment.VERCEL_ENV ??
+  (processEnvironment.NODE_ENV === 'production' ? 'production' : 'development')
+
+const FULL_SAMPLE_RATE = 1
 const DROP_SAMPLE_RATE = 0
 const DEFAULT_SAMPLE_RATE = 0.2
 
 const SENSITIVE_HEADERS = ['authorization', 'cookie', 'set-cookie']
 
 Sentry.init({
-  dsn: process.env.VITE_SENTRY_DSN,
+  dsn: processEnvironment.VITE_SENTRY_DSN,
   environment: deploymentEnv,
   enabled: deploymentEnv === 'production',
   dataCollection: {
@@ -34,12 +37,12 @@ Sentry.init({
   },
   ignoreErrors: [/Unreachable hosts/u],
   beforeSend: (event) => {
-    if (event.request?.data) {
-      const url = event.request.url ?? ''
+    const url = event.request?.url ?? ''
+    const isSensitiveBody =
+      url.includes('/stripe/webhook') || url.includes('/api/auth/')
 
-      if (url.includes('/stripe/webhook') || url.includes('/api/auth/')) {
-        delete event.request.data
-      }
+    if (event.request && isSensitiveBody) {
+      delete event.request.data
     }
 
     if (event.request?.headers) {

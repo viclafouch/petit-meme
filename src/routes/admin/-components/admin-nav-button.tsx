@@ -13,11 +13,11 @@ import { UserAvatar } from '~/components/user-avatar'
 import { useSignOut } from '~/hooks/use-sign-out'
 import type { SessionUser } from '~/lib/role'
 
-type AdminNavButtonParams = {
+type AdminNavButtonProps = {
   user: SessionUser
 }
 
-export const AdminNavButton = ({ user }: AdminNavButtonParams) => {
+export const AdminNavButton = ({ user }: AdminNavButtonProps) => {
   const { signOut } = useSignOut()
 
   return (

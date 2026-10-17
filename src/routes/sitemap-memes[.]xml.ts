@@ -60,7 +60,10 @@ export const Route = createFileRoute('/sitemap-memes.xml')({
                 video: {
                   thumbnailLoc: thumbnailUrl,
                   title: resolved.title,
-                  description: resolved.description || resolved.title,
+                  description:
+                    resolved.description === ''
+                      ? resolved.title
+                      : resolved.description,
                   contentLoc,
                   duration: meme.video.duration
                 }

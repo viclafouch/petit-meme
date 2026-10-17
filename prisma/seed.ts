@@ -5,7 +5,7 @@ import { prismaClient } from '~/db'
 import { MEME_ALGOLIA_INCLUDE } from '~/constants/meme'
 import { clientEnv } from '~/env/client'
 import {
-  algoliaAdminClient,
+  getAlgoliaAdminClient,
   resolveAlgoliaIndexName,
   syncMemeToAllIndices
 } from '~/lib/algolia'
@@ -16,11 +16,13 @@ import {
   uploadVideo
 } from '~/lib/bunny'
 import { getTweetByUrl, getTweetMedia } from '~/lib/react-tweet'
-import { stripeClient } from '~/lib/stripe'
+import { getStripeClient } from '~/lib/stripe'
 import { fetchWithZod } from '~/lib/utils'
 import { locales } from '~/paraglide/runtime'
 import { logEnvironmentInfo } from '../scripts/lib/env-guard'
 import mocks from './seed-mock.json' with { type: 'json' }
+
+const ABORT_GRACE_PERIOD_MS = 5000
 
 const createMemeFromTwitterUrl = async (tweetUrl: string, title: string) => {
   const tweet = await getTweetByUrl(tweetUrl)
@@ -55,9 +57,11 @@ const createMemeFromTwitterUrl = async (tweetUrl: string, title: string) => {
     include: MEME_ALGOLIA_INCLUDE
   })
 
-  await syncMemeToAllIndices(meme).catch((error) => {
+  try {
+    await syncMemeToAllIndices(meme)
+  } catch (error) {
     console.error(error)
-  })
+  }
 
   await uploadVideo(videoId, buffer)
 }
@@ -86,7 +90,7 @@ const clearAlgolia = async () => {
   console.log('Clearing Algolia indices...')
   await Promise.all(
     locales.map((locale) => {
-      return algoliaAdminClient.replaceAllObjects({
+      return getAlgoliaAdminClient().replaceAllObjects({
         indexName: resolveAlgoliaIndexName(locale),
         objects: []
       })
@@ -97,11 +101,11 @@ const clearAlgolia = async () => {
 
 const clearStripe = async () => {
   console.log('Clearing Stripe test customers...')
-  const customers = await stripeClient.customers.list()
+  const customers = await getStripeClient().customers.list()
 
   for (const customer of customers.data) {
     // oxlint-disable-next-line no-await-in-loop -- sequential deletion required by Stripe API
-    await stripeClient.customers.del(customer.id)
+    await getStripeClient().customers.del(customer.id)
   }
 
   console.log(`  ${customers.data.length} customers deleted`)
@@ -133,8 +137,7 @@ const seed = async () => {
   logEnvironmentInfo()
 
   await new Promise((resolve) => {
-    // oxlint-disable-next-line no-promise-executor-return
-    return setTimeout(resolve, 5000)
+    setTimeout(resolve, ABORT_GRACE_PERIOD_MS)
   })
 
   await clearDatabase()
@@ -197,7 +200,9 @@ const seed = async () => {
   process.exit(0)
 }
 
-seed().catch((error) => {
+try {
+  await seed()
+} catch (error) {
   console.error('Seed failed:', error)
   process.exit(1)
-})
+}

@@ -1,9 +1,10 @@
+import { expect } from '@playwright/test'
+import { m } from '~/paraglide/messages.js'
 import { getAuthDialogSignInButton } from './auth-flows'
 import { E2E_NAMED_MEMES } from './content'
 import { resolveStorageStatePath } from './env'
-import { expect, test } from './fixtures'
+import { test } from './fixtures'
 import { repeatUntilVisible } from './hydration'
-import { m } from './messages'
 import { matchIsServerFunctionCall } from './server-functions'
 
 const BOOKMARKED_MEME_PATHNAME = `/memes/${E2E_NAMED_MEMES.mostViewed.id}`
@@ -60,16 +61,16 @@ test.describe('a User who reached the free cap', () => {
   })
 })
 
-test('an anonymous Visitor is asked to sign in before bookmarking', async ({
-  page
-}) => {
-  await page.goto(BOOKMARKED_MEME_PATHNAME)
+test.describe('an anonymous Visitor', () => {
+  test('is asked to sign in before bookmarking', async ({ page }) => {
+    await page.goto(BOOKMARKED_MEME_PATHNAME)
 
-  const signInButton = getAuthDialogSignInButton(page)
+    const signInButton = getAuthDialogSignInButton(page)
 
-  await repeatUntilVisible(() => {
-    return page.getByRole('button', { name: m.meme_add_favorite() }).click()
-  }, signInButton)
+    await repeatUntilVisible(() => {
+      return page.getByRole('button', { name: m.meme_add_favorite() }).click()
+    }, signInButton)
 
-  await expect(signInButton).toBeVisible()
+    await expect(signInButton).toBeVisible()
+  })
 })

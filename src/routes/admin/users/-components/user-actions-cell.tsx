@@ -18,11 +18,11 @@ import { UserModerationDialogs } from './user-moderation-dialogs'
 
 const routeApi = getRouteApi('/admin')
 
-type UserActionsCellParams = {
+type UserActionsCellProps = {
   user: EnrichedUser
 }
 
-export const UserActionsCell = ({ user }: UserActionsCellParams) => {
+export const UserActionsCell = ({ user }: UserActionsCellProps) => {
   const { user: admin } = routeApi.useRouteContext()
   const moderation = useUserModeration({ userId: user.id })
 

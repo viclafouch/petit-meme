@@ -11,7 +11,7 @@ import {
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
-import { XTwitterIcon } from '~/components/icon'
+import { XTwitterIcon } from '~/components/icon/x-twitter'
 import {
   Sidebar,
   SidebarContent,
@@ -26,9 +26,9 @@ import {
 } from '~/components/ui/sidebar'
 import { getAdminPendingSubmissionCountQueryOpts } from '~/routes/admin/-lib/queries'
 
-export const AdminSidebar = ({
-  ...props
-}: React.ComponentProps<typeof Sidebar>) => {
+type AdminSidebarProps = React.ComponentProps<typeof Sidebar>
+
+export const AdminSidebar = ({ ...props }: AdminSidebarProps) => {
   const pendingCountQuery = useQuery(getAdminPendingSubmissionCountQueryOpts())
   const pendingCount = pendingCountQuery.data ?? 0
 

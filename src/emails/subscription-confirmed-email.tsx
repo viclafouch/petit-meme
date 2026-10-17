@@ -1,6 +1,7 @@
 import { Button, Section, Text } from 'react-email'
 import type { Locale } from '~/paraglide/runtime'
-import { BUTTON_CLASS, EmailLayout, SITE_URL } from './email-layout'
+import { BUTTON_CLASS, SITE_URL } from './constants'
+import { EmailLayout } from './email-layout'
 
 const translations = {
   fr: {
@@ -91,8 +92,13 @@ SubscriptionConfirmedEmail.PreviewProps = {
   locale: 'fr'
 } satisfies SubscriptionConfirmedEmailProps
 
+type SubscriptionConfirmedEmailENProps = Omit<
+  SubscriptionConfirmedEmailProps,
+  'locale'
+>
+
 export const SubscriptionConfirmedEmailEN = (
-  props: Omit<SubscriptionConfirmedEmailProps, 'locale'>
+  props: SubscriptionConfirmedEmailENProps
 ) => {
   return <SubscriptionConfirmedEmail {...props} locale="en" />
 }
@@ -102,6 +108,6 @@ SubscriptionConfirmedEmailEN.PreviewProps = {
   planTitle: 'Premium',
   amount: '€3.99',
   isAnnual: false
-} satisfies Omit<SubscriptionConfirmedEmailProps, 'locale'>
+} satisfies SubscriptionConfirmedEmailENProps
 
 export default SubscriptionConfirmedEmail

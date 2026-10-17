@@ -1,6 +1,12 @@
+import { z } from 'zod'
 import { createFileRoute } from '@tanstack/react-router'
 
 const SENTRY_HOST_SUFFIX = '.sentry.io'
+const SENTRY_FORWARD_TIMEOUT_MS = 10_000
+
+const ENVELOPE_HEADER_SCHEMA = z.object({
+  dsn: z.string().optional()
+})
 
 function parseEnvelopeHeader(envelope: string) {
   const firstLine = envelope.split('\n')[0]
@@ -10,13 +16,13 @@ function parseEnvelopeHeader(envelope: string) {
   }
 
   try {
-    const header = JSON.parse(firstLine) as { dsn?: string }
+    const header = ENVELOPE_HEADER_SCHEMA.safeParse(JSON.parse(firstLine))
 
-    if (!header.dsn) {
+    if (!header.success || !header.data.dsn) {
       return null
     }
 
-    const dsn = new URL(header.dsn)
+    const dsn = new URL(header.data.dsn)
 
     return {
       projectId: dsn.pathname.replace('/', ''),
@@ -50,8 +56,8 @@ export const Route = createFileRoute('/api/sentry-tunnel')({
 
         const controller = new AbortController()
         const timeoutId = setTimeout(() => {
-          return controller.abort()
-        }, 10_000)
+          controller.abort()
+        }, SENTRY_FORWARD_TIMEOUT_MS)
 
         try {
           const response = await fetch(upstream, {

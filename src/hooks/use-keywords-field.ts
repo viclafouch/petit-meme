@@ -10,7 +10,7 @@ export function useKeywordsField({ setKeywordsValue }: UseKeywordsFieldParams) {
   const [keywordValue, setKeywordValue] = React.useState('')
 
   const handleAddKeyword = () => {
-    if (keywordValue.trim()) {
+    if (keywordValue.trim() !== '') {
       setKeywordsValue((prevState) => {
         return removeDuplicates([
           ...prevState,

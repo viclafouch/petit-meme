@@ -6,14 +6,14 @@ import { Input } from '~/components/ui/input'
 import { useClipboardPaste } from '~/hooks/use-clipboard-paste'
 import { m } from '~/paraglide/messages'
 
-type ClipboardPasteInputParams = {
+type ClipboardPasteInputProps = {
   onClipboardPaste: (text: string) => void
 } & Omit<React.ComponentProps<typeof Input>, 'className'>
 
 export const ClipboardPasteInput = ({
   onClipboardPaste,
   ...inputProps
-}: ClipboardPasteInputParams) => {
+}: ClipboardPasteInputProps) => {
   const clipboard = useClipboardPaste({ onPaste: onClipboardPaste })
 
   return (

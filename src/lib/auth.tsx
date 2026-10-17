@@ -1,7 +1,7 @@
 import { betterAuth, type BetterAuthOptions } from 'better-auth'
 import { admin, lastLoginMethod } from 'better-auth/plugins'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
-import type Stripe from 'stripe'
+import type { Stripe } from 'stripe'
 import { prismaAdapter } from '@better-auth/prisma-adapter'
 import { stripe } from '@better-auth/stripe'
 import { createServerOnlyFn } from '@tanstack/react-start'
@@ -14,7 +14,13 @@ import {
   SEVEN_DAYS_IN_SECONDS
 } from '~/constants/time'
 import { ActivityEventType, UserLocale } from '~/db/generated/prisma/enums'
+import { EmailVerification } from '~/emails/email-verification'
+import { PasswordChangedEmail } from '~/emails/password-changed-email'
+import { PaymentFailedEmail } from '~/emails/payment-failed-email'
+import { ResetPassword } from '~/emails/reset-password'
 import { emailSubjects } from '~/emails/subjects'
+import { SubscriptionConfirmedEmail } from '~/emails/subscription-confirmed-email'
+import { WelcomeEmail } from '~/emails/welcome-email'
 import { clientEnv } from '~/env/client'
 import {
   matchIsDeployed,
@@ -27,24 +33,18 @@ import { formatCentsToEuros } from '~/helpers/number'
 import { authLogger, stripeLogger } from '~/lib/logger'
 import { sendEmailAsync } from '~/lib/resend'
 import { captureWithFeature } from '~/lib/sentry'
-import { stripeClient } from '~/lib/stripe'
+import { getStripeClient } from '~/lib/stripe'
 import { getLocale } from '~/paraglide/runtime'
 import { recordActivityEvent } from '~/utils/activity-event'
 import { cleanupUserData } from '~/utils/user-cleanup'
-import EmailVerification from '../emails/email-verification'
-import PasswordChangedEmail from '../emails/password-changed-email'
-import PaymentFailedEmail from '../emails/payment-failed-email'
-import ResetPassword from '../emails/reset-password'
-import SubscriptionConfirmedEmail from '../emails/subscription-confirmed-email'
-import WelcomeEmail from '../emails/welcome-email'
 
 const PASSWORD_CHANGED_DATE_OPTIONS: Intl.DateTimeFormatOptions = {
   dateStyle: 'long',
   timeStyle: 'short'
 }
 
-const handlePaymentFailed = async (event: Stripe.Event) => {
-  const invoice = event.data.object as Stripe.Invoice
+const handlePaymentFailed = async (event: Stripe.InvoicePaymentFailedEvent) => {
+  const invoice = event.data.object
   const customerId = invoice.customer
 
   if (typeof customerId !== 'string') {
@@ -71,12 +71,10 @@ const handlePaymentFailed = async (event: Stripe.Event) => {
     return
   }
 
-  let portalSession: Awaited<
-    ReturnType<typeof stripeClient.billingPortal.sessions.create>
-  >
+  let portalSession: Stripe.Response<Stripe.BillingPortal.Session>
 
   try {
-    portalSession = await stripeClient.billingPortal.sessions.create({
+    portalSession = await getStripeClient().billingPortal.sessions.create({
       customer: customerId,
       return_url: `${clientEnv.VITE_SITE_URL}/settings`
     })
@@ -104,17 +102,19 @@ const handlePaymentFailed = async (event: Stripe.Event) => {
   })
 }
 
+const updateUserLastActive = async (userId: string) => {
+  try {
+    await prismaClient.user.update({
+      where: { id: userId },
+      data: { lastActiveAt: new Date() }
+    })
+  } catch (error) {
+    authLogger.error({ error }, 'Failed to update lastActiveAt')
+  }
+}
+
 const touchUserLastActive = async (session: { userId: string }) => {
-  waitUntil(
-    prismaClient.user
-      .update({
-        where: { id: session.userId },
-        data: { lastActiveAt: new Date() }
-      })
-      .catch((error) => {
-        authLogger.error({ error }, 'Failed to update lastActiveAt')
-      })
-  )
+  waitUntil(updateUserLastActive(session.userId))
 }
 
 const USER_ADDITIONAL_FIELDS = {
@@ -312,7 +312,7 @@ const getAuthConfig = createServerOnlyFn(() => {
       lastLoginMethod(),
       tanstackStartCookies(),
       stripe({
-        stripeClient,
+        stripeClient: getStripeClient(),
         stripeWebhookSecret: serverEnv.STRIPE_WEBHOOK_SECRET,
         createCustomerOnSignUp: true,
         subscription: {

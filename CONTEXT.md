@@ -176,6 +176,9 @@ A preview deployment is a production build, so `NODE_ENV` cannot tell it from th
 **The end to end suite owns the `test` branch of the database, and empties it.**
 Every run truncates every table but the migration history before seeding, listed from `pg_tables` rather than by hand, since a hand written list drifts each time a model appears. `.env.e2e` is loaded so that it wins over any exported variable, and the truncation refuses to run unless the connection string it sees is the one that file declares. That second check belongs next to the destruction, never at the call site.
 
+**`@playwright/test` is pinned to the exact version of the e2e image.**
+The e2e job runs in `mcr.microsoft.com/playwright:v<version>-noble`, which carries the browsers of that one version and nothing else. A range in `package.json` would let an install pick a newer runner that looks for browsers the image does not have, and the whole suite fails on launch. Bumping Playwright means bumping both, in the same commit.
+
 **The end to end suite never calls Anthropic.**
 The AiSearch asks Haiku for its keywords, and each call is billed. Playwright starts `e2e/fake-anthropic.ts` next to the app and hands the app `ANTHROPIC_BASE_URL`, which the Anthropic SDK reads by itself. The fake streams back the words of the prompt as keywords, so the suite covers the Haiku path, not the fallback. A test that passes is therefore no proof that the real model answers: a fake that drifts from the API falls back on the raw prompt, gives the same Memes for a one word prompt, and only leaves a trace in `e2e/.logs/server.log`.
 

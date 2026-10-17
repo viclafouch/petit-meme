@@ -82,8 +82,6 @@ French, plain technical language, short sentences. The first line says the outco
 
 The specification is what I asked for in the conversation. Plans live in the conversation too, this repository holds no plan file for a feature. Work that needs steps checks in between them.
 
-There is no `docs/` directory, and adding one is a conversation to have first. Prose about the code goes stale the day the code moves, and I will move the code without moving the prose. What outlives a feature belongs in one of two places instead: a rule in `.claude/rules/`, or a GitHub issue for anything still to do. `specs/` is the scratch area of the Playwright agents, never a place to keep anything.
-
 ## Git
 
 Commit and push on my word only. `main` is the branch and pushing it deploys, so the last look at the diff happens before the push, not after. One concern per commit, conventional title, English for messages and branches.

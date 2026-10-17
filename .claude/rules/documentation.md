@@ -3,7 +3,6 @@
 ### Principle
 
 - **AGENTS.md** = How to work on this project (principles, traps, judgement)
-- **CONTEXT.md** = Domain model: ubiquitous language and the constraints the code cannot explain
 - **package.json** = Source of truth for versions
 
 Never put version numbers in AGENTS.md (sync risk).
@@ -11,8 +10,7 @@ Never put version numbers in AGENTS.md (sync risk).
 ### After Code Changes
 
 1. Verify AGENTS.md remains valid (principles, traps)
-2. Add any new domain term or non obvious constraint to CONTEXT.md
-3. `pnpm lint:fix`
+2. `pnpm lint:fix`
 
 ### Adding a Dependency
 
@@ -29,6 +27,5 @@ Never put version numbers in AGENTS.md (sync risk).
 ### Checklist
 
 - [ ] AGENTS.md consistent
-- [ ] CONTEXT.md updated if a term or a constraint appeared
 - [ ] No orphan imports
 - [ ] `pnpm lint:fix` passes

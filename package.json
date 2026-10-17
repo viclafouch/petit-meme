@@ -23,7 +23,9 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "lint": "tsc && oxlint",
+    "check": "turbo run typecheck lint test format:check",
+    "typecheck": "tsc",
+    "lint": "oxlint",
     "lint:fix": "tsc && oxlint --fix && pnpm run format",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
@@ -132,6 +134,7 @@
     "pino-pretty": "^13.2.0",
     "prisma": "^7.10.0",
     "shadcn": "^4.21.2",
+    "turbo": "^2.11.9",
     "typescript": "^7.0.2",
     "vite-node": "^6.0.0",
     "vitest": "^4.1.11"

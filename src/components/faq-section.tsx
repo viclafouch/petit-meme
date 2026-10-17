@@ -10,7 +10,7 @@ export type FaqItem = {
   answer: string
 }
 
-type FaqSectionParams = {
+type FaqSectionProps = {
   items: readonly FaqItem[]
   heading: string
   headingClassName?: string
@@ -22,7 +22,7 @@ export const FaqSection = ({
   heading,
   headingClassName = 'mb-4 text-3xl font-semibold md:mb-11 md:text-4xl',
   className
-}: FaqSectionParams) => {
+}: FaqSectionProps) => {
   return (
     <section className={className}>
       <h2 className={headingClassName}>{heading}</h2>

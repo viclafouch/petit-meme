@@ -6,10 +6,10 @@ import {
   SelectTrigger,
   SelectValue
 } from '~/components/ui/select'
-import { BAN_REASONS, type BanReason } from '~/routes/admin/-server/users'
+import { BAN_REASONS, matchIsBanReason } from '~/routes/admin/-lib/ban'
 import type { useUserModeration } from './use-user-moderation'
 
-type UserModerationDialogsParams = {
+type UserModerationDialogsProps = {
   userName: string
   moderation: ReturnType<typeof useUserModeration>
 }
@@ -17,7 +17,7 @@ type UserModerationDialogsParams = {
 export const UserModerationDialogs = ({
   userName,
   moderation
-}: UserModerationDialogsParams) => {
+}: UserModerationDialogsProps) => {
   return (
     <>
       <ConfirmAlertDialog
@@ -31,7 +31,9 @@ export const UserModerationDialogs = ({
         <Select
           value={moderation.banReason}
           onValueChange={(value) => {
-            moderation.setBanReason(value as BanReason)
+            if (matchIsBanReason(value)) {
+              moderation.setBanReason(value)
+            }
           }}
         >
           <SelectTrigger aria-label="Raison du bannissement">

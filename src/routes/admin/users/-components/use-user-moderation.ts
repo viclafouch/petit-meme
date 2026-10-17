@@ -3,12 +3,10 @@ import { toast } from 'sonner'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 import { getErrorMessage } from '~/helpers/error'
-import { captureWithFeature } from '~/lib/sentry'
-import type { SentryFeature } from '~/lib/sentry'
+import { captureWithFeature, type SentryFeature } from '~/lib/sentry'
+import { BAN_REASONS, type BanReason } from '~/routes/admin/-lib/ban'
 import { getAdminUserDetailQueryOpts } from '~/routes/admin/-lib/queries'
 import {
-  BAN_REASONS,
-  type BanReason,
   banUserById,
   removeUser,
   unbanUserById
@@ -21,8 +19,12 @@ type ModerationRunParams = {
   banReason: BanReason
 }
 
+type ModerationResult = {
+  success: boolean
+}
+
 type ModerationAction = {
-  run: (params: ModerationRunParams) => Promise<unknown>
+  run: (params: ModerationRunParams) => Promise<ModerationResult>
   loading: string
   success: string
   feature: SentryFeature
@@ -136,7 +138,7 @@ export const useUserModeration = ({
   }
 
   const handleConfirm = () => {
-    if (activeDialog) {
+    if (activeDialog !== null) {
       moderationMutation.mutate(activeDialog)
     }
   }

@@ -26,11 +26,11 @@ const TOTAL_CONFIGS = [
   }
 ] as const satisfies readonly IconConfig<keyof DashboardTotals>[]
 
-type TotalsSectionParams = {
+type TotalsSectionProps = {
   totals: DashboardTotals
 }
 
-export const TotalsSection = ({ totals }: TotalsSectionParams) => {
+export const TotalsSection = ({ totals }: TotalsSectionProps) => {
   return (
     <StatTiles
       tiles={TOTAL_CONFIGS.map((config) => {

@@ -12,7 +12,7 @@ import { getLocale } from '~/paraglide/runtime'
 import type { ActiveSubscription } from '~/server/customer'
 import { AvatarPickerDialog } from './avatar-picker-dialog'
 
-type ProfileHeaderParams = {
+type ProfileHeaderProps = {
   user: SessionUser
   activeSubscription: ActiveSubscription | null
 }
@@ -20,7 +20,7 @@ type ProfileHeaderParams = {
 export const ProfileHeader = ({
   user,
   activeSubscription
-}: ProfileHeaderParams) => {
+}: ProfileHeaderProps) => {
   const [isAvatarPickerOpened, setIsAvatarPickerOpened] = React.useState(false)
 
   return (

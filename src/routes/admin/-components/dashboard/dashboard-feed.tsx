@@ -3,12 +3,12 @@ import { formatRelativeTime } from '~/helpers/date'
 import { getLocale } from '~/paraglide/runtime'
 import { EmptyMessage } from '~/routes/admin/-components/empty-message'
 
-type FeedActorParams = {
+type FeedActorProps = {
   name: string
   image: string | null
 }
 
-export const FeedActor = ({ name, image }: FeedActorParams) => {
+export const FeedActor = ({ name, image }: FeedActorProps) => {
   return (
     <span className="flex min-w-0 items-center gap-1.5">
       <UserAvatar name={name} image={image} size="xs" />
@@ -25,12 +25,12 @@ type DashboardFeedEntry = {
   createdAt: Date
 }
 
-type DashboardFeedParams = {
+type DashboardFeedProps = {
   entries: DashboardFeedEntry[]
   emptyLabel: string
 }
 
-export const DashboardFeed = ({ entries, emptyLabel }: DashboardFeedParams) => {
+export const DashboardFeed = ({ entries, emptyLabel }: DashboardFeedProps) => {
   if (entries.length === 0) {
     return <EmptyMessage>{emptyLabel}</EmptyMessage>
   }

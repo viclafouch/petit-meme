@@ -1,7 +1,9 @@
 import pino from 'pino'
 import { IS_PRODUCTION } from '~/constants/env'
+import { processEnvironment } from '~/env/process'
 
-const level = process.env.LOG_LEVEL ?? (!IS_PRODUCTION ? 'debug' : 'info')
+const level =
+  processEnvironment.LOG_LEVEL ?? (!IS_PRODUCTION ? 'debug' : 'info')
 
 export const logger = pino({
   level,

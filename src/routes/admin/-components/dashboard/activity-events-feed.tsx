@@ -1,17 +1,17 @@
 import { CountryFlag } from '~/components/country-flag'
+import { ActivityTypeIcon } from '~/routes/admin/-components/activity-type-icon'
 import {
   ACTIVITY_TYPE_DISPLAY,
-  ActivityTypeIcon,
   formatActivityEntry
 } from '~/routes/admin/-helpers/activity'
 import type { AdminActivityRow } from '~/routes/admin/-server/activity'
 import { DashboardFeed, FeedActor } from './dashboard-feed'
 
-type ActivityActorParams = {
+type ActivityActorProps = {
   entry: AdminActivityRow
 }
 
-const ActivityActor = ({ entry }: ActivityActorParams) => {
+const ActivityActor = ({ entry }: ActivityActorProps) => {
   if (entry.user) {
     return <FeedActor name={entry.user.name} image={entry.user.image} />
   }
@@ -28,11 +28,11 @@ const ActivityActor = ({ entry }: ActivityActorParams) => {
   )
 }
 
-type ActivityEventsFeedParams = {
+type ActivityEventsFeedProps = {
   entries: AdminActivityRow[]
 }
 
-export const ActivityEventsFeed = ({ entries }: ActivityEventsFeedParams) => {
+export const ActivityEventsFeed = ({ entries }: ActivityEventsFeedProps) => {
   return (
     <DashboardFeed
       emptyLabel="Aucun événement enregistré"

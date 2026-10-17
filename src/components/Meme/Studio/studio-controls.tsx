@@ -1,4 +1,5 @@
 import React from 'react'
+import { RadioGroup } from 'radix-ui'
 import { StudioTemplates } from '~/components/Meme/Studio/studio-templates'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
@@ -16,45 +17,43 @@ import {
   getStudioColors,
   getStudioFontSizes,
   STUDIO_FONTS,
-  STUDIO_TEXT_MAX_LENGTH
-} from '~/constants/studio'
-import type {
-  StudioBandColorValue,
-  StudioColorEntry,
-  StudioFontColorValue,
-  StudioFontFamilyId,
-  StudioFontSizeValue,
-  StudioSettings,
-  StudioTextPosition
+  STUDIO_TEXT_MAX_LENGTH,
+  STUDIO_TEXT_POSITIONS,
+  type StudioBandColorValue,
+  type StudioColorEntry,
+  type StudioFontColorValue,
+  type StudioSettings
 } from '~/constants/studio'
 import { SELECTED_TILE_RING_CLASS_NAME } from '~/constants/ui'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 
-type ColorSwatchesParams = {
-  colors: StudioColorEntry[]
-  activeValue: string
-  onSelect: (value: string) => void
+type ColorSwatchesProps<TValue extends string> = {
+  colors: StudioColorEntry<TValue>[]
+  activeValue: TValue
+  onSelect: (value: TValue) => void
   labelledBy: string
 }
 
-const ColorSwatches = ({
+const ColorSwatches = <TValue extends string>({
   colors,
   activeValue,
   onSelect,
   labelledBy
-}: ColorSwatchesParams) => {
+}: ColorSwatchesProps<TValue>) => {
   return (
-    <div className="flex gap-3" role="radiogroup" aria-labelledby={labelledBy}>
+    <RadioGroup.Root
+      value={activeValue}
+      className="flex gap-3"
+      aria-labelledby={labelledBy}
+    >
       {colors.map((color) => {
         const isSelected = activeValue === color.value
 
         return (
-          <button
+          <RadioGroup.Item
             key={color.id}
-            type="button"
-            role="radio"
-            aria-checked={isSelected}
+            value={color.value}
             aria-label={color.label}
             data-active={isSelected || undefined}
             className={cn(
@@ -68,11 +67,11 @@ const ColorSwatches = ({
           />
         )
       })}
-    </div>
+    </RadioGroup.Root>
   )
 }
 
-type StudioControlsParams = {
+type StudioControlsProps = {
   settings: StudioSettings
   onSettingsChange: (updates: Partial<StudioSettings>) => void
   disabled: boolean
@@ -88,38 +87,52 @@ export const StudioControls = ({
   bunnyId,
   hideTextInput = false,
   onTextInputFocus
-}: StudioControlsParams) => {
+}: StudioControlsProps) => {
+  const fontSizes = getStudioFontSizes()
+  const colors = getStudioColors()
+  const bandColors = getStudioBandColors()
+
   const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     onSettingsChange({ text: event.target.value })
   }
 
   const handlePositionChange = (value: string) => {
-    if (value) {
-      onSettingsChange({ textPosition: value as StudioTextPosition })
+    const textPosition = STUDIO_TEXT_POSITIONS.find((position) => {
+      return position === value
+    })
+
+    if (textPosition !== undefined) {
+      onSettingsChange({ textPosition })
     }
   }
 
   const handleFontFamilyChange = (value: string) => {
-    onSettingsChange({ fontFamily: value as StudioFontFamilyId })
-  }
+    const font = STUDIO_FONTS.find((entry) => {
+      return entry.id === value
+    })
 
-  const handleFontSizeChange = (value: string) => {
-    if (value) {
-      onSettingsChange({ fontSize: Number(value) as StudioFontSizeValue })
+    if (font !== undefined) {
+      onSettingsChange({ fontFamily: font.id })
     }
   }
 
-  const handleFontColorChange = (value: string) => {
-    onSettingsChange({ fontColor: value as StudioFontColorValue })
+  const handleFontSizeChange = (value: string) => {
+    const fontSize = fontSizes.find((size) => {
+      return String(size.value) === value
+    })
+
+    if (fontSize !== undefined) {
+      onSettingsChange({ fontSize: fontSize.value })
+    }
   }
 
-  const handleBandColorChange = (value: string) => {
-    onSettingsChange({ bandColor: value as StudioBandColorValue })
+  const handleFontColorChange = (value: StudioFontColorValue) => {
+    onSettingsChange({ fontColor: value })
   }
 
-  const fontSizes = getStudioFontSizes()
-  const colors = getStudioColors()
-  const bandColors = getStudioBandColors()
+  const handleBandColorChange = (value: StudioBandColorValue) => {
+    onSettingsChange({ bandColor: value })
+  }
 
   return (
     <fieldset disabled={disabled} className="flex flex-col gap-4">

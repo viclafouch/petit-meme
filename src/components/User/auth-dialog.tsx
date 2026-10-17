@@ -9,7 +9,8 @@ import {
   DialogHeader,
   DialogTitle
 } from '~/components/animate-ui/radix/dialog'
-import { DiscordIcon, XTwitterIcon } from '~/components/icon'
+import { DiscordIcon } from '~/components/icon/discord'
+import { XTwitterIcon } from '~/components/icon/x-twitter'
 import { Button } from '~/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { LastLoginBadge } from '~/components/User/last-login-badge'
@@ -80,13 +81,15 @@ const handleSignInWithSocial = async (
   }
 }
 
-export const AuthDialog = ({ open, onOpenChange }: WithDialog<unknown>) => {
+type AuthDialogProps = WithDialog<unknown>
+
+export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
   const [authType, setAuthType] = React.useState<AuthType>('login')
   const lastLoginMethod = useLastLoginMethod()
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+      <DialogContent className="max-w-lg max-h-vh-90 overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle />
           <DialogDescription />
@@ -124,7 +127,7 @@ export const AuthDialog = ({ open, onOpenChange }: WithDialog<unknown>) => {
                 {m.auth_create_account()}
               </TabsTrigger>
             </TabsList>
-            <div className="grid [interpolate-size:allow-keywords] pt-4">
+            <div className="grid interpolate-size-keywords pt-4">
               <TabsContent
                 forceMount
                 inert={authType !== 'login'}
@@ -163,7 +166,7 @@ export const AuthDialog = ({ open, onOpenChange }: WithDialog<unknown>) => {
                   variant="outline"
                   className="w-full relative"
                   onClick={() => {
-                    return void handleSignInWithSocial(provider)
+                    void handleSignInWithSocial(provider)
                   }}
                 >
                   <provider.icon />

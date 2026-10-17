@@ -17,22 +17,24 @@ import { m } from '~/paraglide/messages'
 import type { AdminMemeRecord } from '~/routes/admin/-server/memes'
 import { matchIsVideoPlayable } from '~/utils/video'
 
-type MemeListItemParams = {
+const VIDEO_STATUS_POLL_INTERVAL_MS = 30_000
+
+type MemeListItemProps = {
   meme: AdminMemeRecord
 }
 
-export const MemeListItem = React.memo(({ meme }: MemeListItemParams) => {
+export const MemeListItem = React.memo(({ meme }: MemeListItemProps) => {
   const isInitiallyPlayable = matchIsVideoPlayable(meme.video.bunnyStatus)
 
   const videoStatusQuery = useQuery({
     ...getVideoStatusByIdQueryOpts(meme.video.id),
     enabled: !isInitiallyPlayable,
     refetchInterval: ({ state }) => {
-      if (state.data?.status && matchIsVideoPlayable(state.data.status)) {
+      if (state.data !== undefined && matchIsVideoPlayable(state.data.status)) {
         return false
       }
 
-      return 30_000
+      return VIDEO_STATUS_POLL_INTERVAL_MS
     }
   })
 

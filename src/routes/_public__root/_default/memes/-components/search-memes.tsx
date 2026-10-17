@@ -1,6 +1,5 @@
 import React from 'react'
-import { ErrorBoundary } from 'react-error-boundary'
-import type { FallbackProps } from 'react-error-boundary'
+import { ErrorBoundary, type FallbackProps } from 'react-error-boundary'
 import { TriangleAlertIcon, RefreshCw } from 'lucide-react'
 import {
   QueryErrorResetBoundary,
@@ -41,7 +40,13 @@ import {
   PageHeading
 } from '~/routes/_public__root/-components/page-headers'
 
-const MemesListWrapper = ({ columnGridCount }: { columnGridCount: number }) => {
+const DEFAULT_COLUMN_GRID_COUNT = 5
+
+type MemesListWrapperProps = {
+  columnGridCount: number
+}
+
+const MemesListWrapper = ({ columnGridCount }: MemesListWrapperProps) => {
   const search = useSearch({
     from: '/_public__root/_default/memes/category/$slug'
   })
@@ -110,9 +115,11 @@ const MemesListWrapper = ({ columnGridCount }: { columnGridCount: number }) => {
   )
 }
 
+type MemesListErrorFallbackProps = Pick<FallbackProps, 'resetErrorBoundary'>
+
 const MemesListErrorFallback = ({
   resetErrorBoundary
-}: Pick<FallbackProps, 'resetErrorBoundary'>) => {
+}: MemesListErrorFallbackProps) => {
   return (
     <div
       role="alert"
@@ -134,18 +141,24 @@ const MemesListErrorFallback = ({
 }
 
 export const SearchMemes = () => {
-  const [columnGridCount, setColumnGridCount] = React.useState<number>(5)
+  const [columnGridCount, setColumnGridCount] = React.useState<number>(
+    DEFAULT_COLUMN_GRID_COUNT
+  )
   const search = useSearch({ strict: false })
   const navigate = useNavigate()
   const { slug: activeSlug } = useParams({ strict: false })
 
-  const categories = useSuspenseQuery(getCategoriesListQueryOpts(getLocale()))
+  const categoriesQuery = useSuspenseQuery(
+    getCategoriesListQueryOpts(getLocale())
+  )
 
   const currentCategory = React.useMemo(() => {
-    return [...getVirtualCategories(), ...categories.data].find((category) => {
-      return category.slug === activeSlug
-    })
-  }, [categories.data, activeSlug])
+    return [...getVirtualCategories(), ...categoriesQuery.data].find(
+      (category) => {
+        return category.slug === activeSlug
+      }
+    )
+  }, [categoriesQuery.data, activeSlug])
 
   const locale = getLocale()
   const rawContentLocales =

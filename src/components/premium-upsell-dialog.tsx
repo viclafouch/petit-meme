@@ -14,12 +14,12 @@ import { formatCentsToEuros } from '~/helpers/number'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
 
-type PremiumUpsellDialogParams = {
+type PremiumUpsellDialogProps = WithDialog<{
   title: string
   description: string
   imageUrl: string
   secondaryAction?: React.ReactNode
-}
+}>
 
 export const PremiumUpsellDialog = ({
   open,
@@ -28,7 +28,7 @@ export const PremiumUpsellDialog = ({
   description,
   imageUrl,
   secondaryAction
-}: WithDialog<PremiumUpsellDialogParams>) => {
+}: PremiumUpsellDialogProps) => {
   const premiumPlan = getPremiumPlan()
   const monthlyPrice = formatCentsToEuros(
     PREMIUM_PLAN_PRICING.monthly.priceInCents,

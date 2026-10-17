@@ -1,9 +1,10 @@
 import { create } from 'zustand'
 import {
   STUDIO_DEFAULT_SETTINGS,
-  STUDIO_TEMPLATE_STYLES
+  STUDIO_TEMPLATE_STYLES,
+  type StudioSettings,
+  type StudioTemplateId
 } from '~/constants/studio'
-import type { StudioSettings, StudioTemplateId } from '~/constants/studio'
 
 const STUDIO_TEMPLATES_BY_ID = new Map(
   STUDIO_TEMPLATE_STYLES.map((template) => {

@@ -1,6 +1,8 @@
 import React from 'react'
 
-export const XTwitterIcon = (props: React.ComponentProps<'svg'>) => {
+type XTwitterIconProps = React.ComponentProps<'svg'>
+
+export const XTwitterIcon = (props: XTwitterIconProps) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

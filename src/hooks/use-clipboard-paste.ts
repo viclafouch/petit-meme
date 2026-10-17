@@ -9,7 +9,7 @@ type ClipboardPasteParams = {
 }
 
 export const useClipboardPaste = ({ onPaste }: ClipboardPasteParams) => {
-  const mutation = useMutation({
+  const pasteMutation = useMutation({
     mutationFn: () => {
       return navigator.clipboard.readText()
     },
@@ -21,17 +21,17 @@ export const useClipboardPaste = ({ onPaste }: ClipboardPasteParams) => {
     },
     onSettled: () => {
       setTimeout(() => {
-        mutation.reset()
+        pasteMutation.reset()
       }, RESET_DELAY_MS)
     }
   })
 
   const handlePaste = () => {
-    mutation.mutate()
+    pasteMutation.mutate()
   }
 
   return {
     handlePaste,
-    isActive: mutation.isPending || mutation.isSuccess
+    isActive: pasteMutation.isPending || pasteMutation.isSuccess
   }
 }

@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { createServerOnlyFn } from '@tanstack/react-start'
+import { HTTP_STATUS } from '~/constants/http'
 import { FIVE_MINUTES_IN_SECONDS } from '~/constants/time'
 import { clientEnv } from '~/env/client'
 import { serverEnv } from '~/env/server'
@@ -112,7 +113,7 @@ export const createVideo = createServerOnlyFn(async (title: string) => {
 })
 
 export const uploadVideo = createServerOnlyFn(
-  async (videoId: string, videoBuffer: Buffer) => {
+  async (videoId: string, videoBuffer: Buffer<ArrayBuffer>) => {
     const headers = getBunnyHeaders()
     headers.set('Content-Type', 'video/mp4')
 
@@ -122,7 +123,6 @@ export const uploadVideo = createServerOnlyFn(
       {
         method: 'PUT',
         headers,
-        // @ts-expect-error: fetch body type doesn't accept Buffer but it works at runtime
         body: videoBuffer
       }
     )
@@ -144,13 +144,13 @@ const STORAGE_UPLOAD_TIMEOUT_MS = 120_000
 const withStorageTimeout = (timeoutMs = STORAGE_TIMEOUT_MS) => {
   const controller = new AbortController()
   const timeoutId = setTimeout(() => {
-    return controller.abort()
+    controller.abort()
   }, timeoutMs)
 
   return {
     signal: controller.signal,
     clear: () => {
-      return clearTimeout(timeoutId)
+      clearTimeout(timeoutId)
     }
   }
 }
@@ -187,7 +187,7 @@ export const fetchWatermarkedVideo = createServerOnlyFn(
 )
 
 export const uploadWatermarkedVideo = createServerOnlyFn(
-  async (bunnyId: string, videoBuffer: Buffer) => {
+  async (bunnyId: string, videoBuffer: Buffer<ArrayBuffer>) => {
     const headers = getStorageHeaders()
     headers.set('Content-Type', 'application/octet-stream')
     const timeout = withStorageTimeout(STORAGE_UPLOAD_TIMEOUT_MS)
@@ -196,7 +196,6 @@ export const uploadWatermarkedVideo = createServerOnlyFn(
       const response = await fetch(buildStorageUrl(bunnyId), {
         method: 'PUT',
         headers,
-        // @ts-expect-error -- fetch body type doesn't accept Buffer but it works at runtime
         body: videoBuffer,
         signal: timeout.signal
       })
@@ -228,7 +227,7 @@ export const deleteWatermarkedVideo = createServerOnlyFn(
         signal: timeout.signal
       })
 
-      if (!response.ok && response.status !== 404) {
+      if (!response.ok && response.status !== HTTP_STATUS.NOT_FOUND) {
         throw new Error(
           `Bunny Storage delete failed with status ${response.status}`
         )
@@ -254,7 +253,7 @@ export const checkWatermarkExists = createServerOnlyFn(
         signal: timeout.signal
       })
 
-      return response.ok || response.status === 206
+      return response.ok || response.status === HTTP_STATUS.PARTIAL_CONTENT
     } finally {
       timeout.clear()
     }

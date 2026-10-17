@@ -1,10 +1,10 @@
 import { expect, type Page } from '@playwright/test'
 import { prismaClient } from '~/db'
+import { m } from '~/paraglide/messages.js'
 import type { Locale } from '~/paraglide/runtime'
 import { STRIPE_TEST_CARD } from './constants'
 import { repeatUntilRequested } from './hydration'
 import { E2E_LOCALE } from './locales'
-import { m } from './messages'
 
 const SUBSCRIPTION_WRITE_TIMEOUT_MS = 15_000
 
@@ -19,7 +19,9 @@ export const startCheckout = async (
   await repeatUntilRequested(
     async () => {
       await page
-        .getByRole('button', { name: m.nav_upgrade_premium({}, { locale }) })
+        .getByRole('button', {
+          name: m.nav_upgrade_premium({}, { locale })
+        })
         .click()
     },
     { page, urlPattern: /subscription\/upgrade/u }
@@ -28,8 +30,18 @@ export const startCheckout = async (
   await page.waitForURL(/checkout\.stripe\.com/u)
 }
 
+type StripeHostedFieldId =
+  | 'cardNumber'
+  | 'cardExpiry'
+  | 'cardCvc'
+  | 'billingName'
+
+const getStripeHostedField = (page: Page, fieldId: StripeHostedFieldId) => {
+  return page.locator(`#${fieldId}`)
+}
+
 const fillStripeHostedCardForm = async (page: Page, cardholderName: string) => {
-  const cardNumber = page.locator('#cardNumber')
+  const cardNumber = getStripeHostedField(page, 'cardNumber')
   const isCardFormFoldedBehindWalletPicker = !(await cardNumber.isVisible())
 
   if (isCardFormFoldedBehindWalletPicker) {
@@ -37,9 +49,9 @@ const fillStripeHostedCardForm = async (page: Page, cardholderName: string) => {
   }
 
   await cardNumber.fill(STRIPE_TEST_CARD.number)
-  await page.locator('#cardExpiry').fill(STRIPE_TEST_CARD.expiry)
-  await page.locator('#cardCvc').fill(STRIPE_TEST_CARD.cvc)
-  await page.locator('#billingName').fill(cardholderName)
+  await getStripeHostedField(page, 'cardExpiry').fill(STRIPE_TEST_CARD.expiry)
+  await getStripeHostedField(page, 'cardCvc').fill(STRIPE_TEST_CARD.cvc)
+  await getStripeHostedField(page, 'billingName').fill(cardholderName)
 }
 
 export const payWithTestCard = async (page: Page, cardholderName: string) => {

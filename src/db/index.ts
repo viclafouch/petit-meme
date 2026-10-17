@@ -1,12 +1,13 @@
 import { PrismaPg } from '@prisma/adapter-pg'
 import { IS_PRODUCTION } from '~/constants/env'
+import { processEnvironment } from '~/env/process'
 import { PrismaClient } from './generated/prisma/client'
 
 export const DATABASE_POOL_MAX_CONNECTIONS = 5
 
 const prismaClientSingleton = () => {
   const adapter = new PrismaPg({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: processEnvironment.DATABASE_URL,
     max: DATABASE_POOL_MAX_CONNECTIONS,
     idleTimeoutMillis: 10_000,
     connectionTimeoutMillis: 5000
@@ -15,12 +16,10 @@ const prismaClientSingleton = () => {
   return new PrismaClient({ adapter })
 }
 
-// oxlint-disable-next-line no-shadow-restricted-names -- standard Prisma singleton pattern
-declare const globalThis: {
-  prismaGlobal: ReturnType<typeof prismaClientSingleton>
-} & typeof global
+declare global {
+  var prismaGlobal: ReturnType<typeof prismaClientSingleton> | undefined
+}
 
-// oxlint-disable-next-line typescript/no-unnecessary-condition -- globalThis.prismaGlobal may be undefined at first run
 export const prismaClient = globalThis.prismaGlobal ?? prismaClientSingleton()
 
 if (!IS_PRODUCTION) {

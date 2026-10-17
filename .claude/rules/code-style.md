@@ -14,7 +14,6 @@ Never change what the code does - only how it does it. All original features, ou
 **Never remove explicit types that serve as contracts** — return types that constrain a function's output to a specific shape or union, types validated against library/external types, or `as const satisfies Type` patterns. If an explicit type would catch a bug at compile time that inference alone would miss, it must stay.
 
 ### 2. Clarity Over Brevity
-- **Avoid nested ternaries** - prefer switch/if-else for multiple conditions
 - Choose explicit code over compact one-liners
 - Dense code is not better code
 
@@ -30,32 +29,14 @@ Avoid over-simplification that could:
 
 ### Naming Conventions
 - Variables: descriptive, meaningful names
-- Booleans: `is*`, `has*`, `should*`, `can*`
-- Boolean functions: `matchIs*`, `matchAs*`
-- Event handlers: `handle*`, `on*`
-- No single-letter variables
 - No abbreviations unless universal (`id`, `url`, `api`)
 
 ### Self-Documented Code
-- Code readable without comments
 - Complex logic extracted into well-named functions
-- Magic numbers replaced with named constants
-- No comments - code should speak for itself
-
-### Unicode
-- Write UTF-8 directly, never `\uXXXX` for printable characters: `"Début"` not `'D\u00e9but'`
-- Invisible characters (`\u00a0`, `\u200b`): use named constants
-
-### JSX
-- No empty lines between sibling JSX elements (blank lines are forbidden inside JSX blocks)
-
-### Conditionals
-- **Always use ternary** instead of `&&` for conditional expressions
 
 ### No Unnecessary Abstractions
 **FORBIDDEN:**
 - Wrapper functions that just call another function
-- Re-exporting without transformation
 - Abstractions "for future use"
 
 **Justified when:**
@@ -63,37 +44,20 @@ Avoid over-simplification that could:
 - Combining multiple calls
 - Providing simpler API for complex operations
 
-### Function Parameters
-- **Max 2 positional parameters** - use object destructuring beyond that
-- Define a dedicated type for the params object (named `*Params`)
-- Required properties first, optional last in type definition
-- Destructure directly in function signature, not in body
-
-### Arrow Functions
-- **Always use block body with explicit `return`** — never use implicit returns
-- **Never remove curly braces** from arrow functions
-- This applies to all arrow functions: callbacks, handlers, `.map()`, `.filter()`, etc.
-
 ### Oxlint Disables
 
-- **NEVER disable a rule at the file level** (`/* oxlint-disable rule-name */`) — only per-line (`// oxlint-disable-next-line rule-name`)
-- **Exception : `no-console`** — seule règle autorisée en disable global fichier (`/* oxlint-disable no-console */`)
-- Always include a description explaining why: `// oxlint-disable-next-line rule-name -- reason`
 - Before disabling, ask: can the rule be satisfied by fixing the code? If yes, fix it
 - A disable is only justified when the rule conflicts with a library API, a specific pattern that cannot be avoided, or a known oxlint false positive
 - If the same rule is disabled on many lines in a file, that is a code smell — reconsider the approach
 
 ### Code Structure
 - Functions do one thing well
-- Under 30 lines when possible
-- Max 3 levels of nesting
 - Early returns over nested conditions
 - Group related code together
 
 ### No Mutations
 
 Never mutate objects or arrays. Always return new instances.
-Use `toSorted()`, `toReversed()`, spread operators, etc.
 
 ### Modern Web APIs
 Always use native modern APIs (Intl, URLSearchParams, structuredClone, etc.) instead of manual implementations or libraries.

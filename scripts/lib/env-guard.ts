@@ -11,10 +11,12 @@ const getHost = (url: string) => {
 }
 
 export const logEnvironmentInfo = () => {
-  const dbHost = getHost(process.env.DATABASE_URL ?? '')
-  const algoliaIndex = process.env.VITE_ALGOLIA_INDEX ?? 'unknown'
-  const bunnyLibraryId = process.env.VITE_BUNNY_LIBRARY_ID ?? 'unknown'
-  const siteUrl = process.env.VITE_SITE_URL ?? 'unknown'
+  // oxlint-disable-next-line node/no-process-env -- the scripts' guard prints the raw environment a script is about to touch
+  const processEnvironment = process.env
+  const dbHost = getHost(processEnvironment.DATABASE_URL ?? '')
+  const algoliaIndex = processEnvironment.VITE_ALGOLIA_INDEX ?? 'unknown'
+  const bunnyLibraryId = processEnvironment.VITE_BUNNY_LIBRARY_ID ?? 'unknown'
+  const siteUrl = processEnvironment.VITE_SITE_URL ?? 'unknown'
 
   console.log(`Site URL:        ${siteUrl}`)
   console.log(`Database:        ${dbHost}`)

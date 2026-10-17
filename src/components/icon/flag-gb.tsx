@@ -1,6 +1,8 @@
 import React from 'react'
 
-export const FlagGb = (props: React.ComponentProps<'svg'>) => {
+type FlagGbProps = React.ComponentProps<'svg'>
+
+export const FlagGb = (props: FlagGbProps) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

@@ -1,4 +1,3 @@
-/* oxlint-disable no-await-in-loop */
 import { z } from 'zod'
 import { createFileRoute } from '@tanstack/react-router'
 import { prismaClient } from '~/db'
@@ -38,15 +37,19 @@ const processWithConcurrency = async <TItem>({
 }: ConcurrentProcessParams<TItem>) => {
   let currentIndex = 0
 
-  const worker = async () => {
-    while (currentIndex < items.length) {
-      const item = items[currentIndex]
-      currentIndex += 1
-
-      if (item) {
-        await handler(item)
-      }
+  const worker = async (): Promise<void> => {
+    if (currentIndex >= items.length) {
+      return
     }
+
+    const item = items[currentIndex]
+    currentIndex += 1
+
+    if (item !== undefined) {
+      await handler(item)
+    }
+
+    return worker()
   }
 
   const workers = Array.from(
@@ -57,6 +60,44 @@ const processWithConcurrency = async <TItem>({
   )
 
   await Promise.all(workers)
+}
+
+type SyncTitlesFromParams = {
+  totalProcessed: number
+  cursor?: string
+}
+
+const syncTitlesFrom = async ({
+  totalProcessed,
+  cursor
+}: SyncTitlesFromParams): Promise<number> => {
+  const memes = await prismaClient.meme.findMany({
+    take: BATCH_SIZE,
+    ...(cursor === undefined ? {} : { skip: 1, cursor: { id: cursor } }),
+    orderBy: { id: 'asc' },
+    include: { video: true }
+  })
+
+  if (memes.length === 0) {
+    return totalProcessed
+  }
+
+  await processWithConcurrency({
+    items: memes,
+    concurrency: CONCURRENCY,
+    handler: async (meme) => {
+      await updateVideoTitle(meme.video.bunnyId, meme.title)
+      log.debug({ title: meme.title }, 'Updated meme title on Bunny')
+    }
+  })
+
+  const processedCount = totalProcessed + memes.length
+  log.info({ totalProcessed: processedCount }, 'Batch processed')
+
+  return syncTitlesFrom({
+    totalProcessed: processedCount,
+    cursor: memes.at(-1)?.id
+  })
 }
 
 export const Route = createFileRoute('/api/cron/sync-bunny-titles')({
@@ -70,35 +111,7 @@ export const Route = createFileRoute('/api/cron/sync-bunny-titles')({
         }
 
         try {
-          let cursor: string | undefined
-          let totalProcessed = 0
-
-          // oxlint-disable-next-line typescript/no-unnecessary-condition -- cursor-based pagination loop
-          while (true) {
-            const memes = await prismaClient.meme.findMany({
-              take: BATCH_SIZE,
-              ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
-              orderBy: { id: 'asc' },
-              include: { video: true }
-            })
-
-            if (memes.length === 0) {
-              break
-            }
-
-            await processWithConcurrency({
-              items: memes,
-              concurrency: CONCURRENCY,
-              handler: async (meme) => {
-                await updateVideoTitle(meme.video.bunnyId, meme.title)
-                log.debug({ title: meme.title }, 'Updated meme title on Bunny')
-              }
-            })
-
-            totalProcessed += memes.length
-            log.info({ totalProcessed }, 'Batch processed')
-            cursor = memes.at(-1)?.id
-          }
+          const totalProcessed = await syncTitlesFrom({ totalProcessed: 0 })
 
           log.info({ totalProcessed }, 'Completed')
 

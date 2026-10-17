@@ -3,7 +3,7 @@ import { RATE_LIMIT_ERROR_MESSAGE } from '~/constants/rate-limit'
 const DEFAULT_ERROR_MESSAGE = "Une erreur s'est produite"
 
 export const getErrorMessage = (error: unknown) => {
-  if (Error.isError(error) && error.message) {
+  if (Error.isError(error) && error.message !== '') {
     return error.message
   }
 

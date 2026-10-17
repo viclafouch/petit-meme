@@ -6,17 +6,22 @@ import { IMMUTABLE_CACHE_CONTROL } from '~/constants/http'
 import { OG_IMAGE_HEIGHT, OG_IMAGE_WIDTH } from '~/constants/og'
 import { clientEnv } from '~/env/client'
 import { captureWithFeature } from '~/lib/sentry'
-import type { OgDefaultedType } from '~/lib/seo'
-import { OG_DEFAULTED_TYPE_VALUES, OG_TITLED_TYPE_VALUES } from '~/lib/seo'
-import type { Locale } from '~/paraglide/runtime'
-import { locales } from '~/paraglide/runtime'
+import {
+  type OgDefaultedType,
+  OG_DEFAULTED_TYPE_VALUES,
+  OG_TITLED_TYPE_VALUES
+} from '~/lib/seo'
+import { type Locale, locales } from '~/paraglide/runtime'
+
+const OG_SUBTITLE_MAX_LENGTH = 500
+const OG_TITLE_MAX_LENGTH = 200
 
 const OG_SHARED_SHAPE = {
-  subtitle: z.string().max(500).optional(),
+  subtitle: z.string().max(OG_SUBTITLE_MAX_LENGTH).optional(),
   locale: z.enum(locales).default('fr')
 }
 
-const OG_TITLE = z.string().min(1).max(200)
+const OG_TITLE = z.string().min(1).max(OG_TITLE_MAX_LENGTH)
 
 const OG_QUERY_SCHEMA = z.discriminatedUnion('type', [
   z.object({ type: z.literal('home'), ...OG_SHARED_SHAPE }),

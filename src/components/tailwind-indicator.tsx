@@ -1,11 +1,4 @@
-import React from 'react'
-import { IS_PRODUCTION } from '~/constants/env'
-
 export const TailwindIndicator = () => {
-  if (IS_PRODUCTION) {
-    return null
-  }
-
   return (
     <div className="fixed bottom-1 right-1 z-50 flex size-6 items-center justify-center rounded-full bg-gray-800 p-3 font-mono text-xs text-white *:shrink-0">
       <div className="block sm:hidden">xs</div>

@@ -1,12 +1,12 @@
-import type {
-  ClickedObjectIDs,
-  ClickedObjectIDsAfterSearch,
-  ConvertedObjectIDs,
-  ConvertedObjectIDsAfterSearch,
-  EventsItems,
-  ViewedObjectIDs
+import {
+  type ClickedObjectIDs,
+  type ClickedObjectIDsAfterSearch,
+  type ConvertedObjectIDs,
+  type ConvertedObjectIDsAfterSearch,
+  type EventsItems,
+  type ViewedObjectIDs,
+  insightsClient
 } from '@algolia/client-insights'
-import { insightsClient } from '@algolia/client-insights'
 import * as Sentry from '@sentry/tanstackstart-react'
 import { createClientOnlyFn } from '@tanstack/react-start'
 import { COOKIE_ALGOLIA_USER_TOKEN_KEY } from '~/constants/cookie'
@@ -21,7 +21,6 @@ const algoliaInsights = insightsClient(
 )
 
 function logInsightsError(error: unknown) {
-  // oxlint-disable-next-line no-console
   console.warn('[Algolia Insights]', error)
   Sentry.captureException(error)
 }
@@ -40,8 +39,12 @@ function getInsightsIndex() {
   return `${clientEnv.VITE_ALGOLIA_INDEX}_${getLocale()}`
 }
 
-function pushEvent(event: EventsItems) {
-  algoliaInsights.pushEvents({ events: [event] }).catch(logInsightsError)
+async function pushEvent(event: EventsItems) {
+  try {
+    await algoliaInsights.pushEvents({ events: [event] })
+  } catch (error) {
+    logInsightsError(error)
+  }
 }
 
 export type ConversionEventName =
@@ -84,13 +87,13 @@ export const sendClickEvent = createClientOnlyFn(
     }
 
     if (queryID) {
-      pushEvent({
+      void pushEvent({
         ...base,
         queryID,
         positions: [position]
       } satisfies ClickedObjectIDsAfterSearch)
     } else {
-      pushEvent(base satisfies ClickedObjectIDs)
+      void pushEvent(base satisfies ClickedObjectIDs)
     }
   }
 )
@@ -122,9 +125,12 @@ export const sendConversionEvent = createClientOnlyFn(
     }
 
     if (queryID) {
-      pushEvent({ ...base, queryID } satisfies ConvertedObjectIDsAfterSearch)
+      void pushEvent({
+        ...base,
+        queryID
+      } satisfies ConvertedObjectIDsAfterSearch)
     } else {
-      pushEvent(base satisfies ConvertedObjectIDs)
+      void pushEvent(base satisfies ConvertedObjectIDs)
     }
   }
 )
@@ -147,7 +153,7 @@ export const sendViewEvent = createClientOnlyFn(
       offset < objectIDs.length;
       offset += ALGOLIA_MAX_OBJECTS_PER_EVENT
     ) {
-      pushEvent({
+      void pushEvent({
         eventType: 'view',
         eventName: 'Memes Viewed',
         index: getInsightsIndex(),

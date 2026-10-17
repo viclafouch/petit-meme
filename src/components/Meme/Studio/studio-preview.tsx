@@ -15,7 +15,7 @@ type ProcessedRatioState = {
   ratio: number
 }
 
-type StudioPreviewParams = {
+type StudioPreviewProps = {
   bunnyId: string
   title: string
   isProcessing: boolean
@@ -24,11 +24,11 @@ type StudioPreviewParams = {
   onCancel: () => void
 }
 
-type OriginalVideoParams = {
+type OriginalVideoProps = {
   bunnyId: string
 }
 
-const OriginalVideo = ({ bunnyId }: OriginalVideoParams) => {
+const OriginalVideo = ({ bunnyId }: OriginalVideoProps) => {
   const { videoRef } = useMemeHls({ bunnyId })
 
   return (
@@ -41,7 +41,7 @@ const OriginalVideo = ({ bunnyId }: OriginalVideoParams) => {
   )
 }
 
-type ProcessedVideoParams = {
+type ProcessedVideoProps = {
   url: string
   onAspectRatioDetected: (ratio: number) => void
 }
@@ -49,7 +49,7 @@ type ProcessedVideoParams = {
 const ProcessedVideo = ({
   url,
   onAspectRatioDetected
-}: ProcessedVideoParams) => {
+}: ProcessedVideoProps) => {
   return (
     <MemeVideoPlayer
       src={url}
@@ -73,7 +73,7 @@ export const StudioPreview = ({
   progress,
   processedVideoUrl,
   onCancel
-}: StudioPreviewParams) => {
+}: StudioPreviewProps) => {
   const containerRef = React.useRef<HTMLDivElement>(null)
   const posterUrl = buildVideoImageUrl(bunnyId)
   const posterRatio = useImageAspectRatio(posterUrl)
@@ -101,9 +101,8 @@ export const StudioPreview = ({
               decoding="async"
             />
           </Skeleton>
-          <div
+          <output
             className="absolute flex flex-col gap-2 px-4 w-full text-center max-w-md items-center justify-center"
-            role="status"
             aria-live="polite"
           >
             <Badge variant="outline">
@@ -124,7 +123,7 @@ export const StudioPreview = ({
             >
               {m.common_cancel()}
             </Button>
-          </div>
+          </output>
         </div>
       )
     }

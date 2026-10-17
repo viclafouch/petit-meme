@@ -2,13 +2,18 @@ export function capitalize(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1)
 }
 
+const TRUNCATED_URL_MAX_LENGTH = 50
+
 export function truncateUrl(url: string) {
   try {
     const parsed = new URL(url)
 
-    return `${parsed.hostname}${parsed.pathname}`.slice(0, 50)
+    return `${parsed.hostname}${parsed.pathname}`.slice(
+      0,
+      TRUNCATED_URL_MAX_LENGTH
+    )
   } catch {
-    return url.slice(0, 50)
+    return url.slice(0, TRUNCATED_URL_MAX_LENGTH)
   }
 }
 

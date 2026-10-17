@@ -15,7 +15,7 @@ export const useAiSearchPrompt = () => {
 
     if (handedOverPrompt) {
       sessionStorage.removeItem(AI_SEARCH_PROMPT_STORAGE_KEY)
-      // oxlint-disable-next-line react/react-compiler -- reading sessionStorage is what this effect is for, and its value cannot be known during the render that the server also runs
+      // oxlint-disable-next-line react/set-state-in-effect -- sessionStorage only exists after hydration, the server render cannot know the handed over prompt
       setPrompt(handedOverPrompt)
     }
   }, [])

@@ -5,30 +5,21 @@ import type { MemeWithVideo } from '~/constants/meme'
 import { buildVideoImageUrl } from '~/lib/bunny'
 import { m } from '~/paraglide/messages.js'
 
-type StudioRelatedMemesParams = {
+type StudioRelatedMemesProps = {
   currentMemeId: string
   relatedMemesPromise: Promise<MemeWithVideo[]>
 }
 
-export const StudioRelatedMemes = ({
-  currentMemeId,
-  relatedMemesPromise
-}: StudioRelatedMemesParams) => {
-  const relatedMemes = React.use(relatedMemesPromise)
+type StudioRelatedMemesGridProps = {
+  memes: MemeWithVideo[]
+}
 
-  const filteredMemes = relatedMemes.filter((meme) => {
-    return meme.id !== currentMemeId
-  })
-
-  if (filteredMemes.length === 0) {
-    return null
-  }
-
+const StudioRelatedMemesGrid = ({ memes }: StudioRelatedMemesGridProps) => {
   return (
     <div className="flex flex-col gap-2.5">
       <Label>{m.studio_try_another_meme()}</Label>
       <div className="grid grid-cols-2 gap-2">
-        {filteredMemes.map((meme) => {
+        {memes.map((meme) => {
           return (
             <Link
               key={meme.id}
@@ -44,7 +35,7 @@ export const StudioRelatedMemes = ({
                 decoding="async"
               />
               <div className="absolute inset-x-0 bottom-0 bg-black/70 px-1.5 py-1">
-                <span className="text-[11px] text-white leading-tight line-clamp-1">
+                <span className="text-caption text-white leading-tight line-clamp-1">
                   {meme.title}
                 </span>
               </div>
@@ -54,4 +45,19 @@ export const StudioRelatedMemes = ({
       </div>
     </div>
   )
+}
+
+export const StudioRelatedMemes = ({
+  currentMemeId,
+  relatedMemesPromise
+}: StudioRelatedMemesProps) => {
+  const relatedMemes = React.use(relatedMemesPromise)
+
+  const filteredMemes = relatedMemes.filter((meme) => {
+    return meme.id !== currentMemeId
+  })
+
+  return filteredMemes.length > 0 ? (
+    <StudioRelatedMemesGrid memes={filteredMemes} />
+  ) : null
 }

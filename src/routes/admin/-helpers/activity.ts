@@ -11,11 +11,7 @@ import {
 import { z } from 'zod'
 import { ActivityEventType } from '~/db/generated/prisma/enums'
 import { getLocale } from '~/paraglide/runtime'
-import type { StatTileEntry } from '~/routes/admin/-components/stat-tiles'
-import type {
-  ActivityTotals,
-  AdminActivityRow
-} from '~/routes/admin/-server/activity'
+import type { AdminActivityRow } from '~/routes/admin/-server/activity'
 
 type ActivityTypeDisplay = {
   label: string
@@ -68,24 +64,6 @@ export const ACTIVITY_TYPE_DISPLAY = {
 
 export const ACTIVITY_TYPE_OPTIONS = Object.values(ActivityEventType)
 
-const ACTIVITY_TILE_TYPES = [
-  ActivityEventType.VIEW,
-  ActivityEventType.DOWNLOAD,
-  ActivityEventType.SHARE,
-  ActivityEventType.GENERATION
-] as const satisfies readonly ActivityEventType[]
-
-export function buildActivityTiles(totals: ActivityTotals) {
-  return ACTIVITY_TILE_TYPES.map((type) => {
-    return {
-      key: type,
-      label: ACTIVITY_TYPE_DISPLAY[type].pluralLabel,
-      value: totals[type],
-      icon: <ActivityTypeIcon type={type} className="size-4" />
-    }
-  }) satisfies StatTileEntry[]
-}
-
 export function formatEventCount(total: number) {
   const formattedTotal = new Intl.NumberFormat(getLocale()).format(total)
 
@@ -97,12 +75,15 @@ export function formatEventCount(total: number) {
 const ACTIVITY_METADATA_SCHEMA = z
   .object({ prompt: z.string(), plan: z.string() })
   .partial()
-  .catch({})
 
 function getActivityMetadataText(metadata: AdminActivityRow['metadata']) {
-  const { prompt, plan } = ACTIVITY_METADATA_SCHEMA.parse(metadata)
+  const result = ACTIVITY_METADATA_SCHEMA.safeParse(metadata)
 
-  return prompt ?? plan ?? null
+  if (!result.success) {
+    return null
+  }
+
+  return result.data.prompt ?? result.data.plan ?? null
 }
 
 type ActivityEntryParams = Pick<AdminActivityRow, 'type' | 'meme' | 'metadata'>
@@ -117,18 +98,4 @@ export function formatActivityEntry({
     getActivityMetadataText(metadata) ??
     ACTIVITY_TYPE_DISPLAY[type].label
   )
-}
-
-type ActivityTypeIconParams = {
-  type: ActivityEventType
-  className?: string
-}
-
-export const ActivityTypeIcon = ({
-  type,
-  className
-}: ActivityTypeIconParams) => {
-  const Icon = ACTIVITY_TYPE_DISPLAY[type].icon
-
-  return <Icon className={className} aria-hidden />
 }

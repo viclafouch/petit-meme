@@ -1,7 +1,12 @@
 import { OG_IMAGE_HEIGHT, OG_IMAGE_WIDTH } from '~/constants/og'
 
+const SEED_SCALE = 10_000
+const STAR_MIN_OPACITY = 0.3
+const STAR_OPACITY_RANGE = 0.7
+const OPACITY_SEED_STRIDE = 3
+
 const seededRandom = (seed: number) => {
-  const x = Math.sin(seed) * 10_000
+  const x = Math.sin(seed) * SEED_SCALE
 
   return x - Math.floor(x)
 }
@@ -18,7 +23,9 @@ const generateStarShadows = ({ count, size, seed }: StarLayerParams) => {
   return Array.from({ length: count }, (_, index) => {
     const px = Math.floor(seededRandom(seed + index * 2) * OG_IMAGE_WIDTH)
     const py = Math.floor(seededRandom(seed + index * 2 + 1) * OG_IMAGE_HEIGHT)
-    const opacity = 0.3 + seededRandom(seed + index * 3) * 0.7
+    const opacity =
+      STAR_MIN_OPACITY +
+      seededRandom(seed + index * OPACITY_SEED_STRIDE) * STAR_OPACITY_RANGE
 
     return `${px}px ${py}px 0px ${spread} rgba(255,255,255,${opacity.toFixed(2)})`
   }).join(', ')

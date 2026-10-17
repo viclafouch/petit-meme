@@ -3,12 +3,12 @@ import { useQueryClient } from '@tanstack/react-query'
 import { type LinkOptions, useRouteContext } from '@tanstack/react-router'
 import { type BillingPeriod, PREMIUM_PLAN_PRICING } from '~/constants/plan'
 import { getErrorMessage } from '~/helpers/error'
+import { useShowDialog } from '~/hooks/use-show-dialog'
 import { authClient } from '~/lib/auth-client'
 import { getActiveSubscriptionQueryOpts } from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
-import { useShowDialog } from '~/stores/dialog.store'
 
 export const useStripeCheckout = () => {
   const { user } = useRouteContext({ from: '__root__' })
@@ -34,7 +34,7 @@ export const useStripeCheckout = () => {
       const { error } = await promise
 
       if (error) {
-        throw error
+        throw new Error(getErrorMessage(error), { cause: error })
       }
     } catch (error) {
       captureWithFeature(error, 'stripe-checkout')
@@ -49,9 +49,11 @@ export const useStripeCheckout = () => {
     }
 
     try {
-      const promise = new Promise((resolve) => {
-        setTimeout(resolve, 1)
-      }).then(async () => {
+      const runCheckout = async () => {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 1)
+        })
+
         const activeSubscription = await queryClient.query(
           getActiveSubscriptionQueryOpts()
         )
@@ -72,9 +74,11 @@ export const useStripeCheckout = () => {
         })
 
         if (error) {
-          throw error
+          throw new Error(getErrorMessage(error), { cause: error })
         }
-      })
+      }
+
+      const promise = runCheckout()
 
       toast.promise(promise, {
         loading: m.common_loading(),

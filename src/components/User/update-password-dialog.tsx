@@ -131,7 +131,7 @@ const UpdatePasswordForm = () => {
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(event) => {
-                      return field.handleChange(event.target.value)
+                      field.handleChange(event.target.value)
                     }}
                   />
                 </FormControl>
@@ -158,7 +158,7 @@ const UpdatePasswordForm = () => {
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(event) => {
-                      return field.handleChange(event.target.value)
+                      field.handleChange(event.target.value)
                     }}
                   />
                 </FormControl>
@@ -185,7 +185,7 @@ const UpdatePasswordForm = () => {
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(event) => {
-                      return field.handleChange(event.target.value)
+                      field.handleChange(event.target.value)
                     }}
                   />
                 </FormControl>
@@ -230,10 +230,12 @@ const UpdatePasswordForm = () => {
   )
 }
 
+type UpdatePasswordDialogProps = WithDialog<{ user: User }>
+
 export const UpdatePasswordDialog = ({
   open,
   onOpenChange
-}: WithDialog<{ user: User }>) => {
+}: UpdatePasswordDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">

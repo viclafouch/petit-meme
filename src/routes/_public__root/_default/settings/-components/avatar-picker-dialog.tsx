@@ -26,12 +26,12 @@ const AVATAR_TILE_CLASS_NAME = cn(
   SELECTED_TILE_RING_CLASS_NAME
 )
 
-type AvatarSectionParams = {
+type AvatarSectionProps = {
   label: string
   children: React.ReactNode
 }
 
-const AvatarSection = ({ label, children }: AvatarSectionParams) => {
+const AvatarSection = ({ label, children }: AvatarSectionProps) => {
   return (
     <div className="flex flex-col gap-2">
       <p className="text-muted-foreground text-xs">{label}</p>
@@ -40,7 +40,7 @@ const AvatarSection = ({ label, children }: AvatarSectionParams) => {
   )
 }
 
-type AvatarTileParams = {
+type AvatarTileProps = {
   selection: AvatarSelection
   image: string
   label: string
@@ -52,7 +52,7 @@ const AvatarTile = ({
   image,
   label,
   isSelected
-}: AvatarTileParams) => {
+}: AvatarTileProps) => {
   return (
     <ToggleGroupItem
       value={selection}
@@ -73,13 +73,13 @@ const AvatarTile = ({
   )
 }
 
-type AvatarPickerDialogParams = WithDialog<{ user: SessionUser }>
+type AvatarPickerDialogProps = WithDialog<{ user: SessionUser }>
 
 export const AvatarPickerDialog = ({
   open,
   onOpenChange,
   user
-}: AvatarPickerDialogParams) => {
+}: AvatarPickerDialogProps) => {
   const updateAvatarMutation = useUpdateAvatar()
 
   const providerAvatar = user.providerAvatar ?? null
@@ -114,7 +114,7 @@ export const AvatarPickerDialog = ({
           }}
           aria-label={m.settings_avatar_change()}
           aria-busy={updateAvatarMutation.isPending}
-          className="flex max-h-[60dvh] w-full flex-col items-stretch gap-4 overflow-y-auto p-1"
+          className="flex max-h-dvh-60 w-full flex-col items-stretch gap-4 overflow-y-auto p-1"
         >
           {providerAvatar ? (
             <>

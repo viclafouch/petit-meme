@@ -17,15 +17,22 @@ export const LOCALE_META = {
   en: { label: 'English' }
 } as const satisfies Record<Locale, LocaleMeta>
 
-type ContentLocaleMessageKey = `meme_content_locale_${MemeContentLocale}`
+const CONTENT_LOCALE_LABELS = {
+  FR: m.meme_content_locale_FR,
+  EN: m.meme_content_locale_EN,
+  UNIVERSAL: m.meme_content_locale_UNIVERSAL
+} as const satisfies Record<MemeContentLocale, () => string>
 
 export const getContentLocaleLabel = (
   contentLocale: MemeContentLocale
 ): string => {
-  const key: ContentLocaleMessageKey = `meme_content_locale_${contentLocale}`
+  return CONTENT_LOCALE_LABELS[contentLocale]()
+}
 
-  // oxlint-disable-next-line import/namespace -- accès dynamique type-safe aux messages Paraglide (key est une union de littéraux)
-  return m[key]()
+export const matchIsMemeContentLocale = (
+  value: string
+): value is MemeContentLocale => {
+  return Object.values<string>(MemeContentLocaleEnum).includes(value)
 }
 
 export const getContentLocaleOptions = () => {
@@ -103,9 +110,7 @@ export const parseContentLocalesParam = (
     return [...DEFAULT_CONTENT_LOCALE_FILTER[locale]]
   }
 
-  return param.split(',').filter((value): value is MemeContentLocale => {
-    return value in MemeContentLocaleEnum
-  })
+  return param.split(',').filter(matchIsMemeContentLocale)
 }
 
 export const serializeContentLocalesParam = (
@@ -134,27 +139,31 @@ export const resolveVisibleContentLocales = (
   return contentLocalesWithUniversal(contentLocales)
 }
 
-export const CONTENT_LOCALE_TO_SITE_LOCALES = Object.fromEntries(
-  Object.values(MemeContentLocaleEnum).map((contentLocale) => {
-    return [
-      contentLocale,
-      locales.filter((locale) => {
-        return VISIBLE_CONTENT_LOCALES[locale].includes(contentLocale)
-      })
-    ]
+const findSiteLocalesShowing = (contentLocale: MemeContentLocale) => {
+  return locales.filter((locale) => {
+    return VISIBLE_CONTENT_LOCALES[locale].includes(contentLocale)
   })
-) as Record<MemeContentLocale, Locale[]>
-
-export const buildLocaleRecord = <T>(factory: (locale: Locale) => T) => {
-  return Object.fromEntries(
-    locales.map((locale) => {
-      return [locale, factory(locale)]
-    })
-  ) as Record<Locale, T>
 }
 
-export const findTranslationByLocale = <T extends { locale: string }>(
-  translations: T[],
+export const CONTENT_LOCALE_TO_SITE_LOCALES = {
+  FR: findSiteLocalesShowing(MemeContentLocaleEnum.FR),
+  EN: findSiteLocalesShowing(MemeContentLocaleEnum.EN),
+  UNIVERSAL: findSiteLocalesShowing(MemeContentLocaleEnum.UNIVERSAL)
+} as const satisfies Record<MemeContentLocale, Locale[]>
+
+export const buildLocaleRecord = <TValue>(
+  factory: (locale: Locale) => TValue
+): Record<Locale, TValue> => {
+  return {
+    fr: factory('fr'),
+    en: factory('en')
+  }
+}
+
+export const findTranslationByLocale = <
+  TTranslation extends { locale: string }
+>(
+  translations: TTranslation[],
   locale: string
 ) => {
   return translations.find((translation) => {
@@ -162,10 +171,10 @@ export const findTranslationByLocale = <T extends { locale: string }>(
   })
 }
 
-const findTranslationWithPriority = <T extends { locale: string }>(
-  translations: T[],
+const findTranslationWithPriority = <TTranslation extends { locale: string }>(
+  translations: TTranslation[],
   localePriority: readonly string[]
-): T | undefined => {
+): TTranslation | undefined => {
   for (const locale of localePriority) {
     const match = findTranslationByLocale(translations, locale)
 
@@ -174,7 +183,6 @@ const findTranslationWithPriority = <T extends { locale: string }>(
     }
   }
 
-  // oxlint-disable-next-line typescript/consistent-return -- explicit undefined return for no-match case, function returns T | undefined
   return undefined
 }
 
@@ -217,9 +225,9 @@ type MemeWithTranslationsToResolve = {
 }
 
 export const mapMemesWithResolvedTranslations = <
-  T extends MemeWithTranslationsToResolve
+  TMeme extends MemeWithTranslationsToResolve
 >(
-  memes: T[],
+  memes: TMeme[],
   locale: Locale
 ) => {
   return memes.map(({ translations, ...meme }) => {

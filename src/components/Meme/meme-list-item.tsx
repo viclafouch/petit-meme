@@ -10,7 +10,7 @@ import {
 import { motion } from 'motion/react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useRouteContext } from '@tanstack/react-router'
-import { BunnyPlayIcon } from '~/components/icon'
+import { BunnyPlayIcon } from '~/components/icon/play'
 import { MemeLanguageBadge } from '~/components/Meme/meme-language-badge'
 import { MemeVideoThumbnail } from '~/components/Meme/meme-video-thumbnail'
 import {
@@ -22,16 +22,19 @@ import {
 import type { MemeWithVideo } from '~/constants/meme'
 import { matchIsContentLocaleForeign } from '~/helpers/i18n-content'
 import { useMemeExport } from '~/hooks/use-meme-export'
+import { useShowDialog } from '~/hooks/use-show-dialog'
 import { useToggleBookmark } from '~/hooks/use-toggle-bookmark'
-import { sendClickEvent, sendConversionEvent } from '~/lib/algolia-insights'
-import type { ConversionEventName } from '~/lib/algolia-insights'
+import {
+  sendClickEvent,
+  sendConversionEvent,
+  type ConversionEventName
+} from '~/lib/algolia-insights'
 import { getFavoritesMemesQueryOpts } from '~/lib/queries'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
-import { useShowDialog } from '~/stores/dialog.store'
 
-export type MemeListItemParams = {
+export type MemeListItemProps = {
   meme: MemeWithVideo
   layoutContext: string
   size: keyof typeof sizes
@@ -55,22 +58,24 @@ const sizes = {
   }
 } as const satisfies Record<string, Record<string, string>>
 
-type FavoriteItemParams = {
+type FavoriteItemProps = {
   meme: MemeWithVideo
   queryID?: string
   authenticatedUserToken?: string
 }
 
+type FavoriteItemGuardProps = FavoriteItemProps
+
 const FavoriteItem = ({
   meme,
   queryID,
   authenticatedUserToken
-}: FavoriteItemParams) => {
-  const query = useQuery(getFavoritesMemesQueryOpts())
+}: FavoriteItemProps) => {
+  const favoritesMemesQuery = useQuery(getFavoritesMemesQueryOpts())
 
   const { isMemeBookmarked, isPending, toggleBookmark } = useToggleBookmark({
     meme,
-    bookmarks: query.data?.bookmarks
+    bookmarks: favoritesMemesQuery.data?.bookmarks
   })
 
   const handleToggleFavorite = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -103,7 +108,7 @@ const FavoriteItemGuard = ({
   meme,
   queryID,
   authenticatedUserToken
-}: FavoriteItemParams) => {
+}: FavoriteItemGuardProps) => {
   const { user } = useRouteContext({ from: '__root__' })
   const showDialog = useShowDialog()
 
@@ -140,7 +145,7 @@ export const MemeListItem = React.memo(
     queryID,
     position,
     authenticatedUserToken
-  }: MemeListItemParams) => {
+  }: MemeListItemProps) => {
     const shareMutation = useMemeExport({ mode: 'share' })
     const downloadMutation = useMemeExport({ mode: 'download' })
 
@@ -163,10 +168,9 @@ export const MemeListItem = React.memo(
     }
 
     return (
-      <motion.div
+      <motion.li
         className="relative flex w-full flex-col gap-2 text-sm sm:min-w-0 group"
         layoutId={`${layoutContext}-item-${meme.id}`}
-        role="listitem"
       >
         <motion.div className="group relative aspect-video w-full text-sm overflow-hidden rounded-lg border border-white/10">
           <MemeVideoThumbnail
@@ -202,7 +206,7 @@ export const MemeListItem = React.memo(
               {highlightedTitle ? (
                 <span
                   className="[&>em]:not-italic [&>em]:bg-yellow-200 [&>em]:text-black [&>em]:rounded-sm"
-                  // oxlint-disable-next-line react/no-danger
+                  // oxlint-disable-next-line react/no-danger -- Algolia returns the highlighted title as HTML with <em> tags
                   dangerouslySetInnerHTML={{ __html: highlightedTitle }}
                 />
               ) : (
@@ -246,7 +250,7 @@ export const MemeListItem = React.memo(
                   onClick={() => {
                     handleTrackConversion('Meme Shared')
 
-                    return shareMutation.trigger(meme)
+                    shareMutation.trigger(meme)
                   }}
                   className="md:hidden"
                 >
@@ -257,7 +261,7 @@ export const MemeListItem = React.memo(
                   onClick={() => {
                     handleTrackConversion('Meme Downloaded')
 
-                    return downloadMutation.trigger(meme)
+                    downloadMutation.trigger(meme)
                   }}
                 >
                   <Download />
@@ -272,7 +276,7 @@ export const MemeListItem = React.memo(
             </DropdownMenu>
           </div>
         </div>
-      </motion.div>
+      </motion.li>
     )
   }
 )

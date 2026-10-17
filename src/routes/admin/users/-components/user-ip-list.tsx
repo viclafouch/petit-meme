@@ -6,11 +6,11 @@ import { VisitorIpLink } from '~/routes/admin/-components/visitor-ip-link'
 import { formatEventCount } from '~/routes/admin/-helpers/activity'
 import type { AdminUserDetailPayload } from '~/routes/admin/-server/user-detail'
 
-type UserIpListParams = {
+type UserIpListProps = {
   ipAddresses: AdminUserDetailPayload['ipAddresses']
 }
 
-export const UserIpList = ({ ipAddresses }: UserIpListParams) => {
+export const UserIpList = ({ ipAddresses }: UserIpListProps) => {
   const locale = getLocale()
 
   return (
@@ -28,7 +28,7 @@ export const UserIpList = ({ ipAddresses }: UserIpListParams) => {
           ),
           subtitle: entry.lastSeenAt
             ? formatRelativeTime(new Date(entry.lastSeenAt), locale)
-            : null,
+            : undefined,
           trailing: formatEventCount(entry.eventCount)
         }
       })}

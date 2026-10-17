@@ -2,7 +2,7 @@ import { Link } from '@tanstack/react-router'
 import { CountryFlag } from '~/components/country-flag'
 import { cn } from '~/lib/utils'
 
-type VisitorIpLinkParams = {
+type VisitorIpLinkProps = {
   ipAddress: string
   country: string | null
   className?: string
@@ -12,7 +12,7 @@ export const VisitorIpLink = ({
   ipAddress,
   country,
   className
-}: VisitorIpLinkParams) => {
+}: VisitorIpLinkProps) => {
   return (
     <Link
       to="/admin/activity/$ip"

@@ -57,11 +57,11 @@ const EURO_FORMAT_OPTIONS = {
   trailingZeroDisplay: 'stripIfInteger'
 } as const satisfies Intl.NumberFormatOptions
 
-type FeatureItemParams = {
+type FeatureItemProps = {
   feature: Plan['features'][number]
 }
 
-const FeatureItem = ({ feature }: FeatureItemParams) => {
+const FeatureItem = ({ feature }: FeatureItemProps) => {
   const { icon: Icon, className } = FEATURE_STATUS_STATIC_CONFIG[feature.status]
 
   return (
@@ -86,7 +86,7 @@ const FeatureItem = ({ feature }: FeatureItemParams) => {
   )
 }
 
-type PricingCardParams = Plan & {
+type PricingCardProps = Plan & {
   billingPeriod: BillingPeriod
   isActive: boolean
   onChangePlan: () => void
@@ -103,7 +103,7 @@ export const PricingCard = ({
   billingPeriod,
   onChangePlan,
   className
-}: PricingCardParams) => {
+}: PricingCardProps) => {
   const currentPricing = pricing[billingPeriod]
   const periodLabel = getBillingPeriodLabel(billingPeriod)
   const isFree = currentPricing.priceInCents === 0
@@ -115,7 +115,7 @@ export const PricingCard = ({
       data-highlighted={isHighlighted || undefined}
       className={cn(
         'grid row-span-4 grid-rows-subgrid py-8',
-        'data-highlighted:animate-background-shine data-highlighted:border-amber-700/25 data-highlighted:bg-[linear-gradient(110deg,#fff,45%,#fffbeb,55%,#fff)] data-highlighted:bg-size-[200%_100%] data-highlighted:transition-colors dark:data-highlighted:border-amber-400/20 dark:data-highlighted:bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)]',
+        'data-highlighted:animate-background-shine data-highlighted:border-amber-700/25 data-highlighted:shine-gradient-light data-highlighted:shine-size data-highlighted:transition-colors dark:data-highlighted:border-amber-400/20 dark:data-highlighted:shine-gradient-dark',
         className
       )}
     >

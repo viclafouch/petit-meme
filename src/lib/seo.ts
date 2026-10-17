@@ -23,6 +23,7 @@ import { LOGO_PATH, SITE_NAME } from '~/constants/branding'
 import type { MemeWithCategories, MemeWithVideo } from '~/constants/meme'
 import { OG_IMAGE_HEIGHT, OG_IMAGE_WIDTH } from '~/constants/og'
 import type { Plan } from '~/constants/plan'
+import { ONE_HOUR_IN_SECONDS, SECONDS_PER_MINUTE } from '~/constants/time'
 import type { CategoryModel } from '~/db/generated/prisma/models'
 import { clientEnv } from '~/env/client'
 import { convertCentsToEuros } from '~/helpers/number'
@@ -36,9 +37,9 @@ import {
   baseLocale,
   getLocale,
   locales,
-  localizeUrl
+  localizeUrl,
+  type Locale
 } from '~/paraglide/runtime'
-import type { Locale } from '~/paraglide/runtime'
 
 export const websiteOrigin = clientEnv.VITE_SITE_URL
 const websiteId = `${websiteOrigin}/#website`
@@ -115,7 +116,7 @@ export const buildUrl = (pathname: string, locale?: Locale): string => {
   try {
     const baseUrl = new URL(pathname, websiteOrigin).href
 
-    if (!locale || locale === baseLocale) {
+    if (locale === undefined || locale === baseLocale) {
       return baseUrl
     }
 
@@ -239,7 +240,7 @@ export const seo = ({
 }
 
 const buildDescription = (meme: MemeWithVideo & MemeWithCategories) => {
-  if (meme.description) {
+  if (meme.description !== '') {
     return meme.description
   }
 
@@ -286,9 +287,11 @@ const formatSchemaDuration = (totalSeconds: number) => {
     return 'PT0S'
   }
 
-  const hours = Math.floor(totalSeconds / 3600)
-  const minutes = Math.floor((totalSeconds % 3600) / 60)
-  const seconds = totalSeconds % 60
+  const hours = Math.floor(totalSeconds / ONE_HOUR_IN_SECONDS)
+  const minutes = Math.floor(
+    (totalSeconds % ONE_HOUR_IN_SECONDS) / SECONDS_PER_MINUTE
+  )
+  const seconds = totalSeconds % SECONDS_PER_MINUTE
 
   const parts = [
     hours > 0 ? `${hours}H` : '',

@@ -1,8 +1,8 @@
-import type { Page } from '@playwright/test'
+import { expect, type Page } from '@playwright/test'
+import { m } from '~/paraglide/messages.js'
 import { E2E_NAMED_MEMES } from './content'
 import { resolveStorageStatePath } from './env'
-import { expect, test } from './fixtures'
-import { m } from './messages'
+import { test } from './fixtures'
 
 const STUDIO_MEME = E2E_NAMED_MEMES.mostViewed
 const STUDIO_PATHNAME = `/memes/${STUDIO_MEME.id}/studio`
@@ -29,20 +29,20 @@ test.describe('a free User', () => {
   })
 })
 
-test('an anonymous Visitor is asked for text before anything is generated', async ({
-  page
-}) => {
-  await page.goto(STUDIO_PATHNAME)
+test.describe('an anonymous Visitor', () => {
+  test('is asked for text before anything is generated', async ({ page }) => {
+    await page.goto(STUDIO_PATHNAME)
 
-  await expect(
-    page.getByRole('heading', { level: 1, name: STUDIO_MEME.title })
-  ).toBeVisible()
-  await expect(getCaptionInput(page)).toBeEmpty()
+    await expect(
+      page.getByRole('heading', { level: 1, name: STUDIO_MEME.title })
+    ).toBeVisible()
+    await expect(getCaptionInput(page)).toBeEmpty()
 
-  await getGenerateButton(page).click()
+    await getGenerateButton(page).click()
 
-  await expect(page.getByText(m.studio_enter_text())).toBeVisible()
-  await expect(
-    page.getByRole('button', { name: m.studio_cancel_processing() })
-  ).toBeHidden()
+    await expect(page.getByText(m.studio_enter_text())).toBeVisible()
+    await expect(
+      page.getByRole('button', { name: m.studio_cancel_processing() })
+    ).toBeHidden()
+  })
 })

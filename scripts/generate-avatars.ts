@@ -46,7 +46,7 @@ const writeCatalogAvatars = async () => {
   )
   console.log(`Style : ${AVATAR_STYLE_ID}`)
   console.log(`Palette : ${AVATAR_BACKGROUND_PALETTE.join(' ')}`)
-  console.log(`Licence : ${style.meta().license().text()}`)
+  console.log(`Licence : ${String(style.meta().license().text())}`)
 }
 
 void writeCatalogAvatars()

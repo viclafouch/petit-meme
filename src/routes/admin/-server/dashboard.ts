@@ -13,11 +13,7 @@ import {
   truncateToUtcDay
 } from '~/helpers/date'
 import { DASHBOARD_FEED_SIZE } from '~/routes/admin/-lib/constants'
-import type {
-  AuditAction,
-  AuditMetadata,
-  AuditTargetType
-} from '~/server/audit'
+import type { AuditMetadata } from '~/server/audit'
 import { adminRequiredMiddleware } from '~/server/user-auth'
 
 export const PERIOD_SCHEMA = z.enum(['7d', '30d', '90d', 'all'])
@@ -221,13 +217,25 @@ type RawAuditLogEntry = Prisma.AdminAuditLogGetPayload<{
   select: typeof RECENT_AUDIT_SELECT
 }>
 
-export type AuditLogEntry = Omit<
-  RawAuditLogEntry,
-  'action' | 'targetType' | 'metadata'
-> & {
-  action: AuditAction
-  targetType: AuditTargetType
-  metadata: AuditMetadata | null
+export type AuditLogEntry = Omit<RawAuditLogEntry, 'metadata'> & {
+  metadata: AuditMetadata
+}
+
+const AUDIT_METADATA_SCHEMA = z
+  .object({
+    title: z.string(),
+    slug: z.string(),
+    banReason: z.string(),
+    from: z.string(),
+    to: z.string(),
+    source: z.string()
+  })
+  .partial() satisfies z.ZodType<AuditMetadata>
+
+const parseAuditMetadata = (metadata: RawAuditLogEntry['metadata']) => {
+  const result = AUDIT_METADATA_SCHEMA.safeParse(metadata)
+
+  return result.success ? result.data : {}
 }
 
 async function fetchRecentAudit() {
@@ -237,7 +245,12 @@ async function fetchRecentAudit() {
     select: RECENT_AUDIT_SELECT
   })
 
-  return entries as AuditLogEntry[]
+  return entries.map((entry) => {
+    return {
+      ...entry,
+      metadata: parseAuditMetadata(entry.metadata)
+    } satisfies AuditLogEntry
+  })
 }
 
 export const getAdminRecentAudit = createServerFn({ method: 'GET' })

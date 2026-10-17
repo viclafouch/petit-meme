@@ -10,11 +10,11 @@ import {
 } from '~/helpers/date'
 import { getLocale } from '~/paraglide/runtime'
 
-type RelativeDateTooltipParams = {
+type RelativeDateTooltipProps = {
   date: Date
 }
 
-export const RelativeDateTooltip = ({ date }: RelativeDateTooltipParams) => {
+export const RelativeDateTooltip = ({ date }: RelativeDateTooltipProps) => {
   const locale = getLocale()
 
   return (

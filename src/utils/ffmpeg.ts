@@ -55,5 +55,5 @@ export const readAndDeleteFFmpegOutput = async (ffmpeg: FFmpeg) => {
     throw new Error('Unexpected FFmpeg output format')
   }
 
-  return new Blob([outputData.buffer as ArrayBuffer], { type: 'video/mp4' })
+  return new Blob([new Uint8Array(outputData)], { type: 'video/mp4' })
 }

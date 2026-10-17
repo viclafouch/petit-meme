@@ -1,19 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { ResetPasswordForm } from '~/components/User/reset-password-form'
 import { m } from '~/paraglide/messages.js'
-
-const RouteComponent = () => {
-  return (
-    <div className="flex justify-center w-full sm:py-20">
-      <div className="border-muted bg-background flex sm:max-w-md flex-col items-center gap-y-4 rounded-md border px-6 py-8 shadow-md w-full">
-        <ResetPasswordForm />
-      </div>
-    </div>
-  )
-}
+import { PasswordResetPage } from './-components/password-reset-page'
 
 export const Route = createFileRoute('/_public__root/_default/password/reset')({
-  component: RouteComponent,
+  component: PasswordResetPage,
   head: () => {
     return {
       meta: [

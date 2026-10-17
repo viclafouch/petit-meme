@@ -1,10 +1,12 @@
 import { PASSWORD_MIN_LENGTH } from '~/constants/auth'
+import { HTTP_STATUS } from '~/constants/http'
+import { matchIsOwnKey } from '~/helpers/object'
 import type { authClient } from '~/lib/auth-client'
 import { m } from '~/paraglide/messages.js'
 
 type AuthErrorCode = keyof typeof authClient.$ERROR_CODES
 
-const AUTH_ERROR_MESSAGES: Partial<Record<AuthErrorCode, () => string>> = {
+const AUTH_ERROR_MESSAGES = {
   USER_NOT_FOUND: () => {
     return m.auth_error_user_not_found()
   },
@@ -82,16 +84,16 @@ const AUTH_ERROR_MESSAGES: Partial<Record<AuthErrorCode, () => string>> = {
   USER_ALREADY_HAS_PASSWORD: () => {
     return m.auth_error_user_already_has_password()
   }
-}
+} as const satisfies Partial<Record<AuthErrorCode, () => string>>
 
-const EXTRA_ERROR_MESSAGES: Record<string, () => string> = {
+const EXTRA_ERROR_MESSAGES = {
   TOO_MANY_REQUESTS: () => {
     return m.auth_error_too_many_requests()
   },
   BANNED_USER: () => {
     return m.auth_error_banned_user()
   }
-}
+} as const satisfies Record<string, () => string>
 
 type AuthErrorResponse = {
   code?: string
@@ -104,7 +106,7 @@ export function extractAuthErrorCode(error: AuthErrorResponse): string {
     return error.code
   }
 
-  if (error.status === 429) {
+  if (error.status === HTTP_STATUS.TOO_MANY_REQUESTS) {
     return 'TOO_MANY_REQUESTS'
   }
 
@@ -112,24 +114,22 @@ export function extractAuthErrorCode(error: AuthErrorResponse): string {
 }
 
 export function getAuthErrorMessage(code: string): string {
-  const getMessage =
-    AUTH_ERROR_MESSAGES[code as AuthErrorCode] ?? EXTRA_ERROR_MESSAGES[code]
+  if (matchIsOwnKey(AUTH_ERROR_MESSAGES, code)) {
+    return AUTH_ERROR_MESSAGES[code]()
+  }
 
-  if (getMessage) {
-    return getMessage()
+  if (matchIsOwnKey(EXTRA_ERROR_MESSAGES, code)) {
+    return EXTRA_ERROR_MESSAGES[code]()
   }
 
   if (import.meta.env.DEV) {
-    // oxlint-disable-next-line no-console
     console.warn(`[auth-errors] Untranslated code: ${code}`)
   }
 
   return m.auth_error_unknown()
 }
 
-const CHANGE_PASSWORD_ERROR_MESSAGES: Partial<
-  Record<AuthErrorCode, () => string>
-> = {
+const CHANGE_PASSWORD_ERROR_MESSAGES = {
   PASSWORD_TOO_SHORT: () => {
     return m.auth_error_change_password_too_short({
       minLength: String(PASSWORD_MIN_LENGTH)
@@ -138,13 +138,11 @@ const CHANGE_PASSWORD_ERROR_MESSAGES: Partial<
   PASSWORD_TOO_LONG: () => {
     return m.auth_error_change_password_too_long()
   }
-}
+} as const satisfies Partial<Record<AuthErrorCode, () => string>>
 
 export function getChangePasswordErrorMessage(code: string): string {
-  const getMessage = CHANGE_PASSWORD_ERROR_MESSAGES[code as AuthErrorCode]
-
-  if (getMessage) {
-    return getMessage()
+  if (matchIsOwnKey(CHANGE_PASSWORD_ERROR_MESSAGES, code)) {
+    return CHANGE_PASSWORD_ERROR_MESSAGES[code]()
   }
 
   return getAuthErrorMessage(code)

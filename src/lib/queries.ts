@@ -1,6 +1,11 @@
 import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
 import type { MemesFilters } from '~/constants/meme'
-import { MINUTE } from '~/constants/time'
+import {
+  MINUTE,
+  FIVE_MINUTES_MS,
+  TEN_MINUTES_MS,
+  THIRTY_MINUTES_MS
+} from '~/constants/time'
 import type { Meme, Video } from '~/db/generated/prisma/client'
 import type { Locale } from '~/paraglide/runtime'
 import { checkAiSearchQuota } from '~/server/ai-search'
@@ -26,7 +31,7 @@ export const getMemesListQueryOpts = (filters: MemesFilters) => {
     queryFn: () => {
       return getMemes({ data: filters })
     },
-    staleTime: 5 * MINUTE
+    staleTime: FIVE_MINUTES_MS
   })
 }
 
@@ -38,7 +43,7 @@ export const getTrendingMemesQueryOpts = () => {
     queryFn: () => {
       return getTrendingMemes()
     },
-    staleTime: 30 * MINUTE
+    staleTime: THIRTY_MINUTES_MS
   })
 }
 
@@ -50,7 +55,7 @@ export const getMemeByIdQueryOpts = (memeId: Meme['id']) => {
     queryFn: () => {
       return getMemeById({ data: memeId })
     },
-    staleTime: 5 * MINUTE
+    staleTime: FIVE_MINUTES_MS
   })
 }
 
@@ -74,7 +79,7 @@ export const getAuthUserQueryOpts = () => {
     queryFn: () => {
       return getAuthUser()
     },
-    staleTime: 5 * MINUTE
+    staleTime: FIVE_MINUTES_MS
   })
 }
 
@@ -86,7 +91,7 @@ export const getFavoritesMemesQueryOpts = () => {
     queryFn: () => {
       return getFavoritesMemes()
     },
-    staleTime: 5 * MINUTE
+    staleTime: FIVE_MINUTES_MS
   })
 }
 
@@ -98,7 +103,7 @@ export const getCategoriesListQueryOpts = (locale: Locale) => {
     queryFn: () => {
       return getCategories({ data: { locale } })
     },
-    staleTime: 10 * MINUTE
+    staleTime: TEN_MINUTES_MS
   })
 }
 
@@ -110,7 +115,7 @@ export const getRecentCountMemesQueryOpts = () => {
     queryFn: () => {
       return getRecentCountMemes()
     },
-    staleTime: 10 * MINUTE
+    staleTime: TEN_MINUTES_MS
   })
 }
 
@@ -122,7 +127,7 @@ export const getActiveSubscriptionQueryOpts = () => {
     queryFn: () => {
       return getActiveSubscription()
     },
-    staleTime: 5 * MINUTE
+    staleTime: FIVE_MINUTES_MS
   })
 }
 
@@ -138,7 +143,7 @@ export const getInfiniteReelsQueryOpts = (excludedIds: string[] = []) => {
     getNextPageParam: (lastPage) => {
       return lastPage.excludedIds
     },
-    staleTime: 5 * MINUTE
+    staleTime: FIVE_MINUTES_MS
   })
 }
 
@@ -158,7 +163,7 @@ export const getRelatedMemesQueryOpts = ({
     queryFn: () => {
       return getRelatedMemes({ data: { memeId, title } })
     },
-    staleTime: 10 * MINUTE
+    staleTime: TEN_MINUTES_MS
   })
 }
 
@@ -170,7 +175,7 @@ export const getUserSubmissionsQueryOpts = () => {
     queryFn: () => {
       return getUserSubmissions()
     },
-    staleTime: 5 * MINUTE
+    staleTime: FIVE_MINUTES_MS
   })
 }
 

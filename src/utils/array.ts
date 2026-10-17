@@ -1,3 +1,3 @@
-export const removeDuplicates = <T>(array: T[]) => {
+export const removeDuplicates = <TItem>(array: TItem[]) => {
   return [...new Set(array)]
 }

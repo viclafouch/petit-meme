@@ -1,25 +1,35 @@
-import { createServer } from 'node:http'
-import type { IncomingMessage, ServerResponse } from 'node:http'
+import {
+  createServer,
+  type IncomingMessage,
+  type ServerResponse
+} from 'node:http'
+import { text as readStreamText } from 'node:stream/consumers'
+import { parseArgs } from 'node:util'
+import { z } from 'zod'
+import { HTTP_STATUS } from '../src/constants/http.ts'
 
 const MAX_KEYWORDS = 8
 const MAX_KEYWORD_LENGTH = 30
 
-type MessageContent = string | { type: string; text?: string }[]
+const MESSAGE_CONTENT_SCHEMA = z.union([
+  z.string(),
+  z.array(z.object({ type: z.string(), text: z.string().optional() }))
+])
 
-type MessagesRequest = {
-  model: string
-  messages: { role: string; content: MessageContent }[]
-}
+const MESSAGES_REQUEST_SCHEMA = z.object({
+  model: z.string(),
+  messages: z.array(
+    z.object({ role: z.string(), content: MESSAGE_CONTENT_SCHEMA })
+  )
+})
 
-const readBody = async (request: IncomingMessage) => {
-  const chunks: Buffer[] = []
+type MessageContent = z.infer<typeof MESSAGE_CONTENT_SCHEMA>
 
-  for await (const chunk of request) {
-    chunks.push(Buffer.from(chunk))
-  }
+type MessagesRequest = z.infer<typeof MESSAGES_REQUEST_SCHEMA>
 
-  return Buffer.concat(chunks).toString('utf8')
-}
+const { values: cliOptions } = parseArgs({
+  options: { port: { type: 'string' } }
+})
 
 const readText = (content: MessageContent) => {
   if (typeof content === 'string') {
@@ -33,7 +43,9 @@ const readText = (content: MessageContent) => {
     .join(' ')
 }
 
-const extractKeywords = ({ messages }: MessagesRequest) => {
+type ExtractKeywordsParams = MessagesRequest
+
+const extractKeywords = ({ messages }: ExtractKeywordsParams) => {
   const prompt = readText(messages.at(-1)?.content ?? '')
 
   return prompt
@@ -49,7 +61,12 @@ const toServerSentEvent = (event: { type: string }) => {
   return `event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`
 }
 
-const buildStream = ({ model, text }: { model: string; text: string }) => {
+type BuildStreamParams = {
+  model: string
+  text: string
+}
+
+const buildStream = ({ model, text }: BuildStreamParams) => {
   return [
     {
       type: 'message_start',
@@ -90,14 +107,16 @@ const answerMessages = async (
   request: IncomingMessage,
   response: ServerResponse
 ) => {
-  const body: MessagesRequest = JSON.parse(await readBody(request))
+  const body = MESSAGES_REQUEST_SCHEMA.parse(
+    JSON.parse(await readStreamText(request))
+  )
   const text = JSON.stringify({ keywords: extractKeywords(body) })
 
-  response.writeHead(200, { 'content-type': 'text/event-stream' })
+  response.writeHead(HTTP_STATUS.OK, { 'content-type': 'text/event-stream' })
   response.end(buildStream({ model: body.model, text }))
 }
 
-createServer((request, response) => {
+export const fakeAnthropicServer = createServer((request, response) => {
   const { pathname } = new URL(request.url ?? '/', 'http://localhost')
 
   if (request.method === 'POST' && pathname === '/v1/messages') {
@@ -106,6 +125,8 @@ createServer((request, response) => {
     return
   }
 
-  response.writeHead(request.method === 'GET' ? 200 : 404)
+  response.writeHead(
+    request.method === 'GET' ? HTTP_STATUS.OK : HTTP_STATUS.NOT_FOUND
+  )
   response.end()
-}).listen(Number(process.env.PORT))
+}).listen(Number(cliOptions.port))

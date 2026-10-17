@@ -4,22 +4,22 @@ import { baseLocale, type Locale, locales } from '~/paraglide/runtime'
 export type SitemapPage = {
   pathname: string
   lastmod?: string
-  image?: SitemapImage
-  video?: SitemapVideo
+  image?: SitemapImageParams
+  video?: SitemapVideoParams
 }
 
-type SitemapImage = {
+type SitemapImageParams = {
   loc: string
   title: string
 }
 
-type SitemapVideo = {
+type SitemapVideoParams = {
   thumbnailLoc: string
   title: string
   description: string
   contentLoc: string
-  playerLoc?: string
   duration: number
+  playerLoc?: string
   publicationDate?: string
 }
 
@@ -50,16 +50,18 @@ type UrlEntryParams = {
   lastmod?: string
   changefreq?: SitemapChangeFreq
   priority?: SitemapPriority
-  image?: SitemapImage
-  video?: SitemapVideo
+  image?: SitemapImageParams
+  video?: SitemapVideoParams
   hreflang?: {
     pathname: string
     locales: readonly Locale[]
   }
 }
 
+const ISO_DATE_LENGTH = 'YYYY-MM-DD'.length
+
 export const formatIsoDate = (date: Date) => {
-  return date.toISOString().slice(0, 10)
+  return date.toISOString().slice(0, ISO_DATE_LENGTH)
 }
 
 const escapeXml = (text: string) => {
@@ -83,7 +85,7 @@ const buildHreflangLinks = (
   ].join('\n')
 }
 
-const buildImageTag = ({ loc, title }: SitemapImage) => {
+const buildImageTag = ({ loc, title }: SitemapImageParams) => {
   return [
     '    <image:image>',
     `      <image:loc>${loc}</image:loc>`,
@@ -100,7 +102,7 @@ const buildVideoTag = ({
   playerLoc,
   duration,
   publicationDate
-}: SitemapVideo) => {
+}: SitemapVideoParams) => {
   return [
     '    <video:video>',
     `      <video:title>${escapeXml(title)}</video:title>`,
@@ -147,9 +149,7 @@ export const buildUrlEntry = ({
 
 export const buildLocalizedEntries = (pages: readonly SitemapPage[]) => {
   return pages
-    .flatMap((page) => {
-      const { pathname, ...content } = page
-
+    .flatMap(({ pathname, ...content }) => {
       return locales.map((locale) => {
         return buildUrlEntry({
           ...content,

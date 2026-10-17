@@ -1,11 +1,11 @@
 import { OgBackdrop } from './og-backdrop'
 
-type OgTemplateParams = {
+type OgTemplateProps = {
   title: string
-  subtitle?: string
   hostname: string
   logoUrl: string
   heroImageUrl: string
+  subtitle?: string
 }
 
 export const OgTemplate = ({
@@ -14,7 +14,7 @@ export const OgTemplate = ({
   hostname,
   logoUrl,
   heroImageUrl
-}: OgTemplateParams) => {
+}: OgTemplateProps) => {
   return (
     <div
       tw="flex flex-col w-full h-full p-[60px] relative"

@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { createServerFn } from '@tanstack/react-start'
 import { setResponseStatus } from '@tanstack/react-start/server'
 import { prismaClient } from '~/db'
+import { HTTP_STATUS } from '~/constants/http'
 import { Prisma } from '~/db/generated/prisma/client'
 import { MemeSubmissionStatus } from '~/db/generated/prisma/enums'
 import { emailSubjects } from '~/emails/subjects'
@@ -12,6 +13,8 @@ import { sendEmailAsync } from '~/lib/resend'
 import { captureWithFeature } from '~/lib/sentry'
 import { logAuditAction } from '~/server/audit'
 import { adminRequiredMiddleware } from '~/server/user-auth'
+
+const ADMIN_NOTE_MAX_LENGTH = 500
 
 const SUBMISSION_ADMIN_SELECT = {
   id: true,
@@ -46,9 +49,8 @@ export const getAdminSubmissions = createServerFn({ method: 'GET' })
   })
   .middleware([adminRequiredMiddleware])
   .handler(async ({ data: statusFilter }) => {
-    const where: Prisma.MemeSubmissionWhereInput = statusFilter
-      ? { status: statusFilter }
-      : {}
+    const where: Prisma.MemeSubmissionWhereInput =
+      statusFilter === undefined ? {} : { status: statusFilter }
 
     try {
       const [submissions, countsByStatus] = await Promise.all([
@@ -90,7 +92,7 @@ const UPDATE_SUBMISSION_STATUS_SCHEMA = z.discriminatedUnion('status', [
   z.object({
     submissionId: z.string(),
     status: z.literal(MemeSubmissionStatus.REJECTED),
-    adminNote: z.string().max(500).optional()
+    adminNote: z.string().max(ADMIN_NOTE_MAX_LENGTH).optional()
   })
 ])
 
@@ -113,12 +115,12 @@ export const updateSubmissionStatus = createServerFn({ method: 'POST' })
       })
 
       if (!found) {
-        setResponseStatus(404)
+        setResponseStatus(HTTP_STATUS.NOT_FOUND)
         throw new Error('Soumission introuvable')
       }
 
       if (found.status !== MemeSubmissionStatus.PENDING) {
-        setResponseStatus(422)
+        setResponseStatus(HTTP_STATUS.UNPROCESSABLE_CONTENT)
         throw new Error('Seule une soumission en attente peut être modifiée')
       }
 
@@ -210,12 +212,12 @@ export const deleteSubmission = createServerFn({ method: 'POST' })
         where: { id: submissionId },
         select: { id: true, title: true, userId: true }
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         if (
           error instanceof Prisma.PrismaClientKnownRequestError &&
           error.code === 'P2025'
         ) {
-          setResponseStatus(404)
+          setResponseStatus(HTTP_STATUS.NOT_FOUND)
           throw new Error('Soumission introuvable')
         }
 

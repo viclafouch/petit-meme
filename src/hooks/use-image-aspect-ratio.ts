@@ -1,6 +1,8 @@
 import React from 'react'
 
-const DEFAULT_ASPECT_RATIO = 16 / 9
+const WIDESCREEN_WIDTH = 16
+const WIDESCREEN_HEIGHT = 9
+const DEFAULT_ASPECT_RATIO = WIDESCREEN_WIDTH / WIDESCREEN_HEIGHT
 
 export const useImageAspectRatio = (src: string) => {
   const [aspectRatio, setAspectRatio] = React.useState(DEFAULT_ASPECT_RATIO)

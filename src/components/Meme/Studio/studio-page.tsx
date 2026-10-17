@@ -30,11 +30,11 @@ import {
 import { m } from '~/paraglide/messages.js'
 import { useStudioStore } from '~/stores/studio.store'
 
-type StudioBrandingParams = {
+type StudioBrandingProps = {
   title: string
 }
 
-const StudioBranding = ({ title }: StudioBrandingParams) => {
+const StudioBranding = ({ title }: StudioBrandingProps) => {
   return (
     <div className="flex-1 min-w-0">
       <div className="flex items-center gap-1.5">
@@ -47,7 +47,7 @@ const StudioBranding = ({ title }: StudioBrandingParams) => {
           className="size-4"
           aria-hidden="true"
         />
-        <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+        <span className="text-2xs font-semibold uppercase tracking-widest text-muted-foreground">
           Studio
         </span>
       </div>
@@ -56,12 +56,12 @@ const StudioBranding = ({ title }: StudioBrandingParams) => {
   )
 }
 
-type StudioPageParams = {
+type StudioPageProps = {
   meme: MemeWithVideo
   relatedMemesPromise: Promise<MemeWithVideo[]>
 }
 
-export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
+export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageProps) => {
   const ffmpegQuery = useVideoInitializer()
   const { triggerPreload } = useVideoPreloader(ffmpegQuery.data, meme.id)
 
@@ -163,7 +163,7 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageParams) => {
           )}
         </div>
         <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-          <DrawerContent className="max-h-[80dvh]" aria-describedby={undefined}>
+          <DrawerContent className="max-h-dvh-80" aria-describedby={undefined}>
             <DrawerHeader>
               <DrawerTitle>{m.studio_settings()}</DrawerTitle>
             </DrawerHeader>

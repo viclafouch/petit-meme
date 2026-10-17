@@ -12,14 +12,17 @@ import { useInertBackground } from '~/hooks/use-inert-background'
 import { useMemeExport } from '~/hooks/use-meme-export'
 import { useMemeHls } from '~/hooks/use-meme-hls'
 import { useRegisterMemeView } from '~/hooks/use-register-meme-view'
-import { sendConversionEvent } from '~/lib/algolia-insights'
-import type { ConversionEventName } from '~/lib/algolia-insights'
+import {
+  sendConversionEvent,
+  type ConversionEventName
+} from '~/lib/algolia-insights'
 import { buildVideoImageUrl } from '~/lib/bunny'
 import { buildUrl } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
 import { trackMemeAction } from '~/server/meme'
+import { tryPlayVideo } from '~/utils/video'
 
-type PlayerDialogParams = {
+type PlayerDialogProps = {
   meme: MemeWithVideo
   layoutContext: string
   onClose: () => void
@@ -37,7 +40,7 @@ export const PlayerDialog = ({
   onClose,
   queryID,
   authenticatedUserToken
-}: PlayerDialogParams) => {
+}: PlayerDialogProps) => {
   const { videoRef } = useMemeHls({ bunnyId: meme.video.bunnyId })
   const { dialogRef, letFocusLeave } = useInertBackground()
   const isReducedMotion = useReducedMotion()
@@ -73,7 +76,11 @@ export const PlayerDialog = ({
   }
 
   const handleCopyMemeLink = async () => {
-    const text = buildUrl(memeLink.href as string)
+    if (memeLink.href === undefined) {
+      return
+    }
+
+    const text = buildUrl(memeLink.href)
 
     try {
       await navigator.clipboard.writeText(text)
@@ -93,10 +100,10 @@ export const PlayerDialog = ({
   }
 
   useHotkeys('escape', () => {
-    return handleClose()
+    handleClose()
   })
 
-  const handlePlayVideo = () => {
+  const playVideoWhenReady = async () => {
     const video = videoRef.current
 
     if (!video) {
@@ -107,19 +114,23 @@ export const PlayerDialog = ({
     playAbortRef.current = new AbortController()
     const { signal } = playAbortRef.current
 
-    video.play().catch(() => {
-      if (signal.aborted) {
-        return
-      }
+    const hasStarted = await tryPlayVideo(video)
 
-      video.addEventListener(
-        'canplay',
-        () => {
-          video.play().catch(() => {})
-        },
-        { once: true, signal }
-      )
-    })
+    if (hasStarted || signal.aborted) {
+      return
+    }
+
+    video.addEventListener(
+      'canplay',
+      () => {
+        void tryPlayVideo(video)
+      },
+      { once: true, signal }
+    )
+  }
+
+  const handlePlayVideo = () => {
+    void playVideoWhenReady()
   }
 
   const handleStudioClick = () => {
@@ -152,9 +163,9 @@ export const PlayerDialog = ({
       loop
       onUnmountAutoFocus={handleUnmountAutoFocus}
     >
-      <div
-        className="fixed inset-0 flex items-center justify-center z-50 overflow-hidden dark"
-        role="dialog"
+      <dialog
+        open
+        className="fixed inset-0 flex size-full items-center justify-center z-50 overflow-hidden bg-transparent text-inherit dark"
         aria-modal="true"
         aria-labelledby="player-dialog-title"
       >
@@ -183,7 +194,7 @@ export const PlayerDialog = ({
         <motion.div
           layoutId={`${layoutContext}-item-${meme.id}`}
           onLayoutAnimationComplete={handlePlayVideo}
-          className="relative w-200 max-w-[90vw]"
+          className="relative w-200 max-w-vw-90"
         >
           <div className="size-full flex flex-col items-center gap-y-4">
             <h3
@@ -248,7 +259,7 @@ export const PlayerDialog = ({
             </div>
           </div>
         </motion.div>
-      </div>
+      </dialog>
     </FocusScope>
   )
 }

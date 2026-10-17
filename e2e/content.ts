@@ -178,10 +178,14 @@ export const E2E_NAMED_MEMES = {
 } as const satisfies Record<string, E2eMeme>
 
 const FILLER_MEME_COUNT = 48
+const FRENCH_FILLER_EVERY = 3
+const FILLER_TOP_VIEW_COUNT = 3000
+const FILLER_VIEW_COUNT_STEP = 10
+const FILLER_MIN_DAYS_AGO = 60
 
 const buildFillerMeme = (rank: number): E2eMeme => {
   const paddedRank = String(rank).padStart(2, '0')
-  const isUniversal = rank % 3 !== 0
+  const isUniversal = rank % FRENCH_FILLER_EVERY !== 0
   const frenchTitle = `Meme de démonstration ${paddedRank}`
   const frenchDescription = `Meme semé pour la liste, rang ${rank}.`
 
@@ -207,9 +211,9 @@ const buildFillerMeme = (rank: number): E2eMeme => {
     contentLocale: isUniversal
       ? MemeContentLocale.UNIVERSAL
       : MemeContentLocale.FR,
-    viewCount: 3000 - rank * 10,
+    viewCount: FILLER_TOP_VIEW_COUNT - rank * FILLER_VIEW_COUNT_STEP,
     bunnyId: `e2e-video-filler-${paddedRank}`,
-    publishedDaysAgo: 60 + rank,
+    publishedDaysAgo: FILLER_MIN_DAYS_AGO + rank,
     categorySlugs: [],
     translations: isUniversal
       ? [frenchTranslation, englishTranslation]

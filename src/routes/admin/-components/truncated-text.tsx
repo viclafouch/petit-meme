@@ -5,12 +5,12 @@ import {
 } from '~/components/ui/tooltip'
 import { cn } from '~/lib/utils'
 
-type TruncatedTextParams = {
+type TruncatedTextProps = {
   text: string
   className?: string
 }
 
-export const TruncatedText = ({ text, className }: TruncatedTextParams) => {
+export const TruncatedText = ({ text, className }: TruncatedTextProps) => {
   return (
     <Tooltip>
       <TooltipTrigger

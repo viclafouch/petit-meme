@@ -1,7 +1,10 @@
 import React from 'react'
 import * as Sentry from '@sentry/tanstackstart-react'
+import { SECOND } from '~/constants/time'
 import type { Meme } from '~/db/generated/prisma/client'
 import { registerMemeView } from '~/server/meme'
+
+const MAX_TIMEUPDATE_DELTA_SECONDS = 1.1
 
 type UseRegisterMemeViewParams = {
   memeId: Meme['id']
@@ -28,7 +31,7 @@ type GetTresholdMsParams = {
 
 const getTresholdMs = ({ video, ratio, minMs, maxMs }: GetTresholdMsParams) => {
   const duration = Number.isFinite(video.duration) ? video.duration : 0
-  const ratioMs = duration > 0 ? duration * 1000 * ratio : 0
+  const ratioMs = duration > 0 ? duration * SECOND * ratio : 0
   const raw = Math.max(minMs, ratioMs)
 
   return Math.min(maxMs, raw)
@@ -45,14 +48,16 @@ export function useRegisterMemeView({
   const sentRef = React.useRef(false)
   const watchMsRef = React.useRef(0)
   const lastTRef = React.useRef<number | null>(null)
+  const trackedMemeIdRef = React.useRef(memeId)
 
   React.useEffect(() => {
-    sentRef.current = false
-    watchMsRef.current = 0
-    lastTRef.current = null
-  }, [memeId])
+    if (trackedMemeIdRef.current !== memeId) {
+      trackedMemeIdRef.current = memeId
+      sentRef.current = false
+      watchMsRef.current = 0
+      lastTRef.current = null
+    }
 
-  React.useEffect(() => {
     const video = videoRef.current
 
     if (!enabled || !video) {
@@ -113,11 +118,11 @@ export function useRegisterMemeView({
 
       const delta = cur - prev
 
-      if (delta <= 0 || delta > 1.1) {
+      if (delta <= 0 || delta > MAX_TIMEUPDATE_DELTA_SECONDS) {
         return
       }
 
-      watchMsRef.current += delta * 1000
+      watchMsRef.current += delta * SECOND
 
       void maybeSend()
     }

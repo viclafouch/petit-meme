@@ -27,7 +27,7 @@ const USER_AVATAR_SHAPE_CLASSES = {
   rounded: 'rounded-lg'
 } as const satisfies Record<UserAvatarShape, string>
 
-type UserAvatarParams = {
+type UserAvatarProps = {
   name: string
   image: string | null | undefined
   email?: string
@@ -43,7 +43,7 @@ export const UserAvatar = ({
   size = 'md',
   shape = 'circle',
   className
-}: UserAvatarParams) => {
+}: UserAvatarProps) => {
   const [hasImageFailed, setHasImageFailed] = React.useState(false)
 
   const sizeClasses = USER_AVATAR_SIZE_CLASSES[size]
@@ -67,7 +67,7 @@ export const UserAvatar = ({
         />
       ) : null}
       <AvatarFallback className={cn(shapeClassName, sizeClasses.fallback)}>
-        {hasImageFailed && catalogFallbackImage ? (
+        {hasImageFailed && catalogFallbackImage !== null ? (
           <img
             src={catalogFallbackImage}
             alt={alt}

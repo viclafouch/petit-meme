@@ -1,0 +1,38 @@
+import { getRouteApi, Outlet, useMatchRoute } from '@tanstack/react-router'
+import { StarsBackground } from '~/components/animate-ui/backgrounds/stars'
+import { Footer } from '~/components/footer'
+import { LocaleBanner } from '~/components/locale-banner'
+import { Navbar } from '~/components/navbar'
+import { SentryFeedbackWidget } from '~/components/sentry-feedback-widget'
+import { m } from '~/paraglide/messages.js'
+
+const publicRouteApi = getRouteApi('/_public__root')
+
+export const PublicLayout = () => {
+  const { _localeBannerDismissed } = publicRouteApi.useLoaderData()
+  const matchRoute = useMatchRoute()
+  const isHomePage = matchRoute({ to: '/' }) !== false
+
+  return (
+    <StarsBackground animated={isHomePage}>
+      <div className="z-10 relative min-h-dvh flex flex-col">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:z-60 focus:top-4 focus:left-4 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:text-sm focus:font-medium"
+        >
+          {m.common_skip_to_content()}
+        </a>
+        <div className="fixed top-0 right-0 left-0 z-50">
+          <LocaleBanner isInitiallyDismissed={_localeBannerDismissed} />
+          <Navbar />
+        </div>
+        <div className="h-(--navbar-height)" aria-hidden="true" />
+        <main id="main-content" className="flex flex-1 flex-col">
+          <Outlet />
+        </main>
+        <Footer />
+      </div>
+      <SentryFeedbackWidget />
+    </StarsBackground>
+  )
+}

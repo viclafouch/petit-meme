@@ -24,21 +24,29 @@ import {
   createMemeFromFile
 } from '~/routes/admin/-server/memes'
 
-type FileFormParams = {
-  onSuccess?: ({ memeId }: { memeId: string }) => void
+const FILE_NAME_PREVIEW_LENGTH = 20
+
+type FileFormProps = {
   closeDialog: () => void
+  onSuccess?: ({ memeId }: { memeId: string }) => void
+}
+
+type FileFormValues = {
+  video: File | undefined
+}
+
+const DEFAULT_VALUES: FileFormValues = {
+  video: undefined
 }
 
 const formOpts = formOptions({
-  defaultValues: {
-    video: undefined as unknown as File
-  },
+  defaultValues: DEFAULT_VALUES,
   validators: {
     onChange: CREATE_MEME_FROM_FILE_SCHEMA
   }
 })
 
-export const FileForm = ({ onSuccess, closeDialog }: FileFormParams) => {
+export const FileForm = ({ onSuccess, closeDialog }: FileFormProps) => {
   const form = useForm({
     ...formOpts,
     onSubmit: async ({ value }) => {
@@ -46,7 +54,9 @@ export const FileForm = ({ onSuccess, closeDialog }: FileFormParams) => {
         return
       }
 
-      await createMemeFromFileMutation.mutateAsync({ video: value.video })
+      await createMemeFromFileMutation.mutateAsync(
+        CREATE_MEME_FROM_FILE_SCHEMA.parse(value)
+      )
     }
   })
 
@@ -75,7 +85,7 @@ export const FileForm = ({ onSuccess, closeDialog }: FileFormParams) => {
 
   const onFileReject = React.useCallback((file: File, message: string) => {
     toast(message, {
-      description: `"${file.name.length > 20 ? `${file.name.slice(0, 20)}...` : file.name}" has been rejected`
+      description: `"${file.name.length > FILE_NAME_PREVIEW_LENGTH ? `${file.name.slice(0, FILE_NAME_PREVIEW_LENGTH)}...` : file.name}" has been rejected`
     })
   }, [])
 
@@ -96,10 +106,11 @@ export const FileForm = ({ onSuccess, closeDialog }: FileFormParams) => {
           return (
             <FormItem error={errorMessage} className="w-full">
               <FileUpload
-                // oxlint-disable-next-line typescript/no-unnecessary-condition -- defaultValue is `undefined as unknown as File`, runtime value can be undefined
-                value={field.state.value ? [field.state.value] : []}
+                value={
+                  field.state.value === undefined ? [] : [field.state.value]
+                }
                 onValueChange={(files) => {
-                  return field.handleChange(files[0] as File)
+                  field.handleChange(files[0])
                 }}
                 onFileReject={onFileReject}
                 accept="video/*"
@@ -125,8 +136,7 @@ export const FileForm = ({ onSuccess, closeDialog }: FileFormParams) => {
                   </FileUploadTrigger>
                 </FileUploadDropzone>
                 <FileUploadList>
-                  {/* oxlint-disable-next-line typescript/no-unnecessary-condition -- defaultValue is `undefined as unknown as File` */}
-                  {field.state.value ? (
+                  {field.state.value === undefined ? null : (
                     <FileUploadItem value={field.state.value}>
                       <FileUploadItemPreview />
                       <FileUploadItemMetadata />
@@ -141,7 +151,7 @@ export const FileForm = ({ onSuccess, closeDialog }: FileFormParams) => {
                         </Button>
                       </FileUploadItemDelete>
                     </FileUploadItem>
-                  ) : null}
+                  )}
                 </FileUploadList>
               </FileUpload>
               <FormMessage />
@@ -151,9 +161,9 @@ export const FileForm = ({ onSuccess, closeDialog }: FileFormParams) => {
       />
       <form.Subscribe
         selector={(state) => {
-          return [state.canSubmit, state.isSubmitting]
+          return [state.canSubmit, state.isSubmitting] as const
         }}
-        children={([canSubmit = false, isSubmitting = false]) => {
+        children={([canSubmit, isSubmitting]) => {
           return (
             <FormFooter
               canSubmit={canSubmit}

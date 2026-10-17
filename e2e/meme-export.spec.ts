@@ -1,9 +1,9 @@
+import { m } from '~/paraglide/messages.js'
 import { E2E_NAMED_MEMES } from './content'
 import { expectDownloadIsNotEmpty } from './downloads'
 import { resolveStorageStatePath } from './env'
 import { test } from './fixtures'
 import { repeatUntilVisible } from './hydration'
-import { m } from './messages'
 
 const EXPORTABLE_MEME = E2E_NAMED_MEMES.mostViewed
 const EXPORTABLE_MEME_PATHNAME = `/memes/${EXPORTABLE_MEME.id}`

@@ -1,8 +1,7 @@
 import React from 'react'
 import { User } from 'lucide-react'
-import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react'
-import type { LinkOptions } from '@tanstack/react-router'
-import { Link, useRouteContext } from '@tanstack/react-router'
+import { motion, useScroll, useTransform, useReducedMotion } from 'motion/react'
+import { type LinkOptions, Link, useRouteContext } from '@tanstack/react-router'
 import { ThemeSwitcher } from '~/components/animate-ui/theme-switcher'
 import { LanguageSwitcher } from '~/components/language-switcher'
 import { Button, buttonVariants } from '~/components/ui/button'
@@ -15,9 +14,9 @@ import {
 import { UserDropdown } from '~/components/user-dropdown'
 import { LOGO_PATH } from '~/constants/branding'
 import { useNeedsScrollFadeFallback } from '~/hooks/use-scroll-fade'
+import { useShowDialog } from '~/hooks/use-show-dialog'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
-import { useShowDialog } from '~/stores/dialog.store'
 import { MobileNav } from './mobile-nav'
 
 export type NavigationLink = {
@@ -56,13 +55,11 @@ export const Navbar = () => {
   const showDialog = useShowDialog()
   const navigationLinks = getNavigationLinks()
   const needsFallback = useNeedsScrollFadeFallback()
-  const shouldReduceMotion = useReducedMotion()
+  const isReducedMotion = useReducedMotion()
 
   return (
     <header className="navbar-scroll-fade relative h-(--navbar-height)">
-      {needsFallback && !shouldReduceMotion ? (
-        <NavbarScrollFadeFallback />
-      ) : null}
+      {needsFallback && !isReducedMotion ? <NavbarScrollFadeFallback /> : null}
       <div className="container relative flex h-full items-center justify-between gap-4">
         <div className="flex flex-1 items-center justify-start gap-2">
           <MobileNav links={navigationLinks} user={user} />

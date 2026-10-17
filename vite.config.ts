@@ -42,12 +42,16 @@ const staticAssetRouteRules = Object.fromEntries(
 const WITHOUT_PREFIX_FILTER = ''
 
 export default defineConfig(({ mode }) => {
+  // oxlint-disable-next-line node/no-process-env -- the Vite config is the build boundary that loads the mode's env files into the process environment
+  const processEnvironment = process.env
+
   Object.assign(
-    process.env,
+    processEnvironment,
     loadEnv(mode, process.cwd(), WITHOUT_PREFIX_FILTER)
   )
 
-  process.env.VITE_VERCEL_ENV ??= process.env.VERCEL_ENV ?? 'development'
+  processEnvironment.VITE_VERCEL_ENV ??=
+    processEnvironment.VERCEL_ENV ?? 'development'
 
   return {
     resolve: {
@@ -137,9 +141,9 @@ export default defineConfig(({ mode }) => {
       sentryTanstackStart({
         org: 'viclafouch',
         project: 'petit-meme',
-        authToken: process.env.SENTRY_AUTH_TOKEN,
+        authToken: processEnvironment.SENTRY_AUTH_TOKEN,
         release: {
-          name: process.env.VERCEL_GIT_COMMIT_SHA
+          name: processEnvironment.VERCEL_GIT_COMMIT_SHA
         },
         sourcemaps: {
           filesToDeleteAfterUpload: ['.vercel/output/**/*.map']

@@ -9,10 +9,12 @@ import { Button } from '~/components/ui/button'
 import { Separator } from '~/components/ui/separator'
 import { Textarea } from '~/components/ui/textarea'
 import { MAX_PROMPT_LENGTH } from '~/constants/ai-search'
+import { EASE_OUT } from '~/constants/motion'
 import { getErrorMessage, matchIsRateLimitError } from '~/helpers/error'
 import { useAiSearchPrompt } from '~/hooks/use-ai-search-prompt'
 import { useAiSearchStages } from '~/hooks/use-ai-search-stages'
 import { snoozePremiumReminder } from '~/hooks/use-premium-reminder'
+import { useShowDialog } from '~/hooks/use-show-dialog'
 import { getAiSearchQuotaQueryOpts } from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
 import { buildBreadcrumbJsonLd } from '~/lib/seo'
@@ -25,7 +27,6 @@ import {
 } from '~/routes/_public__root/-components/page-headers'
 import { AiSearchStages } from '~/routes/_public__root/_default/memes/-components/ai-search-stages'
 import { aiSearchMemes } from '~/server/ai-search'
-import { useShowDialog } from '~/stores/dialog.store'
 
 function getSearchErrorMessage(error: unknown) {
   if (matchIsRateLimitError(error)) {
@@ -160,7 +161,7 @@ export const AiSearchPage = () => {
             </Button>
           </div>
         </form>
-        <div aria-live="polite" role="region" aria-label={m.ai_search_title()}>
+        <section aria-live="polite" aria-label={m.ai_search_title()}>
           <AnimatePresence mode="wait">
             {searchStages.isActive ? (
               <AiSearchStages key="stages" stages={searchStages.stages} />
@@ -174,7 +175,7 @@ export const AiSearchPage = () => {
               />
             ) : null}
           </AnimatePresence>
-        </div>
+        </section>
       </section>
     </PageContainer>
   )
@@ -186,9 +187,9 @@ type RemainingSearchesProps = {
 
 const RemainingSearches = ({ remainingSearches }: RemainingSearchesProps) => {
   return (
-    <p role="status" className="text-muted-foreground text-sm">
+    <output className="block text-muted-foreground text-sm">
       {m.ai_search_remaining_searches({ count: remainingSearches })}
-    </p>
+    </output>
   )
 }
 
@@ -196,7 +197,9 @@ type AiSearchResultsProps = {
   result: AiSearchResult
 }
 
-const AiSearchResultsAnimated = ({ result }: AiSearchResultsProps) => {
+type AiSearchResultsAnimatedProps = AiSearchResultsProps
+
+const AiSearchResultsAnimated = ({ result }: AiSearchResultsAnimatedProps) => {
   const isReducedMotion = useReducedMotion()
   const resultsRef = React.useRef<HTMLDivElement>(null)
 
@@ -211,7 +214,7 @@ const AiSearchResultsAnimated = ({ result }: AiSearchResultsProps) => {
       className="outline-none"
       initial={isReducedMotion ? false : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+      transition={{ duration: 0.4, ease: EASE_OUT }}
     >
       <AiSearchResults result={result} />
     </motion.div>

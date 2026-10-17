@@ -1,3 +1,5 @@
+import { SECOND } from '~/constants/time'
+
 type SignBunnyUrlParams = {
   url: string
   securityKey: string
@@ -11,7 +13,7 @@ export const signBunnyUrl = async ({
 }: SignBunnyUrlParams) => {
   const { createHash } = await import('node:crypto')
   const parsed = new URL(url)
-  const expiration = Math.floor(Date.now() / 1000) + expirationSeconds
+  const expiration = Math.floor(Date.now() / SECOND) + expirationSeconds
 
   const hashableBase = `${securityKey}${parsed.pathname}${expiration}`
   const token = createHash('sha256').update(hashableBase).digest('base64url')

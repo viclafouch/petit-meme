@@ -1,6 +1,8 @@
 import React from 'react'
 
-export const DiscordIcon = (props: React.ComponentProps<'svg'>) => {
+type DiscordIconProps = React.ComponentProps<'svg'>
+
+export const DiscordIcon = (props: DiscordIconProps) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

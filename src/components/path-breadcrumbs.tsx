@@ -1,6 +1,6 @@
 import React from 'react'
 import { House } from 'lucide-react'
-import { isMatch, Link, useMatches } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,26 +9,13 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator
 } from '~/components/ui/breadcrumb'
+import type { useCrumbMatches } from '~/hooks/use-crumb-matches'
 
-export const PathBreadcrumbs = () => {
-  const matches = useMatches()
+type PathBreadcrumbsProps = {
+  crumbMatches: ReturnType<typeof useCrumbMatches>
+}
 
-  if (
-    matches.some((match) => {
-      return match.status === 'pending'
-    })
-  ) {
-    return null
-  }
-
-  const matchesWithCrumbs = matches.filter((match) => {
-    return isMatch(match, 'loaderData.crumb')
-  })
-
-  if (matchesWithCrumbs.length === 0) {
-    return null
-  }
-
+export const PathBreadcrumbs = ({ crumbMatches }: PathBreadcrumbsProps) => {
   return (
     <Breadcrumb>
       <BreadcrumbList>
@@ -40,8 +27,8 @@ export const PathBreadcrumbs = () => {
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator className="shrink-0" />
-        {matchesWithCrumbs.map((match, index) => {
-          const isLast = index === matchesWithCrumbs.length - 1
+        {crumbMatches.map((match, index) => {
+          const isLast = index === crumbMatches.length - 1
 
           return (
             <React.Fragment key={match.fullPath}>

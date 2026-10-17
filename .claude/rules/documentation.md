@@ -22,10 +22,8 @@ Never put version numbers in AGENTS.md (sync risk).
 
 1. Remove from `package.json`
 2. `pnpm install`
-3. Search and remove orphan imports
 
 ### Checklist
 
 - [ ] AGENTS.md consistent
-- [ ] No orphan imports
 - [ ] `pnpm lint:fix` passes

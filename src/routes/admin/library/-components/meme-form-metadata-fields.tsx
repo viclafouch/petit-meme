@@ -19,13 +19,14 @@ import {
   MemeStatus as MemeStatusEnum
 } from '~/db/generated/prisma/enums'
 import { type FormFieldApi, getFieldErrorMessage } from '~/lib/utils'
+import { matchIsMemeStatus } from '~/routes/admin/-lib/meme-status'
 
 type CategoryOption = {
   label: string
   value: string
 }
 
-type MemeFormMetadataFieldsParams = {
+type MemeFormMetadataFieldsProps = {
   statusField: FormFieldApi<MemeStatus>
   categoryIdsField: FormFieldApi<string[]>
   tweetUrlField: FormFieldApi<string | null>
@@ -41,7 +42,7 @@ export const MemeFormMetadataFields = ({
   categoriesOptions,
   isCategoriesLoading,
   categoriesError
-}: MemeFormMetadataFieldsParams) => {
+}: MemeFormMetadataFieldsProps) => {
   const statusError = getFieldErrorMessage({ field: statusField })
   const categoryIdsError = getFieldErrorMessage({ field: categoryIdsField })
   const tweetUrlError = getFieldErrorMessage({ field: tweetUrlField })
@@ -54,7 +55,9 @@ export const MemeFormMetadataFields = ({
           <Select
             value={statusField.state.value}
             onValueChange={(value) => {
-              return statusField.handleChange(value as MemeStatus)
+              if (matchIsMemeStatus(value)) {
+                statusField.handleChange(value)
+              }
             }}
           >
             <SelectTrigger className="w-full">
@@ -87,7 +90,7 @@ export const MemeFormMetadataFields = ({
             options={categoriesOptions}
             value={categoryIdsField.state.value}
             onValueChange={(value) => {
-              return categoryIdsField.handleChange(value)
+              categoryIdsField.handleChange(value)
             }}
             hideSelectAll
             closeText="Fermer"
@@ -109,7 +112,7 @@ export const MemeFormMetadataFields = ({
             value={tweetUrlField.state.value ?? ''}
             onBlur={tweetUrlField.handleBlur}
             onChange={(event) => {
-              return tweetUrlField.handleChange(event.target.value)
+              tweetUrlField.handleChange(event.target.value)
             }}
           />
         </FormControl>

@@ -9,7 +9,7 @@ import {
 import { Input } from '~/components/ui/input'
 import { type FormFieldApi, getFieldErrorMessage } from '~/lib/utils'
 
-type KeywordsFieldParams = {
+type KeywordsFieldProps = {
   field: FormFieldApi<string[]>
   keywordValue: string
   setKeywordValue: (value: string) => void
@@ -23,7 +23,7 @@ export const KeywordsField = ({
   setKeywordValue,
   handleAddKeyword,
   handleRemoveKeyword
-}: KeywordsFieldParams) => {
+}: KeywordsFieldProps) => {
   const errorMessage = getFieldErrorMessage({ field })
 
   return (

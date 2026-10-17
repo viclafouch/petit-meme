@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { HTTP_STATUS } from '~/constants/http'
 import { E2E_BASE_URL, E2E_BUNNY_HOSTNAME } from './env'
 
 const CHILD_SITEMAPS = [
@@ -16,80 +17,87 @@ const readLocations = (body: string) => {
   })
 }
 
-test('the sitemap index points at its three children', async ({ request }) => {
-  const response = await request.get('/sitemap.xml')
-
-  expect(response.status()).toBe(200)
-  expect(response.headers()['content-type']).toContain('xml')
-
-  const body = await response.text()
-
-  expect(body.startsWith(XML_DECLARATION)).toBe(true)
-  expect(readLocations(body)).toEqual(
-    CHILD_SITEMAPS.map((pathname) => {
-      return `${E2E_BASE_URL}${pathname}`
-    })
-  )
-})
-
-for (const pathname of CHILD_SITEMAPS) {
-  test(`${pathname} is XML and only lists pages of ours`, async ({
+test.describe('the HTTP contracts', () => {
+  test('the sitemap index points at its three children', async ({
     request
   }) => {
-    const response = await request.get(pathname)
+    const response = await request.get('/sitemap.xml')
 
-    expect(response.status()).toBe(200)
+    expect(response.status()).toBe(HTTP_STATUS.OK)
     expect(response.headers()['content-type']).toContain('xml')
 
     const body = await response.text()
 
     expect(body.startsWith(XML_DECLARATION)).toBe(true)
-    expect(body).toContain('</urlset>')
-
-    const locations = readLocations(body)
-
-    expect(locations.length).toBeGreaterThan(0)
-
-    for (const location of locations) {
-      expect(location.startsWith(E2E_BASE_URL)).toBe(true)
-      expect(location).not.toContain(E2E_BUNNY_HOSTNAME)
-    }
+    expect(readLocations(body)).toStrictEqual(
+      CHILD_SITEMAPS.map((pathname) => {
+        return `${E2E_BASE_URL}${pathname}`
+      })
+    )
   })
-}
 
-test('robots.txt answers and hands over the sitemap', async ({ request }) => {
-  const response = await request.get('/robots.txt')
+  for (const pathname of CHILD_SITEMAPS) {
+    test(`${pathname} is XML`, async ({ request }) => {
+      const response = await request.get(pathname)
 
-  expect(response.status()).toBe(200)
-  expect(response.headers()['content-type']).toContain('text/plain')
-  expect(await response.text()).toContain(
-    `Sitemap: ${E2E_BASE_URL}/sitemap.xml`
-  )
-})
+      expect(response.status()).toBe(HTTP_STATUS.OK)
+      expect(response.headers()['content-type']).toContain('xml')
 
-test('the health route answers', async ({ request }) => {
-  const response = await request.get('/health')
+      const body = await response.text()
 
-  expect(response.status()).toBe(200)
-})
+      expect(body.startsWith(XML_DECLARATION)).toBe(true)
+      expect(body).toContain('</urlset>')
+    })
 
-test('the manifest is JSON and starts on the library', async ({ request }) => {
-  const response = await request.get('/manifest.json')
+    test(`${pathname} only lists pages of ours`, async ({ request }) => {
+      const response = await request.get(pathname)
+      const locations = readLocations(await response.text())
 
-  expect(response.status()).toBe(200)
-  expect(await response.json()).toMatchObject({
-    name: 'Petit Meme',
-    start_url: expect.stringContaining('/memes')
+      expect(locations.length).toBeGreaterThan(0)
+
+      for (const location of locations) {
+        expect(location.startsWith(E2E_BASE_URL)).toBe(true)
+        expect(location).not.toContain(E2E_BUNNY_HOSTNAME)
+      }
+    })
+  }
+
+  test('robots.txt answers and hands over the sitemap', async ({ request }) => {
+    const response = await request.get('/robots.txt')
+
+    expect(response.status()).toBe(HTTP_STATUS.OK)
+    expect(response.headers()['content-type']).toContain('text/plain')
+    expect(await response.text()).toContain(
+      `Sitemap: ${E2E_BASE_URL}/sitemap.xml`
+    )
   })
-})
 
-test('the OG endpoint renders an image', async ({ request }) => {
-  const response = await request.get('/api/og?type=home')
+  test('the health route answers', async ({ request }) => {
+    const response = await request.get('/health')
 
-  expect(response.status()).toBe(200)
-  expect(response.headers()['content-type']).toContain('image/')
+    expect(response.status()).toBe(HTTP_STATUS.OK)
+  })
 
-  const image = await response.body()
+  test('the manifest is JSON and starts on the library', async ({
+    request
+  }) => {
+    const response = await request.get('/manifest.json')
 
-  expect(image.byteLength).toBeGreaterThan(0)
+    expect(response.status()).toBe(HTTP_STATUS.OK)
+    expect(await response.json()).toMatchObject({
+      name: 'Petit Meme',
+      start_url: expect.stringContaining('/memes')
+    })
+  })
+
+  test('the OG endpoint renders an image', async ({ request }) => {
+    const response = await request.get('/api/og?type=home')
+
+    expect(response.status()).toBe(HTTP_STATUS.OK)
+    expect(response.headers()['content-type']).toContain('image/')
+
+    const image = await response.body()
+
+    expect(image.byteLength).toBeGreaterThan(0)
+  })
 })

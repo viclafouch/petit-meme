@@ -11,15 +11,14 @@ import { getLocaleDisplayName } from '~/helpers/locale'
 import { dismissLocaleBanner } from '~/lib/locale-banner'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
-import { getLocale, locales, setLocale } from '~/paraglide/runtime'
-import type { Locale } from '~/paraglide/runtime'
+import { getLocale, locales, setLocale, type Locale } from '~/paraglide/runtime'
 import { updateUserLocale } from '~/server/user-locale'
 
-type LanguageSwitcherParams = {
+type LanguageSwitcherProps = {
   className?: string
 }
 
-export const LanguageSwitcher = ({ className }: LanguageSwitcherParams) => {
+export const LanguageSwitcher = ({ className }: LanguageSwitcherProps) => {
   const currentLocale = getLocale()
   const CurrentFlag = LOCALE_FLAGS[currentLocale]
 

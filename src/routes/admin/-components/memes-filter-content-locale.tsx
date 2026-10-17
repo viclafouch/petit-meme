@@ -12,24 +12,30 @@ import {
   type MemeContentLocale,
   MemeContentLocale as MemeContentLocaleEnum
 } from '~/db/generated/prisma/enums'
-import { getContentLocaleLabel } from '~/helpers/i18n-content'
+import {
+  getContentLocaleLabel,
+  matchIsMemeContentLocale
+} from '~/helpers/i18n-content'
 
 const CONTENT_LOCALE_OPTIONS = Object.values(MemeContentLocaleEnum)
 
-type MemesFilterContentLocaleParams = {
+type MemesFilterContentLocaleProps = {
   contentLocale: MemeContentLocale | null
   onContentLocaleChange: (contentLocale: MemeContentLocale | null) => void
 }
 
 export const MemesFilterContentLocale = React.memo(
-  ({
-    contentLocale,
-    onContentLocaleChange
-  }: MemesFilterContentLocaleParams) => {
+  ({ contentLocale, onContentLocaleChange }: MemesFilterContentLocaleProps) => {
     const handleChange = (value: string) => {
-      onContentLocaleChange(
-        value === 'all' ? null : (value as MemeContentLocale)
-      )
+      if (value === 'all') {
+        onContentLocaleChange(null)
+
+        return
+      }
+
+      if (matchIsMemeContentLocale(value)) {
+        onContentLocaleChange(value)
+      }
     }
 
     return (

@@ -100,7 +100,7 @@ export const ResetPasswordForm = () => {
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(event) => {
-                      return field.handleChange(event.target.value)
+                      field.handleChange(event.target.value)
                     }}
                   />
                 </FormControl>

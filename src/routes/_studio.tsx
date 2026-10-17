@@ -1,16 +1,6 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router'
-import { StarsBackground } from '~/components/animate-ui/backgrounds/stars'
-
-const RouteComponent = () => {
-  return (
-    <StarsBackground animated={false}>
-      <div className="z-10 relative h-dvh flex flex-col overflow-hidden">
-        <Outlet />
-      </div>
-    </StarsBackground>
-  )
-}
+import { createFileRoute } from '@tanstack/react-router'
+import { StudioLayout } from './-components/studio-layout'
 
 export const Route = createFileRoute('/_studio')({
-  component: RouteComponent
+  component: StudioLayout
 })

@@ -1,15 +1,14 @@
+/* oxlint-disable no-console */
 import type { SupportedLanguage } from '@algolia/client-search'
-/* oxlint-disable no-console, no-await-in-loop */
 import {
-  algoliaAdminClient,
+  getAlgoliaAdminClient,
   algoliaIndexPrefix,
   resolveAlgoliaIndexName,
   resolveAlgoliaReplicaCreated,
   resolveAlgoliaReplicaPopular,
   resolveAlgoliaReplicaRecent
 } from '~/lib/algolia'
-import { locales } from '~/paraglide/runtime'
-import type { Locale } from '~/paraglide/runtime'
+import { locales, type Locale } from '~/paraglide/runtime'
 import { logEnvironmentInfo } from './lib/env-guard'
 
 const INDEX_LANGUAGES = {
@@ -65,55 +64,65 @@ const buildReplicaConfigs = (locale: Locale): ReplicaConfig[] => {
   ]
 }
 
+const configureReplica = async (replica: ReplicaConfig) => {
+  console.log(`  Configuring replica: ${replica.name}`)
+
+  const replicaResponse = await getAlgoliaAdminClient().setSettings({
+    indexName: replica.name,
+    indexSettings: {
+      attributesForFaceting: BASE_INDEX_SETTINGS.attributesForFaceting,
+      customRanking: replica.customRanking
+    }
+  })
+
+  await getAlgoliaAdminClient().waitForTask({
+    indexName: replica.name,
+    taskID: replicaResponse.taskID
+  })
+
+  console.log(`    Done`)
+}
+
+const configureLocaleIndices = async (locale: Locale) => {
+  const indexName = resolveAlgoliaIndexName(locale)
+  const languages = [...INDEX_LANGUAGES[locale]]
+  const replicaConfigs = buildReplicaConfigs(locale)
+
+  const replicas = replicaConfigs.map(({ name }) => {
+    return name
+  })
+
+  console.log(`\nConfiguring primary index: ${indexName}`)
+  console.log(`  Languages: ${languages.join(', ')}`)
+  console.log(`  Replicas: ${replicas.join(', ')}`)
+
+  const { taskID } = await getAlgoliaAdminClient().setSettings({
+    indexName,
+    indexSettings: {
+      ...BASE_INDEX_SETTINGS,
+      queryLanguages: languages,
+      indexLanguages: languages,
+      ignorePlurals: languages,
+      removeStopWords: languages,
+      replicas
+    }
+  })
+
+  await getAlgoliaAdminClient().waitForTask({ indexName, taskID })
+  console.log(`  Primary index configured`)
+
+  for (const replica of replicaConfigs) {
+    // oxlint-disable-next-line no-await-in-loop -- Algolia applies the replicas one after the other, after their primary exists
+    await configureReplica(replica)
+  }
+}
+
 const setupAlgoliaIndices = async () => {
   logEnvironmentInfo()
 
   for (const locale of locales) {
-    const indexName = resolveAlgoliaIndexName(locale)
-    const languages = [...INDEX_LANGUAGES[locale]]
-    const replicaConfigs = buildReplicaConfigs(locale)
-
-    const replicas = replicaConfigs.map(({ name }) => {
-      return name
-    })
-
-    console.log(`\nConfiguring primary index: ${indexName}`)
-    console.log(`  Languages: ${languages.join(', ')}`)
-    console.log(`  Replicas: ${replicas.join(', ')}`)
-
-    const { taskID } = await algoliaAdminClient.setSettings({
-      indexName,
-      indexSettings: {
-        ...BASE_INDEX_SETTINGS,
-        queryLanguages: languages,
-        indexLanguages: languages,
-        ignorePlurals: languages,
-        removeStopWords: languages,
-        replicas
-      }
-    })
-
-    await algoliaAdminClient.waitForTask({ indexName, taskID })
-    console.log(`  Primary index configured`)
-
-    for (const replica of replicaConfigs) {
-      console.log(`  Configuring replica: ${replica.name}`)
-
-      const replicaResponse = await algoliaAdminClient.setSettings({
-        indexName: replica.name,
-        indexSettings: {
-          attributesForFaceting: BASE_INDEX_SETTINGS.attributesForFaceting,
-          customRanking: replica.customRanking
-        }
-      })
-
-      await algoliaAdminClient.waitForTask({
-        indexName: replica.name,
-        taskID: replicaResponse.taskID
-      })
-
-      console.log(`    Done`)
-    }
+    // oxlint-disable-next-line no-await-in-loop -- the locales run one after the other so the logs stay readable and the task queue stays small
+    await configureLocaleIndices(locale)
   }
 
   const mode = import.meta.env.MODE

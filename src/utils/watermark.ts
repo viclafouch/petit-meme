@@ -24,6 +24,8 @@ type MediaDimensions = {
   height: number
 }
 
+const FFMPEG_LOG_TAIL_LINES = 10
+
 const getVideoDimensions = (blob: Blob) => {
   return new Promise<MediaDimensions>((resolve, reject) => {
     const video = document.createElement('video')
@@ -141,7 +143,7 @@ export const applyWatermark = async ({
     ])
 
     if (exitCode !== 0) {
-      const lastLogs = logs.slice(-10).join('\n')
+      const lastLogs = logs.slice(-FFMPEG_LOG_TAIL_LINES).join('\n')
       throw new Error(
         `FFmpeg watermark failed (exit ${exitCode}):\n${lastLogs}`
       )

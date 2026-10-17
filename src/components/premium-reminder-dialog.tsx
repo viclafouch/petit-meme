@@ -15,10 +15,12 @@ import { formatCentsToEuros } from '~/helpers/number'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
 
+type PremiumReminderDialogProps = WithDialog<Record<string, never>>
+
 export const PremiumReminderDialog = ({
   open,
   onOpenChange
-}: WithDialog<Record<string, never>>) => {
+}: PremiumReminderDialogProps) => {
   const ctaRef = React.useRef<HTMLAnchorElement>(null)
   const monthlyPrice = formatCentsToEuros(
     PREMIUM_PLAN_PRICING.monthly.priceInCents,

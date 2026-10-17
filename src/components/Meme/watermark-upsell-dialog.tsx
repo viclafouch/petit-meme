@@ -13,10 +13,10 @@ import { m } from '~/paraglide/messages.js'
 import { shareMeme, trackMemeAction } from '~/server/meme'
 import { downloadBlob, shareBlob } from '~/utils/download'
 
-type WatermarkUpsellDialogParams = {
+type WatermarkUpsellDialogProps = WithDialog<{
   meme: Pick<MemeWithVideo, 'id' | 'title'>
   mode: MemeExportMode
-}
+}>
 
 const getTitle = (mode: MemeExportMode) => {
   if (mode === 'download') {
@@ -44,7 +44,7 @@ export const WatermarkUpsellDialog = ({
   onOpenChange,
   meme,
   mode
-}: WithDialog<WatermarkUpsellDialogParams>) => {
+}: WatermarkUpsellDialogProps) => {
   const exportMutation = useMutation({
     mutationFn: async () => {
       const response = await shareMeme({ data: { memeId: meme.id, mode } })
@@ -99,9 +99,7 @@ export const WatermarkUpsellDialog = ({
             {getConfirmLabel(mode)}
           </Button>
           {exportMutation.isPending ? (
-            <p role="status" className="sr-only">
-              {m.common_loading()}
-            </p>
+            <output className="sr-only">{m.common_loading()}</output>
           ) : null}
         </>
       }

@@ -1,11 +1,7 @@
 import { Button, Section, Text } from 'react-email'
 import type { Locale } from '~/paraglide/runtime'
-import {
-  BoldText,
-  BUTTON_CLASS,
-  EmailFallbackLink,
-  EmailLayout
-} from './email-layout'
+import { BUTTON_CLASS } from './constants'
+import { BoldText, EmailFallbackLink, EmailLayout } from './email-layout'
 
 const translations = {
   fr: {
@@ -79,13 +75,15 @@ ResetPassword.PreviewProps = {
   locale: 'fr'
 } satisfies ResetPasswordProps
 
-export const ResetPasswordEN = (props: Omit<ResetPasswordProps, 'locale'>) => {
+type ResetPasswordENProps = Omit<ResetPasswordProps, 'locale'>
+
+export const ResetPasswordEN = (props: ResetPasswordENProps) => {
   return <ResetPassword {...props} locale="en" />
 }
 
 ResetPasswordEN.PreviewProps = {
   username: 'Alan',
   resetUrl: 'https://petit-meme.io/reset-password?token=abc123'
-} satisfies Omit<ResetPasswordProps, 'locale'>
+} satisfies ResetPasswordENProps
 
 export default ResetPassword

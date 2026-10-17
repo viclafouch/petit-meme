@@ -5,7 +5,7 @@ import { CONTACT_EMAIL } from '~/emails/constants'
 import { PendingSubmissionsReminderEmail } from '~/emails/pending-submissions-reminder-email'
 import { formatDate } from '~/helpers/date'
 import { cronLogger } from '~/lib/logger'
-import { EMAIL_FROM, getEmailRecipient, resend } from '~/lib/resend'
+import { getEmailFrom, getEmailRecipient, getResendClient } from '~/lib/resend'
 import { verifyCronSecret } from '~/utils/cron-auth'
 
 const log = cronLogger.child({ job: 'pending-submissions-reminder' })
@@ -45,8 +45,8 @@ const runPendingSubmissionsReminder = async () => {
     }
   })
 
-  const { error } = await resend.emails.send({
-    from: EMAIL_FROM,
+  const { error } = await getResendClient().emails.send({
+    from: getEmailFrom(),
     to: getEmailRecipient(CONTACT_EMAIL),
     subject: SUBJECT,
     react: PendingSubmissionsReminderEmail({ submissions: emailSubmissions })

@@ -13,13 +13,15 @@ import {
   MAX_AI_SEARCH_RESULTS,
   MAX_PROMPT_LENGTH
 } from '~/constants/ai-search'
+import { HTTP_STATUS } from '~/constants/http'
 import { RATE_LIMIT_AI_SEARCH } from '~/constants/rate-limit'
+import type { Prisma } from '~/db/generated/prisma/client'
 import {
   ActivityEventType,
   MemeContentLocale as MemeContentLocaleEnum,
-  MemeStatus
+  MemeStatus,
+  type MemeContentLocale
 } from '~/db/generated/prisma/enums'
-import type { MemeContentLocale } from '~/db/generated/prisma/enums'
 import { serverEnv } from '~/env/server'
 import { buildAiSearchQuota } from '~/helpers/ai-search'
 import { truncateToUtcDay, truncateToUtcMonth } from '~/helpers/date'
@@ -29,13 +31,12 @@ import {
   ALGOLIA_SEARCH_PARAMS_BASE,
   algoliaSearchClient,
   normalizeAlgoliaHit,
-  resolveAlgoliaIndexName
+  resolveAlgoliaIndexName,
+  type AlgoliaMemeRecord
 } from '~/lib/algolia'
-import type { AlgoliaMemeRecord } from '~/lib/algolia'
 import { aiSearchLogger } from '~/lib/logger'
 import { captureWithFeature } from '~/lib/sentry'
-import { getLocale } from '~/paraglide/runtime'
-import type { Locale } from '~/paraglide/runtime'
+import { getLocale, type Locale } from '~/paraglide/runtime'
 import { matchIsUserPremium } from '~/server/customer'
 import { buildAlgoliaContentLocaleFilter } from '~/server/meme'
 import {
@@ -54,11 +55,14 @@ const AI_SEARCH_INPUT_SCHEMA = z.object({
     .optional()
 })
 
+const AI_SEARCH_KEYWORD_MAX_LENGTH = 30
+const AI_SEARCH_KEYWORDS_MAX_COUNT = 8
+
 const AI_SEARCH_RESPONSE_SCHEMA = z.object({
   keywords: z
-    .array(z.string().trim().min(1).max(30))
+    .array(z.string().trim().min(1).max(AI_SEARCH_KEYWORD_MAX_LENGTH))
     .min(1)
-    .max(8)
+    .max(AI_SEARCH_KEYWORDS_MAX_COUNT)
     .describe(
       'Context keywords + close synonyms extracted from the user prompt'
     )
@@ -122,14 +126,26 @@ async function extractSearchKeywords(prompt: string, systemPrompt: string) {
   }
 }
 
+const createAiSearchLog = async (
+  aiSearchLog: Prisma.AiSearchLogUncheckedCreateInput
+) => {
+  try {
+    await prismaClient.aiSearchLog.create({ data: aiSearchLog })
+  } catch (error) {
+    captureWithFeature(error, 'ai-search')
+    aiSearchLogger.error({ error }, 'Failed to log AI search')
+  }
+}
+
 function buildAlgoliaFilters(
   contentLocale: MemeContentLocale | undefined
 ): string {
-  const contentLocaleFilter = contentLocale
-    ? buildAlgoliaContentLocaleFilter(
-        contentLocalesWithUniversal([contentLocale])
-      )
-    : undefined
+  const contentLocaleFilter =
+    contentLocale === undefined
+      ? undefined
+      : buildAlgoliaContentLocaleFilter(
+          contentLocalesWithUniversal([contentLocale])
+        )
 
   return [`status:${MemeStatus.PUBLISHED}`, contentLocaleFilter]
     .filter(Boolean)
@@ -164,12 +180,12 @@ export const aiSearchMemes = createServerFn({ method: 'POST' })
 
     if (dailyCount >= DAILY_GLOBAL_AI_SEARCH_CAP) {
       aiSearchLogger.warn({ dailyCount }, 'Daily global AI search cap reached')
-      setResponseStatus(429)
+      setResponseStatus(HTTP_STATUS.TOO_MANY_REQUESTS)
       throw new Error('AI search temporarily unavailable')
     }
 
     if (!isPremium && monthlyCount >= FREE_PLAN_MAX_AI_SEARCHES) {
-      setResponseStatus(429)
+      setResponseStatus(HTTP_STATUS.TOO_MANY_REQUESTS)
       throw new Error(AI_SEARCH_QUOTA_EXCEEDED_MESSAGE)
     }
 
@@ -201,8 +217,8 @@ export const aiSearchMemes = createServerFn({ method: 'POST' })
     } catch (error) {
       captureWithFeature(error, 'ai-search')
       aiSearchLogger.error({ error, query, filters }, 'Algolia search failed')
-      setResponseStatus(502)
-      throw new Error('AI search failed')
+      setResponseStatus(HTTP_STATUS.BAD_GATEWAY)
+      throw new Error('AI search failed', { cause: error })
     }
 
     const memeIds = response.hits.map((hit) => {
@@ -210,21 +226,14 @@ export const aiSearchMemes = createServerFn({ method: 'POST' })
     })
 
     waitUntil(
-      prismaClient.aiSearchLog
-        .create({
-          data: {
-            userId,
-            prompt: data.prompt,
-            keywords,
-            memeIds,
-            locale,
-            resultCount: response.hits.length
-          }
-        })
-        .catch((error: unknown) => {
-          captureWithFeature(error, 'ai-search')
-          aiSearchLogger.error({ error }, 'Failed to log AI search')
-        })
+      createAiSearchLog({
+        userId,
+        prompt: data.prompt,
+        keywords,
+        memeIds,
+        locale,
+        resultCount: response.hits.length
+      })
     )
 
     recordActivityEvent({

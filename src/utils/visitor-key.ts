@@ -6,7 +6,7 @@ import { truncateToUtcDay } from '~/helpers/date'
 const ISO_DAY_LENGTH = 'YYYY-MM-DD'.length
 
 export const getVisitorKey = createServerOnlyFn(
-  (ipAddress: string, date = new Date()) => {
+  (ipAddress: string, date: Date = new Date()) => {
     const utcDay = truncateToUtcDay(date).toISOString().slice(0, ISO_DAY_LENGTH)
 
     return createHash('sha256')

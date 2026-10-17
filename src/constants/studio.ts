@@ -8,7 +8,12 @@ export const STUDIO_TEXT_MAX_LENGTH = 150
 export const STUDIO_LINE_SPACING = 4
 export const STUDIO_BASELINE_RATIO = 0.2
 
-export type StudioTextPosition = 'top' | 'bottom'
+export const STUDIO_TEXT_POSITIONS = [
+  'top',
+  'bottom'
+] as const satisfies readonly string[]
+
+export type StudioTextPosition = (typeof STUDIO_TEXT_POSITIONS)[number]
 
 type StudioFontSize = {
   id: string
@@ -26,14 +31,14 @@ export const getStudioFontSizes = (): StudioFontSize[] => {
   ]
 }
 
-export type StudioColorEntry = {
+export type StudioFontColorValue = 'black' | 'white' | 'red' | 'blue'
+
+export type StudioColorEntry<TValue extends string = StudioFontColorValue> = {
   id: string
   label: string
-  value: string
+  value: TValue
   className: string
 }
-
-export type StudioFontColorValue = 'black' | 'white' | 'red' | 'blue'
 
 export const getStudioColors = (): StudioColorEntry[] => {
   return [
@@ -100,17 +105,18 @@ const BAND_COLOR_ORDER: StudioBandColorValue[] = [
   'blue'
 ]
 
-export const getStudioBandColors = (): StudioColorEntry[] => {
-  const allColors = getStudioColors()
+export const getStudioBandColors =
+  (): StudioColorEntry<StudioBandColorValue>[] => {
+    const allColors = getStudioColors()
 
-  return BAND_COLOR_ORDER.flatMap((id) => {
-    const match = allColors.find((color) => {
-      return color.id === id
+    return BAND_COLOR_ORDER.flatMap((id) => {
+      const match = allColors.find((color) => {
+        return color.id === id
+      })
+
+      return match ? [match] : []
     })
-
-    return match ? [match] : []
-  })
-}
+  }
 
 type StudioTemplateStyle = {
   id: StudioTemplateId

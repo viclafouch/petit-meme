@@ -14,7 +14,9 @@ import type { MemeWithVideo } from '~/constants/meme'
 import { buildVideoImageUrl, buildVideoStreamUrl } from '~/lib/bunny'
 import { getInfiniteReelsQueryOpts } from '~/lib/queries'
 import { m } from '~/paraglide/messages.js'
-import { attachHlsSource } from '~/utils/video'
+import { attachHlsSource, tryPlayVideo } from '~/utils/video'
+
+const PREFETCH_THRESHOLD_ITEMS = 3
 
 type ReelProps = {
   meme: MemeWithVideo
@@ -55,7 +57,7 @@ export const Reel = React.memo(
         }
 
         if (isActive && isPlaying) {
-          video.play().catch(() => {})
+          void tryPlayVideo(video)
         } else {
           video.pause()
         }
@@ -73,7 +75,7 @@ export const Reel = React.memo(
         video,
         videoSrc: buildVideoStreamUrl(meme.video.bunnyId)
       })
-    }, [meme.video.id, meme.video.bunnyId])
+    }, [meme.video.bunnyId])
 
     return (
       <div className="size-full relative select-none">
@@ -112,10 +114,10 @@ export const Reel = React.memo(
           className="absolute inset-0 bg-transparent"
           aria-hidden="true"
           onTouchStart={() => {
-            return setIsPlaying(false)
+            setIsPlaying(false)
           }}
           onTouchEnd={() => {
-            return setIsPlaying(true)
+            setIsPlaying(true)
           }}
         />
         <div className="absolute bottom-0 inset-x-0 z-10 bg-linear-to-b to-black/60 from-transparent p-3">
@@ -148,7 +150,7 @@ export const Reel = React.memo(
                   isPlaying ? m.meme_pause_video() : m.meme_play_video()
                 }
                 onClick={() => {
-                  return setIsPlaying((prevState) => {
+                  setIsPlaying((prevState) => {
                     return !prevState
                   })
                 }}
@@ -160,7 +162,7 @@ export const Reel = React.memo(
               <Button
                 aria-label={isMuted ? m.meme_unmute() : m.meme_mute()}
                 onClick={() => {
-                  return setIsMuted((prevState) => {
+                  setIsMuted((prevState) => {
                     return !prevState
                   })
                 }}
@@ -185,7 +187,7 @@ export const MemeReels = () => {
 
   const reelsFragmentRef = React.useRef<React.FragmentInstance>(null)
 
-  const infiniteReels = useInfiniteQuery(getInfiniteReelsQueryOpts())
+  const infiniteReelsQuery = useInfiniteQuery(getInfiniteReelsQueryOpts())
 
   const setActiveDebouncer = useDebouncer(
     (index: number) => {
@@ -196,7 +198,7 @@ export const MemeReels = () => {
   )
 
   const memes =
-    infiniteReels.data?.pages.flatMap((page) => {
+    infiniteReelsQuery.data?.pages.flatMap((page) => {
       return page.memes
     }) ?? []
 
@@ -258,8 +260,6 @@ export const MemeReels = () => {
     rowVirtualizer.scrollToIndex(prevIndex, { align: 'start' })
   })
 
-  const { hasNextPage, fetchNextPage, isFetchingNextPage } = infiniteReels
-
   React.useEffect(() => {
     const items = rowVirtualizer.getVirtualItems()
     const [lastItem] = items.toReversed()
@@ -269,17 +269,17 @@ export const MemeReels = () => {
     }
 
     if (
-      memes.length - 3 < lastItem.index &&
-      hasNextPage &&
-      !isFetchingNextPage
+      memes.length - PREFETCH_THRESHOLD_ITEMS < lastItem.index &&
+      infiniteReelsQuery.hasNextPage &&
+      !infiniteReelsQuery.isFetchingNextPage
     ) {
-      void fetchNextPage()
+      void infiniteReelsQuery.fetchNextPage()
     }
   }, [
-    hasNextPage,
-    fetchNextPage,
+    infiniteReelsQuery.hasNextPage,
+    infiniteReelsQuery.fetchNextPage,
     memes.length,
-    isFetchingNextPage,
+    infiniteReelsQuery.isFetchingNextPage,
     virtualItemsKey,
     rowVirtualizer
   ])
@@ -299,10 +299,8 @@ export const MemeReels = () => {
           role="feed"
           aria-label={m.meme_video_feed()}
         >
-          {/* oxlint-disable-next-line react/jsx-no-useless-fragment -- a Fragment ref is not useless, fixed in oxlint 1.83 (oxc#26571) */}
           <React.Fragment ref={reelsFragmentRef}>
-            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-              const { index } = virtualRow
+            {rowVirtualizer.getVirtualItems().map(({ index, start }) => {
               const meme = memes[index]
 
               if (!meme) {
@@ -310,10 +308,10 @@ export const MemeReels = () => {
               }
 
               return (
-                <div
+                <article
                   className="snap-start absolute top-0 left-0 w-full h-dvh overflow-hidden"
                   style={{
-                    transform: `translateY(${virtualRow.start}px)`,
+                    transform: `translateY(${start}px)`,
                     display:
                       rowVirtualizer.isScrolling &&
                       (index > currentIndex + 1 || index < currentIndex - 1)
@@ -322,7 +320,6 @@ export const MemeReels = () => {
                   }}
                   data-index={index}
                   key={meme.id}
-                  role="article"
                   aria-label={meme.title}
                   aria-setsize={-1}
                   aria-posinset={index + 1}
@@ -335,7 +332,7 @@ export const MemeReels = () => {
                     isActive={currentIndex === index}
                     isMuted={isMuted}
                   />
-                </div>
+                </article>
               )
             })}
           </React.Fragment>

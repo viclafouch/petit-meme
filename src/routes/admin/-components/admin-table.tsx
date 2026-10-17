@@ -1,11 +1,11 @@
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
-import type {
-  Header,
-  ReactTable,
-  RowData,
-  SortDirection
+import {
+  type Header,
+  type ReactTable,
+  type RowData,
+  type SortDirection,
+  FlexRender
 } from '@tanstack/react-table'
-import { FlexRender } from '@tanstack/react-table'
 import { Button } from '~/components/ui/button'
 import {
   Table,
@@ -18,11 +18,11 @@ import {
 } from '~/components/ui/table'
 import type { AdminTableFeatures } from '~/routes/admin/-lib/table'
 
-type SortIconParams = {
+type SortIconProps = {
   direction: SortDirection | false
 }
 
-const SortIcon = ({ direction }: SortIconParams) => {
+const SortIcon = ({ direction }: SortIconProps) => {
   if (direction === 'asc') {
     return <ArrowUp className="size-4" aria-hidden />
   }
@@ -44,20 +44,20 @@ function getAriaSortValue<TData extends RowData>(
 ): 'ascending' | 'descending' | 'none' | undefined {
   const sortDirection = header.column.getIsSorted()
 
-  if (sortDirection) {
+  if (sortDirection !== false) {
     return SORT_ARIA_MAP[sortDirection]
   }
 
   return header.column.getCanSort() ? 'none' : undefined
 }
 
-type SortableHeaderParams<TData extends RowData> = {
+type SortableHeaderProps<TData extends RowData> = {
   header: Header<AdminTableFeatures, TData>
 }
 
 const SortableHeader = <TData extends RowData>({
   header
-}: SortableHeaderParams<TData>) => {
+}: SortableHeaderProps<TData>) => {
   const canSort = header.column.getCanSort()
 
   if (!canSort) {
@@ -79,13 +79,13 @@ const SortableHeader = <TData extends RowData>({
   )
 }
 
-type PaginationFooterParams<TData extends RowData> = {
+type PaginationFooterProps<TData extends RowData> = {
   table: ReactTable<AdminTableFeatures, TData>
 }
 
 const PaginationFooter = <TData extends RowData>({
   table
-}: PaginationFooterParams<TData>) => {
+}: PaginationFooterProps<TData>) => {
   const currentPage = table.state.pagination.pageIndex + 1
   const totalPages = table.getPageCount()
 
@@ -132,7 +132,7 @@ const PaginationFooter = <TData extends RowData>({
   )
 }
 
-type AdminTableParams<TData extends RowData> = {
+type AdminTableProps<TData extends RowData> = {
   table: ReactTable<AdminTableFeatures, TData>
   caption?: string
 }
@@ -140,7 +140,7 @@ type AdminTableParams<TData extends RowData> = {
 export const AdminTable = <TData extends RowData>({
   table,
   caption
-}: AdminTableParams<TData>) => {
+}: AdminTableProps<TData>) => {
   const hasPagination = table.getPageCount() > 0
 
   return (

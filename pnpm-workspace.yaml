@@ -38,3 +38,5 @@ peerDependencyRules:
     '@typescript-eslint/typescript-estree>typescript': '7'
     '@typescript-eslint/project-service>typescript': '7'
     '@typescript-eslint/tsconfig-utils>typescript': '7'
+minimumReleaseAgeExclude:
+  - '@viclafouch/oxc-config@1.1.0'

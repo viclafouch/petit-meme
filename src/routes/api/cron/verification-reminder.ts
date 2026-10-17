@@ -1,4 +1,3 @@
-/* oxlint-disable no-await-in-loop */
 import { randomBytes, randomUUID } from 'node:crypto'
 import { createFileRoute } from '@tanstack/react-router'
 import { prismaClient } from '~/db'
@@ -9,7 +8,7 @@ import { emailSubjects } from '~/emails/subjects'
 import { VerificationReminderEmail } from '~/emails/verification-reminder-email'
 import { clientEnv } from '~/env/client'
 import { cronLogger } from '~/lib/logger'
-import { EMAIL_FROM, getEmailRecipient, resend } from '~/lib/resend'
+import { getEmailFrom, getEmailRecipient, getResendClient } from '~/lib/resend'
 import { verifyCronSecret } from '~/utils/cron-auth'
 
 const log = cronLogger.child({ job: 'verification-reminder' })
@@ -17,6 +16,7 @@ const log = cronLogger.child({ job: 'verification-reminder' })
 const REMINDER_AFTER_HOURS = 42
 const REMINDER_BEFORE_HOURS = 54
 const TOKEN_EXPIRY_MS = DAY
+const TOKEN_BYTE_LENGTH = 32
 
 const sendReminderToUser = async (
   user: {
@@ -27,7 +27,7 @@ const sendReminderToUser = async (
   },
   now: Date
 ) => {
-  const token = randomBytes(32).toString('hex')
+  const token = randomBytes(TOKEN_BYTE_LENGTH).toString('hex')
 
   await prismaClient.verification.create({
     data: {
@@ -41,16 +41,14 @@ const sendReminderToUser = async (
   })
 
   const verificationUrl = `${clientEnv.VITE_SITE_URL}/api/auth/verify-email?token=${token}&callbackURL=${encodeURIComponent('/')}`
-  const { locale } = user
-
-  const { error } = await resend.emails.send({
-    from: EMAIL_FROM,
+  const { error } = await getResendClient().emails.send({
+    from: getEmailFrom(),
     to: getEmailRecipient(user.email),
-    subject: emailSubjects[locale].verificationReminder,
+    subject: emailSubjects[user.locale].verificationReminder,
     react: VerificationReminderEmail({
       username: user.name ?? 'there',
       verificationUrl,
-      locale
+      locale: user.locale
     })
   })
 
@@ -99,6 +97,7 @@ const runVerificationReminders = async () => {
 
   for (const user of users) {
     try {
+      // oxlint-disable-next-line no-await-in-loop -- reminders go out one at a time on purpose, never as a burst against Resend
       const isSent = await sendReminderToUser(user, now)
 
       if (isSent) {

@@ -11,11 +11,11 @@ import { UserModerationDialogs } from './user-moderation-dialogs'
 
 const routeApi = getRouteApi('/admin')
 
-type UserDetailActionsParams = {
+type UserDetailActionsProps = {
   user: Pick<AdminUserDetail, 'id' | 'name' | 'banned' | 'role'>
 }
 
-export const UserDetailActions = ({ user }: UserDetailActionsParams) => {
+export const UserDetailActions = ({ user }: UserDetailActionsProps) => {
   const { user: admin } = routeApi.useRouteContext()
   const navigate = useNavigate()
 

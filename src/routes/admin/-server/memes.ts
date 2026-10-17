@@ -4,6 +4,7 @@ import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { setResponseStatus } from '@tanstack/react-start/server'
 import { prismaClient } from '~/db'
+import { HTTP_STATUS } from '~/constants/http'
 import {
   DEFAULT_MEME_TITLE,
   MAX_SIZE_MEME_IN_BYTES,
@@ -32,9 +33,9 @@ import {
   resolveAlgoliaIndexName,
   resolveAlgoliaReplicaCreated,
   safeAlgoliaOp,
-  syncMemeToAllIndices
+  syncMemeToAllIndices,
+  type AlgoliaMemeRecord
 } from '~/lib/algolia'
-import type { AlgoliaMemeRecord } from '~/lib/algolia'
 import {
   checkWatermarkExists,
   createVideo,
@@ -85,14 +86,22 @@ export const getAdminMemeById = createServerFn({ method: 'GET' })
 
 export const MEME_DESCRIPTION_MAX_LENGTH = 200
 
+const MEME_TITLE_MIN_LENGTH = 3
+const MEME_TITLE_MAX_LENGTH = 100
+const MEME_KEYWORD_MAX_LENGTH = 50
+const MEME_KEYWORDS_MAX_COUNT = 20
+const MEME_CATEGORIES_MAX_COUNT = 10
+
 export const MEME_TRANSLATION_SCHEMA = z.object({
-  title: z.string().max(100),
+  title: z.string().max(MEME_TITLE_MAX_LENGTH),
   description: z.string().max(MEME_DESCRIPTION_MAX_LENGTH),
-  keywords: z.array(z.string().max(50)).max(20)
+  keywords: z
+    .array(z.string().max(MEME_KEYWORD_MAX_LENGTH))
+    .max(MEME_KEYWORDS_MAX_COUNT)
 })
 
 const REQUIRED_MEME_TRANSLATION_SCHEMA = MEME_TRANSLATION_SCHEMA.extend({
-  title: z.string().min(3).max(100)
+  title: z.string().min(MEME_TITLE_MIN_LENGTH).max(MEME_TITLE_MAX_LENGTH)
 })
 
 export const MEME_FORM_SCHEMA = z
@@ -103,7 +112,7 @@ export const MEME_FORM_SCHEMA = z
         return MEME_TRANSLATION_SCHEMA
       })
     ),
-    categoryIds: z.array(z.string()).max(10),
+    categoryIds: z.array(z.string()).max(MEME_CATEGORIES_MAX_COUNT),
     status: z.enum(MemeStatus),
     tweetUrl: TWEET_LINK_SCHEMA.nullable().or(
       z
@@ -253,7 +262,7 @@ export const editMeme = createServerFn({ method: 'POST' })
 
     if (!meme) {
       adminLogger.warn({ memeId: values.id }, 'Meme not found for edit')
-      setResponseStatus(404)
+      setResponseStatus(HTTP_STATUS.NOT_FOUND)
       throw new Error('Mème introuvable')
     }
 
@@ -261,7 +270,7 @@ export const editMeme = createServerFn({ method: 'POST' })
       const hasWatermark = await checkWatermarkExists(meme.video.bunnyId)
 
       if (!hasWatermark) {
-        setResponseStatus(422)
+        setResponseStatus(HTTP_STATUS.UNPROCESSABLE_CONTENT)
         throw new Error(
           'Impossible de publier : le watermark doit être généré et uploadé'
         )
@@ -385,7 +394,7 @@ export const deleteMemeById = createServerFn({ method: 'POST' })
 
     if (!meme) {
       adminLogger.warn({ memeId }, 'Meme not found for deletion')
-      setResponseStatus(404)
+      setResponseStatus(HTTP_STATUS.NOT_FOUND)
       throw new Error('Mème introuvable')
     }
 
@@ -429,9 +438,9 @@ export const deleteMemeById = createServerFn({ method: 'POST' })
   })
 
 type CreateMemeWithVideoParams = {
-  buffer: Buffer
-  tweetUrl?: string
+  buffer: Buffer<ArrayBuffer>
   adminId: string
+  tweetUrl?: string
 }
 
 async function rollbackMemeCreation(memeId: string) {
@@ -514,7 +523,10 @@ async function createMemeWithVideo({
     actingAdminId: adminId,
     targetId: meme.id,
     targetType: 'meme',
-    metadata: { title, source: tweetUrl ? 'twitter' : 'upload' }
+    metadata: {
+      title,
+      source: tweetUrl ? 'twitter' : 'upload'
+    }
   })
 
   adminLogger.info({ memeId: meme.id, tweetUrl }, 'Meme created')
@@ -536,7 +548,7 @@ export const createMemeFromTwitterUrl = createServerFn({ method: 'POST' })
         { tweetId: tweet.id, size: filesize(media.video.blob.size) },
         'Video size too big from Twitter'
       )
-      setResponseStatus(422)
+      setResponseStatus(HTTP_STATUS.UNPROCESSABLE_CONTENT)
       throw new Error(
         `La vidéo est trop volumineuse : ${filesize(media.video.blob.size)}`
       )
@@ -580,11 +592,11 @@ export const getAdminMemes = createServerFn({ method: 'GET' })
   .handler(async ({ data }) => {
     const filterParts: string[] = []
 
-    if (data.status) {
+    if (data.status !== undefined) {
       filterParts.push(ALGOLIA_STATUS_FILTERS[data.status])
     }
 
-    if (data.contentLocale) {
+    if (data.contentLocale !== undefined) {
       filterParts.push(ALGOLIA_CONTENT_LOCALE_FILTERS[data.contentLocale])
     }
 
@@ -600,7 +612,7 @@ export const getAdminMemes = createServerFn({ method: 'GET' })
         indexName: searchIndex,
         searchParams: {
           query: data.query,
-          page: data.page ? data.page - 1 : 0,
+          page: data.page === undefined ? 0 : data.page - 1,
           hitsPerPage: MEMES_PER_PAGE,
           filters,
           ...ALGOLIA_ADMIN_SEARCH_PARAMS

@@ -3,12 +3,12 @@ import React from 'react'
 const MOBILE_BREAKPOINT = 768
 const QUERY = `(max-width: ${MOBILE_BREAKPOINT - 1}px)`
 
-const subscribe = (callback: () => void) => {
+const subscribe = (onStoreChange: () => void) => {
   const mql = window.matchMedia(QUERY)
-  mql.addEventListener('change', callback)
+  mql.addEventListener('change', onStoreChange)
 
   return () => {
-    mql.removeEventListener('change', callback)
+    mql.removeEventListener('change', onStoreChange)
   }
 }
 

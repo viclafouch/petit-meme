@@ -4,7 +4,7 @@ import {
   ACTIVITY_IP_RETENTION_DAYS,
   ACTIVITY_RETENTION_DAYS
 } from '~/constants/activity'
-import { DAY } from '~/constants/time'
+import { DAY, DAYS_PER_YEAR } from '~/constants/time'
 import { cronLogger } from '~/lib/logger'
 import { verifyCronSecret } from '~/utils/cron-auth'
 
@@ -16,9 +16,10 @@ const ANALYTICS_RETENTION_DAYS = 365
 const AUDIT_LOG_RETENTION_YEARS = 2
 const ANONYMIZATION_YEARS = 3
 const UNVERIFIED_RETENTION_DAYS = 30
+const MASKED_ID_LENGTH = 8
 
 const maskId = (id: string) => {
-  return id.slice(0, 8)
+  return id.slice(0, MASKED_ID_LENGTH)
 }
 
 const runRetentionCleanup = async () => {
@@ -108,7 +109,7 @@ const runRetentionCleanup = async () => {
   )
 
   const auditLogCutoff = new Date(
-    now.getTime() - AUDIT_LOG_RETENTION_YEARS * 365 * DAY
+    now.getTime() - AUDIT_LOG_RETENTION_YEARS * DAYS_PER_YEAR * DAY
   )
 
   const deletedAuditLogs = await prismaClient.adminAuditLog.deleteMany({
@@ -146,7 +147,7 @@ const runRetentionCleanup = async () => {
   )
 
   const anonymizationCutoff = new Date(
-    now.getTime() - ANONYMIZATION_YEARS * 365 * DAY
+    now.getTime() - ANONYMIZATION_YEARS * DAYS_PER_YEAR * DAY
   )
 
   const usersToAnonymize = await prismaClient.$queryRaw<{ id: string }[]>`

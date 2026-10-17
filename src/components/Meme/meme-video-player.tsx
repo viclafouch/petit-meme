@@ -7,7 +7,7 @@ import {
 } from '~/components/ui/kibo-ui/video-player'
 import { cn } from '~/lib/utils'
 
-type MemeVideoPlayerParams = {
+type MemeVideoPlayerProps = {
   showOverlay?: boolean
   showRemainingTime?: boolean
   className?: string
@@ -28,12 +28,14 @@ export const MemeVideoPlayer = ({
   preload = 'auto',
   ref,
   ...videoProps
-}: MemeVideoPlayerParams) => {
+}: MemeVideoPlayerProps) => {
   return (
     <VideoPlayer
+      data-testid="meme-video-player"
       className={cn('size-full max-h-full overflow-hidden', className)}
     >
       <VideoPlayerContent
+        data-testid="meme-video"
         crossOrigin=""
         className="size-full"
         playsInline

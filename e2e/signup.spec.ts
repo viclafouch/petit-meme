@@ -1,10 +1,10 @@
-import type { Locator, Page } from '@playwright/test'
+import { expect, type Locator, type Page } from '@playwright/test'
 import { prismaClient } from '~/db'
 import { UserLocale } from '~/db/generated/prisma/enums'
+import { m } from '~/paraglide/messages.js'
 import { buildEmailVerificationUrl, openAuthDialog } from './auth-flows'
 import { E2E_EMAIL_DOMAIN, E2E_PASSWORD, E2E_ROLES } from './constants'
-import { expect, test } from './fixtures'
-import { m } from './messages'
+import { test } from './fixtures'
 
 const SIGNUP_USER = {
   name: 'E2E Signup',
@@ -36,59 +36,61 @@ const fillSignupForm = async (panel: Locator, name: string, email: string) => {
   await panel.getByRole('button', { name: m.auth_create_account() }).click()
 }
 
-test('a Visitor signs up, verifies their email and comes back signed in', async ({
-  page
-}) => {
-  await page.goto('/')
+test.describe('the sign up', () => {
+  test('a Visitor signs up, verifies their email and comes back signed in', async ({
+    page
+  }) => {
+    await page.goto('/')
 
-  const signupPanel = await openSignupPanel(page)
+    const signupPanel = await openSignupPanel(page)
 
-  await fillSignupForm(signupPanel, SIGNUP_USER.name, SIGNUP_USER.email)
+    await fillSignupForm(signupPanel, SIGNUP_USER.name, SIGNUP_USER.email)
 
-  await expect(
-    signupPanel.getByText(m.auth_signup_success_title())
-  ).toBeVisible()
+    await expect(
+      signupPanel.getByText(m.auth_signup_success_title())
+    ).toBeVisible()
 
-  const createdUser = await findSignupUser()
+    const createdUser = await findSignupUser()
 
-  expect(createdUser).toMatchObject({
-    name: SIGNUP_USER.name,
-    emailVerified: false,
-    providerAvatar: null,
-    locale: UserLocale.fr,
-    termsAcceptedAt: expect.any(Date),
-    privacyAcceptedAt: expect.any(Date)
-  })
-  expect(createdUser?.image).toBeTruthy()
-
-  await page.goto(await buildEmailVerificationUrl(SIGNUP_USER.email))
-
-  await expect(
-    page.getByRole('banner').getByText(SIGNUP_USER.name)
-  ).toBeVisible()
-  expect(await findSignupUser()).toMatchObject({ emailVerified: true })
-})
-
-test('an address that already has an account gives nothing away', async ({
-  page
-}) => {
-  await page.goto('/')
-
-  const signupPanel = await openSignupPanel(page)
-
-  await fillSignupForm(signupPanel, IMPOSTOR_NAME, E2E_ROLES.free.email)
-
-  await expect(
-    signupPanel.getByText(m.auth_signup_success_title())
-  ).toBeVisible()
-  await expect(
-    signupPanel.getByText(m.auth_error_user_already_exists_use_another())
-  ).toBeHidden()
-
-  expect(
-    await prismaClient.user.findUnique({
-      where: { email: E2E_ROLES.free.email },
-      select: { id: true, name: true }
+    expect(createdUser).toMatchObject({
+      name: SIGNUP_USER.name,
+      emailVerified: false,
+      providerAvatar: null,
+      locale: UserLocale.fr,
+      termsAcceptedAt: expect.any(Date),
+      privacyAcceptedAt: expect.any(Date)
     })
-  ).toEqual({ id: E2E_ROLES.free.id, name: E2E_ROLES.free.name })
+    expect(createdUser?.image).toBeTruthy()
+
+    await page.goto(await buildEmailVerificationUrl(SIGNUP_USER.email))
+
+    await expect(
+      page.getByRole('banner').getByText(SIGNUP_USER.name)
+    ).toBeVisible()
+    expect(await findSignupUser()).toMatchObject({ emailVerified: true })
+  })
+
+  test('an address that already has an account gives nothing away', async ({
+    page
+  }) => {
+    await page.goto('/')
+
+    const signupPanel = await openSignupPanel(page)
+
+    await fillSignupForm(signupPanel, IMPOSTOR_NAME, E2E_ROLES.free.email)
+
+    await expect(
+      signupPanel.getByText(m.auth_signup_success_title())
+    ).toBeVisible()
+    await expect(
+      signupPanel.getByText(m.auth_error_user_already_exists_use_another())
+    ).toBeHidden()
+
+    expect(
+      await prismaClient.user.findUnique({
+        where: { email: E2E_ROLES.free.email },
+        select: { id: true, name: true }
+      })
+    ).toStrictEqual({ id: E2E_ROLES.free.id, name: E2E_ROLES.free.name })
+  })
 })

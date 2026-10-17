@@ -50,7 +50,7 @@ export const test = base.extend<object, E2eWorkerFixtures>({
 
     await provide(context)
 
-    expect(pageErrors, 'uncaught errors on our own pages').toEqual([])
+    expect(pageErrors, 'uncaught errors on our own pages').toStrictEqual([])
   },
   prismaClosedOncePerWorker: [
     // oxlint-disable-next-line no-empty-pattern -- Playwright reads the destructuring to find a fixture's dependencies, and this one has none
@@ -61,5 +61,3 @@ export const test = base.extend<object, E2eWorkerFixtures>({
     { scope: 'worker', auto: true }
   ]
 })
-
-export { expect } from '@playwright/test'

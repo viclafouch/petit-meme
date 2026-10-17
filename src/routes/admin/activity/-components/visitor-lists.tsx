@@ -7,11 +7,11 @@ import { TruncatedText } from '~/routes/admin/-components/truncated-text'
 import { formatEventCount } from '~/routes/admin/-helpers/activity'
 import type { AdminVisitorDetailPayload } from '~/routes/admin/-server/visitor'
 
-type VisitorMemeListParams = {
+type VisitorMemeListProps = {
   memes: AdminVisitorDetailPayload['memes']
 }
 
-export const VisitorMemeList = ({ memes }: VisitorMemeListParams) => {
+export const VisitorMemeList = ({ memes }: VisitorMemeListProps) => {
   return (
     <DetailList
       emptyLabel="Aucun meme touché"
@@ -34,13 +34,13 @@ export const VisitorMemeList = ({ memes }: VisitorMemeListParams) => {
   )
 }
 
-type VisitorUserAgentListParams = {
+type VisitorUserAgentListProps = {
   userAgents: AdminVisitorDetailPayload['userAgents']
 }
 
 export const VisitorUserAgentList = ({
   userAgents
-}: VisitorUserAgentListParams) => {
+}: VisitorUserAgentListProps) => {
   return (
     <DetailList
       emptyLabel="Aucun user-agent observé"
@@ -60,11 +60,11 @@ export const VisitorUserAgentList = ({
   )
 }
 
-type VisitorAccountListParams = {
+type VisitorAccountListProps = {
   users: AdminVisitorDetailPayload['users']
 }
 
-export const VisitorAccountList = ({ users }: VisitorAccountListParams) => {
+export const VisitorAccountList = ({ users }: VisitorAccountListProps) => {
   const locale = getLocale()
 
   return (
@@ -91,7 +91,7 @@ export const VisitorAccountList = ({ users }: VisitorAccountListParams) => {
           ),
           subtitle: entry.lastSeenAt
             ? formatRelativeTime(new Date(entry.lastSeenAt), locale)
-            : null,
+            : undefined,
           trailing: formatEventCount(entry.eventCount)
         }
       })}

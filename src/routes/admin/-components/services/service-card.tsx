@@ -10,7 +10,7 @@ import {
   Search,
   Sparkles
 } from 'lucide-react'
-import { XTwitterIcon } from '~/components/icon'
+import { XTwitterIcon } from '~/components/icon/x-twitter'
 import { clientEnv } from '~/env/client'
 import { cn } from '~/lib/utils'
 
@@ -85,11 +85,11 @@ export const SERVICES = [
   }
 ] as const satisfies readonly ServiceConfig[]
 
-type ServiceCardParams = {
+type ServiceCardProps = {
   service: (typeof SERVICES)[number]
 }
 
-export const ServiceCard = ({ service }: ServiceCardParams) => {
+export const ServiceCard = ({ service }: ServiceCardProps) => {
   const Icon = service.icon
 
   return (

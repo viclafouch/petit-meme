@@ -1,11 +1,7 @@
 import { Button, Section, Text } from 'react-email'
 import type { Locale } from '~/paraglide/runtime'
-import {
-  BoldText,
-  BUTTON_CLASS,
-  CONTACT_EMAIL,
-  EmailLayout
-} from './email-layout'
+import { BUTTON_CLASS, CONTACT_EMAIL } from './constants'
+import { BoldText, EmailLayout } from './email-layout'
 
 const translations = {
   fr: {
@@ -87,15 +83,15 @@ PaymentFailedEmail.PreviewProps = {
   locale: 'fr'
 } satisfies PaymentFailedEmailProps
 
-export const PaymentFailedEmailEN = (
-  props: Omit<PaymentFailedEmailProps, 'locale'>
-) => {
+type PaymentFailedEmailENProps = Omit<PaymentFailedEmailProps, 'locale'>
+
+export const PaymentFailedEmailEN = (props: PaymentFailedEmailENProps) => {
   return <PaymentFailedEmail {...props} locale="en" />
 }
 
 PaymentFailedEmailEN.PreviewProps = {
   username: 'Alan',
   billingPortalUrl: 'https://billing.stripe.com/p/login/test_example'
-} satisfies Omit<PaymentFailedEmailProps, 'locale'>
+} satisfies PaymentFailedEmailENProps
 
 export default PaymentFailedEmail

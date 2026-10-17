@@ -1,8 +1,14 @@
 import React from 'react'
-import type { Variants } from 'motion/react'
-import { motion, useReducedMotion } from 'motion/react'
-import LogoCarousel from '~/components/ui/logo-carousel'
+import { type Variants, motion, useReducedMotion } from 'motion/react'
+import { LogoCarousel } from '~/components/ui/logo-carousel'
 import { logos } from '~/constants/config'
+
+const FLOAT_MIN_DURATION = 4
+const FLOAT_DURATION_SPREAD = 4
+const FLOAT_HEIGHT = 20
+const FLOAT_TILT_DEGREES = 10
+const FLOAT_PEAK_TIME = 0.5
+const LOGO_ENTRANCE_STAGGER = 0.2
 
 const logoPositions = [
   { x: 'left-0', y: 'top-0', duration: 8000, delay: 0 },
@@ -30,12 +36,16 @@ const logoPositions = [
 
 const positionRandoms = logoPositions.map(() => {
   return {
-    duration: 4 + Math.random() * 4,
+    duration: FLOAT_MIN_DURATION + Math.random() * FLOAT_DURATION_SPREAD,
     delay: Math.random() * 2
   }
 })
 
-export const FloatingLogos = ({ variants }: { variants: Variants }) => {
+type FloatingLogosProps = {
+  variants: Variants
+}
+
+export const FloatingLogos = ({ variants }: FloatingLogosProps) => {
   const isReducedMotion = useReducedMotion()
   const logosPerPosition = Math.floor(logos.length / logoPositions.length)
   const remainingLogos = logos.length % logoPositions.length
@@ -46,7 +56,10 @@ export const FloatingLogos = ({ variants }: { variants: Variants }) => {
     const endIndex =
       startIndex + logosPerPosition + (index < remainingLogos ? 1 : 0)
     const positionLogos = logos.slice(startIndex, endIndex)
-    const random = positionRandoms[index] ?? { duration: 4, delay: 0 }
+    const random = positionRandoms[index] ?? {
+      duration: FLOAT_MIN_DURATION,
+      delay: 0
+    }
 
     return {
       ...position,
@@ -66,7 +79,7 @@ export const FloatingLogos = ({ variants }: { variants: Variants }) => {
             initial={isReducedMotion ? false : 'hidden'}
             animate="visible"
             custom={{
-              delay: 1 + 0.2 * index
+              delay: 1 + LOGO_ENTRANCE_STAGGER * index
             }}
             key={position.index}
             className={`absolute ${position.x} ${position.y}`}
@@ -76,15 +89,15 @@ export const FloatingLogos = ({ variants }: { variants: Variants }) => {
                 isReducedMotion
                   ? undefined
                   : {
-                      y: [0, -20, 0],
-                      rotate: [0, 10, -10, 0]
+                      y: [0, -FLOAT_HEIGHT, 0],
+                      rotate: [0, FLOAT_TILT_DEGREES, -FLOAT_TILT_DEGREES, 0]
                     }
               }
               transition={{
                 repeat: Infinity,
                 duration: position.randomDuration,
                 ease: 'easeInOut',
-                times: [0, 0.5, 1],
+                times: [0, FLOAT_PEAK_TIME, 1],
                 delay: position.randomDelay
               }}
             >

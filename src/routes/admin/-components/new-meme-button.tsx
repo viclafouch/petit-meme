@@ -18,6 +18,10 @@ import {
   getAdminMemesListQueryOpts
 } from '~/routes/admin/-lib/queries'
 
+type HandleAddMemeParams = {
+  memeId: string
+}
+
 type NewMemeButtonProps = Partial<React.ComponentProps<typeof Button>>
 
 export const NewMemeButton = ({ ...restButtonProps }: NewMemeButtonProps) => {
@@ -29,7 +33,7 @@ export const NewMemeButton = ({ ...restButtonProps }: NewMemeButtonProps) => {
     setIsOpen(false)
   }
 
-  const handleAddMeme = ({ memeId }: { memeId: string }) => {
+  const handleAddMeme = ({ memeId }: HandleAddMemeParams) => {
     void queryClient.invalidateQueries({
       queryKey: getAdminMemesListQueryOpts.all,
       exact: false

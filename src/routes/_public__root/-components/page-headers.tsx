@@ -1,6 +1,5 @@
 import React from 'react'
-import type { LinkOptions } from '@tanstack/react-router'
-import { Link } from '@tanstack/react-router'
+import { type LinkOptions, Link } from '@tanstack/react-router'
 import { cn } from '~/lib/utils'
 
 type PageContainerProps = {
@@ -43,15 +42,17 @@ export const PageHeader = ({
   )
 }
 
+type PageHeadingProps = React.HTMLAttributes<HTMLHeadingElement>
+
 export const PageHeading = ({
   className,
   children,
   ...props
-}: React.HTMLAttributes<HTMLHeadingElement>) => {
+}: PageHeadingProps) => {
   return (
     <h1
       className={cn(
-        'font-bricolage text-foreground max-w-4xl text-center text-4xl leading-[1.1] font-semibold text-balance sm:text-5xl lg:text-6xl mx-auto',
+        'font-bricolage text-foreground max-w-4xl text-center text-4xl leading-display font-semibold text-balance sm:text-5xl lg:text-6xl mx-auto',
         className
       )}
       {...props}
@@ -61,15 +62,17 @@ export const PageHeading = ({
   )
 }
 
+type PageHeading2Props = React.HTMLAttributes<HTMLHeadingElement>
+
 export const PageHeading2 = ({
   className,
   children,
   ...props
-}: React.HTMLAttributes<HTMLHeadingElement>) => {
+}: PageHeading2Props) => {
   return (
     <h2
       className={cn(
-        'font-bricolage text-foreground max-w-4xl text-center text-2xl leading-[1.1] font-semibold text-balance sm:text-3xl lg:text-4xl mx-auto',
+        'font-bricolage text-foreground max-w-4xl text-center text-2xl leading-display font-semibold text-balance sm:text-3xl lg:text-4xl mx-auto',
         className
       )}
       {...props}
@@ -79,11 +82,13 @@ export const PageHeading2 = ({
   )
 }
 
+type PageDescriptionProps = React.HTMLAttributes<HTMLParagraphElement>
+
 export const PageDescription = ({
   className,
   children,
   ...props
-}: React.HTMLAttributes<HTMLParagraphElement>) => {
+}: PageDescriptionProps) => {
   return (
     <p
       className={cn(
@@ -97,11 +102,13 @@ export const PageDescription = ({
   )
 }
 
+type PageActionsProps = React.HTMLAttributes<HTMLDivElement>
+
 export const PageActions = ({
   className,
   children,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) => {
+}: PageActionsProps) => {
   return (
     <div
       className={cn(
@@ -116,9 +123,9 @@ export const PageActions = ({
 }
 
 type AnnouncementProps = {
-  className?: string
   linkOptions: LinkOptions
   text: string
+  className?: string
   actionText?: string
 }
 

@@ -1,11 +1,11 @@
-export async function withTimeout<T>(
-  promise: Promise<T>,
+export async function withTimeout<TResult>(
+  promise: Promise<TResult>,
   ms: number,
   message: string
-): Promise<T> {
+): Promise<TResult> {
   let timer: ReturnType<typeof setTimeout> | undefined
 
-  const timeout = new Promise<never>((_, reject) => {
+  const timeout = new Promise<never>((_resolve, reject) => {
     timer = setTimeout(() => {
       reject(new Error(message))
     }, ms)

@@ -1,7 +1,12 @@
 import type { VariantProps } from 'class-variance-authority'
 import { z } from 'zod'
 import type { badgeVariants } from '~/components/ui/badge'
-import { DAY, HOUR } from '~/constants/time'
+import { BYTES_PER_KILOBYTE } from '~/constants/number'
+import {
+  SEARCH_PARAM_MAX_PAGE,
+  SEARCH_QUERY_MAX_LENGTH
+} from '~/constants/search-params'
+import { DAY, DAYS_PER_WEEK } from '~/constants/time'
 import type { Prisma } from '~/db/generated/prisma/client'
 import { MemeContentLocale, MemeStatus } from '~/db/generated/prisma/enums'
 import { FILTERABLE_CONTENT_LOCALES } from '~/helpers/i18n-content'
@@ -95,13 +100,20 @@ export const MEME_VIDEO_INTENTS = [
 export type MemeVideoIntent = (typeof MEME_VIDEO_INTENTS)[number]
 
 export const MEMES_PER_PAGE = 30
+
+export const MEME_GRID_COLUMNS = {
+  SMALL: 4,
+  MEDIUM: 5,
+  LARGE: 6
+} as const satisfies Record<string, number>
+
 export const RELATED_MEMES_COUNT = 4
 export const TRENDING_MEMES_COUNT = 12
 
 export const RECOMMEND_TRENDING_CACHE_TTL = DAY
-export const RECOMMEND_RELATED_CACHE_TTL = 7 * DAY
+export const RECOMMEND_RELATED_CACHE_TTL = DAYS_PER_WEEK * DAY
 
-export const TRENDING_CATEGORY_CACHE_TTL = 12 * HOUR
+export const TRENDING_CATEGORY_CACHE_TTL = DAY / 2
 export const TRENDING_CATEGORY_LIMIT = 30
 export const TRENDING_CATEGORY_DAYS = 7
 
@@ -146,9 +158,16 @@ export const MemeStatusMeta = {
 export const CATEGORY_SLUG_REGEX = /^[\da-z-]{1,60}$/u
 
 export const MEMES_SEARCH_SCHEMA = z.object({
-  // oxlint-disable-next-line unicorn/no-useless-undefined
-  query: z.string().max(200).optional().catch(undefined),
-  page: z.coerce.number().int().min(1).max(1000).optional().catch(1),
+  // oxlint-disable-next-line promise/prefer-await-to-then, unicorn/no-useless-undefined -- Zod's catch() sets the parse fallback, it is no promise, and undefined is the fallback value
+  query: z.string().max(SEARCH_QUERY_MAX_LENGTH).optional().catch(undefined),
+  page: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(SEARCH_PARAM_MAX_PAGE)
+    .optional()
+    // oxlint-disable-next-line promise/prefer-await-to-then -- Zod's catch() sets the parse fallback, it is no promise
+    .catch(1),
   status: z.enum(MemeStatus).optional(),
   contentLocale: z.enum(MemeContentLocale).optional(),
   contentLocales: z
@@ -159,13 +178,13 @@ export const MEMES_SEARCH_SCHEMA = z.object({
       })
     })
     .optional()
-    // oxlint-disable-next-line unicorn/no-useless-undefined -- Zod .catch() requires an argument
+    // oxlint-disable-next-line promise/prefer-await-to-then, unicorn/no-useless-undefined -- Zod's catch() sets the parse fallback, it is no promise, and undefined is the fallback value
     .catch(undefined)
 })
 
 export const MEMES_FILTERS_SCHEMA = z.object({
   ...MEMES_SEARCH_SCHEMA.shape,
-  // oxlint-disable-next-line unicorn/no-useless-undefined
+  // oxlint-disable-next-line promise/prefer-await-to-then, unicorn/no-useless-undefined -- Zod's catch() sets the parse fallback, it is no promise, and undefined is the fallback value
   category: z.string().regex(CATEGORY_SLUG_REGEX).optional().catch(undefined)
 })
 
@@ -186,6 +205,7 @@ export type MemeWithCategories = Prisma.MemeGetPayload<{
 }>
 
 const SIZE_IN_MB = 16
-export const MAX_SIZE_MEME_IN_BYTES = SIZE_IN_MB * 1024 * 1024
+export const MAX_SIZE_MEME_IN_BYTES =
+  SIZE_IN_MB * BYTES_PER_KILOBYTE * BYTES_PER_KILOBYTE
 
 export type MemesFilters = z.infer<typeof MEMES_FILTERS_SCHEMA>

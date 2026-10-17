@@ -1,10 +1,6 @@
-import type {
-  AuditAction,
-  AuditMetadata,
-  AuditTargetType
-} from '~/server/audit'
+import type { AuditMetadata } from '~/server/audit'
 
-function getAuditTargetLabel(targetType: AuditTargetType) {
+function getAuditTargetLabel(targetType: string) {
   switch (targetType) {
     case 'category': {
       return 'Catégorie'
@@ -28,7 +24,12 @@ function getAuditTargetLabel(targetType: AuditTargetType) {
   }
 }
 
-function getAuditActionVerb(action: AuditAction, targetType: AuditTargetType) {
+type AuditActionVerbParams = {
+  action: string
+  targetType: string
+}
+
+function getAuditActionVerb({ action, targetType }: AuditActionVerbParams) {
   const label = getAuditTargetLabel(targetType)
 
   switch (action) {
@@ -67,9 +68,9 @@ function getAuditActionVerb(action: AuditAction, targetType: AuditTargetType) {
 }
 
 type FormatAuditEntryParams = {
-  action: AuditAction
-  targetType: AuditTargetType
-  metadata: AuditMetadata | null
+  action: string
+  targetType: string
+  metadata: AuditMetadata
 }
 
 export function formatAuditEntry({
@@ -77,15 +78,14 @@ export function formatAuditEntry({
   targetType,
   metadata
 }: FormatAuditEntryParams) {
-  const verb = getAuditActionVerb(action, targetType)
-  const data = metadata ?? {}
+  const verb = getAuditActionVerb({ action, targetType })
 
-  if (data.title) {
-    return `${verb} : ${data.title}`
+  if (metadata.title) {
+    return `${verb} : ${metadata.title}`
   }
 
-  if (data.banReason) {
-    return `${verb} (${data.banReason})`
+  if (metadata.banReason) {
+    return `${verb} (${metadata.banReason})`
   }
 
   return verb

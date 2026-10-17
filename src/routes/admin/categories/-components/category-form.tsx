@@ -1,7 +1,6 @@
 import { toast } from 'sonner'
 import type { z } from 'zod'
-import type { AnyFieldApi } from '@tanstack/react-form'
-import { useForm } from '@tanstack/react-form'
+import { type AnyFieldApi, useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 import { FormFooter } from '~/components/form-footer'
 import { FLAG_ICON_CLASS, LOCALE_FLAGS } from '~/components/icon/flags'
@@ -20,17 +19,16 @@ import {
 } from '~/helpers/i18n-content'
 import { useKeywordsField } from '~/hooks/use-keywords-field'
 import { getFieldErrorMessage } from '~/lib/utils'
-import { locales } from '~/paraglide/runtime'
-import type { Locale } from '~/paraglide/runtime'
+import { locales, type Locale } from '~/paraglide/runtime'
 import { KeywordsField } from '~/routes/admin/-components/keywords-field'
 import {
   addCategory,
   CATEGORY_FORM_SCHEMA,
-  editCategory
+  editCategory,
+  type EnrichedCategory
 } from '~/server/categories'
-import type { EnrichedCategory } from '~/server/categories'
 
-export type CategoryFormParams =
+export type CategoryFormProps =
   | {
       type: 'edit'
       onClose?: () => void
@@ -49,7 +47,7 @@ export const CategoryForm = ({
   category,
   onSuccess,
   onClose
-}: CategoryFormParams) => {
+}: CategoryFormProps) => {
   const manageCategoryMutation = useMutation({
     mutationFn: async (body: z.infer<typeof CATEGORY_FORM_SCHEMA>) => {
       if (type === 'edit') {
@@ -124,13 +122,13 @@ export const CategoryForm = ({
 
   const frKeywordsField = useKeywordsField({
     setKeywordsValue: (updater) => {
-      return form.setFieldValue('translations.fr.keywords', updater)
+      form.setFieldValue('translations.fr.keywords', updater)
     }
   })
 
   const enKeywordsField = useKeywordsField({
     setKeywordsValue: (updater) => {
-      return form.setFieldValue('translations.en.keywords', updater)
+      form.setFieldValue('translations.en.keywords', updater)
     }
   })
 
@@ -171,9 +169,7 @@ export const CategoryForm = ({
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(event) => {
-                      return field.handleChange(
-                        event.target.value.toLowerCase()
-                      )
+                      field.handleChange(event.target.value.toLowerCase())
                     }}
                   />
                 </FormControl>
@@ -197,7 +193,7 @@ export const CategoryForm = ({
               </legend>
               <form.Field
                 name={`translations.${locale}.title`}
-                children={(field: AnyFieldApi) => {
+                children={(field) => {
                   const errorMessage = getFieldErrorMessage({ field })
 
                   return (
@@ -208,10 +204,10 @@ export const CategoryForm = ({
                           required
                           type="text"
                           name={field.name}
-                          value={field.state.value as string}
+                          value={field.state.value}
                           onBlur={field.handleBlur}
                           onChange={(event) => {
-                            return field.handleChange(event.target.value)
+                            field.handleChange(event.target.value)
                           }}
                         />
                       </FormControl>
@@ -234,9 +230,9 @@ export const CategoryForm = ({
       </div>
       <form.Subscribe
         selector={(state) => {
-          return [state.canSubmit, state.isSubmitting]
+          return [state.canSubmit, state.isSubmitting] as const
         }}
-        children={([canSubmit = false, isSubmitting = false]) => {
+        children={([canSubmit, isSubmitting]) => {
           return (
             <FormFooter
               canSubmit={canSubmit}

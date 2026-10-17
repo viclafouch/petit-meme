@@ -7,11 +7,11 @@ export type StatTileEntry = {
   icon: React.ReactNode
 }
 
-type StatTilesParams = {
+type StatTilesProps = {
   tiles: StatTileEntry[]
 }
 
-export const StatTiles = ({ tiles }: StatTilesParams) => {
+export const StatTiles = ({ tiles }: StatTilesProps) => {
   const locale = getLocale()
 
   return (

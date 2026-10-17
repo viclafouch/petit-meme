@@ -2,17 +2,19 @@ import { z } from 'zod'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
 import { prismaClient } from '~/db'
-import { matchIsAuthProviderId } from '~/constants/auth'
-import type { AuthProviderId } from '~/constants/auth'
-import type { Prisma } from '~/db/generated/prisma/client'
+import { matchIsAuthProviderId, type AuthProviderId } from '~/constants/auth'
+import { HTTP_STATUS } from '~/constants/http'
+import type { Prisma, User } from '~/db/generated/prisma/client'
 import { AccountBannedEmail } from '~/emails/account-banned-email'
 import { AccountUnbannedEmail } from '~/emails/account-unbanned-email'
 import { emailSubjects } from '~/emails/subjects'
+import { differenceInMonths } from '~/helpers/date'
 import { auth } from '~/lib/auth'
 import { adminLogger } from '~/lib/logger'
 import { sendEmailAsync } from '~/lib/resend'
 import { captureWithFeature } from '~/lib/sentry'
-import { stripeClient } from '~/lib/stripe'
+import { getStripeClient } from '~/lib/stripe'
+import { BAN_REASONS, type BanReason } from '~/routes/admin/-lib/ban'
 import { logAuditAction } from '~/server/audit'
 import { adminRequiredMiddleware } from '~/server/user-auth'
 import { cleanupUserData } from '~/utils/user-cleanup'
@@ -41,36 +43,53 @@ type SubscriptionRow = Prisma.SubscriptionGetPayload<{
   select: typeof SUBSCRIPTION_LIST_SELECT
 }>
 
-export type SubscriptionInfo = {
+type SubscriptionPeriod = {
   status: SubscriptionStatus
   startedAt: SubscriptionRow['periodStart']
   endsAt: SubscriptionRow['periodEnd']
 }
 
-const NO_SUBSCRIPTION: SubscriptionInfo = {
+export type SubscriptionInfo = SubscriptionPeriod & {
+  monthCount: number
+}
+
+const NO_SUBSCRIPTION: SubscriptionPeriod = {
   status: 'none',
   startedAt: null,
   endsAt: null
 }
 
-export function buildSubscriptionInfo(subscriptions: SubscriptionRow[]) {
-  return subscriptions.reduce<SubscriptionInfo>((merged, subscription) => {
-    const isActive = subscription.status === 'active'
+const countSubscribedMonths = (startedAt: SubscriptionPeriod['startedAt']) => {
+  return startedAt
+    ? Math.max(1, differenceInMonths(new Date(), new Date(startedAt)))
+    : 1
+}
 
-    return {
-      status: merged.status === 'active' || isActive ? 'active' : 'past',
-      startedAt:
-        subscription.periodStart &&
-        (!merged.startedAt || subscription.periodStart < merged.startedAt)
-          ? subscription.periodStart
-          : merged.startedAt,
-      endsAt:
-        subscription.periodEnd &&
-        (!merged.endsAt || subscription.periodEnd > merged.endsAt)
-          ? subscription.periodEnd
-          : merged.endsAt
-    }
-  }, NO_SUBSCRIPTION)
+export function buildSubscriptionInfo(
+  subscriptions: SubscriptionRow[]
+): SubscriptionInfo {
+  const period = subscriptions.reduce<SubscriptionPeriod>(
+    (merged, subscription) => {
+      const isActive = subscription.status === 'active'
+
+      return {
+        status: merged.status === 'active' || isActive ? 'active' : 'past',
+        startedAt:
+          subscription.periodStart &&
+          (!merged.startedAt || subscription.periodStart < merged.startedAt)
+            ? subscription.periodStart
+            : merged.startedAt,
+        endsAt:
+          subscription.periodEnd &&
+          (!merged.endsAt || subscription.periodEnd > merged.endsAt)
+            ? subscription.periodEnd
+            : merged.endsAt
+      }
+    },
+    NO_SUBSCRIPTION
+  )
+
+  return { ...period, monthCount: countSubscribedMonths(period.startedAt) }
 }
 
 export function resolveAuthProvider(providerId?: string) {
@@ -163,16 +182,6 @@ export const getListUsers = createServerFn({ method: 'GET' })
     return { users: enrichedUsers }
   })
 
-export const BAN_REASONS = [
-  'Spam',
-  'Contenu inapproprié',
-  'Harcèlement',
-  "Usurpation d'identité",
-  'Autre'
-] as const satisfies readonly string[]
-
-export type BanReason = (typeof BAN_REASONS)[number]
-
 const BAN_USER_SCHEMA = z.object({
   userId: z.string(),
   banReason: z.enum(BAN_REASONS)
@@ -184,7 +193,7 @@ const cancelActiveSubscription = async (stripeCustomerId: string | null) => {
   }
 
   try {
-    const subscriptions = await stripeClient.subscriptions.list({
+    const subscriptions = await getStripeClient().subscriptions.list({
       customer: stripeCustomerId,
       status: 'active',
       limit: 1
@@ -196,7 +205,7 @@ const cancelActiveSubscription = async (stripeCustomerId: string | null) => {
       return false
     }
 
-    await stripeClient.subscriptions.update(activeSubscription.id, {
+    await getStripeClient().subscriptions.update(activeSubscription.id, {
       cancel_at_period_end: true
     })
 
@@ -212,12 +221,40 @@ const cancelActiveSubscription = async (stripeCustomerId: string | null) => {
   }
 }
 
+type CancelSubscriptionAndNotifyBanParams = {
+  bannedUser: Pick<User, 'email' | 'name' | 'locale' | 'stripeCustomerId'>
+  banReason: BanReason
+}
+
+const cancelSubscriptionAndNotifyBan = async ({
+  bannedUser,
+  banReason
+}: CancelSubscriptionAndNotifyBanParams) => {
+  const hasActiveSubscription = await cancelActiveSubscription(
+    bannedUser.stripeCustomerId
+  )
+
+  sendEmailAsync({
+    to: bannedUser.email,
+    subject: emailSubjects[bannedUser.locale].accountBanned,
+    react: (
+      <AccountBannedEmail
+        username={bannedUser.name}
+        banReason={banReason}
+        hasActiveSubscription={hasActiveSubscription}
+        locale={bannedUser.locale}
+      />
+    ),
+    logMessage: 'Sending ban notification email'
+  })
+}
+
 export const banUserById = createServerFn({ method: 'POST' })
   .middleware([adminRequiredMiddleware])
   .validator(BAN_USER_SCHEMA)
   .handler(async ({ data, context }) => {
     if (data.userId === context.user.id) {
-      setResponseStatus(422)
+      setResponseStatus(HTTP_STATUS.UNPROCESSABLE_CONTENT)
       throw new Error('Impossible de vous bannir vous-même')
     }
 
@@ -234,17 +271,17 @@ export const banUserById = createServerFn({ method: 'POST' })
     })
 
     if (!targetUser) {
-      setResponseStatus(404)
+      setResponseStatus(HTTP_STATUS.NOT_FOUND)
       throw new Error('Utilisateur introuvable')
     }
 
     if (targetUser.banned === true) {
-      setResponseStatus(422)
+      setResponseStatus(HTTP_STATUS.UNPROCESSABLE_CONTENT)
       throw new Error('Cet utilisateur est déjà banni')
     }
 
     if (targetUser.role === 'admin') {
-      setResponseStatus(422)
+      setResponseStatus(HTTP_STATUS.UNPROCESSABLE_CONTENT)
       throw new Error('Impossible de bannir un administrateur')
     }
 
@@ -264,23 +301,10 @@ export const banUserById = createServerFn({ method: 'POST' })
       })
     ])
 
-    void cancelActiveSubscription(targetUser.stripeCustomerId).then(
-      (hasActiveSubscription) => {
-        sendEmailAsync({
-          to: targetUser.email,
-          subject: emailSubjects[targetUser.locale].accountBanned,
-          react: (
-            <AccountBannedEmail
-              username={targetUser.name}
-              banReason={data.banReason}
-              hasActiveSubscription={hasActiveSubscription}
-              locale={targetUser.locale}
-            />
-          ),
-          logMessage: 'Sending ban notification email'
-        })
-      }
-    )
+    void cancelSubscriptionAndNotifyBan({
+      bannedUser: targetUser,
+      banReason: data.banReason
+    })
 
     void logAuditAction({
       action: 'ban',
@@ -312,7 +336,7 @@ export const unbanUserById = createServerFn({ method: 'POST' })
     })
 
     if (!targetUser) {
-      setResponseStatus(404)
+      setResponseStatus(HTTP_STATUS.NOT_FOUND)
       throw new Error('Utilisateur introuvable')
     }
 
@@ -355,7 +379,7 @@ export const removeUser = createServerFn({ method: 'POST' })
   .validator(z.string())
   .handler(async ({ data: userId, context }) => {
     if (userId === context.user.id) {
-      setResponseStatus(422)
+      setResponseStatus(HTTP_STATUS.UNPROCESSABLE_CONTENT)
       throw new Error('Impossible de supprimer votre propre compte')
     }
 
@@ -365,12 +389,12 @@ export const removeUser = createServerFn({ method: 'POST' })
     })
 
     if (!targetUser) {
-      setResponseStatus(404)
+      setResponseStatus(HTTP_STATUS.NOT_FOUND)
       throw new Error('Utilisateur introuvable')
     }
 
     if (targetUser.role === 'admin') {
-      setResponseStatus(422)
+      setResponseStatus(HTTP_STATUS.UNPROCESSABLE_CONTENT)
       throw new Error('Impossible de supprimer un administrateur')
     }
 

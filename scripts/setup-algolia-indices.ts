@@ -121,7 +121,7 @@ const setupAlgoliaIndices = async () => {
   console.log('\nAll indices configured successfully!')
   console.log('\nNext steps:')
   console.log(
-    `1. Run reindex: npx vite-node --mode ${mode} scripts/reindex-memes.ts`
+    `1. Run reindex: pnpm exec vite-node --mode ${mode} scripts/reindex-memes.ts`
   )
   console.log(
     `2. Delete old index "${algoliaIndexPrefix}" and its replicas from Algolia dashboard`

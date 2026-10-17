@@ -14,12 +14,10 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v5
+      - uses: pnpm/setup@v3
         with:
-          node-version: 24
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+          runtime: node@24
+          cache: true
       - uses: actions/cache@v6
         with:
           path: .turbo/cache
@@ -33,12 +31,10 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v5
+      - uses: pnpm/setup@v3
         with:
-          node-version: 24
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+          runtime: node@24
+          cache: true
       - uses: actions/cache@v6
         with:
           path: .turbo/cache
@@ -51,12 +47,10 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v5
+      - uses: pnpm/setup@v3
         with:
-          node-version: 24
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+          runtime: node@24
+          cache: true
       - uses: actions/cache@v6
         with:
           path: .turbo/cache

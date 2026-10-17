@@ -6,7 +6,6 @@ import { StudioError } from '~/constants/error'
 import { HTTP_STATUS } from '~/constants/http'
 import { auth } from '~/lib/auth'
 import { authLogger } from '~/lib/logger'
-import { wrapMiddlewareWithSentry } from '~/lib/sentry'
 import { getLocale } from '~/paraglide/runtime'
 
 export const getAuthUser = createServerFn({ method: 'GET' }).handler(
@@ -31,7 +30,7 @@ export const getAuthUser = createServerFn({ method: 'GET' }).handler(
   }
 )
 
-const rawAuthUserRequiredMiddleware = createMiddleware({
+export const authUserRequiredMiddleware = createMiddleware({
   type: 'function'
 }).server(async ({ next }) => {
   const { headers } = getRequest()
@@ -53,12 +52,7 @@ const rawAuthUserRequiredMiddleware = createMiddleware({
   return next({ context: { user: session.user } })
 })
 
-export const authUserRequiredMiddleware = wrapMiddlewareWithSentry(
-  'authUserRequired',
-  rawAuthUserRequiredMiddleware
-)
-
-const rawAdminRequiredMiddleware = createMiddleware({
+export const adminRequiredMiddleware = createMiddleware({
   type: 'function'
 })
   .middleware([authUserRequiredMiddleware])
@@ -73,8 +67,3 @@ const rawAdminRequiredMiddleware = createMiddleware({
 
     return next({ context: { user } })
   })
-
-export const adminRequiredMiddleware = wrapMiddlewareWithSentry(
-  'adminRequired',
-  rawAdminRequiredMiddleware
-)

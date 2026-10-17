@@ -61,7 +61,7 @@
     "@radix-ui/react-toggle": "^1.1.18",
     "@radix-ui/react-toggle-group": "^1.1.19",
     "@radix-ui/react-tooltip": "^1.2.16",
-    "@sentry/tanstackstart-react": "10.76.0",
+    "@sentry/tanstackstart-react": "11.8.0",
     "@t3-oss/env-core": "^0.13.11",
     "@tanstack/ai": "^0.64.1",
     "@tanstack/ai-anthropic": "^0.19.4",

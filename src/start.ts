@@ -21,7 +21,7 @@ export const startInstance = createStart(() => {
   return {
     defaultSsr: true,
     serializationAdapters: [customErrorAdapter],
-    requestMiddleware: [csrfMiddleware, sentryGlobalRequestMiddleware],
+    requestMiddleware: [sentryGlobalRequestMiddleware, csrfMiddleware],
     functionMiddleware: [sentryGlobalFunctionMiddleware]
   }
 })

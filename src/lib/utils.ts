@@ -8,34 +8,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-type FieldMeta = {
-  isTouched: boolean
-  isValid: boolean
-  errors: ({ message: string } | undefined)[]
-}
-
-export type FormFieldApi<TValue> = {
-  state: {
-    value: TValue
-    meta: FieldMeta
-  }
-  name: string
-  handleBlur: () => void
-  handleChange: (value: TValue) => void
-}
-
-type GetFieldErrorMessageParams<TValue> = {
-  field: FormFieldApi<TValue>
-}
-
-export function getFieldErrorMessage<TValue>({
-  field
-}: GetFieldErrorMessageParams<TValue>) {
-  return field.state.meta.isTouched && !field.state.meta.isValid
-    ? (field.state.meta.errors[0]?.message ?? '')
-    : ''
-}
-
 const DEFAULT_FETCH_TIMEOUT_MS = 15_000
 
 const matchHasMessage = (value: unknown): value is { message: unknown } => {

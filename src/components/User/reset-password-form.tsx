@@ -1,25 +1,19 @@
 import { CircleAlert } from 'lucide-react'
 import { z } from 'zod'
-import { formOptions, useForm } from '@tanstack/react-form'
+import { formOptions } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
-import {
-  FormControl,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from '~/components/ui/form'
-import { Input } from '~/components/ui/input'
 import { LoadingButton } from '~/components/ui/loading-button'
 import { getEmailSchema } from '~/constants/auth'
 import {
   extractAuthErrorCode,
   getAuthErrorMessage
 } from '~/helpers/auth-errors'
+import { useAppForm } from '~/hooks/use-app-form'
 import { useErrorFocus } from '~/hooks/use-error-focus'
 import { authClient } from '~/lib/auth-client'
+import { focusFirstInvalidField } from '~/lib/form'
 import { captureWithFeature } from '~/lib/sentry'
-import { getFieldErrorMessage } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 import { localizeHref } from '~/paraglide/runtime'
 
@@ -62,8 +56,9 @@ export const ResetPasswordForm = () => {
 
   const errorRef = useErrorFocus(resetPasswordMutation.error)
 
-  const form = useForm({
+  const form = useAppForm({
     ...getResetPasswordFormOpts(),
+    onSubmitInvalid: focusFirstInvalidField,
     onSubmit: ({ value }) => {
       resetPasswordMutation.mutate({ email: value.email })
     }
@@ -82,30 +77,17 @@ export const ResetPasswordForm = () => {
         {m.auth_reset_password_heading()}
       </h1>
       <div className="flex flex-col items-center gap-y-4 w-full">
-        <form.Field
+        <form.AppField
           name="email"
           children={(field) => {
-            const errorMessage = getFieldErrorMessage({ field })
-
             return (
-              <FormItem error={errorMessage}>
-                <FormLabel>{m.common_email()}</FormLabel>
-                <FormControl>
-                  <Input
-                    required
-                    type="email"
-                    autoComplete="email"
-                    placeholder={m.auth_email_placeholder()}
-                    name="email"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => {
-                      field.handleChange(event.target.value)
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+              <field.TextField
+                label={m.common_email()}
+                required
+                type="email"
+                autoComplete="email"
+                placeholder={m.auth_email_placeholder()}
+              />
             )
           }}
         />

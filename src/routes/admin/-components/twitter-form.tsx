@@ -1,13 +1,11 @@
 import { toast } from 'sonner'
 import { z } from 'zod'
-import { formOptions, useForm } from '@tanstack/react-form'
+import { formOptions } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
-import { ClipboardPasteInput } from '~/components/clipboard-paste-input'
-import { FormFooter } from '~/components/form-footer'
-import { FormItem, FormLabel, FormMessage } from '~/components/ui/form'
 import { TWEET_LINK_SCHEMA } from '~/constants/url'
 import { getErrorMessage } from '~/helpers/error'
-import { getFieldErrorMessage } from '~/lib/utils'
+import { useAppForm } from '~/hooks/use-app-form'
+import { focusFirstInvalidField } from '~/lib/form'
 import { createMemeFromTwitterUrl } from '~/routes/admin/-server/memes'
 
 const formSchema = z.object({ url: TWEET_LINK_SCHEMA })
@@ -27,8 +25,9 @@ type TwitterFormProps = {
 }
 
 export const TwitterForm = ({ onSuccess, closeDialog }: TwitterFormProps) => {
-  const form = useForm({
+  const form = useAppForm({
     ...formOpts,
+    onSubmitInvalid: focusFirstInvalidField,
     onSubmit: async ({ value }) => {
       if (createMemeFromTwitterUrlMutation.isPending) {
         return
@@ -70,48 +69,23 @@ export const TwitterForm = ({ onSuccess, closeDialog }: TwitterFormProps) => {
       noValidate
     >
       <div className="grid gap-3">
-        <form.Field
+        <form.AppField
           name="url"
           children={(field) => {
-            const errorMessage = getFieldErrorMessage({ field })
-
             return (
-              <FormItem error={errorMessage}>
-                <FormLabel>Tweet URL</FormLabel>
-                <ClipboardPasteInput
-                  required
-                  type="text"
-                  name="twitter-link"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(event) => {
-                    field.handleChange(event.target.value)
-                  }}
-                  onClipboardPaste={(text) => {
-                    field.handleChange(text)
-                  }}
-                />
-                <FormMessage />
-              </FormItem>
+              <field.ClipboardPasteField
+                label="Tweet URL"
+                required
+                type="text"
+                name="twitter-link"
+              />
             )
           }}
         />
       </div>
-      <form.Subscribe
-        selector={(state) => {
-          return [state.canSubmit, state.isSubmitting] as const
-        }}
-        children={([canSubmit, isSubmitting]) => {
-          return (
-            <FormFooter
-              canSubmit={canSubmit}
-              isSubmitting={isSubmitting}
-              onCancel={closeDialog}
-              submitLabel="Ajouter"
-            />
-          )
-        }}
-      />
+      <form.AppForm>
+        <form.FormFooter onCancel={closeDialog} submitLabel="Ajouter" />
+      </form.AppForm>
     </form>
   )
 }

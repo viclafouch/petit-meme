@@ -1,17 +1,10 @@
 import React from 'react'
 import { CircleAlert } from 'lucide-react'
 import { z } from 'zod'
-import { formOptions, useForm } from '@tanstack/react-form'
+import { formOptions } from '@tanstack/react-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link, useRouter } from '@tanstack/react-router'
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
-import {
-  FormControl,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from '~/components/ui/form'
-import { Input } from '~/components/ui/input'
 import { LoadingButton } from '~/components/ui/loading-button'
 import { LastLoginBadge } from '~/components/User/last-login-badge'
 import { getEmailSchema } from '~/constants/auth'
@@ -19,14 +12,15 @@ import {
   extractAuthErrorCode,
   getAuthErrorMessage
 } from '~/helpers/auth-errors'
+import { useAppForm } from '~/hooks/use-app-form'
 import { useErrorFocus } from '~/hooks/use-error-focus'
 import { authClient } from '~/lib/auth-client'
+import { focusFirstInvalidField } from '~/lib/form'
 import {
   getActiveSubscriptionQueryOpts,
   getAuthUserQueryOpts
 } from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
-import { getFieldErrorMessage } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 
 type LoginFormProps = {
@@ -94,8 +88,9 @@ export const LoginForm = ({
   const isEmailNotVerified =
     signInMutation.error?.message === 'EMAIL_NOT_VERIFIED'
 
-  const form = useForm({
+  const form = useAppForm({
     ...getLoginFormOpts(),
+    onSubmitInvalid: focusFirstInvalidField,
     onSubmit: ({ value }) => {
       signInMutation.mutate({
         email: value.email,
@@ -115,57 +110,31 @@ export const LoginForm = ({
       noValidate
       className="flex flex-col items-center gap-y-4 w-full"
     >
-      <form.Field
+      <form.AppField
         name="email"
         children={(field) => {
-          const errorMessage = getFieldErrorMessage({ field })
-
           return (
-            <FormItem error={errorMessage}>
-              <FormLabel>{m.common_email()}</FormLabel>
-              <FormControl>
-                <Input
-                  required
-                  type="email"
-                  autoComplete="email"
-                  placeholder={m.auth_email_placeholder()}
-                  name="email"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(event) => {
-                    field.handleChange(event.target.value)
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+            <field.TextField
+              label={m.common_email()}
+              required
+              type="email"
+              autoComplete="email"
+              placeholder={m.auth_email_placeholder()}
+            />
           )
         }}
       />
-      <form.Field
+      <form.AppField
         name="password"
         children={(field) => {
-          const errorMessage = getFieldErrorMessage({ field })
-
           return (
-            <FormItem error={errorMessage}>
-              <FormLabel>{m.common_password()}</FormLabel>
-              <FormControl>
-                <Input
-                  required
-                  type="password"
-                  autoComplete="current-password"
-                  placeholder="******"
-                  name="password"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(event) => {
-                    field.handleChange(event.target.value)
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+            <field.TextField
+              label={m.common_password()}
+              required
+              type="password"
+              autoComplete="current-password"
+              placeholder="******"
+            />
           )
         }}
       />

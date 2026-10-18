@@ -6,23 +6,21 @@ import {
   FormLabel,
   FormMessage
 } from '~/components/ui/form'
-import { Input } from '~/components/ui/input'
 import { LoadingButton } from '~/components/ui/loading-button'
 import { Textarea } from '~/components/ui/textarea'
 import { LOCALE_META } from '~/helpers/i18n-content'
 import type { useKeywordsField } from '~/hooks/use-keywords-field'
-import { type FormFieldApi, getFieldErrorMessage } from '~/lib/utils'
+import { getFieldErrorMessage } from '~/lib/form'
 import type { Locale } from '~/paraglide/runtime'
 import { KeywordsField } from '~/routes/admin/-components/keywords-field'
 import { MEME_DESCRIPTION_MAX_LENGTH } from '~/routes/admin/-server/memes'
+import type { MemeFormApi } from './use-meme-form'
 
 const MIN_TITLE_LENGTH = 3
 
 type MemeTranslationSectionProps = {
+  form: MemeFormApi
   locale: Locale
-  titleField: FormFieldApi<string>
-  descriptionField: FormFieldApi<string>
-  keywordsFieldApi: FormFieldApi<string[]>
   keywordsField: ReturnType<typeof useKeywordsField>
   isTranslateVisible: boolean
   isTranslating: boolean
@@ -30,24 +28,15 @@ type MemeTranslationSectionProps = {
 }
 
 export const MemeTranslationSection = ({
+  form,
   locale,
-  titleField,
-  descriptionField,
-  keywordsFieldApi,
   keywordsField,
   isTranslateVisible,
   isTranslating,
   onTranslate
 }: MemeTranslationSectionProps) => {
-  const titleError = getFieldErrorMessage({ field: titleField })
-  const descriptionError = getFieldErrorMessage({ field: descriptionField })
   const meta = LOCALE_META[locale]
   const Flag = LOCALE_FLAGS[locale]
-
-  const canTranslate =
-    titleField.state.value.length >= MIN_TITLE_LENGTH &&
-    descriptionField.state.value.length > 0 &&
-    keywordsFieldApi.state.value.length > 0
 
   return (
     <fieldset className="flex flex-col gap-4 rounded-lg border p-4">
@@ -55,58 +44,74 @@ export const MemeTranslationSection = ({
         <Flag className={FLAG_ICON_CLASS} />
         {meta.label}
       </legend>
-      <FormItem error={titleError}>
-        <FormLabel>Titre</FormLabel>
-        <FormControl>
-          <Input
-            required
-            type="text"
-            name={titleField.name}
-            value={titleField.state.value}
-            onBlur={titleField.handleBlur}
-            onChange={(event) => {
-              titleField.handleChange(event.target.value)
-            }}
-          />
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-      <FormItem error={descriptionError}>
-        <FormLabel>Description</FormLabel>
-        <FormControl>
-          <Textarea
-            name={descriptionField.name}
-            onBlur={descriptionField.handleBlur}
-            value={descriptionField.state.value}
-            onChange={(event) => {
-              descriptionField.handleChange(event.target.value)
-            }}
-          />
-        </FormControl>
-        <div className="flex items-center justify-end">
-          <span className="text-xs text-muted-foreground">
-            {descriptionField.state.value.length}/{MEME_DESCRIPTION_MAX_LENGTH}{' '}
-            caractères
-          </span>
-        </div>
-        <FormMessage />
-      </FormItem>
-      <KeywordsField field={keywordsFieldApi} {...keywordsField} />
+      <form.AppField
+        name={`translations.${locale}.title`}
+        children={(field) => {
+          return <field.TextField label="Titre" required type="text" />
+        }}
+      />
+      <form.Field
+        name={`translations.${locale}.description`}
+        children={(field) => {
+          return (
+            <FormItem error={getFieldErrorMessage(field.state.meta)}>
+              <FormLabel>Description</FormLabel>
+              <FormControl>
+                <Textarea
+                  name={field.name}
+                  onBlur={field.handleBlur}
+                  value={field.state.value}
+                  onChange={(event) => {
+                    field.handleChange(event.target.value)
+                  }}
+                />
+              </FormControl>
+              <div className="flex items-center justify-end">
+                <span className="text-xs text-muted-foreground">
+                  {field.state.value.length}/{MEME_DESCRIPTION_MAX_LENGTH}{' '}
+                  caractères
+                </span>
+              </div>
+              <FormMessage />
+            </FormItem>
+          )
+        }}
+      />
+      <form.AppField
+        name={`translations.${locale}.keywords`}
+        children={() => {
+          return <KeywordsField {...keywordsField} />
+        }}
+      />
       {isTranslateVisible ? (
-        <div className="flex justify-end border-t pt-4">
-          <LoadingButton
-            disabled={!canTranslate}
-            isLoading={isTranslating}
-            loadingText="Traduction..."
-            size="sm"
-            type="button"
-            variant="outline"
-            onClick={onTranslate}
-          >
-            <Languages />
-            Traduire vers les autres langues
-          </LoadingButton>
-        </div>
+        <form.Subscribe
+          selector={(state) => {
+            return state.values.translations[locale]
+          }}
+          children={(translation) => {
+            const canTranslate =
+              translation.title.length >= MIN_TITLE_LENGTH &&
+              translation.description.length > 0 &&
+              translation.keywords.length > 0
+
+            return (
+              <div className="flex justify-end border-t pt-4">
+                <LoadingButton
+                  disabled={!canTranslate}
+                  isLoading={isTranslating}
+                  loadingText="Traduction..."
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                  onClick={onTranslate}
+                >
+                  <Languages />
+                  Traduire vers les autres langues
+                </LoadingButton>
+              </div>
+            )
+          }}
+        />
       ) : null}
     </fieldset>
   )

@@ -1,6 +1,5 @@
 import { toast } from 'sonner'
 import type { z } from 'zod'
-import { useForm } from '@tanstack/react-form'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import type { MemeFullData } from '~/constants/meme'
 import type { Meme } from '~/db/generated/prisma/client'
@@ -10,7 +9,9 @@ import {
   findTranslationByLocale,
   getRequiredLocales
 } from '~/helpers/i18n-content'
+import { useAppForm } from '~/hooks/use-app-form'
 import { useKeywordsField } from '~/hooks/use-keywords-field'
+import { focusFirstInvalidField } from '~/lib/form'
 import { getCategoriesListQueryOpts } from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
 import { baseLocale, isLocale, type Locale } from '~/paraglide/runtime'
@@ -55,7 +56,7 @@ export function useMemeForm({ meme, onSuccess }: UseMemeFormParams) {
     }
   })
 
-  const form = useForm({
+  const form = useAppForm({
     defaultValues: {
       contentLocale: meme.contentLocale,
       translations: buildLocaleRecord((locale) => {
@@ -76,6 +77,7 @@ export function useMemeForm({ meme, onSuccess }: UseMemeFormParams) {
     validators: {
       onChange: MEME_FORM_SCHEMA
     },
+    onSubmitInvalid: focusFirstInvalidField,
     onSubmit: async ({ value }) => {
       if (editMutation.isPending) {
         return
@@ -175,3 +177,5 @@ export function useMemeForm({ meme, onSuccess }: UseMemeFormParams) {
     isLocaleRequired
   }
 }
+
+export type MemeFormApi = ReturnType<typeof useMemeForm>['form']

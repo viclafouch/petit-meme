@@ -1,17 +1,9 @@
 import { CircleCheckBig, CircleAlert } from 'lucide-react'
 import { z } from 'zod'
-import { formOptions, useForm } from '@tanstack/react-form'
+import { formOptions } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
-import { Checkbox } from '~/components/ui/checkbox'
-import {
-  FormControl,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from '~/components/ui/form'
-import { Input } from '~/components/ui/input'
 import { LoadingButton } from '~/components/ui/loading-button'
 import {
   getEmailSchema,
@@ -21,10 +13,11 @@ import {
   extractAuthErrorCode,
   getAuthErrorMessage
 } from '~/helpers/auth-errors'
+import { useAppForm } from '~/hooks/use-app-form'
 import { useErrorFocus } from '~/hooks/use-error-focus'
 import { authClient } from '~/lib/auth-client'
+import { focusFirstInvalidField } from '~/lib/form'
 import { captureWithFeature } from '~/lib/sentry'
-import { getFieldErrorMessage } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 import { localizeHref } from '~/paraglide/runtime'
 
@@ -97,8 +90,9 @@ export const SignupForm = () => {
 
   const errorRef = useErrorFocus(signupMutation.error)
 
-  const form = useForm({
+  const form = useAppForm({
     ...getSignupFormOpts(),
+    onSubmitInvalid: focusFirstInvalidField,
     onSubmit: ({ value }) => {
       signupMutation.mutate({
         email: value.email,
@@ -117,134 +111,69 @@ export const SignupForm = () => {
       noValidate
       className="flex flex-col items-center gap-y-4 w-full"
     >
-      <form.Field
+      <form.AppField
         name="name"
         children={(field) => {
-          const errorMessage = getFieldErrorMessage({ field })
-
           return (
-            <FormItem error={errorMessage}>
-              <FormLabel>{m.auth_username()}</FormLabel>
-              <FormControl>
-                <Input
-                  required
-                  type="text"
-                  autoComplete="name"
-                  placeholder={m.auth_name_placeholder()}
-                  name="name"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(event) => {
-                    field.handleChange(event.target.value)
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+            <field.TextField
+              label={m.auth_username()}
+              required
+              type="text"
+              autoComplete="name"
+              placeholder={m.auth_name_placeholder()}
+            />
           )
         }}
       />
-      <form.Field
+      <form.AppField
         name="email"
         children={(field) => {
-          const errorMessage = getFieldErrorMessage({ field })
-
           return (
-            <FormItem error={errorMessage}>
-              <FormLabel>{m.common_email()}</FormLabel>
-              <FormControl>
-                <Input
-                  required
-                  type="email"
-                  autoComplete="email"
-                  placeholder={m.auth_email_placeholder()}
-                  name="email"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(event) => {
-                    field.handleChange(event.target.value)
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+            <field.TextField
+              label={m.common_email()}
+              required
+              type="email"
+              autoComplete="email"
+              placeholder={m.auth_email_placeholder()}
+            />
           )
         }}
       />
-      <form.Field
+      <form.AppField
         name="password"
         children={(field) => {
-          const errorMessage = getFieldErrorMessage({ field })
-
           return (
-            <FormItem error={errorMessage}>
-              <FormLabel>{m.common_password()}</FormLabel>
-              <FormControl>
-                <Input
-                  required
-                  type="password"
-                  autoComplete="new-password"
-                  placeholder="******"
-                  name="password"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(event) => {
-                    field.handleChange(event.target.value)
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+            <field.TextField
+              label={m.common_password()}
+              required
+              type="password"
+              autoComplete="new-password"
+              placeholder="******"
+            />
           )
         }}
       />
-      <form.Field
+      <form.AppField
         name="confirmPassword"
         children={(field) => {
-          const errorMessage = getFieldErrorMessage({ field })
-
           return (
-            <FormItem error={errorMessage}>
-              <FormLabel>{m.auth_confirm_password()}</FormLabel>
-              <FormControl>
-                <Input
-                  required
-                  type="password"
-                  autoComplete="new-password"
-                  placeholder="******"
-                  name="confirmPassword"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(event) => {
-                    field.handleChange(event.target.value)
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+            <field.TextField
+              label={m.auth_confirm_password()}
+              required
+              type="password"
+              autoComplete="new-password"
+              placeholder="******"
+            />
           )
         }}
       />
-      <form.Field
+      <form.AppField
         name="acceptTerms"
         children={(field) => {
-          const errorMessage = getFieldErrorMessage({ field })
-
           return (
-            <FormItem error={errorMessage} className="w-full">
-              <div className="flex items-start gap-x-2">
-                <Checkbox
-                  id="acceptTerms"
-                  checked={field.state.value}
-                  onCheckedChange={(checked) => {
-                    field.handleChange(checked === true)
-                  }}
-                  onBlur={field.handleBlur}
-                />
-                <label
-                  htmlFor="acceptTerms"
-                  className="text-xs text-muted-foreground leading-snug"
-                >
+            <field.CheckboxField
+              label={
+                <>
                   {m.auth_accept_terms_prefix()}
                   <Link
                     to="/terms-of-use"
@@ -263,10 +192,9 @@ export const SignupForm = () => {
                   >
                     {m.auth_privacy_link_text()}
                   </Link>
-                </label>
-              </div>
-              <FormMessage />
-            </FormItem>
+                </>
+              }
+            />
           )
         }}
       />

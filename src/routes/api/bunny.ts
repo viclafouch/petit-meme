@@ -2,11 +2,8 @@ import { z } from 'zod'
 import { createFileRoute } from '@tanstack/react-router'
 import { prismaClient } from '~/db'
 import { MEME_ALGOLIA_INCLUDE } from '~/constants/meme'
-import {
-  invalidateAlgoliaCache,
-  safeAlgoliaOp,
-  syncMemeToAllIndices
-} from '~/lib/algolia'
+import { safeAlgoliaOp, syncMemeToAllIndices } from '~/lib/algolia'
+import { invalidateAlgoliaCache } from '~/lib/algolia-cache'
 import { getVideoPlayData } from '~/lib/bunny'
 import { bunnyLogger } from '~/lib/logger'
 import { captureWithFeature } from '~/lib/sentry'
@@ -62,7 +59,7 @@ export const Route = createFileRoute('/api/bunny')({
 
           if (meme) {
             await safeAlgoliaOp(syncMemeToAllIndices(meme))
-            invalidateAlgoliaCache()
+            await invalidateAlgoliaCache()
           }
 
           bunnyLogger.info(

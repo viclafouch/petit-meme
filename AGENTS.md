@@ -21,9 +21,9 @@ The site stands out by being plain. It opens on a video, it plays, and nothing a
 
 ## Cost discipline
 
-Every service sits on a free or near free tier, the hosting plan has no cap and no alert, and an overage is billed in silence. Two invoices already paid for this lesson: a database kept awake by a 60 second admin poll, and a recommendation API called on every page view instead of being cached.
+Vercel runs on Pro: usage draws on its monthly included credit first, then bills on demand. Every other service sits on a free or near free tier, where an overage is billed in silence. Two invoices already paid for this lesson: a database kept awake by a 60 second admin poll, and a recommendation API called on every page view instead of being cached.
 
-Before anything that runs on a schedule, holds a connection, or calls a paid API on a hot path, answer two questions out loud: does this let the database sleep, and how many calls a month does it cost at current traffic. Cache in our own database rather than pay per call. A feature already included in a tier we hold is worth suggesting.
+Before anything that runs on a schedule, holds a connection, or calls a paid API on a hot path, answer two questions out loud: does this let the database sleep, and how many calls a month does it cost at current traffic. Cache before paying per call: in our own database, or in a cache the Pro credit covers, such as Vercel Runtime Cache. A feature already included in a tier we hold is worth suggesting.
 
 ## A note from Victor
 

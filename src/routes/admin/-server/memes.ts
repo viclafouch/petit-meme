@@ -28,7 +28,6 @@ import {
   ALGOLIA_ADMIN_SEARCH_PARAMS,
   algoliaSearchClient,
   deleteMemeFromAllIndices,
-  invalidateAlgoliaCache,
   normalizeAlgoliaHit,
   resolveAlgoliaIndexName,
   resolveAlgoliaReplicaCreated,
@@ -36,6 +35,7 @@ import {
   syncMemeToAllIndices,
   type AlgoliaMemeRecord
 } from '~/lib/algolia'
+import { invalidateAlgoliaCache } from '~/lib/algolia-cache'
 import {
   checkWatermarkExists,
   createVideo,
@@ -334,7 +334,7 @@ export const editMeme = createServerFn({ method: 'POST' })
 
     await safeAlgoliaOp(syncMemeToAllIndices(memeUpdated))
 
-    invalidateAlgoliaCache()
+    await invalidateAlgoliaCache()
 
     const hasLeftPublished =
       meme.status === MemeStatus.PUBLISHED &&
@@ -421,7 +421,7 @@ export const deleteMemeById = createServerFn({ method: 'POST' })
       })
     ])
 
-    invalidateAlgoliaCache()
+    await invalidateAlgoliaCache()
     void clearRecommendCache()
 
     void logAuditAction({
@@ -516,7 +516,7 @@ async function createMemeWithVideo({
     throw error
   }
 
-  invalidateAlgoliaCache()
+  await invalidateAlgoliaCache()
 
   void logAuditAction({
     action: 'create',

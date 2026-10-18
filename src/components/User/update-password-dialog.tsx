@@ -1,7 +1,7 @@
 import type { User } from 'better-auth'
 import { CircleAlert } from 'lucide-react'
 import { z } from 'zod'
-import { formOptions, useForm } from '@tanstack/react-form'
+import { formOptions } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 import type { WithDialog } from '~/@types/dialog'
 import {
@@ -13,23 +13,17 @@ import {
   DialogTitle
 } from '~/components/animate-ui/radix/dialog'
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
-import {
-  FormControl,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from '~/components/ui/form'
-import { Input } from '~/components/ui/input'
 import { LoadingButton } from '~/components/ui/loading-button'
 import { getPasswordSchema } from '~/constants/auth'
 import {
   extractAuthErrorCode,
   getChangePasswordErrorMessage
 } from '~/helpers/auth-errors'
+import { useAppForm } from '~/hooks/use-app-form'
 import { useErrorFocus } from '~/hooks/use-error-focus'
 import { authClient } from '~/lib/auth-client'
+import { focusFirstInvalidField } from '~/lib/form'
 import { captureWithFeature } from '~/lib/sentry'
-import { getFieldErrorMessage } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 
 const getUpdatePasswordSchema = () => {
@@ -93,8 +87,9 @@ const UpdatePasswordForm = () => {
 
   const errorRef = useErrorFocus(updatePasswordMutation.error)
 
-  const form = useForm({
+  const form = useAppForm({
     ...getUpdatePasswordFormOpts(),
+    onSubmitInvalid: focusFirstInvalidField,
     onSubmit: ({ value }) => {
       updatePasswordMutation.mutate({
         currentPassword: value.currentPassword,
@@ -113,84 +108,47 @@ const UpdatePasswordForm = () => {
       className="flex flex-col items-center gap-y-6 w-full"
     >
       <div className="flex flex-col items-center gap-y-4 w-full">
-        <form.Field
+        <form.AppField
           name="currentPassword"
           children={(field) => {
-            const errorMessage = getFieldErrorMessage({ field })
-
             return (
-              <FormItem error={errorMessage}>
-                <FormLabel>{m.auth_current_password()}</FormLabel>
-                <FormControl>
-                  <Input
-                    required
-                    type="password"
-                    autoComplete="current-password"
-                    placeholder="******"
-                    name="current-password"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => {
-                      field.handleChange(event.target.value)
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+              <field.TextField
+                label={m.auth_current_password()}
+                required
+                type="password"
+                autoComplete="current-password"
+                placeholder="******"
+                name="current-password"
+              />
             )
           }}
         />
-        <form.Field
+        <form.AppField
           name="newPassword"
           children={(field) => {
-            const errorMessage = getFieldErrorMessage({ field })
-
             return (
-              <FormItem error={errorMessage}>
-                <FormLabel>{m.auth_new_password()}</FormLabel>
-                <FormControl>
-                  <Input
-                    required
-                    type="password"
-                    autoComplete="new-password"
-                    placeholder="*******"
-                    name="password"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => {
-                      field.handleChange(event.target.value)
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+              <field.TextField
+                label={m.auth_new_password()}
+                required
+                type="password"
+                autoComplete="new-password"
+                placeholder="*******"
+                name="password"
+              />
             )
           }}
         />
-        <form.Field
+        <form.AppField
           name="confirmPassword"
           children={(field) => {
-            const errorMessage = getFieldErrorMessage({ field })
-
             return (
-              <FormItem error={errorMessage}>
-                <FormLabel>{m.auth_confirm_password()}</FormLabel>
-                <FormControl>
-                  <Input
-                    required
-                    type="password"
-                    autoComplete="new-password"
-                    placeholder="******"
-                    name="confirmPassword"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => {
-                      field.handleChange(event.target.value)
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+              <field.TextField
+                label={m.auth_confirm_password()}
+                required
+                type="password"
+                autoComplete="new-password"
+                placeholder="******"
+              />
             )
           }}
         />

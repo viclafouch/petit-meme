@@ -14,12 +14,10 @@ import {
   SelectValue
 } from '~/components/ui/select'
 import { MemeStatusMeta } from '~/constants/meme'
-import {
-  type MemeStatus,
-  MemeStatus as MemeStatusEnum
-} from '~/db/generated/prisma/enums'
-import { type FormFieldApi, getFieldErrorMessage } from '~/lib/utils'
+import { MemeStatus } from '~/db/generated/prisma/enums'
+import { getFieldErrorMessage } from '~/lib/form'
 import { matchIsMemeStatus } from '~/routes/admin/-lib/meme-status'
+import type { MemeFormApi } from './use-meme-form'
 
 type CategoryOption = {
   label: string
@@ -27,97 +25,110 @@ type CategoryOption = {
 }
 
 type MemeFormMetadataFieldsProps = {
-  statusField: FormFieldApi<MemeStatus>
-  categoryIdsField: FormFieldApi<string[]>
-  tweetUrlField: FormFieldApi<string | null>
+  form: MemeFormApi
   categoriesOptions: CategoryOption[]
   isCategoriesLoading: boolean
   categoriesError: Error | null
 }
 
 export const MemeFormMetadataFields = ({
-  statusField,
-  categoryIdsField,
-  tweetUrlField,
+  form,
   categoriesOptions,
   isCategoriesLoading,
   categoriesError
 }: MemeFormMetadataFieldsProps) => {
-  const statusError = getFieldErrorMessage({ field: statusField })
-  const categoryIdsError = getFieldErrorMessage({ field: categoryIdsField })
-  const tweetUrlError = getFieldErrorMessage({ field: tweetUrlField })
-
   return (
     <>
-      <FormItem error={statusError}>
-        <FormLabel>Statut</FormLabel>
-        <FormControl>
-          <Select
-            value={statusField.state.value}
-            onValueChange={(value) => {
-              if (matchIsMemeStatus(value)) {
-                statusField.handleChange(value)
-              }
-            }}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Sélectionnez un statut" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={MemeStatusEnum.PENDING}>
-                {MemeStatusMeta.PENDING.label}
-              </SelectItem>
-              <SelectItem value={MemeStatusEnum.PUBLISHED}>
-                {MemeStatusMeta.PUBLISHED.label}
-              </SelectItem>
-              <SelectItem value={MemeStatusEnum.ARCHIVED}>
-                {MemeStatusMeta.ARCHIVED.label}
-              </SelectItem>
-              <SelectItem value={MemeStatusEnum.REJECTED}>
-                {MemeStatusMeta.REJECTED.label}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-      <FormItem error={categoryIdsError}>
-        <FormLabel>Catégories</FormLabel>
-        <FormControl>
-          <MultiAsyncSelect
-            loading={isCategoriesLoading}
-            error={categoriesError}
-            options={categoriesOptions}
-            value={categoryIdsField.state.value}
-            onValueChange={(value) => {
-              categoryIdsField.handleChange(value)
-            }}
-            hideSelectAll
-            closeText="Fermer"
-            clearText="Effacer"
-            className="w-full"
-            searchPlaceholder="Rechercher..."
-            placeholder="Sélectionnez une catégorie..."
-            maxCount={6}
-          />
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-      <FormItem error={tweetUrlError}>
-        <FormLabel>Twitter URL</FormLabel>
-        <FormControl>
-          <Input
-            type="text"
-            name={tweetUrlField.name}
-            value={tweetUrlField.state.value ?? ''}
-            onBlur={tweetUrlField.handleBlur}
-            onChange={(event) => {
-              tweetUrlField.handleChange(event.target.value)
-            }}
-          />
-        </FormControl>
-        <FormMessage />
-      </FormItem>
+      <form.Field
+        name="status"
+        children={(field) => {
+          return (
+            <FormItem error={getFieldErrorMessage(field.state.meta)}>
+              <FormLabel>Statut</FormLabel>
+              <Select
+                value={field.state.value}
+                onValueChange={(value) => {
+                  if (matchIsMemeStatus(value)) {
+                    field.handleChange(value)
+                  }
+                }}
+              >
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Sélectionnez un statut" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value={MemeStatus.PENDING}>
+                    {MemeStatusMeta.PENDING.label}
+                  </SelectItem>
+                  <SelectItem value={MemeStatus.PUBLISHED}>
+                    {MemeStatusMeta.PUBLISHED.label}
+                  </SelectItem>
+                  <SelectItem value={MemeStatus.ARCHIVED}>
+                    {MemeStatusMeta.ARCHIVED.label}
+                  </SelectItem>
+                  <SelectItem value={MemeStatus.REJECTED}>
+                    {MemeStatusMeta.REJECTED.label}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )
+        }}
+      />
+      <form.Field
+        name="categoryIds"
+        children={(field) => {
+          return (
+            <FormItem error={getFieldErrorMessage(field.state.meta)}>
+              <FormLabel>Catégories</FormLabel>
+              <FormControl>
+                <MultiAsyncSelect
+                  loading={isCategoriesLoading}
+                  error={categoriesError}
+                  options={categoriesOptions}
+                  value={field.state.value}
+                  onValueChange={(value) => {
+                    field.handleChange(value)
+                  }}
+                  hideSelectAll
+                  closeText="Fermer"
+                  clearText="Effacer"
+                  className="w-full"
+                  searchPlaceholder="Rechercher..."
+                  placeholder="Sélectionnez une catégorie..."
+                  maxCount={6}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )
+        }}
+      />
+      <form.Field
+        name="tweetUrl"
+        children={(field) => {
+          return (
+            <FormItem error={getFieldErrorMessage(field.state.meta)}>
+              <FormLabel>Twitter URL</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  name={field.name}
+                  value={field.state.value ?? ''}
+                  onBlur={field.handleBlur}
+                  onChange={(event) => {
+                    field.handleChange(event.target.value)
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )
+        }}
+      />
     </>
   )
 }

@@ -1,19 +1,16 @@
 import { CircleAlert } from 'lucide-react'
 import { toast } from 'sonner'
 import type { z } from 'zod'
-import { formOptions, useForm } from '@tanstack/react-form'
+import { formOptions } from '@tanstack/react-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
-import { ClipboardPasteInput } from '~/components/clipboard-paste-input'
 import { Alert, AlertDescription } from '~/components/ui/alert'
-import { Checkbox } from '~/components/ui/checkbox'
 import {
   FormControl,
   FormItem,
   FormLabel,
   FormMessage
 } from '~/components/ui/form'
-import { Input } from '~/components/ui/input'
 import { LoadingButton } from '~/components/ui/loading-button'
 import {
   Select,
@@ -33,41 +30,13 @@ import {
   getContentLocaleOptions,
   matchIsMemeContentLocale
 } from '~/helpers/i18n-content'
+import { useAppForm } from '~/hooks/use-app-form'
 import { useErrorFocus } from '~/hooks/use-error-focus'
+import { focusFirstInvalidField, getFieldErrorMessage } from '~/lib/form'
 import { getUserSubmissionsQueryOpts } from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
-import { getFieldErrorMessage } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
 import { createMemeSubmission } from '~/server/meme-submission'
-
-const SUBMISSION_FIELD_ERRORS = {
-  titleTooShort: () => {
-    return m.submit_error_title_too_short()
-  },
-  invalidUrl: () => {
-    return m.submit_error_invalid_url()
-  },
-  invalidSubmissionUrl: () => {
-    return m.submit_url_error()
-  },
-  acceptTermsRequired: () => {
-    return m.validation_accept_terms()
-  }
-} satisfies Record<string, () => string>
-
-const matchIsSubmissionFieldError = (
-  errorMessage: string
-): errorMessage is keyof typeof SUBMISSION_FIELD_ERRORS => {
-  return Object.hasOwn(SUBMISSION_FIELD_ERRORS, errorMessage)
-}
-
-const getDisplayError = (errorMessage: string) => {
-  if (matchIsSubmissionFieldError(errorMessage)) {
-    return SUBMISSION_FIELD_ERRORS[errorMessage]()
-  }
-
-  return errorMessage
-}
 
 type SubmissionFormValues = {
   title: string
@@ -147,8 +116,9 @@ export const SubmissionForm = ({ pendingCount }: SubmissionFormProps) => {
     }
   })
 
-  const form = useForm({
+  const form = useAppForm({
     ...submissionFormOpts,
+    onSubmitInvalid: focusFirstInvalidField,
     onSubmit: async ({ value }) => {
       return submitMutation.mutateAsync({
         title: value.title,
@@ -170,67 +140,38 @@ export const SubmissionForm = ({ pendingCount }: SubmissionFormProps) => {
       noValidate
       className="flex flex-col gap-4"
     >
-      <form.Field
+      <form.AppField
         name="title"
         children={(field) => {
-          const errorMessage = getFieldErrorMessage({ field })
-
           return (
-            <FormItem error={getDisplayError(errorMessage)}>
-              <FormLabel>{m.submit_field_title()}</FormLabel>
-              <FormControl>
-                <Input
-                  required
-                  type="text"
-                  placeholder={m.submit_field_title_placeholder()}
-                  name="title"
-                  maxLength={100}
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(event) => {
-                    field.handleChange(event.target.value)
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+            <field.TextField
+              label={m.submit_field_title()}
+              required
+              type="text"
+              placeholder={m.submit_field_title_placeholder()}
+              maxLength={100}
+            />
           )
         }}
       />
-      <form.Field
+      <form.AppField
         name="url"
         children={(field) => {
-          const errorMessage = getFieldErrorMessage({ field })
-
           return (
-            <FormItem error={getDisplayError(errorMessage)}>
-              <FormLabel>{m.submit_field_link()}</FormLabel>
-              <ClipboardPasteInput
-                required
-                type="url"
-                placeholder={m.submit_field_link_placeholder()}
-                name="url"
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(event) => {
-                  field.handleChange(event.target.value)
-                }}
-                onClipboardPaste={(text) => {
-                  field.handleChange(text)
-                }}
-              />
-              <FormMessage />
-            </FormItem>
+            <field.ClipboardPasteField
+              label={m.submit_field_link()}
+              required
+              type="url"
+              placeholder={m.submit_field_link_placeholder()}
+            />
           )
         }}
       />
       <form.Field
         name="contentLocale"
         children={(field) => {
-          const errorMessage = getFieldErrorMessage({ field })
-
           return (
-            <FormItem error={errorMessage}>
+            <FormItem error={getFieldErrorMessage(field.state.meta)}>
               <FormLabel>{m.submit_field_language()}</FormLabel>
               <Select
                 value={field.state.value}
@@ -260,28 +201,13 @@ export const SubmissionForm = ({ pendingCount }: SubmissionFormProps) => {
           )
         }}
       />
-      <form.Field
+      <form.AppField
         name="acceptTerms"
         children={(field) => {
-          const errorMessage = getFieldErrorMessage({ field })
-
           return (
-            <FormItem error={getDisplayError(errorMessage)} className="w-full">
-              <div className="flex items-start gap-2">
-                <FormControl>
-                  <Checkbox
-                    id="acceptTermsSubmit"
-                    checked={field.state.value}
-                    onCheckedChange={(checked) => {
-                      field.handleChange(checked === true)
-                    }}
-                    onBlur={field.handleBlur}
-                  />
-                </FormControl>
-                <label
-                  htmlFor="acceptTermsSubmit"
-                  className="text-xs text-muted-foreground leading-snug"
-                >
+            <field.CheckboxField
+              label={
+                <>
                   {m.submit_accept_terms_prefix()}
                   <Link
                     to="/terms-of-use"
@@ -300,10 +226,9 @@ export const SubmissionForm = ({ pendingCount }: SubmissionFormProps) => {
                   >
                     {m.submit_privacy_link_text()}
                   </Link>
-                </label>
-              </div>
-              <FormMessage />
-            </FormItem>
+                </>
+              }
+            />
           )
         }}
       />

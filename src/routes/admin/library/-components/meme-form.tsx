@@ -1,6 +1,5 @@
 import React from 'react'
 import { Sparkles } from 'lucide-react'
-import { FormFooter } from '~/components/form-footer'
 import { CONTENT_LOCALE_FLAGS, FLAG_ICON_CLASS } from '~/components/icon/flags'
 import { Button } from '~/components/ui/button'
 import {
@@ -23,7 +22,7 @@ import {
   getRequiredLocales,
   matchIsMemeContentLocale
 } from '~/helpers/i18n-content'
-import { getFieldErrorMessage } from '~/lib/utils'
+import { getFieldErrorMessage } from '~/lib/form'
 import { type Locale, locales } from '~/paraglide/runtime'
 import type { AiAssistResult } from '~/server/ai'
 import { AiAssistDialog, type AiAssistFieldSelection } from './ai-assist-dialog'
@@ -129,41 +128,37 @@ export const MemeForm = ({ meme, onSuccess }: MemeFormProps) => {
         <form.Field
           name="contentLocale"
           children={(field) => {
-            const errorMessage = getFieldErrorMessage({ field })
-
             return (
-              <FormItem error={errorMessage}>
+              <FormItem error={getFieldErrorMessage(field.state.meta)}>
                 <FormLabel>Langue du contenu</FormLabel>
-                <FormControl>
-                  <Select
-                    value={field.state.value}
-                    onValueChange={(value) => {
-                      if (matchIsMemeContentLocale(value)) {
-                        field.handleChange(value)
-                      }
-                    }}
-                  >
+                <Select
+                  value={field.state.value}
+                  onValueChange={(value) => {
+                    if (matchIsMemeContentLocale(value)) {
+                      field.handleChange(value)
+                    }
+                  }}
+                >
+                  <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Sélectionnez une langue" />
                     </SelectTrigger>
-                    <SelectContent>
-                      {getContentLocaleOptions().map((option) => {
-                        const Flag = CONTENT_LOCALE_FLAGS[option.value]
+                  </FormControl>
+                  <SelectContent>
+                    {getContentLocaleOptions().map((option) => {
+                      const Flag = CONTENT_LOCALE_FLAGS[option.value]
 
-                        return (
-                          <SelectItem key={option.value} value={option.value}>
-                            <span className="flex items-center gap-2">
-                              {Flag ? (
-                                <Flag className={FLAG_ICON_CLASS} />
-                              ) : null}
-                              {option.label}
-                            </span>
-                          </SelectItem>
-                        )
-                      })}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
+                      return (
+                        <SelectItem key={option.value} value={option.value}>
+                          <span className="flex items-center gap-2">
+                            {Flag ? <Flag className={FLAG_ICON_CLASS} /> : null}
+                            {option.label}
+                          </span>
+                        </SelectItem>
+                      )
+                    })}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )
@@ -184,47 +179,19 @@ export const MemeForm = ({ meme, onSuccess }: MemeFormProps) => {
                   })
                   .map((locale) => {
                     return (
-                      <form.Field
+                      <MemeTranslationSection
                         key={locale}
-                        name={`translations.${locale}.title`}
-                        children={(titleField) => {
-                          return (
-                            <form.Field
-                              name={`translations.${locale}.description`}
-                              children={(descriptionField) => {
-                                return (
-                                  <form.Field
-                                    name={`translations.${locale}.keywords`}
-                                    children={(keywordsFieldApi) => {
-                                      return (
-                                        <MemeTranslationSection
-                                          locale={locale}
-                                          titleField={titleField}
-                                          descriptionField={descriptionField}
-                                          keywordsFieldApi={keywordsFieldApi}
-                                          keywordsField={keywordsFields[locale]}
-                                          isTranslateVisible={
-                                            contentLocale === 'UNIVERSAL'
-                                          }
-                                          isTranslating={
-                                            translateContentMutation.isPending
-                                              ? translateContentMutation.variables ===
-                                                locale
-                                              : false
-                                          }
-                                          onTranslate={() => {
-                                            translateContentMutation.mutate(
-                                              locale
-                                            )
-                                          }}
-                                        />
-                                      )
-                                    }}
-                                  />
-                                )
-                              }}
-                            />
-                          )
+                        form={form}
+                        locale={locale}
+                        keywordsField={keywordsFields[locale]}
+                        isTranslateVisible={contentLocale === 'UNIVERSAL'}
+                        isTranslating={
+                          translateContentMutation.isPending
+                            ? translateContentMutation.variables === locale
+                            : false
+                        }
+                        onTranslate={() => {
+                          translateContentMutation.mutate(locale)
                         }}
                       />
                     )
@@ -233,52 +200,20 @@ export const MemeForm = ({ meme, onSuccess }: MemeFormProps) => {
             )
           }}
         />
-        <form.Field
-          name="status"
-          children={(statusField) => {
-            return (
-              <form.Field
-                name="categoryIds"
-                children={(categoryIdsField) => {
-                  return (
-                    <form.Field
-                      name="tweetUrl"
-                      children={(tweetUrlField) => {
-                        return (
-                          <MemeFormMetadataFields
-                            statusField={statusField}
-                            categoryIdsField={categoryIdsField}
-                            tweetUrlField={tweetUrlField}
-                            categoriesOptions={categoriesOptions}
-                            isCategoriesLoading={categoriesListQuery.isLoading}
-                            categoriesError={categoriesListQuery.error}
-                          />
-                        )
-                      }}
-                    />
-                  )
-                }}
-              />
-            )
-          }}
+        <MemeFormMetadataFields
+          form={form}
+          categoriesOptions={categoriesOptions}
+          isCategoriesLoading={categoriesListQuery.isLoading}
+          categoriesError={categoriesListQuery.error}
         />
       </div>
-      <form.Subscribe
-        selector={(state) => {
-          return [state.canSubmit, state.isSubmitting] as const
-        }}
-        children={([canSubmit, isSubmitting]) => {
-          return (
-            <FormFooter
-              canSubmit={canSubmit}
-              isSubmitting={isSubmitting}
-              submitLabel="Enregistrer"
-              isLoadingButton
-              formId="edit-meme-form"
-            />
-          )
-        }}
-      />
+      <form.AppForm>
+        <form.FormFooter
+          submitLabel="Enregistrer"
+          isLoadingButton
+          formId="edit-meme-form"
+        />
+      </form.AppForm>
     </form>
   )
 }

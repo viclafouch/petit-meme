@@ -1,8 +1,6 @@
 import { toast } from 'sonner'
 import type { z } from 'zod'
-import { type AnyFieldApi, useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
-import { FormFooter } from '~/components/form-footer'
 import { FLAG_ICON_CLASS, LOCALE_FLAGS } from '~/components/icon/flags'
 import {
   FormControl,
@@ -17,8 +15,9 @@ import {
   findTranslationByLocale,
   LOCALE_META
 } from '~/helpers/i18n-content'
+import { useAppForm } from '~/hooks/use-app-form'
 import { useKeywordsField } from '~/hooks/use-keywords-field'
-import { getFieldErrorMessage } from '~/lib/utils'
+import { focusFirstInvalidField, getFieldErrorMessage } from '~/lib/form'
 import { locales, type Locale } from '~/paraglide/runtime'
 import { KeywordsField } from '~/routes/admin/-components/keywords-field'
 import {
@@ -82,7 +81,7 @@ export const CategoryForm = ({
     onSuccess
   })
 
-  const form = useForm({
+  const form = useAppForm({
     defaultValues:
       type === 'edit'
         ? {
@@ -111,6 +110,7 @@ export const CategoryForm = ({
     validators: {
       onChange: CATEGORY_FORM_SCHEMA
     },
+    onSubmitInvalid: focusFirstInvalidField,
     onSubmit: async ({ value }) => {
       if (manageCategoryMutation.isPending) {
         return
@@ -156,10 +156,8 @@ export const CategoryForm = ({
         <form.Field
           name="slug"
           children={(field) => {
-            const errorMessage = getFieldErrorMessage({ field })
-
             return (
-              <FormItem error={errorMessage}>
+              <FormItem error={getFieldErrorMessage(field.state.meta)}>
                 <FormLabel>Slug</FormLabel>
                 <FormControl>
                   <Input
@@ -191,61 +189,33 @@ export const CategoryForm = ({
                 <Flag className={FLAG_ICON_CLASS} />
                 {meta.label}
               </legend>
-              <form.Field
+              <form.AppField
                 name={`translations.${locale}.title`}
                 children={(field) => {
-                  const errorMessage = getFieldErrorMessage({ field })
-
                   return (
-                    <FormItem error={errorMessage}>
-                      <FormLabel>{meta.label}</FormLabel>
-                      <FormControl>
-                        <Input
-                          required
-                          type="text"
-                          name={field.name}
-                          value={field.state.value}
-                          onBlur={field.handleBlur}
-                          onChange={(event) => {
-                            field.handleChange(event.target.value)
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                    <field.TextField label={meta.label} required type="text" />
                   )
                 }}
               />
-              <form.Field
+              <form.AppField
                 name={`translations.${locale}.keywords`}
-                children={(field: AnyFieldApi) => {
-                  return (
-                    <KeywordsField field={field} {...keywordsFields[locale]} />
-                  )
+                children={() => {
+                  return <KeywordsField {...keywordsFields[locale]} />
                 }}
               />
             </fieldset>
           )
         })}
       </div>
-      <form.Subscribe
-        selector={(state) => {
-          return [state.canSubmit, state.isSubmitting] as const
-        }}
-        children={([canSubmit, isSubmitting]) => {
-          return (
-            <FormFooter
-              canSubmit={canSubmit}
-              isSubmitting={isSubmitting}
-              onCancel={() => {
-                return onClose?.()
-              }}
-              submitLabel="Enregistrer"
-              isLoadingButton
-            />
-          )
-        }}
-      />
+      <form.AppForm>
+        <form.FormFooter
+          onCancel={() => {
+            return onClose?.()
+          }}
+          submitLabel="Enregistrer"
+          isLoadingButton
+        />
+      </form.AppForm>
     </form>
   )
 }

@@ -2,9 +2,8 @@ import React from 'react'
 import { Upload, X } from 'lucide-react'
 import { toast } from 'sonner'
 import type { z } from 'zod'
-import { formOptions, useForm } from '@tanstack/react-form'
+import { formOptions } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
-import { FormFooter } from '~/components/form-footer'
 import { Button } from '~/components/ui/button'
 import {
   FileUpload,
@@ -18,7 +17,8 @@ import {
 } from '~/components/ui/file-upload'
 import { FormItem, FormMessage } from '~/components/ui/form'
 import { getErrorMessage } from '~/helpers/error'
-import { getFieldErrorMessage } from '~/lib/utils'
+import { useAppForm } from '~/hooks/use-app-form'
+import { focusFirstInvalidField, getFieldErrorMessage } from '~/lib/form'
 import {
   CREATE_MEME_FROM_FILE_SCHEMA,
   createMemeFromFile
@@ -47,8 +47,9 @@ const formOpts = formOptions({
 })
 
 export const FileForm = ({ onSuccess, closeDialog }: FileFormProps) => {
-  const form = useForm({
+  const form = useAppForm({
     ...formOpts,
+    onSubmitInvalid: focusFirstInvalidField,
     onSubmit: async ({ value }) => {
       if (createMemeFromFileMutation.isPending) {
         return
@@ -101,7 +102,7 @@ export const FileForm = ({ onSuccess, closeDialog }: FileFormProps) => {
       <form.Field
         name="video"
         children={(field) => {
-          const errorMessage = getFieldErrorMessage({ field })
+          const errorMessage = getFieldErrorMessage(field.state.meta)
 
           return (
             <FormItem error={errorMessage} className="w-full">
@@ -117,7 +118,7 @@ export const FileForm = ({ onSuccess, closeDialog }: FileFormProps) => {
                 maxFiles={1}
                 className="w-full"
               >
-                <FileUploadDropzone>
+                <FileUploadDropzone aria-invalid={errorMessage !== ''}>
                   <div className="flex flex-col items-center gap-1">
                     <div className="flex items-center justify-center rounded-full border p-2.5">
                       <Upload className="size-6 text-muted-foreground" />
@@ -159,21 +160,9 @@ export const FileForm = ({ onSuccess, closeDialog }: FileFormProps) => {
           )
         }}
       />
-      <form.Subscribe
-        selector={(state) => {
-          return [state.canSubmit, state.isSubmitting] as const
-        }}
-        children={([canSubmit, isSubmitting]) => {
-          return (
-            <FormFooter
-              canSubmit={canSubmit}
-              isSubmitting={isSubmitting}
-              onCancel={closeDialog}
-              submitLabel="Ajouter"
-            />
-          )
-        }}
-      />
+      <form.AppForm>
+        <form.FormFooter onCancel={closeDialog} submitLabel="Ajouter" />
+      </form.AppForm>
     </form>
   )
 }

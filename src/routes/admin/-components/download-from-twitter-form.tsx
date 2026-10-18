@@ -1,8 +1,7 @@
 import { toast } from 'sonner'
 import { z } from 'zod'
-import { formOptions, useForm } from '@tanstack/react-form'
+import { formOptions } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
-import { ClipboardPasteInput } from '~/components/clipboard-paste-input'
 import {
   Card,
   CardContent,
@@ -11,13 +10,13 @@ import {
   CardHeader,
   CardTitle
 } from '~/components/ui/card'
-import { FormItem, FormLabel, FormMessage } from '~/components/ui/form'
 import { LoadingButton } from '~/components/ui/loading-button'
 import { TWEET_LINK_SCHEMA } from '~/constants/url'
 import { base64ToBlob } from '~/helpers/blob'
 import { getErrorMessage } from '~/helpers/error'
+import { useAppForm } from '~/hooks/use-app-form'
+import { focusFirstInvalidField } from '~/lib/form'
 import { captureWithFeature } from '~/lib/sentry'
-import { getFieldErrorMessage } from '~/lib/utils'
 import { fetchTweetVideo, getTweetFromUrl } from '~/server/twitter'
 import { downloadBlob } from '~/utils/download'
 
@@ -33,8 +32,9 @@ const formOpts = formOptions({
 })
 
 export const DownloadFromTwitterForm = () => {
-  const form = useForm({
+  const form = useAppForm({
     ...formOpts,
+    onSubmitInvalid: focusFirstInvalidField,
     onSubmit: async ({ value }) => {
       if (downloadFileFromTweetMutation.isPending) {
         return
@@ -79,29 +79,16 @@ export const DownloadFromTwitterForm = () => {
         </CardHeader>
         <CardContent>
           <div className="grid gap-3">
-            <form.Field
+            <form.AppField
               name="url"
               children={(field) => {
-                const errorMessage = getFieldErrorMessage({ field })
-
                 return (
-                  <FormItem error={errorMessage}>
-                    <FormLabel>Tweet URL</FormLabel>
-                    <ClipboardPasteInput
-                      required
-                      type="text"
-                      name="twitter-link"
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(event) => {
-                        field.handleChange(event.target.value)
-                      }}
-                      onClipboardPaste={(text) => {
-                        field.handleChange(text)
-                      }}
-                    />
-                    <FormMessage />
-                  </FormItem>
+                  <field.ClipboardPasteField
+                    label="Tweet URL"
+                    required
+                    type="text"
+                    name="twitter-link"
+                  />
                 )
               }}
             />

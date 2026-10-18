@@ -7,10 +7,10 @@ import {
   FormMessage
 } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
-import { type FormFieldApi, getFieldErrorMessage } from '~/lib/utils'
+import { useFieldContext } from '~/hooks/form-context'
+import { getFieldErrorMessage } from '~/lib/form'
 
 type KeywordsFieldProps = {
-  field: FormFieldApi<string[]>
   keywordValue: string
   setKeywordValue: (value: string) => void
   handleAddKeyword: () => void
@@ -18,13 +18,13 @@ type KeywordsFieldProps = {
 }
 
 export const KeywordsField = ({
-  field,
   keywordValue,
   setKeywordValue,
   handleAddKeyword,
   handleRemoveKeyword
 }: KeywordsFieldProps) => {
-  const errorMessage = getFieldErrorMessage({ field })
+  const field = useFieldContext<string[]>()
+  const errorMessage = getFieldErrorMessage(field.state.meta)
 
   return (
     <FormItem error={errorMessage}>

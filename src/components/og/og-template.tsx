@@ -37,8 +37,7 @@ export const OgTemplate = ({
               fontSize: '64px',
               lineHeight: 1.1,
               letterSpacing: '-0.02em',
-              lineClamp: 2,
-              textOverflow: 'ellipsis'
+              lineClamp: 2
             }}
           >
             {title}
@@ -49,8 +48,7 @@ export const OgTemplate = ({
               style={{
                 fontSize: '28px',
                 lineHeight: 1.4,
-                lineClamp: 3,
-                textOverflow: 'ellipsis'
+                lineClamp: 3
               }}
             >
               {subtitle}

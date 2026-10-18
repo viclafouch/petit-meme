@@ -76,26 +76,6 @@ export default defineConfig(({ mode }) => {
     },
     assetsInclude: ['**/*.md'],
     plugins: [
-      paraglideVitePlugin({
-        project: './project.inlang',
-        outdir: './src/paraglide',
-        outputStructure: 'message-modules',
-        cookieName: 'PARAGLIDE_LOCALE',
-        strategy: ['cookie', 'url', 'preferredLanguage', 'baseLocale'],
-        urlPatterns: [
-          {
-            pattern: '/:path(.*)?',
-            localized: [['en', '/en/:path(.*)?']]
-          }
-        ],
-        routeStrategies: [
-          { match: '/api/:path(.*)?', exclude: true },
-          { match: '/admin/:path(.*)?', exclude: true },
-          { match: '/health', exclude: true },
-          { match: '/sitemap:rest(.*)', exclude: true },
-          { match: '/robots.txt', exclude: true }
-        ]
-      }),
       tailwindcss(),
       tanstackStart({
         router: {
@@ -104,6 +84,9 @@ export default defineConfig(({ mode }) => {
         }
       }),
       react(),
+      paraglideVitePlugin({
+        project: './project.inlang'
+      }),
       nitro({
         preset: mode === 'e2e' ? 'node-server' : 'vercel',
         sourcemap: true,

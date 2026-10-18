@@ -114,7 +114,7 @@
   "devDependencies": {
     "@dicebear/core": "10.7.0",
     "@dicebear/styles": "10.6.0",
-    "@inlang/paraglide-js": "2.23.2",
+    "@inlang/paraglide-js": "2.29.0",
     "@oxlint/plugins": "1.88.0",
     "@playwright/test": "^1.63.0",
     "@react-email/ui": "6.11.3",

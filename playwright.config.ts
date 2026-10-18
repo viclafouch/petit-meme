@@ -4,6 +4,8 @@ import { E2E_BASE_URL, IS_CI } from './e2e/env'
 const FAKE_ANTHROPIC_PORT = '3101'
 const FAKE_ANTHROPIC_URL = `http://127.0.0.1:${FAKE_ANTHROPIC_PORT}`
 
+const APP_READINESS_URL = new URL('/health', E2E_BASE_URL).href
+
 const SERVER_LOG_DIRECTORY = 'e2e/.logs'
 const START_SERVER = `mkdir -p ${SERVER_LOG_DIRECTORY} && pnpm run start:e2e > ${SERVER_LOG_DIRECTORY}/server.log 2>&1`
 
@@ -26,17 +28,15 @@ export default defineConfig({
     {
       name: 'Fake Anthropic',
       command: `node e2e/fake-anthropic.ts --port ${FAKE_ANTHROPIC_PORT}`,
-      url: FAKE_ANTHROPIC_URL,
-      reuseExistingServer: false
+      url: FAKE_ANTHROPIC_URL
     },
     {
       name: 'App',
       command: IS_CI
         ? START_SERVER
         : `pnpm run prisma:migrate:e2e && pnpm run build:e2e && ${START_SERVER}`,
-      url: E2E_BASE_URL,
+      url: APP_READINESS_URL,
       env: { ANTHROPIC_BASE_URL: FAKE_ANTHROPIC_URL },
-      reuseExistingServer: false,
       timeout: 300_000
     }
   ],

@@ -7,8 +7,11 @@ import {
 } from '@algolia/client-search'
 import { recommendClient } from '@algolia/recommend'
 import * as Sentry from '@sentry/tanstackstart-react'
+import {
+  ALGOLIA_FAIL_FAST_ON_RATE_LIMIT,
+  ALGOLIA_WAIT_ON_RATE_LIMIT
+} from '~/constants/algolia'
 import type { MemeAlgoliaData } from '~/constants/meme'
-import { FIVE_MINUTES_MS, TEN_MINUTES_MS } from '~/constants/time'
 import { MemeContentLocale, MemeStatus } from '~/db/generated/prisma/enums'
 import { clientEnv } from '~/env/client'
 import { serverEnv } from '~/env/server'
@@ -42,7 +45,8 @@ export function resolveAlgoliaReplicaCreated(locale: Locale) {
 
 export const algoliaSearchClient = searchClient(
   clientEnv.VITE_ALGOLIA_APP_ID,
-  clientEnv.VITE_ALGOLIA_SEARCH_KEY
+  clientEnv.VITE_ALGOLIA_SEARCH_KEY,
+  ALGOLIA_FAIL_FAST_ON_RATE_LIMIT
 )
 
 let algoliaAdminClient: ReturnType<typeof searchClient> | null = null
@@ -50,7 +54,8 @@ let algoliaAdminClient: ReturnType<typeof searchClient> | null = null
 export const getAlgoliaAdminClient = () => {
   algoliaAdminClient ??= searchClient(
     clientEnv.VITE_ALGOLIA_APP_ID,
-    serverEnv.ALGOLIA_ADMIN_KEY
+    serverEnv.ALGOLIA_ADMIN_KEY,
+    ALGOLIA_WAIT_ON_RATE_LIMIT
   )
 
   return algoliaAdminClient
@@ -58,7 +63,8 @@ export const getAlgoliaAdminClient = () => {
 
 export const algoliaRecommendClient = recommendClient(
   clientEnv.VITE_ALGOLIA_APP_ID,
-  clientEnv.VITE_ALGOLIA_SEARCH_KEY
+  clientEnv.VITE_ALGOLIA_SEARCH_KEY,
+  ALGOLIA_FAIL_FAST_ON_RATE_LIMIT
 )
 
 export async function safeAlgoliaOp<TResult>(promise: Promise<TResult>) {
@@ -96,111 +102,6 @@ export const ALGOLIA_ADMIN_SEARCH_PARAMS = {
     '-imageURL'
   ],
   attributesToSnippet: [] satisfies string[]
-}
-
-const ALGOLIA_CACHE_TTL = FIVE_MINUTES_MS
-const ALGOLIA_CACHE_MAX_SIZE = 200
-const ALGOLIA_CACHE_SWEEP_INTERVAL = TEN_MINUTES_MS
-
-type AlgoliaCacheEntry<TResult> = {
-  data: TResult
-  expiresAt: number
-}
-
-type AlgoliaCacheStore = {
-  sweepExpired: (now: number) => void
-  clear: () => void
-}
-
-const algoliaCacheStores = new Set<AlgoliaCacheStore>()
-
-const sweepInterval = setInterval(() => {
-  const now = Date.now()
-
-  for (const store of algoliaCacheStores) {
-    store.sweepExpired(now)
-  }
-}, ALGOLIA_CACHE_SWEEP_INTERVAL)
-
-sweepInterval.unref()
-
-export function invalidateAlgoliaCache() {
-  for (const store of algoliaCacheStores) {
-    store.clear()
-  }
-}
-
-type ReadAlgoliaCacheParams<TParams> = {
-  key: string
-  params: TParams
-  ttl?: number
-}
-
-export function createAlgoliaCache<TParams, TResult>(
-  fetchFresh: (params: TParams) => Promise<TResult>
-) {
-  const results = new Map<string, AlgoliaCacheEntry<TResult>>()
-  const pendingRequests = new Map<string, Promise<TResult>>()
-
-  algoliaCacheStores.add({
-    sweepExpired: (now) => {
-      for (const [key, entry] of results) {
-        if (entry.expiresAt <= now) {
-          results.delete(key)
-        }
-      }
-    },
-    clear: () => {
-      results.clear()
-    }
-  })
-
-  const fetchAndStore = async ({
-    key,
-    params,
-    ttl = ALGOLIA_CACHE_TTL
-  }: ReadAlgoliaCacheParams<TParams>) => {
-    try {
-      const data = await fetchFresh(params)
-
-      if (results.size >= ALGOLIA_CACHE_MAX_SIZE) {
-        const oldestKey = results.keys().next().value
-
-        if (oldestKey !== undefined) {
-          results.delete(oldestKey)
-        }
-      }
-
-      results.set(key, {
-        data,
-        expiresAt: Date.now() + ttl
-      })
-
-      return data
-    } finally {
-      pendingRequests.delete(key)
-    }
-  }
-
-  return async (readParams: ReadAlgoliaCacheParams<TParams>) => {
-    const cached = results.get(readParams.key)
-
-    if (cached && cached.expiresAt > Date.now()) {
-      return cached.data
-    }
-
-    const pending = pendingRequests.get(readParams.key)
-
-    if (pending) {
-      return pending
-    }
-
-    const request = fetchAndStore(readParams)
-
-    pendingRequests.set(readParams.key, request)
-
-    return request
-  }
 }
 
 export type AlgoliaMemeRecord = ReturnType<typeof memeToAlgoliaRecord>
@@ -245,13 +146,38 @@ const ALGOLIA_MEME_HIT_SCHEMA = z.object({
   })
 })
 
+export const parseAlgoliaMemeHit = (hit: unknown) => {
+  const parsedHit = ALGOLIA_MEME_HIT_SCHEMA.safeParse(hit)
+
+  if (!parsedHit.success) {
+    algoliaLogger.warn(
+      { issues: parsedHit.error.issues },
+      'Algolia hit does not match the meme schema'
+    )
+
+    return null
+  }
+
+  return parsedHit.data
+}
+
 export const parseAlgoliaMemeHits = (hits: unknown[]) => {
   return hits.flatMap((hit) => {
-    const parsedHit = ALGOLIA_MEME_HIT_SCHEMA.safeParse(hit)
+    const meme = parseAlgoliaMemeHit(hit)
 
-    return parsedHit.success ? [parsedHit.data] : []
+    return meme ? [meme] : []
   })
 }
+
+export const ALGOLIA_MEMES_PAGE_SCHEMA = z.object({
+  memes: z.array(
+    ALGOLIA_MEME_HIT_SCHEMA.extend({ highlightedTitle: z.string().optional() })
+  ),
+  query: z.string().optional(),
+  queryID: z.string().optional(),
+  page: z.number().optional(),
+  totalPages: z.number().optional()
+})
 
 type AlgoliaMemeHitFields = {
   contentLocale?: MemeContentLocale
@@ -272,6 +198,15 @@ export function normalizeAlgoliaHit<THit extends AlgoliaMemeHitFields>(
       hit.publishedAt === null || hit.publishedAt === ''
         ? null
         : new Date(hit.publishedAt)
+  }
+}
+
+export function normalizeAlgoliaMemesPage(
+  page: z.output<typeof ALGOLIA_MEMES_PAGE_SCHEMA>
+) {
+  return {
+    ...page,
+    memes: page.memes.map(normalizeAlgoliaHit)
   }
 }
 

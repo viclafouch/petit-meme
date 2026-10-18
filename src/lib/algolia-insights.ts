@@ -9,6 +9,7 @@ import {
 } from '@algolia/client-insights'
 import * as Sentry from '@sentry/tanstackstart-react'
 import { createClientOnlyFn } from '@tanstack/react-start'
+import { ALGOLIA_FAIL_FAST_ON_RATE_LIMIT } from '~/constants/algolia'
 import { COOKIE_ALGOLIA_USER_TOKEN_KEY } from '~/constants/cookie'
 import { clientEnv } from '~/env/client'
 import { readClientCookie } from '~/helpers/cookie'
@@ -17,7 +18,9 @@ import { getLocale } from '~/paraglide/runtime'
 
 const algoliaInsights = insightsClient(
   clientEnv.VITE_ALGOLIA_APP_ID,
-  clientEnv.VITE_ALGOLIA_SEARCH_KEY
+  clientEnv.VITE_ALGOLIA_SEARCH_KEY,
+  undefined,
+  ALGOLIA_FAIL_FAST_ON_RATE_LIMIT
 )
 
 function logInsightsError(error: unknown) {

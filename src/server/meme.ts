@@ -8,6 +8,7 @@ import {
   setResponseStatus
 } from '@tanstack/react-start/server'
 import { prismaClient } from '~/db'
+import { ALGOLIA_FAIL_FAST_ON_RATE_LIMIT } from '~/constants/algolia'
 import { COOKIE_ALGOLIA_USER_TOKEN_KEY } from '~/constants/cookie'
 import { HTTP_STATUS } from '~/constants/http'
 import {
@@ -61,20 +62,23 @@ import {
 } from '~/helpers/i18n-content'
 import { extractClientIp } from '~/helpers/request'
 import {
+  ALGOLIA_MEMES_PAGE_SCHEMA,
   ALGOLIA_SEARCH_PARAMS_BASE,
   ALGOLIA_SEARCH_RETRIEVE,
   algoliaRecommendClient,
   algoliaSearchClient,
   getHighlightedTitle,
   normalizeAlgoliaHit,
+  normalizeAlgoliaMemesPage,
+  parseAlgoliaMemeHit,
   parseAlgoliaMemeHits,
   resolveAlgoliaIndexName,
   resolveAlgoliaReplicaPopular,
   resolveAlgoliaReplicaRecent,
   safeAlgoliaOp,
-  createAlgoliaCache,
   type AlgoliaMemeRecord
 } from '~/lib/algolia'
+import { createAlgoliaCache } from '~/lib/algolia-cache'
 import { auth } from '~/lib/auth'
 import { buildSignedOriginalUrl, fetchWatermarkedVideo } from '~/lib/bunny'
 import { matchIsAnalyticsConsentGiven } from '~/lib/cookie-consent'
@@ -96,7 +100,9 @@ let serverInsightsClient: ReturnType<typeof createInsightsClient> | null = null
 const getServerInsightsClient = () => {
   serverInsightsClient ??= createInsightsClient(
     clientEnv.VITE_ALGOLIA_APP_ID,
-    serverEnv.ALGOLIA_ADMIN_KEY
+    serverEnv.ALGOLIA_ADMIN_KEY,
+    undefined,
+    ALGOLIA_FAIL_FAST_ON_RATE_LIMIT
   )
 
   return serverInsightsClient
@@ -497,7 +503,7 @@ const fetchTrendingMemesPage = async ({
     })
 
   return {
-    memes: response.hits.map(normalizeAlgoliaHit),
+    memes: parseAlgoliaMemeHits(response.hits),
     query,
     queryID: response.queryID,
     page: (response.page ?? 0) + 1,
@@ -505,7 +511,10 @@ const fetchTrendingMemesPage = async ({
   }
 }
 
-const readTrendingMemesPage = createAlgoliaCache(fetchTrendingMemesPage)
+const readTrendingMemesPage = createAlgoliaCache({
+  schema: ALGOLIA_MEMES_PAGE_SCHEMA,
+  fetchFresh: fetchTrendingMemesPage
+})
 
 type FetchSearchMemesPageParams = {
   indexName: string
@@ -548,11 +557,19 @@ const fetchSearchMemesPage = async ({
     })
 
   return {
-    memes: response.hits.map((hit) => {
-      return {
-        ...normalizeAlgoliaHit(hit),
-        highlightedTitle: hasQuery ? getHighlightedTitle(hit) : undefined
+    memes: response.hits.flatMap((hit) => {
+      const meme = parseAlgoliaMemeHit(hit)
+
+      if (!meme) {
+        return []
       }
+
+      return [
+        {
+          ...meme,
+          highlightedTitle: hasQuery ? getHighlightedTitle(hit) : undefined
+        }
+      ]
     }),
     query,
     queryID: response.queryID,
@@ -561,7 +578,10 @@ const fetchSearchMemesPage = async ({
   }
 }
 
-const readSearchMemesPage = createAlgoliaCache(fetchSearchMemesPage)
+const readSearchMemesPage = createAlgoliaCache({
+  schema: ALGOLIA_MEMES_PAGE_SCHEMA,
+  fetchFresh: fetchSearchMemesPage
+})
 
 const fetchRecentMemesCount = async (locale: Locale) => {
   const thirtyDaysAgo = Date.now() - THIRTY_DAYS_MS
@@ -583,7 +603,10 @@ const fetchRecentMemesCount = async (locale: Locale) => {
   return countResult.nbHits ?? 0
 }
 
-const readRecentMemesCount = createAlgoliaCache(fetchRecentMemesCount)
+const readRecentMemesCount = createAlgoliaCache({
+  schema: z.number(),
+  fetchFresh: fetchRecentMemesCount
+})
 
 export const getMemes = createServerFn({ method: 'GET' })
   .validator(MEMES_FILTERS_SCHEMA)
@@ -653,7 +676,7 @@ export const getMemes = createServerFn({ method: 'GET' })
       const algoliaPage = requestedPage - 2
       const cacheKey = `trending-page:${indexName}:${requestedPage}:${data.contentLocales ?? ''}`
 
-      return readTrendingMemesPage({
+      const trendingPage = await readTrendingMemesPage({
         key: cacheKey,
         params: {
           indexName,
@@ -663,6 +686,8 @@ export const getMemes = createServerFn({ method: 'GET' })
           query: data.query
         }
       })
+
+      return normalizeAlgoliaMemesPage(trendingPage)
     }
 
     const indexName = resolveSearchIndex({
@@ -677,7 +702,7 @@ export const getMemes = createServerFn({ method: 'GET' })
       ? getCookie(COOKIE_ALGOLIA_USER_TOKEN_KEY)
       : undefined
 
-    return readSearchMemesPage({
+    const searchPage = await readSearchMemesPage({
       key: cacheKey,
       params: {
         indexName,
@@ -689,16 +714,22 @@ export const getMemes = createServerFn({ method: 'GET' })
         hasQuery
       }
     })
+
+    return normalizeAlgoliaMemesPage(searchPage)
   })
 
 export const getRecentCountMemes = createServerFn({ method: 'GET' }).handler(
   async () => {
     const locale = getLocale()
 
-    return readRecentMemesCount({
-      key: `recent-count:${locale}`,
-      params: locale
-    })
+    const recentMemesCount = await safeAlgoliaOp(
+      readRecentMemesCount({
+        key: `recent-count:${locale}`,
+        params: locale
+      })
+    )
+
+    return recentMemesCount ?? 0
   }
 )
 

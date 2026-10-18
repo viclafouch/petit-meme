@@ -5,6 +5,9 @@ export default defineConfig({
     tsconfigPaths: true
   },
   test: {
-    include: ['src/**/*.test.ts', 'lint/**/*.test.ts']
+    include: ['src/**/*.test.ts', 'lint/**/*.test.ts'],
+    pool: 'threads',
+    isolate: false,
+    maxWorkers: 2
   }
 })

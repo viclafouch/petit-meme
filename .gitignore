@@ -8,6 +8,7 @@
 
 # testing
 /coverage
+/.vitest
 e2e/.auth/
 e2e/.results/
 e2e/.logs/

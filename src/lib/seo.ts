@@ -53,7 +53,7 @@ const websiteSearchAction = {
   'query-input': 'required name=search_term_string'
 } satisfies WithActionConstraints<SearchAction>
 
-const OG_VERSION = 2
+const OG_VERSION = 3
 
 export const OG_DEFAULTED_TYPE_VALUES = [
   'ai-search',

@@ -105,16 +105,7 @@ export const Route = createFileRoute('/api/og')({
           width: OG_IMAGE_WIDTH,
           height: OG_IMAGE_HEIGHT,
           images: { fetchCache: OG_IMAGE_FETCH_CACHE },
-          fonts: [
-            {
-              name: 'Bricolage Grotesque',
-              data: () => {
-                return fetch(fontUrl).then((response) => {
-                  return response.arrayBuffer()
-                })
-              }
-            }
-          ],
+          fonts: [fontUrl],
           headers: { 'Cache-Control': IMMUTABLE_CACHE_CONTROL },
           onError: (error) => {
             captureWithFeature(error, 'og-image')

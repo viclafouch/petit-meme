@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { createEnv } from '@t3-oss/env-core'
-import { IS_PRODUCTION } from '~/constants/env'
+import { IS_PRODUCTION } from '../constants/env.ts'
+import { baseEnv } from './base.ts'
 
 const SECRET_MIN_LENGTH = 32
 const TOKEN_MIN_LENGTH = 16
@@ -29,12 +30,9 @@ export const serverEnv = createEnv({
     STRIPE_WEBHOOK_SECRET: z.string().startsWith('whsec_'),
     STRIPE_MONTHLY_PRICE_ID: z.string().startsWith('price_'),
     STRIPE_ANNUAL_PRICE_ID: z.string().startsWith('price_'),
-    CRON_SECRET: z.string().min(TOKEN_MIN_LENGTH).optional(),
-    VERCEL_ENV: z.enum(['production', 'preview', 'development']).optional(),
-    LOG_LEVEL: z
-      .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace'])
-      .optional()
+    CRON_SECRET: z.string().min(TOKEN_MIN_LENGTH).optional()
   },
+  extends: [baseEnv],
   // oxlint-disable-next-line node/no-process-env -- the validated server env is the boundary that reads the process environment
   runtimeEnv: process.env,
   emptyStringAsUndefined: true

@@ -5,17 +5,17 @@ import {
   SENTRY_IGNORE_ERRORS,
   SENTRY_TRACES_SAMPLE_RATE
 } from '~/constants/sentry'
-import { processEnvironment } from '~/env/process'
+import { baseEnv } from '~/env/base'
+import { clientEnv } from '~/env/client'
 
 const deploymentEnv =
-  processEnvironment.VERCEL_ENV ??
-  (IS_PRODUCTION ? 'production' : 'development')
+  baseEnv.VERCEL_ENV ?? (IS_PRODUCTION ? 'production' : 'development')
 
 const FULL_SAMPLE_RATE = 1
 const DROP_SAMPLE_RATE = 0
 
 Sentry.init({
-  dsn: processEnvironment.VITE_SENTRY_DSN,
+  dsn: clientEnv.VITE_SENTRY_DSN,
   environment: deploymentEnv,
   enabled: deploymentEnv === 'production',
   dataCollection: SENTRY_DATA_COLLECTION,

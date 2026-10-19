@@ -1,13 +1,13 @@
 import { PrismaPg } from '@prisma/adapter-pg'
 import { IS_PRODUCTION } from '~/constants/env'
-import { baseEnv } from '~/env/base'
+import { serverEnv } from '~/env/server'
 import { PrismaClient } from './generated/prisma/client'
 
 export const DATABASE_POOL_MAX_CONNECTIONS = 5
 
 const prismaClientSingleton = () => {
   const adapter = new PrismaPg({
-    connectionString: baseEnv.DATABASE_URL,
+    connectionString: serverEnv.DATABASE_URL,
     max: DATABASE_POOL_MAX_CONNECTIONS,
     idleTimeoutMillis: 10_000,
     connectionTimeoutMillis: 5000

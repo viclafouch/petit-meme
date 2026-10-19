@@ -8,6 +8,7 @@ const TOKEN_MIN_LENGTH = 16
 
 export const serverEnv = createEnv({
   server: {
+    DATABASE_URL: z.string(),
     AUTH_DISCORD_ID: z.string(),
     AUTH_DISCORD_SECRET: z.string(),
     AUTH_TWITTER_ID: z.string(),

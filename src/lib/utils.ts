@@ -1,12 +1,33 @@
-import { type ClassValue, clsx } from 'clsx'
-import { twMerge } from 'tailwind-merge'
+import { createCn, validators } from 'cn/config'
 import type { ZodType } from 'zod'
 import { IS_DEVELOPMENT } from '~/constants/env'
 import { logger } from '~/lib/logger'
 
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
+export const cn = createCn({
+  extend: {
+    classGroups: {
+      'font-size': [{ text: ['caption', 'banner'] }],
+      leading: [{ leading: ['display', 'heading'] }],
+      'max-h': [
+        {
+          'max-h': [
+            'dialog',
+            'sticky-aside',
+            'banner',
+            { dvh: [validators.isInteger], vh: [validators.isInteger] }
+          ]
+        }
+      ],
+      'max-w': [{ 'max-w': [{ vw: [validators.isInteger] }] }],
+      w: [{ w: ['banner'] }],
+      'grid-cols': [{ 'grid-cols': ['submit', 'meme-page'] }],
+      rounded: [{ rounded: ['swatch'] }],
+      'rounded-bl': [{ 'rounded-bl': ['banner'] }],
+      'rounded-br': [{ 'rounded-br': ['banner'] }],
+      pb: [{ pb: ['banner-safe'] }]
+    }
+  }
+})
 
 const DEFAULT_FETCH_TIMEOUT_MS = 15_000
 

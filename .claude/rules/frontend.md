@@ -14,7 +14,7 @@ paths: ["src/**/*.{ts,tsx}"]
 
 ### Libraries
 - ALWAYS use shadcn components instead of raw HTML elements
-- **Never modify code** in `src/components/ui` or `src/components/animate-ui`
+- **Never modify code** in `src/components/ui` or `src/components/animate-ui`, with one exception: after a `shadcn add`, rewrite `import { cn } from "cn"` to `import { cn } from '~/lib/utils'`, which carries the project classes. `src/lib/utils.test.ts` fails until every file does
 
 ### Server Functions (TanStack Start)
 - Use `useMutation` (TanStack Query) for async operations

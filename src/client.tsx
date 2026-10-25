@@ -1,4 +1,6 @@
-// oxlint-disable-next-line import/no-unassigned-import -- Sentry init must run before any other module
+// oxlint-disable-next-line import/no-unassigned-import -- the document locale must be pinned before any module reads it, Sentry included
+import '~/lib/document-locale'
+// oxlint-disable-next-line import/no-unassigned-import -- Sentry init must run before any other module but the document locale
 import '~/instrument.client'
 import { hydrateRoot } from 'react-dom/client'
 import { z } from 'zod'

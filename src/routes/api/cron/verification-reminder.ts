@@ -1,46 +1,35 @@
-import { randomBytes, randomUUID } from 'node:crypto'
 import { createFileRoute } from '@tanstack/react-router'
 import { prismaClient } from '~/db'
 import { PLACEHOLDER_EMAIL_DOMAIN } from '~/constants/auth'
-import { DAY, HOUR } from '~/constants/time'
+import { HOUR, ONE_DAY_IN_SECONDS } from '~/constants/time'
 import type { UserLocale } from '~/db/generated/prisma/client'
 import { emailSubjects } from '~/emails/subjects'
 import { VerificationReminderEmail } from '~/emails/verification-reminder-email'
 import { clientEnv } from '~/env/client'
+import { serverEnv } from '~/env/server'
 import { cronLogger } from '~/lib/logger'
 import { getEmailFrom, getEmailRecipient, getResendClient } from '~/lib/resend'
 import { verifyCronSecret } from '~/utils/cron-auth'
+import { buildEmailVerificationPath } from '~/utils/email-verification'
 
 const log = cronLogger.child({ job: 'verification-reminder' })
 
 const REMINDER_AFTER_HOURS = 42
 const REMINDER_BEFORE_HOURS = 54
-const TOKEN_EXPIRY_MS = DAY
-const TOKEN_BYTE_LENGTH = 32
+const TOKEN_EXPIRY_IN_SECONDS = ONE_DAY_IN_SECONDS
 
-const sendReminderToUser = async (
-  user: {
-    id: string
-    email: string
-    name: string | null
-    locale: UserLocale
-  },
-  now: Date
-) => {
-  const token = randomBytes(TOKEN_BYTE_LENGTH).toString('hex')
-
-  await prismaClient.verification.create({
-    data: {
-      id: randomUUID(),
-      identifier: user.email,
-      value: token,
-      expiresAt: new Date(now.getTime() + TOKEN_EXPIRY_MS),
-      createdAt: now,
-      updatedAt: now
-    }
+const sendReminderToUser = async (user: {
+  id: string
+  email: string
+  name: string | null
+  locale: UserLocale
+}) => {
+  const verificationPath = await buildEmailVerificationPath({
+    email: user.email,
+    secret: serverEnv.BETTER_AUTH_SECRET,
+    expiresInSeconds: TOKEN_EXPIRY_IN_SECONDS
   })
-
-  const verificationUrl = `${clientEnv.VITE_SITE_URL}/api/auth/verify-email?token=${token}&callbackURL=${encodeURIComponent('/')}`
+  const verificationUrl = `${clientEnv.VITE_SITE_URL}${verificationPath}`
   const { error } = await getResendClient().emails.send({
     from: getEmailFrom(),
     to: getEmailRecipient(user.email),
@@ -98,7 +87,7 @@ const runVerificationReminders = async () => {
   for (const user of users) {
     try {
       // oxlint-disable-next-line no-await-in-loop -- reminders go out one at a time on purpose, never as a burst against Resend
-      const isSent = await sendReminderToUser(user, now)
+      const isSent = await sendReminderToUser(user)
 
       if (isSent) {
         sentCount += 1

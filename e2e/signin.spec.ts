@@ -65,7 +65,7 @@ test.describe('the sign in', () => {
     await expect(dialog).toBeVisible()
   })
 
-  test('an unverified account is told to verify its email', async ({
+  test('an unverified account is told a new verification link is on its way', async ({
     page
   }) => {
     await page.goto('/')
@@ -81,6 +81,9 @@ test.describe('the sign in', () => {
 
     await expect(
       loginPanel.getByText(m.auth_email_not_verified_title())
+    ).toBeVisible()
+    await expect(
+      loginPanel.getByText(m.auth_email_not_verified_description())
     ).toBeVisible()
     await expect(dialog).toBeVisible()
   })

@@ -5,7 +5,7 @@ let stripeClient: Stripe | null = null
 
 export const getStripeClient = () => {
   stripeClient ??= new Stripe(serverEnv.STRIPE_SECRET_KEY, {
-    apiVersion: '2026-08-26.dahlia'
+    apiVersion: '2026-09-30.endive'
   })
 
   return stripeClient

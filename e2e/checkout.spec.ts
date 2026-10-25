@@ -1,4 +1,5 @@
 import { expect, type Page } from '@playwright/test'
+import { PREMIUM_PLAN_NAME } from '~/constants/plan'
 import { m } from '~/paraglide/messages.js'
 import {
   expectActiveSubscription,
@@ -51,7 +52,7 @@ test.describe('a monthly checkout', () => {
     await expectActiveSubscription(E2E_ROLES.checkout.id)
 
     expect(await findSubscription(E2E_ROLES.checkout.id)).toMatchObject({
-      plan: 'premium',
+      plan: PREMIUM_PLAN_NAME,
       status: 'active',
       billingInterval: 'month',
       stripeCustomerId: expect.stringMatching(/^cus_/u),
@@ -89,7 +90,7 @@ test.describe('an annual checkout', () => {
     await expectActiveSubscription(E2E_ROLES.checkoutAnnual.id)
 
     expect(await findSubscription(E2E_ROLES.checkoutAnnual.id)).toMatchObject({
-      plan: 'premium-annual',
+      plan: PREMIUM_PLAN_NAME,
       status: 'active',
       billingInterval: 'year',
       stripeCustomerId: expect.stringMatching(/^cus_/u),

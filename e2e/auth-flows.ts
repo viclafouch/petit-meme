@@ -1,7 +1,7 @@
-import { signJWT } from 'better-auth/crypto'
 import type { Page } from '@playwright/test'
 import { ONE_HOUR_IN_SECONDS } from '~/constants/time'
 import { m } from '~/paraglide/messages.js'
+import { buildEmailVerificationPath } from '~/utils/email-verification'
 import { E2E_AUTH_SECRET } from './env'
 import { repeatUntilVisible } from './hydration'
 
@@ -25,12 +25,10 @@ export const getAuthDialogSignInButton = (page: Page) => {
     .getByRole('button', { name: m.nav_sign_in() })
 }
 
-export const buildEmailVerificationUrl = async (email: string) => {
-  const token = await signJWT(
-    { email: email.toLowerCase() },
-    E2E_AUTH_SECRET,
-    ONE_HOUR_IN_SECONDS
-  )
-
-  return `/api/auth/verify-email?token=${token}&callbackURL=${encodeURIComponent('/')}`
+export const buildEmailVerificationUrl = (email: string) => {
+  return buildEmailVerificationPath({
+    email,
+    secret: E2E_AUTH_SECRET,
+    expiresInSeconds: ONE_HOUR_IN_SECONDS
+  })
 }

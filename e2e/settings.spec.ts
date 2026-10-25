@@ -1,5 +1,7 @@
 import { expect, type Locator, type Page } from '@playwright/test'
 import { HTTP_STATUS } from '~/constants/http'
+import { getBillingPeriodLabel, PREMIUM_PLAN_PRICING } from '~/constants/plan'
+import { formatCentsToEuros } from '~/helpers/number'
 import { m } from '~/paraglide/messages.js'
 import { openAuthDialog } from './auth-flows'
 import { E2E_PASSWORD, E2E_ROLES, E2E_WRONG_PASSWORD } from './constants'
@@ -7,6 +9,7 @@ import { expectDownloadIsNotEmpty } from './downloads'
 import { resolveStorageStatePath } from './env'
 import { test } from './fixtures'
 import { repeatUntilRequested, repeatUntilVisible } from './hydration'
+import { E2E_LOCALE } from './locales'
 import { SERVER_FUNCTION_URL_PATTERN } from './server-functions'
 
 const NEW_PASSWORD = 'e2e-settings-password-2026'
@@ -269,6 +272,21 @@ test.describe('a Premium', () => {
     const portalRequest = await portalRequested
 
     expect(portalRequest.url()).toContain(STRIPE_PORTAL_SESSION_PATH)
+  })
+})
+
+test.describe('a Premium still on the former annual plan', () => {
+  test.use({ storageState: resolveStorageStatePath('premiumAnnualLegacy') })
+
+  test('sees the yearly price of their subscription', async ({ page }) => {
+    const yearlyPrice = `${formatCentsToEuros(
+      PREMIUM_PLAN_PRICING.yearly.priceInCents,
+      { locale: E2E_LOCALE }
+    )}${getBillingPeriodLabel('yearly')}`
+
+    await page.goto('/settings')
+
+    await expect(page.getByRole('main').getByText(yearlyPrice)).toBeVisible()
   })
 })
 

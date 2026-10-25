@@ -7,7 +7,12 @@ import { stripe } from '@better-auth/stripe'
 import { createServerOnlyFn } from '@tanstack/react-start'
 import { waitUntil } from '@vercel/functions'
 import { prismaClient } from '~/db'
-import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '~/constants/auth'
+import {
+  AUTH_BASE_PATH,
+  PASSWORD_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH
+} from '~/constants/auth'
+import { PREMIUM_PLAN_NAME } from '~/constants/plan'
 import {
   FIVE_MINUTES_IN_SECONDS,
   ONE_HOUR_IN_SECONDS,
@@ -149,7 +154,7 @@ const getAuthConfig = createServerOnlyFn(() => {
   return betterAuth({
     appName: 'Petit Meme',
     baseURL: clientEnv.VITE_SITE_URL,
-    basePath: '/api/auth',
+    basePath: AUTH_BASE_PATH,
     secret: serverEnv.BETTER_AUTH_SECRET,
     database: prismaAdapter(prismaClient, {
       provider: 'postgresql'
@@ -228,6 +233,7 @@ const getAuthConfig = createServerOnlyFn(() => {
     },
     emailVerification: {
       sendOnSignUp: true,
+      sendOnSignIn: true,
       autoSignInAfterVerification: true,
       expiresIn: ONE_HOUR_IN_SECONDS,
       sendVerificationEmail: async ({ user, url }) => {
@@ -282,6 +288,12 @@ const getAuthConfig = createServerOnlyFn(() => {
     },
     advanced: {
       useSecureCookies: matchIsDeployed(),
+      ipAddress: {
+        ipAddressHeaders: ['x-real-ip']
+      },
+      database: {
+        joins: true
+      },
       backgroundTasks: {
         handler: waitUntil
       }
@@ -310,7 +322,6 @@ const getAuthConfig = createServerOnlyFn(() => {
     plugins: [
       admin({ defaultRole: 'user' }),
       lastLoginMethod(),
-      tanstackStartCookies(),
       stripe({
         stripeClient: getStripeClient(),
         stripeWebhookSecret: serverEnv.STRIPE_WEBHOOK_SECRET,
@@ -319,12 +330,9 @@ const getAuthConfig = createServerOnlyFn(() => {
           enabled: true,
           plans: [
             {
-              name: 'premium',
-              priceId: serverEnv.STRIPE_MONTHLY_PRICE_ID
-            },
-            {
-              name: 'premium-annual',
-              priceId: serverEnv.STRIPE_ANNUAL_PRICE_ID
+              name: PREMIUM_PLAN_NAME,
+              priceId: serverEnv.STRIPE_MONTHLY_PRICE_ID,
+              annualDiscountPriceId: serverEnv.STRIPE_ANNUAL_PRICE_ID
             }
           ],
           onSubscriptionComplete: async ({
@@ -349,7 +357,10 @@ const getAuthConfig = createServerOnlyFn(() => {
             recordActivityEvent({
               type: ActivityEventType.SUBSCRIPTION,
               actor: { id: subscription.referenceId, role: user.role },
-              metadata: { plan: plan.name }
+              metadata: {
+                plan: plan.name,
+                billingInterval: subscription.billingInterval
+              }
             })
 
             const stripePrice = stripeSubscription.items.data[0]?.price
@@ -387,7 +398,8 @@ const getAuthConfig = createServerOnlyFn(() => {
             await handlePaymentFailed(event)
           }
         }
-      })
+      }),
+      tanstackStartCookies()
     ]
   })
 })

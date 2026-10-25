@@ -289,6 +289,12 @@ export const MemeReels = () => {
       <div
         className="size-full md:aspect-9/16 bg-muted lg:border-x border-muted md:max-w-md mx-auto flex flex-col overflow-auto snap-y snap-mandatory no-scrollbar overscroll-contain"
         ref={parentRef}
+        onTouchStart={() => {
+          rowVirtualizer.cancelScroll()
+        }}
+        onWheel={() => {
+          rowVirtualizer.cancelScroll()
+        }}
       >
         <div
           style={{

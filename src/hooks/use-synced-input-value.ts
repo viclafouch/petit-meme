@@ -24,8 +24,7 @@ export const useSyncedInputValue = ({
   }, [externalValue])
 
   const debouncedOnValueChange = useDebouncedCallback(onValueChange, {
-    wait: SYNC_DEBOUNCE_WAIT,
-    leading: false
+    wait: SYNC_DEBOUNCE_WAIT
   })
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {

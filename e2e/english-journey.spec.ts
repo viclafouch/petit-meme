@@ -8,7 +8,7 @@ import { getLocaleDisplayName } from '~/helpers/locale'
 import { formatCentsToEuros } from '~/helpers/number'
 import { buildPageTitle, buildUrl, OG_LOCALE_MAP } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
-import { baseLocale, type Locale } from '~/paraglide/runtime'
+import { baseLocale, cookieName, type Locale } from '~/paraglide/runtime'
 import {
   expectActiveSubscription,
   payWithTestCard,
@@ -353,6 +353,42 @@ test.describe('the English journey', () => {
         return readDocumentLanguage(page)
       })
       .toStrictEqual([baseLocale])
+  })
+
+  test('an English page keeps its language when the locale cookie changes before it hydrates', async ({
+    page,
+    context
+  }) => {
+    await context.clearCookies({ name: COOKIE_LOCALE_BANNER_DISMISSED_KEY })
+    await page.addInitScript(
+      ({ name, value }) => {
+        document.cookie = `${name}=${value}; path=/`
+      },
+      { name: cookieName, value: baseLocale }
+    )
+
+    await page.goto(ENGLISH_HOME_PATHNAME)
+
+    const frenchName = getLocaleDisplayName(baseLocale, E2E_ENGLISH_LOCALE)
+
+    await expect(
+      page.getByText(
+        m.locale_banner_available({ language: frenchName }, IN_ENGLISH)
+      )
+    ).toBeVisible()
+    await expect(
+      page.getByText(m.home_best_subtitle({}, IN_ENGLISH))
+    ).toBeVisible()
+  })
+
+  test('an English landing keeps English for the next visit', async ({
+    page
+  }) => {
+    await page.goto(ENGLISH_HOME_PATHNAME)
+
+    await page.goto('/')
+
+    await expect(page).toHaveURL(ENGLISH_HOME_PATHNAME)
   })
 
   test.describe('an English checkout', () => {

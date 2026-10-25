@@ -19,6 +19,8 @@ export const matchIsAuthProviderId = (
 
 export const PLACEHOLDER_EMAIL_DOMAIN = 'placeholder.invalid'
 
+export const AUTH_BASE_PATH = '/api/auth'
+
 export const PASSWORD_MIN_LENGTH = 8
 export const PASSWORD_MAX_LENGTH = 100
 

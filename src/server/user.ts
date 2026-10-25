@@ -337,6 +337,7 @@ export const exportUserData = createServerFn({ method: 'GET' })
           where: { referenceId: context.user.id },
           select: {
             plan: true,
+            billingInterval: true,
             status: true,
             periodStart: true,
             periodEnd: true
@@ -432,6 +433,7 @@ export const exportUserData = createServerFn({ method: 'GET' })
       subscriptions: subscriptions.map((subscription) => {
         return {
           plan: subscription.plan,
+          billingInterval: subscription.billingInterval,
           status: subscription.status,
           periodStart: subscription.periodStart,
           periodEnd: subscription.periodEnd

@@ -1,3 +1,4 @@
+import type { Subscription } from '@better-auth/stripe'
 import { FREE_PLAN_MAX_AI_SEARCHES } from '~/constants/ai-search'
 import { m } from '~/paraglide/messages.js'
 
@@ -9,11 +10,17 @@ export type PlanFeature = {
   note?: string
 }
 
-export type BetterAuthPlanName = 'free' | 'premium' | 'premium-annual'
+export const PREMIUM_PLAN_NAME = 'premium'
+
+export const STRIPE_BILLING_INTERVALS = [
+  'day',
+  'week',
+  'month',
+  'year'
+] as const satisfies readonly NonNullable<Subscription['billingInterval']>[]
 
 export type PlanPricing = {
   priceInCents: number
-  betterAuthPlanName: BetterAuthPlanName
 }
 
 export type Plan = {
@@ -32,13 +39,13 @@ export const FREE_PLAN_MAX_GENERATIONS = 3
 export const FREE_PLAN_MAX_FAVORITES = 20
 
 const FREE_PLAN_PRICING = {
-  monthly: { priceInCents: 0, betterAuthPlanName: 'free' },
-  yearly: { priceInCents: 0, betterAuthPlanName: 'free' }
+  monthly: { priceInCents: 0 },
+  yearly: { priceInCents: 0 }
 } as const satisfies Record<BillingPeriod, PlanPricing>
 
 const PREMIUM_PLAN_PRICING = {
-  monthly: { priceInCents: 399, betterAuthPlanName: 'premium' },
-  yearly: { priceInCents: 2999, betterAuthPlanName: 'premium-annual' }
+  monthly: { priceInCents: 399 },
+  yearly: { priceInCents: 2999 }
 } as const satisfies Record<BillingPeriod, PlanPricing>
 
 export const PREMIUM_PLAN_PRODUCT_ID = 'f9395cde-98ed-4d06-9631-b9b9f0a64566'

@@ -55,7 +55,7 @@
   "auth_current_password": "Your password",
   "auth_delete": "Delete",
   "auth_delete_confirm_warning": "Are you sure you want to delete your account? This action is irreversible: all your data (such as your favorites) will be permanently erased, with no possibility of recovery.",
-  "auth_email_not_verified_description": "Your account is not activated. Please activate it before trying to sign in. If you need help, contact us.",
+  "auth_email_not_verified_description": "Your account is not activated yet. We just sent you a new activation link by email. If you need help, contact us.",
   "auth_email_not_verified_title": "You must verify your email!",
   "auth_email_placeholder": "john@example.com",
   "auth_error_account_not_found": "Account not found",

@@ -56,7 +56,7 @@ const createSubscription = async (
   role: E2eRole,
   stripeCustomerId: string | null
 ) => {
-  if (role.premiumPlan === undefined) {
+  if (!role.subscription) {
     return
   }
 
@@ -65,11 +65,11 @@ const createSubscription = async (
   await prismaClient.subscription.create({
     data: {
       id: `${role.id}-subscription`,
-      plan: role.premiumPlan,
+      plan: role.subscription.plan,
       referenceId: role.id,
       stripeCustomerId,
       status: 'active',
-      billingInterval: 'month',
+      billingInterval: role.subscription.billingInterval,
       periodStart: now,
       periodEnd: new Date(now.getTime() + THIRTY_DAYS_MS)
     }

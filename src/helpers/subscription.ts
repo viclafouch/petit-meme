@@ -1,3 +1,4 @@
+import type { Subscription } from '@better-auth/stripe'
 import {
   type BillingPeriod,
   getBillingPeriodLabel,
@@ -6,8 +7,10 @@ import {
 import { formatCentsToEuros } from '~/helpers/number'
 import type { Locale } from '~/paraglide/runtime'
 
-export const getBillingPeriodFromPlan = (planName: string): BillingPeriod => {
-  if (planName === PREMIUM_PLAN_PRICING.yearly.betterAuthPlanName) {
+export const getBillingPeriodFromInterval = (
+  billingInterval: Subscription['billingInterval']
+): BillingPeriod => {
+  if (billingInterval === 'year') {
     return 'yearly'
   }
 
@@ -15,15 +18,15 @@ export const getBillingPeriodFromPlan = (planName: string): BillingPeriod => {
 }
 
 type SubscriptionDisplayInfoParams = {
-  planName: string
+  billingInterval: Subscription['billingInterval']
   locale: Locale
 }
 
 export const getSubscriptionDisplayInfo = ({
-  planName,
+  billingInterval,
   locale
 }: SubscriptionDisplayInfoParams) => {
-  const billingPeriod = getBillingPeriodFromPlan(planName)
+  const billingPeriod = getBillingPeriodFromInterval(billingInterval)
   const pricing = PREMIUM_PLAN_PRICING[billingPeriod]
   const formattedPrice = formatCentsToEuros(pricing.priceInCents, { locale })
   const periodLabel = getBillingPeriodLabel(billingPeriod)

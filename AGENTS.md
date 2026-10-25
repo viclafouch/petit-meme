@@ -64,6 +64,8 @@ Several unknowns left means asking before writing code. One round of questions i
 
 Prove the change with the smallest thing that proves it: type check and lint the scope you touched, run the tests covering the behaviour you changed, write a targeted script when the logic is data shaped. Backend behaviour that can regress in silence earns a test rather than a paragraph.
 
+A local build runs as `pnpm build:e2e`: `pnpm build` validates the production env when it loads its config, and that env lives on Vercel only.
+
 The running site is invisible to you. When the last proof is visual or device specific, say what to look at and on which surface, and let me confirm.
 
 A task is finished when nothing is left that only I can run. Anything left is listed, in order.

@@ -9,6 +9,7 @@ import {
   WandSparkles
 } from 'lucide-react'
 import { z } from 'zod'
+import { STRIPE_BILLING_INTERVALS } from '~/constants/plan'
 import { ActivityEventType } from '~/db/generated/prisma/enums'
 import { getLocale } from '~/paraglide/runtime'
 import type { AdminActivityRow } from '~/routes/admin/-server/activity'
@@ -73,8 +74,25 @@ export function formatEventCount(total: number) {
 }
 
 const ACTIVITY_METADATA_SCHEMA = z
-  .object({ prompt: z.string(), plan: z.string() })
+  .object({
+    prompt: z.string(),
+    plan: z.string(),
+    billingInterval: z.enum(STRIPE_BILLING_INTERVALS)
+  })
   .partial()
+
+type PlanTextParams = Pick<
+  z.infer<typeof ACTIVITY_METADATA_SCHEMA>,
+  'plan' | 'billingInterval'
+>
+
+function formatPlanText({ plan, billingInterval }: PlanTextParams) {
+  if (plan && billingInterval) {
+    return `${plan} · ${billingInterval}`
+  }
+
+  return plan
+}
 
 function getActivityMetadataText(metadata: AdminActivityRow['metadata']) {
   const result = ACTIVITY_METADATA_SCHEMA.safeParse(metadata)
@@ -83,7 +101,7 @@ function getActivityMetadataText(metadata: AdminActivityRow['metadata']) {
     return null
   }
 
-  return result.data.prompt ?? result.data.plan ?? null
+  return result.data.prompt ?? formatPlanText(result.data) ?? null
 }
 
 type ActivityEntryParams = Pick<AdminActivityRow, 'type' | 'meme' | 'metadata'>

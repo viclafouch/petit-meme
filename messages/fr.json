@@ -55,7 +55,7 @@
   "auth_current_password": "Votre mot de passe",
   "auth_delete": "Supprimer",
   "auth_delete_confirm_warning": "Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible : toutes vos données (comme vos favoris) seront définitivement effacés, sans possibilité de récupération.",
-  "auth_email_not_verified_description": "Votre compte n'est pas activé. Veuillez l'activer avant d'essayer de vous connecter. Si vous avez besoin d'aide, contactez-nous.",
+  "auth_email_not_verified_description": "Votre compte n'est pas encore activé. Nous venons de vous renvoyer un lien d'activation par email. Si vous avez besoin d'aide, contactez-nous.",
   "auth_email_not_verified_title": "Vous devez vérifier votre email !",
   "auth_email_placeholder": "jean@dupont.fr",
   "auth_error_account_not_found": "Compte introuvable",

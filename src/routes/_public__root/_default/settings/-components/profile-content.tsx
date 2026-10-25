@@ -100,7 +100,7 @@ export const ProfileContent = ({
                     {getPremiumPlan().title} -{' '}
                     {
                       getSubscriptionDisplayInfo({
-                        planName: activeSubscription.plan,
+                        billingInterval: activeSubscription.billingInterval,
                         locale: getLocale()
                       }).displayPrice
                     }{' '}

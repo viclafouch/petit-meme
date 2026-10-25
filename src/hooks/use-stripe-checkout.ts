@@ -1,7 +1,7 @@
 import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
 import { type LinkOptions, useRouteContext } from '@tanstack/react-router'
-import { type BillingPeriod, PREMIUM_PLAN_PRICING } from '~/constants/plan'
+import { type BillingPeriod, PREMIUM_PLAN_NAME } from '~/constants/plan'
 import { getErrorMessage } from '~/helpers/error'
 import { useShowDialog } from '~/hooks/use-show-dialog'
 import { authClient } from '~/lib/auth-client'
@@ -64,10 +64,9 @@ export const useStripeCheckout = () => {
           return
         }
 
-        const planName = PREMIUM_PLAN_PRICING[billingPeriod].betterAuthPlanName
-
         const { error } = await authClient.subscription.upgrade({
-          plan: planName,
+          plan: PREMIUM_PLAN_NAME,
+          annual: billingPeriod === 'yearly',
           successUrl: '/checkout/success' satisfies LinkOptions['to'],
           cancelUrl: '/pricing' satisfies LinkOptions['to'],
           returnUrl: '/settings' satisfies LinkOptions['to']

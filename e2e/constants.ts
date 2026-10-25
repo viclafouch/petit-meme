@@ -1,22 +1,31 @@
 import { FREE_PLAN_MAX_AI_SEARCHES } from '~/constants/ai-search'
-import {
-  type BetterAuthPlanName,
-  FREE_PLAN_MAX_FAVORITES
-} from '~/constants/plan'
-import type { Meme, User } from '~/db/generated/prisma/client'
+import { FREE_PLAN_MAX_FAVORITES, PREMIUM_PLAN_NAME } from '~/constants/plan'
+import type { Meme, Subscription, User } from '~/db/generated/prisma/client'
 import { E2E_FILLER_MEMES, E2E_NAMED_MEMES } from './content'
 
 export const E2E_EMAIL_DOMAIN = 'e2e.petitmeme.invalid'
 export const E2E_PASSWORD = 'e2e-password-2026'
 export const E2E_WRONG_PASSWORD = 'not-the-e2e-password'
 
+type E2eSubscription = Pick<Subscription, 'plan' | 'billingInterval'>
+
 export type E2eRole = Pick<User, 'id' | 'name' | 'email' | 'emailVerified'> & {
-  premiumPlan?: BetterAuthPlanName
+  subscription?: E2eSubscription
   bookmarkedMemeIds?: readonly Meme['id'][]
   providerAvatar?: NonNullable<User['providerAvatar']>
   hasStripeCustomer?: boolean
   aiSearchCount?: number
 }
+
+const MONTHLY_PREMIUM_SUBSCRIPTION = {
+  plan: PREMIUM_PLAN_NAME,
+  billingInterval: 'month'
+} as const satisfies E2eSubscription
+
+const LEGACY_ANNUAL_PREMIUM_SUBSCRIPTION = {
+  plan: 'premium-annual',
+  billingInterval: 'year'
+} as const satisfies E2eSubscription
 
 const SELF_SERVED_NON_CATALOGUE_AVATAR_PATH = '/apple-touch-icon.png'
 
@@ -76,7 +85,7 @@ export const E2E_ROLES = {
     name: 'E2E Premium',
     email: `e2e-premium@${E2E_EMAIL_DOMAIN}`,
     emailVerified: true,
-    premiumPlan: 'premium'
+    subscription: MONTHLY_PREMIUM_SUBSCRIPTION
   },
   bookmark: {
     id: 'e2e-user-bookmark',
@@ -115,7 +124,7 @@ export const E2E_ROLES = {
     name: 'E2E Billing Portal',
     email: `e2e-billing-portal@${E2E_EMAIL_DOMAIN}`,
     emailVerified: true,
-    premiumPlan: 'premium',
+    subscription: MONTHLY_PREMIUM_SUBSCRIPTION,
     hasStripeCustomer: true
   },
   favorites: {
@@ -158,8 +167,15 @@ export const E2E_ROLES = {
     name: 'E2E Ai Search Premium',
     email: `e2e-ai-search-premium@${E2E_EMAIL_DOMAIN}`,
     emailVerified: true,
-    premiumPlan: 'premium',
+    subscription: MONTHLY_PREMIUM_SUBSCRIPTION,
     aiSearchCount: FREE_PLAN_MAX_AI_SEARCHES
+  },
+  premiumAnnualLegacy: {
+    id: 'e2e-user-premium-annual-legacy',
+    name: 'E2E Premium Annual Legacy',
+    email: `e2e-premium-annual-legacy@${E2E_EMAIL_DOMAIN}`,
+    emailVerified: true,
+    subscription: LEGACY_ANNUAL_PREMIUM_SUBSCRIPTION
   },
   unverified: {
     id: 'e2e-user-unverified',

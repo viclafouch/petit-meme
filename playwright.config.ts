@@ -13,6 +13,7 @@ export default defineConfig({
   testDir: './e2e',
   outputDir: './e2e/.results',
   timeout: 30_000,
+  globalTimeout: 900_000,
   forbidOnly: IS_CI,
   retries: IS_CI ? 2 : 0,
   workers: 3,

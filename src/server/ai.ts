@@ -1,11 +1,5 @@
 import { z } from 'zod'
-import {
-  createPartFromUri,
-  createUserContent,
-  FileState,
-  type GenerateContentConfig,
-  GoogleGenAI
-} from '@google/genai'
+import { FileState, GoogleGenAI, type Interactions } from '@google/genai'
 import { createServerFn } from '@tanstack/react-start'
 import { setResponseStatus } from '@tanstack/react-start/server'
 import { prismaClient } from '~/db'
@@ -13,7 +7,6 @@ import { HTTP_STATUS } from '~/constants/http'
 import { serverEnv } from '~/env/server'
 import { getErrorMessage } from '~/helpers/error'
 import { LOCALE_META } from '~/helpers/i18n-content'
-import { withTimeout } from '~/helpers/promise'
 import { buildSignedOriginalUrl } from '~/lib/bunny'
 import { adminLogger } from '~/lib/logger'
 import { captureWithFeature } from '~/lib/sentry'
@@ -22,14 +15,10 @@ import { adminRequiredMiddleware } from '~/server/user-auth'
 
 const CUSTOM_PROMPT_MAX_LENGTH = 500
 
-const translationSchema = z.object({
-  description: z
-    .string()
-    .describe(
-      'La description de la vidéo, utile pour le SEO (200 caractères maximum)'
-    ),
-  keywords: z.array(z.string()).describe('Mots clefs de la vidéo')
-})
+const DESCRIPTION_PREFIX = {
+  fr: 'Découvrez et téléchargez ce mème de',
+  en: 'Discover and download this meme of'
+} as const satisfies Record<Locale, string>
 
 let geminiClient: GoogleGenAI | null = null
 
@@ -39,7 +28,8 @@ const getGeminiClient = () => {
   return geminiClient
 }
 
-const GEMINI_MODEL = 'gemini-3-flash-preview'
+const GEMINI_TRANSLATION_MODEL = 'gemini-3.5-flash-lite'
+const GEMINI_VIDEO_MODEL = 'gemini-3.8-flash'
 const GEMINI_TIMEOUT_MS = 100_000
 const GEMINI_FILE_POLL_INTERVAL_MS = 2000
 const GEMINI_FILE_MAX_RETRIES = 15
@@ -73,40 +63,52 @@ async function waitForFileActive(fileName: string) {
 }
 
 const aiAssistResultSchema = z.object({
-  title: z
-    .string()
-    .describe(
-      'Titre court (60 caractères max). Format : "[Qui] [action] - [source]". Qui = personnage ou acteur. Source = film, série, émission si applicable. Langage simple de jeune 15-35 ans, jamais de mots soutenus (pas "s\'esclaffe", "contemple" → "rigole", "regarde"). JAMAIS "mème", "trend", "template". Ex: "Tobey Maguire qui rigole - Spider-Man 3"'
-    ),
-  description: z
-    .string()
-    .describe(
-      'Description SEO (200 caractères max, commence par "Découvrez et téléchargez ce mème de [mini description]")'
-    ),
-  keywords: z
-    .array(z.string())
-    .describe(
-      'Mots-clés de recherche, 1 mot chacun. Même langue que le titre. Public jeune 15-35 ans. Catégories : (1) noms propres (acteur, personnage, film/série — pas de franchise générique comme "marvel"), (2) nom du template mème si connu, (3) verbes ou adjectifs simples en 1 mot (ex: "marrant", "rigoler", "triste", "choqué"). JAMAIS de groupes de mots ("fou rire", "trop drôle", "mort de rire"). JAMAIS de mots génériques (cinéma, réaction, costume, scène). JAMAIS de doublons sémantiques. JAMAIS répéter un mot du titre. 5-8 max.'
-    )
+  title: z.string(),
+  description: z.string(),
+  keywords: z.array(z.string())
 })
 
 export type AiAssistResult = z.infer<typeof aiAssistResultSchema>
 
-type BuildGeminiJsonConfigParams = {
-  schema: z.ZodType
-  abortSignal: AbortSignal
+type ModelInteractionParams =
+  Interactions.InteractionCreateParams.CreateModelInteractionParamsNonStreaming
+
+type RequestGeminiJsonParams<TSchema extends z.ZodType> = Pick<
+  ModelInteractionParams,
+  'model' | 'input'
+> & {
+  thinkingLevel: NonNullable<
+    ModelInteractionParams['generation_config']
+  >['thinking_level']
+  schema: TSchema
 }
 
-const buildGeminiJsonConfig = ({
-  schema,
-  abortSignal
-}: BuildGeminiJsonConfigParams) => {
-  return {
-    abortSignal,
-    automaticContinuation: false,
-    responseMimeType: 'application/json',
-    responseJsonSchema: z.toJSONSchema(schema, { target: 'draft-07' })
-  } satisfies GenerateContentConfig
+async function requestGeminiJson<TSchema extends z.ZodType>({
+  model,
+  input,
+  thinkingLevel,
+  schema
+}: RequestGeminiJsonParams<TSchema>) {
+  const interaction = await getGeminiClient().interactions.create(
+    {
+      model,
+      store: false,
+      input,
+      response_format: {
+        type: 'text',
+        mime_type: 'application/json',
+        schema: z.toJSONSchema(schema, { target: 'draft-07' })
+      },
+      generation_config: { thinking_level: thinkingLevel }
+    },
+    { timeout_ms: GEMINI_TIMEOUT_MS }
+  )
+
+  if (!interaction.output_text) {
+    throw new Error('réponse vide')
+  }
+
+  return schema.parse(JSON.parse(interaction.output_text))
 }
 
 type BuildAiAssistPromptParams = {
@@ -119,29 +121,22 @@ function buildAiAssistPrompt({
   targetLocale
 }: BuildAiAssistPromptParams) {
   const { label } = LOCALE_META[targetLocale]
-  const descriptionPrefix =
-    targetLocale === 'fr'
-      ? 'Découvrez et téléchargez ce mème de'
-      : 'Discover and download this meme of'
+  const trimmedCustomPrompt = customPrompt.trim()
+  const adminContext =
+    trimmedCustomPrompt === ''
+      ? ''
+      : `\n\nContexte donné par l'admin : "${trimmedCustomPrompt}"`
 
-  const contextBlock =
-    customPrompt.trim() !== ''
-      ? `\nContexte fourni par l'admin : "${customPrompt.trim()}"\n`
-      : ''
+  return `Tu écris la fiche de ce mème vidéo pour Petit Meme, en ${label}.${adminContext}
 
-  return `Tu es un expert en mèmes internet et en SEO.
+Le public a entre 15 et 35 ans : écris avec les mots simples qu'il dit à l'oral, comme « rigole », « regarde » ou « pleure ».
 
-Analyse cette vidéo de mème.${contextBlock}
-Génère en ${label} :
-1. Un titre court (60 caractères max). Format : "[Qui] [action] - [source]". Qui = personnage ou acteur. Action = verbe simple (rigole, pleure, regarde, danse...). Source = film, série, émission si applicable. Langage de jeune 15-35 ans, JAMAIS de mots soutenus (pas "s'esclaffe", "contemple"). JAMAIS "mème", "trend", "template". Ex: "Tobey Maguire qui rigole - Spider-Man 3", "Chat qui fixe la caméra", "Pedro Pascal qui pleure puis rit"
-2. Une description SEO courte (200 caractères max). Elle doit commencer par : "${descriptionPrefix} [ta mini description de 150 caractères max]"
-3. 5-8 mots-clés de recherche en minuscules. TOUS dans la même langue que le reste. Chaque mot-clé = 1 SEUL mot (sauf noms propres composés). Catégories :
-   - Noms propres : acteur, personnage, film/série (pas de franchise générique comme "marvel")
-   - Nom du template mème si connu (ex: "bully maguire", "drake hotline bling")
-   - Verbes ou adjectifs simples en 1 mot que des jeunes 15-35 ans taperaient (ex: "marrant", "rigoler", "triste", "choqué")
-   INTERDIT : groupes de mots ("fou rire", "trop drôle", "mort de rire"), mots génériques (cinéma, réaction, costume, scène), mots soutenus/littéraires, doublons sémantiques, mots déjà dans le titre.
-
-Identifie le template/la référence si possible.`
+- title : 60 caractères au plus, au format « [qui] [action] - [source] ». Qui : le personnage ou l'acteur. Source : le film, la série ou l'émission, quand il y en a une. Exemples : « Tobey Maguire qui rigole - Spider-Man 3 », « Chat qui fixe la caméra », « Pedro Pascal qui pleure puis rit ».
+- description : 200 caractères au plus. Elle commence par « ${DESCRIPTION_PREFIX[targetLocale]} », puis décrit la scène.
+- keywords : 5 à 8 mots-clés en minuscules, d'un seul mot chacun (un nom propre compte pour un mot). Chaque mot-clé aide à retrouver ce mème précis et ajoute un mot absent du titre :
+  - les noms propres : l'acteur, le personnage, le film ou la série ;
+  - le nom du template quand tu le reconnais, comme « bully maguire » ou « drake hotline bling » ;
+  - les verbes et adjectifs qu'un jeune taperait pour le chercher, comme « marrant », « rigoler », « triste » ou « choqué ».`
 }
 
 async function deleteGeminiFile(fileName: string, failureMessage: string) {
@@ -207,8 +202,10 @@ async function uploadVideoToGemini(memeId: string) {
   }
 }
 
-const memeTranslateResultSchema = translationSchema.extend({
-  title: z.string().describe('Titre traduit (100 caractères max)')
+const memeTranslateResultSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  keywords: z.array(z.string())
 })
 
 const LOCALIZED_TRANSLATION_SCHEMA = z.object({
@@ -241,31 +238,24 @@ function buildTranslatePrompt({
   description,
   keywords
 }: BuildTranslatePromptParams) {
-  const targetInstructions = targetLocales
+  const targetLanguages = targetLocales
     .map((locale) => {
-      return `- "${locale}" (${LOCALE_META[locale].label})`
+      return `- "${locale}" : ${LOCALE_META[locale].label}`
     })
     .join('\n')
 
-  return `Tu es un traducteur professionnel spécialisé dans le contenu web et le SEO.
+  return `Traduis la fiche d'un mème, écrite en ${sourceLabel}, vers chaque langue cible. Garde le ton de l'original, et remplace chaque expression par celle qu'on dit vraiment dans la langue cible.
 
-Traduis les métadonnées suivantes d'un mème de ${sourceLabel} vers les langues indiquées.
+Langues cibles, une entrée par clé :
+${targetLanguages}
+
+- title : 100 caractères au plus.
+- description : 200 caractères au plus. Son préfixe suit la langue : « ${DESCRIPTION_PREFIX.fr} » en français, « ${DESCRIPTION_PREFIX.en} » en anglais.
+- keywords : chaque mot-clé traduit séparément, en minuscules.
 
 Titre : "${title}"
 Description : "${description}"
-Mots-clés : ${keywords.join(', ')}
-
-Langues cibles :
-${targetInstructions}
-
-Règles :
-- Conserve le même ton et style
-- Titre : 100 caractères maximum
-- Description : 200 caractères maximum
-- Si la description commence par "Découvrez et téléchargez ce mème de...", adapte le préfixe naturellement ("Discover and download this meme of...")
-- Traduis chaque mot-clé individuellement
-- Les mots-clés doivent être en minuscules
-- Adapte les expressions idiomatiques à la langue cible`
+Mots-clés : ${keywords.join(', ')}`
 }
 
 export const translateMemeContent = createServerFn({ method: 'POST' })
@@ -293,27 +283,12 @@ export const translateMemeContent = createServerFn({ method: 'POST' })
     })
 
     try {
-      const result = await withTimeout(
-        (abortController) => {
-          return getGeminiClient().models.generateContent({
-            model: GEMINI_MODEL,
-            contents: prompt,
-            config: buildGeminiJsonConfig({
-              schema: responseSchema,
-              abortSignal: abortController.signal
-            })
-          })
-        },
-        GEMINI_TIMEOUT_MS,
-        `Traduction AI : timeout après ${GEMINI_TIMEOUT_MS}ms`
-      )
-
-      if (!result.text) {
-        setResponseStatus(HTTP_STATUS.BAD_GATEWAY)
-        throw new Error('La traduction AI a échoué : réponse vide')
-      }
-
-      const parsed = responseSchema.parse(JSON.parse(result.text))
+      const parsed = await requestGeminiJson({
+        model: GEMINI_TRANSLATION_MODEL,
+        input: prompt,
+        thinkingLevel: 'minimal',
+        schema: responseSchema
+      })
 
       adminLogger.info(
         { sourceLocale: data.sourceLocale, targetLocales: data.targetLocales },
@@ -356,30 +331,15 @@ export const aiAssistMemeContent = createServerFn({ method: 'POST' })
         targetLocale: data.targetLocale
       })
 
-      const filePart = createPartFromUri(fileUri, fileMimeType)
-      const userContent = createUserContent([filePart, prompt])
-
-      const result = await withTimeout(
-        (abortController) => {
-          return getGeminiClient().models.generateContent({
-            model: GEMINI_MODEL,
-            contents: userContent,
-            config: buildGeminiJsonConfig({
-              schema: aiAssistResultSchema,
-              abortSignal: abortController.signal
-            })
-          })
-        },
-        GEMINI_TIMEOUT_MS,
-        `AI Assist : timeout après ${GEMINI_TIMEOUT_MS}ms`
-      )
-
-      if (!result.text) {
-        setResponseStatus(HTTP_STATUS.BAD_GATEWAY)
-        throw new Error('AI Assist a échoué : réponse vide')
-      }
-
-      const parsed = aiAssistResultSchema.parse(JSON.parse(result.text))
+      const parsed = await requestGeminiJson({
+        model: GEMINI_VIDEO_MODEL,
+        input: [
+          { type: 'video', uri: fileUri, mime_type: fileMimeType },
+          { type: 'text', text: prompt }
+        ],
+        thinkingLevel: 'low',
+        schema: aiAssistResultSchema
+      })
 
       adminLogger.info(
         { memeId: data.memeId, targetLocale: data.targetLocale },

@@ -33,7 +33,7 @@ export class StudioError extends Error {
 }
 
 export const matchIsStudioError = (error: unknown): error is StudioError => {
-  return Error.isError(error) && 'code' in error
+  return error instanceof Error && 'code' in error
 }
 
 export const getStudioErrorCode = (
@@ -43,7 +43,7 @@ export const getStudioErrorCode = (
     return error.code
   }
 
-  if (!Error.isError(error)) {
+  if (!(error instanceof Error)) {
     return undefined
   }
 

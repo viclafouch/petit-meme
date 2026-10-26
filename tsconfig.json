@@ -7,7 +7,7 @@
     "jsx": "react-jsx",
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "lib": ["DOM", "DOM.Iterable", "ES2025"],
     "types": ["react-dom"],
     "isolatedModules": true,
     "resolveJsonModule": true,

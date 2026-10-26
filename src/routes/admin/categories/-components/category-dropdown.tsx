@@ -115,7 +115,7 @@ export const CategoryDropdown = ({ category }: CategoryDropdownProps) => {
         }}
       />
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Modifier une catégorie</DialogTitle>
             <DialogDescription className="sr-only">

@@ -31,7 +31,7 @@ export const AddCategoryButton = ({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger render={<Button {...restButtonProps} />} />
-      <DialogContent>
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Ajouter une catégorie</DialogTitle>
           <DialogDescription className="sr-only">

@@ -124,9 +124,13 @@ const OverlayTemplateCard = ({
 
 type StudioTemplatesProps = {
   bunnyId: string
+  disabled: boolean
 }
 
-export const StudioTemplates = ({ bunnyId }: StudioTemplatesProps) => {
+export const StudioTemplates = ({
+  bunnyId,
+  disabled
+}: StudioTemplatesProps) => {
   const activeTemplateId = useStudioStore((state) => {
     return state.activeTemplateId
   })
@@ -140,6 +144,7 @@ export const StudioTemplates = ({ bunnyId }: StudioTemplatesProps) => {
   return (
     <RadioGroup
       value={activeTemplateId}
+      disabled={disabled}
       onValueChange={(templateId) => {
         if (templateId !== null) {
           applyTemplate(templateId)

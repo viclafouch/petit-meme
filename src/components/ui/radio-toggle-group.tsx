@@ -50,7 +50,7 @@ function RadioToggleGroupItem<Value>({
       data-size={size}
       className={cn(
         toggleVariants({ variant, size }),
-        'min-w-0 flex-1 shrink-0 rounded-none px-2 shadow-none first:rounded-l-md last:rounded-r-md focus:z-10 focus-visible:z-10 data-checked:bg-muted data-disabled:pointer-events-none data-disabled:opacity-50 data-[variant=outline]:border-l-0 data-[variant=outline]:first:border-l',
+        'min-w-0 flex-1 shrink-0 rounded-none px-2 shadow-none first-of-type:rounded-l-md last-of-type:rounded-r-md focus:z-10 focus-visible:z-10 data-checked:bg-muted data-disabled:pointer-events-none data-disabled:opacity-50 data-[variant=outline]:border-l-0 data-[variant=outline]:first-of-type:border-l',
         className
       )}
       {...props}

@@ -194,7 +194,9 @@ export const UserScalarFieldEnum = {
   verificationReminderSent: 'verificationReminderSent',
   isAnonymized: 'isAnonymized',
   locale: 'locale',
-  lastActiveAt: 'lastActiveAt'
+  lastActiveAt: 'lastActiveAt',
+  verificationEmailCount: 'verificationEmailCount',
+  verificationEmailWindowStart: 'verificationEmailWindowStart'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]

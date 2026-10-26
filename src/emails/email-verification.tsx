@@ -8,9 +8,7 @@ const translations = {
     preview: 'Confirme ton inscription à Petit Meme',
     title: 'Confirme ton adresse e-mail',
     subtitle: 'Plus qu’une étape pour rejoindre Petit Meme.',
-    body: (username: string) => {
-      return `Salut ${username}, bienvenue sur **Petit Meme** ! Clique sur le bouton ci-dessous pour confirmer ton adresse e-mail et commencer à explorer les mèmes.`
-    },
+    body: 'Salut, bienvenue sur **Petit Meme** ! Clique sur le bouton ci-dessous pour confirmer ton adresse e-mail et commencer à explorer les mèmes.',
     cta: 'Confirmer mon inscription',
     ignore: 'Si tu n’as pas créé de compte sur Petit Meme, ignore ce message.'
   },
@@ -18,9 +16,7 @@ const translations = {
     preview: 'Confirm your Petit Meme registration',
     title: 'Confirm your email address',
     subtitle: 'One more step to join Petit Meme.',
-    body: (username: string) => {
-      return `Hi ${username}, welcome to **Petit Meme**! Click the button below to confirm your email address and start exploring memes.`
-    },
+    body: 'Hi, welcome to **Petit Meme**! Click the button below to confirm your email address and start exploring memes.',
     cta: 'Confirm my registration',
     ignore:
       'If you didn’t create an account on Petit Meme, ignore this message.'
@@ -28,13 +24,11 @@ const translations = {
 } as const satisfies Record<Locale, Record<string, unknown>>
 
 type EmailVerificationProps = {
-  username: string
   verificationUrl: string
   locale: Locale
 }
 
 export const EmailVerification = ({
-  username,
   verificationUrl,
   locale
 }: EmailVerificationProps) => {
@@ -50,7 +44,7 @@ export const EmailVerification = ({
           {tr.subtitle}
         </Text>
         <Text className="m-0 mb-4 text-sm leading-6 text-neutral-600">
-          <BoldText text={tr.body(username)} />
+          <BoldText text={tr.body} />
         </Text>
         <Section className="mb-6 mt-2">
           <Button className={BUTTON_CLASS} href={verificationUrl}>
@@ -67,7 +61,6 @@ export const EmailVerification = ({
 }
 
 EmailVerification.PreviewProps = {
-  username: 'Alan',
   verificationUrl: 'https://petit-meme.io/api/auth/verify-email?token=abc123',
   locale: 'fr'
 } satisfies EmailVerificationProps
@@ -79,7 +72,6 @@ export const EmailVerificationEN = (props: EmailVerificationENProps) => {
 }
 
 EmailVerificationEN.PreviewProps = {
-  username: 'Alan',
   verificationUrl: 'https://petit-meme.io/api/auth/verify-email?token=abc123'
 } satisfies EmailVerificationENProps
 

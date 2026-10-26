@@ -44,6 +44,7 @@ export type SentryFeature =
   | 'ai-search'
   | 'activity-event'
   | 'og-image'
+  | 'verification-email-quota'
 
 export const captureWithFeature = (error: unknown, feature: SentryFeature) => {
   if (IS_DEVELOPMENT) {

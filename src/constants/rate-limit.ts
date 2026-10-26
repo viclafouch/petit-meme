@@ -32,6 +32,12 @@ export const RATE_LIMIT_SUBMIT_MEME = {
   windowMs: DAY
 } as const satisfies RateLimitConfig
 
+export const RATE_LIMIT_VERIFICATION_EMAIL = {
+  action: 'verification-email',
+  maxRequests: 3,
+  windowMs: HOUR
+} as const satisfies RateLimitConfig
+
 export const RATE_LIMIT_UPDATE_AVATAR = {
   action: 'update-avatar',
   maxRequests: 20,

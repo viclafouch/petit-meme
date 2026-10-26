@@ -21,7 +21,6 @@ const TOKEN_EXPIRY_IN_SECONDS = ONE_DAY_IN_SECONDS
 const sendReminderToUser = async (user: {
   id: string
   email: string
-  name: string | null
   locale: UserLocale
 }) => {
   const verificationPath = await buildEmailVerificationPath({
@@ -35,7 +34,6 @@ const sendReminderToUser = async (user: {
     to: getEmailRecipient(user.email),
     subject: emailSubjects[user.locale].verificationReminder,
     react: VerificationReminderEmail({
-      username: user.name ?? 'there',
       verificationUrl,
       locale: user.locale
     })
@@ -72,7 +70,7 @@ const runVerificationReminders = async () => {
         lte: newestCreatedAt
       }
     },
-    select: { id: true, email: true, name: true, locale: true }
+    select: { id: true, email: true, locale: true }
   })
 
   if (users.length === 0) {

@@ -8,9 +8,7 @@ const translations = {
     preview: 'Rappel : confirme ton email Petit Meme',
     title: 'Rappel : confirme ton adresse e-mail',
     subtitle: 'Tu n’as pas encore confirmé ton adresse e-mail.',
-    body: (username: string) => {
-      return `Salut ${username}, tu t’es inscrit sur **Petit Meme** mais tu n’as pas encore confirmé ton adresse e-mail. Clique sur le bouton ci-dessous pour confirmer et accéder à toutes les fonctionnalités.`
-    },
+    body: 'Salut, tu t’es inscrit sur **Petit Meme** mais tu n’as pas encore confirmé ton adresse e-mail. Clique sur le bouton ci-dessous pour confirmer et accéder à toutes les fonctionnalités.',
     warning:
       'Si tu ne confirmes pas dans les 30 jours suivant ton inscription, ton compte sera automatiquement supprimé.',
     cta: 'Confirmer mon adresse e-mail',
@@ -20,9 +18,7 @@ const translations = {
     preview: 'Reminder: confirm your Petit Meme email',
     title: 'Reminder: confirm your email address',
     subtitle: 'You have not yet confirmed your email address.',
-    body: (username: string) => {
-      return `Hi ${username}, you signed up on **Petit Meme** but have not yet confirmed your email address. Click the button below to confirm and access all features.`
-    },
+    body: 'Hi, you signed up on **Petit Meme** but have not yet confirmed your email address. Click the button below to confirm and access all features.',
     warning:
       'If you do not confirm within 30 days of signing up, your account will be automatically deleted.',
     cta: 'Confirm my email address',
@@ -32,13 +28,11 @@ const translations = {
 } as const satisfies Record<Locale, Record<string, unknown>>
 
 type VerificationReminderEmailProps = {
-  username: string
   verificationUrl: string
   locale: Locale
 }
 
 export const VerificationReminderEmail = ({
-  username,
   verificationUrl,
   locale
 }: VerificationReminderEmailProps) => {
@@ -54,7 +48,7 @@ export const VerificationReminderEmail = ({
           {tr.subtitle}
         </Text>
         <Text className="m-0 mb-4 text-sm leading-6 text-neutral-600">
-          <BoldText text={tr.body(username)} />
+          <BoldText text={tr.body} />
         </Text>
         <Text className="m-0 mb-6 text-sm leading-6 text-brand-danger">
           {tr.warning}
@@ -74,7 +68,6 @@ export const VerificationReminderEmail = ({
 }
 
 VerificationReminderEmail.PreviewProps = {
-  username: 'Alan',
   verificationUrl: 'https://petit-meme.io/api/auth/verify-email?token=abc123',
   locale: 'fr'
 } satisfies VerificationReminderEmailProps
@@ -91,7 +84,6 @@ export const VerificationReminderEmailEN = (
 }
 
 VerificationReminderEmailEN.PreviewProps = {
-  username: 'Alan',
   verificationUrl: 'https://petit-meme.io/api/auth/verify-email?token=abc123'
 } satisfies VerificationReminderEmailENProps
 

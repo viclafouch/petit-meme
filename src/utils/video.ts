@@ -1,6 +1,8 @@
-// oxlint-disable-next-line import/no-named-as-default -- hls.js 1.7 types declare the default export only, the named Hls export is missing from them
-import Hls from 'hls.js'
+import hlsWorkerUrl from 'hls.js/dist/hls.worker.js?url'
+import { createClientOnlyFn } from '@tanstack/react-start'
 import { BUNNY_STATUS, HLS_MIME_TYPE } from '~/constants/bunny'
+
+const MEDIA_ERROR_RECOVERY_INTERVAL_MS = 5_000
 
 export const matchIsVideoPlayable = (bunnyStatus: number) => {
   return (
@@ -11,38 +13,143 @@ export const matchIsVideoPlayable = (bunnyStatus: number) => {
 }
 
 const matchIsNativeHlsPreferred = (video: HTMLVideoElement) => {
+  const canPlayHlsNatively = video.canPlayType(HLS_MIME_TYPE) !== ''
+  const hasMediaSource = 'MediaSource' in window
+
   return (
-    video.canPlayType(HLS_MIME_TYPE) !== '' && 'ManagedMediaSource' in window
+    canPlayHlsNatively && ('ManagedMediaSource' in window || !hasMediaSource)
   )
 }
+
+const loadHls = async () => {
+  try {
+    const { default: Hls } = await import('hls.js/light')
+
+    return Hls
+  } catch {
+    return null
+  }
+}
+
+export const preloadHls = createClientOnlyFn(() => {
+  if (matchIsNativeHlsPreferred(document.createElement('video'))) {
+    return
+  }
+
+  void loadHls()
+})
 
 type AttachHlsSourceParams = {
   video: HTMLVideoElement
   videoSrc: string
+  onFatalError: () => void
 }
 
-export const attachHlsSource = ({ video, videoSrc }: AttachHlsSourceParams) => {
-  if (matchIsNativeHlsPreferred(video)) {
-    video.src = videoSrc
+type AttachHlsJsSourceParams = AttachHlsSourceParams & {
+  signal: AbortSignal
+}
 
-    return () => {}
-  }
-
-  // oxlint-disable-next-line import/no-named-as-default-member -- hls.js 1.7 types declare isSupported as a static method only, not as a named export
-  if (!Hls.isSupported()) {
-    return () => {}
-  }
-
-  const hls = new Hls()
-  hls.loadSource(videoSrc)
-  hls.attachMedia(video)
+const attachNativeHlsSource = ({
+  video,
+  videoSrc,
+  onFatalError
+}: AttachHlsSourceParams) => {
+  video.addEventListener('error', onFatalError, { once: true })
+  video.src = videoSrc
 
   return () => {
-    hls.destroy()
+    video.removeEventListener('error', onFatalError)
   }
 }
 
-export const tryPlayVideo = async (video: HTMLVideoElement) => {
+type StartHlsPlayerParams = AttachHlsJsSourceParams & {
+  Hls: NonNullable<Awaited<ReturnType<typeof loadHls>>>
+}
+
+const startHlsPlayer = ({
+  Hls,
+  video,
+  videoSrc,
+  onFatalError,
+  signal
+}: StartHlsPlayerParams) => {
+  const hls = new Hls({ workerPath: hlsWorkerUrl, loopBackBufferFlush: false })
+  let lastMediaErrorRecoveryAt = Number.NEGATIVE_INFINITY
+
+  const failPlayback = () => {
+    hls.destroy()
+    onFatalError()
+  }
+
+  hls.on(Hls.Events.ERROR, (_event, data) => {
+    if (!data.fatal) {
+      return
+    }
+
+    const now = Date.now()
+    const canRecoverMediaError =
+      data.type === Hls.ErrorTypes.MEDIA_ERROR &&
+      now - lastMediaErrorRecoveryAt >= MEDIA_ERROR_RECOVERY_INTERVAL_MS
+
+    if (!canRecoverMediaError) {
+      failPlayback()
+
+      return
+    }
+
+    lastMediaErrorRecoveryAt = now
+    hls.recoverMediaError()
+  })
+
+  signal.addEventListener(
+    'abort',
+    () => {
+      hls.destroy()
+    },
+    { once: true }
+  )
+
+  hls.loadSource(videoSrc)
+  hls.attachMedia(video)
+}
+
+const attachHlsJsSource = async (params: AttachHlsJsSourceParams) => {
+  const Hls = await loadHls()
+
+  if (params.signal.aborted) {
+    return
+  }
+
+  if (!Hls?.isSupported()) {
+    params.onFatalError()
+
+    return
+  }
+
+  try {
+    startHlsPlayer({ ...params, Hls })
+  } catch {
+    params.onFatalError()
+  }
+}
+
+export const attachHlsSource = createClientOnlyFn(
+  (params: AttachHlsSourceParams) => {
+    if (matchIsNativeHlsPreferred(params.video)) {
+      return attachNativeHlsSource(params)
+    }
+
+    const abortController = new AbortController()
+
+    void attachHlsJsSource({ ...params, signal: abortController.signal })
+
+    return () => {
+      abortController.abort()
+    }
+  }
+)
+
+const tryPlayVideo = async (video: HTMLVideoElement) => {
   try {
     await video.play()
 
@@ -50,4 +157,28 @@ export const tryPlayVideo = async (video: HTMLVideoElement) => {
   } catch {
     return false
   }
+}
+
+type PlayVideoWhenReadyParams = {
+  video: HTMLVideoElement
+  signal: AbortSignal
+}
+
+export const playVideoWhenReady = async ({
+  video,
+  signal
+}: PlayVideoWhenReadyParams) => {
+  const hasStarted = await tryPlayVideo(video)
+
+  if (hasStarted || signal.aborted) {
+    return
+  }
+
+  video.addEventListener(
+    'canplay',
+    () => {
+      void tryPlayVideo(video)
+    },
+    { once: true, signal }
+  )
 }

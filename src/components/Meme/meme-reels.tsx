@@ -7,14 +7,16 @@ import { Link } from '@tanstack/react-router'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { ShareMemeButton } from '~/components/Meme/share-meme-button'
 import { ToggleLikeButton } from '~/components/Meme/toggle-like-button'
+import { VideoPlaybackError } from '~/components/Meme/video-playback-error'
 import { Button, buttonVariants } from '~/components/ui/button'
 import { LoadingSpinner } from '~/components/ui/spinner'
 import { LOGO_PATH } from '~/constants/branding'
 import type { MemeWithVideo } from '~/constants/meme'
-import { buildVideoImageUrl, buildVideoStreamUrl } from '~/lib/bunny'
+import { useMemeHls } from '~/hooks/use-meme-hls'
+import { buildVideoImageUrl } from '~/lib/bunny'
 import { getInfiniteReelsQueryOpts } from '~/lib/queries'
 import { m } from '~/paraglide/messages.js'
-import { attachHlsSource, tryPlayVideo } from '~/utils/video'
+import { playVideoWhenReady } from '~/utils/video'
 
 const PREFETCH_THRESHOLD_ITEMS = 3
 
@@ -36,7 +38,10 @@ export const Reel = React.memo(
     setIsMuted,
     isActive
   }: ReelProps) => {
-    const videoRef = React.useRef<HTMLVideoElement>(null)
+    const { videoRef, playbackFailure } = useMemeHls({
+      bunnyId: meme.video.bunnyId
+    })
+    const hasPlaybackFailed = playbackFailure !== null
 
     React.useEffect(() => {
       const video = videoRef.current
@@ -46,36 +51,32 @@ export const Reel = React.memo(
       }
 
       video.muted = isMuted
-    }, [isMuted])
+    }, [isMuted, videoRef])
 
     React.useEffect(() => {
-      const video = videoRef.current
-
-      if (video) {
-        if (!isActive) {
-          video.currentTime = 0
-        }
-
-        if (isActive && isPlaying) {
-          void tryPlayVideo(video)
-        } else {
-          video.pause()
-        }
-      }
-    }, [isActive, isPlaying])
-
-    React.useLayoutEffect(() => {
       const video = videoRef.current
 
       if (!video) {
         return () => {}
       }
 
-      return attachHlsSource({
-        video,
-        videoSrc: buildVideoStreamUrl(meme.video.bunnyId)
-      })
-    }, [meme.video.bunnyId])
+      if (!isActive) {
+        video.currentTime = 0
+      }
+
+      if (!isActive || !isPlaying || hasPlaybackFailed) {
+        video.pause()
+
+        return () => {}
+      }
+
+      const playAbortController = new AbortController()
+      void playVideoWhenReady({ video, signal: playAbortController.signal })
+
+      return () => {
+        playAbortController.abort()
+      }
+    }, [isActive, isPlaying, hasPlaybackFailed, videoRef])
 
     return (
       <div className="size-full relative select-none">
@@ -120,6 +121,9 @@ export const Reel = React.memo(
             setIsPlaying(true)
           }}
         />
+        {playbackFailure ? (
+          <VideoPlaybackError onRetry={playbackFailure.handleRetry} />
+        ) : null}
         <div className="absolute bottom-0 inset-x-0 z-10 bg-linear-to-b to-black/60 from-transparent p-3">
           <div className="w-full flex justify-between items-end">
             <div>

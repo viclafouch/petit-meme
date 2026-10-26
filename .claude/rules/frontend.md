@@ -91,8 +91,8 @@ paths: ["src/**/*.{ts,tsx}"]
 - Links use `hover:text-primary` or `hover:text-foreground` - keep it simple
 - **Consistency over creativity**: match existing patterns, don't invent new interactions
 
-### Animations (Framer Motion)
-- **Use Framer Motion** for all UI animations - no CSS transitions for interactive elements
+### Animations (Motion)
+- **Use Motion** (`motion/react`) for all UI animations - no CSS transitions for interactive elements
 - **AnimatePresence** for enter/exit animations (notifications, modals, toasts)
 - **layout prop** for smooth layout shifts when elements appear/disappear
 - **Prefer `motion` components** over CSS animations for:
@@ -101,7 +101,12 @@ paths: ["src/**/*.{ts,tsx}"]
   - List item additions/removals
   - Page transitions
   - Hover/tap interactions
-- **Respect `prefers-reduced-motion`** - use `useReducedMotion()` hook
+- **Animate `transform` values and `opacity`**: independent transforms (`x`, `y`, `scale`, `rotate`), `opacity`, `filter` and `clipPath` run hardware accelerated. A CSS variable never does, even when it feeds `transform`
+- **Reduced motion is site-wide**: `<MotionConfig reducedMotion="user">` sits in `RootDocument`. It turns off independent transforms (`x`, `scale`, `rotateY`…), size, position and layout animations in every `motion` component, vendor code included. A raw `transform` string, `opacity`, color, `filter` and `clipPath` keep animating
+- **`useReducedMotion()` covers what `MotionConfig` leaves running**:
+  - a raw `transform` string, a fade or a `filter` to cut
+  - a motion value passed through `style` (`useScroll`, `useSpring`)
+  - a behaviour outside Motion, such as video autoplay
 - **Standard durations**: 0.2s (fast), 0.3s (normal), 0.5s (slow)
 - **Standard easings**: `[0.4, 0, 0.2, 1]` (ease-out), `[0.4, 0, 1, 1]` (ease-in)
 - **CSS transitions exception**: when CSS transitions are used (accordion, collapse), add a named CSS class and include it in the `@media (prefers-reduced-motion: reduce)` block in `styles.css` with `transition: none`

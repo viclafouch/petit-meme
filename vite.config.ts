@@ -64,7 +64,8 @@ export default defineConfig(async ({ mode }) => {
       tsconfigPaths: true
     },
     server: {
-      port: 3000
+      port: 3000,
+      strictPort: true
     },
     ssr: {
       external: ['takumi-js', '@takumi-rs/core']

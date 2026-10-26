@@ -16,6 +16,8 @@ const POLITICS_CATEGORY = E2E_CATEGORIES.politique
 
 const CATS_CATEGORY_PATHNAME = `/memes/category/${CATS_CATEGORY.slug}`
 
+const SLOW_PHONE_CPU_THROTTLING_RATE = 4
+
 const countMemesOfCategory = (category: E2eCategory) => {
   return E2E_MEMES.filter((meme) => {
     return meme.categorySlugs.includes(category.slug)
@@ -47,9 +49,15 @@ test.describe('the Categories', () => {
     ).toBeHidden()
   })
 
-  test('the Categories list carries the library from one Category to the other', async ({
-    page
+  test('the Categories list carries the library from one Category to the other, even before the page has hydrated', async ({
+    page,
+    context
   }) => {
+    const cdpSession = await context.newCDPSession(page)
+
+    await cdpSession.send('Emulation.setCPUThrottlingRate', {
+      rate: SLOW_PHONE_CPU_THROTTLING_RATE
+    })
     await page.goto(CATS_CATEGORY_PATHNAME)
 
     await page

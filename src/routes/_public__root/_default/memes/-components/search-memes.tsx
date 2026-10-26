@@ -5,13 +5,7 @@ import {
   QueryErrorResetBoundary,
   useSuspenseQuery
 } from '@tanstack/react-query'
-import {
-  Link,
-  useLoaderData,
-  useNavigate,
-  useParams,
-  useSearch
-} from '@tanstack/react-router'
+import { getRouteApi, Link, useNavigate } from '@tanstack/react-router'
 import { AnimateIcon } from '~/components/animate-ui/icons/icon'
 import { Sparkles } from '~/components/animate-ui/icons/sparkles'
 import { CategoriesList } from '~/components/categories/categories-list'
@@ -39,24 +33,29 @@ import {
   PageDescription,
   PageHeading
 } from '~/routes/_public__root/-components/page-headers'
+import type { Route as CategoryRoute } from '~/routes/_public__root/_default/memes/category/$slug'
 
 const DEFAULT_COLUMN_GRID_COUNT = 5
 
+const categoryRoute = getRouteApi(
+  '/_public__root/_default/memes/category/$slug'
+)
+
+type CategoryRouteTypes = (typeof CategoryRoute)['types']
+
 type MemesListWrapperProps = {
   columnGridCount: number
+  slug: string
+  search: CategoryRouteTypes['fullSearchSchema']
+  selectedCategory: CategoryRouteTypes['loaderData']['category']
 }
 
-const MemesListWrapper = ({ columnGridCount }: MemesListWrapperProps) => {
-  const search = useSearch({
-    from: '/_public__root/_default/memes/category/$slug'
-  })
-  const { slug } = useParams({
-    from: '/_public__root/_default/memes/category/$slug'
-  })
-  const selectedCategory = useLoaderData({
-    from: '/_public__root/_default/memes/category/$slug'
-  }).category
-
+const MemesListWrapper = ({
+  columnGridCount,
+  slug,
+  search,
+  selectedCategory
+}: MemesListWrapperProps) => {
   const hasSearchQuery = Boolean(search.query)
   const categorySlug = slug === 'all' ? undefined : slug
 
@@ -144,9 +143,10 @@ export const SearchMemes = () => {
   const [columnGridCount, setColumnGridCount] = React.useState<number>(
     DEFAULT_COLUMN_GRID_COUNT
   )
-  const search = useSearch({ strict: false })
+  const search = categoryRoute.useSearch()
   const navigate = useNavigate()
-  const { slug: activeSlug } = useParams({ strict: false })
+  const { slug: activeSlug } = categoryRoute.useParams()
+  const { category: selectedCategory } = categoryRoute.useLoaderData()
 
   const categoriesQuery = useSuspenseQuery(
     getCategoriesListQueryOpts(getLocale())
@@ -287,7 +287,12 @@ export const SearchMemes = () => {
                   FallbackComponent={MemesListErrorFallback}
                 >
                   <React.Suspense fallback={<LoadingSpinner />}>
-                    <MemesListWrapper columnGridCount={columnGridCount} />
+                    <MemesListWrapper
+                      columnGridCount={columnGridCount}
+                      slug={activeSlug}
+                      search={search}
+                      selectedCategory={selectedCategory}
+                    />
                   </React.Suspense>
                 </ErrorBoundary>
               )

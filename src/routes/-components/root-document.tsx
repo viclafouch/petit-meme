@@ -1,4 +1,5 @@
 import type React from 'react'
+import { MotionConfig } from 'motion/react'
 import {
   ClientOnly,
   getRouteApi,
@@ -52,22 +53,24 @@ export const RootDocument = ({ children }: RootDocumentProps) => {
         <ScriptOnce>
           {`document.documentElement.className = ${JSON.stringify(_storedTheme)};`}
         </ScriptOnce>
-        <ThemeProvider initialTheme={_storedTheme}>
-          <CookieConsentProvider
-            config={cookieConsentConfig}
-            initialState={_consentState}
-          >
-            <DialogProvider>{children}</DialogProvider>
-            <ClientOnly>
-              <Toaster richColors />
-            </ClientOnly>
-            <ClientOnly>
-              <CookieBanner />
-            </ClientOnly>
-            <CookieSettings />
-            {IS_PRODUCTION ? null : <TailwindIndicator />}
-          </CookieConsentProvider>
-        </ThemeProvider>
+        <MotionConfig reducedMotion="user">
+          <ThemeProvider initialTheme={_storedTheme}>
+            <CookieConsentProvider
+              config={cookieConsentConfig}
+              initialState={_consentState}
+            >
+              <DialogProvider>{children}</DialogProvider>
+              <ClientOnly>
+                <Toaster richColors />
+              </ClientOnly>
+              <ClientOnly>
+                <CookieBanner />
+              </ClientOnly>
+              <CookieSettings />
+              {IS_PRODUCTION ? null : <TailwindIndicator />}
+            </CookieConsentProvider>
+          </ThemeProvider>
+        </MotionConfig>
         <Scripts />
       </body>
     </html>

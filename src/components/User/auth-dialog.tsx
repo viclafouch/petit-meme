@@ -83,7 +83,7 @@ const handleSignInWithSocial = async (
   } catch (error) {
     captureWithFeature(error, `sign-in-${provider.id}`)
     toast.error(
-      Error.isError(error)
+      error instanceof Error
         ? getAuthErrorMessage(error.message)
         : provider.errorMessage()
     )

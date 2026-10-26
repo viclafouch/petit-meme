@@ -373,7 +373,7 @@ const runUpload = async (options: ParsedOptions) => {
 
         return result
       } catch (error) {
-        const message = Error.isError(error) ? error.message : String(error)
+        const message = error instanceof Error ? error.message : String(error)
         console.error(`${prefix} FAILED: ${message}`)
 
         return 'error'
@@ -438,7 +438,7 @@ const main = async () => {
         return result
       } catch (error) {
         const prefix = formatProgress(index, memes.length, meme.video.bunnyId)
-        const message = Error.isError(error) ? error.message : String(error)
+        const message = error instanceof Error ? error.message : String(error)
         console.error(`${prefix} FAILED: ${message}`)
 
         return 'error'

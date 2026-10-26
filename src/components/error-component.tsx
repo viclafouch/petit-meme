@@ -59,7 +59,7 @@ export const ErrorComponent = ({ error }: ErrorComponentProps) => {
           >
             {m.error_back_to_site()}
           </Link>
-          {!IS_PRODUCTION && Error.isError(error) ? (
+          {!IS_PRODUCTION && error instanceof Error ? (
             <Accordion className="w-full">
               <AccordionItem value="error-details">
                 <AccordionTrigger>{m.error_details_heading()}</AccordionTrigger>

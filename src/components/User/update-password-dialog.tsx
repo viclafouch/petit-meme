@@ -11,7 +11,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '~/components/animate-ui/radix/dialog'
+} from '~/components/animate-ui/base/dialog'
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
 import { LoadingButton } from '~/components/ui/loading-button'
 import { getPasswordSchema } from '~/constants/auth'

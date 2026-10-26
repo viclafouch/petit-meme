@@ -37,11 +37,9 @@ export const AdminSidebar = ({ ...props }: AdminSidebarProps) => {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link to="/">
-                <ArrowLeft />
-                Retour au site
-              </Link>
+            <SidebarMenuButton render={<Link to="/" />}>
+              <ArrowLeft />
+              Retour au site
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -52,43 +50,33 @@ export const AdminSidebar = ({ ...props }: AdminSidebarProps) => {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link to="/admin">
-                    <LayoutDashboard />
-                    <span>Dashboard</span>
-                  </Link>
+                <SidebarMenuButton render={<Link to="/admin" />}>
+                  <LayoutDashboard />
+                  <span>Dashboard</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link to="/admin/activity">
-                    <Activity />
-                    <span>Activité</span>
-                  </Link>
+                <SidebarMenuButton render={<Link to="/admin/activity" />}>
+                  <Activity />
+                  <span>Activité</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link to="/admin/library">
-                    <Video />
-                    <span>Librairie</span>
-                  </Link>
+                <SidebarMenuButton render={<Link to="/admin/library" />}>
+                  <Video />
+                  <span>Librairie</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link to="/admin/categories">
-                    <SquareLibrary />
-                    <span>Catégories</span>
-                  </Link>
+                <SidebarMenuButton render={<Link to="/admin/categories" />}>
+                  <SquareLibrary />
+                  <span>Catégories</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link to="/admin/submissions">
-                    <MessageSquarePlus />
-                    <span>Soumissions</span>
-                  </Link>
+                <SidebarMenuButton render={<Link to="/admin/submissions" />}>
+                  <MessageSquarePlus />
+                  <span>Soumissions</span>
                 </SidebarMenuButton>
                 {pendingCount > 0 ? (
                   <SidebarMenuBadge className="bg-warning text-warning-foreground font-medium">
@@ -97,35 +85,27 @@ export const AdminSidebar = ({ ...props }: AdminSidebarProps) => {
                 ) : null}
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link to="/admin/ai-search">
-                    <SparklesIcon />
-                    <span>Recherche IA</span>
-                  </Link>
+                <SidebarMenuButton render={<Link to="/admin/ai-search" />}>
+                  <SparklesIcon />
+                  <span>Recherche IA</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link to="/admin/users">
-                    <UsersRound />
-                    <span>Utilisateurs</span>
-                  </Link>
+                <SidebarMenuButton render={<Link to="/admin/users" />}>
+                  <UsersRound />
+                  <span>Utilisateurs</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link to="/admin/downloader">
-                    <XTwitterIcon />
-                    <span>Téléchargeur Twitter</span>
-                  </Link>
+                <SidebarMenuButton render={<Link to="/admin/downloader" />}>
+                  <XTwitterIcon />
+                  <span>Téléchargeur Twitter</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link to="/admin/services">
-                    <Blocks />
-                    <span>Services</span>
-                  </Link>
+                <SidebarMenuButton render={<Link to="/admin/services" />}>
+                  <Blocks />
+                  <span>Services</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

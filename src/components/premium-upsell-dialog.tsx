@@ -7,10 +7,11 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle
-} from '~/components/animate-ui/radix/dialog'
-import { Button } from '~/components/ui/button'
+} from '~/components/animate-ui/base/dialog'
+import { buttonVariants } from '~/components/ui/button'
 import { getPremiumPlan, PREMIUM_PLAN_PRICING } from '~/constants/plan'
 import { formatCentsToEuros } from '~/helpers/number'
+import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
 
@@ -86,17 +87,18 @@ export const PremiumUpsellDialog = ({
             {m.watermark_upsell_price_from({ price: monthlyPrice })}
           </p>
           <div className="flex flex-col gap-2">
-            <Button asChild size="lg" className="w-full">
-              <Link
-                to="/pricing"
-                onClick={() => {
-                  onOpenChange(false)
-                }}
-              >
-                <Sparkles className="size-4" aria-hidden="true" />
-                {m.nav_upgrade_premium()}
-              </Link>
-            </Button>
+            <Link
+              to="/pricing"
+              className={cn(
+                buttonVariants({ size: 'lg', className: 'w-full' })
+              )}
+              onClick={() => {
+                onOpenChange(false)
+              }}
+            >
+              <Sparkles className="size-4" aria-hidden="true" />
+              {m.nav_upgrade_premium()}
+            </Link>
             {secondaryAction}
           </div>
         </div>

@@ -1,5 +1,8 @@
 import { useNavigate } from '@tanstack/react-router'
-import { ToggleGroup, ToggleGroupItem } from '~/components/ui/toggle-group'
+import {
+  RadioToggleGroup,
+  RadioToggleGroupItem
+} from '~/components/ui/radio-toggle-group'
 import {
   type DashboardPeriod,
   PERIOD_SCHEMA
@@ -19,8 +22,8 @@ type PeriodSelectorProps = {
 export const PeriodSelector = ({ period }: PeriodSelectorProps) => {
   const navigate = useNavigate()
 
-  const handleValueChange = (value: string) => {
-    const result = PERIOD_SCHEMA.safeParse(value)
+  const handleValueChange = (nextPeriod: string) => {
+    const result = PERIOD_SCHEMA.safeParse(nextPeriod)
 
     if (!result.success) {
       return
@@ -33,8 +36,7 @@ export const PeriodSelector = ({ period }: PeriodSelectorProps) => {
   }
 
   return (
-    <ToggleGroup
-      type="single"
+    <RadioToggleGroup
       value={period}
       onValueChange={handleValueChange}
       variant="outline"
@@ -42,15 +44,15 @@ export const PeriodSelector = ({ period }: PeriodSelectorProps) => {
     >
       {PERIOD_OPTIONS.map((option) => {
         return (
-          <ToggleGroupItem
+          <RadioToggleGroupItem
             key={option.value}
             value={option.value}
             aria-label={`Période de ${option.label}`}
           >
             {option.label}
-          </ToggleGroupItem>
+          </RadioToggleGroupItem>
         )
       })}
-    </ToggleGroup>
+    </RadioToggleGroup>
   )
 }

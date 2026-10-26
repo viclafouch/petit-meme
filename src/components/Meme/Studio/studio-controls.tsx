@@ -1,8 +1,13 @@
 import React from 'react'
-import { RadioGroup } from 'radix-ui'
+import { Radio } from '@base-ui/react/radio'
+import { RadioGroup } from '@base-ui/react/radio-group'
 import { StudioTemplates } from '~/components/Meme/Studio/studio-templates'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
+import {
+  RadioToggleGroup,
+  RadioToggleGroupItem
+} from '~/components/ui/radio-toggle-group'
 import {
   Select,
   SelectContent,
@@ -11,7 +16,6 @@ import {
   SelectValue
 } from '~/components/ui/select'
 import { Separator } from '~/components/ui/separator'
-import { ToggleGroup, ToggleGroupItem } from '~/components/ui/toggle-group'
 import {
   getStudioBandColors,
   getStudioColors,
@@ -35,6 +39,10 @@ type ColorSwatchesProps<TValue extends string> = {
   labelledBy: string
 }
 
+const STUDIO_FONT_SELECT_ITEMS = STUDIO_FONTS.map((font) => {
+  return { value: font.id, label: font.label }
+})
+
 const ColorSwatches = <TValue extends string>({
   colors,
   activeValue,
@@ -42,8 +50,9 @@ const ColorSwatches = <TValue extends string>({
   labelledBy
 }: ColorSwatchesProps<TValue>) => {
   return (
-    <RadioGroup.Root
+    <RadioGroup
       value={activeValue}
+      onValueChange={onSelect}
       className="flex gap-3"
       aria-labelledby={labelledBy}
     >
@@ -51,7 +60,7 @@ const ColorSwatches = <TValue extends string>({
         const isSelected = activeValue === color.value
 
         return (
-          <RadioGroup.Item
+          <Radio.Root
             key={color.id}
             value={color.value}
             aria-label={color.label}
@@ -61,13 +70,10 @@ const ColorSwatches = <TValue extends string>({
               SELECTED_TILE_RING_CLASS_NAME,
               color.className
             )}
-            onClick={() => {
-              onSelect(color.value)
-            }}
           />
         )
       })}
-    </RadioGroup.Root>
+    </RadioGroup>
   )
 }
 
@@ -96,9 +102,9 @@ export const StudioControls = ({
     onSettingsChange({ text: event.target.value })
   }
 
-  const handlePositionChange = (value: string) => {
+  const handlePositionChange = (nextPosition: string) => {
     const textPosition = STUDIO_TEXT_POSITIONS.find((position) => {
-      return position === value
+      return position === nextPosition
     })
 
     if (textPosition !== undefined) {
@@ -106,7 +112,7 @@ export const StudioControls = ({
     }
   }
 
-  const handleFontFamilyChange = (value: string) => {
+  const handleFontFamilyChange = (value: string | null) => {
     const font = STUDIO_FONTS.find((entry) => {
       return entry.id === value
     })
@@ -116,9 +122,9 @@ export const StudioControls = ({
     }
   }
 
-  const handleFontSizeChange = (value: string) => {
+  const handleFontSizeChange = (nextSize: string) => {
     const fontSize = fontSizes.find((size) => {
-      return String(size.value) === value
+      return String(size.value) === nextSize
     })
 
     if (fontSize !== undefined) {
@@ -166,25 +172,25 @@ export const StudioControls = ({
       <Separator />
       <div className="flex flex-col gap-1.5">
         <Label id="studio-position-label">{m.studio_position()}</Label>
-        <ToggleGroup
-          type="single"
+        <RadioToggleGroup
           variant="outline"
           value={settings.textPosition}
           onValueChange={handlePositionChange}
           className="w-full"
           aria-labelledby="studio-position-label"
         >
-          <ToggleGroupItem value="top" className="flex-1">
+          <RadioToggleGroupItem value="top" className="flex-1">
             {m.studio_position_top()}
-          </ToggleGroupItem>
-          <ToggleGroupItem value="bottom" className="flex-1">
+          </RadioToggleGroupItem>
+          <RadioToggleGroupItem value="bottom" className="flex-1">
             {m.studio_position_bottom()}
-          </ToggleGroupItem>
-        </ToggleGroup>
+          </RadioToggleGroupItem>
+        </RadioToggleGroup>
       </div>
       <div className="flex flex-col gap-1.5">
         <Label id="studio-font-label">{m.studio_font()}</Label>
         <Select
+          items={STUDIO_FONT_SELECT_ITEMS}
           value={settings.fontFamily}
           onValueChange={handleFontFamilyChange}
         >
@@ -192,9 +198,9 @@ export const StudioControls = ({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {STUDIO_FONTS.map((font) => {
+            {STUDIO_FONT_SELECT_ITEMS.map((font) => {
               return (
-                <SelectItem key={font.id} value={font.id}>
+                <SelectItem key={font.value} value={font.value}>
                   {font.label}
                 </SelectItem>
               )
@@ -204,8 +210,7 @@ export const StudioControls = ({
       </div>
       <div className="flex flex-col gap-1.5">
         <Label id="studio-size-label">{m.studio_size()}</Label>
-        <ToggleGroup
-          type="single"
+        <RadioToggleGroup
           variant="outline"
           value={String(settings.fontSize)}
           onValueChange={handleFontSizeChange}
@@ -214,16 +219,16 @@ export const StudioControls = ({
         >
           {fontSizes.map((size) => {
             return (
-              <ToggleGroupItem
+              <RadioToggleGroupItem
                 key={size.value}
                 value={String(size.value)}
                 className="flex-1"
               >
                 {size.label}
-              </ToggleGroupItem>
+              </RadioToggleGroupItem>
             )
           })}
-        </ToggleGroup>
+        </RadioToggleGroup>
       </div>
       <div className="flex flex-col gap-2.5">
         <Label id="studio-font-color-label">{m.studio_font_color()}</Label>

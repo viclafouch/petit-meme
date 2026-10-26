@@ -159,18 +159,20 @@ export const CategoryForm = ({
             return (
               <FormItem error={getFieldErrorMessage(field.state.meta)}>
                 <FormLabel>Slug</FormLabel>
-                <FormControl>
-                  <Input
-                    required
-                    type="text"
-                    name={field.name}
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => {
-                      field.handleChange(event.target.value.toLowerCase())
-                    }}
-                  />
-                </FormControl>
+                <FormControl
+                  render={
+                    <Input
+                      required
+                      type="text"
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(event) => {
+                        field.handleChange(event.target.value.toLowerCase())
+                      }}
+                    />
+                  }
+                />
                 <FormMessage />
               </FormItem>
             )

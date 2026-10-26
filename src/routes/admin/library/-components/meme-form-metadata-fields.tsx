@@ -1,3 +1,16 @@
+import { Combobox as ComboboxPrimitive } from '@base-ui/react/combobox'
+import {
+  Combobox,
+  ComboboxChip,
+  ComboboxChips,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxValue,
+  useComboboxAnchor
+} from '~/components/ui/combobox'
 import {
   FormControl,
   FormItem,
@@ -5,7 +18,6 @@ import {
   FormMessage
 } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
-import { MultiAsyncSelect } from '~/components/ui/multi-select'
 import {
   Select,
   SelectContent,
@@ -16,8 +28,16 @@ import {
 import { MemeStatusMeta } from '~/constants/meme'
 import { MemeStatus } from '~/db/generated/prisma/enums'
 import { getFieldErrorMessage } from '~/lib/form'
-import { matchIsMemeStatus } from '~/routes/admin/-lib/meme-status'
 import type { MemeFormApi } from './use-meme-form'
+
+const MEME_STATUS_SELECT_ITEMS = [
+  MemeStatus.PENDING,
+  MemeStatus.PUBLISHED,
+  MemeStatus.ARCHIVED,
+  MemeStatus.REJECTED
+].map((status) => {
+  return { value: status, label: MemeStatusMeta[status].label }
+})
 
 type CategoryOption = {
   label: string
@@ -37,6 +57,30 @@ export const MemeFormMetadataFields = ({
   isCategoriesLoading,
   categoriesError
 }: MemeFormMetadataFieldsProps) => {
+  const categoriesAnchor = useComboboxAnchor()
+  const categoryItems = ComboboxPrimitive.createItems(categoriesOptions, {
+    getValue: (category) => {
+      return category.value
+    },
+    getLabel: (category) => {
+      return category.label
+    }
+  })
+
+  const getCategoryLabel = (categoryId: string) => {
+    return categoriesOptions.find((category) => {
+      return category.value === categoryId
+    })?.label
+  }
+
+  const getCategoriesEmptyMessage = () => {
+    if (isCategoriesLoading) {
+      return 'Chargement...'
+    }
+
+    return categoriesError ? categoriesError.message : 'Aucun résultat.'
+  }
+
   return (
     <>
       <form.Field
@@ -46,31 +90,25 @@ export const MemeFormMetadataFields = ({
             <FormItem error={getFieldErrorMessage(field.state.meta)}>
               <FormLabel>Statut</FormLabel>
               <Select
+                items={MEME_STATUS_SELECT_ITEMS}
                 value={field.state.value}
                 onValueChange={(value) => {
-                  if (matchIsMemeStatus(value)) {
+                  if (value !== null) {
                     field.handleChange(value)
                   }
                 }}
               >
-                <FormControl>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Sélectionnez un statut" />
-                  </SelectTrigger>
+                <FormControl render={<SelectTrigger className="w-full" />}>
+                  <SelectValue placeholder="Sélectionnez un statut" />
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value={MemeStatus.PENDING}>
-                    {MemeStatusMeta.PENDING.label}
-                  </SelectItem>
-                  <SelectItem value={MemeStatus.PUBLISHED}>
-                    {MemeStatusMeta.PUBLISHED.label}
-                  </SelectItem>
-                  <SelectItem value={MemeStatus.ARCHIVED}>
-                    {MemeStatusMeta.ARCHIVED.label}
-                  </SelectItem>
-                  <SelectItem value={MemeStatus.REJECTED}>
-                    {MemeStatusMeta.REJECTED.label}
-                  </SelectItem>
+                  {MEME_STATUS_SELECT_ITEMS.map((item) => {
+                    return (
+                      <SelectItem key={item.value} value={item.value}>
+                        {item.label}
+                      </SelectItem>
+                    )
+                  })}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -84,24 +122,58 @@ export const MemeFormMetadataFields = ({
           return (
             <FormItem error={getFieldErrorMessage(field.state.meta)}>
               <FormLabel>Catégories</FormLabel>
-              <FormControl>
-                <MultiAsyncSelect
-                  loading={isCategoriesLoading}
-                  error={categoriesError}
-                  options={categoriesOptions}
-                  value={field.state.value}
-                  onValueChange={(value) => {
-                    field.handleChange(value)
-                  }}
-                  hideSelectAll
-                  closeText="Fermer"
-                  clearText="Effacer"
-                  className="w-full"
-                  searchPlaceholder="Rechercher..."
-                  placeholder="Sélectionnez une catégorie..."
-                  maxCount={6}
-                />
-              </FormControl>
+              <Combobox
+                multiple
+                items={categoryItems}
+                value={field.state.value}
+                onValueChange={(categoryIds) => {
+                  field.handleChange(categoryIds)
+                }}
+              >
+                <ComboboxChips ref={categoriesAnchor} className="w-full">
+                  <ComboboxValue>
+                    {(categoryIds: string[]) => {
+                      return (
+                        <>
+                          {categoryIds.map((categoryId) => {
+                            return (
+                              <ComboboxChip key={categoryId}>
+                                {getCategoryLabel(categoryId)}
+                              </ComboboxChip>
+                            )
+                          })}
+                          <FormControl
+                            render={
+                              <ComboboxChipsInput
+                                placeholder={
+                                  categoryIds.length > 0
+                                    ? undefined
+                                    : 'Sélectionnez une catégorie...'
+                                }
+                              />
+                            }
+                          />
+                        </>
+                      )
+                    }}
+                  </ComboboxValue>
+                </ComboboxChips>
+                <ComboboxContent anchor={categoriesAnchor}>
+                  <ComboboxEmpty>{getCategoriesEmptyMessage()}</ComboboxEmpty>
+                  <ComboboxList>
+                    {(category: CategoryOption) => {
+                      return (
+                        <ComboboxItem
+                          key={category.value}
+                          value={category.value}
+                        >
+                          {category.label}
+                        </ComboboxItem>
+                      )
+                    }}
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
               <FormMessage />
             </FormItem>
           )
@@ -113,17 +185,19 @@ export const MemeFormMetadataFields = ({
           return (
             <FormItem error={getFieldErrorMessage(field.state.meta)}>
               <FormLabel>Twitter URL</FormLabel>
-              <FormControl>
-                <Input
-                  type="text"
-                  name={field.name}
-                  value={field.state.value ?? ''}
-                  onBlur={field.handleBlur}
-                  onChange={(event) => {
-                    field.handleChange(event.target.value)
-                  }}
-                />
-              </FormControl>
+              <FormControl
+                render={
+                  <Input
+                    type="text"
+                    name={field.name}
+                    value={field.state.value ?? ''}
+                    onBlur={field.handleBlur}
+                    onChange={(event) => {
+                      field.handleChange(event.target.value)
+                    }}
+                  />
+                }
+              />
               <FormMessage />
             </FormItem>
           )

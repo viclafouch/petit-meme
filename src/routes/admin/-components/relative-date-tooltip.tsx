@@ -19,10 +19,8 @@ export const RelativeDateTooltip = ({ date }: RelativeDateTooltipProps) => {
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <span className="text-sm cursor-default">
-          {formatRelativeTime(date, locale)}
-        </span>
+      <TooltipTrigger render={<span className="text-sm cursor-default" />}>
+        {formatRelativeTime(date, locale)}
       </TooltipTrigger>
       <TooltipContent>
         {formatDate(date, locale, DATE_WITH_TIME_OPTIONS)}

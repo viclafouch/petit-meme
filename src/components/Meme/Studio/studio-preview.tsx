@@ -1,5 +1,5 @@
 import React from 'react'
-import { Progress } from '~/components/animate-ui/radix/progress'
+import { Progress } from '~/components/animate-ui/base/progress'
 import { MemeVideoPlayer } from '~/components/Meme/meme-video-player'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'

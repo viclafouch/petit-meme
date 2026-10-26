@@ -37,9 +37,7 @@ export const NewMemeButton = ({ ...restButtonProps }: NewMemeButtonProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button {...restButtonProps} />
-      </DialogTrigger>
+      <DialogTrigger render={<Button {...restButtonProps} />} />
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Ajouter un mème</DialogTitle>

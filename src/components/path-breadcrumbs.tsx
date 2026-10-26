@@ -20,10 +20,8 @@ export const PathBreadcrumbs = ({ crumbMatches }: PathBreadcrumbsProps) => {
     <Breadcrumb>
       <BreadcrumbList>
         <BreadcrumbItem className="shrink-0">
-          <BreadcrumbLink asChild>
-            <Link to="/admin">
-              <House className="size-4" />
-            </Link>
+          <BreadcrumbLink render={<Link to="/admin" />}>
+            <House className="size-4" />
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator className="shrink-0" />
@@ -38,8 +36,11 @@ export const PathBreadcrumbs = ({ crumbMatches }: PathBreadcrumbsProps) => {
                     {match.loaderData?.crumb}
                   </BreadcrumbPage>
                 ) : (
-                  <BreadcrumbLink asChild className="truncate">
-                    <Link from={match.fullPath}>{match.loaderData?.crumb}</Link>
+                  <BreadcrumbLink
+                    className="truncate"
+                    render={<Link from={match.fullPath} />}
+                  >
+                    {match.loaderData?.crumb}
                   </BreadcrumbLink>
                 )}
               </BreadcrumbItem>

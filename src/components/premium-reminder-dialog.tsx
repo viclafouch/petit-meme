@@ -8,10 +8,11 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle
-} from '~/components/animate-ui/radix/dialog'
-import { Button } from '~/components/ui/button'
+} from '~/components/animate-ui/base/dialog'
+import { Button, buttonVariants } from '~/components/ui/button'
 import { PREMIUM_PLAN_PRICING } from '~/constants/plan'
 import { formatCentsToEuros } from '~/helpers/number'
+import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
 
@@ -31,10 +32,7 @@ export const PremiumReminderDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="max-w-sm overflow-hidden p-0"
-        onOpenAutoFocus={(event) => {
-          event.preventDefault()
-          ctaRef.current?.focus()
-        }}
+        initialFocus={ctaRef}
       >
         <div className="relative flex flex-col items-center gap-4 px-6 pb-6 pt-8">
           <div className="absolute inset-0 bg-linear-to-b from-amber-500/10 via-transparent to-transparent" />
@@ -63,18 +61,19 @@ export const PremiumReminderDialog = ({
             </DialogHeader>
           </div>
           <div className="relative flex flex-col gap-2 w-full pt-1">
-            <Button asChild size="lg" className="w-full">
-              <Link
-                ref={ctaRef}
-                to="/pricing"
-                onClick={() => {
-                  onOpenChange(false)
-                }}
-              >
-                <Crown className="size-4" aria-hidden="true" />
-                {m.nav_upgrade_premium()}
-              </Link>
-            </Button>
+            <Link
+              ref={ctaRef}
+              to="/pricing"
+              className={cn(
+                buttonVariants({ size: 'lg', className: 'w-full' })
+              )}
+              onClick={() => {
+                onOpenChange(false)
+              }}
+            >
+              <Crown className="size-4" aria-hidden="true" />
+              {m.nav_upgrade_premium()}
+            </Link>
             <Button
               variant="ghost"
               size="lg"

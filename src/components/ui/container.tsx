@@ -5,10 +5,5 @@ export const Container = ({
   className,
   ...restDivProps
 }: React.ComponentPropsWithoutRef<'div'>) => {
-  return (
-    <div
-      className={cn('container px-4 mx-auto', className)}
-      {...restDivProps}
-    />
-  )
+  return <div className={cn('container', className)} {...restDivProps} />
 }

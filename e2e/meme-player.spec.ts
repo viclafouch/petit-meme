@@ -11,16 +11,16 @@ test.describe('the player', () => {
 
     const memeList = getMemeList(page)
 
-    await expect(memeList).not.toHaveAttribute('inert')
+    await expect(memeList).toBeVisible()
 
     const playerDialog = await openMemePlayer(page)
 
-    await expect(memeList).toHaveAttribute('inert')
+    await expect(memeList).toHaveCount(0)
 
     await playerDialog.getByRole('button', { name: m.common_close() }).click()
 
     await expect(playerDialog).toBeHidden()
-    await expect(memeList).not.toHaveAttribute('inert')
+    await expect(memeList).toBeVisible()
   })
 
   test('escape closes the player and gives the library back', async ({
@@ -34,6 +34,6 @@ test.describe('the player', () => {
     await page.keyboard.press('Escape')
 
     await expect(playerDialog).toBeHidden()
-    await expect(memeList).not.toHaveAttribute('inert')
+    await expect(memeList).toBeVisible()
   })
 })

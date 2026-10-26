@@ -56,9 +56,9 @@ export const SubmissionHistory = () => {
                         SUBMISSION_STATUS_BADGE_VARIANT[submission.status]
                       }
                       size="sm"
-                      asChild
+                      render={<output />}
                     >
-                      <output>{STATUS_LABELS[submission.status]()}</output>
+                      {STATUS_LABELS[submission.status]()}
                     </Badge>
                     <time
                       dateTime={createdAt.toISOString()}

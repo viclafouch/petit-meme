@@ -34,16 +34,18 @@ export const LanguageSwitcher = ({ className }: LanguageSwitcherProps) => {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          aria-label={m.nav_switch_language()}
-          className={cn('gap-1.5 px-2 text-xs font-medium', className)}
-        >
-          <CurrentFlag className={FLAG_ICON_CLASS} />
-          {currentLocale.toUpperCase()}
-        </Button>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="sm"
+            aria-label={m.nav_switch_language()}
+            className={cn('gap-1.5 px-2 text-xs font-medium', className)}
+          />
+        }
+      >
+        <CurrentFlag className={FLAG_ICON_CLASS} />
+        {currentLocale.toUpperCase()}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-40">
         {locales.map((locale) => {

@@ -49,11 +49,13 @@ export const MemesFilterLanguage = React.memo(
 
     return (
       <Popover>
-        <PopoverTrigger asChild>
-          <Button active={isActive} variant="outline" className={className}>
-            <Globe aria-hidden />
-            {m.meme_filter_languages()}
-          </Button>
+        <PopoverTrigger
+          render={
+            <Button active={isActive} variant="outline" className={className} />
+          }
+        >
+          <Globe aria-hidden />
+          {m.meme_filter_languages()}
         </PopoverTrigger>
         <PopoverContent className="w-48 p-3" align="start">
           <div className="flex flex-col gap-3">
@@ -71,7 +73,7 @@ export const MemesFilterLanguage = React.memo(
                     checked={isChecked}
                     disabled={isLastChecked}
                     onCheckedChange={(checked) => {
-                      handleToggle(contentLocale, checked === true)
+                      handleToggle(contentLocale, checked)
                     }}
                   />
                   <span className="flex items-center gap-1.5 text-sm">

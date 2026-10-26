@@ -85,16 +85,14 @@ export const Navbar = () => {
               return (
                 <NavigationMenuItem key={link.to}>
                   <NavigationMenuLink
-                    asChild
                     data-active={false}
                     className={cn(
                       'rounded-md px-3 py-1.5 font-medium',
                       link.className
                     )}
+                    render={<Link to={link.to} preload={link.preload} />}
                   >
-                    <Link to={link.to} preload={link.preload}>
-                      {link.label}
-                    </Link>
+                    {link.label}
                   </NavigationMenuLink>
                 </NavigationMenuItem>
               )

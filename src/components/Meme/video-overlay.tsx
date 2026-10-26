@@ -136,36 +136,40 @@ export const VideoOverlay = ({
       </button>
       <div className="absolute bottom-3 right-3 flex flex-col gap-2">
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              size="icon"
-              variant="ghost"
-              className={OVERLAY_BUTTON_CLASS}
-              onClick={handleFullscreenClick}
-              aria-label={fullscreenLabel}
-            >
-              <Maximize className="size-4" />
-            </Button>
+          <TooltipTrigger
+            render={
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                className={OVERLAY_BUTTON_CLASS}
+                onClick={handleFullscreenClick}
+                aria-label={fullscreenLabel}
+              />
+            }
+          >
+            <Maximize className="size-4" />
           </TooltipTrigger>
           <TooltipContent side="left">{fullscreenLabel}</TooltipContent>
         </Tooltip>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              size="icon"
-              variant="ghost"
-              className={OVERLAY_BUTTON_CLASS}
-              onClick={handleMuteClick}
-              aria-label={muteLabel}
-            >
-              {isMuted ? (
-                <VolumeX className="size-4" />
-              ) : (
-                <Volume2 className="size-4" />
-              )}
-            </Button>
+          <TooltipTrigger
+            render={
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                className={OVERLAY_BUTTON_CLASS}
+                onClick={handleMuteClick}
+                aria-label={muteLabel}
+              />
+            }
+          >
+            {isMuted ? (
+              <VolumeX className="size-4" />
+            ) : (
+              <Volume2 className="size-4" />
+            )}
           </TooltipTrigger>
           <TooltipContent side="left">{muteLabel}</TooltipContent>
         </Tooltip>

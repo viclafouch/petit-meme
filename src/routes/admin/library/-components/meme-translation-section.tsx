@@ -56,16 +56,18 @@ export const MemeTranslationSection = ({
           return (
             <FormItem error={getFieldErrorMessage(field.state.meta)}>
               <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea
-                  name={field.name}
-                  onBlur={field.handleBlur}
-                  value={field.state.value}
-                  onChange={(event) => {
-                    field.handleChange(event.target.value)
-                  }}
-                />
-              </FormControl>
+              <FormControl
+                render={
+                  <Textarea
+                    name={field.name}
+                    onBlur={field.handleBlur}
+                    value={field.state.value}
+                    onChange={(event) => {
+                      field.handleChange(event.target.value)
+                    }}
+                  />
+                }
+              />
               <div className="flex items-center justify-end">
                 <span className="text-xs text-muted-foreground">
                   {field.state.value.length}/{MEME_DESCRIPTION_MAX_LENGTH}{' '}

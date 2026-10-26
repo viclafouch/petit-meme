@@ -7,9 +7,3 @@ export const BAN_REASONS = [
 ] as const satisfies readonly string[]
 
 export type BanReason = (typeof BAN_REASONS)[number]
-
-export const matchIsBanReason = (value: string): value is BanReason => {
-  return BAN_REASONS.some((reason) => {
-    return reason === value
-  })
-}

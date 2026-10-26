@@ -26,7 +26,7 @@ export const FaqSection = ({
   return (
     <section className={className}>
       <h2 className={headingClassName}>{heading}</h2>
-      <Accordion type="single" collapsible>
+      <Accordion hiddenUntilFound>
         {items.map((item) => {
           return (
             <AccordionItem key={item.question} value={item.question}>

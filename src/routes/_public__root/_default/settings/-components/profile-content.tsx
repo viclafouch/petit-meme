@@ -4,7 +4,7 @@ import { CreditCard, Download, Key, Sparkles, Trash } from 'lucide-react'
 import { toast } from 'sonner'
 import { useMutation } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
-import { Button } from '~/components/ui/button'
+import { Button, buttonVariants } from '~/components/ui/button'
 import {
   Card,
   CardContent,
@@ -22,6 +22,7 @@ import { formatDate } from '~/helpers/date'
 import { getSubscriptionDisplayInfo } from '~/helpers/subscription'
 import { useStripeCheckout } from '~/hooks/use-stripe-checkout'
 import { captureWithFeature } from '~/lib/sentry'
+import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
 import type { ActiveSubscription } from '~/server/customer'
@@ -133,15 +134,18 @@ export const ProfileContent = ({
                   {m.nav_manage_subscription()}
                 </Button>
               ) : (
-                <Button
-                  asChild
-                  className="border-amber-400/30 bg-amber-400/15 text-amber-400 hover:bg-amber-400/25"
+                <Link
+                  to="/pricing"
+                  className={cn(
+                    buttonVariants({
+                      className:
+                        'border-amber-400/30 bg-amber-400/15 text-amber-400 hover:bg-amber-400/25'
+                    })
+                  )}
                 >
-                  <Link to="/pricing">
-                    <Sparkles />
-                    {m.nav_upgrade_premium()}
-                  </Link>
-                </Button>
+                  <Sparkles />
+                  {m.nav_upgrade_premium()}
+                </Link>
               )}
             </div>
             <Separator />

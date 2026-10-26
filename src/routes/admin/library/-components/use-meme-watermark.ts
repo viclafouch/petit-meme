@@ -56,33 +56,33 @@ export function useMemeWatermark(memeId: Meme['id']) {
       setProgress(0)
     },
     mutationFn: async () => {
-      ffmpegRef.current ??= await loadFFmpeg('FFmpeg loading timeout')
+      const ffmpeg =
+        ffmpegRef.current ?? (await loadFFmpeg('FFmpeg loading timeout'))
+      ffmpegRef.current = ffmpeg
 
-      const ffmpeg = ffmpegRef.current
+      const [videoBlob, watermarkResponse] = await Promise.all([
+        queryClient.query({
+          ...getAdminVideoBlobQueryOpts(memeId),
+          staleTime: 'static'
+        }),
+        fetch(WATERMARK_ASSET_PATH)
+      ])
+
+      if (!watermarkResponse.ok) {
+        throw new Error(
+          `Failed to fetch watermark asset (${watermarkResponse.status})`
+        )
+      }
+
+      const watermarkBlob = await watermarkResponse.blob()
 
       ffmpeg.on('progress', handleProgress)
 
-      try {
-        const [videoBlob, watermarkResponse] = await Promise.all([
-          queryClient.query({
-            ...getAdminVideoBlobQueryOpts(memeId),
-            staleTime: 'static'
-          }),
-          fetch(WATERMARK_ASSET_PATH)
-        ])
-
-        if (!watermarkResponse.ok) {
-          throw new Error(
-            `Failed to fetch watermark asset (${watermarkResponse.status})`
-          )
+      return applyWatermark({ ffmpeg, videoBlob, watermarkBlob }).finally(
+        () => {
+          ffmpeg.off('progress', handleProgress)
         }
-
-        const watermarkBlob = await watermarkResponse.blob()
-
-        return await applyWatermark({ ffmpeg, videoBlob, watermarkBlob })
-      } finally {
-        ffmpeg.off('progress', handleProgress)
-      }
+      )
     },
     onSuccess: (blob) => {
       const url = URL.createObjectURL(blob)

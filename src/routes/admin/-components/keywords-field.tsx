@@ -29,26 +29,28 @@ export const KeywordsField = ({
   return (
     <FormItem error={errorMessage}>
       <FormLabel>Mots clés ({field.state.value.length})</FormLabel>
-      <FormControl>
-        <Input
-          required
-          type="text"
-          name={field.name}
-          onBlur={field.handleBlur}
-          value={keywordValue}
-          onChange={(event) => {
-            setKeywordValue(event.target.value)
-          }}
-          enterKeyHint="done"
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') {
-              event.preventDefault()
-              event.stopPropagation()
-              handleAddKeyword()
-            }
-          }}
-        />
-      </FormControl>
+      <FormControl
+        render={
+          <Input
+            required
+            type="text"
+            name={field.name}
+            onBlur={field.handleBlur}
+            value={keywordValue}
+            onChange={(event) => {
+              setKeywordValue(event.target.value)
+            }}
+            enterKeyHint="done"
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault()
+                event.stopPropagation()
+                handleAddKeyword()
+              }
+            }}
+          />
+        }
+      />
       {field.state.value.length > 0 ? (
         <div className="flex flex-wrap gap-2">
           {field.state.value.map((keyword, index) => {

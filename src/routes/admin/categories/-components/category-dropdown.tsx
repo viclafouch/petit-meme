@@ -72,19 +72,21 @@ export const CategoryDropdown = ({ category }: CategoryDropdownProps) => {
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="data-[state=open]:bg-muted text-muted-foreground flex size-9 float-right"
-            size="icon"
-          >
-            <EllipsisVertical />
-            <span className="sr-only">Actions</span>
-          </Button>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              variant="ghost"
+              className="data-popup-open:bg-muted text-muted-foreground flex size-9 float-right"
+              size="icon"
+            />
+          }
+        >
+          <EllipsisVertical />
+          <span className="sr-only">Actions</span>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-32">
           <DropdownMenuItem
-            onSelect={() => {
+            onClick={() => {
               setIsEditDialogOpen(true)
             }}
           >
@@ -92,7 +94,7 @@ export const CategoryDropdown = ({ category }: CategoryDropdownProps) => {
           </DropdownMenuItem>
           <DropdownMenuItem
             variant="destructive"
-            onSelect={() => {
+            onClick={() => {
               setIsDeleteDialogOpen(true)
             }}
           >

@@ -13,7 +13,7 @@ paths: ["src/**/*.{ts,tsx}"]
 
 ### Libraries
 - ALWAYS use shadcn components instead of raw HTML elements
-- **Code in `src/components/ui` and `src/components/animate-ui` changes in two ways only**: through the shadcn CLI (`shadcn add`, or a `shadcn migrate` such as `radix`), or by porting an upstream fix by hand. After a `shadcn add`, rewrite `import { cn } from "cn"` to `import { cn } from '~/lib/utils'`, which carries the project classes. `src/lib/utils.test.ts` fails until every file does. The components carry deliberate variants: `shadcn add <name> --diff` shows the upstream changes, and a fix found there is ported rather than overwritten
+- **Code in `src/components/ui` and `src/components/animate-ui` changes in two ways only**: through the shadcn CLI (`shadcn add`, or a `shadcn migrate`), or by porting an upstream fix by hand. After a `shadcn add`, rewrite `import { cn } from "cn"` to `import { cn } from '~/lib/utils'`, which carries the project classes. `src/lib/utils.test.ts` fails until every file does. The components carry deliberate variants: `shadcn add <name> --diff` shows the upstream changes, and a fix found there is ported rather than overwritten
 
 ### Data loading (TanStack Query + Router)
 - **Query owns server data and its freshness.** A loader fills the cache with `context.queryClient.query({ ...opts, staleTime: 'static' })`, and the component reads the same options with `useSuspenseQuery`. A loader never returns server data the component reads: the one exception is what `head()` needs

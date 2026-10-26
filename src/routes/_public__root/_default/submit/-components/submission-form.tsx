@@ -26,10 +26,7 @@ import {
 } from '~/constants/meme-submission'
 import { MemeContentLocale } from '~/db/generated/prisma/enums'
 import { getErrorMessage, matchIsRateLimitError } from '~/helpers/error'
-import {
-  getContentLocaleOptions,
-  matchIsMemeContentLocale
-} from '~/helpers/i18n-content'
+import { getContentLocaleOptions } from '~/helpers/i18n-content'
 import { useAppForm } from '~/hooks/use-app-form'
 import { useErrorFocus } from '~/hooks/use-error-focus'
 import { focusFirstInvalidField, getFieldErrorMessage } from '~/lib/form'
@@ -97,6 +94,7 @@ type SubmissionFormProps = {
 }
 
 export const SubmissionForm = ({ pendingCount }: SubmissionFormProps) => {
+  const contentLocaleOptions = getContentLocaleOptions()
   const queryClient = useQueryClient()
   const remaining = MAX_PENDING_SUBMISSIONS - pendingCount
 
@@ -175,20 +173,19 @@ export const SubmissionForm = ({ pendingCount }: SubmissionFormProps) => {
             <FormItem error={getFieldErrorMessage(field.state.meta)}>
               <FormLabel>{m.submit_field_language()}</FormLabel>
               <Select
+                items={contentLocaleOptions}
                 value={field.state.value}
                 onValueChange={(value) => {
-                  if (matchIsMemeContentLocale(value)) {
+                  if (value !== null) {
                     field.handleChange(value)
                   }
                 }}
               >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
+                <FormControl render={<SelectTrigger />}>
+                  <SelectValue />
                 </FormControl>
                 <SelectContent>
-                  {getContentLocaleOptions().map((option) => {
+                  {contentLocaleOptions.map((option) => {
                     return (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}

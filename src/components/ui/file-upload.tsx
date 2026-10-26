@@ -11,7 +11,8 @@ import {
   FileTextIcon,
   FileVideoIcon
 } from 'lucide-react'
-import { Slot as SlotPrimitive } from 'radix-ui'
+import { mergeProps } from '@base-ui/react/merge-props'
+import { useRender } from '@base-ui/react/use-render'
 import { cn } from '~/lib/utils'
 
 const ROOT_NAME = 'FileUpload'
@@ -335,7 +336,6 @@ type FileUploadRootProps = {
   dir?: Direction
   label?: string
   name?: string
-  asChild?: boolean
   disabled?: boolean
   invalid?: boolean
   multiple?: boolean
@@ -358,7 +358,6 @@ const FileUploadRoot = (props: FileUploadRootProps) => {
     dir: dirProp,
     label,
     name,
-    asChild,
     disabled = false,
     invalid = false,
     multiple = false,
@@ -644,12 +643,10 @@ const FileUploadRoot = (props: FileUploadRootProps) => {
     }
   }, [dropzoneId, inputId, listId, labelId, dir, disabled, urlCache])
 
-  const RootPrimitive = asChild ? SlotPrimitive.Slot : 'div'
-
   return (
     <StoreContext.Provider value={store}>
       <FileUploadContext.Provider value={contextValue}>
-        <RootPrimitive
+        <div
           data-disabled={disabled ? '' : undefined}
           data-slot="file-upload"
           dir={dir}
@@ -675,19 +672,16 @@ const FileUploadRoot = (props: FileUploadRootProps) => {
           <span id={labelId} className="sr-only">
             {label ?? 'File upload'}
           </span>
-        </RootPrimitive>
+        </div>
       </FileUploadContext.Provider>
     </StoreContext.Provider>
   )
 }
 
-type FileUploadDropzoneProps = {
-  asChild?: boolean
-} & React.ComponentPropsWithoutRef<'div'>
+type FileUploadDropzoneProps = React.ComponentPropsWithoutRef<'div'>
 
 const FileUploadDropzone = (props: FileUploadDropzoneProps) => {
   const {
-    asChild,
     className,
     onClick: onClickProp,
     onDragOver: onDragOverProp,
@@ -879,11 +873,9 @@ const FileUploadDropzone = (props: FileUploadDropzoneProps) => {
     [context.inputRef, onKeyDownProp]
   )
 
-  const DropzonePrimitive = asChild ? SlotPrimitive.Slot : 'div'
-
   return (
     // oxlint-disable-next-line jsx-a11y/role-supports-aria-props
-    <DropzonePrimitive
+    <div
       role="region"
       id={context.dropzoneId}
       aria-controls={`${context.inputId} ${context.listId}`}
@@ -911,12 +903,10 @@ const FileUploadDropzone = (props: FileUploadDropzoneProps) => {
   )
 }
 
-type FileUploadTriggerProps = {
-  asChild?: boolean
-} & React.ComponentPropsWithoutRef<'button'>
+type FileUploadTriggerProps = useRender.ComponentProps<'button'>
 
 const FileUploadTrigger = (props: FileUploadTriggerProps) => {
-  const { asChild, onClick: onClickProp, ...triggerProps } = props
+  const { render, onClick: onClickProp, ...triggerProps } = props
   const context = useFileUploadContext(TRIGGER_NAME)
 
   const onClick = React.useCallback(
@@ -932,24 +922,23 @@ const FileUploadTrigger = (props: FileUploadTriggerProps) => {
     [context.inputRef, onClickProp]
   )
 
-  const TriggerPrimitive = asChild ? SlotPrimitive.Slot : 'button'
-
-  return (
-    <TriggerPrimitive
-      type="button"
-      aria-controls={context.inputId}
-      data-disabled={context.disabled ? '' : undefined}
-      data-slot="file-upload-trigger"
-      {...triggerProps}
-      disabled={context.disabled}
-      onClick={onClick}
-    />
-  )
+  return useRender({
+    defaultTagName: 'button',
+    render,
+    props: mergeProps<'button'>(
+      { type: 'button', 'aria-controls': context.inputId },
+      triggerProps,
+      { disabled: context.disabled, onClick }
+    ),
+    state: {
+      slot: 'file-upload-trigger',
+      disabled: context.disabled
+    }
+  })
 }
 
 type FileUploadListProps = {
   orientation?: 'horizontal' | 'vertical'
-  asChild?: boolean
   forceMount?: boolean
 } & React.ComponentPropsWithoutRef<'div'>
 
@@ -957,7 +946,6 @@ const FileUploadList = (props: FileUploadListProps) => {
   const {
     className,
     orientation = 'vertical',
-    asChild,
     forceMount,
     ...listProps
   } = props
@@ -972,11 +960,9 @@ const FileUploadList = (props: FileUploadListProps) => {
     return null
   }
 
-  const ListPrimitive = asChild ? SlotPrimitive.Slot : 'div'
-
   return (
     // oxlint-disable-next-line jsx-a11y/role-supports-aria-props
-    <ListPrimitive
+    <div
       role="list"
       id={context.listId}
       aria-orientation={orientation}
@@ -1018,11 +1004,10 @@ function useFileUploadItemContext(consumerName: string) {
 
 type FileUploadItemProps = {
   value: File
-  asChild?: boolean
 } & React.ComponentPropsWithoutRef<'div'>
 
 const FileUploadItem = (props: FileUploadItemProps) => {
-  const { value, asChild, className, ...itemProps } = props
+  const { value, className, ...itemProps } = props
 
   const id = React.useId()
   const statusId = `${id}-status`
@@ -1066,11 +1051,9 @@ const FileUploadItem = (props: FileUploadItemProps) => {
         ? 'Upload complete'
         : 'Ready to upload'
 
-  const ItemPrimitive = asChild ? SlotPrimitive.Slot : 'div'
-
   return (
     <FileUploadItemContext.Provider value={itemContext}>
-      <ItemPrimitive
+      <div
         role="listitem"
         id={id}
         aria-setsize={fileCount}
@@ -1092,7 +1075,7 @@ const FileUploadItem = (props: FileUploadItemProps) => {
         <span id={statusId} className="sr-only">
           {statusText}
         </span>
-      </ItemPrimitive>
+      </div>
     </FileUploadItemContext.Provider>
   )
 }
@@ -1165,11 +1148,10 @@ function getFileIcon(file: File) {
 
 type FileUploadItemPreviewProps = {
   render?: (file: File) => React.ReactNode
-  asChild?: boolean
 } & React.ComponentPropsWithoutRef<'div'>
 
 const FileUploadItemPreview = (props: FileUploadItemPreviewProps) => {
-  const { render, asChild, children, className, ...previewProps } = props
+  const { render, children, className, ...previewProps } = props
 
   const itemContext = useFileUploadItemContext(ITEM_PREVIEW_NAME)
   const context = useFileUploadContext(ITEM_PREVIEW_NAME)
@@ -1202,10 +1184,8 @@ const FileUploadItemPreview = (props: FileUploadItemPreviewProps) => {
     return null
   }
 
-  const ItemPreviewPrimitive = asChild ? SlotPrimitive.Slot : 'div'
-
   return (
-    <ItemPreviewPrimitive
+    <div
       aria-labelledby={itemContext.nameId}
       data-slot="file-upload-preview"
       {...previewProps}
@@ -1216,23 +1196,16 @@ const FileUploadItemPreview = (props: FileUploadItemPreviewProps) => {
     >
       {onPreviewRender(itemContext.fileState.file)}
       {children}
-    </ItemPreviewPrimitive>
+    </div>
   )
 }
 
 type FileUploadItemMetadataProps = {
-  asChild?: boolean
   size?: 'default' | 'sm'
 } & React.ComponentPropsWithoutRef<'div'>
 
 const FileUploadItemMetadata = (props: FileUploadItemMetadataProps) => {
-  const {
-    asChild,
-    size = 'default',
-    children,
-    className,
-    ...metadataProps
-  } = props
+  const { size = 'default', children, className, ...metadataProps } = props
 
   const context = useFileUploadContext(ITEM_METADATA_NAME)
   const itemContext = useFileUploadItemContext(ITEM_METADATA_NAME)
@@ -1241,10 +1214,8 @@ const FileUploadItemMetadata = (props: FileUploadItemMetadataProps) => {
     return null
   }
 
-  const ItemMetadataPrimitive = asChild ? SlotPrimitive.Slot : 'div'
-
   return (
-    <ItemMetadataPrimitive
+    <div
       data-slot="file-upload-metadata"
       dir={context.dir}
       {...metadataProps}
@@ -1280,14 +1251,13 @@ const FileUploadItemMetadata = (props: FileUploadItemMetadataProps) => {
           ) : null}
         </>
       )}
-    </ItemMetadataPrimitive>
+    </div>
   )
 }
 
 type FileUploadItemProgressProps = {
   variant?: 'linear' | 'circular' | 'fill'
   size?: number
-  asChild?: boolean
   forceMount?: boolean
 } & React.ComponentPropsWithoutRef<'div'>
 
@@ -1295,7 +1265,6 @@ const FileUploadItemProgress = (props: FileUploadItemProgressProps) => {
   const {
     variant = 'linear',
     size = 40,
-    asChild,
     forceMount,
     className,
     ...progressProps
@@ -1313,8 +1282,6 @@ const FileUploadItemProgress = (props: FileUploadItemProgressProps) => {
     return null
   }
 
-  const ItemProgressPrimitive = asChild ? SlotPrimitive.Slot : 'div'
-
   switch (variant) {
     case 'circular': {
       const circumference = 2 * Math.PI * ((size - 4) / 2)
@@ -1322,7 +1289,7 @@ const FileUploadItemProgress = (props: FileUploadItemProgressProps) => {
         circumference - (itemContext.fileState.progress / 100) * circumference
 
       return (
-        <ItemProgressPrimitive
+        <div
           role="progressbar"
           aria-valuemin={0}
           aria-valuemax={100}
@@ -1362,7 +1329,7 @@ const FileUploadItemProgress = (props: FileUploadItemProgressProps) => {
               r={(size - 4) / 2}
             />
           </svg>
-        </ItemProgressPrimitive>
+        </div>
       )
     }
 
@@ -1371,7 +1338,7 @@ const FileUploadItemProgress = (props: FileUploadItemProgressProps) => {
       const topInset = 100 - progressPercentage
 
       return (
-        <ItemProgressPrimitive
+        <div
           role="progressbar"
           aria-valuemin={0}
           aria-valuemax={100}
@@ -1393,7 +1360,7 @@ const FileUploadItemProgress = (props: FileUploadItemProgressProps) => {
 
     default:
       return (
-        <ItemProgressPrimitive
+        <div
           role="progressbar"
           aria-valuemin={0}
           aria-valuemax={100}
@@ -1413,17 +1380,15 @@ const FileUploadItemProgress = (props: FileUploadItemProgressProps) => {
               transform: `translateX(-${100 - itemContext.fileState.progress}%)`
             }}
           />
-        </ItemProgressPrimitive>
+        </div>
       )
   }
 }
 
-type FileUploadItemDeleteProps = {
-  asChild?: boolean
-} & React.ComponentPropsWithoutRef<'button'>
+type FileUploadItemDeleteProps = useRender.ComponentProps<'button'>
 
 const FileUploadItemDelete = (props: FileUploadItemDeleteProps) => {
-  const { asChild, onClick: onClickProp, ...deleteProps } = props
+  const { render, onClick: onClickProp, ...deleteProps } = props
 
   const store = useStoreContext(ITEM_DELETE_NAME)
   const itemContext = useFileUploadItemContext(ITEM_DELETE_NAME)
@@ -1444,37 +1409,31 @@ const FileUploadItemDelete = (props: FileUploadItemDeleteProps) => {
     [store, itemContext.fileState, onClickProp]
   )
 
-  if (!itemContext.fileState) {
-    return null
-  }
-
-  const ItemDeletePrimitive = asChild ? SlotPrimitive.Slot : 'button'
-
-  return (
-    <ItemDeletePrimitive
-      type="button"
-      aria-controls={itemContext.id}
-      aria-describedby={itemContext.nameId}
-      data-slot="file-upload-item-delete"
-      {...deleteProps}
-      onClick={onClick}
-    />
-  )
+  return useRender({
+    enabled: Boolean(itemContext.fileState),
+    defaultTagName: 'button',
+    render,
+    props: mergeProps<'button'>(
+      {
+        type: 'button',
+        'aria-controls': itemContext.id,
+        'aria-describedby': itemContext.nameId
+      },
+      deleteProps,
+      { onClick }
+    ),
+    state: {
+      slot: 'file-upload-item-delete'
+    }
+  })
 }
 
 type FileUploadClearProps = {
   forceMount?: boolean
-  asChild?: boolean
 } & React.ComponentPropsWithoutRef<'button'>
 
 const FileUploadClear = (props: FileUploadClearProps) => {
-  const {
-    asChild,
-    forceMount,
-    disabled,
-    onClick: onClickProp,
-    ...clearProps
-  } = props
+  const { forceMount, disabled, onClick: onClickProp, ...clearProps } = props
 
   const context = useFileUploadContext(CLEAR_NAME)
   const store = useStoreContext(CLEAR_NAME)
@@ -1503,10 +1462,8 @@ const FileUploadClear = (props: FileUploadClearProps) => {
     return null
   }
 
-  const ClearPrimitive = asChild ? SlotPrimitive.Slot : 'button'
-
   return (
-    <ClearPrimitive
+    <button
       type="button"
       aria-controls={context.listId}
       data-slot="file-upload-clear"

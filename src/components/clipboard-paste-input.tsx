@@ -18,9 +18,7 @@ export const ClipboardPasteInput = ({
 
   return (
     <div className="relative w-full">
-      <FormControl>
-        <Input className="pr-9" {...inputProps} />
-      </FormControl>
+      <FormControl render={<Input className="pr-9" {...inputProps} />} />
       <IconButtonStars
         active={clipboard.isActive}
         className="absolute right-1 top-1/2 -translate-y-1/2 size-7 text-muted-foreground hover:text-foreground"

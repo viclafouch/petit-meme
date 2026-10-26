@@ -13,7 +13,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '~/components/animate-ui/radix/dialog'
+} from '~/components/animate-ui/base/dialog'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import { Button } from '~/components/ui/button'
 import { LoadingButton } from '~/components/ui/loading-button'

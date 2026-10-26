@@ -1,6 +1,7 @@
 import React from 'react'
 import { LayoutGroup, motion, useReducedMotion } from 'motion/react'
-import { RadioGroup } from 'radix-ui'
+import { Radio } from '@base-ui/react/radio'
+import { RadioGroup } from '@base-ui/react/radio-group'
 import { ANNUAL_DISCOUNT_PERCENT, type BillingPeriod } from '~/constants/plan'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
@@ -35,8 +36,12 @@ export const BillingToggle = ({
 
   return (
     <LayoutGroup>
-      <RadioGroup.Root
+      <RadioGroup
         value={billingPeriod}
+        onValueChange={(period) => {
+          setHasInteracted(true)
+          onBillingPeriodChange(period)
+        }}
         className="relative flex rounded-full bg-muted p-1"
         aria-label={m.pricing_billing_period()}
       >
@@ -45,13 +50,9 @@ export const BillingToggle = ({
           const isYearly = option.value === 'yearly'
 
           return (
-            <RadioGroup.Item
+            <Radio.Root
               key={option.value}
               value={option.value}
-              onClick={() => {
-                setHasInteracted(true)
-                onBillingPeriodChange(option.value)
-              }}
               className={cn(
                 'relative z-10 min-h-11 cursor-pointer rounded-full px-5 py-2.5 text-sm font-medium outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-muted',
                 isSelected
@@ -90,10 +91,10 @@ export const BillingToggle = ({
                   </motion.span>
                 ) : null}
               </span>
-            </RadioGroup.Item>
+            </Radio.Root>
           )
         })}
-      </RadioGroup.Root>
+      </RadioGroup>
     </LayoutGroup>
   )
 }

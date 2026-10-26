@@ -46,7 +46,12 @@ export const ConfirmAlertDialog = ({
         {children ?? null}
         <AlertDialogFooter>
           <AlertDialogCancel>Annuler</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm}>
+          <AlertDialogAction
+            onClick={() => {
+              onConfirm()
+              onClose()
+            }}
+          >
             {actionLabel}
           </AlertDialogAction>
         </AlertDialogFooter>

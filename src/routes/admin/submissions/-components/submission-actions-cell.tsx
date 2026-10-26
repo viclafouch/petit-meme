@@ -16,6 +16,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLinkItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '~/components/ui/dropdown-menu'
@@ -151,40 +152,46 @@ export const SubmissionActionsCell = ({
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="data-[state=open]:bg-muted text-muted-foreground flex ml-auto"
-            size="icon"
-          >
-            <EllipsisVertical />
-            <span className="sr-only">Actions</span>
-          </Button>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              variant="ghost"
+              className="data-popup-open:bg-muted text-muted-foreground flex ml-auto"
+              size="icon"
+            />
+          }
+        >
+          <EllipsisVertical />
+          <span className="sr-only">Actions</span>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuItem asChild>
-            <a href={submission.url} target="_blank" rel="noopener noreferrer">
-              <ExternalLink className="size-4" aria-hidden="true" />
-              Ouvrir le lien
-            </a>
-          </DropdownMenuItem>
+          <DropdownMenuLinkItem
+            href={submission.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <ExternalLink className="size-4" aria-hidden="true" />
+            Ouvrir le lien
+          </DropdownMenuLinkItem>
           {isApproved && submission.memeId !== null ? (
-            <DropdownMenuItem asChild>
-              <Link
-                to="/admin/library/$memeId"
-                params={{ memeId: submission.memeId }}
-              >
-                <Eye className="size-4" aria-hidden="true" />
-                Voir le mème
-              </Link>
-            </DropdownMenuItem>
+            <DropdownMenuLinkItem
+              render={
+                <Link
+                  to="/admin/library/$memeId"
+                  params={{ memeId: submission.memeId }}
+                />
+              }
+            >
+              <Eye className="size-4" aria-hidden="true" />
+              Voir le mème
+            </DropdownMenuLinkItem>
           ) : null}
           {isPending ? (
             <>
               <DropdownMenuSeparator />
               {isTweet ? (
                 <DropdownMenuItem
-                  onSelect={() => {
+                  onClick={() => {
                     setActiveDialog('approve-tweet')
                   }}
                 >
@@ -193,7 +200,7 @@ export const SubmissionActionsCell = ({
                 </DropdownMenuItem>
               ) : null}
               <DropdownMenuItem
-                onSelect={() => {
+                onClick={() => {
                   setActiveDialog('reject')
                 }}
               >
@@ -205,7 +212,7 @@ export const SubmissionActionsCell = ({
           <DropdownMenuSeparator />
           <DropdownMenuItem
             variant="destructive"
-            onSelect={() => {
+            onClick={() => {
               setActiveDialog('delete')
             }}
           >

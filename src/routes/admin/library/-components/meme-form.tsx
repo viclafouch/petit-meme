@@ -19,8 +19,7 @@ import type { MemeFullData } from '~/constants/meme'
 import {
   CONTENT_LOCALE_TO_LOCALE,
   getContentLocaleOptions,
-  getRequiredLocales,
-  matchIsMemeContentLocale
+  getRequiredLocales
 } from '~/helpers/i18n-content'
 import { getFieldErrorMessage } from '~/lib/form'
 import { type Locale, locales } from '~/paraglide/runtime'
@@ -36,6 +35,20 @@ type MemeFormProps = {
 }
 
 export const MemeForm = ({ meme, onSuccess }: MemeFormProps) => {
+  const contentLocaleItems = getContentLocaleOptions().map((option) => {
+    const Flag = CONTENT_LOCALE_FLAGS[option.value]
+
+    return {
+      value: option.value,
+      label: (
+        <span className="flex items-center gap-2">
+          {Flag ? <Flag className={FLAG_ICON_CLASS} /> : null}
+          {option.label}
+        </span>
+      )
+    }
+  })
+
   const {
     form,
     keywordsFields,
@@ -132,28 +145,22 @@ export const MemeForm = ({ meme, onSuccess }: MemeFormProps) => {
               <FormItem error={getFieldErrorMessage(field.state.meta)}>
                 <FormLabel>Langue du contenu</FormLabel>
                 <Select
+                  items={contentLocaleItems}
                   value={field.state.value}
                   onValueChange={(value) => {
-                    if (matchIsMemeContentLocale(value)) {
+                    if (value !== null) {
                       field.handleChange(value)
                     }
                   }}
                 >
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Sélectionnez une langue" />
-                    </SelectTrigger>
+                  <FormControl render={<SelectTrigger className="w-full" />}>
+                    <SelectValue placeholder="Sélectionnez une langue" />
                   </FormControl>
                   <SelectContent>
-                    {getContentLocaleOptions().map((option) => {
-                      const Flag = CONTENT_LOCALE_FLAGS[option.value]
-
+                    {contentLocaleItems.map((item) => {
                       return (
-                        <SelectItem key={option.value} value={option.value}>
-                          <span className="flex items-center gap-2">
-                            {Flag ? <Flag className={FLAG_ICON_CLASS} /> : null}
-                            {option.label}
-                          </span>
+                        <SelectItem key={item.value} value={item.value}>
+                          {item.label}
                         </SelectItem>
                       )
                     })}

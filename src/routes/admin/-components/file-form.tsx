@@ -131,10 +131,16 @@ export const FileForm = ({ onSuccess, closeDialog }: FileFormProps) => {
                       Ou cliquez pour parcourir (1 fichier maximum)
                     </p>
                   </div>
-                  <FileUploadTrigger asChild>
-                    <Button variant="outline" size="sm" className="mt-2 w-fit">
-                      Parcourir les fichiers
-                    </Button>
+                  <FileUploadTrigger
+                    render={
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-2 w-fit"
+                      />
+                    }
+                  >
+                    Parcourir les fichiers
                   </FileUploadTrigger>
                 </FileUploadDropzone>
                 <FileUploadList>
@@ -142,15 +148,17 @@ export const FileForm = ({ onSuccess, closeDialog }: FileFormProps) => {
                     <FileUploadItem value={field.state.value}>
                       <FileUploadItemPreview />
                       <FileUploadItemMetadata />
-                      <FileUploadItemDelete asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-9"
-                          aria-label="Supprimer le fichier"
-                        >
-                          <X />
-                        </Button>
+                      <FileUploadItemDelete
+                        aria-label="Supprimer le fichier"
+                        render={
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-9"
+                          />
+                        }
+                      >
+                        <X />
                       </FileUploadItemDelete>
                     </FileUploadItem>
                   )}

@@ -16,6 +16,7 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLinkItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger
@@ -44,48 +45,45 @@ export const UserDropdown = ({ user }: UserDropdownProps) => {
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="gap-2 px-2">
-          <UserAvatar
-            name={user.name}
-            image={user.image}
-            email={user.email}
-            size="sm"
-            shape="rounded"
-          />
-          <div className="truncate max-md:hidden">{user.name}</div>
-          <ChevronDown className="max-md:hidden" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-        sideOffset={4}
+      <DropdownMenuTrigger
+        render={<Button variant="outline" className="gap-2 px-2" />}
       >
-        <DropdownMenuLabel className="p-0 font-normal">
-          <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-            <UserAvatar
-              name={user.name}
-              image={user.image}
-              email={user.email}
-              shape="rounded"
-            />
-            <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-semibold">{user.name}</span>
-              <span className="text-muted-foreground truncate text-xs">
-                {user.email}
-              </span>
+        <UserAvatar
+          name={user.name}
+          image={user.image}
+          email={user.email}
+          size="sm"
+          shape="rounded"
+        />
+        <div className="truncate max-md:hidden">{user.name}</div>
+        <ChevronDown className="max-md:hidden" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="min-w-56 rounded-lg" sideOffset={4}>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="p-0 font-normal">
+            <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+              <UserAvatar
+                name={user.name}
+                image={user.image}
+                email={user.email}
+                shape="rounded"
+              />
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-semibold">{user.name}</span>
+                <span className="text-muted-foreground truncate text-xs">
+                  {user.email}
+                </span>
+              </div>
             </div>
-          </div>
-        </DropdownMenuLabel>
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           {!activeSubscriptionQuery.data ? (
-            <DropdownMenuItem asChild>
-              <Link to="/pricing">
-                <SparklesIcon />
-                {m.nav_upgrade_premium()}
-              </Link>
-            </DropdownMenuItem>
+            <DropdownMenuLinkItem render={<Link to="/pricing" />}>
+              <SparklesIcon />
+              {m.nav_upgrade_premium()}
+            </DropdownMenuLinkItem>
           ) : (
             <DropdownMenuItem
               onClick={() => {
@@ -102,27 +100,21 @@ export const UserDropdown = ({ user }: UserDropdownProps) => {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem asChild>
-            <Link to="/favorites">
-              <Star />
-              {m.nav_favorites({
-                count: String(favoritesMemesCountQuery.data?.count ?? 0)
-              })}
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to="/settings">
-              <User />
-              {m.nav_my_account()}
-            </Link>
-          </DropdownMenuItem>
+          <DropdownMenuLinkItem render={<Link to="/favorites" />}>
+            <Star />
+            {m.nav_favorites({
+              count: String(favoritesMemesCountQuery.data?.count ?? 0)
+            })}
+          </DropdownMenuLinkItem>
+          <DropdownMenuLinkItem render={<Link to="/settings" />}>
+            <User />
+            {m.nav_my_account()}
+          </DropdownMenuLinkItem>
           {matchIsUserAdmin(user) ? (
-            <DropdownMenuItem asChild>
-              <Link to="/admin">
-                <Shield />
-                {m.nav_admin()}
-              </Link>
-            </DropdownMenuItem>
+            <DropdownMenuLinkItem render={<Link to="/admin" />}>
+              <Shield />
+              {m.nav_admin()}
+            </DropdownMenuLinkItem>
           ) : null}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />

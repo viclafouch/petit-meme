@@ -49,41 +49,43 @@ export const MobileNav = ({ links, user }: MobileNavProps) => {
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="block size-8 touch-manipulation items-center justify-start gap-2.5 hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 active:bg-transparent md:hidden dark:hover:bg-transparent"
-        >
-          <div className="relative flex items-center justify-center">
-            <div className="relative size-4" aria-hidden="true">
-              <span
-                className={cn(
-                  'bg-foreground absolute left-0 block h-0.5 w-4 transition-all duration-100',
-                  isOpen ? 'top-1.75 -rotate-45' : 'top-0.5'
-                )}
-              />
-              <span
-                className={cn(
-                  'bg-foreground absolute left-0 block h-0.5 w-4 transition-all duration-100',
-                  isOpen ? 'opacity-0' : 'top-1.75 opacity-100'
-                )}
-              />
-              <span
-                className={cn(
-                  'bg-foreground absolute left-0 block h-0.5 w-4 transition-all duration-100',
-                  isOpen ? 'top-1.75 rotate-45' : 'top-3'
-                )}
-              />
-            </div>
-            <span className="sr-only">{m.nav_toggle_menu()}</span>
+      <PopoverTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon"
+            className="block size-8 touch-manipulation items-center justify-start gap-2.5 hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 active:bg-transparent md:hidden dark:hover:bg-transparent"
+          />
+        }
+      >
+        <div className="relative flex items-center justify-center">
+          <div className="relative size-4" aria-hidden="true">
+            <span
+              className={cn(
+                'bg-foreground absolute left-0 block h-0.5 w-4 transition-all duration-100',
+                isOpen ? 'top-1.75 -rotate-45' : 'top-0.5'
+              )}
+            />
+            <span
+              className={cn(
+                'bg-foreground absolute left-0 block h-0.5 w-4 transition-all duration-100',
+                isOpen ? 'opacity-0' : 'top-1.75 opacity-100'
+              )}
+            />
+            <span
+              className={cn(
+                'bg-foreground absolute left-0 block h-0.5 w-4 transition-all duration-100',
+                isOpen ? 'top-1.75 rotate-45' : 'top-3'
+              )}
+            />
           </div>
-        </Button>
+          <span className="sr-only">{m.nav_toggle_menu()}</span>
+        </div>
       </PopoverTrigger>
       <PopoverContent
         data-mobile-nav
         data-testid="mobile-nav"
-        className="bg-background/90 h-(--radix-popover-content-available-height) w-(--radix-popover-content-available-width) rounded-none border-none p-0 shadow-none backdrop-blur duration-100"
+        className="bg-background/90 h-(--available-height) w-(--available-width) rounded-none border-none p-0 shadow-none ring-0 backdrop-blur duration-100"
         align="start"
         side="bottom"
       >

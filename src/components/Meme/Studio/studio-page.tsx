@@ -161,8 +161,12 @@ export const StudioPage = ({ meme }: StudioPageProps) => {
             </>
           )}
         </div>
-        <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-          <DrawerContent className="max-h-dvh-80" aria-describedby={undefined}>
+        <Drawer
+          open={isDrawerOpen}
+          onOpenChange={setIsDrawerOpen}
+          showSwipeHandle
+        >
+          <DrawerContent className="max-h-dvh-80">
             <DrawerHeader>
               <DrawerTitle>{m.studio_settings()}</DrawerTitle>
             </DrawerHeader>

@@ -1,5 +1,8 @@
 import React from 'react'
-import { ToggleGroup, ToggleGroupItem } from '~/components/ui/toggle-group'
+import {
+  RadioToggleGroup,
+  RadioToggleGroupItem
+} from '~/components/ui/radio-toggle-group'
 import { MEME_GRID_COLUMNS } from '~/constants/meme'
 import { m } from '~/paraglide/messages.js'
 
@@ -20,29 +23,26 @@ const MemesToggleGrid = ({
   values = DEFAULT_COLUMN_VALUES,
   onColumnValueChange
 }: MemesToggleGridProps) => {
-  const handleChange = (value: string) => {
-    if (value !== '') {
-      onColumnValueChange(Math.trunc(Number(value)))
-    }
+  const handleChange = (nextValue: string) => {
+    onColumnValueChange(Math.trunc(Number(nextValue)))
   }
 
   return (
-    <ToggleGroup
+    <RadioToggleGroup
       size="default"
       variant="outline"
-      type="single"
       aria-label={m.meme_grid_columns()}
       value={columnValue.toString()}
       onValueChange={handleChange}
     >
       {values.map((value) => {
         return (
-          <ToggleGroupItem key={value} value={value.toString()}>
+          <RadioToggleGroupItem key={value} value={value.toString()}>
             {value}
-          </ToggleGroupItem>
+          </RadioToggleGroupItem>
         )
       })}
-    </ToggleGroup>
+    </RadioToggleGroup>
   )
 }
 

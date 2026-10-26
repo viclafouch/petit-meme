@@ -4,7 +4,9 @@ import { Button } from '~/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLinkItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger
@@ -22,32 +24,34 @@ export const AdminNavButton = ({ user }: AdminNavButtonProps) => {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative size-9 rounded-full">
-          <UserAvatar
-            name={user.name}
-            image={user.image}
-            email={user.email}
-            size="lg"
-          />
-        </Button>
+      <DropdownMenuTrigger
+        render={
+          <Button variant="ghost" className="relative size-9 rounded-full" />
+        }
+      >
+        <UserAvatar
+          name={user.name}
+          image={user.image}
+          email={user.email}
+          size="lg"
+        />
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
-        <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col gap-1">
-            <p className="text-sm font-medium leading-none">{user.name}</p>
-            <p className="text-xs leading-none text-muted-foreground">
-              {user.email}
-            </p>
-          </div>
-        </DropdownMenuLabel>
+      <DropdownMenuContent className="w-56" align="end">
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="font-normal">
+            <div className="flex flex-col gap-1">
+              <p className="text-sm font-medium leading-none">{user.name}</p>
+              <p className="text-xs leading-none text-muted-foreground">
+                {user.email}
+              </p>
+            </div>
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link to="/">
-            <ArrowLeft />
-            Retour au site
-          </Link>
-        </DropdownMenuItem>
+        <DropdownMenuLinkItem render={<Link to="/" />}>
+          <ArrowLeft />
+          Retour au site
+        </DropdownMenuLinkItem>
         <DropdownMenuItem
           onClick={() => {
             void signOut()

@@ -6,9 +6,12 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle
-} from '~/components/animate-ui/radix/dialog'
+} from '~/components/animate-ui/base/dialog'
+import {
+  RadioToggleGroup,
+  RadioToggleGroupItem
+} from '~/components/ui/radio-toggle-group'
 import { Separator } from '~/components/ui/separator'
-import { ToggleGroup, ToggleGroupItem } from '~/components/ui/toggle-group'
 import {
   AVATAR_CATALOG,
   AVATAR_PROVIDER_SELECTION,
@@ -54,7 +57,7 @@ const AvatarTile = ({
   isSelected
 }: AvatarTileProps) => {
   return (
-    <ToggleGroupItem
+    <RadioToggleGroupItem
       value={selection}
       aria-label={label}
       data-active={isSelected || undefined}
@@ -69,7 +72,7 @@ const AvatarTile = ({
         decoding="async"
         className="size-full rounded-full object-cover"
       />
-    </ToggleGroupItem>
+    </RadioToggleGroupItem>
   )
 }
 
@@ -87,12 +90,12 @@ export const AvatarPickerDialog = ({
     return resolveAvatarPath(slot.id) === user.image
   })
 
-  const resolveCurrentSelection = () => {
+  const resolveCurrentSelection = (): AvatarSelection | null => {
     if (selectedSlot) {
       return selectedSlot.id
     }
 
-    return user.image === providerAvatar ? AVATAR_PROVIDER_SELECTION : undefined
+    return user.image === providerAvatar ? AVATAR_PROVIDER_SELECTION : null
   }
 
   return (
@@ -104,11 +107,10 @@ export const AvatarPickerDialog = ({
             {m.settings_avatar_description()}
           </DialogDescription>
         </DialogHeader>
-        <ToggleGroup
-          type="single"
+        <RadioToggleGroup
           value={resolveCurrentSelection()}
-          onValueChange={(selection: AvatarSelection | '') => {
-            if (selection !== '') {
+          onValueChange={(selection) => {
+            if (selection !== null) {
               updateAvatarMutation.mutate(selection)
             }
           }}
@@ -146,7 +148,7 @@ export const AvatarPickerDialog = ({
               )
             })}
           </AvatarSection>
-        </ToggleGroup>
+        </RadioToggleGroup>
       </DialogContent>
     </Dialog>
   )

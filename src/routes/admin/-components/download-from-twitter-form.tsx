@@ -101,7 +101,11 @@ export const DownloadFromTwitterForm = () => {
             }}
             children={([canSubmit, isSubmitting]) => {
               return (
-                <LoadingButton isLoading={isSubmitting} disabled={!canSubmit}>
+                <LoadingButton
+                  type="submit"
+                  isLoading={isSubmitting}
+                  disabled={!canSubmit}
+                >
                   Extraire et télécharger
                 </LoadingButton>
               )

@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { CircleAlert } from 'lucide-react'
-import { type Label as LabelPrimitive, Slot as SlotPrimitive } from 'radix-ui'
+import { mergeProps } from '@base-ui/react/merge-props'
+import { useRender } from '@base-ui/react/use-render'
 import { Label } from '~/components/ui/label'
 import { cn } from '~/lib/utils'
 
@@ -55,7 +56,7 @@ const FormItem = ({
 const FormLabel = ({
   className,
   ...props
-}: React.ComponentProps<typeof LabelPrimitive.Root>) => {
+}: React.ComponentProps<typeof Label>) => {
   const { error, formItemId } = useFormField()
 
   return (
@@ -69,24 +70,25 @@ const FormLabel = ({
   )
 }
 
-const FormControl = ({
-  ...props
-}: React.ComponentProps<typeof SlotPrimitive.Slot>) => {
+const FormControl = ({ render, ...props }: useRender.ComponentProps<'div'>) => {
   const { error, formItemId, formDescriptionId, formMessageId } = useFormField()
 
-  return (
-    <SlotPrimitive.Slot
-      data-slot="form-control"
-      id={formItemId}
-      aria-describedby={
-        !error
-          ? `${formDescriptionId}`
-          : `${formDescriptionId} ${formMessageId}`
-      }
-      aria-invalid={Boolean(error)}
-      {...props}
-    />
-  )
+  return useRender({
+    render,
+    props: mergeProps<'div'>(
+      {
+        id: formItemId,
+        'aria-describedby': !error
+          ? formDescriptionId
+          : `${formDescriptionId} ${formMessageId}`,
+        'aria-invalid': Boolean(error)
+      },
+      props
+    ),
+    state: {
+      slot: 'form-control'
+    }
+  })
 }
 
 const FormDescription = ({

@@ -17,6 +17,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLinkItem,
   DropdownMenuTrigger
 } from '~/components/ui/dropdown-menu'
 import type { MemeWithVideo } from '~/constants/meme'
@@ -229,23 +230,28 @@ export const MemeListItem = React.memo(
                 <span className="sr-only">{m.meme_open_options()}</span>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem asChild>
-                  <Link to="/memes/$memeId" params={{ memeId: meme.id }}>
-                    <ArrowRight />
-                    {m.meme_details()}
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  asChild
+                <DropdownMenuLinkItem
+                  render={
+                    <Link to="/memes/$memeId" params={{ memeId: meme.id }} />
+                  }
+                >
+                  <ArrowRight />
+                  {m.meme_details()}
+                </DropdownMenuLinkItem>
+                <DropdownMenuLinkItem
+                  render={
+                    <Link
+                      to="/memes/$memeId/studio"
+                      params={{ memeId: meme.id }}
+                    />
+                  }
                   onClick={() => {
                     handleTrackConversion('Meme Studio Opened')
                   }}
                 >
-                  <Link to="/memes/$memeId/studio" params={{ memeId: meme.id }}>
-                    <Clapperboard />
-                    {m.meme_open_studio()}
-                  </Link>
-                </DropdownMenuItem>
+                  <Clapperboard />
+                  {m.meme_open_studio()}
+                </DropdownMenuLinkItem>
                 <DropdownMenuItem
                   onClick={() => {
                     handleTrackConversion('Meme Shared')

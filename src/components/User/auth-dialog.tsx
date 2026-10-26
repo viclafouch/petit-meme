@@ -8,11 +8,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '~/components/animate-ui/radix/dialog'
+} from '~/components/animate-ui/base/dialog'
 import { DiscordIcon } from '~/components/icon/discord'
 import { XTwitterIcon } from '~/components/icon/x-twitter'
 import { Button } from '~/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
+import {
+  Tabs,
+  TabsContent,
+  TabsIndicator,
+  TabsList,
+  TabsTrigger
+} from '~/components/ui/tabs'
 import { LastLoginBadge } from '~/components/User/last-login-badge'
 import { LoginForm } from '~/components/User/login-form'
 import { SignupForm } from '~/components/User/signup-form'
@@ -26,7 +32,7 @@ import { localizeHref } from '~/paraglide/runtime'
 
 type AuthType = 'login' | 'signup'
 
-const matchIsAuthType = (value: string): value is AuthType => {
+const matchIsAuthType = (value: unknown): value is AuthType => {
   return value === 'login' || value === 'signup'
 }
 
@@ -38,7 +44,10 @@ type SocialProvider = {
 }
 
 const ANIMATED_TAB_CONTENT_CLASS =
-  '[grid-area:1/1] transition-[height,opacity] duration-300 ease-in-out data-[state=inactive]:h-0 data-[state=inactive]:overflow-hidden data-[state=inactive]:opacity-0'
+  '[grid-area:1/1] transition-[height,opacity] duration-300 ease-in-out data-starting-style:h-0 data-starting-style:overflow-hidden data-starting-style:opacity-0 data-ending-style:h-0 data-ending-style:overflow-hidden data-ending-style:opacity-0'
+
+const AUTH_TAB_TRIGGER_CLASS =
+  'relative z-1 flex-1 transition-colors duration-300 data-active:bg-transparent group-data-[variant=default]/tabs-list:data-active:shadow-none dark:data-active:border-transparent dark:data-active:bg-transparent'
 
 const SOCIAL_PROVIDERS = [
   {
@@ -113,24 +122,18 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
             }}
             className="w-full"
           >
-            <TabsList className="w-full auth-tabs-list" data-active={authType}>
-              <TabsTrigger
-                value="login"
-                className="flex-1 transition-colors duration-300"
-              >
+            <TabsList className="relative w-full">
+              <TabsIndicator className="rounded-md bg-background shadow-xs duration-300 ease-in-out dark:border dark:border-input dark:bg-white/7" />
+              <TabsTrigger value="login" className={AUTH_TAB_TRIGGER_CLASS}>
                 {m.auth_login_title()}
               </TabsTrigger>
-              <TabsTrigger
-                value="signup"
-                className="flex-1 transition-colors duration-300"
-              >
+              <TabsTrigger value="signup" className={AUTH_TAB_TRIGGER_CLASS}>
                 {m.auth_create_account()}
               </TabsTrigger>
             </TabsList>
             <div className="grid interpolate-size-keywords pt-4">
               <TabsContent
-                forceMount
-                inert={authType !== 'login'}
+                keepMounted
                 aria-hidden={authType !== 'login'}
                 value="login"
                 className={ANIMATED_TAB_CONTENT_CLASS}
@@ -141,8 +144,7 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                 />
               </TabsContent>
               <TabsContent
-                forceMount
-                inert={authType !== 'signup'}
+                keepMounted
                 aria-hidden={authType !== 'signup'}
                 value="signup"
                 className={ANIMATED_TAB_CONTENT_CLASS}

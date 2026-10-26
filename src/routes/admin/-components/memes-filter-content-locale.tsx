@@ -40,10 +40,10 @@ export const MemesFilterContentLocale = React.memo(
 
     return (
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button active={contentLocale !== null} variant="outline">
-            Filtrer par langue
-          </Button>
+        <DropdownMenuTrigger
+          render={<Button active={contentLocale !== null} variant="outline" />}
+        >
+          Filtrer par langue
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-40">
           <DropdownMenuRadioGroup

@@ -14,8 +14,9 @@ import {
   AccordionTrigger
 } from '~/components/ui/accordion'
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
-import { Button } from '~/components/ui/button'
+import { Button, buttonVariants } from '~/components/ui/button'
 import { IS_PRODUCTION } from '~/constants/env'
+import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 
 type ErrorComponentProps = Pick<RouterErrorComponentProps, 'error'>
@@ -50,11 +51,16 @@ export const ErrorComponent = ({ error }: ErrorComponentProps) => {
           >
             {m.common_retry()}
           </Button>
-          <Button asChild className="w-full" variant="outline">
-            <Link to="/">{m.error_back_to_site()}</Link>
-          </Button>
+          <Link
+            to="/"
+            className={cn(
+              buttonVariants({ variant: 'outline', className: 'w-full' })
+            )}
+          >
+            {m.error_back_to_site()}
+          </Link>
           {!IS_PRODUCTION && Error.isError(error) ? (
-            <Accordion type="single" collapsible className="w-full">
+            <Accordion className="w-full">
               <AccordionItem value="error-details">
                 <AccordionTrigger>{m.error_details_heading()}</AccordionTrigger>
                 <AccordionContent>

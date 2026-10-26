@@ -6,7 +6,7 @@ import {
   RefreshCw,
   Upload
 } from 'lucide-react'
-import { Progress } from '~/components/animate-ui/radix/progress'
+import { Progress } from '~/components/animate-ui/base/progress'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import {

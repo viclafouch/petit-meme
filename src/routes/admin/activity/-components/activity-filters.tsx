@@ -89,15 +89,15 @@ const ActivityTypeFilter = ({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button active={types.length > 0} variant="outline">
-          Filtrer par type
-          {types.length > 0 ? (
-            <Badge variant="secondary" size="sm">
-              {types.length}
-            </Badge>
-          ) : null}
-        </Button>
+      <DropdownMenuTrigger
+        render={<Button active={types.length > 0} variant="outline" />}
+      >
+        Filtrer par type
+        {types.length > 0 ? (
+          <Badge variant="secondary" size="sm">
+            {types.length}
+          </Badge>
+        ) : null}
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         {ACTIVITY_TYPE_OPTIONS.map((type) => {
@@ -110,9 +110,6 @@ const ActivityTypeFilter = ({
               onCheckedChange={(isChecked) => {
                 handleToggle(type, isChecked)
               }}
-              onSelect={(event) => {
-                event.preventDefault()
-              }}
             >
               <span className="flex items-center gap-1.5">
                 <Icon className="size-3.5" aria-hidden />
@@ -124,7 +121,7 @@ const ActivityTypeFilter = ({
         {types.length > 0 ? (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={handleReset}>
+            <DropdownMenuItem onClick={handleReset}>
               Tout afficher
             </DropdownMenuItem>
           </>

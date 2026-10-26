@@ -19,17 +19,19 @@ export const TextField = ({ label, ...inputProps }: TextFieldProps) => {
   return (
     <FormItem error={getFieldErrorMessage(field.state.meta)}>
       <FormLabel>{label}</FormLabel>
-      <FormControl>
-        <Input
-          name={field.name}
-          {...inputProps}
-          value={field.state.value}
-          onBlur={field.handleBlur}
-          onChange={(event) => {
-            field.handleChange(event.target.value)
-          }}
-        />
-      </FormControl>
+      <FormControl
+        render={
+          <Input
+            name={field.name}
+            {...inputProps}
+            value={field.state.value}
+            onBlur={field.handleBlur}
+            onChange={(event) => {
+              field.handleChange(event.target.value)
+            }}
+          />
+        }
+      />
       <FormMessage />
     </FormItem>
   )

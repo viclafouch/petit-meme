@@ -4,6 +4,7 @@ import { Button } from '~/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger
@@ -37,20 +38,22 @@ export const UserActionsCell = ({ user }: UserActionsCellProps) => {
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="data-[state=open]:bg-muted text-muted-foreground flex ml-auto"
-            size="icon"
-          >
-            <EllipsisVertical />
-            <span className="sr-only">Actions</span>
-          </Button>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              variant="ghost"
+              className="data-popup-open:bg-muted text-muted-foreground flex ml-auto"
+              size="icon"
+            />
+          }
+        >
+          <EllipsisVertical />
+          <span className="sr-only">Actions</span>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-32">
           {permissions.canUnban ? (
             <DropdownMenuItem
-              onSelect={() => {
+              onClick={() => {
                 moderation.openDialog('unban')
               }}
             >
@@ -60,7 +63,7 @@ export const UserActionsCell = ({ user }: UserActionsCellProps) => {
           {permissions.canBan ? (
             <DropdownMenuItem
               variant="destructive"
-              onSelect={() => {
+              onClick={() => {
                 moderation.openDialog('ban')
               }}
             >
@@ -70,7 +73,7 @@ export const UserActionsCell = ({ user }: UserActionsCellProps) => {
           {permissions.canDelete ? (
             <DropdownMenuItem
               variant="destructive"
-              onSelect={() => {
+              onClick={() => {
                 moderation.openDialog('delete')
               }}
             >
@@ -78,9 +81,11 @@ export const UserActionsCell = ({ user }: UserActionsCellProps) => {
             </DropdownMenuItem>
           ) : null}
           {hasActions ? null : (
-            <DropdownMenuLabel className="font-normal text-muted-foreground">
-              {NO_MODERATION_REASON}
-            </DropdownMenuLabel>
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="font-normal text-muted-foreground">
+                {NO_MODERATION_REASON}
+              </DropdownMenuLabel>
+            </DropdownMenuGroup>
           )}
         </DropdownMenuContent>
       </DropdownMenu>

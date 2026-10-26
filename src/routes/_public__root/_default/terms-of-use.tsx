@@ -23,6 +23,7 @@ const loadMarkdown = createServerFn({ method: 'GET' }).handler(async () => {
 export const Route = createFileRoute('/_public__root/_default/terms-of-use')({
   component: TermsOfUsePage,
   staleTime: Infinity,
+  preloadStaleTime: Infinity,
   loader: () => {
     return loadMarkdown()
   },

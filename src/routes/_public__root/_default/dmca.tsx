@@ -23,6 +23,7 @@ const loadMarkdown = createServerFn({ method: 'GET' }).handler(async () => {
 export const Route = createFileRoute('/_public__root/_default/dmca')({
   component: DmcaPage,
   staleTime: Infinity,
+  preloadStaleTime: Infinity,
   loader: () => {
     return loadMarkdown()
   },

@@ -1,6 +1,11 @@
-import { keepPreviousData, queryOptions } from '@tanstack/react-query'
+import {
+  keepPreviousData,
+  type QueryClient,
+  queryOptions
+} from '@tanstack/react-query'
 import type { ActivityFilters } from '~/constants/activity'
 import type { MemesFilters } from '~/constants/meme'
+import { PRIVATE_QUERY_META } from '~/constants/query'
 import { MINUTE } from '~/constants/time'
 import type { Meme, User } from '~/db/generated/prisma/client'
 import type { MemeSubmissionStatus } from '~/db/generated/prisma/enums'
@@ -26,6 +31,7 @@ import {
   getAdminUserActivity,
   getAdminUserDetail
 } from '~/routes/admin/-server/user-detail'
+import { getListUsers } from '~/routes/admin/-server/users'
 import {
   type AdminVisitorActivityFilters,
   getAdminVisitorActivity,
@@ -42,6 +48,7 @@ const BACKGROUND_STALE_MINUTES = 5
 export const getAdminMemeByIdQueryOpts = (memeId: Meme['id']) => {
   return queryOptions({
     queryKey: [...getAdminMemeByIdQueryOpts.all, memeId],
+    meta: PRIVATE_QUERY_META,
     queryFn: () => {
       return getAdminMemeById({ data: memeId })
     },
@@ -54,6 +61,7 @@ getAdminMemeByIdQueryOpts.all = ['admin-meme'] as const
 export const getAdminMemesListQueryOpts = (filters: MemesFilters) => {
   return queryOptions({
     queryKey: [...getAdminMemesListQueryOpts.all, filters],
+    meta: PRIVATE_QUERY_META,
     queryFn: () => {
       return getAdminMemes({ data: filters })
     },
@@ -66,6 +74,7 @@ getAdminMemesListQueryOpts.all = ['admin-memes-list'] as const
 export const getAdminDashboardTotalsQueryOpts = () => {
   return queryOptions({
     queryKey: [...getAdminDashboardTotalsQueryOpts.all],
+    meta: PRIVATE_QUERY_META,
     queryFn: () => {
       return getAdminDashboardTotals()
     },
@@ -78,6 +87,7 @@ getAdminDashboardTotalsQueryOpts.all = ['admin-dashboard-totals'] as const
 export const getAdminChartDataQueryOpts = (period: DashboardPeriod) => {
   return queryOptions({
     queryKey: [...getAdminChartDataQueryOpts.all, period],
+    meta: PRIVATE_QUERY_META,
     queryFn: () => {
       return getAdminChartData({ data: period })
     },
@@ -90,6 +100,7 @@ getAdminChartDataQueryOpts.all = ['admin-chart-data'] as const
 export const getAdminRecentAuditQueryOpts = () => {
   return queryOptions({
     queryKey: [...getAdminRecentAuditQueryOpts.all],
+    meta: PRIVATE_QUERY_META,
     queryFn: () => {
       return getAdminRecentAudit()
     },
@@ -102,6 +113,7 @@ getAdminRecentAuditQueryOpts.all = ['admin-recent-audit'] as const
 export const getAdminActivityQueryOpts = (filters: ActivityFilters) => {
   return queryOptions({
     queryKey: [...getAdminActivityQueryOpts.all, filters],
+    meta: PRIVATE_QUERY_META,
     queryFn: () => {
       return getAdminActivity({ data: filters })
     },
@@ -115,6 +127,7 @@ getAdminActivityQueryOpts.all = ['admin-activity'] as const
 export const getAdminRecentActivityEventsQueryOpts = () => {
   return queryOptions({
     queryKey: [...getAdminRecentActivityEventsQueryOpts.all],
+    meta: PRIVATE_QUERY_META,
     queryFn: () => {
       return getAdminRecentActivityEvents()
     },
@@ -126,9 +139,23 @@ getAdminRecentActivityEventsQueryOpts.all = [
   'admin-recent-activity-events'
 ] as const
 
+export const getAdminUsersListQueryOpts = () => {
+  return queryOptions({
+    queryKey: [...getAdminUsersListQueryOpts.all],
+    meta: PRIVATE_QUERY_META,
+    queryFn: () => {
+      return getListUsers()
+    },
+    staleTime: BACKGROUND_STALE_MINUTES * MINUTE
+  })
+}
+
+getAdminUsersListQueryOpts.all = ['admin-users-list'] as const
+
 export const getAdminUserDetailQueryOpts = (userId: User['id']) => {
   return queryOptions({
     queryKey: [...getAdminUserDetailQueryOpts.all, userId],
+    meta: PRIVATE_QUERY_META,
     queryFn: () => {
       return getAdminUserDetail({ data: userId })
     },
@@ -143,6 +170,7 @@ export const getAdminUserActivityQueryOpts = (
 ) => {
   return queryOptions({
     queryKey: [...getAdminUserActivityQueryOpts.all, filters],
+    meta: PRIVATE_QUERY_META,
     queryFn: () => {
       return getAdminUserActivity({ data: filters })
     },
@@ -156,6 +184,7 @@ getAdminUserActivityQueryOpts.all = ['admin-user-activity'] as const
 export const getAdminVisitorDetailQueryOpts = (ipAddress: string) => {
   return queryOptions({
     queryKey: [...getAdminVisitorDetailQueryOpts.all, ipAddress],
+    meta: PRIVATE_QUERY_META,
     queryFn: () => {
       return getAdminVisitorDetail({ data: ipAddress })
     },
@@ -170,6 +199,7 @@ export const getAdminVisitorActivityQueryOpts = (
 ) => {
   return queryOptions({
     queryKey: [...getAdminVisitorActivityQueryOpts.all, filters],
+    meta: PRIVATE_QUERY_META,
     queryFn: () => {
       return getAdminVisitorActivity({ data: filters })
     },
@@ -183,6 +213,7 @@ getAdminVisitorActivityQueryOpts.all = ['admin-visitor-activity'] as const
 export const getAdminTrendingMemesQueryOpts = () => {
   return queryOptions({
     queryKey: [...getAdminTrendingMemesQueryOpts.all],
+    meta: PRIVATE_QUERY_META,
     queryFn: () => {
       return getAdminTrendingMemes()
     },
@@ -197,6 +228,7 @@ export const getAdminSubmissionsQueryOpts = (
 ) => {
   return queryOptions({
     queryKey: [...getAdminSubmissionsQueryOpts.all, statusFilter],
+    meta: PRIVATE_QUERY_META,
     queryFn: () => {
       return getAdminSubmissions({ data: statusFilter })
     },
@@ -209,6 +241,7 @@ getAdminSubmissionsQueryOpts.all = ['admin-submissions'] as const
 export const getAdminPendingSubmissionCountQueryOpts = () => {
   return queryOptions({
     queryKey: [...getAdminPendingSubmissionCountQueryOpts.all],
+    meta: PRIVATE_QUERY_META,
     queryFn: () => {
       return getAdminPendingSubmissionCount()
     },
@@ -223,6 +256,7 @@ getAdminPendingSubmissionCountQueryOpts.all = [
 export const getAdminMemeWatermarkQueryOpts = (memeId: Meme['id']) => {
   return queryOptions({
     queryKey: [...getAdminMemeWatermarkQueryOpts.all, memeId],
+    meta: PRIVATE_QUERY_META,
     queryFn: () => {
       return checkMemeWatermark({ data: memeId })
     },
@@ -235,6 +269,7 @@ getAdminMemeWatermarkQueryOpts.all = ['admin-meme-watermark'] as const
 export const getAdminVideoBlobQueryOpts = (memeId: Meme['id']) => {
   return queryOptions({
     queryKey: [...getAdminVideoBlobQueryOpts.all, memeId],
+    meta: PRIVATE_QUERY_META,
     queryFn: async () => {
       const response = await fetchAdminVideoBlob({ data: memeId })
 
@@ -249,6 +284,7 @@ getAdminVideoBlobQueryOpts.all = ['admin-video-blob'] as const
 export const getAdminAiSearchLogsQueryOpts = () => {
   return queryOptions({
     queryKey: [...getAdminAiSearchLogsQueryOpts.all],
+    meta: PRIVATE_QUERY_META,
     queryFn: () => {
       return getAdminAiSearchLogs()
     },
@@ -257,3 +293,14 @@ export const getAdminAiSearchLogsQueryOpts = () => {
 }
 
 getAdminAiSearchLogsQueryOpts.all = ['admin-ai-search-logs'] as const
+
+export const invalidateAdminMemesOverview = (queryClient: QueryClient) => {
+  return Promise.all([
+    queryClient.invalidateQueries({
+      queryKey: getAdminMemesListQueryOpts.all
+    }),
+    queryClient.invalidateQueries({
+      queryKey: getAdminDashboardTotalsQueryOpts.all
+    })
+  ])
+}

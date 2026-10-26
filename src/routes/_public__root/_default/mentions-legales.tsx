@@ -25,6 +25,7 @@ export const Route = createFileRoute(
 )({
   component: MentionsLegalesPage,
   staleTime: Infinity,
+  preloadStaleTime: Infinity,
   loader: () => {
     return loadMarkdown()
   },

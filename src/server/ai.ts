@@ -3,6 +3,7 @@ import {
   createPartFromUri,
   createUserContent,
   FileState,
+  type GenerateContentConfig,
   GoogleGenAI
 } from '@google/genai'
 import { createServerFn } from '@tanstack/react-start'
@@ -90,6 +91,23 @@ const aiAssistResultSchema = z.object({
 })
 
 export type AiAssistResult = z.infer<typeof aiAssistResultSchema>
+
+type BuildGeminiJsonConfigParams = {
+  schema: z.ZodType
+  abortSignal: AbortSignal
+}
+
+const buildGeminiJsonConfig = ({
+  schema,
+  abortSignal
+}: BuildGeminiJsonConfigParams) => {
+  return {
+    abortSignal,
+    automaticContinuation: false,
+    responseMimeType: 'application/json',
+    responseJsonSchema: z.toJSONSchema(schema, { target: 'draft-07' })
+  } satisfies GenerateContentConfig
+}
 
 type BuildAiAssistPromptParams = {
   customPrompt: string
@@ -276,16 +294,16 @@ export const translateMemeContent = createServerFn({ method: 'POST' })
 
     try {
       const result = await withTimeout(
-        getGeminiClient().models.generateContent({
-          model: GEMINI_MODEL,
-          contents: prompt,
-          config: {
-            responseMimeType: 'application/json',
-            responseJsonSchema: z.toJSONSchema(responseSchema, {
-              target: 'draft-07'
+        (abortController) => {
+          return getGeminiClient().models.generateContent({
+            model: GEMINI_MODEL,
+            contents: prompt,
+            config: buildGeminiJsonConfig({
+              schema: responseSchema,
+              abortSignal: abortController.signal
             })
-          }
-        }),
+          })
+        },
         GEMINI_TIMEOUT_MS,
         `Traduction AI : timeout après ${GEMINI_TIMEOUT_MS}ms`
       )
@@ -342,16 +360,16 @@ export const aiAssistMemeContent = createServerFn({ method: 'POST' })
       const userContent = createUserContent([filePart, prompt])
 
       const result = await withTimeout(
-        getGeminiClient().models.generateContent({
-          model: GEMINI_MODEL,
-          contents: userContent,
-          config: {
-            responseMimeType: 'application/json',
-            responseJsonSchema: z.toJSONSchema(aiAssistResultSchema, {
-              target: 'draft-07'
+        (abortController) => {
+          return getGeminiClient().models.generateContent({
+            model: GEMINI_MODEL,
+            contents: userContent,
+            config: buildGeminiJsonConfig({
+              schema: aiAssistResultSchema,
+              abortSignal: abortController.signal
             })
-          }
-        }),
+          })
+        },
         GEMINI_TIMEOUT_MS,
         `AI Assist : timeout après ${GEMINI_TIMEOUT_MS}ms`
       )

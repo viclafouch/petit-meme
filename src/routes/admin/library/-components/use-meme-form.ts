@@ -20,7 +20,7 @@ import { translateMemeContent } from '~/server/ai'
 
 type UseMemeFormParams = {
   meme: MemeFullData
-  onSuccess?: () => void
+  onSuccess?: () => Promise<void>
 }
 
 export function useMemeForm({ meme, onSuccess }: UseMemeFormParams) {

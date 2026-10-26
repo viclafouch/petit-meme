@@ -22,7 +22,7 @@ export const noThrowResponse = defineRule({
     type: 'problem',
     messages: {
       throwResponse:
-        'Throw an `Error`: a thrown `Response` resolves on the client and `onError` never fires.'
+        'Throw an `Error`: a thrown `Response` rejects the call with a `Response`, which carries no message for `getErrorMessage` or `matchIsRateLimitError`.'
     },
     schema: []
   },

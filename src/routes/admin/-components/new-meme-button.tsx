@@ -13,10 +13,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { FileForm } from '~/routes/admin/-components/file-form'
 import { TwitterForm } from '~/routes/admin/-components/twitter-form'
-import {
-  getAdminDashboardTotalsQueryOpts,
-  getAdminMemesListQueryOpts
-} from '~/routes/admin/-lib/queries'
+import { invalidateAdminMemesOverview } from '~/routes/admin/-lib/queries'
 
 type HandleAddMemeParams = {
   memeId: string
@@ -33,16 +30,9 @@ export const NewMemeButton = ({ ...restButtonProps }: NewMemeButtonProps) => {
     setIsOpen(false)
   }
 
-  const handleAddMeme = ({ memeId }: HandleAddMemeParams) => {
-    void queryClient.invalidateQueries({
-      queryKey: getAdminMemesListQueryOpts.all,
-      exact: false
-    })
-    void queryClient.invalidateQueries({
-      queryKey: getAdminDashboardTotalsQueryOpts.all
-    })
-    void navigate({ to: '/admin/library/$memeId', params: { memeId } })
-    closeDialog()
+  const handleAddMeme = async ({ memeId }: HandleAddMemeParams) => {
+    await invalidateAdminMemesOverview(queryClient)
+    await navigate({ to: '/admin/library/$memeId', params: { memeId } })
   }
 
   return (

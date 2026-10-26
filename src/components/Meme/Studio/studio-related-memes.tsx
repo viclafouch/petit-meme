@@ -1,13 +1,13 @@
-import React from 'react'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { Label } from '~/components/ui/label'
 import type { MemeWithVideo } from '~/constants/meme'
 import { buildVideoImageUrl } from '~/lib/bunny'
+import { getRelatedMemesQueryOpts } from '~/lib/queries'
 import { m } from '~/paraglide/messages.js'
 
 type StudioRelatedMemesProps = {
-  currentMemeId: string
-  relatedMemesPromise: Promise<MemeWithVideo[]>
+  meme: Pick<MemeWithVideo, 'id' | 'title'>
 }
 
 type StudioRelatedMemesGridProps = {
@@ -47,14 +47,13 @@ const StudioRelatedMemesGrid = ({ memes }: StudioRelatedMemesGridProps) => {
   )
 }
 
-export const StudioRelatedMemes = ({
-  currentMemeId,
-  relatedMemesPromise
-}: StudioRelatedMemesProps) => {
-  const relatedMemes = React.use(relatedMemesPromise)
+export const StudioRelatedMemes = ({ meme }: StudioRelatedMemesProps) => {
+  const relatedMemesQuery = useSuspenseQuery(
+    getRelatedMemesQueryOpts({ memeId: meme.id, title: meme.title })
+  )
 
-  const filteredMemes = relatedMemes.filter((meme) => {
-    return meme.id !== currentMemeId
+  const filteredMemes = relatedMemesQuery.data.filter((relatedMeme) => {
+    return relatedMeme.id !== meme.id
   })
 
   return filteredMemes.length > 0 ? (

@@ -1,18 +1,17 @@
 import { Plus } from 'lucide-react'
-import { getRouteApi } from '@tanstack/react-router'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { PageHeader } from '~/components/page-header'
 import { Badge } from '~/components/ui/badge'
 import { Container } from '~/components/ui/container'
 import { formatDate } from '~/helpers/date'
-import { getLocale } from '~/paraglide/runtime'
+import { getCategoriesListQueryOpts } from '~/lib/queries'
+import { baseLocale, getLocale } from '~/paraglide/runtime'
 import { AdminTable } from '~/routes/admin/-components/admin-table'
 import { INITIAL_PAGINATION } from '~/routes/admin/-lib/constants'
 import { createAppColumnHelper, useAppTable } from '~/routes/admin/-lib/table'
 import { AddCategoryButton } from '~/routes/admin/categories/-components/add-category-button'
 import { CategoryDropdown } from '~/routes/admin/categories/-components/category-dropdown'
 import type { EnrichedCategory } from '~/server/categories'
-
-const routeApi = getRouteApi('/admin/categories/')
 
 const columnHelper = createAppColumnHelper<EnrichedCategory>()
 
@@ -80,10 +79,12 @@ const columns = columnHelper.columns([
 ])
 
 export const CategoriesPage = () => {
-  const { categories } = routeApi.useLoaderData()
+  const categoriesListQuery = useSuspenseQuery(
+    getCategoriesListQueryOpts(baseLocale)
+  )
 
   const table = useAppTable({
-    data: categories,
+    data: categoriesListQuery.data,
     columns,
     initialState: {
       sorting: [{ id: 'createdAt', desc: true }],

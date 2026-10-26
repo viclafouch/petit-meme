@@ -12,9 +12,8 @@ import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { DeleteMemeButton } from '~/routes/admin/-components/delete-meme-button'
 import {
-  getAdminDashboardTotalsQueryOpts,
   getAdminMemeByIdQueryOpts,
-  getAdminMemesListQueryOpts
+  invalidateAdminMemesOverview
 } from '~/routes/admin/-lib/queries'
 import { MemeForm } from '~/routes/admin/library/-components/meme-form'
 import { MemeWatermarkSection } from '~/routes/admin/library/-components/meme-watermark-section'
@@ -28,18 +27,14 @@ export const MemePage = () => {
   const locale = getLocale()
   const memeQuery = useSuspenseQuery(getAdminMemeByIdQueryOpts(memeId))
 
-  const handleEditSuccess = () => {
-    void queryClient.invalidateQueries({
-      queryKey: getAdminMemesListQueryOpts.all,
-      exact: false
-    })
-    void queryClient.invalidateQueries(
-      getAdminMemeByIdQueryOpts(memeQuery.data.id)
-    )
-    void queryClient.invalidateQueries({
-      queryKey: getAdminDashboardTotalsQueryOpts.all
-    })
-    void router.invalidate()
+  const handleEditSuccess = async () => {
+    await Promise.all([
+      invalidateAdminMemesOverview(queryClient),
+      queryClient.invalidateQueries(
+        getAdminMemeByIdQueryOpts(memeQuery.data.id)
+      )
+    ])
+    await router.invalidate()
   }
 
   return (

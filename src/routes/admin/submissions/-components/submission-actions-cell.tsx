@@ -62,19 +62,17 @@ export const SubmissionActionsCell = ({
     setAdminNote('')
   }
 
-  const invalidateSubmissions = () => {
-    void queryClient.invalidateQueries({
-      queryKey: getAdminSubmissionsQueryOpts.all
-    })
-    void queryClient.invalidateQueries({
-      queryKey: getAdminPendingSubmissionCountQueryOpts.all
-    })
-  }
-
   const handleMutationSuccess = () => {
     handleCloseDialog()
-    invalidateSubmissions()
-    void router.invalidate()
+
+    return Promise.all([
+      queryClient.invalidateQueries({
+        queryKey: getAdminSubmissionsQueryOpts.all
+      }),
+      queryClient.invalidateQueries({
+        queryKey: getAdminPendingSubmissionCountQueryOpts.all
+      })
+    ])
   }
 
   const rejectMutation = useMutation({
@@ -121,11 +119,12 @@ export const SubmissionActionsCell = ({
       return result
     },
     onSuccess: (result) => {
-      handleMutationSuccess()
       void router.navigate({
         to: '/admin/library/$memeId',
         params: { memeId: result.id }
       })
+
+      return handleMutationSuccess()
     },
     onError: handleMutationError
   })

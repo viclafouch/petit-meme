@@ -58,10 +58,9 @@ const StudioBranding = ({ title }: StudioBrandingProps) => {
 
 type StudioPageProps = {
   meme: MemeWithVideo
-  relatedMemesPromise: Promise<MemeWithVideo[]>
 }
 
-export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageProps) => {
+export const StudioPage = ({ meme }: StudioPageProps) => {
   const ffmpegQuery = useVideoInitializer()
   const { triggerPreload } = useVideoPreloader(ffmpegQuery.data, meme.id)
 
@@ -177,10 +176,7 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageProps) => {
               />
               <Separator />
               <React.Suspense fallback={null}>
-                <StudioRelatedMemes
-                  currentMemeId={meme.id}
-                  relatedMemesPromise={relatedMemesPromise}
-                />
+                <StudioRelatedMemes meme={meme} />
               </React.Suspense>
             </div>
           </DrawerContent>
@@ -214,10 +210,7 @@ export const StudioPage = ({ meme, relatedMemesPromise }: StudioPageProps) => {
           />
           <Separator />
           <React.Suspense fallback={null}>
-            <StudioRelatedMemes
-              currentMemeId={meme.id}
-              relatedMemesPromise={relatedMemesPromise}
-            />
+            <StudioRelatedMemes meme={meme} />
           </React.Suspense>
         </div>
       </div>

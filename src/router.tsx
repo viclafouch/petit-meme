@@ -61,8 +61,7 @@ export function getRouter() {
         return localizeUrl(url)
       }
     },
-    defaultPreloadStaleTime: 30_000,
-    defaultStaleTime: 30_000,
+    defaultPreloadStaleTime: 0,
     defaultStaleReloadMode: 'background',
     defaultPendingComponent: () => {
       return <DefaultLoading className="flex-1" />

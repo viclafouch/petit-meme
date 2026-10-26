@@ -1,6 +1,5 @@
 import React from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { useRouter } from '@tanstack/react-router'
 import { Button } from '~/components/ui/button'
 import {
   Dialog,
@@ -20,14 +19,13 @@ export const AddCategoryButton = ({
 }: AddCategoryButtonProps) => {
   const [isOpen, setIsOpen] = React.useState(false)
   const queryClient = useQueryClient()
-  const router = useRouter()
 
   const handleSuccess = () => {
     setIsOpen(false)
-    void queryClient.invalidateQueries({
+
+    return queryClient.invalidateQueries({
       queryKey: getCategoriesListQueryOpts.all
     })
-    void router.invalidate()
   }
 
   return (

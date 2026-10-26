@@ -32,13 +32,13 @@ export type CategoryFormProps =
       type: 'edit'
       onClose?: () => void
       category: EnrichedCategory
-      onSuccess?: () => void
+      onSuccess?: () => Promise<void>
     }
   | {
       type: 'add'
       onClose?: () => void
       category?: never
-      onSuccess?: () => void
+      onSuccess?: () => Promise<void>
     }
 
 export const CategoryForm = ({

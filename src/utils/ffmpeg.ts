@@ -15,7 +15,12 @@ export const loadFFmpeg = createClientOnlyFn(async (timeoutMessage: string) => {
   ])
 
   await withTimeout(
-    ffmpeg.load({ coreURL, wasmURL }),
+    (abortController) => {
+      return ffmpeg.load(
+        { coreURL, wasmURL },
+        { signal: abortController.signal }
+      )
+    },
     FFMPEG_LOAD_TIMEOUT_MS,
     timeoutMessage
   )

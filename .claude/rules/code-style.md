@@ -67,13 +67,13 @@ Always use native modern APIs (Intl, URLSearchParams, structuredClone, etc.) ins
 **NEVER duplicate constants, helpers, or types across files.**
 
 **Global constants** (used across multiple features):
-- `src/constants/` - One file per domain (`booking.ts`, `court.ts`)
+- `src/constants/` - One file per domain (`meme.ts`, `bunny.ts`)
 - `src/constants/types.ts` - Shared types
 - `src/helpers/` - Pure utility functions
 
 **Component-specific constants** (used only by one component/feature):
 - Co-locate with the component in a `constants.ts` file
-- Example: `booking-modal/constants.ts` for modal-specific config
+- Example: `cookie-consent/constants.ts` for config used by that component only
 - Import with relative path: `from './constants'`
 
 Before creating a constant or helper, search if it already exists.

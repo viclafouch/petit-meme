@@ -21,7 +21,7 @@ const formOpts = formOptions({
 
 type TwitterFormProps = {
   closeDialog: () => void
-  onSuccess?: ({ memeId }: { memeId: string }) => void
+  onSuccess?: ({ memeId }: { memeId: string }) => Promise<void>
 }
 
 export const TwitterForm = ({ onSuccess, closeDialog }: TwitterFormProps) => {
@@ -55,7 +55,8 @@ export const TwitterForm = ({ onSuccess, closeDialog }: TwitterFormProps) => {
     },
     onSuccess: (data) => {
       closeDialog()
-      onSuccess?.({ memeId: data.id })
+
+      return onSuccess?.({ memeId: data.id })
     }
   })
 

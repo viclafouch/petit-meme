@@ -41,3 +41,12 @@ minimumReleaseAgeExclude:
   - '@better-auth/stripe@1.7.13'
   - '@better-auth/telemetry@1.7.13'
   - better-auth@1.7.13
+permissions:
+  '@tanstack/ai':
+    skills: false
+  '@tanstack/react-router':
+    skills: false
+  '@tanstack/react-start':
+    skills: false
+  '@tanstack/react-table':
+    skills: false

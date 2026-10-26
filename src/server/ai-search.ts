@@ -103,13 +103,17 @@ async function extractSearchKeywords(prompt: string, systemPrompt: string) {
     )
 
     const result = await withTimeout(
-      chat({
-        adapter,
-        systemPrompts: [systemPrompt],
-        messages: [{ role: 'user', content: prompt }],
-        outputSchema: AI_SEARCH_RESPONSE_SCHEMA,
-        modelOptions: { max_tokens: 100 }
-      }),
+      (abortController) => {
+        return chat({
+          adapter,
+          systemPrompts: [systemPrompt],
+          messages: [{ role: 'user', content: prompt }],
+          threadId: crypto.randomUUID(),
+          outputSchema: AI_SEARCH_RESPONSE_SCHEMA,
+          modelOptions: { max_tokens: 100 },
+          abortController
+        })
+      },
       AI_SEARCH_TIMEOUT_MS,
       `AI search: timeout after ${AI_SEARCH_TIMEOUT_MS}ms`
     )

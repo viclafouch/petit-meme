@@ -28,7 +28,7 @@ const FILE_NAME_PREVIEW_LENGTH = 20
 
 type FileFormProps = {
   closeDialog: () => void
-  onSuccess?: ({ memeId }: { memeId: string }) => void
+  onSuccess?: ({ memeId }: { memeId: string }) => Promise<void>
 }
 
 type FileFormValues = {
@@ -80,7 +80,8 @@ export const FileForm = ({ onSuccess, closeDialog }: FileFormProps) => {
     },
     onSuccess: (data) => {
       closeDialog()
-      onSuccess?.({ memeId: data.id })
+
+      return onSuccess?.({ memeId: data.id })
     }
   })
 

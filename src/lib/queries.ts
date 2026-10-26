@@ -1,5 +1,6 @@
 import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
 import type { MemesFilters } from '~/constants/meme'
+import { PRIVATE_QUERY_META } from '~/constants/query'
 import {
   MINUTE,
   FIVE_MINUTES_MS,
@@ -76,6 +77,7 @@ getVideoStatusByIdQueryOpts.all = ['video-status'] as const
 export const getAuthUserQueryOpts = () => {
   return queryOptions({
     queryKey: [...getAuthUserQueryOpts.all],
+    meta: PRIVATE_QUERY_META,
     queryFn: () => {
       return getAuthUser()
     },
@@ -88,6 +90,7 @@ getAuthUserQueryOpts.all = ['auth-user'] as const
 export const getFavoritesMemesQueryOpts = () => {
   return queryOptions({
     queryKey: [...getFavoritesMemesQueryOpts.all],
+    meta: PRIVATE_QUERY_META,
     queryFn: () => {
       return getFavoritesMemes()
     },
@@ -124,6 +127,7 @@ getRecentCountMemesQueryOpts.all = ['recent-count-memes'] as const
 export const getActiveSubscriptionQueryOpts = () => {
   return queryOptions({
     queryKey: [...getActiveSubscriptionQueryOpts.all],
+    meta: PRIVATE_QUERY_META,
     queryFn: () => {
       return getActiveSubscription()
     },
@@ -172,6 +176,7 @@ getRelatedMemesQueryOpts.all = ['related-memes'] as const
 export const getUserSubmissionsQueryOpts = () => {
   return queryOptions({
     queryKey: [...getUserSubmissionsQueryOpts.all],
+    meta: PRIVATE_QUERY_META,
     queryFn: () => {
       return getUserSubmissions()
     },
@@ -200,6 +205,7 @@ getVideoBlobQueryOpts.all = ['video-blob'] as const
 export const getAiSearchQuotaQueryOpts = () => {
   return queryOptions({
     queryKey: [...getAiSearchQuotaQueryOpts.all],
+    meta: PRIVATE_QUERY_META,
     queryFn: () => {
       return checkAiSearchQuota()
     },

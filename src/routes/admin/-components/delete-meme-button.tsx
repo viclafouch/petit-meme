@@ -7,9 +7,8 @@ import { Button } from '~/components/ui/button'
 import type { Meme } from '~/db/generated/prisma/client'
 import { getErrorMessage } from '~/helpers/error'
 import {
-  getAdminDashboardTotalsQueryOpts,
   getAdminMemeByIdQueryOpts,
-  getAdminMemesListQueryOpts
+  invalidateAdminMemesOverview
 } from '~/routes/admin/-lib/queries'
 import { deleteMemeById } from '~/routes/admin/-server/memes'
 
@@ -42,15 +41,9 @@ export const DeleteMemeButton = ({
     },
     onSuccess: async () => {
       setIsDialogOpen(false)
-      await queryClient.invalidateQueries({
-        queryKey: getAdminMemesListQueryOpts.all,
-        exact: false
-      })
       queryClient.removeQueries(getAdminMemeByIdQueryOpts(meme.id))
-      void queryClient.invalidateQueries({
-        queryKey: getAdminDashboardTotalsQueryOpts.all
-      })
-      void router.navigate({ to: '/admin/library' })
+      await invalidateAdminMemesOverview(queryClient)
+      await router.navigate({ to: '/admin/library' })
     }
   })
 

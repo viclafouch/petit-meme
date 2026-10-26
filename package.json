@@ -103,7 +103,7 @@
     "@tanstack/eslint-plugin-query": "^5.104.5",
     "@tanstack/intent": "0.5.6",
     "@types/canvas-confetti": "1.9.0",
-    "@types/node": "^26.6.5",
+    "@types/node": "^24.19.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@viclafouch/oxc-config": "1.1.0",
@@ -131,7 +131,7 @@
     }
   },
   "engines": {
-    "node": ">=24.0.0"
+    "node": "24.x"
   },
   "intent": {
     "skills": [

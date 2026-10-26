@@ -17,7 +17,9 @@ const MEME_PATHNAME = `/memes/${E2E_NAMED_MEMES.mostViewed.id}`
 
 const clearPremiumReminderSnooze = (page: Page) => {
   return page.addInitScript((storageKey) => {
-    localStorage.removeItem(storageKey)
+    if (window === window.top) {
+      localStorage.removeItem(storageKey)
+    }
   }, PREMIUM_REMINDER_STORAGE_KEY)
 }
 

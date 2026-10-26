@@ -24,8 +24,20 @@ export const AUTH_BASE_PATH = '/api/auth'
 export const PASSWORD_MIN_LENGTH = 8
 export const PASSWORD_MAX_LENGTH = 100
 
+export const USER_NAME_MAX_LENGTH = 50
+
 export const getEmailSchema = () => {
   return z.email({ error: m.validation_email_invalid() })
+}
+
+export const getUserNameSchema = () => {
+  return z
+    .string()
+    .trim()
+    .min(1, { error: m.validation_name_required() })
+    .max(USER_NAME_MAX_LENGTH, {
+      error: m.validation_name_too_long({ maxLength: USER_NAME_MAX_LENGTH })
+    })
 }
 
 export const getPasswordSchema = () => {

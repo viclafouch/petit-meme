@@ -35,6 +35,8 @@ import {
 import { getAvatarSlotIdForEmail, resolveAvatarPath } from '~/helpers/avatar'
 import { formatDate } from '~/helpers/date'
 import { formatCentsToEuros } from '~/helpers/number'
+import { boundProviderName } from '~/helpers/user-name'
+import { signUpGuard } from '~/lib/auth-guard'
 import { authLogger, stripeLogger } from '~/lib/logger'
 import { sendEmailAsync } from '~/lib/resend'
 import { captureWithFeature } from '~/lib/sentry'
@@ -42,6 +44,7 @@ import { getStripeClient } from '~/lib/stripe'
 import { getLocale } from '~/paraglide/runtime'
 import { recordActivityEvent } from '~/utils/activity-event'
 import { cleanupUserData } from '~/utils/user-cleanup'
+import { claimVerificationEmailSend } from '~/utils/verification-email-quota'
 
 const PASSWORD_CHANGED_DATE_OPTIONS: Intl.DateTimeFormatOptions = {
   dateStyle: 'long',
@@ -156,6 +159,10 @@ const getAuthConfig = createServerOnlyFn(() => {
     baseURL: clientEnv.VITE_SITE_URL,
     basePath: AUTH_BASE_PATH,
     secret: serverEnv.BETTER_AUTH_SECRET,
+    disabledPaths: ['/update-user'],
+    hooks: {
+      before: signUpGuard
+    },
     database: prismaAdapter(prismaClient, {
       provider: 'postgresql'
     }),
@@ -198,13 +205,7 @@ const getAuthConfig = createServerOnlyFn(() => {
         sendEmailAsync({
           to: user.email,
           subject: emailSubjects[locale].resetPassword,
-          react: (
-            <ResetPassword
-              username={user.name}
-              resetUrl={url}
-              locale={locale}
-            />
-          ),
+          react: <ResetPassword resetUrl={url} locale={locale} />,
           logMessage: 'Sending reset password email to'
         })
       },
@@ -237,18 +238,18 @@ const getAuthConfig = createServerOnlyFn(() => {
       autoSignInAfterVerification: true,
       expiresIn: ONE_HOUR_IN_SECONDS,
       sendVerificationEmail: async ({ user, url }) => {
+        const isSendClaimed = await claimVerificationEmailSend(user.id)
+
+        if (!isSendClaimed) {
+          return
+        }
+
         const locale = getLocale()
         authLogger.info({ email: user.email }, 'Sending verification email')
         sendEmailAsync({
           to: user.email,
           subject: emailSubjects[locale].verifyEmail,
-          react: (
-            <EmailVerification
-              username={user.name}
-              verificationUrl={url}
-              locale={locale}
-            />
-          ),
+          react: <EmailVerification verificationUrl={url} locale={locale} />,
           logMessage: 'Sending verification email to'
         })
       },
@@ -266,11 +267,19 @@ const getAuthConfig = createServerOnlyFn(() => {
     socialProviders: {
       twitter: {
         clientId: serverEnv.AUTH_TWITTER_ID,
-        clientSecret: serverEnv.AUTH_TWITTER_SECRET
+        clientSecret: serverEnv.AUTH_TWITTER_SECRET,
+        mapProfileToUser: (profile) => {
+          return { name: boundProviderName(profile.data.name) }
+        }
       },
       discord: {
         clientId: serverEnv.AUTH_DISCORD_ID,
-        clientSecret: serverEnv.AUTH_DISCORD_SECRET
+        clientSecret: serverEnv.AUTH_DISCORD_SECRET,
+        mapProfileToUser: (profile) => {
+          return {
+            name: boundProviderName(profile.global_name || profile.username)
+          }
+        }
       }
     },
     rateLimit: {

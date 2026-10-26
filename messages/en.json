@@ -575,6 +575,7 @@
   "validation_accept_terms": "You must accept the terms to continue",
   "validation_email_invalid": "Invalid email address",
   "validation_name_required": "Username is required",
+  "validation_name_too_long": "Username must not exceed {maxLength} characters",
   "validation_password_too_long": "Password must not exceed {maxLength} characters",
   "validation_password_too_short": "Password must be at least {minLength} characters",
   "validation_passwords_dont_match": "Passwords do not match",

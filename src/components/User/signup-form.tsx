@@ -7,7 +7,8 @@ import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
 import { LoadingButton } from '~/components/ui/loading-button'
 import {
   getEmailSchema,
-  getPasswordWithConfirmationSchema
+  getPasswordWithConfirmationSchema,
+  getUserNameSchema
 } from '~/constants/auth'
 import {
   extractAuthErrorCode,
@@ -24,7 +25,7 @@ import { localizeHref } from '~/paraglide/runtime'
 const getSignupSchema = () => {
   return z
     .object({
-      name: z.string().min(1, { error: m.validation_name_required() }),
+      name: getUserNameSchema(),
       email: getEmailSchema(),
       acceptTerms: z.literal(true, {
         error: m.validation_accept_terms()

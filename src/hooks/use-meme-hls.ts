@@ -8,17 +8,22 @@ type UseMemeHlsParams = {
 
 export const useMemeHls = ({ bunnyId }: UseMemeHlsParams) => {
   const videoRef = React.useRef<HTMLVideoElement>(null)
+  const [failedBunnyId, setFailedBunnyId] = React.useState<string | null>(null)
+  const hasPlaybackFailed = failedBunnyId === bunnyId
 
   React.useEffect(() => {
     const video = videoRef.current
 
-    if (!video) {
+    if (!video || hasPlaybackFailed) {
       return () => {}
     }
 
     const detachHlsSource = attachHlsSource({
       video,
-      videoSrc: buildVideoStreamUrl(bunnyId)
+      videoSrc: buildVideoStreamUrl(bunnyId),
+      onFatalError: () => {
+        setFailedBunnyId(bunnyId)
+      }
     })
 
     return () => {
@@ -27,7 +32,15 @@ export const useMemeHls = ({ bunnyId }: UseMemeHlsParams) => {
       video.removeAttribute('src')
       video.load()
     }
-  }, [bunnyId])
+  }, [bunnyId, hasPlaybackFailed])
 
-  return { videoRef }
+  const handleRetryPlayback = () => {
+    setFailedBunnyId(null)
+  }
+
+  const playbackFailure = hasPlaybackFailed
+    ? { handleRetry: handleRetryPlayback }
+    : null
+
+  return { videoRef, playbackFailure }
 }

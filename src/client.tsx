@@ -6,6 +6,9 @@ import { hydrateRoot } from 'react-dom/client'
 import { z } from 'zod'
 import { StartClient } from '@tanstack/react-start/client'
 import { getLocale, type Locale } from '~/paraglide/runtime'
+import { preloadHls } from '~/utils/video'
+
+preloadHls()
 
 const ZOD_LOCALE_IMPORTS = {
   fr: () => {

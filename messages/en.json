@@ -304,6 +304,7 @@
   "meme_open_studio": "Open in Studio",
   "meme_pause_video": "Pause",
   "meme_play_video": "Play video",
+  "meme_video_playback_error": "The video could not be played.",
   "meme_ai_search_cta": "AI",
   "meme_ai_search_cta_mobile": "Search with AI",
   "meme_random": "Random",

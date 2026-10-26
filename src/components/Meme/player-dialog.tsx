@@ -18,7 +18,7 @@ import { buildVideoImageUrl } from '~/lib/bunny'
 import { buildUrl } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
 import { trackMemeAction } from '~/server/meme'
-import { tryPlayVideo } from '~/utils/video'
+import { playVideoWhenReady } from '~/utils/video'
 
 type PlayerDialogProps = {
   meme: MemeWithVideo
@@ -35,7 +35,9 @@ export const PlayerDialog = ({
   queryID,
   authenticatedUserToken
 }: PlayerDialogProps) => {
-  const { videoRef } = useMemeHls({ bunnyId: meme.video.bunnyId })
+  const { videoRef, playbackFailure } = useMemeHls({
+    bunnyId: meme.video.bunnyId
+  })
   const isReducedMotion = useReducedMotion()
   const shareMutation = useMemeExport({ mode: 'share' })
   const downloadMutation = useMemeExport({ mode: 'download' })
@@ -91,7 +93,7 @@ export const PlayerDialog = ({
     onClose()
   }
 
-  const playVideoWhenReady = async () => {
+  const handlePlayVideo = () => {
     const video = videoRef.current
 
     if (!video) {
@@ -100,25 +102,7 @@ export const PlayerDialog = ({
 
     playAbortRef.current?.abort()
     playAbortRef.current = new AbortController()
-    const { signal } = playAbortRef.current
-
-    const hasStarted = await tryPlayVideo(video)
-
-    if (hasStarted || signal.aborted) {
-      return
-    }
-
-    video.addEventListener(
-      'canplay',
-      () => {
-        void tryPlayVideo(video)
-      },
-      { once: true, signal }
-    )
-  }
-
-  const handlePlayVideo = () => {
-    void playVideoWhenReady()
+    void playVideoWhenReady({ video, signal: playAbortRef.current.signal })
   }
 
   const handleStudioClick = () => {
@@ -194,6 +178,7 @@ export const PlayerDialog = ({
                   ref={videoRef}
                   poster={buildVideoImageUrl(meme.video.bunnyId)}
                   showRemainingTime
+                  playbackFailure={playbackFailure}
                 />
               </div>
               <div

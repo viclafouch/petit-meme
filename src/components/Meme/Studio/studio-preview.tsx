@@ -29,12 +29,13 @@ type OriginalVideoProps = {
 }
 
 const OriginalVideo = ({ bunnyId }: OriginalVideoProps) => {
-  const { videoRef } = useMemeHls({ bunnyId })
+  const { videoRef, playbackFailure } = useMemeHls({ bunnyId })
 
   return (
     <MemeVideoPlayer
       ref={videoRef}
       poster={buildVideoImageUrl(bunnyId)}
+      playbackFailure={playbackFailure}
       tabIndex={-1}
       className="dark"
     />

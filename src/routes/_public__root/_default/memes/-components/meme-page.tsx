@@ -110,7 +110,9 @@ export const MemePage = () => {
       title: memeQuery.data.title
     })
   )
-  const { videoRef } = useMemeHls({ bunnyId: memeQuery.data.video.bunnyId })
+  const { videoRef, playbackFailure } = useMemeHls({
+    bunnyId: memeQuery.data.video.bunnyId
+  })
   const navigate = memeRouteApi.useNavigate()
   const memeLink = useLinkProps({
     to: '/memes/$memeId',
@@ -214,6 +216,7 @@ export const MemePage = () => {
                 poster={buildVideoImageUrl(memeQuery.data.video.bunnyId)}
                 autoPlay
                 showRemainingTime
+                playbackFailure={playbackFailure}
                 className="dark"
               />
             </div>

@@ -109,6 +109,7 @@ async function extractSearchKeywords(prompt: string, systemPrompt: string) {
           systemPrompts: [systemPrompt],
           messages: [{ role: 'user', content: prompt }],
           threadId: crypto.randomUUID(),
+          promptCache: 'none',
           outputSchema: AI_SEARCH_RESPONSE_SCHEMA,
           modelOptions: { max_tokens: 100 },
           abortController

@@ -37,6 +37,7 @@ type ColorSwatchesProps<TValue extends string> = {
   activeValue: TValue
   onSelect: (value: TValue) => void
   labelledBy: string
+  disabled: boolean
 }
 
 const STUDIO_FONT_SELECT_ITEMS = STUDIO_FONTS.map((font) => {
@@ -47,12 +48,14 @@ const ColorSwatches = <TValue extends string>({
   colors,
   activeValue,
   onSelect,
-  labelledBy
+  labelledBy,
+  disabled
 }: ColorSwatchesProps<TValue>) => {
   return (
     <RadioGroup
       value={activeValue}
       onValueChange={onSelect}
+      disabled={disabled}
       className="flex gap-3"
       aria-labelledby={labelledBy}
     >
@@ -167,12 +170,13 @@ export const StudioControls = ({
       ) : null}
       <div className="flex flex-col gap-1.5">
         <Label id="studio-templates-label">{m.studio_templates()}</Label>
-        <StudioTemplates bunnyId={bunnyId} />
+        <StudioTemplates bunnyId={bunnyId} disabled={disabled} />
       </div>
       <Separator />
       <div className="flex flex-col gap-1.5">
         <Label id="studio-position-label">{m.studio_position()}</Label>
         <RadioToggleGroup
+          disabled={disabled}
           variant="outline"
           value={settings.textPosition}
           onValueChange={handlePositionChange}
@@ -190,6 +194,7 @@ export const StudioControls = ({
       <div className="flex flex-col gap-1.5">
         <Label id="studio-font-label">{m.studio_font()}</Label>
         <Select
+          disabled={disabled}
           items={STUDIO_FONT_SELECT_ITEMS}
           value={settings.fontFamily}
           onValueChange={handleFontFamilyChange}
@@ -211,6 +216,7 @@ export const StudioControls = ({
       <div className="flex flex-col gap-1.5">
         <Label id="studio-size-label">{m.studio_size()}</Label>
         <RadioToggleGroup
+          disabled={disabled}
           variant="outline"
           value={String(settings.fontSize)}
           onValueChange={handleFontSizeChange}
@@ -233,6 +239,7 @@ export const StudioControls = ({
       <div className="flex flex-col gap-2.5">
         <Label id="studio-font-color-label">{m.studio_font_color()}</Label>
         <ColorSwatches
+          disabled={disabled}
           colors={colors}
           activeValue={settings.fontColor}
           onSelect={handleFontColorChange}
@@ -242,6 +249,7 @@ export const StudioControls = ({
       <div className="flex flex-col gap-2.5">
         <Label id="studio-band-color-label">{m.studio_band_color()}</Label>
         <ColorSwatches
+          disabled={disabled}
           colors={bandColors}
           activeValue={settings.bandColor}
           onSelect={handleBandColorChange}

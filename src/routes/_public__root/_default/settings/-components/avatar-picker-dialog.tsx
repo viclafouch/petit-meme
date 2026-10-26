@@ -25,7 +25,7 @@ import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 
 const AVATAR_TILE_CLASS_NAME = cn(
-  'size-auto aspect-square min-w-11 flex-none rounded-full p-0 first:rounded-full last:rounded-full',
+  'size-auto aspect-square min-w-11 flex-none rounded-full p-0 first-of-type:rounded-full last-of-type:rounded-full',
   SELECTED_TILE_RING_CLASS_NAME
 )
 

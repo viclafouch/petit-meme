@@ -23,8 +23,8 @@ const USER_AVATAR_SIZE_CLASSES = {
 } as const satisfies Record<UserAvatarSize, UserAvatarSizeClasses>
 
 const USER_AVATAR_SHAPE_CLASSES = {
-  circle: 'rounded-full',
-  rounded: 'rounded-lg'
+  circle: 'rounded-full after:rounded-full',
+  rounded: 'rounded-lg after:rounded-lg'
 } as const satisfies Record<UserAvatarShape, string>
 
 type UserAvatarProps = {
@@ -55,9 +55,17 @@ export const UserAvatar = ({
     : null
 
   return (
-    <Avatar className={cn(sizeClasses.avatar, shapeClassName, className)}>
+    <Avatar
+      className={cn(
+        'overflow-hidden',
+        sizeClasses.avatar,
+        shapeClassName,
+        className
+      )}
+    >
       {image ? (
         <AvatarImage
+          className={shapeClassName}
           src={image}
           alt={alt}
           referrerPolicy="no-referrer"

@@ -278,7 +278,6 @@ export const MemePage = () => {
               </div>
               <Button
                 variant="outline"
-                className="shrink-0 flex-1"
                 onClick={() => {
                   void handleCopyMemeLink()
                 }}

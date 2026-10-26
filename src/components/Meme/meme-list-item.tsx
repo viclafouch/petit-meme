@@ -229,7 +229,7 @@ export const MemeListItem = React.memo(
                 <EllipsisVertical className={cn(sizes[size].icon)} />
                 <span className="sr-only">{m.meme_open_options()}</span>
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
+              <DropdownMenuContent className="w-auto">
                 <DropdownMenuLinkItem
                   render={
                     <Link to="/memes/$memeId" params={{ memeId: meme.id }} />

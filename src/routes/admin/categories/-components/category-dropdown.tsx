@@ -3,7 +3,6 @@ import { EllipsisVertical } from 'lucide-react'
 import { toast } from 'sonner'
 import * as Sentry from '@sentry/tanstackstart-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useRouter } from '@tanstack/react-router'
 import { ConfirmAlertDialog } from '~/components/confirm-alert-dialog'
 import { Button } from '~/components/ui/button'
 import {
@@ -29,26 +28,26 @@ type CategoryDropdownProps = {
 }
 
 export const CategoryDropdown = ({ category }: CategoryDropdownProps) => {
-  const router = useRouter()
   const queryClient = useQueryClient()
   const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false)
 
-  const invalidateData = () => {
-    void queryClient.invalidateQueries({
+  const invalidateCategories = () => {
+    return queryClient.invalidateQueries({
       queryKey: getCategoriesListQueryOpts.all
     })
-    void router.invalidate()
   }
 
   const handleDeleteSuccess = () => {
     setIsDeleteDialogOpen(false)
-    invalidateData()
+
+    return invalidateCategories()
   }
 
   const handleEditSuccess = () => {
     setIsEditDialogOpen(false)
-    invalidateData()
+
+    return invalidateCategories()
   }
 
   const deleteMutation = useMutation({

@@ -6,15 +6,21 @@ paths: ["src/**/*.{ts,tsx}"]
 
 ### React
 - **Use `useMutation`** for async operations (forms, API calls) instead of multiple `useState` and manual state management for loading/success/error.
-- **NEVER use `useCallback` or `useMemo`** unless you have a proven performance problem. These are premature optimizations that add complexity without benefit in 99% of cases. Only valid uses:
-  - Passing callbacks to heavily memoized child components (`React.memo`)
-  - Expensive computations that are measurably slow (profile first)
-  - Dependencies in `useEffect` that would cause infinite loops without memoization
+- **The React Compiler memoizes the client build** (`react({ compiler: true })` in `vite.config.ts`). New code writes no `useMemo`, `useCallback` or `React.memo`. The one escape hatch is a value used as an effect dependency, where the effect must not fire again unless the value really changes
+- **Existing memoization stays.** Removing a `useMemo` or `useCallback` can change the compiler output, so it goes only with a test of the behaviour it guards
+- **Code the compiler skips still runs**, unmemoized. Run the build with `react({ compiler: { reportDiagnostics: true } })` to list the skipped functions. Never add `"use no memo"` to make a component work: fix the Rules of React violation instead
 - **Extract logic into custom hooks** - any useEffect, useState combo, or reusable logic should become a custom hook in `src/hooks/`. Keep components focused on rendering.
 
 ### Libraries
 - ALWAYS use shadcn components instead of raw HTML elements
-- **Never modify code** in `src/components/ui` or `src/components/animate-ui`, with one exception: after a `shadcn add`, rewrite `import { cn } from "cn"` to `import { cn } from '~/lib/utils'`, which carries the project classes. `src/lib/utils.test.ts` fails until every file does
+- **Code in `src/components/ui` and `src/components/animate-ui` changes in two ways only**: through the shadcn CLI (`shadcn add`, or a `shadcn migrate` such as `radix`), or by porting an upstream fix by hand. After a `shadcn add`, rewrite `import { cn } from "cn"` to `import { cn } from '~/lib/utils'`, which carries the project classes. `src/lib/utils.test.ts` fails until every file does. The components carry deliberate variants: `shadcn add <name> --diff` shows the upstream changes, and a fix found there is ported rather than overwritten
+
+### Data loading (TanStack Query + Router)
+- **Query owns server data and its freshness.** A loader fills the cache with `context.queryClient.query({ ...opts, staleTime: 'static' })`, and the component reads the same options with `useSuspenseQuery`. A loader never returns server data the component reads: the one exception is what `head()` needs
+- **Secondary data streams**: start it with `void Promise.allSettled([context.queryClient.query(opts)])` and read it under a `Suspense` boundary
+- **The router leaves preload freshness to Query** (`defaultPreloadStaleTime: 0`). A loader that calls a server function outside Query sets its own `staleTime` and `preloadStaleTime`, or every hovered link calls the server again
+- **A mutation returns its invalidation** from `onSuccess` or `onSettled`, so `isPending` lasts until the fresh data is on screen. `router.invalidate()` follows only when router-owned data changed too: the root `user` context, or a loader read by `head()`
+- **A query that belongs to one account carries `meta: PRIVATE_QUERY_META`** (`~/constants/query`). `useResetAccountData` removes these queries at sign in, sign out and account deletion
 
 ### Server Functions (TanStack Start)
 - Use `useMutation` (TanStack Query) for async operations
@@ -68,11 +74,8 @@ paths: ["src/**/*.{ts,tsx}"]
 - Adaptive layouts
 
 ### Performance
-- Core Web Vitals optimization
-- Bundle size management
-- Lazy loading strategies
-- Image optimization
-- Font loading
+- **The entry chunk loads on every page, before the video.** A library a page needs only after an interaction or after load comes in through a dynamic `import()`, the way `instrument.client.ts` adds Sentry Replay on `load`
+- **Measure a bundle change** with `pnpm build:e2e`, then the gzip size of `.output/public/assets/*.js`. The sourcemaps next to each chunk name the packages inside it
 
 ### Tailwind CSS
 - Keep styling consistent: one source of truth for design tokens (fonts, colors, spacing)

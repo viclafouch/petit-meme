@@ -67,8 +67,10 @@ export function useToggleBookmark({
       toast.error(m.error_bookmark_update())
     },
     onSettled: () => {
-      void queryClient.invalidateQueries(getMemeByIdQueryOpts(meme.id))
-      void queryClient.invalidateQueries(getFavoritesMemesQueryOpts())
+      return Promise.all([
+        queryClient.invalidateQueries(getMemeByIdQueryOpts(meme.id)),
+        queryClient.invalidateQueries(getFavoritesMemesQueryOpts())
+      ])
     }
   })
 

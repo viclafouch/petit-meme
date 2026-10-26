@@ -1,5 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { MINUTE } from '~/constants/time'
 import {
   getFavoritesMemesQueryOpts,
   getRecentCountMemesQueryOpts,
@@ -11,12 +10,9 @@ import { getLocale } from '~/paraglide/runtime'
 import { getHomeFaqItems } from './-components/faq-items'
 import { HomePage } from './-components/home-page'
 
-const HOME_STALE_MINUTES = 10
-
 export const Route = createFileRoute('/_public__root/')({
   component: HomePage,
   pendingMs: 3000,
-  staleTime: HOME_STALE_MINUTES * MINUTE,
   head: () => {
     const locale = getLocale()
     const description = m.seo_home_description()

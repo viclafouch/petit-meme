@@ -2,8 +2,8 @@ import React from 'react'
 import { CircleAlert } from 'lucide-react'
 import { z } from 'zod'
 import { formOptions } from '@tanstack/react-form'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Link, useRouter } from '@tanstack/react-router'
+import { useMutation } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
 import { LoadingButton } from '~/components/ui/loading-button'
 import { LastLoginBadge } from '~/components/User/last-login-badge'
@@ -14,12 +14,9 @@ import {
 } from '~/helpers/auth-errors'
 import { useAppForm } from '~/hooks/use-app-form'
 import { useErrorFocus } from '~/hooks/use-error-focus'
+import { useResetAccountData } from '~/hooks/use-reset-account-data'
 import { authClient } from '~/lib/auth-client'
 import { focusFirstInvalidField } from '~/lib/form'
-import {
-  getActiveSubscriptionQueryOpts,
-  getAuthUserQueryOpts
-} from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
 
@@ -51,8 +48,7 @@ export const LoginForm = ({
   onOpenChange,
   lastLoginMethod
 }: LoginFormProps) => {
-  const router = useRouter()
-  const queryClient = useQueryClient()
+  const resetAccountData = useResetAccountData()
 
   const signInMutation = useMutation({
     mutationFn: async ({
@@ -75,9 +71,7 @@ export const LoginForm = ({
       captureWithFeature(error, 'sign-in')
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries(getAuthUserQueryOpts())
-      await router.invalidate({ sync: true })
-      await queryClient.invalidateQueries(getActiveSubscriptionQueryOpts())
+      await resetAccountData()
 
       onOpenChange?.(false)
     }

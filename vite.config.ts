@@ -88,7 +88,7 @@ export default defineConfig(async ({ mode }) => {
           semicolons: false
         }
       }),
-      react(),
+      react({ compiler: true }),
       paraglideVitePlugin({
         project: './project.inlang'
       }),

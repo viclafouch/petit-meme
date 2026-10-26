@@ -109,10 +109,11 @@ export const SubmissionForm = ({ pendingCount }: SubmissionFormProps) => {
     },
     onSuccess: () => {
       toast.success(m.submit_success_toast())
-      void queryClient.invalidateQueries({
+      form.reset()
+
+      return queryClient.invalidateQueries({
         queryKey: getUserSubmissionsQueryOpts.all
       })
-      form.reset()
     }
   })
 

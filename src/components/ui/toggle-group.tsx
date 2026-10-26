@@ -1,7 +1,7 @@
 /* oxlint-disable react/jsx-no-constructed-context-values */
 import * as React from 'react'
 import { type VariantProps } from 'class-variance-authority'
-import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group'
+import { ToggleGroup as ToggleGroupPrimitive } from 'radix-ui'
 import { toggleVariants } from '~/components/ui/toggle'
 import { cn } from '~/lib/utils'
 

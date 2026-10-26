@@ -1,5 +1,6 @@
 import { Minus } from 'lucide-react'
-import { getRouteApi, Link } from '@tanstack/react-router'
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
 import { PageHeader } from '~/components/page-header'
 import { Badge } from '~/components/ui/badge'
 import { Container } from '~/components/ui/container'
@@ -13,6 +14,7 @@ import { AdminTable } from '~/routes/admin/-components/admin-table'
 import { EmptyCell } from '~/routes/admin/-components/empty-cell'
 import { RelativeDateTooltip } from '~/routes/admin/-components/relative-date-tooltip'
 import { INITIAL_PAGINATION } from '~/routes/admin/-lib/constants'
+import { getAdminUsersListQueryOpts } from '~/routes/admin/-lib/queries'
 import { createAppColumnHelper, useAppTable } from '~/routes/admin/-lib/table'
 import type { EnrichedUser } from '~/routes/admin/-server/users'
 import { UserActionsCell } from '~/routes/admin/users/-components/user-actions-cell'
@@ -21,8 +23,6 @@ import {
   SubscriptionBadge,
   UserStatusBadges
 } from '~/routes/admin/users/-components/user-badges'
-
-const routeApi = getRouteApi('/admin/users/')
 
 const columnHelper = createAppColumnHelper<EnrichedUser>()
 
@@ -155,10 +155,10 @@ const columns = columnHelper.columns([
 ])
 
 export const UsersPage = () => {
-  const { users } = routeApi.useLoaderData()
+  const usersListQuery = useSuspenseQuery(getAdminUsersListQueryOpts())
 
   const table = useAppTable({
-    data: users,
+    data: usersListQuery.data.users,
     columns,
     initialState: {
       sorting: [{ id: 'lastActiveAt', desc: true }],

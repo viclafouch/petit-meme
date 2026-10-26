@@ -24,10 +24,10 @@ L'app est en production avec des utilisateurs et des données réelles.
 
 #### 2. Créer la migration
 
-**Important** : Prisma lit `DATABASE_URL` depuis l'environnement. Le fichier `prisma/prisma.config.ts` ne charge pas `.env` automatiquement. Il faut toujours préfixer avec `dotenv -e` pour injecter les variables.
+**Important** : Prisma lit `DATABASE_URL` depuis l'environnement. Le fichier `prisma.config.ts` ne charge aucun fichier d'environnement. Il faut toujours préfixer avec `dotenv run -f` pour injecter les variables.
 
 ```bash
-pnpm exec dotenv -e .env.development -- pnpm exec prisma migrate dev --name <nom_descriptif>
+pnpm exec dotenv run -f .env.development -- pnpm exec prisma migrate dev --name <nom_descriptif>
 ```
 
 Cela :
@@ -59,7 +59,7 @@ pnpm run prisma:migrate:prod
 
 **`--environment=production` n'est pas optionnel.** Sans ce drapeau, `vercel env pull` tire le scope *development*, quel que soit le nom du fichier de destination. Le fichier obtenu s'appellerait `.env.production` sans contenir les variables de production.
 
-Le script `prisma:migrate:prod` utilise `dotenv -e .env.production -- prisma migrate deploy`. `migrate deploy` est safe : il n'applique que les migrations non encore appliquées et ne touche jamais au schema directement.
+Le script `prisma:migrate:prod` utilise `dotenv run -f .env.production -- prisma migrate deploy`. `migrate deploy` est safe : il n'applique que les migrations non encore appliquées et ne touche jamais au schema directement.
 
 **Toujours tirer `.env.production` avant d'appliquer** pour avoir la `DATABASE_URL` à jour.
 
@@ -67,8 +67,8 @@ Le script `prisma:migrate:prod` utilise `dotenv -e .env.production -- prisma mig
 
 | Commande | Environnement | Usage |
 |----------|--------------|-------|
-| `pnpm exec dotenv -e .env.development -- pnpm exec prisma migrate dev --name <nom>` | Local | Créer + appliquer une migration |
-| `pnpm exec dotenv -e .env.development -- pnpm exec prisma generate` | Local | Régénérer le client (aussi dans `postinstall`) |
+| `pnpm exec dotenv run -f .env.development -- pnpm exec prisma migrate dev --name <nom>` | Local | Créer + appliquer une migration |
+| `pnpm exec dotenv run -f .env.development -- pnpm exec prisma generate` | Local | Régénérer le client (aussi dans `postinstall`) |
 | `pnpm run prisma:migrate:dev` | Local | Appliquer les migrations pendantes (via `.env.development`) |
 | `vercel env pull --environment=production .env.production` | — | Tirer les env de prod depuis Vercel |
 | `pnpm run prisma:migrate:prod` | Production | Appliquer les migrations pendantes (via `.env.production`) |

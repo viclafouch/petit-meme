@@ -1,11 +1,13 @@
 import React from 'react'
 import { toast } from 'sonner'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useRouter } from '@tanstack/react-router'
 import { getErrorMessage } from '~/helpers/error'
 import { captureWithFeature, type SentryFeature } from '~/lib/sentry'
 import { BAN_REASONS, type BanReason } from '~/routes/admin/-lib/ban'
-import { getAdminUserDetailQueryOpts } from '~/routes/admin/-lib/queries'
+import {
+  getAdminUserDetailQueryOpts,
+  getAdminUsersListQueryOpts
+} from '~/routes/admin/-lib/queries'
 import {
   banUserById,
   removeUser,
@@ -97,7 +99,6 @@ export const useUserModeration = ({
   const [activeDialog, setActiveDialog] =
     React.useState<UserModerationDialog | null>(null)
   const [banReason, setBanReason] = React.useState<BanReason>(BAN_REASONS[0])
-  const router = useRouter()
   const queryClient = useQueryClient()
 
   const handleClose = () => {
@@ -119,14 +120,20 @@ export const useUserModeration = ({
     },
     onSuccess: (_result, dialog) => {
       handleClose()
-      void queryClient.invalidateQueries({
-        queryKey: getAdminUserDetailQueryOpts(userId).queryKey
+      const usersListInvalidation = queryClient.invalidateQueries({
+        queryKey: getAdminUsersListQueryOpts.all
       })
-      void router.invalidate()
 
       if (dialog === 'delete') {
         onDeleted?.()
+
+        return usersListInvalidation
       }
+
+      return Promise.all([
+        usersListInvalidation,
+        queryClient.invalidateQueries(getAdminUserDetailQueryOpts(userId))
+      ])
     },
     onError: (error, dialog) => {
       captureWithFeature(error, MODERATION_ACTIONS[dialog].feature)

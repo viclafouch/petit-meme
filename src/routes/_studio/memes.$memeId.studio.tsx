@@ -1,9 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { StudioLoadingFallback } from '~/components/Meme/studio-fallbacks'
 import { buildVideoImageUrl } from '~/lib/bunny'
-import { getMemeByIdQueryOpts } from '~/lib/queries'
+import { getMemeByIdQueryOpts, getRelatedMemesQueryOpts } from '~/lib/queries'
 import { buildMemeSeo } from '~/lib/seo'
-import { getRelatedMemes } from '~/server/meme'
 import { MemeStudioRoutePage } from './-components/meme-studio-route-page'
 
 export const Route = createFileRoute('/_studio/memes/$memeId/studio')({
@@ -16,11 +15,13 @@ export const Route = createFileRoute('/_studio/memes/$memeId/studio')({
       staleTime: 'static'
     })
 
-    const relatedMemesPromise = getRelatedMemes({
-      data: { memeId: meme.id, title: meme.title }
-    })
+    void Promise.allSettled([
+      context.queryClient.query(
+        getRelatedMemesQueryOpts({ memeId: meme.id, title: meme.title })
+      )
+    ])
 
-    return { meme, relatedMemesPromise }
+    return { meme }
   },
   head: ({ loaderData, match }) => {
     if (loaderData?.meme) {

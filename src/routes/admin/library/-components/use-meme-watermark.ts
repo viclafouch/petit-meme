@@ -128,8 +128,11 @@ export function useMemeWatermark(memeId: Meme['id']) {
     },
     onSuccess: () => {
       revokePreview()
-      void queryClient.invalidateQueries(getAdminMemeWatermarkQueryOpts(memeId))
       toast.success('Watermark uploadé')
+
+      return queryClient.invalidateQueries(
+        getAdminMemeWatermarkQueryOpts(memeId)
+      )
     },
     onError: (error) => {
       captureWithFeature(error, 'admin-watermark')

@@ -3,7 +3,7 @@ import { CircleAlert, MessageCircleWarning } from 'lucide-react'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { formOptions } from '@tanstack/react-form'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 import type { WithDialog } from '~/@types/dialog'
 import {
@@ -23,13 +23,9 @@ import {
 } from '~/helpers/auth-errors'
 import { useAppForm } from '~/hooks/use-app-form'
 import { useErrorFocus } from '~/hooks/use-error-focus'
+import { useResetAccountData } from '~/hooks/use-reset-account-data'
 import { authClient } from '~/lib/auth-client'
 import { focusFirstInvalidField } from '~/lib/form'
-import {
-  getActiveSubscriptionQueryOpts,
-  getAuthUserQueryOpts,
-  getFavoritesMemesQueryOpts
-} from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
 
@@ -56,7 +52,7 @@ type DeleteAccountFormProps = {
 
 const DeleteAccountForm = ({ onCancel }: DeleteAccountFormProps) => {
   const router = useRouter()
-  const queryClient = useQueryClient()
+  const resetAccountData = useResetAccountData()
 
   const deleteAccountMutation = useMutation({
     mutationFn: async ({ currentPassword }: { currentPassword: string }) => {
@@ -72,12 +68,9 @@ const DeleteAccountForm = ({ onCancel }: DeleteAccountFormProps) => {
       captureWithFeature(error, 'delete-account')
     },
     onSuccess: async () => {
-      queryClient.removeQueries(getAuthUserQueryOpts())
-      queryClient.removeQueries(getActiveSubscriptionQueryOpts())
-      queryClient.removeQueries(getFavoritesMemesQueryOpts())
+      await resetAccountData()
       toast.success(m.auth_account_deleted_toast())
-      void router.navigate({ to: '/', from: '/' })
-      await router.invalidate()
+      await router.navigate({ to: '/' })
     }
   })
 

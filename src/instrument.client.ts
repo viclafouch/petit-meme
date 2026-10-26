@@ -20,11 +20,6 @@ Sentry.init({
   enabled: clientEnv.VITE_VERCEL_ENV === 'production',
   dataCollection: SENTRY_DATA_COLLECTION,
   integrations: [
-    Sentry.replayIntegration({
-      maskAllText: false,
-      blockAllMedia: false,
-      networkDetailDenyUrls: SENSITIVE_API_PATTERNS
-    }),
     Sentry.feedbackIntegration(getFeedbackOptions()),
     Sentry.thirdPartyErrorFilterIntegration({
       filterKeys: [SENTRY_APPLICATION_KEY],
@@ -39,3 +34,27 @@ Sentry.init({
   beforeSend: scrubUserPii,
   beforeBreadcrumb: scrubSensitiveBreadcrumbs
 })
+
+const addReplayIntegration = async () => {
+  try {
+    const { replayIntegration } = await import('@sentry/browser')
+
+    Sentry.addIntegration(
+      replayIntegration({
+        maskAllText: false,
+        blockAllMedia: false,
+        networkDetailDenyUrls: SENSITIVE_API_PATTERNS
+      })
+    )
+  } catch (error) {
+    Sentry.captureException(error)
+  }
+}
+
+window.addEventListener(
+  'load',
+  () => {
+    void addReplayIntegration()
+  },
+  { once: true }
+)

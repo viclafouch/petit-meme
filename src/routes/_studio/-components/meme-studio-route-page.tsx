@@ -14,7 +14,6 @@ const memeStudioRouteApi = getRouteApi('/_studio/memes/$memeId/studio')
 
 export const MemeStudioRoutePage = () => {
   const { memeId } = memeStudioRouteApi.useParams()
-  const { relatedMemesPromise } = memeStudioRouteApi.useLoaderData()
   const memeQuery = useSuspenseQuery(getMemeByIdQueryOpts(memeId))
 
   return (
@@ -27,10 +26,7 @@ export const MemeStudioRoutePage = () => {
       }}
     >
       <React.Suspense fallback={<StudioLoadingFallback />}>
-        <StudioPage
-          meme={memeQuery.data}
-          relatedMemesPromise={relatedMemesPromise}
-        />
+        <StudioPage meme={memeQuery.data} />
       </React.Suspense>
     </ErrorBoundary>
   )

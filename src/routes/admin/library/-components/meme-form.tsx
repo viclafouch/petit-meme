@@ -32,7 +32,7 @@ import { useMemeForm } from './use-meme-form'
 
 type MemeFormProps = {
   meme: MemeFullData
-  onSuccess?: () => void
+  onSuccess?: () => Promise<void>
 }
 
 export const MemeForm = ({ meme, onSuccess }: MemeFormProps) => {

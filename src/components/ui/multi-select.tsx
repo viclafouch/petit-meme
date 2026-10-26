@@ -5,7 +5,7 @@
 import * as React from 'react'
 import { useEffect, useImperativeHandle, useRef } from 'react'
 import { CheckIcon, ChevronDown, X } from 'lucide-react'
-import type { PopoverContentProps } from '@radix-ui/react-popover'
+import type { Popover as PopoverPrimitive } from 'radix-ui'
 import { Badge } from '~/components/ui/badge'
 import {
   Command,
@@ -129,7 +129,7 @@ type Props = {
    * Optional, defaults to null.
    * portal: Whether to use portal to render the popover content. !!!need to modify the popover component!!!
    */
-  popoverOptions?: PopoverContentProps & {
+  popoverOptions?: PopoverPrimitive.PopoverContentProps & {
     portal?: boolean
   }
 

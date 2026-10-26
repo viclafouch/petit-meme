@@ -1,8 +1,8 @@
 import React from 'react'
-import { Separator } from '@radix-ui/react-separator'
 import { getRouteApi, Outlet } from '@tanstack/react-router'
 import { PathBreadcrumbs } from '~/components/path-breadcrumbs'
 import { Container } from '~/components/ui/container'
+import { Separator } from '~/components/ui/separator'
 import {
   SidebarInset,
   SidebarProvider,

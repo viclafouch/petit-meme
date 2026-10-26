@@ -8,7 +8,7 @@ const MAX_TIMEUPDATE_DELTA_SECONDS = 1.1
 
 type UseRegisterMemeViewParams = {
   memeId: Meme['id']
-  videoRef: React.RefObject<HTMLVideoElement | null>
+  video: HTMLVideoElement | null
   enabled?: boolean
   ratio?: number
   minMs?: number
@@ -39,7 +39,7 @@ const getTresholdMs = ({ video, ratio, minMs, maxMs }: GetTresholdMsParams) => {
 
 export function useRegisterMemeView({
   memeId,
-  videoRef,
+  video,
   enabled = true,
   ratio = 0.3,
   minMs = 2500,
@@ -57,8 +57,6 @@ export function useRegisterMemeView({
       watchMsRef.current = 0
       lastTRef.current = null
     }
-
-    const video = videoRef.current
 
     if (!enabled || !video) {
       return () => {}
@@ -147,5 +145,5 @@ export function useRegisterMemeView({
       video.removeEventListener('timeupdate', onTimeUpdate)
       document.removeEventListener('visibilitychange', onVisibilityChange)
     }
-  }, [enabled, memeId, maxMs, minMs, ratio, videoRef])
+  }, [enabled, memeId, maxMs, minMs, ratio, video])
 }

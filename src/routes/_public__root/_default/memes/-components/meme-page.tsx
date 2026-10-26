@@ -110,7 +110,7 @@ export const MemePage = () => {
       title: memeQuery.data.title
     })
   )
-  const { videoRef, playbackFailure } = useMemeHls({
+  const { video, videoCallbackRef, playbackFailure } = useMemeHls({
     bunnyId: memeQuery.data.video.bunnyId
   })
   const navigate = memeRouteApi.useNavigate()
@@ -121,14 +121,14 @@ export const MemePage = () => {
 
   useRegisterMemeView({
     memeId: memeQuery.data.id,
-    videoRef,
+    video,
     ratio: 0.3,
     minMs: 2500,
     maxMs: 12_000
   })
 
   const pauseVideo = () => {
-    videoRef.current?.pause()
+    video?.pause()
   }
 
   const handleCopyMemeLink = async () => {
@@ -212,7 +212,7 @@ export const MemePage = () => {
                 />
               </div>
               <MemeVideoPlayer
-                ref={videoRef}
+                ref={videoCallbackRef}
                 poster={buildVideoImageUrl(memeQuery.data.video.bunnyId)}
                 autoPlay
                 showRemainingTime

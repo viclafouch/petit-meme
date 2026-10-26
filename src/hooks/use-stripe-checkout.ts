@@ -10,6 +10,17 @@ import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
 
+const openBillingPortal = async () => {
+  const { error } = await authClient.subscription.billingPortal({
+    locale: getLocale(),
+    returnUrl: '/settings'
+  })
+
+  if (error) {
+    throw new Error(getErrorMessage(error), { cause: error })
+  }
+}
+
 export const useStripeCheckout = () => {
   const { user } = useRouteContext({ from: '__root__' })
   const showDialog = useShowDialog()
@@ -23,19 +34,14 @@ export const useStripeCheckout = () => {
     }
 
     try {
-      const promise = authClient.subscription.billingPortal({
-        locale: getLocale(),
-        returnUrl: '/settings'
-      })
+      const promise = openBillingPortal()
+
       toast.promise(promise, {
         loading: m.common_loading(),
         error: getErrorMessage
       })
-      const { error } = await promise
 
-      if (error) {
-        throw new Error(getErrorMessage(error), { cause: error })
-      }
+      await promise
     } catch (error) {
       captureWithFeature(error, 'stripe-checkout')
     }

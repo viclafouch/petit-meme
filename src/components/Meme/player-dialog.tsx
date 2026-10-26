@@ -10,6 +10,7 @@ import type { MemeWithVideo } from '~/constants/meme'
 import { useMemeExport } from '~/hooks/use-meme-export'
 import { useMemeHls } from '~/hooks/use-meme-hls'
 import { useRegisterMemeView } from '~/hooks/use-register-meme-view'
+import { useVideoPlayback } from '~/hooks/use-video-playback'
 import {
   sendConversionEvent,
   type ConversionEventName
@@ -18,7 +19,6 @@ import { buildVideoImageUrl } from '~/lib/bunny'
 import { buildUrl } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
 import { trackMemeAction } from '~/server/meme'
-import { playVideoWhenReady } from '~/utils/video'
 
 type PlayerDialogProps = {
   meme: MemeWithVideo
@@ -35,7 +35,7 @@ export const PlayerDialog = ({
   queryID,
   authenticatedUserToken
 }: PlayerDialogProps) => {
-  const { videoRef, playbackFailure } = useMemeHls({
+  const { video, videoCallbackRef, playbackFailure } = useMemeHls({
     bunnyId: meme.video.bunnyId
   })
   const isReducedMotion = useReducedMotion()
@@ -46,19 +46,24 @@ export const PlayerDialog = ({
     params: { memeId: meme.id }
   })
 
-  const playAbortRef = React.useRef<AbortController | null>(null)
+  const [isPlaybackRequested, setIsPlaybackRequested] = React.useState(false)
+
+  useVideoPlayback({
+    video,
+    shouldPlay: isPlaybackRequested && playbackFailure === null
+  })
 
   useRegisterMemeView({
     memeId: meme.id,
-    videoRef,
+    video,
     ratio: 0.3,
     minMs: 2500,
     maxMs: 12_000
   })
 
   const pauseVideo = () => {
-    playAbortRef.current?.abort()
-    videoRef.current?.pause()
+    setIsPlaybackRequested(false)
+    video?.pause()
   }
 
   const handleTrackConversion = (eventName: ConversionEventName) => {
@@ -94,15 +99,7 @@ export const PlayerDialog = ({
   }
 
   const handlePlayVideo = () => {
-    const video = videoRef.current
-
-    if (!video) {
-      return
-    }
-
-    playAbortRef.current?.abort()
-    playAbortRef.current = new AbortController()
-    void playVideoWhenReady({ video, signal: playAbortRef.current.signal })
+    setIsPlaybackRequested(true)
   }
 
   const handleStudioClick = () => {
@@ -175,7 +172,7 @@ export const PlayerDialog = ({
               </Dialog.Title>
               <div className="bg-muted relative aspect-video w-full overflow-hidden rounded-lg text-sm border border-white/10 z-1">
                 <MemeVideoPlayer
-                  ref={videoRef}
+                  ref={videoCallbackRef}
                   poster={buildVideoImageUrl(meme.video.bunnyId)}
                   showRemainingTime
                   playbackFailure={playbackFailure}

@@ -13,10 +13,10 @@ import { LoadingSpinner } from '~/components/ui/spinner'
 import { LOGO_PATH } from '~/constants/branding'
 import type { MemeWithVideo } from '~/constants/meme'
 import { useMemeHls } from '~/hooks/use-meme-hls'
+import { useVideoPlayback } from '~/hooks/use-video-playback'
 import { buildVideoImageUrl } from '~/lib/bunny'
 import { getInfiniteReelsQueryOpts } from '~/lib/queries'
 import { m } from '~/paraglide/messages.js'
-import { playVideoWhenReady } from '~/utils/video'
 
 const PREFETCH_THRESHOLD_ITEMS = 3
 
@@ -38,45 +38,15 @@ export const Reel = React.memo(
     setIsMuted,
     isActive
   }: ReelProps) => {
-    const { videoRef, playbackFailure } = useMemeHls({
+    const { video, videoCallbackRef, playbackFailure } = useMemeHls({
       bunnyId: meme.video.bunnyId
     })
-    const hasPlaybackFailed = playbackFailure !== null
 
-    React.useEffect(() => {
-      const video = videoRef.current
-
-      if (!video) {
-        return
-      }
-
-      video.muted = isMuted
-    }, [isMuted, videoRef])
-
-    React.useEffect(() => {
-      const video = videoRef.current
-
-      if (!video) {
-        return () => {}
-      }
-
-      if (!isActive) {
-        video.currentTime = 0
-      }
-
-      if (!isActive || !isPlaying || hasPlaybackFailed) {
-        video.pause()
-
-        return () => {}
-      }
-
-      const playAbortController = new AbortController()
-      void playVideoWhenReady({ video, signal: playAbortController.signal })
-
-      return () => {
-        playAbortController.abort()
-      }
-    }, [isActive, isPlaying, hasPlaybackFailed, videoRef])
+    useVideoPlayback({
+      video,
+      shouldPlay: isActive && isPlaying && playbackFailure === null,
+      shouldRewind: !isActive
+    })
 
     return (
       <div className="size-full relative select-none">
@@ -107,7 +77,7 @@ export const Reel = React.memo(
           loop
           disablePictureInPicture
           disableRemotePlayback
-          ref={videoRef}
+          ref={videoCallbackRef}
           preload="auto"
           aria-label="Meme video"
         />

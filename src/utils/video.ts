@@ -159,6 +159,11 @@ const tryPlayVideo = async (video: HTMLVideoElement) => {
   }
 }
 
+export const stopVideo = (video: HTMLVideoElement) => {
+  video.pause()
+  video.currentTime = 0
+}
+
 type PlayVideoWhenReadyParams = {
   video: HTMLVideoElement
   signal: AbortSignal

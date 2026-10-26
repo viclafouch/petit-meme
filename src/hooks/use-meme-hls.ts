@@ -7,13 +7,11 @@ type UseMemeHlsParams = {
 }
 
 export const useMemeHls = ({ bunnyId }: UseMemeHlsParams) => {
-  const videoRef = React.useRef<HTMLVideoElement>(null)
+  const [video, setVideo] = React.useState<HTMLVideoElement | null>(null)
   const [failedBunnyId, setFailedBunnyId] = React.useState<string | null>(null)
   const hasPlaybackFailed = failedBunnyId === bunnyId
 
   React.useEffect(() => {
-    const video = videoRef.current
-
     if (!video || hasPlaybackFailed) {
       return () => {}
     }
@@ -32,7 +30,7 @@ export const useMemeHls = ({ bunnyId }: UseMemeHlsParams) => {
       video.removeAttribute('src')
       video.load()
     }
-  }, [bunnyId, hasPlaybackFailed])
+  }, [video, bunnyId, hasPlaybackFailed])
 
   const handleRetryPlayback = () => {
     setFailedBunnyId(null)
@@ -42,5 +40,5 @@ export const useMemeHls = ({ bunnyId }: UseMemeHlsParams) => {
     ? { handleRetry: handleRetryPlayback }
     : null
 
-  return { videoRef, playbackFailure }
+  return { video, videoCallbackRef: setVideo, playbackFailure }
 }

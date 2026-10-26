@@ -1,8 +1,19 @@
-import pino from 'pino'
+import pino, { type TransportSingleOptions } from 'pino'
 import { IS_PRODUCTION } from '~/constants/env'
 import { baseEnv } from '~/env/base'
 
 const level = baseEnv.LOG_LEVEL ?? (!IS_PRODUCTION ? 'debug' : 'info')
+
+const prettyTransport = {
+  caller: import.meta.url,
+  target: 'pino-pretty',
+  options: {
+    colorize: true,
+    translateTime: 'SYS:HH:MM:ss.l',
+    ignore: 'pid,hostname',
+    singleLine: true
+  }
+} satisfies TransportSingleOptions & { caller: string }
 
 export const logger = pino({
   level,
@@ -23,19 +34,7 @@ export const logger = pino({
     'req.headers.authorization',
     'req.headers.cookie'
   ],
-  ...(!IS_PRODUCTION
-    ? {
-        transport: {
-          target: 'pino-pretty',
-          options: {
-            colorize: true,
-            translateTime: 'SYS:HH:MM:ss.l',
-            ignore: 'pid,hostname',
-            singleLine: true
-          }
-        }
-      }
-    : {})
+  ...(!IS_PRODUCTION ? { transport: prettyTransport } : {})
 })
 
 export const authLogger = logger.child({ module: 'auth' })

@@ -14,10 +14,12 @@ import {
   SENSITIVE_API_PATTERNS
 } from '~/lib/sentry'
 
+const isSentryEnabled = clientEnv.VITE_VERCEL_ENV === 'production'
+
 Sentry.init({
   dsn: clientEnv.VITE_SENTRY_DSN,
   environment: clientEnv.VITE_VERCEL_ENV,
-  enabled: clientEnv.VITE_VERCEL_ENV === 'production',
+  enabled: isSentryEnabled,
   dataCollection: SENTRY_DATA_COLLECTION,
   integrations: [
     Sentry.feedbackIntegration(getFeedbackOptions()),
@@ -51,10 +53,12 @@ const addReplayIntegration = async () => {
   }
 }
 
-window.addEventListener(
-  'load',
-  () => {
-    void addReplayIntegration()
-  },
-  { once: true }
-)
+if (isSentryEnabled) {
+  window.addEventListener(
+    'load',
+    () => {
+      void addReplayIntegration()
+    },
+    { once: true }
+  )
+}

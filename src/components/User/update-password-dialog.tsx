@@ -70,7 +70,8 @@ const UpdatePasswordForm = () => {
     }) => {
       const { error } = await authClient.changePassword({
         currentPassword,
-        newPassword
+        newPassword,
+        revokeOtherSessions: true
       })
 
       if (error) {

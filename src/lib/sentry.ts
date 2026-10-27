@@ -27,6 +27,7 @@ export type SentryFeature =
   | 'sign-up'
   | 'sign-out'
   | 'reset-password'
+  | 'verify-email'
   | 'request-password-reset'
   | 'delete-account'
   | 'update-password'

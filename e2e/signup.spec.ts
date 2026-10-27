@@ -5,6 +5,7 @@ import { m } from '~/paraglide/messages.js'
 import { buildEmailVerificationUrl, openAuthDialog } from './auth-flows'
 import { E2E_EMAIL_DOMAIN, E2E_PASSWORD, E2E_ROLES } from './constants'
 import { test } from './fixtures'
+import { repeatUntilVisible } from './hydration'
 
 const SIGNUP_USER = {
   name: 'E2E Signup',
@@ -12,6 +13,7 @@ const SIGNUP_USER = {
 }
 
 const IMPOSTOR_NAME = 'E2E Impostor'
+const IMPOSTOR_PASSWORD = 'e2e-impostor-password'
 
 const findSignupUser = () => {
   return prismaClient.user.findUnique({ where: { email: SIGNUP_USER.email } })
@@ -64,10 +66,38 @@ test.describe('the sign up', () => {
 
     await page.goto(await buildEmailVerificationUrl(SIGNUP_USER.email))
 
-    await expect(
-      page.getByRole('banner').getByText(SIGNUP_USER.name)
-    ).toBeVisible()
+    await repeatUntilVisible(async () => {
+      const passwordField = page.getByLabel(m.common_password())
+      await passwordField.clear()
+      await passwordField.fill(E2E_PASSWORD)
+      await page
+        .getByRole('button', { name: m.auth_verify_email_submit() })
+        .click()
+    }, page.getByRole('banner').getByText(SIGNUP_USER.name))
+
     expect(await findSignupUser()).toMatchObject({ emailVerified: true })
+  })
+
+  test('the activation link refuses a password that is not the account one', async ({
+    page
+  }) => {
+    await page.goto(await buildEmailVerificationUrl(E2E_ROLES.unverified.email))
+
+    await repeatUntilVisible(async () => {
+      const passwordField = page.getByLabel(m.common_password())
+      await passwordField.clear()
+      await passwordField.fill(IMPOSTOR_PASSWORD)
+      await page
+        .getByRole('button', { name: m.auth_verify_email_submit() })
+        .click()
+    }, page.getByText(m.auth_error_invalid_password()))
+
+    expect(
+      await prismaClient.user.findUnique({
+        where: { email: E2E_ROLES.unverified.email },
+        select: { emailVerified: true }
+      })
+    ).toStrictEqual({ emailVerified: false })
   })
 
   test('an address that already has an account gives nothing away', async ({

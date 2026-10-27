@@ -35,7 +35,10 @@ export const authUserRequiredMiddleware = createMiddleware({
 }).server(async ({ next }) => {
   const { headers } = getRequest()
 
-  const session = await auth.api.getSession({ headers })
+  const session = await auth.api.getSession({
+    headers,
+    query: { disableCookieCache: true }
+  })
 
   if (!session) {
     authLogger.debug('Unauthenticated access attempt')

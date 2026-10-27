@@ -11,7 +11,10 @@ import { getLocale } from '~/paraglide/runtime'
 export const getAuthUser = createServerFn({ method: 'GET' }).handler(
   async () => {
     const { headers } = getRequest()
-    const session = await auth.api.getSession({ headers })
+    const session = await auth.api.getSession({
+      headers,
+      query: { disableCookieCache: true }
+    })
 
     if (!session?.user) {
       return null

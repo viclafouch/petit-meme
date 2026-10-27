@@ -1,24 +1,40 @@
 import { createEmailVerificationToken } from 'better-auth/api'
-import { AUTH_BASE_PATH } from '~/constants/auth'
+import type { UserLocale } from '~/db/generated/prisma/enums'
+import { localizeHref } from '~/paraglide/runtime'
 
 type EmailVerificationPathParams = {
+  token: string
+  locale: UserLocale
+}
+
+type SignedEmailVerificationPathParams = {
   email: string
   secret: string
   expiresInSeconds: number
+  locale: UserLocale
 }
 
-export const buildEmailVerificationPath = async ({
+export const buildEmailVerificationPath = ({
+  token,
+  locale
+}: EmailVerificationPathParams) => {
+  const searchParams = new URLSearchParams({ token })
+
+  return localizeHref(`/verify-email?${searchParams}`, { locale })
+}
+
+export const createEmailVerificationPath = async ({
   email,
   secret,
-  expiresInSeconds
-}: EmailVerificationPathParams) => {
+  expiresInSeconds,
+  locale
+}: SignedEmailVerificationPathParams) => {
   const token = await createEmailVerificationToken(
     secret,
     email,
     undefined,
     expiresInSeconds
   )
-  const searchParams = new URLSearchParams({ token, callbackURL: '/' })
 
-  return `${AUTH_BASE_PATH}/verify-email?${searchParams}`
+  return buildEmailVerificationPath({ token, locale })
 }

@@ -61,7 +61,7 @@ export const EmailVerification = ({
 }
 
 EmailVerification.PreviewProps = {
-  verificationUrl: 'https://petit-meme.io/api/auth/verify-email?token=abc123',
+  verificationUrl: 'https://petit-meme.io/verify-email?token=abc123',
   locale: 'fr'
 } satisfies EmailVerificationProps
 
@@ -72,7 +72,7 @@ export const EmailVerificationEN = (props: EmailVerificationENProps) => {
 }
 
 EmailVerificationEN.PreviewProps = {
-  verificationUrl: 'https://petit-meme.io/api/auth/verify-email?token=abc123'
+  verificationUrl: 'https://petit-meme.io/verify-email?token=abc123'
 } satisfies EmailVerificationENProps
 
 export default EmailVerification

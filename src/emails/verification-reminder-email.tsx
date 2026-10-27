@@ -68,7 +68,7 @@ export const VerificationReminderEmail = ({
 }
 
 VerificationReminderEmail.PreviewProps = {
-  verificationUrl: 'https://petit-meme.io/api/auth/verify-email?token=abc123',
+  verificationUrl: 'https://petit-meme.io/verify-email?token=abc123',
   locale: 'fr'
 } satisfies VerificationReminderEmailProps
 
@@ -84,7 +84,7 @@ export const VerificationReminderEmailEN = (
 }
 
 VerificationReminderEmailEN.PreviewProps = {
-  verificationUrl: 'https://petit-meme.io/api/auth/verify-email?token=abc123'
+  verificationUrl: 'https://petit-meme.io/verify-email?token=abc123'
 } satisfies VerificationReminderEmailENProps
 
 export default VerificationReminderEmail

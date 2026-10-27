@@ -33,6 +33,7 @@ import { Route as Public__rootDefaultMentionsLegalesRouteImport } from './routes
 import { Route as Public__rootDefaultPrivacyRouteImport } from './routes/_public__root/_default/privacy'
 import { Route as Public__rootDefaultSettingsRouteRouteImport } from './routes/_public__root/_default/settings/route'
 import { Route as Public__rootDefaultTermsOfUseRouteImport } from './routes/_public__root/_default/terms-of-use'
+import { Route as Public__rootDefaultVerifyEmailRouteImport } from './routes/_public__root/_default/verify-email'
 import { Route as AdminActivityIndexRouteImport } from './routes/admin/activity/index'
 import { Route as AdminActivityIpRouteImport } from './routes/admin/activity/$ip'
 import { Route as AdminAiSearchIndexRouteImport } from './routes/admin/ai-search/index'
@@ -182,6 +183,12 @@ const Public__rootDefaultTermsOfUseRoute =
   Public__rootDefaultTermsOfUseRouteImport.update({
     id: '/terms-of-use',
     path: '/terms-of-use',
+    getParentRoute: () => Public__rootDefaultRouteRoute,
+  } as any)
+const Public__rootDefaultVerifyEmailRoute =
+  Public__rootDefaultVerifyEmailRouteImport.update({
+    id: '/verify-email',
+    path: '/verify-email',
     getParentRoute: () => Public__rootDefaultRouteRoute,
   } as any)
 const AdminActivityIndexRoute = AdminActivityIndexRouteImport.update({
@@ -355,6 +362,7 @@ export interface FileRoutesByFullPath {
   '/mentions-legales': typeof Public__rootDefaultMentionsLegalesRoute
   '/privacy': typeof Public__rootDefaultPrivacyRoute
   '/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
+  '/verify-email': typeof Public__rootDefaultVerifyEmailRoute
   '/admin/activity/$ip': typeof AdminActivityIpRoute
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
@@ -403,6 +411,7 @@ export interface FileRoutesByTo {
   '/mentions-legales': typeof Public__rootDefaultMentionsLegalesRoute
   '/privacy': typeof Public__rootDefaultPrivacyRoute
   '/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
+  '/verify-email': typeof Public__rootDefaultVerifyEmailRoute
   '/admin/activity/$ip': typeof AdminActivityIpRoute
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
@@ -457,6 +466,7 @@ export interface FileRoutesById {
   '/_public__root/_default/mentions-legales': typeof Public__rootDefaultMentionsLegalesRoute
   '/_public__root/_default/privacy': typeof Public__rootDefaultPrivacyRoute
   '/_public__root/_default/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
+  '/_public__root/_default/verify-email': typeof Public__rootDefaultVerifyEmailRoute
   '/admin/activity/$ip': typeof AdminActivityIpRoute
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
@@ -509,6 +519,7 @@ export interface FileRouteTypes {
     | '/mentions-legales'
     | '/privacy'
     | '/terms-of-use'
+    | '/verify-email'
     | '/admin/activity/$ip'
     | '/admin/library/$memeId'
     | '/admin/users/$userId'
@@ -557,6 +568,7 @@ export interface FileRouteTypes {
     | '/mentions-legales'
     | '/privacy'
     | '/terms-of-use'
+    | '/verify-email'
     | '/admin/activity/$ip'
     | '/admin/library/$memeId'
     | '/admin/users/$userId'
@@ -610,6 +622,7 @@ export interface FileRouteTypes {
     | '/_public__root/_default/mentions-legales'
     | '/_public__root/_default/privacy'
     | '/_public__root/_default/terms-of-use'
+    | '/_public__root/_default/verify-email'
     | '/admin/activity/$ip'
     | '/admin/library/$memeId'
     | '/admin/users/$userId'
@@ -831,6 +844,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Public__rootDefaultTermsOfUseRouteImport
       parentRoute: typeof Public__rootDefaultRouteRoute
     }
+    '/_public__root/_default/verify-email': {
+      id: '/_public__root/_default/verify-email'
+      path: '/verify-email'
+      fullPath: '/verify-email'
+      preLoaderRoute: typeof Public__rootDefaultVerifyEmailRouteImport
+      parentRoute: typeof Public__rootDefaultRouteRoute
+    }
     '/admin/activity/': {
       id: '/admin/activity/'
       path: '/activity'
@@ -1045,6 +1065,7 @@ interface Public__rootDefaultRouteRouteChildren {
   Public__rootDefaultMentionsLegalesRoute: typeof Public__rootDefaultMentionsLegalesRoute
   Public__rootDefaultPrivacyRoute: typeof Public__rootDefaultPrivacyRoute
   Public__rootDefaultTermsOfUseRoute: typeof Public__rootDefaultTermsOfUseRoute
+  Public__rootDefaultVerifyEmailRoute: typeof Public__rootDefaultVerifyEmailRoute
   Public__rootDefaultCheckoutSuccessRoute: typeof Public__rootDefaultCheckoutSuccessRoute
   Public__rootDefaultMemesMemeIdRoute: typeof Public__rootDefaultMemesMemeIdRoute
   Public__rootDefaultMemesAiSearchRoute: typeof Public__rootDefaultMemesAiSearchRoute
@@ -1067,6 +1088,7 @@ const Public__rootDefaultRouteRouteChildren: Public__rootDefaultRouteRouteChildr
       Public__rootDefaultMentionsLegalesRoute,
     Public__rootDefaultPrivacyRoute: Public__rootDefaultPrivacyRoute,
     Public__rootDefaultTermsOfUseRoute: Public__rootDefaultTermsOfUseRoute,
+    Public__rootDefaultVerifyEmailRoute: Public__rootDefaultVerifyEmailRoute,
     Public__rootDefaultCheckoutSuccessRoute:
       Public__rootDefaultCheckoutSuccessRoute,
     Public__rootDefaultMemesMemeIdRoute: Public__rootDefaultMemesMemeIdRoute,

@@ -36,13 +36,14 @@ import { getAvatarSlotIdForEmail, resolveAvatarPath } from '~/helpers/avatar'
 import { formatDate } from '~/helpers/date'
 import { formatCentsToEuros } from '~/helpers/number'
 import { boundProviderName } from '~/helpers/user-name'
-import { signUpGuard } from '~/lib/auth-guard'
+import { rejectUnverifiedDiscordEmail, signUpGuard } from '~/lib/auth-guard'
 import { authLogger, stripeLogger } from '~/lib/logger'
 import { sendEmailAsync } from '~/lib/resend'
 import { captureWithFeature } from '~/lib/sentry'
 import { getStripeClient } from '~/lib/stripe'
 import { getLocale } from '~/paraglide/runtime'
 import { recordActivityEvent } from '~/utils/activity-event'
+import { buildEmailVerificationPath } from '~/utils/email-verification'
 import { cleanupUserData } from '~/utils/user-cleanup'
 import { claimVerificationEmailSend } from '~/utils/verification-email-quota'
 
@@ -121,6 +122,36 @@ const updateUserLastActive = async (userId: string) => {
   }
 }
 
+type SendVerificationEmail = NonNullable<
+  NonNullable<BetterAuthOptions['emailVerification']>['sendVerificationEmail']
+>
+
+const sendVerificationEmail: SendVerificationEmail = async ({
+  user,
+  token
+}) => {
+  const isSendClaimed = await claimVerificationEmailSend(user.id)
+
+  if (!isSendClaimed) {
+    return
+  }
+
+  const locale = getLocale()
+  const verificationPath = buildEmailVerificationPath({ token, locale })
+  authLogger.info({ email: user.email }, 'Sending verification email')
+  sendEmailAsync({
+    to: user.email,
+    subject: emailSubjects[locale].verifyEmail,
+    react: (
+      <EmailVerification
+        verificationUrl={`${clientEnv.VITE_SITE_URL}${verificationPath}`}
+        locale={locale}
+      />
+    ),
+    logMessage: 'Sending verification email to'
+  })
+}
+
 const touchUserLastActive = async (session: { userId: string }) => {
   waitUntil(updateUserLastActive(session.userId))
 }
@@ -159,7 +190,7 @@ const getAuthConfig = createServerOnlyFn(() => {
     baseURL: clientEnv.VITE_SITE_URL,
     basePath: AUTH_BASE_PATH,
     secret: serverEnv.BETTER_AUTH_SECRET,
-    disabledPaths: ['/update-user'],
+    disabledPaths: ['/update-user', '/verify-email'],
     hooks: {
       before: signUpGuard
     },
@@ -177,6 +208,7 @@ const getAuthConfig = createServerOnlyFn(() => {
     },
     user: {
       additionalFields: USER_ADDITIONAL_FIELDS,
+      validateUserInfo: rejectUnverifiedDiscordEmail,
       deleteUser: {
         enabled: true,
         beforeDelete: async (user) => {
@@ -237,22 +269,7 @@ const getAuthConfig = createServerOnlyFn(() => {
       sendOnSignIn: true,
       autoSignInAfterVerification: true,
       expiresIn: ONE_HOUR_IN_SECONDS,
-      sendVerificationEmail: async ({ user, url }) => {
-        const isSendClaimed = await claimVerificationEmailSend(user.id)
-
-        if (!isSendClaimed) {
-          return
-        }
-
-        const locale = getLocale()
-        authLogger.info({ email: user.email }, 'Sending verification email')
-        sendEmailAsync({
-          to: user.email,
-          subject: emailSubjects[locale].verifyEmail,
-          react: <EmailVerification verificationUrl={url} locale={locale} />,
-          logMessage: 'Sending verification email to'
-        })
-      },
+      sendVerificationEmail,
       afterEmailVerification: async (user) => {
         const locale = getLocale()
         authLogger.info({ email: user.email }, 'Email verified')

@@ -49,3 +49,9 @@ export const RATE_LIMIT_AI_SEARCH = {
   maxRequests: 10,
   windowMs: MINUTE
 } as const satisfies RateLimitConfig
+
+export const RATE_LIMIT_VERIFY_EMAIL = {
+  action: 'verify-email',
+  maxRequests: 10,
+  windowMs: FIVE_MINUTES_MS
+} as const satisfies RateLimitConfig

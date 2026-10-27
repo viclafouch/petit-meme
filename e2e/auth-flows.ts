@@ -1,9 +1,10 @@
 import type { Page } from '@playwright/test'
 import { ONE_HOUR_IN_SECONDS } from '~/constants/time'
 import { m } from '~/paraglide/messages.js'
-import { buildEmailVerificationPath } from '~/utils/email-verification'
+import { createEmailVerificationPath } from '~/utils/email-verification'
 import { E2E_AUTH_SECRET } from './env'
 import { repeatUntilVisible } from './hydration'
+import { E2E_LOCALE } from './locales'
 
 export const openAuthDialog = async (page: Page) => {
   const dialog = page.getByRole('dialog')
@@ -26,9 +27,10 @@ export const getAuthDialogSignInButton = (page: Page) => {
 }
 
 export const buildEmailVerificationUrl = (email: string) => {
-  return buildEmailVerificationPath({
+  return createEmailVerificationPath({
     email,
     secret: E2E_AUTH_SECRET,
-    expiresInSeconds: ONE_HOUR_IN_SECONDS
+    expiresInSeconds: ONE_HOUR_IN_SECONDS,
+    locale: E2E_LOCALE
   })
 }

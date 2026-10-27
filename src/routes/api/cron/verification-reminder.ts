@@ -10,7 +10,7 @@ import { serverEnv } from '~/env/server'
 import { cronLogger } from '~/lib/logger'
 import { getEmailFrom, getEmailRecipient, getResendClient } from '~/lib/resend'
 import { verifyCronSecret } from '~/utils/cron-auth'
-import { buildEmailVerificationPath } from '~/utils/email-verification'
+import { createEmailVerificationPath } from '~/utils/email-verification'
 
 const log = cronLogger.child({ job: 'verification-reminder' })
 
@@ -23,10 +23,11 @@ const sendReminderToUser = async (user: {
   email: string
   locale: UserLocale
 }) => {
-  const verificationPath = await buildEmailVerificationPath({
+  const verificationPath = await createEmailVerificationPath({
     email: user.email,
     secret: serverEnv.BETTER_AUTH_SECRET,
-    expiresInSeconds: TOKEN_EXPIRY_IN_SECONDS
+    expiresInSeconds: TOKEN_EXPIRY_IN_SECONDS,
+    locale: user.locale
   })
   const verificationUrl = `${clientEnv.VITE_SITE_URL}${verificationPath}`
   const { error } = await getResendClient().emails.send({

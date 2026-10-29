@@ -3,6 +3,7 @@ import { prismaClient } from '~/db'
 import { MemeSubmissionStatus } from '~/db/generated/prisma/enums'
 import { CONTACT_EMAIL } from '~/emails/constants'
 import { PendingSubmissionsReminderEmail } from '~/emails/pending-submissions-reminder-email'
+import { serverEnv } from '~/env/server'
 import { formatDate } from '~/helpers/date'
 import { cronLogger } from '~/lib/logger'
 import { getEmailFrom, getEmailRecipient, getResendClient } from '~/lib/resend'
@@ -67,7 +68,10 @@ export const Route = createFileRoute('/api/cron/pending-submissions-reminder')({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        const authError = verifyCronSecret(request)
+        const authError = verifyCronSecret({
+          request,
+          secret: serverEnv.CRON_SECRET
+        })
 
         if (authError) {
           return authError

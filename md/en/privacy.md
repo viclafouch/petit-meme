@@ -1,6 +1,6 @@
 # Privacy Policy - Petit Meme
 
-Last updated: **July 2026**
+Last updated: **October 2026**
 
 This Privacy Policy describes how **Petit Meme**
 (accessible at [https://petit-meme.io](https://petit-meme.io))
@@ -185,7 +185,9 @@ place (European Commission standard contractual clauses).
 
 | Data | Retention period |
 |------|-----------------|
-| Account data | Until account deletion by the user |
+| Account data | Until account deletion by the user, except in the two cases below |
+| Email account whose address was never confirmed | Deleted 30 days after sign up, unless it holds a favorite, a subscription or activity in the last 30 days |
+| Inactive account | Anonymized after 3 years without activity: name and email address replaced, avatar removed |
 | Session data | Duration of active session (automatically deleted upon expiry) |
 | Verification tokens | Automatically deleted 24 hours after expiry |
 | Detailed view data (`MemeViewDaily`) | 90 days, then aggregated (global counter) and deleted |
@@ -202,8 +204,9 @@ place (European Commission standard contractual clauses).
 | Transactional emails | Per Resend's retention policy |
 
 An automated cleanup process runs every day to delete expired sessions and
-obsolete verification tokens, aggregate view data beyond 90 days and enforce
-the activity log retention periods.
+obsolete verification tokens, aggregate view data beyond 90 days, enforce the
+activity log retention periods, delete accounts that were never confirmed and
+anonymize inactive accounts.
 
 Upon deletion of your account, your personal data is deleted within 30 days,
 except for data we are required to retain under legal obligations.

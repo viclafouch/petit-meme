@@ -1,6 +1,6 @@
 # Politique de confidentialité - Petit Meme
 
-Dernière mise à jour : **Juillet 2026**
+Dernière mise à jour : **Octobre 2026**
 
 La présente Politique de confidentialité décrit la manière dont **Petit Meme**
 (accessible à l'adresse [https://petit-meme.io](https://petit-meme.io))
@@ -194,7 +194,9 @@ européenne).
 
 | Données | Durée de conservation |
 |---------|----------------------|
-| Données de compte | Jusqu'à suppression du compte par l'utilisateur |
+| Données de compte | Jusqu'à suppression du compte par l'utilisateur, sauf dans les deux cas suivants |
+| Compte e-mail dont l'adresse n'a jamais été confirmée | Supprimé 30 jours après l'inscription, sauf en cas de favori, d'abonnement ou d'activité dans les 30 derniers jours |
+| Compte inactif | Anonymisé après 3 ans sans activité : nom et adresse e-mail remplacés, avatar retiré |
 | Données de session | Durée de la session active (supprimées automatiquement à expiration) |
 | Tokens de vérification | Supprimés automatiquement 24h après leur expiration |
 | Données de vues détaillées (`MemeViewDaily`) | 90 jours, puis agrégées (compteur global) et supprimées |
@@ -212,7 +214,8 @@ européenne).
 
 Un processus automatisé de nettoyage s'exécute chaque jour pour supprimer les
 sessions expirées et les tokens de vérification obsolètes, agréger les données
-de vues au-delà de 90 jours et appliquer les durées du journal d'activité.
+de vues au-delà de 90 jours, appliquer les durées du journal d'activité,
+supprimer les comptes jamais confirmés et anonymiser les comptes inactifs.
 
 À la suppression de votre compte, vos données personnelles sont supprimées
 dans un délai de 30 jours, à l'exception des données que nous sommes tenus de

@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { createFileRoute } from '@tanstack/react-router'
 import { prismaClient } from '~/db'
 import { clientEnv } from '~/env/client'
+import { serverEnv } from '~/env/server'
 import { getBunnyHeaders } from '~/lib/bunny'
 import { cronLogger } from '~/lib/logger'
 import { fetchWithZod } from '~/lib/utils'
@@ -104,7 +105,10 @@ export const Route = createFileRoute('/api/cron/sync-bunny-titles')({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        const authError = verifyCronSecret(request)
+        const authError = verifyCronSecret({
+          request,
+          secret: serverEnv.CRON_SECRET
+        })
 
         if (authError) {
           return authError

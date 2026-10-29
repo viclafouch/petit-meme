@@ -4,7 +4,14 @@ import {
   ACTIVITY_IP_RETENTION_DAYS,
   ACTIVITY_RETENTION_DAYS
 } from '~/constants/activity'
+import {
+  INACTIVITY_ANONYMIZATION_YEARS,
+  LAST_ACTIVE_AT_TRACKING_START,
+  UNVERIFIED_RETENTION_DAYS
+} from '~/constants/auth'
 import { DAY, DAYS_PER_YEAR } from '~/constants/time'
+import { serverEnv } from '~/env/server'
+import { auth } from '~/lib/auth'
 import { cronLogger } from '~/lib/logger'
 import { verifyCronSecret } from '~/utils/cron-auth'
 
@@ -14,8 +21,6 @@ const VERIFICATION_GRACE_PERIOD_MS = DAY
 const VIEW_RETENTION_DAYS = 90
 const ANALYTICS_RETENTION_DAYS = 365
 const AUDIT_LOG_RETENTION_YEARS = 2
-const ANONYMIZATION_YEARS = 3
-const UNVERIFIED_RETENTION_DAYS = 30
 const MASKED_ID_LENGTH = 8
 
 const maskId = (id: string) => {
@@ -147,22 +152,28 @@ const runRetentionCleanup = async () => {
   )
 
   const anonymizationCutoff = new Date(
-    now.getTime() - ANONYMIZATION_YEARS * DAYS_PER_YEAR * DAY
+    now.getTime() - INACTIVITY_ANONYMIZATION_YEARS * DAYS_PER_YEAR * DAY
   )
 
-  const usersToAnonymize = await prismaClient.$queryRaw<{ id: string }[]>`
-    SELECT u."id"
-    FROM "user" u
-    LEFT JOIN LATERAL (
-      SELECT s."created_at"
-      FROM "session" s
-      WHERE s."user_id" = u."id"
-      ORDER BY s."created_at" DESC
-      LIMIT 1
-    ) latest_session ON true
-    WHERE u."is_anonymized" = false
-      AND u."updated_at" < ${anonymizationCutoff}
-      AND (latest_session."created_at" IS NULL OR latest_session."created_at" < ${anonymizationCutoff})`
+  const inactiveSinceLastActivity = {
+    lastActiveAt: { lt: anonymizationCutoff }
+  }
+  const inactiveSinceBeforeTracking = {
+    lastActiveAt: null,
+    updatedAt: { lt: anonymizationCutoff }
+  }
+  const isTrackingOlderThanCutoff =
+    LAST_ACTIVE_AT_TRACKING_START < anonymizationCutoff
+
+  const usersToAnonymize = await prismaClient.user.findMany({
+    where: {
+      isAnonymized: false,
+      OR: isTrackingOlderThanCutoff
+        ? [inactiveSinceLastActivity, inactiveSinceBeforeTracking]
+        : [inactiveSinceLastActivity]
+    },
+    select: { id: true }
+  })
 
   let anonymizedCount = 0
 
@@ -180,6 +191,7 @@ const runRetentionCleanup = async () => {
         "provider_avatar" = NULL,
         "email_verified" = false,
         "is_anonymized" = true,
+        "last_active_at" = NULL,
         "updated_at" = ${now}
       WHERE "id" = ANY(${userIds}::text[])`
 
@@ -207,22 +219,25 @@ const runRetentionCleanup = async () => {
 const runUnverifiedCleanup = async () => {
   const cutoffDate = new Date(Date.now() - UNVERIFIED_RETENTION_DAYS * DAY)
 
-  const unverifiedUsers = await prismaClient.user.findMany({
+  const abandonedSignUps = await prismaClient.user.findMany({
     where: {
       emailVerified: false,
+      isAnonymized: false,
       createdAt: { lt: cutoffDate },
+      OR: [{ lastActiveAt: null }, { lastActiveAt: { lt: cutoffDate } }],
+      accounts: { every: { providerId: 'credential' } },
       bookmarks: { none: {} }
     },
     select: { id: true, email: true }
   })
 
-  if (unverifiedUsers.length === 0) {
-    log.info('No unverified users to clean up')
+  if (abandonedSignUps.length === 0) {
+    log.info('No abandoned sign ups to clean up')
 
     return { deletedCount: 0, errorCount: 0 }
   }
 
-  const userIds = unverifiedUsers.map((user) => {
+  const userIds = abandonedSignUps.map((user) => {
     return user.id
   })
 
@@ -237,40 +252,22 @@ const runUnverifiedCleanup = async () => {
     })
   )
 
-  const deletableUsers = unverifiedUsers.filter((user) => {
+  const deletableUsers = abandonedSignUps.filter((user) => {
     return !subscribedUserIds.has(user.id)
   })
 
-  if (deletableUsers.length === 0) {
-    log.info('No unverified users without subscriptions to clean up')
-
-    return { deletedCount: 0, errorCount: 0 }
-  }
-
-  const results = await Promise.allSettled(
-    deletableUsers.map((user) => {
-      return prismaClient.user.delete({ where: { id: user.id } })
-    })
-  )
-
+  const { internalAdapter } = await auth.$context
   let deletedCount = 0
   let errorCount = 0
 
-  for (const [index, result] of results.entries()) {
-    const user = deletableUsers[index]
-
-    if (!user) {
-      continue
-    }
-
-    if (result.status === 'fulfilled') {
-      log.info({ email: user.email }, 'Deleted unverified user')
+  for (const user of deletableUsers) {
+    try {
+      // oxlint-disable-next-line no-await-in-loop -- each deletion calls Stripe and Resend through cleanupUserData, one account at a time
+      await internalAdapter.deleteUser(user.id)
+      log.info({ email: user.email }, 'Deleted abandoned sign up')
       deletedCount += 1
-    } else {
-      log.error(
-        { error: result.reason, email: user.email },
-        'Failed to delete user'
-      )
+    } catch (error) {
+      log.error({ error, email: user.email }, 'Failed to delete user')
       errorCount += 1
     }
   }
@@ -284,7 +281,10 @@ export const Route = createFileRoute('/api/cron/cleanup')({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        const authError = verifyCronSecret(request)
+        const authError = verifyCronSecret({
+          request,
+          secret: serverEnv.CRON_SECRET
+        })
 
         if (authError) {
           return authError

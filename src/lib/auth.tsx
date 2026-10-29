@@ -210,20 +210,7 @@ const getAuthConfig = createServerOnlyFn(() => {
       additionalFields: USER_ADDITIONAL_FIELDS,
       validateUserInfo: rejectUnverifiedDiscordEmail,
       deleteUser: {
-        enabled: true,
-        beforeDelete: async (user) => {
-          const dbUser = await prismaClient.user.findUniqueOrThrow({
-            where: { id: user.id },
-            select: { locale: true }
-          })
-
-          await cleanupUserData({
-            userId: user.id,
-            email: user.email,
-            name: user.name,
-            locale: dbUser.locale
-          })
-        }
+        enabled: true
       }
     },
     emailAndPassword: {
@@ -335,6 +322,21 @@ const getAuthConfig = createServerOnlyFn(() => {
               type: ActivityEventType.SIGNUP,
               actor: { id: user.id },
               headers: context?.headers
+            })
+          }
+        },
+        delete: {
+          before: async (user) => {
+            const dbUser = await prismaClient.user.findUniqueOrThrow({
+              where: { id: user.id },
+              select: { locale: true }
+            })
+
+            await cleanupUserData({
+              userId: user.id,
+              email: user.email,
+              name: user.name,
+              locale: dbUser.locale
             })
           }
         }

@@ -17,7 +17,6 @@ import { getStripeClient } from '~/lib/stripe'
 import { BAN_REASONS, type BanReason } from '~/routes/admin/-lib/ban'
 import { logAuditAction } from '~/server/audit'
 import { adminRequiredMiddleware } from '~/server/user-auth'
-import { cleanupUserData } from '~/utils/user-cleanup'
 
 const USER_LIST_SELECT = {
   id: true,
@@ -385,7 +384,7 @@ export const removeUser = createServerFn({ method: 'POST' })
 
     const targetUser = await prismaClient.user.findUnique({
       where: { id: userId },
-      select: { role: true, email: true, name: true, locale: true }
+      select: { role: true }
     })
 
     if (!targetUser) {
@@ -397,13 +396,6 @@ export const removeUser = createServerFn({ method: 'POST' })
       setResponseStatus(HTTP_STATUS.UNPROCESSABLE_CONTENT)
       throw new Error('Impossible de supprimer un administrateur')
     }
-
-    await cleanupUserData({
-      userId,
-      email: targetUser.email,
-      name: targetUser.name,
-      locale: targetUser.locale
-    })
 
     const { headers } = getRequest()
 

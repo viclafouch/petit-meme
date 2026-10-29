@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { prismaClient } from '~/db'
 import { MEME_ALGOLIA_INCLUDE, type MemeAlgoliaData } from '~/constants/meme'
+import { serverEnv } from '~/env/server'
 import { replaceAllIndicesWithMemes } from '~/lib/algolia'
 import { cronLogger } from '~/lib/logger'
 import { verifyCronSecret } from '~/utils/cron-auth'
@@ -39,7 +40,10 @@ export const Route = createFileRoute('/api/cron/sync-algolia')({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        const authError = verifyCronSecret(request)
+        const authError = verifyCronSecret({
+          request,
+          secret: serverEnv.CRON_SECRET
+        })
 
         if (authError) {
           return authError

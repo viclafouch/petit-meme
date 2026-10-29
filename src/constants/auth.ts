@@ -26,6 +26,10 @@ export const PASSWORD_MAX_LENGTH = 100
 
 export const USER_NAME_MAX_LENGTH = 50
 
+export const UNVERIFIED_RETENTION_DAYS = 30
+export const INACTIVITY_ANONYMIZATION_YEARS = 3
+export const LAST_ACTIVE_AT_TRACKING_START = new Date('2026-04-06T21:57:05Z')
+
 export const getEmailSchema = () => {
   return z.email({ error: m.validation_email_invalid() })
 }

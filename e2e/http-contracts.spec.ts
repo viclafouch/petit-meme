@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { HTTP_STATUS } from '~/constants/http'
+import vercelConfig from '../vercel.json' with { type: 'json' }
 import { E2E_BASE_URL, E2E_BUNNY_HOSTNAME } from './env'
 
 const CHILD_SITEMAPS = [
@@ -89,6 +90,16 @@ test.describe('the HTTP contracts', () => {
       start_url: expect.stringContaining('/memes')
     })
   })
+
+  for (const { path } of vercelConfig.crons) {
+    test(`${path} refuses a call without the cron secret`, async ({
+      request
+    }) => {
+      const response = await request.get(path)
+
+      expect(response.status()).toBe(HTTP_STATUS.UNAUTHORIZED)
+    })
+  }
 
   test('the OG endpoint renders an image', async ({ request }) => {
     const response = await request.get('/api/og?type=home')

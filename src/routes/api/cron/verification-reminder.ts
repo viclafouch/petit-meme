@@ -108,7 +108,10 @@ export const Route = createFileRoute('/api/cron/verification-reminder')({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        const authError = verifyCronSecret(request)
+        const authError = verifyCronSecret({
+          request,
+          secret: serverEnv.CRON_SECRET
+        })
 
         if (authError) {
           return authError

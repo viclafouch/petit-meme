@@ -6,7 +6,7 @@ import { PendingSubmissionsReminderEmail } from '~/emails/pending-submissions-re
 import { serverEnv } from '~/env/server'
 import { formatDate } from '~/helpers/date'
 import { cronLogger } from '~/lib/logger'
-import { getEmailFrom, getEmailRecipient, getResendClient } from '~/lib/resend'
+import { sendEmail } from '~/lib/resend'
 import { verifyCronSecret } from '~/utils/cron-auth'
 
 const log = cronLogger.child({ job: 'pending-submissions-reminder' })
@@ -46,15 +46,14 @@ const runPendingSubmissionsReminder = async () => {
     }
   })
 
-  const { error } = await getResendClient().emails.send({
-    from: getEmailFrom(),
-    to: getEmailRecipient(CONTACT_EMAIL),
+  const isSent = await sendEmail({
+    to: CONTACT_EMAIL,
     subject: SUBJECT,
     react: PendingSubmissionsReminderEmail({ submissions: emailSubmissions })
   })
 
-  if (error) {
-    log.error({ error }, 'Failed to send reminder email')
+  if (!isSent) {
+    log.error('Failed to send reminder email')
 
     return { sent: false, count: submissions.length }
   }

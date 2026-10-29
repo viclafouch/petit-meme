@@ -9,7 +9,7 @@ import { emailSubjects } from '~/emails/subjects'
 import { SubmissionApprovedEmail } from '~/emails/submission-approved-email'
 import { SubmissionRejectedEmail } from '~/emails/submission-rejected-email'
 import { submissionLogger } from '~/lib/logger'
-import { sendEmailAsync } from '~/lib/resend'
+import { sendEmailInBackground } from '~/lib/resend'
 import { captureWithFeature } from '~/lib/sentry'
 import { logAuditAction } from '~/server/audit'
 import { adminRequiredMiddleware } from '~/server/user-auth'
@@ -149,30 +149,26 @@ export const updateSubmissionStatus = createServerFn({ method: 'POST' })
     })
 
     if (data.status === MemeSubmissionStatus.APPROVED) {
-      sendEmailAsync({
+      sendEmailInBackground({
         to: submission.user.email,
         subject: emailSubjects[submission.user.locale].submissionApproved,
-        react: (
-          <SubmissionApprovedEmail
-            username={submission.user.name}
-            memeTitle={submission.title}
-            memeId={data.memeId}
-            locale={submission.user.locale}
-          />
-        ),
+        react: SubmissionApprovedEmail({
+          username: submission.user.name,
+          memeTitle: submission.title,
+          memeId: data.memeId,
+          locale: submission.user.locale
+        }),
         logMessage: 'Sending submission approved email'
       })
     } else {
-      sendEmailAsync({
+      sendEmailInBackground({
         to: submission.user.email,
         subject: emailSubjects[submission.user.locale].submissionRejected,
-        react: (
-          <SubmissionRejectedEmail
-            username={submission.user.name}
-            memeTitle={submission.title}
-            locale={submission.user.locale}
-          />
-        ),
+        react: SubmissionRejectedEmail({
+          username: submission.user.name,
+          memeTitle: submission.title,
+          locale: submission.user.locale
+        }),
         logMessage: 'Sending submission rejected email'
       })
     }

@@ -8,7 +8,7 @@ import { VerificationReminderEmail } from '~/emails/verification-reminder-email'
 import { clientEnv } from '~/env/client'
 import { serverEnv } from '~/env/server'
 import { cronLogger } from '~/lib/logger'
-import { getEmailFrom, getEmailRecipient, getResendClient } from '~/lib/resend'
+import { sendEmail } from '~/lib/resend'
 import { verifyCronSecret } from '~/utils/cron-auth'
 import { createEmailVerificationPath } from '~/utils/email-verification'
 
@@ -30,9 +30,8 @@ const sendReminderToUser = async (user: {
     locale: user.locale
   })
   const verificationUrl = `${clientEnv.VITE_SITE_URL}${verificationPath}`
-  const { error } = await getResendClient().emails.send({
-    from: getEmailFrom(),
-    to: getEmailRecipient(user.email),
+  const isSent = await sendEmail({
+    to: user.email,
     subject: emailSubjects[user.locale].verificationReminder,
     react: VerificationReminderEmail({
       verificationUrl,
@@ -40,8 +39,8 @@ const sendReminderToUser = async (user: {
     })
   })
 
-  if (error) {
-    log.error({ error, email: user.email }, 'Failed to send reminder')
+  if (!isSent) {
+    log.error({ email: user.email }, 'Failed to send reminder')
 
     return false
   }

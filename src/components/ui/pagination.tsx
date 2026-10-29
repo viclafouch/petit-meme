@@ -1,10 +1,6 @@
 /* oxlint-disable */
 import * as React from 'react'
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  MoreHorizontalIcon
-} from 'lucide-react'
+import { ChevronLeftIcon, ChevronRightIcon, EllipsisIcon } from 'lucide-react'
 import type { LinkProps } from '@tanstack/react-router'
 import { Link } from '@tanstack/react-router'
 import { buttonVariants } from '~/components/ui/button'
@@ -113,7 +109,7 @@ const PaginationEllipsis = ({
       className={cn('flex size-9 items-center justify-center', className)}
       {...props}
     >
-      <MoreHorizontalIcon className="size-4" />
+      <EllipsisIcon className="size-4" />
       <span className="sr-only">{m.common_more_pages()}</span>
     </span>
   )

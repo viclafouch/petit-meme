@@ -54,7 +54,7 @@ export async function getTweetByUrl(tweetUrl: string) {
 
 const TWEET_FETCH_TIMEOUT_MS = 30_000
 
-export async function getTweetById(tweetId: string) {
+async function getTweetById(tweetId: string) {
   const tweet = await getTweet(tweetId, {
     signal: AbortSignal.timeout(TWEET_FETCH_TIMEOUT_MS)
   })

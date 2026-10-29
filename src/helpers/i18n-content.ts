@@ -83,7 +83,7 @@ export const FILTERABLE_CONTENT_LOCALES = [
   MemeContentLocaleEnum.EN
 ] as const satisfies readonly MemeContentLocale[]
 
-export const DEFAULT_CONTENT_LOCALE_FILTER = {
+const DEFAULT_CONTENT_LOCALE_FILTER = {
   fr: [MemeContentLocaleEnum.FR, MemeContentLocaleEnum.EN],
   en: [MemeContentLocaleEnum.EN]
 } as const satisfies Record<Locale, readonly MemeContentLocale[]>

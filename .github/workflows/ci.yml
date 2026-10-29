@@ -42,6 +42,22 @@ jobs:
           restore-keys: turbo-typecheck-${{ runner.os }}-
       - run: pnpm turbo run typecheck
 
+  knip:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/setup@v3
+        with:
+          runtime: node@24
+          cache: true
+      - uses: actions/cache@v6
+        with:
+          path: .turbo/cache
+          key: turbo-knip-${{ runner.os }}-${{ github.sha }}
+          restore-keys: turbo-knip-${{ runner.os }}-
+      - run: pnpm turbo run knip
+
   unit:
     runs-on: ubuntu-latest
     timeout-minutes: 10

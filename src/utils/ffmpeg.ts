@@ -29,7 +29,7 @@ export const loadFFmpeg = createClientOnlyFn(async (timeoutMessage: string) => {
 })
 
 export const FFMPEG_INPUT_FILE = 'input.mp4'
-export const FFMPEG_OUTPUT_FILE = 'output.mp4'
+const FFMPEG_OUTPUT_FILE = 'output.mp4'
 export const FFMPEG_WATERMARK_FILE = 'watermark.png'
 export const FFMPEG_TEXT_FILE = 'text.txt'
 

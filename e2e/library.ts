@@ -38,7 +38,7 @@ export const openMemePlayer = async (page: Page) => {
   return playerDialog
 }
 
-export const getReels = (page: Page) => {
+const getReels = (page: Page) => {
   return page
     .getByRole('feed', { name: m.meme_video_feed() })
     .getByRole('article')

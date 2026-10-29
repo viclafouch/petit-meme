@@ -1,4 +1,4 @@
-import { CENTS_PER_EURO, PERCENT_SCALE } from '~/constants/number'
+import { CENTS_PER_EURO } from '~/constants/number'
 import type { Locale } from '~/paraglide/runtime'
 
 type FormatCurrencyParams = {
@@ -23,14 +23,6 @@ function formatEuros(
 
 export function getRandomFloatInRange(min: number, max: number) {
   return min + Math.random() * (max - min)
-}
-
-export function computePercentChange(current: number, previous: number) {
-  if (previous === 0) {
-    return null
-  }
-
-  return Math.round(((current - previous) / previous) * PERCENT_SCALE)
 }
 
 export function convertCentsToEuros(cents: number) {

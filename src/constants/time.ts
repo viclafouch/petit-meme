@@ -1,9 +1,9 @@
 export const SECOND = 1000
 export const SECONDS_PER_MINUTE = 60
-export const MINUTES_PER_HOUR = 60
-export const HOURS_PER_DAY = 24
+const MINUTES_PER_HOUR = 60
+const HOURS_PER_DAY = 24
 export const DAYS_PER_WEEK = 7
-export const DAYS_PER_MONTH = 30
+const DAYS_PER_MONTH = 30
 export const DAYS_PER_YEAR = 365
 export const MONTHS_IN_YEAR = 12
 
@@ -17,7 +17,6 @@ export const ONE_DAY_IN_SECONDS = HOURS_PER_DAY * ONE_HOUR_IN_SECONDS
 export const SEVEN_DAYS_IN_SECONDS = DAYS_PER_WEEK * ONE_DAY_IN_SECONDS
 export const ONE_YEAR_IN_SECONDS = DAYS_PER_YEAR * ONE_DAY_IN_SECONDS
 
-export const ONE_HOUR_MS = HOUR
 export const THIRTY_DAYS_MS = DAYS_PER_MONTH * DAY
 export const ONE_YEAR_MS = DAYS_PER_YEAR * DAY
 export const FIVE_MINUTES_MS = FIVE_MINUTES_IN_SECONDS * SECOND

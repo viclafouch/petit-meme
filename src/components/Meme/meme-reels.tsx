@@ -29,7 +29,7 @@ type ReelProps = {
   setIsMuted: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-export const Reel = React.memo(
+const Reel = React.memo(
   ({
     meme,
     isMuted,

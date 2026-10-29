@@ -12,7 +12,7 @@ import { MemeContentLocale, MemeStatus } from '~/db/generated/prisma/enums'
 import { FILTERABLE_CONTENT_LOCALES } from '~/helpers/i18n-content'
 import { m } from '~/paraglide/messages.js'
 
-export const MEME_VIDEO_SELECT = {
+const MEME_VIDEO_SELECT = {
   id: true,
   bunnyId: true,
   duration: true,

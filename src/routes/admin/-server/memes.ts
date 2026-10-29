@@ -92,7 +92,7 @@ const MEME_KEYWORD_MAX_LENGTH = 50
 const MEME_KEYWORDS_MAX_COUNT = 20
 const MEME_CATEGORIES_MAX_COUNT = 10
 
-export const MEME_TRANSLATION_SCHEMA = z.object({
+const MEME_TRANSLATION_SCHEMA = z.object({
   title: z.string().max(MEME_TITLE_MAX_LENGTH),
   description: z.string().max(MEME_DESCRIPTION_MAX_LENGTH),
   keywords: z

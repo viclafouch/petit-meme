@@ -2,7 +2,7 @@ import type { BetterAuthOptions } from 'better-auth'
 import { z } from 'zod'
 import { m } from '~/paraglide/messages.js'
 
-export const AUTH_PROVIDER_IDS = [
+const AUTH_PROVIDER_IDS = [
   'credential',
   'twitter',
   'discord'

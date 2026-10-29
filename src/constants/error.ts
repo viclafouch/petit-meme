@@ -32,7 +32,7 @@ export class StudioError extends Error {
   }
 }
 
-export const matchIsStudioError = (error: unknown): error is StudioError => {
+const matchIsStudioError = (error: unknown): error is StudioError => {
   return error instanceof Error && 'code' in error
 }
 

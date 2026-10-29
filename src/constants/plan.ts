@@ -4,7 +4,7 @@ import { m } from '~/paraglide/messages.js'
 
 export type BillingPeriod = 'monthly' | 'yearly'
 
-export type PlanFeature = {
+type PlanFeature = {
   label: string
   status: 'included' | 'limited' | 'not_included'
   note?: string
@@ -19,7 +19,7 @@ export const STRIPE_BILLING_INTERVALS = [
   'year'
 ] as const satisfies readonly NonNullable<Subscription['billingInterval']>[]
 
-export type PlanPricing = {
+type PlanPricing = {
   priceInCents: number
 }
 
@@ -35,7 +35,7 @@ export type Plan = {
   pricing: Record<BillingPeriod, PlanPricing>
 }
 
-export const FREE_PLAN_MAX_GENERATIONS = 3
+const FREE_PLAN_MAX_GENERATIONS = 3
 export const FREE_PLAN_MAX_FAVORITES = 20
 
 const FREE_PLAN_PRICING = {
@@ -48,7 +48,7 @@ const PREMIUM_PLAN_PRICING = {
   yearly: { priceInCents: 2999 }
 } as const satisfies Record<BillingPeriod, PlanPricing>
 
-export const PREMIUM_PLAN_PRODUCT_ID = 'f9395cde-98ed-4d06-9631-b9b9f0a64566'
+const PREMIUM_PLAN_PRODUCT_ID = 'f9395cde-98ed-4d06-9631-b9b9f0a64566'
 
 export { PREMIUM_PLAN_PRICING }
 

@@ -404,7 +404,7 @@ function AnimateIcon({
   )
 
   return (
-    <AnimateIconContext.Provider
+    <AnimateIconContext
       value={{
         controls,
         animation: currentAnimation,
@@ -418,7 +418,7 @@ function AnimateIcon({
       }}
     >
       {content}
-    </AnimateIconContext.Provider>
+    </AnimateIconContext>
   )
 }
 
@@ -510,7 +510,7 @@ function IconWrapper<T extends string>({
     const loopDelayToUse = parentLoopDelay
 
     return (
-      <AnimateIconContext.Provider
+      <AnimateIconContext
         value={{
           controls,
           animation: animationToUse,
@@ -532,7 +532,7 @@ function IconWrapper<T extends string>({
           )}
           {...props}
         />
-      </AnimateIconContext.Provider>
+      </AnimateIconContext>
     )
   }
 

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ChevronRightIcon, MoreHorizontalIcon } from 'lucide-react'
+import { ChevronRightIcon, EllipsisIcon } from 'lucide-react'
 import { mergeProps } from '@base-ui/react/merge-props'
 import { useRender } from '@base-ui/react/use-render'
 import { cn } from '~/lib/utils'
@@ -104,7 +104,7 @@ function BreadcrumbEllipsis({
       )}
       {...props}
     >
-      <MoreHorizontalIcon />
+      <EllipsisIcon />
       <span className="sr-only">More</span>
     </span>
   )

@@ -4,12 +4,12 @@
 import * as React from 'react'
 import {
   FileArchiveIcon,
-  FileAudioIcon,
+  FileHeadphoneIcon,
   FileCodeIcon,
   FileCogIcon,
   FileIcon,
   FileTextIcon,
-  FileVideoIcon
+  FilePlayIcon
 } from 'lucide-react'
 import { mergeProps } from '@base-ui/react/merge-props'
 import { useRender } from '@base-ui/react/use-render'
@@ -644,8 +644,8 @@ const FileUploadRoot = (props: FileUploadRootProps) => {
   }, [dropzoneId, inputId, listId, labelId, dir, disabled, urlCache])
 
   return (
-    <StoreContext.Provider value={store}>
-      <FileUploadContext.Provider value={contextValue}>
+    <StoreContext value={store}>
+      <FileUploadContext value={contextValue}>
         <div
           data-disabled={disabled ? '' : undefined}
           data-slot="file-upload"
@@ -673,8 +673,8 @@ const FileUploadRoot = (props: FileUploadRootProps) => {
             {label ?? 'File upload'}
           </span>
         </div>
-      </FileUploadContext.Provider>
-    </StoreContext.Provider>
+      </FileUploadContext>
+    </StoreContext>
   )
 }
 
@@ -1052,7 +1052,7 @@ const FileUploadItem = (props: FileUploadItemProps) => {
         : 'Ready to upload'
 
   return (
-    <FileUploadItemContext.Provider value={itemContext}>
+    <FileUploadItemContext value={itemContext}>
       <div
         role="listitem"
         id={id}
@@ -1076,7 +1076,7 @@ const FileUploadItem = (props: FileUploadItemProps) => {
           {statusText}
         </span>
       </div>
-    </FileUploadItemContext.Provider>
+    </FileUploadItemContext>
   )
 }
 
@@ -1096,11 +1096,11 @@ function getFileIcon(file: File) {
   const extension = file.name.split('.').pop()?.toLowerCase() ?? ''
 
   if (type.startsWith('video/')) {
-    return <FileVideoIcon />
+    return <FilePlayIcon />
   }
 
   if (type.startsWith('audio/')) {
-    return <FileAudioIcon />
+    return <FileHeadphoneIcon />
   }
 
   if (

@@ -43,15 +43,14 @@ const Dialog = ({
   }
 
   return (
-    // oxlint-disable-next-line react/jsx-no-constructed-context-values
-    <DialogContext.Provider value={{ isOpen }}>
+    <DialogContext value={{ isOpen }}>
       <DialogPrimitive.Root
         data-slot="dialog"
         open={isOpen}
         onOpenChange={handleOpenChange}
         {...props}
       />
-    </DialogContext.Provider>
+    </DialogContext>
   )
 }
 

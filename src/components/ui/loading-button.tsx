@@ -1,5 +1,5 @@
 import React from 'react'
-import { Loader2Icon } from 'lucide-react'
+import { LoaderCircleIcon } from 'lucide-react'
 import { useSpinDelay } from 'spin-delay'
 import { Button } from '~/components/ui/button'
 
@@ -19,7 +19,7 @@ export const LoadingButton = ({
     <Button {...props} disabled={disabled || isLoading} aria-busy={isLoading}>
       {showSpinner ? (
         <>
-          <Loader2Icon className="animate-spin" />
+          <LoaderCircleIcon className="animate-spin" />
           {loadingText}
         </>
       ) : (

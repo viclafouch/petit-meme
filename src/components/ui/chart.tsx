@@ -47,7 +47,7 @@ function ChartContainer({
   const chartId = `chart-${id || uniqueId.replace(/:/g, '')}`
 
   return (
-    <ChartContext.Provider value={{ config }}>
+    <ChartContext value={{ config }}>
       <div
         data-slot="chart"
         data-chart={chartId}
@@ -58,13 +58,11 @@ function ChartContainer({
         {...props}
       >
         <ChartStyle id={chartId} config={config} />
-        <RechartsPrimitive.ResponsiveContainer
-          initialDimension={{ width: 1, height: 1 }}
-        >
+        <RechartsPrimitive.ResponsiveContainer>
           {children}
         </RechartsPrimitive.ResponsiveContainer>
       </div>
-    </ChartContext.Provider>
+    </ChartContext>
   )
 }
 

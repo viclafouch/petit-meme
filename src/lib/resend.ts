@@ -1,5 +1,6 @@
 import type React from 'react'
 import { Resend } from 'resend'
+import { waitUntil } from '@vercel/functions'
 import { serverEnv } from '~/env/server'
 import { emailLogger } from '~/lib/logger'
 import { captureWithFeature } from '~/lib/sentry'
@@ -8,30 +9,30 @@ const DEFAULT_EMAIL_FROM = 'Petit Meme <noreply@petit-meme.io>'
 
 let resendClient: Resend | null = null
 
-export const getResendClient = () => {
+const getResendClient = () => {
   resendClient ??= new Resend(serverEnv.RESEND_API_KEY)
 
   return resendClient
 }
 
-export const getEmailFrom = () => {
+const getEmailFrom = () => {
   return serverEnv.EMAIL_OVERRIDE_FROM ?? DEFAULT_EMAIL_FROM
 }
 
-export const getEmailRecipient = (email: string) => {
+const getEmailRecipient = (email: string) => {
   return serverEnv.EMAIL_OVERRIDE_TO ?? email
 }
 
-type SendEmailAsyncParams = {
+type SendEmailInBackgroundParams = {
   to: string
   subject: string
   react: React.ReactElement
   logMessage: string
 }
 
-type SendEmailParams = Omit<SendEmailAsyncParams, 'logMessage'>
+type SendEmailParams = Omit<SendEmailInBackgroundParams, 'logMessage'>
 
-const sendEmail = async ({ to, subject, react }: SendEmailParams) => {
+export const sendEmail = async ({ to, subject, react }: SendEmailParams) => {
   try {
     const { error } = await getResendClient().emails.send({
       from: getEmailFrom(),
@@ -43,20 +44,26 @@ const sendEmail = async ({ to, subject, react }: SendEmailParams) => {
     if (error) {
       emailLogger.error({ error, subject, to }, 'Failed to send email')
       captureWithFeature(error, 'resend-email')
+
+      return false
     }
+
+    return true
   } catch (error) {
-    emailLogger.error({ error, subject, to }, 'Network error sending email')
+    emailLogger.error({ error, subject, to }, 'Unexpected error sending email')
     captureWithFeature(error, 'resend-email')
+
+    return false
   }
 }
 
-export const sendEmailAsync = ({
+export const sendEmailInBackground = ({
   to,
   subject,
   react,
   logMessage
-}: SendEmailAsyncParams) => {
+}: SendEmailInBackgroundParams) => {
   emailLogger.info({ to, subject }, logMessage)
 
-  void sendEmail({ to, subject, react })
+  waitUntil(sendEmail({ to, subject, react }))
 }

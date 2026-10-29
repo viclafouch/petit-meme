@@ -11,7 +11,7 @@ import { emailSubjects } from '~/emails/subjects'
 import { differenceInMonths } from '~/helpers/date'
 import { auth } from '~/lib/auth'
 import { adminLogger } from '~/lib/logger'
-import { sendEmailAsync } from '~/lib/resend'
+import { sendEmailInBackground } from '~/lib/resend'
 import { captureWithFeature } from '~/lib/sentry'
 import { getStripeClient } from '~/lib/stripe'
 import { BAN_REASONS, type BanReason } from '~/routes/admin/-lib/ban'
@@ -233,17 +233,15 @@ const cancelSubscriptionAndNotifyBan = async ({
     bannedUser.stripeCustomerId
   )
 
-  sendEmailAsync({
+  sendEmailInBackground({
     to: bannedUser.email,
     subject: emailSubjects[bannedUser.locale].accountBanned,
-    react: (
-      <AccountBannedEmail
-        username={bannedUser.name}
-        banReason={banReason}
-        hasActiveSubscription={hasActiveSubscription}
-        locale={bannedUser.locale}
-      />
-    ),
+    react: AccountBannedEmail({
+      username: bannedUser.name,
+      banReason,
+      hasActiveSubscription,
+      locale: bannedUser.locale
+    }),
     logMessage: 'Sending ban notification email'
   })
 }
@@ -346,15 +344,13 @@ export const unbanUserById = createServerFn({ method: 'POST' })
       headers
     })
 
-    sendEmailAsync({
+    sendEmailInBackground({
       to: targetUser.email,
       subject: emailSubjects[targetUser.locale].accountUnbanned,
-      react: (
-        <AccountUnbannedEmail
-          username={targetUser.name}
-          locale={targetUser.locale}
-        />
-      ),
+      react: AccountUnbannedEmail({
+        username: targetUser.name,
+        locale: targetUser.locale
+      }),
       logMessage: 'Sending unban notification email'
     })
 

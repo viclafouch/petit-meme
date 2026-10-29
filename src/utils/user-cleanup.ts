@@ -3,7 +3,7 @@ import { prismaClient } from '~/db'
 import { AccountDeletedEmail } from '~/emails/account-deleted-email'
 import { emailSubjects } from '~/emails/subjects'
 import { authLogger } from '~/lib/logger'
-import { sendEmailAsync } from '~/lib/resend'
+import { sendEmailInBackground } from '~/lib/resend'
 import { captureWithFeature } from '~/lib/sentry'
 import { getStripeClient } from '~/lib/stripe'
 import type { Locale } from '~/paraglide/runtime'
@@ -19,10 +19,10 @@ export const cleanupUserData = createServerOnlyFn(
   async ({ userId, email, name, locale }: CleanupUserDataParams) => {
     authLogger.info({ userId, email }, 'Account deletion cleanup initiated')
 
-    sendEmailAsync({
+    sendEmailInBackground({
       to: email,
       subject: emailSubjects[locale].accountDeleted,
-      react: <AccountDeletedEmail username={name} locale={locale} />,
+      react: AccountDeletedEmail({ username: name, locale }),
       logMessage: 'Sending account deleted email to'
     })
 

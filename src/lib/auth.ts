@@ -39,7 +39,7 @@ import { formatCentsToEuros } from '~/helpers/number'
 import { boundProviderName } from '~/helpers/user-name'
 import { rejectUnverifiedDiscordEmail, signUpGuard } from '~/lib/auth-guard'
 import { authLogger, stripeLogger } from '~/lib/logger'
-import { sendEmailAsync } from '~/lib/resend'
+import { sendEmail, sendEmailInBackground } from '~/lib/resend'
 import { captureWithFeature } from '~/lib/sentry'
 import { getStripeClient } from '~/lib/stripe'
 import { getLocale } from '~/paraglide/runtime'
@@ -98,16 +98,14 @@ const handlePaymentFailed = async (event: Stripe.InvoicePaymentFailedEvent) => {
     return
   }
 
-  sendEmailAsync({
+  sendEmailInBackground({
     to: user.email,
     subject: emailSubjects[user.locale].paymentFailed,
-    react: (
-      <PaymentFailedEmail
-        username={user.name}
-        billingPortalUrl={portalSession.url}
-        locale={user.locale}
-      />
-    ),
+    react: PaymentFailedEmail({
+      username: user.name,
+      billingPortalUrl: portalSession.url,
+      locale: user.locale
+    }),
     logMessage: 'Sending payment failed email to'
   })
 }
@@ -140,16 +138,13 @@ const sendVerificationEmail: SendVerificationEmail = async ({
   const locale = getLocale()
   const verificationPath = buildEmailVerificationPath({ token, locale })
   authLogger.info({ email: user.email }, 'Sending verification email')
-  sendEmailAsync({
+  await sendEmail({
     to: user.email,
     subject: emailSubjects[locale].verifyEmail,
-    react: (
-      <EmailVerification
-        verificationUrl={`${clientEnv.VITE_SITE_URL}${verificationPath}`}
-        locale={locale}
-      />
-    ),
-    logMessage: 'Sending verification email to'
+    react: EmailVerification({
+      verificationUrl: `${clientEnv.VITE_SITE_URL}${verificationPath}`,
+      locale
+    })
   })
 }
 
@@ -222,30 +217,27 @@ const getAuthConfig = createServerOnlyFn(() => {
       sendResetPassword: async ({ user, url }) => {
         const locale = getLocale()
         authLogger.info({ email: user.email }, 'Password reset requested')
-        sendEmailAsync({
+        await sendEmail({
           to: user.email,
           subject: emailSubjects[locale].resetPassword,
-          react: <ResetPassword resetUrl={url} locale={locale} />,
-          logMessage: 'Sending reset password email to'
+          react: ResetPassword({ resetUrl: url, locale })
         })
       },
       onPasswordReset: async ({ user }) => {
         const locale = getLocale()
         authLogger.info({ email: user.email }, 'Password reset completed')
-        sendEmailAsync({
+        sendEmailInBackground({
           to: user.email,
           subject: emailSubjects[locale].passwordChanged,
-          react: (
-            <PasswordChangedEmail
-              username={user.name}
-              changedAt={formatDate(
-                new Date(),
-                locale,
-                PASSWORD_CHANGED_DATE_OPTIONS
-              )}
-              locale={locale}
-            />
-          ),
+          react: PasswordChangedEmail({
+            username: user.name,
+            changedAt: formatDate(
+              new Date(),
+              locale,
+              PASSWORD_CHANGED_DATE_OPTIONS
+            ),
+            locale
+          }),
           logMessage: 'Password reset for'
         })
       },
@@ -261,10 +253,10 @@ const getAuthConfig = createServerOnlyFn(() => {
       afterEmailVerification: async (user) => {
         const locale = getLocale()
         authLogger.info({ email: user.email }, 'Email verified')
-        sendEmailAsync({
+        sendEmailInBackground({
           to: user.email,
           subject: emailSubjects[locale].welcome,
-          react: <WelcomeEmail username={user.name} locale={locale} />,
+          react: WelcomeEmail({ username: user.name, locale }),
           logMessage: 'Email verified for'
         })
       }
@@ -392,18 +384,16 @@ const getAuthConfig = createServerOnlyFn(() => {
               locale
             })
 
-            sendEmailAsync({
+            sendEmailInBackground({
               to: user.email,
               subject: emailSubjects[locale].subscriptionConfirmed,
-              react: (
-                <SubscriptionConfirmedEmail
-                  username={user.name}
-                  planTitle="Premium"
-                  amount={formattedAmount}
-                  isAnnual={isAnnual}
-                  locale={locale}
-                />
-              ),
+              react: SubscriptionConfirmedEmail({
+                username: user.name,
+                planTitle: 'Premium',
+                amount: formattedAmount,
+                isAnnual,
+                locale
+              }),
               logMessage: 'Sending subscription confirmed email to'
             })
           }

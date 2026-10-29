@@ -275,7 +275,7 @@ export type RateLimitCreateInput = {
   key: string
   count: number
   lastRequest: bigint | number
-  windowStart: bigint | number
+  windowStart?: bigint | number
 }
 
 export type RateLimitUncheckedCreateInput = {
@@ -283,7 +283,7 @@ export type RateLimitUncheckedCreateInput = {
   key: string
   count: number
   lastRequest: bigint | number
-  windowStart: bigint | number
+  windowStart?: bigint | number
 }
 
 export type RateLimitUpdateInput = {
@@ -307,7 +307,7 @@ export type RateLimitCreateManyInput = {
   key: string
   count: number
   lastRequest: bigint | number
-  windowStart: bigint | number
+  windowStart?: bigint | number
 }
 
 export type RateLimitUpdateManyMutationInput = {

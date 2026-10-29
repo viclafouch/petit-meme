@@ -12,10 +12,7 @@ import {
 import { StudioError } from '~/constants/error'
 import { HTTP_STATUS } from '~/constants/http'
 import { MEME_TRANSLATION_SELECT, MEME_VIDEO_INCLUDE } from '~/constants/meme'
-import {
-  FREE_PLAN_MAX_FAVORITES,
-  FREE_PLAN_MAX_GENERATIONS
-} from '~/constants/plan'
+import { FREE_PLAN_MAX_FAVORITES } from '~/constants/plan'
 import { RATE_LIMIT_UPDATE_AVATAR } from '~/constants/rate-limit'
 import type { Meme } from '~/db/generated/prisma/client'
 import { ActivityEventType } from '~/db/generated/prisma/enums'
@@ -77,33 +74,6 @@ export const getFavoritesMemes = createServerFn({ method: 'GET' })
       }),
       count: bookmarks.length
     }
-  })
-
-export const checkGeneration = createServerFn({ method: 'POST' })
-  .middleware([authUserRequiredMiddleware])
-  .handler(async ({ context }) => {
-    const [{ generationCount }, isPremium] = await Promise.all([
-      prismaClient.user.findUniqueOrThrow({
-        where: {
-          id: context.user.id
-        },
-        select: {
-          generationCount: true
-        }
-      }),
-      matchIsUserPremium(context.user)
-    ])
-
-    if (generationCount >= FREE_PLAN_MAX_GENERATIONS && !isPremium) {
-      authLogger.warn(
-        { userId: context.user.id, generationCount },
-        'Generation limit reached'
-      )
-      setResponseStatus(HTTP_STATUS.FORBIDDEN)
-      throw new StudioError('unauthorized', { code: 'UNAUTHORIZED' })
-    }
-
-    return { result: 'ok' } as const
   })
 
 type ToggleBookmarkParams = {

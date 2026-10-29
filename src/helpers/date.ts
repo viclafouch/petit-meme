@@ -90,14 +90,6 @@ export function truncateToUtcMonth(date: Date) {
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1))
 }
 
-export function computeDateRanges(days: number) {
-  const now = new Date()
-  const currentStart = new Date(now.getTime() - days * DAY)
-  const previousStart = new Date(currentStart.getTime() - days * DAY)
-
-  return { now, currentStart, previousStart }
-}
-
 export function getChartGranularity(days: number | null): ChartGranularity {
   if (days === null) {
     return 'month'

@@ -19,7 +19,7 @@ const CATEGORY_TITLE_MAX_LENGTH = 100
 const CATEGORY_KEYWORD_MAX_LENGTH = 50
 const CATEGORY_KEYWORDS_MAX_COUNT = 20
 
-export const CATEGORY_TRANSLATION_SCHEMA = z.object({
+const CATEGORY_TRANSLATION_SCHEMA = z.object({
   title: z
     .string()
     .min(CATEGORY_TITLE_MIN_LENGTH)
@@ -106,7 +106,7 @@ type CategoriesCacheEntry = {
 
 let categoriesCache: CategoriesCacheEntry | null = null
 
-export const invalidateCategoriesCache = createServerOnlyFn(() => {
+const invalidateCategoriesCache = createServerOnlyFn(() => {
   categoriesCache = null
 })
 

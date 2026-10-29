@@ -16,6 +16,10 @@
       "description": "Runs the Vitest unit tests",
       "inputs": ["$TURBO_DEFAULT$", "!**/*.md", "!.claude/**"]
     },
+    "knip": {
+      "description": "Finds unused files, exports and dependencies with Knip",
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.md", "!.claude/**"]
+    },
     "format:check": {
       "description": "Checks the formatting with oxfmt",
       "inputs": ["$TURBO_DEFAULT$", "!**/*.md", "!.claude/**"]

@@ -26,7 +26,7 @@ if (!parsedE2eEnv.success) {
 }
 
 export const E2E_BASE_URL = parsedE2eEnv.data.VITE_SITE_URL
-export const E2E_DATABASE_URL = parsedE2eEnv.data.DATABASE_URL
+const E2E_DATABASE_URL = parsedE2eEnv.data.DATABASE_URL
 export const E2E_AUTH_SECRET = parsedE2eEnv.data.BETTER_AUTH_SECRET
 export const E2E_BUNNY_HOSTNAME = parsedE2eEnv.data.VITE_BUNNY_HOSTNAME
 export const { E2E_VIDEO_BUNNY_ID } = parsedE2eEnv.data

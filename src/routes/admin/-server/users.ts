@@ -29,7 +29,7 @@ const USER_LIST_SELECT = {
   lastActiveAt: true
 } as const satisfies Prisma.UserSelect
 
-export type SubscriptionStatus = 'active' | 'past' | 'none'
+type SubscriptionStatus = 'active' | 'past' | 'none'
 
 export const SUBSCRIPTION_LIST_SELECT = {
   referenceId: true,

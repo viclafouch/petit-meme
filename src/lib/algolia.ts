@@ -210,7 +210,7 @@ export function normalizeAlgoliaMemesPage(
   }
 }
 
-export function memeToAlgoliaRecord(meme: MemeAlgoliaData, locale: Locale) {
+function memeToAlgoliaRecord(meme: MemeAlgoliaData, locale: Locale) {
   const resolved = resolveMemeTranslation({
     translations: meme.translations,
     contentLocale: meme.contentLocale,

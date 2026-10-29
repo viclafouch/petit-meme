@@ -1,6 +1,6 @@
 import { expect, type Page } from '@playwright/test'
 
-export type RecordedShare = {
+type RecordedShare = {
   title: string
   fileName: string
   isEmpty: boolean

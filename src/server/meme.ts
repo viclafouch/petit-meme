@@ -39,7 +39,7 @@ import {
   RATE_LIMIT_TRACK,
   RATE_LIMIT_VIEW
 } from '~/constants/rate-limit'
-import { DAY, ONE_HOUR_MS, THIRTY_DAYS_MS } from '~/constants/time'
+import { DAY, HOUR, THIRTY_DAYS_MS } from '~/constants/time'
 import { Prisma } from '~/db/generated/prisma/client'
 import {
   ActivityEventType as ActivityEventTypeEnum,
@@ -1062,7 +1062,7 @@ export const registerMemeView = createServerFn({ method: 'POST' })
     return z
       .object({
         memeId: z.string(),
-        watchMs: z.number().int().min(0).max(ONE_HOUR_MS)
+        watchMs: z.number().int().min(0).max(HOUR)
       })
       .parse(data)
   })

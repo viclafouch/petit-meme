@@ -42,7 +42,7 @@ export const fetchActivityRows = createServerOnlyFn(
   }
 )
 
-export const fetchActivityPage = createServerOnlyFn(
+const fetchActivityPage = createServerOnlyFn(
   async ({ where, page }: ActivityPageParams) => {
     const [rows, total] = await Promise.all([
       fetchActivityRows({ where, page }),

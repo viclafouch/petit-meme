@@ -1,7 +1,7 @@
 import { prismaClient } from '~/db'
 import { adminLogger } from '~/lib/logger'
 
-export type AuditAction =
+type AuditAction =
   | 'create'
   | 'edit'
   | 'delete'
@@ -10,7 +10,7 @@ export type AuditAction =
   | 'status_change'
   | 'watermark_upload'
 
-export type AuditTargetType = 'category' | 'meme' | 'submission' | 'user'
+type AuditTargetType = 'category' | 'meme' | 'submission' | 'user'
 
 export type AuditMetadata = {
   title?: string

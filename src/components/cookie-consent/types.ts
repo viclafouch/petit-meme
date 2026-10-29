@@ -2,7 +2,7 @@ import type { LinkOptions } from '@tanstack/react-router'
 
 export type ConsentCategory = 'necessary' | 'analytics'
 
-export type ConsentAction = 'accept_all' | 'reject_all' | 'custom'
+type ConsentAction = 'accept_all' | 'reject_all' | 'custom'
 
 export type ConsentCategories = {
   necessary: boolean

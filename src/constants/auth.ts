@@ -1,3 +1,4 @@
+import type { BetterAuthOptions } from 'better-auth'
 import { z } from 'zod'
 import { m } from '~/paraglide/messages.js'
 
@@ -20,6 +21,20 @@ export const matchIsAuthProviderId = (
 export const PLACEHOLDER_EMAIL_DOMAIN = 'placeholder.invalid'
 
 export const AUTH_BASE_PATH = '/api/auth'
+
+export const AUTH_RATE_LIMIT = {
+  window: 60,
+  max: 100,
+  storage: 'database',
+  customRules: {
+    '/get-session': false,
+    '/sign-in/email': { window: 300, max: 10 },
+    '/sign-up/email': { window: 3600, max: 3 },
+    '/forget-password': { window: 3600, max: 3 },
+    '/change-password': { window: 900, max: 5 },
+    '/send-verification-email': { window: 60, max: 2 }
+  }
+} as const satisfies BetterAuthOptions['rateLimit']
 
 export const PASSWORD_MIN_LENGTH = 8
 export const PASSWORD_MAX_LENGTH = 100

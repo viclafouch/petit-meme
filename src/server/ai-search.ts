@@ -1,24 +1,23 @@
-import { z } from 'zod'
 import { createAnthropicChat } from '@tanstack/ai-anthropic'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
 import { waitUntil } from '@vercel/functions'
 import { prismaClient } from '~/db'
 import {
+  AI_SEARCH_INPUT_SCHEMA,
   AI_SEARCH_MODEL,
   AI_SEARCH_TIMEOUT_MS,
   AI_SEARCH_QUOTA_EXCEEDED_MESSAGE,
   DAILY_GLOBAL_AI_SEARCH_CAP,
   FREE_PLAN_MAX_AI_SEARCHES,
-  MAX_AI_SEARCH_RESULTS,
-  MAX_PROMPT_LENGTH
+  MAX_AI_SEARCH_RESULTS
 } from '~/constants/ai-search'
 import { HTTP_STATUS } from '~/constants/http'
 import { RATE_LIMIT_AI_SEARCH } from '~/constants/rate-limit'
+import { lockUntilTransactionEnds } from '~/db/advisory-lock'
 import type { Prisma } from '~/db/generated/prisma/client'
 import {
   ActivityEventType,
-  MemeContentLocale as MemeContentLocaleEnum,
   MemeStatus,
   type MemeContentLocale
 } from '~/db/generated/prisma/enums'
@@ -46,13 +45,6 @@ import {
 import { authUserRequiredMiddleware } from '~/server/user-auth'
 import { recordActivityEvent } from '~/utils/activity-event'
 import { requestSearchKeywords } from '~/utils/ai-search-keywords'
-
-const AI_SEARCH_INPUT_SCHEMA = z.object({
-  prompt: z.string().trim().min(1).max(MAX_PROMPT_LENGTH),
-  contentLocale: z
-    .enum([MemeContentLocaleEnum.FR, MemeContentLocaleEnum.EN])
-    .optional()
-})
 
 async function extractSearchKeywordsOrPrompt(prompt: string, locale: Locale) {
   try {
@@ -84,14 +76,84 @@ async function extractSearchKeywordsOrPrompt(prompt: string, locale: Locale) {
   }
 }
 
-const createAiSearchLog = async (
-  aiSearchLog: Prisma.AiSearchLogUncheckedCreateInput
-) => {
+const AI_SEARCH_QUOTA_LOCK_KEY = 'ai-search-quota'
+
+type ReserveAiSearchParams = Pick<
+  Prisma.AiSearchLogUncheckedCreateInput,
+  'userId' | 'prompt' | 'locale'
+> & {
+  isPremium: boolean
+}
+
+const reserveAiSearch = ({
+  userId,
+  isPremium,
+  prompt,
+  locale
+}: ReserveAiSearchParams) => {
+  return prismaClient.$transaction(async (transaction) => {
+    await lockUntilTransactionEnds(transaction, AI_SEARCH_QUOTA_LOCK_KEY)
+
+    const now = new Date()
+    const dailyCount = await transaction.aiSearchLog.count({
+      where: { createdAt: { gte: truncateToUtcDay(now) } }
+    })
+
+    if (dailyCount >= DAILY_GLOBAL_AI_SEARCH_CAP) {
+      aiSearchLogger.warn({ dailyCount }, 'Daily global AI search cap reached')
+      setResponseStatus(HTTP_STATUS.TOO_MANY_REQUESTS)
+      throw new Error('AI search temporarily unavailable')
+    }
+
+    const monthlyCount = await transaction.aiSearchLog.count({
+      where: { userId, createdAt: { gte: truncateToUtcMonth(now) } }
+    })
+
+    if (!isPremium && monthlyCount >= FREE_PLAN_MAX_AI_SEARCHES) {
+      setResponseStatus(HTTP_STATUS.TOO_MANY_REQUESTS)
+      throw new Error(AI_SEARCH_QUOTA_EXCEEDED_MESSAGE)
+    }
+
+    const { id } = await transaction.aiSearchLog.create({
+      data: {
+        userId,
+        prompt,
+        keywords: [],
+        memeIds: [],
+        locale,
+        resultCount: 0
+      },
+      select: { id: true }
+    })
+
+    return { id, monthlyCount: monthlyCount + 1 }
+  })
+}
+
+const refundAiSearch = async (aiSearchLogId: string) => {
   try {
-    await prismaClient.aiSearchLog.create({ data: aiSearchLog })
+    await prismaClient.aiSearchLog.delete({ where: { id: aiSearchLogId } })
   } catch (error) {
     captureWithFeature(error, 'ai-search')
-    aiSearchLogger.error({ error }, 'Failed to log AI search')
+    aiSearchLogger.error({ error, aiSearchLogId }, 'Failed to refund AI search')
+  }
+}
+
+const completeAiSearchLog = async (
+  aiSearchLogId: string,
+  result: Pick<
+    Prisma.AiSearchLogUpdateInput,
+    'keywords' | 'memeIds' | 'resultCount'
+  >
+) => {
+  try {
+    await prismaClient.aiSearchLog.update({
+      where: { id: aiSearchLogId },
+      data: result
+    })
+  } catch (error) {
+    captureWithFeature(error, 'ai-search')
+    aiSearchLogger.error({ error, aiSearchLogId }, 'Failed to log AI search')
   }
 }
 
@@ -121,31 +183,13 @@ export const aiSearchMemes = createServerFn({ method: 'POST' })
   .handler(async ({ data, context }) => {
     const locale = getLocale()
     const userId = context.user.id
-    const now = new Date()
-
-    const [dailyCount, isPremium, monthlyCount] = await Promise.all([
-      prismaClient.aiSearchLog.count({
-        where: { createdAt: { gte: truncateToUtcDay(now) } }
-      }),
-      matchIsUserPremium(context.user),
-      prismaClient.aiSearchLog.count({
-        where: {
-          userId,
-          createdAt: { gte: truncateToUtcMonth(now) }
-        }
-      })
-    ])
-
-    if (dailyCount >= DAILY_GLOBAL_AI_SEARCH_CAP) {
-      aiSearchLogger.warn({ dailyCount }, 'Daily global AI search cap reached')
-      setResponseStatus(HTTP_STATUS.TOO_MANY_REQUESTS)
-      throw new Error('AI search temporarily unavailable')
-    }
-
-    if (!isPremium && monthlyCount >= FREE_PLAN_MAX_AI_SEARCHES) {
-      setResponseStatus(HTTP_STATUS.TOO_MANY_REQUESTS)
-      throw new Error(AI_SEARCH_QUOTA_EXCEEDED_MESSAGE)
-    }
+    const isPremium = await matchIsUserPremium(context.user)
+    const reservation = await reserveAiSearch({
+      userId,
+      isPremium,
+      prompt: data.prompt,
+      locale
+    })
 
     const keywords = await extractSearchKeywordsOrPrompt(data.prompt, locale)
 
@@ -172,6 +216,7 @@ export const aiSearchMemes = createServerFn({ method: 'POST' })
     } catch (error) {
       captureWithFeature(error, 'ai-search')
       aiSearchLogger.error({ error, query, filters }, 'Algolia search failed')
+      await refundAiSearch(reservation.id)
       setResponseStatus(HTTP_STATUS.BAD_GATEWAY)
       throw new Error('AI search failed', { cause: error })
     }
@@ -181,12 +226,9 @@ export const aiSearchMemes = createServerFn({ method: 'POST' })
     })
 
     waitUntil(
-      createAiSearchLog({
-        userId,
-        prompt: data.prompt,
+      completeAiSearchLog(reservation.id, {
         keywords,
         memeIds,
-        locale,
         resultCount: response.hits.length
       })
     )
@@ -207,8 +249,6 @@ export const aiSearchMemes = createServerFn({ method: 'POST' })
       'AI search completed'
     )
 
-    const monthlyCountWithCurrentSearch = monthlyCount + 1
-
     return {
       memes: response.hits.map((hit) => {
         return normalizeAlgoliaHit(hit)
@@ -216,7 +256,7 @@ export const aiSearchMemes = createServerFn({ method: 'POST' })
       keywords,
       queryID: response.queryID,
       quota: buildAiSearchQuota({
-        monthlyCount: monthlyCountWithCurrentSearch,
+        monthlyCount: reservation.monthlyCount,
         isPremium
       })
     }

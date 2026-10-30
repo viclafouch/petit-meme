@@ -8,6 +8,7 @@ import {
   MAX_PENDING_SUBMISSIONS
 } from '~/constants/meme-submission'
 import { RATE_LIMIT_SUBMIT_MEME } from '~/constants/rate-limit'
+import { lockUntilTransactionEnds } from '~/db/advisory-lock'
 import { Prisma } from '~/db/generated/prisma/client'
 import {
   MemeSubmissionStatus,
@@ -63,6 +64,8 @@ export const createMemeSubmission = createServerFn({ method: 'POST' })
 
     try {
       const submission = await prismaClient.$transaction(async (tx) => {
+        await lockUntilTransactionEnds(tx, `meme-submission:${userId}`)
+
         const pendingCount = await tx.memeSubmission.count({
           where: { userId, status: MemeSubmissionStatus.PENDING }
         })

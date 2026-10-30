@@ -5,31 +5,35 @@ import {
   AI_SEARCH_STAGE_MAX_DELAY_MS,
   FREE_PLAN_MAX_AI_SEARCHES
 } from '~/constants/ai-search'
+import { HTTP_STATUS } from '~/constants/http'
 import { m } from '~/paraglide/messages.js'
+import {
+  AI_SEARCH_PATH,
+  getPromptField,
+  getSubmitButton,
+  submitPrompt
+} from './ai-search'
 import { getAuthDialogSignInButton } from './auth-flows'
 import { E2E_NAMED_MEMES, E2E_UNIQUE_SEARCH_WORD } from './content'
 import { resolveStorageStatePath } from './env'
 import { test } from './fixtures'
 import { repeatUntilVisible } from './hydration'
 import { getMemeLink } from './library'
-import { SERVER_FUNCTION_URL_PATTERN } from './server-functions'
+import {
+  holdServerFunctionCall,
+  repeat,
+  sendServerFunctionCallsAtOnce,
+  SERVER_FUNCTION_URL_PATTERN
+} from './server-functions'
 
-const AI_SEARCH_PATH = '/memes/ai-search'
 const UNANSWERABLE_PROMPT = 'zzzzqqqqxxxx'
+const CONCURRENT_SEARCH_COUNT = FREE_PLAN_MAX_AI_SEARCHES * 2
 
 const SERVER_ROUND_TRIP_BUDGET_MS = 5000
 const RESULTS_TIMEOUT_MS =
   AI_SEARCH_STAGE_KEYS.length * AI_SEARCH_STAGE_MAX_DELAY_MS +
   AI_SEARCH_STAGE_LINGER_MS +
   SERVER_ROUND_TRIP_BUDGET_MS
-
-const getPromptField = (page: Page) => {
-  return page.getByRole('textbox', { name: m.ai_search_title() })
-}
-
-const getSubmitButton = (page: Page) => {
-  return page.getByRole('button', { name: m.ai_search_submit() })
-}
 
 const getQuotaCounter = (page: Page) => {
   return page.getByRole('status')
@@ -45,11 +49,6 @@ const expectRemainingSearches = async (page: Page, count: number) => {
   await expect(getQuotaCounter(page)).toHaveText(
     m.ai_search_remaining_searches({ count })
   )
-}
-
-const submitPrompt = async (page: Page, prompt: string) => {
-  await getPromptField(page).fill(prompt)
-  await getSubmitButton(page).click()
 }
 
 test.describe('a free User with searches left', () => {
@@ -78,6 +77,38 @@ test.describe('a free User with searches left', () => {
     await page.reload()
 
     await expectRemainingSearches(page, FREE_PLAN_MAX_AI_SEARCHES - 1)
+  })
+})
+
+test.describe('a free User who sends several searches at once', () => {
+  test.describe.configure({ retries: 0 })
+  test.use({ storageState: resolveStorageStatePath('aiSearchConcurrent') })
+
+  test('gets their three searches and not one more', async ({ page }) => {
+    await page.goto(AI_SEARCH_PATH)
+    await expectRemainingSearches(page, FREE_PLAN_MAX_AI_SEARCHES)
+
+    const call = await holdServerFunctionCall(page, () => {
+      return submitPrompt(page, E2E_UNIQUE_SEARCH_WORD)
+    })
+    const statuses = await sendServerFunctionCallsAtOnce({
+      page,
+      call,
+      bodies: repeat(call.body, CONCURRENT_SEARCH_COUNT),
+      clientIp: 'e2e-ai-search-concurrent'
+    })
+
+    expect(statuses).toStrictEqual([
+      ...repeat(HTTP_STATUS.OK, FREE_PLAN_MAX_AI_SEARCHES),
+      ...repeat(
+        HTTP_STATUS.TOO_MANY_REQUESTS,
+        CONCURRENT_SEARCH_COUNT - FREE_PLAN_MAX_AI_SEARCHES
+      )
+    ])
+
+    await page.reload()
+
+    await expectRemainingSearches(page, 0)
   })
 })
 

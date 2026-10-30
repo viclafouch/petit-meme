@@ -54,7 +54,7 @@ export default defineConfig({
     {
       name: 'chromium',
       testMatch: /.*\.spec\.ts/u,
-      testIgnore: /.*\.mobile\.spec\.ts/u,
+      testIgnore: [/.*\.mobile\.spec\.ts/u, /.*\.last\.spec\.ts/u],
       use: { ...devices['Desktop Chrome'], locale: 'fr-FR' },
       dependencies: ['auth']
     },
@@ -63,6 +63,12 @@ export default defineConfig({
       testMatch: /.*\.mobile\.spec\.ts/u,
       use: { ...devices['iPhone 15'], locale: 'fr-FR' },
       dependencies: ['auth']
+    },
+    {
+      name: 'last',
+      testMatch: /.*\.last\.spec\.ts/u,
+      use: { ...devices['Desktop Chrome'], locale: 'fr-FR' },
+      dependencies: ['chromium', 'mobile-safari']
     }
   ]
 })

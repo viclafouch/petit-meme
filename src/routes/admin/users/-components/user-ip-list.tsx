@@ -8,9 +8,10 @@ import type { AdminUserDetailPayload } from '~/routes/admin/-server/user-detail'
 
 type UserIpListProps = {
   ipAddresses: AdminUserDetailPayload['ipAddresses']
+  now: number
 }
 
-export const UserIpList = ({ ipAddresses }: UserIpListProps) => {
+export const UserIpList = ({ ipAddresses, now }: UserIpListProps) => {
   const locale = getLocale()
 
   return (
@@ -27,7 +28,7 @@ export const UserIpList = ({ ipAddresses }: UserIpListProps) => {
             />
           ),
           subtitle: entry.lastSeenAt
-            ? formatRelativeTime(new Date(entry.lastSeenAt), locale)
+            ? formatRelativeTime(new Date(entry.lastSeenAt), locale, now)
             : undefined,
           trailing: formatEventCount(entry.eventCount)
         }

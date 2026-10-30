@@ -1,9 +1,10 @@
+import React from 'react'
 import type { OnChangeFn, PaginationState } from '@tanstack/react-table'
 import { LoadingSpinner } from '~/components/ui/spinner'
 import { getErrorMessage } from '~/helpers/error'
 import {
   type ActivityTimelineScope,
-  ACTIVITY_COLUMNS,
+  getActivityColumns,
   ACTIVITY_TIMELINE_SCOPES
 } from '~/routes/admin/-components/activity-columns'
 import { AdminTable } from '~/routes/admin/-components/admin-table'
@@ -23,6 +24,7 @@ type ActivityTimelineProps = {
   isPending: boolean
   isError: boolean
   error: Error | null
+  now: number
 }
 
 export const ActivityTimeline = ({
@@ -34,8 +36,13 @@ export const ActivityTimeline = ({
   scope,
   isPending,
   isError,
-  error
+  error,
+  now
 }: ActivityTimelineProps) => {
+  const columns = React.useMemo(() => {
+    return getActivityColumns(now)
+  }, [now])
+
   const handlePaginationChange: OnChangeFn<PaginationState> = (updater) => {
     const currentPagination = { pageIndex: page - 1, pageSize: PAGE_SIZE }
     const nextPagination =
@@ -46,7 +53,7 @@ export const ActivityTimeline = ({
 
   const table = useAppTable({
     data: rows ?? EMPTY_ROWS,
-    columns: ACTIVITY_COLUMNS,
+    columns,
     manualPagination: true,
     pageCount: Math.ceil(total / PAGE_SIZE),
     state: {

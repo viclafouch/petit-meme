@@ -36,14 +36,12 @@ export const Route = createFileRoute('/_public__root/_default/submit/')({
       ]
     }
   },
-  loader: ({ context }) => {
+  loader: async ({ context }) => {
     if (context.user) {
-      void Promise.allSettled([
-        context.queryClient.query({
-          ...getUserSubmissionsQueryOpts(),
-          staleTime: 'static'
-        })
-      ])
+      await context.queryClient.query({
+        ...getUserSubmissionsQueryOpts(),
+        staleTime: 'static'
+      })
     }
   }
 })

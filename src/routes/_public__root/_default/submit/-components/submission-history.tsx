@@ -64,7 +64,11 @@ export const SubmissionHistory = () => {
                       dateTime={createdAt.toISOString()}
                       className="text-xs text-muted-foreground"
                     >
-                      {formatRelativeTime(createdAt, locale)}
+                      {formatRelativeTime(
+                        createdAt,
+                        locale,
+                        submissionsQuery.dataUpdatedAt
+                      )}
                     </time>
                   </div>
                 </div>

@@ -123,7 +123,10 @@ export const VisitorPage = () => {
                 <VisitorMemeList memes={detailQuery.data.memes} />
               </SectionCard>
               <SectionCard title="Comptes associés">
-                <VisitorAccountList users={detailQuery.data.users} />
+                <VisitorAccountList
+                  users={detailQuery.data.users}
+                  now={detailQuery.dataUpdatedAt}
+                />
               </SectionCard>
               <SectionCard title="User-agents observés">
                 <VisitorUserAgentList
@@ -142,6 +145,7 @@ export const VisitorPage = () => {
                 isPending={activityQuery.isPending}
                 isError={activityQuery.isError}
                 error={activityQuery.error}
+                now={activityQuery.dataUpdatedAt}
                 scope="visitor"
               />
             </section>

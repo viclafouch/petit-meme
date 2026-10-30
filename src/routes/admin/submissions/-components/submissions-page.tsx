@@ -50,93 +50,97 @@ const STATUS_FILTER_OPTIONS = [
 
 const columnHelper = createAppColumnHelper<AdminSubmission>()
 
-const columns = columnHelper.columns([
-  columnHelper.accessor('user', {
-    header: 'Utilisateur',
-    enableSorting: false,
-    cell: (info) => {
-      const user = info.getValue()
+const getColumns = (now: number) => {
+  return columnHelper.columns([
+    columnHelper.accessor('user', {
+      header: 'Utilisateur',
+      enableSorting: false,
+      cell: (info) => {
+        const user = info.getValue()
 
-      return (
-        <div className="flex items-center gap-2">
-          <UserAvatar name={user.name} image={user.image} />
-          <span className="font-medium truncate max-w-24">{user.name}</span>
-        </div>
-      )
-    }
-  }),
-  columnHelper.accessor('title', {
-    header: 'Titre',
-    cell: (info) => {
-      return (
-        <span className="font-medium truncate max-w-48 block">
-          {info.getValue()}
-        </span>
-      )
-    }
-  }),
-  columnHelper.accessor('url', {
-    header: 'Lien',
-    enableSorting: false,
-    cell: (info) => {
-      const url = info.getValue()
-      const { urlType } = info.row.original
-      const config = URL_TYPE_CONFIG[urlType]
-      const Icon = config.icon
+        return (
+          <div className="flex items-center gap-2">
+            <UserAvatar name={user.name} image={user.image} />
+            <span className="font-medium truncate max-w-24">{user.name}</span>
+          </div>
+        )
+      }
+    }),
+    columnHelper.accessor('title', {
+      header: 'Titre',
+      cell: (info) => {
+        return (
+          <span className="font-medium truncate max-w-48 block">
+            {info.getValue()}
+          </span>
+        )
+      }
+    }),
+    columnHelper.accessor('url', {
+      header: 'Lien',
+      enableSorting: false,
+      cell: (info) => {
+        const url = info.getValue()
+        const { urlType } = info.row.original
+        const config = URL_TYPE_CONFIG[urlType]
+        const Icon = config.icon
 
-      return (
-        <a
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <Icon className="size-4 shrink-0" aria-hidden="true" />
-          <span className="truncate max-w-32">{config.label}</span>
-          <ExternalLink className="size-3 shrink-0" aria-hidden="true" />
-        </a>
-      )
-    }
-  }),
-  columnHelper.accessor('contentLocale', {
-    header: 'Langue',
-    enableSorting: false,
-    cell: (info) => {
-      const locale = info.getValue()
-      const FlagComponent = CONTENT_LOCALE_FLAGS[locale]
+        return (
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Icon className="size-4 shrink-0" aria-hidden="true" />
+            <span className="truncate max-w-32">{config.label}</span>
+            <ExternalLink className="size-3 shrink-0" aria-hidden="true" />
+          </a>
+        )
+      }
+    }),
+    columnHelper.accessor('contentLocale', {
+      header: 'Langue',
+      enableSorting: false,
+      cell: (info) => {
+        const locale = info.getValue()
+        const FlagComponent = CONTENT_LOCALE_FLAGS[locale]
 
-      return FlagComponent ? (
-        <FlagComponent className={FLAG_ICON_CLASS} aria-label={locale} />
-      ) : (
-        <span className="text-muted-foreground text-sm">{locale}</span>
-      )
-    }
-  }),
-  columnHelper.accessor('status', {
-    header: 'Statut',
-    cell: (info) => {
-      const status = info.getValue()
+        return FlagComponent ? (
+          <FlagComponent className={FLAG_ICON_CLASS} aria-label={locale} />
+        ) : (
+          <span className="text-muted-foreground text-sm">{locale}</span>
+        )
+      }
+    }),
+    columnHelper.accessor('status', {
+      header: 'Statut',
+      cell: (info) => {
+        const status = info.getValue()
 
-      return (
-        <Badge variant={SUBMISSION_STATUS_BADGE_VARIANT[status]} size="sm">
-          {STATUS_LABELS[status]}
-        </Badge>
-      )
-    }
-  }),
-  columnHelper.accessor('createdAt', {
-    header: 'Date',
-    cell: (info) => {
-      return <RelativeDateTooltip date={new Date(info.getValue())} />
-    }
-  }),
-  columnHelper.display({
-    id: 'actions',
-    cell: (info) => {
-      return <SubmissionActionsCell submission={info.row.original} />
-    }
-  })
-])
+        return (
+          <Badge variant={SUBMISSION_STATUS_BADGE_VARIANT[status]} size="sm">
+            {STATUS_LABELS[status]}
+          </Badge>
+        )
+      }
+    }),
+    columnHelper.accessor('createdAt', {
+      header: 'Date',
+      cell: (info) => {
+        return (
+          <RelativeDateTooltip date={new Date(info.getValue())} now={now} />
+        )
+      }
+    }),
+    columnHelper.display({
+      id: 'actions',
+      cell: (info) => {
+        return <SubmissionActionsCell submission={info.row.original} />
+      }
+    })
+  ])
+}
 
 type StatusFilterTabsProps = {
   currentStatus: MemeSubmissionStatus | 'all'
@@ -204,6 +208,10 @@ export const SubmissionsPage = () => {
     submissionsQuery.data.statusCounts[MemeSubmissionStatus.PENDING] +
     submissionsQuery.data.statusCounts[MemeSubmissionStatus.APPROVED] +
     submissionsQuery.data.statusCounts[MemeSubmissionStatus.REJECTED]
+
+  const columns = React.useMemo(() => {
+    return getColumns(submissionsQuery.dataUpdatedAt)
+  }, [submissionsQuery.dataUpdatedAt])
 
   const table = useAppTable({
     data: submissionsQuery.data.submissions,

@@ -1,6 +1,10 @@
 import { z } from 'zod'
 import { createFileRoute } from '@tanstack/react-router'
 import { DashboardPage } from '~/routes/admin/-components/dashboard/dashboard-page'
+import {
+  getAdminRecentActivityEventsQueryOpts,
+  getAdminRecentAuditQueryOpts
+} from '~/routes/admin/-lib/queries'
 import { PERIOD_SCHEMA } from '~/routes/admin/-server/dashboard'
 
 const dashboardSearchSchema = z.object({
@@ -11,6 +15,18 @@ const dashboardSearchSchema = z.object({
 export const Route = createFileRoute('/admin/')({
   component: DashboardPage,
   validateSearch: dashboardSearchSchema,
+  loader: async ({ context }) => {
+    await Promise.all([
+      context.queryClient.query({
+        ...getAdminRecentAuditQueryOpts(),
+        staleTime: 'static'
+      }),
+      context.queryClient.query({
+        ...getAdminRecentActivityEventsQueryOpts(),
+        staleTime: 'static'
+      })
+    ])
+  },
   head: () => {
     return {
       meta: [{ title: 'Dashboard — Admin' }]

@@ -62,9 +62,10 @@ export const VisitorUserAgentList = ({
 
 type VisitorAccountListProps = {
   users: AdminVisitorDetailPayload['users']
+  now: number
 }
 
-export const VisitorAccountList = ({ users }: VisitorAccountListProps) => {
+export const VisitorAccountList = ({ users, now }: VisitorAccountListProps) => {
   const locale = getLocale()
 
   return (
@@ -90,7 +91,7 @@ export const VisitorAccountList = ({ users }: VisitorAccountListProps) => {
             </Link>
           ),
           subtitle: entry.lastSeenAt
-            ? formatRelativeTime(new Date(entry.lastSeenAt), locale)
+            ? formatRelativeTime(new Date(entry.lastSeenAt), locale, now)
             : undefined,
           trailing: formatEventCount(entry.eventCount)
         }

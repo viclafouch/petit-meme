@@ -118,8 +118,8 @@ export const SubmissionForm = ({ pendingCount }: SubmissionFormProps) => {
   const form = useAppForm({
     ...submissionFormOpts,
     onSubmitInvalid: focusFirstInvalidField,
-    onSubmit: async ({ value }) => {
-      return submitMutation.mutateAsync({
+    onSubmit: ({ value }) => {
+      submitMutation.mutate({
         title: value.title,
         url: value.url,
         contentLocale: value.contentLocale,
@@ -233,22 +233,13 @@ export const SubmissionForm = ({ pendingCount }: SubmissionFormProps) => {
       <p className="text-sm text-muted-foreground">
         {m.submit_pending_count({ remaining })}
       </p>
-      <form.Subscribe
-        selector={(state) => {
-          return state.isSubmitting
-        }}
-        children={(isSubmitting) => {
-          return (
-            <LoadingButton
-              isLoading={isSubmitting}
-              type="submit"
-              className="w-full"
-            >
-              {m.submit_submit_button()}
-            </LoadingButton>
-          )
-        }}
-      />
+      <LoadingButton
+        isLoading={submitMutation.isPending}
+        type="submit"
+        className="w-full"
+      >
+        {m.submit_submit_button()}
+      </LoadingButton>
       {submitMutation.error ? (
         <Alert ref={errorRef} variant="destructive" role="alert" tabIndex={-1}>
           <CircleAlert aria-hidden="true" />

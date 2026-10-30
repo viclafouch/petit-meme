@@ -30,12 +30,17 @@ const ActivityActor = ({ entry }: ActivityActorProps) => {
 
 type ActivityEventsFeedProps = {
   entries: AdminActivityRow[]
+  now: number
 }
 
-export const ActivityEventsFeed = ({ entries }: ActivityEventsFeedProps) => {
+export const ActivityEventsFeed = ({
+  entries,
+  now
+}: ActivityEventsFeedProps) => {
   return (
     <DashboardFeed
       emptyLabel="Aucun événement enregistré"
+      now={now}
       entries={entries.map((entry) => {
         return {
           id: entry.id,

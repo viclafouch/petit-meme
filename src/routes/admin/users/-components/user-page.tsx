@@ -126,7 +126,10 @@ export const UserPage = () => {
             </span>
           }
         >
-          <UserIpList ipAddresses={detailQuery.data.ipAddresses} />
+          <UserIpList
+            ipAddresses={detailQuery.data.ipAddresses}
+            now={detailQuery.dataUpdatedAt}
+          />
         </SectionCard>
         <section aria-label="Journal d'activité">
           <SectionHeading title="Journal d'activité" />
@@ -139,6 +142,7 @@ export const UserPage = () => {
             isPending={activityQuery.isPending}
             isError={activityQuery.isError}
             error={activityQuery.error}
+            now={activityQuery.dataUpdatedAt}
             scope="user"
           />
         </section>

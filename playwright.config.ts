@@ -38,7 +38,8 @@ export default defineConfig({
         : `pnpm run prisma:migrate:e2e && pnpm run build:e2e && ${START_SERVER}`,
       url: APP_READINESS_URL,
       env: { ANTHROPIC_BASE_URL: FAKE_ANTHROPIC_URL },
-      timeout: 300_000
+      timeout: 300_000,
+      gracefulShutdown: { signal: 'SIGTERM', timeout: 5000 }
     }
   ],
   projects: [

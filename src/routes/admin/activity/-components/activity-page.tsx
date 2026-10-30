@@ -79,6 +79,7 @@ export const ActivityPage = () => {
           isPending={activityQuery.isPending}
           isError={activityQuery.isError}
           error={activityQuery.error}
+          now={activityQuery.dataUpdatedAt}
         />
       </div>
     </Container>

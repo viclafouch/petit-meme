@@ -53,7 +53,7 @@ const TrendingContent = () => {
 const AuditContent = () => {
   const auditQuery = useSuspenseQuery(getAdminRecentAuditQueryOpts())
 
-  return <AuditFeed entries={auditQuery.data} />
+  return <AuditFeed entries={auditQuery.data} now={auditQuery.dataUpdatedAt} />
 }
 
 const ActivityContent = () => {
@@ -61,7 +61,12 @@ const ActivityContent = () => {
     getAdminRecentActivityEventsQueryOpts()
   )
 
-  return <ActivityEventsFeed entries={activityQuery.data} />
+  return (
+    <ActivityEventsFeed
+      entries={activityQuery.data}
+      now={activityQuery.dataUpdatedAt}
+    />
+  )
 }
 
 export const DashboardPage = () => {

@@ -52,8 +52,8 @@ const RELATIVE_TIME_THRESHOLDS = [
   unit: Intl.RelativeTimeFormatUnit
 }[]
 
-export function formatRelativeTime(date: Date, locale: Locale) {
-  const elapsed = date.getTime() - Date.now()
+export function formatRelativeTime(date: Date, locale: Locale, now: number) {
+  const elapsed = date.getTime() - now
   const absoluteElapsed = Math.abs(elapsed)
 
   const threshold = RELATIVE_TIME_THRESHOLDS.find((entry) => {

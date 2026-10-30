@@ -28,9 +28,14 @@ type DashboardFeedEntry = {
 type DashboardFeedProps = {
   entries: DashboardFeedEntry[]
   emptyLabel: string
+  now: number
 }
 
-export const DashboardFeed = ({ entries, emptyLabel }: DashboardFeedProps) => {
+export const DashboardFeed = ({
+  entries,
+  emptyLabel,
+  now
+}: DashboardFeedProps) => {
   if (entries.length === 0) {
     return <EmptyMessage>{emptyLabel}</EmptyMessage>
   }
@@ -57,7 +62,7 @@ export const DashboardFeed = ({ entries, emptyLabel }: DashboardFeedProps) => {
                   dateTime={entry.createdAt.toISOString()}
                   className="shrink-0"
                 >
-                  {formatRelativeTime(entry.createdAt, locale)}
+                  {formatRelativeTime(entry.createdAt, locale, now)}
                 </time>
               </div>
             </div>

@@ -2,6 +2,7 @@ import { expect, type Page } from '@playwright/test'
 import { prismaClient } from '~/db'
 import { HTTP_STATUS } from '~/constants/http'
 import { MAX_PENDING_SUBMISSIONS } from '~/constants/meme-submission'
+import { FIVE_MINUTES_MS } from '~/constants/time'
 import type { MemeSubmission } from '~/db/generated/prisma/client'
 import { MemeSubmissionUrlType } from '~/db/generated/prisma/enums'
 import { truncateUrl } from '~/helpers/format'
@@ -12,6 +13,7 @@ import { resolveStorageStatePath } from './env'
 import { test } from './fixtures'
 import { repeatUntilVisible } from './hydration'
 import {
+  cutServerFunctionCalls,
   holdServerFunctionCall,
   matchIsServerFunctionRequest,
   repeat,
@@ -138,7 +140,9 @@ const recordServerFunctionCalls = (page: Page) => {
 test.describe('a User with nothing proposed yet', () => {
   test.use({ storageState: resolveStorageStatePath('submission') })
 
-  test('proposes a link and finds it in their history', async ({ page }) => {
+  test('proposes a link and finds it in their history, even after a reload', async ({
+    page
+  }) => {
     await page.goto(SUBMIT_PATH)
 
     await expectNothingProposedYet(page)
@@ -162,6 +166,11 @@ test.describe('a User with nothing proposed yet', () => {
       url: PROPOSED_SUBMISSION.url,
       urlType: MemeSubmissionUrlType.YOUTUBE
     })
+
+    await page.clock.setFixedTime(Date.now() + FIVE_MINUTES_MS)
+    await page.reload()
+
+    await expectHistoryToHoldTheProposal(page)
   })
 })
 
@@ -217,6 +226,25 @@ test.describe('a User whose link is neither a tweet nor a YouTube video', () => 
 
     await expect(page.getByText(m.validation_accept_terms())).toBeVisible()
     await expectProposalKeptFromTheServer(page, serverFunctionCalls)
+  })
+})
+
+test.describe('a User whose proposal never reaches the server', () => {
+  test.use({ storageState: resolveStorageStatePath('free') })
+
+  test('is shown an error and can try again', async ({ page }) => {
+    await page.goto(SUBMIT_PATH)
+    await cutServerFunctionCalls(page)
+    const failedProposal = page.waitForEvent(
+      'requestfailed',
+      matchIsServerFunctionRequest
+    )
+
+    await proposeLink(page, PROPOSED_SUBMISSION.url)
+
+    await failedProposal
+    await expect(getPageMain(page).getByRole('alert')).toBeVisible()
+    await expect(getSubmitButton(page)).toBeEnabled()
   })
 })
 

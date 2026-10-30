@@ -5,12 +5,14 @@ import { DashboardFeed, FeedActor } from './dashboard-feed'
 
 type AuditFeedProps = {
   entries: AuditLogEntry[]
+  now: number
 }
 
-export const AuditFeed = ({ entries }: AuditFeedProps) => {
+export const AuditFeed = ({ entries, now }: AuditFeedProps) => {
   return (
     <DashboardFeed
       emptyLabel="Aucune action récente"
+      now={now}
       entries={entries.map((entry) => {
         return {
           id: entry.id,

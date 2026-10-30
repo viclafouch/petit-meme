@@ -14,6 +14,16 @@ export const matchIsServerFunctionCall = (response: Response) => {
   return matchIsServerFunctionRequest(response.request())
 }
 
+export const cutServerFunctionCalls = (page: Page) => {
+  return page.route(SERVER_FUNCTION_URL_PATTERN, (route) => {
+    if (!matchIsServerFunctionRequest(route.request())) {
+      return route.fallback()
+    }
+
+    return route.abort('internetdisconnected')
+  })
+}
+
 type ServerFunctionCall = {
   url: string
   headers: ReturnType<Request['headers']>

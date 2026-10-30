@@ -15,72 +15,76 @@ import type { AdminAiSearchLog } from '~/routes/admin/-server/ai-search-logs'
 
 const columnHelper = createAppColumnHelper<AdminAiSearchLog>()
 
-const columns = columnHelper.columns([
-  columnHelper.accessor('user', {
-    header: 'Utilisateur',
-    enableSorting: false,
-    cell: (info) => {
-      const user = info.getValue()
+const getColumns = (now: number) => {
+  return columnHelper.columns([
+    columnHelper.accessor('user', {
+      header: 'Utilisateur',
+      enableSorting: false,
+      cell: (info) => {
+        const user = info.getValue()
 
-      return (
-        <div className="flex items-center gap-2">
-          <UserAvatar name={user.name} image={user.image} />
-          <span className="font-medium truncate max-w-24">{user.name}</span>
-        </div>
-      )
-    }
-  }),
-  columnHelper.accessor('prompt', {
-    header: 'Prompt',
-    cell: (info) => {
-      return <span className="text-sm">{info.getValue()}</span>
-    }
-  }),
-  columnHelper.accessor('keywords', {
-    header: 'Mots-clés',
-    cell: (info) => {
-      return (
-        <div className="flex max-w-48 flex-wrap gap-1">
-          {info.getValue().map((keyword) => {
-            return (
-              <Badge key={keyword} variant="secondary" size="sm">
-                {keyword}
-              </Badge>
-            )
-          })}
-        </div>
-      )
-    }
-  }),
-  columnHelper.accessor('resultCount', {
-    header: 'Résultats',
-    cell: (info) => {
-      const count = info.getValue()
+        return (
+          <div className="flex items-center gap-2">
+            <UserAvatar name={user.name} image={user.image} />
+            <span className="font-medium truncate max-w-24">{user.name}</span>
+          </div>
+        )
+      }
+    }),
+    columnHelper.accessor('prompt', {
+      header: 'Prompt',
+      cell: (info) => {
+        return <span className="text-sm">{info.getValue()}</span>
+      }
+    }),
+    columnHelper.accessor('keywords', {
+      header: 'Mots-clés',
+      cell: (info) => {
+        return (
+          <div className="flex max-w-48 flex-wrap gap-1">
+            {info.getValue().map((keyword) => {
+              return (
+                <Badge key={keyword} variant="secondary" size="sm">
+                  {keyword}
+                </Badge>
+              )
+            })}
+          </div>
+        )
+      }
+    }),
+    columnHelper.accessor('resultCount', {
+      header: 'Résultats',
+      cell: (info) => {
+        const count = info.getValue()
 
-      return (
-        <Badge variant={count === 0 ? 'destructive' : 'outline'} size="sm">
-          {count}
-        </Badge>
-      )
-    }
-  }),
-  columnHelper.accessor('locale', {
-    header: 'Locale',
-    enableSorting: false,
-    cell: (info) => {
-      const locale = info.getValue()
-      const FlagComponent = LOCALE_FLAGS[locale]
+        return (
+          <Badge variant={count === 0 ? 'destructive' : 'outline'} size="sm">
+            {count}
+          </Badge>
+        )
+      }
+    }),
+    columnHelper.accessor('locale', {
+      header: 'Locale',
+      enableSorting: false,
+      cell: (info) => {
+        const locale = info.getValue()
+        const FlagComponent = LOCALE_FLAGS[locale]
 
-      return <FlagComponent className={FLAG_ICON_CLASS} aria-label={locale} />
-    }
-  }),
-  columnHelper.accessor('createdAt', {
-    header: 'Date',
-    cell: (info) => {
-      return <RelativeDateTooltip date={new Date(info.getValue())} />
-    }
-  })
-])
+        return <FlagComponent className={FLAG_ICON_CLASS} aria-label={locale} />
+      }
+    }),
+    columnHelper.accessor('createdAt', {
+      header: 'Date',
+      cell: (info) => {
+        return (
+          <RelativeDateTooltip date={new Date(info.getValue())} now={now} />
+        )
+      }
+    })
+  ])
+}
 
 type StatCardProps = {
   label: string
@@ -102,6 +106,10 @@ const StatCard = ({ label, value, icon }: StatCardProps) => {
 
 export const AiSearchPage = () => {
   const logsQuery = useSuspenseQuery(getAdminAiSearchLogsQueryOpts())
+
+  const columns = React.useMemo(() => {
+    return getColumns(logsQuery.dataUpdatedAt)
+  }, [logsQuery.dataUpdatedAt])
 
   const table = useAppTable({
     data: logsQuery.data.logs,

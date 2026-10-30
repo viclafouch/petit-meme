@@ -143,11 +143,30 @@ export const E2E_ROLES = {
     email: `e2e-submission@${E2E_EMAIL_DOMAIN}`,
     emailVerified: true
   },
+  submissionConcurrent: {
+    id: 'e2e-user-submission-concurrent',
+    name: 'E2E Submission Concurrent',
+    email: `e2e-submission-concurrent@${E2E_EMAIL_DOMAIN}`,
+    emailVerified: true
+  },
   aiSearch: {
     id: 'e2e-user-ai-search',
     name: 'E2E Ai Search',
     email: `e2e-ai-search@${E2E_EMAIL_DOMAIN}`,
     emailVerified: true
+  },
+  aiSearchConcurrent: {
+    id: 'e2e-user-ai-search-concurrent',
+    name: 'E2E Ai Search Concurrent',
+    email: `e2e-ai-search-concurrent@${E2E_EMAIL_DOMAIN}`,
+    emailVerified: true
+  },
+  aiSearchGlobalCap: {
+    id: 'e2e-user-ai-search-global-cap',
+    name: 'E2E Ai Search Global Cap',
+    email: `e2e-ai-search-global-cap@${E2E_EMAIL_DOMAIN}`,
+    emailVerified: true,
+    subscription: MONTHLY_PREMIUM_SUBSCRIPTION
   },
   aiSearchNoResults: {
     id: 'e2e-user-ai-search-no-results',

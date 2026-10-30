@@ -1,3 +1,6 @@
+import { z } from 'zod'
+import { MemeContentLocale } from '~/db/generated/prisma/enums'
+
 export const AI_SEARCH_MODEL = 'claude-haiku-5-5'
 export const FREE_PLAN_MAX_AI_SEARCHES = 3
 export const MAX_PROMPT_LENGTH = 300
@@ -16,3 +19,17 @@ export const AI_SEARCH_STAGE_KEYS = [
 export const AI_SEARCH_STAGE_MIN_DELAY_MS = 1500
 export const AI_SEARCH_STAGE_MAX_DELAY_MS = 2500
 export const AI_SEARCH_STAGE_LINGER_MS = 600
+
+const CONTROL_CHARACTER_OTHER_THAN_LINE_BREAK_OR_TAB = /(?![\t\n\r])\p{Cc}/u
+
+export const AI_SEARCH_INPUT_SCHEMA = z.object({
+  prompt: z
+    .string()
+    .trim()
+    .min(1)
+    .max(MAX_PROMPT_LENGTH)
+    .refine((prompt) => {
+      return !CONTROL_CHARACTER_OTHER_THAN_LINE_BREAK_OR_TAB.test(prompt)
+    }),
+  contentLocale: z.enum([MemeContentLocale.FR, MemeContentLocale.EN]).optional()
+})

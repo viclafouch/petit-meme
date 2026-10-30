@@ -1,5 +1,6 @@
 import { expect, type Page } from '@playwright/test'
 import { prismaClient } from '~/db'
+import { HTTP_STATUS } from '~/constants/http'
 import { MAX_PENDING_SUBMISSIONS } from '~/constants/meme-submission'
 import type { MemeSubmission } from '~/db/generated/prisma/client'
 import { MemeSubmissionUrlType } from '~/db/generated/prisma/enums'
@@ -10,7 +11,12 @@ import { E2E_ROLES } from './constants'
 import { resolveStorageStatePath } from './env'
 import { test } from './fixtures'
 import { repeatUntilVisible } from './hydration'
-import { matchIsServerFunctionRequest } from './server-functions'
+import {
+  holdServerFunctionCall,
+  matchIsServerFunctionRequest,
+  repeat,
+  sendServerFunctionCallsAtOnce
+} from './server-functions'
 
 const SUBMIT_PATH = '/submit'
 
@@ -20,6 +26,14 @@ const PROPOSED_SUBMISSION = {
 } as const satisfies Pick<MemeSubmission, 'title' | 'url'>
 
 const UNSUPPORTED_SUBMISSION_URL = 'https://vimeo.com/76979871'
+
+const CONCURRENT_SUBMISSION_URLS = [
+  'https://www.youtube.com/watch?v=e2eConcur01',
+  'https://www.youtube.com/watch?v=e2eConcur02',
+  'https://www.youtube.com/watch?v=e2eConcur03',
+  'https://www.youtube.com/watch?v=e2eConcur04',
+  'https://www.youtube.com/watch?v=e2eConcur05'
+] as const satisfies readonly MemeSubmission['url'][]
 
 const getPageMain = (page: Page) => {
   return page.getByRole('main')
@@ -148,6 +162,37 @@ test.describe('a User with nothing proposed yet', () => {
       url: PROPOSED_SUBMISSION.url,
       urlType: MemeSubmissionUrlType.YOUTUBE
     })
+  })
+})
+
+test.describe('a User who proposes several links at once', () => {
+  test.describe.configure({ retries: 0 })
+  test.use({ storageState: resolveStorageStatePath('submissionConcurrent') })
+
+  test('gets as many pending proposals as the cap allows', async ({ page }) => {
+    const [interceptedUrl] = CONCURRENT_SUBMISSION_URLS
+    await page.goto(SUBMIT_PATH)
+    await expectNothingProposedYet(page)
+
+    const call = await holdServerFunctionCall(page, () => {
+      return proposeLink(page, interceptedUrl)
+    })
+    const statuses = await sendServerFunctionCallsAtOnce({
+      page,
+      call,
+      bodies: CONCURRENT_SUBMISSION_URLS.map((url) => {
+        return call.body.replaceAll(interceptedUrl, url)
+      }),
+      clientIp: 'e2e-submission-concurrent'
+    })
+
+    expect(statuses).toStrictEqual([
+      ...repeat(HTTP_STATUS.OK, MAX_PENDING_SUBMISSIONS),
+      ...repeat(
+        HTTP_STATUS.UNPROCESSABLE_CONTENT,
+        CONCURRENT_SUBMISSION_URLS.length - MAX_PENDING_SUBMISSIONS
+      )
+    ])
   })
 })
 

@@ -30,6 +30,14 @@ const DIALOGS = {
       return { default: AiSearchUpsellDialog }
     })
   },
+  'studio-upsell': {
+    component: React.lazy(async () => {
+      const { StudioUpsellDialog } =
+        await import('~/components/Meme/studio-upsell-dialog')
+
+      return { default: StudioUpsellDialog }
+    })
+  },
   'premium-reminder': {
     component: React.lazy(async () => {
       const { PremiumReminderDialog } =
@@ -61,6 +69,7 @@ const DIALOG_COMPONENTS: DialogComponentMap = {
   auth: DIALOGS.auth.component,
   'watermark-upsell': DIALOGS['watermark-upsell'].component,
   'ai-search-upsell': DIALOGS['ai-search-upsell'].component,
+  'studio-upsell': DIALOGS['studio-upsell'].component,
   'premium-reminder': DIALOGS['premium-reminder'].component
 }
 

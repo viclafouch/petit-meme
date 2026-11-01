@@ -35,7 +35,7 @@ export type Plan = {
   pricing: Record<BillingPeriod, PlanPricing>
 }
 
-const FREE_PLAN_MAX_GENERATIONS = 3
+export const FREE_PLAN_MAX_GENERATIONS = 3
 export const FREE_PLAN_MAX_FAVORITES = 20
 
 const FREE_PLAN_PRICING = {

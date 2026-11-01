@@ -6,11 +6,18 @@ import { ConfirmAlertDialog } from '~/components/confirm-alert-dialog'
 import { Button } from '~/components/ui/button'
 import type { Meme } from '~/db/generated/prisma/client'
 import { getErrorMessage } from '~/helpers/error'
+import type { MemeFile } from '~/lib/meme-files'
 import {
   getAdminMemeByIdQueryOpts,
   invalidateAdminMemesOverview
 } from '~/routes/admin/-lib/queries'
 import { deleteMemeById } from '~/routes/admin/-server/memes'
+
+const MEME_FILE_LABELS = {
+  stream: 'la vidéo Bunny Stream',
+  mp4: 'le MP4 watermarké',
+  mp3: 'le MP3'
+} as const satisfies Record<MemeFile, string>
 
 type DeleteMemeButtonProps = {
   meme: Meme
@@ -39,8 +46,19 @@ export const DeleteMemeButton = ({
 
       return promise
     },
-    onSuccess: async () => {
+    onSuccess: async ({ undeletedFiles }) => {
       setIsDialogOpen(false)
+
+      if (undeletedFiles.length > 0) {
+        const labels = undeletedFiles.map((file) => {
+          return MEME_FILE_LABELS[file]
+        })
+        toast.warning(`Bunny n'a pas supprimé : ${labels.join(', ')}`, {
+          description: 'Supprime ces fichiers à la main sur Bunny.',
+          duration: Infinity
+        })
+      }
+
       queryClient.removeQueries(getAdminMemeByIdQueryOpts(meme.id))
       await invalidateAdminMemesOverview(queryClient)
       await router.navigate({ to: '/admin/library' })

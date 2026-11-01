@@ -106,7 +106,7 @@ export function useMemeWatermark(memeId: Meme['id']) {
 
       const config = await getWatermarkUploadConfig({ data: memeId })
 
-      const uploadResponse = await fetch(config.url, {
+      const uploadResponse = await fetch(config.urls.mp4, {
         method: 'PUT',
         headers: {
           AccessKey: config.accessKey,

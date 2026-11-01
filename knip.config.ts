@@ -9,7 +9,8 @@ export default defineConfig({
     'project.inlang/paraglide.config.ts',
     'scripts/*.ts',
     'e2e/*.setup.ts',
-    'e2e/fake-anthropic.ts'
+    'e2e/fake-anthropic.ts',
+    'src/utils/mp3.ts'
   ],
   vite: { config: [] },
   playwright: { config: [] },

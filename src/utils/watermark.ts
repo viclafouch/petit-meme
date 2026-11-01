@@ -7,7 +7,7 @@ import {
   WATERMARK_WIDTH_RATIO
 } from '~/constants/watermark'
 import {
-  FFMPEG_ENCODING_ARGS,
+  FFMPEG_VIDEO_ENCODING_ARGS,
   FFMPEG_INPUT_FILE,
   FFMPEG_WATERMARK_FILE,
   readAndDeleteFFmpegOutput
@@ -139,7 +139,7 @@ export const applyWatermark = async ({
       filterComplex,
       '-map',
       '0:a:0?',
-      ...FFMPEG_ENCODING_ARGS
+      ...FFMPEG_VIDEO_ENCODING_ARGS
     ])
 
     if (exitCode !== 0) {

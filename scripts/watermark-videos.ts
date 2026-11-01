@@ -13,11 +13,8 @@ import {
 import type { Prisma } from '~/db/generated/prisma/client'
 import { MemeStatus } from '~/db/generated/prisma/enums'
 import { serverEnv } from '~/env/server'
-import {
-  checkWatermarkExists,
-  signOriginalUrl,
-  uploadWatermarkedVideo
-} from '~/lib/bunny'
+import { signOriginalUrl } from '~/lib/bunny'
+import { checkMemeFileExists, uploadMemeFile } from '~/lib/meme-files'
 import { logEnvironmentInfo } from './lib/env-guard'
 
 // oxlint-disable-next-line typescript/strict-void-return -- util.promisify picks execFile's custom promisified form, not the callback overload the rule compares against
@@ -301,7 +298,7 @@ type UploadResult = 'uploaded' | 'skipped' | 'error'
 const processAndUploadMeme = async (meme: MemeVideo): Promise<UploadResult> => {
   const { bunnyId } = meme.video
 
-  if (await checkWatermarkExists(bunnyId)) {
+  if (await checkMemeFileExists(bunnyId, 'mp4')) {
     return 'skipped'
   }
 
@@ -314,7 +311,7 @@ const processAndUploadMeme = async (meme: MemeVideo): Promise<UploadResult> => {
     await runFFmpeg(tempInputPath, tempOutputPath)
 
     const fileBuffer = await fs.readFile(tempOutputPath)
-    await uploadWatermarkedVideo(bunnyId, fileBuffer)
+    await uploadMemeFile(bunnyId, 'mp4', fileBuffer)
 
     return 'uploaded'
   } finally {
@@ -354,7 +351,7 @@ const runUpload = async (options: ParsedOptions) => {
       const prefix = formatProgress(index, memes.length, meme.video.bunnyId)
 
       if (options.dryRun) {
-        const exists = await checkWatermarkExists(meme.video.bunnyId)
+        const exists = await checkMemeFileExists(meme.video.bunnyId, 'mp4')
         console.log(
           `${prefix} [DRY RUN] storage=${exists ? 'exists' : 'missing'}`
         )

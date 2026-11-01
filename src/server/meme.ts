@@ -80,9 +80,10 @@ import {
 } from '~/lib/algolia'
 import { createAlgoliaCache } from '~/lib/algolia-cache'
 import { auth } from '~/lib/auth'
-import { buildSignedOriginalUrl, fetchWatermarkedVideo } from '~/lib/bunny'
+import { buildSignedOriginalUrl } from '~/lib/bunny'
 import { matchIsAnalyticsConsentGiven } from '~/lib/cookie-consent'
 import { algoliaLogger, logger } from '~/lib/logger'
+import { fetchMemeFile } from '~/lib/meme-files'
 import { matchIsUserAdmin } from '~/lib/role'
 import { captureWithFeature } from '~/lib/sentry'
 import { baseLocale, getLocale, type Locale } from '~/paraglide/runtime'
@@ -989,7 +990,7 @@ export const shareMeme = createServerFn({ method: 'GET' })
 
     if (!isPremium) {
       try {
-        const watermarkedResponse = await fetchWatermarkedVideo(bunnyId)
+        const watermarkedResponse = await fetchMemeFile(bunnyId, 'mp4')
 
         return buildVideoProxyResponse(watermarkedResponse)
       } catch (error) {

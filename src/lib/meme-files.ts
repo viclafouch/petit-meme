@@ -1,4 +1,5 @@
 import { createServerOnlyFn } from '@tanstack/react-start'
+import { MEME_DERIVED_FORMATS, type MemeDerivedFormat } from '~/constants/bunny'
 import { HTTP_STATUS } from '~/constants/http'
 import { serverEnv } from '~/env/server'
 import { deleteVideo } from '~/lib/bunny'
@@ -7,10 +8,6 @@ import { captureWithFeature } from '~/lib/sentry'
 
 const STORAGE_TIMEOUT_MS = 15_000
 const STORAGE_UPLOAD_TIMEOUT_MS = 120_000
-
-const MEME_DERIVED_FORMATS = ['mp4', 'mp3'] as const satisfies readonly string[]
-
-export type MemeDerivedFormat = (typeof MEME_DERIVED_FORMATS)[number]
 
 export type MemeFile = 'stream' | MemeDerivedFormat
 
@@ -105,6 +102,20 @@ export const checkMemeFileExists = createServerOnlyFn(
     }
 
     return true
+  }
+)
+
+export const findMissingMemeFiles = createServerOnlyFn(
+  async (bunnyId: string) => {
+    const presence = await Promise.all(
+      MEME_DERIVED_FORMATS.map(async (format) => {
+        return { format, exists: await checkMemeFileExists(bunnyId, format) }
+      })
+    )
+
+    return presence.flatMap(({ format, exists }) => {
+      return exists ? [] : [format]
+    })
   }
 )
 

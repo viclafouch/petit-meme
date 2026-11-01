@@ -14,16 +14,24 @@ export const loadFFmpeg = createClientOnlyFn(async (timeoutMessage: string) => {
     toBlobURL(FFMPEG_WASM_URL, 'application/wasm')
   ])
 
-  await withTimeout(
-    (abortController) => {
-      return ffmpeg.load(
-        { coreURL, wasmURL },
-        { signal: abortController.signal }
-      )
-    },
-    FFMPEG_LOAD_TIMEOUT_MS,
-    timeoutMessage
-  )
+  try {
+    await withTimeout(
+      (abortController) => {
+        return ffmpeg.load(
+          { coreURL, wasmURL },
+          { signal: abortController.signal }
+        )
+      },
+      FFMPEG_LOAD_TIMEOUT_MS,
+      timeoutMessage
+    )
+  } catch (error) {
+    ffmpeg.terminate()
+    throw error
+  } finally {
+    URL.revokeObjectURL(coreURL)
+    URL.revokeObjectURL(wasmURL)
+  }
 
   return ffmpeg
 })

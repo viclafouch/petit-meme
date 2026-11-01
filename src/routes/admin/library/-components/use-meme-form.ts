@@ -3,6 +3,7 @@ import type { z } from 'zod'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import type { MemeFullData } from '~/constants/meme'
 import type { Meme } from '~/db/generated/prisma/client'
+import { MemeStatus } from '~/db/generated/prisma/enums'
 import { getErrorMessage } from '~/helpers/error'
 import {
   buildLocaleRecord,
@@ -20,10 +21,30 @@ import { translateMemeContent } from '~/server/ai'
 
 type UseMemeFormParams = {
   meme: MemeFullData
+  generateFiles: () => Promise<void>
   onSuccess?: () => Promise<void>
 }
 
-export function useMemeForm({ meme, onSuccess }: UseMemeFormParams) {
+const resolveDefaultStatus = (status: MemeStatus): MemeStatus => {
+  return status === MemeStatus.PENDING ? MemeStatus.PUBLISHED : status
+}
+
+const ignoreReportedError = () => {}
+
+export const isFirstPublish = (
+  meme: Pick<MemeFullData, 'status'>,
+  nextStatus: MemeStatus
+) => {
+  return (
+    nextStatus === MemeStatus.PUBLISHED && meme.status !== MemeStatus.PUBLISHED
+  )
+}
+
+export function useMemeForm({
+  meme,
+  onSuccess,
+  generateFiles
+}: UseMemeFormParams) {
   const categoriesListQuery = useQuery(getCategoriesListQueryOpts(baseLocale))
 
   const categoriesOptions =
@@ -56,6 +77,21 @@ export function useMemeForm({ meme, onSuccess }: UseMemeFormParams) {
     }
   })
 
+  const submitMeme = async (value: z.infer<typeof MEME_FORM_SCHEMA>) => {
+    if (isFirstPublish(meme, value.status)) {
+      await generateFiles()
+    }
+
+    await editMutation.mutateAsync({
+      contentLocale: value.contentLocale,
+      translations: value.translations,
+      tweetUrl: value.tweetUrl,
+      status: value.status,
+      id: meme.id,
+      categoryIds: value.categoryIds
+    })
+  }
+
   const form = useAppForm({
     defaultValues: {
       contentLocale: meme.contentLocale,
@@ -69,7 +105,7 @@ export function useMemeForm({ meme, onSuccess }: UseMemeFormParams) {
         }
       }),
       tweetUrl: meme.tweetUrl,
-      status: meme.status,
+      status: resolveDefaultStatus(meme.status),
       categoryIds: meme.categories.map((category) => {
         return category.categoryId
       })
@@ -83,14 +119,7 @@ export function useMemeForm({ meme, onSuccess }: UseMemeFormParams) {
         return
       }
 
-      await editMutation.mutateAsync({
-        contentLocale: value.contentLocale,
-        translations: value.translations,
-        tweetUrl: value.tweetUrl,
-        status: value.status,
-        id: meme.id,
-        categoryIds: value.categoryIds
-      })
+      await submitMeme(value).catch(ignoreReportedError)
     }
   })
 

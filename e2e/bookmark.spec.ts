@@ -4,8 +4,7 @@ import { getAuthDialogSignInButton } from './auth-flows'
 import { E2E_NAMED_MEMES } from './content'
 import { resolveStorageStatePath } from './env'
 import { test } from './fixtures'
-import { repeatUntilVisible } from './hydration'
-import { matchIsServerFunctionCall } from './server-functions'
+import { expectVisibleAfterReload, repeatUntilVisible } from './hydration'
 
 const BOOKMARKED_MEME_PATHNAME = `/memes/${E2E_NAMED_MEMES.mostViewed.id}`
 const UNBOOKMARKED_MEME_PATHNAME = `/memes/${E2E_NAMED_MEMES.universal.id}`
@@ -23,25 +22,17 @@ test.describe('a signed in User', () => {
       name: m.meme_remove_favorite()
     })
 
-    const bookmarkWritten = page.waitForResponse(matchIsServerFunctionCall)
-
     await repeatUntilVisible(() => {
       return addButton.click()
     }, removeButton)
 
-    await bookmarkWritten
-    await page.reload()
+    await expectVisibleAfterReload(page, removeButton)
 
-    await expect(removeButton).toBeVisible()
+    await repeatUntilVisible(() => {
+      return removeButton.click()
+    }, addButton)
 
-    const bookmarkRemoved = page.waitForResponse(matchIsServerFunctionCall)
-
-    await removeButton.click()
-
-    await bookmarkRemoved
-    await page.reload()
-
-    await expect(addButton).toBeVisible()
+    await expectVisibleAfterReload(page, addButton)
   })
 })
 

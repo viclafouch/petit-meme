@@ -1,9 +1,22 @@
 import type { MemeDerivedFormat } from '~/constants/bunny'
 import type { MemeExportMode, MemeWithVideo } from '~/constants/meme'
+import {
+  sendConversionEvent,
+  type ConversionEventName,
+  type InsightsTracking
+} from '~/lib/algolia-insights'
 import { shareMeme, trackMemeAction } from '~/server/meme'
 import { downloadBlob, matchIsBlobShareable, shareBlob } from '~/utils/download'
 
 export type ExportableMeme = Pick<MemeWithVideo, 'id' | 'title'>
+
+const EXPORT_CONVERSION_EVENT_NAMES = {
+  download: { mp4: 'Meme MP4 Downloaded', mp3: 'Meme MP3 Downloaded' },
+  share: { mp4: 'Meme MP4 Shared', mp3: 'Meme MP3 Shared' }
+} as const satisfies Record<
+  MemeExportMode,
+  Record<MemeDerivedFormat, ConversionEventName>
+>
 
 type MemeExportParams = {
   meme: ExportableMeme
@@ -25,6 +38,7 @@ export const fetchMemeExport = async ({
 
 type DeliverMemeExportParams = MemeExportParams & {
   blob: Blob
+  tracking: InsightsTracking
 }
 
 const shareOrDownloadBlob = async ({
@@ -32,24 +46,33 @@ const shareOrDownloadBlob = async ({
   meme,
   mode,
   format
-}: DeliverMemeExportParams) => {
+}: DeliverMemeExportParams): Promise<MemeExportMode | null> => {
   if (mode === 'share' && matchIsBlobShareable(blob, meme.title, format)) {
-    return shareBlob(blob, meme.title, format)
+    const wasShared = await shareBlob(blob, meme.title, format)
+
+    return wasShared ? 'share' : null
   }
 
   downloadBlob(blob, `${meme.title}.${format}`)
 
-  return true
+  return 'download'
 }
 
 export const deliverMemeExport = async (params: DeliverMemeExportParams) => {
-  const wasDelivered = await shareOrDownloadBlob(params)
+  const deliveredMode = await shareOrDownloadBlob(params)
 
-  if (wasDelivered) {
-    void trackMemeAction({
-      data: { memeId: params.meme.id, action: params.mode }
-    })
+  if (deliveredMode === null) {
+    return false
   }
 
-  return wasDelivered
+  void trackMemeAction({
+    data: { memeId: params.meme.id, action: params.mode }
+  })
+  sendConversionEvent({
+    eventName: EXPORT_CONVERSION_EVENT_NAMES[deliveredMode][params.format],
+    objectID: params.meme.id,
+    ...params.tracking
+  })
+
+  return true
 }

@@ -6,6 +6,7 @@ import { Button } from '~/components/ui/button'
 import { LoadingSpinner } from '~/components/ui/spinner'
 import type { MemeExportMode } from '~/constants/meme'
 import { getErrorMessage } from '~/helpers/error'
+import type { InsightsTracking } from '~/lib/algolia-insights'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
 import {
@@ -17,6 +18,7 @@ import {
 type WatermarkedVideoButtonProps = {
   meme: ExportableMeme
   mode: MemeExportMode
+  tracking: InsightsTracking
   label: string
   onExported: () => void
 }
@@ -29,6 +31,7 @@ const MODE_ICONS = {
 export const WatermarkedVideoButton = ({
   meme,
   mode,
+  tracking,
   label,
   onExported
 }: WatermarkedVideoButtonProps) => {
@@ -36,7 +39,13 @@ export const WatermarkedVideoButton = ({
     mutationFn: async () => {
       const blob = await fetchMemeExport({ meme, mode, format: 'mp4' })
 
-      return deliverMemeExport({ blob, meme, mode, format: 'mp4' })
+      return deliverMemeExport({
+        blob,
+        meme,
+        mode,
+        format: 'mp4',
+        tracking
+      })
     },
     onSuccess: (wasExported) => {
       if (wasExported) {

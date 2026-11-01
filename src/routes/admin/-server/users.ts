@@ -26,7 +26,8 @@ const USER_LIST_SELECT = {
   image: true,
   role: true,
   banned: true,
-  lastActiveAt: true
+  lastActiveAt: true,
+  generationCount: true
 } as const satisfies Prisma.UserSelect
 
 type SubscriptionStatus = 'active' | 'past' | 'none'
@@ -103,7 +104,6 @@ export type EnrichedUser = Prisma.UserGetPayload<{
   provider: AuthProviderId
   subscription: SubscriptionInfo
   bookmarkCount: number
-  generationCount: number
 }
 
 export const getListUsers = createServerFn({ method: 'GET' })
@@ -119,27 +119,21 @@ export const getListUsers = createServerFn({ method: 'GET' })
       return user.id
     })
 
-    const [accounts, subscriptions, bookmarkCounts, generationCounts] =
-      await Promise.all([
-        prismaClient.account.findMany({
-          where: { userId: { in: userIds } },
-          select: { userId: true, providerId: true }
-        }),
-        prismaClient.subscription.findMany({
-          where: { referenceId: { in: userIds } },
-          select: SUBSCRIPTION_LIST_SELECT
-        }),
-        prismaClient.userBookmark.groupBy({
-          by: ['userId'],
-          where: { userId: { in: userIds } },
-          _count: { id: true }
-        }),
-        prismaClient.studioGeneration.groupBy({
-          by: ['userId'],
-          where: { userId: { in: userIds } },
-          _count: { id: true }
-        })
-      ])
+    const [accounts, subscriptions, bookmarkCounts] = await Promise.all([
+      prismaClient.account.findMany({
+        where: { userId: { in: userIds } },
+        select: { userId: true, providerId: true }
+      }),
+      prismaClient.subscription.findMany({
+        where: { referenceId: { in: userIds } },
+        select: SUBSCRIPTION_LIST_SELECT
+      }),
+      prismaClient.userBookmark.groupBy({
+        by: ['userId'],
+        where: { userId: { in: userIds } },
+        _count: { id: true }
+      })
+    ])
 
     const providerByUserId = new Map(
       accounts.map((account) => {
@@ -160,12 +154,6 @@ export const getListUsers = createServerFn({ method: 'GET' })
       })
     )
 
-    const generationCountByUserId = new Map(
-      generationCounts.map((group) => {
-        return [group.userId, group._count.id] as const
-      })
-    )
-
     const enrichedUsers = users.map((user) => {
       return {
         ...user,
@@ -173,8 +161,7 @@ export const getListUsers = createServerFn({ method: 'GET' })
         subscription: buildSubscriptionInfo(
           subscriptionsByUserId[user.id] ?? []
         ),
-        bookmarkCount: bookmarkCountByUserId.get(user.id) ?? 0,
-        generationCount: generationCountByUserId.get(user.id) ?? 0
+        bookmarkCount: bookmarkCountByUserId.get(user.id) ?? 0
       } satisfies EnrichedUser
     })
 

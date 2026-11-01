@@ -40,6 +40,8 @@ const staticAssetRouteRules = Object.fromEntries(
   })
 )
 
+const NODE_RUNTIME_PACKAGES = ['takumi-js', '@takumi-rs/core', 'pg']
+
 const WITHOUT_PREFIX_FILTER = ''
 
 export default defineConfig(async ({ mode }) => {
@@ -68,7 +70,7 @@ export default defineConfig(async ({ mode }) => {
       strictPort: true
     },
     ssr: {
-      external: ['takumi-js', '@takumi-rs/core']
+      external: NODE_RUNTIME_PACKAGES
     },
     optimizeDeps: {
       exclude: [
@@ -97,7 +99,7 @@ export default defineConfig(async ({ mode }) => {
         preset: mode === 'e2e' ? 'node-server' : 'vercel',
         sourcemap: true,
         exportConditions: ['!unwasm'],
-        traceDeps: ['takumi-js', '@takumi-rs/core'],
+        traceDeps: NODE_RUNTIME_PACKAGES,
         rolldownConfig: {
           onLog: (level, log, handler) => {
             if (log.code !== 'MODULE_LEVEL_DIRECTIVE') {

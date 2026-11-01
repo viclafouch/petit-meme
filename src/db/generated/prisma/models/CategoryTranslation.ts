@@ -206,7 +206,6 @@ export type CategoryTranslationOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   category?: Prisma.CategoryOrderByWithRelationInput
-  _relevance?: Prisma.CategoryTranslationOrderByRelevanceInput
 }
 
 export type CategoryTranslationWhereUniqueInput = Prisma.AtLeast<{
@@ -327,12 +326,6 @@ export type CategoryTranslationListRelationFilter = {
 
 export type CategoryTranslationOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type CategoryTranslationOrderByRelevanceInput = {
-  fields: Prisma.CategoryTranslationOrderByRelevanceFieldEnum | Prisma.CategoryTranslationOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type CategoryTranslationCategoryIdLocaleCompoundUniqueInput = {

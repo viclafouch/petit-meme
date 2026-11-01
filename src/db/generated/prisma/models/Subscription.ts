@@ -332,7 +332,6 @@ export type SubscriptionOrderByWithRelationInput = {
   trialEnd?: Prisma.SortOrderInput | Prisma.SortOrder
   endedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   stripeScheduleId?: Prisma.SortOrderInput | Prisma.SortOrder
-  _relevance?: Prisma.SubscriptionOrderByRelevanceInput
 }
 
 export type SubscriptionWhereUniqueInput = Prisma.AtLeast<{
@@ -544,12 +543,6 @@ export type SubscriptionUncheckedUpdateManyInput = {
   trialEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   stripeScheduleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-}
-
-export type SubscriptionOrderByRelevanceInput = {
-  fields: Prisma.SubscriptionOrderByRelevanceFieldEnum | Prisma.SubscriptionOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type SubscriptionCountOrderByAggregateInput = {

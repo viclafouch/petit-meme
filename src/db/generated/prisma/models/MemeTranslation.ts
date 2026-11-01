@@ -215,7 +215,6 @@ export type MemeTranslationOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   meme?: Prisma.MemeOrderByWithRelationInput
-  _relevance?: Prisma.MemeTranslationOrderByRelevanceInput
 }
 
 export type MemeTranslationWhereUniqueInput = Prisma.AtLeast<{
@@ -346,12 +345,6 @@ export type MemeTranslationListRelationFilter = {
 
 export type MemeTranslationOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type MemeTranslationOrderByRelevanceInput = {
-  fields: Prisma.MemeTranslationOrderByRelevanceFieldEnum | Prisma.MemeTranslationOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type MemeTranslationMemeIdLocaleCompoundUniqueInput = {

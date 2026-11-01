@@ -245,7 +245,6 @@ export type AiSearchLogOrderByWithRelationInput = {
   resultCount?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
-  _relevance?: Prisma.AiSearchLogOrderByRelevanceInput
 }
 
 export type AiSearchLogWhereUniqueInput = Prisma.AtLeast<{
@@ -377,12 +376,6 @@ export type AiSearchLogListRelationFilter = {
 
 export type AiSearchLogOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type AiSearchLogOrderByRelevanceInput = {
-  fields: Prisma.AiSearchLogOrderByRelevanceFieldEnum | Prisma.AiSearchLogOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type AiSearchLogCountOrderByAggregateInput = {

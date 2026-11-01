@@ -185,7 +185,6 @@ export type StudioGenerationOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   meme?: Prisma.MemeOrderByWithRelationInput
-  _relevance?: Prisma.StudioGenerationOrderByRelevanceInput
 }
 
 export type StudioGenerationWhereUniqueInput = Prisma.AtLeast<{
@@ -275,12 +274,6 @@ export type StudioGenerationListRelationFilter = {
 
 export type StudioGenerationOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type StudioGenerationOrderByRelevanceInput = {
-  fields: Prisma.StudioGenerationOrderByRelevanceFieldEnum | Prisma.StudioGenerationOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type StudioGenerationCountOrderByAggregateInput = {

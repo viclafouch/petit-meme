@@ -176,7 +176,6 @@ export type MemeCategoryOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   meme?: Prisma.MemeOrderByWithRelationInput
   category?: Prisma.CategoryOrderByWithRelationInput
-  _relevance?: Prisma.MemeCategoryOrderByRelevanceInput
 }
 
 export type MemeCategoryWhereUniqueInput = Prisma.AtLeast<{
@@ -257,12 +256,6 @@ export type MemeCategoryListRelationFilter = {
 
 export type MemeCategoryOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type MemeCategoryOrderByRelevanceInput = {
-  fields: Prisma.MemeCategoryOrderByRelevanceFieldEnum | Prisma.MemeCategoryOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type MemeCategoryMemeIdCategoryIdCompoundUniqueInput = {

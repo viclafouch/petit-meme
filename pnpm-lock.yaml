@@ -277,6 +277,9 @@ importers:
       nitro:
         specifier: 3.0.260903-beta
         version: 3.0.260903-beta
+      pg:
+        specifier: ^8.18.0
+        version: 8.18.0
       pino:
         specifier: ^10.4.0
         version: 10.4.0
@@ -374,6 +377,9 @@ importers:
       '@types/node':
         specifier: ^24.19.2
         version: 24.19.2
+      '@types/pg':
+        specifier: ^8.20.0
+        version: 8.20.0
       '@types/react':
         specifier: ^19.3.0
         version: 19.3.0

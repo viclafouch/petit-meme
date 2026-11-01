@@ -232,7 +232,6 @@ export type RateLimitOrderByWithRelationInput = {
   count?: Prisma.SortOrder
   lastRequest?: Prisma.SortOrder
   windowStart?: Prisma.SortOrder
-  _relevance?: Prisma.RateLimitOrderByRelevanceInput
 }
 
 export type RateLimitWhereUniqueInput = Prisma.AtLeast<{
@@ -324,12 +323,6 @@ export type RateLimitUncheckedUpdateManyInput = {
   count?: Prisma.IntFieldUpdateOperationsInput | number
   lastRequest?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   windowStart?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
-}
-
-export type RateLimitOrderByRelevanceInput = {
-  fields: Prisma.RateLimitOrderByRelevanceFieldEnum | Prisma.RateLimitOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type RateLimitCountOrderByAggregateInput = {

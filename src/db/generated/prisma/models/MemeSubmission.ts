@@ -248,7 +248,6 @@ export type MemeSubmissionOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   meme?: Prisma.MemeOrderByWithRelationInput
-  _relevance?: Prisma.MemeSubmissionOrderByRelevanceInput
 }
 
 export type MemeSubmissionWhereUniqueInput = Prisma.AtLeast<{
@@ -408,12 +407,6 @@ export type MemeSubmissionListRelationFilter = {
 
 export type MemeSubmissionOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type MemeSubmissionOrderByRelevanceInput = {
-  fields: Prisma.MemeSubmissionOrderByRelevanceFieldEnum | Prisma.MemeSubmissionOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type MemeSubmissionCountOrderByAggregateInput = {

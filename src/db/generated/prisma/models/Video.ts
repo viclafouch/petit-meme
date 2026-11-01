@@ -225,7 +225,6 @@ export type VideoOrderByWithRelationInput = {
   duration?: Prisma.SortOrder
   bunnyStatus?: Prisma.SortOrder
   meme?: Prisma.MemeOrderByWithRelationInput
-  _relevance?: Prisma.VideoOrderByRelevanceInput
 }
 
 export type VideoWhereUniqueInput = Prisma.AtLeast<{
@@ -309,12 +308,6 @@ export type VideoUncheckedUpdateManyInput = {
   bunnyId?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.IntFieldUpdateOperationsInput | number
   bunnyStatus?: Prisma.IntFieldUpdateOperationsInput | number
-}
-
-export type VideoOrderByRelevanceInput = {
-  fields: Prisma.VideoOrderByRelevanceFieldEnum | Prisma.VideoOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type VideoCountOrderByAggregateInput = {

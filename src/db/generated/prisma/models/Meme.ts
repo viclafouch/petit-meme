@@ -331,7 +331,6 @@ export type MemeOrderByWithRelationInput = {
   studioGenerations?: Prisma.StudioGenerationOrderByRelationAggregateInput
   submissions?: Prisma.MemeSubmissionOrderByRelationAggregateInput
   activityEvents?: Prisma.ActivityEventOrderByRelationAggregateInput
-  _relevance?: Prisma.MemeOrderByRelevanceInput
 }
 
 export type MemeWhereUniqueInput = Prisma.AtLeast<{
@@ -563,12 +562,6 @@ export type MemeScalarRelationFilter = {
 export type MemeNullableScalarRelationFilter = {
   is?: Prisma.MemeWhereInput | null
   isNot?: Prisma.MemeWhereInput | null
-}
-
-export type MemeOrderByRelevanceInput = {
-  fields: Prisma.MemeOrderByRelevanceFieldEnum | Prisma.MemeOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type MemeCountOrderByAggregateInput = {

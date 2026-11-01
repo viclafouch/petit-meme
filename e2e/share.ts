@@ -1,4 +1,5 @@
 import { expect, type Page } from '@playwright/test'
+import type { MemeDerivedFormat } from '~/constants/bunny'
 
 type RecordedShare = {
   title: string
@@ -13,9 +14,21 @@ declare global {
   }
 }
 
-export const recordShares = async (page: Page) => {
-  await page.addInitScript(() => {
+type RecordSharesParams = {
+  page: Page
+  isFileShareable?: boolean
+}
+
+export const recordShares = async ({
+  page,
+  isFileShareable = true
+}: RecordSharesParams) => {
+  await page.addInitScript((isShareable) => {
     window.e2eRecordedShares = []
+
+    navigator.canShare = () => {
+      return isShareable
+    }
 
     navigator.share = async (data) => {
       const [file] = data?.files ?? []
@@ -29,20 +42,22 @@ export const recordShares = async (page: Page) => {
         }
       ]
     }
-  })
+  }, isFileShareable)
 }
 
-type ExpectVideoWasSharedParams = {
+type ExpectFileWasSharedParams = {
   page: Page
   title: string
+  format: MemeDerivedFormat
 }
 
 const WHOLE_FILE_PROXY_GIVE_UP_MS = 15_000
 
-export const expectVideoWasShared = async ({
+export const expectFileWasShared = async ({
   page,
-  title
-}: ExpectVideoWasSharedParams) => {
+  title,
+  format
+}: ExpectFileWasSharedParams) => {
   await expect
     .poll(
       () => {
@@ -52,5 +67,5 @@ export const expectVideoWasShared = async ({
       },
       { timeout: WHOLE_FILE_PROXY_GIVE_UP_MS }
     )
-    .toStrictEqual([{ title, fileName: `${title}.mp4`, isEmpty: false }])
+    .toStrictEqual([{ title, fileName: `${title}.${format}`, isEmpty: false }])
 }

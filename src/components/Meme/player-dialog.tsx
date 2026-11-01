@@ -1,11 +1,20 @@
 import React from 'react'
-import { Clapperboard, Clipboard, Download, Share2, X } from 'lucide-react'
+import {
+  ChevronDown,
+  Clapperboard,
+  Clipboard,
+  Download,
+  Share2,
+  X
+} from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 import { toast } from 'sonner'
 import { Dialog } from '@base-ui/react/dialog'
 import { Link, useLinkProps } from '@tanstack/react-router'
+import { MemeExportMenu } from '~/components/Meme/meme-export-menu'
 import { MemeVideoPlayer } from '~/components/Meme/meme-video-player'
 import { Button, buttonVariants } from '~/components/ui/button'
+import type { MemeDerivedFormat } from '~/constants/bunny'
 import type { MemeWithVideo } from '~/constants/meme'
 import { useMemeExport } from '~/hooks/use-meme-export'
 import { useMemeHls } from '~/hooks/use-meme-hls'
@@ -107,10 +116,10 @@ export const PlayerDialog = ({
     handleTrackConversion('Meme Studio Opened')
   }
 
-  const handleShareClick = () => {
+  const handleShare = (format: MemeDerivedFormat) => {
     pauseVideo()
     handleTrackConversion('Meme Shared')
-    shareMutation.trigger(meme)
+    shareMutation.trigger(meme, format)
   }
 
   const handleCopyClick = () => {
@@ -119,10 +128,10 @@ export const PlayerDialog = ({
     void handleCopyMemeLink()
   }
 
-  const handleDownloadClick = () => {
+  const handleDownload = (format: MemeDerivedFormat) => {
     pauseVideo()
     handleTrackConversion('Meme Downloaded')
-    downloadMutation.trigger(meme)
+    downloadMutation.trigger(meme, format)
   }
 
   return (
@@ -194,16 +203,22 @@ export const PlayerDialog = ({
                   {m.meme_open_studio()}
                 </Link>
                 <div className="grid gap-2 grid-cols-2">
-                  <Button
-                    size="lg"
-                    variant="secondary"
-                    disabled={shareMutation.isPending}
-                    className="md:hidden w-full"
-                    onClick={handleShareClick}
+                  <MemeExportMenu
+                    mode="share"
+                    onExport={handleShare}
+                    render={
+                      <Button
+                        size="lg"
+                        variant="secondary"
+                        disabled={shareMutation.isPending}
+                        className="md:hidden w-full"
+                      />
+                    }
                   >
                     <Share2 />
-                    {m.meme_share_video()}
-                  </Button>
+                    {m.meme_share()}
+                    <ChevronDown className="text-muted-foreground" />
+                  </MemeExportMenu>
                   <Button
                     size="lg"
                     variant="secondary"
@@ -213,16 +228,22 @@ export const PlayerDialog = ({
                     <Clipboard />
                     {m.meme_copy_link()}
                   </Button>
-                  <Button
-                    size="lg"
-                    variant="secondary"
-                    disabled={downloadMutation.isPending}
-                    className="col-span-2 md:col-span-1 w-full"
-                    onClick={handleDownloadClick}
+                  <MemeExportMenu
+                    mode="download"
+                    onExport={handleDownload}
+                    render={
+                      <Button
+                        size="lg"
+                        variant="secondary"
+                        disabled={downloadMutation.isPending}
+                        className="col-span-2 md:col-span-1 w-full"
+                      />
+                    }
                   >
                     <Download />
-                    {m.meme_download_video()}
-                  </Button>
+                    {m.meme_download()}
+                    <ChevronDown className="text-muted-foreground" />
+                  </MemeExportMenu>
                 </div>
               </div>
             </div>

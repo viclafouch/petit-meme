@@ -1,43 +1,24 @@
-import React from 'react'
-import { Download, Share2 } from 'lucide-react'
-import { toast } from 'sonner'
-import { useMutation } from '@tanstack/react-query'
 import type { WithDialog } from '~/@types/dialog'
+import { WatermarkedVideoButton } from '~/components/Meme/watermarked-video-button'
 import { PremiumUpsellDialog } from '~/components/premium-upsell-dialog'
-import { Button } from '~/components/ui/button'
-import { LoadingSpinner } from '~/components/ui/spinner'
-import type { MemeExportMode, MemeWithVideo } from '~/constants/meme'
-import { getErrorMessage } from '~/helpers/error'
-import { captureWithFeature } from '~/lib/sentry'
+import type { MemeExportMode } from '~/constants/meme'
 import { m } from '~/paraglide/messages.js'
-import { shareMeme, trackMemeAction } from '~/server/meme'
-import { downloadBlob, shareBlob } from '~/utils/download'
+import type { ExportableMeme } from '~/utils/meme-export'
 
 type WatermarkUpsellDialogProps = WithDialog<{
-  meme: Pick<MemeWithVideo, 'id' | 'title'>
+  meme: ExportableMeme
   mode: MemeExportMode
 }>
 
-const getTitle = (mode: MemeExportMode) => {
-  if (mode === 'download') {
-    return m.watermark_upsell_title_download()
-  }
+const TITLES = {
+  download: m.watermark_upsell_title_download,
+  share: m.watermark_upsell_title_share
+} as const satisfies Record<MemeExportMode, () => string>
 
-  return m.watermark_upsell_title_share()
-}
-
-const getConfirmLabel = (mode: MemeExportMode) => {
-  if (mode === 'download') {
-    return m.watermark_download_with_watermark()
-  }
-
-  return m.watermark_share_with_watermark()
-}
-
-const CONFIRM_ICONS = {
-  download: Download,
-  share: Share2
-} as const satisfies Record<MemeExportMode, React.ElementType>
+const CONFIRM_LABELS = {
+  download: m.watermark_download_with_watermark,
+  share: m.watermark_share_with_watermark
+} as const satisfies Record<MemeExportMode, () => string>
 
 export const WatermarkUpsellDialog = ({
   open,
@@ -45,65 +26,22 @@ export const WatermarkUpsellDialog = ({
   meme,
   mode
 }: WatermarkUpsellDialogProps) => {
-  const exportMutation = useMutation({
-    mutationFn: async () => {
-      const response = await shareMeme({
-        data: { memeId: meme.id, mode, format: 'mp4' }
-      })
-      const blob = await response.blob()
-
-      if (mode === 'download') {
-        downloadBlob(blob, meme.title)
-
-        return true
-      }
-
-      return shareBlob(blob, meme.title)
-    },
-    onSuccess: (wasExported) => {
-      if (wasExported) {
-        onOpenChange(false)
-        void trackMemeAction({ data: { memeId: meme.id, action: mode } })
-      }
-    },
-    onError: (error) => {
-      toast.error(getErrorMessage(error))
-      captureWithFeature(error, mode)
-    }
-  })
-
-  const ConfirmIcon = CONFIRM_ICONS[mode]
-
   return (
     <PremiumUpsellDialog
       open={open}
       onOpenChange={onOpenChange}
       imageUrl="/images/premium-upsell.webp"
-      title={getTitle(mode)}
+      title={TITLES[mode]()}
       description={m.watermark_upsell_description()}
       secondaryAction={
-        <>
-          <Button
-            variant="secondary"
-            size="lg"
-            className="w-full"
-            disabled={exportMutation.isPending}
-            onClick={() => {
-              exportMutation.mutate()
-            }}
-            aria-busy={exportMutation.isPending}
-          >
-            {exportMutation.isPending ? (
-              <LoadingSpinner className="size-4" aria-hidden="true" />
-            ) : (
-              <ConfirmIcon className="size-4" aria-hidden="true" />
-            )}
-            {getConfirmLabel(mode)}
-          </Button>
-          {exportMutation.isPending ? (
-            <output className="sr-only">{m.common_loading()}</output>
-          ) : null}
-        </>
+        <WatermarkedVideoButton
+          meme={meme}
+          mode={mode}
+          label={CONFIRM_LABELS[mode]()}
+          onExported={() => {
+            onOpenChange(false)
+          }}
+        />
       }
     />
   )

@@ -1,6 +1,6 @@
 # Conditions d'utilisation - Petit Meme
 
-Dernière mise à jour : **Septembre 2025**
+Dernière mise à jour : **Novembre 2026**
 
 Bienvenue sur **Petit Meme**.
 En utilisant notre site (https://petit-meme.io) et nos services, vous
@@ -52,7 +52,8 @@ informations ou mener des activités frauduleuses.
 -   Les téléchargements gratuits peuvent contenir un filigrane
     (watermark).
 -   Les fonctionnalités premium donnent accès à un téléchargement sans
-    watermark, sans restriction de revente ou redistribution.
+    watermark et au son de chaque mème en MP3, sans restriction de
+    revente ou redistribution.
 
 ------------------------------------------------------------------------
 

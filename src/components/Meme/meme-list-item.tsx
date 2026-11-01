@@ -2,7 +2,6 @@ import React from 'react'
 import {
   ArrowRight,
   Clapperboard,
-  Download,
   EllipsisVertical,
   Share2,
   Star
@@ -11,6 +10,7 @@ import { motion } from 'motion/react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useRouteContext } from '@tanstack/react-router'
 import { BunnyPlayIcon } from '~/components/icon/play'
+import { MemeExportMenuItems } from '~/components/Meme/meme-export-menu'
 import { MemeLanguageBadge } from '~/components/Meme/meme-language-badge'
 import { MemeVideoThumbnail } from '~/components/Meme/meme-video-thumbnail'
 import {
@@ -256,23 +256,21 @@ export const MemeListItem = React.memo(
                   onClick={() => {
                     handleTrackConversion('Meme Shared')
 
-                    shareMutation.trigger(meme)
+                    shareMutation.trigger(meme, 'mp4')
                   }}
                   className="md:hidden"
                 >
                   <Share2 />
                   {m.meme_share()}
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
+                <MemeExportMenuItems
+                  mode="download"
+                  onExport={(format) => {
                     handleTrackConversion('Meme Downloaded')
 
-                    downloadMutation.trigger(meme)
+                    downloadMutation.trigger(meme, format)
                   }}
-                >
-                  <Download />
-                  {m.meme_download()}
-                </DropdownMenuItem>
+                />
                 <FavoriteItemGuard
                   meme={meme}
                   queryID={queryID}

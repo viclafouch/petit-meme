@@ -4,6 +4,8 @@ export const IMMUTABLE_CACHE_CONTROL = `public, max-age=${ONE_YEAR_IN_SECONDS}, 
 
 export const WEEKLY_CACHE_CONTROL = `public, max-age=${SEVEN_DAYS_IN_SECONDS}`
 
+export const NO_STORE_CACHE_CONTROL = 'no-store'
+
 export const HTTP_STATUS = {
   OK: 200,
   PARTIAL_CONTENT: 206,

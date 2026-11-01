@@ -13,6 +13,13 @@ export const repeatUntilVisible = async (
   }).toPass({ timeout: HYDRATION_GIVE_UP_MS })
 }
 
+export const expectVisibleAfterReload = async (page: Page, target: Locator) => {
+  await expect(async () => {
+    await page.reload()
+    await expect(target).toBeVisible({ timeout: HYDRATED_ACTION_MS })
+  }).toPass({ timeout: HYDRATION_GIVE_UP_MS })
+}
+
 type RepeatUntilNavigatedParams = {
   page: Page
   from: string

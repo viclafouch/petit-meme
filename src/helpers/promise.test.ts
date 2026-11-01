@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { withTimeout } from '~/helpers/promise'
+import { createLatch, withTimeout } from '~/helpers/promise'
 
 const TIMEOUT_MS = 1000
 const TIMEOUT_MESSAGE = 'timed out'
@@ -72,5 +72,66 @@ describe('withTimeout', () => {
     )
 
     expect(workController?.signal.aborted).toBe(false)
+  })
+})
+
+describe('createLatch', () => {
+  it('should ignore a call made while the first one is still running', () => {
+    const run = vi.fn(neverSettles)
+    const latch = createLatch(run)
+
+    void latch.run()
+    void latch.run()
+
+    expect(run).toHaveBeenCalledTimes(1)
+  })
+
+  it('should let the next call run once the previous one failed', async () => {
+    const run = vi.fn(async () => {
+      throw new Error('checkout failed')
+    })
+    const latch = createLatch(run)
+
+    await expect(latch.run()).rejects.toThrow('checkout failed')
+    await expect(latch.run()).rejects.toThrow('checkout failed')
+
+    expect(run).toHaveBeenCalledTimes(2)
+  })
+
+  it('should keep ignoring calls once a run ends on hold', async () => {
+    const run = vi.fn(async () => {
+      return 'hold' as const
+    })
+    const latch = createLatch(run)
+
+    await latch.run()
+    await latch.run()
+
+    expect(run).toHaveBeenCalledTimes(1)
+  })
+
+  it('should let the next call run once a run ends on release', async () => {
+    const run = vi.fn(async () => {
+      return 'release' as const
+    })
+    const latch = createLatch(run)
+
+    await latch.run()
+    await latch.run()
+
+    expect(run).toHaveBeenCalledTimes(2)
+  })
+
+  it('should let the next call run once released after a hold', async () => {
+    const run = vi.fn(async () => {
+      return 'hold' as const
+    })
+    const latch = createLatch(run)
+
+    await latch.run()
+    latch.release()
+    await latch.run()
+
+    expect(run).toHaveBeenCalledTimes(2)
   })
 })

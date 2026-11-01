@@ -39,6 +39,7 @@ export const getActivityColumns = (now: number) => {
       enableSorting: false,
       cell: (info) => {
         const type = info.getValue()
+        const { format } = info.row.original
 
         return (
           <div className="flex items-center gap-2 text-sm">
@@ -49,6 +50,11 @@ export const getActivityColumns = (now: number) => {
             <span className="whitespace-nowrap">
               {ACTIVITY_TYPE_DISPLAY[type].label}
             </span>
+            {format ? (
+              <Badge variant="outline" size="sm">
+                {format.toUpperCase()}
+              </Badge>
+            ) : null}
           </div>
         )
       }

@@ -2,7 +2,10 @@ import { createServerOnlyFn } from '@tanstack/react-start'
 import { waitUntil } from '@vercel/functions'
 import { prismaClient } from '~/db'
 import type { Prisma } from '~/db/generated/prisma/client'
-import type { ActivityEventType } from '~/db/generated/prisma/enums'
+import type {
+  ActivityEventType,
+  MemeExportFormat
+} from '~/db/generated/prisma/enums'
 import { extractClientCountry, extractClientIp } from '~/helpers/request'
 import {
   matchIsUserAdmin,
@@ -20,6 +23,7 @@ type RecordActivityEventParams = {
   memeId?: string
   dedupKey?: string
   metadata?: Prisma.InputJsonValue
+  format?: MemeExportFormat
 }
 
 const createActivityEvent = async (
@@ -42,7 +46,8 @@ export const recordActivityEvent = createServerOnlyFn(
     headers,
     memeId,
     dedupKey,
-    metadata
+    metadata,
+    format
   }: RecordActivityEventParams) => {
     if (actor && matchIsUserAdmin(actor)) {
       return
@@ -55,6 +60,7 @@ export const recordActivityEvent = createServerOnlyFn(
         memeId,
         dedupKey,
         metadata,
+        format,
         ipAddress: headers ? extractClientIp(headers) : undefined,
         country: headers ? extractClientCountry(headers) : undefined,
         userAgent: headers?.get('user-agent') ?? undefined

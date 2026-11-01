@@ -383,7 +383,8 @@ export const ActivityEventScalarFieldEnum = {
   userId: 'userId',
   memeId: 'memeId',
   dedupKey: 'dedupKey',
-  metadata: 'metadata'
+  metadata: 'metadata',
+  format: 'format'
 } as const
 
 export type ActivityEventScalarFieldEnum = (typeof ActivityEventScalarFieldEnum)[keyof typeof ActivityEventScalarFieldEnum]

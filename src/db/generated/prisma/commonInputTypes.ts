@@ -436,6 +436,13 @@ export type EnumActivityEventTypeFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumActivityEventTypeFilter<$PrismaModel> | $Enums.ActivityEventType
 }
 
+export type EnumMemeExportFormatNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.MemeExportFormat | Prisma.EnumMemeExportFormatFieldRefInput<$PrismaModel> | null
+  in?: $Enums.MemeExportFormat[] | Prisma.ListEnumMemeExportFormatFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.MemeExportFormat[] | Prisma.ListEnumMemeExportFormatFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumMemeExportFormatNullableFilter<$PrismaModel> | $Enums.MemeExportFormat | null
+}
+
 export type EnumActivityEventTypeWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.ActivityEventType | Prisma.EnumActivityEventTypeFieldRefInput<$PrismaModel>
   in?: $Enums.ActivityEventType[] | Prisma.ListEnumActivityEventTypeFieldRefInput<$PrismaModel>
@@ -444,6 +451,16 @@ export type EnumActivityEventTypeWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumActivityEventTypeFilter<$PrismaModel>
   _max?: Prisma.NestedEnumActivityEventTypeFilter<$PrismaModel>
+}
+
+export type EnumMemeExportFormatNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.MemeExportFormat | Prisma.EnumMemeExportFormatFieldRefInput<$PrismaModel> | null
+  in?: $Enums.MemeExportFormat[] | Prisma.ListEnumMemeExportFormatFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.MemeExportFormat[] | Prisma.ListEnumMemeExportFormatFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumMemeExportFormatNullableWithAggregatesFilter<$PrismaModel> | $Enums.MemeExportFormat | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumMemeExportFormatNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumMemeExportFormatNullableFilter<$PrismaModel>
 }
 
 export type NestedStringFilter<$PrismaModel = never> = {
@@ -827,6 +844,13 @@ export type NestedEnumActivityEventTypeFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumActivityEventTypeFilter<$PrismaModel> | $Enums.ActivityEventType
 }
 
+export type NestedEnumMemeExportFormatNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.MemeExportFormat | Prisma.EnumMemeExportFormatFieldRefInput<$PrismaModel> | null
+  in?: $Enums.MemeExportFormat[] | Prisma.ListEnumMemeExportFormatFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.MemeExportFormat[] | Prisma.ListEnumMemeExportFormatFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumMemeExportFormatNullableFilter<$PrismaModel> | $Enums.MemeExportFormat | null
+}
+
 export type NestedEnumActivityEventTypeWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.ActivityEventType | Prisma.EnumActivityEventTypeFieldRefInput<$PrismaModel>
   in?: $Enums.ActivityEventType[] | Prisma.ListEnumActivityEventTypeFieldRefInput<$PrismaModel>
@@ -835,6 +859,16 @@ export type NestedEnumActivityEventTypeWithAggregatesFilter<$PrismaModel = never
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumActivityEventTypeFilter<$PrismaModel>
   _max?: Prisma.NestedEnumActivityEventTypeFilter<$PrismaModel>
+}
+
+export type NestedEnumMemeExportFormatNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.MemeExportFormat | Prisma.EnumMemeExportFormatFieldRefInput<$PrismaModel> | null
+  in?: $Enums.MemeExportFormat[] | Prisma.ListEnumMemeExportFormatFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.MemeExportFormat[] | Prisma.ListEnumMemeExportFormatFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumMemeExportFormatNullableWithAggregatesFilter<$PrismaModel> | $Enums.MemeExportFormat | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumMemeExportFormatNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumMemeExportFormatNullableFilter<$PrismaModel>
 }
 
 

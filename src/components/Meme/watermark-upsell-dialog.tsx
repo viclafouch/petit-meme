@@ -47,7 +47,9 @@ export const WatermarkUpsellDialog = ({
 }: WatermarkUpsellDialogProps) => {
   const exportMutation = useMutation({
     mutationFn: async () => {
-      const response = await shareMeme({ data: { memeId: meme.id, mode } })
+      const response = await shareMeme({
+        data: { memeId: meme.id, mode, format: 'mp4' }
+      })
       const blob = await response.blob()
 
       if (mode === 'download') {

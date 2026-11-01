@@ -2323,7 +2323,8 @@ export const ActivityEventScalarFieldEnum = {
   userId: 'userId',
   memeId: 'memeId',
   dedupKey: 'dedupKey',
-  metadata: 'metadata'
+  metadata: 'metadata',
+  format: 'format'
 } as const
 
 export type ActivityEventScalarFieldEnum = (typeof ActivityEventScalarFieldEnum)[keyof typeof ActivityEventScalarFieldEnum]
@@ -2541,6 +2542,20 @@ export type EnumActivityEventTypeFieldRefInput<$PrismaModel> = FieldRefInputType
  * Reference to a field of type 'ActivityEventType[]'
  */
 export type ListEnumActivityEventTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ActivityEventType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'MemeExportFormat'
+ */
+export type EnumMemeExportFormatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MemeExportFormat'>
+    
+
+
+/**
+ * Reference to a field of type 'MemeExportFormat[]'
+ */
+export type ListEnumMemeExportFormatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MemeExportFormat[]'>
     
 
 

@@ -65,3 +65,11 @@ export const ActivityEventType = {
 } as const
 
 export type ActivityEventType = (typeof ActivityEventType)[keyof typeof ActivityEventType]
+
+
+export const MemeExportFormat = {
+  mp4: 'mp4',
+  mp3: 'mp3'
+} as const
+
+export type MemeExportFormat = (typeof MemeExportFormat)[keyof typeof MemeExportFormat]

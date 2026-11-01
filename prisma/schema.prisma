@@ -410,6 +410,13 @@ enum ActivityEventType {
   SUBSCRIPTION
 }
 
+enum MemeExportFormat {
+  mp4
+  mp3
+
+  @@map("meme_export_format")
+}
+
 model ActivityEvent {
   id        String            @id @default(cuid())
   type      ActivityEventType
@@ -421,6 +428,7 @@ model ActivityEvent {
   memeId    String?           @map("meme_id")
   dedupKey  String?           @unique @map("dedup_key")
   metadata  Json?
+  format    MemeExportFormat?
 
   user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
   meme Meme? @relation(fields: [memeId], references: [id], onDelete: Cascade)

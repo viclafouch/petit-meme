@@ -18,6 +18,7 @@ export type SentryFeature =
   | 'admin-ban'
   | 'admin-dashboard'
   | 'admin-meme-edit'
+  | 'admin-meme-import'
   | 'admin-user-ban'
   | 'admin-user-unban'
   | 'admin-user-delete'

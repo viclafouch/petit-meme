@@ -263,6 +263,9 @@
 @utility grid-cols-meme-page {
   grid-template-columns: auto 300px;
 }
+@utility grid-cols-meme-editor {
+  grid-template-columns: minmax(0, 1fr) minmax(20rem, 24rem);
+}
 @utility leading-display {
   --tw-leading: 1.1;
   line-height: 1.1;

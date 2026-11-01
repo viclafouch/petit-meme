@@ -1,14 +1,14 @@
-import { X } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 import { Badge } from '~/components/ui/badge'
+import { Field, FieldError, FieldLabel } from '~/components/ui/field'
 import {
-  FormControl,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from '~/components/ui/form'
-import { Input } from '~/components/ui/input'
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput
+} from '~/components/ui/input-group'
 import { useFieldContext } from '~/hooks/form-context'
-import { getFieldErrorMessage } from '~/lib/form'
+import { matchIsFieldInvalid } from '~/lib/form'
 
 type KeywordsFieldProps = {
   keywordValue: string
@@ -24,57 +24,74 @@ export const KeywordsField = ({
   handleRemoveKeyword
 }: KeywordsFieldProps) => {
   const field = useFieldContext<string[]>()
-  const errorMessage = getFieldErrorMessage(field.state.meta)
+  const isInvalid = matchIsFieldInvalid(field.state.meta)
 
   return (
-    <FormItem error={errorMessage}>
-      <FormLabel>Mots clés ({field.state.value.length})</FormLabel>
-      <FormControl
-        render={
-          <Input
-            required
-            type="text"
-            name={field.name}
-            onBlur={field.handleBlur}
-            value={keywordValue}
-            onChange={(event) => {
-              setKeywordValue(event.target.value)
-            }}
-            enterKeyHint="done"
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                event.preventDefault()
-                event.stopPropagation()
-                handleAddKeyword()
-              }
-            }}
-          />
-        }
-      />
+    <Field data-invalid={isInvalid}>
+      <FieldLabel htmlFor={field.name}>
+        Mots-clés
+        <span className="text-muted-foreground tabular-nums">
+          {field.state.value.length}
+        </span>
+      </FieldLabel>
+      <InputGroup>
+        <InputGroupInput
+          id={field.name}
+          name={field.name}
+          placeholder="chat, surprise, réaction..."
+          aria-invalid={isInvalid}
+          value={keywordValue}
+          enterKeyHint="done"
+          onBlur={() => {
+            handleAddKeyword()
+            field.handleBlur()
+          }}
+          onChange={(event) => {
+            setKeywordValue(event.target.value)
+          }}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') {
+              event.preventDefault()
+              event.stopPropagation()
+              handleAddKeyword()
+            }
+          }}
+        />
+        <InputGroupAddon align="inline-end">
+          <InputGroupButton
+            type="button"
+            disabled={keywordValue.trim() === ''}
+            onClick={handleAddKeyword}
+          >
+            <Plus data-icon="inline-start" aria-hidden />
+            Ajouter
+          </InputGroupButton>
+        </InputGroupAddon>
+      </InputGroup>
       {field.state.value.length > 0 ? (
-        <div className="flex flex-wrap gap-2">
+        <ul className="flex flex-wrap gap-1.5" aria-label="Mots-clés ajoutés">
           {field.state.value.map((keyword, index) => {
             return (
-              <Badge variant="secondary" key={keyword}>
-                {keyword}
-                <button
-                  onClick={(event) => {
-                    event.preventDefault()
-                    event.stopPropagation()
-                    handleRemoveKeyword(index)
-                  }}
-                  aria-label={`Supprimer le mot-clé "${keyword}"`}
-                  type="button"
-                  className="flex cursor-pointer items-center rounded p-1.5 -m-1 hover:bg-muted"
-                >
-                  <X className="size-3" />
-                </button>
-              </Badge>
+              <li key={keyword}>
+                <Badge variant="secondary" size="md" className="gap-1 pr-0.5">
+                  {keyword}
+                  <button
+                    type="button"
+                    aria-label={`Supprimer le mot-clé « ${keyword} »`}
+                    className="-my-1 flex cursor-pointer items-center rounded-sm p-1.5 hover:bg-muted"
+                    onClick={() => {
+                      handleRemoveKeyword(index)
+                    }}
+                  >
+                    <X className="size-3" aria-hidden />
+                  </button>
+                </Badge>
+              </li>
             )
           })}
-        </div>
+        </ul>
       ) : null}
-      <FormMessage />
-    </FormItem>
+      {isInvalid ? <FieldError errors={field.state.meta.errors} /> : null}
+    </Field>
   )
 }

@@ -177,7 +177,6 @@ export type RecommendCacheOrderByWithRelationInput = {
   data?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-  _relevance?: Prisma.RecommendCacheOrderByRelevanceInput
 }
 
 export type RecommendCacheWhereUniqueInput = Prisma.AtLeast<{
@@ -257,12 +256,6 @@ export type RecommendCacheUncheckedUpdateManyInput = {
   data?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-}
-
-export type RecommendCacheOrderByRelevanceInput = {
-  fields: Prisma.RecommendCacheOrderByRelevanceFieldEnum | Prisma.RecommendCacheOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type RecommendCacheCountOrderByAggregateInput = {

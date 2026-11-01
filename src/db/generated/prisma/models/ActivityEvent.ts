@@ -235,7 +235,6 @@ export type ActivityEventOrderByWithRelationInput = {
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   meme?: Prisma.MemeOrderByWithRelationInput
-  _relevance?: Prisma.ActivityEventOrderByRelevanceInput
 }
 
 export type ActivityEventWhereUniqueInput = Prisma.AtLeast<{
@@ -385,12 +384,6 @@ export type ActivityEventListRelationFilter = {
 
 export type ActivityEventOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type ActivityEventOrderByRelevanceInput = {
-  fields: Prisma.ActivityEventOrderByRelevanceFieldEnum | Prisma.ActivityEventOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type ActivityEventCountOrderByAggregateInput = {

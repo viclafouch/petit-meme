@@ -226,7 +226,6 @@ export type MemeActionDailyOrderByWithRelationInput = {
   action?: Prisma.SortOrder
   count?: Prisma.SortOrder
   meme?: Prisma.MemeOrderByWithRelationInput
-  _relevance?: Prisma.MemeActionDailyOrderByRelevanceInput
 }
 
 export type MemeActionDailyWhereUniqueInput = Prisma.AtLeast<{
@@ -329,12 +328,6 @@ export type MemeActionDailyListRelationFilter = {
 
 export type MemeActionDailyOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type MemeActionDailyOrderByRelevanceInput = {
-  fields: Prisma.MemeActionDailyOrderByRelevanceFieldEnum | Prisma.MemeActionDailyOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type MemeActionDailyMemeIdDayActionCompoundUniqueInput = {

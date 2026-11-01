@@ -199,7 +199,6 @@ export type CategoryOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   memes?: Prisma.MemeCategoryOrderByRelationAggregateInput
   translations?: Prisma.CategoryTranslationOrderByRelationAggregateInput
-  _relevance?: Prisma.CategoryOrderByRelevanceInput
 }
 
 export type CategoryWhereUniqueInput = Prisma.AtLeast<{
@@ -317,12 +316,6 @@ export type StringNullableListFilter<$PrismaModel = never> = {
   hasEvery?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
   hasSome?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
   isEmpty?: boolean
-}
-
-export type CategoryOrderByRelevanceInput = {
-  fields: Prisma.CategoryOrderByRelevanceFieldEnum | Prisma.CategoryOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type CategoryCountOrderByAggregateInput = {

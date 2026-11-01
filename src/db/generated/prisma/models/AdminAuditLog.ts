@@ -206,7 +206,6 @@ export type AdminAuditLogOrderByWithRelationInput = {
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   actingAdmin?: Prisma.UserOrderByWithRelationInput
-  _relevance?: Prisma.AdminAuditLogOrderByRelevanceInput
 }
 
 export type AdminAuditLogWhereUniqueInput = Prisma.AtLeast<{
@@ -326,12 +325,6 @@ export type AdminAuditLogListRelationFilter = {
 
 export type AdminAuditLogOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type AdminAuditLogOrderByRelevanceInput = {
-  fields: Prisma.AdminAuditLogOrderByRelevanceFieldEnum | Prisma.AdminAuditLogOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type AdminAuditLogCountOrderByAggregateInput = {

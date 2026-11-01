@@ -82,7 +82,7 @@ cp .env.example .env.development
 Push the schema to your database:
 
 ```bash
-pnpm exec prisma migrate dev
+pnpm exec dotenv run -f .env.development -- pnpm exec prisma migrate dev
 ```
 
 ### 4. Run the development server
@@ -100,7 +100,7 @@ Prisma Migrate is used to manage schema changes safely across environments.
 After modifying `prisma/schema.prisma`:
 
 ```bash
-pnpm exec prisma migrate dev --name descriptive_name
+pnpm exec dotenv run -f .env.development -- pnpm exec prisma migrate dev --name descriptive_name
 ```
 
 This creates a migration file, applies it to the local database, and regenerates the Prisma Client.

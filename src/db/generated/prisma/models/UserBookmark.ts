@@ -185,7 +185,6 @@ export type UserBookmarkOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   meme?: Prisma.MemeOrderByWithRelationInput
-  _relevance?: Prisma.UserBookmarkOrderByRelevanceInput
 }
 
 export type UserBookmarkWhereUniqueInput = Prisma.AtLeast<{
@@ -266,12 +265,6 @@ export type UserBookmarkUncheckedUpdateManyInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   memeId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-}
-
-export type UserBookmarkOrderByRelevanceInput = {
-  fields: Prisma.UserBookmarkOrderByRelevanceFieldEnum | Prisma.UserBookmarkOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type UserBookmarkUserIdMemeIdCompoundUniqueInput = {

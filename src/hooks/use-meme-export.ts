@@ -1,14 +1,10 @@
 import { toast } from 'sonner'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import type { MemeExportMode, MemeWithVideo } from '~/constants/meme'
 import { getErrorMessage } from '~/helpers/error'
+import { useIsPremium } from '~/hooks/use-is-premium'
 import { snoozePremiumReminder } from '~/hooks/use-premium-reminder'
 import { useShowDialog } from '~/hooks/use-show-dialog'
-import {
-  getActiveSubscriptionQueryOpts,
-  getAuthUserQueryOpts
-} from '~/lib/queries'
-import { matchIsUserAdmin } from '~/lib/role'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
 import { shareMeme, trackMemeAction } from '~/server/meme'
@@ -19,30 +15,12 @@ type UseMemeExportParams = {
 }
 
 export const useMemeExport = ({ mode }: UseMemeExportParams) => {
-  const queryClient = useQueryClient()
   const showDialog = useShowDialog()
-
-  const matchIsClientPremium = () => {
-    const user = queryClient.getQueryData(getAuthUserQueryOpts().queryKey)
-
-    if (!user) {
-      return false
-    }
-
-    if (matchIsUserAdmin(user)) {
-      return true
-    }
-
-    const subscription = queryClient.getQueryData(
-      getActiveSubscriptionQueryOpts().queryKey
-    )
-
-    return Boolean(subscription)
-  }
+  const isPremium = useIsPremium()
 
   const exportMutation = useMutation({
     mutationFn: async (meme: Pick<MemeWithVideo, 'id' | 'title'>) => {
-      if (!matchIsClientPremium()) {
+      if (!isPremium) {
         snoozePremiumReminder()
         showDialog('watermark-upsell', { meme, mode })
 

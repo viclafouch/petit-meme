@@ -22,6 +22,7 @@ import {
   DropdownMenuTrigger
 } from '~/components/ui/dropdown-menu'
 import { UserAvatar } from '~/components/user-avatar'
+import { useIsPremium } from '~/hooks/use-is-premium'
 import { useSignOut } from '~/hooks/use-sign-out'
 import { useStripeCheckout } from '~/hooks/use-stripe-checkout'
 import {
@@ -42,6 +43,7 @@ export const UserDropdown = ({ user }: UserDropdownProps) => {
 
   const favoritesMemesCountQuery = useQuery(getFavoritesMemesQueryOpts())
   const activeSubscriptionQuery = useQuery(getActiveSubscriptionQueryOpts())
+  const isPremium = useIsPremium()
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -79,12 +81,13 @@ export const UserDropdown = ({ user }: UserDropdownProps) => {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          {!activeSubscriptionQuery.data ? (
+          {isPremium ? null : (
             <DropdownMenuLinkItem render={<Link to="/pricing" />}>
               <SparklesIcon />
               {m.nav_upgrade_premium()}
             </DropdownMenuLinkItem>
-          ) : (
+          )}
+          {activeSubscriptionQuery.data ? (
             <DropdownMenuItem
               onClick={() => {
                 void goToBillingPortal()
@@ -96,7 +99,7 @@ export const UserDropdown = ({ user }: UserDropdownProps) => {
                 {m.nav_manage_subscription()}
               </div>
             </DropdownMenuItem>
-          )}
+          ) : null}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>

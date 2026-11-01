@@ -1,15 +1,10 @@
 import React from 'react'
-import { useQueryClient } from '@tanstack/react-query'
 import {
   PREMIUM_REMINDER_DELAY_MS,
   PREMIUM_REMINDER_STORAGE_KEY
 } from '~/constants/plan'
 import { DAY } from '~/constants/time'
-import {
-  getActiveSubscriptionQueryOpts,
-  getAuthUserQueryOpts
-} from '~/lib/queries'
-import { matchIsUserAdmin } from '~/lib/role'
+import { useIsPremium } from '~/hooks/use-is-premium'
 import { matchIsDialogOpen, useDialog } from '~/stores/dialog.store'
 
 const COOLDOWN_DAYS = 3
@@ -24,32 +19,22 @@ export const snoozePremiumReminder = () => {
 }
 
 export const usePremiumReminder = ({ enabled }: UsePremiumReminderParams) => {
-  const queryClient = useQueryClient()
+  const isPremium = useIsPremium()
 
-  React.useEffect(() => {
-    const matchIsReminderRelevant = () => {
-      const user = queryClient.getQueryData(getAuthUserQueryOpts().queryKey)
-
-      if (user && matchIsUserAdmin(user)) {
-        return false
-      }
-
-      const subscription = queryClient.getQueryData(
-        getActiveSubscriptionQueryOpts().queryKey
-      )
-
-      if (user && subscription) {
-        return false
-      }
-
-      const snoozedAt = localStorage.getItem(PREMIUM_REMINDER_STORAGE_KEY)
-
-      const isSnoozed =
-        snoozedAt !== null && Date.now() - Number(snoozedAt) < COOLDOWN_MS
-
-      return !isSnoozed
+  const matchIsReminderRelevant = React.useEffectEvent(() => {
+    if (isPremium) {
+      return false
     }
 
+    const snoozedAt = localStorage.getItem(PREMIUM_REMINDER_STORAGE_KEY)
+
+    const isSnoozed =
+      snoozedAt !== null && Date.now() - Number(snoozedAt) < COOLDOWN_MS
+
+    return !isSnoozed
+  })
+
+  React.useEffect(() => {
     let timeout: ReturnType<typeof setTimeout> | null = null
 
     const showReminderWhenScreenIsFree = () => {
@@ -84,5 +69,5 @@ export const usePremiumReminder = ({ enabled }: UsePremiumReminderParams) => {
         clearTimeout(timeout)
       }
     }
-  }, [enabled, queryClient])
+  }, [enabled])
 }

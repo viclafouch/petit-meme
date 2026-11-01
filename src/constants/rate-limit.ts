@@ -6,8 +6,6 @@ export type RateLimitConfig = {
   windowMs: number
 }
 
-export const RATE_LIMIT_ERROR_MESSAGE = 'Too Many Requests'
-
 export const RATE_LIMIT_DOWNLOAD = {
   action: 'download',
   maxRequests: 10,

@@ -2,8 +2,9 @@ import { toast } from 'sonner'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 import type { AvatarSelection } from '~/constants/avatar'
+import { getAppErrorCode } from '~/constants/error'
 import { resolveAvatar } from '~/helpers/avatar'
-import { matchIsRateLimitError } from '~/helpers/error'
+import { getErrorMessage, matchIsRateLimitError } from '~/helpers/error'
 import { authClient } from '~/lib/auth-client'
 import { getAuthUserQueryOpts } from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
@@ -44,12 +45,14 @@ export const useUpdateAvatar = () => {
       return { previousUser }
     },
     onError: async (error, _selection, context) => {
-      captureWithFeature(error, 'update-avatar')
-      toast.error(
-        matchIsRateLimitError(error)
-          ? m.settings_avatar_error_rate_limit()
-          : m.settings_avatar_error()
-      )
+      if (matchIsRateLimitError(error)) {
+        toast.error(m.settings_avatar_error_rate_limit())
+      } else if (getAppErrorCode(error) === undefined) {
+        captureWithFeature(error, 'update-avatar')
+        toast.error(m.settings_avatar_error())
+      } else {
+        toast.error(getErrorMessage(error))
+      }
 
       if (context?.previousUser) {
         queryClient.setQueryData(authUserQueryKey, context.previousUser)

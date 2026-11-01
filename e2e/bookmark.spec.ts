@@ -48,15 +48,21 @@ test.describe('a signed in User', () => {
 test.describe('a User who reached the free cap', () => {
   test.use({ storageState: resolveStorageStatePath('bookmarkCapped') })
 
-  test('is refused one more Bookmark and told so', async ({ page }) => {
+  test('is offered Premium instead of one more Bookmark', async ({ page }) => {
     await page.goto(UNBOOKMARKED_MEME_PATHNAME)
 
     const addButton = page.getByRole('button', { name: m.meme_add_favorite() })
+    const dialog = page.getByRole('dialog', {
+      name: m.bookmark_upsell_title()
+    })
 
     await repeatUntilVisible(() => {
       return addButton.click()
-    }, page.getByText(m.error_bookmark_limit()))
+    }, dialog)
 
+    await page.keyboard.press('Escape')
+
+    await expect(dialog).toBeHidden()
     await expect(addButton).toBeVisible()
   })
 })

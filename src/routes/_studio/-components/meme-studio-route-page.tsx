@@ -4,7 +4,7 @@ import * as Sentry from '@sentry/tanstackstart-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import {
-  StudioErrorFallback,
+  StudioCrashFallback,
   StudioLoadingFallback
 } from '~/components/Meme/studio-fallbacks'
 import { StudioPage } from '~/components/Meme/Studio/studio-page'
@@ -18,7 +18,7 @@ export const MemeStudioRoutePage = () => {
 
   return (
     <ErrorBoundary
-      FallbackComponent={StudioErrorFallback}
+      FallbackComponent={StudioCrashFallback}
       onError={(error) => {
         Sentry.captureException(error, {
           tags: { feature: 'studio' }

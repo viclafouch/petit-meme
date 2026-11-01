@@ -9,7 +9,7 @@ export const SettingsPage = () => {
 
   return (
     <div className="mx-auto flex flex-col gap-6">
-      <ProfileHeader user={user} activeSubscription={activeSubscription} />
+      <ProfileHeader user={user} />
       <ProfileContent user={user} activeSubscription={activeSubscription} />
     </div>
   )

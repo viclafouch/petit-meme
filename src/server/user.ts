@@ -9,7 +9,7 @@ import {
   AVATAR_PROVIDER_SELECTION,
   type AvatarSelection
 } from '~/constants/avatar'
-import { StudioError } from '~/constants/error'
+import { AppError } from '~/constants/error'
 import { HTTP_STATUS } from '~/constants/http'
 import { MEME_TRANSLATION_SELECT, MEME_VIDEO_INCLUDE } from '~/constants/meme'
 import { FREE_PLAN_MAX_FAVORITES } from '~/constants/plan'
@@ -109,7 +109,7 @@ const toggleBookmark = createServerOnlyFn(
           if (!activeSubscription) {
             authLogger.warn({ userId }, 'Bookmark limit reached')
             setResponseStatus(HTTP_STATUS.FORBIDDEN)
-            throw new StudioError('premium_required', {
+            throw new AppError('premium_required', {
               code: 'PREMIUM_REQUIRED'
             })
           }

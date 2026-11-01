@@ -9,8 +9,9 @@ import { Button } from '~/components/ui/button'
 import { Separator } from '~/components/ui/separator'
 import { Textarea } from '~/components/ui/textarea'
 import { MAX_PROMPT_LENGTH } from '~/constants/ai-search'
+import { getAppErrorCode } from '~/constants/error'
 import { EASE_OUT } from '~/constants/motion'
-import { getErrorMessage, matchIsRateLimitError } from '~/helpers/error'
+import { getErrorMessage } from '~/helpers/error'
 import { useAiSearchPrompt } from '~/hooks/use-ai-search-prompt'
 import { useAiSearchStages } from '~/hooks/use-ai-search-stages'
 import { snoozePremiumReminder } from '~/hooks/use-premium-reminder'
@@ -27,14 +28,6 @@ import {
 } from '~/routes/_public__root/-components/page-headers'
 import { AiSearchStages } from '~/routes/_public__root/_default/memes/-components/ai-search-stages'
 import { aiSearchMemes } from '~/server/ai-search'
-
-function getSearchErrorMessage(error: unknown) {
-  if (matchIsRateLimitError(error)) {
-    return m.ai_search_error_rate_limit()
-  }
-
-  return m.ai_search_error_generic()
-}
 
 type AiSearchResult = Awaited<ReturnType<typeof aiSearchMemes>>
 
@@ -62,10 +55,40 @@ export const AiSearchPage = () => {
     onError: (error) => {
       searchStagesResetRef.current()
 
+      const errorCode = getAppErrorCode(error)
+
+      if (errorCode === 'AI_SEARCH_QUOTA_EXCEEDED') {
+        queryClient.setQueryData(getAiSearchQuotaQueryOpts().queryKey, {
+          canSearch: false,
+          remainingSearches: 0,
+          isPremium: false
+        })
+        snoozePremiumReminder()
+        showDialog('ai-search-upsell', {})
+
+        return
+      }
+
+      if (errorCode === 'UNAUTHORIZED') {
+        showDialog('auth', {})
+
+        return
+      }
+
+      if (errorCode === 'RATE_LIMITED') {
+        toast.error(m.ai_search_error_rate_limit())
+
+        return
+      }
+
+      if (errorCode !== undefined) {
+        toast.error(getErrorMessage(error))
+
+        return
+      }
+
       captureWithFeature(error, 'ai-search')
-      toast.error(getSearchErrorMessage(error), {
-        description: getErrorMessage(error)
-      })
+      toast.error(m.ai_search_error_generic())
     }
   })
 

@@ -102,6 +102,10 @@ The specification is what I asked for in the conversation. Plans live in the con
 
 Commit and push on my word only. `main` is the branch and pushing it deploys, so the last look at the diff happens before the push, not after. One concern per commit, conventional title, English for messages and branches.
 
+Every issue and PR opens assigned and labelled: `--assignee @me --label <label>` on `gh issue create` and `gh pr create`. The label follows the conventional type: `fix` → `bug`, `feat` → `enhancement`, `docs` → `documentation`, and `chore`, `test`, `refactor` carry their own name. A PR that closes an issue takes that issue's labels instead.
+
+Right after `gh pr create`, arm auto-merge with `gh pr merge <number> --auto --rebase`: the PR merges as soon as the required checks pass.
+
 ## Taste
 
 Write code a person would write. The tell of the other kind is defensive noise: a triple guard where the type already answers, a ternary chain nobody can read out loud, an abstraction wrapping a single call. When you catch yourself producing it, name the real constraint and write the small version instead.

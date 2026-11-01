@@ -7,6 +7,8 @@ import { resolveStorageStatePath } from './env'
 import { test } from './fixtures'
 import { repeatUntilVisible } from './hydration'
 
+const DELETE_USER_URL_PATTERN = /\/api\/auth\/delete-user$/u
+
 const openDeleteAccountDialog = async (page: Page) => {
   await page.goto('/settings')
 
@@ -26,7 +28,10 @@ const askForDeletion = async (page: Page, password: string) => {
 
   await dialog.getByLabel(m.auth_current_password()).fill(password)
   await dialog.getByRole('button', { name: m.auth_delete() }).click()
+
+  const deletionResponse = page.waitForResponse(DELETE_USER_URL_PATTERN)
   await dialog.getByRole('button', { name: m.auth_confirm_deletion() }).click()
+  await deletionResponse
 
   return dialog
 }

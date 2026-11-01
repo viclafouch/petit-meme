@@ -7,6 +7,7 @@ import {
   COOKIE_LOCALE_BANNER_DISMISSED_KEY
 } from '~/constants/cookie'
 import { PREMIUM_REMINDER_STORAGE_KEY } from '~/constants/plan'
+import { SERVER_FUNCTION_URL_PATTERN } from './server-functions'
 
 const ACCEPTED_CONSENT = {
   hasConsented: true,
@@ -20,7 +21,16 @@ type E2eWorkerFixtures = {
 }
 
 export const test = base.extend<object, E2eWorkerFixtures>({
-  context: async ({ context, baseURL }, provide) => {
+  context: async ({ context, baseURL }, provide, testInfo) => {
+    await context.route(SERVER_FUNCTION_URL_PATTERN, (route) => {
+      return route.fallback({
+        headers: {
+          ...route.request().headers(),
+          'x-real-ip': `e2e-${testInfo.testId}`
+        }
+      })
+    })
+
     await context.addCookies([
       {
         name: CONSENT_COOKIE_KEY,

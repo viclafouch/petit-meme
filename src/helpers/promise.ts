@@ -20,3 +20,32 @@ export async function withTimeout<TResult>(
     clearTimeout(timer)
   }
 }
+
+export type LatchEnd = 'release' | 'hold'
+
+export const createLatch = <TArgs extends unknown[]>(
+  task: (...args: TArgs) => Promise<LatchEnd>
+) => {
+  let isLocked = false
+
+  const run = async (...args: TArgs) => {
+    if (isLocked) {
+      return
+    }
+
+    isLocked = true
+
+    try {
+      isLocked = (await task(...args)) === 'hold'
+    } catch (error) {
+      isLocked = false
+      throw error
+    }
+  }
+
+  const release = () => {
+    isLocked = false
+  }
+
+  return { run, release }
+}

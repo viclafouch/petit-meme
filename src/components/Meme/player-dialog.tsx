@@ -48,8 +48,8 @@ export const PlayerDialog = ({
     bunnyId: meme.video.bunnyId
   })
   const isReducedMotion = useReducedMotion()
-  const shareMutation = useMemeExport({ mode: 'share' })
-  const downloadMutation = useMemeExport({ mode: 'download' })
+  const shareMutation = useMemeExport({ mode: 'share', queryID })
+  const downloadMutation = useMemeExport({ mode: 'download', queryID })
   const memeLink = useLinkProps({
     to: '/memes/$memeId',
     params: { memeId: meme.id }
@@ -118,7 +118,6 @@ export const PlayerDialog = ({
 
   const handleShare = (format: MemeDerivedFormat) => {
     pauseVideo()
-    handleTrackConversion('Meme Shared')
     shareMutation.trigger(meme, format)
   }
 
@@ -130,7 +129,6 @@ export const PlayerDialog = ({
 
   const handleDownload = (format: MemeDerivedFormat) => {
     pauseVideo()
-    handleTrackConversion('Meme Downloaded')
     downloadMutation.trigger(meme, format)
   }
 

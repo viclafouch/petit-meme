@@ -1,11 +1,13 @@
 import { toast } from 'sonner'
 import { useMutation } from '@tanstack/react-query'
+import { useRouteContext } from '@tanstack/react-router'
 import type { MemeDerivedFormat } from '~/constants/bunny'
 import type { MemeExportMode } from '~/constants/meme'
 import { getErrorMessage } from '~/helpers/error'
 import { useIsPremium } from '~/hooks/use-is-premium'
 import { snoozePremiumReminder } from '~/hooks/use-premium-reminder'
 import { useShowDialog } from '~/hooks/use-show-dialog'
+import type { InsightsTracking } from '~/lib/algolia-insights'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
 import {
@@ -16,6 +18,7 @@ import {
 
 type UseMemeExportParams = {
   mode: MemeExportMode
+  queryID?: string
 }
 
 type MemeExportRequest = {
@@ -23,9 +26,14 @@ type MemeExportRequest = {
   format: MemeDerivedFormat
 }
 
-export const useMemeExport = ({ mode }: UseMemeExportParams) => {
+export const useMemeExport = ({ mode, queryID }: UseMemeExportParams) => {
+  const { user } = useRouteContext({ from: '__root__' })
   const showDialog = useShowDialog()
   const isPremium = useIsPremium()
+  const tracking = {
+    queryID,
+    authenticatedUserToken: user?.id
+  } satisfies InsightsTracking
 
   const exportMutation = useMutation({
     mutationFn: async ({ meme, format }: MemeExportRequest) => {
@@ -36,7 +44,13 @@ export const useMemeExport = ({ mode }: UseMemeExportParams) => {
         error: getErrorMessage
       })
 
-      await deliverMemeExport({ blob: await blobPromise, meme, mode, format })
+      await deliverMemeExport({
+        blob: await blobPromise,
+        meme,
+        mode,
+        format,
+        tracking
+      })
     },
     onError: (error) => {
       captureWithFeature(error, mode)
@@ -57,12 +71,12 @@ export const useMemeExport = ({ mode }: UseMemeExportParams) => {
     snoozePremiumReminder()
 
     if (format === 'mp3') {
-      showDialog('audio-upsell', { meme, mode })
+      showDialog('audio-upsell', { meme, mode, tracking })
 
       return
     }
 
-    showDialog('watermark-upsell', { meme, mode })
+    showDialog('watermark-upsell', { meme, mode, tracking })
   }
 
   return {

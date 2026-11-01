@@ -53,14 +53,19 @@ async function pushEvent(event: EventsItems) {
 export type ConversionEventName =
   | 'Meme Bookmarked'
   | 'Meme Studio Opened'
-  | 'Meme Shared'
-  | 'Meme Downloaded'
+  | 'Meme MP4 Downloaded'
+  | 'Meme MP3 Downloaded'
+  | 'Meme MP4 Shared'
+  | 'Meme MP3 Shared'
   | 'Meme Link Copied'
 
-type BaseEventParams = {
-  objectID: string
+export type InsightsTracking = {
   queryID?: string
   authenticatedUserToken?: string
+}
+
+type BaseEventParams = InsightsTracking & {
+  objectID: string
 }
 
 type SendClickEventParams = BaseEventParams & {

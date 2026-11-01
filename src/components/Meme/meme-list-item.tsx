@@ -141,8 +141,8 @@ export const MemeListItem = React.memo(
     position,
     authenticatedUserToken
   }: MemeListItemProps) => {
-    const shareMutation = useMemeExport({ mode: 'share' })
-    const downloadMutation = useMemeExport({ mode: 'download' })
+    const shareMutation = useMemeExport({ mode: 'share', queryID })
+    const downloadMutation = useMemeExport({ mode: 'download', queryID })
 
     const handleTrackClick = () => {
       sendClickEvent({
@@ -250,16 +250,12 @@ export const MemeListItem = React.memo(
                   mode="share"
                   className="md:hidden"
                   onExport={(format) => {
-                    handleTrackConversion('Meme Shared')
-
                     shareMutation.trigger(meme, format)
                   }}
                 />
                 <MemeExportSubmenu
                   mode="download"
                   onExport={(format) => {
-                    handleTrackConversion('Meme Downloaded')
-
                     downloadMutation.trigger(meme, format)
                   }}
                 />

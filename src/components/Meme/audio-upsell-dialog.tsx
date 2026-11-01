@@ -2,12 +2,14 @@ import type { WithDialog } from '~/@types/dialog'
 import { WatermarkedVideoButton } from '~/components/Meme/watermarked-video-button'
 import { PremiumUpsellDialog } from '~/components/premium-upsell-dialog'
 import type { MemeExportMode } from '~/constants/meme'
+import type { InsightsTracking } from '~/lib/algolia-insights'
 import { m } from '~/paraglide/messages.js'
 import type { ExportableMeme } from '~/utils/meme-export'
 
 type AudioUpsellDialogProps = WithDialog<{
   meme: ExportableMeme
   mode: MemeExportMode
+  tracking: InsightsTracking
 }>
 
 const TITLES = {
@@ -24,7 +26,8 @@ export const AudioUpsellDialog = ({
   open,
   onOpenChange,
   meme,
-  mode
+  mode,
+  tracking
 }: AudioUpsellDialogProps) => {
   return (
     <PremiumUpsellDialog
@@ -37,6 +40,7 @@ export const AudioUpsellDialog = ({
         <WatermarkedVideoButton
           meme={meme}
           mode={mode}
+          tracking={tracking}
           label={VIDEO_LABELS[mode]()}
           onExported={() => {
             onOpenChange(false)

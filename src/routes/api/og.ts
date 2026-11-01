@@ -2,10 +2,8 @@ import { z } from 'zod'
 import { createFileRoute } from '@tanstack/react-router'
 import { OgHomeTemplate } from '~/components/og/og-home-template'
 import { OgTemplate } from '~/components/og/og-template'
-import { IMMUTABLE_CACHE_CONTROL } from '~/constants/http'
-import { OG_IMAGE_HEIGHT, OG_IMAGE_WIDTH } from '~/constants/og'
 import { clientEnv } from '~/env/client'
-import { captureWithFeature } from '~/lib/sentry'
+import { renderOgImage } from '~/lib/og-image'
 import {
   type OgDefaultedType,
   OG_DEFAULTED_TYPE_VALUES,
@@ -62,8 +60,6 @@ const resolvePageTitle = (query: OgPageQuery) => {
   return query.title ?? OG_DEFAULT_TITLES[query.locale][query.type]
 }
 
-const OG_IMAGE_FETCH_CACHE = new Map<string, Promise<ArrayBuffer>>()
-
 export const Route = createFileRoute('/api/og')({
   server: {
     handlers: {
@@ -83,8 +79,6 @@ export const Route = createFileRoute('/api/og')({
         const fontUrl = `${siteUrl}/fonts/bricolage-grotesque-bold.ttf`
         const { hostname } = new URL(siteUrl)
 
-        const { default: ImageResponse } = await import('takumi-js/response')
-
         const template =
           query.type === 'home'
             ? OgHomeTemplate({
@@ -101,16 +95,7 @@ export const Route = createFileRoute('/api/og')({
                 heroImageUrl: `${siteUrl}/images/will-smith-flipped.png`
               })
 
-        return new ImageResponse(template, {
-          width: OG_IMAGE_WIDTH,
-          height: OG_IMAGE_HEIGHT,
-          images: { fetchCache: OG_IMAGE_FETCH_CACHE },
-          fonts: [fontUrl],
-          headers: { 'Cache-Control': IMMUTABLE_CACHE_CONTROL },
-          onError: (error) => {
-            captureWithFeature(error, 'og-image')
-          }
-        })
+        return renderOgImage({ template, fontUrls: [fontUrl] })
       }
     }
   }

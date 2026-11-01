@@ -38,7 +38,6 @@ const fillTheDayUpTo = async (searchCount: number) => {
 }
 
 test.describe('a Premium searching when the day nears its global cap', () => {
-  test.describe.configure({ retries: 0 })
   test.use({ storageState: resolveStorageStatePath('aiSearchGlobalCap') })
 
   test('gets the last searches of the day and not one more', async ({

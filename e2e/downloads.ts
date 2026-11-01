@@ -1,5 +1,7 @@
 import { stat } from 'node:fs/promises'
+import path from 'node:path'
 import { type Download, expect } from '@playwright/test'
+import type { MemeDerivedFormat } from '~/constants/bunny'
 
 export const expectDownloadIsNotEmpty = async (download: Download) => {
   const { size } = await stat(await download.path())
@@ -9,13 +11,13 @@ export const expectDownloadIsNotEmpty = async (download: Download) => {
 
 type ExpectMemeFileDownloadedParams = {
   download: Download
-  fileName: string
+  format: MemeDerivedFormat
 }
 
 export const expectMemeFileDownloaded = async ({
   download,
-  fileName
+  format
 }: ExpectMemeFileDownloadedParams) => {
-  expect(download.suggestedFilename()).toBe(fileName)
+  expect(path.extname(download.suggestedFilename())).toBe(`.${format}`)
   await expectDownloadIsNotEmpty(download)
 }

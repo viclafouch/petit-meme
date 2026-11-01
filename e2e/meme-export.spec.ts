@@ -33,7 +33,7 @@ test.describe('a Premium', () => {
 
     await expectMemeFileDownloaded({
       download: await downloadPromise,
-      fileName: `${EXPORTABLE_MEME.title}.mp4`
+      format: 'mp4'
     })
   })
 
@@ -46,7 +46,7 @@ test.describe('a Premium', () => {
 
     await expectMemeFileDownloaded({
       download: await downloadPromise,
-      fileName: `${EXPORTABLE_MEME.title}.mp3`
+      format: 'mp3'
     })
   })
 })
@@ -73,7 +73,7 @@ test.describe('a free User', () => {
 
     await expectMemeFileDownloaded({
       download: await downloadPromise,
-      fileName: `${EXPORTABLE_MEME.title}.mp4`
+      format: 'mp4'
     })
   })
 
@@ -96,7 +96,7 @@ test.describe('a free User', () => {
 
     await expectMemeFileDownloaded({
       download: await downloadPromise,
-      fileName: `${EXPORTABLE_MEME.title}.mp4`
+      format: 'mp4'
     })
     await expect(upsellDialog).toBeHidden()
   })

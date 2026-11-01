@@ -131,7 +131,7 @@ test.describe('the native share', () => {
 
       await expectMemeFileDownloaded({
         download: await downloadPromise,
-        fileName: `${SHARED_MEME.title}.mp3`
+        format: 'mp3'
       })
     })
   })

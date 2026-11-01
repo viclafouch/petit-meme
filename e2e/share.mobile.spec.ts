@@ -53,7 +53,7 @@ test.describe('the native share', () => {
       const videoItem = await openShareMenu({
         page,
         shareButton: getMemePageShareButton(page),
-        formatLabel: m.meme_share_video()
+        formatLabel: m.meme_format_video()
       })
 
       await videoItem.click()
@@ -73,7 +73,7 @@ test.describe('the native share', () => {
       const audioItem = await openShareMenu({
         page,
         shareButton: getMemePageShareButton(page),
-        formatLabel: m.meme_share_audio()
+        formatLabel: m.meme_format_audio()
       })
 
       await audioItem.click()
@@ -95,7 +95,7 @@ test.describe('the native share', () => {
         shareButton: getReelAt(page, FIRST_REEL_INDEX).getByRole('button', {
           name: m.meme_share()
         }),
-        formatLabel: m.meme_share_video()
+        formatLabel: m.meme_format_video()
       })
 
       await Promise.all([
@@ -122,7 +122,7 @@ test.describe('the native share', () => {
       const audioItem = await openShareMenu({
         page,
         shareButton: getMemePageShareButton(page),
-        formatLabel: m.meme_share_audio()
+        formatLabel: m.meme_format_audio()
       })
 
       const downloadPromise = page.waitForEvent('download')
@@ -149,7 +149,7 @@ test.describe('the native share', () => {
       const videoItem = await openShareMenu({
         page,
         shareButton: getMemePageShareButton(page),
-        formatLabel: m.meme_share_video()
+        formatLabel: m.meme_format_video()
       })
 
       await videoItem.click()
@@ -178,7 +178,7 @@ test.describe('the native share', () => {
       const audioItem = await openShareMenu({
         page,
         shareButton: getMemePageShareButton(page),
-        formatLabel: m.meme_share_audio()
+        formatLabel: m.meme_format_audio()
       })
 
       await audioItem.click()

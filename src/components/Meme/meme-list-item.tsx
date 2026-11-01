@@ -1,16 +1,10 @@
 import React from 'react'
-import {
-  ArrowRight,
-  Clapperboard,
-  EllipsisVertical,
-  Share2,
-  Star
-} from 'lucide-react'
+import { ArrowRight, Clapperboard, EllipsisVertical, Star } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useRouteContext } from '@tanstack/react-router'
 import { BunnyPlayIcon } from '~/components/icon/play'
-import { MemeExportMenuItems } from '~/components/Meme/meme-export-menu'
+import { MemeExportSubmenu } from '~/components/Meme/meme-export-menu'
 import { MemeLanguageBadge } from '~/components/Meme/meme-language-badge'
 import { MemeVideoThumbnail } from '~/components/Meme/meme-video-thumbnail'
 import {
@@ -252,18 +246,16 @@ export const MemeListItem = React.memo(
                   <Clapperboard />
                   {m.meme_open_studio()}
                 </DropdownMenuLinkItem>
-                <DropdownMenuItem
-                  onClick={() => {
+                <MemeExportSubmenu
+                  mode="share"
+                  className="md:hidden"
+                  onExport={(format) => {
                     handleTrackConversion('Meme Shared')
 
-                    shareMutation.trigger(meme, 'mp4')
+                    shareMutation.trigger(meme, format)
                   }}
-                  className="md:hidden"
-                >
-                  <Share2 />
-                  {m.meme_share()}
-                </DropdownMenuItem>
-                <MemeExportMenuItems
+                />
+                <MemeExportSubmenu
                   mode="download"
                   onExport={(format) => {
                     handleTrackConversion('Meme Downloaded')

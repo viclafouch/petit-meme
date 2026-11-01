@@ -78,6 +78,8 @@ Prove the change with the smallest thing that proves it: type check and lint the
 
 A local build runs as `pnpm build:e2e`: `pnpm build` validates the production env when it loads its config, and that env lives on Vercel only.
 
+The e2e suite reads `.env.e2e`, which lives in the main checkout only (the first line of `git worktree list`): copy it into a worktree. It targets the Neon branch `test`, which e2e runs are free to write. Each e2e role is one shared account, so `--repeat-each` runs with `--workers=1`.
+
 The running site is invisible to you. When the last proof is visual or device specific, say what to look at and on which surface, and let me confirm.
 
 A task is finished when nothing is left that only I can run. Anything left is listed, in order.

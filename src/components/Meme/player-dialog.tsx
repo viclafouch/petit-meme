@@ -204,7 +204,6 @@ export const PlayerDialog = ({
                 </Link>
                 <div className="grid gap-2 grid-cols-2">
                   <MemeExportMenu
-                    mode="share"
                     onExport={handleShare}
                     render={
                       <Button
@@ -229,7 +228,6 @@ export const PlayerDialog = ({
                     {m.meme_copy_link()}
                   </Button>
                   <MemeExportMenu
-                    mode="download"
                     onExport={handleDownload}
                     render={
                       <Button

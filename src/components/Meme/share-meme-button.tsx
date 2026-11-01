@@ -18,7 +18,6 @@ export const ShareMemeButton = ({
 
   return (
     <MemeExportMenu
-      mode="share"
       align="end"
       onExport={(format) => {
         shareMutation.trigger(meme, format)

@@ -5,6 +5,7 @@ import { expectMemeFileDownloaded } from './downloads'
 import { resolveStorageStatePath } from './env'
 import { test } from './fixtures'
 import { repeatUntilVisible } from './hydration'
+import { getMemeList } from './library'
 
 const EXPORTABLE_MEME = E2E_NAMED_MEMES.mostViewed
 const EXPORTABLE_MEME_PATHNAME = `/memes/${EXPORTABLE_MEME.id}`
@@ -21,6 +22,15 @@ const pickDownloadFormat = async (page: Page, formatLabel: string) => {
   await formatItem.click()
 }
 
+const getFirstMemeCardOptionsButton = (page: Page) => {
+  return (
+    getMemeList(page)
+      .getByRole('button', { name: m.meme_open_options() })
+      // oxlint-disable-next-line playwright/no-nth-methods -- any Meme card will do: every card carries the same menu
+      .first()
+  )
+}
+
 test.describe('a Premium', () => {
   test.use({ storageState: resolveStorageStatePath('premium') })
 
@@ -29,7 +39,7 @@ test.describe('a Premium', () => {
 
     const downloadPromise = page.waitForEvent('download')
 
-    await pickDownloadFormat(page, m.meme_download_video())
+    await pickDownloadFormat(page, m.meme_format_video())
 
     await expectMemeFileDownloaded({
       download: await downloadPromise,
@@ -42,7 +52,7 @@ test.describe('a Premium', () => {
 
     const downloadPromise = page.waitForEvent('download')
 
-    await pickDownloadFormat(page, m.meme_download_audio())
+    await pickDownloadFormat(page, m.meme_format_audio())
 
     await expectMemeFileDownloaded({
       download: await downloadPromise,
@@ -59,7 +69,7 @@ test.describe('a free User', () => {
   }) => {
     await page.goto(EXPORTABLE_MEME_PATHNAME)
 
-    await pickDownloadFormat(page, m.meme_download_video())
+    await pickDownloadFormat(page, m.meme_format_video())
 
     const upsellDialog = page.getByRole('dialog', {
       name: m.watermark_upsell_title_download()
@@ -77,12 +87,34 @@ test.describe('a free User', () => {
     })
   })
 
+  test('picks the sound from the download submenu of a Meme card', async ({
+    page
+  }) => {
+    await page.goto('/memes')
+
+    const downloadSubmenu = page.getByRole('menuitem', {
+      name: m.meme_download(),
+      exact: true
+    })
+
+    await repeatUntilVisible(() => {
+      return getFirstMemeCardOptionsButton(page).click()
+    }, downloadSubmenu)
+
+    await downloadSubmenu.click()
+    await page.getByRole('menuitem', { name: m.meme_format_audio() }).click()
+
+    await expect(
+      page.getByRole('dialog', { name: m.audio_upsell_title_download() })
+    ).toBeVisible()
+  })
+
   test('is offered Premium for the sound and says no with the video', async ({
     page
   }) => {
     await page.goto(EXPORTABLE_MEME_PATHNAME)
 
-    await pickDownloadFormat(page, m.meme_download_audio())
+    await pickDownloadFormat(page, m.meme_format_audio())
 
     const upsellDialog = page.getByRole('dialog', {
       name: m.audio_upsell_title_download()
@@ -108,7 +140,7 @@ test.describe('a Visitor', () => {
   }) => {
     await page.goto(EXPORTABLE_MEME_PATHNAME)
 
-    await pickDownloadFormat(page, m.meme_download_audio())
+    await pickDownloadFormat(page, m.meme_format_audio())
 
     const audioUpsellDialog = page.getByRole('dialog', {
       name: m.audio_upsell_title_download()
@@ -120,7 +152,7 @@ test.describe('a Visitor', () => {
 
     await expect(audioUpsellDialog).toBeHidden()
 
-    await pickDownloadFormat(page, m.meme_download_video())
+    await pickDownloadFormat(page, m.meme_format_video())
 
     await expect(
       page.getByRole('dialog', { name: m.watermark_upsell_title_download() })

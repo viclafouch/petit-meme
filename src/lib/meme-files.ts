@@ -1,8 +1,10 @@
 import { createServerOnlyFn } from '@tanstack/react-start'
+import { setResponseStatus } from '@tanstack/react-start/server'
 import { MEME_DERIVED_FORMATS, type MemeDerivedFormat } from '~/constants/bunny'
+import { AppError } from '~/constants/error'
 import { HTTP_STATUS } from '~/constants/http'
 import { serverEnv } from '~/env/server'
-import { deleteVideo } from '~/lib/bunny'
+import { buildSignedOriginalUrl, deleteVideo } from '~/lib/bunny'
 import { bunnyLogger } from '~/lib/logger'
 import { captureWithFeature } from '~/lib/sentry'
 
@@ -26,29 +28,106 @@ const getStorageHeaders = () => {
   return new Headers({ AccessKey: serverEnv.BUNNY_STORAGE_API_KEY })
 }
 
-export const fetchMemeFile = createServerOnlyFn(
-  async (bunnyId: string, format: MemeDerivedFormat) => {
-    const headersController = new AbortController()
-    const headersTimeoutId = setTimeout(() => {
-      headersController.abort()
-    }, STORAGE_TIMEOUT_MS)
+const fetchWithHeadersTimeout = async (url: string, init: RequestInit = {}) => {
+  const headersController = new AbortController()
+  const headersTimeoutId = setTimeout(() => {
+    headersController.abort()
+  }, STORAGE_TIMEOUT_MS)
 
-    try {
-      const response = await fetch(buildMemeFileUrl(bunnyId, format), {
-        headers: getStorageHeaders(),
-        signal: headersController.signal
-      })
+  try {
+    return await fetch(url, { ...init, signal: headersController.signal })
+  } finally {
+    clearTimeout(headersTimeoutId)
+  }
+}
 
-      if (!response.ok) {
-        throw new Error(
-          `Bunny Storage responded with status ${response.status}`
-        )
-      }
+const fetchMemeFile = async (bunnyId: string, format: MemeDerivedFormat) => {
+  const response = await fetchWithHeadersTimeout(
+    buildMemeFileUrl(bunnyId, format),
+    { headers: getStorageHeaders() }
+  )
 
-      return response
-    } finally {
-      clearTimeout(headersTimeoutId)
+  if (!response.ok) {
+    throw new Error(`Bunny Storage responded with status ${response.status}`)
+  }
+
+  return response
+}
+
+const buildMemeFileProxyResponse = (
+  upstream: Response,
+  contentType: string
+) => {
+  const headers: HeadersInit = {
+    'Content-Type': contentType,
+    'Cache-Control': 'no-cache'
+  }
+
+  const contentLength = upstream.headers.get('Content-Length')
+
+  if (contentLength) {
+    headers['Content-Length'] = contentLength
+  }
+
+  return new Response(upstream.body, { headers })
+}
+
+const fetchOriginalVideo = async (bunnyId: string) => {
+  const response = await fetchWithHeadersTimeout(
+    await buildSignedOriginalUrl(bunnyId)
+  )
+
+  if (!response.ok) {
+    setResponseStatus(HTTP_STATUS.BAD_GATEWAY)
+    throw new Error(`Bunny CDN responded with status ${response.status}`)
+  }
+
+  return response
+}
+
+const fetchVideoExport = async (bunnyId: string, isPremium: boolean) => {
+  if (isPremium) {
+    return fetchOriginalVideo(bunnyId)
+  }
+
+  try {
+    return await fetchMemeFile(bunnyId, 'mp4')
+  } catch (error) {
+    captureWithFeature(error, 'watermark-fallback')
+    bunnyLogger.warn(
+      { bunnyId, error },
+      'Watermark fallback: serving original video'
+    )
+
+    return fetchOriginalVideo(bunnyId)
+  }
+}
+
+type ServeMemeExportParams = {
+  bunnyId: string
+  format: MemeDerivedFormat
+  isPremium: boolean
+}
+
+export const serveMemeExport = createServerOnlyFn(
+  async ({ bunnyId, format, isPremium }: ServeMemeExportParams) => {
+    if (format === 'mp4') {
+      const response = await fetchVideoExport(bunnyId, isPremium)
+
+      return buildMemeFileProxyResponse(
+        response,
+        response.headers.get('Content-Type') ?? 'video/mp4'
+      )
     }
+
+    if (!isPremium) {
+      setResponseStatus(HTTP_STATUS.FORBIDDEN)
+      throw new AppError('premium_required', { code: 'PREMIUM_REQUIRED' })
+    }
+
+    const response = await fetchMemeFile(bunnyId, format)
+
+    return buildMemeFileProxyResponse(response, 'audio/mpeg')
   }
 )
 

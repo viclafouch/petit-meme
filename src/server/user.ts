@@ -341,7 +341,8 @@ export const exportUserData = createServerFn({ method: 'GET' })
             ipAddress: true,
             country: true,
             userAgent: true,
-            metadata: true
+            metadata: true,
+            format: true
           },
           orderBy: { createdAt: 'desc' }
         })
@@ -432,7 +433,8 @@ export const exportUserData = createServerFn({ method: 'GET' })
           ipAddress: event.ipAddress,
           country: event.country,
           userAgent: event.userAgent,
-          metadata: event.metadata
+          metadata: event.metadata,
+          format: event.format
         }
       })
     }

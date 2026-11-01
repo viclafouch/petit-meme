@@ -34,6 +34,7 @@ export type ActivityEventMinAggregateOutputType = {
   userId: string | null
   memeId: string | null
   dedupKey: string | null
+  format: $Enums.MemeExportFormat | null
 }
 
 export type ActivityEventMaxAggregateOutputType = {
@@ -46,6 +47,7 @@ export type ActivityEventMaxAggregateOutputType = {
   userId: string | null
   memeId: string | null
   dedupKey: string | null
+  format: $Enums.MemeExportFormat | null
 }
 
 export type ActivityEventCountAggregateOutputType = {
@@ -59,6 +61,7 @@ export type ActivityEventCountAggregateOutputType = {
   memeId: number
   dedupKey: number
   metadata: number
+  format: number
   _all: number
 }
 
@@ -73,6 +76,7 @@ export type ActivityEventMinAggregateInputType = {
   userId?: true
   memeId?: true
   dedupKey?: true
+  format?: true
 }
 
 export type ActivityEventMaxAggregateInputType = {
@@ -85,6 +89,7 @@ export type ActivityEventMaxAggregateInputType = {
   userId?: true
   memeId?: true
   dedupKey?: true
+  format?: true
 }
 
 export type ActivityEventCountAggregateInputType = {
@@ -98,6 +103,7 @@ export type ActivityEventCountAggregateInputType = {
   memeId?: true
   dedupKey?: true
   metadata?: true
+  format?: true
   _all?: true
 }
 
@@ -184,6 +190,7 @@ export type ActivityEventGroupByOutputType = {
   memeId: string | null
   dedupKey: string | null
   metadata: runtime.JsonValue | null
+  format: $Enums.MemeExportFormat | null
   _count: ActivityEventCountAggregateOutputType | null
   _min: ActivityEventMinAggregateOutputType | null
   _max: ActivityEventMaxAggregateOutputType | null
@@ -218,6 +225,7 @@ export type ActivityEventWhereInput = {
   memeId?: Prisma.StringNullableFilter<"ActivityEvent"> | string | null
   dedupKey?: Prisma.StringNullableFilter<"ActivityEvent"> | string | null
   metadata?: Prisma.JsonNullableFilter<"ActivityEvent">
+  format?: Prisma.EnumMemeExportFormatNullableFilter<"ActivityEvent"> | $Enums.MemeExportFormat | null
   user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   meme?: Prisma.XOR<Prisma.MemeNullableScalarRelationFilter, Prisma.MemeWhereInput> | null
 }
@@ -233,6 +241,7 @@ export type ActivityEventOrderByWithRelationInput = {
   memeId?: Prisma.SortOrderInput | Prisma.SortOrder
   dedupKey?: Prisma.SortOrderInput | Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
+  format?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   meme?: Prisma.MemeOrderByWithRelationInput
 }
@@ -251,6 +260,7 @@ export type ActivityEventWhereUniqueInput = Prisma.AtLeast<{
   userId?: Prisma.StringNullableFilter<"ActivityEvent"> | string | null
   memeId?: Prisma.StringNullableFilter<"ActivityEvent"> | string | null
   metadata?: Prisma.JsonNullableFilter<"ActivityEvent">
+  format?: Prisma.EnumMemeExportFormatNullableFilter<"ActivityEvent"> | $Enums.MemeExportFormat | null
   user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   meme?: Prisma.XOR<Prisma.MemeNullableScalarRelationFilter, Prisma.MemeWhereInput> | null
 }, "id" | "dedupKey">
@@ -266,6 +276,7 @@ export type ActivityEventOrderByWithAggregationInput = {
   memeId?: Prisma.SortOrderInput | Prisma.SortOrder
   dedupKey?: Prisma.SortOrderInput | Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
+  format?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ActivityEventCountOrderByAggregateInput
   _max?: Prisma.ActivityEventMaxOrderByAggregateInput
   _min?: Prisma.ActivityEventMinOrderByAggregateInput
@@ -285,6 +296,7 @@ export type ActivityEventScalarWhereWithAggregatesInput = {
   memeId?: Prisma.StringNullableWithAggregatesFilter<"ActivityEvent"> | string | null
   dedupKey?: Prisma.StringNullableWithAggregatesFilter<"ActivityEvent"> | string | null
   metadata?: Prisma.JsonNullableWithAggregatesFilter<"ActivityEvent">
+  format?: Prisma.EnumMemeExportFormatNullableWithAggregatesFilter<"ActivityEvent"> | $Enums.MemeExportFormat | null
 }
 
 export type ActivityEventCreateInput = {
@@ -296,6 +308,7 @@ export type ActivityEventCreateInput = {
   userAgent?: string | null
   dedupKey?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  format?: $Enums.MemeExportFormat | null
   user?: Prisma.UserCreateNestedOneWithoutActivityEventsInput
   meme?: Prisma.MemeCreateNestedOneWithoutActivityEventsInput
 }
@@ -311,6 +324,7 @@ export type ActivityEventUncheckedCreateInput = {
   memeId?: string | null
   dedupKey?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  format?: $Enums.MemeExportFormat | null
 }
 
 export type ActivityEventUpdateInput = {
@@ -322,6 +336,7 @@ export type ActivityEventUpdateInput = {
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dedupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  format?: Prisma.NullableEnumMemeExportFormatFieldUpdateOperationsInput | $Enums.MemeExportFormat | null
   user?: Prisma.UserUpdateOneWithoutActivityEventsNestedInput
   meme?: Prisma.MemeUpdateOneWithoutActivityEventsNestedInput
 }
@@ -337,6 +352,7 @@ export type ActivityEventUncheckedUpdateInput = {
   memeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dedupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  format?: Prisma.NullableEnumMemeExportFormatFieldUpdateOperationsInput | $Enums.MemeExportFormat | null
 }
 
 export type ActivityEventCreateManyInput = {
@@ -350,6 +366,7 @@ export type ActivityEventCreateManyInput = {
   memeId?: string | null
   dedupKey?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  format?: $Enums.MemeExportFormat | null
 }
 
 export type ActivityEventUpdateManyMutationInput = {
@@ -361,6 +378,7 @@ export type ActivityEventUpdateManyMutationInput = {
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dedupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  format?: Prisma.NullableEnumMemeExportFormatFieldUpdateOperationsInput | $Enums.MemeExportFormat | null
 }
 
 export type ActivityEventUncheckedUpdateManyInput = {
@@ -374,6 +392,7 @@ export type ActivityEventUncheckedUpdateManyInput = {
   memeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dedupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  format?: Prisma.NullableEnumMemeExportFormatFieldUpdateOperationsInput | $Enums.MemeExportFormat | null
 }
 
 export type ActivityEventListRelationFilter = {
@@ -397,6 +416,7 @@ export type ActivityEventCountOrderByAggregateInput = {
   memeId?: Prisma.SortOrder
   dedupKey?: Prisma.SortOrder
   metadata?: Prisma.SortOrder
+  format?: Prisma.SortOrder
 }
 
 export type ActivityEventMaxOrderByAggregateInput = {
@@ -409,6 +429,7 @@ export type ActivityEventMaxOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   memeId?: Prisma.SortOrder
   dedupKey?: Prisma.SortOrder
+  format?: Prisma.SortOrder
 }
 
 export type ActivityEventMinOrderByAggregateInput = {
@@ -421,6 +442,7 @@ export type ActivityEventMinOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   memeId?: Prisma.SortOrder
   dedupKey?: Prisma.SortOrder
+  format?: Prisma.SortOrder
 }
 
 export type ActivityEventCreateNestedManyWithoutMemeInput = {
@@ -511,6 +533,10 @@ export type EnumActivityEventTypeFieldUpdateOperationsInput = {
   set?: $Enums.ActivityEventType
 }
 
+export type NullableEnumMemeExportFormatFieldUpdateOperationsInput = {
+  set?: $Enums.MemeExportFormat | null
+}
+
 export type ActivityEventCreateWithoutMemeInput = {
   id?: string
   type: $Enums.ActivityEventType
@@ -520,6 +546,7 @@ export type ActivityEventCreateWithoutMemeInput = {
   userAgent?: string | null
   dedupKey?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  format?: $Enums.MemeExportFormat | null
   user?: Prisma.UserCreateNestedOneWithoutActivityEventsInput
 }
 
@@ -533,6 +560,7 @@ export type ActivityEventUncheckedCreateWithoutMemeInput = {
   userId?: string | null
   dedupKey?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  format?: $Enums.MemeExportFormat | null
 }
 
 export type ActivityEventCreateOrConnectWithoutMemeInput = {
@@ -575,6 +603,7 @@ export type ActivityEventScalarWhereInput = {
   memeId?: Prisma.StringNullableFilter<"ActivityEvent"> | string | null
   dedupKey?: Prisma.StringNullableFilter<"ActivityEvent"> | string | null
   metadata?: Prisma.JsonNullableFilter<"ActivityEvent">
+  format?: Prisma.EnumMemeExportFormatNullableFilter<"ActivityEvent"> | $Enums.MemeExportFormat | null
 }
 
 export type ActivityEventCreateWithoutUserInput = {
@@ -586,6 +615,7 @@ export type ActivityEventCreateWithoutUserInput = {
   userAgent?: string | null
   dedupKey?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  format?: $Enums.MemeExportFormat | null
   meme?: Prisma.MemeCreateNestedOneWithoutActivityEventsInput
 }
 
@@ -599,6 +629,7 @@ export type ActivityEventUncheckedCreateWithoutUserInput = {
   memeId?: string | null
   dedupKey?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  format?: $Enums.MemeExportFormat | null
 }
 
 export type ActivityEventCreateOrConnectWithoutUserInput = {
@@ -637,6 +668,7 @@ export type ActivityEventCreateManyMemeInput = {
   userId?: string | null
   dedupKey?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  format?: $Enums.MemeExportFormat | null
 }
 
 export type ActivityEventUpdateWithoutMemeInput = {
@@ -648,6 +680,7 @@ export type ActivityEventUpdateWithoutMemeInput = {
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dedupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  format?: Prisma.NullableEnumMemeExportFormatFieldUpdateOperationsInput | $Enums.MemeExportFormat | null
   user?: Prisma.UserUpdateOneWithoutActivityEventsNestedInput
 }
 
@@ -661,6 +694,7 @@ export type ActivityEventUncheckedUpdateWithoutMemeInput = {
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dedupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  format?: Prisma.NullableEnumMemeExportFormatFieldUpdateOperationsInput | $Enums.MemeExportFormat | null
 }
 
 export type ActivityEventUncheckedUpdateManyWithoutMemeInput = {
@@ -673,6 +707,7 @@ export type ActivityEventUncheckedUpdateManyWithoutMemeInput = {
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dedupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  format?: Prisma.NullableEnumMemeExportFormatFieldUpdateOperationsInput | $Enums.MemeExportFormat | null
 }
 
 export type ActivityEventCreateManyUserInput = {
@@ -685,6 +720,7 @@ export type ActivityEventCreateManyUserInput = {
   memeId?: string | null
   dedupKey?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  format?: $Enums.MemeExportFormat | null
 }
 
 export type ActivityEventUpdateWithoutUserInput = {
@@ -696,6 +732,7 @@ export type ActivityEventUpdateWithoutUserInput = {
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dedupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  format?: Prisma.NullableEnumMemeExportFormatFieldUpdateOperationsInput | $Enums.MemeExportFormat | null
   meme?: Prisma.MemeUpdateOneWithoutActivityEventsNestedInput
 }
 
@@ -709,6 +746,7 @@ export type ActivityEventUncheckedUpdateWithoutUserInput = {
   memeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dedupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  format?: Prisma.NullableEnumMemeExportFormatFieldUpdateOperationsInput | $Enums.MemeExportFormat | null
 }
 
 export type ActivityEventUncheckedUpdateManyWithoutUserInput = {
@@ -721,6 +759,7 @@ export type ActivityEventUncheckedUpdateManyWithoutUserInput = {
   memeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dedupKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  format?: Prisma.NullableEnumMemeExportFormatFieldUpdateOperationsInput | $Enums.MemeExportFormat | null
 }
 
 
@@ -736,6 +775,7 @@ export type ActivityEventSelect<ExtArgs extends runtime.Types.Extensions.Interna
   memeId?: boolean
   dedupKey?: boolean
   metadata?: boolean
+  format?: boolean
   user?: boolean | Prisma.ActivityEvent$userArgs<ExtArgs>
   meme?: boolean | Prisma.ActivityEvent$memeArgs<ExtArgs>
 }, ExtArgs["result"]["activityEvent"]>
@@ -751,6 +791,7 @@ export type ActivityEventSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   memeId?: boolean
   dedupKey?: boolean
   metadata?: boolean
+  format?: boolean
   user?: boolean | Prisma.ActivityEvent$userArgs<ExtArgs>
   meme?: boolean | Prisma.ActivityEvent$memeArgs<ExtArgs>
 }, ExtArgs["result"]["activityEvent"]>
@@ -766,6 +807,7 @@ export type ActivityEventSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   memeId?: boolean
   dedupKey?: boolean
   metadata?: boolean
+  format?: boolean
   user?: boolean | Prisma.ActivityEvent$userArgs<ExtArgs>
   meme?: boolean | Prisma.ActivityEvent$memeArgs<ExtArgs>
 }, ExtArgs["result"]["activityEvent"]>
@@ -781,9 +823,10 @@ export type ActivityEventSelectScalar = {
   memeId?: boolean
   dedupKey?: boolean
   metadata?: boolean
+  format?: boolean
 }
 
-export type ActivityEventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "type" | "createdAt" | "ipAddress" | "country" | "userAgent" | "userId" | "memeId" | "dedupKey" | "metadata", ExtArgs["result"]["activityEvent"]>
+export type ActivityEventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "type" | "createdAt" | "ipAddress" | "country" | "userAgent" | "userId" | "memeId" | "dedupKey" | "metadata" | "format", ExtArgs["result"]["activityEvent"]>
 export type ActivityEventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.ActivityEvent$userArgs<ExtArgs>
   meme?: boolean | Prisma.ActivityEvent$memeArgs<ExtArgs>
@@ -814,6 +857,7 @@ export type $ActivityEventPayload<ExtArgs extends runtime.Types.Extensions.Inter
     memeId: string | null
     dedupKey: string | null
     metadata: runtime.JsonValue | null
+    format: $Enums.MemeExportFormat | null
   }, ExtArgs["result"]["activityEvent"]>
   composites: {}
 }
@@ -1249,6 +1293,7 @@ export interface ActivityEventFieldRefs {
   readonly memeId: Prisma.FieldRef<"ActivityEvent", 'String'>
   readonly dedupKey: Prisma.FieldRef<"ActivityEvent", 'String'>
   readonly metadata: Prisma.FieldRef<"ActivityEvent", 'Json'>
+  readonly format: Prisma.FieldRef<"ActivityEvent", 'MemeExportFormat'>
 }
     
 

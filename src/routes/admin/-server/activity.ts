@@ -17,6 +17,7 @@ const ACTIVITY_ROW_SELECT = {
   ipAddress: true,
   country: true,
   metadata: true,
+  format: true,
   user: { select: { id: true, name: true, email: true, image: true } },
   meme: { select: { id: true, title: true } }
 } as const satisfies Prisma.ActivityEventSelect

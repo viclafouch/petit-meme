@@ -2,15 +2,11 @@ import { z } from 'zod'
 import { insightsClient as createInsightsClient } from '@algolia/client-insights'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
-import {
-  getCookie,
-  getRequest,
-  setResponseStatus
-} from '@tanstack/react-start/server'
+import { getCookie, getRequest } from '@tanstack/react-start/server'
 import { prismaClient } from '~/db'
 import { ALGOLIA_FAIL_FAST_ON_RATE_LIMIT } from '~/constants/algolia'
+import { MEME_DERIVED_FORMATS } from '~/constants/bunny'
 import { COOKIE_ALGOLIA_USER_TOKEN_KEY } from '~/constants/cookie'
-import { HTTP_STATUS } from '~/constants/http'
 import {
   MEME_EXPORT_MODES,
   MEME_FULL_INCLUDE,
@@ -80,12 +76,10 @@ import {
 } from '~/lib/algolia'
 import { createAlgoliaCache } from '~/lib/algolia-cache'
 import { auth } from '~/lib/auth'
-import { buildSignedOriginalUrl } from '~/lib/bunny'
 import { matchIsAnalyticsConsentGiven } from '~/lib/cookie-consent'
 import { algoliaLogger, logger } from '~/lib/logger'
-import { fetchMemeFile } from '~/lib/meme-files'
+import { serveMemeExport } from '~/lib/meme-files'
 import { matchIsUserAdmin } from '~/lib/role'
-import { captureWithFeature } from '~/lib/sentry'
 import { baseLocale, getLocale, type Locale } from '~/paraglide/runtime'
 import { matchIsUserPremium } from '~/server/customer'
 import { createRateLimitMiddleware } from '~/server/rate-limit'
@@ -93,8 +87,6 @@ import { authUserRequiredMiddleware } from '~/server/user-auth'
 import { recordActivityEvent } from '~/utils/activity-event'
 import { ensureAlgoliaUserToken } from '~/utils/tracking-cookies'
 import { getVisitorKey } from '~/utils/visitor-key'
-
-const ORIGINAL_VIDEO_FETCH_TIMEOUT_MS = 15_000
 
 let serverInsightsClient: ReturnType<typeof createInsightsClient> | null = null
 
@@ -906,24 +898,10 @@ export const getRandomMeme = createServerFn({ method: 'GET' })
     return meme ?? null
   })
 
-const buildVideoProxyResponse = (upstream: Response) => {
-  const headers: HeadersInit = {
-    'Content-Type': upstream.headers.get('Content-Type') ?? 'video/mp4',
-    'Cache-Control': 'no-cache'
-  }
-
-  const contentLength = upstream.headers.get('Content-Length')
-
-  if (contentLength) {
-    headers['Content-Length'] = contentLength
-  }
-
-  return new Response(upstream.body, { headers })
-}
-
 const SHARE_MEME_SCHEMA = z.object({
   memeId: z.string(),
-  mode: z.enum(MEME_VIDEO_INTENTS)
+  mode: z.enum(MEME_VIDEO_INTENTS),
+  format: z.enum(MEME_DERIVED_FORMATS)
 })
 
 const ACTIVITY_EVENT_TYPE_BY_VIDEO_INTENT = {
@@ -938,7 +916,7 @@ export const shareMeme = createServerFn({ method: 'GET' })
   })
   .middleware([createRateLimitMiddleware(RATE_LIMIT_DOWNLOAD)])
   .handler(async ({ data }) => {
-    const { memeId, mode } = data
+    const { memeId, mode, format } = data
     const request = getRequest()
 
     const [meme, session] = await Promise.all([
@@ -964,7 +942,6 @@ export const shareMeme = createServerFn({ method: 'GET' })
       throw notFound()
     }
 
-    const { bunnyId } = meme.video
     const ip = extractClientIp(request.headers)
     const userAgent = request.headers.get('user-agent') ?? 'unknown'
 
@@ -972,8 +949,14 @@ export const shareMeme = createServerFn({ method: 'GET' })
       ? await matchIsUserPremium(session.user)
       : false
 
+    const response = await serveMemeExport({
+      bunnyId: meme.video.bunnyId,
+      format,
+      isPremium
+    })
+
     logger.info(
-      { memeId, mode, ip, userAgent, isPremium },
+      { memeId, mode, format, ip, userAgent, isPremium },
       'Meme shared/downloaded'
     )
 
@@ -984,44 +967,12 @@ export const shareMeme = createServerFn({ method: 'GET' })
         type: activityEventType,
         actor: session?.user,
         headers: request.headers,
-        memeId
+        memeId,
+        format
       })
     }
 
-    if (!isPremium) {
-      try {
-        const watermarkedResponse = await fetchMemeFile(bunnyId, 'mp4')
-
-        return buildVideoProxyResponse(watermarkedResponse)
-      } catch (error) {
-        captureWithFeature(error, 'watermark-fallback')
-        logger.warn(
-          { memeId, bunnyId, error },
-          'Watermark fallback: serving original video'
-        )
-      }
-    }
-
-    const originalUrl = await buildSignedOriginalUrl(bunnyId)
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => {
-      controller.abort()
-    }, ORIGINAL_VIDEO_FETCH_TIMEOUT_MS)
-
-    try {
-      const response = await fetch(originalUrl, {
-        signal: controller.signal
-      })
-
-      if (!response.ok) {
-        setResponseStatus(HTTP_STATUS.BAD_GATEWAY)
-        throw new Error(`Bunny CDN responded with status ${response.status}`)
-      }
-
-      return buildVideoProxyResponse(response)
-    } finally {
-      clearTimeout(timeoutId)
-    }
+    return response
   })
 
 const TRACK_MEME_ACTION_SCHEMA = z.object({

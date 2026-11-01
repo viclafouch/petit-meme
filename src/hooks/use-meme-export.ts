@@ -29,7 +29,7 @@ export const useMemeExport = ({ mode }: UseMemeExportParams) => {
 
       const fetchMemeBlob = async () => {
         const response = await shareMeme({
-          data: { memeId: meme.id, mode }
+          data: { memeId: meme.id, mode, format: 'mp4' }
         })
 
         return response.blob()

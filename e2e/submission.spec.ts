@@ -175,7 +175,6 @@ test.describe('a User with nothing proposed yet', () => {
 })
 
 test.describe('a User who proposes several links at once', () => {
-  test.describe.configure({ retries: 0 })
   test.use({ storageState: resolveStorageStatePath('submissionConcurrent') })
 
   test('gets as many pending proposals as the cap allows', async ({ page }) => {

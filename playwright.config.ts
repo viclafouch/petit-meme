@@ -15,7 +15,6 @@ export default defineConfig({
   timeout: 30_000,
   globalTimeout: 900_000,
   forbidOnly: IS_CI,
-  retries: IS_CI ? 2 : 0,
   workers: 3,
   reporter: IS_CI
     ? [['list'], ['html', { open: 'never' }], ['github']]

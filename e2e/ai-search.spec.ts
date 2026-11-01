@@ -81,7 +81,6 @@ test.describe('a free User with searches left', () => {
 })
 
 test.describe('a free User who sends several searches at once', () => {
-  test.describe.configure({ retries: 0 })
   test.use({ storageState: resolveStorageStatePath('aiSearchConcurrent') })
 
   test('gets their three searches and not one more', async ({ page }) => {

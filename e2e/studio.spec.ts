@@ -67,7 +67,7 @@ const generateUntil = async (page: Page, signal: Locator) => {
 }
 
 test.describe('a free User with generations left', () => {
-  test.describe.configure({ retries: 0, timeout: GENERATION_TEST_TIMEOUT_MS })
+  test.describe.configure({ timeout: GENERATION_TEST_TIMEOUT_MS })
   test.use({ storageState: resolveStorageStatePath('studio') })
 
   test('gets the video, then their three generations and not one more', async ({

@@ -12,6 +12,7 @@ export const getSubmitButton = (page: Page) => {
 }
 
 export const submitPrompt = async (page: Page, prompt: string) => {
+  await getPromptField(page).fill('')
   await getPromptField(page).fill(prompt)
   await getSubmitButton(page).click()
 }

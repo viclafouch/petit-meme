@@ -54,4 +54,5 @@ jobs:
           path: |
             playwright-report/
             e2e/.logs/
+          include-hidden-files: true
           retention-days: 3

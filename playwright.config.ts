@@ -22,7 +22,7 @@ export default defineConfig({
     : [['list']],
   use: {
     baseURL: E2E_BASE_URL,
-    trace: 'on-first-retry',
+    trace: 'retain-on-failure',
     screenshot: 'only-on-failure'
   },
   webServer: [

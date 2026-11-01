@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { HTTP_STATUS } from '~/constants/http'
-import { deleteMemeFiles } from '~/lib/meme-files'
+import { checkMemeFileExists, deleteMemeFiles } from '~/lib/meme-files'
 
 const BUNNY_ID = 'bunny-video-id'
 const STREAM_VIDEO_URL = `https://video.bunnycdn.com/library/4242/videos/${BUNNY_ID}`
@@ -28,21 +28,55 @@ const readDeletedUrls = (fetchMock: ReturnType<typeof stubBunny>) => {
     })
 }
 
-describe('deleteMemeFiles', () => {
-  beforeEach(() => {
-    vi.stubEnv('VITE_BUNNY_LIBRARY_ID', '4242')
-    vi.stubEnv('BUNNY_ACCESS_KEY', 'stream-access-key')
-    vi.stubEnv('BUNNY_STORAGE_API_KEY', 'storage-access-key')
-    vi.stubEnv('BUNNY_STORAGE_HOSTNAME', 'storage.bunnycdn.test')
-    vi.stubEnv('BUNNY_STORAGE_ZONE_NAME', 'petit-meme')
-    vi.spyOn(console, 'error').mockImplementation(() => {})
+const stubBunnyEnv = () => {
+  vi.stubEnv('VITE_BUNNY_LIBRARY_ID', '4242')
+  vi.stubEnv('BUNNY_ACCESS_KEY', 'stream-access-key')
+  vi.stubEnv('BUNNY_STORAGE_API_KEY', 'storage-access-key')
+  vi.stubEnv('BUNNY_STORAGE_HOSTNAME', 'storage.bunnycdn.test')
+  vi.stubEnv('BUNNY_STORAGE_ZONE_NAME', 'petit-meme')
+  vi.spyOn(console, 'error').mockImplementation(() => {})
+}
+
+const restoreStubs = () => {
+  vi.unstubAllGlobals()
+  vi.unstubAllEnvs()
+  vi.restoreAllMocks()
+}
+
+describe('checkMemeFileExists', () => {
+  beforeEach(stubBunnyEnv)
+  afterEach(restoreStubs)
+
+  it.each([HTTP_STATUS.OK, HTTP_STATUS.PARTIAL_CONTENT])(
+    'should find the file when Bunny Storage answers %i',
+    async (status) => {
+      stubBunny({ [MP3_URL]: status })
+
+      expect(await checkMemeFileExists(BUNNY_ID, 'mp3')).toBe(true)
+    }
+  )
+
+  it('should miss the file when Bunny Storage answers 404', async () => {
+    stubBunny({ [MP3_URL]: HTTP_STATUS.NOT_FOUND })
+
+    expect(await checkMemeFileExists(BUNNY_ID, 'mp3')).toBe(false)
   })
 
-  afterEach(() => {
-    vi.unstubAllGlobals()
-    vi.unstubAllEnvs()
-    vi.restoreAllMocks()
-  })
+  it.each([HTTP_STATUS.UNAUTHORIZED, HTTP_STATUS.INTERNAL_SERVER_ERROR])(
+    'should throw when Bunny Storage answers %i',
+    async (status) => {
+      stubBunny({ [MP3_URL]: status })
+
+      await expect(checkMemeFileExists(BUNNY_ID, 'mp3')).rejects.toThrow(
+        String(status)
+      )
+    }
+  )
+})
+
+describe('deleteMemeFiles', () => {
+  beforeEach(stubBunnyEnv)
+  afterEach(restoreStubs)
 
   it('should delete the Stream video, the MP4 and the MP3 of a Meme', async () => {
     const fetchMock = stubBunny()

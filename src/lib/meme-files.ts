@@ -94,7 +94,17 @@ export const checkMemeFileExists = createServerOnlyFn(
       signal: AbortSignal.timeout(STORAGE_TIMEOUT_MS)
     })
 
-    return response.ok || response.status === HTTP_STATUS.PARTIAL_CONTENT
+    if (response.status === HTTP_STATUS.NOT_FOUND) {
+      return false
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        `Bunny Storage exists check failed with status ${response.status}`
+      )
+    }
+
+    return true
   }
 )
 

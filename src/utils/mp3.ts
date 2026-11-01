@@ -27,20 +27,26 @@ const PROBE_SCHEMA = z.object({
   format: z.object({ duration: z.coerce.number().positive() })
 })
 
-const probeVideo = async (ffmpeg: FFmpeg): Promise<VideoProbe> => {
-  await ffmpeg.ffprobe([
-    '-v',
-    'error',
-    '-select_streams',
-    'a',
-    '-show_entries',
-    'stream=codec_type:format=duration',
-    '-of',
-    'json',
-    FFMPEG_INPUT_FILE,
-    '-o',
-    FFMPEG_PROBE_FILE
-  ])
+export const VIDEO_PROBE_ARGS = [
+  '-v',
+  'error',
+  '-select_streams',
+  'a',
+  '-show_entries',
+  'stream=codec_type:format=duration',
+  '-of',
+  'json',
+  FFMPEG_INPUT_FILE
+] as const satisfies readonly string[]
+
+export const parseVideoProbe = (probeOutput: string): VideoProbe => {
+  const { streams, format } = PROBE_SCHEMA.parse(JSON.parse(probeOutput))
+
+  return { hasAudio: streams.length > 0, duration: format.duration }
+}
+
+const probeVideo = async (ffmpeg: FFmpeg) => {
+  await ffmpeg.ffprobe([...VIDEO_PROBE_ARGS, '-o', FFMPEG_PROBE_FILE])
 
   const probeOutput = await ffmpeg.readFile(FFMPEG_PROBE_FILE, 'utf8')
 
@@ -48,12 +54,10 @@ const probeVideo = async (ffmpeg: FFmpeg): Promise<VideoProbe> => {
     throw new TypeError('Unexpected FFprobe output format')
   }
 
-  const { streams, format } = PROBE_SCHEMA.parse(JSON.parse(probeOutput))
-
-  return { hasAudio: streams.length > 0, duration: format.duration }
+  return parseVideoProbe(probeOutput)
 }
 
-const buildMp3InputArgs = ({ hasAudio, duration }: VideoProbe) => {
+export const buildMp3InputArgs = ({ hasAudio, duration }: VideoProbe) => {
   if (hasAudio) {
     return ['-i', FFMPEG_INPUT_FILE, '-map', '0:a:0']
   }

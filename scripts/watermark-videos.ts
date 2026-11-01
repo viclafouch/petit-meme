@@ -13,9 +13,10 @@ import {
 import type { Prisma } from '~/db/generated/prisma/client'
 import { MemeStatus } from '~/db/generated/prisma/enums'
 import { serverEnv } from '~/env/server'
-import { signOriginalUrl } from '~/lib/bunny'
 import { checkMemeFileExists, uploadMemeFile } from '~/lib/meme-files'
+import { countResults, processWithConcurrency } from './lib/concurrency'
 import { logEnvironmentInfo } from './lib/env-guard'
+import { downloadOriginalVideo } from './lib/original-video'
 
 // oxlint-disable-next-line typescript/strict-void-return -- util.promisify picks execFile's custom promisified form, not the callback overload the rule compares against
 const execFileAsync = promisify(execFile)
@@ -23,7 +24,6 @@ const execFileAsync = promisify(execFile)
 const OUTPUT_DIR = path.resolve('watermarked')
 const WATERMARK_PATH = path.resolve(`public${WATERMARK_ASSET_PATH}`)
 const CONCURRENCY = 3
-const FETCH_TIMEOUT_MS = 30_000
 const FFMPEG_TIMEOUT_MS = 120_000
 const FFMPEG_MAX_BUFFER_MB = 10
 const BYTES_PER_MEGABYTE = BYTES_PER_KILOBYTE * BYTES_PER_KILOBYTE
@@ -70,30 +70,6 @@ const fetchMemes = async ({
     orderBy: { createdAt: 'asc' },
     ...(limit === undefined || limit === 0 ? {} : { take: limit })
   })
-}
-
-const downloadVideo = async (bunnyId: string, destPath: string) => {
-  const url = await signOriginalUrl(bunnyId)
-  const controller = new AbortController()
-  const timeout = setTimeout(() => {
-    controller.abort()
-  }, FETCH_TIMEOUT_MS)
-
-  try {
-    const response = await fetch(url, { signal: controller.signal })
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`)
-    }
-
-    if (!response.body) {
-      throw new Error('Empty response body')
-    }
-
-    await fs.writeFile(destPath, Buffer.from(await response.arrayBuffer()))
-  } finally {
-    clearTimeout(timeout)
-  }
 }
 
 const runFFmpeg = async (inputPath: string, outputPath: string) => {
@@ -159,7 +135,7 @@ const processMeme = async (
   const tempInputPath = path.join(OUTPUT_DIR, `_input_${bunnyId}.mp4`)
 
   try {
-    await downloadVideo(bunnyId, tempInputPath)
+    await downloadOriginalVideo(bunnyId, tempInputPath)
     await runFFmpeg(tempInputPath, outputPath)
 
     return 'processed'
@@ -169,36 +145,6 @@ const processMeme = async (
   } finally {
     await fs.unlink(tempInputPath).catch(() => {})
   }
-}
-
-const processWithConcurrency = async <TItem, TResult extends string>(
-  items: TItem[],
-  concurrency: number,
-  fn: (item: TItem, index: number) => Promise<TResult>
-) => {
-  const results: TResult[] = []
-  let nextIndex = 0
-
-  const worker = async () => {
-    while (nextIndex < items.length) {
-      const index = nextIndex
-      nextIndex += 1
-      const item = items[index]
-
-      if (item !== undefined) {
-        // oxlint-disable-next-line no-await-in-loop -- intentional sequential processing within each concurrent worker
-        results[index] = await fn(item, index)
-      }
-    }
-  }
-
-  await Promise.all(
-    Array.from({ length: Math.min(concurrency, items.length) }, () => {
-      return worker()
-    })
-  )
-
-  return results
 }
 
 const parseArgs = (): ParsedOptions => {
@@ -283,16 +229,6 @@ const computeTotalSize = async () => {
   return { totalMB, fileCount: mp4Files.length }
 }
 
-const countResults = <TResult extends string>(results: TResult[]) => {
-  const counts: Partial<Record<TResult, number>> = {}
-
-  for (const result of results) {
-    counts[result] = (counts[result] ?? 0) + 1
-  }
-
-  return counts
-}
-
 type UploadResult = 'uploaded' | 'skipped' | 'error'
 
 const processAndUploadMeme = async (meme: MemeVideo): Promise<UploadResult> => {
@@ -307,7 +243,7 @@ const processAndUploadMeme = async (meme: MemeVideo): Promise<UploadResult> => {
   const tempOutputPath = path.join(tmpDir, `output_${bunnyId}.mp4`)
 
   try {
-    await downloadVideo(bunnyId, tempInputPath)
+    await downloadOriginalVideo(bunnyId, tempInputPath)
     await runFFmpeg(tempInputPath, tempOutputPath)
 
     const fileBuffer = await fs.readFile(tempOutputPath)

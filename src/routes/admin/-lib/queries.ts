@@ -294,6 +294,19 @@ export const getAdminAiSearchLogsQueryOpts = () => {
 
 getAdminAiSearchLogsQueryOpts.all = ['admin-ai-search-logs'] as const
 
+export const markAdminMemesOverviewStale = (queryClient: QueryClient) => {
+  return Promise.all([
+    queryClient.invalidateQueries({
+      queryKey: getAdminMemesListQueryOpts.all,
+      refetchType: 'none'
+    }),
+    queryClient.invalidateQueries({
+      queryKey: getAdminDashboardTotalsQueryOpts.all,
+      refetchType: 'none'
+    })
+  ])
+}
+
 export const invalidateAdminMemesOverview = (queryClient: QueryClient) => {
   return Promise.all([
     queryClient.invalidateQueries({

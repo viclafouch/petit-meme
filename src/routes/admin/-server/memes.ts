@@ -81,7 +81,7 @@ export const getAdminMemeById = createServerFn({ method: 'GET' })
 
 export const MEME_DESCRIPTION_MAX_LENGTH = 200
 
-const MEME_TITLE_MIN_LENGTH = 3
+export const MEME_TITLE_MIN_LENGTH = 3
 const MEME_TITLE_MAX_LENGTH = 100
 const MEME_KEYWORD_MAX_LENGTH = 50
 const MEME_KEYWORDS_MAX_COUNT = 20
@@ -119,6 +119,10 @@ export const MEME_FORM_SCHEMA = z
     )
   })
   .superRefine((data, refinementContext) => {
+    if (data.status !== MemeStatus.PUBLISHED) {
+      return
+    }
+
     const requiredLocales = REQUIRED_TRANSLATION_LOCALES[data.contentLocale]
 
     for (const locale of requiredLocales) {
@@ -261,7 +265,11 @@ export const editMeme = createServerFn({ method: 'POST' })
       throw new Error('Mème introuvable')
     }
 
-    if (values.status === 'PUBLISHED') {
+    const isGoingLive =
+      values.status === MemeStatus.PUBLISHED &&
+      meme.status !== MemeStatus.PUBLISHED
+
+    if (isGoingLive) {
       const missingFiles = await findMissingMemeFiles(meme.video.bunnyId)
 
       if (missingFiles.length > 0) {
@@ -329,7 +337,13 @@ export const editMeme = createServerFn({ method: 'POST' })
 
     await safeAlgoliaOp(syncMemeToAllIndices(memeUpdated))
 
-    await invalidateAlgoliaCache()
+    const isPubliclyVisible =
+      meme.status === MemeStatus.PUBLISHED ||
+      values.status === MemeStatus.PUBLISHED
+
+    if (isPubliclyVisible) {
+      await invalidateAlgoliaCache()
+    }
 
     const hasLeftPublished =
       meme.status === MemeStatus.PUBLISHED &&

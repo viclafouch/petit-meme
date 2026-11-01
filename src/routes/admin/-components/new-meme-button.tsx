@@ -15,24 +15,17 @@ import { FileForm } from '~/routes/admin/-components/file-form'
 import { TwitterForm } from '~/routes/admin/-components/twitter-form'
 import { invalidateAdminMemesOverview } from '~/routes/admin/-lib/queries'
 
-type HandleAddMemeParams = {
-  memeId: string
-}
-
 type NewMemeButtonProps = Partial<React.ComponentProps<typeof Button>>
 
 export const NewMemeButton = ({ ...restButtonProps }: NewMemeButtonProps) => {
   const queryClient = useQueryClient()
-  const [isOpen, setIsOpen] = React.useState(false)
   const navigate = useNavigate()
+  const [isOpen, setIsOpen] = React.useState(false)
 
-  const closeDialog = () => {
-    setIsOpen(false)
-  }
-
-  const handleAddMeme = async ({ memeId }: HandleAddMemeParams) => {
+  const handleImported = async (memeId: string) => {
     await invalidateAdminMemesOverview(queryClient)
     await navigate({ to: '/admin/library/$memeId', params: { memeId } })
+    setIsOpen(false)
   }
 
   return (
@@ -40,21 +33,21 @@ export const NewMemeButton = ({ ...restButtonProps }: NewMemeButtonProps) => {
       <DialogTrigger render={<Button {...restButtonProps} />} />
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Ajouter un mème</DialogTitle>
-          <DialogDescription className="sr-only">
-            Ajouter un mème depuis Twitter ou un fichier local
+          <DialogTitle>Importer un Meme</DialogTitle>
+          <DialogDescription>
+            Depuis un tweet ou un fichier. Tu le publies ensuite depuis sa page.
           </DialogDescription>
         </DialogHeader>
-        <Tabs defaultValue="twitter" className="w-full gap-4">
-          <TabsList>
-            <TabsTrigger value="twitter">Twitter</TabsTrigger>
-            <TabsTrigger value="local">Fichier local</TabsTrigger>
+        <Tabs defaultValue="tweet" className="w-full gap-4">
+          <TabsList className="w-full">
+            <TabsTrigger value="tweet">Lien X</TabsTrigger>
+            <TabsTrigger value="file">Fichier</TabsTrigger>
           </TabsList>
-          <TabsContent value="twitter">
-            <TwitterForm onSuccess={handleAddMeme} closeDialog={closeDialog} />
+          <TabsContent value="tweet">
+            <TwitterForm onImported={handleImported} />
           </TabsContent>
-          <TabsContent value="local">
-            <FileForm onSuccess={handleAddMeme} closeDialog={closeDialog} />
+          <TabsContent value="file">
+            <FileForm onImported={handleImported} />
           </TabsContent>
         </Tabs>
       </DialogContent>

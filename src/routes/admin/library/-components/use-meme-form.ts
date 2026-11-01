@@ -2,8 +2,6 @@ import { toast } from 'sonner'
 import type { z } from 'zod'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import type { MemeFullData } from '~/constants/meme'
-import type { Meme } from '~/db/generated/prisma/client'
-import { MemeStatus } from '~/db/generated/prisma/enums'
 import { getErrorMessage } from '~/helpers/error'
 import {
   buildLocaleRecord,
@@ -16,81 +14,19 @@ import { focusFirstInvalidField } from '~/lib/form'
 import { getCategoriesListQueryOpts } from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
 import { baseLocale, isLocale, type Locale } from '~/paraglide/runtime'
-import { editMeme, MEME_FORM_SCHEMA } from '~/routes/admin/-server/memes'
+import { MEME_FORM_SCHEMA } from '~/routes/admin/-server/memes'
 import { translateMemeContent } from '~/server/ai'
+
+export type MemeFormValues = z.infer<typeof MEME_FORM_SCHEMA>
 
 type UseMemeFormParams = {
   meme: MemeFullData
-  generateFiles: () => Promise<void>
-  onSuccess?: () => Promise<void>
+  onChange: (values: MemeFormValues) => void
+  onSubmit: (values: MemeFormValues) => Promise<void>
 }
 
-const resolveDefaultStatus = (status: MemeStatus): MemeStatus => {
-  return status === MemeStatus.PENDING ? MemeStatus.PUBLISHED : status
-}
-
-const ignoreReportedError = () => {}
-
-export const isFirstPublish = (
-  meme: Pick<MemeFullData, 'status'>,
-  nextStatus: MemeStatus
-) => {
-  return (
-    nextStatus === MemeStatus.PUBLISHED && meme.status !== MemeStatus.PUBLISHED
-  )
-}
-
-export function useMemeForm({
-  meme,
-  onSuccess,
-  generateFiles
-}: UseMemeFormParams) {
+export function useMemeForm({ meme, onChange, onSubmit }: UseMemeFormParams) {
   const categoriesListQuery = useQuery(getCategoriesListQueryOpts(baseLocale))
-
-  const categoriesOptions =
-    categoriesListQuery.data?.map((category) => {
-      return {
-        label: category.title,
-        value: category.id
-      }
-    }) ?? []
-
-  const editMutation = useMutation({
-    mutationKey: ['edit-meme'],
-    mutationFn: async (
-      body: z.infer<typeof MEME_FORM_SCHEMA> & { id: Meme['id'] }
-    ) => {
-      const promise = editMeme({ data: body })
-      toast.promise(promise, {
-        loading: 'Modification...',
-        success: () => {
-          return 'Mème modifié avec succès !'
-        },
-        error: getErrorMessage
-      })
-
-      return promise
-    },
-    onSuccess,
-    onError: (error) => {
-      captureWithFeature(error, 'admin-meme-edit')
-    }
-  })
-
-  const submitMeme = async (value: z.infer<typeof MEME_FORM_SCHEMA>) => {
-    if (isFirstPublish(meme, value.status)) {
-      await generateFiles()
-    }
-
-    await editMutation.mutateAsync({
-      contentLocale: value.contentLocale,
-      translations: value.translations,
-      tweetUrl: value.tweetUrl,
-      status: value.status,
-      id: meme.id,
-      categoryIds: value.categoryIds
-    })
-  }
 
   const form = useAppForm({
     defaultValues: {
@@ -105,7 +41,7 @@ export function useMemeForm({
         }
       }),
       tweetUrl: meme.tweetUrl,
-      status: resolveDefaultStatus(meme.status),
+      status: meme.status,
       categoryIds: meme.categories.map((category) => {
         return category.categoryId
       })
@@ -113,13 +49,14 @@ export function useMemeForm({
     validators: {
       onChange: MEME_FORM_SCHEMA
     },
-    onSubmitInvalid: focusFirstInvalidField,
-    onSubmit: async ({ value }) => {
-      if (editMutation.isPending) {
-        return
+    listeners: {
+      onChange: ({ formApi }) => {
+        onChange(formApi.state.values)
       }
-
-      await submitMeme(value).catch(ignoreReportedError)
+    },
+    onSubmitInvalid: focusFirstInvalidField,
+    onSubmit: ({ value }) => {
+      return onSubmit(value)
     }
   })
 
@@ -143,27 +80,22 @@ export function useMemeForm({
   const translateContentMutation = useMutation({
     mutationKey: ['translate-content'],
     mutationFn: (sourceLocale: Locale) => {
-      const title = form.getFieldValue(`translations.${sourceLocale}.title`)
-      const description = form.getFieldValue(
-        `translations.${sourceLocale}.description`
-      )
-      const keywords = form.getFieldValue(
-        `translations.${sourceLocale}.keywords`
-      )
-
       const contentLocale = form.getFieldValue('contentLocale')
-      const requiredLocales = getRequiredLocales(contentLocale)
-      const targetLocales = requiredLocales.filter((locale) => {
-        return locale !== sourceLocale
-      })
+      const targetLocales = getRequiredLocales(contentLocale).filter(
+        (locale) => {
+          return locale !== sourceLocale
+        }
+      )
 
       return translateMemeContent({
         data: {
           sourceLocale,
           targetLocales,
-          title,
-          description,
-          keywords
+          title: form.getFieldValue(`translations.${sourceLocale}.title`),
+          description: form.getFieldValue(
+            `translations.${sourceLocale}.description`
+          ),
+          keywords: form.getFieldValue(`translations.${sourceLocale}.keywords`)
         }
       })
     },
@@ -190,20 +122,20 @@ export function useMemeForm({
     }
   })
 
-  const isLocaleRequired = (locale: Locale) => {
-    const contentLocale = form.getFieldValue('contentLocale')
-    const required = getRequiredLocales(contentLocale)
-
-    return required.includes(locale)
+  const flushPendingKeywords = () => {
+    for (const locale of getRequiredLocales(
+      form.getFieldValue('contentLocale')
+    )) {
+      keywordsFields[locale].handleAddKeyword()
+    }
   }
 
   return {
     form,
     keywordsFields,
     categoriesListQuery,
-    categoriesOptions,
     translateContentMutation,
-    isLocaleRequired
+    flushPendingKeywords
   }
 }
 

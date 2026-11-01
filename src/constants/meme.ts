@@ -128,21 +128,25 @@ export const TRENDING_WEIGHTS = {
 export const MemeStatusMeta = {
   PENDING: {
     label: 'En attente',
+    description: 'Caché du site, en attente de publication.',
     className: 'text-destructive',
     badgeVariant: 'info'
   },
   PUBLISHED: {
     label: 'Publié',
+    description: 'Visible par tout le monde sur le site.',
     className: 'text-primary',
     badgeVariant: 'success'
   },
   REJECTED: {
     label: 'Rejeté',
+    description: 'Écarté, il ne sera pas publié.',
     className: 'text-destructive',
     badgeVariant: 'warning'
   },
   ARCHIVED: {
     label: 'Archivé',
+    description: 'Retiré du site, gardé dans la bibliothèque.',
     className: 'text-muted-foreground',
     badgeVariant: 'destructive'
   }
@@ -150,6 +154,7 @@ export const MemeStatusMeta = {
   MemeStatus,
   {
     label: string
+    description: string
     className: string
     badgeVariant: VariantProps<typeof badgeVariants>['variant']
   }

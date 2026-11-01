@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { createEnv } from '@t3-oss/env-core'
+import { IS_TEST } from '../constants/env.ts'
 
 export const clientEnv = createEnv({
   clientPrefix: 'VITE_',
@@ -16,5 +17,6 @@ export const clientEnv = createEnv({
       .default('development')
   },
   runtimeEnv: import.meta.env,
-  emptyStringAsUndefined: true
+  emptyStringAsUndefined: true,
+  skipValidation: IS_TEST
 })

@@ -29,11 +29,25 @@ export const loadFFmpeg = createClientOnlyFn(async (timeoutMessage: string) => {
 })
 
 export const FFMPEG_INPUT_FILE = 'input.mp4'
-const FFMPEG_OUTPUT_FILE = 'output.mp4'
 export const FFMPEG_WATERMARK_FILE = 'watermark.png'
 export const FFMPEG_TEXT_FILE = 'text.txt'
 
-export const FFMPEG_ENCODING_ARGS = [
+type FFmpegOutput = {
+  fileName: string
+  mimeType: string
+}
+
+const FFMPEG_VIDEO_OUTPUT = {
+  fileName: 'output.mp4',
+  mimeType: 'video/mp4'
+} as const satisfies FFmpegOutput
+
+export const FFMPEG_AUDIO_OUTPUT = {
+  fileName: 'output.mp3',
+  mimeType: 'audio/mpeg'
+} as const satisfies FFmpegOutput
+
+export const FFMPEG_VIDEO_ENCODING_ARGS = [
   '-c:v',
   'libx264',
   '-c:a',
@@ -49,16 +63,33 @@ export const FFMPEG_ENCODING_ARGS = [
   '-map_metadata',
   '-1',
   '-y',
-  FFMPEG_OUTPUT_FILE
+  FFMPEG_VIDEO_OUTPUT.fileName
 ] as const satisfies readonly string[]
 
-export const readAndDeleteFFmpegOutput = async (ffmpeg: FFmpeg) => {
-  const outputData = await ffmpeg.readFile(FFMPEG_OUTPUT_FILE)
-  await ffmpeg.deleteFile(FFMPEG_OUTPUT_FILE).catch(() => {})
+export const FFMPEG_MP3_ENCODING_ARGS = [
+  '-vn',
+  '-c:a',
+  'libmp3lame',
+  '-q:a',
+  '2',
+  '-map_metadata',
+  '-1',
+  '-id3v2_version',
+  '0',
+  '-y',
+  FFMPEG_AUDIO_OUTPUT.fileName
+] as const satisfies readonly string[]
+
+export const readAndDeleteFFmpegOutput = async (
+  ffmpeg: FFmpeg,
+  output: FFmpegOutput = FFMPEG_VIDEO_OUTPUT
+) => {
+  const outputData = await ffmpeg.readFile(output.fileName)
+  await ffmpeg.deleteFile(output.fileName).catch(() => {})
 
   if (!(outputData instanceof globalThis.Uint8Array)) {
     throw new Error('Unexpected FFmpeg output format')
   }
 
-  return new Blob([new Uint8Array(outputData)], { type: 'video/mp4' })
+  return new Blob([new Uint8Array(outputData)], { type: output.mimeType })
 }

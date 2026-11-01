@@ -3,13 +3,13 @@ import { createServerFn } from '@tanstack/react-start'
 import { prismaClient } from '~/db'
 import type { Meme, Prisma } from '~/db/generated/prisma/client'
 import { serverEnv } from '~/env/server'
-import {
-  buildSignedOriginalUrl,
-  buildStorageUrl,
-  checkWatermarkExists,
-  fetchWatermarkedVideo
-} from '~/lib/bunny'
+import { buildSignedOriginalUrl } from '~/lib/bunny'
 import { adminLogger } from '~/lib/logger'
+import {
+  buildMemeFileUrl,
+  checkMemeFileExists,
+  fetchMemeFile
+} from '~/lib/meme-files'
 import { logAuditAction } from '~/server/audit'
 import { adminRequiredMiddleware } from '~/server/user-auth'
 
@@ -39,7 +39,7 @@ export const checkMemeWatermark = createServerFn({ method: 'GET' })
   .middleware([adminRequiredMiddleware])
   .handler(async ({ data: memeId }) => {
     const bunnyId = await findMemeBunnyId(memeId)
-    const exists = await checkWatermarkExists(bunnyId)
+    const exists = await checkMemeFileExists(bunnyId, 'mp4')
 
     return { exists }
   })
@@ -54,7 +54,10 @@ export const getWatermarkUploadConfig = createServerFn({ method: 'POST' })
 
     return {
       bunnyId,
-      url: buildStorageUrl(bunnyId),
+      urls: {
+        mp4: buildMemeFileUrl(bunnyId, 'mp4'),
+        mp3: buildMemeFileUrl(bunnyId, 'mp3')
+      },
       accessKey: serverEnv.BUNNY_STORAGE_API_KEY
     }
   })
@@ -131,7 +134,7 @@ export const previewMemeWatermark = createServerFn({ method: 'GET' })
   .middleware([adminRequiredMiddleware])
   .handler(async ({ data: memeId }) => {
     const bunnyId = await findMemeBunnyId(memeId)
-    const upstream = await fetchWatermarkedVideo(bunnyId)
+    const upstream = await fetchMemeFile(bunnyId, 'mp4')
 
     const headers: HeadersInit = {
       'Content-Type': upstream.headers.get('Content-Type') ?? 'video/mp4'

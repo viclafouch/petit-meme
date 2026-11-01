@@ -40,7 +40,6 @@ export type SentryFeature =
   | 'admin-submission'
   | 'admin-downloader'
   | 'admin-watermark'
-  | 'bunny-storage-cleanup'
   | 'watermark-fallback'
   | 'ai-search'
   | 'activity-event'

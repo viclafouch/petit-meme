@@ -36,7 +36,7 @@ import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
 import { recordGeneration } from '~/server/studio'
 import {
-  FFMPEG_ENCODING_ARGS,
+  FFMPEG_VIDEO_ENCODING_ARGS,
   FFMPEG_INPUT_FILE,
   FFMPEG_TEXT_FILE,
   loadFFmpeg,
@@ -196,7 +196,7 @@ const buildFFmpegArgs = (videoFilter: string) => {
     '0:a:0?',
     '-vf',
     videoFilter,
-    ...FFMPEG_ENCODING_ARGS
+    ...FFMPEG_VIDEO_ENCODING_ARGS
   ]
 }
 

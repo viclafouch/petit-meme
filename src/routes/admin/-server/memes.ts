@@ -36,14 +36,9 @@ import {
   type AlgoliaMemeRecord
 } from '~/lib/algolia'
 import { invalidateAlgoliaCache } from '~/lib/algolia-cache'
-import {
-  checkWatermarkExists,
-  createVideo,
-  deleteVideo,
-  deleteWatermarkedVideo,
-  uploadVideo
-} from '~/lib/bunny'
-import { adminLogger, bunnyLogger } from '~/lib/logger'
+import { createVideo, uploadVideo } from '~/lib/bunny'
+import { adminLogger } from '~/lib/logger'
+import { checkMemeFileExists, deleteMemeFiles } from '~/lib/meme-files'
 import { getTweetByUrl, getTweetMedia } from '~/lib/react-tweet'
 import { captureWithFeature } from '~/lib/sentry'
 import { baseLocale } from '~/paraglide/runtime'
@@ -267,7 +262,7 @@ export const editMeme = createServerFn({ method: 'POST' })
     }
 
     if (values.status === 'PUBLISHED') {
-      const hasWatermark = await checkWatermarkExists(meme.video.bunnyId)
+      const hasWatermark = await checkMemeFileExists(meme.video.bunnyId, 'mp4')
 
       if (!hasWatermark) {
         setResponseStatus(HTTP_STATUS.UNPROCESSABLE_CONTENT)
@@ -403,22 +398,9 @@ export const deleteMemeById = createServerFn({ method: 'POST' })
       prismaClient.video.delete({ where: { id: meme.videoId } })
     ])
 
-    await Promise.all([
+    const [, undeletedFiles] = await Promise.all([
       safeAlgoliaOp(deleteMemeFromAllIndices(meme.id)),
-      deleteVideo(meme.video.bunnyId).catch((error: unknown) => {
-        captureWithFeature(error, 'bunny-cleanup')
-        bunnyLogger.error(
-          { error, bunnyId: meme.video.bunnyId },
-          'Failed to delete video from Bunny CDN'
-        )
-      }),
-      deleteWatermarkedVideo(meme.video.bunnyId).catch((error: unknown) => {
-        captureWithFeature(error, 'bunny-storage-cleanup')
-        bunnyLogger.error(
-          { error, bunnyId: meme.video.bunnyId },
-          'Failed to delete watermarked video from Bunny Storage'
-        )
-      })
+      deleteMemeFiles(meme.video.bunnyId)
     ])
 
     await invalidateAlgoliaCache()
@@ -432,9 +414,9 @@ export const deleteMemeById = createServerFn({ method: 'POST' })
       metadata: { title: meme.title }
     })
 
-    adminLogger.info({ memeId: meme.id }, 'Meme deleted')
+    adminLogger.info({ memeId: meme.id, undeletedFiles }, 'Meme deleted')
 
-    return { id: meme.id }
+    return { id: meme.id, undeletedFiles }
   })
 
 type CreateMemeWithVideoParams = {
@@ -443,7 +425,7 @@ type CreateMemeWithVideoParams = {
   tweetUrl?: string
 }
 
-async function rollbackMemeCreation(memeId: string) {
+async function rollbackMemeCreation(memeId: string, bunnyId: string) {
   await Promise.all([
     prismaClient.meme
       .delete({ where: { id: memeId } })
@@ -453,7 +435,8 @@ async function rollbackMemeCreation(memeId: string) {
           'Failed to rollback meme from DB'
         )
       }),
-    safeAlgoliaOp(deleteMemeFromAllIndices(memeId))
+    safeAlgoliaOp(deleteMemeFromAllIndices(memeId)),
+    deleteMemeFiles(bunnyId)
   ])
 }
 
@@ -491,13 +474,7 @@ async function createMemeWithVideo({
       include: MEME_ALGOLIA_INCLUDE
     })
   } catch (error) {
-    await deleteVideo(videoId).catch((cleanupError: unknown) => {
-      captureWithFeature(cleanupError, 'bunny-cleanup')
-      bunnyLogger.error(
-        { error: cleanupError, bunnyVideoId: videoId },
-        'Failed to cleanup orphan Bunny video after DB error'
-      )
-    })
+    await deleteMemeFiles(videoId)
     throw error
   }
 
@@ -512,7 +489,7 @@ async function createMemeWithVideo({
       { error, memeId: meme.id, bunnyVideoId: videoId },
       'Upload/Algolia failed after DB create, rolling back'
     )
-    await rollbackMemeCreation(meme.id)
+    await rollbackMemeCreation(meme.id, videoId)
     throw error
   }
 

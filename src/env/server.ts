@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { createEnv } from '@t3-oss/env-core'
-import { IS_PRODUCTION } from '../constants/env.ts'
+import { IS_PRODUCTION, IS_TEST } from '../constants/env.ts'
 import { baseEnv } from './base.ts'
 
 const SECRET_MIN_LENGTH = 32
@@ -36,7 +36,8 @@ export const serverEnv = createEnv({
   extends: [baseEnv],
   // oxlint-disable-next-line node/no-process-env -- the validated server env is the boundary that reads the process environment
   runtimeEnv: process.env,
-  emptyStringAsUndefined: true
+  emptyStringAsUndefined: true,
+  skipValidation: IS_TEST
 })
 
 export const matchIsProductionDeployment = () => {

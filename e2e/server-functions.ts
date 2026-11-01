@@ -24,11 +24,27 @@ export const cutServerFunctionCalls = (page: Page) => {
   })
 }
 
-type ServerFunctionCall = {
-  url: string
-  headers: ReturnType<Request['headers']>
-  body: string
+export const collectServerFunctionCalls = (page: Page) => {
+  const requests: Request[] = []
+
+  page.on('request', (request) => {
+    if (matchIsServerFunctionRequest(request)) {
+      requests.push(request)
+    }
+  })
+
+  return requests
 }
+
+export const readServerFunctionCall = (request: Request) => {
+  return {
+    url: request.url(),
+    headers: request.headers(),
+    body: request.postData() ?? ''
+  }
+}
+
+type ServerFunctionCall = ReturnType<typeof readServerFunctionCall>
 
 export const holdServerFunctionCall = async (
   page: Page,
@@ -43,11 +59,7 @@ export const holdServerFunctionCall = async (
       return route.fallback()
     }
 
-    resolve({
-      url: request.url(),
-      headers: request.headers(),
-      body: request.postData() ?? ''
-    })
+    resolve(readServerFunctionCall(request))
   })
 
   await repeatUntilRequested(act, {

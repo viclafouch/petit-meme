@@ -23,6 +23,7 @@ import {
 } from '~/server/meme'
 import { getUserSubmissions } from '~/server/meme-submission'
 import { getInfiniteReels } from '~/server/reels'
+import { checkGenerationQuota } from '~/server/studio'
 import { getFavoritesMemes } from '~/server/user'
 import { getAuthUser } from '~/server/user-auth'
 
@@ -214,3 +215,16 @@ export const getAiSearchQuotaQueryOpts = () => {
 }
 
 getAiSearchQuotaQueryOpts.all = ['ai-search-quota'] as const
+
+export const getGenerationQuotaQueryOpts = () => {
+  return queryOptions({
+    queryKey: [...getGenerationQuotaQueryOpts.all],
+    meta: PRIVATE_QUERY_META,
+    queryFn: () => {
+      return checkGenerationQuota()
+    },
+    staleTime: MINUTE
+  })
+}
+
+getGenerationQuotaQueryOpts.all = ['generation-quota'] as const

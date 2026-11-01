@@ -122,6 +122,7 @@ const createUser = async (role: E2eRole) => {
       email: role.email,
       emailVerified: role.emailVerified,
       providerAvatar: role.providerAvatar,
+      generationCount: role.generationCount,
       stripeCustomerId,
       createdAt: now,
       updatedAt: now,

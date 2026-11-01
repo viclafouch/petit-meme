@@ -1,5 +1,9 @@
 import { FREE_PLAN_MAX_AI_SEARCHES } from '~/constants/ai-search'
-import { FREE_PLAN_MAX_FAVORITES, PREMIUM_PLAN_NAME } from '~/constants/plan'
+import {
+  FREE_PLAN_MAX_FAVORITES,
+  FREE_PLAN_MAX_GENERATIONS,
+  PREMIUM_PLAN_NAME
+} from '~/constants/plan'
 import type { Meme, Subscription, User } from '~/db/generated/prisma/client'
 import { E2E_FILLER_MEMES, E2E_NAMED_MEMES } from './content'
 
@@ -15,6 +19,7 @@ export type E2eRole = Pick<User, 'id' | 'name' | 'email' | 'emailVerified'> & {
   providerAvatar?: NonNullable<User['providerAvatar']>
   hasStripeCustomer?: boolean
   aiSearchCount?: number
+  generationCount?: User['generationCount']
 }
 
 const MONTHLY_PREMIUM_SUBSCRIPTION = {
@@ -188,6 +193,27 @@ export const E2E_ROLES = {
     emailVerified: true,
     subscription: MONTHLY_PREMIUM_SUBSCRIPTION,
     aiSearchCount: FREE_PLAN_MAX_AI_SEARCHES
+  },
+  studio: {
+    id: 'e2e-user-studio',
+    name: 'E2E Studio',
+    email: `e2e-studio@${E2E_EMAIL_DOMAIN}`,
+    emailVerified: true
+  },
+  studioCapped: {
+    id: 'e2e-user-studio-capped',
+    name: 'E2E Studio Capped',
+    email: `e2e-studio-capped@${E2E_EMAIL_DOMAIN}`,
+    emailVerified: true,
+    generationCount: FREE_PLAN_MAX_GENERATIONS
+  },
+  studioPremium: {
+    id: 'e2e-user-studio-premium',
+    name: 'E2E Studio Premium',
+    email: `e2e-studio-premium@${E2E_EMAIL_DOMAIN}`,
+    emailVerified: true,
+    subscription: MONTHLY_PREMIUM_SUBSCRIPTION,
+    generationCount: FREE_PLAN_MAX_GENERATIONS
   },
   premiumAnnualLegacy: {
     id: 'e2e-user-premium-annual-legacy',

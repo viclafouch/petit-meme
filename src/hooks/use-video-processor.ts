@@ -8,7 +8,7 @@ import {
   useQueryClient,
   useSuspenseQuery
 } from '@tanstack/react-query'
-import { getStudioErrorCode } from '~/constants/error'
+import { getStudioErrorCode, StudioError } from '~/constants/error'
 import type { MemeWithVideo } from '~/constants/meme'
 import { PERCENT_SCALE } from '~/constants/number'
 import {
@@ -25,11 +25,15 @@ import {
   type StudioFontSizeValue,
   type StudioTextPosition
 } from '~/constants/studio'
+import { snoozePremiumReminder } from '~/hooks/use-premium-reminder'
 import { useShowDialog } from '~/hooks/use-show-dialog'
-import { getAuthUserQueryOpts, getVideoBlobQueryOpts } from '~/lib/queries'
+import {
+  getGenerationQuotaQueryOpts,
+  getVideoBlobQueryOpts
+} from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
-import { incrementGenerationCount } from '~/server/user'
+import { recordGeneration } from '~/server/studio'
 import {
   FFMPEG_ENCODING_ARGS,
   FFMPEG_INPUT_FILE,
@@ -350,6 +354,14 @@ export const useVideoProcessor = (
       ffmpeg.on('progress', handleProgress)
     },
     mutationFn: async ({ meme, ...processingOptions }: ProcessVideoParams) => {
+      const { canGenerate } = await queryClient.query(
+        getGenerationQuotaQueryOpts()
+      )
+
+      if (!canGenerate) {
+        throw new StudioError('premium_required', { code: 'PREMIUM_REQUIRED' })
+      }
+
       const videoBlob = await queryClient.query({
         ...getVideoBlobQueryOpts(meme.id),
         staleTime: 'static'
@@ -359,6 +371,8 @@ export const useVideoProcessor = (
         memeId: meme.id,
         ...processingOptions
       })
+
+      await recordGeneration({ data: { memeId: meme.id } })
 
       if (objectUrlRef.current !== null) {
         URL.revokeObjectURL(objectUrlRef.current)
@@ -373,13 +387,9 @@ export const useVideoProcessor = (
         title: meme.title
       }
     },
-    onSuccess: ({ blob }, { meme }) => {
+    onSuccess: ({ blob }) => {
       options?.onSuccess?.(blob)
-      const user = queryClient.getQueryData(getAuthUserQueryOpts().queryKey)
-
-      if (user) {
-        void incrementGenerationCount({ data: { memeId: meme.id } })
-      }
+      void queryClient.invalidateQueries(getGenerationQuotaQueryOpts())
     },
     onError: (error) => {
       const studioCode = getStudioErrorCode(error)
@@ -391,7 +401,11 @@ export const useVideoProcessor = (
       }
 
       if (studioCode === 'PREMIUM_REQUIRED') {
-        toast.error(m.error_bookmark_limit())
+        queryClient.setQueryData(getGenerationQuotaQueryOpts().queryKey, {
+          canGenerate: false
+        })
+        snoozePremiumReminder()
+        showDialog('studio-upsell', {})
 
         return
       }

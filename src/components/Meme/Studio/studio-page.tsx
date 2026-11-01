@@ -1,7 +1,7 @@
 import React from 'react'
 import { ArrowLeft, Pencil, SlidersHorizontal, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
-import { Link } from '@tanstack/react-router'
+import { Link, useRouteContext } from '@tanstack/react-router'
 import {
   StudioActions,
   StudioMobileActions
@@ -22,6 +22,7 @@ import { Separator } from '~/components/ui/separator'
 import { LOGO_PATH } from '~/constants/branding'
 import type { MemeWithVideo } from '~/constants/meme'
 import { STUDIO_TEXT_MAX_LENGTH } from '~/constants/studio'
+import { useShowDialog } from '~/hooks/use-show-dialog'
 import {
   useVideoInitializer,
   useVideoPreloader,
@@ -61,6 +62,8 @@ type StudioPageProps = {
 }
 
 export const StudioPage = ({ meme }: StudioPageProps) => {
+  const { user } = useRouteContext({ from: '__root__' })
+  const showDialog = useShowDialog()
   const ffmpegQuery = useVideoInitializer()
   const { triggerPreload } = useVideoPreloader(ffmpegQuery.data, meme.id)
 
@@ -80,6 +83,12 @@ export const StudioPage = ({ meme }: StudioPageProps) => {
   const handleGenerate = () => {
     if (!hasText) {
       toast.error(m.studio_enter_text())
+
+      return
+    }
+
+    if (!user) {
+      showDialog('auth', {})
 
       return
     }

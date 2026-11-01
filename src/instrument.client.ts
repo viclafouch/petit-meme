@@ -7,6 +7,7 @@ import {
   SENTRY_TRACES_SAMPLE_RATE
 } from '~/constants/sentry'
 import { clientEnv } from '~/env/client'
+import { dropExpectedError } from '~/lib/expected-error'
 import {
   getFeedbackOptions,
   scrubSensitiveBreadcrumbs,
@@ -33,7 +34,9 @@ Sentry.init({
   replaysOnErrorSampleRate: 1,
   denyUrls: [/extensions\//iu, /^chrome:\/\//iu, /^chrome-extension:\/\//iu],
   ignoreErrors: [...SENTRY_IGNORE_ERRORS, ...BROWSER_NETWORK_ERRORS],
-  beforeSend: scrubUserPii,
+  beforeSend: (event, hint) => {
+    return dropExpectedError(scrubUserPii(event), hint)
+  },
   beforeBreadcrumb: scrubSensitiveBreadcrumbs
 })
 

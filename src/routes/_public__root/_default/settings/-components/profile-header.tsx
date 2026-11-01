@@ -5,23 +5,20 @@ import { Card, CardContent } from '~/components/ui/card'
 import { UserAvatar } from '~/components/user-avatar'
 import { FOCUS_VISIBLE_RING_CLASS_NAME } from '~/constants/ui'
 import { formatDate } from '~/helpers/date'
+import { useIsPremium } from '~/hooks/use-is-premium'
 import type { SessionUser } from '~/lib/role'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
-import type { ActiveSubscription } from '~/server/customer'
 import { AvatarPickerDialog } from './avatar-picker-dialog'
 
 type ProfileHeaderProps = {
   user: SessionUser
-  activeSubscription: ActiveSubscription | null
 }
 
-export const ProfileHeader = ({
-  user,
-  activeSubscription
-}: ProfileHeaderProps) => {
+export const ProfileHeader = ({ user }: ProfileHeaderProps) => {
   const [isAvatarPickerOpened, setIsAvatarPickerOpened] = React.useState(false)
+  const isPremium = useIsPremium()
 
   return (
     <Card>
@@ -63,10 +60,10 @@ export const ProfileHeader = ({
           <div className="flex-1 space-y-2">
             <div className="flex flex-col gap-2 md:flex-row md:items-center">
               <h1 className="text-2xl font-bold">{user.name}</h1>
-              {!activeSubscription ? (
-                <Badge variant="secondary">{m.settings_badge_tester()}</Badge>
-              ) : (
+              {isPremium ? (
                 <Badge variant="default">{m.settings_badge_premium()}</Badge>
+              ) : (
+                <Badge variant="secondary">{m.settings_badge_tester()}</Badge>
               )}
             </div>
             <div className="text-muted-foreground flex flex-wrap gap-4 text-sm">

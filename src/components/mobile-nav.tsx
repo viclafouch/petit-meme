@@ -11,6 +11,7 @@ import {
   PopoverTrigger
 } from '~/components/ui/popover'
 import { getLegalLinks } from '~/constants/navigation'
+import { useIsPremium } from '~/hooks/use-is-premium'
 import { useStripeCheckout } from '~/hooks/use-stripe-checkout'
 import {
   getActiveSubscriptionQueryOpts,
@@ -42,6 +43,7 @@ export const MobileNav = ({ links, user }: MobileNavProps) => {
     ...getActiveSubscriptionQueryOpts(),
     enabled: Boolean(user)
   })
+  const isPremium = useIsPremium()
 
   const handleClose = () => {
     setIsOpen(false)
@@ -187,7 +189,7 @@ export const MobileNav = ({ links, user }: MobileNavProps) => {
             </div>
           </div>
           <div className="shrink-0 space-y-4 border-t border-border/40 p-6">
-            {activeSubscriptionQuery.data ? (
+            {isPremium ? (
               <Link
                 to="/submit"
                 className={STICKY_CTA_CLASS}

@@ -19,7 +19,6 @@ import {
   SelectTrigger,
   SelectValue
 } from '~/components/ui/select'
-import { getStudioErrorCode, type StudioErrorCode } from '~/constants/error'
 import {
   CREATE_MEME_SUBMISSION_SCHEMA,
   MAX_PENDING_SUBMISSIONS
@@ -56,32 +55,7 @@ const submissionFormOpts = formOptions({
   }
 })
 
-const SUBMISSION_ERROR_MESSAGES: Partial<
-  Record<StudioErrorCode, () => string>
-> = {
-  SUBMISSION_LIMIT_REACHED: () => {
-    return m.submit_error_limit_reached()
-  },
-  DUPLICATE_URL: () => {
-    return m.submit_error_duplicate_url()
-  },
-  TWEET_NO_VIDEO: () => {
-    return m.submit_error_tweet_no_video()
-  },
-  TWEET_VERIFICATION_FAILED: () => {
-    return m.submit_error_tweet_verification_failed()
-  }
-}
-
 const getSubmissionErrorMessage = (error: Error) => {
-  const code = getStudioErrorCode(error)
-  const mapper =
-    code === undefined ? undefined : SUBMISSION_ERROR_MESSAGES[code]
-
-  if (mapper) {
-    return mapper()
-  }
-
   if (matchIsRateLimitError(error)) {
     return m.submit_error_rate_limit()
   }

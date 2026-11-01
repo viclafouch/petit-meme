@@ -4,11 +4,9 @@ import {
   setResponseHeader,
   setResponseStatus
 } from '@tanstack/react-start/server'
+import { AppError } from '~/constants/error'
 import { HTTP_STATUS } from '~/constants/http'
-import {
-  RATE_LIMIT_ERROR_MESSAGE,
-  type RateLimitConfig
-} from '~/constants/rate-limit'
+import type { RateLimitConfig } from '~/constants/rate-limit'
 import { extractClientIp } from '~/helpers/request'
 import { logger } from '~/lib/logger'
 import { captureWithFeature, wrapMiddlewareWithSentry } from '~/lib/sentry'
@@ -46,7 +44,7 @@ const throwRateLimitExceeded = ({
   setResponseStatus(HTTP_STATUS.TOO_MANY_REQUESTS)
   setResponseHeader('Retry-After', String(result.retryAfterSeconds))
 
-  throw new Error(RATE_LIMIT_ERROR_MESSAGE)
+  throw new AppError('rate_limited', { code: 'RATE_LIMITED' })
 }
 
 export const createRateLimitMiddleware = (config: RateLimitConfig) => {

@@ -1,69 +1,28 @@
-import { createSerializationAdapter } from '@tanstack/react-router'
+export type AppErrorCode =
+  | 'PREMIUM_REQUIRED'
+  | 'UNAUTHORIZED'
+  | 'BANNED_USER'
+  | 'RATE_LIMITED'
+  | 'SUBMISSION_LIMIT_REACHED'
+  | 'DUPLICATE_URL'
+  | 'TWEET_NO_VIDEO'
+  | 'TWEET_VERIFICATION_FAILED'
+  | 'AI_SEARCH_QUOTA_EXCEEDED'
+  | 'AI_SEARCH_UNAVAILABLE'
 
-const STUDIO_ERROR_CODES = [
-  'PREMIUM_REQUIRED',
-  'UNAUTHORIZED',
-  'BANNED_USER',
-  'SUBMISSION_LIMIT_REACHED',
-  'DUPLICATE_URL',
-  'TWEET_NO_VIDEO',
-  'TWEET_VERIFICATION_FAILED',
-  'AI_SEARCH_QUOTA_EXCEEDED'
-] as const satisfies readonly string[]
+export class AppError extends Error {
+  code: AppErrorCode
 
-export type StudioErrorCode = (typeof STUDIO_ERROR_CODES)[number]
-
-const matchIsStudioErrorCode = (value: string): value is StudioErrorCode => {
-  return STUDIO_ERROR_CODES.some((code) => {
-    return code === value
-  })
-}
-
-export class StudioError extends Error {
-  code: StudioErrorCode
-
-  constructor(message: string, options: { code: StudioErrorCode }) {
+  constructor(message: string, options: { code: AppErrorCode }) {
     super(message)
 
     Object.setPrototypeOf(this, new.target.prototype)
 
-    this.name = 'StudioError'
+    this.name = 'AppError'
     this.code = options.code
   }
 }
 
-const matchIsStudioError = (error: unknown): error is StudioError => {
-  return error instanceof Error && 'code' in error
+export const getAppErrorCode = (error: unknown) => {
+  return error instanceof AppError ? error.code : undefined
 }
-
-export const getStudioErrorCode = (
-  error: unknown
-): StudioErrorCode | undefined => {
-  if (matchIsStudioError(error)) {
-    return error.code
-  }
-
-  if (!(error instanceof Error)) {
-    return undefined
-  }
-
-  const messageCode = error.message.toUpperCase()
-
-  return matchIsStudioErrorCode(messageCode) ? messageCode : undefined
-}
-
-export const customErrorAdapter = createSerializationAdapter({
-  key: 'custom-error',
-  test: (value) => {
-    return value instanceof StudioError
-  },
-  toSerializable: ({ message, code }) => {
-    return {
-      message,
-      code
-    }
-  },
-  fromSerializable: ({ message, code }) => {
-    return new StudioError(message, { code })
-  }
-})

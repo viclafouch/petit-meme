@@ -7,11 +7,11 @@ import {
   AI_SEARCH_INPUT_SCHEMA,
   AI_SEARCH_MODEL,
   AI_SEARCH_TIMEOUT_MS,
-  AI_SEARCH_QUOTA_EXCEEDED_MESSAGE,
   DAILY_GLOBAL_AI_SEARCH_CAP,
   FREE_PLAN_MAX_AI_SEARCHES,
   MAX_AI_SEARCH_RESULTS
 } from '~/constants/ai-search'
+import { AppError } from '~/constants/error'
 import { HTTP_STATUS } from '~/constants/http'
 import { RATE_LIMIT_AI_SEARCH } from '~/constants/rate-limit'
 import { lockUntilTransactionEnds } from '~/db/advisory-lock'
@@ -102,7 +102,9 @@ const reserveAiSearch = ({
     if (dailyCount >= DAILY_GLOBAL_AI_SEARCH_CAP) {
       aiSearchLogger.warn({ dailyCount }, 'Daily global AI search cap reached')
       setResponseStatus(HTTP_STATUS.TOO_MANY_REQUESTS)
-      throw new Error('AI search temporarily unavailable')
+      throw new AppError('ai_search_unavailable', {
+        code: 'AI_SEARCH_UNAVAILABLE'
+      })
     }
 
     const monthlyCount = await transaction.aiSearchLog.count({
@@ -111,7 +113,9 @@ const reserveAiSearch = ({
 
     if (!isPremium && monthlyCount >= FREE_PLAN_MAX_AI_SEARCHES) {
       setResponseStatus(HTTP_STATUS.TOO_MANY_REQUESTS)
-      throw new Error(AI_SEARCH_QUOTA_EXCEEDED_MESSAGE)
+      throw new AppError('ai_search_quota_exceeded', {
+        code: 'AI_SEARCH_QUOTA_EXCEEDED'
+      })
     }
 
     const { id } = await transaction.aiSearchLog.create({

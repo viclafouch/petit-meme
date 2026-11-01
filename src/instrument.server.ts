@@ -7,6 +7,7 @@ import {
 } from '~/constants/sentry'
 import { baseEnv } from '~/env/base'
 import { clientEnv } from '~/env/client'
+import { dropExpectedError } from '~/lib/expected-error'
 
 const deploymentEnv =
   baseEnv.VERCEL_ENV ?? (IS_PRODUCTION ? 'production' : 'development')
@@ -40,5 +41,6 @@ Sentry.init({
 
     return inheritOrSampleWith(SENTRY_TRACES_SAMPLE_RATE)
   },
-  ignoreErrors: SENTRY_IGNORE_ERRORS
+  ignoreErrors: SENTRY_IGNORE_ERRORS,
+  beforeSend: dropExpectedError
 })

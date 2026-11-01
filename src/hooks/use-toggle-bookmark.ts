@@ -1,8 +1,13 @@
 import React from 'react'
 import { toast } from 'sonner'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { getStudioErrorCode } from '~/constants/error'
+import { getAppErrorCode } from '~/constants/error'
 import type { MemeWithVideo } from '~/constants/meme'
+import { FREE_PLAN_MAX_FAVORITES } from '~/constants/plan'
+import { getErrorMessage } from '~/helpers/error'
+import { useIsPremium } from '~/hooks/use-is-premium'
+import { snoozePremiumReminder } from '~/hooks/use-premium-reminder'
+import { useShowDialog } from '~/hooks/use-show-dialog'
 import { getFavoritesMemesQueryOpts, getMemeByIdQueryOpts } from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
@@ -18,6 +23,13 @@ export function useToggleBookmark({
   bookmarks
 }: UseToggleBookmarkParams) {
   const queryClient = useQueryClient()
+  const showDialog = useShowDialog()
+  const isPremium = useIsPremium()
+
+  const openBookmarkUpsell = () => {
+    snoozePremiumReminder()
+    showDialog('bookmark-upsell', {})
+  }
 
   const isMemeBookmarked = React.useMemo(() => {
     if (!bookmarks) {
@@ -57,8 +69,22 @@ export function useToggleBookmark({
       })
     },
     onError: (error) => {
-      if (getStudioErrorCode(error) === 'PREMIUM_REQUIRED') {
-        toast.error(m.error_bookmark_limit())
+      const errorCode = getAppErrorCode(error)
+
+      if (errorCode === 'PREMIUM_REQUIRED') {
+        openBookmarkUpsell()
+
+        return
+      }
+
+      if (errorCode === 'UNAUTHORIZED') {
+        showDialog('auth', {})
+
+        return
+      }
+
+      if (errorCode !== undefined) {
+        toast.error(getErrorMessage(error))
 
         return
       }
@@ -78,6 +104,15 @@ export function useToggleBookmark({
     isMemeBookmarked,
     isPending: toggleMutation.isPending,
     toggleBookmark: () => {
+      const isFavoritesFull =
+        (bookmarks?.length ?? 0) >= FREE_PLAN_MAX_FAVORITES
+
+      if (!isMemeBookmarked && !isPremium && isFavoritesFull) {
+        openBookmarkUpsell()
+
+        return
+      }
+
       toggleMutation.mutate({ data: meme.id })
     }
   }

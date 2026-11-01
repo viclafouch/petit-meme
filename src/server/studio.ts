@@ -3,7 +3,7 @@ import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
 import { prismaClient } from '~/db'
-import { StudioError } from '~/constants/error'
+import { AppError } from '~/constants/error'
 import { HTTP_STATUS } from '~/constants/http'
 import { FREE_PLAN_MAX_GENERATIONS } from '~/constants/plan'
 import { ActivityEventType, MemeStatus } from '~/db/generated/prisma/enums'
@@ -61,7 +61,7 @@ export const recordGeneration = createServerFn({ method: 'POST' })
       if (count === 0) {
         authLogger.warn({ userId }, 'Generation limit reached')
         setResponseStatus(HTTP_STATUS.FORBIDDEN)
-        throw new StudioError('premium_required', { code: 'PREMIUM_REQUIRED' })
+        throw new AppError('premium_required', { code: 'PREMIUM_REQUIRED' })
       }
 
       await transaction.studioGeneration.create({

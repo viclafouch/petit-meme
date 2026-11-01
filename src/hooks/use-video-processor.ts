@@ -8,7 +8,7 @@ import {
   useQueryClient,
   useSuspenseQuery
 } from '@tanstack/react-query'
-import { getStudioErrorCode, StudioError } from '~/constants/error'
+import { getAppErrorCode, AppError } from '~/constants/error'
 import type { MemeWithVideo } from '~/constants/meme'
 import { PERCENT_SCALE } from '~/constants/number'
 import {
@@ -25,6 +25,7 @@ import {
   type StudioFontSizeValue,
   type StudioTextPosition
 } from '~/constants/studio'
+import { getErrorMessage } from '~/helpers/error'
 import { snoozePremiumReminder } from '~/hooks/use-premium-reminder'
 import { useShowDialog } from '~/hooks/use-show-dialog'
 import {
@@ -359,7 +360,7 @@ export const useVideoProcessor = (
       )
 
       if (!canGenerate) {
-        throw new StudioError('premium_required', { code: 'PREMIUM_REQUIRED' })
+        throw new AppError('premium_required', { code: 'PREMIUM_REQUIRED' })
       }
 
       const videoBlob = await queryClient.query({
@@ -392,20 +393,27 @@ export const useVideoProcessor = (
       void queryClient.invalidateQueries(getGenerationQuotaQueryOpts())
     },
     onError: (error) => {
-      const studioCode = getStudioErrorCode(error)
+      const errorCode = getAppErrorCode(error)
 
-      if (studioCode === 'UNAUTHORIZED') {
+      if (errorCode === 'UNAUTHORIZED') {
         showDialog('auth', {})
 
         return
       }
 
-      if (studioCode === 'PREMIUM_REQUIRED') {
+      if (errorCode === 'PREMIUM_REQUIRED') {
         queryClient.setQueryData(getGenerationQuotaQueryOpts().queryKey, {
           canGenerate: false
         })
         snoozePremiumReminder()
         showDialog('studio-upsell', {})
+
+        return
+      }
+
+      if (errorCode !== undefined) {
+        toast.error(getErrorMessage(error))
+        options?.onError?.(error)
 
         return
       }

@@ -6,7 +6,9 @@ import { useMutation } from '@tanstack/react-query'
 import { Link, useRouter } from '@tanstack/react-router'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import { LoadingButton } from '~/components/ui/loading-button'
+import { getAppErrorCode } from '~/constants/error'
 import { getAuthErrorMessage } from '~/helpers/auth-errors'
+import { getErrorMessage } from '~/helpers/error'
 import { useAppForm } from '~/hooks/use-app-form'
 import { useErrorFocus } from '~/hooks/use-error-focus'
 import { useResetAccountData } from '~/hooks/use-reset-account-data'
@@ -108,7 +110,9 @@ export const VerifyEmailForm = ({ token }: VerifyEmailFormProps) => {
         <Alert ref={errorRef} variant="destructive" role="alert" tabIndex={-1}>
           <CircleAlert aria-hidden="true" />
           <AlertDescription className="text-destructive-foreground">
-            {getAuthErrorMessage(verifyEmailMutation.error.message)}
+            {getAppErrorCode(verifyEmailMutation.error) === undefined
+              ? getAuthErrorMessage(verifyEmailMutation.error.message)
+              : getErrorMessage(verifyEmailMutation.error)}
           </AlertDescription>
         </Alert>
       ) : null}

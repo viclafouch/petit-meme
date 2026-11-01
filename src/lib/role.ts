@@ -9,3 +9,19 @@ export type UserRoleHolder = {
 export const matchIsUserAdmin = (user: UserRoleHolder) => {
   return user.role === 'admin'
 }
+
+type MatchIsPremiumParams = {
+  user: UserRoleHolder | null | undefined
+  subscription: object | null | undefined
+}
+
+export const matchIsPremium = ({
+  user,
+  subscription
+}: MatchIsPremiumParams) => {
+  if (!user) {
+    return false
+  }
+
+  return matchIsUserAdmin(user) || Boolean(subscription)
+}

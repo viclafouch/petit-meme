@@ -15,11 +15,11 @@ export const StudioLoadingFallback = () => {
   )
 }
 
-type StudioErrorFallbackProps = FallbackProps
+type StudioCrashFallbackProps = FallbackProps
 
-export const StudioErrorFallback = ({
+export const StudioCrashFallback = ({
   resetErrorBoundary
-}: StudioErrorFallbackProps) => {
+}: StudioCrashFallbackProps) => {
   return (
     <div
       role="alert"

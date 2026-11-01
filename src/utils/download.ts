@@ -18,14 +18,27 @@ export function downloadBlob(blob: Blob, filename: string) {
   URL.revokeObjectURL(url)
 }
 
-export async function shareBlob(blob: Blob, title: string, extension = 'mp4') {
-  const data: ShareData = {
+const buildShareData = (blob: Blob, title: string, extension: string) => {
+  return {
     files: [new File([blob], `${title}.${extension}`, { type: blob.type })],
     title
-  }
+  } satisfies ShareData
+}
 
+export const matchIsBlobShareable = (
+  blob: Blob,
+  title: string,
+  extension: string
+) => {
+  return (
+    'canShare' in navigator &&
+    navigator.canShare(buildShareData(blob, title, extension))
+  )
+}
+
+export async function shareBlob(blob: Blob, title: string, extension = 'mp4') {
   try {
-    await navigator.share(data)
+    await navigator.share(buildShareData(blob, title, extension))
 
     return true
   } catch (error) {

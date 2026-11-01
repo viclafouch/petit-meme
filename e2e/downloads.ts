@@ -6,3 +6,16 @@ export const expectDownloadIsNotEmpty = async (download: Download) => {
 
   expect(size).toBeGreaterThan(0)
 }
+
+type ExpectMemeFileDownloadedParams = {
+  download: Download
+  fileName: string
+}
+
+export const expectMemeFileDownloaded = async ({
+  download,
+  fileName
+}: ExpectMemeFileDownloadedParams) => {
+  expect(download.suggestedFilename()).toBe(fileName)
+  await expectDownloadIsNotEmpty(download)
+}

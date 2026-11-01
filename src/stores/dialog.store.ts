@@ -22,6 +22,14 @@ const DIALOGS = {
       return { default: WatermarkUpsellDialog }
     })
   },
+  'audio-upsell': {
+    component: React.lazy(async () => {
+      const { AudioUpsellDialog } =
+        await import('~/components/Meme/audio-upsell-dialog')
+
+      return { default: AudioUpsellDialog }
+    })
+  },
   'ai-search-upsell': {
     component: React.lazy(async () => {
       const { AiSearchUpsellDialog } =
@@ -76,6 +84,7 @@ type DialogComponentMap = {
 const DIALOG_COMPONENTS: DialogComponentMap = {
   auth: DIALOGS.auth.component,
   'watermark-upsell': DIALOGS['watermark-upsell'].component,
+  'audio-upsell': DIALOGS['audio-upsell'].component,
   'ai-search-upsell': DIALOGS['ai-search-upsell'].component,
   'studio-upsell': DIALOGS['studio-upsell'].component,
   'bookmark-upsell': DIALOGS['bookmark-upsell'].component,

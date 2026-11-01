@@ -1,6 +1,7 @@
 import React from 'react'
 import {
   ArrowLeft,
+  ChevronDown,
   Clapperboard,
   Clipboard,
   Download,
@@ -16,6 +17,7 @@ import {
   useLinkProps,
   useRouteContext
 } from '@tanstack/react-router'
+import { MemeExportMenu } from '~/components/Meme/meme-export-menu'
 import { MemeLanguageBadge } from '~/components/Meme/meme-language-badge'
 import { MemeVideoPlayer } from '~/components/Meme/meme-video-player'
 import { MemesList } from '~/components/Meme/memes-list'
@@ -254,30 +256,42 @@ export const MemePage = () => {
                 {m.meme_open_studio()}
               </Link>
               <div className="flex gap-2 flex-wrap">
-                <Button
-                  disabled={shareMutation.isPending}
-                  variant="outline"
-                  className="md:hidden shrink-0 flex-1"
-                  onClick={() => {
+                <MemeExportMenu
+                  mode="share"
+                  onExport={(format) => {
                     pauseVideo()
-                    shareMutation.trigger(memeQuery.data)
+                    shareMutation.trigger(memeQuery.data, format)
                   }}
+                  render={
+                    <Button
+                      disabled={shareMutation.isPending}
+                      variant="outline"
+                      className="md:hidden shrink-0 flex-1"
+                    />
+                  }
                 >
                   <Share2 />
-                  {m.meme_share_video()}
-                </Button>
-                <Button
-                  disabled={downloadMutation.isPending}
-                  variant="outline"
-                  className="flex-1 shrink-0"
-                  onClick={() => {
+                  {m.meme_share()}
+                  <ChevronDown className="text-muted-foreground" />
+                </MemeExportMenu>
+                <MemeExportMenu
+                  mode="download"
+                  onExport={(format) => {
                     pauseVideo()
-                    downloadMutation.trigger(memeQuery.data)
+                    downloadMutation.trigger(memeQuery.data, format)
                   }}
+                  render={
+                    <Button
+                      disabled={downloadMutation.isPending}
+                      variant="outline"
+                      className="flex-1 shrink-0"
+                    />
+                  }
                 >
                   <Download />
-                  {m.meme_download_video()}
-                </Button>
+                  {m.meme_download()}
+                  <ChevronDown className="text-muted-foreground" />
+                </MemeExportMenu>
               </div>
               <Button
                 variant="outline"

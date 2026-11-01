@@ -74,6 +74,7 @@ export const getFreePlan = (): Plan => {
         note: m.plan_note_3_max()
       },
       { label: m.plan_feature_watermark(), status: 'limited' },
+      { label: m.plan_feature_audio_download(), status: 'not_included' },
       {
         label: m.plan_feature_ai_search(),
         status: 'limited',
@@ -106,6 +107,7 @@ export const getPremiumPlan = (): Plan => {
         note: m.plan_note_unlimited()
       },
       { label: m.plan_feature_no_watermark(), status: 'included' },
+      { label: m.plan_feature_audio_download(), status: 'included' },
       {
         label: m.plan_feature_ai_search(),
         status: 'included',

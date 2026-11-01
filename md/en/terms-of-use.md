@@ -1,6 +1,6 @@
 # Terms of Use - Petit Meme
 
-Last updated: **September 2025**
+Last updated: **November 2026**
 
 Welcome to **Petit Meme**.
 By using our website (https://petit-meme.io) and our services, you accept
@@ -50,8 +50,9 @@ in fraudulent activities.
 -   The distributed content is presented solely for the purposes of
     **indexing, discovery and entertainment**.
 -   Free downloads may contain a watermark.
--   Premium features provide access to watermark-free downloads, with no
-    restrictions on resale or redistribution.
+-   Premium features provide access to watermark-free downloads and to
+    the sound of every meme as MP3, with no restrictions on resale or
+    redistribution.
 
 ------------------------------------------------------------------------
 

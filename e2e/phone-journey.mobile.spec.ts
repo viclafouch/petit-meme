@@ -37,7 +37,7 @@ test.describe('the phone journey', () => {
     const playerDialog = await openMemePlayer(page)
 
     await expect(
-      playerDialog.getByRole('button', { name: m.meme_share_video() })
+      playerDialog.getByRole('button', { name: m.meme_share(), exact: true })
     ).toBeVisible()
     await expect(playerDialog.getByTestId('meme-video-player')).toBeVisible()
   })

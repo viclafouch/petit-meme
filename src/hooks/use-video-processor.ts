@@ -268,21 +268,21 @@ const getVideoInitQueryOpts = () => {
     queryFn: () => {
       return loadFFmpeg(m.error_video_timeout())
     },
-    staleTime: Infinity,
-    refetchOnMount: 'always'
+    staleTime: Infinity
   })
 }
 
 getVideoInitQueryOpts.all = ['video-processor-init'] as const
 
 export const useVideoInitializer = () => {
+  const queryClient = useQueryClient()
   const videoInitQuery = useSuspenseQuery(getVideoInitQueryOpts())
 
   React.useEffect(() => {
     return () => {
-      videoInitQuery.data.terminate()
+      queryClient.removeQueries({ queryKey: getVideoInitQueryOpts.all })
     }
-  }, [videoInitQuery.data])
+  }, [queryClient])
 
   return videoInitQuery
 }

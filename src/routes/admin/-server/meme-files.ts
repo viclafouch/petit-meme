@@ -5,11 +5,7 @@ import type { Meme, Prisma } from '~/db/generated/prisma/client'
 import { serverEnv } from '~/env/server'
 import { buildSignedOriginalUrl } from '~/lib/bunny'
 import { adminLogger } from '~/lib/logger'
-import {
-  buildMemeFileUrl,
-  checkMemeFileExists,
-  fetchMemeFile
-} from '~/lib/meme-files'
+import { buildMemeFileUrl, findMissingMemeFiles } from '~/lib/meme-files'
 import { logAuditAction } from '~/server/audit'
 import { adminRequiredMiddleware } from '~/server/user-auth'
 
@@ -32,19 +28,19 @@ async function findMemeBunnyId(memeId: Meme['id']) {
   return meme.video.bunnyId
 }
 
-export const checkMemeWatermark = createServerFn({ method: 'GET' })
+export const checkMemeFiles = createServerFn({ method: 'GET' })
   .validator((data) => {
     return z.string().parse(data)
   })
   .middleware([adminRequiredMiddleware])
   .handler(async ({ data: memeId }) => {
     const bunnyId = await findMemeBunnyId(memeId)
-    const exists = await checkMemeFileExists(bunnyId, 'mp4')
+    const missingFiles = await findMissingMemeFiles(bunnyId)
 
-    return { exists }
+    return { missingFiles }
   })
 
-export const getWatermarkUploadConfig = createServerFn({ method: 'POST' })
+export const getMemeFilesUploadConfig = createServerFn({ method: 'POST' })
   .validator((data) => {
     return z.string().parse(data)
   })
@@ -62,7 +58,7 @@ export const getWatermarkUploadConfig = createServerFn({ method: 'POST' })
     }
   })
 
-export const logWatermarkUpload = createServerFn({ method: 'POST' })
+export const logMemeFilesUpload = createServerFn({ method: 'POST' })
   .validator((data) => {
     return z
       .object({
@@ -82,7 +78,7 @@ export const logWatermarkUpload = createServerFn({ method: 'POST' })
 
     adminLogger.info(
       { memeId: data.memeId, bunnyId: data.bunnyId },
-      'Watermark uploaded via admin'
+      'Meme files uploaded via admin'
     )
 
     return { success: true as const }
@@ -125,26 +121,4 @@ export const fetchAdminVideoBlob = createServerFn({ method: 'GET' })
     } finally {
       clearTimeout(timeoutId)
     }
-  })
-
-export const previewMemeWatermark = createServerFn({ method: 'GET' })
-  .validator((data) => {
-    return z.string().parse(data)
-  })
-  .middleware([adminRequiredMiddleware])
-  .handler(async ({ data: memeId }) => {
-    const bunnyId = await findMemeBunnyId(memeId)
-    const upstream = await fetchMemeFile(bunnyId, 'mp4')
-
-    const headers: HeadersInit = {
-      'Content-Type': upstream.headers.get('Content-Type') ?? 'video/mp4'
-    }
-
-    const contentLength = upstream.headers.get('Content-Length')
-
-    if (contentLength) {
-      headers['Content-Length'] = contentLength
-    }
-
-    return new Response(upstream.body, { headers })
   })

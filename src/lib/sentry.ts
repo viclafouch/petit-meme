@@ -39,7 +39,7 @@ export type SentryFeature =
   | 'meme-submission'
   | 'admin-submission'
   | 'admin-downloader'
-  | 'admin-watermark'
+  | 'admin-meme-files'
   | 'watermark-fallback'
   | 'ai-search'
   | 'activity-event'

@@ -27,14 +27,15 @@ import type { AiAssistResult } from '~/server/ai'
 import { AiAssistDialog, type AiAssistFieldSelection } from './ai-assist-dialog'
 import { MemeFormMetadataFields } from './meme-form-metadata-fields'
 import { MemeTranslationSection } from './meme-translation-section'
-import { useMemeForm } from './use-meme-form'
+import { isFirstPublish, useMemeForm } from './use-meme-form'
 
 type MemeFormProps = {
   meme: MemeFullData
+  generateFiles: () => Promise<void>
   onSuccess?: () => Promise<void>
 }
 
-export const MemeForm = ({ meme, onSuccess }: MemeFormProps) => {
+export const MemeForm = ({ meme, onSuccess, generateFiles }: MemeFormProps) => {
   const contentLocaleItems = getContentLocaleOptions().map((option) => {
     const Flag = CONTENT_LOCALE_FLAGS[option.value]
 
@@ -56,7 +57,7 @@ export const MemeForm = ({ meme, onSuccess }: MemeFormProps) => {
     categoriesOptions,
     translateContentMutation,
     isLocaleRequired
-  } = useMemeForm({ meme, onSuccess })
+  } = useMemeForm({ meme, onSuccess, generateFiles })
 
   const [isAiAssistOpen, setIsAiAssistOpen] = React.useState(false)
 
@@ -214,13 +215,24 @@ export const MemeForm = ({ meme, onSuccess }: MemeFormProps) => {
           categoriesError={categoriesListQuery.error}
         />
       </div>
-      <form.AppForm>
-        <form.FormFooter
-          submitLabel="Enregistrer"
-          isLoadingButton
-          formId="edit-meme-form"
-        />
-      </form.AppForm>
+      <form.Subscribe
+        selector={(state) => {
+          return state.values.status
+        }}
+        children={(status) => {
+          return (
+            <form.AppForm>
+              <form.FormFooter
+                submitLabel={
+                  isFirstPublish(meme, status) ? 'Publier' : 'Enregistrer'
+                }
+                isLoadingButton
+                formId="edit-meme-form"
+              />
+            </form.AppForm>
+          )
+        }}
+      />
     </form>
   )
 }

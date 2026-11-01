@@ -13,3 +13,10 @@ export const BUNNY_STATUS = {
 } as const satisfies Record<string, number>
 
 export const HLS_MIME_TYPE = 'application/vnd.apple.mpegurl'
+
+export const MEME_DERIVED_FORMATS = [
+  'mp4',
+  'mp3'
+] as const satisfies readonly string[]
+
+export type MemeDerivedFormat = (typeof MEME_DERIVED_FORMATS)[number]

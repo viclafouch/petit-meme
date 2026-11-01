@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { HTTP_STATUS } from '~/constants/http'
-import { checkMemeFileExists, deleteMemeFiles } from '~/lib/meme-files'
+import {
+  checkMemeFileExists,
+  deleteMemeFiles,
+  findMissingMemeFiles
+} from '~/lib/meme-files'
 
 const BUNNY_ID = 'bunny-video-id'
 const STREAM_VIDEO_URL = `https://video.bunnycdn.com/library/4242/videos/${BUNNY_ID}`
@@ -72,6 +76,32 @@ describe('checkMemeFileExists', () => {
       )
     }
   )
+})
+
+describe('findMissingMemeFiles', () => {
+  beforeEach(stubBunnyEnv)
+  afterEach(restoreStubs)
+
+  it('should report the MP3 when Bunny Storage only holds the MP4', async () => {
+    stubBunny({ [MP3_URL]: HTTP_STATUS.NOT_FOUND })
+
+    expect(await findMissingMemeFiles(BUNNY_ID)).toStrictEqual(['mp3'])
+  })
+
+  it('should report nothing when Bunny Storage holds both files', async () => {
+    stubBunny()
+
+    expect(await findMissingMemeFiles(BUNNY_ID)).toStrictEqual([])
+  })
+
+  it('should report both files when Bunny Storage holds neither', async () => {
+    stubBunny({
+      [MP4_URL]: HTTP_STATUS.NOT_FOUND,
+      [MP3_URL]: HTTP_STATUS.NOT_FOUND
+    })
+
+    expect(await findMissingMemeFiles(BUNNY_ID)).toStrictEqual(['mp4', 'mp3'])
+  })
 })
 
 describe('deleteMemeFiles', () => {

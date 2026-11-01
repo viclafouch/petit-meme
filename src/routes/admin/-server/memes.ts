@@ -38,7 +38,7 @@ import {
 import { invalidateAlgoliaCache } from '~/lib/algolia-cache'
 import { createVideo, uploadVideo } from '~/lib/bunny'
 import { adminLogger } from '~/lib/logger'
-import { checkMemeFileExists, deleteMemeFiles } from '~/lib/meme-files'
+import { deleteMemeFiles, findMissingMemeFiles } from '~/lib/meme-files'
 import { getTweetByUrl, getTweetMedia } from '~/lib/react-tweet'
 import { captureWithFeature } from '~/lib/sentry'
 import { baseLocale } from '~/paraglide/runtime'
@@ -262,12 +262,12 @@ export const editMeme = createServerFn({ method: 'POST' })
     }
 
     if (values.status === 'PUBLISHED') {
-      const hasWatermark = await checkMemeFileExists(meme.video.bunnyId, 'mp4')
+      const missingFiles = await findMissingMemeFiles(meme.video.bunnyId)
 
-      if (!hasWatermark) {
+      if (missingFiles.length > 0) {
         setResponseStatus(HTTP_STATUS.UNPROCESSABLE_CONTENT)
         throw new Error(
-          'Impossible de publier : le watermark doit être généré et uploadé'
+          `Impossible de publier : fichier manquant (${missingFiles.join(', ')})`
         )
       }
     }

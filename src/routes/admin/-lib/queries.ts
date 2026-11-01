@@ -21,6 +21,10 @@ import {
   getAdminRecentAudit,
   getAdminTrendingMemes
 } from '~/routes/admin/-server/dashboard'
+import {
+  checkMemeFiles,
+  fetchAdminVideoBlob
+} from '~/routes/admin/-server/meme-files'
 import { getAdminMemeById, getAdminMemes } from '~/routes/admin/-server/memes'
 import {
   getAdminPendingSubmissionCount,
@@ -37,10 +41,6 @@ import {
   getAdminVisitorActivity,
   getAdminVisitorDetail
 } from '~/routes/admin/-server/visitor'
-import {
-  checkMemeWatermark,
-  fetchAdminVideoBlob
-} from '~/routes/admin/-server/watermark'
 
 const DASHBOARD_STALE_MINUTES = 10
 const BACKGROUND_STALE_MINUTES = 5
@@ -253,18 +253,18 @@ getAdminPendingSubmissionCountQueryOpts.all = [
   'admin-pending-submission-count'
 ] as const
 
-export const getAdminMemeWatermarkQueryOpts = (memeId: Meme['id']) => {
+export const getAdminMemeFilesQueryOpts = (memeId: Meme['id']) => {
   return queryOptions({
-    queryKey: [...getAdminMemeWatermarkQueryOpts.all, memeId],
+    queryKey: [...getAdminMemeFilesQueryOpts.all, memeId],
     meta: PRIVATE_QUERY_META,
     queryFn: () => {
-      return checkMemeWatermark({ data: memeId })
+      return checkMemeFiles({ data: memeId })
     },
     staleTime: BACKGROUND_STALE_MINUTES * MINUTE
   })
 }
 
-getAdminMemeWatermarkQueryOpts.all = ['admin-meme-watermark'] as const
+getAdminMemeFilesQueryOpts.all = ['admin-meme-files'] as const
 
 export const getAdminVideoBlobQueryOpts = (memeId: Meme['id']) => {
   return queryOptions({

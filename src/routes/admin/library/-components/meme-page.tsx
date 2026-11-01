@@ -6,6 +6,7 @@ import { Badge } from '~/components/ui/badge'
 import { buttonVariants } from '~/components/ui/button'
 import { Container } from '~/components/ui/container'
 import { MemeStatusMeta } from '~/constants/meme'
+import { MemeStatus } from '~/db/generated/prisma/enums'
 import { formatDate } from '~/helpers/date'
 import { buildIframeVideoUrl } from '~/lib/bunny'
 import { m } from '~/paraglide/messages'
@@ -15,8 +16,9 @@ import {
   getAdminMemeByIdQueryOpts,
   invalidateAdminMemesOverview
 } from '~/routes/admin/-lib/queries'
+import { MemeFilesSection } from '~/routes/admin/library/-components/meme-files-section'
 import { MemeForm } from '~/routes/admin/library/-components/meme-form'
-import { MemeWatermarkSection } from '~/routes/admin/library/-components/meme-watermark-section'
+import { useMemeFilesEngine } from '~/routes/admin/library/-components/use-meme-files-engine'
 
 const routeApi = getRouteApi('/admin/library/$memeId')
 
@@ -26,6 +28,7 @@ export const MemePage = () => {
   const router = useRouter()
   const locale = getLocale()
   const memeQuery = useSuspenseQuery(getAdminMemeByIdQueryOpts(memeId))
+  const filesEngine = useMemeFilesEngine(memeQuery.data.id)
 
   const handleEditSuccess = async () => {
     await Promise.all([
@@ -86,8 +89,15 @@ export const MemePage = () => {
             allow="autoplay; fullscreen"
           />
         </div>
-        <MemeWatermarkSection memeId={memeQuery.data.id} />
-        <MemeForm meme={memeQuery.data} onSuccess={handleEditSuccess} />
+        <MemeFilesSection
+          engine={filesEngine}
+          isPublished={memeQuery.data.status === MemeStatus.PUBLISHED}
+        />
+        <MemeForm
+          meme={memeQuery.data}
+          onSuccess={handleEditSuccess}
+          generateFiles={filesEngine.generateAsync}
+        />
       </div>
     </Container>
   )

@@ -1,11 +1,12 @@
 import { hashPassword } from 'better-auth/crypto'
 import { expect, test as setup } from '@playwright/test'
 import { DATABASE_POOL_MAX_CONNECTIONS, prismaClient } from '~/db'
-import { BUNNY_STATUS } from '~/constants/bunny'
+import { BUNNY_STATUS, type MemeDerivedFormat } from '~/constants/bunny'
 import { MEME_ALGOLIA_INCLUDE, TRENDING_CATEGORY_DAYS } from '~/constants/meme'
 import { DAY, THIRTY_DAYS_MS } from '~/constants/time'
 import { MemeStatus, UserLocale } from '~/db/generated/prisma/enums'
 import { replaceAllIndicesWithMemes } from '~/lib/algolia'
+import { findMissingMemeFiles } from '~/lib/meme-files'
 import { getStripeClient } from '~/lib/stripe'
 import { clearDatabase } from './clear-database'
 import { E2E_PASSWORD, E2E_ROLES, type E2eRole } from './constants'
@@ -16,8 +17,14 @@ import {
   type E2eCategory,
   type E2eMeme
 } from './content'
+import { E2E_VIDEO_BUNNY_ID } from './env'
 
 const SEED_TIMEOUT_MS = 180_000
+
+const MEME_FILE_BACKFILL_COMMANDS = {
+  mp4: 'pnpm exec vite-node --mode e2e scripts/watermark-videos.ts',
+  mp3: 'pnpm exec vite-node --mode e2e scripts/backfill-mp3.ts'
+} as const satisfies Record<MemeDerivedFormat, string>
 
 const createWithinPool = async <TItem>(
   items: readonly TItem[],
@@ -241,5 +248,17 @@ setup.describe('the e2e environment', () => {
     const indexedMemes = await indexMemes()
 
     expect(toMemeIds(indexedMemes)).toStrictEqual(toMemeIds(E2E_MEMES))
+  })
+
+  setup('holds every file of its playable Meme', async () => {
+    const missingFormats = await findMissingMemeFiles(E2E_VIDEO_BUNNY_ID)
+    const backfillCommands = missingFormats.map((format) => {
+      return MEME_FILE_BACKFILL_COMMANDS[format]
+    })
+
+    expect(
+      missingFormats,
+      `Bunny Storage misses files of the e2e Meme, run: ${backfillCommands.join(' && ')}`
+    ).toStrictEqual([])
   })
 })

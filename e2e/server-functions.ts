@@ -1,4 +1,4 @@
-import type { Page, Request, Response } from '@playwright/test'
+import type { Page, Request } from '@playwright/test'
 import { repeatUntilRequested } from './hydration'
 
 export const SERVER_FUNCTION_URL_PATTERN = /\/_serverFn\//u
@@ -8,10 +8,6 @@ export const matchIsServerFunctionRequest = (request: Request) => {
     request.method() === 'POST' &&
     SERVER_FUNCTION_URL_PATTERN.test(request.url())
   )
-}
-
-export const matchIsServerFunctionCall = (response: Response) => {
-  return matchIsServerFunctionRequest(response.request())
 }
 
 export const cutServerFunctionCalls = (page: Page) => {

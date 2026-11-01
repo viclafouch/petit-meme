@@ -11,8 +11,7 @@ import { E2E_ROLES } from './constants'
 import { E2E_NAMED_MEMES } from './content'
 import { resolveStorageStatePath } from './env'
 import { test } from './fixtures'
-import { repeatUntilVisible } from './hydration'
-import { matchIsServerFunctionCall } from './server-functions'
+import { expectVisibleAfterReload, repeatUntilVisible } from './hydration'
 
 const CHECKOUT_TIMEOUT_MS = 90_000
 
@@ -24,16 +23,12 @@ const bookmarkTheMemeOverTheFreeCap = async (page: Page) => {
   const removeBookmarkButton = page.getByRole('button', {
     name: m.meme_remove_favorite()
   })
-  const bookmarkWritten = page.waitForResponse(matchIsServerFunctionCall)
 
   await repeatUntilVisible(() => {
     return page.getByRole('button', { name: m.meme_add_favorite() }).click()
   }, removeBookmarkButton)
 
-  await bookmarkWritten
-  await page.reload()
-
-  await expect(removeBookmarkButton).toBeVisible()
+  await expectVisibleAfterReload(page, removeBookmarkButton)
 }
 
 test.describe('a monthly checkout', () => {

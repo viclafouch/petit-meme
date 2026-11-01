@@ -257,7 +257,6 @@ export const MemePage = () => {
               </Link>
               <div className="flex gap-2 flex-wrap">
                 <MemeExportMenu
-                  mode="share"
                   onExport={(format) => {
                     pauseVideo()
                     shareMutation.trigger(memeQuery.data, format)
@@ -275,7 +274,6 @@ export const MemePage = () => {
                   <ChevronDown className="text-muted-foreground" />
                 </MemeExportMenu>
                 <MemeExportMenu
-                  mode="download"
                   onExport={(format) => {
                     pauseVideo()
                     downloadMutation.trigger(memeQuery.data, format)

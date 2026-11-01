@@ -1,15 +1,18 @@
 import { createElement } from 'react'
 import { describe, expect, it, vi } from 'vitest'
-import * as Sentry from '@sentry/tanstackstart-react'
 import {
   HTTP_STATUS,
   IMMUTABLE_CACHE_CONTROL,
   NO_STORE_CACHE_CONTROL
 } from '~/constants/http'
 import { renderOgImage } from '~/lib/og-image'
+import { captureWithFeature } from '~/lib/sentry'
 
-vi.mock(import('@sentry/tanstackstart-react'), async (importOriginal) => {
-  return { ...(await importOriginal()), captureException: vi.fn() }
+vi.mock(import('~/lib/sentry'), async (importOriginal) => {
+  return {
+    ...(await importOriginal()),
+    captureWithFeature: vi.fn<typeof captureWithFeature>()
+  }
 })
 
 const UNREACHABLE_FONT_URL = 'http://127.0.0.1:1/missing-font.ttf'
@@ -34,9 +37,10 @@ describe('renderOgImage', () => {
   it('should report a failed render to Sentry', async () => {
     await renderBrokenOgImage()
 
-    expect(Sentry.captureException).toHaveBeenCalledWith(expect.any(Error), {
-      tags: { feature: 'og-image' }
-    })
+    expect(captureWithFeature).toHaveBeenCalledWith(
+      expect.any(Error),
+      'og-image'
+    )
   })
 
   it('should answer a successful render with an immutable PNG', async () => {

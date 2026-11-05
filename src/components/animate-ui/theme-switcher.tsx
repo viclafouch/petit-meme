@@ -3,8 +3,9 @@ import { Moon, Sun } from 'lucide-react'
 import type { TargetAndTransition, Transition } from 'motion/react'
 import { motion } from 'motion/react'
 import { Switch } from '@base-ui/react/switch'
-import { useTheme } from '~/hooks/use-theme'
+import { useSelector } from '@tanstack/react-store'
 import { cn } from '~/lib/utils'
+import { useThemeStore } from '~/stores/theme.store'
 
 const SPRING_NO_BOUNCE = {
   type: 'spring',
@@ -19,7 +20,11 @@ const VISIBLE = { scale: 1, opacity: 1 } as const satisfies TargetAndTransition
 const HIDDEN = { scale: 0, opacity: 0 } as const satisfies TargetAndTransition
 
 export const ThemeSwitcher = ({ className }: { className?: string }) => {
-  const { setTheme, theme } = useTheme()
+  const themeStore = useThemeStore()
+  const theme = useSelector(themeStore, (state) => {
+    return state.theme
+  })
+  const { setTheme } = themeStore.actions
   const [isTapped, setIsTapped] = React.useState(false)
   const isDark = theme === 'dark'
 

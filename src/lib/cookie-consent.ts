@@ -1,19 +1,16 @@
 import { createClientOnlyFn, createIsomorphicFn } from '@tanstack/react-start'
 import { getCookie } from '@tanstack/react-start/server'
-import type {
-  CategoryConfig,
-  CookieConsentConfig
-} from '~/components/cookie-consent/types'
+import type { CategoryConfig } from '~/components/cookie-consent/types'
 import {
   matchIsAnalyticsConsented,
   parseConsentCookie
 } from '~/components/cookie-consent/utils'
-import { CONSENT_COOKIE_KEY, CONSENT_VERSION } from '~/constants/cookie'
+import { CONSENT_COOKIE_KEY } from '~/constants/cookie'
 import { readClientCookie } from '~/helpers/cookie'
 import { m } from '~/paraglide/messages.js'
 
-export function getCookieConsentConfig(): CookieConsentConfig {
-  const categories = [
+export function getCookieConsentCategories(): readonly CategoryConfig[] {
+  return [
     {
       key: 'necessary',
       label: m.cookie_category_necessary_label(),
@@ -25,13 +22,7 @@ export function getCookieConsentConfig(): CookieConsentConfig {
       label: m.cookie_category_analytics_label(),
       description: m.cookie_category_analytics_description()
     }
-  ] as const satisfies readonly CategoryConfig[]
-
-  return {
-    consentVersion: CONSENT_VERSION,
-    privacyPolicyUrl: '/privacy',
-    categories
-  }
+  ]
 }
 
 export const getConsentState = createIsomorphicFn()

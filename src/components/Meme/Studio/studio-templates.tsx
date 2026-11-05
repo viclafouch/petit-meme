@@ -1,5 +1,6 @@
 import { Radio } from '@base-ui/react/radio'
 import { RadioGroup } from '@base-ui/react/radio-group'
+import { useSelector } from '@tanstack/react-store'
 import {
   getStudioTemplates,
   STUDIO_FONTS,
@@ -9,7 +10,7 @@ import { SELECTED_TILE_RING_CLASS_NAME } from '~/constants/ui'
 import { buildVideoImageUrl } from '~/lib/bunny'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
-import { useStudioStore } from '~/stores/studio.store'
+import { studioStore } from '~/stores/studio.store'
 
 const PREVIEW_FONT_SIZE = 14
 const PERCENT = 100
@@ -131,12 +132,10 @@ export const StudioTemplates = ({
   bunnyId,
   disabled
 }: StudioTemplatesProps) => {
-  const activeTemplateId = useStudioStore((state) => {
+  const activeTemplateId = useSelector(studioStore, (state) => {
     return state.activeTemplateId
   })
-  const applyTemplate = useStudioStore((state) => {
-    return state.applyTemplate
-  })
+  const { applyTemplate } = studioStore.actions
 
   const thumbnailUrl = buildVideoImageUrl(bunnyId)
   const templates = getStudioTemplates()

@@ -1,6 +1,12 @@
 import React from 'react'
+import { curveMonotoneX } from 'd3-shape'
 import { BrainCircuit, Download, Eye, Share2, Sparkles } from 'lucide-react'
-import { CartesianGrid, Line, LineChart, XAxis } from 'recharts'
+import { defineChart, lineY } from '@tanstack/charts'
+import { d3Curve } from '@tanstack/charts/d3/shape'
+import { Chart } from '@tanstack/charts/react'
+import { scaleLinear } from '@tanstack/charts/scales/linear'
+import { scaleUtc } from '@tanstack/charts/scales/time'
+import { tooltip } from '@tanstack/charts/tooltip'
 import {
   Card,
   CardContent,
@@ -8,12 +14,6 @@ import {
   CardHeader,
   CardTitle
 } from '~/components/ui/card'
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig
-} from '~/components/ui/chart'
 import { formatDate } from '~/helpers/date'
 import { getLocale, type Locale } from '~/paraglide/runtime'
 import type {
@@ -42,7 +42,19 @@ const CHART_CONFIG = {
   downloads: { label: 'Téléchargements', color: 'var(--chart-6)' },
   signups: { label: 'Nouveaux utilisateurs', color: 'var(--chart-2)' },
   aiSearches: { label: 'Recherches IA', color: 'var(--chart-7)' }
-} as const satisfies ChartConfig
+} as const satisfies Record<MetricKey, { label: string; color: string }>
+
+const CHART_HEIGHT = 250
+
+const METRIC_COLORS = METRIC_KEYS.map((key) => {
+  return CHART_CONFIG[key].color
+})
+
+type TrendRow = {
+  date: Date
+  metric: MetricKey
+  value: number
+}
 
 const METRIC_SUMMARIES = [
   {
@@ -117,18 +129,92 @@ const DATE_LONG_OPTIONS: Intl.DateTimeFormatOptions = {
   timeZone: 'UTC'
 }
 
-function formatXAxisDate(
-  value: string,
-  period: DashboardPeriod,
-  locale: Locale
-) {
-  const date = new Date(value)
-
+function formatXAxisDate(date: Date, period: DashboardPeriod, locale: Locale) {
   if (period === 'all') {
     return formatDate(date, locale, MONTH_YEAR_OPTIONS)
   }
 
   return formatDate(date, locale, DAY_MONTH_OPTIONS)
+}
+
+function toTrendRows(data: ChartDataPoint[], hiddenMetrics: Set<MetricKey>) {
+  const visibleKeys = METRIC_KEYS.filter((key) => {
+    return !hiddenMetrics.has(key)
+  })
+
+  return visibleKeys.flatMap((key) => {
+    return data.map((point): TrendRow => {
+      return {
+        date: new Date(point.date),
+        metric: key,
+        value: point[key]
+      }
+    })
+  })
+}
+
+type TrendsDefinitionParams = {
+  rows: TrendRow[]
+  period: DashboardPeriod
+  locale: Locale
+}
+
+function defineTrendsChart({ rows, period, locale }: TrendsDefinitionParams) {
+  return defineChart({
+    marks: [
+      lineY(rows, {
+        x: 'date',
+        y: 'value',
+        z: 'metric',
+        strokeWidth: 2,
+        curve: d3Curve(curveMonotoneX)
+      })
+    ],
+    scales: {
+      x: {
+        scale: scaleUtc,
+        axis: {
+          line: false,
+          ticks: {
+            size: 0,
+            format: (date) => {
+              return formatXAxisDate(date, period, locale)
+            }
+          }
+        }
+      },
+      y: { scale: scaleLinear, nice: true, grid: true, axis: false }
+    },
+    color: { domain: METRIC_KEYS, range: METRIC_COLORS },
+    focus: 'group-x',
+    tooltip: {
+      use: tooltip,
+      anchor: 'group-center',
+      items: [
+        {
+          channel: 'x',
+          label: 'Date',
+          text: (point) => {
+            return formatDate(point.xValue, locale, DATE_LONG_OPTIONS)
+          }
+        },
+        {
+          channel: 'y',
+          label: 'Valeur',
+          text: (point) => {
+            return point.yValue.toLocaleString(locale)
+          }
+        },
+        {
+          channel: 'group',
+          label: 'Métrique',
+          text: (point) => {
+            return CHART_CONFIG[point.datum.metric].label
+          }
+        }
+      ]
+    }
+  })
 }
 
 type TrendsChartProps = {
@@ -143,6 +229,14 @@ export const TrendsChart = ({ data, period }: TrendsChartProps) => {
   )
 
   const totals = computeMetricTotals(data)
+
+  const definition = React.useMemo(() => {
+    return defineTrendsChart({
+      rows: toTrendRows(data, hiddenMetrics),
+      period,
+      locale
+    })
+  }, [data, hiddenMetrics, period, locale])
 
   const handleLegendClick = (metricKey: MetricKey) => {
     setHiddenMetrics((prev) => {
@@ -194,60 +288,12 @@ export const TrendsChart = ({ data, period }: TrendsChartProps) => {
               )
             })}
           </fieldset>
-          <ChartContainer
-            config={CHART_CONFIG}
-            className="aspect-auto h-62.5 w-full"
-          >
-            <LineChart
-              aria-label={`Graphique des tendances — ${PERIOD_DESCRIPTIONS[period]}`}
-              data={data}
-              margin={{ top: 0, right: 12, bottom: 0, left: 12 }}
-            >
-              <CartesianGrid vertical={false} />
-              <XAxis
-                dataKey="date"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                minTickGap={32}
-                tickFormatter={(value: string) => {
-                  return formatXAxisDate(value, period, locale)
-                }}
-              />
-              <ChartTooltip
-                content={
-                  <ChartTooltipContent
-                    className="min-w-48"
-                    labelFormatter={(label) => {
-                      if (typeof label !== 'string') {
-                        return label
-                      }
-
-                      return formatDate(
-                        new Date(label),
-                        locale,
-                        DATE_LONG_OPTIONS
-                      )
-                    }}
-                    indicator="dot"
-                  />
-                }
-              />
-              {METRIC_KEYS.map((key) => {
-                return (
-                  <Line
-                    key={key}
-                    dataKey={key}
-                    type="monotone"
-                    stroke={`var(--color-${key})`}
-                    strokeWidth={2}
-                    dot={false}
-                    hide={hiddenMetrics.has(key)}
-                  />
-                )
-              })}
-            </LineChart>
-          </ChartContainer>
+          <Chart
+            definition={definition}
+            height={CHART_HEIGHT}
+            className="chart-tooltip-popover text-xs text-muted-foreground"
+            ariaLabel={`Graphique des tendances, ${PERIOD_DESCRIPTIONS[period]}`}
+          />
           <p className="sr-only">
             {PERIOD_DESCRIPTIONS[period]} :{' '}
             {METRIC_SUMMARIES.map((metric) => {

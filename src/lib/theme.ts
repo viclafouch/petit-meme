@@ -1,4 +1,3 @@
-import React from 'react'
 import { createIsomorphicFn } from '@tanstack/react-start'
 import { getCookie } from '@tanstack/react-start/server'
 import { readClientCookie } from '~/helpers/cookie'
@@ -19,12 +18,3 @@ export const getStoredTheme = createIsomorphicFn()
 
     return value === 'light' || value === 'dark' ? value : DEFAULT_THEME
   })
-
-type ThemeContextProps = {
-  theme: Theme
-  setTheme: (theme: Theme) => void
-}
-
-export const ThemeContext = React.createContext<ThemeContextProps | undefined>(
-  undefined
-)

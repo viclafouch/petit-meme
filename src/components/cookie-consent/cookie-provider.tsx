@@ -1,124 +1,29 @@
-import React from 'react'
-import type {
-  ConsentCategories,
-  ConsentCategory,
-  ConsentChangeEvent,
-  ConsentState,
-  CookieConsentConfig,
-  CookieConsentContextValue
-} from './types'
-import { CookieConsentContext } from './use-cookie-consent'
+import type React from 'react'
+import { useCreateStore } from '@tanstack/react-store'
 import {
-  getAllAcceptedCategories,
-  getDefaultCategories,
-  saveConsentState
-} from './utils'
+  CookieConsentStoreProvider,
+  createCookieConsentActions,
+  getInitialCookieConsentState
+} from './cookie-consent.store'
+import type { ConsentState } from './types'
 
 type CookieConsentProviderProps = {
   children: React.ReactNode
-  config: CookieConsentConfig
-  initialState: ConsentState | null
+  storedConsent: ConsentState | null
 }
 
 export const CookieConsentProvider = ({
   children,
-  config,
-  initialState
+  storedConsent
 }: CookieConsentProviderProps) => {
-  const isVersionMatch = initialState?.consentVersion === config.consentVersion
-
-  const [state, setState] = React.useState<ConsentState>(() => {
-    if (initialState && isVersionMatch) {
-      return initialState
-    }
-
-    return {
-      hasConsented: false,
-      categories: getDefaultCategories(),
-      lastUpdated: null,
-      consentVersion: config.consentVersion
-    }
-  })
-
-  const [isBannerVisible, setIsBannerVisible] = React.useState(
-    !initialState || !isVersionMatch
-  )
-  const [isSettingsOpen, setIsSettingsOpen] = React.useState(false)
-
-  const previousCategoriesRef = React.useRef<ConsentCategories>(
-    state.categories
+  const cookieConsentStore = useCreateStore(
+    getInitialCookieConsentState(storedConsent),
+    createCookieConsentActions
   )
 
-  const value: CookieConsentContextValue = React.useMemo(() => {
-    const saveAndNotify = (
-      categories: ConsentCategories,
-      action: ConsentChangeEvent['action']
-    ) => {
-      const previousCategories = previousCategoriesRef.current
-
-      const newState = {
-        hasConsented: true,
-        categories,
-        lastUpdated: new Date().toISOString(),
-        consentVersion: config.consentVersion
-      } satisfies ConsentState
-
-      setState(newState)
-      saveConsentState(newState)
-      setIsBannerVisible(false)
-
-      previousCategoriesRef.current = categories
-
-      config.onConsentChange?.({
-        previousCategories,
-        currentCategories: categories,
-        action
-      })
-    }
-
-    const acceptAll = () => {
-      saveAndNotify(getAllAcceptedCategories(), 'accept_all')
-    }
-
-    const rejectAll = () => {
-      saveAndNotify(getDefaultCategories(), 'reject_all')
-    }
-
-    const updateConsent = (categories: Partial<ConsentCategories>) => {
-      const newCategories = {
-        ...state.categories,
-        ...categories,
-        necessary: true
-      } satisfies ConsentCategories
-
-      saveAndNotify(newCategories, 'custom')
-    }
-
-    const openSettings = () => {
-      setIsSettingsOpen(true)
-    }
-
-    const closeSettings = () => {
-      setIsSettingsOpen(false)
-    }
-
-    const matchHasConsent = (category: ConsentCategory) => {
-      return state.categories[category]
-    }
-
-    return {
-      state,
-      isBannerVisible,
-      isSettingsOpen,
-      acceptAll,
-      rejectAll,
-      updateConsent,
-      openSettings,
-      closeSettings,
-      matchHasConsent,
-      config
-    }
-  }, [state, isBannerVisible, isSettingsOpen, config])
-
-  return <CookieConsentContext value={value}>{children}</CookieConsentContext>
+  return (
+    <CookieConsentStoreProvider value={cookieConsentStore}>
+      {children}
+    </CookieConsentStoreProvider>
+  )
 }

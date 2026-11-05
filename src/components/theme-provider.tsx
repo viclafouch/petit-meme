@@ -1,7 +1,7 @@
-import React from 'react'
-import { ONE_YEAR_IN_SECONDS } from '~/constants/time'
-import { createClientCookie } from '~/helpers/cookie'
-import { type Theme, THEME_COOKIE_KEY, ThemeContext } from '~/lib/theme'
+import type React from 'react'
+import { useCreateStore } from '@tanstack/react-store'
+import type { Theme } from '~/lib/theme'
+import { createThemeActions, ThemeStoreProvider } from '~/stores/theme.store'
 
 type ThemeProviderProps = {
   children: React.ReactNode
@@ -12,27 +12,7 @@ export const ThemeProvider = ({
   children,
   initialTheme
 }: ThemeProviderProps) => {
-  const [theme, setTheme] = React.useState<Theme>(initialTheme)
+  const themeStore = useCreateStore({ theme: initialTheme }, createThemeActions)
 
-  React.useEffect(() => {
-    const root = document.documentElement
-    root.classList.remove('light', 'dark')
-    root.classList.add(theme)
-  }, [theme])
-
-  const handleSetTheme = React.useCallback(
-    (newTheme: Theme) => {
-      setTheme(newTheme)
-      createClientCookie(THEME_COOKIE_KEY, newTheme, {
-        maxAge: ONE_YEAR_IN_SECONDS
-      })
-    },
-    [setTheme]
-  )
-
-  const value = React.useMemo(() => {
-    return { theme, setTheme: handleSetTheme }
-  }, [theme, handleSetTheme])
-
-  return <ThemeContext value={value}>{children}</ThemeContext>
+  return <ThemeStoreProvider value={themeStore}>{children}</ThemeStoreProvider>
 }

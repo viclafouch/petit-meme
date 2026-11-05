@@ -1,6 +1,7 @@
 trustPolicy: no-downgrade
 trustPolicyExcludePrune: true
 trustPolicyExclude:
+  - '@tanstack/*'
   - '@vercel/cli-config@0.3.1'
   - '@vercel/cli-exec@1.0.1'
   - '@vercel/functions@3.10.1'
@@ -31,18 +32,16 @@ peerDependencyRules:
     '@typescript-eslint/tsconfig-utils>typescript': '7'
 
 minimumReleaseAgeExclude:
+  - '@tanstack/*'
   - '@viclafouch/*'
-  - '@better-auth/core@1.7.13'
-  - '@better-auth/drizzle-adapter@1.7.13'
-  - '@better-auth/kysely-adapter@1.7.13'
-  - '@better-auth/memory-adapter@1.7.13'
-  - '@better-auth/mongo-adapter@1.7.13'
-  - '@better-auth/prisma-adapter@1.7.13'
-  - '@better-auth/stripe@1.7.13'
-  - '@better-auth/telemetry@1.7.13'
-  - better-auth@1.7.13
 permissions:
   '@tanstack/ai':
+    skills: false
+  '@tanstack/charts':
+    skills: false
+  '@tanstack/markdown':
+    skills: false
+  '@tanstack/react-hotkeys':
     skills: false
   '@tanstack/react-router':
     skills: false

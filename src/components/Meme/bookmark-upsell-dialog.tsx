@@ -2,7 +2,7 @@ import type { WithDialog } from '~/@types/dialog'
 import { PremiumUpsellDialog } from '~/components/premium-upsell-dialog'
 import { m } from '~/paraglide/messages.js'
 
-type BookmarkUpsellDialogProps = WithDialog<Record<string, never>>
+type BookmarkUpsellDialogProps = WithDialog
 
 export const BookmarkUpsellDialog = ({
   open,

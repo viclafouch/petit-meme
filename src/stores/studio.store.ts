@@ -1,4 +1,4 @@
-import { create } from 'zustand'
+import { createStore } from '@tanstack/react-store'
 import {
   STUDIO_DEFAULT_SETTINGS,
   STUDIO_TEMPLATE_STYLES,
@@ -12,31 +12,31 @@ const STUDIO_TEMPLATES_BY_ID = new Map(
   })
 )
 
-type StudioStore = {
+type StudioState = {
   settings: StudioSettings
   activeTemplateId: StudioTemplateId | null
-  setSettings: (updates: Partial<StudioSettings>) => void
-  applyTemplate: (templateId: StudioTemplateId) => void
-  resetSettings: () => void
 }
 
-export const useStudioStore = create<StudioStore>((set) => {
+const INITIAL_STUDIO_STATE: StudioState = {
+  settings: STUDIO_DEFAULT_SETTINGS,
+  activeTemplateId: 'caption'
+}
+
+export const studioStore = createStore(INITIAL_STUDIO_STATE, ({ setState }) => {
   return {
-    settings: STUDIO_DEFAULT_SETTINGS,
-    activeTemplateId: 'caption',
-    setSettings: (updates) => {
+    setSettings: (updates: Partial<StudioSettings>) => {
       const hasStyleChange = Object.keys(updates).some((key) => {
         return key !== 'text'
       })
 
-      set((prev) => {
+      setState((prev) => {
         return {
           settings: { ...prev.settings, ...updates },
           activeTemplateId: hasStyleChange ? null : prev.activeTemplateId
         }
       })
     },
-    applyTemplate: (templateId) => {
+    applyTemplate: (templateId: StudioTemplateId) => {
       const template = STUDIO_TEMPLATES_BY_ID.get(templateId)
 
       if (!template) {
@@ -45,15 +45,12 @@ export const useStudioStore = create<StudioStore>((set) => {
 
       const { id, ...style } = template
 
-      set((prev) => {
+      setState((prev) => {
         return {
           settings: { ...prev.settings, ...style },
           activeTemplateId: id
         }
       })
-    },
-    resetSettings: () => {
-      set({ settings: STUDIO_DEFAULT_SETTINGS, activeTemplateId: null })
     }
   }
 })

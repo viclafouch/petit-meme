@@ -6,10 +6,10 @@ import type { MemeExportMode } from '~/constants/meme'
 import { getErrorMessage } from '~/helpers/error'
 import { useIsPremium } from '~/hooks/use-is-premium'
 import { snoozePremiumReminder } from '~/hooks/use-premium-reminder'
-import { useShowDialog } from '~/hooks/use-show-dialog'
 import type { InsightsTracking } from '~/lib/algolia-insights'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
+import { dialogStore } from '~/stores/dialog.store'
 import {
   deliverMemeExport,
   fetchMemeExport,
@@ -28,7 +28,6 @@ type MemeExportRequest = {
 
 export const useMemeExport = ({ mode, queryID }: UseMemeExportParams) => {
   const { user } = useRouteContext({ from: '__root__' })
-  const showDialog = useShowDialog()
   const isPremium = useIsPremium()
   const tracking = {
     queryID,
@@ -71,12 +70,12 @@ export const useMemeExport = ({ mode, queryID }: UseMemeExportParams) => {
     snoozePremiumReminder()
 
     if (format === 'mp3') {
-      showDialog('audio-upsell', { meme, mode, tracking })
+      dialogStore.actions.showDialog('audio-upsell', { meme, mode, tracking })
 
       return
     }
 
-    showDialog('watermark-upsell', { meme, mode, tracking })
+    dialogStore.actions.showDialog('watermark-upsell', { meme, mode, tracking })
   }
 
   return {

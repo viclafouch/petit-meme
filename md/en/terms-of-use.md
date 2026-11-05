@@ -3,7 +3,7 @@
 Last updated: **November 2026**
 
 Welcome to **Petit Meme**.
-By using our website (https://petit-meme.io) and our services, you accept
+By using our website ([https://petit-meme.io](https://petit-meme.io)) and our services, you accept
 these Terms of Use.
 Please read them carefully.
 
@@ -107,4 +107,4 @@ Users will be informed in case of a significant change.
 ## 9. Contact
 
 For any questions regarding these terms:
-📩 **legal@petit-meme.io**
+📩 **[legal@petit-meme.io](mailto:legal@petit-meme.io)**

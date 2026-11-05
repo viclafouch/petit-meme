@@ -3,7 +3,7 @@
 Dernière mise à jour : **Novembre 2026**
 
 Bienvenue sur **Petit Meme**.
-En utilisant notre site (https://petit-meme.io) et nos services, vous
+En utilisant notre site ([https://petit-meme.io](https://petit-meme.io)) et nos services, vous
 acceptez les présentes Conditions d'utilisation.
 Veuillez les lire attentivement.
 
@@ -110,4 +110,4 @@ Les utilisateurs seront informés en cas de changement significatif.
 ## 9. Contact
 
 Pour toute question relative à ces conditions :
-📩 **legal@petit-meme.io**
+📩 **[legal@petit-meme.io](mailto:legal@petit-meme.io)**

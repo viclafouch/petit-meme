@@ -9,15 +9,15 @@ import {
   SidebarTrigger
 } from '~/components/ui/sidebar'
 import { useCrumbMatches } from '~/hooks/use-crumb-matches'
-import { useTheme } from '~/hooks/use-theme'
 import { AdminNavButton } from '~/routes/admin/-components/admin-nav-button'
 import { AdminSidebar } from '~/routes/admin/-components/admin-sidebar'
+import { useThemeStore } from '~/stores/theme.store'
 
 const routeApi = getRouteApi('/admin')
 
 export const AdminLayout = () => {
   const { user } = routeApi.useRouteContext()
-  const { setTheme } = useTheme()
+  const { setTheme } = useThemeStore().actions
   const crumbMatches = useCrumbMatches()
 
   React.useLayoutEffect(() => {

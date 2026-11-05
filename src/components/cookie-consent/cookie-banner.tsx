@@ -2,13 +2,14 @@ import React from 'react'
 import { Cookie } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Link } from '@tanstack/react-router'
+import { useSelector } from '@tanstack/react-store'
 import { Button } from '~/components/ui/button'
 import { CONSENT_BANNER_DELAY_MS } from '~/constants/cookie'
-import { useIsDialogOpen } from '~/hooks/use-is-dialog-open'
 import { useIsMobile } from '~/hooks/use-mobile'
 import { useTimeout } from '~/hooks/use-timeout'
 import { m } from '~/paraglide/messages.js'
-import { useCookieConsent } from './use-cookie-consent'
+import { dialogStore } from '~/stores/dialog.store'
+import { useCookieConsentStore } from './cookie-consent.store'
 
 const BANNER_VIDEO_SRC = '/videos/want-a-cookie.mp4'
 const BANNER_POSTER_SRC = '/images/want-a-cookie.webp'
@@ -58,10 +59,15 @@ const BannerMedia = ({ isMobile }: BannerMediaProps) => {
 }
 
 export const CookieBanner = () => {
-  const { isBannerVisible, acceptAll, openSettings, config } =
-    useCookieConsent()
+  const cookieConsentStore = useCookieConsentStore()
+  const isBannerVisible = useSelector(cookieConsentStore, (state) => {
+    return state.isBannerVisible
+  })
+  const { acceptAll, openSettings } = cookieConsentStore.actions
   const isMobile = useIsMobile()
-  const isDialogOpen = useIsDialogOpen()
+  const isDialogOpen = useSelector(dialogStore, (state) => {
+    return state.isOpen
+  })
   const [hasDelayElapsed, setHasDelayElapsed] = React.useState(false)
 
   useTimeout({
@@ -135,7 +141,7 @@ export const CookieBanner = () => {
                 <p className="text-banner leading-relaxed text-muted-foreground">
                   {m.cookie_description()}{' '}
                   <Link
-                    to={config.privacyPolicyUrl}
+                    to="/privacy"
                     className="text-foreground/70 underline decoration-foreground/20 underline-offset-2 transition-colors hover:text-foreground hover:decoration-foreground/40"
                   >
                     {m.cookie_learn_more()}

@@ -2,7 +2,7 @@ import type { WithDialog } from '~/@types/dialog'
 import { PremiumUpsellDialog } from '~/components/premium-upsell-dialog'
 import { m } from '~/paraglide/messages.js'
 
-type AiSearchUpsellDialogProps = WithDialog<Record<string, never>>
+type AiSearchUpsellDialogProps = WithDialog
 
 export const AiSearchUpsellDialog = ({
   open,

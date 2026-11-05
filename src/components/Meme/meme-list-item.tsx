@@ -17,7 +17,6 @@ import {
 import type { MemeWithVideo } from '~/constants/meme'
 import { matchIsContentLocaleForeign } from '~/helpers/i18n-content'
 import { useMemeExport } from '~/hooks/use-meme-export'
-import { useShowDialog } from '~/hooks/use-show-dialog'
 import { useToggleBookmark } from '~/hooks/use-toggle-bookmark'
 import {
   sendClickEvent,
@@ -28,6 +27,7 @@ import { getFavoritesMemesQueryOpts } from '~/lib/queries'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
+import { dialogStore } from '~/stores/dialog.store'
 
 export type MemeListItemProps = {
   meme: MemeWithVideo
@@ -105,14 +105,13 @@ const FavoriteItemGuard = ({
   authenticatedUserToken
 }: FavoriteItemGuardProps) => {
   const { user } = useRouteContext({ from: '__root__' })
-  const showDialog = useShowDialog()
 
   if (!user) {
     return (
       <DropdownMenuItem
         onClick={(event) => {
           event.preventDefault()
-          showDialog('auth', {})
+          dialogStore.actions.showDialog('auth')
         }}
       >
         <Star />

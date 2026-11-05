@@ -1,5 +1,6 @@
-import Markdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
+import React from 'react'
+import { parseMarkdown } from '@tanstack/markdown/parser'
+import { Markdown } from '@tanstack/markdown/react'
 import { getRouteApi } from '@tanstack/react-router'
 import { BASE_MARKDOWN_COMPONENTS } from '~/constants/markdown'
 
@@ -10,41 +11,34 @@ const mentionsLegalesRouteApi = getRouteApi(
   '/_public__root/_default/mentions-legales'
 )
 
-type GfmMarkdownProps = {
+type LegalMarkdownProps = {
   markdown: string
 }
 
-const GfmMarkdown = ({ markdown }: GfmMarkdownProps) => {
+const LegalMarkdown = ({ markdown }: LegalMarkdownProps) => {
+  const document = React.useMemo(() => {
+    return parseMarkdown(markdown)
+  }, [markdown])
+
   return (
-    <div>
-      <Markdown
-        remarkPlugins={[remarkGfm]}
-        components={BASE_MARKDOWN_COMPONENTS}
-      >
-        {markdown}
-      </Markdown>
-    </div>
+    <article>
+      <Markdown components={BASE_MARKDOWN_COMPONENTS}>{document}</Markdown>
+    </article>
   )
 }
 
 export const DmcaPage = () => {
-  const markdown = dmcaRouteApi.useLoaderData()
-
-  return (
-    <div>
-      <Markdown components={BASE_MARKDOWN_COMPONENTS}>{markdown}</Markdown>
-    </div>
-  )
+  return <LegalMarkdown markdown={dmcaRouteApi.useLoaderData()} />
 }
 
 export const PrivacyPage = () => {
-  return <GfmMarkdown markdown={privacyRouteApi.useLoaderData()} />
+  return <LegalMarkdown markdown={privacyRouteApi.useLoaderData()} />
 }
 
 export const TermsOfUsePage = () => {
-  return <GfmMarkdown markdown={termsOfUseRouteApi.useLoaderData()} />
+  return <LegalMarkdown markdown={termsOfUseRouteApi.useLoaderData()} />
 }
 
 export const MentionsLegalesPage = () => {
-  return <GfmMarkdown markdown={mentionsLegalesRouteApi.useLoaderData()} />
+  return <LegalMarkdown markdown={mentionsLegalesRouteApi.useLoaderData()} />
 }

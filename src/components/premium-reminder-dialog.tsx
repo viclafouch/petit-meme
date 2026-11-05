@@ -16,7 +16,7 @@ import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
 
-type PremiumReminderDialogProps = WithDialog<Record<string, never>>
+type PremiumReminderDialogProps = WithDialog
 
 export const PremiumReminderDialog = ({
   open,

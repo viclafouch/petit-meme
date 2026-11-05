@@ -5,10 +5,10 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { useRouteContext } from '@tanstack/react-router'
 import { IconButtonStars } from '~/components/animate-ui/buttons/icon-button-stars'
 import type { MemeWithVideo } from '~/constants/meme'
-import { useShowDialog } from '~/hooks/use-show-dialog'
 import { useToggleBookmark } from '~/hooks/use-toggle-bookmark'
 import { getFavoritesMemesQueryOpts } from '~/lib/queries'
 import { m } from '~/paraglide/messages.js'
+import { dialogStore } from '~/stores/dialog.store'
 
 type ToggleLikeButtonProps = {
   meme: MemeWithVideo
@@ -51,7 +51,6 @@ const AuthBookmarkButton = ({
 
 const ToggleLikeButton = ({ meme, ...restProps }: ToggleLikeButtonProps) => {
   const { user } = useRouteContext({ from: '__root__' })
-  const showDialog = useShowDialog()
 
   if (!user) {
     return (
@@ -60,7 +59,7 @@ const ToggleLikeButton = ({ meme, ...restProps }: ToggleLikeButtonProps) => {
         {...restProps}
         onClick={(event) => {
           event.preventDefault()
-          showDialog('auth', {})
+          dialogStore.actions.showDialog('auth')
         }}
         aria-label={m.meme_add_favorite()}
       >

@@ -90,7 +90,7 @@ const handleSignInWithSocial = async (
   }
 }
 
-type AuthDialogProps = WithDialog<unknown>
+type AuthDialogProps = WithDialog
 
 export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
   const [authType, setAuthType] = React.useState<AuthType>('login')

@@ -5,7 +5,7 @@ import {
 } from '~/constants/plan'
 import { DAY } from '~/constants/time'
 import { useIsPremium } from '~/hooks/use-is-premium'
-import { matchIsDialogOpen, useDialog } from '~/stores/dialog.store'
+import { dialogStore } from '~/stores/dialog.store'
 
 const COOLDOWN_DAYS = 3
 const COOLDOWN_MS = COOLDOWN_DAYS * DAY
@@ -42,9 +42,7 @@ export const usePremiumReminder = ({ enabled }: UsePremiumReminderParams) => {
         return
       }
 
-      const dialogState = useDialog.getState()
-
-      if (matchIsDialogOpen(dialogState)) {
+      if (dialogStore.state.isOpen) {
         timeout = setTimeout(
           showReminderWhenScreenIsFree,
           PREMIUM_REMINDER_DELAY_MS
@@ -54,7 +52,7 @@ export const usePremiumReminder = ({ enabled }: UsePremiumReminderParams) => {
       }
 
       snoozePremiumReminder()
-      dialogState.showDialog('premium-reminder', {})
+      dialogStore.actions.showDialog('premium-reminder')
     }
 
     if (enabled) {

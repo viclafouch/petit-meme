@@ -16,7 +16,6 @@ import { ThemeProvider } from '~/components/theme-provider'
 import { Toaster } from '~/components/ui/sonner'
 import { IS_PRODUCTION } from '~/constants/env'
 import { clientEnv } from '~/env/client'
-import { getCookieConsentConfig } from '~/lib/cookie-consent'
 import { getLocale, getTextDirection } from '~/paraglide/runtime'
 
 const rootRouteApi = getRouteApi('__root__')
@@ -27,7 +26,6 @@ type RootDocumentProps = {
 
 export const RootDocument = ({ children }: RootDocumentProps) => {
   const { _storedTheme, _consentState } = rootRouteApi.useLoaderData()
-  const cookieConsentConfig = getCookieConsentConfig()
 
   return (
     <html lang={getLocale()} suppressHydrationWarning dir={getTextDirection()}>
@@ -55,10 +53,7 @@ export const RootDocument = ({ children }: RootDocumentProps) => {
         </ScriptOnce>
         <MotionConfig reducedMotion="user">
           <ThemeProvider initialTheme={_storedTheme}>
-            <CookieConsentProvider
-              config={cookieConsentConfig}
-              initialState={_consentState}
-            >
+            <CookieConsentProvider storedConsent={_consentState}>
               <DialogProvider>{children}</DialogProvider>
               <ClientOnly>
                 <Toaster richColors />

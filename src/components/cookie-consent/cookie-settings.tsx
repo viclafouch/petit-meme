@@ -1,6 +1,7 @@
 import React from 'react'
 import { Check, Shield } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
+import { useSelector } from '@tanstack/react-store'
 import { Button } from '~/components/ui/button'
 import {
   Dialog,
@@ -13,16 +14,20 @@ import {
 import { Label } from '~/components/ui/label'
 import { Separator } from '~/components/ui/separator'
 import { Switch } from '~/components/ui/switch'
+import { getCookieConsentCategories } from '~/lib/cookie-consent'
 import { m } from '~/paraglide/messages.js'
+import { useCookieConsentStore } from './cookie-consent.store'
 import type { ConsentCategory } from './types'
-import { useCookieConsent } from './use-cookie-consent'
 import { getAllAcceptedCategories, getDefaultCategories } from './utils'
 
 const CookieSettingsContent = () => {
-  const { closeSettings, state, updateConsent, config, acceptAll, rejectAll } =
-    useCookieConsent()
-
-  const [localCategories, setLocalCategories] = React.useState(state.categories)
+  const cookieConsentStore = useCookieConsentStore()
+  const consentCategories = useSelector(cookieConsentStore, (state) => {
+    return state.consent.categories
+  })
+  const { updateConsent, acceptAll, rejectAll } = cookieConsentStore.actions
+  const [localCategories, setLocalCategories] =
+    React.useState(consentCategories)
 
   const handleToggle = (key: ConsentCategory, checked: boolean) => {
     setLocalCategories((prev) => {
@@ -32,19 +37,16 @@ const CookieSettingsContent = () => {
 
   const handleSave = () => {
     updateConsent(localCategories)
-    closeSettings()
   }
 
   const handleAcceptAll = () => {
     setLocalCategories(getAllAcceptedCategories())
     acceptAll()
-    closeSettings()
   }
 
   const handleRejectAll = () => {
     setLocalCategories(getDefaultCategories())
     rejectAll()
-    closeSettings()
   }
 
   return (
@@ -67,7 +69,7 @@ const CookieSettingsContent = () => {
       </DialogHeader>
       <Separator />
       <div className="space-y-4 py-4">
-        {config.categories.map((category) => {
+        {getCookieConsentCategories().map((category) => {
           const isEnabled = localCategories[category.key]
           const isRequired = category.required
 
@@ -143,7 +145,11 @@ const CookieSettingsContent = () => {
 }
 
 export const CookieSettings = () => {
-  const { isSettingsOpen, closeSettings } = useCookieConsent()
+  const cookieConsentStore = useCookieConsentStore()
+  const isSettingsOpen = useSelector(cookieConsentStore, (state) => {
+    return state.isSettingsOpen
+  })
+  const { closeSettings } = cookieConsentStore.actions
 
   return (
     <Dialog

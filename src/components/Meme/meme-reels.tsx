@@ -1,6 +1,6 @@
 import React from 'react'
-import { useHotkeys } from 'react-hotkeys-hook'
 import { Pause, Play, Volume2, VolumeX } from 'lucide-react'
+import { useHotkeys } from '@tanstack/react-hotkeys'
 import { useDebouncer } from '@tanstack/react-pacer'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
@@ -222,17 +222,22 @@ export const MemeReels = () => {
     }
   }, [setActiveDebouncer])
 
-  useHotkeys('down, pagedown', (event) => {
-    event.preventDefault()
+  const scrollToNextReel = () => {
     const nextIndex = Math.min(currentIndex + 1, memes.length - 1)
     rowVirtualizer.scrollToIndex(nextIndex, { align: 'start' })
-  })
+  }
 
-  useHotkeys('up, pageup', (event) => {
-    event.preventDefault()
+  const scrollToPreviousReel = () => {
     const prevIndex = Math.max(currentIndex - 1, 0)
     rowVirtualizer.scrollToIndex(prevIndex, { align: 'start' })
-  })
+  }
+
+  useHotkeys([
+    { hotkey: 'ArrowDown', callback: scrollToNextReel },
+    { hotkey: 'PageDown', callback: scrollToNextReel },
+    { hotkey: 'ArrowUp', callback: scrollToPreviousReel },
+    { hotkey: 'PageUp', callback: scrollToPreviousReel }
+  ])
 
   React.useEffect(() => {
     const items = rowVirtualizer.getVirtualItems()

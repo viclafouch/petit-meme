@@ -1,10 +1,13 @@
 import { Link } from '@tanstack/react-router'
+import { useSelector } from '@tanstack/react-store'
+import { useCookieConsentStore } from '~/components/cookie-consent/cookie-consent.store'
 import { CookieTrigger } from '~/components/cookie-consent/cookie-trigger'
-import { useCookieConsent } from '~/components/cookie-consent/use-cookie-consent'
 import { getLegalLinks } from '~/constants/navigation'
 
 export const Footer = () => {
-  const { state } = useCookieConsent()
+  const hasConsented = useSelector(useCookieConsentStore(), (state) => {
+    return state.consent.hasConsented
+  })
 
   return (
     <footer className="border-t bg-background/40 relative">
@@ -21,7 +24,7 @@ export const Footer = () => {
               </Link>
             )
           })}
-          {state.hasConsented ? <CookieTrigger /> : null}
+          {hasConsented ? <CookieTrigger /> : null}
         </div>
       </div>
     </footer>

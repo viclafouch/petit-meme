@@ -31,6 +31,9 @@ const APP_ERROR_MESSAGES = {
   },
   AI_SEARCH_UNAVAILABLE: () => {
     return m.ai_search_error_unavailable()
+  },
+  EMAIL_VERIFICATION_REFUSED: () => {
+    return m.auth_error_unknown()
   }
 } as const satisfies Record<AppErrorCode, () => string>
 

@@ -2,17 +2,14 @@ import {
   sentryGlobalFunctionMiddleware,
   sentryGlobalRequestMiddleware
 } from '@sentry/tanstackstart-react'
-import {
-  createSerializationAdapter,
-  isNotFound,
-  isRedirect
-} from '@tanstack/react-router'
+import { createSerializationAdapter } from '@tanstack/react-router'
 import {
   createCsrfMiddleware,
   createMiddleware,
   createStart
 } from '@tanstack/react-start'
-import { AppError, getAppErrorCode } from '~/constants/error'
+import { AppError } from '~/constants/error'
+import { matchIsUnexpectedError } from '~/lib/expected-error'
 import { logger } from '~/lib/logger'
 import { observeCsrfBlock } from '~/utils/csrf-observer'
 
@@ -42,14 +39,6 @@ const csrfMiddleware = createCsrfMiddleware({
     return new Response('Forbidden', { status: 403 })
   }
 })
-
-const matchIsUnexpectedError = (error: unknown) => {
-  return (
-    getAppErrorCode(error) === undefined &&
-    !isNotFound(error) &&
-    !isRedirect(error)
-  )
-}
 
 const unexpectedErrorLogMiddleware = createMiddleware({
   type: 'function'

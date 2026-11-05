@@ -31,3 +31,11 @@ export const BROWSER_NETWORK_ERRORS = [
   /^Load failed$/u,
   /^NetworkError when attempting to fetch resource\.$/u
 ]
+
+export const BROWSER_NOISE_ERRORS = [
+  /not allowed by the user agent or the platform in the current context/u,
+  /^Failed to execute '(?:insertBefore|removeChild)' on 'Node'/u,
+  /^NS_ERROR_FAILURE/u
+]
+
+export const AUTOMATED_BROWSER_USER_AGENT = /HeadlessChrome|GoogleOther/u

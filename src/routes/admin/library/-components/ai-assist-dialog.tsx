@@ -20,7 +20,6 @@ import { getErrorMessage } from '~/helpers/error'
 import { CONTENT_LOCALE_TO_LOCALE } from '~/helpers/i18n-content'
 import { parseKeywordsInput } from '~/helpers/keywords'
 import { useKeywordsField } from '~/hooks/use-keywords-field'
-import { captureWithFeature } from '~/lib/sentry'
 import type { Locale } from '~/paraglide/runtime'
 import {
   aiAssistMemeContent,
@@ -93,7 +92,6 @@ export const AiAssistDialog = ({
       keywordsField.setKeywordValue('')
     },
     onError: (error) => {
-      captureWithFeature(error, 'ai-generation')
       toast.error(getErrorMessage(error))
     }
   })
@@ -119,7 +117,6 @@ export const AiAssistDialog = ({
       handleOpenChange(false)
     },
     onError: (error) => {
-      captureWithFeature(error, 'ai-translation')
       toast.error(getErrorMessage(error))
     }
   })

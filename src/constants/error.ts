@@ -9,6 +9,7 @@ export type AppErrorCode =
   | 'TWEET_VERIFICATION_FAILED'
   | 'AI_SEARCH_QUOTA_EXCEEDED'
   | 'AI_SEARCH_UNAVAILABLE'
+  | 'EMAIL_VERIFICATION_REFUSED'
 
 export class AppError extends Error {
   code: AppErrorCode

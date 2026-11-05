@@ -9,7 +9,6 @@ import { getErrorMessage } from '~/helpers/error'
 import { LOCALE_META } from '~/helpers/i18n-content'
 import { buildSignedOriginalUrl } from '~/lib/bunny'
 import { adminLogger } from '~/lib/logger'
-import { captureWithFeature } from '~/lib/sentry'
 import { type Locale, locales } from '~/paraglide/runtime'
 import { adminRequiredMiddleware } from '~/server/user-auth'
 
@@ -309,7 +308,6 @@ export const translateMemeContent = createServerFn({ method: 'POST' })
 
       return parsed
     } catch (error) {
-      captureWithFeature(error, 'ai-translation')
       adminLogger.error(
         { error, sourceLocale: data.sourceLocale },
         'AI translation failed'
@@ -360,7 +358,6 @@ export const aiAssistMemeContent = createServerFn({ method: 'POST' })
 
       return parsed
     } catch (error) {
-      captureWithFeature(error, 'ai-generation')
       adminLogger.error(
         { error, memeId: data.memeId },
         'AI assist content generation failed'

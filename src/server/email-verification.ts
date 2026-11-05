@@ -2,6 +2,7 @@ import { APIError } from 'better-auth'
 import { z } from 'zod'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
+import { AppError } from '~/constants/error'
 import { RATE_LIMIT_VERIFY_EMAIL } from '~/constants/rate-limit'
 import { auth } from '~/lib/auth'
 import { verifyEmailWithPassword } from '~/lib/email-ownership'
@@ -30,6 +31,8 @@ export const verifyEmail = createServerFn({ method: 'POST' })
 
       authLogger.warn({ code: error.body?.code }, 'Email verification refused')
       setResponseStatus(error.statusCode)
-      throw new Error(error.body?.code ?? 'UNKNOWN', { cause: error })
+      throw new AppError(error.body?.code ?? 'UNKNOWN', {
+        code: 'EMAIL_VERIFICATION_REFUSED'
+      })
     }
   })

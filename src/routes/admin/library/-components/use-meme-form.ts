@@ -12,7 +12,6 @@ import { useAppForm } from '~/hooks/use-app-form'
 import { useKeywordsField } from '~/hooks/use-keywords-field'
 import { focusFirstInvalidField } from '~/lib/form'
 import { getCategoriesListQueryOpts } from '~/lib/queries'
-import { captureWithFeature } from '~/lib/sentry'
 import { baseLocale, isLocale, type Locale } from '~/paraglide/runtime'
 import { MEME_FORM_SCHEMA } from '~/routes/admin/-server/memes'
 import { translateMemeContent } from '~/server/ai'
@@ -117,7 +116,6 @@ export function useMemeForm({ meme, onChange, onSubmit }: UseMemeFormParams) {
       toast.success('Traduction terminée !')
     },
     onError: (error) => {
-      captureWithFeature(error, 'ai-translation')
       toast.error(getErrorMessage(error))
     }
   })

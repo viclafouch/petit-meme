@@ -1,6 +1,8 @@
 import * as Sentry from '@sentry/tanstackstart-react'
 import {
+  AUTOMATED_BROWSER_USER_AGENT,
   BROWSER_NETWORK_ERRORS,
+  BROWSER_NOISE_ERRORS,
   SENTRY_APPLICATION_KEY,
   SENTRY_DATA_COLLECTION,
   SENTRY_IGNORE_ERRORS,
@@ -15,7 +17,11 @@ import {
   SENSITIVE_API_PATTERNS
 } from '~/lib/sentry'
 
-const isSentryEnabled = clientEnv.VITE_VERCEL_ENV === 'production'
+const isAutomatedBrowser =
+  navigator.webdriver || AUTOMATED_BROWSER_USER_AGENT.test(navigator.userAgent)
+
+const isSentryEnabled =
+  clientEnv.VITE_VERCEL_ENV === 'production' && !isAutomatedBrowser
 
 Sentry.init({
   dsn: clientEnv.VITE_SENTRY_DSN,
@@ -33,7 +39,11 @@ Sentry.init({
   replaysSessionSampleRate: 0,
   replaysOnErrorSampleRate: 1,
   denyUrls: [/extensions\//iu, /^chrome:\/\//iu, /^chrome-extension:\/\//iu],
-  ignoreErrors: [...SENTRY_IGNORE_ERRORS, ...BROWSER_NETWORK_ERRORS],
+  ignoreErrors: [
+    ...SENTRY_IGNORE_ERRORS,
+    ...BROWSER_NETWORK_ERRORS,
+    ...BROWSER_NOISE_ERRORS
+  ],
   beforeSend: (event, hint) => {
     return dropExpectedError(scrubUserPii(event), hint)
   },

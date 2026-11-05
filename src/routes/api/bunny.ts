@@ -39,6 +39,24 @@ export const Route = createFileRoute('/api/bunny')({
         }
 
         try {
+          const video = await prismaClient.video.findUnique({
+            where: { bunnyId: result.VideoGuid },
+            select: { bunnyStatus: true }
+          })
+
+          if (!video || video.bunnyStatus >= result.Status) {
+            bunnyLogger.info(
+              {
+                videoId: result.VideoGuid,
+                status: result.Status,
+                currentStatus: video?.bunnyStatus
+              },
+              'Webhook ignored: unknown video or stale status'
+            )
+
+            return Response.json({ success: true })
+          }
+
           const videoPlayData = await getVideoPlayData(result.VideoGuid)
 
           const { meme } = await prismaClient.video.update({

@@ -4,20 +4,18 @@ import { useRouteContext } from '@tanstack/react-router'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
 import { MAX_PENDING_SUBMISSIONS } from '~/constants/meme-submission'
-import { useShowDialog } from '~/hooks/use-show-dialog'
 import { getUserSubmissionsQueryOpts } from '~/lib/queries'
 import { m } from '~/paraglide/messages'
 import {
   PageDescription,
   PageHeading
 } from '~/routes/_public__root/-components/page-headers'
+import { dialogStore } from '~/stores/dialog.store'
 import { SubmissionForm } from './submission-form'
 import { SubmissionHistory } from './submission-history'
 import { SubmissionRules } from './submission-rules'
 
 const NotLoggedIn = () => {
-  const showDialog = useShowDialog()
-
   return (
     <Card>
       <CardContent className="flex flex-col items-center gap-4 py-8">
@@ -27,7 +25,7 @@ const NotLoggedIn = () => {
         <Button
           onClick={(event) => {
             event.preventDefault()
-            showDialog('auth', {})
+            dialogStore.actions.showDialog('auth')
           }}
         >
           <LogIn aria-hidden="true" />

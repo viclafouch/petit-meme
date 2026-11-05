@@ -276,6 +276,11 @@
 @utility grid-cols-meme-page {
   grid-template-columns: auto 300px;
 }
+@utility chart-tooltip-popover {
+  --ts-chart-tooltip-background: var(--popover);
+  --ts-chart-tooltip-color: var(--popover-foreground);
+  --ts-chart-tooltip-border: 1px solid var(--border);
+}
 @utility grid-cols-meme-editor {
   grid-template-columns: minmax(0, 1fr) minmax(20rem, 24rem);
 }

@@ -1,4 +1,4 @@
-import type { Components } from 'react-markdown'
+import type { MarkdownComponents } from '@tanstack/markdown/react'
 import { Separator } from '~/components/ui/separator'
 import { baseLocale, getLocale } from '~/paraglide/runtime'
 
@@ -86,4 +86,4 @@ export const BASE_MARKDOWN_COMPONENTS = {
       </a>
     )
   }
-} as const satisfies Components
+} as const satisfies MarkdownComponents

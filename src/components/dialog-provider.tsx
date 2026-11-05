@@ -1,14 +1,16 @@
 import React from 'react'
 import { ClientOnly } from '@tanstack/react-router'
+import { useSelector } from '@tanstack/react-store'
 import { OverlaySpinner } from '~/components/ui/overlay-spinner'
-import { useDialog } from '~/stores/dialog.store'
+import { dialogStore } from '~/stores/dialog.store'
 
 type DialogProviderProps = {
   children: React.ReactNode
 }
 
 export const DialogProvider = ({ children }: DialogProviderProps) => {
-  const { renderDialog, isOpen, closeDialog, forceCloseDialog } = useDialog()
+  const { renderDialog, isOpen } = useSelector(dialogStore)
+  const { closeDialog, forceCloseDialog } = dialogStore.actions
 
   return (
     <>

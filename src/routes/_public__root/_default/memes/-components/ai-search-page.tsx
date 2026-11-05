@@ -8,14 +8,16 @@ import { MemesList } from '~/components/Meme/memes-list'
 import { Button } from '~/components/ui/button'
 import { Separator } from '~/components/ui/separator'
 import { Textarea } from '~/components/ui/textarea'
-import { MAX_PROMPT_LENGTH } from '~/constants/ai-search'
+import {
+  AI_SEARCH_PROMPT_STORAGE_KEY,
+  MAX_PROMPT_LENGTH
+} from '~/constants/ai-search'
 import { getAppErrorCode } from '~/constants/error'
 import { EASE_OUT } from '~/constants/motion'
 import { getErrorMessage } from '~/helpers/error'
-import { useAiSearchPrompt } from '~/hooks/use-ai-search-prompt'
 import { useAiSearchStages } from '~/hooks/use-ai-search-stages'
+import { useAppForm } from '~/hooks/use-app-form'
 import { snoozePremiumReminder } from '~/hooks/use-premium-reminder'
-import { useShowDialog } from '~/hooks/use-show-dialog'
 import { getAiSearchQuotaQueryOpts } from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
 import { buildBreadcrumbJsonLd } from '~/lib/seo'
@@ -28,14 +30,13 @@ import {
 } from '~/routes/_public__root/-components/page-headers'
 import { AiSearchStages } from '~/routes/_public__root/_default/memes/-components/ai-search-stages'
 import { aiSearchMemes } from '~/server/ai-search'
+import { dialogStore } from '~/stores/dialog.store'
 
 type AiSearchResult = Awaited<ReturnType<typeof aiSearchMemes>>
 
 export const AiSearchPage = () => {
   const { user } = useRouteContext({ from: '__root__' })
-  const showDialog = useShowDialog()
   const queryClient = useQueryClient()
-  const { prompt, setPrompt, handOverPrompt } = useAiSearchPrompt()
 
   const quotaQuery = useQuery({
     ...getAiSearchQuotaQueryOpts(),
@@ -64,13 +65,13 @@ export const AiSearchPage = () => {
           isPremium: false
         })
         snoozePremiumReminder()
-        showDialog('ai-search-upsell', {})
+        dialogStore.actions.showDialog('ai-search-upsell')
 
         return
       }
 
       if (errorCode === 'UNAUTHORIZED') {
-        showDialog('auth', {})
+        dialogStore.actions.showDialog('auth')
 
         return
       }
@@ -98,31 +99,43 @@ export const AiSearchPage = () => {
     searchStagesResetRef.current = searchStages.reset
   }, [searchStages.reset])
 
-  const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  const form = useAppForm({
+    defaultValues: { prompt: '' },
+    onSubmit: ({ value }) => {
+      const trimmed = value.prompt.trim()
 
-    const trimmed = prompt.trim()
+      if (trimmed.length === 0) {
+        return
+      }
 
-    if (trimmed.length === 0) {
-      return
+      if (!user) {
+        sessionStorage.setItem(AI_SEARCH_PROMPT_STORAGE_KEY, trimmed)
+        dialogStore.actions.showDialog('auth')
+
+        return
+      }
+
+      if (quotaQuery.data && !quotaQuery.data.canSearch) {
+        snoozePremiumReminder()
+        dialogStore.actions.showDialog('ai-search-upsell')
+
+        return
+      }
+
+      searchMutation.mutate({ prompt: trimmed })
     }
+  })
 
-    if (!user) {
-      handOverPrompt(trimmed)
-      showDialog('auth', {})
+  React.useEffect(() => {
+    const handedOverPrompt = sessionStorage.getItem(
+      AI_SEARCH_PROMPT_STORAGE_KEY
+    )
 
-      return
+    if (handedOverPrompt) {
+      sessionStorage.removeItem(AI_SEARCH_PROMPT_STORAGE_KEY)
+      form.setFieldValue('prompt', handedOverPrompt)
     }
-
-    if (quotaQuery.data && !quotaQuery.data.canSearch) {
-      snoozePremiumReminder()
-      showDialog('ai-search-upsell', {})
-
-      return
-    }
-
-    searchMutation.mutate({ prompt: trimmed })
-  }
+  }, [form])
 
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: m.meme_breadcrumb_home(), pathname: '/' },
@@ -140,27 +153,39 @@ export const AiSearchPage = () => {
       </PageHeader>
       <section className="flex flex-col gap-y-8">
         <form
-          onSubmit={handleSubmit}
+          onSubmit={(event) => {
+            event.preventDefault()
+            void form.handleSubmit()
+          }}
           className="mx-auto flex w-full max-w-2xl flex-col gap-y-2"
         >
-          <div className="relative">
-            <Textarea
-              value={prompt}
-              onChange={(event) => {
-                setPrompt(event.target.value)
-              }}
-              placeholder={m.ai_search_placeholder()}
-              maxLength={MAX_PROMPT_LENGTH}
-              className="min-h-28 resize-none text-base"
-              aria-label={m.ai_search_title()}
-            />
-            <span
-              className="text-muted-foreground pointer-events-none absolute right-3 bottom-3 text-xs"
-              aria-hidden="true"
-            >
-              {prompt.length}/{MAX_PROMPT_LENGTH}
-            </span>
-          </div>
+          <form.Field
+            name="prompt"
+            children={(field) => {
+              return (
+                <div className="relative">
+                  <Textarea
+                    name={field.name}
+                    value={field.state.value}
+                    onChange={(event) => {
+                      field.handleChange(event.target.value)
+                    }}
+                    onBlur={field.handleBlur}
+                    placeholder={m.ai_search_placeholder()}
+                    maxLength={MAX_PROMPT_LENGTH}
+                    className="min-h-28 resize-none text-base"
+                    aria-label={m.ai_search_title()}
+                  />
+                  <span
+                    className="text-muted-foreground pointer-events-none absolute right-3 bottom-3 text-xs"
+                    aria-hidden="true"
+                  >
+                    {field.state.value.length}/{MAX_PROMPT_LENGTH}
+                  </span>
+                </div>
+              )
+            }}
+          />
           <div className="flex items-start justify-between">
             <div>
               {quotaQuery.data &&

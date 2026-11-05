@@ -7,15 +7,20 @@ import { FREE_PLAN_MAX_FAVORITES } from '~/constants/plan'
 import { getErrorMessage } from '~/helpers/error'
 import { useIsPremium } from '~/hooks/use-is-premium'
 import { snoozePremiumReminder } from '~/hooks/use-premium-reminder'
-import { useShowDialog } from '~/hooks/use-show-dialog'
 import { getFavoritesMemesQueryOpts, getMemeByIdQueryOpts } from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
 import { toggleBookmarkByMemeId } from '~/server/user'
+import { dialogStore } from '~/stores/dialog.store'
 
 type UseToggleBookmarkParams = {
   meme: MemeWithVideo
   bookmarks: MemeWithVideo[] | undefined
+}
+
+const openBookmarkUpsell = () => {
+  snoozePremiumReminder()
+  dialogStore.actions.showDialog('bookmark-upsell')
 }
 
 export function useToggleBookmark({
@@ -23,13 +28,7 @@ export function useToggleBookmark({
   bookmarks
 }: UseToggleBookmarkParams) {
   const queryClient = useQueryClient()
-  const showDialog = useShowDialog()
   const isPremium = useIsPremium()
-
-  const openBookmarkUpsell = () => {
-    snoozePremiumReminder()
-    showDialog('bookmark-upsell', {})
-  }
 
   const isMemeBookmarked = React.useMemo(() => {
     if (!bookmarks) {
@@ -78,7 +77,7 @@ export function useToggleBookmark({
       }
 
       if (errorCode === 'UNAUTHORIZED') {
-        showDialog('auth', {})
+        dialogStore.actions.showDialog('auth')
 
         return
       }

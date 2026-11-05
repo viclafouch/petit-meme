@@ -27,7 +27,6 @@ import {
 } from '~/constants/studio'
 import { getErrorMessage } from '~/helpers/error'
 import { snoozePremiumReminder } from '~/hooks/use-premium-reminder'
-import { useShowDialog } from '~/hooks/use-show-dialog'
 import {
   getGenerationQuotaQueryOpts,
   getVideoBlobQueryOpts
@@ -35,6 +34,7 @@ import {
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
 import { recordGeneration } from '~/server/studio'
+import { dialogStore } from '~/stores/dialog.store'
 import {
   FFMPEG_VIDEO_ENCODING_ARGS,
   FFMPEG_INPUT_FILE,
@@ -333,7 +333,6 @@ export const useVideoProcessor = (
 ) => {
   const [progress, setProgress] = React.useState(0)
   const objectUrlRef = React.useRef<string | null>(null)
-  const showDialog = useShowDialog()
   const queryClient = useQueryClient()
 
   const handleProgress = React.useCallback(
@@ -396,7 +395,7 @@ export const useVideoProcessor = (
       const errorCode = getAppErrorCode(error)
 
       if (errorCode === 'UNAUTHORIZED') {
-        showDialog('auth', {})
+        dialogStore.actions.showDialog('auth')
 
         return
       }
@@ -406,7 +405,7 @@ export const useVideoProcessor = (
           canGenerate: false
         })
         snoozePremiumReminder()
-        showDialog('studio-upsell', {})
+        dialogStore.actions.showDialog('studio-upsell')
 
         return
       }

@@ -14,9 +14,9 @@ import {
 import { UserDropdown } from '~/components/user-dropdown'
 import { LOGO_PATH } from '~/constants/branding'
 import { useNeedsScrollFadeFallback } from '~/hooks/use-scroll-fade'
-import { useShowDialog } from '~/hooks/use-show-dialog'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
+import { dialogStore } from '~/stores/dialog.store'
 import { MobileNav } from './mobile-nav'
 
 export type NavigationLink = {
@@ -52,7 +52,6 @@ const NavbarScrollFadeFallback = () => {
 
 export const Navbar = () => {
   const { user } = useRouteContext({ from: '__root__' })
-  const showDialog = useShowDialog()
   const navigationLinks = getNavigationLinks()
   const needsFallback = useNeedsScrollFadeFallback()
   const isReducedMotion = useReducedMotion()
@@ -108,7 +107,7 @@ export const Navbar = () => {
             <Button
               onClick={(event) => {
                 event.preventDefault()
-                showDialog('auth', {})
+                dialogStore.actions.showDialog('auth')
               }}
               variant="default"
               size="lg"

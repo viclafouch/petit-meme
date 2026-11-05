@@ -1,5 +1,5 @@
 import React from 'react'
-import { create } from 'zustand'
+import { createStore } from '@tanstack/react-store'
 import type { WithDialog } from '~/@types/dialog'
 
 type DialogEntry = {
@@ -68,7 +68,7 @@ type Dialogs = typeof DIALOGS
 
 type DialogKey = keyof Dialogs
 
-type DefaultDialogProps = keyof WithDialog<unknown>
+type DefaultDialogProps = keyof WithDialog
 
 type DialogPropsMap = {
   [TKey in DialogKey]: Omit<
@@ -76,6 +76,11 @@ type DialogPropsMap = {
     DefaultDialogProps
   >
 }
+
+type DialogPropsArgs<TKey extends DialogKey> =
+  Partial<DialogPropsMap[TKey]> extends DialogPropsMap[TKey]
+    ? []
+    : [props: DialogPropsMap[TKey]]
 
 type DialogComponentMap = {
   [TKey in DialogKey]: React.ComponentType<WithDialog<DialogPropsMap[TKey]>>
@@ -91,45 +96,45 @@ const DIALOG_COMPONENTS: DialogComponentMap = {
   'premium-reminder': DIALOGS['premium-reminder'].component
 }
 
-type RenderDialog = (dialogState: WithDialog<unknown>) => React.ReactNode
+type RenderDialog = (dialogState: WithDialog) => React.ReactNode
 
-type DialogStore = {
+type DialogState = {
   renderDialog: RenderDialog | null
   isOpen: boolean
-  forceCloseDialog: () => void
-  closeDialog: () => void
-  showDialog: <TKey extends DialogKey>(
-    name: TKey,
-    props: DialogPropsMap[TKey]
-  ) => void
 }
 
-export const useDialog = create<DialogStore>((set) => {
+const INITIAL_DIALOG_STATE: DialogState = {
+  renderDialog: null,
+  isOpen: false
+}
+
+export const dialogStore = createStore(INITIAL_DIALOG_STATE, ({ setState }) => {
   return {
-    renderDialog: null,
-    isOpen: false,
     forceCloseDialog: () => {
-      set({ renderDialog: null, isOpen: false })
+      setState(() => {
+        return INITIAL_DIALOG_STATE
+      })
     },
     closeDialog: () => {
-      set({ isOpen: false })
+      setState((prev) => {
+        return { ...prev, isOpen: false }
+      })
     },
-    showDialog: (name, props) => {
-      set({
-        renderDialog: (dialogState) => {
-          return React.createElement(DIALOG_COMPONENTS[name], {
-            ...props,
-            ...dialogState
-          })
-        },
-        isOpen: true
+    showDialog: <TKey extends DialogKey>(
+      name: TKey,
+      ...[props]: DialogPropsArgs<TKey>
+    ) => {
+      setState(() => {
+        return {
+          renderDialog: (dialogState) => {
+            return React.createElement(
+              DIALOG_COMPONENTS[name],
+              Object.assign(dialogState, props)
+            )
+          },
+          isOpen: true
+        }
       })
     }
   }
 })
-
-type DialogState = ReturnType<typeof useDialog.getState>
-
-export const matchIsDialogOpen = (state: DialogState) => {
-  return state.isOpen
-}

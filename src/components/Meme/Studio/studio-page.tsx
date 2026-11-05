@@ -2,6 +2,7 @@ import React from 'react'
 import { ArrowLeft, Pencil, SlidersHorizontal, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 import { Link, useRouteContext } from '@tanstack/react-router'
+import { useSelector } from '@tanstack/react-store'
 import {
   StudioActions,
   StudioMobileActions
@@ -22,14 +23,14 @@ import { Separator } from '~/components/ui/separator'
 import { LOGO_PATH } from '~/constants/branding'
 import type { MemeWithVideo } from '~/constants/meme'
 import { STUDIO_TEXT_MAX_LENGTH } from '~/constants/studio'
-import { useShowDialog } from '~/hooks/use-show-dialog'
 import {
   useVideoInitializer,
   useVideoPreloader,
   useVideoProcessor
 } from '~/hooks/use-video-processor'
 import { m } from '~/paraglide/messages.js'
-import { useStudioStore } from '~/stores/studio.store'
+import { dialogStore } from '~/stores/dialog.store'
+import { studioStore } from '~/stores/studio.store'
 
 type StudioBrandingProps = {
   title: string
@@ -63,16 +64,13 @@ type StudioPageProps = {
 
 export const StudioPage = ({ meme }: StudioPageProps) => {
   const { user } = useRouteContext({ from: '__root__' })
-  const showDialog = useShowDialog()
   const ffmpegQuery = useVideoInitializer()
   const { triggerPreload } = useVideoPreloader(ffmpegQuery.data, meme.id)
 
-  const settings = useStudioStore((state) => {
+  const settings = useSelector(studioStore, (state) => {
     return state.settings
   })
-  const setSettings = useStudioStore((state) => {
-    return state.setSettings
-  })
+  const { setSettings } = studioStore.actions
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false)
 
   const { progress, processVideo, isProcessing, processedData, cancel, reset } =
@@ -88,7 +86,7 @@ export const StudioPage = ({ meme }: StudioPageProps) => {
     }
 
     if (!user) {
-      showDialog('auth', {})
+      dialogStore.actions.showDialog('auth')
 
       return
     }

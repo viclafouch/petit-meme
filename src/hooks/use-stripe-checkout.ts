@@ -5,12 +5,12 @@ import { type LinkOptions, useRouteContext } from '@tanstack/react-router'
 import { type BillingPeriod, PREMIUM_PLAN_NAME } from '~/constants/plan'
 import { getErrorMessage } from '~/helpers/error'
 import { createLatch, type LatchEnd } from '~/helpers/promise'
-import { useShowDialog } from '~/hooks/use-show-dialog'
 import { authClient } from '~/lib/auth-client'
 import { getActiveSubscriptionQueryOpts } from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
+import { dialogStore } from '~/stores/dialog.store'
 
 const openBillingPortal = async () => {
   const { error } = await authClient.subscription.billingPortal({
@@ -71,7 +71,6 @@ const checkoutLatch = createLatch(
 
 export const useStripeCheckout = () => {
   const { user } = useRouteContext({ from: '__root__' })
-  const showDialog = useShowDialog()
   const queryClient = useQueryClient()
 
   React.useEffect(() => {
@@ -90,7 +89,7 @@ export const useStripeCheckout = () => {
 
   const goToBillingPortal = async () => {
     if (!user) {
-      showDialog('auth', {})
+      dialogStore.actions.showDialog('auth')
 
       return
     }
@@ -111,7 +110,7 @@ export const useStripeCheckout = () => {
 
   const checkoutPremium = async (billingPeriod: BillingPeriod) => {
     if (!user) {
-      showDialog('auth', {})
+      dialogStore.actions.showDialog('auth')
 
       return
     }

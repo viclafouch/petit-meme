@@ -1,9 +1,12 @@
 import type { ToasterProps } from 'sonner'
 import { Toaster as Sonner } from 'sonner'
-import { useTheme } from '~/hooks/use-theme'
+import { useSelector } from '@tanstack/react-store'
+import { useThemeStore } from '~/stores/theme.store'
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme } = useTheme()
+  const theme = useSelector(useThemeStore(), (state) => {
+    return state.theme
+  })
 
   return (
     <Sonner

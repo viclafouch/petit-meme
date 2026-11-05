@@ -1,22 +1,23 @@
 name: e2e
 
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
 
 # The test database is shared, so the group stays global: two runs never
-# overlap, whatever branch they come from. The newest one wins, and the runs it
-# supersedes stop where they are rather than pay for a verdict nobody reads.
-# A run killed mid flight can leave a temporary Algolia index behind, which the
-# next seed replaces.
+# overlap, whatever branch they come from. Runs wait their turn instead of
+# cancelling each other: a push on main gates its production deployment, so a
+# pull request must never cancel it.
 concurrency:
   group: e2e
-  cancel-in-progress: true
+  queue: max
 
 jobs:
   e2e:
     # A pull request from a fork gets no secrets, so it would fail on boot.
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 25
     container:

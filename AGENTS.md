@@ -14,7 +14,7 @@ Before editing files for a substantial task:
 
 A video meme library. Victor publishes every Meme, everyone else watches them, exports them and generates captioned versions of their own.
 
-The site is live: real accounts, real subscriptions, real personal data, real invoices. I am its only developer, `main` deploys itself, and there is no staging. Pushed code is production code, and the review before the push is the only one there is.
+The site is live: real accounts, real subscriptions, real personal data, real invoices. I am its only developer and there is no staging. A push on `main` goes to production as soon as the `ci` and `e2e` workflows pass: Vercel Deployment Checks hold the deployment until then. The checks catch what the tests cover, and the review before the push is the only one for the rest.
 
 It is also small, so a breaking change is cheap and the clean fix beats the compatible one.
 
@@ -100,7 +100,7 @@ The specification is what I asked for in the conversation. Plans live in the con
 
 ## Git
 
-Commit and push on my word only. `main` is the branch and pushing it deploys, so the last look at the diff happens before the push, not after. One concern per commit, conventional title, English for messages and branches.
+Commit and push on my word only. `main` is the branch and a green push on it deploys, so the last look at the diff happens before the push, not after. Conventional title, English for messages and branches.
 
 Every issue and PR opens assigned and labelled: `--assignee @me --label <label>` on `gh issue create` and `gh pr create`. The label follows the conventional type: `fix` → `bug`, `feat` → `enhancement`, `docs` → `documentation`, and `chore`, `test`, `refactor` carry their own name. A PR that closes an issue takes that issue's labels instead.
 

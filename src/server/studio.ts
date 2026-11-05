@@ -6,8 +6,9 @@ import { prismaClient } from '~/db'
 import { AppError } from '~/constants/error'
 import { HTTP_STATUS } from '~/constants/http'
 import { FREE_PLAN_MAX_GENERATIONS } from '~/constants/plan'
-import { ActivityEventType, MemeStatus } from '~/db/generated/prisma/enums'
+import { ActivityEventType } from '~/db/generated/prisma/enums'
 import { authLogger } from '~/lib/logger'
+import { matchCanViewMeme } from '~/lib/role'
 import { matchIsUserPremium } from '~/server/customer'
 import { authUserRequiredMiddleware } from '~/server/user-auth'
 import { recordActivityEvent } from '~/utils/activity-event'
@@ -37,13 +38,16 @@ export const recordGeneration = createServerFn({ method: 'POST' })
     const userId = context.user.id
     const [meme, isPremium] = await Promise.all([
       prismaClient.meme.findUnique({
-        where: { id: data.memeId, status: MemeStatus.PUBLISHED },
-        select: { id: true }
+        where: { id: data.memeId },
+        select: { id: true, status: true }
       }),
       matchIsUserPremium(context.user)
     ])
 
-    if (!meme) {
+    if (
+      !meme ||
+      !matchCanViewMeme({ user: context.user, status: meme.status })
+    ) {
       throw notFound()
     }
 

@@ -7,6 +7,7 @@ import { getErrorMessage } from '~/helpers/error'
 import { captureWithFeature } from '~/lib/sentry'
 import {
   getAdminMemeByIdQueryOpts,
+  invalidateSavedMeme,
   markAdminMemesOverviewStale
 } from '~/routes/admin/-lib/queries'
 import { editMeme, MEME_FORM_SCHEMA } from '~/routes/admin/-server/memes'
@@ -40,7 +41,7 @@ export function useMemeAutosave(meme: MemeFullData) {
     },
     onSuccess: () => {
       return Promise.all([
-        queryClient.invalidateQueries(getAdminMemeByIdQueryOpts(meme.id)),
+        invalidateSavedMeme(queryClient, meme.id),
         markAdminMemesOverviewStale(queryClient)
       ])
     },

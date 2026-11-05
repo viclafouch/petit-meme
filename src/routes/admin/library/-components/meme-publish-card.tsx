@@ -32,7 +32,7 @@ type FileBadgeProps = {
   missingFiles: MemeDerivedFormat[] | undefined
 }
 
-const FileBadge = ({ format, missingFiles }: FileBadgeProps) => {
+export const FileBadge = ({ format, missingFiles }: FileBadgeProps) => {
   const label = format.toUpperCase()
 
   if (!missingFiles) {

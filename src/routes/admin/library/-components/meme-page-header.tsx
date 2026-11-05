@@ -1,18 +1,19 @@
-import { ExternalLink, Trash } from 'lucide-react'
-import { Link } from '@tanstack/react-router'
+import { Trash } from 'lucide-react'
 import { Badge } from '~/components/ui/badge'
-import { Button } from '~/components/ui/button'
 import { type MemeFullData, MemeStatusMeta } from '~/constants/meme'
 import { formatDate } from '~/helpers/date'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { DeleteMemeButton } from '~/routes/admin/-components/delete-meme-button'
+import type { MemePublisher } from './use-meme-publisher'
+import { ViewMemeOnSiteButton } from './view-meme-on-site-button'
 
 type MemePageHeaderProps = {
   meme: MemeFullData
+  publisher: MemePublisher
 }
 
-export const MemePageHeader = ({ meme }: MemePageHeaderProps) => {
+export const MemePageHeader = ({ meme, publisher }: MemePageHeaderProps) => {
   const statusMeta = MemeStatusMeta[meme.status]
 
   return (
@@ -34,15 +35,7 @@ export const MemePageHeader = ({ meme }: MemePageHeaderProps) => {
         </h1>
       </div>
       <div className="flex shrink-0 items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          nativeButton={false}
-          render={<Link to="/memes/$memeId" params={{ memeId: meme.id }} />}
-        >
-          <ExternalLink data-icon="inline-start" aria-hidden />
-          Voir sur le site
-        </Button>
+        <ViewMemeOnSiteButton meme={meme} publisher={publisher} />
         <DeleteMemeButton size="sm" variant="destructive" meme={meme}>
           <Trash data-icon="inline-start" aria-hidden />
           Supprimer

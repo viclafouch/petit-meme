@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { MemeStatus } from '~/db/generated/prisma/enums'
 import { buildVideoImageUrl, buildVideoOriginalUrl } from '~/lib/bunny'
 import { getMemeByIdQueryOpts } from '~/lib/queries'
 import { buildBreadcrumbJsonLd, buildMemeJsonLd, buildMemeSeo } from '~/lib/seo'
@@ -22,7 +23,7 @@ export const Route = createFileRoute('/_public__root/_default/memes/$memeId')({
     }
   },
   scripts: ({ loaderData }) => {
-    if (loaderData) {
+    if (loaderData?.meme.status === MemeStatus.PUBLISHED) {
       const { meme } = loaderData
       const categoryName =
         meme.categories[0]?.category.title ?? m.meme_breadcrumb_fallback()
@@ -55,7 +56,10 @@ export const Route = createFileRoute('/_public__root/_default/memes/$memeId')({
   },
   head: ({ loaderData, match }) => {
     if (loaderData?.meme) {
-      const seo = buildMemeSeo(loaderData.meme, { pathname: match.pathname })
+      const seo = buildMemeSeo(loaderData.meme, {
+        pathname: match.pathname,
+        noindex: loaderData.meme.status !== MemeStatus.PUBLISHED
+      })
 
       return {
         ...seo,

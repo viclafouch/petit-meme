@@ -251,6 +251,13 @@
 @utility max-w-vw-* {
   max-width: calc(--value(integer) * 1vw);
 }
+@utility bg-hatch {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0 14px,
+    rgb(255 255 255 / 0.08) 14px 28px
+  );
+}
 @utility max-h-dialog {
   max-height: calc(100dvh - 2rem);
 }

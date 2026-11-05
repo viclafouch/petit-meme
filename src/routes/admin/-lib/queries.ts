@@ -9,6 +9,7 @@ import { PRIVATE_QUERY_META } from '~/constants/query'
 import { MINUTE } from '~/constants/time'
 import type { Meme, User } from '~/db/generated/prisma/client'
 import type { MemeSubmissionStatus } from '~/db/generated/prisma/enums'
+import { getMemeByIdQueryOpts } from '~/lib/queries'
 import {
   getAdminActivity,
   getAdminRecentActivityEvents
@@ -293,6 +294,15 @@ export const getAdminAiSearchLogsQueryOpts = () => {
 }
 
 getAdminAiSearchLogsQueryOpts.all = ['admin-ai-search-logs'] as const
+
+export const invalidateSavedMeme = (
+  queryClient: QueryClient,
+  memeId: Meme['id']
+) => {
+  queryClient.removeQueries(getMemeByIdQueryOpts(memeId))
+
+  return queryClient.invalidateQueries(getAdminMemeByIdQueryOpts(memeId))
+}
 
 export const markAdminMemesOverviewStale = (queryClient: QueryClient) => {
   return Promise.all([

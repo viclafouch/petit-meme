@@ -8,6 +8,7 @@ import { ALGOLIA_FAIL_FAST_ON_RATE_LIMIT } from '~/constants/algolia'
 import { MEME_DERIVED_FORMATS } from '~/constants/bunny'
 import { COOKIE_ALGOLIA_USER_TOKEN_KEY } from '~/constants/cookie'
 import {
+  DEFAULT_MEME_TITLE,
   MEME_EXPORT_MODES,
   MEME_FULL_INCLUDE,
   MEME_TRANSLATION_SELECT,
@@ -79,7 +80,7 @@ import { auth } from '~/lib/auth'
 import { matchIsAnalyticsConsentGiven } from '~/lib/cookie-consent'
 import { algoliaLogger, logger } from '~/lib/logger'
 import { serveMemeExport } from '~/lib/meme-files'
-import { matchIsUserAdmin } from '~/lib/role'
+import { matchCanViewMeme, matchIsUserAdmin } from '~/lib/role'
 import { baseLocale, getLocale, type Locale } from '~/paraglide/runtime'
 import { matchIsUserPremium } from '~/server/customer'
 import { createRateLimitMiddleware } from '~/server/rate-limit'
@@ -393,20 +394,35 @@ function resolveEffectiveLocale(
     : locale
 }
 
+const getRequestSession = createServerOnlyFn(() => {
+  return auth.api.getSession({ headers: getRequest().headers }).catch(() => {
+    return null
+  })
+})
+
+const matchCanRequestViewMeme = createServerOnlyFn(
+  async (status: MemeStatus) => {
+    if (status === MemeStatus.PUBLISHED) {
+      return true
+    }
+
+    const session = await getRequestSession()
+
+    return matchCanViewMeme({ user: session?.user, status })
+  }
+)
+
 export const getMemeById = createServerFn({ method: 'GET' })
   .validator((data) => {
     return z.string().parse(data)
   })
   .handler(async ({ data: memeId }) => {
     const meme = await prismaClient.meme.findUnique({
-      where: {
-        id: memeId,
-        status: MemeStatus.PUBLISHED
-      },
+      where: { id: memeId },
       include: MEME_FULL_INCLUDE
     })
 
-    if (!meme) {
+    if (!meme || !(await matchCanRequestViewMeme(meme.status))) {
       throw notFound()
     }
 
@@ -420,7 +436,7 @@ export const getMemeById = createServerFn({ method: 'GET' })
 
     return {
       ...meme,
-      title: resolved.title,
+      title: resolved.title === '' ? DEFAULT_MEME_TITLE : resolved.title,
       description: resolved.description,
       keywords: resolved.keywords,
       categories: meme.categories.map((memeCategory) => {
@@ -921,11 +937,9 @@ export const shareMeme = createServerFn({ method: 'GET' })
 
     const [meme, session] = await Promise.all([
       prismaClient.meme.findUnique({
-        where: {
-          id: memeId,
-          status: MemeStatus.PUBLISHED
-        },
+        where: { id: memeId },
         select: {
+          status: true,
           video: {
             select: {
               bunnyId: true
@@ -933,12 +947,13 @@ export const shareMeme = createServerFn({ method: 'GET' })
           }
         }
       }),
-      auth.api.getSession({ headers: request.headers }).catch(() => {
-        return null
-      })
+      getRequestSession()
     ])
 
-    if (!meme) {
+    if (
+      !meme ||
+      !matchCanViewMeme({ user: session?.user, status: meme.status })
+    ) {
       throw notFound()
     }
 

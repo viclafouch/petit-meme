@@ -46,7 +46,7 @@ export const MemeEditor = ({ meme }: MemeEditorProps) => {
 
   return (
     <div className="flex flex-col gap-8">
-      <MemePageHeader meme={meme} />
+      <MemePageHeader meme={meme} publisher={publisher} />
       <form
         noValidate
         className="grid gap-6 lg:grid-cols-meme-editor"

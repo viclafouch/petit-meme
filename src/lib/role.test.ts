@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { matchIsPremium } from '~/lib/role'
+import { MemeStatus } from '~/db/generated/prisma/enums'
+import { matchCanViewMeme, matchIsPremium } from '~/lib/role'
 
 const SUBSCRIPTION = { id: 'subscription-1' }
 
@@ -24,6 +25,37 @@ describe('matchIsPremium', () => {
 
   it('should not count an anonymous Visitor as Premium', () => {
     expect(matchIsPremium({ user: null, subscription: SUBSCRIPTION })).toBe(
+      false
+    )
+  })
+})
+
+describe('matchCanViewMeme', () => {
+  const admin = { role: 'admin' }
+  const user = { role: 'user' }
+
+  it('should show a published Meme to everyone', () => {
+    expect(matchCanViewMeme({ user: null, status: MemeStatus.PUBLISHED })).toBe(
+      true
+    )
+    expect(matchCanViewMeme({ user, status: MemeStatus.PUBLISHED })).toBe(true)
+  })
+
+  it('should show a pending Meme to an admin only', () => {
+    expect(matchCanViewMeme({ user: admin, status: MemeStatus.PENDING })).toBe(
+      true
+    )
+    expect(matchCanViewMeme({ user, status: MemeStatus.PENDING })).toBe(false)
+    expect(matchCanViewMeme({ user: null, status: MemeStatus.PENDING })).toBe(
+      false
+    )
+  })
+
+  it('should hide an archived or rejected Meme from an admin', () => {
+    expect(matchCanViewMeme({ user: admin, status: MemeStatus.ARCHIVED })).toBe(
+      false
+    )
+    expect(matchCanViewMeme({ user: admin, status: MemeStatus.REJECTED })).toBe(
       false
     )
   })

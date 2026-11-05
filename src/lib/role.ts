@@ -1,3 +1,4 @@
+import { MemeStatus } from '~/db/generated/prisma/enums'
 import type { auth } from '~/lib/auth'
 
 export type SessionUser = (typeof auth)['$Infer']['Session']['user']
@@ -24,4 +25,21 @@ export const matchIsPremium = ({
   }
 
   return matchIsUserAdmin(user) || Boolean(subscription)
+}
+
+type MatchCanViewMemeParams = {
+  user: UserRoleHolder | null | undefined
+  status: MemeStatus
+}
+
+export const matchCanViewMeme = ({ user, status }: MatchCanViewMemeParams) => {
+  if (status === MemeStatus.PUBLISHED) {
+    return true
+  }
+
+  if (!user || status !== MemeStatus.PENDING) {
+    return false
+  }
+
+  return matchIsUserAdmin(user)
 }

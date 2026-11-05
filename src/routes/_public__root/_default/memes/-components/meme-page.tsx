@@ -25,6 +25,7 @@ import { ToggleLikeButton } from '~/components/Meme/toggle-like-button'
 import { Badge } from '~/components/ui/badge'
 import { Button, buttonVariants } from '~/components/ui/button'
 import type { MemeFullData } from '~/constants/meme'
+import { MemeStatus } from '~/db/generated/prisma/enums'
 import { formatDate } from '~/helpers/date'
 import { useMemeExport } from '~/hooks/use-meme-export'
 import { useMemeHls } from '~/hooks/use-meme-hls'
@@ -37,6 +38,7 @@ import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
 import { getRandomMeme, trackMemeAction } from '~/server/meme'
+import { MemePendingBanner } from './meme-pending-banner'
 
 const memeRouteApi = getRouteApi('/_public__root/_default/memes/$memeId')
 
@@ -193,6 +195,9 @@ export const MemePage = () => {
   return (
     <div>
       <div className="flex flex-col gap-y-2 md:gap-y-4 items-start">
+        {memeQuery.data.status === MemeStatus.PUBLISHED ? null : (
+          <MemePendingBanner memeId={memeQuery.data.id} />
+        )}
         <Link
           to="/memes"
           className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}

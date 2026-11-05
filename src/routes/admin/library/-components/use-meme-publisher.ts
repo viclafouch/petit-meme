@@ -6,8 +6,8 @@ import { MemeStatus } from '~/db/generated/prisma/enums'
 import { getErrorMessage } from '~/helpers/error'
 import { captureWithFeature } from '~/lib/sentry'
 import {
-  getAdminMemeByIdQueryOpts,
-  invalidateAdminMemesOverview
+  invalidateAdminMemesOverview,
+  invalidateSavedMeme
 } from '~/routes/admin/-lib/queries'
 import { editMeme } from '~/routes/admin/-server/memes'
 import {
@@ -46,7 +46,7 @@ export function useMemePublisher(meme: MemeFullData) {
     onSuccess: async () => {
       await Promise.all([
         invalidateAdminMemesOverview(queryClient),
-        queryClient.invalidateQueries(getAdminMemeByIdQueryOpts(meme.id))
+        invalidateSavedMeme(queryClient, meme.id)
       ])
       await router.invalidate()
     },

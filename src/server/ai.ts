@@ -30,7 +30,7 @@ const getGeminiClient = () => {
 
 const GEMINI_TRANSLATION_MODEL = 'gemini-3.5-flash-lite'
 const GEMINI_VIDEO_MODEL = 'gemini-3.8-flash'
-const GEMINI_TIMEOUT_MS = 100_000
+const GEMINI_TIMEOUT_MS = 60_000
 const GEMINI_FILE_POLL_INTERVAL_MS = 2000
 const GEMINI_FILE_MAX_RETRIES = 15
 
@@ -101,7 +101,19 @@ async function requestGeminiJson<TSchema extends z.ZodType>({
       },
       generation_config: { thinking_level: thinkingLevel }
     },
-    { timeout_ms: GEMINI_TIMEOUT_MS }
+    {
+      signal: AbortSignal.timeout(GEMINI_TIMEOUT_MS),
+      retries: {
+        strategy: 'backoff',
+        backoff: {
+          initialInterval: 500,
+          maxInterval: 8000,
+          exponent: 2,
+          maxElapsedTime: GEMINI_TIMEOUT_MS
+        },
+        retryConnectionErrors: true
+      }
+    }
   )
 
   if (!interaction.output_text) {

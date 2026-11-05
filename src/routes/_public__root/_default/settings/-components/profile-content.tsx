@@ -139,7 +139,7 @@ export const ProfileContent = ({
                   className={cn(
                     buttonVariants({
                       className:
-                        'border-amber-400/30 bg-amber-400/15 text-amber-400 hover:bg-amber-400/25'
+                        'border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 dark:border-amber-400/30 dark:bg-amber-400/15 dark:text-amber-400 dark:hover:bg-amber-400/25'
                     })
                   )}
                 >

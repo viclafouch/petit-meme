@@ -65,7 +65,7 @@ const AUTH_PROVIDER_DISPLAY = {
   discord: {
     label: 'Discord',
     icon: DiscordIcon,
-    variant: 'default'
+    variant: 'discord'
   }
 } as const satisfies Record<AuthProviderId, ProviderDisplayConfig>
 
@@ -108,7 +108,7 @@ export const SubscriptionBadge = ({
     <Tooltip>
       <TooltipTrigger className="cursor-default rounded-md">
         {isActive ? (
-          <Badge className="bg-amber-500 text-white border-amber-600" size="sm">
+          <Badge variant="amber" size="sm">
             <Crown className="size-3" aria-hidden />
             Premium
           </Badge>

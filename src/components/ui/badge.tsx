@@ -22,7 +22,8 @@ const badgeVariants = cva(
         outline:
           'border-border text-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground',
         amber:
-          'border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-300'
+          'border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-300',
+        discord: 'bg-[#5865F2] text-white [a]:hover:bg-[#5865F2]/90'
       },
       size: {
         sm: 'px-1 py-0.5 text-xs font-normal',

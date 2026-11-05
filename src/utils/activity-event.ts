@@ -7,14 +7,10 @@ import type {
   MemeExportFormat
 } from '~/db/generated/prisma/enums'
 import { extractClientCountry, extractClientIp } from '~/helpers/request'
-import {
-  matchIsUserAdmin,
-  type SessionUser,
-  type UserRoleHolder
-} from '~/lib/role'
+import type { SessionUser } from '~/lib/role'
 import { captureWithFeature } from '~/lib/sentry'
 
-type ActivityActor = Pick<SessionUser, 'id'> & UserRoleHolder
+type ActivityActor = Pick<SessionUser, 'id'>
 
 type RecordActivityEventParams = {
   type: ActivityEventType
@@ -49,10 +45,6 @@ export const recordActivityEvent = createServerOnlyFn(
     metadata,
     format
   }: RecordActivityEventParams) => {
-    if (actor && matchIsUserAdmin(actor)) {
-      return
-    }
-
     waitUntil(
       createActivityEvent({
         type,

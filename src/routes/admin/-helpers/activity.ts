@@ -104,21 +104,16 @@ function getActivityMetadataText(metadata: AdminActivityRow['metadata']) {
   return result.data.prompt ?? formatPlanText(result.data) ?? null
 }
 
-type ActivityEntryParams = Pick<
-  AdminActivityRow,
-  'type' | 'meme' | 'metadata' | 'format'
->
+type ActivityEntryParams = Pick<AdminActivityRow, 'type' | 'meme' | 'metadata'>
 
 export function formatActivityEntry({
   type,
   meme,
-  metadata,
-  format
+  metadata
 }: ActivityEntryParams) {
-  const text =
+  return (
     meme?.title ??
     getActivityMetadataText(metadata) ??
     ACTIVITY_TYPE_DISPLAY[type].label
-
-  return format ? `${text} · ${format.toUpperCase()}` : text
+  )
 }

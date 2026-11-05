@@ -359,7 +359,7 @@ const getAuthConfig = createServerOnlyFn(() => {
 
             const user = await prismaClient.user.findUnique({
               where: { id: subscription.referenceId },
-              select: { email: true, name: true, locale: true, role: true }
+              select: { email: true, name: true, locale: true }
             })
 
             if (!user) {
@@ -368,7 +368,7 @@ const getAuthConfig = createServerOnlyFn(() => {
 
             recordActivityEvent({
               type: ActivityEventType.SUBSCRIPTION,
-              actor: { id: subscription.referenceId, role: user.role },
+              actor: { id: subscription.referenceId },
               metadata: {
                 plan: plan.name,
                 billingInterval: subscription.billingInterval

@@ -1,5 +1,6 @@
 import React from 'react'
 import { AudioLines, Download, Film, Share2 } from 'lucide-react'
+import { MemeFormatChip } from '~/components/Meme/meme-format-chip'
 import { PremiumBadge } from '~/components/premium-badge'
 import {
   DropdownMenu,
@@ -22,16 +23,12 @@ const FORMATS = {
   mp4: {
     icon: Film,
     label: m.meme_format_video,
-    iconClassName: 'text-violet-600! dark:text-violet-400!',
-    chipClassName:
-      'bg-violet-500/15 text-violet-700! ring-violet-500/30 dark:text-violet-300!'
+    iconClassName: 'text-violet-600! dark:text-violet-400!'
   },
   mp3: {
     icon: AudioLines,
     label: m.meme_format_audio,
-    iconClassName: 'text-emerald-600! dark:text-emerald-400!',
-    chipClassName:
-      'bg-emerald-500/15 text-emerald-700! ring-emerald-500/30 dark:text-emerald-300!'
+    iconClassName: 'text-emerald-600! dark:text-emerald-400!'
   }
 } as const satisfies Record<
   MemeDerivedFormat,
@@ -39,7 +36,6 @@ const FORMATS = {
     icon: React.ElementType
     label: () => string
     iconClassName: string
-    chipClassName: string
   }
 >
 
@@ -60,12 +56,7 @@ const MemeExportMenuItems = ({ onExport }: MemeExportMenuItemsProps) => {
 
   return MEME_DERIVED_FORMATS.map((format) => {
     const isLocked = format === 'mp3' && !isPremium
-    const {
-      icon: FormatIcon,
-      label,
-      iconClassName,
-      chipClassName
-    } = FORMATS[format]
+    const { icon: FormatIcon, label, iconClassName } = FORMATS[format]
 
     return (
       <DropdownMenuItem
@@ -81,14 +72,7 @@ const MemeExportMenuItems = ({ onExport }: MemeExportMenuItemsProps) => {
         <FormatIcon className={iconClassName} />
         {label()}
         <span className="ml-auto flex items-center gap-1.5 pl-4">
-          <span
-            className={cn(
-              'rounded px-1.5 py-0.5 font-mono text-xs font-semibold uppercase ring-1 ring-inset',
-              chipClassName
-            )}
-          >
-            {format}
-          </span>
+          <MemeFormatChip format={format} />
           {isLocked ? <PremiumBadge /> : null}
         </span>
       </DropdownMenuItem>

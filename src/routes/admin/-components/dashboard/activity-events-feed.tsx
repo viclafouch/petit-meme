@@ -1,4 +1,5 @@
 import { CountryFlag } from '~/components/country-flag'
+import { MemeFormatChip } from '~/components/Meme/meme-format-chip'
 import { ActivityTypeIcon } from '~/routes/admin/-components/activity-type-icon'
 import {
   ACTIVITY_TYPE_DISPLAY,
@@ -53,6 +54,7 @@ export const ActivityEventsFeed = ({
             </>
           ),
           text: formatActivityEntry(entry),
+          badge: entry.format ? <MemeFormatChip format={entry.format} /> : null,
           actor: <ActivityActor entry={entry} />,
           createdAt: new Date(entry.createdAt)
         }

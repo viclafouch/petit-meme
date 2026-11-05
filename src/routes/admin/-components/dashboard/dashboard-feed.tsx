@@ -21,6 +21,7 @@ type DashboardFeedEntry = {
   id: string
   icon: React.ReactNode
   text: string
+  badge?: React.ReactNode
   actor: React.ReactNode
   createdAt: Date
 }
@@ -54,7 +55,10 @@ export const DashboardFeed = ({
               {entry.icon}
             </div>
             <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-              <p className="text-sm leading-snug truncate">{entry.text}</p>
+              <div className="flex min-w-0 items-center gap-2">
+                <p className="text-sm leading-snug truncate">{entry.text}</p>
+                {entry.badge}
+              </div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 {entry.actor}
                 <span aria-hidden>·</span>

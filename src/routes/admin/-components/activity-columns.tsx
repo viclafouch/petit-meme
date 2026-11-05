@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import type { ColumnVisibilityState } from '@tanstack/react-table'
+import { MemeFormatChip } from '~/components/Meme/meme-format-chip'
 import { Badge } from '~/components/ui/badge'
 import {
   Tooltip,
@@ -50,11 +51,7 @@ export const getActivityColumns = (now: number) => {
             <span className="whitespace-nowrap">
               {ACTIVITY_TYPE_DISPLAY[type].label}
             </span>
-            {format ? (
-              <Badge variant="outline" size="sm">
-                {format.toUpperCase()}
-              </Badge>
-            ) : null}
+            {format ? <MemeFormatChip format={format} /> : null}
           </div>
         )
       }

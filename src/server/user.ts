@@ -259,6 +259,7 @@ export const exportUserData = createServerFn({ method: 'GET' })
         lastActiveAt: true,
         generationCount: true,
         stripeCustomerId: true,
+        premiumGrantedAt: true,
         termsAcceptedAt: true,
         privacyAcceptedAt: true,
         banned: true,

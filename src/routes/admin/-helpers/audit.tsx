@@ -61,6 +61,14 @@ function getAuditActionVerb({ action, targetType }: AuditActionVerbParams) {
       return 'Watermark uploadé'
     }
 
+    case 'premium_grant': {
+      return 'Premium offert'
+    }
+
+    case 'premium_revoke': {
+      return 'Premium retiré'
+    }
+
     default: {
       return `${label} ${action}`
     }

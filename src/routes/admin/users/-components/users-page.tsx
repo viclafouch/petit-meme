@@ -1,7 +1,7 @@
 import React from 'react'
 import { Minus } from 'lucide-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
+import { getRouteApi, Link } from '@tanstack/react-router'
 import { PageHeader } from '~/components/page-header'
 import { Badge } from '~/components/ui/badge'
 import { Container } from '~/components/ui/container'
@@ -13,17 +13,79 @@ import {
 import { UserAvatar } from '~/components/user-avatar'
 import { AdminTable } from '~/routes/admin/-components/admin-table'
 import { EmptyCell } from '~/routes/admin/-components/empty-cell'
+import { FilterTab } from '~/routes/admin/-components/filter-tab'
+import { FilterTabs } from '~/routes/admin/-components/filter-tabs'
 import { RelativeDateTooltip } from '~/routes/admin/-components/relative-date-tooltip'
 import { INITIAL_PAGINATION } from '~/routes/admin/-lib/constants'
+import {
+  getPremiumStatus,
+  type PremiumSource
+} from '~/routes/admin/-lib/premium'
 import { getAdminUsersListQueryOpts } from '~/routes/admin/-lib/queries'
 import { createAppColumnHelper, useAppTable } from '~/routes/admin/-lib/table'
 import type { EnrichedUser } from '~/routes/admin/-server/users'
 import { UserActionsCell } from '~/routes/admin/users/-components/user-actions-cell'
 import {
   AuthProviderBadge,
-  SubscriptionBadge,
+  PremiumBadges,
   UserStatusBadges
 } from '~/routes/admin/users/-components/user-badges'
+
+const routeApi = getRouteApi('/admin/users/')
+
+type PremiumFilter = PremiumSource | 'all'
+
+const PREMIUM_FILTER_OPTIONS = [
+  { value: 'all', label: 'Tous' },
+  { value: 'paid', label: 'Payants' },
+  { value: 'granted', label: 'Offerts' },
+  { value: 'none', label: 'Sans Premium' }
+] as const satisfies readonly { value: PremiumFilter; label: string }[]
+
+type PremiumFilterTabsProps = {
+  currentFilter: PremiumFilter
+  counts: Record<PremiumFilter, number>
+}
+
+const PremiumFilterTabs = ({
+  currentFilter,
+  counts
+}: PremiumFilterTabsProps) => {
+  return (
+    <FilterTabs>
+      {PREMIUM_FILTER_OPTIONS.map((option) => {
+        return (
+          <FilterTab
+            key={option.value}
+            from="/admin/users/"
+            search={{
+              premium: option.value === 'all' ? undefined : option.value
+            }}
+            aria-selected={option.value === currentFilter}
+            count={counts[option.value]}
+          >
+            {option.label}
+          </FilterTab>
+        )
+      })}
+    </FilterTabs>
+  )
+}
+
+const countUsersByPremiumSource = (
+  users: EnrichedUser[]
+): Record<PremiumFilter, number> => {
+  const usersBySource = Object.groupBy(users, (user) => {
+    return getPremiumStatus(user).source
+  })
+
+  return {
+    all: users.length,
+    paid: usersBySource.paid?.length ?? 0,
+    granted: usersBySource.granted?.length ?? 0,
+    none: usersBySource.none?.length ?? 0
+  }
+}
 
 const columnHelper = createAppColumnHelper<EnrichedUser>()
 
@@ -95,23 +157,21 @@ const getColumns = (now: number) => {
       id: 'subscription',
       header: 'Abo',
       cell: (info) => {
-        const { subscription } = info.row.original
-
-        if (subscription.status === 'none') {
-          return (
-            <span className="text-muted-foreground">
-              <Minus className="size-4" aria-hidden />
-              <span className="sr-only">Aucun abonnement</span>
-            </span>
-          )
-        }
+        const { subscription, premiumGrantedAt } = info.row.original
 
         return (
-          <SubscriptionBadge
-            isActive={subscription.status === 'active'}
-            monthCount={subscription.monthCount}
-            endsAt={subscription.endsAt}
-          />
+          <div className="flex flex-wrap gap-1">
+            <PremiumBadges
+              premiumGrantedAt={premiumGrantedAt}
+              subscription={subscription}
+              emptyFallback={
+                <span className="text-muted-foreground">
+                  <Minus className="size-4" aria-hidden />
+                  <span className="sr-only">Aucun abonnement</span>
+                </span>
+              }
+            />
+          </div>
         )
       }
     }),
@@ -159,14 +219,29 @@ const getColumns = (now: number) => {
 }
 
 export const UsersPage = () => {
+  const { premium } = routeApi.useSearch()
   const usersListQuery = useSuspenseQuery(getAdminUsersListQueryOpts())
 
   const columns = React.useMemo(() => {
     return getColumns(usersListQuery.dataUpdatedAt)
   }, [usersListQuery.dataUpdatedAt])
 
+  const premiumCounts = React.useMemo(() => {
+    return countUsersByPremiumSource(usersListQuery.data.users)
+  }, [usersListQuery.data.users])
+
+  const filteredUsers = React.useMemo(() => {
+    if (!premium) {
+      return usersListQuery.data.users
+    }
+
+    return usersListQuery.data.users.filter((user) => {
+      return getPremiumStatus(user).source === premium
+    })
+  }, [usersListQuery.data.users, premium])
+
   const table = useAppTable({
-    data: usersListQuery.data.users,
+    data: filteredUsers,
     columns,
     initialState: {
       sorting: [{ id: 'lastActiveAt', desc: true }],
@@ -177,7 +252,11 @@ export const UsersPage = () => {
   return (
     <Container>
       <PageHeader title="Utilisateurs" />
-      <div className="py-10">
+      <div className="flex flex-col gap-6 py-6">
+        <PremiumFilterTabs
+          currentFilter={premium ?? 'all'}
+          counts={premiumCounts}
+        />
         <AdminTable table={table} caption="Liste des utilisateurs" />
       </div>
     </Container>

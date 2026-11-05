@@ -175,6 +175,7 @@ model User {
   isAnonymized             Boolean   @default(false) @map("is_anonymized")
   locale                   UserLocale @default(fr)
   lastActiveAt             DateTime?  @map("last_active_at")
+  premiumGrantedAt         DateTime?  @map("premium_granted_at")
 
   verificationEmailCount       Int       @default(0) @map("verification_email_count")
   verificationEmailWindowStart DateTime? @map("verification_email_window_start")

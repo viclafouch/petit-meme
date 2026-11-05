@@ -9,6 +9,8 @@ type AuditAction =
   | 'unban'
   | 'status_change'
   | 'watermark_upload'
+  | 'premium_grant'
+  | 'premium_revoke'
 
 type AuditTargetType = 'category' | 'meme' | 'submission' | 'user'
 

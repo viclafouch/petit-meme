@@ -11,11 +11,11 @@ import {
 } from '~/components/ui/dropdown-menu'
 import type { EnrichedUser } from '~/routes/admin/-server/users'
 import {
-  getUserModerationPermissions,
-  NO_MODERATION_REASON,
-  useUserModeration
-} from './use-user-moderation'
-import { UserModerationDialogs } from './user-moderation-dialogs'
+  getUserActionPermissions,
+  NO_USER_ACTION_REASON,
+  useUserActions
+} from './use-user-actions'
+import { UserActionDialogs } from './user-action-dialogs'
 
 const routeApi = getRouteApi('/admin')
 
@@ -25,9 +25,9 @@ type UserActionsCellProps = {
 
 export const UserActionsCell = ({ user }: UserActionsCellProps) => {
   const { user: admin } = routeApi.useRouteContext()
-  const moderation = useUserModeration({ userId: user.id })
+  const userActions = useUserActions({ userId: user.id })
 
-  const permissions = getUserModerationPermissions({
+  const permissions = getUserActionPermissions({
     target: user,
     adminId: admin.id
   })
@@ -54,7 +54,7 @@ export const UserActionsCell = ({ user }: UserActionsCellProps) => {
           {permissions.canUnban ? (
             <DropdownMenuItem
               onClick={() => {
-                moderation.openDialog('unban')
+                userActions.openDialog('unban')
               }}
             >
               Débannir
@@ -64,7 +64,7 @@ export const UserActionsCell = ({ user }: UserActionsCellProps) => {
             <DropdownMenuItem
               variant="destructive"
               onClick={() => {
-                moderation.openDialog('ban')
+                userActions.openDialog('ban')
               }}
             >
               Bannir
@@ -74,7 +74,7 @@ export const UserActionsCell = ({ user }: UserActionsCellProps) => {
             <DropdownMenuItem
               variant="destructive"
               onClick={() => {
-                moderation.openDialog('delete')
+                userActions.openDialog('delete')
               }}
             >
               Supprimer
@@ -83,13 +83,13 @@ export const UserActionsCell = ({ user }: UserActionsCellProps) => {
           {hasActions ? null : (
             <DropdownMenuGroup>
               <DropdownMenuLabel className="font-normal text-muted-foreground">
-                {NO_MODERATION_REASON}
+                {NO_USER_ACTION_REASON}
               </DropdownMenuLabel>
             </DropdownMenuGroup>
           )}
         </DropdownMenuContent>
       </DropdownMenu>
-      <UserModerationDialogs userName={user.name} moderation={moderation} />
+      <UserActionDialogs userName={user.name} userActions={userActions} />
     </>
   )
 }

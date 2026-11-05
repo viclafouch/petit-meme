@@ -1,7 +1,7 @@
 import React from 'react'
 import { ExternalLink, Inbox } from 'lucide-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { getRouteApi, Link } from '@tanstack/react-router'
+import { getRouteApi } from '@tanstack/react-router'
 import { CONTENT_LOCALE_FLAGS, FLAG_ICON_CLASS } from '~/components/icon/flags'
 import { XTwitterIcon } from '~/components/icon/x-twitter'
 import { YoutubeIcon } from '~/components/icon/youtube'
@@ -15,6 +15,8 @@ import {
   type MemeSubmissionUrlType
 } from '~/db/generated/prisma/enums'
 import { AdminTable } from '~/routes/admin/-components/admin-table'
+import { FilterTab } from '~/routes/admin/-components/filter-tab'
+import { FilterTabs } from '~/routes/admin/-components/filter-tabs'
 import { RelativeDateTooltip } from '~/routes/admin/-components/relative-date-tooltip'
 import { INITIAL_PAGINATION } from '~/routes/admin/-lib/constants'
 import { getAdminSubmissionsQueryOpts } from '~/routes/admin/-lib/queries'
@@ -152,31 +154,24 @@ const StatusFilterTabs = ({
   statusCounts
 }: StatusFilterTabsProps) => {
   return (
-    <div className="flex gap-1 rounded-lg bg-muted p-1 overflow-x-auto">
+    <FilterTabs>
       {STATUS_FILTER_OPTIONS.map((option) => {
-        const isActive = option.value === currentStatus
-        const count = statusCounts[option.value]
-        const search =
-          option.value === 'all'
-            ? { submissionStatus: undefined }
-            : { submissionStatus: option.value }
-
         return (
-          <Link
+          <FilterTab
             key={option.value}
             from="/admin/submissions/"
-            search={search}
-            className="relative shrink-0 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors aria-selected:bg-background aria-selected:text-foreground aria-selected:shadow-sm text-muted-foreground hover:text-foreground"
-            aria-selected={isActive}
+            search={{
+              submissionStatus:
+                option.value === 'all' ? undefined : option.value
+            }}
+            aria-selected={option.value === currentStatus}
+            count={statusCounts[option.value]}
           >
             {option.label}
-            <span className="ml-1.5 text-xs tabular-nums opacity-60">
-              {count}
-            </span>
-          </Link>
+          </FilterTab>
         )
       })}
-    </div>
+    </FilterTabs>
   )
 }
 

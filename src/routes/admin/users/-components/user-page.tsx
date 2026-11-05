@@ -1,6 +1,5 @@
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
-import { PageHeader } from '~/components/page-header'
 import { Badge } from '~/components/ui/badge'
 import { Container } from '~/components/ui/container'
 import { UserAvatar } from '~/components/user-avatar'
@@ -8,9 +7,7 @@ import {
   ACTIVITY_IP_RETENTION_DAYS,
   ACTIVITY_RETENTION_DAYS
 } from '~/constants/activity'
-import { DATE_WITH_TIME_OPTIONS, formatDate } from '~/helpers/date'
 import { cn } from '~/lib/utils'
-import { getLocale } from '~/paraglide/runtime'
 import { ActivityTimeline } from '~/routes/admin/-components/activity-timeline'
 import {
   SectionCard,
@@ -22,21 +19,60 @@ import {
   getAdminUserActivityQueryOpts,
   getAdminUserDetailQueryOpts
 } from '~/routes/admin/-lib/queries'
+import type { AdminUserDetailPayload } from '~/routes/admin/-server/user-detail'
+import { UserAccountPanel } from '~/routes/admin/users/-components/user-account-panel'
 import {
-  AuthProviderBadge,
-  SubscriptionBadge,
+  PremiumBadges,
   UserStatusBadges
 } from '~/routes/admin/users/-components/user-badges'
-import { UserDetailActions } from '~/routes/admin/users/-components/user-detail-actions'
 import { UserIpList } from '~/routes/admin/users/-components/user-ip-list'
 
 const routeApi = getRouteApi('/admin/users/$userId')
+
+type UserIdentityProps = Pick<AdminUserDetailPayload, 'user' | 'subscription'>
+
+const UserIdentity = ({ user, subscription }: UserIdentityProps) => {
+  return (
+    <header className="flex items-center gap-4">
+      <UserAvatar
+        name={user.name}
+        image={user.image}
+        email={user.email}
+        size="xl"
+        className={cn(
+          'size-16 sm:size-20',
+          user.banned === true
+            ? 'ring-2 ring-destructive ring-offset-2 ring-offset-background'
+            : undefined
+        )}
+      />
+      <div className="flex min-w-0 flex-col gap-1.5">
+        <h1 className="truncate text-2xl font-bold sm:text-3xl">{user.name}</h1>
+        <p className="truncate text-sm text-muted-foreground">{user.email}</p>
+        <div className="flex flex-wrap items-center gap-1">
+          <UserStatusBadges
+            banned={user.banned}
+            emailVerified={user.emailVerified}
+          />
+          <PremiumBadges
+            premiumGrantedAt={user.premiumGrantedAt}
+            subscription={subscription}
+            emptyFallback={
+              <Badge variant="outline" size="sm">
+                Gratuit
+              </Badge>
+            }
+          />
+        </div>
+      </div>
+    </header>
+  )
+}
 
 export const UserPage = () => {
   const { userId } = routeApi.useParams()
   const { page } = routeApi.useSearch()
   const navigate = routeApi.useNavigate()
-  const locale = getLocale()
 
   const detailQuery = useSuspenseQuery(getAdminUserDetailQueryOpts(userId))
   const activityQuery = useQuery(
@@ -55,82 +91,43 @@ export const UserPage = () => {
 
   return (
     <Container>
-      <PageHeader
-        title={
-          <span className="flex items-center gap-3">
-            <UserAvatar
-              name={detailQuery.data.user.name}
-              image={detailQuery.data.user.image}
-              email={detailQuery.data.user.email}
-              className={cn(
-                'size-10',
-                detailQuery.data.user.banned === true
-                  ? 'ring-2 ring-destructive'
-                  : undefined
-              )}
+      <div className="flex flex-col gap-10 pt-2 pb-12">
+        <UserIdentity
+          user={detailQuery.data.user}
+          subscription={detailQuery.data.subscription}
+        />
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-detail-aside lg:items-start lg:gap-8">
+          <div className="lg:col-start-2 lg:row-start-1">
+            <UserAccountPanel
+              user={detailQuery.data.user}
+              provider={detailQuery.data.provider}
+              subscription={detailQuery.data.subscription}
             />
-            {detailQuery.data.user.name}
-          </span>
-        }
-        description={
-          <div className="flex flex-col gap-2">
-            <span className="text-sm text-muted-foreground">
-              {detailQuery.data.user.email}
-              {' · Inscrit le '}
-              {formatDate(new Date(detailQuery.data.user.createdAt), locale)}
-              {' · Dernière activité : '}
-              {detailQuery.data.user.lastActiveAt
-                ? formatDate(
-                    new Date(detailQuery.data.user.lastActiveAt),
-                    locale,
-                    DATE_WITH_TIME_OPTIONS
-                  )
-                : 'jamais'}
-            </span>
-            <div className="flex flex-wrap items-center gap-1">
-              <AuthProviderBadge provider={detailQuery.data.provider} />
-              <UserStatusBadges
-                banned={detailQuery.data.user.banned}
-                emailVerified={detailQuery.data.user.emailVerified}
-              />
-              {detailQuery.data.subscription.status === 'none' ? (
-                <Badge variant="outline" size="sm">
-                  Gratuit
-                </Badge>
-              ) : (
-                <SubscriptionBadge
-                  isActive={detailQuery.data.subscription.status === 'active'}
-                  monthCount={detailQuery.data.subscription.monthCount}
-                  endsAt={detailQuery.data.subscription.endsAt}
-                />
-              )}
-            </div>
           </div>
-        }
-        action={<UserDetailActions user={detailQuery.data.user} />}
-      />
-      <div className="flex flex-col gap-6 py-10">
-        <section aria-label="Totaux d'activité">
-          <SectionHeading
-            title={`Activité — ${ACTIVITY_RETENTION_DAYS} derniers jours`}
-          />
-          <StatTiles
-            tiles={buildActivityTiles(detailQuery.data.summary.totals)}
-          />
-        </section>
-        <SectionCard
-          title="Dernières IP connues"
-          action={
-            <span className="text-xs text-muted-foreground">
-              Purgées après {ACTIVITY_IP_RETENTION_DAYS} jours
-            </span>
-          }
-        >
-          <UserIpList
-            ipAddresses={detailQuery.data.ipAddresses}
-            now={detailQuery.dataUpdatedAt}
-          />
-        </SectionCard>
+          <div className="flex min-w-0 flex-col gap-10 lg:col-start-1 lg:row-start-1">
+            <section aria-label="Totaux d'activité">
+              <SectionHeading
+                title={`Activité des ${ACTIVITY_RETENTION_DAYS} derniers jours`}
+              />
+              <StatTiles
+                tiles={buildActivityTiles(detailQuery.data.summary.totals)}
+              />
+            </section>
+            <SectionCard
+              title="Dernières IP connues"
+              action={
+                <span className="text-xs text-muted-foreground">
+                  Purgées après {ACTIVITY_IP_RETENTION_DAYS} jours
+                </span>
+              }
+            >
+              <UserIpList
+                ipAddresses={detailQuery.data.ipAddresses}
+                now={detailQuery.dataUpdatedAt}
+              />
+            </SectionCard>
+          </div>
+        </div>
         <section aria-label="Journal d'activité">
           <SectionHeading title="Journal d'activité" />
           <ActivityTimeline

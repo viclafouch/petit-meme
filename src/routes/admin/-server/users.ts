@@ -4,9 +4,14 @@ import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
 import { prismaClient } from '~/db'
 import { matchIsAuthProviderId, type AuthProviderId } from '~/constants/auth'
 import { HTTP_STATUS } from '~/constants/http'
+import {
+  ACTIVE_SUBSCRIPTION_STATUSES,
+  matchIsActiveSubscriptionStatus
+} from '~/constants/plan'
 import type { Prisma, User } from '~/db/generated/prisma/client'
 import { AccountBannedEmail } from '~/emails/account-banned-email'
 import { AccountUnbannedEmail } from '~/emails/account-unbanned-email'
+import { PremiumGrantedEmail } from '~/emails/premium-granted-email'
 import { emailSubjects } from '~/emails/subjects'
 import { differenceInMonths } from '~/helpers/date'
 import { auth } from '~/lib/auth'
@@ -27,7 +32,8 @@ const USER_LIST_SELECT = {
   role: true,
   banned: true,
   lastActiveAt: true,
-  generationCount: true
+  generationCount: true,
+  premiumGrantedAt: true
 } as const satisfies Prisma.UserSelect
 
 type SubscriptionStatus = 'active' | 'past' | 'none'
@@ -70,7 +76,7 @@ export function buildSubscriptionInfo(
 ): SubscriptionInfo {
   const period = subscriptions.reduce<SubscriptionPeriod>(
     (merged, subscription) => {
-      const isActive = subscription.status === 'active'
+      const isActive = matchIsActiveSubscriptionStatus(subscription.status)
 
       return {
         status: merged.status === 'active' || isActive ? 'active' : 'past',
@@ -397,6 +403,112 @@ export const removeUser = createServerFn({ method: 'POST' })
     adminLogger.info(
       { userId, adminId: context.user.id },
       'User removed by admin'
+    )
+
+    return { success: true }
+  })
+
+export const grantPremiumById = createServerFn({ method: 'POST' })
+  .middleware([adminRequiredMiddleware])
+  .validator(z.string())
+  .handler(async ({ data: userId, context }) => {
+    const targetUser = await prismaClient.user.findUnique({
+      where: { id: userId },
+      select: {
+        role: true,
+        banned: true,
+        email: true,
+        name: true,
+        locale: true
+      }
+    })
+
+    if (!targetUser) {
+      setResponseStatus(HTTP_STATUS.NOT_FOUND)
+      throw new Error('Utilisateur introuvable')
+    }
+
+    if (targetUser.role === 'admin') {
+      setResponseStatus(HTTP_STATUS.UNPROCESSABLE_CONTENT)
+      throw new Error('Un administrateur est déjà Premium')
+    }
+
+    if (targetUser.banned === true) {
+      setResponseStatus(HTTP_STATUS.UNPROCESSABLE_CONTENT)
+      throw new Error("Impossible d'offrir Premium à un utilisateur banni")
+    }
+
+    const activeSubscriptionCount = await prismaClient.subscription.count({
+      where: {
+        referenceId: userId,
+        status: { in: [...ACTIVE_SUBSCRIPTION_STATUSES] }
+      }
+    })
+
+    if (activeSubscriptionCount > 0) {
+      setResponseStatus(HTTP_STATUS.UNPROCESSABLE_CONTENT)
+      throw new Error('Abonnement payant en cours')
+    }
+
+    const { count } = await prismaClient.user.updateMany({
+      where: { id: userId, premiumGrantedAt: null },
+      data: { premiumGrantedAt: new Date() }
+    })
+
+    if (count === 0) {
+      setResponseStatus(HTTP_STATUS.UNPROCESSABLE_CONTENT)
+      throw new Error('Premium est déjà offert à cet utilisateur')
+    }
+
+    sendEmailInBackground({
+      to: targetUser.email,
+      subject: emailSubjects[targetUser.locale].premiumGranted,
+      react: PremiumGrantedEmail({
+        username: targetUser.name,
+        locale: targetUser.locale
+      }),
+      logMessage: 'Sending premium granted email'
+    })
+
+    void logAuditAction({
+      action: 'premium_grant',
+      actingAdminId: context.user.id,
+      targetId: userId,
+      targetType: 'user'
+    })
+
+    adminLogger.info(
+      { userId, adminId: context.user.id },
+      'Premium granted by admin'
+    )
+
+    return { success: true }
+  })
+
+export const revokePremiumById = createServerFn({ method: 'POST' })
+  .middleware([adminRequiredMiddleware])
+  .validator(z.string())
+  .handler(async ({ data: userId, context }) => {
+    const { count } = await prismaClient.user.updateMany({
+      where: { id: userId, premiumGrantedAt: { not: null } },
+      data: { premiumGrantedAt: null }
+    })
+
+    if (count === 0) {
+      setResponseStatus(HTTP_STATUS.UNPROCESSABLE_CONTENT)
+      throw new Error("Premium n'est pas offert à cet utilisateur")
+    }
+
+    void logAuditAction({
+      action: 'premium_revoke',
+      actingAdminId: context.user.id,
+      targetId: userId,
+      targetType: 'user'
+    })
+
+    adminLogger.info(
+      { userId, adminId: context.user.id },
+      'Premium revoked by admin'
     )
 
     return { success: true }

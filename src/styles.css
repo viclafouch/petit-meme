@@ -267,6 +267,12 @@
 @utility grid-cols-submit {
   grid-template-columns: 7fr 3fr;
 }
+@utility grid-cols-stat-tiles {
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+}
+@utility grid-cols-detail-aside {
+  grid-template-columns: minmax(0, 1fr) 22rem;
+}
 @utility grid-cols-meme-page {
   grid-template-columns: auto 300px;
 }

@@ -1,5 +1,4 @@
 import React from 'react'
-import type { User } from 'better-auth'
 import { CreditCard, Download, Key, Sparkles, Trash } from 'lucide-react'
 import { toast } from 'sonner'
 import { useMutation } from '@tanstack/react-query'
@@ -21,6 +20,7 @@ import { getFreePlan, getPremiumPlan } from '~/constants/plan'
 import { formatDate } from '~/helpers/date'
 import { getSubscriptionDisplayInfo } from '~/helpers/subscription'
 import { useStripeCheckout } from '~/hooks/use-stripe-checkout'
+import { matchIsPremiumGranted, type SessionUser } from '~/lib/role'
 import { captureWithFeature } from '~/lib/sentry'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
@@ -33,8 +33,100 @@ const SETTINGS_ROW_CLASS_NAME =
   'flex md:items-center justify-between gap-6 flex-col md:flex-row'
 
 type ProfileContentProps = {
-  user: User
+  user: SessionUser
   activeSubscription: ActiveSubscription | null
+}
+
+type SubscriptionRowProps = {
+  user: SessionUser
+  activeSubscription: ActiveSubscription | null
+}
+
+const SubscriptionRow = ({
+  user,
+  activeSubscription
+}: SubscriptionRowProps) => {
+  const { goToBillingPortal } = useStripeCheckout()
+
+  if (activeSubscription) {
+    const subscriptionDate = activeSubscription.periodEnd
+      ? formatDate(new Date(activeSubscription.periodEnd), getLocale())
+      : ''
+
+    return (
+      <div className={SETTINGS_ROW_CLASS_NAME}>
+        <div className="space-y-1">
+          <Label className="text-base">
+            {m.settings_current_subscription()}
+          </Label>
+          <p className="text-muted-foreground text-sm">
+            {getPremiumPlan().title} -{' '}
+            {
+              getSubscriptionDisplayInfo({
+                billingInterval: activeSubscription.billingInterval,
+                locale: getLocale()
+              }).displayPrice
+            }{' '}
+            -{' '}
+            <span className="text-info">
+              {activeSubscription.cancelAtPeriodEnd
+                ? m.settings_subscription_ends({ date: subscriptionDate })
+                : m.settings_subscription_renews({ date: subscriptionDate })}
+            </span>
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          onClick={(event) => {
+            event.preventDefault()
+            void goToBillingPortal()
+          }}
+        >
+          <CreditCard />
+          {m.nav_manage_subscription()}
+        </Button>
+      </div>
+    )
+  }
+
+  if (matchIsPremiumGranted(user)) {
+    return (
+      <div className={SETTINGS_ROW_CLASS_NAME}>
+        <div className="space-y-1">
+          <Label className="text-base">
+            {m.settings_current_subscription()}
+          </Label>
+          <p className="text-muted-foreground text-sm">
+            {getPremiumPlan().title} -{' '}
+            <span className="text-info">{m.premium_granted_for_life()}</span>
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className={SETTINGS_ROW_CLASS_NAME}>
+      <div className="space-y-1">
+        <Label className="text-base">{m.settings_current_subscription()}</Label>
+        <p className="text-muted-foreground text-sm">
+          {getFreePlan().title} - {m.pricing_free_label()}
+        </p>
+      </div>
+      <Link
+        to="/pricing"
+        className={cn(
+          buttonVariants({
+            className:
+              'border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 dark:border-amber-400/30 dark:bg-amber-400/15 dark:text-amber-400 dark:hover:bg-amber-400/25'
+          })
+        )}
+      >
+        <Sparkles />
+        {m.nav_upgrade_premium()}
+      </Link>
+    </div>
+  )
 }
 
 export const ProfileContent = ({
@@ -45,8 +137,6 @@ export const ProfileContent = ({
     React.useState(false)
   const [isDeleteAccountOpened, setIsDeleteAccountOpened] =
     React.useState(false)
-
-  const { goToBillingPortal } = useStripeCheckout()
 
   const exportMutation = useMutation({
     mutationFn: async () => {
@@ -65,10 +155,6 @@ export const ProfileContent = ({
       toast.error(m.settings_data_export_error())
     }
   })
-
-  const subscriptionDate = activeSubscription?.periodEnd
-    ? formatDate(new Date(activeSubscription.periodEnd), getLocale())
-    : ''
 
   return (
     <>
@@ -91,63 +177,10 @@ export const ProfileContent = ({
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className={SETTINGS_ROW_CLASS_NAME}>
-              <div className="space-y-1">
-                <Label className="text-base">
-                  {m.settings_current_subscription()}
-                </Label>
-                {activeSubscription ? (
-                  <p className="text-muted-foreground text-sm">
-                    {getPremiumPlan().title} -{' '}
-                    {
-                      getSubscriptionDisplayInfo({
-                        billingInterval: activeSubscription.billingInterval,
-                        locale: getLocale()
-                      }).displayPrice
-                    }{' '}
-                    -{' '}
-                    <span className="text-info">
-                      {activeSubscription.cancelAtPeriodEnd
-                        ? m.settings_subscription_ends({
-                            date: subscriptionDate
-                          })
-                        : m.settings_subscription_renews({
-                            date: subscriptionDate
-                          })}
-                    </span>
-                  </p>
-                ) : (
-                  <p className="text-muted-foreground text-sm">
-                    {getFreePlan().title} - {m.pricing_free_label()}
-                  </p>
-                )}
-              </div>
-              {activeSubscription ? (
-                <Button
-                  variant="outline"
-                  onClick={(event) => {
-                    event.preventDefault()
-                    void goToBillingPortal()
-                  }}
-                >
-                  <CreditCard />
-                  {m.nav_manage_subscription()}
-                </Button>
-              ) : (
-                <Link
-                  to="/pricing"
-                  className={cn(
-                    buttonVariants({
-                      className:
-                        'border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 dark:border-amber-400/30 dark:bg-amber-400/15 dark:text-amber-400 dark:hover:bg-amber-400/25'
-                    })
-                  )}
-                >
-                  <Sparkles />
-                  {m.nav_upgrade_premium()}
-                </Link>
-              )}
-            </div>
+            <SubscriptionRow
+              user={user}
+              activeSubscription={activeSubscription}
+            />
             <Separator />
             <div className={SETTINGS_ROW_CLASS_NAME}>
               <div className="space-y-1">

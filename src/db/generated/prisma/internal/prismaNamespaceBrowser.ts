@@ -195,6 +195,7 @@ export const UserScalarFieldEnum = {
   isAnonymized: 'isAnonymized',
   locale: 'locale',
   lastActiveAt: 'lastActiveAt',
+  premiumGrantedAt: 'premiumGrantedAt',
   verificationEmailCount: 'verificationEmailCount',
   verificationEmailWindowStart: 'verificationEmailWindowStart'
 } as const

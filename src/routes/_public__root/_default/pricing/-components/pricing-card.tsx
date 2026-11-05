@@ -89,6 +89,7 @@ const FeatureItem = ({ feature }: FeatureItemProps) => {
 type PricingCardProps = Plan & {
   billingPeriod: BillingPeriod
   isActive: boolean
+  activeLabel: string
   onChangePlan: () => void
   className?: string
 }
@@ -100,6 +101,7 @@ export const PricingCard = ({
   features,
   isExclusive = false,
   isActive,
+  activeLabel,
   billingPeriod,
   onChangePlan,
   className
@@ -210,7 +212,7 @@ export const PricingCard = ({
               }
             }}
           >
-            {m.pricing_active()}
+            {activeLabel}
           </Button>
         ) : (
           <Button

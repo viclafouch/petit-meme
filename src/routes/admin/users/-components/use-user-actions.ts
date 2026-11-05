@@ -2,37 +2,47 @@ import React from 'react'
 import { toast } from 'sonner'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { getErrorMessage } from '~/helpers/error'
+import { matchIsPremiumGranted } from '~/lib/role'
 import { captureWithFeature, type SentryFeature } from '~/lib/sentry'
 import { BAN_REASONS, type BanReason } from '~/routes/admin/-lib/ban'
+import { getPremiumStatus } from '~/routes/admin/-lib/premium'
 import {
   getAdminUserDetailQueryOpts,
   getAdminUsersListQueryOpts
 } from '~/routes/admin/-lib/queries'
 import {
   banUserById,
+  grantPremiumById,
   removeUser,
+  revokePremiumById,
+  type SubscriptionInfo,
   unbanUserById
 } from '~/routes/admin/-server/users'
 
-export type UserModerationDialog = 'ban' | 'unban' | 'delete'
+export type UserActionDialog =
+  | 'ban'
+  | 'unban'
+  | 'delete'
+  | 'grantPremium'
+  | 'revokePremium'
 
-type ModerationRunParams = {
+type UserActionRunParams = {
   userId: string
   banReason: BanReason
 }
 
-type ModerationResult = {
+type UserActionResult = {
   success: boolean
 }
 
-type ModerationAction = {
-  run: (params: ModerationRunParams) => Promise<ModerationResult>
+type UserAction = {
+  run: (params: UserActionRunParams) => Promise<UserActionResult>
   loading: string
   success: string
   feature: SentryFeature
 }
 
-const MODERATION_ACTIONS = {
+const USER_ACTIONS = {
   ban: {
     run: ({ userId, banReason }) => {
       return banUserById({ data: { userId, banReason } })
@@ -56,48 +66,67 @@ const MODERATION_ACTIONS = {
     loading: 'Suppression en cours...',
     success: 'Utilisateur supprimé',
     feature: 'admin-user-delete'
+  },
+  grantPremium: {
+    run: ({ userId }) => {
+      return grantPremiumById({ data: userId })
+    },
+    loading: 'Activation de Premium...',
+    success: 'Premium offert',
+    feature: 'admin-user-premium'
+  },
+  revokePremium: {
+    run: ({ userId }) => {
+      return revokePremiumById({ data: userId })
+    },
+    loading: 'Retrait de Premium...',
+    success: 'Premium retiré',
+    feature: 'admin-user-premium'
   }
-} as const satisfies Record<UserModerationDialog, ModerationAction>
+} as const satisfies Record<UserActionDialog, UserAction>
 
-export const NO_MODERATION_REASON = 'Aucune action sur votre propre compte'
+export const NO_USER_ACTION_REASON = 'Aucune action sur votre propre compte'
 
-type ModerationTarget = {
+type UserActionTarget = {
   id: string
   banned: boolean | null
   role: string | null
+  premiumGrantedAt: Date | null
+  subscription: Pick<SubscriptionInfo, 'status'>
 }
 
-type UserModerationPermissionsParams = {
-  target: ModerationTarget
+type UserActionPermissionsParams = {
+  target: UserActionTarget
   adminId: string
 }
 
-export function getUserModerationPermissions({
+export function getUserActionPermissions({
   target,
   adminId
-}: UserModerationPermissionsParams) {
+}: UserActionPermissionsParams) {
   const isOwnAccount = target.id === adminId
   const isTargetAdmin = target.role === 'admin'
   const isBanned = target.banned === true
+  const premiumSource = getPremiumStatus(target).source
 
   return {
     canBan: !isTargetAdmin && !isBanned,
     canUnban: !isTargetAdmin && isBanned,
-    canDelete: !isOwnAccount
+    canDelete: !isOwnAccount,
+    canGrantPremium: !isTargetAdmin && !isBanned && premiumSource === 'none',
+    isGrantPremiumBlockedByPayment: !isTargetAdmin && premiumSource === 'paid',
+    canRevokePremium: matchIsPremiumGranted(target)
   }
 }
 
-type UseUserModerationParams = {
+type UseUserActionsParams = {
   userId: string
   onDeleted?: () => void
 }
 
-export const useUserModeration = ({
-  userId,
-  onDeleted
-}: UseUserModerationParams) => {
+export const useUserActions = ({ userId, onDeleted }: UseUserActionsParams) => {
   const [activeDialog, setActiveDialog] =
-    React.useState<UserModerationDialog | null>(null)
+    React.useState<UserActionDialog | null>(null)
   const [banReason, setBanReason] = React.useState<BanReason>(BAN_REASONS[0])
   const queryClient = useQueryClient()
 
@@ -105,9 +134,9 @@ export const useUserModeration = ({
     setActiveDialog(null)
   }
 
-  const moderationMutation = useMutation({
-    mutationFn: (dialog: UserModerationDialog) => {
-      const action = MODERATION_ACTIONS[dialog]
+  const userActionMutation = useMutation({
+    mutationFn: (dialog: UserActionDialog) => {
+      const action = USER_ACTIONS[dialog]
       const promise = action.run({ userId, banReason })
 
       toast.promise(promise, {
@@ -136,17 +165,17 @@ export const useUserModeration = ({
       ])
     },
     onError: (error, dialog) => {
-      captureWithFeature(error, MODERATION_ACTIONS[dialog].feature)
+      captureWithFeature(error, USER_ACTIONS[dialog].feature)
     }
   })
 
-  const openDialog = (dialog: UserModerationDialog) => {
+  const openDialog = (dialog: UserActionDialog) => {
     setActiveDialog(dialog)
   }
 
   const handleConfirm = () => {
     if (activeDialog !== null) {
-      moderationMutation.mutate(activeDialog)
+      userActionMutation.mutate(activeDialog)
     }
   }
 
@@ -157,6 +186,6 @@ export const useUserModeration = ({
     openDialog,
     handleClose,
     handleConfirm,
-    isPending: moderationMutation.isPending
+    isPending: userActionMutation.isPending
   }
 }

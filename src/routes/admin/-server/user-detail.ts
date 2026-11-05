@@ -39,12 +39,9 @@ const USER_DETAIL_SELECT = {
   banReason: true,
   createdAt: true,
   lastActiveAt: true,
-  generationCount: true
+  generationCount: true,
+  premiumGrantedAt: true
 } as const satisfies Prisma.UserSelect
-
-export type AdminUserDetail = Prisma.UserGetPayload<{
-  select: typeof USER_DETAIL_SELECT
-}>
 
 export const getAdminUserDetail = createServerFn({ method: 'GET' })
   .middleware([adminRequiredMiddleware])

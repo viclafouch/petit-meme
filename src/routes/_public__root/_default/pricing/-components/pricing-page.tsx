@@ -8,6 +8,7 @@ import {
 } from '~/constants/plan'
 import { useStripeCheckout } from '~/hooks/use-stripe-checkout'
 import { getActiveSubscriptionQueryOpts } from '~/lib/queries'
+import { matchIsPremiumGranted } from '~/lib/role'
 import { m } from '~/paraglide/messages.js'
 import {
   PageDescription,
@@ -33,7 +34,8 @@ export const PricingPage = () => {
   const isLoggedIn = user !== null
   const hasActiveSubscription =
     isLoggedIn && activeSubscriptionQuery.data !== null
-  const isOnFreePlan = isLoggedIn && !hasActiveSubscription
+  const isPremiumGranted = isLoggedIn && matchIsPremiumGranted(user)
+  const isOnFreePlan = isLoggedIn && !hasActiveSubscription && !isPremiumGranted
 
   return (
     <div className="flex flex-col items-center gap-8 pb-16">
@@ -56,6 +58,7 @@ export const PricingPage = () => {
             void goToBillingPortal()
           }}
           isActive={isOnFreePlan}
+          activeLabel={m.pricing_active()}
           className="order-last sm:order-0"
         />
         <PricingCard
@@ -64,7 +67,12 @@ export const PricingPage = () => {
           onChangePlan={() => {
             void checkoutPremium(billingPeriod)
           }}
-          isActive={hasActiveSubscription}
+          isActive={hasActiveSubscription || isPremiumGranted}
+          activeLabel={
+            hasActiveSubscription
+              ? m.pricing_active()
+              : m.premium_granted_for_life()
+          }
         />
       </section>
       <div className="flex w-full flex-col items-center gap-16 pt-8">

@@ -156,7 +156,8 @@ const USER_ADDITIONAL_FIELDS = {
   providerAvatar: { type: 'string', required: false, input: false },
   termsAcceptedAt: { type: 'date', required: false, input: false },
   privacyAcceptedAt: { type: 'date', required: false, input: false },
-  locale: { type: Object.values(UserLocale), required: false, input: false }
+  locale: { type: Object.values(UserLocale), required: false, input: false },
+  premiumGrantedAt: { type: 'date', required: false, input: false }
 } as const satisfies NonNullable<
   NonNullable<BetterAuthOptions['user']>['additionalFields']
 >

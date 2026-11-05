@@ -20,6 +20,7 @@ export type SentryFeature =
   | 'admin-user-ban'
   | 'admin-user-unban'
   | 'admin-user-delete'
+  | 'admin-user-premium'
   | 'sign-in'
   | 'sign-in-twitter'
   | 'sign-in-discord'

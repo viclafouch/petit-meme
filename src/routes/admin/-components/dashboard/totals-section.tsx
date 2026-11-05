@@ -1,4 +1,4 @@
-import { Clock, Crown, FilePlay, Users } from 'lucide-react'
+import { Clock, Crown, FilePlay, Gift, Users } from 'lucide-react'
 import { StatTiles } from '~/routes/admin/-components/stat-tiles'
 import type { DashboardTotals } from '~/routes/admin/-server/dashboard'
 import type { IconConfig } from './types'
@@ -20,9 +20,14 @@ const TOTAL_CONFIGS = [
     icon: <Users className="size-4" aria-hidden />
   },
   {
-    key: 'activePremium',
-    label: 'Premium actifs',
+    key: 'paidPremium',
+    label: 'Premium payants',
     icon: <Crown className="size-4" aria-hidden />
+  },
+  {
+    key: 'grantedPremium',
+    label: 'Premium offerts',
+    icon: <Gift className="size-4" aria-hidden />
   }
 ] as const satisfies readonly IconConfig<keyof DashboardTotals>[]
 

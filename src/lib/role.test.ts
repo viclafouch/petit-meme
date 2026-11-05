@@ -17,6 +17,18 @@ describe('matchIsPremium', () => {
     expect(matchIsPremium({ user, subscription: SUBSCRIPTION })).toBe(true)
   })
 
+  it('should count a User with a granted Premium as Premium', () => {
+    const user = { role: 'user', premiumGrantedAt: new Date() }
+
+    expect(matchIsPremium({ user, subscription: null })).toBe(true)
+  })
+
+  it('should not count a User with a revoked grant as Premium', () => {
+    const user = { role: 'user', premiumGrantedAt: null }
+
+    expect(matchIsPremium({ user, subscription: null })).toBe(false)
+  })
+
   it('should not count a User without a subscription as Premium', () => {
     const user = { role: 'user' }
 

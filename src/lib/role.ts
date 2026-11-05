@@ -11,8 +11,16 @@ export const matchIsUserAdmin = (user: UserRoleHolder) => {
   return user.role === 'admin'
 }
 
+export type PremiumHolder = UserRoleHolder & {
+  premiumGrantedAt?: SessionUser['premiumGrantedAt']
+}
+
+export const matchIsPremiumGranted = (user: PremiumHolder) => {
+  return Boolean(user.premiumGrantedAt)
+}
+
 type MatchIsPremiumParams = {
-  user: UserRoleHolder | null | undefined
+  user: PremiumHolder | null | undefined
   subscription: object | null | undefined
 }
 
@@ -24,7 +32,11 @@ export const matchIsPremium = ({
     return false
   }
 
-  return matchIsUserAdmin(user) || Boolean(subscription)
+  return (
+    matchIsUserAdmin(user) ||
+    matchIsPremiumGranted(user) ||
+    Boolean(subscription)
+  )
 }
 
 type MatchCanViewMemeParams = {

@@ -1,4 +1,5 @@
-import { Crown, Mail } from 'lucide-react'
+import type React from 'react'
+import { Crown, Gift, Mail } from 'lucide-react'
 import { DiscordIcon } from '~/components/icon/discord'
 import { XTwitterIcon } from '~/components/icon/x-twitter'
 import { Badge } from '~/components/ui/badge'
@@ -10,6 +11,7 @@ import {
 import type { AuthProviderId } from '~/constants/auth'
 import { formatDate } from '~/helpers/date'
 import { getLocale } from '~/paraglide/runtime'
+import { getPremiumStatus } from '~/routes/admin/-lib/premium'
 import type {
   EnrichedUser,
   SubscriptionInfo
@@ -90,7 +92,7 @@ type SubscriptionBadgeProps = {
   endsAt: SubscriptionInfo['endsAt']
 }
 
-export const SubscriptionBadge = ({
+const SubscriptionBadge = ({
   isActive,
   monthCount,
   endsAt
@@ -124,4 +126,70 @@ export const SubscriptionBadge = ({
       </TooltipContent>
     </Tooltip>
   )
+}
+
+type GrantedPremiumBadgeProps = {
+  grantedAt: Date
+}
+
+const GrantedPremiumBadge = ({ grantedAt }: GrantedPremiumBadgeProps) => {
+  return (
+    <Tooltip>
+      <TooltipTrigger className="cursor-default rounded-md">
+        <Badge
+          variant="outline"
+          size="sm"
+          className="border-amber-500/70 text-amber-600 dark:text-amber-400"
+        >
+          <Gift className="size-3" aria-hidden />
+          Offert
+        </Badge>
+      </TooltipTrigger>
+      <TooltipContent>
+        Premium offert le {formatDate(new Date(grantedAt), getLocale())}
+      </TooltipContent>
+    </Tooltip>
+  )
+}
+
+type PremiumBadgesProps = {
+  premiumGrantedAt: Date | null
+  subscription: SubscriptionInfo
+  emptyFallback: React.ReactNode
+}
+
+export const PremiumBadges = ({
+  premiumGrantedAt,
+  subscription,
+  emptyFallback
+}: PremiumBadgesProps) => {
+  const premiumStatus = getPremiumStatus({ premiumGrantedAt, subscription })
+
+  switch (premiumStatus.source) {
+    case 'paid': {
+      return (
+        <SubscriptionBadge
+          isActive
+          monthCount={subscription.monthCount}
+          endsAt={subscription.endsAt}
+        />
+      )
+    }
+
+    case 'granted': {
+      return <GrantedPremiumBadge grantedAt={premiumStatus.grantedAt} />
+    }
+
+    case 'none': {
+      return subscription.status === 'past' ? (
+        <SubscriptionBadge
+          isActive={false}
+          monthCount={subscription.monthCount}
+          endsAt={subscription.endsAt}
+        />
+      ) : (
+        emptyFallback
+      )
+    }
+  }
 }

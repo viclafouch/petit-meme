@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { createServerFn } from '@tanstack/react-start'
 import { prismaClient } from '~/db'
 import { TRENDING_CATEGORY_DAYS, TRENDING_WEIGHTS } from '~/constants/meme'
+import { ACTIVE_SUBSCRIPTION_STATUSES } from '~/constants/plan'
 import { DAY } from '~/constants/time'
 import type { Prisma } from '~/db/generated/prisma/client'
 import { MemeStatus } from '~/db/generated/prisma/enums'
@@ -31,19 +32,34 @@ export type DashboardTotals = {
   publishedMemes: number
   pendingMemes: number
   totalUsers: number
-  activePremium: number
+  paidPremium: number
+  grantedPremium: number
 }
 
 async function fetchTotals() {
-  const [publishedMemes, pendingMemes, totalUsers, activePremium] =
-    await Promise.all([
-      prismaClient.meme.count({ where: { status: MemeStatus.PUBLISHED } }),
-      prismaClient.meme.count({ where: { status: MemeStatus.PENDING } }),
-      prismaClient.user.count(),
-      prismaClient.subscription.count({ where: { status: 'active' } })
-    ])
+  const [
+    publishedMemes,
+    pendingMemes,
+    totalUsers,
+    paidPremium,
+    grantedPremium
+  ] = await Promise.all([
+    prismaClient.meme.count({ where: { status: MemeStatus.PUBLISHED } }),
+    prismaClient.meme.count({ where: { status: MemeStatus.PENDING } }),
+    prismaClient.user.count(),
+    prismaClient.subscription.count({
+      where: { status: { in: [...ACTIVE_SUBSCRIPTION_STATUSES] } }
+    }),
+    prismaClient.user.count({ where: { premiumGrantedAt: { not: null } } })
+  ])
 
-  return { publishedMemes, pendingMemes, totalUsers, activePremium }
+  return {
+    publishedMemes,
+    pendingMemes,
+    totalUsers,
+    paidPremium,
+    grantedPremium
+  }
 }
 
 export const getAdminDashboardTotals = createServerFn({ method: 'GET' })

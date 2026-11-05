@@ -1,6 +1,8 @@
 import React from 'react'
 import {
   Ban,
+  CircleSlash,
+  Gift,
   SquarePen,
   FilePlus,
   RefreshCw,
@@ -37,6 +39,14 @@ export function getActionIcon(action: string) {
 
     case 'watermark_upload': {
       return <Upload className="size-4" aria-hidden />
+    }
+
+    case 'premium_grant': {
+      return <Gift className="size-4" aria-hidden />
+    }
+
+    case 'premium_revoke': {
+      return <CircleSlash className="size-4" aria-hidden />
     }
 
     default: {

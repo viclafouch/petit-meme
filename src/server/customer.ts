@@ -1,8 +1,13 @@
 import type { User } from 'better-auth'
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
+import { matchIsActiveSubscriptionStatus } from '~/constants/plan'
 import { auth } from '~/lib/auth'
-import { matchIsUserAdmin, type SessionUser } from '~/lib/role'
+import {
+  matchIsPremiumGranted,
+  matchIsUserAdmin,
+  type SessionUser
+} from '~/lib/role'
 import { getAuthUser } from '~/server/user-auth'
 
 export const findActiveSubscription = createServerOnlyFn(
@@ -17,9 +22,7 @@ export const findActiveSubscription = createServerOnlyFn(
     })
 
     const activeSubscription = subscriptions.find((subscription) => {
-      return (
-        subscription.status === 'active' || subscription.status === 'trialing'
-      )
+      return matchIsActiveSubscriptionStatus(subscription.status)
     })
 
     if (!activeSubscription) {
@@ -50,7 +53,7 @@ export type ActiveSubscription = NonNullable<
 
 export const matchIsUserPremium = createServerOnlyFn(
   async (user: SessionUser) => {
-    if (matchIsUserAdmin(user)) {
+    if (matchIsUserAdmin(user) || matchIsPremiumGranted(user)) {
       return true
     }
 

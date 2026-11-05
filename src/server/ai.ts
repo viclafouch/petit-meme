@@ -13,6 +13,8 @@ import { type Locale, locales } from '~/paraglide/runtime'
 import { adminRequiredMiddleware } from '~/server/user-auth'
 
 const CUSTOM_PROMPT_MAX_LENGTH = 500
+const AI_ASSIST_KEYWORDS_MIN = 5
+const AI_ASSIST_KEYWORDS_MAX = 8
 
 const DESCRIPTION_PREFIX = {
   fr: 'Découvrez et téléchargez ce mème de',
@@ -62,9 +64,17 @@ async function waitForFileActive(fileName: string) {
 }
 
 const aiAssistResultSchema = z.object({
-  title: z.string(),
-  description: z.string(),
-  keywords: z.array(z.string())
+  title: z
+    .string()
+    .describe('Titre du mème, au format « [qui] [action] - [source] »'),
+  description: z
+    .string()
+    .describe('Description de la scène, de ce qu’on y voit et entend'),
+  keywords: z
+    .array(z.string().describe('Un mot-clé en minuscules, d’un seul mot'))
+    .min(AI_ASSIST_KEYWORDS_MIN)
+    .max(AI_ASSIST_KEYWORDS_MAX)
+    .describe('Mots-clés pour retrouver ce mème précis')
 })
 
 export type AiAssistResult = z.infer<typeof aiAssistResultSchema>
@@ -140,11 +150,13 @@ function buildAiAssistPrompt({
 
   return `Tu écris la fiche de ce mème vidéo pour Petit Meme, en ${label}.${adminContext}
 
+Regarde l'image et écoute le son. La réplique, la chanson ou le bruitage identifient souvent le mème : sers-t'en pour reconnaître la source et le template.
+
 Le public a entre 15 et 35 ans : écris avec les mots simples qu'il dit à l'oral, comme « rigole », « regarde » ou « pleure ».
 
 - title : 60 caractères au plus, au format « [qui] [action] - [source] ». Qui : le personnage ou l'acteur. Source : le film, la série ou l'émission, quand il y en a une. Exemples : « Tobey Maguire qui rigole - Spider-Man 3 », « Chat qui fixe la caméra », « Pedro Pascal qui pleure puis rit ».
-- description : 200 caractères au plus. Elle commence par « ${DESCRIPTION_PREFIX[targetLocale]} », puis décrit la scène.
-- keywords : 5 à 8 mots-clés en minuscules, d'un seul mot chacun (un nom propre compte pour un mot). Chaque mot-clé aide à retrouver ce mème précis et ajoute un mot absent du titre :
+- description : 200 caractères au plus. Elle commence par « ${DESCRIPTION_PREFIX[targetLocale]} », puis décrit la scène : ce qu'on voit, et ce qu'on entend quand le son compte.
+- keywords : ${AI_ASSIST_KEYWORDS_MIN} à ${AI_ASSIST_KEYWORDS_MAX} mots-clés en minuscules, d'un seul mot chacun (un nom propre compte pour un mot). Chaque mot-clé aide à retrouver ce mème précis et ajoute un mot absent du titre :
   - les noms propres : l'acteur, le personnage, le film ou la série ;
   - le nom du template quand tu le reconnais, comme « bully maguire » ou « drake hotline bling » ;
   - les verbes et adjectifs qu'un jeune taperait pour le chercher, comme « marrant », « rigoler », « triste » ou « choqué ».`
@@ -344,10 +356,16 @@ export const aiAssistMemeContent = createServerFn({ method: 'POST' })
       const parsed = await requestGeminiJson({
         model: GEMINI_VIDEO_MODEL,
         input: [
-          { type: 'video', uri: fileUri, mime_type: fileMimeType },
+          {
+            type: 'video',
+            uri: fileUri,
+            mime_type: fileMimeType,
+            resolution: 'high',
+            processing: { type: 'static', fps: 2 }
+          },
           { type: 'text', text: prompt }
         ],
-        thinkingLevel: 'low',
+        thinkingLevel: 'medium',
         schema: aiAssistResultSchema
       })
 

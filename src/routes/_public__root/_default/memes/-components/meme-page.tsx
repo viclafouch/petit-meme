@@ -115,7 +115,7 @@ export const MemePage = () => {
     })
   )
   const { video, videoCallbackRef, playbackFailure } = useMemeHls({
-    bunnyId: memeQuery.data.video.bunnyId
+    memeId: memeQuery.data.id
   })
   const navigate = memeRouteApi.useNavigate()
   const memeLink = useLinkProps({

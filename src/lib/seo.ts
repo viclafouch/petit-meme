@@ -20,6 +20,7 @@ import type {
 import type { AnyRouteMatch } from '@tanstack/react-router'
 import type { FaqItem } from '~/components/faq-section'
 import { LOGO_PATH, SITE_NAME } from '~/constants/branding'
+import { HLS_MIME_TYPE } from '~/constants/bunny'
 import type { MemeWithCategories, MemeWithVideo } from '~/constants/meme'
 import { OG_IMAGE_HEIGHT, OG_IMAGE_WIDTH } from '~/constants/og'
 import type { Plan } from '~/constants/plan'
@@ -27,11 +28,7 @@ import { ONE_HOUR_IN_SECONDS, SECONDS_PER_MINUTE } from '~/constants/time'
 import type { CategoryModel } from '~/db/generated/prisma/models'
 import { clientEnv } from '~/env/client'
 import { convertCentsToEuros } from '~/helpers/number'
-import {
-  buildIframeVideoUrl,
-  buildVideoImageUrl,
-  buildVideoOriginalUrl
-} from '~/lib/bunny'
+import { buildVideoImageUrl } from '~/lib/bunny'
 import { m } from '~/paraglide/messages.js'
 import {
   baseLocale,
@@ -110,6 +107,10 @@ const ADMIN_SITE_NAME = `Admin ${SITE_NAME}`
 
 export const buildPageTitle = (title: string, siteName = SITE_NAME) => {
   return `${siteName} - ${title}`
+}
+
+export const buildEmbedUrl = (memeId: string, locale: Locale = getLocale()) => {
+  return buildUrl(`/embed/${memeId}`, locale)
 }
 
 export const buildUrl = (pathname: string, locale?: Locale): string => {
@@ -256,7 +257,7 @@ export const buildMemeSeo = (
   })
 
   const description = buildDescription(meme)
-  const embedUrl = buildIframeVideoUrl(meme.video.bunnyId)
+  const embedUrl = buildEmbedUrl(meme.id)
 
   const result = seo({
     title: meme.title,
@@ -306,7 +307,7 @@ type SchemaGraph = Graph & { '@context': 'https://schema.org' }
 
 export const buildMemeJsonLd = (
   meme: MemeWithVideo,
-  originalUrl: string
+  crawlerStreamUrl: string | null
 ): SchemaGraph => {
   const memeUrl = `${websiteOrigin}/memes/${meme.id}`
   const thumbnailUrl = buildVideoImageUrl(meme.video.bunnyId)
@@ -332,13 +333,14 @@ export const buildMemeJsonLd = (
         description: meme.description,
         thumbnailUrl,
         uploadDate: meme.createdAt.toISOString(),
-        embedUrl: buildIframeVideoUrl(meme.video.bunnyId),
+        embedUrl: buildEmbedUrl(meme.id),
         duration: formatSchemaDuration(meme.video.duration),
         requiresSubscription: false,
         videoQuality: 'HD',
         keywords: meme.keywords.join(', '),
-        contentUrl: originalUrl,
-        encodingFormat: 'video/mp4',
+        ...(crawlerStreamUrl === null
+          ? {}
+          : { contentUrl: crawlerStreamUrl, encodingFormat: HLS_MIME_TYPE }),
         interactionStatistic: {
           '@type': 'InteractionCounter',
           interactionType: { '@type': 'WatchAction' },
@@ -387,8 +389,7 @@ export const buildCategoryJsonLd = (
               '@id': `${websiteOrigin}/memes/${meme.id}#video`,
               name: meme.title,
               description: meme.description,
-              contentUrl: buildVideoOriginalUrl(meme.video.bunnyId),
-              embedUrl: buildIframeVideoUrl(meme.video.bunnyId),
+              embedUrl: buildEmbedUrl(meme.id),
               thumbnailUrl: buildVideoImageUrl(meme.video.bunnyId),
               uploadDate: meme.publishedAt?.toISOString(),
               url: `${websiteOrigin}/memes/${meme.id}`,

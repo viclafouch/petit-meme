@@ -26,7 +26,7 @@ import {
 } from '~/helpers/i18n-content'
 import {
   ALGOLIA_ADMIN_SEARCH_PARAMS,
-  algoliaSearchClient,
+  getAlgoliaSearchClient,
   deleteMemeFromAllIndices,
   normalizeAlgoliaHit,
   resolveAlgoliaIndexName,
@@ -599,7 +599,7 @@ export const getAdminMemes = createServerFn({ method: 'GET' })
       : resolveAlgoliaReplicaCreated(baseLocale)
 
     const response =
-      await algoliaSearchClient.searchSingleIndex<AlgoliaMemeRecord>({
+      await getAlgoliaSearchClient().searchSingleIndex<AlgoliaMemeRecord>({
         indexName: searchIndex,
         searchParams: {
           query: data.query,

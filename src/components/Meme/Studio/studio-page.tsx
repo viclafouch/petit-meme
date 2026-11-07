@@ -114,6 +114,7 @@ export const StudioPage = ({ meme }: StudioPageProps) => {
         </div>
         <div className="flex-1 min-h-0 p-3 md:p-8 md:bg-black/40">
           <StudioPreview
+            memeId={meme.id}
             bunnyId={meme.video.bunnyId}
             title={meme.title}
             isProcessing={isProcessing}

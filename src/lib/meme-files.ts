@@ -1,10 +1,17 @@
 import { createServerOnlyFn } from '@tanstack/react-start'
 import { setResponseStatus } from '@tanstack/react-start/server'
-import { MEME_DERIVED_FORMATS, type MemeDerivedFormat } from '~/constants/bunny'
+import { del, get, issueSignedToken, presignUrl } from '@vercel/blob'
+import {
+  MEME_DERIVED_FORMAT_CONTENT_TYPES,
+  MEME_DERIVED_FORMATS,
+  type MemeDerivedFormat
+} from '~/constants/bunny'
 import { AppError } from '~/constants/error'
 import { HTTP_STATUS } from '~/constants/http'
+import { MAX_SIZE_MEME_FILE_IN_BYTES } from '~/constants/meme'
+import { FIVE_MINUTES_MS } from '~/constants/time'
 import { serverEnv } from '~/env/server'
-import { buildSignedOriginalUrl, deleteVideo } from '~/lib/bunny'
+import { deleteVideo, fetchOriginalVideo } from '~/lib/bunny'
 import { bunnyLogger } from '~/lib/logger'
 import { captureWithFeature } from '~/lib/sentry'
 
@@ -18,7 +25,7 @@ const MEME_FILES = [
   ...MEME_DERIVED_FORMATS
 ] as const satisfies readonly MemeFile[]
 
-export const buildMemeFileUrl = createServerOnlyFn(
+const buildMemeFileUrl = createServerOnlyFn(
   (bunnyId: string, format: MemeDerivedFormat) => {
     return `https://${serverEnv.BUNNY_STORAGE_HOSTNAME}/${serverEnv.BUNNY_STORAGE_ZONE_NAME}/${bunnyId}.${format}`
   }
@@ -28,24 +35,28 @@ const getStorageHeaders = () => {
   return new Headers({ AccessKey: serverEnv.BUNNY_STORAGE_API_KEY })
 }
 
-const fetchWithHeadersTimeout = async (url: string, init: RequestInit = {}) => {
+const fetchWithHeadersTimeout = async (
+  sendRequest: (signal: AbortSignal) => Promise<Response>
+) => {
   const headersController = new AbortController()
   const headersTimeoutId = setTimeout(() => {
     headersController.abort()
   }, STORAGE_TIMEOUT_MS)
 
   try {
-    return await fetch(url, { ...init, signal: headersController.signal })
+    return await sendRequest(headersController.signal)
   } finally {
     clearTimeout(headersTimeoutId)
   }
 }
 
 const fetchMemeFile = async (bunnyId: string, format: MemeDerivedFormat) => {
-  const response = await fetchWithHeadersTimeout(
-    buildMemeFileUrl(bunnyId, format),
-    { headers: getStorageHeaders() }
-  )
+  const response = await fetchWithHeadersTimeout((signal) => {
+    return fetch(buildMemeFileUrl(bunnyId, format), {
+      headers: getStorageHeaders(),
+      signal
+    })
+  })
 
   if (!response.ok) {
     throw new Error(`Bunny Storage responded with status ${response.status}`)
@@ -72,10 +83,10 @@ const buildMemeFileProxyResponse = (
   return new Response(upstream.body, { headers })
 }
 
-const fetchOriginalVideo = async (bunnyId: string) => {
-  const response = await fetchWithHeadersTimeout(
-    await buildSignedOriginalUrl(bunnyId)
-  )
+const fetchOriginalForExport = async (bunnyId: string) => {
+  const response = await fetchWithHeadersTimeout((signal) => {
+    return fetchOriginalVideo(bunnyId, { signal })
+  })
 
   if (!response.ok) {
     setResponseStatus(HTTP_STATUS.BAD_GATEWAY)
@@ -87,7 +98,7 @@ const fetchOriginalVideo = async (bunnyId: string) => {
 
 const fetchVideoExport = async (bunnyId: string, isPremium: boolean) => {
   if (isPremium) {
-    return fetchOriginalVideo(bunnyId)
+    return fetchOriginalForExport(bunnyId)
   }
 
   try {
@@ -99,7 +110,7 @@ const fetchVideoExport = async (bunnyId: string, isPremium: boolean) => {
       'Watermark fallback: serving original video'
     )
 
-    return fetchOriginalVideo(bunnyId)
+    return fetchOriginalForExport(bunnyId)
   }
 }
 
@@ -157,6 +168,56 @@ export const uploadMemeFile = createServerOnlyFn(
       { bunnyId, format, sizeBytes: fileBuffer.length },
       'Meme file uploaded to Storage'
     )
+  }
+)
+
+const buildMemeFileBlobPathname = (
+  bunnyId: string,
+  format: MemeDerivedFormat
+) => {
+  return `meme-files/${bunnyId}.${format}`
+}
+
+export const presignMemeFileUpload = createServerOnlyFn(
+  async (bunnyId: string, format: MemeDerivedFormat) => {
+    const pathname = buildMemeFileBlobPathname(bunnyId, format)
+    const allowedContentTypes = [MEME_DERIVED_FORMAT_CONTENT_TYPES[format]]
+    const signedToken = await issueSignedToken({
+      pathname,
+      operations: ['put'],
+      allowedContentTypes,
+      maximumSizeInBytes: MAX_SIZE_MEME_FILE_IN_BYTES,
+      validUntil: Date.now() + FIVE_MINUTES_MS
+    })
+    const { presignedUrl } = await presignUrl(signedToken, {
+      operation: 'put',
+      pathname,
+      access: 'private',
+      allowedContentTypes,
+      maximumSizeInBytes: MAX_SIZE_MEME_FILE_IN_BYTES,
+      allowOverwrite: true,
+      addRandomSuffix: false
+    })
+
+    return presignedUrl
+  }
+)
+
+export const moveMemeFileFromBlobToStorage = createServerOnlyFn(
+  async (bunnyId: string, format: MemeDerivedFormat) => {
+    const pathname = buildMemeFileBlobPathname(bunnyId, format)
+    const result = await get(pathname, { access: 'private', useCache: false })
+
+    if (result?.statusCode !== HTTP_STATUS.OK) {
+      throw new Error(`Meme file ${pathname} is missing from Vercel Blob`)
+    }
+
+    const fileBuffer = Buffer.from(
+      await new Response(result.stream).arrayBuffer()
+    )
+
+    await uploadMemeFile(bunnyId, format, fileBuffer)
+    await del(pathname)
   }
 )
 

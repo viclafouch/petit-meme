@@ -5,8 +5,8 @@ import {
   CONTENT_LOCALE_TO_SITE_LOCALES,
   resolveMemeTranslation
 } from '~/helpers/i18n-content'
-import { buildVideoImageUrl, buildVideoOriginalUrl } from '~/lib/bunny'
-import { buildUrl } from '~/lib/seo'
+import { buildVideoImageUrl } from '~/lib/bunny'
+import { buildEmbedUrl, buildUrl } from '~/lib/seo'
 import {
   buildSitemapResponse,
   buildUrlEntry,
@@ -40,7 +40,6 @@ export const Route = createFileRoute('/sitemap-memes.xml')({
               CONTENT_LOCALE_TO_SITE_LOCALES[meme.contentLocale]
             const { bunnyId } = meme.video
             const thumbnailUrl = buildVideoImageUrl(bunnyId)
-            const contentLoc = buildVideoOriginalUrl(bunnyId)
             const memePath = `/memes/${meme.id}`
             const lastmod = meme.updatedAt.toISOString()
 
@@ -64,7 +63,7 @@ export const Route = createFileRoute('/sitemap-memes.xml')({
                     resolved.description === ''
                       ? resolved.title
                       : resolved.description,
-                  contentLoc,
+                  playerLoc: buildEmbedUrl(meme.id, locale),
                   duration: meme.video.duration
                 }
               })

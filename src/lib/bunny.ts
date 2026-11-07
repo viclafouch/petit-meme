@@ -1,6 +1,11 @@
 import { z } from 'zod'
 import { createServerOnlyFn } from '@tanstack/react-start'
-import { FIVE_MINUTES_IN_SECONDS } from '~/constants/time'
+import {
+  CRAWLER_STREAM_EXPIRES_AT,
+  ORIGINAL_ACCESS_HEADER,
+  PLAYBACK_TOKEN_TTL_SECONDS
+} from '~/constants/bunny'
+import { FIVE_MINUTES_IN_SECONDS, SECOND } from '~/constants/time'
 import { clientEnv } from '~/env/client'
 import { serverEnv } from '~/env/server'
 import { signBunnyUrl } from '~/lib/bunny-token'
@@ -30,31 +35,50 @@ export const buildVideoImageUrl = (videoId: string) => {
   return buildBunnyUrl(`/${videoId}/thumbnail.jpg`)
 }
 
-export const buildVideoOriginalUrl = (videoId: string) => {
-  return buildBunnyUrl(`/${videoId}/original`)
-}
-
-export const buildIframeVideoUrl = (videoId: string) => {
-  return `https://iframe.mediadelivery.net/embed/${clientEnv.VITE_BUNNY_LIBRARY_ID}/${videoId}`
-}
-
 export const buildVideoPreviewUrl = (videoId: string) => {
   return buildBunnyUrl(`/${videoId}/preview.webp`)
 }
 
-export const buildVideoStreamUrl = (videoId: string) => {
-  return buildBunnyUrl(`/${videoId}/playlist.m3u8`)
+const getUnixTimeInSeconds = () => {
+  return Math.floor(Date.now() / SECOND)
 }
 
-export const signOriginalUrl = (videoId: string) => {
+const signOriginalUrl = (videoId: string) => {
   return signBunnyUrl({
-    url: buildVideoOriginalUrl(videoId),
+    url: buildBunnyUrl(`/${videoId}/original`),
     securityKey: serverEnv.BUNNY_TOKEN_AUTH_KEY,
-    expirationSeconds: FIVE_MINUTES_IN_SECONDS
+    expiresAt: getUnixTimeInSeconds() + FIVE_MINUTES_IN_SECONDS
   })
 }
 
-export const buildSignedOriginalUrl = createServerOnlyFn(signOriginalUrl)
+export const fetchOriginalVideo = createServerOnlyFn(
+  async (videoId: string, init: RequestInit = {}) => {
+    const headers = new Headers(init.headers)
+    headers.set(ORIGINAL_ACCESS_HEADER, serverEnv.BUNNY_ORIGINAL_ACCESS_KEY)
+
+    return fetch(await signOriginalUrl(videoId), { ...init, headers })
+  }
+)
+
+const signVideoStreamUrl = (videoId: string, expiresAt: number) => {
+  return signBunnyUrl({
+    url: buildBunnyUrl(`/${videoId}/playlist.m3u8`),
+    securityKey: serverEnv.BUNNY_TOKEN_AUTH_KEY,
+    expiresAt,
+    directoryPath: `/${videoId}/`
+  })
+}
+
+export const buildSignedStreamUrl = createServerOnlyFn((videoId: string) => {
+  return signVideoStreamUrl(
+    videoId,
+    getUnixTimeInSeconds() + PLAYBACK_TOKEN_TTL_SECONDS
+  )
+})
+
+export const buildCrawlerStreamUrl = createServerOnlyFn((videoId: string) => {
+  return signVideoStreamUrl(videoId, CRAWLER_STREAM_EXPIRES_AT)
+})
 
 export const deleteVideo = createServerOnlyFn(async (videoId: string) => {
   const result = await fetchWithZod(

@@ -1,26 +1,51 @@
 import React from 'react'
-import { buildVideoStreamUrl } from '~/lib/bunny'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useHydrated } from '@tanstack/react-router'
+import { HOUR } from '~/constants/time'
+import type { Meme } from '~/db/generated/prisma/client'
+import { getMemePlaybackUrlQueryOpts } from '~/lib/queries'
 import { attachHlsSource } from '~/utils/video'
 
+const PLAYBACK_URL_REFRESH_AFTER_MS = HOUR
+
 type UseMemeHlsParams = {
-  bunnyId: string
+  memeId: Meme['id']
 }
 
-export const useMemeHls = ({ bunnyId }: UseMemeHlsParams) => {
+export const useMemeHls = ({ memeId }: UseMemeHlsParams) => {
   const [video, setVideo] = React.useState<HTMLVideoElement | null>(null)
-  const [failedBunnyId, setFailedBunnyId] = React.useState<string | null>(null)
-  const hasPlaybackFailed = failedBunnyId === bunnyId
+  const [failedStreamUrl, setFailedStreamUrl] = React.useState<string | null>(
+    null
+  )
+  const queryClient = useQueryClient()
+  const isHydrated = useHydrated()
+  const playbackUrlQuery = useQuery(getMemePlaybackUrlQueryOpts(memeId))
+  const streamUrl = playbackUrlQuery.data ?? null
+  const hasPlaybackFailed =
+    (streamUrl !== null && failedStreamUrl === streamUrl) ||
+    (isHydrated && playbackUrlQuery.isError)
 
   React.useEffect(() => {
-    if (!video || hasPlaybackFailed) {
+    if (!video || streamUrl === null || hasPlaybackFailed) {
       return () => {}
     }
 
+    const playbackUrlQueryOpts = getMemePlaybackUrlQueryOpts(memeId)
+
     const detachHlsSource = attachHlsSource({
       video,
-      videoSrc: buildVideoStreamUrl(bunnyId),
+      videoSrc: streamUrl,
       onFatalError: () => {
-        setFailedBunnyId(bunnyId)
+        const { dataUpdatedAt = 0 } =
+          queryClient.getQueryState(playbackUrlQueryOpts.queryKey) ?? {}
+
+        if (Date.now() - dataUpdatedAt >= PLAYBACK_URL_REFRESH_AFTER_MS) {
+          void queryClient.resetQueries(playbackUrlQueryOpts)
+
+          return
+        }
+
+        setFailedStreamUrl(streamUrl)
       }
     })
 
@@ -30,10 +55,10 @@ export const useMemeHls = ({ bunnyId }: UseMemeHlsParams) => {
       video.removeAttribute('src')
       video.load()
     }
-  }, [video, bunnyId, hasPlaybackFailed])
+  }, [video, streamUrl, hasPlaybackFailed, memeId, queryClient])
 
   const handleRetryPlayback = () => {
-    setFailedBunnyId(null)
+    void queryClient.resetQueries(getMemePlaybackUrlQueryOpts(memeId))
   }
 
   const playbackFailure = hasPlaybackFailed

@@ -1,7 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { MemeStatus } from '~/db/generated/prisma/enums'
-import { buildVideoImageUrl, buildVideoOriginalUrl } from '~/lib/bunny'
-import { getMemeByIdQueryOpts } from '~/lib/queries'
+import { buildVideoImageUrl } from '~/lib/bunny'
+import { getCrawlerStreamUrl } from '~/lib/crawler-video'
+import {
+  getMemeByIdQueryOpts,
+  getMemePlaybackUrlQueryOpts
+} from '~/lib/queries'
 import { buildBreadcrumbJsonLd, buildMemeJsonLd, buildMemeSeo } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
 import { MemePage } from './-components/meme-page'
@@ -15,11 +19,18 @@ export const Route = createFileRoute('/_public__root/_default/memes/$memeId')({
       staleTime: 'static'
     })
 
-    const originalUrl = buildVideoOriginalUrl(meme.video.bunnyId)
+    void Promise.allSettled([
+      context.queryClient.query(getMemePlaybackUrlQueryOpts(meme.id))
+    ])
+
+    const crawlerStreamUrl =
+      meme.status === MemeStatus.PUBLISHED
+        ? await getCrawlerStreamUrl(meme.video.bunnyId)
+        : null
 
     return {
       meme,
-      originalUrl
+      crawlerStreamUrl
     }
   },
   scripts: ({ loaderData }) => {
@@ -33,7 +44,7 @@ export const Route = createFileRoute('/_public__root/_default/memes/$memeId')({
         {
           type: 'application/ld+json',
           children: JSON.stringify(
-            buildMemeJsonLd(meme, loaderData.originalUrl)
+            buildMemeJsonLd(meme, loaderData.crawlerStreamUrl)
           )
         },
         {

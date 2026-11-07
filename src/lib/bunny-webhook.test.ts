@@ -1,3 +1,4 @@
+import { createHmac } from 'node:crypto'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { prismaClient } from '~/db'
 import { BUNNY_STATUS } from '~/constants/bunny'
@@ -36,15 +37,44 @@ const FINISHED_VIDEO = {
   bunnyStatus: BUNNY_STATUS.FINISHED
 }
 
-const postWebhook = (status: number) => {
+const LIBRARY_ID = 4242
+const READ_ONLY_API_KEY = 'stream-read-only-key'
+const SIGNATURE_HEX_LENGTH = 64
+
+type PostWebhookParams = {
+  status: number
+  libraryId?: number
+  signature?: string | null
+}
+
+const postWebhook = ({
+  status,
+  libraryId = LIBRARY_ID,
+  signature
+}: PostWebhookParams) => {
+  const body = JSON.stringify({
+    VideoLibraryId: libraryId,
+    VideoGuid: VIDEO_GUID,
+    Status: status
+  })
+  const headers = new Headers({
+    'X-BunnyStream-Signature-Version': 'v1',
+    'X-BunnyStream-Signature-Algorithm': 'hmac-sha256'
+  })
+  const resolvedSignature =
+    signature === undefined
+      ? createHmac('sha256', READ_ONLY_API_KEY).update(body).digest('hex')
+      : signature
+
+  if (resolvedSignature !== null) {
+    headers.set('X-BunnyStream-Signature', resolvedSignature)
+  }
+
   return handleBunnyWebhook(
     new Request('https://www.petit-meme.io/api/bunny', {
       method: 'POST',
-      body: JSON.stringify({
-        VideoLibraryId: 4242,
-        VideoGuid: VIDEO_GUID,
-        Status: status
-      })
+      headers,
+      body
     })
   )
 }
@@ -61,6 +91,8 @@ const stubBunnyPlayData = () => {
 describe('handleBunnyWebhook', () => {
   beforeEach(() => {
     vi.stubEnv('BUNNY_ACCESS_KEY', 'stream-access-key')
+    vi.stubEnv('BUNNY_READ_ONLY_API_KEY', READ_ONLY_API_KEY)
+    vi.stubEnv('VITE_BUNNY_LIBRARY_ID', String(LIBRARY_ID))
     stubBunnyPlayData()
     vi.spyOn(prismaClient.video, 'findUnique').mockResolvedValue(FINISHED_VIDEO)
   })
@@ -79,7 +111,9 @@ describe('handleBunnyWebhook', () => {
       duration: VIDEO_LENGTH_SECONDS
     })
 
-    const response = await postWebhook(BUNNY_STATUS.RESOLUTION_FINISHED)
+    const response = await postWebhook({
+      status: BUNNY_STATUS.RESOLUTION_FINISHED
+    })
 
     expect(response.status).toBe(HTTP_STATUS.OK)
     expect(update).toHaveBeenCalledWith(
@@ -104,7 +138,9 @@ describe('handleBunnyWebhook', () => {
       })
     )
 
-    const response = await postWebhook(BUNNY_STATUS.RESOLUTION_FINISHED)
+    const response = await postWebhook({
+      status: BUNNY_STATUS.RESOLUTION_FINISHED
+    })
 
     expect(response.status).toBe(HTTP_STATUS.OK)
     expect(syncMemeToAllIndices).not.toHaveBeenCalled()
@@ -116,7 +152,9 @@ describe('handleBunnyWebhook', () => {
       new Error('Connection reset')
     )
 
-    const response = await postWebhook(BUNNY_STATUS.RESOLUTION_FINISHED)
+    const response = await postWebhook({
+      status: BUNNY_STATUS.RESOLUTION_FINISHED
+    })
 
     expect(response.status).toBe(HTTP_STATUS.INTERNAL_SERVER_ERROR)
     expect(captureWithFeature).toHaveBeenCalledTimes(1)
@@ -125,10 +163,46 @@ describe('handleBunnyWebhook', () => {
   it('should ignore a stale status without updating', async () => {
     const update = vi.spyOn(prismaClient.video, 'update')
 
-    const response = await postWebhook(BUNNY_STATUS.FINISHED)
+    const response = await postWebhook({ status: BUNNY_STATUS.FINISHED })
 
     expect(response.status).toBe(HTTP_STATUS.OK)
     expect(fetch).not.toHaveBeenCalled()
+    expect(update).not.toHaveBeenCalled()
+  })
+
+  it('should reject a webhook without a signature', async () => {
+    const update = vi.spyOn(prismaClient.video, 'update')
+
+    const response = await postWebhook({
+      status: BUNNY_STATUS.RESOLUTION_FINISHED,
+      signature: null
+    })
+
+    expect(response.status).toBe(HTTP_STATUS.UNAUTHORIZED)
+    expect(update).not.toHaveBeenCalled()
+  })
+
+  it('should reject a webhook signed with another key', async () => {
+    const update = vi.spyOn(prismaClient.video, 'update')
+
+    const response = await postWebhook({
+      status: BUNNY_STATUS.RESOLUTION_FINISHED,
+      signature: 'a'.repeat(SIGNATURE_HEX_LENGTH)
+    })
+
+    expect(response.status).toBe(HTTP_STATUS.UNAUTHORIZED)
+    expect(update).not.toHaveBeenCalled()
+  })
+
+  it('should reject a signed webhook from another library', async () => {
+    const update = vi.spyOn(prismaClient.video, 'update')
+
+    const response = await postWebhook({
+      status: BUNNY_STATUS.RESOLUTION_FINISHED,
+      libraryId: 1
+    })
+
+    expect(response.status).toBe(HTTP_STATUS.FORBIDDEN)
     expect(update).not.toHaveBeenCalled()
   })
 })

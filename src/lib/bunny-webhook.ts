@@ -1,6 +1,10 @@
+import { createHmac, timingSafeEqual } from 'node:crypto'
 import { z } from 'zod'
 import { prismaClient } from '~/db'
+import { HTTP_STATUS } from '~/constants/http'
 import { MEME_ALGOLIA_INCLUDE } from '~/constants/meme'
+import { clientEnv } from '~/env/client'
+import { serverEnv } from '~/env/server'
 import { safeAlgoliaOp, syncMemeToAllIndices } from '~/lib/algolia'
 import { invalidateAlgoliaCache } from '~/lib/algolia-cache'
 import { getVideoPlayData } from '~/lib/bunny'
@@ -14,11 +18,39 @@ const WEBHOOK_PAYLOAD_SCHEMA = z.object({
   Status: z.number()
 })
 
+const matchIsSignedByBunny = (headers: Headers, rawBody: string) => {
+  const signature = headers.get('X-BunnyStream-Signature') ?? ''
+  const expectedSignature = createHmac(
+    'sha256',
+    serverEnv.BUNNY_READ_ONLY_API_KEY
+  )
+    .update(rawBody)
+    .digest('hex')
+
+  return (
+    headers.get('X-BunnyStream-Signature-Version') === 'v1' &&
+    headers.get('X-BunnyStream-Signature-Algorithm') === 'hmac-sha256' &&
+    signature.length === expectedSignature.length &&
+    timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))
+  )
+}
+
 export const handleBunnyWebhook = async (request: Request) => {
+  const rawBody = await request.text()
+
+  if (!matchIsSignedByBunny(request.headers, rawBody)) {
+    bunnyLogger.warn('Webhook rejected: invalid signature')
+
+    return Response.json(
+      { success: false },
+      { status: HTTP_STATUS.UNAUTHORIZED }
+    )
+  }
+
   let data: unknown
 
   try {
-    data = await request.json()
+    data = JSON.parse(rawBody)
   } catch (error) {
     bunnyLogger.error({ error }, 'Invalid JSON in webhook body')
 
@@ -33,6 +65,15 @@ export const handleBunnyWebhook = async (request: Request) => {
     bunnyLogger.error({ error, data }, 'Invalid webhook payload')
 
     return Response.json({ success: false }, { status: 400 })
+  }
+
+  if (String(result.VideoLibraryId) !== clientEnv.VITE_BUNNY_LIBRARY_ID) {
+    bunnyLogger.warn(
+      { libraryId: result.VideoLibraryId },
+      'Webhook rejected: unknown library'
+    )
+
+    return Response.json({ success: false }, { status: HTTP_STATUS.FORBIDDEN })
   }
 
   try {

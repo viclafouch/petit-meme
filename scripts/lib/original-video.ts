@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises'
-import { signOriginalUrl } from '~/lib/bunny'
+import { fetchOriginalVideo } from '~/lib/bunny'
 
 const FETCH_TIMEOUT_MS = 30_000
 
@@ -7,7 +7,7 @@ export const downloadOriginalVideo = async (
   bunnyId: string,
   destPath: string
 ) => {
-  const response = await fetch(await signOriginalUrl(bunnyId), {
+  const response = await fetchOriginalVideo(bunnyId, {
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS)
   })
 

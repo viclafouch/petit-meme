@@ -45,7 +45,7 @@ export const PlayerDialog = ({
   authenticatedUserToken
 }: PlayerDialogProps) => {
   const { video, videoCallbackRef, playbackFailure } = useMemeHls({
-    bunnyId: meme.video.bunnyId
+    memeId: meme.id
   })
   const isReducedMotion = useReducedMotion()
   const shareMutation = useMemeExport({ mode: 'share', queryID })

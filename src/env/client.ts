@@ -9,7 +9,7 @@ export const clientEnv = createEnv({
     VITE_BUNNY_LIBRARY_ID: z.string(),
     VITE_BUNNY_HOSTNAME: z.string(),
     VITE_ALGOLIA_APP_ID: z.string(),
-    VITE_ALGOLIA_SEARCH_KEY: z.string(),
+    VITE_ALGOLIA_INSIGHTS_KEY: z.string(),
     VITE_ALGOLIA_INDEX: z.string(),
     VITE_SENTRY_DSN: z.url(),
     VITE_VERCEL_ENV: z

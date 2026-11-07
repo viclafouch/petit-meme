@@ -17,9 +17,8 @@ type SitemapVideoParams = {
   thumbnailLoc: string
   title: string
   description: string
-  contentLoc: string
+  playerLoc: string
   duration: number
-  playerLoc?: string
   publicationDate?: string
 }
 
@@ -98,7 +97,6 @@ const buildVideoTag = ({
   title,
   thumbnailLoc,
   description,
-  contentLoc,
   playerLoc,
   duration,
   publicationDate
@@ -108,10 +106,7 @@ const buildVideoTag = ({
     `      <video:title>${escapeXml(title)}</video:title>`,
     `      <video:thumbnail_loc>${thumbnailLoc}</video:thumbnail_loc>`,
     `      <video:description>${escapeXml(description)}</video:description>`,
-    `      <video:content_loc>${contentLoc}</video:content_loc>`,
-    ...(playerLoc
-      ? [`      <video:player_loc>${playerLoc}</video:player_loc>`]
-      : []),
+    `      <video:player_loc>${playerLoc}</video:player_loc>`,
     `      <video:duration>${duration}</video:duration>`,
     ...(publicationDate
       ? [

@@ -18,6 +18,12 @@ export const RATE_LIMIT_VIEW = {
   windowMs: FIVE_MINUTES_MS
 } as const satisfies RateLimitConfig
 
+export const RATE_LIMIT_PLAYBACK = {
+  action: 'playback',
+  maxRequests: 120,
+  windowMs: FIVE_MINUTES_MS
+} as const satisfies RateLimitConfig
+
 export const RATE_LIMIT_TRACK = {
   action: 'track',
   maxRequests: 30,

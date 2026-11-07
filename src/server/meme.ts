@@ -33,6 +33,7 @@ import {
 } from '~/constants/meme'
 import {
   RATE_LIMIT_DOWNLOAD,
+  RATE_LIMIT_PLAYBACK,
   RATE_LIMIT_TRACK,
   RATE_LIMIT_VIEW
 } from '~/constants/rate-limit'
@@ -62,8 +63,8 @@ import {
   ALGOLIA_MEMES_PAGE_SCHEMA,
   ALGOLIA_SEARCH_PARAMS_BASE,
   ALGOLIA_SEARCH_RETRIEVE,
-  algoliaRecommendClient,
-  algoliaSearchClient,
+  getAlgoliaRecommendClient,
+  getAlgoliaSearchClient,
   getHighlightedTitle,
   normalizeAlgoliaHit,
   normalizeAlgoliaMemesPage,
@@ -77,6 +78,7 @@ import {
 } from '~/lib/algolia'
 import { createAlgoliaCache } from '~/lib/algolia-cache'
 import { auth } from '~/lib/auth'
+import { buildSignedStreamUrl } from '~/lib/bunny'
 import { matchIsAnalyticsConsentGiven } from '~/lib/cookie-consent'
 import { algoliaLogger, logger } from '~/lib/logger'
 import { serveMemeExport } from '~/lib/meme-files'
@@ -458,6 +460,24 @@ export const getMemeById = createServerFn({ method: 'GET' })
     }
   })
 
+export const getMemePlaybackUrl = createServerFn({ method: 'GET' })
+  .validator((data) => {
+    return z.string().parse(data)
+  })
+  .middleware([createRateLimitMiddleware(RATE_LIMIT_PLAYBACK)])
+  .handler(async ({ data: memeId }) => {
+    const meme = await prismaClient.meme.findUnique({
+      where: { id: memeId },
+      select: { status: true, video: { select: { bunnyId: true } } }
+    })
+
+    if (!meme || !(await matchCanRequestViewMeme(meme.status))) {
+      throw notFound()
+    }
+
+    return buildSignedStreamUrl(meme.video.bunnyId)
+  })
+
 export const getVideoStatusById = createServerFn({ method: 'GET' })
   .validator((data) => {
     return z.number().parse(data)
@@ -498,7 +518,7 @@ const fetchTrendingMemesPage = async ({
   query
 }: FetchTrendingMemesPageParams) => {
   const response =
-    await algoliaSearchClient.searchSingleIndex<AlgoliaMemeRecord>({
+    await getAlgoliaSearchClient().searchSingleIndex<AlgoliaMemeRecord>({
       indexName,
       searchParams: {
         query: '',
@@ -552,7 +572,7 @@ const fetchSearchMemesPage = async ({
   })
 
   const response =
-    await algoliaSearchClient.searchSingleIndex<AlgoliaMemeRecord>({
+    await getAlgoliaSearchClient().searchSingleIndex<AlgoliaMemeRecord>({
       indexName,
       searchParams: {
         query,
@@ -595,7 +615,7 @@ const readSearchMemesPage = createAlgoliaCache({
 const fetchRecentMemesCount = async (locale: Locale) => {
   const thirtyDaysAgo = Date.now() - THIRTY_DAYS_MS
 
-  const countResult = await algoliaSearchClient.searchSingleIndex({
+  const countResult = await getAlgoliaSearchClient().searchSingleIndex({
     indexName: resolveAlgoliaIndexName(locale),
     searchParams: {
       filters: [
@@ -655,7 +675,7 @@ export const getMemes = createServerFn({ method: 'GET' })
       if (requestedPage <= 1) {
         const [memes, countResponse] = await Promise.all([
           hydrateTrendingPage1(page1Ids, locale),
-          algoliaSearchClient.searchSingleIndex<AlgoliaMemeRecord>({
+          getAlgoliaSearchClient().searchSingleIndex<AlgoliaMemeRecord>({
             indexName,
             searchParams: {
               query: '',
@@ -779,7 +799,7 @@ export const getRelatedMemes = createServerFn({ method: 'GET' })
     )
 
     try {
-      const response = await algoliaRecommendClient.getRecommendations({
+      const response = await getAlgoliaRecommendClient().getRecommendations({
         requests: [
           {
             indexName: resolveAlgoliaIndexName(locale),
@@ -834,7 +854,7 @@ export const getTrendingMemes = createServerFn({ method: 'GET' }).handler(
     )
 
     try {
-      const response = await algoliaRecommendClient.getRecommendations({
+      const response = await getAlgoliaRecommendClient().getRecommendations({
         requests: [
           {
             indexName: resolveAlgoliaIndexName(locale),

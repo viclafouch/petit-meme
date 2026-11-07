@@ -1,7 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
 import { FIVE_MINUTES_MS, SECOND } from '~/constants/time'
-import { createAlgoliaCache, invalidateAlgoliaCache } from '~/lib/algolia-cache'
+import {
+  createAlgoliaCache,
+  invalidateAlgoliaCache
+} from '~/lib/algolia-cache.server'
 
 const RECENT_MEMES_COUNT = 42
 

@@ -1,26 +1,26 @@
 import { z } from 'zod'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
-import { prismaClient } from '~/db'
 import { matchIsAuthProviderId, type AuthProviderId } from '~/constants/auth'
 import { HTTP_STATUS } from '~/constants/http'
 import {
   ACTIVE_SUBSCRIPTION_STATUSES,
   matchIsActiveSubscriptionStatus
 } from '~/constants/plan'
+import { prismaClient } from '~/db/client.server'
 import type { Prisma, User } from '~/db/generated/prisma/client'
 import { AccountBannedEmail } from '~/emails/account-banned-email'
 import { AccountUnbannedEmail } from '~/emails/account-unbanned-email'
 import { PremiumGrantedEmail } from '~/emails/premium-granted-email'
 import { emailSubjects } from '~/emails/subjects'
 import { differenceInMonths } from '~/helpers/date'
-import { auth } from '~/lib/auth'
+import { auth } from '~/lib/auth.server'
 import { adminLogger } from '~/lib/logger'
-import { sendEmailInBackground } from '~/lib/resend'
+import { sendEmailInBackground } from '~/lib/resend.server'
 import { captureWithFeature } from '~/lib/sentry'
-import { getStripeClient } from '~/lib/stripe'
+import { getStripeClient } from '~/lib/stripe.server'
 import { BAN_REASONS, type BanReason } from '~/routes/admin/-lib/ban'
-import { logAuditAction } from '~/server/audit'
+import { logAuditAction } from '~/server/audit.server'
 import { adminRequiredMiddleware } from '~/server/user-auth'
 
 const USER_LIST_SELECT = {

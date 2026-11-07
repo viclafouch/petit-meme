@@ -6,7 +6,6 @@ import { prismaAdapter } from '@better-auth/prisma-adapter'
 import { stripe } from '@better-auth/stripe'
 import { createServerOnlyFn } from '@tanstack/react-start'
 import { waitUntil } from '@vercel/functions'
-import { prismaClient } from '~/db'
 import {
   AUTH_BASE_PATH,
   AUTH_RATE_LIMIT,
@@ -19,6 +18,7 @@ import {
   ONE_HOUR_IN_SECONDS,
   SEVEN_DAYS_IN_SECONDS
 } from '~/constants/time'
+import { prismaClient } from '~/db/client.server'
 import { ActivityEventType, UserLocale } from '~/db/generated/prisma/enums'
 import { EmailVerification } from '~/emails/email-verification'
 import { PasswordChangedEmail } from '~/emails/password-changed-email'
@@ -27,26 +27,28 @@ import { ResetPassword } from '~/emails/reset-password'
 import { emailSubjects } from '~/emails/subjects'
 import { SubscriptionConfirmedEmail } from '~/emails/subscription-confirmed-email'
 import { WelcomeEmail } from '~/emails/welcome-email'
-import { clientEnv } from '~/env/client'
 import {
   matchIsDeployed,
   matchIsProductionDeployment,
   serverEnv
-} from '~/env/server'
+} from '~/env/server.server'
 import { getAvatarSlotIdForEmail, resolveAvatarPath } from '~/helpers/avatar'
 import { formatDate } from '~/helpers/date'
 import { formatCentsToEuros } from '~/helpers/number'
 import { boundProviderName } from '~/helpers/user-name'
-import { rejectUnverifiedDiscordEmail, signUpGuard } from '~/lib/auth-guard'
+import {
+  rejectUnverifiedDiscordEmail,
+  signUpGuard
+} from '~/lib/auth-guard.server'
 import { authLogger, stripeLogger } from '~/lib/logger'
-import { sendEmail, sendEmailInBackground } from '~/lib/resend'
+import { sendEmail, sendEmailInBackground } from '~/lib/resend.server'
 import { captureWithFeature } from '~/lib/sentry'
-import { getStripeClient } from '~/lib/stripe'
+import { getStripeClient } from '~/lib/stripe.server'
 import { getLocale } from '~/paraglide/runtime'
-import { recordActivityEvent } from '~/utils/activity-event'
-import { buildEmailVerificationPath } from '~/utils/email-verification'
-import { cleanupUserData } from '~/utils/user-cleanup'
-import { claimVerificationEmailSend } from '~/utils/verification-email-quota'
+import { recordActivityEvent } from '~/utils/activity-event.server'
+import { buildEmailVerificationPath } from '~/utils/email-verification.server'
+import { cleanupUserData } from '~/utils/user-cleanup.server'
+import { claimVerificationEmailSend } from '~/utils/verification-email-quota.server'
 
 const PASSWORD_CHANGED_DATE_OPTIONS: Intl.DateTimeFormatOptions = {
   dateStyle: 'long',
@@ -86,7 +88,7 @@ const handlePaymentFailed = async (event: Stripe.InvoicePaymentFailedEvent) => {
   try {
     portalSession = await getStripeClient().billingPortal.sessions.create({
       customer: customerId,
-      return_url: `${clientEnv.VITE_SITE_URL}/settings`
+      return_url: `${serverEnv.VITE_SITE_URL}/settings`
     })
   } catch (error) {
     captureWithFeature(error, 'stripe-billing-portal')
@@ -142,7 +144,7 @@ const sendVerificationEmail: SendVerificationEmail = async ({
     to: user.email,
     subject: emailSubjects[locale].verifyEmail,
     react: EmailVerification({
-      verificationUrl: `${clientEnv.VITE_SITE_URL}${verificationPath}`,
+      verificationUrl: `${serverEnv.VITE_SITE_URL}${verificationPath}`,
       locale
     })
   })
@@ -184,7 +186,7 @@ const buildUserCreateData = <
 const getAuthConfig = createServerOnlyFn(() => {
   return betterAuth({
     appName: 'Petit Meme',
-    baseURL: clientEnv.VITE_SITE_URL,
+    baseURL: serverEnv.VITE_SITE_URL,
     basePath: AUTH_BASE_PATH,
     secret: serverEnv.BETTER_AUTH_SECRET,
     disabledPaths: ['/update-user', '/verify-email'],
@@ -331,7 +333,7 @@ const getAuthConfig = createServerOnlyFn(() => {
         update: { after: touchUserLastActive }
       }
     },
-    trustedOrigins: [clientEnv.VITE_SITE_URL],
+    trustedOrigins: [serverEnv.VITE_SITE_URL],
     plugins: [
       admin({ defaultRole: 'user' }),
       lastLoginMethod(),

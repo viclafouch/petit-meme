@@ -1,8 +1,8 @@
 import { z } from 'zod'
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
-import { prismaClient } from '~/db'
 import { CATEGORY_SLUG_REGEX } from '~/constants/meme'
 import { DAY } from '~/constants/time'
+import { prismaClient } from '~/db/client.server'
 import type { Prisma } from '~/db/generated/prisma/client'
 import { MemeStatus } from '~/db/generated/prisma/enums'
 import {
@@ -11,7 +11,7 @@ import {
 } from '~/helpers/i18n-content'
 import { adminLogger } from '~/lib/logger'
 import { baseLocale, type Locale, locales } from '~/paraglide/runtime'
-import { logAuditAction } from '~/server/audit'
+import { logAuditAction } from '~/server/audit.server'
 import { adminRequiredMiddleware } from '~/server/user-auth'
 
 const CATEGORY_TITLE_MIN_LENGTH = 3

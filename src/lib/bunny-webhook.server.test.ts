@@ -1,21 +1,21 @@
 import { createHmac } from 'node:crypto'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { prismaClient } from '~/db'
 import { BUNNY_STATUS } from '~/constants/bunny'
 import { HTTP_STATUS } from '~/constants/http'
+import { prismaClient } from '~/db/client.server'
 import { Prisma } from '~/db/generated/prisma/client'
-import { syncMemeToAllIndices } from '~/lib/algolia'
-import { invalidateAlgoliaCache } from '~/lib/algolia-cache'
-import { handleBunnyWebhook } from '~/lib/bunny-webhook'
+import { invalidateAlgoliaCache } from '~/lib/algolia-cache.server'
+import { syncMemeToAllIndices } from '~/lib/algolia.server'
+import { handleBunnyWebhook } from '~/lib/bunny-webhook.server'
 import { captureWithFeature } from '~/lib/sentry'
 
-vi.mock(import('~/lib/algolia'), () => {
+vi.mock(import('~/lib/algolia.server'), () => {
   return {
     syncMemeToAllIndices: vi.fn<typeof syncMemeToAllIndices>()
   }
 })
 
-vi.mock(import('~/lib/algolia-cache'), () => {
+vi.mock(import('~/lib/algolia-cache.server'), () => {
   return {
     invalidateAlgoliaCache: vi.fn<typeof invalidateAlgoliaCache>()
   }

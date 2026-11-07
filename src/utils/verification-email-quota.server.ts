@@ -1,6 +1,6 @@
 import { createServerOnlyFn } from '@tanstack/react-start'
-import { prismaClient } from '~/db'
 import { RATE_LIMIT_VERIFICATION_EMAIL } from '~/constants/rate-limit'
+import { prismaClient } from '~/db/client.server'
 import { authLogger } from '~/lib/logger'
 import { captureWithFeature } from '~/lib/sentry'
 

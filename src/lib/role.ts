@@ -1,5 +1,5 @@
 import { MemeStatus } from '~/db/generated/prisma/enums'
-import type { auth } from '~/lib/auth'
+import type { auth } from '~/lib/auth.server'
 
 export type SessionUser = (typeof auth)['$Infer']['Session']['user']
 

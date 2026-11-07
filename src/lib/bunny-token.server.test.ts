@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { signBunnyUrl } from '~/lib/bunny-token'
+import { signBunnyUrl } from '~/lib/bunny-token.server'
 
 const SECURITY_KEY = 'SecurityKey'
 const EXPIRES_AT = 1598024587

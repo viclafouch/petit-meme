@@ -1,6 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
 import { setResponseStatus } from '@tanstack/react-start/server'
-import { prismaClient } from '~/db'
 import { AppError } from '~/constants/error'
 import { HTTP_STATUS } from '~/constants/http'
 import {
@@ -8,14 +7,15 @@ import {
   MAX_PENDING_SUBMISSIONS
 } from '~/constants/meme-submission'
 import { RATE_LIMIT_SUBMIT_MEME } from '~/constants/rate-limit'
-import { lockUntilTransactionEnds } from '~/db/advisory-lock'
+import { lockUntilTransactionEnds } from '~/db/advisory-lock.server'
+import { prismaClient } from '~/db/client.server'
 import type { Prisma } from '~/db/generated/prisma/client'
 import {
   MemeSubmissionStatus,
   MemeSubmissionUrlType
 } from '~/db/generated/prisma/enums'
 import { submissionLogger } from '~/lib/logger'
-import { matchIsPrismaError } from '~/lib/prisma-error'
+import { matchIsPrismaError } from '~/lib/prisma-error.server'
 import { getTweetByUrl, TweetNoVideoError } from '~/lib/react-tweet'
 import { captureWithFeature } from '~/lib/sentry'
 import { createUserRateLimitMiddleware } from '~/server/rate-limit'

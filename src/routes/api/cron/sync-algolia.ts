@@ -1,10 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { prismaClient } from '~/db'
 import { MEME_ALGOLIA_INCLUDE, type MemeAlgoliaData } from '~/constants/meme'
-import { serverEnv } from '~/env/server'
-import { replaceAllIndicesWithMemes } from '~/lib/algolia'
+import { prismaClient } from '~/db/client.server'
+import { serverEnv } from '~/env/server.server'
+import { replaceAllIndicesWithMemes } from '~/lib/algolia.server'
 import { cronLogger } from '~/lib/logger'
-import { verifyCronSecret } from '~/utils/cron-auth'
+import { verifyCronSecret } from '~/utils/cron-auth.server'
 
 const log = cronLogger.child({ job: 'sync-algolia' })
 

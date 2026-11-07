@@ -2,12 +2,12 @@
 import type { SupportedLanguage } from '@algolia/client-search'
 import {
   getAlgoliaAdminClient,
-  algoliaIndexPrefix,
+  getAlgoliaIndexPrefix,
   resolveAlgoliaIndexName,
   resolveAlgoliaReplicaCreated,
   resolveAlgoliaReplicaPopular,
   resolveAlgoliaReplicaRecent
-} from '~/lib/algolia'
+} from '~/lib/algolia.server'
 import { locales, type Locale } from '~/paraglide/runtime'
 import { logEnvironmentInfo } from './lib/env-guard'
 
@@ -133,7 +133,7 @@ const setupAlgoliaIndices = async () => {
     `1. Run reindex: pnpm exec vite-node --mode ${mode} scripts/reindex-memes.ts`
   )
   console.log(
-    `2. Delete old index "${algoliaIndexPrefix}" and its replicas from Algolia dashboard`
+    `2. Delete old index "${getAlgoliaIndexPrefix()}" and its replicas from Algolia dashboard`
   )
 
   process.exit(0)

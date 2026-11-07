@@ -1,5 +1,5 @@
 import { expect, type Locator, type Page } from '@playwright/test'
-import { prismaClient } from '~/db'
+import { prismaClient } from '~/db/client.server'
 import { UserLocale } from '~/db/generated/prisma/enums'
 import { m } from '~/paraglide/messages.js'
 import { buildEmailVerificationUrl, openAuthDialog } from './auth-flows'

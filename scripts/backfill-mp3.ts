@@ -4,12 +4,12 @@ import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { parseArgs, promisify } from 'node:util'
-import { prismaClient } from '~/db'
 import { BUNNY_STORAGE_ENDPOINT } from '~/constants/bunny'
+import { prismaClient } from '~/db/client.server'
 import type { Prisma } from '~/db/generated/prisma/client'
 import { MemeStatus } from '~/db/generated/prisma/enums'
-import { serverEnv } from '~/env/server'
-import { checkMemeFileExists, uploadMemeFile } from '~/lib/meme-files'
+import { serverEnv } from '~/env/server.server'
+import { checkMemeFileExists, uploadMemeFile } from '~/lib/meme-files.server'
 import {
   FFMPEG_AUDIO_OUTPUT,
   FFMPEG_INPUT_FILE,

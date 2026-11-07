@@ -1,22 +1,22 @@
 /* oxlint-disable no-console */
 import { hashPassword } from 'better-auth/crypto'
 import { z } from 'zod'
-import { prismaClient } from '~/db'
 import { MEME_ALGOLIA_INCLUDE } from '~/constants/meme'
+import { prismaClient } from '~/db/client.server'
 import {
   getAlgoliaAdminClient,
   resolveAlgoliaIndexName,
   syncMemeToAllIndices
-} from '~/lib/algolia'
+} from '~/lib/algolia.server'
 import {
   buildLibraryApiUrl,
   createVideo,
   deleteVideo,
   getBunnyHeaders,
   uploadVideo
-} from '~/lib/bunny'
+} from '~/lib/bunny.server'
 import { getTweetByUrl, getTweetMedia } from '~/lib/react-tweet'
-import { getStripeClient } from '~/lib/stripe'
+import { getStripeClient } from '~/lib/stripe.server'
 import { fetchWithZod } from '~/lib/utils'
 import { locales } from '~/paraglide/runtime'
 import { logEnvironmentInfo } from '../scripts/lib/env-guard'

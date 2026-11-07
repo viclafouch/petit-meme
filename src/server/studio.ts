@@ -2,16 +2,16 @@ import { z } from 'zod'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
-import { prismaClient } from '~/db'
 import { AppError } from '~/constants/error'
 import { HTTP_STATUS } from '~/constants/http'
 import { FREE_PLAN_MAX_GENERATIONS } from '~/constants/plan'
+import { prismaClient } from '~/db/client.server'
 import { ActivityEventType } from '~/db/generated/prisma/enums'
 import { authLogger } from '~/lib/logger'
 import { matchCanViewMeme } from '~/lib/role'
 import { matchIsUserPremium } from '~/server/customer'
 import { authUserRequiredMiddleware } from '~/server/user-auth'
-import { recordActivityEvent } from '~/utils/activity-event'
+import { recordActivityEvent } from '~/utils/activity-event.server'
 
 export const checkGenerationQuota = createServerFn({ method: 'GET' })
   .middleware([authUserRequiredMiddleware])

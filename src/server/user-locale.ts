@@ -1,8 +1,8 @@
 import { z } from 'zod'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
-import { prismaClient } from '~/db'
-import { auth } from '~/lib/auth'
+import { prismaClient } from '~/db/client.server'
+import { auth } from '~/lib/auth.server'
 import { locales } from '~/paraglide/runtime'
 
 const LOCALE_SCHEMA = z.object({ locale: z.enum(locales) })

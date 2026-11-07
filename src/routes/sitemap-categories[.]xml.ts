@@ -1,12 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { prismaClient } from '~/db'
+import { prismaClient } from '~/db/client.server'
 import {
   buildLocalizedEntries,
   buildSitemapResponse,
   formatIsoDate,
   type SitemapPage,
   wrapUrlset
-} from '~/lib/sitemap'
+} from '~/lib/sitemap.server'
 
 export const Route = createFileRoute('/sitemap-categories.xml')({
   server: {

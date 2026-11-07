@@ -1,11 +1,11 @@
 import { createServerOnlyFn } from '@tanstack/react-start'
-import { prismaClient } from '~/db'
+import { prismaClient } from '~/db/client.server'
 import { AccountDeletedEmail } from '~/emails/account-deleted-email'
 import { emailSubjects } from '~/emails/subjects'
 import { authLogger } from '~/lib/logger'
-import { sendEmailInBackground } from '~/lib/resend'
+import { sendEmailInBackground } from '~/lib/resend.server'
 import { captureWithFeature } from '~/lib/sentry'
-import { getStripeClient } from '~/lib/stripe'
+import { getStripeClient } from '~/lib/stripe.server'
 import type { Locale } from '~/paraglide/runtime'
 
 type CleanupUserDataParams = {

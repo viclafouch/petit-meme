@@ -28,6 +28,7 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix && pnpm run format && tsc",
     "knip": "knip --dependencies --exports --files --cycles",
+    "env:check": "node scripts/check-env.ts",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "email:dev": "email dev --dir src/emails --port 3001",

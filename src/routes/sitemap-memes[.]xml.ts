@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { prismaClient } from '~/db'
 import { MEME_TRANSLATION_SELECT } from '~/constants/meme'
+import { prismaClient } from '~/db/client.server'
 import {
   CONTENT_LOCALE_TO_SITE_LOCALES,
   resolveMemeTranslation
@@ -12,7 +12,7 @@ import {
   buildUrlEntry,
   VIDEO_SITEMAP_NAMESPACES,
   wrapUrlset
-} from '~/lib/sitemap'
+} from '~/lib/sitemap.server'
 
 export const Route = createFileRoute('/sitemap-memes.xml')({
   server: {

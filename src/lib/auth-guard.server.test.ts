@@ -2,7 +2,7 @@ import { betterAuth } from 'better-auth'
 import { memoryAdapter } from 'better-auth/adapters/memory'
 import { describe, expect, it } from 'vitest'
 import { USER_NAME_MAX_LENGTH } from '~/constants/auth'
-import { signUpGuard } from '~/lib/auth-guard'
+import { signUpGuard } from '~/lib/auth-guard.server'
 
 const VALID_SIGN_UP_BODY = {
   name: 'Alan',

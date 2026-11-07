@@ -1,12 +1,12 @@
 import { z } from 'zod'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { prismaClient } from '~/db'
 import {
   ACTIVITY_PAGE_SCHEMA,
   ACTIVITY_RETENTION_DAYS
 } from '~/constants/activity'
 import { DAY } from '~/constants/time'
+import { prismaClient } from '~/db/client.server'
 import type { Prisma } from '~/db/generated/prisma/client'
 import {
   fetchActivityRows,

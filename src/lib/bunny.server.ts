@@ -6,9 +6,11 @@ import {
   PLAYBACK_TOKEN_TTL_SECONDS
 } from '~/constants/bunny'
 import { FIVE_MINUTES_IN_SECONDS, SECOND } from '~/constants/time'
-import { clientEnv } from '~/env/client'
-import { serverEnv } from '~/env/server'
-import { signVideoFileUrl, signVideoPlaybackUrl } from '~/lib/bunny-token'
+import { serverEnv } from '~/env/server.server'
+import {
+  signVideoFileUrl,
+  signVideoPlaybackUrl
+} from '~/lib/bunny-token.server'
 import { bunnyLogger } from '~/lib/logger'
 import { fetchWithZod } from './utils'
 
@@ -36,7 +38,7 @@ const getUnixTimeInSeconds = () => {
 
 const signOriginalUrl = (videoId: string) => {
   return signVideoFileUrl({
-    hostname: clientEnv.VITE_BUNNY_HOSTNAME,
+    hostname: serverEnv.VITE_BUNNY_HOSTNAME,
     videoId,
     file: 'original',
     securityKey: serverEnv.BUNNY_TOKEN_AUTH_KEY,
@@ -55,7 +57,7 @@ export const fetchOriginalVideo = createServerOnlyFn(
 
 const signVideoStreamUrl = (videoId: string, expiresAt: number) => {
   return signVideoPlaybackUrl({
-    hostname: clientEnv.VITE_BUNNY_HOSTNAME,
+    hostname: serverEnv.VITE_BUNNY_HOSTNAME,
     videoId,
     file: 'playlist.m3u8',
     securityKey: serverEnv.BUNNY_TOKEN_AUTH_KEY,

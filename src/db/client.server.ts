@@ -2,7 +2,7 @@ import { Pool } from 'pg'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { attachDatabasePool } from '@vercel/functions'
 import { IS_PRODUCTION } from '~/constants/env'
-import { serverEnv } from '~/env/server'
+import { serverEnv } from '~/env/server.server'
 import { PrismaClient } from './generated/prisma/client'
 
 export const DATABASE_POOL_MAX_CONNECTIONS = 5

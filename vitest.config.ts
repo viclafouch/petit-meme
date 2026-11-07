@@ -5,7 +5,11 @@ export default defineConfig({
     tsconfigPaths: true
   },
   test: {
-    include: ['src/**/*.test.ts', 'lint/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'scripts/**/*.test.ts', 'lint/**/*.test.ts'],
+    env: {
+      VITE_SITE_URL: 'https://www.petit-meme.io',
+      VITE_BUNNY_HOSTNAME: 'vz-test.b-cdn.net'
+    },
     pool: 'threads',
     isolate: false,
     maxWorkers: 2

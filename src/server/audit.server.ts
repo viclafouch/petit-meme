@@ -1,4 +1,4 @@
-import { prismaClient } from '~/db'
+import { prismaClient } from '~/db/client.server'
 import { adminLogger } from '~/lib/logger'
 
 type AuditAction =

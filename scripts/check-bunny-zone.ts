@@ -1,8 +1,7 @@
 /* oxlint-disable no-console */
 import { z } from 'zod'
-import { clientEnv } from '~/env/client'
-import { serverEnv } from '~/env/server'
-import { buildLibraryApiUrl } from '~/lib/bunny'
+import { serverEnv } from '~/env/server.server'
+import { buildLibraryApiUrl } from '~/lib/bunny.server'
 import { fetchWithZod } from '~/lib/utils'
 import {
   BUNNY_ZONE_PROBES,
@@ -44,7 +43,7 @@ const findPlayableVideoId = async () => {
 
 const checkBunnyZone = async () => {
   const zone = {
-    hostname: clientEnv.VITE_BUNNY_HOSTNAME,
+    hostname: serverEnv.VITE_BUNNY_HOSTNAME,
     videoId: await findPlayableVideoId(),
     tokenAuthKey: serverEnv.BUNNY_TOKEN_AUTH_KEY,
     originalAccessKey: serverEnv.BUNNY_ORIGINAL_ACCESS_KEY

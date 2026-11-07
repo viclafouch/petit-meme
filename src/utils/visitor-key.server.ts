@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import { createServerOnlyFn } from '@tanstack/react-start'
-import { serverEnv } from '~/env/server'
+import { serverEnv } from '~/env/server.server'
 import { truncateToUtcDay } from '~/helpers/date'
 
 const ISO_DAY_LENGTH = 'YYYY-MM-DD'.length

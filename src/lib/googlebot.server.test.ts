@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { matchIsGooglebotIp } from '~/lib/googlebot'
+import { matchIsGooglebotIp } from '~/lib/googlebot.server'
 
 const GOOGLEBOT_IP_RANGES = {
   creationTime: '2026-11-06T15:46:11.000000',

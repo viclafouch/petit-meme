@@ -2,8 +2,8 @@ import { z } from 'zod'
 import { createFileRoute } from '@tanstack/react-router'
 import { OgHomeTemplate } from '~/components/og/og-home-template'
 import { OgTemplate } from '~/components/og/og-template'
-import { clientEnv } from '~/env/client'
-import { renderOgImage } from '~/lib/og-image'
+import { serverEnv } from '~/env/server.server'
+import { renderOgImage } from '~/lib/og-image.server'
 import {
   type OgDefaultedType,
   OG_DEFAULTED_TYPE_VALUES,
@@ -74,7 +74,7 @@ export const Route = createFileRoute('/api/og')({
         }
 
         const query = parsed.data
-        const siteUrl = clientEnv.VITE_SITE_URL
+        const siteUrl = serverEnv.VITE_SITE_URL
         const logoUrl = `${siteUrl}/images/og-logo.png`
         const fontUrl = `${siteUrl}/fonts/bricolage-grotesque-bold.ttf`
         const { hostname } = new URL(siteUrl)

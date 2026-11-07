@@ -2,7 +2,7 @@ import { betterAuth } from 'better-auth'
 import { memoryAdapter } from 'better-auth/adapters/memory'
 import { createEmailVerificationToken } from 'better-auth/api'
 import { describe, expect, it } from 'vitest'
-import { verifyEmailWithPassword } from '~/lib/email-ownership'
+import { verifyEmailWithPassword } from '~/lib/email-ownership.server'
 
 const TEST_SECRET = 'email-ownership-test-secret-00001'
 const OWNER_EMAIL = 'owner@example.test'

@@ -1,6 +1,6 @@
 import { createServerOnlyFn } from '@tanstack/react-start'
 import { waitUntil } from '@vercel/functions'
-import { prismaClient } from '~/db'
+import { prismaClient } from '~/db/client.server'
 import type { Prisma } from '~/db/generated/prisma/client'
 import type {
   ActivityEventType,

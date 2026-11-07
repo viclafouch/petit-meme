@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { prismaClient } from '~/db'
+import { prismaClient } from '~/db/client.server'
 import type { Prisma } from '~/db/generated/prisma/client'
 import { truncateToUtcDay } from '~/helpers/date'
 import { adminRequiredMiddleware } from '~/server/user-auth'

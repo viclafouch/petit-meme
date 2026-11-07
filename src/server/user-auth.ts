@@ -1,10 +1,10 @@
 import { createMiddleware, createServerFn } from '@tanstack/react-start'
 import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
 import { waitUntil } from '@vercel/functions'
-import { prismaClient } from '~/db'
 import { AppError } from '~/constants/error'
 import { HTTP_STATUS } from '~/constants/http'
-import { auth } from '~/lib/auth'
+import { prismaClient } from '~/db/client.server'
+import { auth } from '~/lib/auth.server'
 import { authLogger } from '~/lib/logger'
 import { getLocale } from '~/paraglide/runtime'
 

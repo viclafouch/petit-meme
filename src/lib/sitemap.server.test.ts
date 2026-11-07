@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildUrlEntry } from '~/lib/sitemap'
+import { buildUrlEntry } from '~/lib/sitemap.server'
 
 const PLAYER_URL = 'https://www.petit-meme.io/embed/meme-id'
 

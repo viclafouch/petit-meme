@@ -1,10 +1,10 @@
 /* oxlint-disable no-console */
-import { prismaClient } from '~/db'
 import { MEME_ALGOLIA_INCLUDE } from '~/constants/meme'
+import { prismaClient } from '~/db/client.server'
 import {
   replaceAllIndicesWithMemes,
   resolveAlgoliaIndexName
-} from '~/lib/algolia'
+} from '~/lib/algolia.server'
 import { logEnvironmentInfo } from './lib/env-guard'
 
 const reindexMemes = async () => {

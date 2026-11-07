@@ -37,6 +37,8 @@ export function formatDate(
   }).format(date)
 }
 
+const DAILY_GRANULARITY_MAX_DAYS = 30
+
 const RELATIVE_TIME_THRESHOLDS = [
   { max: MINUTE, divisor: SECOND, unit: 'second' },
   { max: HOUR, divisor: MINUTE, unit: 'minute' },
@@ -88,88 +90,123 @@ export function truncateToUtcMonth(date: Date) {
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1))
 }
 
-function truncateToUtcWeek(date: Date) {
-  const day = truncateToUtcDay(date)
-  const daysSinceMonday = (day.getUTCDay() + DAYS_PER_WEEK - 1) % DAYS_PER_WEEK
+export function getChartGranularity(days: number | null): ChartGranularity {
+  if (days === null) {
+    return 'month'
+  }
 
-  return new Date(day.getTime() - daysSinceMonday * DAY)
+  if (days <= DAILY_GRANULARITY_MAX_DAYS) {
+    return 'day'
+  }
+
+  return 'week'
 }
 
-const CHART_BUCKETS = {
-  day: { startOf: truncateToUtcDay, days: 1, months: 0 },
-  week: { startOf: truncateToUtcWeek, days: DAYS_PER_WEEK, months: 0 },
-  month: { startOf: truncateToUtcMonth, days: 0, months: 1 }
-} as const satisfies Record<
-  ChartGranularity,
-  { startOf: (date: Date) => Date; days: number; months: number }
->
+function formatUtcDateKey(year: number, month: number, day: number) {
+  const mm = String(month).padStart(2, '0')
+  const dd = String(day).padStart(2, '0')
 
-function shiftBuckets(
-  date: Date,
-  granularity: ChartGranularity,
-  count: number
-) {
-  const bucket = CHART_BUCKETS[granularity]
-
-  return new Date(
-    Date.UTC(
-      date.getUTCFullYear(),
-      date.getUTCMonth() + bucket.months * count,
-      date.getUTCDate() + bucket.days * count
-    )
-  )
-}
-
-function startOfBucket(date: Date, granularity: ChartGranularity) {
-  return CHART_BUCKETS[granularity].startOf(date)
+  return `${year}-${mm}-${dd}T00:00:00.000Z`
 }
 
 export function truncateToGranularity(
   date: Date,
   granularity: ChartGranularity
 ) {
-  return startOfBucket(date, granularity).toISOString()
+  const year = date.getUTCFullYear()
+  const month = date.getUTCMonth()
+  const day = date.getUTCDate()
+
+  switch (granularity) {
+    case 'day': {
+      return formatUtcDateKey(year, month + 1, day)
+    }
+
+    case 'week': {
+      const utcDate = new Date(Date.UTC(year, month, day))
+      const dayOfWeek = utcDate.getUTCDay()
+      const monday = new Date(
+        utcDate.getTime() -
+          ((dayOfWeek + DAYS_PER_WEEK - 1) % DAYS_PER_WEEK) * DAY
+      )
+
+      return formatUtcDateKey(
+        monday.getUTCFullYear(),
+        monday.getUTCMonth() + 1,
+        monday.getUTCDate()
+      )
+    }
+
+    case 'month': {
+      return formatUtcDateKey(year, month + 1, 1)
+    }
+
+    default: {
+      return formatUtcDateKey(year, month + 1, day)
+    }
+  }
 }
 
-export type ChartRange = {
+type GenerateDateSeriesParams = {
   start: Date
   end: Date
   granularity: ChartGranularity
 }
 
-export function generateDateSeries({ start, end, granularity }: ChartRange) {
-  const series: string[] = []
-  const endMs = startOfBucket(end, granularity).getTime()
-  let current = startOfBucket(start, granularity)
+function advanceDate(timestamp: number, granularity: ChartGranularity) {
+  const date = new Date(timestamp)
 
-  while (current.getTime() < endMs) {
-    series.push(current.toISOString())
-    current = shiftBuckets(current, granularity, 1)
+  switch (granularity) {
+    case 'day': {
+      return Date.UTC(
+        date.getUTCFullYear(),
+        date.getUTCMonth(),
+        date.getUTCDate() + 1
+      )
+    }
+
+    case 'week': {
+      return Date.UTC(
+        date.getUTCFullYear(),
+        date.getUTCMonth(),
+        date.getUTCDate() + DAYS_PER_WEEK
+      )
+    }
+
+    case 'month': {
+      return Date.UTC(
+        date.getUTCFullYear(),
+        date.getUTCMonth() + 1,
+        date.getUTCDate()
+      )
+    }
+
+    default: {
+      return Date.UTC(
+        date.getUTCFullYear(),
+        date.getUTCMonth(),
+        date.getUTCDate() + 1
+      )
+    }
+  }
+}
+
+export function generateDateSeries({
+  start,
+  end,
+  granularity
+}: GenerateDateSeriesParams) {
+  const series: string[] = []
+  const endKey = truncateToGranularity(end, granularity)
+  let currentMs = new Date(truncateToGranularity(start, granularity)).getTime()
+  const endMs = new Date(endKey).getTime()
+
+  while (currentMs <= endMs) {
+    series.push(new Date(currentMs).toISOString())
+    currentMs = advanceDate(currentMs, granularity)
   }
 
   return series
-}
-
-type GetCompletedChartRangeParams = {
-  granularity: ChartGranularity
-  bucketCount: number | null
-  launchDate: Date
-  now: Date
-}
-
-export function getCompletedChartRange({
-  granularity,
-  bucketCount,
-  launchDate,
-  now
-}: GetCompletedChartRangeParams): ChartRange {
-  const end = startOfBucket(now, granularity)
-  const start =
-    bucketCount === null
-      ? startOfBucket(launchDate, granularity)
-      : shiftBuckets(end, granularity, -bucketCount)
-
-  return { start, end, granularity }
 }
 
 export const getCurrentYear = () => {

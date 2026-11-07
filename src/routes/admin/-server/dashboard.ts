@@ -1,7 +1,6 @@
 import { z } from 'zod'
 import { createServerFn } from '@tanstack/react-start'
 import { prismaClient } from '~/db'
-import { DASHBOARD_WEEKLY_BUCKETS } from '~/constants/analytics'
 import { TRENDING_CATEGORY_DAYS, TRENDING_WEIGHTS } from '~/constants/meme'
 import { ACTIVE_SUBSCRIPTION_STATUSES } from '~/constants/plan'
 import { DAY } from '~/constants/time'
@@ -9,28 +8,25 @@ import type { Prisma } from '~/db/generated/prisma/client'
 import { MemeStatus } from '~/db/generated/prisma/enums'
 import {
   type ChartGranularity,
-  type ChartRange,
   generateDateSeries,
-  getCompletedChartRange,
-  truncateToGranularity
+  getChartGranularity,
+  truncateToGranularity,
+  truncateToUtcDay
 } from '~/helpers/date'
 import { DASHBOARD_FEED_SIZE } from '~/routes/admin/-lib/constants'
 import type { AuditMetadata } from '~/server/audit'
 import { adminRequiredMiddleware } from '~/server/user-auth'
 
-export const PERIOD_SCHEMA = z.enum(['7d', '30d', '13w', 'all'])
+export const PERIOD_SCHEMA = z.enum(['7d', '30d', '90d', 'all'])
 
 export type DashboardPeriod = z.infer<typeof PERIOD_SCHEMA>
 
-const PERIOD_BUCKETS = {
-  '7d': { granularity: 'day', bucketCount: 7 },
-  '30d': { granularity: 'day', bucketCount: 30 },
-  '13w': { granularity: 'week', bucketCount: DASHBOARD_WEEKLY_BUCKETS },
-  all: { granularity: 'month', bucketCount: null }
-} as const satisfies Record<
-  DashboardPeriod,
-  { granularity: ChartGranularity; bucketCount: number | null }
->
+const PERIOD_DAYS = {
+  '7d': 7,
+  '30d': 30,
+  '90d': 90,
+  all: null
+} as const satisfies Record<DashboardPeriod, number | null>
 
 export type DashboardTotals = {
   publishedMemes: number
@@ -116,8 +112,18 @@ function aggregateActionsByGranularity(
 
 type DailyCountRow = { day: Date; count: bigint }
 
-async function fetchChartData({ start, end, granularity }: ChartRange) {
-  const dateRange = { gte: start, lt: end }
+type FetchChartDataParams = {
+  start: Date
+  end: Date
+  granularity: ChartGranularity
+}
+
+async function fetchChartData({
+  start,
+  end,
+  granularity
+}: FetchChartDataParams) {
+  const dateRange = { gte: start, lte: end }
 
   const [viewRows, generationRows, actionRows, signupRows, aiSearchRows] =
     await Promise.all([
@@ -129,7 +135,7 @@ async function fetchChartData({ start, end, granularity }: ChartRange) {
       prismaClient.$queryRaw<DailyCountRow[]>`
         SELECT date_trunc('day', "created_at") AS day, COUNT(*) AS count
         FROM "studio_generation"
-        WHERE "created_at" >= ${start} AND "created_at" < ${end}
+        WHERE "created_at" >= ${start} AND "created_at" <= ${end}
         GROUP BY 1
       `,
       prismaClient.memeActionDaily.groupBy({
@@ -140,13 +146,13 @@ async function fetchChartData({ start, end, granularity }: ChartRange) {
       prismaClient.$queryRaw<DailyCountRow[]>`
         SELECT date_trunc('day', "created_at") AS day, COUNT(*) AS count
         FROM "user"
-        WHERE "created_at" >= ${start} AND "created_at" < ${end}
+        WHERE "created_at" >= ${start} AND "created_at" <= ${end}
         GROUP BY 1
       `,
       prismaClient.$queryRaw<DailyCountRow[]>`
         SELECT date_trunc('day', "created_at") AS day, COUNT(*) AS count
         FROM "ai_search_log"
-        WHERE "created_at" >= ${start} AND "created_at" < ${end}
+        WHERE "created_at" >= ${start} AND "created_at" <= ${end}
         GROUP BY 1
       `
     ])
@@ -199,13 +205,16 @@ export const getAdminChartData = createServerFn({ method: 'GET' })
   })
   .middleware([adminRequiredMiddleware])
   .handler(async ({ data: period }) => {
-    return fetchChartData(
-      getCompletedChartRange({
-        ...PERIOD_BUCKETS[period],
-        launchDate: PLATFORM_LAUNCH_DATE,
-        now: new Date()
-      })
-    )
+    const days = PERIOD_DAYS[period]
+    const granularity = getChartGranularity(days)
+    const now = new Date()
+    const yesterday = new Date(truncateToUtcDay(now).getTime() - DAY)
+    const start =
+      days === null
+        ? PLATFORM_LAUNCH_DATE
+        : new Date(yesterday.getTime() - days * DAY)
+
+    return fetchChartData({ start, end: yesterday, granularity })
   })
 
 const RECENT_AUDIT_SELECT = {

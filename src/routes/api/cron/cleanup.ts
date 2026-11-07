@@ -4,7 +4,6 @@ import {
   ACTIVITY_IP_RETENTION_DAYS,
   ACTIVITY_RETENTION_DAYS
 } from '~/constants/activity'
-import { VIEW_RETENTION_DAYS } from '~/constants/analytics'
 import {
   INACTIVITY_ANONYMIZATION_YEARS,
   LAST_ACTIVE_AT_TRACKING_START,
@@ -19,6 +18,7 @@ import { verifyCronSecret } from '~/utils/cron-auth'
 const log = cronLogger.child({ job: 'cleanup' })
 
 const VERIFICATION_GRACE_PERIOD_MS = DAY
+const VIEW_RETENTION_DAYS = 90
 const ANALYTICS_RETENTION_DAYS = 365
 const AUDIT_LOG_RETENTION_YEARS = 2
 const MASKED_ID_LENGTH = 8

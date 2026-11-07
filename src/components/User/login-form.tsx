@@ -9,6 +9,7 @@ import { LoadingButton } from '~/components/ui/loading-button'
 import { LastLoginBadge } from '~/components/User/last-login-badge'
 import { getEmailSchema } from '~/constants/auth'
 import {
+  captureUnexpectedAuthError,
   extractAuthErrorCode,
   getAuthErrorMessage
 } from '~/helpers/auth-errors'
@@ -17,7 +18,6 @@ import { useErrorFocus } from '~/hooks/use-error-focus'
 import { useResetAccountData } from '~/hooks/use-reset-account-data'
 import { authClient } from '~/lib/auth-client'
 import { focusFirstInvalidField } from '~/lib/form'
-import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
 
 type LoginFormProps = {
@@ -68,7 +68,7 @@ export const LoginForm = ({
       }
     },
     onError: (error) => {
-      captureWithFeature(error, 'sign-in')
+      captureUnexpectedAuthError(error, 'sign-in')
     },
     onSuccess: async () => {
       await resetAccountData()

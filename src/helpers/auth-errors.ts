@@ -2,6 +2,7 @@ import { PASSWORD_MIN_LENGTH } from '~/constants/auth'
 import { HTTP_STATUS } from '~/constants/http'
 import { matchIsOwnKey } from '~/helpers/object'
 import type { authClient } from '~/lib/auth-client'
+import { captureWithFeature, type SentryFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
 
 type AuthErrorCode = keyof typeof authClient.$ERROR_CODES
@@ -111,6 +112,31 @@ export function extractAuthErrorCode(error: AuthErrorResponse): string {
   }
 
   return error.message ?? 'UNKNOWN'
+}
+
+const EXPECTED_AUTH_ERROR_CODES: ReadonlySet<string> = new Set<
+  AuthErrorCode | keyof typeof EXTRA_ERROR_MESSAGES
+>([
+  'INVALID_EMAIL_OR_PASSWORD',
+  'INVALID_PASSWORD',
+  'INVALID_EMAIL',
+  'INVALID_TOKEN',
+  'EMAIL_NOT_VERIFIED',
+  'PASSWORD_TOO_SHORT',
+  'PASSWORD_TOO_LONG',
+  'USER_ALREADY_EXISTS',
+  'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL',
+  'TOO_MANY_REQUESTS',
+  'BANNED_USER'
+])
+
+export const captureUnexpectedAuthError = (
+  error: Error,
+  feature: SentryFeature
+) => {
+  if (!EXPECTED_AUTH_ERROR_CODES.has(error.message)) {
+    captureWithFeature(error, feature)
+  }
 }
 
 export function getAuthErrorMessage(code: string): string {

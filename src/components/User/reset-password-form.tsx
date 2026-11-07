@@ -6,6 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
 import { LoadingButton } from '~/components/ui/loading-button'
 import { getEmailSchema } from '~/constants/auth'
 import {
+  captureUnexpectedAuthError,
   extractAuthErrorCode,
   getAuthErrorMessage
 } from '~/helpers/auth-errors'
@@ -13,7 +14,6 @@ import { useAppForm } from '~/hooks/use-app-form'
 import { useErrorFocus } from '~/hooks/use-error-focus'
 import { authClient } from '~/lib/auth-client'
 import { focusFirstInvalidField } from '~/lib/form'
-import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
 import { localizeHref } from '~/paraglide/runtime'
 
@@ -47,7 +47,7 @@ export const ResetPasswordForm = () => {
       }
     },
     onError: (error) => {
-      captureWithFeature(error, 'request-password-reset')
+      captureUnexpectedAuthError(error, 'request-password-reset')
     },
     onSuccess: () => {
       form.reset()

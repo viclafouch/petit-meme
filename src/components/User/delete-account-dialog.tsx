@@ -18,6 +18,7 @@ import { Alert, AlertDescription } from '~/components/ui/alert'
 import { Button } from '~/components/ui/button'
 import { LoadingButton } from '~/components/ui/loading-button'
 import {
+  captureUnexpectedAuthError,
   extractAuthErrorCode,
   getAuthErrorMessage
 } from '~/helpers/auth-errors'
@@ -26,7 +27,6 @@ import { useErrorFocus } from '~/hooks/use-error-focus'
 import { useResetAccountData } from '~/hooks/use-reset-account-data'
 import { authClient } from '~/lib/auth-client'
 import { focusFirstInvalidField } from '~/lib/form'
-import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
 
 const getDeleteAccountSchema = () => {
@@ -65,7 +65,7 @@ const DeleteAccountForm = ({ onCancel }: DeleteAccountFormProps) => {
       }
     },
     onError: (error) => {
-      captureWithFeature(error, 'delete-account')
+      captureUnexpectedAuthError(error, 'delete-account')
     },
     onSuccess: async () => {
       await resetAccountData()

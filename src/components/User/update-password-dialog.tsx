@@ -16,6 +16,7 @@ import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
 import { LoadingButton } from '~/components/ui/loading-button'
 import { getPasswordSchema } from '~/constants/auth'
 import {
+  captureUnexpectedAuthError,
   extractAuthErrorCode,
   getChangePasswordErrorMessage
 } from '~/helpers/auth-errors'
@@ -23,7 +24,6 @@ import { useAppForm } from '~/hooks/use-app-form'
 import { useErrorFocus } from '~/hooks/use-error-focus'
 import { authClient } from '~/lib/auth-client'
 import { focusFirstInvalidField } from '~/lib/form'
-import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
 
 const getUpdatePasswordSchema = () => {
@@ -79,7 +79,7 @@ const UpdatePasswordForm = () => {
       }
     },
     onError: (error) => {
-      captureWithFeature(error, 'update-password')
+      captureUnexpectedAuthError(error, 'update-password')
     },
     onSuccess: () => {
       form.reset()

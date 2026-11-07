@@ -1,100 +1,11 @@
-import { z } from 'zod'
 import { createFileRoute } from '@tanstack/react-router'
-import { prismaClient } from '~/db'
-import { MEME_ALGOLIA_INCLUDE } from '~/constants/meme'
-import { safeAlgoliaOp, syncMemeToAllIndices } from '~/lib/algolia'
-import { invalidateAlgoliaCache } from '~/lib/algolia-cache'
-import { getVideoPlayData } from '~/lib/bunny'
-import { bunnyLogger } from '~/lib/logger'
-import { captureWithFeature } from '~/lib/sentry'
-
-const WEBHOOK_RESPONSE_SCHEMA = z.object({
-  VideoLibraryId: z.number(),
-  VideoGuid: z.string(),
-  Status: z.number()
-})
+import { handleBunnyWebhook } from '~/lib/bunny-webhook'
 
 export const Route = createFileRoute('/api/bunny')({
   server: {
     handlers: {
-      POST: async ({ request }) => {
-        let data: unknown
-
-        try {
-          data = await request.json()
-        } catch (error) {
-          bunnyLogger.error({ error }, 'Invalid JSON in webhook body')
-
-          return Response.json({ success: false }, { status: 400 })
-        }
-
-        let result: z.infer<typeof WEBHOOK_RESPONSE_SCHEMA>
-
-        try {
-          result = WEBHOOK_RESPONSE_SCHEMA.parse(data)
-        } catch (error) {
-          bunnyLogger.error({ error, data }, 'Invalid webhook payload')
-
-          return Response.json({ success: false }, { status: 400 })
-        }
-
-        try {
-          const video = await prismaClient.video.findUnique({
-            where: { bunnyId: result.VideoGuid },
-            select: { bunnyStatus: true }
-          })
-
-          if (!video || video.bunnyStatus >= result.Status) {
-            bunnyLogger.info(
-              {
-                videoId: result.VideoGuid,
-                status: result.Status,
-                currentStatus: video?.bunnyStatus
-              },
-              'Webhook ignored: unknown video or stale status'
-            )
-
-            return Response.json({ success: true })
-          }
-
-          const videoPlayData = await getVideoPlayData(result.VideoGuid)
-
-          const { meme } = await prismaClient.video.update({
-            where: {
-              bunnyId: result.VideoGuid,
-              bunnyStatus: { lt: result.Status }
-            },
-            data: {
-              bunnyStatus: result.Status,
-              duration: videoPlayData.video.length
-            },
-            include: {
-              meme: {
-                include: MEME_ALGOLIA_INCLUDE
-              }
-            }
-          })
-
-          if (meme) {
-            await safeAlgoliaOp(syncMemeToAllIndices(meme))
-            await invalidateAlgoliaCache()
-          }
-
-          bunnyLogger.info(
-            { videoId: result.VideoGuid, status: result.Status },
-            'Video updated via webhook'
-          )
-
-          return Response.json({ success: true })
-        } catch (error) {
-          bunnyLogger.error(
-            { error, videoId: result.VideoGuid, status: result.Status },
-            'Video update failed'
-          )
-          captureWithFeature(error, 'bunny-webhook')
-
-          return Response.json({ success: false }, { status: 500 })
-        }
+      POST: ({ request }) => {
+        return handleBunnyWebhook(request)
       }
     }
   }

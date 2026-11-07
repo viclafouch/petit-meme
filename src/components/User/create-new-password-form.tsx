@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from '~/components/ui/alert'
 import { LoadingButton } from '~/components/ui/loading-button'
 import { getPasswordWithConfirmationSchema } from '~/constants/auth'
 import {
+  captureUnexpectedAuthError,
   extractAuthErrorCode,
   getAuthErrorMessage
 } from '~/helpers/auth-errors'
@@ -14,7 +15,6 @@ import { useAppForm } from '~/hooks/use-app-form'
 import { useErrorFocus } from '~/hooks/use-error-focus'
 import { authClient } from '~/lib/auth-client'
 import { focusFirstInvalidField } from '~/lib/form'
-import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
 
 const getCreateNewPasswordFormOpts = () => {
@@ -50,7 +50,7 @@ export const CreateNewPasswordForm = ({
       }
     },
     onError: (error) => {
-      captureWithFeature(error, 'reset-password')
+      captureUnexpectedAuthError(error, 'reset-password')
     },
     onSuccess: () => {
       toast.success(m.auth_password_changed_toast())

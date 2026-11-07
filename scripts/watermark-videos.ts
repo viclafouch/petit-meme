@@ -5,6 +5,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { promisify } from 'node:util'
 import { prismaClient } from '~/db'
+import { BUNNY_STORAGE_ENDPOINT } from '~/constants/bunny'
 import { BYTES_PER_KILOBYTE } from '~/constants/number'
 import {
   WATERMARK_ASSET_PATH,
@@ -263,7 +264,7 @@ const runUpload = async (options: ParsedOptions) => {
   await fs.access(WATERMARK_PATH)
 
   console.log(
-    `Storage:   ${serverEnv.BUNNY_STORAGE_HOSTNAME}/${serverEnv.BUNNY_STORAGE_ZONE_NAME}`
+    `Storage:   ${BUNNY_STORAGE_ENDPOINT}/${serverEnv.BUNNY_STORAGE_ZONE_NAME}`
   )
   console.log(`Watermark: ${WATERMARK_PATH}`)
 

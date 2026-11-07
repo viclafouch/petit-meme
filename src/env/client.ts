@@ -6,7 +6,6 @@ export const clientEnv = createEnv({
   clientPrefix: 'VITE_',
   client: {
     VITE_SITE_URL: z.url(),
-    VITE_BUNNY_LIBRARY_ID: z.string(),
     VITE_BUNNY_HOSTNAME: z.string(),
     VITE_ALGOLIA_APP_ID: z.string(),
     VITE_ALGOLIA_INSIGHTS_KEY: z.string(),

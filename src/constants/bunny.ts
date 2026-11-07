@@ -11,8 +11,11 @@ export const BUNNY_STATUS = {
   PRESIGNED_UPLOAD_FINISHED: 7,
   PRESIGNED_UPLOAD_FAILED: 8,
   CAPTIONS_GENERATED: 9,
-  TITLE_OR_DESCRIPTION_GENERATED: 10
+  TITLE_OR_DESCRIPTION_GENERATED: 10,
+  VIDEO_DELETED: 32
 } as const satisfies Record<string, number>
+
+export const BUNNY_STORAGE_ENDPOINT = 'https://storage.bunnycdn.com'
 
 export const HLS_MIME_TYPE = 'application/vnd.apple.mpegurl'
 

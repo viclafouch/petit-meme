@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { MemeStatus } from '~/db/generated/prisma/enums'
-import { buildVideoImageUrl } from '~/lib/bunny'
+import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import { getCrawlerStreamUrl } from '~/lib/crawler-video'
 import {
   getMemeByIdQueryOpts,

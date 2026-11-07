@@ -8,7 +8,7 @@ import type { Meme } from '~/db/generated/prisma/client'
 import { useContainedSize } from '~/hooks/use-contained-size'
 import { useImageAspectRatio } from '~/hooks/use-image-aspect-ratio'
 import { useMemeHls } from '~/hooks/use-meme-hls'
-import { buildVideoImageUrl } from '~/lib/bunny'
+import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import { m } from '~/paraglide/messages.js'
 
 type ProcessedRatioState = {

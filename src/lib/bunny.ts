@@ -8,16 +8,15 @@ import {
 import { FIVE_MINUTES_IN_SECONDS, SECOND } from '~/constants/time'
 import { clientEnv } from '~/env/client'
 import { serverEnv } from '~/env/server'
-import { signBunnyUrl } from '~/lib/bunny-token'
+import { signVideoFileUrl, signVideoPlaybackUrl } from '~/lib/bunny-token'
 import { bunnyLogger } from '~/lib/logger'
 import { fetchWithZod } from './utils'
 
-const buildBunnyUrl = (pathname: `/${string}`) => {
-  return new URL(
-    pathname,
-    `https://${clientEnv.VITE_BUNNY_HOSTNAME}`
-  ).toString()
-}
+export const buildLibraryApiUrl = createServerOnlyFn(
+  (pathname: `/${string}`) => {
+    return `https://video.bunnycdn.com/library/${serverEnv.BUNNY_LIBRARY_ID}${pathname}`
+  }
+)
 
 export const getBunnyHeaders = createServerOnlyFn(() => {
   return new Headers({
@@ -31,21 +30,15 @@ const DEFAULT_RESPONSE_SCHEMA = z.object({
   success: z.literal(true)
 })
 
-export const buildVideoImageUrl = (videoId: string) => {
-  return buildBunnyUrl(`/${videoId}/thumbnail.jpg`)
-}
-
-export const buildVideoPreviewUrl = (videoId: string) => {
-  return buildBunnyUrl(`/${videoId}/preview.webp`)
-}
-
 const getUnixTimeInSeconds = () => {
   return Math.floor(Date.now() / SECOND)
 }
 
 const signOriginalUrl = (videoId: string) => {
-  return signBunnyUrl({
-    url: buildBunnyUrl(`/${videoId}/original`),
+  return signVideoFileUrl({
+    hostname: clientEnv.VITE_BUNNY_HOSTNAME,
+    videoId,
+    file: 'original',
     securityKey: serverEnv.BUNNY_TOKEN_AUTH_KEY,
     expiresAt: getUnixTimeInSeconds() + FIVE_MINUTES_IN_SECONDS
   })
@@ -61,11 +54,12 @@ export const fetchOriginalVideo = createServerOnlyFn(
 )
 
 const signVideoStreamUrl = (videoId: string, expiresAt: number) => {
-  return signBunnyUrl({
-    url: buildBunnyUrl(`/${videoId}/playlist.m3u8`),
+  return signVideoPlaybackUrl({
+    hostname: clientEnv.VITE_BUNNY_HOSTNAME,
+    videoId,
+    file: 'playlist.m3u8',
     securityKey: serverEnv.BUNNY_TOKEN_AUTH_KEY,
-    expiresAt,
-    directoryPath: `/${videoId}/`
+    expiresAt
   })
 }
 
@@ -83,7 +77,7 @@ export const buildCrawlerStreamUrl = createServerOnlyFn((videoId: string) => {
 export const deleteVideo = createServerOnlyFn(async (videoId: string) => {
   const result = await fetchWithZod(
     DEFAULT_RESPONSE_SCHEMA,
-    `https://video.bunnycdn.com/library/${clientEnv.VITE_BUNNY_LIBRARY_ID}/videos/${videoId}`,
+    buildLibraryApiUrl(`/videos/${videoId}`),
     {
       method: 'DELETE',
       headers: getBunnyHeaders()
@@ -104,7 +98,7 @@ const VIDEO_PLAY_DATA_SCHEMA = z.object({
 export const getVideoPlayData = createServerOnlyFn(async (videoId: string) => {
   return fetchWithZod(
     VIDEO_PLAY_DATA_SCHEMA,
-    `https://video.bunnycdn.com/library/${clientEnv.VITE_BUNNY_LIBRARY_ID}/videos/${videoId}/play`,
+    buildLibraryApiUrl(`/videos/${videoId}/play`),
     {
       method: 'GET',
       headers: getBunnyHeaders()
@@ -119,14 +113,11 @@ const UPLOAD_RESPONSE_SCHEMA = z.object({
 export const createVideo = createServerOnlyFn(async (title: string) => {
   const { guid: videoId } = await fetchWithZod(
     UPLOAD_RESPONSE_SCHEMA,
-    `https://video.bunnycdn.com/library/${clientEnv.VITE_BUNNY_LIBRARY_ID}/videos`,
+    buildLibraryApiUrl('/videos'),
     {
       method: 'POST',
       headers: getBunnyHeaders(),
-      body: JSON.stringify({
-        title,
-        collectionId: serverEnv.BUNNY_COLLECTION_ID
-      })
+      body: JSON.stringify({ title })
     }
   )
 
@@ -142,7 +133,7 @@ export const uploadVideo = createServerOnlyFn(
 
     await fetchWithZod(
       DEFAULT_RESPONSE_SCHEMA,
-      `https://video.bunnycdn.com/library/${clientEnv.VITE_BUNNY_LIBRARY_ID}/videos/${videoId}`,
+      buildLibraryApiUrl(`/videos/${videoId}`),
       {
         method: 'PUT',
         headers,

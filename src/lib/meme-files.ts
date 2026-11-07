@@ -2,6 +2,7 @@ import { createServerOnlyFn } from '@tanstack/react-start'
 import { setResponseStatus } from '@tanstack/react-start/server'
 import { del, get, issueSignedToken, presignUrl } from '@vercel/blob'
 import {
+  BUNNY_STORAGE_ENDPOINT,
   MEME_DERIVED_FORMAT_CONTENT_TYPES,
   MEME_DERIVED_FORMATS,
   type MemeDerivedFormat
@@ -27,7 +28,7 @@ const MEME_FILES = [
 
 const buildMemeFileUrl = createServerOnlyFn(
   (bunnyId: string, format: MemeDerivedFormat) => {
-    return `https://${serverEnv.BUNNY_STORAGE_HOSTNAME}/${serverEnv.BUNNY_STORAGE_ZONE_NAME}/${bunnyId}.${format}`
+    return `${BUNNY_STORAGE_ENDPOINT}/${serverEnv.BUNNY_STORAGE_ZONE_NAME}/${bunnyId}.${format}`
   }
 )
 

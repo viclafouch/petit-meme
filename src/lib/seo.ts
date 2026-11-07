@@ -28,7 +28,7 @@ import { ONE_HOUR_IN_SECONDS, SECONDS_PER_MINUTE } from '~/constants/time'
 import type { CategoryModel } from '~/db/generated/prisma/models'
 import { clientEnv } from '~/env/client'
 import { convertCentsToEuros } from '~/helpers/number'
-import { buildVideoImageUrl } from '~/lib/bunny'
+import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import { m } from '~/paraglide/messages.js'
 import {
   baseLocale,

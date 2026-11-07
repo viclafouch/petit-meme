@@ -15,7 +15,7 @@ export const logEnvironmentInfo = () => {
   const processEnvironment = process.env
   const dbHost = getHost(processEnvironment.DATABASE_URL ?? '')
   const algoliaIndex = processEnvironment.VITE_ALGOLIA_INDEX ?? 'unknown'
-  const bunnyLibraryId = processEnvironment.VITE_BUNNY_LIBRARY_ID ?? 'unknown'
+  const bunnyLibraryId = processEnvironment.BUNNY_LIBRARY_ID ?? 'unknown'
   const siteUrl = processEnvironment.VITE_SITE_URL ?? 'unknown'
 
   console.log(`Site URL:        ${siteUrl}`)

@@ -1,9 +1,9 @@
 import { createHmac, timingSafeEqual } from 'node:crypto'
 import { z } from 'zod'
 import { prismaClient } from '~/db'
+import { BUNNY_STATUS } from '~/constants/bunny'
 import { HTTP_STATUS } from '~/constants/http'
 import { MEME_ALGOLIA_INCLUDE } from '~/constants/meme'
-import { clientEnv } from '~/env/client'
 import { serverEnv } from '~/env/server'
 import { safeAlgoliaOp, syncMemeToAllIndices } from '~/lib/algolia'
 import { invalidateAlgoliaCache } from '~/lib/algolia-cache'
@@ -17,6 +17,26 @@ const WEBHOOK_PAYLOAD_SCHEMA = z.object({
   VideoGuid: z.string(),
   Status: z.number()
 })
+
+const PLAYBACK_STATE_STATUSES: readonly number[] = [
+  BUNNY_STATUS.QUEUED,
+  BUNNY_STATUS.PROCESSING,
+  BUNNY_STATUS.ENCODING,
+  BUNNY_STATUS.FINISHED,
+  BUNNY_STATUS.RESOLUTION_FINISHED,
+  BUNNY_STATUS.FAILED,
+  BUNNY_STATUS.VIDEO_DELETED
+]
+
+const buildVideoUpdate = async (videoId: string, status: number) => {
+  if (status === BUNNY_STATUS.VIDEO_DELETED) {
+    return { bunnyStatus: status }
+  }
+
+  const videoPlayData = await getVideoPlayData(videoId)
+
+  return { bunnyStatus: status, duration: videoPlayData.video.length }
+}
 
 const matchIsSignedByBunny = (headers: Headers, rawBody: string) => {
   const signature = headers.get('X-BunnyStream-Signature') ?? ''
@@ -67,13 +87,22 @@ export const handleBunnyWebhook = async (request: Request) => {
     return Response.json({ success: false }, { status: 400 })
   }
 
-  if (String(result.VideoLibraryId) !== clientEnv.VITE_BUNNY_LIBRARY_ID) {
+  if (String(result.VideoLibraryId) !== serverEnv.BUNNY_LIBRARY_ID) {
     bunnyLogger.warn(
       { libraryId: result.VideoLibraryId },
       'Webhook rejected: unknown library'
     )
 
     return Response.json({ success: false }, { status: HTTP_STATUS.FORBIDDEN })
+  }
+
+  if (!PLAYBACK_STATE_STATUSES.includes(result.Status)) {
+    bunnyLogger.info(
+      { videoId: result.VideoGuid, status: result.Status },
+      'Webhook ignored: status without effect on playback'
+    )
+
+    return Response.json({ success: true })
   }
 
   try {
@@ -95,18 +124,13 @@ export const handleBunnyWebhook = async (request: Request) => {
       return Response.json({ success: true })
     }
 
-    const videoPlayData = await getVideoPlayData(result.VideoGuid)
-
     const updatedVideo = await prismaClient.video
       .update({
         where: {
           bunnyId: result.VideoGuid,
           bunnyStatus: { lt: result.Status }
         },
-        data: {
-          bunnyStatus: result.Status,
-          duration: videoPlayData.video.length
-        },
+        data: await buildVideoUpdate(result.VideoGuid, result.Status),
         include: {
           meme: {
             include: MEME_ALGOLIA_INCLUDE

@@ -92,7 +92,7 @@ describe('handleBunnyWebhook', () => {
   beforeEach(() => {
     vi.stubEnv('BUNNY_ACCESS_KEY', 'stream-access-key')
     vi.stubEnv('BUNNY_READ_ONLY_API_KEY', READ_ONLY_API_KEY)
-    vi.stubEnv('VITE_BUNNY_LIBRARY_ID', String(LIBRARY_ID))
+    vi.stubEnv('BUNNY_LIBRARY_ID', String(LIBRARY_ID))
     stubBunnyPlayData()
     vi.spyOn(prismaClient.video, 'findUnique').mockResolvedValue(FINISHED_VIDEO)
   })
@@ -168,6 +168,39 @@ describe('handleBunnyWebhook', () => {
     expect(response.status).toBe(HTTP_STATUS.OK)
     expect(fetch).not.toHaveBeenCalled()
     expect(update).not.toHaveBeenCalled()
+  })
+
+  it('should ignore a status without effect on playback', async () => {
+    const update = vi.spyOn(prismaClient.video, 'update')
+
+    const response = await postWebhook({
+      status: BUNNY_STATUS.CAPTIONS_GENERATED
+    })
+
+    expect(response.status).toBe(HTTP_STATUS.OK)
+    expect(fetch).not.toHaveBeenCalled()
+    expect(update).not.toHaveBeenCalled()
+  })
+
+  it('should record a video Bunny deleted without reading its play data', async () => {
+    const update = vi.spyOn(prismaClient.video, 'update').mockResolvedValue({
+      ...FINISHED_VIDEO,
+      bunnyStatus: BUNNY_STATUS.VIDEO_DELETED
+    })
+
+    const response = await postWebhook({ status: BUNNY_STATUS.VIDEO_DELETED })
+
+    expect(response.status).toBe(HTTP_STATUS.OK)
+    expect(fetch).not.toHaveBeenCalled()
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          bunnyId: VIDEO_GUID,
+          bunnyStatus: { lt: BUNNY_STATUS.VIDEO_DELETED }
+        },
+        data: { bunnyStatus: BUNNY_STATUS.VIDEO_DELETED }
+      })
+    )
   })
 
   it('should reject a webhook without a signature', async () => {

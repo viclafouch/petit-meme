@@ -1,9 +1,8 @@
 import { z } from 'zod'
 import { createFileRoute } from '@tanstack/react-router'
 import { prismaClient } from '~/db'
-import { clientEnv } from '~/env/client'
 import { serverEnv } from '~/env/server'
-import { getBunnyHeaders } from '~/lib/bunny'
+import { buildLibraryApiUrl, getBunnyHeaders } from '~/lib/bunny'
 import { cronLogger } from '~/lib/logger'
 import { fetchWithZod } from '~/lib/utils'
 import { verifyCronSecret } from '~/utils/cron-auth'
@@ -16,7 +15,7 @@ const CONCURRENCY = 5
 const updateVideoTitle = async (videoId: string, title: string) => {
   return fetchWithZod(
     z.object({ success: z.literal(true) }),
-    `https://video.bunnycdn.com/library/${clientEnv.VITE_BUNNY_LIBRARY_ID}/videos/${videoId}`,
+    buildLibraryApiUrl(`/videos/${videoId}`),
     {
       method: 'POST',
       headers: getBunnyHeaders(),

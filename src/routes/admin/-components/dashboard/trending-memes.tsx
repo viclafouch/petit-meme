@@ -8,7 +8,7 @@ import {
   TrendingUp
 } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
-import { buildVideoImageUrl } from '~/lib/bunny'
+import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import { cn } from '~/lib/utils'
 import type { TrendingMeme } from '~/routes/admin/-server/dashboard'
 import type { IconConfig } from './types'

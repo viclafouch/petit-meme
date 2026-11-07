@@ -1,13 +1,31 @@
 import { expect, test } from '@playwright/test'
 import { HTTP_STATUS } from '~/constants/http'
+import {
+  BUNNY_ZONE_PROBES,
+  type BunnyZone,
+  runZoneProbe
+} from '../scripts/lib/bunny-zone-contract'
 import vercelConfig from '../vercel.json' with { type: 'json' }
-import { E2E_BASE_URL, E2E_BUNNY_HOSTNAME } from './env'
+import {
+  E2E_BASE_URL,
+  E2E_BUNNY_HOSTNAME,
+  E2E_BUNNY_ORIGINAL_ACCESS_KEY,
+  E2E_BUNNY_TOKEN_AUTH_KEY,
+  E2E_VIDEO_BUNNY_ID
+} from './env'
 
 const CHILD_SITEMAPS = [
   '/sitemap-static.xml',
   '/sitemap-categories.xml',
   '/sitemap-memes.xml'
 ] as const satisfies readonly `/${string}.xml`[]
+
+const E2E_BUNNY_ZONE = {
+  hostname: E2E_BUNNY_HOSTNAME,
+  videoId: E2E_VIDEO_BUNNY_ID,
+  tokenAuthKey: E2E_BUNNY_TOKEN_AUTH_KEY,
+  originalAccessKey: E2E_BUNNY_ORIGINAL_ACCESS_KEY
+} as const satisfies BunnyZone
 
 const XML_DECLARATION = '<?xml version="1.0" encoding="UTF-8"?>'
 const LOC_PATTERN = /<loc>([^<]+)<\/loc>/gu
@@ -111,4 +129,17 @@ test.describe('the HTTP contracts', () => {
 
     expect(image.byteLength).toBeGreaterThan(0)
   })
+})
+
+test.describe('the Bunny zone contract', () => {
+  for (const probe of BUNNY_ZONE_PROBES) {
+    test(probe.name, async () => {
+      const { status, expectedStatuses } = await runZoneProbe(
+        E2E_BUNNY_ZONE,
+        probe
+      )
+
+      expect(expectedStatuses).toContain(status)
+    })
+  }
 })

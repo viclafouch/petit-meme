@@ -27,3 +27,36 @@ export const signBunnyUrl = async ({
 
   return `${origin}/bcdn_token=${token}&token_path=${encodeURIComponent(directoryPath)}&expires=${expires}${pathname}`
 }
+
+type SignVideoFileParams = {
+  hostname: string
+  videoId: string
+  file: string
+  securityKey: string
+  expiresAt: number
+}
+
+const buildVideoFileUrl = ({
+  hostname,
+  videoId,
+  file
+}: SignVideoFileParams) => {
+  return `https://${hostname}/${videoId}/${file}`
+}
+
+export const signVideoFileUrl = (params: SignVideoFileParams) => {
+  return signBunnyUrl({
+    url: buildVideoFileUrl(params),
+    securityKey: params.securityKey,
+    expiresAt: params.expiresAt
+  })
+}
+
+export const signVideoPlaybackUrl = (params: SignVideoFileParams) => {
+  return signBunnyUrl({
+    url: buildVideoFileUrl(params),
+    securityKey: params.securityKey,
+    expiresAt: params.expiresAt,
+    directoryPath: `/${params.videoId}/`
+  })
+}

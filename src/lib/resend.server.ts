@@ -1,7 +1,7 @@
 import type React from 'react'
 import { Resend } from 'resend'
 import { waitUntil } from '@vercel/functions'
-import { serverEnv } from '~/env/server'
+import { serverEnv } from '~/env/server.server'
 import { emailLogger } from '~/lib/logger'
 import { captureWithFeature } from '~/lib/sentry'
 

@@ -5,7 +5,7 @@ import {
   IMMUTABLE_CACHE_CONTROL,
   NO_STORE_CACHE_CONTROL
 } from '~/constants/http'
-import { renderOgImage } from '~/lib/og-image'
+import { renderOgImage } from '~/lib/og-image.server'
 import { captureWithFeature } from '~/lib/sentry'
 
 vi.mock(import('~/lib/sentry'), async (importOriginal) => {

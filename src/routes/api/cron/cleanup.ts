@@ -1,5 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { prismaClient } from '~/db'
 import {
   ACTIVITY_IP_RETENTION_DAYS,
   ACTIVITY_RETENTION_DAYS
@@ -10,10 +9,11 @@ import {
   UNVERIFIED_RETENTION_DAYS
 } from '~/constants/auth'
 import { DAY, DAYS_PER_YEAR } from '~/constants/time'
-import { serverEnv } from '~/env/server'
-import { auth } from '~/lib/auth'
+import { prismaClient } from '~/db/client.server'
+import { serverEnv } from '~/env/server.server'
+import { auth } from '~/lib/auth.server'
 import { cronLogger } from '~/lib/logger'
-import { verifyCronSecret } from '~/utils/cron-auth'
+import { verifyCronSecret } from '~/utils/cron-auth.server'
 
 const log = cronLogger.child({ job: 'cleanup' })
 

@@ -1,7 +1,10 @@
 import { ORIGINAL_ACCESS_HEADER } from '~/constants/bunny'
 import { HTTP_STATUS } from '~/constants/http'
 import { FIVE_MINUTES_IN_SECONDS, SECOND } from '~/constants/time'
-import { signVideoFileUrl, signVideoPlaybackUrl } from '~/lib/bunny-token'
+import {
+  signVideoFileUrl,
+  signVideoPlaybackUrl
+} from '~/lib/bunny-token.server'
 
 export type BunnyZone = {
   hostname: string

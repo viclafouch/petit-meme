@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { createServerFn } from '@tanstack/react-start'
-import { prismaClient } from '~/db'
 import { MEME_TRANSLATION_SELECT, type MemeWithVideo } from '~/constants/meme'
+import { prismaClient } from '~/db/client.server'
 import { Prisma } from '~/db/generated/prisma/client'
 import {
   resolveMemeTranslation,

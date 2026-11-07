@@ -1,4 +1,4 @@
-import { prismaClient } from '~/db'
+import { prismaClient } from '~/db/client.server'
 import { matchIsE2eDatabaseInUse } from './env'
 
 export const clearDatabase = async () => {

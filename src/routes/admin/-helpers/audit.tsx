@@ -1,4 +1,4 @@
-import type { AuditMetadata } from '~/server/audit'
+import type { AuditMetadata } from '~/server/audit.server'
 
 function getAuditTargetLabel(targetType: string) {
   switch (targetType) {

@@ -1,6 +1,5 @@
 import { randomUUID } from 'node:crypto'
 import { type APIRequestContext, expect } from '@playwright/test'
-import { prismaClient } from '~/db'
 import {
   type AuthProviderId,
   INACTIVITY_ANONYMIZATION_YEARS,
@@ -8,8 +7,9 @@ import {
 } from '~/constants/auth'
 import { HTTP_STATUS } from '~/constants/http'
 import { DAY, DAYS_PER_WEEK, DAYS_PER_YEAR } from '~/constants/time'
+import { prismaClient } from '~/db/client.server'
 import type { User } from '~/db/generated/prisma/client'
-import { getStripeClient } from '~/lib/stripe'
+import { getStripeClient } from '~/lib/stripe.server'
 import { E2E_EMAIL_DOMAIN } from './constants'
 import { E2E_CRON_SECRET } from './env'
 import { test } from './fixtures'

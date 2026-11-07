@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { HTTP_STATUS } from '~/constants/http'
-import { verifyCronSecret } from '~/utils/cron-auth'
+import { verifyCronSecret } from '~/utils/cron-auth.server'
 
 const CRON_SECRET = 'cron-auth-test-secret-0001'
 

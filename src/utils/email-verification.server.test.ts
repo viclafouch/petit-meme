@@ -5,7 +5,7 @@ import { ONE_DAY_IN_SECONDS } from '~/constants/time'
 import {
   buildEmailVerificationPath,
   createEmailVerificationPath
-} from '~/utils/email-verification'
+} from '~/utils/email-verification.server'
 
 const ORIGIN = 'https://petit-meme.test'
 const TOKEN = 'header.payload.signature'

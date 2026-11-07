@@ -19,7 +19,7 @@ export default defineConfig({
     'src/components/ui/**': ['exports', 'types'],
     'src/components/animate-ui/**': ['exports', 'types']
   },
-  ignoreBinaries: ['run'],
+  ignoreBinaries: ['run', 'vercel'],
   ignoreDependencies: [
     '@ffmpeg/core',
     '@dicebear/styles',

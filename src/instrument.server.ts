@@ -5,7 +5,7 @@ import {
   SENTRY_IGNORE_ERRORS,
   SENTRY_TRACES_SAMPLE_RATE
 } from '~/constants/sentry'
-import { baseEnv } from '~/env/base'
+import { baseEnv } from '~/env/base.server'
 import { clientEnv } from '~/env/client'
 import { dropExpectedError } from '~/lib/expected-error'
 

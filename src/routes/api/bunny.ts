@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { handleBunnyWebhook } from '~/lib/bunny-webhook'
+import { handleBunnyWebhook } from '~/lib/bunny-webhook.server'
 
 export const Route = createFileRoute('/api/bunny')({
   server: {

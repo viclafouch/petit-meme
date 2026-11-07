@@ -1,11 +1,11 @@
 import { z } from 'zod'
 import { createFileRoute } from '@tanstack/react-router'
-import { prismaClient } from '~/db'
-import { serverEnv } from '~/env/server'
-import { buildLibraryApiUrl, getBunnyHeaders } from '~/lib/bunny'
+import { prismaClient } from '~/db/client.server'
+import { serverEnv } from '~/env/server.server'
+import { buildLibraryApiUrl, getBunnyHeaders } from '~/lib/bunny.server'
 import { cronLogger } from '~/lib/logger'
 import { fetchWithZod } from '~/lib/utils'
-import { verifyCronSecret } from '~/utils/cron-auth'
+import { verifyCronSecret } from '~/utils/cron-auth.server'
 
 const log = cronLogger.child({ job: 'sync-bunny-titles' })
 

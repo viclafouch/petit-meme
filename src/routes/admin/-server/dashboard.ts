@@ -1,9 +1,9 @@
 import { z } from 'zod'
 import { createServerFn } from '@tanstack/react-start'
-import { prismaClient } from '~/db'
 import { TRENDING_CATEGORY_DAYS, TRENDING_WEIGHTS } from '~/constants/meme'
 import { ACTIVE_SUBSCRIPTION_STATUSES } from '~/constants/plan'
 import { DAY } from '~/constants/time'
+import { prismaClient } from '~/db/client.server'
 import type { Prisma } from '~/db/generated/prisma/client'
 import { MemeStatus } from '~/db/generated/prisma/enums'
 import {
@@ -14,7 +14,7 @@ import {
   truncateToUtcDay
 } from '~/helpers/date'
 import { DASHBOARD_FEED_SIZE } from '~/routes/admin/-lib/constants'
-import type { AuditMetadata } from '~/server/audit'
+import type { AuditMetadata } from '~/server/audit.server'
 import { adminRequiredMiddleware } from '~/server/user-auth'
 
 export const PERIOD_SCHEMA = z.enum(['7d', '30d', '90d', 'all'])

@@ -7,7 +7,7 @@ import {
   deleteMemeFiles,
   findMissingMemeFiles,
   serveMemeExport
-} from '~/lib/meme-files'
+} from '~/lib/meme-files.server'
 
 vi.mock(import('@tanstack/react-start/server'), async (importOriginal) => {
   return {

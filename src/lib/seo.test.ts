@@ -1,5 +1,5 @@
 import type { Thing } from 'schema-dts'
-import { beforeAll, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import type { MemeWithVideo } from '~/constants/meme'
 
 const BUNNY_ID = 'video-guid'
@@ -39,11 +39,6 @@ const importSeo = () => {
 }
 
 describe('video structured data', () => {
-  beforeAll(() => {
-    vi.stubEnv('VITE_SITE_URL', 'https://www.petit-meme.io')
-    vi.stubEnv('VITE_BUNNY_HOSTNAME', 'vz-test.b-cdn.net')
-  })
-
   it('should give a Visitor the player only, without a video file URL', async () => {
     const { buildMemeJsonLd } = await importSeo()
 

@@ -1,16 +1,16 @@
 import { z } from 'zod'
 import { createServerFn } from '@tanstack/react-start'
-import { prismaClient } from '~/db'
 import { MEME_DERIVED_FORMATS } from '~/constants/bunny'
+import { prismaClient } from '~/db/client.server'
 import type { Meme, Prisma } from '~/db/generated/prisma/client'
-import { fetchOriginalVideo } from '~/lib/bunny'
+import { fetchOriginalVideo } from '~/lib/bunny.server'
 import { adminLogger } from '~/lib/logger'
 import {
   findMissingMemeFiles,
   moveMemeFileFromBlobToStorage,
   presignMemeFileUpload
-} from '~/lib/meme-files'
-import { logAuditAction } from '~/server/audit'
+} from '~/lib/meme-files.server'
+import { logAuditAction } from '~/server/audit.server'
 import { adminRequiredMiddleware } from '~/server/user-auth'
 
 const ORIGINAL_DOWNLOAD_TIMEOUT_MS = 15_000

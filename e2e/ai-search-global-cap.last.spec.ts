@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test'
-import { prismaClient } from '~/db'
 import { DAILY_GLOBAL_AI_SEARCH_CAP } from '~/constants/ai-search'
 import { HTTP_STATUS } from '~/constants/http'
+import { prismaClient } from '~/db/client.server'
 import { UserLocale } from '~/db/generated/prisma/enums'
 import { truncateToUtcDay } from '~/helpers/date'
 import { AI_SEARCH_PATH, submitPrompt } from './ai-search'

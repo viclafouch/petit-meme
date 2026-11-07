@@ -1,5 +1,5 @@
 import { HTTP_STATUS } from '~/constants/http'
-import type { serverEnv } from '~/env/server'
+import type { serverEnv } from '~/env/server.server'
 import { cronLogger } from '~/lib/logger'
 
 type VerifyCronSecretParams = {

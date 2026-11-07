@@ -13,8 +13,7 @@ import {
 } from '~/constants/algolia'
 import type { MemeAlgoliaData } from '~/constants/meme'
 import { MemeContentLocale, MemeStatus } from '~/db/generated/prisma/enums'
-import { clientEnv } from '~/env/client'
-import { serverEnv } from '~/env/server'
+import { serverEnv } from '~/env/server.server'
 import {
   CONTENT_LOCALE_TO_SITE_LOCALES,
   resolveCategoryTranslation,
@@ -25,29 +24,31 @@ import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import { algoliaLogger } from '~/lib/logger'
 import { locales, type Locale } from '~/paraglide/runtime'
 
-export const algoliaIndexPrefix = clientEnv.VITE_ALGOLIA_INDEX
+export const getAlgoliaIndexPrefix = () => {
+  return serverEnv.VITE_ALGOLIA_INDEX
+}
 
 export function resolveAlgoliaIndexName(locale: Locale) {
-  return `${algoliaIndexPrefix}_${locale}`
+  return `${getAlgoliaIndexPrefix()}_${locale}`
 }
 
 export function resolveAlgoliaReplicaPopular(locale: Locale) {
-  return `${algoliaIndexPrefix}_${locale}_replica_popular`
+  return `${getAlgoliaIndexPrefix()}_${locale}_replica_popular`
 }
 
 export function resolveAlgoliaReplicaRecent(locale: Locale) {
-  return `${algoliaIndexPrefix}_${locale}_replica_recent`
+  return `${getAlgoliaIndexPrefix()}_${locale}_replica_recent`
 }
 
 export function resolveAlgoliaReplicaCreated(locale: Locale) {
-  return `${algoliaIndexPrefix}_${locale}_replica_created`
+  return `${getAlgoliaIndexPrefix()}_${locale}_replica_created`
 }
 
 let algoliaSearchClient: ReturnType<typeof searchClient> | null = null
 
 export const getAlgoliaSearchClient = () => {
   algoliaSearchClient ??= searchClient(
-    clientEnv.VITE_ALGOLIA_APP_ID,
+    serverEnv.VITE_ALGOLIA_APP_ID,
     serverEnv.ALGOLIA_SEARCH_KEY,
     ALGOLIA_FAIL_FAST_ON_RATE_LIMIT
   )
@@ -59,7 +60,7 @@ let algoliaAdminClient: ReturnType<typeof searchClient> | null = null
 
 export const getAlgoliaAdminClient = () => {
   algoliaAdminClient ??= searchClient(
-    clientEnv.VITE_ALGOLIA_APP_ID,
+    serverEnv.VITE_ALGOLIA_APP_ID,
     serverEnv.ALGOLIA_ADMIN_KEY,
     ALGOLIA_WAIT_ON_RATE_LIMIT
   )
@@ -71,7 +72,7 @@ let algoliaRecommendClient: ReturnType<typeof recommendClient> | null = null
 
 export const getAlgoliaRecommendClient = () => {
   algoliaRecommendClient ??= recommendClient(
-    clientEnv.VITE_ALGOLIA_APP_ID,
+    serverEnv.VITE_ALGOLIA_APP_ID,
     serverEnv.ALGOLIA_SEARCH_KEY,
     ALGOLIA_FAIL_FAST_ON_RATE_LIMIT
   )

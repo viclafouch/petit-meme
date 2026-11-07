@@ -1,7 +1,8 @@
+import { createServerOnlyFn } from '@tanstack/react-start'
 import { TEN_MINUTES_MS } from '~/constants/time'
 import { extractClientCountry, extractClientIp } from '~/helpers/request'
 import { captureWithFeature } from '~/lib/sentry'
-import { checkRateLimit } from '~/utils/rate-limit-store'
+import { checkRateLimit } from '~/utils/rate-limit-store.server'
 
 const CSRF_SAMPLE_CONFIG = {
   action: 'csrf-block',
@@ -9,7 +10,7 @@ const CSRF_SAMPLE_CONFIG = {
   windowMs: TEN_MINUTES_MS
 }
 
-export const observeCsrfBlock = (request: Request) => {
+export const observeCsrfBlock = createServerOnlyFn((request: Request) => {
   const ip = extractClientIp(request.headers)
   const sample = checkRateLimit(`csrf-block:${ip}`, CSRF_SAMPLE_CONFIG)
 
@@ -28,4 +29,4 @@ export const observeCsrfBlock = (request: Request) => {
     ),
     'scraping-detection'
   )
-}
+})

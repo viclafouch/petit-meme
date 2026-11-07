@@ -14,7 +14,7 @@ import { authUserRequiredMiddleware } from '~/server/user-auth'
 import {
   checkRateLimit,
   type RateLimitCheckResult
-} from '~/utils/rate-limit-store'
+} from '~/utils/rate-limit-store.server'
 
 const rateLimitLogger = logger.child({ module: 'rate-limit' })
 

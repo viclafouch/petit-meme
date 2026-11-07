@@ -1,5 +1,5 @@
 import { Stripe } from 'stripe'
-import { serverEnv } from '~/env/server'
+import { serverEnv } from '~/env/server.server'
 
 let stripeClient: Stripe | null = null
 

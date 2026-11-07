@@ -1,11 +1,11 @@
 import { z } from 'zod'
 import { createServerFn } from '@tanstack/react-start'
-import { prismaClient } from '~/db'
 import {
   ACTIVITY_IP_RETENTION_DAYS,
   ACTIVITY_PAGE_SCHEMA
 } from '~/constants/activity'
 import { DAY } from '~/constants/time'
+import { prismaClient } from '~/db/client.server'
 import {
   fetchActivityRows,
   fetchActivitySummary

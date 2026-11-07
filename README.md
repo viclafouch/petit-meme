@@ -77,6 +77,10 @@ Copy the example file and fill in your values:
 cp .env.example .env.development
 ```
 
+`src/env` holds the schemas. `pnpm run env:check` compares their keys with `.env.example`, `.env.development`, `.env.e2e` and Vercel Production and Preview, and names each missing or extra key. CI runs it on `.env.example` only.
+
+Vercel stores every credential as a Secret, write-only after saving, on Production and Preview. Local development reads `.env.development`, never `vercel env pull`.
+
 ### 3. Database setup
 
 Push the schema to your database:
@@ -113,7 +117,7 @@ Vercel auto-deploys on push to `main`. After a deploy that includes new migratio
 pnpm run prisma:migrate:prod
 ```
 
-This uses `.env.production` (pulled via `vercel env pull --environment=production .env.production`, the flag is required or the CLI pulls the development scope) which contains the production `DATABASE_URL`. It applies only pending migrations and is safe and idempotent.
+This uses `.env.production`, which holds only the production `DATABASE_URL`. Copy that connection string from the Neon console: Vercel stores it as a Secret, so `vercel env pull` returns it empty. The command applies only pending migrations and is safe and idempotent.
 
 ### Rules
 
@@ -156,6 +160,7 @@ The CLI outputs a webhook signing secret (`whsec_...`). Add it to your `.env.dev
 | `pnpm run lint` | oxlint |
 | `pnpm run lint:fix` | Auto-fix lint issues |
 | `pnpm run knip` | Find unused files, exports and dependencies |
+| `pnpm run env:check` | Compare the env schemas with every env file and Vercel |
 | `pnpm run prisma:migrate:dev` | Apply pending migrations (via `.env.development`) |
 | `pnpm run prisma:migrate:prod` | Apply pending migrations (via `.env.production`) |
 | `pnpm run prisma:seed:dev` | Seed database (via `.env.development`) |
@@ -169,7 +174,8 @@ src/
 ├── server/        # Server functions (auth, memes, admin, payments)
 ├── components/    # React components organized by domain
 ├── lib/           # Library integrations (auth, algolia, stripe, bunny)
-├── constants/     # App constants, types, and env validation
+├── constants/     # App constants and types
+├── env/           # Env validation: client.ts for the browser, *.server.ts for the server
 ├── helpers/       # Pure utility functions
 ├── utils/         # Business logic utilities
 ├── hooks/         # Custom React hooks

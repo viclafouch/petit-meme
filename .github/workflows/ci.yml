@@ -27,6 +27,7 @@ jobs:
           restore-keys: turbo-lint-${{ runner.os }}-
       - run: pnpm turbo run lint
       - run: pnpm run format:check
+      - run: pnpm run env:check
 
   typecheck:
     runs-on: ubuntu-latest

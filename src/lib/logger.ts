@@ -1,8 +1,19 @@
 import pino, { type TransportSingleOptions } from 'pino'
+import { createIsomorphicFn } from '@tanstack/react-start'
 import { IS_PRODUCTION } from '~/constants/env'
-import { baseEnv } from '~/env/base'
+import { baseEnv } from '~/env/base.server'
 
-const level = baseEnv.LOG_LEVEL ?? (!IS_PRODUCTION ? 'debug' : 'info')
+const DEFAULT_LEVEL = IS_PRODUCTION ? 'info' : 'debug'
+
+const resolveLogLevel = createIsomorphicFn()
+  .server(() => {
+    return baseEnv.LOG_LEVEL ?? DEFAULT_LEVEL
+  })
+  .client(() => {
+    return DEFAULT_LEVEL
+  })
+
+const level = resolveLogLevel()
 
 const prettyTransport = {
   caller: import.meta.url,

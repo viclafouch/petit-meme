@@ -1,4 +1,5 @@
 import { expect, type Page } from '@playwright/test'
+import { SITE_NAME } from '~/constants/branding'
 import { COOKIE_LOCALE_BANNER_DISMISSED_KEY } from '~/constants/cookie'
 import { HTTP_STATUS } from '~/constants/http'
 import { MEMES_PER_PAGE, TRENDING_CATEGORY_SLUG } from '~/constants/meme'
@@ -6,7 +7,6 @@ import { PREMIUM_PLAN_PRICING } from '~/constants/plan'
 import { MONTHS_IN_YEAR } from '~/constants/time'
 import { getLocaleDisplayName } from '~/helpers/locale'
 import { formatCentsToEuros } from '~/helpers/number'
-import { buildPageTitle, buildUrl, OG_LOCALE_MAP } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
 import { baseLocale, cookieName, type Locale } from '~/paraglide/runtime'
 import {
@@ -28,7 +28,7 @@ import { test } from './fixtures'
 import { repeatUntilVisible } from './hydration'
 import { getMemeLink, getMemePlayButtons } from './library'
 import { E2E_ENGLISH_LOCALE } from './locales'
-import { localizePathname } from './urls'
+import { buildE2eUrl, localizePathname } from './urls'
 
 const IN_ENGLISH = { locale: E2E_ENGLISH_LOCALE } as const satisfies {
   locale: Locale
@@ -275,10 +275,10 @@ test.describe('the English journey', () => {
         localizePathname(englishPage.pathname, E2E_ENGLISH_LOCALE)
       )
 
-      const englishUrl = buildUrl(englishPage.pathname, E2E_ENGLISH_LOCALE)
-      const frenchUrl = buildUrl(englishPage.pathname, baseLocale)
+      const englishUrl = buildE2eUrl(englishPage.pathname, E2E_ENGLISH_LOCALE)
+      const frenchUrl = buildE2eUrl(englishPage.pathname, baseLocale)
 
-      await expect(page).toHaveTitle(buildPageTitle(englishPage.title))
+      await expect(page).toHaveTitle(`${SITE_NAME} - ${englishPage.title}`)
       await expect
         .poll(() => {
           return readLocaleMetadata(page)
@@ -288,8 +288,8 @@ test.describe('the English journey', () => {
           englishAlternate: [englishUrl],
           frenchAlternate: [frenchUrl],
           defaultAlternate: [frenchUrl],
-          ogLocale: [OG_LOCALE_MAP[E2E_ENGLISH_LOCALE]],
-          ogLocaleAlternate: [OG_LOCALE_MAP[baseLocale]]
+          ogLocale: ['en_US'],
+          ogLocaleAlternate: ['fr_FR']
         })
     })
   }

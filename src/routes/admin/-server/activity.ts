@@ -1,10 +1,10 @@
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
-import { prismaClient } from '~/db'
 import {
   ACTIVITY_FILTERS_SCHEMA,
   type ActivityFilters,
   type ActivityScope
 } from '~/constants/activity'
+import { prismaClient } from '~/db/client.server'
 import type { Prisma } from '~/db/generated/prisma/client'
 import { ActivityEventType } from '~/db/generated/prisma/enums'
 import { DASHBOARD_FEED_SIZE, PAGE_SIZE } from '~/routes/admin/-lib/constants'

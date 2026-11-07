@@ -1,7 +1,7 @@
 /* oxlint-disable no-console */
 import { parseArgs } from 'node:util'
-import { prismaClient } from '~/db'
 import { AVATAR_CATALOG, AVATAR_DIRECTORY } from '~/constants/avatar'
+import { prismaClient } from '~/db/client.server'
 import { Prisma } from '~/db/generated/prisma/client'
 import { getAvatarSlotIdForEmail, resolveAvatarPath } from '~/helpers/avatar'
 import { logEnvironmentInfo } from './lib/env-guard'

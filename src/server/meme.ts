@@ -3,7 +3,6 @@ import { insightsClient as createInsightsClient } from '@algolia/client-insights
 import { notFound } from '@tanstack/react-router'
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 import { getCookie, getRequest } from '@tanstack/react-start/server'
-import { prismaClient } from '~/db'
 import { ALGOLIA_FAIL_FAST_ON_RATE_LIMIT } from '~/constants/algolia'
 import { MEME_DERIVED_FORMATS } from '~/constants/bunny'
 import { COOKIE_ALGOLIA_USER_TOKEN_KEY } from '~/constants/cookie'
@@ -38,6 +37,7 @@ import {
   RATE_LIMIT_VIEW
 } from '~/constants/rate-limit'
 import { DAY, HOUR, THIRTY_DAYS_MS } from '~/constants/time'
+import { prismaClient } from '~/db/client.server'
 import { Prisma } from '~/db/generated/prisma/client'
 import {
   ActivityEventType as ActivityEventTypeEnum,
@@ -46,8 +46,7 @@ import {
   type ActivityEventType,
   type MemeContentLocale
 } from '~/db/generated/prisma/enums'
-import { clientEnv } from '~/env/client'
-import { serverEnv } from '~/env/server'
+import { serverEnv } from '~/env/server.server'
 import { truncateToUtcDay } from '~/helpers/date'
 import {
   contentLocalesWithUniversal,
@@ -59,6 +58,7 @@ import {
   VISIBLE_CONTENT_LOCALES
 } from '~/helpers/i18n-content'
 import { extractClientIp } from '~/helpers/request'
+import { createAlgoliaCache } from '~/lib/algolia-cache.server'
 import {
   ALGOLIA_MEMES_PAGE_SCHEMA,
   ALGOLIA_SEARCH_PARAMS_BASE,
@@ -75,27 +75,26 @@ import {
   resolveAlgoliaReplicaRecent,
   safeAlgoliaOp,
   type AlgoliaMemeRecord
-} from '~/lib/algolia'
-import { createAlgoliaCache } from '~/lib/algolia-cache'
-import { auth } from '~/lib/auth'
-import { buildSignedStreamUrl } from '~/lib/bunny'
+} from '~/lib/algolia.server'
+import { auth } from '~/lib/auth.server'
+import { buildSignedStreamUrl } from '~/lib/bunny.server'
 import { matchIsAnalyticsConsentGiven } from '~/lib/cookie-consent'
 import { algoliaLogger, logger } from '~/lib/logger'
-import { serveMemeExport } from '~/lib/meme-files'
+import { serveMemeExport } from '~/lib/meme-files.server'
 import { matchCanViewMeme, matchIsUserAdmin } from '~/lib/role'
 import { baseLocale, getLocale, type Locale } from '~/paraglide/runtime'
 import { matchIsUserPremium } from '~/server/customer'
 import { createRateLimitMiddleware } from '~/server/rate-limit'
 import { authUserRequiredMiddleware } from '~/server/user-auth'
-import { recordActivityEvent } from '~/utils/activity-event'
+import { recordActivityEvent } from '~/utils/activity-event.server'
 import { ensureAlgoliaUserToken } from '~/utils/tracking-cookies'
-import { getVisitorKey } from '~/utils/visitor-key'
+import { getVisitorKey } from '~/utils/visitor-key.server'
 
 let serverInsightsClient: ReturnType<typeof createInsightsClient> | null = null
 
 const getServerInsightsClient = () => {
   serverInsightsClient ??= createInsightsClient(
-    clientEnv.VITE_ALGOLIA_APP_ID,
+    serverEnv.VITE_ALGOLIA_APP_ID,
     serverEnv.ALGOLIA_ADMIN_KEY,
     undefined,
     ALGOLIA_FAIL_FAST_ON_RATE_LIMIT

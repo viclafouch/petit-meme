@@ -44,6 +44,35 @@ const NODE_RUNTIME_PACKAGES = ['takumi-js', '@takumi-rs/core', 'pg']
 
 const WITHOUT_PREFIX_FILTER = ''
 
+const SERVER_ONLY_PACKAGES = [
+  '@algolia/client-search',
+  '@algolia/recommend',
+  '@better-auth/prisma-adapter',
+  '@better-auth/stripe',
+  '@google/genai',
+  '@prisma/adapter-pg',
+  '@prisma/client',
+  '@tanstack/ai',
+  '@tanstack/ai-anthropic',
+  '@vercel/blob',
+  '@vercel/functions',
+  'better-auth',
+  'better-auth/adapters/memory',
+  'better-auth/api',
+  'better-auth/crypto',
+  'better-auth/plugins',
+  'better-auth/tanstack-start',
+  'pg',
+  'react-email',
+  'react-tweet/api',
+  'resend',
+  'stripe',
+  'takumi-js',
+  /^node:/u
+]
+
+const BROWSER_ONLY_PACKAGES = ['@ffmpeg/ffmpeg', 'hls.js']
+
 export default defineConfig(async ({ mode }) => {
   // oxlint-disable-next-line node/no-process-env -- the Vite config is the build boundary that loads the mode's env files into the process environment
   const processEnvironment = process.env
@@ -56,10 +85,7 @@ export default defineConfig(async ({ mode }) => {
   processEnvironment.VITE_VERCEL_ENV ??=
     processEnvironment.VERCEL_ENV ?? 'development'
 
-  const [{ serverEnv }] = await Promise.all([
-    import('./src/env/server.ts'),
-    import('./src/env/client.ts')
-  ])
+  const { serverEnv } = await import('./src/env/server.server.ts')
 
   return {
     resolve: {
@@ -86,6 +112,14 @@ export default defineConfig(async ({ mode }) => {
     plugins: [
       tailwindcss(),
       tanstackStart({
+        importProtection: {
+          client: {
+            specifiers: SERVER_ONLY_PACKAGES
+          },
+          server: {
+            specifiers: BROWSER_ONLY_PACKAGES
+          }
+        },
         router: {
           quoteStyle: 'single',
           semicolons: false
@@ -134,7 +168,7 @@ export default defineConfig(async ({ mode }) => {
         org: 'viclafouch',
         project: 'petit-meme',
         applicationKey: SENTRY_APPLICATION_KEY,
-        authToken: processEnvironment.SENTRY_AUTH_TOKEN,
+        authToken: serverEnv.SENTRY_AUTH_TOKEN,
         release: {
           name: serverEnv.VERCEL_GIT_COMMIT_SHA
         },

@@ -3,7 +3,6 @@ import { z } from 'zod'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
-import { prismaClient } from '~/db'
 import {
   AVATAR_CATALOG,
   AVATAR_PROVIDER_SELECTION,
@@ -14,6 +13,7 @@ import { HTTP_STATUS } from '~/constants/http'
 import { MEME_TRANSLATION_SELECT, MEME_VIDEO_INCLUDE } from '~/constants/meme'
 import { FREE_PLAN_MAX_FAVORITES } from '~/constants/plan'
 import { RATE_LIMIT_UPDATE_AVATAR } from '~/constants/rate-limit'
+import { prismaClient } from '~/db/client.server'
 import type { Meme } from '~/db/generated/prisma/client'
 import { ActivityEventType } from '~/db/generated/prisma/enums'
 import { matchIsAvatarPath, resolveAvatar } from '~/helpers/avatar'
@@ -24,7 +24,7 @@ import { getLocale } from '~/paraglide/runtime'
 import { findActiveSubscription, matchIsUserPremium } from '~/server/customer'
 import { createRateLimitMiddleware } from '~/server/rate-limit'
 import { authUserRequiredMiddleware } from '~/server/user-auth'
-import { recordActivityEvent } from '~/utils/activity-event'
+import { recordActivityEvent } from '~/utils/activity-event.server'
 
 export const getFavoritesMemes = createServerFn({ method: 'GET' })
   .middleware([authUserRequiredMiddleware])

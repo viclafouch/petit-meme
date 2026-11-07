@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createAnthropicChatWithClient } from '@tanstack/ai-anthropic'
 import { AI_SEARCH_MODEL } from '~/constants/ai-search'
-import { requestSearchKeywords } from '~/utils/ai-search-keywords'
+import { requestSearchKeywords } from '~/utils/ai-search-keywords.server'
 
 const REQUEST_CAPTURED_MESSAGE = 'request captured'
 

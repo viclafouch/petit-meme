@@ -6,7 +6,7 @@ import { ConfirmAlertDialog } from '~/components/confirm-alert-dialog'
 import { Button } from '~/components/ui/button'
 import type { Meme } from '~/db/generated/prisma/client'
 import { getErrorMessage } from '~/helpers/error'
-import type { MemeFile } from '~/lib/meme-files'
+import type { MemeFile } from '~/lib/meme-files.server'
 import {
   getAdminMemeByIdQueryOpts,
   invalidateAdminMemesOverview

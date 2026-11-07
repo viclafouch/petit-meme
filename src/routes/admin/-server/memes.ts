@@ -3,7 +3,6 @@ import { z } from 'zod'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { setResponseStatus } from '@tanstack/react-start/server'
-import { prismaClient } from '~/db'
 import { HTTP_STATUS } from '~/constants/http'
 import {
   DEFAULT_MEME_TITLE,
@@ -14,6 +13,7 @@ import {
   MEMES_SEARCH_SCHEMA
 } from '~/constants/meme'
 import { TWEET_LINK_SCHEMA } from '~/constants/url'
+import { prismaClient } from '~/db/client.server'
 import {
   type MemeContentLocale,
   MemeContentLocale as MemeContentLocaleEnum,
@@ -24,6 +24,7 @@ import {
   CONTENT_LOCALE_TO_LOCALE,
   REQUIRED_TRANSLATION_LOCALES
 } from '~/helpers/i18n-content'
+import { invalidateAlgoliaCache } from '~/lib/algolia-cache.server'
 import {
   ALGOLIA_ADMIN_SEARCH_PARAMS,
   getAlgoliaSearchClient,
@@ -34,15 +35,14 @@ import {
   safeAlgoliaOp,
   syncMemeToAllIndices,
   type AlgoliaMemeRecord
-} from '~/lib/algolia'
-import { invalidateAlgoliaCache } from '~/lib/algolia-cache'
-import { createVideo, uploadVideo } from '~/lib/bunny'
+} from '~/lib/algolia.server'
+import { createVideo, uploadVideo } from '~/lib/bunny.server'
 import { adminLogger } from '~/lib/logger'
-import { deleteMemeFiles, findMissingMemeFiles } from '~/lib/meme-files'
+import { deleteMemeFiles, findMissingMemeFiles } from '~/lib/meme-files.server'
 import { getTweetByUrl, getTweetMedia } from '~/lib/react-tweet'
 import { captureWithFeature } from '~/lib/sentry'
 import { baseLocale } from '~/paraglide/runtime'
-import { logAuditAction } from '~/server/audit'
+import { logAuditAction } from '~/server/audit.server'
 import { clearRecommendCache } from '~/server/meme'
 import { adminRequiredMiddleware } from '~/server/user-auth'
 

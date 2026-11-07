@@ -2,7 +2,6 @@ import { createAnthropicChat } from '@tanstack/ai-anthropic'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
 import { waitUntil } from '@vercel/functions'
-import { prismaClient } from '~/db'
 import {
   AI_SEARCH_INPUT_SCHEMA,
   AI_SEARCH_MODEL,
@@ -14,14 +13,15 @@ import {
 import { AppError } from '~/constants/error'
 import { HTTP_STATUS } from '~/constants/http'
 import { RATE_LIMIT_AI_SEARCH } from '~/constants/rate-limit'
-import { lockUntilTransactionEnds } from '~/db/advisory-lock'
+import { lockUntilTransactionEnds } from '~/db/advisory-lock.server'
+import { prismaClient } from '~/db/client.server'
 import type { Prisma } from '~/db/generated/prisma/client'
 import {
   ActivityEventType,
   MemeStatus,
   type MemeContentLocale
 } from '~/db/generated/prisma/enums'
-import { serverEnv } from '~/env/server'
+import { serverEnv } from '~/env/server.server'
 import { buildAiSearchQuota } from '~/helpers/ai-search'
 import { truncateToUtcDay, truncateToUtcMonth } from '~/helpers/date'
 import { contentLocalesWithUniversal } from '~/helpers/i18n-content'
@@ -32,7 +32,7 @@ import {
   normalizeAlgoliaHit,
   resolveAlgoliaIndexName,
   type AlgoliaMemeRecord
-} from '~/lib/algolia'
+} from '~/lib/algolia.server'
 import { aiSearchLogger } from '~/lib/logger'
 import { captureWithFeature } from '~/lib/sentry'
 import { getLocale, type Locale } from '~/paraglide/runtime'
@@ -43,8 +43,8 @@ import {
   createUserRateLimitMiddleware
 } from '~/server/rate-limit'
 import { authUserRequiredMiddleware } from '~/server/user-auth'
-import { recordActivityEvent } from '~/utils/activity-event'
-import { requestSearchKeywords } from '~/utils/ai-search-keywords'
+import { recordActivityEvent } from '~/utils/activity-event.server'
+import { requestSearchKeywords } from '~/utils/ai-search-keywords.server'
 
 async function extractSearchKeywordsOrPrompt(prompt: string, locale: Locale) {
   try {

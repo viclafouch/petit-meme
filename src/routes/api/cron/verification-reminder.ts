@@ -1,16 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { prismaClient } from '~/db'
 import { PLACEHOLDER_EMAIL_DOMAIN } from '~/constants/auth'
 import { HOUR, ONE_DAY_IN_SECONDS } from '~/constants/time'
+import { prismaClient } from '~/db/client.server'
 import type { UserLocale } from '~/db/generated/prisma/client'
 import { emailSubjects } from '~/emails/subjects'
 import { VerificationReminderEmail } from '~/emails/verification-reminder-email'
-import { clientEnv } from '~/env/client'
-import { serverEnv } from '~/env/server'
+import { serverEnv } from '~/env/server.server'
 import { cronLogger } from '~/lib/logger'
-import { sendEmail } from '~/lib/resend'
-import { verifyCronSecret } from '~/utils/cron-auth'
-import { createEmailVerificationPath } from '~/utils/email-verification'
+import { sendEmail } from '~/lib/resend.server'
+import { verifyCronSecret } from '~/utils/cron-auth.server'
+import { createEmailVerificationPath } from '~/utils/email-verification.server'
 
 const log = cronLogger.child({ job: 'verification-reminder' })
 
@@ -29,7 +28,7 @@ const sendReminderToUser = async (user: {
     expiresInSeconds: TOKEN_EXPIRY_IN_SECONDS,
     locale: user.locale
   })
-  const verificationUrl = `${clientEnv.VITE_SITE_URL}${verificationPath}`
+  const verificationUrl = `${serverEnv.VITE_SITE_URL}${verificationPath}`
   const isSent = await sendEmail({
     to: user.email,
     subject: emailSubjects[user.locale].verificationReminder,

@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test'
-import { prismaClient } from '~/db'
+import { prismaClient } from '~/db/client.server'
 import { m } from '~/paraglide/messages.js'
 import { openAuthDialog } from './auth-flows'
 import { E2E_ROLES } from './constants'

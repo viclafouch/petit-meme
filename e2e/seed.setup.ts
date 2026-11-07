@@ -1,13 +1,14 @@
 import { hashPassword } from 'better-auth/crypto'
-import { expect, test as setup } from '@playwright/test'
-import { DATABASE_POOL_MAX_CONNECTIONS, prismaClient } from '~/db'
+import { z } from 'zod'
+import { type APIRequestContext, expect, test as setup } from '@playwright/test'
 import { BUNNY_STATUS, type MemeDerivedFormat } from '~/constants/bunny'
-import { MEME_ALGOLIA_INCLUDE, TRENDING_CATEGORY_DAYS } from '~/constants/meme'
+import { HTTP_STATUS } from '~/constants/http'
+import { TRENDING_CATEGORY_DAYS } from '~/constants/meme'
 import { DAY, THIRTY_DAYS_MS } from '~/constants/time'
+import { DATABASE_POOL_MAX_CONNECTIONS, prismaClient } from '~/db/client.server'
 import { MemeStatus, UserLocale } from '~/db/generated/prisma/enums'
-import { replaceAllIndicesWithMemes } from '~/lib/algolia'
-import { findMissingMemeFiles } from '~/lib/meme-files'
-import { getStripeClient } from '~/lib/stripe'
+import { findMissingMemeFiles } from '~/lib/meme-files.server'
+import { getStripeClient } from '~/lib/stripe.server'
 import { clearDatabase } from './clear-database'
 import { E2E_PASSWORD, E2E_ROLES, type E2eRole } from './constants'
 import {
@@ -17,7 +18,7 @@ import {
   type E2eCategory,
   type E2eMeme
 } from './content'
-import { E2E_VIDEO_BUNNY_ID } from './env'
+import { E2E_CRON_SECRET, E2E_VIDEO_BUNNY_ID } from './env'
 
 const SEED_TIMEOUT_MS = 180_000
 
@@ -211,22 +212,16 @@ const createMeme = async (meme: E2eMeme) => {
   })
 }
 
-const indexMemes = async () => {
-  const memes = await prismaClient.meme.findMany({
-    include: MEME_ALGOLIA_INCLUDE
+const SYNC_ALGOLIA_RESPONSE_SCHEMA = z.object({ totalMemes: z.number() })
+
+const syncAlgolia = async (request: APIRequestContext) => {
+  const response = await request.get('/api/cron/sync-algolia', {
+    headers: { authorization: `Bearer ${E2E_CRON_SECRET}` }
   })
 
-  await replaceAllIndicesWithMemes(memes)
+  expect(response.status()).toBe(HTTP_STATUS.OK)
 
-  return memes
-}
-
-const toMemeIds = (memes: readonly { id: string }[]) => {
-  return new Set(
-    memes.map((meme) => {
-      return meme.id
-    })
-  )
+  return SYNC_ALGOLIA_RESPONSE_SCHEMA.parse(await response.json())
 }
 
 setup.describe('the e2e environment', () => {
@@ -234,7 +229,7 @@ setup.describe('the e2e environment', () => {
     await prismaClient.$disconnect()
   })
 
-  setup('is seeded', async () => {
+  setup('is seeded', async ({ request }) => {
     setup.setTimeout(SEED_TIMEOUT_MS)
 
     await clearDatabase()
@@ -245,9 +240,9 @@ setup.describe('the e2e environment', () => {
     await createWithinPool(Object.values(E2E_ROLES), createBookmarks)
     await createWithinPool(Object.values(E2E_ROLES), createAiSearchLogs)
 
-    const indexedMemes = await indexMemes()
+    const { totalMemes } = await syncAlgolia(request)
 
-    expect(toMemeIds(indexedMemes)).toStrictEqual(toMemeIds(E2E_MEMES))
+    expect(totalMemes).toBe(E2E_MEMES.length)
   })
 
   setup('holds every file of its playable Meme', async () => {

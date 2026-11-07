@@ -5,6 +5,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { parseArgs, promisify } from 'node:util'
 import { prismaClient } from '~/db'
+import { BUNNY_STORAGE_ENDPOINT } from '~/constants/bunny'
 import type { Prisma } from '~/db/generated/prisma/client'
 import { MemeStatus } from '~/db/generated/prisma/enums'
 import { serverEnv } from '~/env/server'
@@ -92,7 +93,7 @@ const main = async () => {
 
   logEnvironmentInfo()
   console.log(
-    `Storage:         ${serverEnv.BUNNY_STORAGE_HOSTNAME}/${serverEnv.BUNNY_STORAGE_ZONE_NAME}`
+    `Storage:         ${BUNNY_STORAGE_ENDPOINT}/${serverEnv.BUNNY_STORAGE_ZONE_NAME}`
   )
   console.log(`Mode:            ${dryRun ? 'DRY RUN' : 'WRITE'}\n`)
 

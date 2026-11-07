@@ -7,6 +7,8 @@ const E2E_ENV_SCHEMA = z.object({
   DATABASE_URL: z.string().min(1),
   BETTER_AUTH_SECRET: z.string().min(1),
   VITE_BUNNY_HOSTNAME: z.string().min(1),
+  BUNNY_TOKEN_AUTH_KEY: z.string().min(1),
+  BUNNY_ORIGINAL_ACCESS_KEY: z.string().min(1),
   E2E_VIDEO_BUNNY_ID: z.string().min(1),
   CRON_SECRET: z.string().min(1)
 })
@@ -21,7 +23,7 @@ const parsedE2eEnv = E2E_ENV_SCHEMA.safeParse(
 
 if (!parsedE2eEnv.success) {
   throw new Error(
-    'Missing .env.e2e, or missing one of VITE_SITE_URL, DATABASE_URL, BETTER_AUTH_SECRET, VITE_BUNNY_HOSTNAME, E2E_VIDEO_BUNNY_ID or CRON_SECRET in it.'
+    'Missing .env.e2e, or missing one of VITE_SITE_URL, DATABASE_URL, BETTER_AUTH_SECRET, VITE_BUNNY_HOSTNAME, BUNNY_TOKEN_AUTH_KEY, BUNNY_ORIGINAL_ACCESS_KEY, E2E_VIDEO_BUNNY_ID or CRON_SECRET in it.'
   )
 }
 
@@ -29,6 +31,9 @@ export const E2E_BASE_URL = parsedE2eEnv.data.VITE_SITE_URL
 const E2E_DATABASE_URL = parsedE2eEnv.data.DATABASE_URL
 export const E2E_AUTH_SECRET = parsedE2eEnv.data.BETTER_AUTH_SECRET
 export const E2E_BUNNY_HOSTNAME = parsedE2eEnv.data.VITE_BUNNY_HOSTNAME
+export const E2E_BUNNY_TOKEN_AUTH_KEY = parsedE2eEnv.data.BUNNY_TOKEN_AUTH_KEY
+export const E2E_BUNNY_ORIGINAL_ACCESS_KEY =
+  parsedE2eEnv.data.BUNNY_ORIGINAL_ACCESS_KEY
 export const { E2E_VIDEO_BUNNY_ID } = parsedE2eEnv.data
 export const E2E_CRON_SECRET = parsedE2eEnv.data.CRON_SECRET
 

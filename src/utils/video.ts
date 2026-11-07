@@ -4,12 +4,13 @@ import { BUNNY_STATUS, HLS_MIME_TYPE } from '~/constants/bunny'
 
 const MEDIA_ERROR_RECOVERY_INTERVAL_MS = 5_000
 
+const PLAYABLE_BUNNY_STATUSES: readonly number[] = [
+  BUNNY_STATUS.FINISHED,
+  BUNNY_STATUS.RESOLUTION_FINISHED
+]
+
 export const matchIsVideoPlayable = (bunnyStatus: number) => {
-  return (
-    bunnyStatus >= BUNNY_STATUS.RESOLUTION_FINISHED &&
-    bunnyStatus !== BUNNY_STATUS.FAILED &&
-    bunnyStatus !== BUNNY_STATUS.PRESIGNED_UPLOAD_FAILED
-  )
+  return PLAYABLE_BUNNY_STATUSES.includes(bunnyStatus)
 }
 
 const matchIsNativeHlsPreferred = (video: HTMLVideoElement) => {

@@ -2,7 +2,7 @@ import { getRouteApi, Link } from '@tanstack/react-router'
 import { MemeVideoPlayer } from '~/components/Meme/meme-video-player'
 import { LOGO_PATH } from '~/constants/branding'
 import { useMemeHls } from '~/hooks/use-meme-hls'
-import { buildVideoImageUrl } from '~/lib/bunny'
+import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import { m } from '~/paraglide/messages.js'
 
 const embedRouteApi = getRouteApi('/embed/$memeId')

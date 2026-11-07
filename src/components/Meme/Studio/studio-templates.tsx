@@ -7,7 +7,7 @@ import {
   type StudioTemplate
 } from '~/constants/studio'
 import { SELECTED_TILE_RING_CLASS_NAME } from '~/constants/ui'
-import { buildVideoImageUrl } from '~/lib/bunny'
+import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 import { studioStore } from '~/stores/studio.store'

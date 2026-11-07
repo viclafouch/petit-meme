@@ -3,13 +3,13 @@ import { hashPassword } from 'better-auth/crypto'
 import { z } from 'zod'
 import { prismaClient } from '~/db'
 import { MEME_ALGOLIA_INCLUDE } from '~/constants/meme'
-import { clientEnv } from '~/env/client'
 import {
   getAlgoliaAdminClient,
   resolveAlgoliaIndexName,
   syncMemeToAllIndices
 } from '~/lib/algolia'
 import {
+  buildLibraryApiUrl,
   createVideo,
   deleteVideo,
   getBunnyHeaders,
@@ -118,7 +118,7 @@ const clearBunny = async () => {
   console.log('Clearing Bunny CDN videos...')
   const { items } = await fetchWithZod(
     bunnyVideosSchema,
-    `https://video.bunnycdn.com/library/${clientEnv.VITE_BUNNY_LIBRARY_ID}/videos`,
+    buildLibraryApiUrl('/videos'),
     {
       method: 'GET',
       headers: getBunnyHeaders()

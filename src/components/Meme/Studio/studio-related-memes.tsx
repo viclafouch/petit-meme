@@ -2,7 +2,7 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { Label } from '~/components/ui/label'
 import type { MemeWithVideo } from '~/constants/meme'
-import { buildVideoImageUrl } from '~/lib/bunny'
+import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import { getRelatedMemesQueryOpts } from '~/lib/queries'
 import { m } from '~/paraglide/messages.js'
 

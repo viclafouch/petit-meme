@@ -21,7 +21,7 @@ import {
   resolveMemeTranslation,
   VISIBLE_CONTENT_LOCALES
 } from '~/helpers/i18n-content'
-import { buildVideoImageUrl } from '~/lib/bunny'
+import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import { algoliaLogger } from '~/lib/logger'
 import { locales, type Locale } from '~/paraglide/runtime'
 

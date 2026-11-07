@@ -14,7 +14,7 @@ import { LOGO_PATH } from '~/constants/branding'
 import type { MemeWithVideo } from '~/constants/meme'
 import { useMemeHls } from '~/hooks/use-meme-hls'
 import { useVideoPlayback } from '~/hooks/use-video-playback'
-import { buildVideoImageUrl } from '~/lib/bunny'
+import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import { getInfiniteReelsQueryOpts } from '~/lib/queries'
 import { m } from '~/paraglide/messages.js'
 

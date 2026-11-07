@@ -5,7 +5,7 @@ import {
   CONTENT_LOCALE_TO_SITE_LOCALES,
   resolveMemeTranslation
 } from '~/helpers/i18n-content'
-import { buildVideoImageUrl } from '~/lib/bunny'
+import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import { buildEmbedUrl, buildUrl } from '~/lib/seo'
 import {
   buildSitemapResponse,

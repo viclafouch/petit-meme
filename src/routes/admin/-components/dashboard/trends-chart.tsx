@@ -106,7 +106,7 @@ function computeMetricTotals(
 const PERIOD_DESCRIPTIONS = {
   '7d': '7 derniers jours',
   '30d': '30 derniers jours',
-  '90d': '90 derniers jours',
+  '13w': '13 dernières semaines',
   all: 'Depuis le lancement'
 } as const satisfies Record<DashboardPeriod, string>
 
@@ -155,11 +155,17 @@ function toTrendRows(data: ChartDataPoint[], hiddenMetrics: Set<MetricKey>) {
 
 type TrendsDefinitionParams = {
   rows: TrendRow[]
+  bucketDates: Date[]
   period: DashboardPeriod
   locale: Locale
 }
 
-function defineTrendsChart({ rows, period, locale }: TrendsDefinitionParams) {
+function defineTrendsChart({
+  rows,
+  bucketDates,
+  period,
+  locale
+}: TrendsDefinitionParams) {
   return defineChart({
     marks: [
       lineY(rows, {
@@ -177,6 +183,7 @@ function defineTrendsChart({ rows, period, locale }: TrendsDefinitionParams) {
           line: false,
           ticks: {
             size: 0,
+            values: bucketDates,
             format: (date) => {
               return formatXAxisDate(date, period, locale)
             }
@@ -233,6 +240,9 @@ export const TrendsChart = ({ data, period }: TrendsChartProps) => {
   const definition = React.useMemo(() => {
     return defineTrendsChart({
       rows: toTrendRows(data, hiddenMetrics),
+      bucketDates: data.map((point) => {
+        return new Date(point.date)
+      }),
       period,
       locale
     })

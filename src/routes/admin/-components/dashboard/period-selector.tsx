@@ -11,7 +11,7 @@ import {
 const PERIOD_OPTIONS = [
   { value: '7d', label: '7j' },
   { value: '30d', label: '30j' },
-  { value: '90d', label: '90j' },
+  { value: '13w', label: '13 sem.' },
   { value: 'all', label: 'Tout' }
 ] as const satisfies readonly { value: DashboardPeriod; label: string }[]
 

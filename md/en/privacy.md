@@ -1,6 +1,6 @@
 # Privacy Policy - Petit Meme
 
-Last updated: **October 2026**
+Last updated: **November 2026**
 
 This Privacy Policy describes how **Petit Meme**
 (accessible at [https://petit-meme.io](https://petit-meme.io))
@@ -190,7 +190,7 @@ place (European Commission standard contractual clauses).
 | Inactive account | Anonymized after 3 years without activity: name and email address replaced, avatar removed |
 | Session data | Duration of active session (automatically deleted upon expiry) |
 | Verification tokens | Automatically deleted 24 hours after expiry |
-| Detailed view data (`MemeViewDaily`) | 90 days, then aggregated (global counter) and deleted |
+| Detailed view data (`MemeViewDaily`) | 98 days, then aggregated (global counter) and deleted |
 | `anonId` cookie | 1 year (with consent) |
 | `algoliaUserToken` cookie | 1 year (with consent) |
 | Algolia event data (views, clicks) | Per Algolia's retention policy (30 days by default) |
@@ -204,7 +204,7 @@ place (European Commission standard contractual clauses).
 | Transactional emails | Per Resend's retention policy |
 
 An automated cleanup process runs every day to delete expired sessions and
-obsolete verification tokens, aggregate view data beyond 90 days, enforce the
+obsolete verification tokens, aggregate view data beyond 98 days, enforce the
 activity log retention periods, delete accounts that were never confirmed and
 anonymize inactive accounts.
 

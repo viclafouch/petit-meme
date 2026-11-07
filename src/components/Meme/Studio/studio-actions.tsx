@@ -3,10 +3,18 @@ import { motion, useReducedMotion } from 'motion/react'
 import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
 import { LoadingButton } from '~/components/ui/loading-button'
+import type { MemeExportMode } from '~/constants/meme'
 import { EASE_OUT } from '~/constants/motion'
 import type { ProcessedData } from '~/hooks/use-video-processor'
 import { m } from '~/paraglide/messages.js'
-import { downloadBlob, shareBlob } from '~/utils/download'
+import { shareOrDownloadBlob } from '~/utils/meme-export'
+
+const deliverStudioVideo = (
+  { blob, title }: ProcessedData,
+  mode: MemeExportMode
+) => {
+  void shareOrDownloadBlob({ blob, title, mode, format: 'mp4' })
+}
 
 type StudioMobileActionsProps = {
   processedData: ProcessedData
@@ -27,7 +35,7 @@ export const StudioMobileActions = ({
       <Button
         className="flex-1"
         onClick={() => {
-          void shareBlob(processedData.blob, processedData.title)
+          deliverStudioVideo(processedData, 'share')
         }}
       >
         <Share2 />
@@ -37,7 +45,7 @@ export const StudioMobileActions = ({
         variant="outline"
         className="flex-1"
         onClick={() => {
-          downloadBlob(processedData.blob, `${processedData.title}.mp4`)
+          deliverStudioVideo(processedData, 'download')
         }}
       >
         <Download />
@@ -65,7 +73,7 @@ export const StudioActions = ({
       return
     }
 
-    void shareBlob(processedData.blob, processedData.title)
+    deliverStudioVideo(processedData, 'share')
   }
 
   const handleDownloadClick = () => {
@@ -75,7 +83,7 @@ export const StudioActions = ({
       return
     }
 
-    downloadBlob(processedData.blob, `${processedData.title}.mp4`)
+    deliverStudioVideo(processedData, 'download')
   }
 
   return (

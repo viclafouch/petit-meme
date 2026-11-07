@@ -1,12 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { sendConversionEvent } from '~/lib/algolia-insights'
 import type { shareMeme, trackMemeAction } from '~/server/meme'
-import {
-  matchIsBlobShareable,
-  shareBlob,
-  type downloadBlob
-} from '~/utils/download'
-import { deliverMemeExport } from '~/utils/meme-export'
+import { downloadBlob, matchIsBlobShareable, shareBlob } from '~/utils/download'
+import { deliverMemeExport, shareOrDownloadBlob } from '~/utils/meme-export'
 
 vi.mock(import('~/lib/algolia-insights'), () => {
   return {
@@ -102,5 +98,26 @@ describe('deliverMemeExport', () => {
       eventName: 'Meme MP3 Downloaded',
       objectID: 'meme-1'
     })
+  })
+})
+
+describe('shareOrDownloadBlob', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('should download the file when the browser cannot share it', async () => {
+    vi.mocked(matchIsBlobShareable).mockReturnValueOnce(false)
+
+    const deliveredMode = await shareOrDownloadBlob({
+      blob: BLOB,
+      title: 'Coucou',
+      mode: 'share',
+      format: 'mp4'
+    })
+
+    expect(deliveredMode).toBe('download')
+    expect(shareBlob).not.toHaveBeenCalled()
+    expect(downloadBlob).toHaveBeenCalledExactlyOnceWith(BLOB, 'Coucou.mp4')
   })
 })

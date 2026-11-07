@@ -11,6 +11,7 @@ import {
   getUserNameSchema
 } from '~/constants/auth'
 import {
+  captureUnexpectedAuthError,
   extractAuthErrorCode,
   getAuthErrorMessage
 } from '~/helpers/auth-errors'
@@ -18,7 +19,6 @@ import { useAppForm } from '~/hooks/use-app-form'
 import { useErrorFocus } from '~/hooks/use-error-focus'
 import { authClient } from '~/lib/auth-client'
 import { focusFirstInvalidField } from '~/lib/form'
-import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
 import { localizeHref } from '~/paraglide/runtime'
 
@@ -82,7 +82,7 @@ export const SignupForm = () => {
       }
     },
     onError: (error) => {
-      captureWithFeature(error, 'sign-up')
+      captureUnexpectedAuthError(error, 'sign-up')
     },
     onSuccess: async () => {
       form.reset()

@@ -32,10 +32,13 @@ export const BROWSER_NETWORK_ERRORS = [
   /^NetworkError when attempting to fetch resource\.$/u
 ]
 
+export const VERCEL_EDGE_ERRORS = [/^Too Many Requests\s+[a-z]{3}\d::/u]
+
 export const BROWSER_NOISE_ERRORS = [
   /not allowed by the user agent or the platform in the current context/u,
   /^Failed to execute '(?:insertBefore|removeChild)' on 'Node'/u,
-  /^NS_ERROR_FAILURE/u
+  /^NS_ERROR_FAILURE/u,
+  /^Invalid call to runtime\.sendMessage\(\)/u
 ]
 
 export const AUTOMATED_BROWSER_USER_AGENT = /HeadlessChrome|GoogleOther/u

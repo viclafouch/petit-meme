@@ -41,25 +41,37 @@ type DeliverMemeExportParams = MemeExportParams & {
   tracking: InsightsTracking
 }
 
-const shareOrDownloadBlob = async ({
+type ShareOrDownloadBlobParams = {
+  blob: Blob
+  title: string
+  mode: MemeExportMode
+  format: MemeDerivedFormat
+}
+
+export const shareOrDownloadBlob = async ({
   blob,
-  meme,
+  title,
   mode,
   format
-}: DeliverMemeExportParams): Promise<MemeExportMode | null> => {
-  if (mode === 'share' && matchIsBlobShareable(blob, meme.title, format)) {
-    const wasShared = await shareBlob(blob, meme.title, format)
+}: ShareOrDownloadBlobParams): Promise<MemeExportMode | null> => {
+  if (mode === 'share' && matchIsBlobShareable(blob, title, format)) {
+    const wasShared = await shareBlob(blob, title, format)
 
     return wasShared ? 'share' : null
   }
 
-  downloadBlob(blob, `${meme.title}.${format}`)
+  downloadBlob(blob, `${title}.${format}`)
 
   return 'download'
 }
 
 export const deliverMemeExport = async (params: DeliverMemeExportParams) => {
-  const deliveredMode = await shareOrDownloadBlob(params)
+  const deliveredMode = await shareOrDownloadBlob({
+    blob: params.blob,
+    title: params.meme.title,
+    mode: params.mode,
+    format: params.format
+  })
 
   if (deliveredMode === null) {
     return false

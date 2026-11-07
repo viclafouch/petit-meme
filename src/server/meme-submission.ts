@@ -9,12 +9,13 @@ import {
 } from '~/constants/meme-submission'
 import { RATE_LIMIT_SUBMIT_MEME } from '~/constants/rate-limit'
 import { lockUntilTransactionEnds } from '~/db/advisory-lock'
-import { Prisma } from '~/db/generated/prisma/client'
+import type { Prisma } from '~/db/generated/prisma/client'
 import {
   MemeSubmissionStatus,
   MemeSubmissionUrlType
 } from '~/db/generated/prisma/enums'
 import { submissionLogger } from '~/lib/logger'
+import { matchIsPrismaError } from '~/lib/prisma-error'
 import { getTweetByUrl, TweetNoVideoError } from '~/lib/react-tweet'
 import { captureWithFeature } from '~/lib/sentry'
 import { createUserRateLimitMiddleware } from '~/server/rate-limit'
@@ -104,10 +105,7 @@ export const createMemeSubmission = createServerFn({ method: 'POST' })
         throw error
       }
 
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2002'
-      ) {
+      if (matchIsPrismaError(error, 'UNIQUE_CONSTRAINT_FAILED')) {
         submissionLogger.warn(
           { userId, url: data.url },
           'Duplicate URL submitted'

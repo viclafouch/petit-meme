@@ -3,12 +3,13 @@ import { createServerFn } from '@tanstack/react-start'
 import { setResponseStatus } from '@tanstack/react-start/server'
 import { prismaClient } from '~/db'
 import { HTTP_STATUS } from '~/constants/http'
-import { Prisma } from '~/db/generated/prisma/client'
+import type { Prisma } from '~/db/generated/prisma/client'
 import { MemeSubmissionStatus } from '~/db/generated/prisma/enums'
 import { emailSubjects } from '~/emails/subjects'
 import { SubmissionApprovedEmail } from '~/emails/submission-approved-email'
 import { SubmissionRejectedEmail } from '~/emails/submission-rejected-email'
 import { submissionLogger } from '~/lib/logger'
+import { matchIsPrismaError } from '~/lib/prisma-error'
 import { sendEmailInBackground } from '~/lib/resend'
 import { captureWithFeature } from '~/lib/sentry'
 import { logAuditAction } from '~/server/audit'
@@ -209,10 +210,7 @@ export const deleteSubmission = createServerFn({ method: 'POST' })
         select: { id: true, title: true, userId: true }
       })
       .catch((error: unknown) => {
-        if (
-          error instanceof Prisma.PrismaClientKnownRequestError &&
-          error.code === 'P2025'
-        ) {
+        if (matchIsPrismaError(error, 'RECORD_NOT_FOUND')) {
           setResponseStatus(HTTP_STATUS.NOT_FOUND)
           throw new Error('Soumission introuvable')
         }

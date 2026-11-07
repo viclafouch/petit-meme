@@ -22,7 +22,8 @@ export default defineConfig({
   use: {
     baseURL: E2E_BASE_URL,
     trace: 'retain-on-failure',
-    screenshot: 'only-on-failure'
+    screenshot: 'only-on-failure',
+    reducedMotion: 'reduce'
   },
   webServer: [
     {

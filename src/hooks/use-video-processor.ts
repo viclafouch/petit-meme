@@ -229,15 +229,13 @@ const addTextToVideo = async (
   }: AddTextToVideoParams
 ) => {
   const font = resolveFont(fontFamily)
-
-  await ensureVideoFile(ffmpeg, { videoBlob, memeId })
-  await ensureFontFile(ffmpeg, font)
-
   const wrappedText = wrapText(text, maxCharsPerLine)
-  await ffmpeg.writeFile(
-    FFMPEG_TEXT_FILE,
-    new TextEncoder().encode(wrappedText)
-  )
+
+  await Promise.all([
+    ensureVideoFile(ffmpeg, { videoBlob, memeId }),
+    ensureFontFile(ffmpeg, font),
+    ffmpeg.writeFile(FFMPEG_TEXT_FILE, new TextEncoder().encode(wrappedText))
+  ])
 
   const videoFilter = buildVideoFilter({
     textPosition,

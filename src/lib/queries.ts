@@ -2,6 +2,7 @@ import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
 import type { MemesFilters } from '~/constants/meme'
 import { PRIVATE_QUERY_META } from '~/constants/query'
 import {
+  HOUR,
   MINUTE,
   FIVE_MINUTES_MS,
   TEN_MINUTES_MS,
@@ -14,6 +15,7 @@ import { getCategories } from '~/server/categories'
 import { getActiveSubscription } from '~/server/customer'
 import {
   getMemeById,
+  getMemePlaybackUrl,
   getMemes,
   getRecentCountMemes,
   getRelatedMemes,
@@ -38,6 +40,20 @@ export const getMemesListQueryOpts = (filters: MemesFilters) => {
 }
 
 getMemesListQueryOpts.all = ['memes-list'] as const
+
+export const getMemePlaybackUrlQueryOpts = (memeId: Meme['id']) => {
+  return queryOptions({
+    queryKey: [...getMemePlaybackUrlQueryOpts.all, memeId],
+    queryFn: () => {
+      return getMemePlaybackUrl({ data: memeId })
+    },
+    staleTime: HOUR,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false
+  })
+}
+
+getMemePlaybackUrlQueryOpts.all = ['meme-playback-url'] as const
 
 export const getTrendingMemesQueryOpts = () => {
   return queryOptions({

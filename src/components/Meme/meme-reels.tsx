@@ -39,7 +39,7 @@ const Reel = React.memo(
     isActive
   }: ReelProps) => {
     const { video, videoCallbackRef, playbackFailure } = useMemeHls({
-      bunnyId: meme.video.bunnyId
+      memeId: meme.id
     })
 
     useVideoPlayback({

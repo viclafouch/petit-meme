@@ -4,6 +4,7 @@ import { MemeVideoPlayer } from '~/components/Meme/meme-video-player'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { Skeleton } from '~/components/ui/skeleton'
+import type { Meme } from '~/db/generated/prisma/client'
 import { useContainedSize } from '~/hooks/use-contained-size'
 import { useImageAspectRatio } from '~/hooks/use-image-aspect-ratio'
 import { useMemeHls } from '~/hooks/use-meme-hls'
@@ -16,6 +17,7 @@ type ProcessedRatioState = {
 }
 
 type StudioPreviewProps = {
+  memeId: Meme['id']
   bunnyId: string
   title: string
   isProcessing: boolean
@@ -25,11 +27,12 @@ type StudioPreviewProps = {
 }
 
 type OriginalVideoProps = {
+  memeId: Meme['id']
   bunnyId: string
 }
 
-const OriginalVideo = ({ bunnyId }: OriginalVideoProps) => {
-  const { videoCallbackRef, playbackFailure } = useMemeHls({ bunnyId })
+const OriginalVideo = ({ memeId, bunnyId }: OriginalVideoProps) => {
+  const { videoCallbackRef, playbackFailure } = useMemeHls({ memeId })
 
   return (
     <MemeVideoPlayer
@@ -68,6 +71,7 @@ const ProcessedVideo = ({
 }
 
 export const StudioPreview = ({
+  memeId,
   bunnyId,
   title,
   isProcessing,
@@ -140,7 +144,7 @@ export const StudioPreview = ({
       )
     }
 
-    return <OriginalVideo bunnyId={bunnyId} />
+    return <OriginalVideo memeId={memeId} bunnyId={bunnyId} />
   }
 
   return (

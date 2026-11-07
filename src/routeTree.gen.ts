@@ -27,6 +27,7 @@ import { Route as AdminDownloaderRouteImport } from './routes/admin/downloader'
 import { Route as AdminServicesRouteImport } from './routes/admin/services'
 import { Route as ApiBunnyRouteImport } from './routes/api/bunny'
 import { Route as ApiOgRouteImport } from './routes/api/og'
+import { Route as EmbedMemeIdRouteImport } from './routes/embed/$memeId'
 import { Route as Public__rootDefaultDmcaRouteImport } from './routes/_public__root/_default/dmca'
 import { Route as Public__rootDefaultFavoritesRouteImport } from './routes/_public__root/_default/favorites'
 import { Route as Public__rootDefaultMentionsLegalesRouteImport } from './routes/_public__root/_default/mentions-legales'
@@ -148,6 +149,11 @@ const ApiBunnyRoute = ApiBunnyRouteImport.update({
 const ApiOgRoute = ApiOgRouteImport.update({
   id: '/api/og',
   path: '/api/og',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmbedMemeIdRoute = EmbedMemeIdRouteImport.update({
+  id: '/embed/$memeId',
+  path: '/embed/$memeId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Public__rootDefaultDmcaRoute = Public__rootDefaultDmcaRouteImport.update({
@@ -355,6 +361,7 @@ export interface FileRoutesByFullPath {
   '/admin/services': typeof AdminServicesRoute
   '/api/bunny': typeof ApiBunnyRoute
   '/api/og': typeof ApiOgRoute
+  '/embed/$memeId': typeof EmbedMemeIdRoute
   '/admin/': typeof AdminIndexRoute
   '/settings': typeof Public__rootDefaultSettingsRouteRouteWithChildren
   '/dmca': typeof Public__rootDefaultDmcaRoute
@@ -405,6 +412,7 @@ export interface FileRoutesByTo {
   '/admin/services': typeof AdminServicesRoute
   '/api/bunny': typeof ApiBunnyRoute
   '/api/og': typeof ApiOgRoute
+  '/embed/$memeId': typeof EmbedMemeIdRoute
   '/admin': typeof AdminIndexRoute
   '/dmca': typeof Public__rootDefaultDmcaRoute
   '/favorites': typeof Public__rootDefaultFavoritesRoute
@@ -458,6 +466,7 @@ export interface FileRoutesById {
   '/admin/services': typeof AdminServicesRoute
   '/api/bunny': typeof ApiBunnyRoute
   '/api/og': typeof ApiOgRoute
+  '/embed/$memeId': typeof EmbedMemeIdRoute
   '/_public__root/': typeof Public__rootIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/_public__root/_default/settings': typeof Public__rootDefaultSettingsRouteRouteWithChildren
@@ -512,6 +521,7 @@ export interface FileRouteTypes {
     | '/admin/services'
     | '/api/bunny'
     | '/api/og'
+    | '/embed/$memeId'
     | '/admin/'
     | '/settings'
     | '/dmca'
@@ -562,6 +572,7 @@ export interface FileRouteTypes {
     | '/admin/services'
     | '/api/bunny'
     | '/api/og'
+    | '/embed/$memeId'
     | '/admin'
     | '/dmca'
     | '/favorites'
@@ -614,6 +625,7 @@ export interface FileRouteTypes {
     | '/admin/services'
     | '/api/bunny'
     | '/api/og'
+    | '/embed/$memeId'
     | '/_public__root/'
     | '/admin/'
     | '/_public__root/_default/settings'
@@ -666,6 +678,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiBunnyRoute: typeof ApiBunnyRoute
   ApiOgRoute: typeof ApiOgRoute
+  EmbedMemeIdRoute: typeof EmbedMemeIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiCronCleanupRoute: typeof ApiCronCleanupRoute
   ApiCronPendingSubmissionsReminderRoute: typeof ApiCronPendingSubmissionsReminderRoute
@@ -800,6 +813,13 @@ declare module '@tanstack/react-router' {
       path: '/api/og'
       fullPath: '/api/og'
       preLoaderRoute: typeof ApiOgRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/embed/$memeId': {
+      id: '/embed/$memeId'
+      path: '/embed/$memeId'
+      fullPath: '/embed/$memeId'
+      preLoaderRoute: typeof EmbedMemeIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_public__root/_default/dmca': {
@@ -1183,6 +1203,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiBunnyRoute: ApiBunnyRoute,
   ApiOgRoute: ApiOgRoute,
+  EmbedMemeIdRoute: EmbedMemeIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiCronCleanupRoute: ApiCronCleanupRoute,
   ApiCronPendingSubmissionsReminderRoute:

@@ -43,11 +43,17 @@ export function resolveAlgoliaReplicaCreated(locale: Locale) {
   return `${algoliaIndexPrefix}_${locale}_replica_created`
 }
 
-export const algoliaSearchClient = searchClient(
-  clientEnv.VITE_ALGOLIA_APP_ID,
-  clientEnv.VITE_ALGOLIA_SEARCH_KEY,
-  ALGOLIA_FAIL_FAST_ON_RATE_LIMIT
-)
+let algoliaSearchClient: ReturnType<typeof searchClient> | null = null
+
+export const getAlgoliaSearchClient = () => {
+  algoliaSearchClient ??= searchClient(
+    clientEnv.VITE_ALGOLIA_APP_ID,
+    serverEnv.ALGOLIA_SEARCH_KEY,
+    ALGOLIA_FAIL_FAST_ON_RATE_LIMIT
+  )
+
+  return algoliaSearchClient
+}
 
 let algoliaAdminClient: ReturnType<typeof searchClient> | null = null
 
@@ -61,11 +67,17 @@ export const getAlgoliaAdminClient = () => {
   return algoliaAdminClient
 }
 
-export const algoliaRecommendClient = recommendClient(
-  clientEnv.VITE_ALGOLIA_APP_ID,
-  clientEnv.VITE_ALGOLIA_SEARCH_KEY,
-  ALGOLIA_FAIL_FAST_ON_RATE_LIMIT
-)
+let algoliaRecommendClient: ReturnType<typeof recommendClient> | null = null
+
+export const getAlgoliaRecommendClient = () => {
+  algoliaRecommendClient ??= recommendClient(
+    clientEnv.VITE_ALGOLIA_APP_ID,
+    serverEnv.ALGOLIA_SEARCH_KEY,
+    ALGOLIA_FAIL_FAST_ON_RATE_LIMIT
+  )
+
+  return algoliaRecommendClient
+}
 
 export async function safeAlgoliaOp<TResult>(promise: Promise<TResult>) {
   try {

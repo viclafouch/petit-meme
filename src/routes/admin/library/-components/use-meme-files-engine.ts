@@ -1,5 +1,6 @@
 import type { ProgressEvent } from '@ffmpeg/ffmpeg'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { MEME_DERIVED_FORMAT_CONTENT_TYPES } from '~/constants/bunny'
 import { PERCENT_SCALE } from '~/constants/number'
 import { WATERMARK_ASSET_PATH } from '~/constants/watermark'
 import type { Meme } from '~/db/generated/prisma/client'
@@ -10,7 +11,7 @@ import {
 } from '~/routes/admin/-lib/queries'
 import {
   getMemeFilesUploadConfig,
-  logMemeFilesUpload
+  storeMemeFiles
 } from '~/routes/admin/-server/meme-files'
 import type { PublishStep } from '~/routes/admin/library/-lib/publish-run'
 import { loadFFmpeg } from '~/utils/ffmpeg'
@@ -22,13 +23,13 @@ export type GenerateMemeFilesHandlers = {
   onProgress: (progress: number) => void
 }
 
-type UploadToStorageParams = {
+type UploadToBlobParams = {
   url: string
-  accessKey: string
+  contentType: string
   blob: Blob
 }
 
-const STORAGE_UPLOAD_TIMEOUT_MS = 120_000
+const BLOB_UPLOAD_TIMEOUT_MS = 120_000
 
 const fetchWatermarkAsset = async () => {
   const response = await fetch(WATERMARK_ASSET_PATH)
@@ -40,23 +41,16 @@ const fetchWatermarkAsset = async () => {
   return response.blob()
 }
 
-const uploadToStorage = async ({
-  url,
-  accessKey,
-  blob
-}: UploadToStorageParams) => {
+const uploadToBlob = async ({ url, contentType, blob }: UploadToBlobParams) => {
   const response = await fetch(url, {
     method: 'PUT',
-    headers: {
-      AccessKey: accessKey,
-      'Content-Type': 'application/octet-stream'
-    },
+    headers: { 'Content-Type': contentType },
     body: blob,
-    signal: AbortSignal.timeout(STORAGE_UPLOAD_TIMEOUT_MS)
+    signal: AbortSignal.timeout(BLOB_UPLOAD_TIMEOUT_MS)
   })
 
   if (!response.ok) {
-    throw new Error(`Bunny Storage upload failed (${response.status})`)
+    throw new Error(`Vercel Blob upload failed (${response.status})`)
   }
 }
 
@@ -115,16 +109,20 @@ export function useMemeFilesEngine(memeId: Meme['id']) {
       })
 
       handlers.onStep('uploading')
-      const { bunnyId, urls, accessKey } = await getMemeFilesUploadConfig({
-        data: memeId
-      })
+      const files = { mp4, mp3 }
+      const { uploads } = await getMemeFilesUploadConfig({ data: memeId })
 
-      await Promise.all([
-        uploadToStorage({ url: urls.mp4, accessKey, blob: mp4 }),
-        uploadToStorage({ url: urls.mp3, accessKey, blob: mp3 })
-      ])
+      await Promise.all(
+        uploads.map(({ format, url }) => {
+          return uploadToBlob({
+            url,
+            contentType: MEME_DERIVED_FORMAT_CONTENT_TYPES[format],
+            blob: files[format]
+          })
+        })
+      )
 
-      await logMemeFilesUpload({ data: { memeId, bunnyId } })
+      await storeMemeFiles({ data: memeId })
     },
     onError: (error) => {
       captureWithFeature(error, 'admin-meme-files')

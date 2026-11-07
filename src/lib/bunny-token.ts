@@ -1,25 +1,29 @@
-import { SECOND } from '~/constants/time'
-
 type SignBunnyUrlParams = {
   url: string
   securityKey: string
-  expirationSeconds: number
+  expiresAt: number
+  directoryPath?: string
 }
 
 export const signBunnyUrl = async ({
   url,
   securityKey,
-  expirationSeconds
+  expiresAt,
+  directoryPath
 }: SignBunnyUrlParams) => {
-  const { createHash } = await import('node:crypto')
-  const parsed = new URL(url)
-  const expiration = Math.floor(Date.now() / SECOND) + expirationSeconds
+  const { createHmac } = await import('node:crypto')
+  const { origin, pathname } = new URL(url)
+  const expires = String(expiresAt)
+  const signedParameters =
+    directoryPath === undefined ? '' : `token_path=${directoryPath}`
+  const digest = createHmac('sha256', securityKey)
+    .update(`${directoryPath ?? pathname}${expires}${signedParameters}`)
+    .digest('base64url')
+  const token = `HS256-${digest}`
 
-  const hashableBase = `${securityKey}${parsed.pathname}${expiration}`
-  const token = createHash('sha256').update(hashableBase).digest('base64url')
+  if (directoryPath === undefined) {
+    return `${origin}${pathname}?token=${token}&expires=${expires}`
+  }
 
-  parsed.searchParams.set('token', token)
-  parsed.searchParams.set('expires', String(expiration))
-
-  return parsed.toString()
+  return `${origin}/bcdn_token=${token}&token_path=${encodeURIComponent(directoryPath)}&expires=${expires}${pathname}`
 }

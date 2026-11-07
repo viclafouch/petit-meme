@@ -18,7 +18,7 @@ import { getLocale } from '~/paraglide/runtime'
 
 const algoliaInsights = insightsClient(
   clientEnv.VITE_ALGOLIA_APP_ID,
-  clientEnv.VITE_ALGOLIA_SEARCH_KEY,
+  clientEnv.VITE_ALGOLIA_INSIGHTS_KEY,
   undefined,
   ALGOLIA_FAIL_FAST_ON_RATE_LIMIT
 )

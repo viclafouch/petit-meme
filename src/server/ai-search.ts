@@ -28,7 +28,7 @@ import { contentLocalesWithUniversal } from '~/helpers/i18n-content'
 import { withTimeout } from '~/helpers/promise'
 import {
   ALGOLIA_SEARCH_PARAMS_BASE,
-  algoliaSearchClient,
+  getAlgoliaSearchClient,
   normalizeAlgoliaHit,
   resolveAlgoliaIndexName,
   type AlgoliaMemeRecord
@@ -204,8 +204,8 @@ export const aiSearchMemes = createServerFn({ method: 'POST' })
     let response
 
     try {
-      response = await algoliaSearchClient.searchSingleIndex<AlgoliaMemeRecord>(
-        {
+      response =
+        await getAlgoliaSearchClient().searchSingleIndex<AlgoliaMemeRecord>({
           indexName,
           searchParams: {
             query,
@@ -215,8 +215,7 @@ export const aiSearchMemes = createServerFn({ method: 'POST' })
             removeWordsIfNoResults: 'allOptional',
             ...ALGOLIA_SEARCH_PARAMS_BASE
           }
-        }
-      )
+        })
     } catch (error) {
       captureWithFeature(error, 'ai-search')
       aiSearchLogger.error({ error, query, filters }, 'Algolia search failed')

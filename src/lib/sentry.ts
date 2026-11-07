@@ -45,6 +45,7 @@ export type SentryFeature =
   | 'activity-event'
   | 'og-image'
   | 'verification-email-quota'
+  | 'googlebot-verification'
 
 export const captureWithFeature = (error: unknown, feature: SentryFeature) => {
   if (IS_DEVELOPMENT) {

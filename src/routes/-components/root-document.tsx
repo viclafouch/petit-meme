@@ -5,7 +5,8 @@ import {
   getRouteApi,
   HeadContent,
   ScriptOnce,
-  Scripts
+  Scripts,
+  useMatch
 } from '@tanstack/react-router'
 import { CookieBanner } from '~/components/cookie-consent/cookie-banner'
 import { CookieConsentProvider } from '~/components/cookie-consent/cookie-provider'
@@ -26,6 +27,7 @@ type RootDocumentProps = {
 
 export const RootDocument = ({ children }: RootDocumentProps) => {
   const { _storedTheme, _consentState } = rootRouteApi.useLoaderData()
+  const embedMatch = useMatch({ from: '/embed/$memeId', shouldThrow: false })
 
   return (
     <html lang={getLocale()} suppressHydrationWarning dir={getTextDirection()}>
@@ -58,9 +60,11 @@ export const RootDocument = ({ children }: RootDocumentProps) => {
               <ClientOnly>
                 <Toaster richColors />
               </ClientOnly>
-              <ClientOnly>
-                <CookieBanner />
-              </ClientOnly>
+              {embedMatch ? null : (
+                <ClientOnly>
+                  <CookieBanner />
+                </ClientOnly>
+              )}
               <CookieSettings />
               {IS_PRODUCTION ? null : <TailwindIndicator />}
             </CookieConsentProvider>

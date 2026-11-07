@@ -1,11 +1,15 @@
 import { z } from 'zod'
 import { createServerFn } from '@tanstack/react-start'
 import { prismaClient } from '~/db'
+import { MEME_DERIVED_FORMATS } from '~/constants/bunny'
 import type { Meme, Prisma } from '~/db/generated/prisma/client'
-import { serverEnv } from '~/env/server'
-import { buildSignedOriginalUrl } from '~/lib/bunny'
+import { fetchOriginalVideo } from '~/lib/bunny'
 import { adminLogger } from '~/lib/logger'
-import { buildMemeFileUrl, findMissingMemeFiles } from '~/lib/meme-files'
+import {
+  findMissingMemeFiles,
+  moveMemeFileFromBlobToStorage,
+  presignMemeFileUpload
+} from '~/lib/meme-files'
 import { logAuditAction } from '~/server/audit'
 import { adminRequiredMiddleware } from '~/server/user-auth'
 
@@ -47,39 +51,37 @@ export const getMemeFilesUploadConfig = createServerFn({ method: 'POST' })
   .middleware([adminRequiredMiddleware])
   .handler(async ({ data: memeId }) => {
     const bunnyId = await findMemeBunnyId(memeId)
+    const uploads = await Promise.all(
+      MEME_DERIVED_FORMATS.map(async (format) => {
+        return { format, url: await presignMemeFileUpload(bunnyId, format) }
+      })
+    )
 
-    return {
-      bunnyId,
-      urls: {
-        mp4: buildMemeFileUrl(bunnyId, 'mp4'),
-        mp3: buildMemeFileUrl(bunnyId, 'mp3')
-      },
-      accessKey: serverEnv.BUNNY_STORAGE_API_KEY
-    }
+    return { uploads }
   })
 
-export const logMemeFilesUpload = createServerFn({ method: 'POST' })
+export const storeMemeFiles = createServerFn({ method: 'POST' })
   .validator((data) => {
-    return z
-      .object({
-        memeId: z.string(),
-        bunnyId: z.string()
-      })
-      .parse(data)
+    return z.string().parse(data)
   })
   .middleware([adminRequiredMiddleware])
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data: memeId, context }) => {
+    const bunnyId = await findMemeBunnyId(memeId)
+
+    await Promise.all(
+      MEME_DERIVED_FORMATS.map((format) => {
+        return moveMemeFileFromBlobToStorage(bunnyId, format)
+      })
+    )
+
     void logAuditAction({
       action: 'watermark_upload',
       actingAdminId: context.user.id,
-      targetId: data.memeId,
+      targetId: memeId,
       targetType: 'meme'
     })
 
-    adminLogger.info(
-      { memeId: data.memeId, bunnyId: data.bunnyId },
-      'Meme files uploaded via admin'
-    )
+    adminLogger.info({ memeId, bunnyId }, 'Meme files stored via admin')
 
     return { success: true as const }
   })
@@ -91,15 +93,13 @@ export const fetchAdminVideoBlob = createServerFn({ method: 'GET' })
   .middleware([adminRequiredMiddleware])
   .handler(async ({ data: memeId }) => {
     const bunnyId = await findMemeBunnyId(memeId)
-    const originalUrl = await buildSignedOriginalUrl(bunnyId)
-
     const controller = new AbortController()
     const timeoutId = setTimeout(() => {
       controller.abort()
     }, ORIGINAL_DOWNLOAD_TIMEOUT_MS)
 
     try {
-      const response = await fetch(originalUrl, {
+      const response = await fetchOriginalVideo(bunnyId, {
         signal: controller.signal
       })
 

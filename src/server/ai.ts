@@ -7,7 +7,7 @@ import { HTTP_STATUS } from '~/constants/http'
 import { serverEnv } from '~/env/server'
 import { getErrorMessage } from '~/helpers/error'
 import { LOCALE_META } from '~/helpers/i18n-content'
-import { buildSignedOriginalUrl } from '~/lib/bunny'
+import { fetchOriginalVideo } from '~/lib/bunny'
 import { adminLogger } from '~/lib/logger'
 import { type Locale, locales } from '~/paraglide/runtime'
 import { adminRequiredMiddleware } from '~/server/user-auth'
@@ -182,8 +182,7 @@ async function uploadVideoToGemini(memeId: string) {
     throw new Error('Mème introuvable')
   }
 
-  const originalUrl = await buildSignedOriginalUrl(meme.video.bunnyId)
-  const videoResponse = await fetch(originalUrl)
+  const videoResponse = await fetchOriginalVideo(meme.video.bunnyId)
 
   if (!videoResponse.ok) {
     setResponseStatus(HTTP_STATUS.BAD_GATEWAY)

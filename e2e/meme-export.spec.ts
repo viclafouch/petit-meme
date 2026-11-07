@@ -101,8 +101,14 @@ test.describe('a free User', () => {
       return getFirstMemeCardOptionsButton(page).click()
     }, downloadSubmenu)
 
-    await downloadSubmenu.click()
-    await page.getByRole('menuitem', { name: m.meme_format_audio() }).click()
+    await downloadSubmenu.press('ArrowRight')
+
+    const audioItem = page.getByRole('menuitem', {
+      name: m.meme_format_audio()
+    })
+
+    await expect(audioItem).toBeVisible()
+    await audioItem.press('Enter')
 
     await expect(
       page.getByRole('dialog', { name: m.audio_upsell_title_download() })

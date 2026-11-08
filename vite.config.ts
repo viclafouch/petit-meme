@@ -40,7 +40,9 @@ const staticAssetRouteRules = Object.fromEntries(
   })
 )
 
-const NODE_RUNTIME_PACKAGES = ['takumi-js', '@takumi-rs/core', 'pg']
+const NODE_RUNTIME_PACKAGES = ['takumi-js', '@takumi-rs/core']
+
+const PACKAGES_SHARING_PG_INSTANCE = ['@prisma/adapter-pg']
 
 const WITHOUT_PREFIX_FILTER = ''
 
@@ -96,7 +98,8 @@ export default defineConfig(async ({ mode }) => {
       strictPort: true
     },
     ssr: {
-      external: NODE_RUNTIME_PACKAGES
+      external: NODE_RUNTIME_PACKAGES,
+      noExternal: PACKAGES_SHARING_PG_INSTANCE
     },
     optimizeDeps: {
       exclude: [
@@ -175,7 +178,11 @@ export default defineConfig(async ({ mode }) => {
         sourcemaps: {
           filesToDeleteAfterUpload: ['.vercel/output/**/*.map']
         },
-        tunnelRoute: true
+        bundleSizeOptimizations: {
+          excludeChannelInjection: true
+        },
+        tunnelRoute: true,
+        autoInstrumentMiddleware: false
       })
     ]
   }

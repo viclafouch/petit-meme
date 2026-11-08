@@ -1,7 +1,6 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
   "ui": "tui",
-  "agentGuidance": true,
   "cacheMaxAge": "7d",
   "tasks": {
     "typecheck": {

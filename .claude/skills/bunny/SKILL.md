@@ -34,7 +34,7 @@ The live setup is the source of truth: read it with the commands below on every 
 ## Change it
 
 1. Write to development first, prove it with the zone check, then e2e.
-2. Production writes (library settings, pull zone, Edge Rule, hostname, DNS) are Victor's: hand him the exact command, then verify the result.
+2. Production writes (library settings, pull zone, Edge Rule, hostname, DNS) are Victor's, unless Victor asks you in the conversation: hand over the exact command, then verify the result.
 3. After a library settings update, read the Edge Rules again: Stream adds and removes rules of its own.
 4. Rerun the zone check on each environment you touched.
 

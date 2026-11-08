@@ -12,111 +12,92 @@ Before editing files for a substantial task:
 
 # Petit Meme
 
-A video meme library. Victor publishes every Meme, everyone else watches them, exports them and generates captioned versions of their own.
+A video meme library, live with real accounts, subscriptions and invoices. Victor, the Creator, is its only developer. There is no staging: a push on `main` reaches production once the `ci` and `e2e` workflows pass. The checks catch what the tests cover, and the review before the push catches the rest.
 
-The site is live: real accounts, real subscriptions, real personal data, real invoices. I am its only developer and there is no staging. A push on `main` goes to production as soon as the `ci` and `e2e` workflows pass: Vercel Deployment Checks hold the deployment until then. The checks catch what the tests cover, and the review before the push is the only one for the rest.
+The site is small, so a breaking change is cheap and the clean fix beats the compatible one.
 
-It is also small, so a breaking change is cheap and the clean fix beats the compatible one.
+## Product
 
-In this file, **you** is the agent reading it, **I** is Victor, the Creator and the only developer.
+`knowledge/` tells the product story. Read the topic a task touches before changing what a person sees or pays:
 
-## What makes Petit Meme special
+- an audience's rights, a cap, a gate: `audiences.md`, `offer.md`
+- a Meme's statuses, import or publication: `meme-lifecycle.md`
+- a string, an email, a locale: `languages.md`
+- video delivery, embeds, scraping: `content-rules.md`
+- a platform, a scheduled job, a paid call: `platforms.md`
+- words: `glossary.md`
 
-The site stands out by being plain. It opens on a video, it plays, and nothing asks anything of the Visitor. That plainness is the product, and it is what to protect as the rest grows. Here is what we never compromise on.
+What every change protects:
 
-1. **The path to the video stays the shortest one.** The consent banner is the only interruption that earns its place, and it earns it legally. An ad, an interstitial, a newsletter popup, an account demanded before watching: each competes with the video, so each has to win that comparison out loud before it ships.
-2. **Premium sells itself, it never blocks.** Anonymous Visitors and free Users keep the whole library: browse, watch, Export, share. Premium lifts caps and adds comfort, so pushing it is welcome, in the right place and at the right moment. A reminder speaks once, waits its turn behind whatever dialog is already open, and takes no for an answer. Saying no leaves a Visitor with everything they already had.
-3. **Bilingual by construction.** French is the base locale, English lives under `/en/`. Strings, emails, metadata and legal pages ship in both at once. One language working is half a feature.
-4. **Mobile first, every browser.** Design starts on the phone. Safari on iOS counts as much as Chrome on desktop, and touch targets, native share, autoplay and keyboards all differ.
-5. **Production data is real.** Migrations are additive: new optional fields, new indexes, new tables. A new required column carries a default. Dropping, renaming and resetting are off the table.
-6. **The video files are the product.** Pages stay indexable while the underlying video URLs stay protected. Any change to how a Meme is delivered, embedded or previewed answers one question first: does a raw video URL come back into the DOM, the sitemap or an API response.
+1. **The shortest path to the video.** An ad, a popup or an account asked before watching is Victor's call, argued out loud.
+2. **Premium never blocks.** Free keeps the whole library, and saying no to Premium keeps everything Free gives.
+3. **Both languages ship together.** The administration and the emails Victor receives stay in French.
+4. **Phone first**, Safari on iOS as much as Chrome on desktop.
+5. **Production data is real.** Data changes only add.
+6. **The video files are the product.** A change to how a Meme is delivered, embedded or previewed keeps raw video URLs out of the DOM, the sitemap, the structured data and every API response.
 
-## Cost discipline
+## Cost
 
-Vercel runs on Pro: usage draws on its monthly included credit first, then bills on demand. Every other service sits on a free or near free tier, where an overage is billed in silence. Two invoices already paid for this lesson: a database kept awake by a 60 second admin poll, and a recommendation API called on every page view instead of being cached.
+Before anything that runs on a schedule, holds a connection or calls a paid API on a hot path, answer out loud: does the database still sleep, and how many calls a month does it cost at current traffic. Cache before paying per call, in the database or in Vercel Runtime Cache.
 
-Before anything that runs on a schedule, holds a connection, or calls a paid API on a hot path, answer two questions out loud: does this let the database sleep, and how many calls a month does it cost at current traffic. Cache before paying per call: in our own database, or in a cache the Pro credit covers, such as Vercel Runtime Cache. A feature already included in a tier we hold is worth suggesting.
+## Environments
 
-## A note from Victor
-
-I like simple systems and code that looks obvious. Find the real constraint, then build the smallest thing that makes the correct behaviour unsurprising. Complexity that is already there has to earn its place again, and machinery that looks serious is still machinery.
-
-Fight scope creep, including your own. Asked for the avatar feature, I want the avatar feature. Tell me about the four adjacent improvements, let me pick.
-
-I read code better than paragraphs. Short answers. A reply that needs a table of contents is too long.
-
-Everything below is a good default. What I ask for in the conversation wins over it.
-
-## The ways to hurt yourself
-
-1. **The dev server is mine.** It is already running on my side. Same for anything interactive: a login flow, a migration against the local database, a command that waits for input. Hand me the exact command and wait for me to come back.
-2. **Database tooling aims at production by default.** A branch, a connection string or an environment file named after production may resolve to something else entirely. Name the environment out loud and confirm what it actually points at before any write. Reading production is yours, writing it is mine to trigger.
-3. **Only handler bodies are stripped from the client bundle.** Server clients and secrets survive at module scope and either break the build or ship to the browser. Lifting a helper out of a handler is the moment to check.
-4. **A migration that looks additive can still rewrite data.** Read the generated SQL before it runs. Ship schema work with the commands in order, the environment for each, and what happens to the rows that already exist.
+- **The dev server is Victor's.** It already runs on Victor's machine. Start or stop it only on request, and hand Victor anything interactive: a login, a prompt, a command that waits for input.
+- **Reach for the tools first.** Run the `gh`, `vercel`, Neon, Stripe, Sentry and `bunny` CLIs or MCPs yourself before handing Victor a command or a dashboard step.
+- **Read production freely, write it on request.** Write production (rows, env variables, platform settings) only when Victor asks in the conversation. Production migrations stay Victor's.
+- **Name the target before a write.** Database tooling aims at production by default, and a branch, connection string or env file named after production may resolve elsewhere. Say which environment a command hits and what it resolves to.
+- **The repository is public.** Issues, PRs and commits carry no account ID, key or threshold. Print no secret value.
 
 ## Hit every surface
 
-The most common defect here is a change that works on the path you tested and is missing everywhere else. Before calling a change done, walk this list and say which entries applied.
+The most common defect here is a change that works on the tested path and is missing everywhere else. Before calling a change done, walk this list and say which entries applied:
 
-- **Both locales.** Strings, plurals, emails, metadata, legal pages, and the URL shape with and without `/en/`.
-- **Every audience.** Anonymous Visitor, signed in User, Premium, and the Creator in Admin. A gate for one of them needs a state for the others.
-- **Both directions.** A way in comes with the way out and the way to see it. A dialog that opens meets one that is already open. A one way door is a bug.
-- **Server and client.** The same route renders on the server and hydrates on the client. State that exists on one side only is a hydration bug waiting.
-- **Phone and desktop.** Layout, touch targets, native share, video player.
-- **Discoverability.** A new public route means sitemap, metadata and structured data, or it is invisible.
-- **Emails.** A flow that changes an account state usually carries one, in both locales.
+- **Both locales**: strings, plurals, emails, metadata, legal pages, the URL with and without `/en/`.
+- **Every audience**: Visitor, User, Premium, and Victor in the administration. A gate for one needs a state for the others.
+- **Both directions**: a way in comes with the way out and the way to see it. A dialog that opens meets one already open.
+- **Server and client**: the same route renders on the server and hydrates on the client.
+- **Phone and desktop**: layout, touch targets, native share, the video player.
+- **Discoverability**: a new public route needs its sitemap entry, metadata and structured data.
+- **Emails**: a flow that changes an account state usually sends one, in both locales.
 
-## Research before writing
+## Verify
 
-Read the documentation of a library rather than recall it. Versions move fast here and the remembered answer is often one major behind. My assertions get the same treatment: check the premise, and tell me when it is wrong instead of building on it.
-
-Several unknowns left means asking before writing code. One round of questions is cheaper than a plan built on a guess. An unknown with an obvious default is yours to take, out loud.
-
-## Verifying
-
-Prove the change with the smallest thing that proves it: type check and lint the scope you touched, run the tests covering the behaviour you changed, write a targeted script when the logic is data shaped. Backend behaviour that can regress in silence earns a test rather than a paragraph.
-
-A local build runs as `pnpm build:e2e`: `pnpm build` validates the production env when it loads its config, and that env lives on Vercel only.
-
-The e2e suite reads `.env.e2e`, which lives in the main checkout only (the first line of `git worktree list`): copy it into a worktree. It targets the Neon branch `test`, which e2e runs are free to write. Each e2e role is one shared account, so `--repeat-each` runs with `--workers=1`.
-
-The running site is invisible to you. When the last proof is visual or device specific, say what to look at and on which surface, and let me confirm.
-
-A task is finished when nothing is left that only I can run. Anything left is listed, in order.
-
-## Reporting back
-
-French, plain technical language, short sentences. The first line says the outcome.
-
-- What changed and why, then stop.
-- What is dangerous. After a dependency bump or a refactor I want the risk and what to test, not the list of bugs upstream fixed.
-- A confidence level when you are guessing, and what would raise it.
-- A step skipped or a thing gone wrong belongs in the first sentence.
-- A session ending mid feature hands over: what is done, what is not, what to read first, which commands are still pending.
+- Read a library's current docs instead of recalling them. Check Victor's premises against the code and the docs, and say when one is wrong.
+- Prove a change with the smallest thing that proves it: the typecheck and lint of the scope, the tests of the behaviour, a script for data-shaped logic. Backend behaviour that can regress in silence gets a test.
+- Build locally with `pnpm build:e2e`: `pnpm build` validates the production env, which lives on Vercel only.
+- The e2e suite reads `.env.e2e` from the main checkout, the first line of `git worktree list`. Copy it into a worktree.
+- The running site is invisible to you. For a visual or device check, name what to look at and on which surface, and let Victor confirm.
+- A task is finished when nothing is left that only Victor can run. List what is left, in order.
 
 ## Scope
 
-The specification is what I asked for in the conversation. Plans live in the conversation too, this repository holds no plan file for a feature. Work that needs steps checks in between them.
+- Asked for the avatar feature, deliver the avatar feature. List what you saw along the way once, ranked, and let Victor pick. A "fais tout" covers everything listed, and nothing past it.
+- Plans live in the conversation and in GitHub issues. Research reports stay out of the repository.
+- Read the open issues before filing one.
 
-## Git
+## Git and GitHub
 
-Commit and push on my word only. `main` is the branch and a green push on it deploys, so the last look at the diff happens before the push, not after. Conventional title, English for messages and branches.
+- **Commit and push on Victor's word only.** "push" sends one commit straight to `main`, for a small change. "go pr" opens a pull request, for a bigger topic.
+- **Every issue and PR opens assigned and labelled**: `--assignee @me --label <label>`. The label follows the conventional type: `fix` → `bug`, `feat` → `enhancement`, `docs` → `documentation`, and `chore`, `test`, `refactor` carry their own name. A PR that closes an issue takes the issue's labels.
+- **Arm auto-merge right after `gh pr create`**: `gh pr merge <number> --auto --rebase`.
+- Conventional titles, in English.
 
-Every issue and PR opens assigned and labelled: `--assignee @me --label <label>` on `gh issue create` and `gh pr create`. The label follows the conventional type: `fix` → `bug`, `feat` → `enhancement`, `docs` → `documentation`, and `chore`, `test`, `refactor` carry their own name. A PR that closes an issue takes that issue's labels instead.
+## Docs
 
-Right after `gh pr create`, arm auto-merge with `gh pr merge <number> --auto --rebase`: the PR merges as soon as the required checks pass.
+- `knowledge/` changes only with a product decision: who Petit Meme serves, what an audience can do, the offer, a platform, the vision. A new admin badge, a bug fix or a renamed file leaves it alone. It names no code, no price, no quota and no count.
+- Agent docs (`AGENTS.md` files, project skills) change only when Victor asks. A skill reads the live setup instead of holding IDs or values, and its description triggers it without a pointer from here.
 
 ## Taste
 
-Write code a person would write. The tell of the other kind is defensive noise: a triple guard where the type already answers, a ternary chain nobody can read out loud, an abstraction wrapping a single call. When you catch yourself producing it, name the real constraint and write the small version instead.
+Victor likes simple systems and code that looks obvious. Find the real constraint, then write the smallest thing that makes the correct behaviour unsurprising. Existing complexity earns its place again.
 
-<!-- BEGIN:turborepo-agent-rules -->
+- Write code a person would write: let the types answer, keep each condition readable out loud, call a function directly.
+- A CI or config file outside the lint may keep a comment that states a constraint the file cannot show.
+- Writes that must all land run one after the other, so a failure stops the next one.
+- The UI stays minimal, and feedback goes through the site's toasts. UI work runs the `frontend-design` skill.
 
-# This is NOT the Turborepo you know
+## Reporting back
 
-Turborepo configuration, task behavior, and CLI commands can vary between installed versions and may differ from your training data. Resolve the `turbo` package from this file's directory or relevant workspace; in monorepos, it may not be visible from the repository root. For example, run `node -p "require.resolve('turbo/package.json')"` from a workspace that depends on `turbo`.
-
-Read `docs/README.md` inside that installed package first, then read the relevant pages from its `docs/` directory before changing Turborepo configuration or commands. Heed deprecation notices. These bundled docs match the installed package version and are available without network access.
-
-This block is written and re-added by `turbo` before repository-scoped commands when an AI agent is detected. In the Turborepo source repository, its template is defined in `crates/turborepo-cli/src/cli/agent_guidance.rs`. Removing the managed block while updates are enabled means a later qualifying invocation will add it again. Set `"agentGuidance": true` in the root `turbo.json` or `turbo.jsonc` to opt in; this does not remove an existing block. Keep the block committed with your work to avoid an uncommitted change on the next agent invocation.
-<!-- END:turborepo-agent-rules -->
+- After a dependency bump or a refactor, name the risk and what to test.
+- Give a confidence level when guessing, and what would raise it.
+- A session that ends mid-feature hands over: what is done, what is not, what to read first, which commands are pending.

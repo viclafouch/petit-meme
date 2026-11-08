@@ -8,15 +8,17 @@ import {
 import { DAY } from '~/constants/time'
 import { prismaClient } from '~/db/client.server'
 import type { Prisma } from '~/db/generated/prisma/client'
+import { buildSubscriptionInfo } from '~/routes/admin/-lib/premium'
+import { buildSubscriptionHistory } from '~/routes/admin/-lib/subscription-history'
 import {
   fetchActivityRows,
   fetchActivitySummary
 } from '~/routes/admin/-server/activity'
 import {
-  buildSubscriptionInfo,
   resolveAuthProvider,
   SUBSCRIPTION_LIST_SELECT
 } from '~/routes/admin/-server/users'
+import { fetchCustomerBilling } from '~/server/stripe-billing.server'
 import { adminRequiredMiddleware } from '~/server/user-auth'
 
 const USER_IP_LIST_SIZE = 8
@@ -119,3 +121,31 @@ export const getAdminUserActivity = createServerFn({ method: 'GET' })
       page: data.page
     })
   })
+
+const NO_STRIPE_BILLING = { subscriptions: [], invoices: [] }
+
+export const getAdminUserSubscriptionHistory = createServerFn({
+  method: 'GET'
+})
+  .middleware([adminRequiredMiddleware])
+  .validator(z.string())
+  .handler(async ({ data: userId }) => {
+    const user = await prismaClient.user.findUnique({
+      where: { id: userId },
+      select: { stripeCustomerId: true }
+    })
+
+    if (!user) {
+      throw notFound()
+    }
+
+    const billing = user.stripeCustomerId
+      ? await fetchCustomerBilling(user.stripeCustomerId)
+      : NO_STRIPE_BILLING
+
+    return buildSubscriptionHistory(billing)
+  })
+
+export type AdminUserSubscriptionHistory = Awaited<
+  ReturnType<typeof getAdminUserSubscriptionHistory>
+>

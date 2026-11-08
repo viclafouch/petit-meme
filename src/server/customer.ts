@@ -1,7 +1,7 @@
 import type { User } from 'better-auth'
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
-import { matchIsActiveSubscriptionStatus } from '~/constants/plan'
+import { matchIsActiveSubscriptionStatus } from '~/helpers/subscription'
 import { auth } from '~/lib/auth.server'
 import {
   matchIsPremiumGranted,

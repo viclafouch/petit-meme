@@ -17,8 +17,12 @@ import { Separator } from '~/components/ui/separator'
 import { DeleteAccountDialog } from '~/components/User/delete-account-dialog'
 import { UpdatePasswordDialog } from '~/components/User/update-password-dialog'
 import { getFreePlan, getPremiumPlan } from '~/constants/plan'
-import { formatDate } from '~/helpers/date'
-import { getSubscriptionDisplayInfo } from '~/helpers/subscription'
+import {
+  formatSubscriptionEnding,
+  getSubscriptionDisplayInfo,
+  getSubscriptionEnding,
+  matchIsCancellationPending
+} from '~/helpers/subscription'
 import { useStripeCheckout } from '~/hooks/use-stripe-checkout'
 import { matchIsPremiumGranted, type SessionUser } from '~/lib/role'
 import { captureWithFeature } from '~/lib/sentry'
@@ -49,9 +53,10 @@ const SubscriptionRow = ({
   const { goToBillingPortal } = useStripeCheckout()
 
   if (activeSubscription) {
-    const subscriptionDate = activeSubscription.periodEnd
-      ? formatDate(new Date(activeSubscription.periodEnd), getLocale())
-      : ''
+    const endingText = formatSubscriptionEnding(
+      getSubscriptionEnding(activeSubscription),
+      getLocale()
+    )
 
     return (
       <div className={SETTINGS_ROW_CLASS_NAME}>
@@ -66,13 +71,13 @@ const SubscriptionRow = ({
                 billingInterval: activeSubscription.billingInterval,
                 locale: getLocale()
               }).displayPrice
-            }{' '}
-            -{' '}
-            <span className="text-info">
-              {activeSubscription.cancelAtPeriodEnd
-                ? m.settings_subscription_ends({ date: subscriptionDate })
-                : m.settings_subscription_renews({ date: subscriptionDate })}
-            </span>
+            }
+            {endingText ? (
+              <>
+                {' '}
+                - <span className="text-info">{endingText}</span>
+              </>
+            ) : null}
           </p>
         </div>
         <Button
@@ -242,7 +247,7 @@ export const ProfileContent = ({
                 onClick={() => {
                   if (
                     activeSubscription &&
-                    !activeSubscription.cancelAtPeriodEnd
+                    !matchIsCancellationPending(activeSubscription)
                   ) {
                     toast.error(m.settings_cancel_subscription_first())
 

@@ -1,5 +1,5 @@
 import type React from 'react'
-import { Crown, Gift, Mail } from 'lucide-react'
+import { Crown, Gift, Mail, ShieldCheck } from 'lucide-react'
 import { DiscordIcon } from '~/components/icon/discord'
 import { XTwitterIcon } from '~/components/icon/x-twitter'
 import { Badge } from '~/components/ui/badge'
@@ -10,12 +10,15 @@ import {
 } from '~/components/ui/tooltip'
 import type { AuthProviderId } from '~/constants/auth'
 import { formatDate } from '~/helpers/date'
+import { formatSubscriptionEnding } from '~/helpers/subscription'
 import { getLocale } from '~/paraglide/runtime'
-import { getPremiumStatus } from '~/routes/admin/-lib/premium'
-import type {
-  EnrichedUser,
-  SubscriptionInfo
-} from '~/routes/admin/-server/users'
+import { SubscriptionStateBadge } from '~/routes/admin/-components/subscription-state-badge'
+import {
+  getPremiumStatus,
+  PREMIUM_PLAN_LABELS,
+  type SubscriptionInfo
+} from '~/routes/admin/-lib/premium'
+import type { EnrichedUser } from '~/routes/admin/-server/users'
 
 type UserStatusBadgesProps = Pick<EnrichedUser, 'banned' | 'emailVerified'>
 
@@ -86,44 +89,36 @@ export const AuthProviderBadge = ({ provider }: AuthProviderBadgeProps) => {
   )
 }
 
-type SubscriptionBadgeProps = {
-  isActive: boolean
-  monthCount: SubscriptionInfo['monthCount']
-  endsAt: SubscriptionInfo['endsAt']
+type EndingTooltipProps = {
+  ending: SubscriptionInfo['ending']
+  children: React.ReactNode
 }
 
-const SubscriptionBadge = ({
-  isActive,
-  monthCount,
-  endsAt
-}: SubscriptionBadgeProps) => {
-  const locale = getLocale()
-
-  const tooltipLines = [
-    `${monthCount} mois d'abonnement`,
-    endsAt ? `Fin : ${formatDate(new Date(endsAt), locale)}` : null
-  ]
-    .filter(Boolean)
-    .join('\n')
+const EndingTooltip = ({ ending, children }: EndingTooltipProps) => {
+  const endingText = ending
+    ? formatSubscriptionEnding(ending, getLocale())
+    : null
 
   return (
     <Tooltip>
-      <TooltipTrigger className="cursor-default rounded-md">
-        {isActive ? (
-          <Badge variant="amber" size="sm">
-            <Crown className="size-3" aria-hidden />
-            Premium
-          </Badge>
-        ) : (
-          <Badge variant="outline" size="sm">
-            <Crown className="size-3" aria-hidden />
-            Ancien
-          </Badge>
-        )}
+      <TooltipTrigger className="inline-flex cursor-default flex-wrap gap-1 rounded-md">
+        {children}
       </TooltipTrigger>
-      <TooltipContent className="whitespace-pre-line">
-        {tooltipLines}
-      </TooltipContent>
+      <TooltipContent>{endingText ?? 'Aucune date connue'}</TooltipContent>
+    </Tooltip>
+  )
+}
+
+const AdminPremiumBadge = () => {
+  return (
+    <Tooltip>
+      <TooltipTrigger className="cursor-default rounded-md">
+        <Badge size="sm">
+          <ShieldCheck className="size-3" aria-hidden />
+          Admin
+        </Badge>
+      </TooltipTrigger>
+      <TooltipContent>Premium inclus avec le rôle admin</TooltipContent>
     </Tooltip>
   )
 }
@@ -152,27 +147,41 @@ const GrantedPremiumBadge = ({ grantedAt }: GrantedPremiumBadgeProps) => {
   )
 }
 
-type PremiumBadgesProps = {
-  premiumGrantedAt: Date | null
+type PremiumBadgesProps = Pick<EnrichedUser, 'role' | 'premiumGrantedAt'> & {
   subscription: SubscriptionInfo
   emptyFallback: React.ReactNode
 }
 
 export const PremiumBadges = ({
+  role,
   premiumGrantedAt,
   subscription,
   emptyFallback
 }: PremiumBadgesProps) => {
-  const premiumStatus = getPremiumStatus({ premiumGrantedAt, subscription })
+  const premiumStatus = getPremiumStatus({
+    role,
+    premiumGrantedAt,
+    subscription
+  })
 
   switch (premiumStatus.source) {
+    case 'admin': {
+      return <AdminPremiumBadge />
+    }
+
     case 'paid': {
       return (
-        <SubscriptionBadge
-          isActive
-          monthCount={subscription.monthCount}
-          endsAt={subscription.endsAt}
-        />
+        <EndingTooltip ending={subscription.ending}>
+          <Badge variant="amber" size="sm">
+            <Crown className="size-3" aria-hidden />
+            {subscription.billingPeriod === null
+              ? 'Premium'
+              : PREMIUM_PLAN_LABELS[subscription.billingPeriod]}
+          </Badge>
+          {subscription.state === 'ending' ? (
+            <SubscriptionStateBadge state="ending" />
+          ) : null}
+        </EndingTooltip>
       )
     }
 
@@ -181,12 +190,14 @@ export const PremiumBadges = ({
     }
 
     case 'none': {
-      return subscription.status === 'past' ? (
-        <SubscriptionBadge
-          isActive={false}
-          monthCount={subscription.monthCount}
-          endsAt={subscription.endsAt}
-        />
+      if (subscription.state === 'failing') {
+        return <SubscriptionStateBadge state="failing" />
+      }
+
+      return subscription.state === 'ended' ? (
+        <EndingTooltip ending={subscription.ending}>
+          <SubscriptionStateBadge state="ended" />
+        </EndingTooltip>
       ) : (
         emptyFallback
       )

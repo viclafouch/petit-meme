@@ -1,67 +1,26 @@
-import type { Stripe } from 'stripe'
 import type { MemeExportMode } from '~/constants/meme'
-import { SECOND, THIRTY_DAYS_MS } from '~/constants/time'
+import { THIRTY_DAYS_MS } from '~/constants/time'
 import { prismaClient } from '~/db/client.server'
 import {
   countDatesWithin,
   countCancellations,
   countNewSubscriptions,
   getRecapWindows,
-  type RecapInvoice,
-  type RecapSubscription,
   type RecapWindow,
   summarizeSubscribersAt,
-  sumPaidCents,
-  toMonthlyCents
+  sumPaidCentsWithin
 } from '~/helpers/weekly-recap'
 import { getStripeClient } from '~/lib/stripe.server'
+import {
+  fromUnixSeconds,
+  toBillingInvoice,
+  toBillingSubscription,
+  toUnixSeconds
+} from '~/server/stripe-billing.server'
 
 const STRIPE_LIST_MAX_ITEMS = 10_000
 
 type RecapWindows = ReturnType<typeof getRecapWindows>
-
-const fromUnixSeconds = (seconds: number) => {
-  return new Date(seconds * SECOND)
-}
-
-const fromNullableUnixSeconds = (seconds: number | null) => {
-  return seconds === null ? null : fromUnixSeconds(seconds)
-}
-
-const toUnixSeconds = (date: Date) => {
-  return Math.floor(date.getTime() / SECOND)
-}
-
-const toRecapSubscription = (
-  subscription: Stripe.Subscription
-): RecapSubscription => {
-  const [item] = subscription.items.data
-  const interval = item?.price.recurring?.interval ?? 'month'
-  const cents = (item?.price.unit_amount ?? 0) * (item?.quantity ?? 1)
-
-  return {
-    customerId:
-      typeof subscription.customer === 'string'
-        ? subscription.customer
-        : subscription.customer.id,
-    status: subscription.status,
-    interval,
-    monthlyCents: toMonthlyCents(cents, interval),
-    startedAt: fromUnixSeconds(subscription.start_date),
-    canceledAt: fromNullableUnixSeconds(subscription.canceled_at),
-    cancelAt: fromNullableUnixSeconds(subscription.cancel_at),
-    endedAt: fromNullableUnixSeconds(subscription.ended_at)
-  }
-}
-
-const toRecapInvoice = (invoice: Stripe.Invoice): RecapInvoice => {
-  return {
-    paidAt: fromUnixSeconds(
-      invoice.status_transitions.paid_at ?? invoice.created
-    ),
-    amountPaidCents: invoice.amount_paid
-  }
-}
 
 async function fetchStripeActivity(since: Date) {
   const stripe = getStripeClient()
@@ -89,8 +48,8 @@ async function fetchStripeActivity(since: Date) {
   ])
 
   return {
-    subscriptions: subscriptions.map(toRecapSubscription),
-    invoices: invoices.map(toRecapInvoice),
+    subscriptions: subscriptions.map(toBillingSubscription),
+    invoices: invoices.map(toBillingInvoice),
     accountDeletions: deletedCustomers.map((event) => {
       return fromUnixSeconds(event.created)
     })
@@ -198,7 +157,7 @@ export async function buildWeeklyRecap(now: Date) {
       downloads: activity.downloads,
       shares: activity.shares,
       collectedCents: compare((window) => {
-        return sumPaidCents(stripeActivity.invoices, window)
+        return sumPaidCentsWithin(stripeActivity.invoices, window)
       })
     }
   }

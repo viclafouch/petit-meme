@@ -26,6 +26,7 @@ import {
   UserStatusBadges
 } from '~/routes/admin/users/-components/user-badges'
 import { UserIpList } from '~/routes/admin/users/-components/user-ip-list'
+import { UserSubscriptionHistory } from '~/routes/admin/users/-components/user-subscription-history'
 
 const routeApi = getRouteApi('/admin/users/$userId')
 
@@ -55,6 +56,7 @@ const UserIdentity = ({ user, subscription }: UserIdentityProps) => {
             emailVerified={user.emailVerified}
           />
           <PremiumBadges
+            role={user.role}
             premiumGrantedAt={user.premiumGrantedAt}
             subscription={subscription}
             emptyFallback={
@@ -113,6 +115,7 @@ export const UserPage = () => {
                 tiles={buildActivityTiles(detailQuery.data.summary.totals)}
               />
             </section>
+            <UserSubscriptionHistory userId={userId} />
             <SectionCard
               title="Dernières IP connues"
               action={

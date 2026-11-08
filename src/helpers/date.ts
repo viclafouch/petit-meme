@@ -3,7 +3,6 @@ import {
   DAYS_PER_WEEK,
   HOUR,
   MINUTE,
-  MONTHS_IN_YEAR,
   ONE_YEAR_MS,
   SECOND,
   THIRTY_DAYS_MS
@@ -69,14 +68,6 @@ export function formatRelativeTime(date: Date, locale: Locale, now: number) {
   return new Intl.RelativeTimeFormat(locale, { numeric: 'auto' }).format(
     value,
     threshold.unit
-  )
-}
-
-export function differenceInMonths(dateA: Date, dateB: Date) {
-  return (
-    (dateA.getFullYear() - dateB.getFullYear()) * MONTHS_IN_YEAR +
-    dateA.getMonth() -
-    dateB.getMonth()
   )
 }
 

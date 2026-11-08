@@ -1,6 +1,14 @@
-import type { Stripe } from 'stripe'
-import { DAY, DAYS_PER_WEEK, MONTHS_IN_YEAR } from '~/constants/time'
+import { DAY, DAYS_PER_WEEK } from '~/constants/time'
 import { formatDate, truncateToUtcDay } from '~/helpers/date'
+import {
+  type BillingInvoice,
+  type BillingSubscription,
+  matchHasBeenPaid,
+  matchIsPayingAt,
+  matchIsYearlyInterval,
+  sumPaidCents,
+  toMonthlyCents
+} from '~/helpers/subscription'
 
 export type RecapWindow = {
   start: Date
@@ -11,34 +19,6 @@ export type Comparison = {
   current: number
   previous: number
 }
-
-export type RecapSubscription = {
-  customerId: string
-  status: Stripe.Subscription.Status
-  interval: Stripe.Price.Recurring.Interval
-  monthlyCents: number
-  startedAt: Date
-  canceledAt: Date | null
-  cancelAt: Date | null
-  endedAt: Date | null
-}
-
-export type RecapInvoice = {
-  paidAt: Date
-  amountPaidCents: number
-}
-
-const NEVER_PAID_STATUSES = [
-  'incomplete',
-  'incomplete_expired'
-] as const satisfies Stripe.Subscription.Status[]
-
-const NOT_PAYING_STATUSES = [
-  ...NEVER_PAID_STATUSES,
-  'past_due',
-  'unpaid',
-  'paused'
-] as const satisfies Stripe.Subscription.Status[]
 
 const WEEK = DAYS_PER_WEEK * DAY
 
@@ -59,33 +39,8 @@ const matchIsWithinWindow = (
   return date !== null && date >= start && date < end
 }
 
-export const toMonthlyCents = (
-  cents: number,
-  interval: Stripe.Price.Recurring.Interval
-) => {
-  return interval === 'year' ? cents / MONTHS_IN_YEAR : cents
-}
-
-const matchIsPayingAt = (subscription: RecapSubscription, date: Date) => {
-  const isPayingStatus = !NOT_PAYING_STATUSES.some((status) => {
-    return status === subscription.status
-  })
-
-  return (
-    isPayingStatus &&
-    subscription.startedAt < date &&
-    (subscription.endedAt === null || subscription.endedAt > date)
-  )
-}
-
-const matchHasBeenPaid = (subscription: RecapSubscription) => {
-  return !NEVER_PAID_STATUSES.some((status) => {
-    return status === subscription.status
-  })
-}
-
 export const summarizeSubscribersAt = (
-  subscriptions: RecapSubscription[],
+  subscriptions: BillingSubscription[],
   date: Date
 ) => {
   const paying = subscriptions.filter((subscription) => {
@@ -94,19 +49,21 @@ export const summarizeSubscribersAt = (
 
   return {
     monthly: paying.filter((subscription) => {
-      return subscription.interval !== 'year'
+      return !matchIsYearlyInterval(subscription.interval)
     }).length,
     yearly: paying.filter((subscription) => {
-      return subscription.interval === 'year'
+      return matchIsYearlyInterval(subscription.interval)
     }).length,
     mrrCents: paying.reduce((total, subscription) => {
-      return total + subscription.monthlyCents
+      return (
+        total + toMonthlyCents(subscription.amountCents, subscription.interval)
+      )
     }, 0)
   }
 }
 
 export const countNewSubscriptions = (
-  subscriptions: RecapSubscription[],
+  subscriptions: BillingSubscription[],
   window: RecapWindow
 ) => {
   return subscriptions.filter((subscription) => {
@@ -118,7 +75,7 @@ export const countNewSubscriptions = (
 }
 
 export const countCancellations = (
-  subscriptions: RecapSubscription[],
+  subscriptions: BillingSubscription[],
   window: RecapWindow
 ) => {
   return subscriptions.filter((subscription) => {
@@ -129,14 +86,15 @@ export const countCancellations = (
   }).length
 }
 
-export const sumPaidCents = (invoices: RecapInvoice[], window: RecapWindow) => {
-  return invoices
-    .filter((invoice) => {
+export const sumPaidCentsWithin = (
+  invoices: BillingInvoice[],
+  window: RecapWindow
+) => {
+  return sumPaidCents(
+    invoices.filter((invoice) => {
       return matchIsWithinWindow(invoice.paidAt, window)
     })
-    .reduce((total, invoice) => {
-      return total + invoice.amountPaidCents
-    }, 0)
+  )
 }
 
 export const countDatesWithin = (dates: Date[], window: RecapWindow) => {

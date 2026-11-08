@@ -1,16 +1,21 @@
+import { Stripe } from 'stripe'
 import { expect, test } from '@playwright/test'
 import { HTTP_STATUS } from '~/constants/http'
+import { STRIPE_API_VERSION } from '~/constants/stripe'
 import {
   BUNNY_ZONE_PROBES,
   type BunnyZone,
   runZoneProbe
 } from '../scripts/lib/bunny-zone-contract'
+import { readStripePriceContract } from '../scripts/lib/stripe-price-contract'
 import vercelConfig from '../vercel.json' with { type: 'json' }
 import {
   E2E_BASE_URL,
   E2E_BUNNY_HOSTNAME,
   E2E_BUNNY_ORIGINAL_ACCESS_KEY,
   E2E_BUNNY_TOKEN_AUTH_KEY,
+  E2E_STRIPE_PRICE_IDS,
+  E2E_STRIPE_SECRET_KEY,
   E2E_VIDEO_BUNNY_ID
 } from './env'
 
@@ -142,4 +147,18 @@ test.describe('the Bunny zone contract', () => {
       expect(expectedStatuses).toContain(status)
     })
   }
+})
+
+test.describe('the Stripe price contract', () => {
+  test('the Stripe prices match the catalog', async () => {
+    const stripe = new Stripe(E2E_STRIPE_SECRET_KEY, {
+      apiVersion: STRIPE_API_VERSION
+    })
+
+    const results = await readStripePriceContract(stripe, E2E_STRIPE_PRICE_IDS)
+
+    for (const { expected, actual } of results) {
+      expect(actual).toStrictEqual(expected)
+    }
+  })
 })

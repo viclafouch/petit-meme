@@ -12,17 +12,6 @@ type PlanFeature = {
 
 export const PREMIUM_PLAN_NAME = 'premium'
 
-export const ACTIVE_SUBSCRIPTION_STATUSES = [
-  'active',
-  'trialing'
-] as const satisfies readonly Subscription['status'][]
-
-export const matchIsActiveSubscriptionStatus = (status: string) => {
-  return ACTIVE_SUBSCRIPTION_STATUSES.some((activeStatus) => {
-    return activeStatus === status
-  })
-}
-
 export const STRIPE_BILLING_INTERVALS = [
   'day',
   'week',

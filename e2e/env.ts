@@ -11,7 +11,10 @@ const E2E_ENV_SCHEMA = z.object({
   BUNNY_TOKEN_AUTH_KEY: z.string().min(1),
   BUNNY_ORIGINAL_ACCESS_KEY: z.string().min(1),
   E2E_VIDEO_BUNNY_ID: z.string().min(1),
-  CRON_SECRET: z.string().min(1)
+  CRON_SECRET: z.string().min(1),
+  STRIPE_SECRET_KEY: z.string().min(1),
+  STRIPE_MONTHLY_PRICE_ID: z.string().min(1),
+  STRIPE_ANNUAL_PRICE_ID: z.string().min(1)
 })
 
 const parsedE2eEnv = E2E_ENV_SCHEMA.safeParse(
@@ -24,7 +27,7 @@ const parsedE2eEnv = E2E_ENV_SCHEMA.safeParse(
 
 if (!parsedE2eEnv.success) {
   throw new Error(
-    'Missing .env.e2e, or missing or invalid one of VITE_SITE_URL, DATABASE_URL, BETTER_AUTH_SECRET, VITE_BUNNY_HOSTNAME, BUNNY_TOKEN_AUTH_KEY, BUNNY_ORIGINAL_ACCESS_KEY, E2E_VIDEO_BUNNY_ID or CRON_SECRET in it.'
+    'Missing .env.e2e, or missing or invalid one of VITE_SITE_URL, DATABASE_URL, BETTER_AUTH_SECRET, VITE_BUNNY_HOSTNAME, BUNNY_TOKEN_AUTH_KEY, BUNNY_ORIGINAL_ACCESS_KEY, E2E_VIDEO_BUNNY_ID, CRON_SECRET, STRIPE_SECRET_KEY, STRIPE_MONTHLY_PRICE_ID or STRIPE_ANNUAL_PRICE_ID in it.'
   )
 }
 
@@ -37,6 +40,11 @@ export const E2E_BUNNY_ORIGINAL_ACCESS_KEY =
   parsedE2eEnv.data.BUNNY_ORIGINAL_ACCESS_KEY
 export const { E2E_VIDEO_BUNNY_ID } = parsedE2eEnv.data
 export const E2E_CRON_SECRET = parsedE2eEnv.data.CRON_SECRET
+export const E2E_STRIPE_SECRET_KEY = parsedE2eEnv.data.STRIPE_SECRET_KEY
+export const E2E_STRIPE_PRICE_IDS = {
+  monthly: parsedE2eEnv.data.STRIPE_MONTHLY_PRICE_ID,
+  yearly: parsedE2eEnv.data.STRIPE_ANNUAL_PRICE_ID
+}
 
 // oxlint-disable-next-line node/no-process-env -- the e2e env boundary reads the CI flag that GitHub Actions sets
 export const IS_CI = Boolean(process.env.CI)

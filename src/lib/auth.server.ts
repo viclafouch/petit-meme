@@ -35,6 +35,10 @@ import {
 import { getAvatarSlotIdForEmail, resolveAvatarPath } from '~/helpers/avatar'
 import { formatDate } from '~/helpers/date'
 import { formatCentsToEuros } from '~/helpers/number'
+import {
+  getSubscriptionPriceCents,
+  matchIsYearlyInterval
+} from '~/helpers/subscription'
 import { boundProviderName } from '~/helpers/user-name'
 import {
   rejectUnverifiedDiscordEmail,
@@ -45,6 +49,7 @@ import { sendEmail, sendEmailInBackground } from '~/lib/resend.server'
 import { captureWithFeature } from '~/lib/sentry'
 import { getStripeClient } from '~/lib/stripe.server'
 import { getLocale } from '~/paraglide/runtime'
+import { toBillingSubscription } from '~/server/stripe-billing.server'
 import { recordActivityEvent } from '~/utils/activity-event.server'
 import { buildEmailVerificationPath } from '~/utils/email-verification.server'
 import { cleanupUserData } from '~/utils/user-cleanup.server'
@@ -378,14 +383,12 @@ const getAuthConfig = createServerOnlyFn(() => {
               }
             })
 
-            const stripePrice = stripeSubscription.items.data[0]?.price
-            const priceCents = stripePrice?.unit_amount ?? 0
-            const isAnnual = stripePrice?.recurring?.interval === 'year'
-
+            const { interval } = toBillingSubscription(stripeSubscription)
             const { locale } = user
-            const formattedAmount = formatCentsToEuros(priceCents, {
-              locale
-            })
+            const formattedAmount = formatCentsToEuros(
+              getSubscriptionPriceCents(interval),
+              { locale }
+            )
 
             sendEmailInBackground({
               to: user.email,
@@ -394,7 +397,7 @@ const getAuthConfig = createServerOnlyFn(() => {
                 username: user.name,
                 planTitle: 'Premium',
                 amount: formattedAmount,
-                isAnnual,
+                isAnnual: matchIsYearlyInterval(interval),
                 locale
               }),
               logMessage: 'Sending subscription confirmed email to'

@@ -4,6 +4,7 @@ import { getRouteApi, useNavigate } from '@tanstack/react-router'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { DATE_WITH_TIME_OPTIONS, formatDate } from '~/helpers/date'
+import { formatSubscriptionEnding } from '~/helpers/subscription'
 import { getLocale } from '~/paraglide/runtime'
 import { SectionHeading } from '~/routes/admin/-components/section-heading'
 import { getPremiumStatus } from '~/routes/admin/-lib/premium'
@@ -63,23 +64,24 @@ type PremiumSummaryProps = Pick<AdminUserDetailPayload, 'user' | 'subscription'>
 const PremiumSummary = ({ user, subscription }: PremiumSummaryProps) => {
   const locale = getLocale()
 
-  if (user.role === 'admin') {
-    return <PanelNote>Inclus avec le rôle admin.</PanelNote>
-  }
-
   const premiumStatus = getPremiumStatus({
+    role: user.role,
     premiumGrantedAt: user.premiumGrantedAt,
     subscription
   })
+  const endingText = subscription.ending
+    ? formatSubscriptionEnding(subscription.ending, locale)
+    : null
 
   switch (premiumStatus.source) {
+    case 'admin': {
+      return <PanelNote>Premium inclus avec le rôle admin.</PanelNote>
+    }
+
     case 'paid': {
       return (
         <PanelNote>
-          Abonnement payant depuis {subscription.monthCount} mois.
-          {subscription.endsAt
-            ? ` Période en cours jusqu’au ${formatDate(new Date(subscription.endsAt), locale)}.`
-            : null}
+          Abonnement payant.{endingText ? ` ${endingText}.` : null}
         </PanelNote>
       )
     }
@@ -94,10 +96,15 @@ const PremiumSummary = ({ user, subscription }: PremiumSummaryProps) => {
     }
 
     case 'none': {
-      return subscription.status === 'past' && subscription.endsAt ? (
+      if (subscription.state === 'failing') {
+        return (
+          <PanelNote>Plan gratuit, le dernier paiement a échoué.</PanelNote>
+        )
+      }
+
+      return subscription.state === 'ended' ? (
         <PanelNote>
-          Plan gratuit. Ancien abonné jusqu’au{' '}
-          {formatDate(new Date(subscription.endsAt), locale)}.
+          Plan gratuit, ancien abonné.{endingText ? ` ${endingText}.` : null}
         </PanelNote>
       ) : (
         <PanelNote>Plan gratuit.</PanelNote>

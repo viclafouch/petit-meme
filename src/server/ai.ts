@@ -4,6 +4,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { setResponseStatus } from '@tanstack/react-start/server'
 import { HTTP_STATUS } from '~/constants/http'
 import { prismaClient } from '~/db/client.server'
+import { MemeContentLocale } from '~/db/generated/prisma/enums'
 import { serverEnv } from '~/env/server.server'
 import { getErrorMessage } from '~/helpers/error'
 import { LOCALE_META } from '~/helpers/i18n-content'
@@ -31,7 +32,8 @@ const getGeminiClient = () => {
 
 const GEMINI_TRANSLATION_MODEL = 'gemini-3.5-flash-lite'
 const GEMINI_VIDEO_MODEL = 'gemini-3.8-flash'
-const GEMINI_TIMEOUT_MS = 60_000
+const GEMINI_TRANSLATION_TIMEOUT_MS = 60_000
+const GEMINI_VIDEO_TIMEOUT_MS = 150_000
 const GEMINI_FILE_POLL_INTERVAL_MS = 2000
 const GEMINI_FILE_MAX_RETRIES = 15
 
@@ -66,7 +68,12 @@ async function waitForFileActive(fileName: string) {
 const aiAssistResultSchema = z.object({
   title: z
     .string()
-    .describe('Titre du mème, au format « [qui] [action] - [source] »'),
+    .describe('Titre du mème, au format « [accroche] - [source] »'),
+  source: z
+    .string()
+    .describe(
+      'L’émission, le film, la série, la personne à l’écran ou l’origine de la vidéo'
+    ),
   description: z
     .string()
     .describe('Description de la scène, de ce qu’on y voit et entend'),
@@ -74,35 +81,48 @@ const aiAssistResultSchema = z.object({
     .array(z.string().describe('Un mot-clé en minuscules, d’un seul mot'))
     .min(AI_ASSIST_KEYWORDS_MIN)
     .max(AI_ASSIST_KEYWORDS_MAX)
-    .describe('Mots-clés pour retrouver ce mème précis')
+    .describe('Mots-clés pour retrouver ce mème précis'),
+  contentLocale: z
+    .enum(MemeContentLocale)
+    .describe('La langue dont le mème a besoin pour être compris'),
+  doubt: z
+    .string()
+    .describe('Ce dont tu n’es pas sûr, vide quand tu es sûr de tout')
 })
 
-export type AiAssistResult = z.infer<typeof aiAssistResultSchema>
+export type AiAssistResult = Pick<
+  z.infer<typeof aiAssistResultSchema>,
+  'title' | 'description' | 'keywords'
+>
 
 type ModelInteractionParams =
   Interactions.InteractionCreateParams.CreateModelInteractionParamsNonStreaming
 
 type RequestGeminiJsonParams<TSchema extends z.ZodType> = Pick<
   ModelInteractionParams,
-  'model' | 'input'
+  'model' | 'input' | 'tools'
 > & {
   thinkingLevel: NonNullable<
     ModelInteractionParams['generation_config']
   >['thinking_level']
   schema: TSchema
+  timeoutMs: number
 }
 
 async function requestGeminiJson<TSchema extends z.ZodType>({
   model,
   input,
+  tools,
   thinkingLevel,
-  schema
+  schema,
+  timeoutMs
 }: RequestGeminiJsonParams<TSchema>) {
   const interaction = await getGeminiClient().interactions.create(
     {
       model,
       store: false,
       input,
+      tools,
       response_format: {
         type: 'text',
         mime_type: 'application/json',
@@ -111,14 +131,14 @@ async function requestGeminiJson<TSchema extends z.ZodType>({
       generation_config: { thinking_level: thinkingLevel }
     },
     {
-      signal: AbortSignal.timeout(GEMINI_TIMEOUT_MS),
+      signal: AbortSignal.timeout(timeoutMs),
       retries: {
         strategy: 'backoff',
         backoff: {
           initialInterval: 500,
           maxInterval: 8000,
           exponent: 2,
-          maxElapsedTime: GEMINI_TIMEOUT_MS
+          maxElapsedTime: timeoutMs
         },
         retryConnectionErrors: true
       }
@@ -150,16 +170,22 @@ function buildAiAssistPrompt({
 
   return `Tu écris la fiche de ce mème vidéo pour Petit Meme, en ${label}.${adminContext}
 
-Regarde l'image et écoute le son. La réplique, la chanson ou le bruitage identifient souvent le mème : sers-t'en pour reconnaître la source et le template.
+Regarde l'image et écoute le son en entier, jusqu'à la dernière seconde. Cherche sur Google pour confirmer qui parle, d'où vient l'extrait, et si la réplique entendue est connue.
 
 Le public a entre 15 et 35 ans : écris avec les mots simples qu'il dit à l'oral, comme « rigole », « regarde » ou « pleure ».
 
-- title : 60 caractères au plus, au format « [qui] [action] - [source] ». Qui : le personnage ou l'acteur. Source : le film, la série ou l'émission, quand il y en a une. Exemples : « Tobey Maguire qui rigole - Spider-Man 3 », « Chat qui fixe la caméra », « Pedro Pascal qui pleure puis rit ».
-- description : 200 caractères au plus. Elle commence par « ${DESCRIPTION_PREFIX[targetLocale]} », puis décrit la scène : ce qu'on voit, et ce qu'on entend quand le son compte.
+- title : 60 caractères au plus, toujours au format « [accroche] - [source] ».
+  - L'accroche est la réplique culte dès que quelqu'un en dit une, même courte, même à moitié audible : c'est elle que les gens tapent pour retrouver le mème. Garde ses mots exacts, sans guillemets. Exemple : « Mon sperme ne t'a pas suffi ?! - Le jour où tout a basculé ».
+  - Sans réplique marquante, l'accroche dit qui fait quoi. Exemples : « Tobey Maguire qui rigole - Spider-Man 3 », « Chat qui fixe la caméra - TikTok ».
+  - La partie après « - » reprend le champ source, mot pour mot.
+- source : jamais vide. Prends la première qui s'applique : l'émission, le film, la série ou le jeu ; sinon la personne connue à l'écran ou l'auteur de la vidéo ; sinon la plateforme ou le contexte d'origine, comme « TikTok », « Twitch » ou « Vidéo amateur ». Quand la source est une supposition, dis-le dans doubt.
+- description : 200 caractères au plus. Elle commence par « ${DESCRIPTION_PREFIX[targetLocale]} », puis décrit la scène : ce qu'on voit, et la réplique entendue quand il y en a une.
 - keywords : ${AI_ASSIST_KEYWORDS_MIN} à ${AI_ASSIST_KEYWORDS_MAX} mots-clés en minuscules, d'un seul mot chacun (un nom propre compte pour un mot). Chaque mot-clé aide à retrouver ce mème précis et ajoute un mot absent du titre :
-  - les noms propres : l'acteur, le personnage, le film ou la série ;
+  - les noms propres : l'acteur, le personnage, le film, la série ou l'émission ;
   - le nom du template quand tu le reconnais, comme « bully maguire » ou « drake hotline bling » ;
-  - les verbes et adjectifs qu'un jeune taperait pour le chercher, comme « marrant », « rigoler », « triste » ou « choqué ».`
+  - les verbes et adjectifs qu'un jeune taperait pour le chercher, comme « marrant », « rigoler », « triste » ou « choqué ».
+- contentLocale : UNIVERSAL quand ni la parole ni le texte à l'écran ne comptent pour comprendre le mème. Sinon la langue parlée : FR pour le français, EN pour l'anglais.
+- doubt : une phrase courte sur ce dont tu n'es pas sûr, vide quand tu es sûr de tout. Dans le doute sur la langue, choisis la langue parlée et dis-le ici.`
 }
 
 async function deleteGeminiFile(fileName: string, failureMessage: string) {
@@ -309,6 +335,7 @@ export const translateMemeContent = createServerFn({ method: 'POST' })
         model: GEMINI_TRANSLATION_MODEL,
         input: prompt,
         thinkingLevel: 'minimal',
+        timeoutMs: GEMINI_TRANSLATION_TIMEOUT_MS,
         schema: responseSchema
       })
 
@@ -364,7 +391,9 @@ export const aiAssistMemeContent = createServerFn({ method: 'POST' })
           },
           { type: 'text', text: prompt }
         ],
+        tools: [{ type: 'google_search' }],
         thinkingLevel: 'medium',
+        timeoutMs: GEMINI_VIDEO_TIMEOUT_MS,
         schema: aiAssistResultSchema
       })
 

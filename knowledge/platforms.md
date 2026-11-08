@@ -38,7 +38,9 @@ Sends every email: account confirmation, password reset, subscription and gift e
 
 ### Google Gemini: AI Assist
 
-Watches and listens to a video, then writes its record and its translations. It is the one model that takes video and sound together. When Google's service is saturated, AI Assist gives up after a set time instead of hanging.
+Watches and listens to a video, searches Google to confirm where it comes from, then writes its record and its translations. It is the one model that takes video and sound together. When Google's service is saturated, AI Assist gives up after a set time instead of hanging.
+
+In November 2026, a blind comparison on Memes with hand-written records picked Gemini 3.8 Flash over Gemini 4 Argon: records as good, faster answers, where Argon sometimes never answered. Pushing the video settings to their maximum made the records slower and dearer, not better. A sharper prompt did make them better. Models change from month to month, so the comparison runs again every few months, on the newest Gemini model and on the prompt, to keep the best record at the lowest cost.
 
 ### Anthropic Claude: AI search
 

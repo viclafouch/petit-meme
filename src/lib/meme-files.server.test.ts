@@ -20,7 +20,7 @@ const BUNNY_ID = 'bunny-video-id'
 const STREAM_VIDEO_URL = `https://video.bunnycdn.com/library/4242/videos/${BUNNY_ID}`
 const MP4_URL = `https://storage.bunnycdn.com/petit-meme/${BUNNY_ID}.mp4`
 const MP3_URL = `https://storage.bunnycdn.com/petit-meme/${BUNNY_ID}.mp3`
-const ORIGINAL_URL = `https://cdn.bunny.test/${BUNNY_ID}/original`
+const ORIGINAL_URL = `https://cdn-test.petit-meme.io/${BUNNY_ID}/original`
 const ORIGINAL_ACCESS_KEY = 'original-access-key'
 
 const stubBunny = (statusByUrl: Record<string, number> = {}) => {
@@ -46,7 +46,7 @@ const readDeletedUrls = (fetchMock: ReturnType<typeof stubBunny>) => {
 
 const stubBunnyEnv = () => {
   vi.stubEnv('BUNNY_LIBRARY_ID', '4242')
-  vi.stubEnv('VITE_BUNNY_HOSTNAME', 'cdn.bunny.test')
+  vi.stubEnv('VITE_BUNNY_HOSTNAME', 'cdn-test.petit-meme.io')
   vi.stubEnv('BUNNY_TOKEN_AUTH_KEY', 'token-auth-key-of-at-least-32-chars')
   vi.stubEnv('BUNNY_ORIGINAL_ACCESS_KEY', ORIGINAL_ACCESS_KEY)
   vi.stubEnv('BUNNY_ACCESS_KEY', 'stream-access-key')

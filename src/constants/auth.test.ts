@@ -1,11 +1,14 @@
 import { betterAuth } from 'better-auth'
 import { memoryAdapter } from 'better-auth/adapters/memory'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { AUTH_BASE_PATH, AUTH_RATE_LIMIT } from '~/constants/auth'
 import { HTTP_STATUS } from '~/constants/http'
+import { HOUR, SECOND } from '~/constants/time'
 
 const BASE_URL = 'http://localhost:3000'
 const SIGN_IN_MAX = AUTH_RATE_LIMIT.customRules['/sign-in/email'].max
+const PASSWORD_RESET_MAX =
+  AUTH_RATE_LIMIT.customRules['/request-password-reset'].max
 
 const createSharedDatabase = () => {
   return { user: [], session: [], account: [], verification: [], rateLimit: [] }
@@ -24,16 +27,41 @@ const createInstance = (database: ReturnType<typeof createSharedDatabase>) => {
 
 type Instance = ReturnType<typeof createInstance>
 
-const signIn = async (instance: Instance, ip: string) => {
+type PostAuthParams = {
+  instance: Instance
+  path: string
+  ip: string
+  body: Record<string, string>
+}
+
+const postAuth = async ({ instance, path, ip, body }: PostAuthParams) => {
   const response = await instance.handler(
-    new Request(`${BASE_URL}${AUTH_BASE_PATH}/sign-in/email`, {
+    new Request(`${BASE_URL}${AUTH_BASE_PATH}${path}`, {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-forwarded-for': ip },
-      body: JSON.stringify({ email: 'nobody@example.test', password: 'x' })
+      body: JSON.stringify(body)
     })
   )
 
   return response.status
+}
+
+const signIn = (instance: Instance, ip: string) => {
+  return postAuth({
+    instance,
+    path: '/sign-in/email',
+    ip,
+    body: { email: 'nobody@example.test', password: 'x' }
+  })
+}
+
+const requestPasswordReset = (instance: Instance, ip: string) => {
+  return postAuth({
+    instance,
+    path: '/request-password-reset',
+    ip,
+    body: { email: 'nobody@example.test' }
+  })
 }
 
 const getSession = async (instance: Instance, ip: string) => {
@@ -60,6 +88,10 @@ const repeat = async (
 }
 
 describe('auth rate limit', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
   it('should share one counter between two instances on the same database', async () => {
     const database = createSharedDatabase()
     const instanceA = createInstance(database)
@@ -94,5 +126,31 @@ describe('auth rate limit', () => {
     })
 
     expect(statuses).not.toContain(HTTP_STATUS.TOO_MANY_REQUESTS)
+  })
+
+  it('should refuse password reset requests for one hour past the limit', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    const instance = createInstance(createSharedDatabase())
+    const ip = '203.0.113.4'
+
+    await repeat(PASSWORD_RESET_MAX, () => {
+      return requestPasswordReset(instance, ip)
+    })
+    vi.advanceTimersByTime(HOUR - SECOND)
+
+    expect(await requestPasswordReset(instance, ip)).toBe(
+      HTTP_STATUS.TOO_MANY_REQUESTS
+    )
+  })
+
+  it('should only hold rules for endpoints that better-auth serves', () => {
+    const instance = createInstance(createSharedDatabase())
+    const servedPaths = Object.values(instance.api).map((endpoint) => {
+      return endpoint.path
+    })
+
+    expect(servedPaths).toStrictEqual(
+      expect.arrayContaining(Object.keys(AUTH_RATE_LIMIT.customRules))
+    )
   })
 })

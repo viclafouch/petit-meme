@@ -30,7 +30,7 @@ export const AUTH_RATE_LIMIT = {
     '/get-session': false,
     '/sign-in/email': { window: 300, max: 10 },
     '/sign-up/email': { window: 3600, max: 3 },
-    '/forget-password': { window: 3600, max: 3 },
+    '/request-password-reset': { window: 3600, max: 3 },
     '/change-password': { window: 900, max: 5 },
     '/send-verification-email': { window: 60, max: 2 }
   }

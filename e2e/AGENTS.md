@@ -5,4 +5,3 @@
 - Two seeds: `seed.setup.ts` prepares the database and runs before everything else. `seed.spec.ts` puts the browser in the state every scenario starts from, and the Playwright agents replay it.
 - Reduced motion stays on: it keeps the suite fast.
 - A flaky test that blocks a PR gets fixed in that PR.
-- Read the specs next to the one you add: they carry the conventions.

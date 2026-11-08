@@ -34,7 +34,11 @@ const getColumns = (now: number) => {
     columnHelper.accessor('prompt', {
       header: 'Prompt',
       cell: (info) => {
-        return <span className="text-sm">{info.getValue()}</span>
+        return (
+          <p className="min-w-64 max-w-md text-sm whitespace-normal text-pretty wrap-break-word">
+            {info.getValue()}
+          </p>
+        )
       }
     }),
     columnHelper.accessor('keywords', {
@@ -44,8 +48,14 @@ const getColumns = (now: number) => {
           <div className="flex max-w-48 flex-wrap gap-1">
             {info.getValue().map((keyword) => {
               return (
-                <Badge key={keyword} variant="secondary" size="sm">
-                  {keyword}
+                <Badge
+                  key={keyword}
+                  variant="secondary"
+                  size="sm"
+                  className="max-w-full"
+                  title={keyword}
+                >
+                  <span className="truncate">{keyword}</span>
                 </Badge>
               )
             })}

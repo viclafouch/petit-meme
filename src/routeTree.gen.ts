@@ -50,6 +50,7 @@ import { Route as ApiCronPendingSubmissionsReminderRouteImport } from './routes/
 import { Route as ApiCronSyncAlgoliaRouteImport } from './routes/api/cron/sync-algolia'
 import { Route as ApiCronSyncBunnyTitlesRouteImport } from './routes/api/cron/sync-bunny-titles'
 import { Route as ApiCronVerificationReminderRouteImport } from './routes/api/cron/verification-reminder'
+import { Route as ApiCronWeeklyRecapRouteImport } from './routes/api/cron/weekly-recap'
 import { Route as Public__rootDefaultCheckoutSuccessRouteImport } from './routes/_public__root/_default/checkout.success'
 import { Route as Public__rootDefaultMemesIndexRouteImport } from './routes/_public__root/_default/memes/index'
 import { Route as Public__rootDefaultMemesMemeIdRouteImport } from './routes/_public__root/_default/memes/$memeId'
@@ -274,6 +275,11 @@ const ApiCronVerificationReminderRoute =
     path: '/api/cron/verification-reminder',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiCronWeeklyRecapRoute = ApiCronWeeklyRecapRouteImport.update({
+  id: '/api/cron/weekly-recap',
+  path: '/api/cron/weekly-recap',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const Public__rootDefaultCheckoutSuccessRoute =
   Public__rootDefaultCheckoutSuccessRouteImport.update({
     id: '/checkout/success',
@@ -379,6 +385,7 @@ export interface FileRoutesByFullPath {
   '/api/cron/sync-algolia': typeof ApiCronSyncAlgoliaRoute
   '/api/cron/sync-bunny-titles': typeof ApiCronSyncBunnyTitlesRoute
   '/api/cron/verification-reminder': typeof ApiCronVerificationReminderRoute
+  '/api/cron/weekly-recap': typeof ApiCronWeeklyRecapRoute
   '/admin/activity/': typeof AdminActivityIndexRoute
   '/admin/ai-search/': typeof AdminAiSearchIndexRoute
   '/admin/categories/': typeof AdminCategoriesIndexRoute
@@ -429,6 +436,7 @@ export interface FileRoutesByTo {
   '/api/cron/sync-algolia': typeof ApiCronSyncAlgoliaRoute
   '/api/cron/sync-bunny-titles': typeof ApiCronSyncBunnyTitlesRoute
   '/api/cron/verification-reminder': typeof ApiCronVerificationReminderRoute
+  '/api/cron/weekly-recap': typeof ApiCronWeeklyRecapRoute
   '/admin/activity': typeof AdminActivityIndexRoute
   '/admin/ai-search': typeof AdminAiSearchIndexRoute
   '/admin/categories': typeof AdminCategoriesIndexRoute
@@ -485,6 +493,7 @@ export interface FileRoutesById {
   '/api/cron/sync-algolia': typeof ApiCronSyncAlgoliaRoute
   '/api/cron/sync-bunny-titles': typeof ApiCronSyncBunnyTitlesRoute
   '/api/cron/verification-reminder': typeof ApiCronVerificationReminderRoute
+  '/api/cron/weekly-recap': typeof ApiCronWeeklyRecapRoute
   '/admin/activity/': typeof AdminActivityIndexRoute
   '/admin/ai-search/': typeof AdminAiSearchIndexRoute
   '/admin/categories/': typeof AdminCategoriesIndexRoute
@@ -539,6 +548,7 @@ export interface FileRouteTypes {
     | '/api/cron/sync-algolia'
     | '/api/cron/sync-bunny-titles'
     | '/api/cron/verification-reminder'
+    | '/api/cron/weekly-recap'
     | '/admin/activity/'
     | '/admin/ai-search/'
     | '/admin/categories/'
@@ -589,6 +599,7 @@ export interface FileRouteTypes {
     | '/api/cron/sync-algolia'
     | '/api/cron/sync-bunny-titles'
     | '/api/cron/verification-reminder'
+    | '/api/cron/weekly-recap'
     | '/admin/activity'
     | '/admin/ai-search'
     | '/admin/categories'
@@ -644,6 +655,7 @@ export interface FileRouteTypes {
     | '/api/cron/sync-algolia'
     | '/api/cron/sync-bunny-titles'
     | '/api/cron/verification-reminder'
+    | '/api/cron/weekly-recap'
     | '/admin/activity/'
     | '/admin/ai-search/'
     | '/admin/categories/'
@@ -685,6 +697,7 @@ export interface RootRouteChildren {
   ApiCronSyncAlgoliaRoute: typeof ApiCronSyncAlgoliaRoute
   ApiCronSyncBunnyTitlesRoute: typeof ApiCronSyncBunnyTitlesRoute
   ApiCronVerificationReminderRoute: typeof ApiCronVerificationReminderRoute
+  ApiCronWeeklyRecapRoute: typeof ApiCronWeeklyRecapRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -976,6 +989,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCronVerificationReminderRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/cron/weekly-recap': {
+      id: '/api/cron/weekly-recap'
+      path: '/api/cron/weekly-recap'
+      fullPath: '/api/cron/weekly-recap'
+      preLoaderRoute: typeof ApiCronWeeklyRecapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_public__root/_default/checkout/success': {
       id: '/_public__root/_default/checkout/success'
       path: '/checkout/success'
@@ -1211,6 +1231,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCronSyncAlgoliaRoute: ApiCronSyncAlgoliaRoute,
   ApiCronSyncBunnyTitlesRoute: ApiCronSyncBunnyTitlesRoute,
   ApiCronVerificationReminderRoute: ApiCronVerificationReminderRoute,
+  ApiCronWeeklyRecapRoute: ApiCronWeeklyRecapRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

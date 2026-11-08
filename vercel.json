@@ -45,6 +45,7 @@
     {
       "path": "/api/cron/pending-submissions-reminder",
       "schedule": "0 9 */3 * *"
-    }
+    },
+    { "path": "/api/cron/weekly-recap", "schedule": "0 7 * * 0" }
   ]
 }

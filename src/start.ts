@@ -11,6 +11,7 @@ import {
 import { AppError } from '~/constants/error'
 import { matchIsUnexpectedError } from '~/lib/expected-error'
 import { logger } from '~/lib/logger'
+import { serverFnFetch } from '~/lib/server-fn-fetch'
 import { observeCsrfBlock } from '~/utils/csrf-observer'
 
 const appErrorAdapter = createSerializationAdapter({
@@ -61,6 +62,7 @@ export const startInstance = createStart(() => {
   return {
     defaultSsr: true,
     serializationAdapters: [appErrorAdapter],
+    serverFns: { fetch: serverFnFetch },
     requestMiddleware: [sentryGlobalRequestMiddleware, csrfMiddleware],
     functionMiddleware: [
       sentryGlobalFunctionMiddleware,

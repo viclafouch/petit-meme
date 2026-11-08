@@ -3,7 +3,6 @@ import {
   AUTOMATED_BROWSER_USER_AGENT,
   BROWSER_NETWORK_ERRORS,
   BROWSER_NOISE_ERRORS,
-  VERCEL_EDGE_ERRORS,
   SENTRY_APPLICATION_KEY,
   SENTRY_DATA_COLLECTION,
   SENTRY_IGNORE_ERRORS,
@@ -43,8 +42,7 @@ Sentry.init({
   ignoreErrors: [
     ...SENTRY_IGNORE_ERRORS,
     ...BROWSER_NETWORK_ERRORS,
-    ...BROWSER_NOISE_ERRORS,
-    ...VERCEL_EDGE_ERRORS
+    ...BROWSER_NOISE_ERRORS
   ],
   beforeSend: (event, hint) => {
     return dropExpectedError(scrubUserPii(event), hint)

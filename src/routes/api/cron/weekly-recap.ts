@@ -25,13 +25,7 @@ const runWeeklyRecap = async () => {
     return { sent: false }
   }
 
-  log.info(
-    {
-      arrivals: recap.arrivals.length,
-      departures: recap.departures.length
-    },
-    'Sent weekly recap'
-  )
+  log.info({ week: recap.week }, 'Sent weekly recap')
 
   return { sent: true }
 }

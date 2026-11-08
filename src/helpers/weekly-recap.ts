@@ -28,11 +28,6 @@ export type RecapInvoice = {
   amountPaidCents: number
 }
 
-export type RecapCheckout = {
-  createdAt: Date
-  isComplete: boolean
-}
-
 const NEVER_PAID_STATUSES = [
   'incomplete',
   'incomplete_expired'
@@ -48,7 +43,7 @@ const NOT_PAYING_STATUSES = [
 const WEEK = DAYS_PER_WEEK * DAY
 
 export const getRecapWindows = (now: Date) => {
-  const end = truncateToUtcDay(now)
+  const end = new Date(truncateToUtcDay(now).getTime() + DAY)
   const start = new Date(end.getTime() - WEEK)
 
   return {
@@ -83,7 +78,7 @@ const matchIsPayingAt = (subscription: RecapSubscription, date: Date) => {
   )
 }
 
-export const matchHasBeenPaid = (subscription: RecapSubscription) => {
+const matchHasBeenPaid = (subscription: RecapSubscription) => {
   return !NEVER_PAID_STATUSES.some((status) => {
     return status === subscription.status
   })
@@ -110,39 +105,28 @@ export const summarizeSubscribersAt = (
   }
 }
 
-export const findArrivals = (
-  subscriptions: RecapSubscription[],
-  window: RecapWindow
-) => {
-  const paidSubscriptions = subscriptions.filter(matchHasBeenPaid)
-
-  return paidSubscriptions
-    .filter((subscription) => {
-      return matchIsWithinWindow(subscription.startedAt, window)
-    })
-    .map((subscription) => {
-      const isComeback = paidSubscriptions.some((other) => {
-        return (
-          other.customerId === subscription.customerId &&
-          other.startedAt < subscription.startedAt
-        )
-      })
-
-      return { subscription, isComeback }
-    })
-}
-
-export const findDepartures = (
+export const countNewSubscriptions = (
   subscriptions: RecapSubscription[],
   window: RecapWindow
 ) => {
   return subscriptions.filter((subscription) => {
     return (
       matchHasBeenPaid(subscription) &&
-      (matchIsWithinWindow(subscription.canceledAt, window) ||
-        matchIsWithinWindow(subscription.endedAt, window))
+      matchIsWithinWindow(subscription.startedAt, window)
     )
-  })
+  }).length
+}
+
+export const countCancellations = (
+  subscriptions: RecapSubscription[],
+  window: RecapWindow
+) => {
+  return subscriptions.filter((subscription) => {
+    return (
+      matchHasBeenPaid(subscription) &&
+      matchIsWithinWindow(subscription.canceledAt, window)
+    )
+  }).length
 }
 
 export const sumPaidCents = (invoices: RecapInvoice[], window: RecapWindow) => {
@@ -155,20 +139,10 @@ export const sumPaidCents = (invoices: RecapInvoice[], window: RecapWindow) => {
     }, 0)
 }
 
-export const countCheckouts = (
-  checkouts: RecapCheckout[],
-  window: RecapWindow
-) => {
-  const inWindow = checkouts.filter((checkout) => {
-    return matchIsWithinWindow(checkout.createdAt, window)
-  })
-
-  return {
-    started: inWindow.length,
-    paid: inWindow.filter((checkout) => {
-      return checkout.isComplete
-    }).length
-  }
+export const countDatesWithin = (dates: Date[], window: RecapWindow) => {
+  return dates.filter((date) => {
+    return matchIsWithinWindow(date, window)
+  }).length
 }
 
 const PERIOD_START_OPTIONS = {

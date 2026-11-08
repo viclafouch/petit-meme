@@ -2,14 +2,11 @@ import type { Stripe } from 'stripe'
 import type { MemeExportMode } from '~/constants/meme'
 import { SECOND, THIRTY_DAYS_MS } from '~/constants/time'
 import { prismaClient } from '~/db/client.server'
-import { SITE_URL } from '~/emails/constants'
 import {
-  countCheckouts,
-  findArrivals,
-  findDepartures,
+  countDatesWithin,
+  countCancellations,
+  countNewSubscriptions,
   getRecapWindows,
-  matchHasBeenPaid,
-  type RecapCheckout,
   type RecapInvoice,
   type RecapSubscription,
   type RecapWindow,
@@ -20,13 +17,8 @@ import {
 import { getStripeClient } from '~/lib/stripe.server'
 
 const STRIPE_LIST_MAX_ITEMS = 10_000
-const TOP_MEMES_COUNT = 5
 
-const PROVIDER_LABELS = new Map([
-  ['credential', 'Email'],
-  ['twitter', 'Twitter'],
-  ['discord', 'Discord']
-])
+type RecapWindows = ReturnType<typeof getRecapWindows>
 
 const fromUnixSeconds = (seconds: number) => {
   return new Date(seconds * SECOND)
@@ -36,16 +28,8 @@ const fromNullableUnixSeconds = (seconds: number | null) => {
   return seconds === null ? null : fromUnixSeconds(seconds)
 }
 
-const getCustomerId = (customer: Stripe.Subscription['customer']) => {
-  return typeof customer === 'string' ? customer : customer.id
-}
-
-const getCustomerEmail = (customer: Stripe.Subscription['customer']) => {
-  if (typeof customer === 'string' || customer.deleted) {
-    return null
-  }
-
-  return customer.email
+const toUnixSeconds = (date: Date) => {
+  return Math.floor(date.getTime() / SECOND)
 }
 
 const toRecapSubscription = (
@@ -56,7 +40,10 @@ const toRecapSubscription = (
   const cents = (item?.price.unit_amount ?? 0) * (item?.quantity ?? 1)
 
   return {
-    customerId: getCustomerId(subscription.customer),
+    customerId:
+      typeof subscription.customer === 'string'
+        ? subscription.customer
+        : subscription.customer.id,
     status: subscription.status,
     interval,
     monthlyCents: toMonthlyCents(cents, interval),
@@ -76,68 +63,43 @@ const toRecapInvoice = (invoice: Stripe.Invoice): RecapInvoice => {
   }
 }
 
-const toRecapCheckout = (session: Stripe.Checkout.Session): RecapCheckout => {
-  return {
-    createdAt: fromUnixSeconds(session.created),
-    isComplete: session.status === 'complete'
-  }
-}
-
-const toUnixSeconds = (date: Date) => {
-  return Math.floor(date.getTime() / SECOND)
-}
-
 async function fetchStripeActivity(since: Date) {
   const stripe = getStripeClient()
-  const createdSince = { gte: toUnixSeconds(since) }
-  const invoicesCreatedSince = {
-    gte: toUnixSeconds(new Date(since.getTime() - THIRTY_DAYS_MS))
-  }
 
-  const [subscriptions, invoices, checkouts] = await Promise.all([
+  const [subscriptions, invoices, deletedCustomers] = await Promise.all([
     stripe.subscriptions
-      .list({ status: 'all', limit: 100, expand: ['data.customer'] })
+      .list({ status: 'all', limit: 100 })
       .autoPagingToArray({ limit: STRIPE_LIST_MAX_ITEMS }),
     stripe.invoices
-      .list({ status: 'paid', created: invoicesCreatedSince, limit: 100 })
+      .list({
+        status: 'paid',
+        created: {
+          gte: toUnixSeconds(new Date(since.getTime() - THIRTY_DAYS_MS))
+        },
+        limit: 100
+      })
       .autoPagingToArray({ limit: STRIPE_LIST_MAX_ITEMS }),
-    stripe.checkout.sessions
-      .list({ created: createdSince, limit: 100 })
+    stripe.events
+      .list({
+        type: 'customer.deleted',
+        created: { gte: toUnixSeconds(since) },
+        limit: 100
+      })
       .autoPagingToArray({ limit: STRIPE_LIST_MAX_ITEMS })
   ])
 
   return {
-    subscriptions,
+    subscriptions: subscriptions.map(toRecapSubscription),
     invoices: invoices.map(toRecapInvoice),
-    checkouts: checkouts
-      .filter((session) => {
-        return session.mode === 'subscription'
-      })
-      .map(toRecapCheckout)
-  }
-}
-
-async function fetchUsersByCustomerId(customerIds: string[]) {
-  const users = await prismaClient.user.findMany({
-    where: { stripeCustomerId: { in: customerIds } },
-    select: {
-      id: true,
-      email: true,
-      stripeCustomerId: true,
-      accounts: { select: { providerId: true } }
-    }
-  })
-
-  return new Map(
-    users.map((user) => {
-      return [user.stripeCustomerId, user] as const
+    accountDeletions: deletedCustomers.map((event) => {
+      return fromUnixSeconds(event.created)
     })
-  )
+  }
 }
 
 const compareWindows = async (
   countIn: (window: RecapWindow) => Promise<number>,
-  windows: ReturnType<typeof getRecapWindows>
+  windows: RecapWindows
 ) => {
   const [current, previous] = await Promise.all([
     countIn(windows.current),
@@ -159,199 +121,86 @@ const sumMemeActions = async (
   return result._sum.count ?? 0
 }
 
-async function fetchUsage(windows: ReturnType<typeof getRecapWindows>) {
-  const [signups, views, exports, shares, generations, aiSearches] =
-    await Promise.all([
-      compareWindows(({ start, end }) => {
-        return prismaClient.user.count({
-          where: { createdAt: { gte: start, lt: end } }
-        })
-      }, windows),
-      compareWindows(({ start, end }) => {
-        return prismaClient.memeViewDaily.count({
-          where: { day: { gte: start, lt: end } }
-        })
-      }, windows),
-      compareWindows((window) => {
-        return sumMemeActions('download', window)
-      }, windows),
-      compareWindows((window) => {
-        return sumMemeActions('share', window)
-      }, windows),
-      compareWindows(({ start, end }) => {
-        return prismaClient.studioGeneration.count({
-          where: { createdAt: { gte: start, lt: end } }
-        })
-      }, windows),
-      compareWindows(({ start, end }) => {
-        return prismaClient.aiSearchLog.count({
-          where: { createdAt: { gte: start, lt: end } }
-        })
-      }, windows)
-    ])
+async function fetchActivity(windows: RecapWindows) {
+  const [signups, views, downloads, shares] = await Promise.all([
+    compareWindows(({ start, end }) => {
+      return prismaClient.user.count({
+        where: { createdAt: { gte: start, lt: end } }
+      })
+    }, windows),
+    compareWindows(({ start, end }) => {
+      return prismaClient.memeViewDaily.count({
+        where: { day: { gte: start, lt: end } }
+      })
+    }, windows),
+    compareWindows((window) => {
+      return sumMemeActions('download', window)
+    }, windows),
+    compareWindows((window) => {
+      return sumMemeActions('share', window)
+    }, windows)
+  ])
 
-  return { signups, views, exports, shares, generations, aiSearches }
-}
-
-async function fetchTopMemes({ start, end }: RecapWindow) {
-  const rows = await prismaClient.memeViewDaily.groupBy({
-    by: ['memeId'],
-    where: { day: { gte: start, lt: end } },
-    _count: { memeId: true },
-    orderBy: { _count: { memeId: 'desc' } },
-    take: TOP_MEMES_COUNT
-  })
-
-  const memes = await prismaClient.meme.findMany({
-    where: {
-      id: {
-        in: rows.map((row) => {
-          return row.memeId
-        })
-      }
-    },
-    select: { id: true, title: true }
-  })
-
-  return rows.flatMap((row) => {
-    const meme = memes.find(({ id }) => {
-      return id === row.memeId
-    })
-
-    return meme
-      ? [
-          {
-            title: meme.title,
-            url: `${SITE_URL}/memes/${meme.id}`,
-            views: row._count.memeId
-          }
-        ]
-      : []
-  })
+  return { signups, views, downloads, shares }
 }
 
 export async function buildWeeklyRecap(now: Date) {
   const windows = getRecapWindows(now)
-  const stripeActivity = await fetchStripeActivity(windows.previous.start)
-
-  const subscriptions = stripeActivity.subscriptions.map(toRecapSubscription)
-  const emailByCustomerId = new Map(
-    stripeActivity.subscriptions.map((subscription) => {
-      return [
-        getCustomerId(subscription.customer),
-        getCustomerEmail(subscription.customer)
-      ] as const
-    })
-  )
-
-  const arrivals = findArrivals(subscriptions, windows.current)
-  const departures = findDepartures(subscriptions, windows.current)
-
-  const [usersByCustomerId, usage, topMemes] = await Promise.all([
-    fetchUsersByCustomerId(
-      [
-        ...arrivals.map(({ subscription }) => {
-          return subscription
-        }),
-        ...departures
-      ].map(({ customerId }) => {
-        return customerId
-      })
-    ),
-    fetchUsage(windows),
-    fetchTopMemes(windows.current)
+  const [stripeActivity, activity] = await Promise.all([
+    fetchStripeActivity(windows.previous.start),
+    fetchActivity(windows)
   ])
+  const { subscriptions } = stripeActivity
 
-  const firstStartByCustomerId = subscriptions
-    .filter(matchHasBeenPaid)
-    .reduce((firstStarts, sub) => {
-      const known = firstStarts.get(sub.customerId)
-
-      return known && known <= sub.startedAt
-        ? firstStarts
-        : firstStarts.set(sub.customerId, sub.startedAt)
-    }, new Map<string, Date>())
-
-  const toPerson = (subscription: RecapSubscription) => {
-    const user = usersByCustomerId.get(subscription.customerId)
-
+  const compare = (measure: (window: RecapWindow) => number) => {
     return {
-      email:
-        user?.email ??
-        emailByCustomerId.get(subscription.customerId) ??
-        subscription.customerId,
-      adminUrl: user ? `${SITE_URL}/admin/users/${user.id}` : null,
-      providers: (user?.accounts ?? []).map(({ providerId }) => {
-        return PROVIDER_LABELS.get(providerId) ?? providerId
-      }),
-      interval: subscription.interval,
-      startedAt: subscription.startedAt,
-      firstStartedAt:
-        firstStartByCustomerId.get(subscription.customerId) ??
-        subscription.startedAt
+      current: measure(windows.current),
+      previous: measure(windows.previous)
     }
   }
 
-  const subscribersNow = summarizeSubscribersAt(
-    subscriptions,
-    windows.current.end
-  )
-  const subscribersBefore = summarizeSubscribersAt(
-    subscriptions,
-    windows.previous.end
-  )
-  const checkoutsNow = countCheckouts(stripeActivity.checkouts, windows.current)
-  const checkoutsBefore = countCheckouts(
-    stripeActivity.checkouts,
-    windows.previous
-  )
+  const compareSubscribers = (
+    pick: (summary: ReturnType<typeof summarizeSubscribersAt>) => number
+  ) => {
+    return compare(({ end }) => {
+      return pick(summarizeSubscribersAt(subscriptions, end))
+    })
+  }
 
   return {
     window: windows.current,
-    revenue: {
-      mrrCents: {
-        current: subscribersNow.mrrCents,
-        previous: subscribersBefore.mrrCents
-      },
-      subscribers: {
-        current: subscribersNow.monthly + subscribersNow.yearly,
-        previous: subscribersBefore.monthly + subscribersBefore.yearly
-      },
-      monthly: subscribersNow.monthly,
-      yearly: subscribersNow.yearly,
-      collectedCents: {
-        current: sumPaidCents(stripeActivity.invoices, windows.current),
-        previous: sumPaidCents(stripeActivity.invoices, windows.previous)
-      }
+    activeSubscriptions: {
+      monthly: compareSubscribers(({ monthly }) => {
+        return monthly
+      }),
+      yearly: compareSubscribers(({ yearly }) => {
+        return yearly
+      }),
+      total: compareSubscribers(({ monthly, yearly }) => {
+        return monthly + yearly
+      }),
+      mrrCents: compareSubscribers(({ mrrCents }) => {
+        return mrrCents
+      })
     },
-    arrivals: arrivals.map(({ subscription, isComeback }) => {
-      return { ...toPerson(subscription), isComeback }
-    }),
-    departures: departures.map((subscription) => {
-      return {
-        ...toPerson(subscription),
-        endsAt: subscription.endedAt ?? subscription.cancelAt
-      }
-    }),
-    funnel: {
-      signups: usage.signups,
-      checkoutsStarted: {
-        current: checkoutsNow.started,
-        previous: checkoutsBefore.started
-      },
-      checkoutsPaid: {
-        current: checkoutsNow.paid,
-        previous: checkoutsBefore.paid
-      }
-    },
-    usage: {
-      views: usage.views,
-      exports: usage.exports,
-      generations: usage.generations,
-      shares: usage.shares,
-      aiSearches: usage.aiSearches
-    },
-    topMemes
+    week: {
+      newSubscriptions: compare((window) => {
+        return countNewSubscriptions(subscriptions, window)
+      }),
+      cancellations: compare((window) => {
+        return countCancellations(subscriptions, window)
+      }),
+      signups: activity.signups,
+      accountDeletions: compare((window) => {
+        return countDatesWithin(stripeActivity.accountDeletions, window)
+      }),
+      views: activity.views,
+      downloads: activity.downloads,
+      shares: activity.shares,
+      collectedCents: compare((window) => {
+        return sumPaidCents(stripeActivity.invoices, window)
+      })
+    }
   }
 }
 

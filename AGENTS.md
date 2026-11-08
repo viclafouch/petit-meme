@@ -30,11 +30,9 @@ The site is small, so a breaking change is cheap and the clean fix beats the com
 What every change protects:
 
 1. **The shortest path to the video.** An ad, a popup or an account asked before watching is Victor's call, argued out loud.
-2. **Premium never blocks.** Free keeps the whole library, and saying no to Premium keeps everything Free gives.
-3. **Both languages ship together.** The administration and the emails Victor receives stay in French.
-4. **Phone first**, Safari on iOS as much as Chrome on desktop.
-5. **Production data is real.** Data changes only add.
-6. **The video files are the product.** A change to how a Meme is delivered, embedded or previewed keeps raw video URLs out of the DOM, the sitemap, the structured data and every API response.
+2. **Premium never blocks.** Read `offer.md` before adding or moving a Premium gate.
+3. **Both languages ship together.** Every user-facing change lands in French and English at once. `languages.md` says which surfaces stay French only.
+4. **The video files are the product.** A change to how a Meme is delivered, embedded or previewed keeps raw video URLs out of the DOM, the sitemap, the structured data and every API response.
 
 ## Cost
 

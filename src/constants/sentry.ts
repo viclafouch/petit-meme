@@ -22,6 +22,10 @@ export const SENTRY_DATA_COLLECTION = {
 
 export const SENTRY_APPLICATION_KEY = 'petit-meme'
 
+export const SENTRY_ORG = 'viclafouch'
+
+export const SENTRY_PROJECT = 'petit-meme'
+
 export const SENTRY_TRACES_SAMPLE_RATE = 0.2
 
 export const SENTRY_IGNORE_ERRORS = [/Unreachable hosts/u]

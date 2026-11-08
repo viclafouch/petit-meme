@@ -44,6 +44,7 @@ import {
   rejectUnverifiedDiscordEmail,
   signUpGuard
 } from '~/lib/auth-guard.server'
+import { identifySentryUser } from '~/lib/auth-sentry.server'
 import { authLogger, stripeLogger } from '~/lib/logger'
 import { sendEmail, sendEmailInBackground } from '~/lib/resend.server'
 import { captureWithFeature } from '~/lib/sentry'
@@ -196,7 +197,8 @@ const getAuthConfig = createServerOnlyFn(() => {
     secret: serverEnv.BETTER_AUTH_SECRET,
     disabledPaths: ['/update-user', '/verify-email'],
     hooks: {
-      before: signUpGuard
+      before: signUpGuard,
+      after: identifySentryUser
     },
     database: prismaAdapter(prismaClient, {
       provider: 'postgresql'

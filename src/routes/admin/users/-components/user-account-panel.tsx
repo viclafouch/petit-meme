@@ -1,5 +1,12 @@
 import React from 'react'
-import { Ban, CircleSlash, Gift, ShieldCheck, Trash } from 'lucide-react'
+import {
+  Ban,
+  CircleSlash,
+  ExternalLink,
+  Gift,
+  ShieldCheck,
+  Trash
+} from 'lucide-react'
 import { getRouteApi, useNavigate } from '@tanstack/react-router'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
@@ -8,6 +15,7 @@ import { formatSubscriptionEnding } from '~/helpers/subscription'
 import { getLocale } from '~/paraglide/runtime'
 import { SectionHeading } from '~/routes/admin/-components/section-heading'
 import { getPremiumStatus } from '~/routes/admin/-lib/premium'
+import { buildSentryUserLinks } from '~/routes/admin/-lib/sentry'
 import type { AdminUserDetailPayload } from '~/routes/admin/-server/user-detail'
 import { AuthProviderBadge } from '~/routes/admin/users/-components/user-badges'
 import {
@@ -111,6 +119,38 @@ const PremiumSummary = ({ user, subscription }: PremiumSummaryProps) => {
       )
     }
   }
+}
+
+type SentryLinksProps = {
+  userId: AdminUserDetailPayload['user']['id']
+}
+
+const SentryLinks = ({ userId }: SentryLinksProps) => {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {buildSentryUserLinks(userId).map((link) => {
+        return (
+          <Button
+            key={link.label}
+            variant="outline"
+            size="sm"
+            nativeButton={false}
+            render={
+              <a
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${link.label} Sentry (ouvre dans un nouvel onglet)`}
+              />
+            }
+          >
+            <ExternalLink data-icon="inline-start" aria-hidden />
+            {link.label}
+          </Button>
+        )
+      })}
+    </div>
+  )
 }
 
 type UserAccountPanelProps = Pick<
@@ -255,6 +295,9 @@ export const UserAccountPanel = ({
           ) : (
             <PanelNote>{NO_USER_ACTION_REASON}</PanelNote>
           )}
+        </PanelSection>
+        <PanelSection title="Sentry">
+          <SentryLinks userId={user.id} />
         </PanelSection>
       </div>
       <UserActionDialogs userName={user.name} userActions={userActions} />

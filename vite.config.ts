@@ -9,7 +9,11 @@ import {
   IMMUTABLE_CACHE_CONTROL,
   WEEKLY_CACHE_CONTROL
 } from './src/constants/http.ts'
-import { SENTRY_APPLICATION_KEY } from './src/constants/sentry.ts'
+import {
+  SENTRY_APPLICATION_KEY,
+  SENTRY_ORG,
+  SENTRY_PROJECT
+} from './src/constants/sentry.ts'
 
 const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
@@ -168,8 +172,8 @@ export default defineConfig(async ({ mode }) => {
         }
       }),
       sentryTanstackStart({
-        org: 'viclafouch',
-        project: 'petit-meme',
+        org: SENTRY_ORG,
+        project: SENTRY_PROJECT,
         applicationKey: SENTRY_APPLICATION_KEY,
         authToken: serverEnv.SENTRY_AUTH_TOKEN,
         release: {

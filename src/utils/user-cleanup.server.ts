@@ -23,7 +23,8 @@ export const cleanupUserData = createServerOnlyFn(
       to: email,
       subject: emailSubjects[locale].accountDeleted,
       react: AccountDeletedEmail({ username: name, locale }),
-      logMessage: 'Sending account deleted email to'
+      logMessage: 'Sending account deleted email to',
+      idempotencyKey: `account-deleted/${userId}`
     })
 
     const dbUser = await prismaClient.user.findUnique({

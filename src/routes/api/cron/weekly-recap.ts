@@ -16,7 +16,8 @@ const runWeeklyRecap = async () => {
   const isSent = await sendEmail({
     to: CONTACT_EMAIL,
     subject: `Petit Meme : récap ${getWeeklyRecapPeriodLabel(recap.window)}`,
-    react: WeeklyRecapEmail({ recap })
+    react: WeeklyRecapEmail({ recap }),
+    idempotencyKey: `weekly-recap/${recap.window.start.toISOString()}`
   })
 
   if (!isSent) {

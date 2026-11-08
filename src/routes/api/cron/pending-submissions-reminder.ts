@@ -4,7 +4,7 @@ import { MemeSubmissionStatus } from '~/db/generated/prisma/enums'
 import { CONTACT_EMAIL } from '~/emails/constants'
 import { PendingSubmissionsReminderEmail } from '~/emails/pending-submissions-reminder-email'
 import { serverEnv } from '~/env/server.server'
-import { formatDate } from '~/helpers/date'
+import { formatDate, truncateToUtcDay } from '~/helpers/date'
 import { cronLogger } from '~/lib/logger'
 import { sendEmail } from '~/lib/resend.server'
 import { verifyCronSecret } from '~/utils/cron-auth.server'
@@ -49,7 +49,8 @@ const runPendingSubmissionsReminder = async () => {
   const isSent = await sendEmail({
     to: CONTACT_EMAIL,
     subject: SUBJECT,
-    react: PendingSubmissionsReminderEmail({ submissions: emailSubmissions })
+    react: PendingSubmissionsReminderEmail({ submissions: emailSubmissions }),
+    idempotencyKey: `pending-submissions-reminder/${truncateToUtcDay(new Date()).toISOString()}`
   })
 
   if (!isSent) {

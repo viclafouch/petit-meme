@@ -114,7 +114,8 @@ const handlePaymentFailed = async (event: Stripe.InvoicePaymentFailedEvent) => {
       billingPortalUrl: portalSession.url,
       locale: user.locale
     }),
-    logMessage: 'Sending payment failed email to'
+    logMessage: 'Sending payment failed email to',
+    idempotencyKey: `payment-failed/${event.id}`
   })
 }
 
@@ -358,6 +359,7 @@ const getAuthConfig = createServerOnlyFn(() => {
             }
           ],
           onSubscriptionComplete: async ({
+            event,
             subscription,
             stripeSubscription,
             plan
@@ -402,7 +404,8 @@ const getAuthConfig = createServerOnlyFn(() => {
                 isAnnual: matchIsYearlyInterval(interval),
                 locale
               }),
-              logMessage: 'Sending subscription confirmed email to'
+              logMessage: 'Sending subscription confirmed email to',
+              idempotencyKey: `subscription-confirmed/${event.id}`
             })
           }
         },

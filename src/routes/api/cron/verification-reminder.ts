@@ -35,7 +35,8 @@ const sendReminderToUser = async (user: {
     react: VerificationReminderEmail({
       verificationUrl,
       locale: user.locale
-    })
+    }),
+    idempotencyKey: `verification-reminder/${user.id}`
   })
 
   if (!isSent) {

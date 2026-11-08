@@ -13,7 +13,6 @@ import { dropExpectedError } from '~/lib/expected-error'
 import {
   getFeedbackOptions,
   scrubSensitiveBreadcrumbs,
-  scrubUserPii,
   SENSITIVE_API_PATTERNS
 } from '~/lib/sentry'
 
@@ -44,9 +43,7 @@ Sentry.init({
     ...BROWSER_NETWORK_ERRORS,
     ...BROWSER_NOISE_ERRORS
   ],
-  beforeSend: (event, hint) => {
-    return dropExpectedError(scrubUserPii(event), hint)
-  },
+  beforeSend: dropExpectedError,
   beforeBreadcrumb: scrubSensitiveBreadcrumbs
 })
 

@@ -4,6 +4,7 @@ import '~/lib/document-locale'
 import '~/instrument.client'
 import { hydrateRoot } from 'react-dom/client'
 import { z } from 'zod'
+import * as Sentry from '@sentry/tanstackstart-react'
 import { StartClient } from '@tanstack/react-start/client'
 import { reloadOnStaleChunk } from '~/lib/stale-chunk-reload'
 import { getLocale, type Locale } from '~/paraglide/runtime'
@@ -27,4 +28,7 @@ const ZOD_LOCALE_IMPORTS = {
 const zodLocaleModule = await ZOD_LOCALE_IMPORTS[getLocale()]()
 z.config(zodLocaleModule.default())
 
-hydrateRoot(document, <StartClient />)
+hydrateRoot(document, <StartClient />, {
+  onUncaughtError: Sentry.reactErrorHandler(),
+  onRecoverableError: Sentry.reactErrorHandler()
+})

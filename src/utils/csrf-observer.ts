@@ -25,7 +25,7 @@ export const observeCsrfBlock = createServerOnlyFn((request: Request) => {
 
   captureWithFeature(
     new Error(
-      `CSRF block: ${request.method} ${url.pathname} — ip=${ip} country=${country} sec-fetch-site=${secFetchSite} ua=${userAgent}`
+      `CSRF block: ${request.method} ${url.pathname} — country=${country} sec-fetch-site=${secFetchSite} ua=${userAgent}`
     ),
     'scraping-detection'
   )

@@ -9,7 +9,7 @@ export const RootComponent = () => {
   const { user } = rootRouteApi.useRouteContext()
 
   React.useEffect(() => {
-    Sentry.setUser(user ? { id: user.id, email: user.email } : null)
+    Sentry.setUser(user ? { id: user.id } : null)
   }, [user])
 
   return (

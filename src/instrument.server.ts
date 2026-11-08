@@ -20,7 +20,11 @@ Sentry.init({
   environment: deploymentEnv,
   enabled: deploymentEnv === 'production',
   dataCollection: SENTRY_DATA_COLLECTION,
-  integrations: [Sentry.pinoIntegration()],
+  integrations: [
+    Sentry.pinoIntegration(),
+    Sentry.extraErrorDataIntegration(),
+    Sentry.zodErrorsIntegration()
+  ],
   tracesSampler: ({ attributes, inheritOrSampleWith }) => {
     const urlPath = attributes['url.path']
 

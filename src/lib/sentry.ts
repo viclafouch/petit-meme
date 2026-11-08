@@ -115,26 +115,10 @@ export const getFeedbackOptions = (): FeedbackOptions => {
   }
 }
 
-const PII_USER_FIELDS = new Set(['email', 'username'])
-
 const matchIsSensitiveApiUrl = (url: string) => {
   return SENSITIVE_API_PATHS.some((path) => {
     return url.includes(path)
   })
-}
-
-export const scrubUserPii = <TEvent extends Sentry.Event>(event: TEvent) => {
-  if (!event.user || event.type === 'feedback') {
-    return event
-  }
-
-  const safeUser = Object.fromEntries(
-    Object.entries(event.user).filter(([key]) => {
-      return !PII_USER_FIELDS.has(key)
-    })
-  )
-
-  return { ...event, user: safeUser }
 }
 
 export const scrubSensitiveBreadcrumbs = (breadcrumb: Sentry.Breadcrumb) => {

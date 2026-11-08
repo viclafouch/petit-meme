@@ -92,12 +92,6 @@ const ComparisonRow = ({
         {formatters.value(comparison.current)}
       </Column>
       <Column
-        className={`${NUMBER_CELL_CLASS} text-brand-muted-dark`}
-        style={TABULAR_STYLE}
-      >
-        {formatters.value(comparison.previous)}
-      </Column>
-      <Column
         className={`${NUMBER_CELL_CLASS} ${getDeltaClass(delta, isIncreaseBad)}`}
         style={TABULAR_STYLE}
       >
@@ -120,7 +114,6 @@ const RecapTable = ({ title, children }: RecapTableProps) => {
           {title}
         </Column>
         <Column className={HEADER_CELL_CLASS}>Cette semaine</Column>
-        <Column className={HEADER_CELL_CLASS}>Semaine d’avant</Column>
         <Column className={HEADER_CELL_CLASS}>Évolution</Column>
       </Row>
       {children}

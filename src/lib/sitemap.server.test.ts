@@ -8,7 +8,7 @@ describe('buildUrlEntry', () => {
     const entry = buildUrlEntry({
       loc: 'https://www.petit-meme.io/memes/meme-id',
       video: {
-        thumbnailLoc: 'https://vz-test.b-cdn.net/video-guid/thumbnail.jpg',
+        thumbnailLoc: 'https://cdn-test.petit-meme.io/video-guid/thumbnail.jpg',
         title: 'Meme title',
         description: 'Meme description',
         playerLoc: PLAYER_URL,

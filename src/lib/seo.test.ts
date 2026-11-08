@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import type { MemeWithVideo } from '~/constants/meme'
 
 const BUNNY_ID = 'video-guid'
-const CRAWLER_STREAM_URL = `https://vz-test.b-cdn.net/bcdn_token=HS256-token&token_path=%2F${BUNNY_ID}%2F&expires=4102444800/${BUNNY_ID}/playlist.m3u8`
+const CRAWLER_STREAM_URL = `https://cdn-test.petit-meme.io/bcdn_token=HS256-token&token_path=%2F${BUNNY_ID}%2F&expires=4102444800/${BUNNY_ID}/playlist.m3u8`
 const EMBED_URL = 'https://www.petit-meme.io/embed/meme-id'
 
 const MEME = {

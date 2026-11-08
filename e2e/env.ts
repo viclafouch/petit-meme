@@ -1,12 +1,13 @@
 import dotenv from 'dotenv'
 import { z } from 'zod'
+import { clientEnvSchema } from '~/env/client-schema'
 import type { E2eRoleName } from './constants'
 
 const E2E_ENV_SCHEMA = z.object({
   VITE_SITE_URL: z.string().min(1),
   DATABASE_URL: z.string().min(1),
   BETTER_AUTH_SECRET: z.string().min(1),
-  VITE_BUNNY_HOSTNAME: z.string().min(1),
+  VITE_BUNNY_HOSTNAME: clientEnvSchema.VITE_BUNNY_HOSTNAME,
   BUNNY_TOKEN_AUTH_KEY: z.string().min(1),
   BUNNY_ORIGINAL_ACCESS_KEY: z.string().min(1),
   E2E_VIDEO_BUNNY_ID: z.string().min(1),
@@ -23,7 +24,7 @@ const parsedE2eEnv = E2E_ENV_SCHEMA.safeParse(
 
 if (!parsedE2eEnv.success) {
   throw new Error(
-    'Missing .env.e2e, or missing one of VITE_SITE_URL, DATABASE_URL, BETTER_AUTH_SECRET, VITE_BUNNY_HOSTNAME, BUNNY_TOKEN_AUTH_KEY, BUNNY_ORIGINAL_ACCESS_KEY, E2E_VIDEO_BUNNY_ID or CRON_SECRET in it.'
+    'Missing .env.e2e, or missing or invalid one of VITE_SITE_URL, DATABASE_URL, BETTER_AUTH_SECRET, VITE_BUNNY_HOSTNAME, BUNNY_TOKEN_AUTH_KEY, BUNNY_ORIGINAL_ACCESS_KEY, E2E_VIDEO_BUNNY_ID or CRON_SECRET in it.'
   )
 }
 

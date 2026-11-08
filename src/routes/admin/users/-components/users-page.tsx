@@ -3,13 +3,7 @@ import { Minus } from 'lucide-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { getRouteApi, Link } from '@tanstack/react-router'
 import { PageHeader } from '~/components/page-header'
-import { Badge } from '~/components/ui/badge'
 import { Container } from '~/components/ui/container'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger
-} from '~/components/ui/tooltip'
 import { UserAvatar } from '~/components/user-avatar'
 import { AdminTable } from '~/routes/admin/-components/admin-table'
 import { EmptyCell } from '~/routes/admin/-components/empty-cell'
@@ -37,6 +31,7 @@ type PremiumFilter = PremiumSource | 'all'
 
 const PREMIUM_FILTER_OPTIONS = [
   { value: 'all', label: 'Tous' },
+  { value: 'admin', label: 'Admins' },
   { value: 'paid', label: 'Payants' },
   { value: 'granted', label: 'Offerts' },
   { value: 'none', label: 'Sans Premium' }
@@ -81,6 +76,7 @@ const countUsersByPremiumSource = (
 
   return {
     all: users.length,
+    admin: usersBySource.admin?.length ?? 0,
     paid: usersBySource.paid?.length ?? 0,
     granted: usersBySource.granted?.length ?? 0,
     none: usersBySource.none?.length ?? 0
@@ -116,22 +112,6 @@ const getColumns = (now: number) => {
     columnHelper.accessor('email', {
       header: 'Email'
     }),
-    columnHelper.accessor('role', {
-      header: 'Rôle',
-      cell: (info) => {
-        const role = info.getValue()
-
-        return role === 'admin' ? (
-          <Badge variant="default" size="sm">
-            Admin
-          </Badge>
-        ) : (
-          <Badge variant="secondary" size="sm">
-            User
-          </Badge>
-        )
-      }
-    }),
     columnHelper.accessor('provider', {
       header: 'Provider',
       enableSorting: false,
@@ -155,13 +135,14 @@ const getColumns = (now: number) => {
     }),
     columnHelper.display({
       id: 'subscription',
-      header: 'Abo',
+      header: 'Abonnement',
       cell: (info) => {
-        const { subscription, premiumGrantedAt } = info.row.original
+        const { role, subscription, premiumGrantedAt } = info.row.original
 
         return (
           <div className="flex flex-wrap gap-1">
             <PremiumBadges
+              role={role}
               premiumGrantedAt={premiumGrantedAt}
               subscription={subscription}
               emptyFallback={
@@ -172,28 +153,6 @@ const getColumns = (now: number) => {
               }
             />
           </div>
-        )
-      }
-    }),
-    columnHelper.display({
-      id: 'engagement',
-      header: 'Engagement',
-      cell: (info) => {
-        const user = info.row.original
-
-        return (
-          <Tooltip>
-            <TooltipTrigger
-              className="text-muted-foreground text-sm tabular-nums cursor-default rounded-sm"
-              aria-label={`${user.bookmarkCount} bookmarks, ${user.generationCount} générations`}
-            >
-              {user.bookmarkCount}b {user.generationCount}g
-            </TooltipTrigger>
-            <TooltipContent>
-              {user.bookmarkCount} bookmarks · {user.generationCount}{' '}
-              générations
-            </TooltipContent>
-          </Tooltip>
         )
       }
     }),

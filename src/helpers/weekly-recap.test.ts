@@ -1,13 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import {
+  type BillingInvoice,
+  type BillingSubscription,
+  toMonthlyCents
+} from '~/helpers/subscription'
+import {
   countDatesWithin,
   countCancellations,
   countNewSubscriptions,
   getRecapWindows,
-  type RecapSubscription,
   summarizeSubscribersAt,
-  sumPaidCents,
-  toMonthlyCents
+  sumPaidCentsWithin
 } from '~/helpers/weekly-recap'
 
 const NOW = new Date('2026-11-08T08:00:00.000Z')
@@ -17,17 +20,31 @@ const YEARLY_MONTHLY_CENTS = toMonthlyCents(YEARLY_PRICE_CENTS, 'year')
 const WINDOWS = getRecapWindows(NOW)
 
 const buildSubscription = (
-  overrides: Partial<RecapSubscription>
-): RecapSubscription => {
+  overrides: Partial<BillingSubscription>
+): BillingSubscription => {
   return {
+    id: 'sub_a',
     customerId: 'cus_a',
     status: 'active',
     interval: 'month',
-    monthlyCents: MONTHLY_PRICE_CENTS,
+    amountCents: MONTHLY_PRICE_CENTS,
     startedAt: new Date('2026-09-01T00:00:00.000Z'),
     canceledAt: null,
     cancelAt: null,
+    cancelAtPeriodEnd: false,
     endedAt: null,
+    periodEnd: null,
+    ...overrides
+  }
+}
+
+const buildInvoice = (overrides: Partial<BillingInvoice>): BillingInvoice => {
+  return {
+    id: 'in_a',
+    subscriptionId: 'sub_a',
+    paidAt: new Date('2026-11-02T10:00:00.000Z'),
+    amountPaidCents: MONTHLY_PRICE_CENTS,
+    billingReason: 'subscription_cycle',
     ...overrides
   }
 }
@@ -86,7 +103,7 @@ describe('summarizeSubscribersAt', () => {
       buildSubscription({ status: 'incomplete' }),
       buildSubscription({
         interval: 'year',
-        monthlyCents: YEARLY_MONTHLY_CENTS
+        amountCents: YEARLY_PRICE_CENTS
       })
     ]
 
@@ -138,24 +155,18 @@ describe('countCancellations', () => {
   })
 })
 
-describe('sumPaidCents', () => {
+describe('sumPaidCentsWithin', () => {
   it('should only sum the invoices paid during the window', () => {
     const invoices = [
-      {
-        paidAt: new Date('2026-11-02T10:00:00.000Z'),
-        amountPaidCents: MONTHLY_PRICE_CENTS
-      },
-      {
+      buildInvoice({ paidAt: new Date('2026-11-02T10:00:00.000Z') }),
+      buildInvoice({
         paidAt: new Date('2026-11-07T23:59:00.000Z'),
         amountPaidCents: YEARLY_PRICE_CENTS
-      },
-      {
-        paidAt: new Date('2026-10-31T10:00:00.000Z'),
-        amountPaidCents: MONTHLY_PRICE_CENTS
-      }
+      }),
+      buildInvoice({ paidAt: new Date('2026-10-31T10:00:00.000Z') })
     ]
 
-    expect(sumPaidCents(invoices, WINDOWS.current)).toBe(
+    expect(sumPaidCentsWithin(invoices, WINDOWS.current)).toBe(
       MONTHLY_PRICE_CENTS + YEARLY_PRICE_CENTS
     )
   })

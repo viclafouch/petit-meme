@@ -3,23 +3,23 @@ import { createServerFn } from '@tanstack/react-start'
 import { getRequest, setResponseStatus } from '@tanstack/react-start/server'
 import { matchIsAuthProviderId, type AuthProviderId } from '~/constants/auth'
 import { HTTP_STATUS } from '~/constants/http'
-import {
-  ACTIVE_SUBSCRIPTION_STATUSES,
-  matchIsActiveSubscriptionStatus
-} from '~/constants/plan'
 import { prismaClient } from '~/db/client.server'
 import type { Prisma, User } from '~/db/generated/prisma/client'
 import { AccountBannedEmail } from '~/emails/account-banned-email'
 import { AccountUnbannedEmail } from '~/emails/account-unbanned-email'
 import { PremiumGrantedEmail } from '~/emails/premium-granted-email'
 import { emailSubjects } from '~/emails/subjects'
-import { differenceInMonths } from '~/helpers/date'
+import { ACTIVE_SUBSCRIPTION_STATUSES } from '~/helpers/subscription'
 import { auth } from '~/lib/auth.server'
 import { adminLogger } from '~/lib/logger'
 import { sendEmailInBackground } from '~/lib/resend.server'
 import { captureWithFeature } from '~/lib/sentry'
 import { getStripeClient } from '~/lib/stripe.server'
 import { BAN_REASONS, type BanReason } from '~/routes/admin/-lib/ban'
+import {
+  buildSubscriptionInfo,
+  type SubscriptionInfo
+} from '~/routes/admin/-lib/premium'
 import { logAuditAction } from '~/server/audit.server'
 import { adminRequiredMiddleware } from '~/server/user-auth'
 
@@ -32,71 +32,18 @@ const USER_LIST_SELECT = {
   role: true,
   banned: true,
   lastActiveAt: true,
-  generationCount: true,
   premiumGrantedAt: true
 } as const satisfies Prisma.UserSelect
-
-type SubscriptionStatus = 'active' | 'past' | 'none'
 
 export const SUBSCRIPTION_LIST_SELECT = {
   referenceId: true,
   status: true,
-  periodStart: true,
-  periodEnd: true
+  billingInterval: true,
+  periodEnd: true,
+  cancelAt: true,
+  cancelAtPeriodEnd: true,
+  endedAt: true
 } as const satisfies Prisma.SubscriptionSelect
-
-type SubscriptionRow = Prisma.SubscriptionGetPayload<{
-  select: typeof SUBSCRIPTION_LIST_SELECT
-}>
-
-type SubscriptionPeriod = {
-  status: SubscriptionStatus
-  startedAt: SubscriptionRow['periodStart']
-  endsAt: SubscriptionRow['periodEnd']
-}
-
-export type SubscriptionInfo = SubscriptionPeriod & {
-  monthCount: number
-}
-
-const NO_SUBSCRIPTION: SubscriptionPeriod = {
-  status: 'none',
-  startedAt: null,
-  endsAt: null
-}
-
-const countSubscribedMonths = (startedAt: SubscriptionPeriod['startedAt']) => {
-  return startedAt
-    ? Math.max(1, differenceInMonths(new Date(), new Date(startedAt)))
-    : 1
-}
-
-export function buildSubscriptionInfo(
-  subscriptions: SubscriptionRow[]
-): SubscriptionInfo {
-  const period = subscriptions.reduce<SubscriptionPeriod>(
-    (merged, subscription) => {
-      const isActive = matchIsActiveSubscriptionStatus(subscription.status)
-
-      return {
-        status: merged.status === 'active' || isActive ? 'active' : 'past',
-        startedAt:
-          subscription.periodStart &&
-          (!merged.startedAt || subscription.periodStart < merged.startedAt)
-            ? subscription.periodStart
-            : merged.startedAt,
-        endsAt:
-          subscription.periodEnd &&
-          (!merged.endsAt || subscription.periodEnd > merged.endsAt)
-            ? subscription.periodEnd
-            : merged.endsAt
-      }
-    },
-    NO_SUBSCRIPTION
-  )
-
-  return { ...period, monthCount: countSubscribedMonths(period.startedAt) }
-}
 
 export function resolveAuthProvider(providerId?: string) {
   return providerId !== undefined && matchIsAuthProviderId(providerId)
@@ -109,7 +56,6 @@ export type EnrichedUser = Prisma.UserGetPayload<{
 }> & {
   provider: AuthProviderId
   subscription: SubscriptionInfo
-  bookmarkCount: number
 }
 
 export const getListUsers = createServerFn({ method: 'GET' })
@@ -125,7 +71,7 @@ export const getListUsers = createServerFn({ method: 'GET' })
       return user.id
     })
 
-    const [accounts, subscriptions, bookmarkCounts] = await Promise.all([
+    const [accounts, subscriptions] = await Promise.all([
       prismaClient.account.findMany({
         where: { userId: { in: userIds } },
         select: { userId: true, providerId: true }
@@ -133,11 +79,6 @@ export const getListUsers = createServerFn({ method: 'GET' })
       prismaClient.subscription.findMany({
         where: { referenceId: { in: userIds } },
         select: SUBSCRIPTION_LIST_SELECT
-      }),
-      prismaClient.userBookmark.groupBy({
-        by: ['userId'],
-        where: { userId: { in: userIds } },
-        _count: { id: true }
       })
     ])
 
@@ -154,20 +95,13 @@ export const getListUsers = createServerFn({ method: 'GET' })
       }
     )
 
-    const bookmarkCountByUserId = new Map(
-      bookmarkCounts.map((group) => {
-        return [group.userId, group._count.id] as const
-      })
-    )
-
     const enrichedUsers = users.map((user) => {
       return {
         ...user,
         provider: resolveAuthProvider(providerByUserId.get(user.id)),
         subscription: buildSubscriptionInfo(
           subscriptionsByUserId[user.id] ?? []
-        ),
-        bookmarkCount: bookmarkCountByUserId.get(user.id) ?? 0
+        )
       } satisfies EnrichedUser
     })
 

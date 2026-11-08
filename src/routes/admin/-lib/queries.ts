@@ -34,7 +34,8 @@ import {
 import {
   type AdminUserActivityFilters,
   getAdminUserActivity,
-  getAdminUserDetail
+  getAdminUserDetail,
+  getAdminUserSubscriptionHistory
 } from '~/routes/admin/-server/user-detail'
 import { getListUsers } from '~/routes/admin/-server/users'
 import {
@@ -165,6 +166,23 @@ export const getAdminUserDetailQueryOpts = (userId: User['id']) => {
 }
 
 getAdminUserDetailQueryOpts.all = ['admin-user-detail'] as const
+
+export const getAdminUserSubscriptionHistoryQueryOpts = (
+  userId: User['id']
+) => {
+  return queryOptions({
+    queryKey: [...getAdminUserSubscriptionHistoryQueryOpts.all, userId],
+    meta: PRIVATE_QUERY_META,
+    queryFn: () => {
+      return getAdminUserSubscriptionHistory({ data: userId })
+    },
+    staleTime: BACKGROUND_STALE_MINUTES * MINUTE
+  })
+}
+
+getAdminUserSubscriptionHistoryQueryOpts.all = [
+  'admin-user-subscription-history'
+] as const
 
 export const getAdminUserActivityQueryOpts = (
   filters: AdminUserActivityFilters

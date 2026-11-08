@@ -5,17 +5,20 @@ import { getErrorMessage } from '~/helpers/error'
 import { matchIsPremiumGranted } from '~/lib/role'
 import { captureWithFeature, type SentryFeature } from '~/lib/sentry'
 import { BAN_REASONS, type BanReason } from '~/routes/admin/-lib/ban'
-import { getPremiumStatus } from '~/routes/admin/-lib/premium'
+import {
+  getPremiumStatus,
+  type SubscriptionInfo
+} from '~/routes/admin/-lib/premium'
 import {
   getAdminUserDetailQueryOpts,
-  getAdminUsersListQueryOpts
+  getAdminUsersListQueryOpts,
+  getAdminUserSubscriptionHistoryQueryOpts
 } from '~/routes/admin/-lib/queries'
 import {
   banUserById,
   grantPremiumById,
   removeUser,
   revokePremiumById,
-  type SubscriptionInfo,
   unbanUserById
 } from '~/routes/admin/-server/users'
 
@@ -92,7 +95,7 @@ type UserActionTarget = {
   banned: boolean | null
   role: string | null
   premiumGrantedAt: Date | null
-  subscription: Pick<SubscriptionInfo, 'status'>
+  subscription: Pick<SubscriptionInfo, 'state'>
 }
 
 type UserActionPermissionsParams = {
@@ -161,7 +164,10 @@ export const useUserActions = ({ userId, onDeleted }: UseUserActionsParams) => {
 
       return Promise.all([
         usersListInvalidation,
-        queryClient.invalidateQueries(getAdminUserDetailQueryOpts(userId))
+        queryClient.invalidateQueries(getAdminUserDetailQueryOpts(userId)),
+        queryClient.invalidateQueries(
+          getAdminUserSubscriptionHistoryQueryOpts(userId)
+        )
       ])
     },
     onError: (error, dialog) => {

@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from 'node:crypto'
 import { z } from 'zod'
+import { waitUntil } from '@vercel/functions'
 import { BUNNY_STATUS } from '~/constants/bunny'
 import { HTTP_STATUS } from '~/constants/http'
 import { MEME_ALGOLIA_INCLUDE } from '~/constants/meme'
@@ -9,6 +10,7 @@ import { invalidateAlgoliaCache } from '~/lib/algolia-cache.server'
 import { safeAlgoliaOp, syncMemeToAllIndices } from '~/lib/algolia.server'
 import { getVideoPlayData } from '~/lib/bunny.server'
 import { bunnyLogger } from '~/lib/logger'
+import { fillMemeDraft } from '~/lib/meme-draft-fill.server'
 import { matchIsPrismaError } from '~/lib/prisma-error.server'
 import { captureWithFeature } from '~/lib/sentry'
 
@@ -26,6 +28,11 @@ const PLAYBACK_STATE_STATUSES: readonly number[] = [
   BUNNY_STATUS.RESOLUTION_FINISHED,
   BUNNY_STATUS.FAILED,
   BUNNY_STATUS.VIDEO_DELETED
+]
+
+const DRAFT_FILL_STATUSES: readonly number[] = [
+  BUNNY_STATUS.FINISHED,
+  BUNNY_STATUS.RESOLUTION_FINISHED
 ]
 
 const buildVideoUpdate = async (videoId: string, status: number) => {
@@ -159,6 +166,10 @@ export const handleBunnyWebhook = async (request: Request) => {
     if (meme) {
       await safeAlgoliaOp(syncMemeToAllIndices(meme))
       await invalidateAlgoliaCache()
+    }
+
+    if (meme && DRAFT_FILL_STATUSES.includes(result.Status)) {
+      waitUntil(fillMemeDraft(meme.id))
     }
 
     bunnyLogger.info(

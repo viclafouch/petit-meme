@@ -6,3 +6,9 @@ export function parseKeywordsInput(input: string) {
     })
     .filter(Boolean)
 }
+
+export function normalizeKeywords(keywords: string[]) {
+  return keywords.map((keyword) => {
+    return keyword.toLowerCase().trim()
+  })
+}

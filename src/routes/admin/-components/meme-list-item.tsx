@@ -6,11 +6,7 @@ import { Link } from '@tanstack/react-router'
 import { MemeVideoThumbnail } from '~/components/Meme/meme-video-thumbnail'
 import { Badge } from '~/components/ui/badge'
 import { Skeleton } from '~/components/ui/skeleton'
-import {
-  DEFAULT_MEME_TITLE,
-  LEGACY_MEME_TITLE,
-  MemeStatusMeta
-} from '~/constants/meme'
+import { DEFAULT_MEME_TITLE, MemeStatusMeta } from '~/constants/meme'
 import { getVideoStatusByIdQueryOpts } from '~/lib/queries'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
@@ -41,8 +37,7 @@ export const MemeListItem = React.memo(({ meme }: MemeListItemProps) => {
   const currentStatus = videoStatusQuery.data?.status ?? meme.video.bunnyStatus
   const isPlayable = matchIsVideoPlayable(currentStatus)
   const statusMeta = MemeStatusMeta[meme.status]
-  const hasPlaceholderTitle =
-    meme.title === LEGACY_MEME_TITLE || meme.title === DEFAULT_MEME_TITLE
+  const hasPlaceholderTitle = meme.title === DEFAULT_MEME_TITLE
   const categoryLabel =
     meme.categoryCount === 0
       ? m.meme_categories_none()

@@ -77,6 +77,15 @@ enum MemeStatus {
   @@map("meme_status")
 }
 
+enum MemeFillStatus {
+  NONE
+  WAITING
+  RUNNING
+  FILLED
+
+  @@map("meme_fill_status")
+}
+
 enum MemeContentLocale {
   FR
   EN
@@ -104,6 +113,9 @@ model Meme {
   categories    MemeCategory[]
   translations  MemeTranslation[]
   status        MemeStatus     @default(PUBLISHED)
+  fillStatus    MemeFillStatus @default(NONE) @map("fill_status")
+  fillAttempts  Int            @default(0) @map("fill_attempts")
+  fillDoubt     String         @default("") @map("fill_doubt")
   viewsDaily          MemeViewDaily[]
   actionsDaily        MemeActionDaily[]
   studioGenerations   StudioGeneration[]

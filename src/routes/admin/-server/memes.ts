@@ -17,6 +17,7 @@ import { prismaClient } from '~/db/client.server'
 import {
   type MemeContentLocale,
   MemeContentLocale as MemeContentLocaleEnum,
+  MemeFillStatus,
   MemeStatus
 } from '~/db/generated/prisma/enums'
 import {
@@ -24,6 +25,7 @@ import {
   CONTENT_LOCALE_TO_LOCALE,
   REQUIRED_TRANSLATION_LOCALES
 } from '~/helpers/i18n-content'
+import { normalizeKeywords } from '~/helpers/keywords'
 import { invalidateAlgoliaCache } from '~/lib/algolia-cache.server'
 import {
   ALGOLIA_ADMIN_SEARCH_PARAMS,
@@ -198,12 +200,6 @@ function resolveSourceTranslation(
   const sourceLocale = CONTENT_LOCALE_TO_LOCALE[contentLocale]
 
   return translations[sourceLocale]
-}
-
-function normalizeKeywords(keywords: string[]) {
-  return keywords.map((keyword) => {
-    return keyword.toLowerCase().trim()
-  })
 }
 
 type BuildTranslationUpsertsParams = {
@@ -469,6 +465,7 @@ async function createMemeWithVideo({
         title,
         tweetUrl,
         status: 'PENDING',
+        fillStatus: MemeFillStatus.WAITING,
         contentLocale: MemeContentLocaleEnum.FR,
         video: {
           create: {

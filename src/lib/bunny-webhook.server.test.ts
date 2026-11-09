@@ -7,10 +7,12 @@ import { Prisma } from '~/db/generated/prisma/client'
 import { invalidateAlgoliaCache } from '~/lib/algolia-cache.server'
 import { syncMemeToAllIndices } from '~/lib/algolia.server'
 import { handleBunnyWebhook } from '~/lib/bunny-webhook.server'
+import { fillMemeDraft } from '~/lib/meme-draft-fill.server'
 import { captureWithFeature } from '~/lib/sentry'
 
-vi.mock(import('~/lib/algolia.server'), () => {
+vi.mock(import('~/lib/algolia.server'), async (importOriginal) => {
   return {
+    ...(await importOriginal()),
     syncMemeToAllIndices: vi.fn<typeof syncMemeToAllIndices>()
   }
 })
@@ -18,6 +20,12 @@ vi.mock(import('~/lib/algolia.server'), () => {
 vi.mock(import('~/lib/algolia-cache.server'), () => {
   return {
     invalidateAlgoliaCache: vi.fn<typeof invalidateAlgoliaCache>()
+  }
+})
+
+vi.mock(import('~/lib/meme-draft-fill.server'), () => {
+  return {
+    fillMemeDraft: vi.fn<typeof fillMemeDraft>()
   }
 })
 
@@ -29,6 +37,7 @@ vi.mock(import('~/lib/sentry'), async (importOriginal) => {
 })
 
 const VIDEO_GUID = 'bunny-video-guid'
+const MEME_ID = 'meme-id'
 const VIDEO_LENGTH_SECONDS = 12
 const FINISHED_VIDEO = {
   id: 1,
@@ -237,5 +246,42 @@ describe('handleBunnyWebhook', () => {
 
     expect(response.status).toBe(HTTP_STATUS.FORBIDDEN)
     expect(update).not.toHaveBeenCalled()
+  })
+
+  it.each([BUNNY_STATUS.FINISHED, BUNNY_STATUS.RESOLUTION_FINISHED])(
+    'should start the draft fill of the Meme when Bunny reports status %i',
+    async (status) => {
+      vi.spyOn(prismaClient.video, 'findUnique').mockResolvedValue({
+        ...FINISHED_VIDEO,
+        bunnyStatus: BUNNY_STATUS.ENCODING
+      })
+      const finishedVideo = {
+        ...FINISHED_VIDEO,
+        bunnyStatus: status,
+        meme: { id: MEME_ID }
+      }
+      vi.spyOn(prismaClient.video, 'update').mockResolvedValue(finishedVideo)
+
+      await postWebhook({ status })
+
+      expect(fillMemeDraft).toHaveBeenCalledExactlyOnceWith(MEME_ID)
+    }
+  )
+
+  it('should not start the draft fill before Bunny finishes the video', async () => {
+    vi.spyOn(prismaClient.video, 'findUnique').mockResolvedValue({
+      ...FINISHED_VIDEO,
+      bunnyStatus: BUNNY_STATUS.QUEUED
+    })
+    const encodingVideo = {
+      ...FINISHED_VIDEO,
+      bunnyStatus: BUNNY_STATUS.ENCODING,
+      meme: { id: MEME_ID }
+    }
+    vi.spyOn(prismaClient.video, 'update').mockResolvedValue(encodingVideo)
+
+    await postWebhook({ status: BUNNY_STATUS.ENCODING })
+
+    expect(fillMemeDraft).not.toHaveBeenCalled()
   })
 })

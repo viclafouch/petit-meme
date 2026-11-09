@@ -20,7 +20,7 @@ const MEME_FILE_LABELS = {
 } as const satisfies Record<MemeFile, string>
 
 type DeleteMemeButtonProps = {
-  meme: Meme
+  meme: Pick<Meme, 'id'>
 } & React.ComponentProps<typeof Button>
 
 export const DeleteMemeButton = ({

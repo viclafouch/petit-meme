@@ -27,6 +27,16 @@ export const MemeStatus = {
 export type MemeStatus = (typeof MemeStatus)[keyof typeof MemeStatus]
 
 
+export const MemeFillStatus = {
+  NONE: 'NONE',
+  WAITING: 'WAITING',
+  RUNNING: 'RUNNING',
+  FILLED: 'FILLED'
+} as const
+
+export type MemeFillStatus = (typeof MemeFillStatus)[keyof typeof MemeFillStatus]
+
+
 export const MemeContentLocale = {
   FR: 'FR',
   EN: 'EN',

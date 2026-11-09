@@ -2085,7 +2085,10 @@ export const MemeScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   publishedAt: 'publishedAt',
-  status: 'status'
+  status: 'status',
+  fillStatus: 'fillStatus',
+  fillAttempts: 'fillAttempts',
+  fillDoubt: 'fillDoubt'
 } as const
 
 export type MemeScalarFieldEnum = (typeof MemeScalarFieldEnum)[keyof typeof MemeScalarFieldEnum]
@@ -2452,6 +2455,20 @@ export type EnumMemeStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Prism
  * Reference to a field of type 'MemeStatus[]'
  */
 export type ListEnumMemeStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MemeStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'MemeFillStatus'
+ */
+export type EnumMemeFillStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MemeFillStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'MemeFillStatus[]'
+ */
+export type ListEnumMemeFillStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MemeFillStatus[]'>
     
 
 

@@ -215,11 +215,14 @@ importers:
         specifier: ^0.13.11
         version: 0.13.11(typescript@7.0.2)(valibot@1.4.2(typescript@7.0.2))(zod@4.6.7)
       '@tanstack/ai':
-        specifier: ^1.2.0
-        version: 1.2.0(@opentelemetry/api@1.9.1)(zod@4.6.7)
+        specifier: ^1.3.0
+        version: 1.3.0(@opentelemetry/api@1.9.1)(zod@4.6.7)
       '@tanstack/ai-anthropic':
         specifier: ^1.1.1
-        version: 1.1.1(@tanstack/ai@1.2.0(@opentelemetry/api@1.9.1)(zod@4.6.7))(zod@4.6.7)
+        version: 1.1.1(@tanstack/ai@1.3.0(@opentelemetry/api@1.9.1)(zod@4.6.7))(zod@4.6.7)
+      '@tanstack/ai-gemini':
+        specifier: ^1.2.1
+        version: 1.2.1(@modelcontextprotocol/sdk@1.32.1(@cfworker/json-schema@4.1.1)(supports-color@7.2.0)(zod@4.6.7))(@tanstack/ai@1.3.0(@opentelemetry/api@1.9.1)(zod@4.6.7))(supports-color@7.2.0)
       '@tanstack/charts':
         specifier: ^1.4.0
         version: 1.4.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -3059,11 +3062,16 @@ packages:
   '@tanstack/ai-event-client@1.0.1':
     resolution: {integrity: sha512-IURnn4oRKJbtbAuC3GcXRcuKHi8DrPmwuACqaTq6ApSGlyJyHhq0NTksKEmzql2Z12+njFjsKSXG9c7UbSHTxg==}
 
+  '@tanstack/ai-gemini@1.2.1':
+    resolution: {integrity: sha512-Obx3S29MjXg71VcVU5m1ix3SiQv8xkuDAeDW43gT2HOoZHuHeVlcNyq7jN/luJTFxof3/le0JR6OGBiUr5iDsQ==}
+    peerDependencies:
+      '@tanstack/ai': ^1.3.0
+
   '@tanstack/ai-utils@1.1.0':
     resolution: {integrity: sha512-li47v/794azVLourgteS/+jjH/ZF+cIp/3RMVA1VybtKAFiMy3ZGxREU10OzfUghMzYLdfpK2l6ahvlWxNVHug==}
 
-  '@tanstack/ai@1.2.0':
-    resolution: {integrity: sha512-N4v2HfkJgwNxkVNcYHVbjuJM4jJhb/y6ifNhUIqoGw6oa/nZjuTnGSCer9ldr9DIMQVrAizc8ocM3FBmszItSw==}
+  '@tanstack/ai@1.3.0':
+    resolution: {integrity: sha512-KXsE77D7IiWyu0pPfZf/WuhEi45AWbguiI8T9Ony1CISVKYbLJSV+lACzsccYvMoFXR9QFUDxye+pjqGKvlIgQ==}
     engines: {node: '>=18'}
     peerDependencies:
       '@opentelemetry/api': '>=1.9.0'
@@ -8745,10 +8753,10 @@ snapshots:
       - preact
       - react
 
-  '@tanstack/ai-anthropic@1.1.1(@tanstack/ai@1.2.0(@opentelemetry/api@1.9.1)(zod@4.6.7))(zod@4.6.7)':
+  '@tanstack/ai-anthropic@1.1.1(@tanstack/ai@1.3.0(@opentelemetry/api@1.9.1)(zod@4.6.7))(zod@4.6.7)':
     dependencies:
       '@anthropic-ai/sdk': 0.135.0(zod@4.6.7)
-      '@tanstack/ai': 1.2.0(@opentelemetry/api@1.9.1)(zod@4.6.7)
+      '@tanstack/ai': 1.3.0(@opentelemetry/api@1.9.1)(zod@4.6.7)
       '@tanstack/ai-utils': 1.1.0
     transitivePeerDependencies:
       - zod
@@ -8757,9 +8765,21 @@ snapshots:
     dependencies:
       '@tanstack/devtools-event-client': 0.4.3
 
+  '@tanstack/ai-gemini@1.2.1(@modelcontextprotocol/sdk@1.32.1(@cfworker/json-schema@4.1.1)(supports-color@7.2.0)(zod@4.6.7))(@tanstack/ai@1.3.0(@opentelemetry/api@1.9.1)(zod@4.6.7))(supports-color@7.2.0)':
+    dependencies:
+      '@google/genai': 2.31.0(@modelcontextprotocol/sdk@1.32.1(@cfworker/json-schema@4.1.1)(supports-color@7.2.0)(zod@4.6.7))(supports-color@7.2.0)
+      '@tanstack/ai': 1.3.0(@opentelemetry/api@1.9.1)(zod@4.6.7)
+      '@tanstack/ai-utils': 1.1.0
+      partial-json: 0.1.7
+    transitivePeerDependencies:
+      - '@modelcontextprotocol/sdk'
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+
   '@tanstack/ai-utils@1.1.0': {}
 
-  '@tanstack/ai@1.2.0(@opentelemetry/api@1.9.1)(zod@4.6.7)':
+  '@tanstack/ai@1.3.0(@opentelemetry/api@1.9.1)(zod@4.6.7)':
     dependencies:
       '@ag-ui/core': 1.0.0(zod@4.6.7)
       '@cfworker/json-schema': 4.1.1

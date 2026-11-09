@@ -1,6 +1,7 @@
 import type { VariantProps } from 'class-variance-authority'
 import { z } from 'zod'
 import type { badgeVariants } from '~/components/ui/badge'
+import { MEME_FILL_OMIT } from '~/constants/meme-fill'
 import { BYTES_PER_KILOBYTE } from '~/constants/number'
 import {
   SEARCH_PARAM_MAX_PAGE,
@@ -43,7 +44,6 @@ export const MEME_TRANSLATION_SELECT = {
 } as const satisfies Prisma.MemeTranslationSelect
 
 export const DEFAULT_MEME_TITLE = 'Sans titre'
-export const LEGACY_MEME_TITLE = 'Titre inconnu'
 
 export const TRENDING_CATEGORY_SLUG = 'trending'
 export const NEWS_CATEGORY_SLUG = 'news'
@@ -195,18 +195,22 @@ export const MEMES_FILTERS_SCHEMA = z.object({
 
 export type MemeFullData = Prisma.MemeGetPayload<{
   include: typeof MEME_FULL_INCLUDE
+  omit: typeof MEME_FILL_OMIT
 }>
 
 export type MemeAlgoliaData = Prisma.MemeGetPayload<{
   include: typeof MEME_ALGOLIA_INCLUDE
+  omit: typeof MEME_FILL_OMIT
 }>
 
 export type MemeWithVideo = Prisma.MemeGetPayload<{
   include: typeof MEME_VIDEO_INCLUDE
+  omit: typeof MEME_FILL_OMIT
 }>
 
 export type MemeWithCategories = Prisma.MemeGetPayload<{
   include: { categories: { include: { category: true } } }
+  omit: typeof MEME_FILL_OMIT
 }>
 
 const SIZE_IN_MB = 16

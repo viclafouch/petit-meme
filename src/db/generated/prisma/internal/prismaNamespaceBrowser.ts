@@ -145,7 +145,10 @@ export const MemeScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   publishedAt: 'publishedAt',
-  status: 'status'
+  status: 'status',
+  fillStatus: 'fillStatus',
+  fillAttempts: 'fillAttempts',
+  fillDoubt: 'fillDoubt'
 } as const
 
 export type MemeScalarFieldEnum = (typeof MemeScalarFieldEnum)[keyof typeof MemeScalarFieldEnum]

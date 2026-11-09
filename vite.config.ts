@@ -9,6 +9,7 @@ import {
   IMMUTABLE_CACHE_CONTROL,
   WEEKLY_CACHE_CONTROL
 } from './src/constants/http.ts'
+import { MEME_FILL_MAX_DURATION_SECONDS } from './src/constants/meme-fill.ts'
 import {
   SENTRY_APPLICATION_KEY,
   SENTRY_ORG,
@@ -60,6 +61,8 @@ const SERVER_ONLY_PACKAGES = [
   '@prisma/client',
   '@tanstack/ai',
   '@tanstack/ai-anthropic',
+  '@tanstack/ai-gemini',
+  '@tanstack/ai-gemini/tools',
   '@vercel/blob',
   '@vercel/functions',
   'better-auth',
@@ -148,7 +151,11 @@ export default defineConfig(async ({ mode }) => {
             }
           }
         },
-        vercel: {},
+        vercel: {
+          functionRules: {
+            '/api/bunny': { maxDuration: MEME_FILL_MAX_DURATION_SECONDS }
+          }
+        },
         routeRules: {
           '/**': {
             headers: {

@@ -2,6 +2,7 @@ import { Pool } from 'pg'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { attachDatabasePool } from '@vercel/functions'
 import { IS_PRODUCTION } from '~/constants/env'
+import { MEME_FILL_OMIT } from '~/constants/meme-fill'
 import { serverEnv } from '~/env/server.server'
 import { PrismaClient } from './generated/prisma/client'
 
@@ -17,7 +18,10 @@ const prismaClientSingleton = () => {
 
   attachDatabasePool(pool)
 
-  return new PrismaClient({ adapter: new PrismaPg(pool) })
+  return new PrismaClient({
+    adapter: new PrismaPg(pool),
+    omit: { meme: MEME_FILL_OMIT }
+  })
 }
 
 declare global {

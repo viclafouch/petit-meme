@@ -1,7 +1,4 @@
-import {
-  MEME_FILL_MAX_DURATION_MS,
-  READY_MEME_DRAFT_WHERE
-} from '~/constants/meme-fill'
+import { MEME_FILL_MAX_DURATION_MS } from '~/constants/meme-fill'
 import { prismaClient } from '~/db/client.server'
 import { CONTACT_EMAIL } from '~/emails/constants'
 import { MemeFillDigestEmail } from '~/emails/meme-fill-digest-email'
@@ -10,6 +7,7 @@ import { formatMemeFillDigestSummary } from '~/helpers/meme-fill-digest'
 import {
   findUnfilledMemeDrafts,
   type MemeFillFailure,
+  READY_MEME_DRAFT_WHERE,
   retryUnfilledMemeDraft,
   type UnfilledMemeDraft
 } from '~/lib/meme-draft-fill.server'

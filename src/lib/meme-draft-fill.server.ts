@@ -170,6 +170,11 @@ async function storeSuggestion({
   return count === 1
 }
 
+export const READY_MEME_DRAFT_WHERE = {
+  status: MemeStatus.PENDING,
+  fillStatus: MemeFillStatus.FILLED
+} as const satisfies Prisma.MemeWhereInput
+
 const UNFILLED_DRAFT_WHERE = {
   status: MemeStatus.PENDING,
   title: DEFAULT_MEME_TITLE

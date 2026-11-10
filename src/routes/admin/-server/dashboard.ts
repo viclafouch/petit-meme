@@ -1,7 +1,6 @@
 import { z } from 'zod'
 import { createServerFn } from '@tanstack/react-start'
 import { TRENDING_CATEGORY_DAYS, TRENDING_WEIGHTS } from '~/constants/meme'
-import { READY_MEME_DRAFT_WHERE } from '~/constants/meme-fill'
 import { DAY } from '~/constants/time'
 import { prismaClient } from '~/db/client.server'
 import type { Prisma } from '~/db/generated/prisma/client'
@@ -14,6 +13,7 @@ import {
   truncateToUtcDay
 } from '~/helpers/date'
 import { ACTIVE_SUBSCRIPTION_STATUSES } from '~/helpers/subscription'
+import { READY_MEME_DRAFT_WHERE } from '~/lib/meme-draft-fill.server'
 import { DASHBOARD_FEED_SIZE } from '~/routes/admin/-lib/constants'
 import type { AuditMetadata } from '~/server/audit.server'
 import { adminRequiredMiddleware } from '~/server/user-auth'

@@ -13,7 +13,6 @@ import {
   MEME_FULL_INCLUDE,
   MEMES_PER_PAGE
 } from '~/constants/meme'
-import { READY_MEME_DRAFT_WHERE } from '~/constants/meme-fill'
 import { MEME_FILL_SUGGESTION_SCHEMA } from '~/constants/meme-fill-suggestion'
 import { TWEET_LINK_SCHEMA } from '~/constants/url'
 import { prismaClient } from '~/db/client.server'
@@ -45,6 +44,7 @@ import {
 } from '~/lib/algolia.server'
 import { createVideo, uploadVideo } from '~/lib/bunny.server'
 import { adminLogger } from '~/lib/logger'
+import { READY_MEME_DRAFT_WHERE } from '~/lib/meme-draft-fill.server'
 import { deleteMemeFiles, findMissingMemeFiles } from '~/lib/meme-files.server'
 import { getTweetByUrl, getTweetMedia } from '~/lib/react-tweet'
 import { captureWithFeature } from '~/lib/sentry'

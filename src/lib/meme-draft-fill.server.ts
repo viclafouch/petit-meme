@@ -10,9 +10,10 @@ import { Prisma } from '~/db/generated/prisma/client'
 import { MemeFillStatus, MemeStatus } from '~/db/generated/prisma/enums'
 import {
   CONTENT_LOCALE_TO_LOCALE,
-  REQUIRED_TRANSLATION_LOCALES
+  REQUIRED_TRANSLATION_LOCALES,
+  resolveCategoryTranslation
 } from '~/helpers/i18n-content'
-import { normalizeKeywords } from '~/helpers/keywords'
+import { keepNewKeywords } from '~/helpers/keywords'
 import { matchIsFillInFlight } from '~/helpers/meme-fill'
 import { withTimeout } from '~/helpers/promise'
 import { safeAlgoliaOp, syncMemeToAllIndices } from '~/lib/algolia.server'
@@ -26,7 +27,7 @@ import {
   writeMemeDraft
 } from '~/lib/meme-draft.server'
 import { captureWithFeature } from '~/lib/sentry'
-import type { Locale } from '~/paraglide/runtime'
+import { type Locale, locales } from '~/paraglide/runtime'
 
 const FILL_RUN_TIMEOUT_MS = 740_000
 const FILL_VIDEO_TIMEOUT_MS = 540_000
@@ -57,6 +58,58 @@ async function translateDraft(draft: MemeDraft) {
   return { ...translations, ...translated }
 }
 
+const DRAFT_CATEGORY_SELECT = {
+  id: true,
+  slug: true,
+  title: true,
+  keywords: true,
+  translations: { select: { locale: true, title: true, keywords: true } }
+} as const satisfies Prisma.CategorySelect
+
+type DraftCategory = Prisma.CategoryGetPayload<{
+  select: typeof DRAFT_CATEGORY_SELECT
+}>
+
+type KeepNewDraftKeywordsParams = {
+  translations: DraftTranslations
+  chosenCategories: DraftCategory[]
+}
+
+function keepNewDraftKeywords({
+  translations,
+  chosenCategories
+}: KeepNewDraftKeywordsParams): DraftTranslations {
+  return Object.fromEntries(
+    locales.flatMap((locale) => {
+      const translation = translations[locale]
+
+      if (!translation) {
+        return []
+      }
+
+      const categoryTexts = chosenCategories.flatMap((category) => {
+        const { title, keywords } = resolveCategoryTranslation({
+          translations: category.translations,
+          requestedLocale: locale,
+          fallback: category
+        })
+
+        return [title, ...keywords]
+      })
+      const keywords = keepNewKeywords({
+        keywords: translation.keywords,
+        knownTexts: [
+          translation.title,
+          translation.description,
+          ...categoryTexts
+        ]
+      })
+
+      return [[locale, { ...translation, keywords }]]
+    })
+  )
+}
+
 function resolveTranslation(translations: DraftTranslations, locale: Locale) {
   const translation = translations[locale]
 
@@ -67,7 +120,7 @@ function resolveTranslation(translations: DraftTranslations, locale: Locale) {
   return {
     title: translation.title,
     description: translation.description,
-    keywords: normalizeKeywords(translation.keywords)
+    keywords: translation.keywords
   }
 }
 
@@ -266,7 +319,7 @@ async function runClaimedFill({
   }
 
   const categories = await prismaClient.category.findMany({
-    select: { id: true, slug: true, title: true }
+    select: DRAFT_CATEGORY_SELECT
   })
   const draft = await writeMemeDraft({
     video,
@@ -275,14 +328,16 @@ async function runClaimedFill({
     categories,
     timeoutMs: FILL_VIDEO_TIMEOUT_MS
   })
-  const translations = await translateDraft(draft)
-  const categoryIds = categories
-    .filter(({ slug }) => {
-      return draft.categorySlugs.includes(slug)
-    })
-    .map(({ id }) => {
-      return id
-    })
+  const chosenCategories = categories.filter(({ slug }) => {
+    return draft.categorySlugs.includes(slug)
+  })
+  const translations = keepNewDraftKeywords({
+    translations: await translateDraft(draft),
+    chosenCategories
+  })
+  const categoryIds = chosenCategories.map(({ id }) => {
+    return id
+  })
 
   const filledMeme = await writeFilledDraft({
     memeId,

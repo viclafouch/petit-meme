@@ -123,6 +123,41 @@ describe('fillMemeDraft', () => {
     expect(captureWithFeature).not.toHaveBeenCalled()
   })
 
+  it('should keep only the keywords that add a word absent from the title, the description and the chosen Categories', async () => {
+    stubBunnyAndGemini({
+      draft: {
+        ...DRAFT,
+        keywords: ['rigoler', 'tobey', 'téléchargez', 'cinema', 'chat']
+      }
+    })
+    const { updateFillStatus } = stubDatabase()
+
+    await fillMemeDraft(MEME_ID)
+
+    expect(updateFillStatus).toHaveBeenNthCalledWith(2, {
+      where: GUARDED_WRITE_WHERE,
+      data: {
+        title: DRAFT.title,
+        description: DRAFT.description,
+        keywords: ['rigoler', 'chat'],
+        contentLocale: MemeContentLocale.FR,
+        fillStatus: MemeFillStatus.FILLED,
+        fillDoubt: ''
+      }
+    })
+  })
+
+  it('should show Gemini the keywords of each Category, so the draft keywords can avoid them', async () => {
+    const fetchMock = stubBunnyAndGemini()
+    stubDatabase()
+
+    await fillMemeDraft(MEME_ID)
+
+    expect(readDraftPrompts(fetchMock)).toStrictEqual([
+      expect.stringContaining('cinéma')
+    ])
+  })
+
   it('should claim a waiting draft, or a run left running past the function limit, and count the attempt', async () => {
     stubBunnyAndGemini()
     const { updateFillStatus } = stubDatabase()
@@ -246,15 +281,40 @@ describe('fillMemeDraft', () => {
       update: {
         title: ENGLISH_TRANSLATION.title,
         description: ENGLISH_TRANSLATION.description,
-        keywords: ['tobey', 'maguire', 'laugh', 'funny', 'spiderman']
+        keywords: ['laugh', 'funny', 'bully', 'peter', 'parker']
       },
       create: {
         memeId: MEME_ID,
         locale: 'en',
         title: ENGLISH_TRANSLATION.title,
         description: ENGLISH_TRANSLATION.description,
-        keywords: ['tobey', 'maguire', 'laugh', 'funny', 'spiderman']
+        keywords: ['laugh', 'funny', 'bully', 'peter', 'parker']
       }
+    })
+  })
+
+  it('should keep only the English keywords that add a word absent from the English title, description and chosen Categories', async () => {
+    stubBunnyAndGemini({
+      draft: { ...DRAFT, contentLocale: MemeContentLocale.UNIVERSAL },
+      englishTranslation: {
+        ...ENGLISH_TRANSLATION,
+        keywords: ['laugh', 'Tobey', 'download', 'movies', 'cinema', 'cat']
+      }
+    })
+    const { upsertTranslation } = stubDatabase()
+
+    await fillMemeDraft(MEME_ID)
+
+    const englishRecord = {
+      title: ENGLISH_TRANSLATION.title,
+      description: ENGLISH_TRANSLATION.description,
+      keywords: ['laugh', 'cat']
+    }
+
+    expect(upsertTranslation).toHaveBeenLastCalledWith({
+      where: { memeId_locale: { memeId: MEME_ID, locale: 'en' } },
+      update: englishRecord,
+      create: { memeId: MEME_ID, locale: 'en', ...englishRecord }
     })
   })
 

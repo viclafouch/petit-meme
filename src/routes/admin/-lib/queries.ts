@@ -26,7 +26,11 @@ import {
   checkMemeFiles,
   fetchAdminVideoBlob
 } from '~/routes/admin/-server/meme-files'
-import { getAdminMemeById, getAdminMemes } from '~/routes/admin/-server/memes'
+import {
+  getAdminMemeById,
+  getAdminMemeFill,
+  getAdminMemes
+} from '~/routes/admin/-server/memes'
 import {
   getAdminPendingSubmissionCount,
   getAdminSubmissions
@@ -59,6 +63,19 @@ export const getAdminMemeByIdQueryOpts = (memeId: Meme['id']) => {
 }
 
 getAdminMemeByIdQueryOpts.all = ['admin-meme'] as const
+
+export const getAdminMemeFillQueryOpts = (memeId: Meme['id']) => {
+  return queryOptions({
+    queryKey: [...getAdminMemeFillQueryOpts.all, memeId],
+    meta: PRIVATE_QUERY_META,
+    queryFn: () => {
+      return getAdminMemeFill({ data: memeId })
+    },
+    staleTime: Infinity
+  })
+}
+
+getAdminMemeFillQueryOpts.all = ['admin-meme-fill'] as const
 
 export const getAdminMemesListQueryOpts = (filters: MemesFilters) => {
   return queryOptions({

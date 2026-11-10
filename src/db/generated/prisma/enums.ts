@@ -31,7 +31,8 @@ export const MemeFillStatus = {
   NONE: 'NONE',
   WAITING: 'WAITING',
   RUNNING: 'RUNNING',
-  FILLED: 'FILLED'
+  FILLED: 'FILLED',
+  FAILED: 'FAILED'
 } as const
 
 export type MemeFillStatus = (typeof MemeFillStatus)[keyof typeof MemeFillStatus]

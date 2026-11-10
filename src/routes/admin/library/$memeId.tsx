@@ -1,15 +1,24 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { buildMemeSeo } from '~/lib/seo'
-import { getAdminMemeByIdQueryOpts } from '~/routes/admin/-lib/queries'
+import {
+  getAdminMemeByIdQueryOpts,
+  getAdminMemeFillQueryOpts
+} from '~/routes/admin/-lib/queries'
 import { MemePage } from '~/routes/admin/library/-components/meme-page'
 
 export const Route = createFileRoute('/admin/library/$memeId')({
   component: MemePage,
   loader: async ({ params, context }) => {
-    const meme = await context.queryClient.query({
-      ...getAdminMemeByIdQueryOpts(params.memeId),
-      staleTime: 'static'
-    })
+    const [meme] = await Promise.all([
+      context.queryClient.query({
+        ...getAdminMemeByIdQueryOpts(params.memeId),
+        staleTime: 'static'
+      }),
+      context.queryClient.query({
+        ...getAdminMemeFillQueryOpts(params.memeId),
+        staleTime: 'static'
+      })
+    ])
 
     return { meme }
   },

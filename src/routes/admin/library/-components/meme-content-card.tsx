@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '~/components/ui/select'
-import type { Meme } from '~/db/generated/prisma/client'
+import { MemeFillStatus } from '~/db/generated/prisma/enums'
 import {
   CONTENT_LOCALE_TO_LOCALE,
   getContentLocaleOptions
@@ -26,8 +26,14 @@ import {
 import { matchIsFieldInvalid } from '~/lib/form'
 import type { Locale } from '~/paraglide/runtime'
 import type { AiAssistResult } from '~/server/ai'
-import { AiAssistDialog, type AiAssistFieldSelection } from './ai-assist-dialog'
+import {
+  type AiAssistFieldSelection,
+  AiAssistReviewDialog,
+  AiAssistStartDialog
+} from './ai-assist-dialog'
+import { MemeFillNotice } from './meme-fill-notice'
 import { MemeSectionTitle } from './meme-section-title'
+import type { MemeFill } from './use-meme-fill'
 import type { MemeFormApi } from './use-meme-form'
 
 const CONTENT_LOCALE_FIELD_ID = 'meme-content-locale'
@@ -35,15 +41,18 @@ const CONTENT_LOCALE_FIELD_ID = 'meme-content-locale'
 type MemeContentCardProps = {
   index: number
   form: MemeFormApi
-  memeId: Meme['id']
+  memeFill: MemeFill
 }
 
 export const MemeContentCard = ({
   index,
   form,
-  memeId
+  memeFill
 }: MemeContentCardProps) => {
-  const [isAiAssistOpen, setIsAiAssistOpen] = React.useState(false)
+  const [isStartOpen, setIsStartOpen] = React.useState(false)
+  const [isReviewOpen, setIsReviewOpen] = React.useState(false)
+  const { fill, isRunning, start, settleSuggestion } = memeFill
+  const { suggestion } = fill
 
   const contentLocaleItems = getContentLocaleOptions().map((option) => {
     const Flag = CONTENT_LOCALE_FLAGS[option.value]
@@ -92,8 +101,9 @@ export const MemeContentCard = ({
             type="button"
             size="sm"
             variant="outline"
+            disabled={isRunning}
             onClick={() => {
-              setIsAiAssistOpen(true)
+              setIsStartOpen(true)
             }}
           >
             <Sparkles data-icon="inline-start" aria-hidden />
@@ -101,7 +111,15 @@ export const MemeContentCard = ({
           </Button>
         </CardAction>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-col gap-5">
+        {fill.status === MemeFillStatus.NONE ? null : (
+          <MemeFillNotice
+            memeFill={memeFill}
+            onReview={() => {
+              setIsReviewOpen(true)
+            }}
+          />
+        )}
         <form.Field
           name="contentLocale"
           children={(field) => {
@@ -148,25 +166,41 @@ export const MemeContentCard = ({
           }}
         />
       </CardContent>
-      <form.Subscribe
-        selector={(state) => {
-          return state.values.contentLocale
-        }}
-        children={(contentLocale) => {
-          const applyLocale = CONTENT_LOCALE_TO_LOCALE[contentLocale]
-
-          return (
-            <AiAssistDialog
-              memeId={memeId}
-              contentLocale={contentLocale}
-              currentValues={form.getFieldValue(`translations.${applyLocale}`)}
-              isOpen={isAiAssistOpen}
-              onOpenChange={setIsAiAssistOpen}
-              onApply={handleAiAssistApply}
-            />
-          )
+      <AiAssistStartDialog
+        isOpen={isStartOpen}
+        isStarting={start.isPending}
+        onOpenChange={setIsStartOpen}
+        onStart={(customPrompt, onStarted) => {
+          start.mutate(customPrompt, { onSuccess: onStarted })
         }}
       />
+      {suggestion ? (
+        <form.Subscribe
+          selector={(state) => {
+            return state.values.contentLocale
+          }}
+          children={(contentLocale) => {
+            const applyLocale = CONTENT_LOCALE_TO_LOCALE[contentLocale]
+
+            return (
+              <AiAssistReviewDialog
+                suggestion={suggestion}
+                contentLocale={contentLocale}
+                currentValues={form.getFieldValue(
+                  `translations.${applyLocale}`
+                )}
+                isOpen={isReviewOpen}
+                isSettling={settleSuggestion.isPending}
+                onOpenChange={setIsReviewOpen}
+                onApply={handleAiAssistApply}
+                onSettle={(isApplied) => {
+                  settleSuggestion.mutate(isApplied)
+                }}
+              />
+            )
+          }}
+        />
+      ) : null}
     </Card>
   )
 }

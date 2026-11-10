@@ -18,6 +18,26 @@ import { translateMemeContent } from '~/server/ai'
 
 export type MemeFormValues = z.infer<typeof MEME_FORM_SCHEMA>
 
+export const buildMemeFormValues = (meme: MemeFullData): MemeFormValues => {
+  return {
+    contentLocale: meme.contentLocale,
+    translations: buildLocaleRecord((locale) => {
+      const translation = findTranslationByLocale(meme.translations, locale)
+
+      return {
+        title: translation?.title ?? '',
+        description: translation?.description ?? '',
+        keywords: translation?.keywords ?? []
+      }
+    }),
+    tweetUrl: meme.tweetUrl,
+    status: meme.status,
+    categoryIds: meme.categories.map((category) => {
+      return category.categoryId
+    })
+  }
+}
+
 type UseMemeFormParams = {
   meme: MemeFullData
   onChange: (values: MemeFormValues) => void
@@ -28,23 +48,7 @@ export function useMemeForm({ meme, onChange, onSubmit }: UseMemeFormParams) {
   const categoriesListQuery = useQuery(getCategoriesListQueryOpts(baseLocale))
 
   const form = useAppForm({
-    defaultValues: {
-      contentLocale: meme.contentLocale,
-      translations: buildLocaleRecord((locale) => {
-        const translation = findTranslationByLocale(meme.translations, locale)
-
-        return {
-          title: translation?.title ?? '',
-          description: translation?.description ?? '',
-          keywords: translation?.keywords ?? []
-        }
-      }),
-      tweetUrl: meme.tweetUrl,
-      status: meme.status,
-      categoryIds: meme.categories.map((category) => {
-        return category.categoryId
-      })
-    },
+    defaultValues: buildMemeFormValues(meme),
     validators: {
       onChange: MEME_FORM_SCHEMA
     },

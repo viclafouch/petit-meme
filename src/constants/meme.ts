@@ -223,3 +223,10 @@ export const MAX_SIZE_MEME_FILE_IN_BYTES =
   MEME_FILE_TO_SOURCE_SIZE_RATIO * MAX_SIZE_MEME_IN_BYTES
 
 export type MemesFilters = z.infer<typeof MEMES_FILTERS_SCHEMA>
+
+export const ADMIN_MEMES_FILTERS_SCHEMA = MEMES_SEARCH_SCHEMA.extend({
+  // oxlint-disable-next-line promise/prefer-await-to-then, unicorn/no-useless-undefined -- Zod's catch() sets the parse fallback, it is no promise, and undefined is the fallback value
+  ready: z.boolean().optional().catch(undefined)
+})
+
+export type AdminMemesFilters = z.infer<typeof ADMIN_MEMES_FILTERS_SCHEMA>

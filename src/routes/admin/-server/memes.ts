@@ -5,13 +5,15 @@ import { createServerFn } from '@tanstack/react-start'
 import { setResponseStatus } from '@tanstack/react-start/server'
 import { HTTP_STATUS } from '~/constants/http'
 import {
+  ADMIN_MEMES_FILTERS_SCHEMA,
+  type AdminMemesFilters,
   DEFAULT_MEME_TITLE,
   MAX_SIZE_MEME_IN_BYTES,
   MEME_ALGOLIA_INCLUDE,
   MEME_FULL_INCLUDE,
-  MEMES_PER_PAGE,
-  MEMES_SEARCH_SCHEMA
+  MEMES_PER_PAGE
 } from '~/constants/meme'
+import { READY_MEME_DRAFT_WHERE } from '~/constants/meme-fill'
 import { MEME_FILL_SUGGESTION_SCHEMA } from '~/constants/meme-fill-suggestion'
 import { TWEET_LINK_SCHEMA } from '~/constants/url'
 import { prismaClient } from '~/db/client.server'
@@ -33,6 +35,7 @@ import {
   ALGOLIA_ADMIN_SEARCH_PARAMS,
   getAlgoliaSearchClient,
   deleteMemeFromAllIndices,
+  memeToAlgoliaRecord,
   normalizeAlgoliaHit,
   resolveAlgoliaIndexName,
   resolveAlgoliaReplicaCreated,
@@ -640,40 +643,79 @@ export type AdminMemeRecord = AlgoliaMemeRecord & {
   bookmarkCount: number
 }
 
+type AdminMemesSearch = AdminMemesFilters & {
+  pageIndex: number
+}
+
+async function searchReadyDrafts({ pageIndex, ...filters }: AdminMemesSearch) {
+  const where = {
+    ...READY_MEME_DRAFT_WHERE,
+    contentLocale: filters.contentLocale,
+    title: filters.query
+      ? { contains: filters.query, mode: 'insensitive' }
+      : undefined
+  } satisfies Prisma.MemeWhereInput
+  const memes = await prismaClient.meme.findMany({
+    where,
+    include: MEME_ALGOLIA_INCLUDE,
+    orderBy: { updatedAt: 'asc' },
+    skip: pageIndex * MEMES_PER_PAGE,
+    take: MEMES_PER_PAGE
+  })
+  const total = await prismaClient.meme.count({ where })
+
+  return {
+    hits: memes.map((meme) => {
+      return memeToAlgoliaRecord(meme, baseLocale)
+    }),
+    page: pageIndex,
+    totalPages: Math.ceil(total / MEMES_PER_PAGE)
+  }
+}
+
+async function searchAlgoliaMemes({ pageIndex, ...filters }: AdminMemesSearch) {
+  const filterParts: string[] = []
+
+  if (filters.status !== undefined) {
+    filterParts.push(ALGOLIA_STATUS_FILTERS[filters.status])
+  }
+
+  if (filters.contentLocale !== undefined) {
+    filterParts.push(ALGOLIA_CONTENT_LOCALE_FILTERS[filters.contentLocale])
+  }
+
+  const response =
+    await getAlgoliaSearchClient().searchSingleIndex<AlgoliaMemeRecord>({
+      indexName: filters.query
+        ? resolveAlgoliaIndexName(baseLocale)
+        : resolveAlgoliaReplicaCreated(baseLocale),
+      searchParams: {
+        query: filters.query,
+        page: pageIndex,
+        hitsPerPage: MEMES_PER_PAGE,
+        filters: filterParts.length > 0 ? filterParts.join(' AND ') : undefined,
+        ...ALGOLIA_ADMIN_SEARCH_PARAMS
+      }
+    })
+
+  return {
+    hits: response.hits.map(normalizeAlgoliaHit),
+    page: response.page,
+    totalPages: response.nbPages
+  }
+}
+
 export const getAdminMemes = createServerFn({ method: 'GET' })
   .middleware([adminRequiredMiddleware])
-  .validator(MEMES_SEARCH_SCHEMA)
+  .validator(ADMIN_MEMES_FILTERS_SCHEMA)
   .handler(async ({ data }) => {
-    const filterParts: string[] = []
-
-    if (data.status !== undefined) {
-      filterParts.push(ALGOLIA_STATUS_FILTERS[data.status])
+    const search = {
+      ...data,
+      pageIndex: data.page === undefined ? 0 : data.page - 1
     }
-
-    if (data.contentLocale !== undefined) {
-      filterParts.push(ALGOLIA_CONTENT_LOCALE_FILTERS[data.contentLocale])
-    }
-
-    const filters =
-      filterParts.length > 0 ? filterParts.join(' AND ') : undefined
-
-    const searchIndex = data.query
-      ? resolveAlgoliaIndexName(baseLocale)
-      : resolveAlgoliaReplicaCreated(baseLocale)
-
-    const response =
-      await getAlgoliaSearchClient().searchSingleIndex<AlgoliaMemeRecord>({
-        indexName: searchIndex,
-        searchParams: {
-          query: data.query,
-          page: data.page === undefined ? 0 : data.page - 1,
-          hitsPerPage: MEMES_PER_PAGE,
-          filters,
-          ...ALGOLIA_ADMIN_SEARCH_PARAMS
-        }
-      })
-
-    const hits = response.hits.map(normalizeAlgoliaHit)
+    const { hits, page, totalPages } = data.ready
+      ? await searchReadyDrafts(search)
+      : await searchAlgoliaMemes(search)
     const memeIds = hits.map((hit) => {
       return hit.id
     })
@@ -698,7 +740,7 @@ export const getAdminMemes = createServerFn({ method: 'GET' })
         } satisfies AdminMemeRecord
       }),
       query: data.query,
-      page: response.page,
-      totalPages: response.nbPages
+      page,
+      totalPages
     }
   })

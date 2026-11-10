@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { createServerFn } from '@tanstack/react-start'
 import { TRENDING_CATEGORY_DAYS, TRENDING_WEIGHTS } from '~/constants/meme'
+import { READY_MEME_DRAFT_WHERE } from '~/constants/meme-fill'
 import { DAY } from '~/constants/time'
 import { prismaClient } from '~/db/client.server'
 import type { Prisma } from '~/db/generated/prisma/client'
@@ -31,6 +32,7 @@ const PERIOD_DAYS = {
 export type DashboardTotals = {
   publishedMemes: number
   pendingMemes: number
+  readyMemeDrafts: number
   totalUsers: number
   paidPremium: number
   grantedPremium: number
@@ -40,12 +42,14 @@ async function fetchTotals() {
   const [
     publishedMemes,
     pendingMemes,
+    readyMemeDrafts,
     totalUsers,
     paidPremium,
     grantedPremium
   ] = await Promise.all([
     prismaClient.meme.count({ where: { status: MemeStatus.PUBLISHED } }),
     prismaClient.meme.count({ where: { status: MemeStatus.PENDING } }),
+    prismaClient.meme.count({ where: READY_MEME_DRAFT_WHERE }),
     prismaClient.user.count(),
     prismaClient.subscription.count({
       where: { status: { in: [...ACTIVE_SUBSCRIPTION_STATUSES] } }
@@ -56,6 +60,7 @@ async function fetchTotals() {
   return {
     publishedMemes,
     pendingMemes,
+    readyMemeDrafts,
     totalUsers,
     paidPremium,
     grantedPremium

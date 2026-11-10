@@ -4,7 +4,7 @@ import {
   queryOptions
 } from '@tanstack/react-query'
 import type { ActivityFilters } from '~/constants/activity'
-import type { MemesFilters } from '~/constants/meme'
+import type { AdminMemesFilters } from '~/constants/meme'
 import { PRIVATE_QUERY_META } from '~/constants/query'
 import { MINUTE } from '~/constants/time'
 import type { Meme, User } from '~/db/generated/prisma/client'
@@ -77,7 +77,7 @@ export const getAdminMemeFillQueryOpts = (memeId: Meme['id']) => {
 
 getAdminMemeFillQueryOpts.all = ['admin-meme-fill'] as const
 
-export const getAdminMemesListQueryOpts = (filters: MemesFilters) => {
+export const getAdminMemesListQueryOpts = (filters: AdminMemesFilters) => {
   return queryOptions({
     queryKey: [...getAdminMemesListQueryOpts.all, filters],
     meta: PRIVATE_QUERY_META,

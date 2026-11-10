@@ -63,13 +63,15 @@ Done when each signal is kept as a proposal or dropped.
 
 ## 6. Present
 
+The whole answer speaks **product**: people, screens, emails, moments and outcomes, in the words of the product docs. The technical how belongs to the session that builds it.
+
 Rank the proposals by impact on the people who use the product. Five at most: past five, split into "now" and "later". Each proposal carries:
 
 - **Target**: product, issue #n, or plan.
-- **Seen**: the signal, with its source.
+- **Seen**: the signal, with the screen, the email or the moment it comes from.
 - **Proposal**: the change, in the product's vocabulary.
 - **Why**: who gains, and the link to the direction.
-- **Size**: the surfaces it touches, by name.
+- **Size**: the screens, emails and flows it touches.
 - **Decision**: the question only the user can settle, when there is one.
 
 Close on the proposal you would start with. Once the user picks, offer the matching write: a new issue for a product proposal, an edit or a comment for an amendment, a comment on the parent issue or the milestone for a challenge.

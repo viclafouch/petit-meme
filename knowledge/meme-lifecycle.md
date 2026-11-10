@@ -34,7 +34,7 @@ A Meme can also carry a Rejected status, but the Creator does not use it. A refu
 
 ## Where it goes
 
-The aim is for the Creator to add a Meme and walk away. AI fills the record in the background, the Creator gets a digest of the Memes ready to check, and validates them. The end goal is publication by default: the AI publishes, and the Creator corrects afterwards.
+The aim is for the Creator to add a Meme and walk away. AI fills the record in the background, the Creator gets a digest of the Memes ready to check, and validates them. The end goal is publication by default: the AI publishes, and the Creator corrects afterwards. That takes a record right on every Meme, with nothing left to fix, whatever the Meme. Each correction the Creator still makes shows what the AI instructions miss, and they change until no Meme needs one.
 
 ## What a Meme never has
 

@@ -158,6 +158,17 @@ describe('fillMemeDraft', () => {
     ])
   })
 
+  it('should let Gemini pick only the slugs of existing Categories', async () => {
+    const fetchMock = stubBunnyAndGemini()
+    stubDatabase()
+
+    await fillMemeDraft(MEME_ID)
+
+    expect(readDraftPrompts(fetchMock)).toStrictEqual([
+      expect.stringContaining('"enum":["films","animaux"]')
+    ])
+  })
+
   it('should claim a waiting draft, or a run left running past the function limit, and count the attempt', async () => {
     stubBunnyAndGemini()
     const { updateFillStatus } = stubDatabase()

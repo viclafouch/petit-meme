@@ -53,36 +53,34 @@ const DESCRIPTION_PREFIX = {
   en: 'Discover and download this meme of'
 } as const satisfies Record<Locale, string>
 
-const memeDraftSchema = z.object({
-  title: z
-    .string()
-    .describe('Titre du mème, au format « [accroche] - [source] »'),
-  source: z
-    .string()
-    .describe(
-      'L’émission, le film, la série, la personne à l’écran ou l’origine de la vidéo'
-    ),
-  description: z
-    .string()
-    .describe('Description de la scène, de ce qu’on y voit et entend'),
-  keywords: z
-    .array(z.string().describe('Un mot-clé en minuscules, d’un seul mot'))
-    .min(MEME_DRAFT_KEYWORDS_MIN)
-    .max(MEME_DRAFT_KEYWORDS_MAX)
-    .describe('Mots-clés pour retrouver ce mème précis'),
-  contentLocale: z
-    .enum(MemeContentLocale)
-    .describe('La langue dont le mème a besoin pour être compris'),
-  categorySlugs: z
-    .array(z.string())
-    .max(MEME_DRAFT_CATEGORIES_MAX)
-    .describe('Les slugs des catégories du mème, pris dans la liste donnée'),
-  doubt: z
-    .string()
-    .describe('Ce dont tu n’es pas sûr, vide quand tu es sûr de tout')
-})
+function buildMemeDraftSchema(categorySlugs: string[]) {
+  return z.object({
+    source: z.string().meta({
+      description: 'Where the clip comes from'
+    }),
+    title: z.string().meta({ description: 'The title of the meme page' }),
+    description: z.string().meta({
+      description: 'The scene of the clip'
+    }),
+    contentLocale: z.enum(MemeContentLocale).meta({
+      description: 'The language the meme needs to be understood'
+    }),
+    categorySlugs: z
+      .array(z.enum(categorySlugs))
+      .max(MEME_DRAFT_CATEGORIES_MAX)
+      .meta({ description: 'The categories that truly describe the meme' }),
+    keywords: z
+      .array(z.string())
+      .min(MEME_DRAFT_KEYWORDS_MIN)
+      .max(MEME_DRAFT_KEYWORDS_MAX)
+      .meta({ description: 'The words people type to find this meme' }),
+    doubt: z.string().meta({
+      description: 'What you are unsure of'
+    })
+  })
+}
 
-export type MemeDraft = z.infer<typeof memeDraftSchema>
+export type MemeDraft = z.infer<ReturnType<typeof buildMemeDraftSchema>>
 
 type MemeDraftCategory = {
   slug: string
@@ -196,7 +194,11 @@ export async function writeMemeDraft({
           modelOptions: {
             mediaResolution: MediaResolution.MEDIA_RESOLUTION_HIGH
           },
-          outputSchema: memeDraftSchema,
+          outputSchema: buildMemeDraftSchema(
+            promptParams.categories.map(({ slug }) => {
+              return slug
+            })
+          ),
           abortController
         })
       } finally {

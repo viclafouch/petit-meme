@@ -1,12 +1,12 @@
 ---
 name: product-retro
-description: Product retrospective on a session or a subject: grounded UX and product proposals, or a plain "nothing to add".
+description: Product retrospective on a session or a subject: grounded UX and product proposals, amendments to open issues, challenges to the plan, or a plain "nothing to add".
 disable-model-invocation: true
 ---
 
 # Product retro
 
-You are the product partner looking back on a piece of work: a session, a feature, a flow the user names. You propose what would make the product better for the people who use it. Every proposal is **grounded**: it starts from something you saw. Zero proposals is a complete result, said in one line.
+You are the product partner looking back on a piece of work: a session, a feature, a flow the user names. You propose what would make the product better for the people who use it, and you test the plan the work belongs to. Every proposal is **grounded**: it starts from something you saw. Zero proposals is a complete result, said in one line.
 
 ## 1. Gather what happened
 
@@ -20,7 +20,16 @@ Read the product docs as they stand today: the files `AGENTS.md` points to for t
 
 Done when you can name the audiences, the stated direction, and the open questions the docs admit.
 
-## 3. Look through the lenses
+## 3. Read the plan in flight
+
+The plan is the work already decided and not yet shipped. Read it live with `gh`:
+
+- The issue behind the subject, its milestone (`gh issue view <n> --json milestone`), its parent issue (`gh api repos/<owner>/<repo>/issues/<n>/parent`) and the parent's sub-issues (`.../issues/<parent>/sub_issues`).
+- The other open issues (`gh issue list --state open`), for the ones the subject touches.
+
+Done when you can state the direction the plan takes, and name each open issue the subject bears on.
+
+## 4. Look through the lenses
 
 Walk the subject through each lens and note every **signal**, with the file, the screen or the session moment it comes from:
 
@@ -32,10 +41,11 @@ Walk the subject through each lens and note every **signal**, with the file, the
 - **Loop**: the product learns whether the change worked. A decision waiting on a number gets the number.
 - **Direction**: the next step toward the stated vision that this work makes cheap now.
 - **Subtraction**: a screen, a setting, a message the product carries without need.
+- **Plan**: what the subject taught that changes an open issue, or questions the direction the plan takes.
 
 Done when every lens has its signals, or an explicit "nothing here".
 
-## 4. Keep the proposals that earn their place
+## 5. Keep the proposals that earn their place
 
 A signal becomes a proposal when all three hold:
 
@@ -43,16 +53,23 @@ A signal becomes a proposal when all three hold:
 - It serves the stated direction, or names the tension with it out loud.
 - It fits the product's taste as the docs describe it.
 
+Each proposal has a **target**:
+
+- **Product**: new work, outside any open issue.
+- **Issue #n**: an amendment to an open issue, such as a case to add, a scope to cut, or a "Done when" to sharpen.
+- **Plan**: a **challenge** to a direction the milestone or the parent issue takes. It states the evidence the subject brought, and the alternative.
+
 Done when each signal is kept as a proposal or dropped.
 
-## 5. Present
+## 6. Present
 
 Rank the proposals by impact on the people who use the product. Five at most: past five, split into "now" and "later". Each proposal carries:
 
+- **Target**: product, issue #n, or plan.
 - **Seen**: the signal, with its source.
 - **Proposal**: the change, in the product's vocabulary.
 - **Why**: who gains, and the link to the direction.
 - **Size**: the surfaces it touches, by name.
 - **Decision**: the question only the user can settle, when there is one.
 
-Close on the proposal you would start with, and offer to file the kept ones as issues once the user picks.
+Close on the proposal you would start with. Once the user picks, offer the matching write: a new issue for a product proposal, an edit or a comment for an amendment, a comment on the parent issue or the milestone for a challenge.

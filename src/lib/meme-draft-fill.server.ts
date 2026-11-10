@@ -13,6 +13,7 @@ import {
   REQUIRED_TRANSLATION_LOCALES
 } from '~/helpers/i18n-content'
 import { normalizeKeywords } from '~/helpers/keywords'
+import { matchIsFillInFlight } from '~/helpers/meme-fill'
 import { withTimeout } from '~/helpers/promise'
 import { safeAlgoliaOp, syncMemeToAllIndices } from '~/lib/algolia.server'
 import { aiLogger } from '~/lib/logger'
@@ -189,6 +190,23 @@ const buildStaleRunWhere = (checkedAt: Date) => {
   } satisfies Prisma.MemeWhereInput
 }
 
+type MatchIsFillStalledParams = {
+  status: MemeFillStatus
+  updatedAt: Date
+  checkedAt: Date
+}
+
+export const matchIsFillStalled = ({
+  status,
+  updatedAt,
+  checkedAt
+}: MatchIsFillStalledParams) => {
+  return (
+    matchIsFillInFlight(status) &&
+    checkedAt.getTime() - updatedAt.getTime() > MEME_FILL_MAX_DURATION_MS
+  )
+}
+
 async function claimMemeFill(
   memeId: string,
   claimableFillStatus: Prisma.MemeWhereInput['fillStatus'],
@@ -337,20 +355,31 @@ export async function fillMemeDraft(memeId: string) {
   })
 }
 
+export const buildNightQueueWhere = (checkedAt: Date) => {
+  return {
+    ...UNFILLED_DRAFT_WHERE,
+    fillAttempts: { lt: MEME_FILL_MAX_ATTEMPTS },
+    OR: [
+      {
+        fillStatus: MemeFillStatus.WAITING,
+        video: { bunnyStatus: { in: [...PLAYABLE_BUNNY_STATUSES] } }
+      },
+      { fillStatus: MemeFillStatus.FAILED },
+      buildStaleRunWhere(checkedAt)
+    ]
+  } satisfies Prisma.MemeWhereInput
+}
+
 export function findUnfilledMemeDrafts(checkedAt: Date) {
   return prismaClient.meme.findMany({
     where: {
-      ...UNFILLED_DRAFT_WHERE,
       OR: [
+        buildNightQueueWhere(checkedAt),
         {
-          fillStatus: MemeFillStatus.WAITING,
-          video: { bunnyStatus: { in: [...PLAYABLE_BUNNY_STATUSES] } }
-        },
-        {
-          fillStatus: MemeFillStatus.FAILED,
-          fillAttempts: { lt: MEME_FILL_MAX_ATTEMPTS }
-        },
-        buildStaleRunWhere(checkedAt)
+          ...UNFILLED_DRAFT_WHERE,
+          ...buildStaleRunWhere(checkedAt),
+          fillAttempts: { gte: MEME_FILL_MAX_ATTEMPTS }
+        }
       ]
     },
     select: { id: true, fillStatus: true, fillAttempts: true },

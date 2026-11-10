@@ -44,7 +44,11 @@ import {
 } from '~/lib/algolia.server'
 import { createVideo, uploadVideo } from '~/lib/bunny.server'
 import { adminLogger } from '~/lib/logger'
-import { READY_MEME_DRAFT_WHERE } from '~/lib/meme-draft-fill.server'
+import {
+  buildNightQueueWhere,
+  matchIsFillStalled,
+  READY_MEME_DRAFT_WHERE
+} from '~/lib/meme-draft-fill.server'
 import { deleteMemeFiles, findMissingMemeFiles } from '~/lib/meme-files.server'
 import { getTweetByUrl, getTweetMedia } from '~/lib/react-tweet'
 import { captureWithFeature } from '~/lib/sentry'
@@ -92,15 +96,21 @@ export const getAdminMemeFill = createServerFn({ method: 'GET' })
   })
   .middleware([adminRequiredMiddleware])
   .handler(async ({ data: memeId }) => {
-    const meme = await prismaClient.meme.findUnique({
-      where: { id: memeId },
-      select: {
-        fillStatus: true,
-        fillDoubt: true,
-        fillSuggestion: true,
-        updatedAt: true
-      }
-    })
+    const checkedAt = new Date()
+    const [meme, queuedTonightCount] = await Promise.all([
+      prismaClient.meme.findUnique({
+        where: { id: memeId },
+        select: {
+          fillStatus: true,
+          fillDoubt: true,
+          fillSuggestion: true,
+          updatedAt: true
+        }
+      }),
+      prismaClient.meme.count({
+        where: { id: memeId, ...buildNightQueueWhere(checkedAt) }
+      })
+    ])
 
     if (!meme) {
       throw notFound()
@@ -114,7 +124,12 @@ export const getAdminMemeFill = createServerFn({ method: 'GET' })
       status: meme.fillStatus,
       doubt: meme.fillDoubt,
       suggestion: suggestion.success ? suggestion.data : null,
-      updatedAt: meme.updatedAt
+      isStalled: matchIsFillStalled({
+        status: meme.fillStatus,
+        updatedAt: meme.updatedAt,
+        checkedAt
+      }),
+      isQueuedTonight: queuedTonightCount > 0
     }
   })
 

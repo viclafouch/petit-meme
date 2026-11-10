@@ -2,6 +2,7 @@ import {
   CircleCheckBig,
   LoaderCircle,
   MessageCircleQuestion,
+  MoonStar,
   RefreshCw,
   Sparkles,
   TriangleAlert
@@ -11,7 +12,21 @@ import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { LoadingButton } from '~/components/ui/loading-button'
 import { MemeFillStatus } from '~/db/generated/prisma/enums'
+import type { FillNotice } from '~/routes/admin/library/-lib/meme-fill'
 import type { MemeFill } from './use-meme-fill'
+
+const NIGHT_NOTICE_COPY = {
+  QUEUED_TONIGHT: {
+    label: 'File de nuit',
+    description: 'La vidéo est prête, l’IA remplit la fiche au passage de nuit.'
+  },
+  RETRIED_TONIGHT: {
+    label: 'Nouvel essai de nuit',
+    description: 'Le dernier essai a échoué, l’IA réessaie au passage de nuit.'
+  }
+} as const satisfies Partial<
+  Record<FillNotice, { label: string; description: string }>
+>
 
 type FillStatusRowProps = {
   memeFill: MemeFill
@@ -19,9 +34,23 @@ type FillStatusRowProps = {
 }
 
 const FillStatusRow = ({ memeFill, onReview }: FillStatusRowProps) => {
-  const { fill, isStalled, start } = memeFill
+  const { notice, start } = memeFill
 
-  if (isStalled || fill.status === MemeFillStatus.FAILED) {
+  if (notice === 'QUEUED_TONIGHT' || notice === 'RETRIED_TONIGHT') {
+    const { label, description } = NIGHT_NOTICE_COPY[notice]
+
+    return (
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge variant="secondary" size="md">
+          <MoonStar aria-hidden />
+          {label}
+        </Badge>
+        <p className="text-sm text-muted-foreground">{description}</p>
+      </div>
+    )
+  }
+
+  if (notice === 'FAILED') {
     return (
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant="warning" size="md">
@@ -46,7 +75,7 @@ const FillStatusRow = ({ memeFill, onReview }: FillStatusRowProps) => {
     )
   }
 
-  if (fill.status === MemeFillStatus.WAITING) {
+  if (notice === 'WAITING_VIDEO') {
     return (
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant="secondary" size="md">
@@ -60,7 +89,7 @@ const FillStatusRow = ({ memeFill, onReview }: FillStatusRowProps) => {
     )
   }
 
-  if (fill.status === MemeFillStatus.RUNNING) {
+  if (notice === 'RUNNING') {
     return (
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant="secondary" size="md">
@@ -74,7 +103,7 @@ const FillStatusRow = ({ memeFill, onReview }: FillStatusRowProps) => {
     )
   }
 
-  if (fill.status === MemeFillStatus.FILLED && fill.suggestion) {
+  if (notice === 'SUGGESTION_READY') {
     return (
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant="info" size="md">

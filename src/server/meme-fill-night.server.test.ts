@@ -118,21 +118,36 @@ describe('runMemeFillNight', () => {
 
     expect(findMemes).toHaveBeenNthCalledWith(1, {
       where: {
-        status: MemeStatus.PENDING,
-        title: DEFAULT_MEME_TITLE,
         OR: [
           {
-            fillStatus: MemeFillStatus.WAITING,
-            video: {
-              bunnyStatus: {
-                in: [BUNNY_STATUS.FINISHED, BUNNY_STATUS.RESOLUTION_FINISHED]
+            status: MemeStatus.PENDING,
+            title: DEFAULT_MEME_TITLE,
+            fillAttempts: { lt: 3 },
+            OR: [
+              {
+                fillStatus: MemeFillStatus.WAITING,
+                video: {
+                  bunnyStatus: {
+                    in: [
+                      BUNNY_STATUS.FINISHED,
+                      BUNNY_STATUS.RESOLUTION_FINISHED
+                    ]
+                  }
+                }
+              },
+              { fillStatus: MemeFillStatus.FAILED },
+              {
+                fillStatus: MemeFillStatus.RUNNING,
+                updatedAt: { lt: STALE_RUN_STARTED_BEFORE }
               }
-            }
+            ]
           },
-          { fillStatus: MemeFillStatus.FAILED, fillAttempts: { lt: 3 } },
           {
+            status: MemeStatus.PENDING,
+            title: DEFAULT_MEME_TITLE,
             fillStatus: MemeFillStatus.RUNNING,
-            updatedAt: { lt: STALE_RUN_STARTED_BEFORE }
+            updatedAt: { lt: STALE_RUN_STARTED_BEFORE },
+            fillAttempts: { gte: 3 }
           }
         ]
       },

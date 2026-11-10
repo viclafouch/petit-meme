@@ -36,20 +36,53 @@ const PENDING_MEME = {
   video: { bunnyId: BUNNY_ID }
 }
 
-const buildCategory = (id: string, slug: string, title: string) => {
+type CategoryTranslationFake = {
+  locale: string
+  title: string
+  keywords: string[]
+}
+
+type BuildCategoryParams = {
+  id: string
+  slug: string
+  title: string
+  keywords: string[]
+  translations: CategoryTranslationFake[]
+}
+
+const buildCategory = ({
+  id,
+  slug,
+  title,
+  keywords,
+  translations
+}: BuildCategoryParams) => {
   return {
     id,
     slug,
     title,
-    keywords: [],
+    keywords,
+    translations,
     createdAt: CREATED_AT,
     updatedAt: CREATED_AT
   }
 }
 
 const CATEGORIES = [
-  buildCategory('category-films', 'films', 'Films'),
-  buildCategory('category-animals', 'animaux', 'Animaux')
+  buildCategory({
+    id: 'category-films',
+    slug: 'films',
+    title: 'Films',
+    keywords: ['cinéma'],
+    translations: [{ locale: 'en', title: 'Movies', keywords: ['cinema'] }]
+  }),
+  buildCategory({
+    id: 'category-animals',
+    slug: 'animaux',
+    title: 'Animaux',
+    keywords: ['chat'],
+    translations: [{ locale: 'en', title: 'Animals', keywords: ['cat'] }]
+  })
 ]
 
 const TRANSLATION_ROW = {
@@ -67,7 +100,7 @@ export const DRAFT: MemeDraft = {
   title: 'Tobey Maguire qui rigole - Spider-Man 3',
   source: 'Spider-Man 3',
   description: 'Découvrez et téléchargez ce mème de Tobey Maguire qui rigole.',
-  keywords: ['tobey', 'maguire', 'rigoler', 'marrant', 'spiderman'],
+  keywords: ['rigoler', 'marrant', 'bully', 'peter', 'parker'],
   contentLocale: MemeContentLocale.FR,
   categorySlugs: ['films'],
   doubt: ''
@@ -76,7 +109,7 @@ export const DRAFT: MemeDraft = {
 export const ENGLISH_TRANSLATION = {
   title: 'Tobey Maguire laughing - Spider-Man 3',
   description: 'Discover and download this meme of Tobey Maguire laughing.',
-  keywords: ['Tobey', 'maguire', 'laugh', 'funny', 'spiderman']
+  keywords: ['Laugh', 'funny', 'bully', 'peter', 'parker']
 }
 
 const readFetchUrl = (input: string | URL | Request) => {
@@ -116,6 +149,7 @@ type GeminiFakeParams = {
   originalStatus?: number
   generationStatuses?: number[]
   draft?: typeof DRAFT
+  englishTranslation?: typeof ENGLISH_TRANSLATION
   onDraftGeneration?: () => void
 }
 
@@ -123,6 +157,7 @@ export const stubBunnyAndGemini = ({
   originalStatus = HTTP_STATUS.OK,
   generationStatuses = [],
   draft = DRAFT,
+  englishTranslation = ENGLISH_TRANSLATION,
   onDraftGeneration
 }: GeminiFakeParams = {}) => {
   const pendingGenerationStatuses = [...generationStatuses]
@@ -156,7 +191,7 @@ export const stubBunnyAndGemini = ({
       }
 
       if (matchIsGeneration(url) && url.includes('flash-lite')) {
-        return respondToGeneration(url, { en: ENGLISH_TRANSLATION })
+        return respondToGeneration(url, { en: englishTranslation })
       }
 
       if (matchIsDraftGeneration(url)) {

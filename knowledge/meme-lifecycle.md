@@ -14,7 +14,7 @@ The Creator pastes an X link or uploads a file in the administration. The Meme i
 
 ## Record
 
-Writing the record by hand is what slowed the library down: without new records, nothing new reaches the site. AI Assist now watches the video, listens to its sound, and proposes the title, the description, the keywords and the translations. The tweet text plays no part: people rarely describe the video in it. The title leads with the cult line when someone says one, since that is what people type to find the Meme, and it always ends with the source: the show, the person on screen, or where the clip comes from.
+Writing the record by hand is what slowed the library down: without new records, nothing new reaches the site. AI Assist now watches the video, listens to its sound, and proposes the title, the description, the keywords and the translations. The tweet text plays no part: people rarely describe the video in it. The title leads with the cult line when someone says one, since that is what people type to find the Meme, and it always ends with the source: the show, the person on screen, or where the clip comes from. Search already reads the title, the description and the categories, so a keyword only earns its place with a word none of them holds. The first one names the action on screen as a plain verb, since that is what people type when no line comes to mind.
 
 A human still checks every record before it goes live. The page saves itself as the Creator types, so nothing gets lost.
 

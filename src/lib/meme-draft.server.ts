@@ -15,8 +15,10 @@ import { MemeContentLocale } from '~/db/generated/prisma/enums'
 import { serverEnv } from '~/env/server.server'
 import { LOCALE_META } from '~/helpers/i18n-content'
 import { withTimeout } from '~/helpers/promise'
+import { fillPromptTemplate } from '~/helpers/prompt-template'
 import { fetchOriginalVideo } from '~/lib/bunny.server'
 import { aiLogger } from '~/lib/logger'
+import memeDraftPromptTemplate from '~/lib/prompts/meme-draft.md?raw'
 import type { Locale } from '~/paraglide/runtime'
 
 const GEMINI_VIDEO_MODEL = 'gemini-3.8-flash'
@@ -85,20 +87,15 @@ export type MemeDraft = z.infer<typeof memeDraftSchema>
 type MemeDraftCategory = {
   slug: string
   title: string
+  keywords: string[]
 }
 
-function buildCategoriesRule(categories: MemeDraftCategory[]) {
-  if (categories.length === 0) {
-    return '- categorySlugs : toujours vide.'
-  }
+function formatCategoryLine({ slug, title, keywords }: MemeDraftCategory) {
+  const categoryLine = `  - ${slug}: ${title}`
 
-  const categoryLines = categories
-    .map(({ slug, title }) => {
-      return `  - ${slug} : ${title}`
-    })
-    .join('\n')
-
-  return `- categorySlugs : 0 à ${MEME_DRAFT_CATEGORIES_MAX} slugs pris dans cette liste, seulement ceux qui décrivent vraiment le mème :\n${categoryLines}`
+  return keywords.length === 0
+    ? categoryLine
+    : `${categoryLine} (keywords: ${keywords.join(', ')})`
 }
 
 type BuildMemeDraftPromptParams = {
@@ -112,32 +109,20 @@ function buildMemeDraftPrompt({
   targetLocale,
   categories
 }: BuildMemeDraftPromptParams) {
-  const { label } = LOCALE_META[targetLocale]
   const trimmedCustomPrompt = customPrompt.trim()
-  const adminContext =
-    trimmedCustomPrompt === ''
-      ? ''
-      : `\n\nContexte donné par l'admin : "${trimmedCustomPrompt}"`
 
-  return `Tu écris la fiche de ce mème vidéo pour Petit Meme, en ${label}.${adminContext}
-
-Regarde l'image et écoute le son en entier, jusqu'à la dernière seconde. Cherche sur Google pour confirmer qui parle, d'où vient l'extrait, et si la réplique entendue est connue.
-
-Le public a entre 15 et 35 ans : écris avec les mots simples qu'il dit à l'oral, comme « rigole », « regarde » ou « pleure ».
-
-- title : 60 caractères au plus, toujours au format « [accroche] - [source] ».
-  - L'accroche est la réplique culte dès que quelqu'un en dit une, même courte, même à moitié audible : c'est elle que les gens tapent pour retrouver le mème. Garde ses mots exacts, sans guillemets. Exemple : « Mon sperme ne t'a pas suffi ?! - Le jour où tout a basculé ».
-  - Sans réplique marquante, l'accroche dit qui fait quoi. Exemples : « Tobey Maguire qui rigole - Spider-Man 3 », « Chat qui fixe la caméra - TikTok ».
-  - La partie après « - » reprend le champ source, mot pour mot.
-- source : jamais vide. Prends la première qui s'applique : l'émission, le film, la série ou le jeu ; sinon la personne connue à l'écran ou l'auteur de la vidéo ; sinon la plateforme ou le contexte d'origine, comme « TikTok », « Twitch » ou « Vidéo amateur ». Quand la source est une supposition, dis-le dans doubt.
-- description : 200 caractères au plus. Elle commence par « ${DESCRIPTION_PREFIX[targetLocale]} », puis décrit la scène : ce qu'on voit, et la réplique entendue quand il y en a une.
-- keywords : ${MEME_DRAFT_KEYWORDS_MIN} à ${MEME_DRAFT_KEYWORDS_MAX} mots-clés en minuscules, d'un seul mot chacun (un nom propre compte pour un mot). Chaque mot-clé aide à retrouver ce mème précis et ajoute un mot absent du titre :
-  - les noms propres : l'acteur, le personnage, le film, la série ou l'émission ;
-  - le nom du template quand tu le reconnais, comme « bully maguire » ou « drake hotline bling » ;
-  - les verbes et adjectifs qu'un jeune taperait pour le chercher, comme « marrant », « rigoler », « triste » ou « choqué ».
-- contentLocale : UNIVERSAL quand ni la parole ni le texte à l'écran ne comptent pour comprendre le mème. Sinon la langue parlée : FR pour le français, EN pour l'anglais.
-${buildCategoriesRule(categories)}
-- doubt : une phrase courte sur ce dont tu n'es pas sûr, vide quand tu es sûr de tout. Dans le doute sur la langue, choisis la langue parlée et dis-le ici.`
+  return fillPromptTemplate(memeDraftPromptTemplate, {
+    language: LOCALE_META[targetLocale].label,
+    adminContext:
+      trimmedCustomPrompt === ''
+        ? ''
+        : `Context from the admin: "${trimmedCustomPrompt}"`,
+    descriptionPrefix: DESCRIPTION_PREFIX[targetLocale],
+    keywordsMin: String(MEME_DRAFT_KEYWORDS_MIN),
+    keywordsMax: String(MEME_DRAFT_KEYWORDS_MAX),
+    categoriesMax: String(MEME_DRAFT_CATEGORIES_MAX),
+    categories: categories.map(formatCategoryLine).join('\n')
+  })
 }
 
 export async function fetchMemeVideo(bunnyId: string) {

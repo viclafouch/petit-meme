@@ -118,7 +118,16 @@ export function useMemeAutosave(meme: MemeFullData) {
     }
   })
 
-  return (values: MemeFormValues) => {
-    void debouncer.maybeExecute(values)
+  return {
+    schedule: (values: MemeFormValues) => {
+      void debouncer.maybeExecute(values)
+    },
+    matchHasUnsavedValues: () => {
+      return (
+        debouncer.state.isPending ||
+        saveMutation.isPending ||
+        saveMutation.isError
+      )
+    }
   }
 }

@@ -10,6 +10,7 @@ import { MemeTranslationCard } from './meme-translation-card'
 import { MemeVideoCard } from './meme-video-card'
 import { MemeVisibilityCard } from './meme-visibility-card'
 import { useMemeAutosave } from './use-meme-autosave'
+import { useMemeFill } from './use-meme-fill'
 import { useMemeForm } from './use-meme-form'
 import { useMemePublisher } from './use-meme-publisher'
 
@@ -23,7 +24,7 @@ type MemeEditorProps = {
 
 export const MemeEditor = ({ meme }: MemeEditorProps) => {
   const publisher = useMemePublisher(meme)
-  const scheduleAutosave = useMemeAutosave(meme)
+  const autosave = useMemeAutosave(meme)
   const {
     form,
     keywordsFields,
@@ -32,8 +33,15 @@ export const MemeEditor = ({ meme }: MemeEditorProps) => {
     flushPendingKeywords
   } = useMemeForm({
     meme,
-    onChange: scheduleAutosave,
+    onChange: autosave.schedule,
     onSubmit: publisher.publish
+  })
+  const memeFill = useMemeFill({
+    memeId: meme.id,
+    form,
+    matchHasUnsavedEdits: () => {
+      return autosave.matchHasUnsavedValues() || !form.state.isValid
+    }
   })
 
   const handlePublish = () => {
@@ -63,7 +71,7 @@ export const MemeEditor = ({ meme }: MemeEditorProps) => {
             return (
               <>
                 <div className="flex min-w-0 flex-col gap-6 max-lg:order-2">
-                  <MemeContentCard index={1} form={form} memeId={meme.id} />
+                  <MemeContentCard index={1} form={form} memeFill={memeFill} />
                   {translationLocales.map((locale, position) => {
                     return (
                       <MemeTranslationCard

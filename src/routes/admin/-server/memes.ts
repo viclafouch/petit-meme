@@ -12,8 +12,10 @@ import {
   MEMES_PER_PAGE,
   MEMES_SEARCH_SCHEMA
 } from '~/constants/meme'
+import { MEME_FILL_SUGGESTION_SCHEMA } from '~/constants/meme-fill-suggestion'
 import { TWEET_LINK_SCHEMA } from '~/constants/url'
 import { prismaClient } from '~/db/client.server'
+import { Prisma } from '~/db/generated/prisma/client'
 import {
   type MemeContentLocale,
   MemeContentLocale as MemeContentLocaleEnum,
@@ -79,6 +81,70 @@ export const getAdminMemeById = createServerFn({ method: 'GET' })
     }
 
     return meme
+  })
+
+export const getAdminMemeFill = createServerFn({ method: 'GET' })
+  .validator((data) => {
+    return z.string().parse(data)
+  })
+  .middleware([adminRequiredMiddleware])
+  .handler(async ({ data: memeId }) => {
+    const meme = await prismaClient.meme.findUnique({
+      where: { id: memeId },
+      select: {
+        fillStatus: true,
+        fillDoubt: true,
+        fillSuggestion: true,
+        updatedAt: true
+      }
+    })
+
+    if (!meme) {
+      throw notFound()
+    }
+
+    const suggestion = MEME_FILL_SUGGESTION_SCHEMA.safeParse(
+      meme.fillSuggestion
+    )
+
+    return {
+      status: meme.fillStatus,
+      doubt: meme.fillDoubt,
+      suggestion: suggestion.success ? suggestion.data : null,
+      updatedAt: meme.updatedAt
+    }
+  })
+
+export const keepMemeFillSuggestion = createServerFn({ method: 'POST' })
+  .validator((data) => {
+    return z
+      .object({ memeId: z.string(), suggestion: MEME_FILL_SUGGESTION_SCHEMA })
+      .parse(data)
+  })
+  .middleware([adminRequiredMiddleware])
+  .handler(async ({ data }) => {
+    await prismaClient.meme.updateMany({
+      where: { id: data.memeId, fillStatus: MemeFillStatus.FILLED },
+      data: { fillSuggestion: data.suggestion }
+    })
+  })
+
+export const settleMemeFillSuggestion = createServerFn({ method: 'POST' })
+  .validator((data) => {
+    return z.object({ memeId: z.string(), isApplied: z.boolean() }).parse(data)
+  })
+  .middleware([adminRequiredMiddleware])
+  .handler(async ({ data }) => {
+    await prismaClient.meme.updateMany({
+      where: { id: data.memeId, fillStatus: MemeFillStatus.FILLED },
+      data: data.isApplied
+        ? { fillSuggestion: Prisma.DbNull }
+        : {
+            fillSuggestion: Prisma.DbNull,
+            fillStatus: MemeFillStatus.NONE,
+            fillDoubt: ''
+          }
+    })
   })
 
 export const MEME_DESCRIPTION_MAX_LENGTH = 200

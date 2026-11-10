@@ -82,6 +82,7 @@ enum MemeFillStatus {
   WAITING
   RUNNING
   FILLED
+  FAILED
 
   @@map("meme_fill_status")
 }
@@ -116,6 +117,7 @@ model Meme {
   fillStatus    MemeFillStatus @default(NONE) @map("fill_status")
   fillAttempts  Int            @default(0) @map("fill_attempts")
   fillDoubt     String         @default("") @map("fill_doubt")
+  fillSuggestion Json?         @map("fill_suggestion")
   viewsDaily          MemeViewDaily[]
   actionsDaily        MemeActionDaily[]
   studioGenerations   StudioGeneration[]

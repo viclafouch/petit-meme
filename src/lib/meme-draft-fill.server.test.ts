@@ -1,14 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { waitUntil } from '@vercel/functions'
 import { HTTP_STATUS } from '~/constants/http'
 import { DEFAULT_MEME_TITLE } from '~/constants/meme'
 import { prismaClient } from '~/db/client.server'
+import { Prisma } from '~/db/generated/prisma/client'
 import {
   MemeContentLocale,
   MemeFillStatus,
   MemeStatus
 } from '~/db/generated/prisma/enums'
 import { syncMemeToAllIndices } from '~/lib/algolia.server'
-import { fillMemeDraft } from '~/lib/meme-draft-fill.server'
+import { fillMemeDraft, startMemeFill } from '~/lib/meme-draft-fill.server'
 import type { MemeDraft } from '~/lib/meme-draft.server'
 import { captureWithFeature } from '~/lib/sentry'
 
@@ -16,6 +18,13 @@ vi.mock(import('~/lib/algolia.server'), async (importOriginal) => {
   return {
     ...(await importOriginal()),
     syncMemeToAllIndices: vi.fn<typeof syncMemeToAllIndices>()
+  }
+})
+
+vi.mock(import('@vercel/functions'), async (importOriginal) => {
+  return {
+    ...(await importOriginal()),
+    waitUntil: vi.fn<typeof waitUntil>()
   }
 })
 
@@ -113,7 +122,23 @@ const GUARDED_WRITE_WHERE = {
   id: MEME_ID,
   status: MemeStatus.PENDING,
   title: DEFAULT_MEME_TITLE,
-  fillStatus: MemeFillStatus.RUNNING
+  fillStatus: MemeFillStatus.RUNNING,
+  updatedAt: CLAIMED_AT
+}
+
+const SUGGESTION_WRITE = {
+  where: { id: MEME_ID, fillStatus: MemeFillStatus.RUNNING },
+  data: {
+    fillStatus: MemeFillStatus.FILLED,
+    fillDoubt: '',
+    fillSuggestion: {
+      fr: {
+        title: DRAFT.title,
+        description: DRAFT.description,
+        keywords: DRAFT.keywords
+      }
+    }
+  }
 }
 
 const readFetchUrl = (input: string | URL | Request) => {
@@ -211,6 +236,24 @@ const stubBunnyAndGemini = ({
   return fetchMock
 }
 
+const readDraftPrompts = (fetchMock: ReturnType<typeof stubBunnyAndGemini>) => {
+  return fetchMock.mock.calls
+    .filter(([input]) => {
+      const url = readFetchUrl(input)
+
+      return matchIsGeneration(url) && !url.includes('flash-lite')
+    })
+    .map(([, init]) => {
+      return typeof init?.body === 'string' ? init.body : ''
+    })
+}
+
+const settleBackgroundRun = async () => {
+  const [run] = vi.mocked(waitUntil).mock.calls.at(-1) ?? []
+
+  await run
+}
+
 const countGenerationCalls = (
   fetchMock: ReturnType<typeof stubBunnyAndGemini>
 ) => {
@@ -260,6 +303,7 @@ const stubDatabase = ({
 
 describe('fillMemeDraft', () => {
   beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'], now: CLAIMED_AT })
     vi.stubEnv('GEMINI_API_KEY', 'gemini-key')
     vi.stubEnv('VITE_BUNNY_HOSTNAME', 'cdn-test.petit-meme.io')
     vi.stubEnv('BUNNY_TOKEN_AUTH_KEY', 'token-auth-key-of-at-least-32-chars')
@@ -267,13 +311,14 @@ describe('fillMemeDraft', () => {
   })
 
   afterEach(() => {
+    vi.useRealTimers()
     vi.unstubAllGlobals()
     vi.unstubAllEnvs()
     vi.restoreAllMocks()
     vi.clearAllMocks()
   })
 
-  it('should write the Gemini record into a waiting draft, only while it stays an untouched pending draft', async () => {
+  it('should write the Gemini record into a waiting draft, only while nobody saved the pending draft since the claim', async () => {
     stubBunnyAndGemini()
     const { updateFillStatus, upsertTranslation, linkCategories } =
       stubDatabase()
@@ -301,12 +346,10 @@ describe('fillMemeDraft', () => {
   })
 
   it('should claim a waiting draft, or a run left running past the function limit, and count the attempt', async () => {
-    vi.useFakeTimers({ toFake: ['Date'], now: CLAIMED_AT })
     stubBunnyAndGemini()
     const { updateFillStatus } = stubDatabase()
 
     await fillMemeDraft(MEME_ID)
-    vi.useRealTimers()
 
     expect(updateFillStatus).toHaveBeenNthCalledWith(1, {
       where: {
@@ -321,7 +364,9 @@ describe('fillMemeDraft', () => {
       },
       data: {
         fillStatus: MemeFillStatus.RUNNING,
-        fillAttempts: { increment: 1 }
+        fillAttempts: { increment: 1 },
+        fillSuggestion: Prisma.DbNull,
+        updatedAt: CLAIMED_AT
       }
     })
   })
@@ -349,7 +394,7 @@ describe('fillMemeDraft', () => {
     expect(updateFillStatus).toHaveBeenCalledTimes(1)
   })
 
-  it('should write nothing when the Creator edits or deletes the Meme during the run', async () => {
+  it('should keep the record as a suggestion, without touching the Meme, when the Creator saved it during the run', async () => {
     stubBunnyAndGemini()
     const { updateFillStatus, upsertTranslation, linkCategories } =
       stubDatabase({ writtenCount: 0 })
@@ -360,12 +405,10 @@ describe('fillMemeDraft', () => {
     expect(linkCategories).not.toHaveBeenCalled()
     expect(syncMemeToAllIndices).not.toHaveBeenCalled()
     expect(captureWithFeature).not.toHaveBeenCalled()
-    expect(updateFillStatus).toHaveBeenLastCalledWith(
-      buildRelease(MemeFillStatus.NONE)
-    )
+    expect(updateFillStatus).toHaveBeenLastCalledWith(SUGGESTION_WRITE)
   })
 
-  it('should leave the draft waiting, and report once, when Gemini rejects the run', async () => {
+  it('should mark the draft failed, and report once, when Gemini rejects the run', async () => {
     stubBunnyAndGemini({ generationStatuses: [HTTP_STATUS.BAD_REQUEST] })
     const { updateFillStatus, readFilledMeme } = stubDatabase()
 
@@ -373,7 +416,7 @@ describe('fillMemeDraft', () => {
 
     expect(readFilledMeme).not.toHaveBeenCalled()
     expect(updateFillStatus).toHaveBeenLastCalledWith(
-      buildRelease(MemeFillStatus.WAITING)
+      buildRelease(MemeFillStatus.FAILED)
     )
     expect(captureWithFeature).toHaveBeenCalledExactlyOnceWith(
       expect.any(Error),
@@ -381,7 +424,7 @@ describe('fillMemeDraft', () => {
     )
   })
 
-  it('should end the fill without calling Gemini, and report once, when Bunny has no original', async () => {
+  it('should mark the draft failed without calling Gemini, and report once, when Bunny has no original', async () => {
     const fetchMock = stubBunnyAndGemini({
       originalStatus: HTTP_STATUS.NOT_FOUND
     })
@@ -392,7 +435,7 @@ describe('fillMemeDraft', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1)
     expect(readFilledMeme).not.toHaveBeenCalled()
     expect(updateFillStatus).toHaveBeenLastCalledWith(
-      buildRelease(MemeFillStatus.NONE)
+      buildRelease(MemeFillStatus.FAILED)
     )
     expect(captureWithFeature).toHaveBeenCalledTimes(1)
   })
@@ -435,5 +478,50 @@ describe('fillMemeDraft', () => {
         keywords: ['tobey', 'maguire', 'laugh', 'funny', 'spiderman']
       }
     })
+  })
+
+  it('should start AI Assist on a Meme that is not running, and write the record with the context of the Creator', async () => {
+    const fetchMock = stubBunnyAndGemini()
+    const { updateFillStatus } = stubDatabase({ writtenCount: 0 })
+
+    await expect(
+      startMemeFill({ memeId: MEME_ID, customPrompt: 'Le chat de Shrek' })
+    ).resolves.toBe(true)
+    await settleBackgroundRun()
+
+    expect(updateFillStatus).toHaveBeenNthCalledWith(1, {
+      where: {
+        id: MEME_ID,
+        OR: [
+          { fillStatus: { not: MemeFillStatus.RUNNING } },
+          {
+            fillStatus: MemeFillStatus.RUNNING,
+            updatedAt: { lt: STALE_RUN_STARTED_BEFORE }
+          }
+        ]
+      },
+      data: {
+        fillStatus: MemeFillStatus.RUNNING,
+        fillAttempts: { increment: 1 },
+        fillSuggestion: Prisma.DbNull,
+        updatedAt: CLAIMED_AT
+      }
+    })
+    expect(readDraftPrompts(fetchMock)).toStrictEqual([
+      expect.stringContaining('Le chat de Shrek')
+    ])
+    expect(updateFillStatus).toHaveBeenLastCalledWith(SUGGESTION_WRITE)
+  })
+
+  it('should refuse AI Assist while a run is in flight', async () => {
+    const fetchMock = stubBunnyAndGemini()
+    stubDatabase({ claimedCount: 0 })
+
+    await expect(
+      startMemeFill({ memeId: MEME_ID, customPrompt: '' })
+    ).resolves.toBe(false)
+
+    expect(waitUntil).not.toHaveBeenCalled()
+    expect(fetchMock).not.toHaveBeenCalled()
   })
 })

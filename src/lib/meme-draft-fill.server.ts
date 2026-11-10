@@ -1,7 +1,8 @@
+import { waitUntil } from '@vercel/functions'
 import { DEFAULT_MEME_TITLE, MEME_ALGOLIA_INCLUDE } from '~/constants/meme'
-import { MEME_FILL_MAX_DURATION_SECONDS } from '~/constants/meme-fill'
-import { SECOND } from '~/constants/time'
+import { MEME_FILL_MAX_DURATION_MS } from '~/constants/meme-fill'
 import { prismaClient } from '~/db/client.server'
+import { Prisma } from '~/db/generated/prisma/client'
 import { MemeFillStatus, MemeStatus } from '~/db/generated/prisma/enums'
 import {
   CONTENT_LOCALE_TO_LOCALE,
@@ -22,7 +23,6 @@ import {
 import { captureWithFeature } from '~/lib/sentry'
 import type { Locale } from '~/paraglide/runtime'
 
-const FILL_MAX_DURATION_MS = MEME_FILL_MAX_DURATION_SECONDS * SECOND
 const FILL_RUN_TIMEOUT_MS = 740_000
 const FILL_VIDEO_TIMEOUT_MS = 540_000
 const FILL_TRANSLATION_TIMEOUT_MS = 120_000
@@ -68,6 +68,7 @@ function resolveTranslation(translations: DraftTranslations, locale: Locale) {
 
 type WriteFilledDraftParams = {
   memeId: string
+  claimedAt: Date
   draft: MemeDraft
   translations: DraftTranslations
   categoryIds: string[]
@@ -75,6 +76,7 @@ type WriteFilledDraftParams = {
 
 async function writeFilledDraft({
   memeId,
+  claimedAt,
   draft,
   translations,
   categoryIds
@@ -94,7 +96,8 @@ async function writeFilledDraft({
         id: memeId,
         status: MemeStatus.PENDING,
         title: DEFAULT_MEME_TITLE,
-        fillStatus: MemeFillStatus.RUNNING
+        fillStatus: MemeFillStatus.RUNNING,
+        updatedAt: claimedAt
       },
       data: {
         ...source,
@@ -135,25 +138,61 @@ async function writeFilledDraft({
   })
 }
 
-async function claimMemeDraft(memeId: string) {
+type StoreSuggestionParams = {
+  memeId: string
+  draft: MemeDraft
+  translations: DraftTranslations
+}
+
+async function storeSuggestion({
+  memeId,
+  draft,
+  translations
+}: StoreSuggestionParams) {
+  const fillSuggestion = Object.fromEntries(
+    REQUIRED_TRANSLATION_LOCALES[draft.contentLocale].map((locale) => {
+      return [locale, resolveTranslation(translations, locale)]
+    })
+  )
+  const { count } = await prismaClient.meme.updateMany({
+    where: { id: memeId, fillStatus: MemeFillStatus.RUNNING },
+    data: {
+      fillStatus: MemeFillStatus.FILLED,
+      fillDoubt: draft.doubt,
+      fillSuggestion
+    }
+  })
+
+  return count === 1
+}
+
+async function claimMemeFill(
+  memeId: string,
+  claimableFillStatus: Prisma.MemeWhereInput['fillStatus']
+) {
+  const claimedAt = new Date()
   const { count } = await prismaClient.meme.updateMany({
     where: {
       id: memeId,
       OR: [
-        { fillStatus: MemeFillStatus.WAITING },
+        { fillStatus: claimableFillStatus },
         {
           fillStatus: MemeFillStatus.RUNNING,
-          updatedAt: { lt: new Date(Date.now() - FILL_MAX_DURATION_MS) }
+          updatedAt: {
+            lt: new Date(claimedAt.getTime() - MEME_FILL_MAX_DURATION_MS)
+          }
         }
       ]
     },
     data: {
       fillStatus: MemeFillStatus.RUNNING,
-      fillAttempts: { increment: 1 }
+      fillAttempts: { increment: 1 },
+      fillSuggestion: Prisma.DbNull,
+      updatedAt: claimedAt
     }
   })
 
-  return count === 1
+  return count === 1 ? claimedAt : null
 }
 
 async function releaseMemeDraft(memeId: string, fillStatus: MemeFillStatus) {
@@ -163,7 +202,17 @@ async function releaseMemeDraft(memeId: string, fillStatus: MemeFillStatus) {
   })
 }
 
-async function runClaimedFill(memeId: string) {
+type ClaimedFill = {
+  memeId: string
+  claimedAt: Date
+  customPrompt: string
+}
+
+async function runClaimedFill({
+  memeId,
+  claimedAt,
+  customPrompt
+}: ClaimedFill) {
   const meme = await prismaClient.meme.findUnique({
     where: { id: memeId },
     select: { video: { select: { bunnyId: true } } }
@@ -178,7 +227,7 @@ async function runClaimedFill(memeId: string) {
   const video = await fetchMemeVideo(meme.video.bunnyId)
 
   if (!video) {
-    await releaseMemeDraft(memeId, MemeFillStatus.NONE)
+    await releaseMemeDraft(memeId, MemeFillStatus.FAILED)
     captureWithFeature(
       new Error(`Bunny has no original for the finished video of ${memeId}`),
       'meme-draft-fill'
@@ -192,7 +241,7 @@ async function runClaimedFill(memeId: string) {
   })
   const draft = await writeMemeDraft({
     video,
-    customPrompt: '',
+    customPrompt,
     targetLocale: MEME_DRAFT_LOCALE,
     categories,
     timeoutMs: FILL_VIDEO_TIMEOUT_MS
@@ -208,16 +257,20 @@ async function runClaimedFill(memeId: string) {
 
   const filledMeme = await writeFilledDraft({
     memeId,
+    claimedAt,
     draft,
     translations,
     categoryIds
   })
 
   if (!filledMeme) {
-    await releaseMemeDraft(memeId, MemeFillStatus.NONE)
+    const isSuggested = await storeSuggestion({ memeId, draft, translations })
+
     aiLogger.info(
       { memeId },
-      'Meme draft fill ended: the Creator changed or deleted the Meme'
+      isSuggested
+        ? 'Meme fill kept as a suggestion: the Creator changed the Meme'
+        : 'Meme fill ended: the Meme is gone'
     )
 
     return
@@ -230,30 +283,64 @@ async function runClaimedFill(memeId: string) {
 
 async function releaseAfterFailure(memeId: string) {
   try {
-    await releaseMemeDraft(memeId, MemeFillStatus.WAITING)
+    await releaseMemeDraft(memeId, MemeFillStatus.FAILED)
   } catch (error) {
     aiLogger.error({ error, memeId }, 'Failed to release the Meme draft')
   }
 }
 
-export async function fillMemeDraft(memeId: string) {
+async function runClaimedFillWithinLimit(claimedFill: ClaimedFill) {
+  await withTimeout(
+    () => {
+      return runClaimedFill(claimedFill)
+    },
+    FILL_RUN_TIMEOUT_MS,
+    `Meme draft fill ran out of time: ${claimedFill.memeId}`
+  )
+}
+
+async function settleFill(memeId: string, run: () => Promise<void>) {
   try {
-    const isClaimed = await claimMemeDraft(memeId)
-
-    if (!isClaimed) {
-      return
-    }
-
-    await withTimeout(
-      () => {
-        return runClaimedFill(memeId)
-      },
-      FILL_RUN_TIMEOUT_MS,
-      `Meme draft fill ran out of time: ${memeId}`
-    )
+    await run()
   } catch (error) {
     aiLogger.error({ error, memeId }, 'Meme draft fill gave up')
     captureWithFeature(error, 'meme-draft-fill')
     await releaseAfterFailure(memeId)
   }
+}
+
+export async function fillMemeDraft(memeId: string) {
+  await settleFill(memeId, async () => {
+    const claimedAt = await claimMemeFill(memeId, MemeFillStatus.WAITING)
+
+    if (claimedAt) {
+      await runClaimedFillWithinLimit({ memeId, claimedAt, customPrompt: '' })
+    }
+  })
+}
+
+type StartMemeFillParams = {
+  memeId: string
+  customPrompt: string
+}
+
+export async function startMemeFill({
+  memeId,
+  customPrompt
+}: StartMemeFillParams) {
+  const claimedAt = await claimMemeFill(memeId, {
+    not: MemeFillStatus.RUNNING
+  })
+
+  if (!claimedAt) {
+    return false
+  }
+
+  waitUntil(
+    settleFill(memeId, () => {
+      return runClaimedFillWithinLimit({ memeId, claimedAt, customPrompt })
+    })
+  )
+
+  return true
 }

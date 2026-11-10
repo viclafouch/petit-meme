@@ -9,6 +9,7 @@ import {
   createStart
 } from '@tanstack/react-start'
 import { AppError } from '~/constants/error'
+import { MEME_FILL_PATH } from '~/constants/meme-fill'
 import { matchIsUnexpectedError } from '~/lib/expected-error'
 import { logger } from '~/lib/logger'
 import { serverFnFetch } from '~/lib/server-fn-fetch'
@@ -32,7 +33,9 @@ const appErrorAdapter = createSerializationAdapter({
 
 const csrfMiddleware = createCsrfMiddleware({
   filter: (context) => {
-    return context.handlerType === 'serverFn'
+    return (
+      context.handlerType === 'serverFn' || context.pathname === MEME_FILL_PATH
+    )
   },
   failureResponse: (context) => {
     observeCsrfBlock(context.request)

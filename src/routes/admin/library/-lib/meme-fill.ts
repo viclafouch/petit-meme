@@ -1,39 +1,47 @@
 import type { MemeFullData } from '~/constants/meme'
-import { MEME_FILL_MAX_DURATION_MS } from '~/constants/meme-fill'
 import type { MemeFillSuggestion } from '~/constants/meme-fill-suggestion'
 import { MemeFillStatus } from '~/db/generated/prisma/enums'
 import {
   findTranslationByLocale,
   getRequiredLocales
 } from '~/helpers/i18n-content'
+import { matchIsFillInFlight } from '~/helpers/meme-fill'
 
 const FILL_POLL_INTERVAL_MS = 5000
 
 type MemeFillState = {
   status: MemeFillStatus
-  updatedAt: Date
+  suggestion: MemeFillSuggestion | null
+  isStalled: boolean
+  isQueuedTonight: boolean
 }
 
-export const matchIsFillInFlight = (status: MemeFillStatus) => {
-  return status === MemeFillStatus.WAITING || status === MemeFillStatus.RUNNING
+export const resolveFillNotice = (fill: MemeFillState) => {
+  if (fill.isQueuedTonight) {
+    return fill.status === MemeFillStatus.WAITING
+      ? 'QUEUED_TONIGHT'
+      : 'RETRIED_TONIGHT'
+  }
+
+  if (fill.isStalled || fill.status === MemeFillStatus.FAILED) {
+    return 'FAILED'
+  }
+
+  if (fill.status === MemeFillStatus.WAITING) {
+    return 'WAITING_VIDEO'
+  }
+
+  if (fill.status === MemeFillStatus.RUNNING) {
+    return 'RUNNING'
+  }
+
+  return fill.suggestion ? 'SUGGESTION_READY' : 'FILLED'
 }
 
-export const matchIsFillStalled = (fill: MemeFillState, checkedAt: number) => {
-  return (
-    matchIsFillInFlight(fill.status) &&
-    checkedAt - fill.updatedAt.getTime() > MEME_FILL_MAX_DURATION_MS
-  )
-}
+export type FillNotice = ReturnType<typeof resolveFillNotice>
 
-export const resolveFillPollInterval = (
-  fill: MemeFillState | undefined,
-  checkedAt: number
-) => {
-  if (
-    !fill ||
-    !matchIsFillInFlight(fill.status) ||
-    matchIsFillStalled(fill, checkedAt)
-  ) {
+export const resolveFillPollInterval = (fill: MemeFillState | undefined) => {
+  if (!fill || !matchIsFillInFlight(fill.status) || fill.isStalled) {
     return false
   }
 

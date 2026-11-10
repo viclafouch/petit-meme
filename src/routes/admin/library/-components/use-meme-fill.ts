@@ -10,6 +10,7 @@ import { MEME_FILL_PATH } from '~/constants/meme-fill'
 import type { Meme } from '~/db/generated/prisma/client'
 import { MemeFillStatus } from '~/db/generated/prisma/enums'
 import { getErrorMessage } from '~/helpers/error'
+import { matchIsFillInFlight } from '~/helpers/meme-fill'
 import {
   getAdminMemeByIdQueryOpts,
   getAdminMemeFillQueryOpts,
@@ -21,8 +22,7 @@ import {
 } from '~/routes/admin/-server/memes'
 import {
   buildFillSuggestionFromMeme,
-  matchIsFillInFlight,
-  matchIsFillStalled,
+  resolveFillNotice,
   resolveFillPollInterval
 } from '~/routes/admin/library/-lib/meme-fill'
 import { buildMemeFormValues, type MemeFormApi } from './use-meme-form'
@@ -75,13 +75,10 @@ export function useMemeFill({
   const fillQuery = useSuspenseQuery({
     ...fillQueryOpts,
     refetchInterval: (query) => {
-      return resolveFillPollInterval(
-        query.state.data,
-        query.state.dataUpdatedAt
-      )
+      return resolveFillPollInterval(query.state.data)
     }
   })
-  const isStalled = matchIsFillStalled(fillQuery.data, fillQuery.dataUpdatedAt)
+  const notice = resolveFillNotice(fillQuery.data)
 
   const startMutation = useMutation({
     mutationKey: ['meme-fill', memeId],
@@ -181,8 +178,8 @@ export function useMemeFill({
 
   return {
     fill: fillQuery.data,
-    isStalled,
-    isRunning: isInFlight && !isStalled,
+    notice,
+    isRunning: notice === 'RUNNING' || notice === 'WAITING_VIDEO',
     start: startMutation,
     settleSuggestion: settleSuggestionMutation
   }

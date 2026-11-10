@@ -9,7 +9,7 @@ import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { Container } from '~/components/ui/container'
 import { LoadingSpinner } from '~/components/ui/spinner'
-import type { MemesFilters } from '~/constants/meme'
+import type { AdminMemesFilters } from '~/constants/meme'
 import { MemeStatus } from '~/db/generated/prisma/enums'
 import { MemeListItem } from '~/routes/admin/-components/meme-list-item'
 import { MemesFilterContentLocale } from '~/routes/admin/-components/memes-filter-content-locale'
@@ -28,7 +28,8 @@ const MemesListWrapper = () => {
     query: search.query,
     page: search.page,
     status: search.status,
-    contentLocale: search.contentLocale
+    contentLocale: search.contentLocale,
+    ready: search.ready
   }
 
   const memesListQuery = useSuspenseQuery(getAdminMemesListQueryOpts(filters))
@@ -59,7 +60,8 @@ const MemesListWrapper = () => {
                   page,
                   query: prevState.query,
                   status: prevState.status,
-                  contentLocale: prevState.contentLocale
+                  contentLocale: prevState.contentLocale,
+                  ready: prevState.ready
                 }
               }
             }
@@ -71,53 +73,82 @@ const MemesListWrapper = () => {
   )
 }
 
-type StatusToggleProps = {
-  isFilteringPending: boolean
-  pendingCount: number | undefined
-  onSelectAll: () => void
-  onSelectPending: () => void
+type LibraryView = 'all' | 'pending' | 'ready'
+
+type ViewOption = {
+  view: LibraryView
+  label: string
+  count: number | undefined
+  activeClassName: string
+  badgeVariant: 'info' | 'success' | undefined
 }
 
-const StatusToggle = ({
-  isFilteringPending,
-  pendingCount,
-  onSelectAll,
-  onSelectPending
-}: StatusToggleProps) => {
-  const hasPendingCount = pendingCount !== undefined
+type ViewToggleProps = {
+  activeView: LibraryView
+  options: readonly ViewOption[]
+  onSelect: (view: LibraryView) => void
+}
 
+const ViewToggle = ({ activeView, options, onSelect }: ViewToggleProps) => {
   return (
-    <fieldset className="flex min-w-0 gap-1.5" aria-label="Filtrer par statut">
-      <Button
-        type="button"
-        variant={isFilteringPending ? 'outline' : 'default'}
-        size="sm"
-        onClick={onSelectAll}
-        aria-pressed={!isFilteringPending}
-      >
-        Tous
-      </Button>
-      <Button
-        type="button"
-        variant={isFilteringPending ? 'default' : 'outline'}
-        size="sm"
-        className={
-          isFilteringPending
-            ? 'bg-info text-info-foreground hover:bg-info/90'
-            : ''
-        }
-        onClick={onSelectPending}
-        aria-pressed={isFilteringPending}
-      >
-        En attente
-        {hasPendingCount && pendingCount > 0 ? (
-          <Badge variant={isFilteringPending ? 'secondary' : 'info'} size="sm">
-            {pendingCount}
-          </Badge>
-        ) : null}
-      </Button>
+    <fieldset
+      className="flex min-w-0 flex-wrap gap-1.5"
+      aria-label="Filtrer par statut"
+    >
+      {options.map((option) => {
+        const isActive = option.view === activeView
+
+        return (
+          <Button
+            key={option.view}
+            type="button"
+            variant={isActive ? 'default' : 'outline'}
+            size="sm"
+            className={isActive ? option.activeClassName : ''}
+            onClick={() => {
+              onSelect(option.view)
+            }}
+            aria-pressed={isActive}
+          >
+            {option.label}
+            {option.badgeVariant &&
+            option.count !== undefined &&
+            option.count > 0 ? (
+              <Badge
+                variant={isActive ? 'secondary' : option.badgeVariant}
+                size="sm"
+              >
+                {option.count}
+              </Badge>
+            ) : null}
+          </Button>
+        )
+      })}
     </fieldset>
   )
+}
+
+const VIEW_FILTERS = {
+  all: { status: undefined, ready: undefined },
+  pending: { status: MemeStatus.PENDING, ready: undefined },
+  ready: { status: undefined, ready: true }
+} as const satisfies Record<
+  LibraryView,
+  Pick<AdminMemesFilters, 'status' | 'ready'>
+>
+
+const VIEW_ANNOUNCEMENTS = {
+  all: 'Affichage de tous les mèmes',
+  pending: 'Filtre actif : mèmes en attente',
+  ready: 'Filtre actif : brouillons prêts à relire'
+} as const satisfies Record<LibraryView, string>
+
+const resolveLibraryView = (filters: AdminMemesFilters): LibraryView => {
+  if (filters.ready) {
+    return 'ready'
+  }
+
+  return filters.status === MemeStatus.PENDING ? 'pending' : 'all'
 }
 
 export const LibraryPage = () => {
@@ -126,11 +157,35 @@ export const LibraryPage = () => {
 
   const dashboardTotalsQuery = useQuery(getAdminDashboardTotalsQueryOpts())
 
-  const isFilteringPending = search.status === MemeStatus.PENDING
+  const activeView = resolveLibraryView(search)
 
-  const handleFilterChange = <TKey extends keyof MemesFilters>(
+  const viewOptions = [
+    {
+      view: 'all',
+      label: 'Tous',
+      count: undefined,
+      activeClassName: '',
+      badgeVariant: undefined
+    },
+    {
+      view: 'pending',
+      label: 'En attente',
+      count: dashboardTotalsQuery.data?.pendingMemes,
+      activeClassName: 'bg-info text-info-foreground hover:bg-info/90',
+      badgeVariant: 'info'
+    },
+    {
+      view: 'ready',
+      label: 'Prêts à relire',
+      count: dashboardTotalsQuery.data?.readyMemeDrafts,
+      activeClassName: 'bg-success text-success-foreground hover:bg-success/90',
+      badgeVariant: 'success'
+    }
+  ] as const satisfies readonly ViewOption[]
+
+  const handleFilterChange = <TKey extends keyof AdminMemesFilters>(
     key: TKey,
-    value: MemesFilters[TKey] | null
+    value: AdminMemesFilters[TKey] | null
   ) => {
     void navigate({
       to: '/admin/library',
@@ -151,17 +206,20 @@ export const LibraryPage = () => {
   }
 
   const handleContentLocaleChange = (
-    value: MemesFilters['contentLocale'] | null
+    value: AdminMemesFilters['contentLocale'] | null
   ) => {
     handleFilterChange('contentLocale', value)
   }
 
-  const handleSelectAll = () => {
-    handleFilterChange('status', null)
-  }
-
-  const handleSelectPending = () => {
-    handleFilterChange('status', MemeStatus.PENDING)
+  const handleSelectView = (view: LibraryView) => {
+    void navigate({
+      to: '/admin/library',
+      search: (prevState) => {
+        return { ...prevState, page: 1, ...VIEW_FILTERS[view] }
+      },
+      viewTransition: false,
+      replace: true
+    })
   }
 
   return (
@@ -177,16 +235,13 @@ export const LibraryPage = () => {
       <div className="py-10">
         <div className="flex flex-col gap-4">
           <div aria-live="polite" className="sr-only">
-            {isFilteringPending
-              ? 'Filtre actif : mèmes en attente'
-              : 'Affichage de tous les mèmes'}
+            {VIEW_ANNOUNCEMENTS[activeView]}
           </div>
           <div className="border-b border-muted pb-4 flex flex-col gap-3">
-            <StatusToggle
-              isFilteringPending={isFilteringPending}
-              pendingCount={dashboardTotalsQuery.data?.pendingMemes}
-              onSelectAll={handleSelectAll}
-              onSelectPending={handleSelectPending}
+            <ViewToggle
+              activeView={activeView}
+              options={viewOptions}
+              onSelect={handleSelectView}
             />
             <div className="flex items-center justify-between gap-x-3">
               <SearchInput

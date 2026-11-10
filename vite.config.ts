@@ -157,7 +157,10 @@ export default defineConfig(async ({ mode }) => {
         vercel: {
           functionRules: {
             '/api/bunny': { maxDuration: MEME_FILL_MAX_DURATION_SECONDS },
-            [MEME_FILL_PATH]: { maxDuration: MEME_FILL_MAX_DURATION_SECONDS }
+            [MEME_FILL_PATH]: { maxDuration: MEME_FILL_MAX_DURATION_SECONDS },
+            '/api/cron/ai-fill': {
+              maxDuration: MEME_FILL_MAX_DURATION_SECONDS
+            }
           }
         },
         routeRules: {

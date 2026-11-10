@@ -15,6 +15,11 @@ export const BUNNY_STATUS = {
   VIDEO_DELETED: 32
 } as const satisfies Record<string, number>
 
+export const PLAYABLE_BUNNY_STATUSES: readonly number[] = [
+  BUNNY_STATUS.FINISHED,
+  BUNNY_STATUS.RESOLUTION_FINISHED
+]
+
 export const BUNNY_STORAGE_ENDPOINT = 'https://storage.bunnycdn.com'
 
 export const HLS_MIME_TYPE = 'application/vnd.apple.mpegurl'

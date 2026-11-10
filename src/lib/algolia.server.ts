@@ -223,7 +223,7 @@ export function normalizeAlgoliaMemesPage(
   }
 }
 
-function memeToAlgoliaRecord(meme: MemeAlgoliaData, locale: Locale) {
+export function memeToAlgoliaRecord(meme: MemeAlgoliaData, locale: Locale) {
   const resolved = resolveMemeTranslation({
     translations: meme.translations,
     contentLocale: meme.contentLocale,

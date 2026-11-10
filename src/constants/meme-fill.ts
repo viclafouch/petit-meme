@@ -1,4 +1,5 @@
 import type { Prisma } from '~/db/generated/prisma/client'
+import { MemeFillStatus, MemeStatus } from '~/db/generated/prisma/enums'
 import { SECOND } from './time.ts'
 
 export const MEME_FILL_OMIT = {
@@ -11,6 +12,13 @@ export const MEME_FILL_OMIT = {
 export const MEME_FILL_MAX_DURATION_SECONDS = 800
 
 export const MEME_FILL_MAX_DURATION_MS = MEME_FILL_MAX_DURATION_SECONDS * SECOND
+
+export const MEME_FILL_MAX_ATTEMPTS = 3
+
+export const READY_MEME_DRAFT_WHERE = {
+  status: MemeStatus.PENDING,
+  fillStatus: MemeFillStatus.FILLED
+} as const satisfies Prisma.MemeWhereInput
 
 export const MEME_FILL_CUSTOM_PROMPT_MAX_LENGTH = 500
 

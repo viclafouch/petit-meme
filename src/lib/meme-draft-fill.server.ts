@@ -1,6 +1,10 @@
 import { waitUntil } from '@vercel/functions'
+import { PLAYABLE_BUNNY_STATUSES } from '~/constants/bunny'
 import { DEFAULT_MEME_TITLE, MEME_ALGOLIA_INCLUDE } from '~/constants/meme'
-import { MEME_FILL_MAX_DURATION_MS } from '~/constants/meme-fill'
+import {
+  MEME_FILL_MAX_ATTEMPTS,
+  MEME_FILL_MAX_DURATION_MS
+} from '~/constants/meme-fill'
 import { prismaClient } from '~/db/client.server'
 import { Prisma } from '~/db/generated/prisma/client'
 import { MemeFillStatus, MemeStatus } from '~/db/generated/prisma/enums'
@@ -166,23 +170,31 @@ async function storeSuggestion({
   return count === 1
 }
 
+const UNFILLED_DRAFT_WHERE = {
+  status: MemeStatus.PENDING,
+  title: DEFAULT_MEME_TITLE
+} as const satisfies Prisma.MemeWhereInput
+
+const buildStaleRunWhere = (checkedAt: Date) => {
+  return {
+    fillStatus: MemeFillStatus.RUNNING,
+    updatedAt: {
+      lt: new Date(checkedAt.getTime() - MEME_FILL_MAX_DURATION_MS)
+    }
+  } satisfies Prisma.MemeWhereInput
+}
+
 async function claimMemeFill(
   memeId: string,
-  claimableFillStatus: Prisma.MemeWhereInput['fillStatus']
+  claimableFillStatus: Prisma.MemeWhereInput['fillStatus'],
+  scope: Prisma.MemeWhereInput = {}
 ) {
   const claimedAt = new Date()
   const { count } = await prismaClient.meme.updateMany({
     where: {
       id: memeId,
-      OR: [
-        { fillStatus: claimableFillStatus },
-        {
-          fillStatus: MemeFillStatus.RUNNING,
-          updatedAt: {
-            lt: new Date(claimedAt.getTime() - MEME_FILL_MAX_DURATION_MS)
-          }
-        }
-      ]
+      ...scope,
+      OR: [{ fillStatus: claimableFillStatus }, buildStaleRunWhere(claimedAt)]
     },
     data: {
       fillStatus: MemeFillStatus.RUNNING,
@@ -227,13 +239,7 @@ async function runClaimedFill({
   const video = await fetchMemeVideo(meme.video.bunnyId)
 
   if (!video) {
-    await releaseMemeDraft(memeId, MemeFillStatus.FAILED)
-    captureWithFeature(
-      new Error(`Bunny has no original for the finished video of ${memeId}`),
-      'meme-draft-fill'
-    )
-
-    return
+    throw new Error(`Bunny has no original for the finished video of ${memeId}`)
   }
 
   const categories = await prismaClient.category.findMany({
@@ -289,12 +295,15 @@ async function releaseAfterFailure(memeId: string) {
   }
 }
 
-async function runClaimedFillWithinLimit(claimedFill: ClaimedFill) {
+async function runClaimedFillWithinLimit(
+  claimedFill: ClaimedFill,
+  timeoutMs = FILL_RUN_TIMEOUT_MS
+) {
   await withTimeout(
     () => {
       return runClaimedFill(claimedFill)
     },
-    FILL_RUN_TIMEOUT_MS,
+    timeoutMs,
     `Meme draft fill ran out of time: ${claimedFill.memeId}`
   )
 }
@@ -302,10 +311,14 @@ async function runClaimedFillWithinLimit(claimedFill: ClaimedFill) {
 async function settleFill(memeId: string, run: () => Promise<void>) {
   try {
     await run()
+
+    return null
   } catch (error) {
     aiLogger.error({ error, memeId }, 'Meme draft fill gave up')
     captureWithFeature(error, 'meme-draft-fill')
     await releaseAfterFailure(memeId)
+
+    return error instanceof Error ? error.message : String(error)
   }
 }
 
@@ -317,6 +330,95 @@ export async function fillMemeDraft(memeId: string) {
       await runClaimedFillWithinLimit({ memeId, claimedAt, customPrompt: '' })
     }
   })
+}
+
+export function findUnfilledMemeDrafts(checkedAt: Date) {
+  return prismaClient.meme.findMany({
+    where: {
+      ...UNFILLED_DRAFT_WHERE,
+      OR: [
+        {
+          fillStatus: MemeFillStatus.WAITING,
+          video: { bunnyStatus: { in: [...PLAYABLE_BUNNY_STATUSES] } }
+        },
+        {
+          fillStatus: MemeFillStatus.FAILED,
+          fillAttempts: { lt: MEME_FILL_MAX_ATTEMPTS }
+        },
+        buildStaleRunWhere(checkedAt)
+      ]
+    },
+    select: { id: true, fillStatus: true, fillAttempts: true },
+    orderBy: { createdAt: 'asc' }
+  })
+}
+
+export type UnfilledMemeDraft = Awaited<
+  ReturnType<typeof findUnfilledMemeDrafts>
+>[number]
+
+export type MemeFillFailure = {
+  memeId: string
+  attempts: number
+  reason: string
+}
+
+async function abandonStaleMemeFill(memeId: string) {
+  await prismaClient.meme.updateMany({
+    where: {
+      id: memeId,
+      ...buildStaleRunWhere(new Date())
+    },
+    data: { fillStatus: MemeFillStatus.FAILED }
+  })
+}
+
+async function retryMemeFill(memeId: string, timeoutMs: number) {
+  return settleFill(memeId, async () => {
+    const claimedAt = await claimMemeFill(
+      memeId,
+      { in: [MemeFillStatus.WAITING, MemeFillStatus.FAILED] },
+      { ...UNFILLED_DRAFT_WHERE, fillAttempts: { lt: MEME_FILL_MAX_ATTEMPTS } }
+    )
+
+    if (claimedAt) {
+      await runClaimedFillWithinLimit(
+        { memeId, claimedAt, customPrompt: '' },
+        Math.min(FILL_RUN_TIMEOUT_MS, timeoutMs)
+      )
+    }
+  })
+}
+
+type RetryUnfilledMemeDraftParams = {
+  draft: UnfilledMemeDraft
+  timeoutMs: number
+}
+
+export async function retryUnfilledMemeDraft({
+  draft,
+  timeoutMs
+}: RetryUnfilledMemeDraftParams): Promise<MemeFillFailure | null> {
+  if (draft.fillStatus === MemeFillStatus.RUNNING) {
+    const stopError = new Error(`Meme draft fill stopped mid-run: ${draft.id}`)
+    captureWithFeature(stopError, 'meme-draft-fill')
+
+    if (draft.fillAttempts >= MEME_FILL_MAX_ATTEMPTS) {
+      await abandonStaleMemeFill(draft.id)
+
+      return {
+        memeId: draft.id,
+        attempts: draft.fillAttempts,
+        reason: stopError.message
+      }
+    }
+  }
+
+  const reason = await retryMemeFill(draft.id, timeoutMs)
+
+  return reason === null
+    ? null
+    : { memeId: draft.id, attempts: draft.fillAttempts + 1, reason }
 }
 
 type StartMemeFillParams = {

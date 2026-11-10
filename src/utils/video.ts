@@ -1,13 +1,8 @@
 import hlsWorkerUrl from 'hls.js/dist/hls.worker.js?url'
 import { createClientOnlyFn } from '@tanstack/react-start'
-import { BUNNY_STATUS, HLS_MIME_TYPE } from '~/constants/bunny'
+import { HLS_MIME_TYPE, PLAYABLE_BUNNY_STATUSES } from '~/constants/bunny'
 
 const MEDIA_ERROR_RECOVERY_INTERVAL_MS = 5_000
-
-const PLAYABLE_BUNNY_STATUSES: readonly number[] = [
-  BUNNY_STATUS.FINISHED,
-  BUNNY_STATUS.RESOLUTION_FINISHED
-]
 
 export const matchIsVideoPlayable = (bunnyStatus: number) => {
   return PLAYABLE_BUNNY_STATUSES.includes(bunnyStatus)

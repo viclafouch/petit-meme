@@ -46,6 +46,7 @@ import { Route as AdminSubmissionsIndexRouteImport } from './routes/admin/submis
 import { Route as AdminUsersIndexRouteImport } from './routes/admin/users/index'
 import { Route as AdminUsersUserIdRouteImport } from './routes/admin/users/$userId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
+import { Route as ApiCronAiFillRouteImport } from './routes/api/cron/ai-fill'
 import { Route as ApiCronCleanupRouteImport } from './routes/api/cron/cleanup'
 import { Route as ApiCronPendingSubmissionsReminderRouteImport } from './routes/api/cron/pending-submissions-reminder'
 import { Route as ApiCronSyncAlgoliaRouteImport } from './routes/api/cron/sync-algolia'
@@ -254,6 +255,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCronAiFillRoute = ApiCronAiFillRouteImport.update({
+  id: '/api/cron/ai-fill',
+  path: '/api/cron/ai-fill',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiCronCleanupRoute = ApiCronCleanupRouteImport.update({
   id: '/api/cron/cleanup',
   path: '/api/cron/cleanup',
@@ -387,6 +393,7 @@ export interface FileRoutesByFullPath {
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/cron/ai-fill': typeof ApiCronAiFillRoute
   '/api/cron/cleanup': typeof ApiCronCleanupRoute
   '/api/cron/pending-submissions-reminder': typeof ApiCronPendingSubmissionsReminderRoute
   '/api/cron/sync-algolia': typeof ApiCronSyncAlgoliaRoute
@@ -439,6 +446,7 @@ export interface FileRoutesByTo {
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/cron/ai-fill': typeof ApiCronAiFillRoute
   '/api/cron/cleanup': typeof ApiCronCleanupRoute
   '/api/cron/pending-submissions-reminder': typeof ApiCronPendingSubmissionsReminderRoute
   '/api/cron/sync-algolia': typeof ApiCronSyncAlgoliaRoute
@@ -497,6 +505,7 @@ export interface FileRoutesById {
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/cron/ai-fill': typeof ApiCronAiFillRoute
   '/api/cron/cleanup': typeof ApiCronCleanupRoute
   '/api/cron/pending-submissions-reminder': typeof ApiCronPendingSubmissionsReminderRoute
   '/api/cron/sync-algolia': typeof ApiCronSyncAlgoliaRoute
@@ -553,6 +562,7 @@ export interface FileRouteTypes {
     | '/admin/library/$memeId'
     | '/admin/users/$userId'
     | '/api/auth/$'
+    | '/api/cron/ai-fill'
     | '/api/cron/cleanup'
     | '/api/cron/pending-submissions-reminder'
     | '/api/cron/sync-algolia'
@@ -605,6 +615,7 @@ export interface FileRouteTypes {
     | '/admin/library/$memeId'
     | '/admin/users/$userId'
     | '/api/auth/$'
+    | '/api/cron/ai-fill'
     | '/api/cron/cleanup'
     | '/api/cron/pending-submissions-reminder'
     | '/api/cron/sync-algolia'
@@ -662,6 +673,7 @@ export interface FileRouteTypes {
     | '/admin/library/$memeId'
     | '/admin/users/$userId'
     | '/api/auth/$'
+    | '/api/cron/ai-fill'
     | '/api/cron/cleanup'
     | '/api/cron/pending-submissions-reminder'
     | '/api/cron/sync-algolia'
@@ -705,6 +717,7 @@ export interface RootRouteChildren {
   ApiOgRoute: typeof ApiOgRoute
   EmbedMemeIdRoute: typeof EmbedMemeIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiCronAiFillRoute: typeof ApiCronAiFillRoute
   ApiCronCleanupRoute: typeof ApiCronCleanupRoute
   ApiCronPendingSubmissionsReminderRoute: typeof ApiCronPendingSubmissionsReminderRoute
   ApiCronSyncAlgoliaRoute: typeof ApiCronSyncAlgoliaRoute
@@ -972,6 +985,13 @@ declare module '@tanstack/react-router' {
       path: '/api/auth/$'
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/ai-fill': {
+      id: '/api/cron/ai-fill'
+      path: '/api/cron/ai-fill'
+      fullPath: '/api/cron/ai-fill'
+      preLoaderRoute: typeof ApiCronAiFillRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/cron/cleanup': {
@@ -1246,6 +1266,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiOgRoute: ApiOgRoute,
   EmbedMemeIdRoute: EmbedMemeIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiCronAiFillRoute: ApiCronAiFillRoute,
   ApiCronCleanupRoute: ApiCronCleanupRoute,
   ApiCronPendingSubmissionsReminderRoute:
     ApiCronPendingSubmissionsReminderRoute,

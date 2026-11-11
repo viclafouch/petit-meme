@@ -1,5 +1,5 @@
-import { testRule } from '../rule-tester.ts'
-import { e2eNames } from './e2e-names.ts'
+import { testRule } from '../../rule-tester.ts'
+import { e2eNames } from '../e2e-names.ts'
 
 testRule({
   name: 'e2e-names',

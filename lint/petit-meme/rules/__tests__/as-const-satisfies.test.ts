@@ -1,5 +1,5 @@
-import { testRule } from '../rule-tester.ts'
-import { asConstSatisfies } from './as-const-satisfies.ts'
+import { testRule } from '../../rule-tester.ts'
+import { asConstSatisfies } from '../as-const-satisfies.ts'
 
 testRule({
   name: 'as-const-satisfies',

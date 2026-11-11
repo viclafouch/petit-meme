@@ -1,5 +1,5 @@
-import { testRule } from '../rule-tester.ts'
-import { jsxBlankLine } from './jsx-blank-line.ts'
+import { testRule } from '../../rule-tester.ts'
+import { jsxBlankLine } from '../jsx-blank-line.ts'
 
 testRule({
   name: 'jsx-blank-line',

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { MemeFillStatus } from '~/db/generated/prisma/enums'
-import { resolveFillNotice } from './meme-fill'
+import { resolveFillNotice } from '../meme-fill'
 
 const FILL = {
   status: MemeFillStatus.WAITING,

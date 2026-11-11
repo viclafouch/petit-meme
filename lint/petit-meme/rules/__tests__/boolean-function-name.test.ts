@@ -1,5 +1,5 @@
-import { testRule } from '../rule-tester.ts'
-import { booleanFunctionName } from './boolean-function-name.ts'
+import { testRule } from '../../rule-tester.ts'
+import { booleanFunctionName } from '../boolean-function-name.ts'
 
 testRule({
   name: 'boolean-function-name',

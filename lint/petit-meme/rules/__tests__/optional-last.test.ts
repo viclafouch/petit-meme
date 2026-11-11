@@ -1,5 +1,5 @@
-import { testRule } from '../rule-tester.ts'
-import { optionalLast } from './optional-last.ts'
+import { testRule } from '../../rule-tester.ts'
+import { optionalLast } from '../optional-last.ts'
 
 testRule({
   name: 'optional-last',

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { z } from 'zod'
-import { compareEnvKeys, parseVercelEnvList } from './env-parity'
+import { compareEnvKeys, parseVercelEnvList } from '../env-parity'
 
 const SCHEMA = {
   DATABASE_URL: z.string(),

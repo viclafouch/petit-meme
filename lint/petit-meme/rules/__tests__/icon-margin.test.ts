@@ -1,5 +1,5 @@
-import { testRule } from '../rule-tester.ts'
-import { iconMargin } from './icon-margin.ts'
+import { testRule } from '../../rule-tester.ts'
+import { iconMargin } from '../icon-margin.ts'
 
 testRule({
   name: 'icon-margin',

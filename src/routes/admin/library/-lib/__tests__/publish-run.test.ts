@@ -5,7 +5,7 @@ import {
   getPublishStepStatus,
   pacePublishRun,
   type PublishRun
-} from './publish-run'
+} from '../publish-run'
 
 const getStatuses = (run: PublishRun) => {
   return getPublishRunSteps(run.kind).map((step) => {

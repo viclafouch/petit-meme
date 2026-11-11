@@ -1,5 +1,5 @@
-import { testRule } from '../rule-tester.ts'
-import { queryNaming } from './query-naming.ts'
+import { testRule } from '../../rule-tester.ts'
+import { queryNaming } from '../query-naming.ts'
 
 testRule({
   name: 'query-naming',

@@ -1,5 +1,5 @@
-import { testRule } from '../rule-tester.ts'
-import { tailwindClasses } from './tailwind-classes.ts'
+import { testRule } from '../../rule-tester.ts'
+import { tailwindClasses } from '../tailwind-classes.ts'
 
 testRule({
   name: 'tailwind-classes',

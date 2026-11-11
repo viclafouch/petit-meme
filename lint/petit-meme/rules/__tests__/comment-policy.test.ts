@@ -1,5 +1,5 @@
-import { testRule } from '../rule-tester.ts'
-import { commentPolicy } from './comment-policy.ts'
+import { testRule } from '../../rule-tester.ts'
+import { commentPolicy } from '../comment-policy.ts'
 
 testRule({
   name: 'comment-policy',

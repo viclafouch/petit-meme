@@ -1,5 +1,5 @@
-import { testRule } from '../rule-tester.ts'
-import { routeHead } from './route-head.ts'
+import { testRule } from '../../rule-tester.ts'
+import { routeHead } from '../route-head.ts'
 
 testRule({
   name: 'route-head',

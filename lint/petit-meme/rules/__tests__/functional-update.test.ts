@@ -1,5 +1,5 @@
-import { testRule } from '../rule-tester.ts'
-import { functionalUpdate } from './functional-update.ts'
+import { testRule } from '../../rule-tester.ts'
+import { functionalUpdate } from '../functional-update.ts'
 
 testRule({
   name: 'functional-update',

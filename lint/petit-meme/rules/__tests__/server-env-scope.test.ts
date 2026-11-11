@@ -1,5 +1,5 @@
-import { testRule } from '../rule-tester.ts'
-import { serverEnvScope } from './server-env-scope.ts'
+import { testRule } from '../../rule-tester.ts'
+import { serverEnvScope } from '../server-env-scope.ts'
 
 testRule({
   name: 'server-env-scope',

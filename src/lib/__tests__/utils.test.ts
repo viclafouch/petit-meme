@@ -3,7 +3,7 @@ import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { cn } from '~/lib/utils'
 
-const SOURCE_DIRECTORY = path.resolve(import.meta.dirname, '..')
+const SOURCE_DIRECTORY = path.resolve(import.meta.dirname, '../..')
 const CN_SOURCE_FILE = path.join('lib', 'utils.ts')
 const CN_PACKAGE_IMPORT = /from\s+["']cn(?:\/[^"']*)?["']/u
 

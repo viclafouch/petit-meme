@@ -1,5 +1,5 @@
-import { testRule } from '../rule-tester.ts'
-import { hookFileName } from './hook-file-name.ts'
+import { testRule } from '../../rule-tester.ts'
+import { hookFileName } from '../hook-file-name.ts'
 
 testRule({
   name: 'hook-file-name',

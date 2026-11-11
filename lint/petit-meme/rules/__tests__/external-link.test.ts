@@ -1,5 +1,5 @@
-import { testRule } from '../rule-tester.ts'
-import { externalLink } from './external-link.ts'
+import { testRule } from '../../rule-tester.ts'
+import { externalLink } from '../external-link.ts'
 
 testRule({
   name: 'external-link',

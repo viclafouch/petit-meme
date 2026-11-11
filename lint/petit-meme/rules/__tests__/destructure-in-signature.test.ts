@@ -1,5 +1,5 @@
-import { testRule } from '../rule-tester.ts'
-import { destructureInSignature } from './destructure-in-signature.ts'
+import { testRule } from '../../rule-tester.ts'
+import { destructureInSignature } from '../destructure-in-signature.ts'
 
 testRule({
   name: 'destructure-in-signature',

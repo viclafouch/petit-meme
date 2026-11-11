@@ -1,5 +1,5 @@
-import { testRule } from '../rule-tester.ts'
-import { noThrowResponse } from './no-throw-response.ts'
+import { testRule } from '../../rule-tester.ts'
+import { noThrowResponse } from '../no-throw-response.ts'
 
 testRule({
   name: 'no-throw-response',

@@ -1,5 +1,5 @@
-import { testRule } from '../rule-tester.ts'
-import { paramsTypeName } from './params-type-name.ts'
+import { testRule } from '../../rule-tester.ts'
+import { paramsTypeName } from '../params-type-name.ts'
 
 testRule({
   name: 'params-type-name',

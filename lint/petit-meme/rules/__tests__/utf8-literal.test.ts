@@ -1,5 +1,5 @@
-import { testRule } from '../rule-tester.ts'
-import { utf8Literal } from './utf8-literal.ts'
+import { testRule } from '../../rule-tester.ts'
+import { utf8Literal } from '../utf8-literal.ts'
 
 const NO_BREAK_SPACE_CODE_POINT = 160
 const NO_BREAK_SPACE = String.fromCodePoint(NO_BREAK_SPACE_CODE_POINT)

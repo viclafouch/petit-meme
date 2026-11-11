@@ -1,5 +1,5 @@
-import { testRule } from '../rule-tester.ts'
-import { noReExport } from './no-re-export.ts'
+import { testRule } from '../../rule-tester.ts'
+import { noReExport } from '../no-re-export.ts'
 
 testRule({
   name: 'no-re-export',

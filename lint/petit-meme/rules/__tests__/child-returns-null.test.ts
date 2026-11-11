@@ -1,5 +1,5 @@
-import { testRule } from '../rule-tester.ts'
-import { childReturnsNull } from './child-returns-null.ts'
+import { testRule } from '../../rule-tester.ts'
+import { childReturnsNull } from '../child-returns-null.ts'
 
 testRule({
   name: 'child-returns-null',

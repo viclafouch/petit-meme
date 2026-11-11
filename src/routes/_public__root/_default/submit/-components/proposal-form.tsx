@@ -4,6 +4,8 @@ import type { z } from 'zod'
 import { formOptions } from '@tanstack/react-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
+import { useAppForm } from '~/components/form/use-app-form'
+import { useErrorFocus } from '~/components/form/use-error-focus'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import {
   FormControl,
@@ -26,12 +28,10 @@ import {
 import { MemeContentLocale } from '~/db/generated/prisma/enums'
 import { getErrorMessage, matchIsRateLimitError } from '~/helpers/error'
 import { getContentLocaleOptions } from '~/helpers/i18n-content'
-import { useAppForm } from '~/hooks/use-app-form'
-import { useErrorFocus } from '~/hooks/use-error-focus'
 import { focusFirstInvalidField, getFieldErrorMessage } from '~/lib/form'
-import { listUserProposalsQueryOpts } from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages'
+import { listUserProposalsQueryOpts } from '~/queries/proposal'
 import { createProposal } from '~/server/proposal/proposal.functions'
 
 type ProposalFormValues = {

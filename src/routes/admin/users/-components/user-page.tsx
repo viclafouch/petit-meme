@@ -8,6 +8,10 @@ import {
   ACTIVITY_RETENTION_DAYS
 } from '~/constants/activity'
 import { cn } from '~/lib/utils'
+import {
+  listAdminUserActivityQueryOpts,
+  getAdminUserQueryOpts
+} from '~/queries/admin/user'
 import { ActivityTimeline } from '~/routes/admin/-components/activity-timeline'
 import {
   SectionCard,
@@ -15,10 +19,6 @@ import {
 } from '~/routes/admin/-components/section-heading'
 import { StatTiles } from '~/routes/admin/-components/stat-tiles'
 import { buildActivityTiles } from '~/routes/admin/-helpers/activity-tiles'
-import {
-  listAdminUserActivityQueryOpts,
-  getAdminUserQueryOpts
-} from '~/routes/admin/-lib/queries'
 import { UserAccountPanel } from '~/routes/admin/users/-components/user-account-panel'
 import {
   PremiumBadges,

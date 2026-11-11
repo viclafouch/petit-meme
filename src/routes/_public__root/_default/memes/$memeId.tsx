@@ -2,9 +2,9 @@ import { createFileRoute } from '@tanstack/react-router'
 import { MemeStatus } from '~/db/generated/prisma/enums'
 import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import { getCrawlerStreamUrl } from '~/lib/crawler-video'
-import { getMemeQueryOpts, getMemePlaybackUrlQueryOpts } from '~/lib/queries'
 import { buildBreadcrumbJsonLd, buildMemeJsonLd, buildMemeSeo } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
+import { getMemeQueryOpts, getMemePlaybackUrlQueryOpts } from '~/queries/meme'
 import { MemePage } from './-components/meme-page'
 
 export const Route = createFileRoute('/_public__root/_default/memes/$memeId')({

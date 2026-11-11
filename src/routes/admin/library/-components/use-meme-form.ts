@@ -2,6 +2,7 @@ import { toast } from 'sonner'
 import type { z } from 'zod'
 import { revalidateLogic } from '@tanstack/react-form'
 import { useMutation, useQuery } from '@tanstack/react-query'
+import { useAppForm } from '~/components/form/use-app-form'
 import type { MemeFullData } from '~/constants/meme'
 import {
   getMemeFormSchema,
@@ -14,11 +15,10 @@ import {
   findTranslationByLocale,
   getRequiredLocales
 } from '~/helpers/i18n-content'
-import { useAppForm } from '~/hooks/use-app-form'
-import { useKeywordsField } from '~/hooks/use-keywords-field'
 import { focusFirstInvalidField } from '~/lib/form'
-import { listCategoriesQueryOpts } from '~/lib/queries'
 import { baseLocale, isLocale, type Locale } from '~/paraglide/runtime'
+import { listCategoriesQueryOpts } from '~/queries/category'
+import { useKeywordsField } from '~/routes/admin/-components/use-keywords-field'
 import { translateMemeRecord } from '~/server/admin/ai-assist/ai-assist.functions'
 
 export type MemeFormValues = z.infer<typeof MEME_FORM_SCHEMA>

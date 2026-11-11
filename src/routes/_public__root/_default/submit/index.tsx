@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { listUserProposalsQueryOpts } from '~/lib/queries'
 import { buildBreadcrumbJsonLd, buildOgImageUrl, seo } from '~/lib/seo'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
+import { listUserProposalsQueryOpts } from '~/queries/proposal'
 import { SubmitPage } from './-components/submit-page'
 
 export const Route = createFileRoute('/_public__root/_default/submit/')({

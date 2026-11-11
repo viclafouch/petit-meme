@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { CancelledError, QueryClient } from '@tanstack/react-query'
 import { PRIVATE_QUERY_META } from '~/constants/query'
-import { removePrivateQueries } from '~/lib/private-queries'
+import { removePrivateQueries } from '~/queries/private'
 
 const PRIVATE_KEY = ['auth-user']
 const PUBLIC_KEY = ['memes', 'trending']

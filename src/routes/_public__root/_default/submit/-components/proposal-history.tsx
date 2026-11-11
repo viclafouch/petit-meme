@@ -7,9 +7,9 @@ import { PROPOSAL_STATUS_BADGE_VARIANT } from '~/constants/meme-proposal'
 import { MemeProposalStatus } from '~/db/generated/prisma/enums'
 import { formatRelativeTime } from '~/helpers/date'
 import { truncateUrl } from '~/helpers/format'
-import { listUserProposalsQueryOpts } from '~/lib/queries'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
+import { listUserProposalsQueryOpts } from '~/queries/proposal'
 
 const STATUS_LABELS = {
   PENDING: () => {

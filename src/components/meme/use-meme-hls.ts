@@ -3,8 +3,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useHydrated } from '@tanstack/react-router'
 import { HOUR } from '~/constants/time'
 import type { Meme } from '~/db/generated/prisma/client'
-import { getMemePlaybackUrlQueryOpts } from '~/lib/queries'
 import { attachHlsSource } from '~/lib/video'
+import { getMemePlaybackUrlQueryOpts } from '~/queries/meme'
 
 const PLAYBACK_URL_REFRESH_AFTER_MS = HOUR
 

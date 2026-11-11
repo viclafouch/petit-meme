@@ -9,7 +9,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator
 } from '~/components/ui/breadcrumb'
-import type { useCrumbMatches } from '~/hooks/use-crumb-matches'
+import type { useCrumbMatches } from '~/routes/admin/-components/use-crumb-matches'
 
 type PathBreadcrumbsProps = {
   crumbMatches: ReturnType<typeof useCrumbMatches>

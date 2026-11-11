@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { listAdminAiSearchLogsQueryOpts } from '~/routes/admin/-lib/queries'
+import { listAdminAiSearchLogsQueryOpts } from '~/queries/admin/ai-search'
 import { AiSearchPage } from '~/routes/admin/ai-search/-components/ai-search-page'
 
 export const Route = createFileRoute('/admin/ai-search/')({

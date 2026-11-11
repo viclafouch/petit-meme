@@ -24,7 +24,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem
 } from '~/components/ui/sidebar'
-import { countAdminPendingProposalsQueryOpts } from '~/routes/admin/-lib/queries'
+import { countAdminPendingProposalsQueryOpts } from '~/queries/admin/proposal'
 
 type AdminSidebarProps = React.ComponentProps<typeof Sidebar>
 

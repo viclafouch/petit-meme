@@ -7,10 +7,10 @@ import {
   SidebarProvider,
   SidebarTrigger
 } from '~/components/ui/sidebar'
-import { useCrumbMatches } from '~/hooks/use-crumb-matches'
 import { AdminNavButton } from '~/routes/admin/-components/admin-nav-button'
 import { AdminSidebar } from '~/routes/admin/-components/admin-sidebar'
 import { PathBreadcrumbs } from '~/routes/admin/-components/path-breadcrumbs'
+import { useCrumbMatches } from '~/routes/admin/-components/use-crumb-matches'
 import { useThemeStore } from '~/stores/theme.store'
 
 const routeApi = getRouteApi('/admin')

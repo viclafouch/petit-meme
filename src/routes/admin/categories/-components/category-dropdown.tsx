@@ -18,7 +18,7 @@ import {
   DropdownMenuTrigger
 } from '~/components/ui/dropdown-menu'
 import { getErrorMessage } from '~/helpers/error'
-import { listCategoriesQueryOpts } from '~/lib/queries'
+import { listCategoriesQueryOpts } from '~/queries/category'
 import { ConfirmAlertDialog } from '~/routes/admin/-components/confirm-alert-dialog'
 import { CategoryForm } from '~/routes/admin/categories/-components/category-form'
 import { deleteCategory } from '~/server/admin/category/category.functions'

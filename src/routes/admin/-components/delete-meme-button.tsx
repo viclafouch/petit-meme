@@ -5,11 +5,11 @@ import { useRouter } from '@tanstack/react-router'
 import { Button } from '~/components/ui/button'
 import type { Meme } from '~/db/generated/prisma/client'
 import { getErrorMessage } from '~/helpers/error'
-import { ConfirmAlertDialog } from '~/routes/admin/-components/confirm-alert-dialog'
 import {
   getAdminMemeQueryOpts,
   invalidateAdminMemesOverview
-} from '~/routes/admin/-lib/queries'
+} from '~/queries/admin/meme'
+import { ConfirmAlertDialog } from '~/routes/admin/-components/confirm-alert-dialog'
 import { deleteMeme } from '~/server/admin/meme/meme.functions'
 import type { MemeFile } from '~/server/meme/meme-file.server'
 

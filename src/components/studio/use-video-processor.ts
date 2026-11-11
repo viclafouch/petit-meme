@@ -8,6 +8,7 @@ import {
   useQueryClient,
   useSuspenseQuery
 } from '@tanstack/react-query'
+import { snoozePremiumReminder } from '~/components/premium/use-premium-reminder'
 import { getAppErrorCode, AppError } from '~/constants/error'
 import type { MemeWithVideo } from '~/constants/meme'
 import { PERCENT_SCALE } from '~/constants/number'
@@ -26,7 +27,6 @@ import {
   type StudioTextPosition
 } from '~/constants/studio'
 import { getErrorMessage } from '~/helpers/error'
-import { snoozePremiumReminder } from '~/hooks/use-premium-reminder'
 import {
   FFMPEG_VIDEO_ENCODING_ARGS,
   FFMPEG_INPUT_FILE,
@@ -34,12 +34,12 @@ import {
   loadFFmpeg,
   readAndDeleteFFmpegOutput
 } from '~/lib/ffmpeg'
+import { captureWithFeature } from '~/lib/sentry'
+import { m } from '~/paraglide/messages.js'
 import {
   getGenerationQuotaQueryOpts,
   getStudioVideoQueryOpts
-} from '~/lib/queries'
-import { captureWithFeature } from '~/lib/sentry'
-import { m } from '~/paraglide/messages.js'
+} from '~/queries/studio'
 import { createGeneration } from '~/server/studio/studio.functions'
 import { dialogStore } from '~/stores/dialog.store'
 

@@ -4,7 +4,9 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { toast } from 'sonner'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouteContext } from '@tanstack/react-router'
+import { useAppForm } from '~/components/form/use-app-form'
 import { MemesList } from '~/components/meme/memes-list'
+import { snoozePremiumReminder } from '~/components/premium/use-premium-reminder'
 import { Button } from '~/components/ui/button'
 import { Separator } from '~/components/ui/separator'
 import { Textarea } from '~/components/ui/textarea'
@@ -15,13 +17,10 @@ import {
 import { getAppErrorCode } from '~/constants/error'
 import { EASE_OUT } from '~/constants/motion'
 import { getErrorMessage } from '~/helpers/error'
-import { useAiSearchStages } from '~/hooks/use-ai-search-stages'
-import { useAppForm } from '~/hooks/use-app-form'
-import { snoozePremiumReminder } from '~/hooks/use-premium-reminder'
-import { getAiSearchQuotaQueryOpts } from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
 import { buildBreadcrumbJsonLd } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
+import { getAiSearchQuotaQueryOpts } from '~/queries/ai-search'
 import {
   PageContainer,
   PageDescription,
@@ -29,6 +28,7 @@ import {
   PageHeading
 } from '~/routes/_public__root/-components/page-headers'
 import { AiSearchStages } from '~/routes/_public__root/_default/memes/-components/ai-search-stages'
+import { useAiSearchStages } from '~/routes/_public__root/_default/memes/-components/use-ai-search-stages'
 import { searchMemesWithAi } from '~/server/ai-search/ai-search.functions'
 import { dialogStore } from '~/stores/dialog.store'
 

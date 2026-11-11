@@ -1,7 +1,7 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import { Container } from '~/components/ui/container'
-import { getAdminMemeQueryOpts } from '~/routes/admin/-lib/queries'
+import { getAdminMemeQueryOpts } from '~/queries/admin/meme'
 import { MemeEditor } from './meme-editor'
 
 const routeApi = getRouteApi('/admin/library/$memeId')

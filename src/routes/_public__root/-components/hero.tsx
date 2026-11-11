@@ -6,9 +6,9 @@ import { buttonVariants } from '~/components/ui/button'
 import { TextEffect } from '~/components/ui/text-effect'
 import { NEWS_CATEGORY_SLUG } from '~/constants/meme'
 import { useIsMobile } from '~/hooks/use-mobile'
-import { countRecentMemesQueryOpts } from '~/lib/queries'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
+import { countRecentMemesQueryOpts } from '~/queries/meme'
 import { FloatingLogos } from './floating-logo'
 import {
   Announcement,

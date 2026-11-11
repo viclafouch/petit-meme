@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { getFreePlan, getPremiumPlan } from '~/constants/plan'
-import { getActiveSubscriptionQueryOpts } from '~/lib/queries'
 import { buildOgImageUrl, buildPricingJsonLd, seo } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
+import { getActiveSubscriptionQueryOpts } from '~/queries/subscription'
 import { getPricingFaqItems } from './-components/constants'
 import { PricingPage } from './-components/pricing-page'
 

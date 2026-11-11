@@ -6,9 +6,9 @@ import { getAppErrorCode } from '~/constants/error'
 import { resolveAvatar } from '~/helpers/avatar'
 import { getErrorMessage, matchIsRateLimitError } from '~/helpers/error'
 import { authClient } from '~/lib/auth-client'
-import { getAuthUserQueryOpts } from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
+import { getAuthUserQueryOpts } from '~/queries/auth'
 import { updateUserAvatar } from '~/server/user/user.functions'
 
 export const useUpdateAvatar = () => {

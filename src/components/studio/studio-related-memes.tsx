@@ -3,8 +3,8 @@ import { Link } from '@tanstack/react-router'
 import { Label } from '~/components/ui/label'
 import type { MemeWithVideo } from '~/constants/meme'
 import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
-import { listRelatedMemesQueryOpts } from '~/lib/queries'
 import { m } from '~/paraglide/messages.js'
+import { listRelatedMemesQueryOpts } from '~/queries/meme'
 
 type StudioRelatedMemesProps = {
   meme: Pick<MemeWithVideo, 'id' | 'title'>

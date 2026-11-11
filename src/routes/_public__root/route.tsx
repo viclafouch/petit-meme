@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { getLocaleBannerDismissed } from '~/lib/locale-banner'
-import { listMemesQueryOpts } from '~/lib/queries'
+import { listMemesQueryOpts } from '~/queries/meme'
 import { PublicLayout } from './-components/public-layout'
 
 export const Route = createFileRoute('/_public__root')({

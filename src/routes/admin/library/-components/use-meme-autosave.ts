@@ -10,7 +10,7 @@ import {
   getAdminMemeQueryOpts,
   invalidateSavedMeme,
   markAdminMemesOverviewStale
-} from '~/routes/admin/-lib/queries'
+} from '~/queries/admin/meme'
 import { updateMeme } from '~/server/admin/meme/meme.functions'
 import type { MemeFormValues } from './use-meme-form'
 import { getMemeEditScope } from './use-meme-publisher'

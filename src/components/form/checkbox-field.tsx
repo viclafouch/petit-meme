@@ -1,7 +1,7 @@
 import React from 'react'
+import { useFieldContext } from '~/components/form/form-context'
 import { Checkbox } from '~/components/ui/checkbox'
 import { FormControl, FormItem, FormMessage } from '~/components/ui/form'
-import { useFieldContext } from '~/hooks/form-context'
 import { getFieldErrorMessage } from '~/lib/form'
 
 type CheckboxFieldProps = {

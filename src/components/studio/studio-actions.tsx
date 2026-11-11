@@ -1,11 +1,11 @@
 import { Download, Share2, Sparkles } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 import { toast } from 'sonner'
+import type { ProcessedData } from '~/components/studio/use-video-processor'
 import { Button } from '~/components/ui/button'
 import { LoadingButton } from '~/components/ui/loading-button'
 import type { MemeExportMode } from '~/constants/meme'
 import { EASE_OUT } from '~/constants/motion'
-import type { ProcessedData } from '~/hooks/use-video-processor'
 import { shareOrDownloadBlob } from '~/lib/meme-export'
 import { m } from '~/paraglide/messages.js'
 

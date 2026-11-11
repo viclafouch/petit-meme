@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { ACTIVITY_PAGE_SCHEMA } from '~/constants/activity'
-import { getAdminVisitorQueryOpts } from '~/routes/admin/-lib/queries'
+import { getAdminVisitorQueryOpts } from '~/queries/admin/visitor'
 import { VisitorPage } from '~/routes/admin/activity/-components/visitor-page'
 
 export const Route = createFileRoute('/admin/activity/$ip')({

@@ -1,10 +1,10 @@
 import React from 'react'
+import { useIsPremium } from '~/components/premium/use-is-premium'
 import {
   PREMIUM_REMINDER_DELAY_MS,
   PREMIUM_REMINDER_STORAGE_KEY
 } from '~/constants/plan'
 import { DAY } from '~/constants/time'
-import { useIsPremium } from '~/hooks/use-is-premium'
 import { dialogStore } from '~/stores/dialog.store'
 
 const COOLDOWN_DAYS = 3

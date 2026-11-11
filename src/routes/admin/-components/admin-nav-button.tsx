@@ -1,5 +1,6 @@
 import { ArrowLeft } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
+import { useSignOut } from '~/components/auth/use-sign-out'
 import { Button } from '~/components/ui/button'
 import {
   DropdownMenu,
@@ -13,7 +14,6 @@ import {
 } from '~/components/ui/dropdown-menu'
 import { UserAvatar } from '~/components/user/user-avatar'
 import type { SessionUser } from '~/helpers/role'
-import { useSignOut } from '~/hooks/use-sign-out'
 
 type AdminNavButtonProps = {
   user: SessionUser

@@ -1,6 +1,7 @@
 import { FileVideo, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { useMutation } from '@tanstack/react-query'
+import { useAppForm } from '~/components/form/use-app-form'
 import { Button } from '~/components/ui/button'
 import { Field, FieldDescription, FieldError } from '~/components/ui/field'
 import {
@@ -14,7 +15,6 @@ import {
   FileUploadTrigger
 } from '~/components/ui/file-upload'
 import { MEME_FILE_IMPORT_SCHEMA } from '~/constants/meme-form'
-import { useAppForm } from '~/hooks/use-app-form'
 import { focusFirstInvalidField, matchIsFieldInvalid } from '~/lib/form'
 import { captureWithFeature } from '~/lib/sentry'
 import { ImportFormFooter } from '~/routes/admin/-components/import-form-footer'

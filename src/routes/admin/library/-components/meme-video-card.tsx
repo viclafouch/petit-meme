@@ -1,7 +1,7 @@
 import { MemeVideoPlayer } from '~/components/meme/meme-video-player'
+import { useMemeHls } from '~/components/meme/use-meme-hls'
 import { Card } from '~/components/ui/card'
 import type { MemeFullData } from '~/constants/meme'
-import { useMemeHls } from '~/hooks/use-meme-hls'
 import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import { cn } from '~/lib/utils'
 

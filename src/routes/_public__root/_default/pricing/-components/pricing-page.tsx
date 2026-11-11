@@ -1,15 +1,15 @@
 import React from 'react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { useRouteContext } from '@tanstack/react-router'
+import { useStripeCheckout } from '~/components/premium/use-stripe-checkout'
 import {
   type BillingPeriod,
   getFreePlan,
   getPremiumPlan
 } from '~/constants/plan'
 import { matchIsPremiumGranted } from '~/helpers/role'
-import { useStripeCheckout } from '~/hooks/use-stripe-checkout'
-import { getActiveSubscriptionQueryOpts } from '~/lib/queries'
 import { m } from '~/paraglide/messages.js'
+import { getActiveSubscriptionQueryOpts } from '~/queries/subscription'
 import {
   PageDescription,
   PageHeading

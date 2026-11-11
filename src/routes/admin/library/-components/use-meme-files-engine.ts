@@ -11,7 +11,7 @@ import { applyWatermark } from '~/lib/watermark'
 import {
   getMissingMemeFilesQueryOpts,
   getAdminMemeOriginalQueryOpts
-} from '~/routes/admin/-lib/queries'
+} from '~/queries/admin/meme'
 import type { PublishStep } from '~/routes/admin/library/-lib/publish-run'
 import {
   createMemeFileUploads,

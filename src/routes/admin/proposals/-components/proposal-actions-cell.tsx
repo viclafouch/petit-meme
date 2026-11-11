@@ -26,11 +26,11 @@ import {
 } from '~/db/generated/prisma/enums'
 import { getErrorMessage } from '~/helpers/error'
 import { captureWithFeature } from '~/lib/sentry'
-import { ConfirmAlertDialog } from '~/routes/admin/-components/confirm-alert-dialog'
 import {
   countAdminPendingProposalsQueryOpts,
   listAdminProposalsQueryOpts
-} from '~/routes/admin/-lib/queries'
+} from '~/queries/admin/proposal'
+import { ConfirmAlertDialog } from '~/routes/admin/-components/confirm-alert-dialog'
 import { createMemeFromTweet } from '~/server/admin/import/import.functions'
 import {
   type AdminProposal,

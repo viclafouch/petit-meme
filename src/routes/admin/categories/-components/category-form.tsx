@@ -1,6 +1,7 @@
 import { toast } from 'sonner'
 import type { z } from 'zod'
 import { useMutation } from '@tanstack/react-query'
+import { useAppForm } from '~/components/form/use-app-form'
 import { FLAG_ICON_CLASS, LOCALE_FLAGS } from '~/components/icon/flags'
 import {
   FormControl,
@@ -16,11 +17,10 @@ import {
   findTranslationByLocale,
   LOCALE_META
 } from '~/helpers/i18n-content'
-import { useAppForm } from '~/hooks/use-app-form'
-import { useKeywordsField } from '~/hooks/use-keywords-field'
 import { focusFirstInvalidField, getFieldErrorMessage } from '~/lib/form'
 import { locales, type Locale } from '~/paraglide/runtime'
 import { KeywordsField } from '~/routes/admin/-components/keywords-field'
+import { useKeywordsField } from '~/routes/admin/-components/use-keywords-field'
 import {
   createCategory,
   updateCategory

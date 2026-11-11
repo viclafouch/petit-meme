@@ -2,8 +2,8 @@ import React from 'react'
 import { Share2 } from 'lucide-react'
 import { IconButtonStars } from '~/components/animate-ui/buttons/icon-button-stars'
 import { MemeExportMenu } from '~/components/meme/meme-export-menu'
+import { useMemeExport } from '~/components/meme/use-meme-export'
 import type { MemeWithVideo } from '~/constants/meme'
-import { useMemeExport } from '~/hooks/use-meme-export'
 import { m } from '~/paraglide/messages.js'
 
 type ShareMemeButtonProps = {

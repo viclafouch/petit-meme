@@ -4,9 +4,9 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { MemesList } from '~/components/meme/memes-list'
 import { buttonVariants } from '~/components/ui/button'
-import { listTrendingMemesQueryOpts } from '~/lib/queries'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
+import { listTrendingMemesQueryOpts } from '~/queries/meme'
 
 export const BestMemes = () => {
   const trendingMemesQuery = useSuspenseQuery(listTrendingMemesQueryOpts())

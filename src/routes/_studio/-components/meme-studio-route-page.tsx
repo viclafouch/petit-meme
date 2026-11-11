@@ -8,7 +8,7 @@ import {
   StudioLoadingFallback
 } from '~/components/studio/studio-fallbacks'
 import { StudioPage } from '~/components/studio/studio-page'
-import { getMemeQueryOpts } from '~/lib/queries'
+import { getMemeQueryOpts } from '~/queries/meme'
 
 const memeStudioRouteApi = getRouteApi('/_studio/memes/$memeId/studio')
 

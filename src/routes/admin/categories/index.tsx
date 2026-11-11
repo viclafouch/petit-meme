@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { listCategoriesQueryOpts } from '~/lib/queries'
 import { baseLocale } from '~/paraglide/runtime'
+import { listCategoriesQueryOpts } from '~/queries/category'
 import { CategoriesPage } from '~/routes/admin/categories/-components/categories-page'
 
 export const Route = createFileRoute('/admin/categories/')({

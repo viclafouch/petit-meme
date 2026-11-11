@@ -4,6 +4,8 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { ThemeSwitcher } from '~/components/animate-ui/theme-switcher'
 import type { NavigationLink } from '~/components/layout/navbar'
+import { useIsPremium } from '~/components/premium/use-is-premium'
+import { useStripeCheckout } from '~/components/premium/use-stripe-checkout'
 import { Button } from '~/components/ui/button'
 import {
   Popover,
@@ -12,14 +14,10 @@ import {
 } from '~/components/ui/popover'
 import { getLegalLinks } from '~/constants/navigation'
 import { matchIsUserAdmin, type SessionUser } from '~/helpers/role'
-import { useIsPremium } from '~/hooks/use-is-premium'
-import { useStripeCheckout } from '~/hooks/use-stripe-checkout'
-import {
-  getActiveSubscriptionQueryOpts,
-  listBookmarkedMemesQueryOpts
-} from '~/lib/queries'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
+import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
+import { getActiveSubscriptionQueryOpts } from '~/queries/subscription'
 
 const ACCOUNT_LINK_CLASS = 'flex items-center gap-3 text-lg font-medium'
 const LEGAL_LINK_CLASS =

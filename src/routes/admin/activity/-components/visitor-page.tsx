@@ -7,6 +7,10 @@ import { Container } from '~/components/ui/container'
 import { ACTIVITY_IP_RETENTION_DAYS } from '~/constants/activity'
 import { formatDate, DATE_WITH_TIME_OPTIONS } from '~/helpers/date'
 import { getLocale } from '~/paraglide/runtime'
+import {
+  listAdminVisitorActivityQueryOpts,
+  getAdminVisitorQueryOpts
+} from '~/queries/admin/visitor'
 import { ActivityTimeline } from '~/routes/admin/-components/activity-timeline'
 import { CountryFlag } from '~/routes/admin/-components/country-flag'
 import { PageHeader } from '~/routes/admin/-components/page-header'
@@ -17,10 +21,6 @@ import {
 import { StatTiles } from '~/routes/admin/-components/stat-tiles'
 import { formatEventCount } from '~/routes/admin/-helpers/activity'
 import { buildActivityTiles } from '~/routes/admin/-helpers/activity-tiles'
-import {
-  listAdminVisitorActivityQueryOpts,
-  getAdminVisitorQueryOpts
-} from '~/routes/admin/-lib/queries'
 import {
   VisitorAccountList,
   VisitorMemeList,

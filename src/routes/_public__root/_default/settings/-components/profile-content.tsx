@@ -3,6 +3,7 @@ import { CreditCard, Download, Key, Sparkles, Trash } from 'lucide-react'
 import { toast } from 'sonner'
 import { useMutation } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
+import { useStripeCheckout } from '~/components/premium/use-stripe-checkout'
 import { Button, buttonVariants } from '~/components/ui/button'
 import {
   Card,
@@ -24,7 +25,6 @@ import {
   getSubscriptionEnding,
   matchIsCancellationPending
 } from '~/helpers/subscription'
-import { useStripeCheckout } from '~/hooks/use-stripe-checkout'
 import { downloadBlob } from '~/lib/download'
 import { captureWithFeature } from '~/lib/sentry'
 import { cn } from '~/lib/utils'

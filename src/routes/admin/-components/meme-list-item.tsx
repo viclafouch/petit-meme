@@ -10,7 +10,7 @@ import { DEFAULT_MEME_TITLE, MemeStatusMeta } from '~/constants/meme'
 import { cn } from '~/lib/utils'
 import { matchIsVideoPlayable } from '~/lib/video'
 import { m } from '~/paraglide/messages'
-import { getAdminVideoStatusQueryOpts } from '~/routes/admin/-lib/queries'
+import { getAdminVideoStatusQueryOpts } from '~/queries/admin/meme'
 import type { AdminMemeRecord } from '~/server/admin/meme/meme.functions'
 
 const VIDEO_STATUS_POLL_INTERVAL_MS = 30_000

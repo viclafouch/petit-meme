@@ -1,6 +1,6 @@
 import React from 'react'
+import { useSyncedInputValue } from '~/components/form/use-synced-input-value'
 import { Input } from '~/components/ui/input'
-import { useSyncedInputValue } from '~/hooks/use-synced-input-value'
 
 type SearchInputProps = {
   value: string

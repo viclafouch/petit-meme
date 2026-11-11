@@ -4,8 +4,8 @@ import { useRouteContext } from '@tanstack/react-router'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
 import { MAX_PENDING_PROPOSALS } from '~/constants/meme-proposal'
-import { listUserProposalsQueryOpts } from '~/lib/queries'
 import { m } from '~/paraglide/messages'
+import { listUserProposalsQueryOpts } from '~/queries/proposal'
 import {
   PageDescription,
   PageHeading

@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { listBookmarkedMemesQueryOpts } from '~/lib/queries'
 import { m } from '~/paraglide/messages.js'
+import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
 import { BookmarksPage } from './-components/bookmarks-page'
 
 export const Route = createFileRoute('/_public__root/_default/bookmarks')({

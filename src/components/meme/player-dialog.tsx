@@ -13,13 +13,13 @@ import { Dialog } from '@base-ui/react/dialog'
 import { Link, useLinkProps } from '@tanstack/react-router'
 import { MemeExportMenu } from '~/components/meme/meme-export-menu'
 import { MemeVideoPlayer } from '~/components/meme/meme-video-player'
+import { useMemeExport } from '~/components/meme/use-meme-export'
+import { useMemeHls } from '~/components/meme/use-meme-hls'
+import { useRegisterMemeView } from '~/components/meme/use-register-meme-view'
+import { useVideoPlayback } from '~/components/meme/use-video-playback'
 import { Button, buttonVariants } from '~/components/ui/button'
 import type { MemeDerivedFormat } from '~/constants/bunny'
 import type { MemeWithVideo } from '~/constants/meme'
-import { useMemeExport } from '~/hooks/use-meme-export'
-import { useMemeHls } from '~/hooks/use-meme-hls'
-import { useRegisterMemeView } from '~/hooks/use-register-meme-view'
-import { useVideoPlayback } from '~/hooks/use-video-playback'
 import {
   sendConversionEvent,
   type ConversionEventName

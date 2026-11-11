@@ -10,6 +10,9 @@ import {
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
+import { useSignOut } from '~/components/auth/use-sign-out'
+import { useIsPremium } from '~/components/premium/use-is-premium'
+import { useStripeCheckout } from '~/components/premium/use-stripe-checkout'
 import { Button } from '~/components/ui/button'
 import {
   DropdownMenu,
@@ -23,14 +26,9 @@ import {
 } from '~/components/ui/dropdown-menu'
 import { UserAvatar } from '~/components/user/user-avatar'
 import { matchIsUserAdmin, type SessionUser } from '~/helpers/role'
-import { useIsPremium } from '~/hooks/use-is-premium'
-import { useSignOut } from '~/hooks/use-sign-out'
-import { useStripeCheckout } from '~/hooks/use-stripe-checkout'
-import {
-  getActiveSubscriptionQueryOpts,
-  listBookmarkedMemesQueryOpts
-} from '~/lib/queries'
 import { m } from '~/paraglide/messages.js'
+import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
+import { getActiveSubscriptionQueryOpts } from '~/queries/subscription'
 
 type UserDropdownProps = {
   user: SessionUser

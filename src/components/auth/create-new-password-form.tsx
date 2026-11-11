@@ -3,11 +3,11 @@ import { toast } from 'sonner'
 import { formOptions } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
+import { useAppForm } from '~/components/form/use-app-form'
+import { useErrorFocus } from '~/components/form/use-error-focus'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import { LoadingButton } from '~/components/ui/loading-button'
 import { getPasswordWithConfirmationSchema } from '~/constants/auth'
-import { useAppForm } from '~/hooks/use-app-form'
-import { useErrorFocus } from '~/hooks/use-error-focus'
 import { authClient } from '~/lib/auth-client'
 import {
   captureUnexpectedAuthError,

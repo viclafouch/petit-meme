@@ -11,9 +11,9 @@ import {
   DialogTrigger
 } from '~/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
+import { invalidateAdminMemesOverview } from '~/queries/admin/meme'
 import { FileForm } from '~/routes/admin/-components/file-form'
 import { TwitterForm } from '~/routes/admin/-components/twitter-form'
-import { invalidateAdminMemesOverview } from '~/routes/admin/-lib/queries'
 
 type NewMemeButtonProps = Partial<React.ComponentProps<typeof Button>>
 

@@ -1,15 +1,15 @@
 import { ArrowRight } from 'lucide-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { getRouteApi, Link } from '@tanstack/react-router'
-import { PageHeader } from '~/routes/admin/-components/page-header'
-import { SectionHeading } from '~/routes/admin/-components/section-heading'
+import { listAdminRecentActivityQueryOpts } from '~/queries/admin/activity'
 import {
   getAdminDashboardChartQueryOpts,
   getAdminDashboardTotalsQueryOpts,
-  listAdminRecentActivityQueryOpts,
   listAdminRecentAuditQueryOpts,
   listAdminTrendingMemesQueryOpts
-} from '~/routes/admin/-lib/queries'
+} from '~/queries/admin/dashboard'
+import { PageHeader } from '~/routes/admin/-components/page-header'
+import { SectionHeading } from '~/routes/admin/-components/section-heading'
 import type { DashboardPeriod } from '~/server/admin/dashboard/dashboard.functions'
 import { ActivityEventsFeed } from './activity-events-feed'
 import { AuditFeed } from './audit-feed'

@@ -10,7 +10,7 @@ import {
   getAdminUserQueryOpts,
   listAdminUsersQueryOpts,
   getAdminUserSubscriptionHistoryQueryOpts
-} from '~/routes/admin/-lib/queries'
+} from '~/queries/admin/user'
 import {
   banUser,
   grantPremium,

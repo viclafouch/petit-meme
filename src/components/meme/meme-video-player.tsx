@@ -1,4 +1,5 @@
 import { ClientOnly } from '@tanstack/react-router'
+import type { useMemeHls } from '~/components/meme/use-meme-hls'
 import { VideoOverlay } from '~/components/meme/video-overlay'
 import { VideoPlaybackError } from '~/components/meme/video-playback-error'
 import {
@@ -6,7 +7,6 @@ import {
   VideoPlayerContent,
   type VideoPlayerContentProps
 } from '~/components/ui/kibo-ui/video-player'
-import type { useMemeHls } from '~/hooks/use-meme-hls'
 import { cn } from '~/lib/utils'
 
 type MemeVideoPlayerProps = {

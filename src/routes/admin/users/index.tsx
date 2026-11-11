@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { createFileRoute } from '@tanstack/react-router'
 import { PREMIUM_SOURCES } from '~/helpers/premium'
-import { listAdminUsersQueryOpts } from '~/routes/admin/-lib/queries'
+import { listAdminUsersQueryOpts } from '~/queries/admin/user'
 import { UsersPage } from '~/routes/admin/users/-components/users-page'
 
 const SEARCH_SCHEMA = z.object({

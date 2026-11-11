@@ -2,6 +2,7 @@ import React from 'react'
 import { AudioLines, Download, Film, Share2 } from 'lucide-react'
 import { MemeFormatChip } from '~/components/meme/meme-format-chip'
 import { PremiumBadge } from '~/components/premium/premium-badge'
+import { useIsPremium } from '~/components/premium/use-is-premium'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +14,6 @@ import {
 } from '~/components/ui/dropdown-menu'
 import { MEME_DERIVED_FORMATS, type MemeDerivedFormat } from '~/constants/bunny'
 import type { MemeExportMode } from '~/constants/meme'
-import { useIsPremium } from '~/hooks/use-is-premium'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 

@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from '~/components/ui/dialog'
-import { listCategoriesQueryOpts } from '~/lib/queries'
+import { listCategoriesQueryOpts } from '~/queries/category'
 import { CategoryForm } from '~/routes/admin/categories/-components/category-form'
 
 type AddCategoryButtonProps = Partial<React.ComponentProps<typeof Button>>

@@ -9,7 +9,7 @@ import { captureWithFeature } from '~/lib/sentry'
 import {
   invalidateAdminMemesOverview,
   invalidateSavedMeme
-} from '~/routes/admin/-lib/queries'
+} from '~/queries/admin/meme'
 import {
   getPublishRunSteps,
   type PublishRun,

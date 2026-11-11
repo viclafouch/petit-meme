@@ -1,11 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
-import {
-  getActiveSubscriptionQueryOpts,
-  listReelsQueryOpts
-} from '~/lib/queries'
 import { buildOgImageUrl, seo } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
+import { listReelsQueryOpts } from '~/queries/meme'
+import { getActiveSubscriptionQueryOpts } from '~/queries/subscription'
 import { ReelsPage, ReelsPending } from './-components/reels-page'
 
 export const Route = createFileRoute('/reels')({

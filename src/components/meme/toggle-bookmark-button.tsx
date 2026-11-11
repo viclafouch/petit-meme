@@ -4,10 +4,10 @@ import { Star } from 'lucide-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { useRouteContext } from '@tanstack/react-router'
 import { IconButtonStars } from '~/components/animate-ui/buttons/icon-button-stars'
+import { useToggleBookmark } from '~/components/meme/use-toggle-bookmark'
 import type { MemeWithVideo } from '~/constants/meme'
-import { useToggleBookmark } from '~/hooks/use-toggle-bookmark'
-import { listBookmarkedMemesQueryOpts } from '~/lib/queries'
 import { m } from '~/paraglide/messages.js'
+import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
 import { dialogStore } from '~/stores/dialog.store'
 
 type ToggleBookmarkButtonProps = {

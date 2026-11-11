@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { ACTIVITY_PAGE_SCHEMA } from '~/constants/activity'
-import { getAdminUserQueryOpts } from '~/routes/admin/-lib/queries'
+import { getAdminUserQueryOpts } from '~/queries/admin/user'
 import { UserPage } from '~/routes/admin/users/-components/user-page'
 
 export const Route = createFileRoute('/admin/users/$userId')({

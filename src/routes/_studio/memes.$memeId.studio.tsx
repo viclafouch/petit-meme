@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { StudioLoadingFallback } from '~/components/studio/studio-fallbacks'
 import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
-import { getMemeQueryOpts, listRelatedMemesQueryOpts } from '~/lib/queries'
 import { buildMemeSeo } from '~/lib/seo'
+import { getMemeQueryOpts, listRelatedMemesQueryOpts } from '~/queries/meme'
 import { MemeStudioRoutePage } from './-components/meme-studio-route-page'
 
 export const Route = createFileRoute('/_studio/memes/$memeId/studio')({

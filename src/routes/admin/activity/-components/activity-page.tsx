@@ -4,10 +4,10 @@ import { getRouteApi } from '@tanstack/react-router'
 import { Button } from '~/components/ui/button'
 import { Container } from '~/components/ui/container'
 import type { ActivityFilters } from '~/constants/activity'
+import { listAdminActivityQueryOpts } from '~/queries/admin/activity'
 import { ActivityTimeline } from '~/routes/admin/-components/activity-timeline'
 import { PageHeader } from '~/routes/admin/-components/page-header'
 import { formatEventCount } from '~/routes/admin/-helpers/activity'
-import { listAdminActivityQueryOpts } from '~/routes/admin/-lib/queries'
 import { ActivityFilterBar } from '~/routes/admin/activity/-components/activity-filters'
 
 const routeApi = getRouteApi('/admin/activity/')

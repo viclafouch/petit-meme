@@ -12,6 +12,7 @@ import {
 import { LastLoginBadge } from '~/components/auth/last-login-badge'
 import { LoginForm } from '~/components/auth/login-form'
 import { SignupForm } from '~/components/auth/signup-form'
+import { useLastLoginMethod } from '~/components/auth/use-last-login-method'
 import { DiscordIcon } from '~/components/icon/discord'
 import { XTwitterIcon } from '~/components/icon/x-twitter'
 import { Button } from '~/components/ui/button'
@@ -23,7 +24,6 @@ import {
   TabsTrigger
 } from '~/components/ui/tabs'
 import type { AuthProviderId } from '~/constants/auth'
-import { useLastLoginMethod } from '~/hooks/use-last-login-method'
 import { authClient } from '~/lib/auth-client'
 import { getAuthErrorMessage } from '~/lib/auth-errors'
 import { captureWithFeature } from '~/lib/sentry'

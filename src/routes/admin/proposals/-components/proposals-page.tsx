@@ -14,12 +14,12 @@ import {
   MemeProposalStatus,
   type MemeProposalUrlType
 } from '~/db/generated/prisma/enums'
+import { listAdminProposalsQueryOpts } from '~/queries/admin/proposal'
 import { AdminTable } from '~/routes/admin/-components/admin-table'
 import { FilterTab } from '~/routes/admin/-components/filter-tab'
 import { FilterTabs } from '~/routes/admin/-components/filter-tabs'
 import { PageHeader } from '~/routes/admin/-components/page-header'
 import { RelativeDateTooltip } from '~/routes/admin/-components/relative-date-tooltip'
-import { listAdminProposalsQueryOpts } from '~/routes/admin/-lib/queries'
 import { createAppColumnHelper, useAppTable } from '~/routes/admin/-lib/table'
 import { ProposalActionsCell } from '~/routes/admin/proposals/-components/proposal-actions-cell'
 import type { AdminProposal } from '~/server/admin/proposal/proposal.functions'

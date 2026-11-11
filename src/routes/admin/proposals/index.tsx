@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { createFileRoute } from '@tanstack/react-router'
 import { MemeProposalStatus } from '~/db/generated/prisma/enums'
-import { listAdminProposalsQueryOpts } from '~/routes/admin/-lib/queries'
+import { listAdminProposalsQueryOpts } from '~/queries/admin/proposal'
 import { ProposalsPage } from '~/routes/admin/proposals/-components/proposals-page'
 
 const SEARCH_SCHEMA = z.object({

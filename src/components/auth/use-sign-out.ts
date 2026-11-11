@@ -1,5 +1,5 @@
 import { toast } from 'sonner'
-import { useResetAccountData } from '~/hooks/use-reset-account-data'
+import { useResetAccountData } from '~/components/auth/use-reset-account-data'
 import { authClient } from '~/lib/auth-client'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'

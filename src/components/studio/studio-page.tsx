@@ -10,6 +10,11 @@ import {
 import { StudioControls } from '~/components/studio/studio-controls'
 import { StudioPreview } from '~/components/studio/studio-preview'
 import { StudioRelatedMemes } from '~/components/studio/studio-related-memes'
+import {
+  useVideoInitializer,
+  useVideoPreloader,
+  useVideoProcessor
+} from '~/components/studio/use-video-processor'
 import { Button, buttonVariants } from '~/components/ui/button'
 import {
   Drawer,
@@ -23,11 +28,6 @@ import { Separator } from '~/components/ui/separator'
 import { LOGO_PATH } from '~/constants/branding'
 import type { MemeWithVideo } from '~/constants/meme'
 import { STUDIO_TEXT_MAX_LENGTH } from '~/constants/studio'
-import {
-  useVideoInitializer,
-  useVideoPreloader,
-  useVideoProcessor
-} from '~/hooks/use-video-processor'
 import { m } from '~/paraglide/messages.js'
 import { dialogStore } from '~/stores/dialog.store'
 import { studioStore } from '~/stores/studio.store'

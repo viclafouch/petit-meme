@@ -9,9 +9,9 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link, useParams, useSearch } from '@tanstack/react-router'
 import { buttonVariants } from '~/components/ui/button'
 import { getVirtualCategories, type MemesFilters } from '~/constants/meme'
-import { listCategoriesQueryOpts } from '~/lib/queries'
 import { cn } from '~/lib/utils'
 import { getLocale } from '~/paraglide/runtime'
+import { listCategoriesQueryOpts } from '~/queries/category'
 
 const resetPageSearch = (prevState: MemesFilters) => {
   return {

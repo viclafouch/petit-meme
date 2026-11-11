@@ -14,12 +14,12 @@ import {
   DialogHeader,
   DialogTitle
 } from '~/components/animate-ui/base/dialog'
+import { useResetAccountData } from '~/components/auth/use-reset-account-data'
+import { useAppForm } from '~/components/form/use-app-form'
+import { useErrorFocus } from '~/components/form/use-error-focus'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import { Button } from '~/components/ui/button'
 import { LoadingButton } from '~/components/ui/loading-button'
-import { useAppForm } from '~/hooks/use-app-form'
-import { useErrorFocus } from '~/hooks/use-error-focus'
-import { useResetAccountData } from '~/hooks/use-reset-account-data'
 import { authClient } from '~/lib/auth-client'
 import {
   captureUnexpectedAuthError,

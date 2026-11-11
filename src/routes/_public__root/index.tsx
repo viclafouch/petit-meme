@@ -1,12 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
-import {
-  listBookmarkedMemesQueryOpts,
-  countRecentMemesQueryOpts,
-  listTrendingMemesQueryOpts
-} from '~/lib/queries'
 import { buildHomeJsonLd, buildOgImageUrl, seo } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
+import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
+import {
+  countRecentMemesQueryOpts,
+  listTrendingMemesQueryOpts
+} from '~/queries/meme'
 import { getHomeFaqItems } from './-components/faq-items'
 import { HomePage } from './-components/home-page'
 

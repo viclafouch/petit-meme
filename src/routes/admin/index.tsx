@@ -1,10 +1,8 @@
 import { z } from 'zod'
 import { createFileRoute } from '@tanstack/react-router'
+import { listAdminRecentActivityQueryOpts } from '~/queries/admin/activity'
+import { listAdminRecentAuditQueryOpts } from '~/queries/admin/dashboard'
 import { DashboardPage } from '~/routes/admin/-components/dashboard/dashboard-page'
-import {
-  listAdminRecentActivityQueryOpts,
-  listAdminRecentAuditQueryOpts
-} from '~/routes/admin/-lib/queries'
 import { PERIOD_SCHEMA } from '~/server/admin/dashboard/dashboard.functions'
 
 const dashboardSearchSchema = z.object({

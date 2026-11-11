@@ -6,10 +6,10 @@ import { type BillingPeriod, PREMIUM_PLAN_NAME } from '~/constants/plan'
 import { getErrorMessage } from '~/helpers/error'
 import { createLatch, type LatchEnd } from '~/helpers/promise'
 import { authClient } from '~/lib/auth-client'
-import { getActiveSubscriptionQueryOpts } from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
+import { getActiveSubscriptionQueryOpts } from '~/queries/subscription'
 import { dialogStore } from '~/stores/dialog.store'
 
 const openBillingPortal = async () => {

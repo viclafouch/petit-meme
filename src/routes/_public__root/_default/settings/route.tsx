@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { getActiveSubscriptionQueryOpts } from '~/lib/queries'
+import { getActiveSubscriptionQueryOpts } from '~/queries/subscription'
 
 export const Route = createFileRoute('/_public__root/_default/settings')({
   beforeLoad: async ({ context }) => {

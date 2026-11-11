@@ -1,8 +1,8 @@
 import { CheckIcon, LoaderCircleIcon } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { EASE_OUT } from '~/constants/motion'
-import type { Stage } from '~/hooks/use-ai-search-stages'
 import { m } from '~/paraglide/messages.js'
+import type { Stage } from '~/routes/_public__root/_default/memes/-components/use-ai-search-stages'
 
 const STAGE_LABELS = {
   context: () => {

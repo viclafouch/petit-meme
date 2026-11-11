@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
-import { removePrivateQueries } from '~/lib/private-queries'
+import { removePrivateQueries } from '~/queries/private'
 
 export const useResetAccountData = () => {
   const router = useRouter()

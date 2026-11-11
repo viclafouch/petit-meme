@@ -21,10 +21,11 @@ import {
   parseContentLocalesParam,
   serializeContentLocalesParam
 } from '~/helpers/i18n-content'
-import { listCategoriesQueryOpts, listMemesQueryOpts } from '~/lib/queries'
 import { buildBreadcrumbJsonLd, buildCategoryJsonLd } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
+import { listCategoriesQueryOpts } from '~/queries/category'
+import { listMemesQueryOpts } from '~/queries/meme'
 import {
   PageDescription,
   PageHeading

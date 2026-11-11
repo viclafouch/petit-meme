@@ -10,14 +10,12 @@ import { Container } from '~/components/ui/container'
 import { LoadingSpinner } from '~/components/ui/spinner'
 import type { AdminMemesFilters } from '~/constants/meme'
 import { MemeStatus } from '~/db/generated/prisma/enums'
+import { getAdminDashboardTotalsQueryOpts } from '~/queries/admin/dashboard'
+import { listAdminMemesQueryOpts } from '~/queries/admin/meme'
 import { MemeListItem } from '~/routes/admin/-components/meme-list-item'
 import { MemesFilterContentLocale } from '~/routes/admin/-components/memes-filter-content-locale'
 import { NewMemeButton } from '~/routes/admin/-components/new-meme-button'
 import { PageHeader } from '~/routes/admin/-components/page-header'
-import {
-  getAdminDashboardTotalsQueryOpts,
-  listAdminMemesQueryOpts
-} from '~/routes/admin/-lib/queries'
 
 const routeApi = getRouteApi('/admin/library/')
 

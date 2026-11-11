@@ -11,11 +11,11 @@ import type { Meme } from '~/db/generated/prisma/client'
 import { MemeFillStatus } from '~/db/generated/prisma/enums'
 import { getErrorMessage } from '~/helpers/error'
 import { matchIsFillInFlight } from '~/helpers/meme-fill'
+import { getAdminMemeFillQueryOpts } from '~/queries/admin/ai-assist'
 import {
   getAdminMemeQueryOpts,
-  getAdminMemeFillQueryOpts,
   markAdminMemesOverviewStale
-} from '~/routes/admin/-lib/queries'
+} from '~/queries/admin/meme'
 import {
   buildFillSuggestionFromMeme,
   resolveFillNotice,

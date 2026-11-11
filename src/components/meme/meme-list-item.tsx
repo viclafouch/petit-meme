@@ -7,6 +7,8 @@ import { BunnyPlayIcon } from '~/components/icon/play'
 import { MemeExportSubmenu } from '~/components/meme/meme-export-menu'
 import { MemeLanguageBadge } from '~/components/meme/meme-language-badge'
 import { MemeVideoThumbnail } from '~/components/meme/meme-video-thumbnail'
+import { useMemeExport } from '~/components/meme/use-meme-export'
+import { useToggleBookmark } from '~/components/meme/use-toggle-bookmark'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,17 +18,15 @@ import {
 } from '~/components/ui/dropdown-menu'
 import type { MemeWithVideo } from '~/constants/meme'
 import { matchIsContentLocaleForeign } from '~/helpers/i18n-content'
-import { useMemeExport } from '~/hooks/use-meme-export'
-import { useToggleBookmark } from '~/hooks/use-toggle-bookmark'
 import {
   sendClickEvent,
   sendConversionEvent,
   type ConversionEventName
 } from '~/lib/algolia-insights'
-import { listBookmarkedMemesQueryOpts } from '~/lib/queries'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
+import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
 import { dialogStore } from '~/stores/dialog.store'
 
 export type MemeListItemProps = {

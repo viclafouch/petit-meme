@@ -1,11 +1,11 @@
 import { toast } from 'sonner'
 import { useMutation } from '@tanstack/react-query'
 import { useRouteContext } from '@tanstack/react-router'
+import { useIsPremium } from '~/components/premium/use-is-premium'
+import { snoozePremiumReminder } from '~/components/premium/use-premium-reminder'
 import type { MemeDerivedFormat } from '~/constants/bunny'
 import type { MemeExportMode } from '~/constants/meme'
 import { getErrorMessage } from '~/helpers/error'
-import { useIsPremium } from '~/hooks/use-is-premium'
-import { snoozePremiumReminder } from '~/hooks/use-premium-reminder'
 import type { InsightsTracking } from '~/lib/algolia-insights'
 import {
   deliverMemeExport,

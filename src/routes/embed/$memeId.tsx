@@ -1,6 +1,6 @@
 import { createFileRoute, notFound } from '@tanstack/react-router'
 import { MemeStatus } from '~/db/generated/prisma/enums'
-import { getMemeQueryOpts, getMemePlaybackUrlQueryOpts } from '~/lib/queries'
+import { getMemeQueryOpts, getMemePlaybackUrlQueryOpts } from '~/queries/meme'
 import { EmbedPage } from './-components/embed-page'
 
 export const Route = createFileRoute('/embed/$memeId')({

@@ -1,6 +1,6 @@
 import { Outlet, useLocation } from '@tanstack/react-router'
+import { usePremiumReminder } from '~/components/premium/use-premium-reminder'
 import { Container } from '~/components/ui/container'
-import { usePremiumReminder } from '~/hooks/use-premium-reminder'
 
 export const DefaultLayout = () => {
   const pathname = useLocation({

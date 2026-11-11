@@ -26,10 +26,10 @@ import {
   MEME_TITLE_MIN_LENGTH
 } from '~/constants/meme-form'
 import { LOCALE_META } from '~/helpers/i18n-content'
-import type { useKeywordsField } from '~/hooks/use-keywords-field'
 import { matchIsFieldInvalid } from '~/lib/form'
 import type { Locale } from '~/paraglide/runtime'
 import { KeywordsField } from '~/routes/admin/-components/keywords-field'
+import type { useKeywordsField } from '~/routes/admin/-components/use-keywords-field'
 import { MemeSectionTitle } from './meme-section-title'
 import type { MemeFormApi } from './use-meme-form'
 

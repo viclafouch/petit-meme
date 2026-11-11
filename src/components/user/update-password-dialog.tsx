@@ -12,11 +12,11 @@ import {
   DialogHeader,
   DialogTitle
 } from '~/components/animate-ui/base/dialog'
+import { useAppForm } from '~/components/form/use-app-form'
+import { useErrorFocus } from '~/components/form/use-error-focus'
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
 import { LoadingButton } from '~/components/ui/loading-button'
 import { getPasswordSchema } from '~/constants/auth'
-import { useAppForm } from '~/hooks/use-app-form'
-import { useErrorFocus } from '~/hooks/use-error-focus'
 import { authClient } from '~/lib/auth-client'
 import {
   captureUnexpectedAuthError,

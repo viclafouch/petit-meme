@@ -1,12 +1,10 @@
 import React from 'react'
 import { toast } from 'sonner'
-import { z } from 'zod'
 import {
   useMutation,
   useQueryClient,
   useSuspenseQuery
 } from '@tanstack/react-query'
-import { MEME_FILL_PATH } from '~/constants/meme-fill'
 import type { Meme } from '~/db/generated/prisma/client'
 import { MemeFillStatus } from '~/db/generated/prisma/enums'
 import { getErrorMessage } from '~/helpers/error'
@@ -25,38 +23,8 @@ import {
   resolveFillNotice,
   resolveFillPollInterval
 } from '~/routes/admin/library/-lib/meme-fill'
+import { requestMemeFill } from '~/routes/admin/library/-lib/request-meme-fill'
 import { buildMemeFormValues, type MemeFormApi } from './use-meme-form'
-
-const START_FAILURE_MESSAGE = 'AI Assist n’a pas pu démarrer'
-
-const FILL_ERROR_SCHEMA = z.object({ message: z.string() })
-
-type MemeFillRequest = {
-  memeId: Meme['id']
-  customPrompt: string
-}
-
-async function requestMemeFill(body: MemeFillRequest) {
-  const response = await fetch(MEME_FILL_PATH, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  })
-
-  if (response.ok) {
-    return
-  }
-
-  const payload = FILL_ERROR_SCHEMA.safeParse(
-    await response.json().catch(() => {
-      return null
-    })
-  )
-
-  throw new Error(
-    payload.success ? payload.data.message : START_FAILURE_MESSAGE
-  )
-}
 
 type UseMemeFillParams = {
   memeId: Meme['id']

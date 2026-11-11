@@ -124,6 +124,10 @@ function resolveTranslation(translations: DraftTranslations, locale: Locale) {
   }
 }
 
+const REWRITABLE_DRAFT_WHERE = {
+  OR: [{ title: DEFAULT_MEME_TITLE }, { fillWrittenAt: { not: null } }]
+} as const satisfies Prisma.MemeWhereInput
+
 type WriteFilledDraftParams = {
   memeId: string
   claimedAt: Date
@@ -153,7 +157,7 @@ async function writeFilledDraft({
       where: {
         id: memeId,
         status: MemeStatus.PENDING,
-        title: DEFAULT_MEME_TITLE,
+        ...REWRITABLE_DRAFT_WHERE,
         fillStatus: MemeFillStatus.RUNNING,
         updatedAt: claimedAt
       },
@@ -161,7 +165,8 @@ async function writeFilledDraft({
         ...source,
         contentLocale: draft.contentLocale,
         fillStatus: MemeFillStatus.FILLED,
-        fillDoubt: draft.doubt
+        fillDoubt: draft.doubt,
+        fillWrittenAt: new Date()
       }
     })
 
@@ -181,6 +186,10 @@ async function writeFilledDraft({
         create: { memeId, locale, ...record }
       })
     }
+
+    await transaction.memeCategory.deleteMany({
+      where: { memeId, categoryId: { notIn: categoryIds } }
+    })
 
     await transaction.memeCategory.createMany({
       data: categoryIds.map((categoryId) => {

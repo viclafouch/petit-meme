@@ -28,6 +28,8 @@ import {
 } from '~/routes/admin/-server/meme-files'
 import {
   getAdminMemeById,
+  getReadyDraftsRerunFills,
+  getReadyMemeDrafts,
   getAdminMemeFill,
   getAdminMemes
 } from '~/routes/admin/-server/memes'
@@ -76,6 +78,36 @@ export const getAdminMemeFillQueryOpts = (memeId: Meme['id']) => {
 }
 
 getAdminMemeFillQueryOpts.all = ['admin-meme-fill'] as const
+
+export const getReadyMemeDraftsQueryOpts = () => {
+  return queryOptions({
+    queryKey: [...getReadyMemeDraftsQueryOpts.all],
+    meta: PRIVATE_QUERY_META,
+    queryFn: () => {
+      return getReadyMemeDrafts()
+    },
+    staleTime: 0
+  })
+}
+
+getReadyMemeDraftsQueryOpts.all = ['admin-ready-meme-drafts'] as const
+
+export const getReadyDraftsRerunFillsQueryOpts = (
+  runId: number,
+  memeIds: Meme['id'][]
+) => {
+  return queryOptions({
+    queryKey: [...getReadyDraftsRerunFillsQueryOpts.all, runId, memeIds],
+    meta: PRIVATE_QUERY_META,
+    queryFn: () => {
+      return getReadyDraftsRerunFills({ data: memeIds })
+    }
+  })
+}
+
+getReadyDraftsRerunFillsQueryOpts.all = [
+  'admin-ready-drafts-rerun-fills'
+] as const
 
 export const getAdminMemesListQueryOpts = (filters: AdminMemesFilters) => {
   return queryOptions({

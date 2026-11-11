@@ -18,6 +18,7 @@ import {
   getAdminDashboardTotalsQueryOpts,
   getAdminMemesListQueryOpts
 } from '~/routes/admin/-lib/queries'
+import { ReadyDraftsRerunButton } from './ready-drafts-rerun-dialog'
 
 const routeApi = getRouteApi('/admin/library/')
 
@@ -238,11 +239,14 @@ export const LibraryPage = () => {
             {VIEW_ANNOUNCEMENTS[activeView]}
           </div>
           <div className="border-b border-muted pb-4 flex flex-col gap-3">
-            <ViewToggle
-              activeView={activeView}
-              options={viewOptions}
-              onSelect={handleSelectView}
-            />
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <ViewToggle
+                activeView={activeView}
+                options={viewOptions}
+                onSelect={handleSelectView}
+              />
+              {activeView === 'ready' ? <ReadyDraftsRerunButton /> : null}
+            </div>
             <div className="flex items-center justify-between gap-x-3">
               <SearchInput
                 value={search.query ?? ''}

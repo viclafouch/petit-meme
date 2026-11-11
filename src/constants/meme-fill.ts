@@ -5,7 +5,8 @@ export const MEME_FILL_OMIT = {
   fillStatus: true,
   fillAttempts: true,
   fillDoubt: true,
-  fillSuggestion: true
+  fillSuggestion: true,
+  fillWrittenAt: true
 } as const satisfies Prisma.MemeOmit
 
 export const MEME_FILL_MAX_DURATION_SECONDS = 800

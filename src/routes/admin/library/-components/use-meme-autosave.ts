@@ -3,6 +3,7 @@ import { useAsyncDebouncer } from '@tanstack/react-pacer'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useBlocker } from '@tanstack/react-router'
 import type { MemeFullData } from '~/constants/meme'
+import { getMemeFormSchema } from '~/constants/meme-form'
 import { getErrorMessage } from '~/helpers/error'
 import { captureWithFeature } from '~/lib/sentry'
 import {
@@ -10,7 +11,7 @@ import {
   invalidateSavedMeme,
   markAdminMemesOverviewStale
 } from '~/routes/admin/-lib/queries'
-import { editMeme, getMemeFormSchema } from '~/routes/admin/-server/memes'
+import { editMeme } from '~/routes/admin/-server/memes'
 import type { MemeFormValues } from './use-meme-form'
 import { getMemeEditScope } from './use-meme-publisher'
 

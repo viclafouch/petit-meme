@@ -14,6 +14,10 @@ import {
   MEMES_PER_PAGE
 } from '~/constants/meme'
 import { MEME_FILL_SUGGESTION_SCHEMA } from '~/constants/meme-fill-suggestion'
+import {
+  MEME_FORM_SCHEMA,
+  REQUIRED_MEME_TRANSLATION_SCHEMA
+} from '~/constants/meme-form'
 import { TWEET_LINK_SCHEMA } from '~/constants/url'
 import { prismaClient } from '~/db/client.server'
 import { Prisma } from '~/db/generated/prisma/client'
@@ -23,12 +27,7 @@ import {
   MemeFillStatus,
   MemeStatus
 } from '~/db/generated/prisma/enums'
-import {
-  buildLocaleRecord,
-  CONTENT_LOCALE_TO_LOCALE,
-  REQUIRED_TRANSLATION_LOCALES
-} from '~/helpers/i18n-content'
-import { normalizeKeywords } from '~/helpers/keywords'
+import { REQUIRED_TRANSLATION_LOCALES } from '~/helpers/i18n-content'
 import { invalidateAlgoliaCache } from '~/lib/algolia-cache.server'
 import {
   ALGOLIA_ADMIN_SEARCH_PARAMS,
@@ -55,6 +54,7 @@ import { captureWithFeature } from '~/lib/sentry'
 import { baseLocale } from '~/paraglide/runtime'
 import { logAuditAction } from '~/server/audit.server'
 import { clearRecommendCache } from '~/server/meme'
+import { editMemeRecord } from '~/server/meme-edit.server'
 import { adminRequiredMiddleware } from '~/server/user-auth'
 
 const ALGOLIA_STATUS_FILTERS = {
@@ -133,6 +133,52 @@ export const getAdminMemeFill = createServerFn({ method: 'GET' })
     }
   })
 
+const READY_DRAFTS_RERUN_MAX_COUNT = 500
+
+export const getReadyMemeDrafts = createServerFn({ method: 'GET' })
+  .middleware([adminRequiredMiddleware])
+  .handler(() => {
+    return prismaClient.meme.findMany({
+      where: READY_MEME_DRAFT_WHERE,
+      select: { id: true, title: true },
+      orderBy: { updatedAt: 'asc' },
+      take: READY_DRAFTS_RERUN_MAX_COUNT
+    })
+  })
+
+export const getReadyDraftsRerunFills = createServerFn({ method: 'GET' })
+  .validator((data) => {
+    return z.array(z.string()).max(READY_DRAFTS_RERUN_MAX_COUNT).parse(data)
+  })
+  .middleware([adminRequiredMiddleware])
+  .handler(async ({ data: memeIds }) => {
+    const checkedAt = new Date()
+    const memes = await prismaClient.meme.findMany({
+      where: { id: { in: memeIds } },
+      select: {
+        id: true,
+        title: true,
+        fillStatus: true,
+        fillSuggestion: true,
+        updatedAt: true
+      }
+    })
+
+    return memes.map((meme) => {
+      return {
+        id: meme.id,
+        title: meme.title,
+        fillStatus: meme.fillStatus,
+        hasSuggestion: meme.fillSuggestion !== null,
+        isStalled: matchIsFillStalled({
+          status: meme.fillStatus,
+          updatedAt: meme.updatedAt,
+          checkedAt
+        })
+      }
+    })
+  })
+
 export const keepMemeFillSuggestion = createServerFn({ method: 'POST' })
   .validator((data) => {
     return z
@@ -165,71 +211,6 @@ export const settleMemeFillSuggestion = createServerFn({ method: 'POST' })
     })
   })
 
-export const MEME_DESCRIPTION_MAX_LENGTH = 200
-
-export const MEME_TITLE_MIN_LENGTH = 3
-const MEME_TITLE_MAX_LENGTH = 100
-const MEME_KEYWORD_MAX_LENGTH = 50
-const MEME_KEYWORDS_MAX_COUNT = 20
-const MEME_CATEGORIES_MAX_COUNT = 10
-
-const MEME_TRANSLATION_SCHEMA = z.object({
-  title: z.string().max(MEME_TITLE_MAX_LENGTH),
-  description: z.string().max(MEME_DESCRIPTION_MAX_LENGTH),
-  keywords: z
-    .array(z.string().max(MEME_KEYWORD_MAX_LENGTH))
-    .max(MEME_KEYWORDS_MAX_COUNT)
-})
-
-const REQUIRED_MEME_TRANSLATION_SCHEMA = MEME_TRANSLATION_SCHEMA.extend({
-  title: z.string().min(MEME_TITLE_MIN_LENGTH).max(MEME_TITLE_MAX_LENGTH)
-})
-
-export const MEME_FORM_SCHEMA = z.object({
-  contentLocale: z.enum(MemeContentLocaleEnum),
-  translations: z.object(
-    buildLocaleRecord(() => {
-      return MEME_TRANSLATION_SCHEMA
-    })
-  ),
-  categoryIds: z.array(z.string()).max(MEME_CATEGORIES_MAX_COUNT),
-  tweetUrl: TWEET_LINK_SCHEMA.nullable().or(
-    z
-      .string()
-      .length(0)
-      .transform(() => {
-        return null
-      })
-  )
-})
-
-export const PUBLISHABLE_MEME_FORM_SCHEMA = MEME_FORM_SCHEMA.superRefine(
-  (data, refinementContext) => {
-    const requiredLocales = REQUIRED_TRANSLATION_LOCALES[data.contentLocale]
-
-    for (const locale of requiredLocales) {
-      const result = REQUIRED_MEME_TRANSLATION_SCHEMA.safeParse(
-        data.translations[locale]
-      )
-
-      if (!result.success) {
-        for (const issue of result.error.issues) {
-          refinementContext.addIssue({
-            ...issue,
-            path: ['translations', locale, ...issue.path]
-          })
-        }
-      }
-    }
-  }
-)
-
-export const getMemeFormSchema = (status: MemeStatus) => {
-  return status === MemeStatus.PUBLISHED
-    ? PUBLISHABLE_MEME_FORM_SCHEMA
-    : MEME_FORM_SCHEMA
-}
-
 const INITIAL_VIEW_COUNT_MIN = 30
 const INITIAL_VIEW_COUNT_MAX = 120
 
@@ -243,163 +224,13 @@ function resolveGoLiveViewCount(viewCount: number) {
   return Math.floor(Math.random() * range) + INITIAL_VIEW_COUNT_MIN
 }
 
-function computeCategoryDiff(currentIds: string[], newIds: string[]) {
-  const currentSet = new Set(currentIds)
-  const newSet = new Set(newIds)
-
-  return {
-    toAdd: newIds.filter((id) => {
-      return !currentSet.has(id)
-    }),
-    toRemove: currentIds.filter((id) => {
-      return !newSet.has(id)
-    })
-  }
-}
-
-type MemeFormTranslations = z.infer<typeof MEME_FORM_SCHEMA>['translations']
-
-function resolveSourceTranslation(
-  contentLocale: MemeContentLocale,
-  translations: MemeFormTranslations
-) {
-  const sourceLocale = CONTENT_LOCALE_TO_LOCALE[contentLocale]
-
-  return translations[sourceLocale]
-}
-
-type BuildTranslationUpsertsParams = {
-  memeId: string
-  contentLocale: MemeContentLocale
-  translations: MemeFormTranslations
-}
-
-function buildTranslationUpserts({
-  memeId,
-  contentLocale,
-  translations
-}: BuildTranslationUpsertsParams) {
-  const requiredLocales = REQUIRED_TRANSLATION_LOCALES[contentLocale]
-
-  return requiredLocales.map((locale) => {
-    const data = translations[locale]
-    const normalizedKeywords = normalizeKeywords(data.keywords)
-
-    return {
-      where: { memeId_locale: { memeId, locale } },
-      update: {
-        title: data.title,
-        description: data.description,
-        keywords: normalizedKeywords
-      },
-      create: {
-        locale,
-        title: data.title,
-        description: data.description,
-        keywords: normalizedKeywords
-      }
-    }
-  })
-}
-
 export const editMeme = createServerFn({ method: 'POST' })
   .validator((data) => {
     return MEME_FORM_SCHEMA.extend({ id: z.string() }).parse(data)
   })
   .middleware([adminRequiredMiddleware])
-  .handler(async ({ data: values, context }) => {
-    const meme = await prismaClient.meme.findUnique({
-      where: {
-        id: values.id
-      },
-      select: {
-        status: true,
-        categories: { select: { categoryId: true } }
-      }
-    })
-
-    if (!meme) {
-      adminLogger.warn({ memeId: values.id }, 'Meme not found for edit')
-      setResponseStatus(HTTP_STATUS.NOT_FOUND)
-      throw new Error('Mème introuvable')
-    }
-
-    const isPublished = meme.status === MemeStatus.PUBLISHED
-
-    if (
-      isPublished &&
-      !PUBLISHABLE_MEME_FORM_SCHEMA.safeParse(values).success
-    ) {
-      setResponseStatus(HTTP_STATUS.UNPROCESSABLE_CONTENT)
-      throw new Error('Un Meme en ligne garde un titre dans chaque langue')
-    }
-
-    const currentCategoryIds = meme.categories.map(({ categoryId }) => {
-      return categoryId
-    })
-    const { toAdd, toRemove } = computeCategoryDiff(
-      currentCategoryIds,
-      values.categoryIds
-    )
-
-    const sourceTranslation = resolveSourceTranslation(
-      values.contentLocale,
-      values.translations
-    )
-    const requiredLocales = REQUIRED_TRANSLATION_LOCALES[values.contentLocale]
-
-    const memeUpdated = await prismaClient.meme.update({
-      where: {
-        id: values.id
-      },
-      data: {
-        contentLocale: values.contentLocale,
-        title: sourceTranslation.title,
-        description: sourceTranslation.description,
-        categories: {
-          deleteMany:
-            toRemove.length > 0 ? { categoryId: { in: toRemove } } : undefined,
-          create: toAdd.map((categoryId) => {
-            return {
-              category: {
-                connect: { id: categoryId }
-              }
-            }
-          })
-        },
-        keywords: normalizeKeywords(sourceTranslation.keywords),
-        tweetUrl: values.tweetUrl ?? null,
-        translations: {
-          upsert: buildTranslationUpserts({
-            memeId: values.id,
-            contentLocale: values.contentLocale,
-            translations: values.translations
-          }),
-          deleteMany: {
-            locale: { notIn: [...requiredLocales] }
-          }
-        }
-      },
-      include: MEME_ALGOLIA_INCLUDE
-    })
-
-    await safeAlgoliaOp(syncMemeToAllIndices(memeUpdated))
-
-    if (isPublished) {
-      await invalidateAlgoliaCache()
-    }
-
-    void logAuditAction({
-      action: 'edit',
-      actingAdminId: context.user.id,
-      targetId: memeUpdated.id,
-      targetType: 'meme',
-      metadata: { title: sourceTranslation.title }
-    })
-
-    adminLogger.info({ memeId: memeUpdated.id }, 'Meme edited')
-
-    return { id: memeUpdated.id }
+  .handler(({ data: values, context }) => {
+    return editMemeRecord({ values, adminId: context.user.id })
   })
 
 export const setMemeStatus = createServerFn({ method: 'POST' })

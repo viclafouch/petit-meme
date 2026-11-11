@@ -59,6 +59,7 @@ export type MemeMinAggregateOutputType = {
   fillStatus: $Enums.MemeFillStatus | null
   fillAttempts: number | null
   fillDoubt: string | null
+  fillWrittenAt: Date | null
 }
 
 export type MemeMaxAggregateOutputType = {
@@ -78,6 +79,7 @@ export type MemeMaxAggregateOutputType = {
   fillStatus: $Enums.MemeFillStatus | null
   fillAttempts: number | null
   fillDoubt: string | null
+  fillWrittenAt: Date | null
 }
 
 export type MemeCountAggregateOutputType = {
@@ -99,6 +101,7 @@ export type MemeCountAggregateOutputType = {
   fillAttempts: number
   fillDoubt: number
   fillSuggestion: number
+  fillWrittenAt: number
   _all: number
 }
 
@@ -136,6 +139,7 @@ export type MemeMinAggregateInputType = {
   fillStatus?: true
   fillAttempts?: true
   fillDoubt?: true
+  fillWrittenAt?: true
 }
 
 export type MemeMaxAggregateInputType = {
@@ -155,6 +159,7 @@ export type MemeMaxAggregateInputType = {
   fillStatus?: true
   fillAttempts?: true
   fillDoubt?: true
+  fillWrittenAt?: true
 }
 
 export type MemeCountAggregateInputType = {
@@ -176,6 +181,7 @@ export type MemeCountAggregateInputType = {
   fillAttempts?: true
   fillDoubt?: true
   fillSuggestion?: true
+  fillWrittenAt?: true
   _all?: true
 }
 
@@ -284,6 +290,7 @@ export type MemeGroupByOutputType = {
   fillAttempts: number
   fillDoubt: string
   fillSuggestion: runtime.JsonValue | null
+  fillWrittenAt: Date | null
   _count: MemeCountAggregateOutputType | null
   _avg: MemeAvgAggregateOutputType | null
   _sum: MemeSumAggregateOutputType | null
@@ -328,6 +335,7 @@ export type MemeWhereInput = {
   fillAttempts?: Prisma.IntFilter<"Meme"> | number
   fillDoubt?: Prisma.StringFilter<"Meme"> | string
   fillSuggestion?: Prisma.JsonNullableFilter<"Meme">
+  fillWrittenAt?: Prisma.DateTimeNullableFilter<"Meme"> | Date | string | null
   video?: Prisma.XOR<Prisma.VideoScalarRelationFilter, Prisma.VideoWhereInput>
   bookmarkedBy?: Prisma.UserBookmarkListRelationFilter
   categories?: Prisma.MemeCategoryListRelationFilter
@@ -358,6 +366,7 @@ export type MemeOrderByWithRelationInput = {
   fillAttempts?: Prisma.SortOrder
   fillDoubt?: Prisma.SortOrder
   fillSuggestion?: Prisma.SortOrderInput | Prisma.SortOrder
+  fillWrittenAt?: Prisma.SortOrderInput | Prisma.SortOrder
   video?: Prisma.VideoOrderByWithRelationInput
   bookmarkedBy?: Prisma.UserBookmarkOrderByRelationAggregateInput
   categories?: Prisma.MemeCategoryOrderByRelationAggregateInput
@@ -391,6 +400,7 @@ export type MemeWhereUniqueInput = Prisma.AtLeast<{
   fillAttempts?: Prisma.IntFilter<"Meme"> | number
   fillDoubt?: Prisma.StringFilter<"Meme"> | string
   fillSuggestion?: Prisma.JsonNullableFilter<"Meme">
+  fillWrittenAt?: Prisma.DateTimeNullableFilter<"Meme"> | Date | string | null
   video?: Prisma.XOR<Prisma.VideoScalarRelationFilter, Prisma.VideoWhereInput>
   bookmarkedBy?: Prisma.UserBookmarkListRelationFilter
   categories?: Prisma.MemeCategoryListRelationFilter
@@ -421,6 +431,7 @@ export type MemeOrderByWithAggregationInput = {
   fillAttempts?: Prisma.SortOrder
   fillDoubt?: Prisma.SortOrder
   fillSuggestion?: Prisma.SortOrderInput | Prisma.SortOrder
+  fillWrittenAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.MemeCountOrderByAggregateInput
   _avg?: Prisma.MemeAvgOrderByAggregateInput
   _max?: Prisma.MemeMaxOrderByAggregateInput
@@ -450,6 +461,7 @@ export type MemeScalarWhereWithAggregatesInput = {
   fillAttempts?: Prisma.IntWithAggregatesFilter<"Meme"> | number
   fillDoubt?: Prisma.StringWithAggregatesFilter<"Meme"> | string
   fillSuggestion?: Prisma.JsonNullableWithAggregatesFilter<"Meme">
+  fillWrittenAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Meme"> | Date | string | null
 }
 
 export type MemeCreateInput = {
@@ -470,6 +482,7 @@ export type MemeCreateInput = {
   fillAttempts?: number
   fillDoubt?: string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Date | string | null
   video: Prisma.VideoCreateNestedOneWithoutMemeInput
   bookmarkedBy?: Prisma.UserBookmarkCreateNestedManyWithoutMemeInput
   categories?: Prisma.MemeCategoryCreateNestedManyWithoutMemeInput
@@ -500,6 +513,7 @@ export type MemeUncheckedCreateInput = {
   fillAttempts?: number
   fillDoubt?: string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Date | string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutMemeInput
   categories?: Prisma.MemeCategoryUncheckedCreateNestedManyWithoutMemeInput
   translations?: Prisma.MemeTranslationUncheckedCreateNestedManyWithoutMemeInput
@@ -528,6 +542,7 @@ export type MemeUpdateInput = {
   fillAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   fillDoubt?: Prisma.StringFieldUpdateOperationsInput | string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   video?: Prisma.VideoUpdateOneRequiredWithoutMemeNestedInput
   bookmarkedBy?: Prisma.UserBookmarkUpdateManyWithoutMemeNestedInput
   categories?: Prisma.MemeCategoryUpdateManyWithoutMemeNestedInput
@@ -558,6 +573,7 @@ export type MemeUncheckedUpdateInput = {
   fillAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   fillDoubt?: Prisma.StringFieldUpdateOperationsInput | string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedUpdateManyWithoutMemeNestedInput
   categories?: Prisma.MemeCategoryUncheckedUpdateManyWithoutMemeNestedInput
   translations?: Prisma.MemeTranslationUncheckedUpdateManyWithoutMemeNestedInput
@@ -587,6 +603,7 @@ export type MemeCreateManyInput = {
   fillAttempts?: number
   fillDoubt?: string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Date | string | null
 }
 
 export type MemeUpdateManyMutationInput = {
@@ -607,6 +624,7 @@ export type MemeUpdateManyMutationInput = {
   fillAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   fillDoubt?: Prisma.StringFieldUpdateOperationsInput | string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type MemeUncheckedUpdateManyInput = {
@@ -628,6 +646,7 @@ export type MemeUncheckedUpdateManyInput = {
   fillAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   fillDoubt?: Prisma.StringFieldUpdateOperationsInput | string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type MemeScalarRelationFilter = {
@@ -659,6 +678,7 @@ export type MemeCountOrderByAggregateInput = {
   fillAttempts?: Prisma.SortOrder
   fillDoubt?: Prisma.SortOrder
   fillSuggestion?: Prisma.SortOrder
+  fillWrittenAt?: Prisma.SortOrder
 }
 
 export type MemeAvgOrderByAggregateInput = {
@@ -686,6 +706,7 @@ export type MemeMaxOrderByAggregateInput = {
   fillStatus?: Prisma.SortOrder
   fillAttempts?: Prisma.SortOrder
   fillDoubt?: Prisma.SortOrder
+  fillWrittenAt?: Prisma.SortOrder
 }
 
 export type MemeMinOrderByAggregateInput = {
@@ -705,6 +726,7 @@ export type MemeMinOrderByAggregateInput = {
   fillStatus?: Prisma.SortOrder
   fillAttempts?: Prisma.SortOrder
   fillDoubt?: Prisma.SortOrder
+  fillWrittenAt?: Prisma.SortOrder
 }
 
 export type MemeSumOrderByAggregateInput = {
@@ -912,6 +934,7 @@ export type MemeCreateWithoutBookmarkedByInput = {
   fillAttempts?: number
   fillDoubt?: string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Date | string | null
   video: Prisma.VideoCreateNestedOneWithoutMemeInput
   categories?: Prisma.MemeCategoryCreateNestedManyWithoutMemeInput
   translations?: Prisma.MemeTranslationCreateNestedManyWithoutMemeInput
@@ -941,6 +964,7 @@ export type MemeUncheckedCreateWithoutBookmarkedByInput = {
   fillAttempts?: number
   fillDoubt?: string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Date | string | null
   categories?: Prisma.MemeCategoryUncheckedCreateNestedManyWithoutMemeInput
   translations?: Prisma.MemeTranslationUncheckedCreateNestedManyWithoutMemeInput
   viewsDaily?: Prisma.MemeViewDailyUncheckedCreateNestedManyWithoutMemeInput
@@ -984,6 +1008,7 @@ export type MemeUpdateWithoutBookmarkedByInput = {
   fillAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   fillDoubt?: Prisma.StringFieldUpdateOperationsInput | string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   video?: Prisma.VideoUpdateOneRequiredWithoutMemeNestedInput
   categories?: Prisma.MemeCategoryUpdateManyWithoutMemeNestedInput
   translations?: Prisma.MemeTranslationUpdateManyWithoutMemeNestedInput
@@ -1013,6 +1038,7 @@ export type MemeUncheckedUpdateWithoutBookmarkedByInput = {
   fillAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   fillDoubt?: Prisma.StringFieldUpdateOperationsInput | string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   categories?: Prisma.MemeCategoryUncheckedUpdateManyWithoutMemeNestedInput
   translations?: Prisma.MemeTranslationUncheckedUpdateManyWithoutMemeNestedInput
   viewsDaily?: Prisma.MemeViewDailyUncheckedUpdateManyWithoutMemeNestedInput
@@ -1040,6 +1066,7 @@ export type MemeCreateWithoutCategoriesInput = {
   fillAttempts?: number
   fillDoubt?: string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Date | string | null
   video: Prisma.VideoCreateNestedOneWithoutMemeInput
   bookmarkedBy?: Prisma.UserBookmarkCreateNestedManyWithoutMemeInput
   translations?: Prisma.MemeTranslationCreateNestedManyWithoutMemeInput
@@ -1069,6 +1096,7 @@ export type MemeUncheckedCreateWithoutCategoriesInput = {
   fillAttempts?: number
   fillDoubt?: string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Date | string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutMemeInput
   translations?: Prisma.MemeTranslationUncheckedCreateNestedManyWithoutMemeInput
   viewsDaily?: Prisma.MemeViewDailyUncheckedCreateNestedManyWithoutMemeInput
@@ -1112,6 +1140,7 @@ export type MemeUpdateWithoutCategoriesInput = {
   fillAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   fillDoubt?: Prisma.StringFieldUpdateOperationsInput | string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   video?: Prisma.VideoUpdateOneRequiredWithoutMemeNestedInput
   bookmarkedBy?: Prisma.UserBookmarkUpdateManyWithoutMemeNestedInput
   translations?: Prisma.MemeTranslationUpdateManyWithoutMemeNestedInput
@@ -1141,6 +1170,7 @@ export type MemeUncheckedUpdateWithoutCategoriesInput = {
   fillAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   fillDoubt?: Prisma.StringFieldUpdateOperationsInput | string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedUpdateManyWithoutMemeNestedInput
   translations?: Prisma.MemeTranslationUncheckedUpdateManyWithoutMemeNestedInput
   viewsDaily?: Prisma.MemeViewDailyUncheckedUpdateManyWithoutMemeNestedInput
@@ -1168,6 +1198,7 @@ export type MemeCreateWithoutVideoInput = {
   fillAttempts?: number
   fillDoubt?: string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Date | string | null
   bookmarkedBy?: Prisma.UserBookmarkCreateNestedManyWithoutMemeInput
   categories?: Prisma.MemeCategoryCreateNestedManyWithoutMemeInput
   translations?: Prisma.MemeTranslationCreateNestedManyWithoutMemeInput
@@ -1196,6 +1227,7 @@ export type MemeUncheckedCreateWithoutVideoInput = {
   fillAttempts?: number
   fillDoubt?: string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Date | string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutMemeInput
   categories?: Prisma.MemeCategoryUncheckedCreateNestedManyWithoutMemeInput
   translations?: Prisma.MemeTranslationUncheckedCreateNestedManyWithoutMemeInput
@@ -1240,6 +1272,7 @@ export type MemeUpdateWithoutVideoInput = {
   fillAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   fillDoubt?: Prisma.StringFieldUpdateOperationsInput | string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bookmarkedBy?: Prisma.UserBookmarkUpdateManyWithoutMemeNestedInput
   categories?: Prisma.MemeCategoryUpdateManyWithoutMemeNestedInput
   translations?: Prisma.MemeTranslationUpdateManyWithoutMemeNestedInput
@@ -1268,6 +1301,7 @@ export type MemeUncheckedUpdateWithoutVideoInput = {
   fillAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   fillDoubt?: Prisma.StringFieldUpdateOperationsInput | string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedUpdateManyWithoutMemeNestedInput
   categories?: Prisma.MemeCategoryUncheckedUpdateManyWithoutMemeNestedInput
   translations?: Prisma.MemeTranslationUncheckedUpdateManyWithoutMemeNestedInput
@@ -1296,6 +1330,7 @@ export type MemeCreateWithoutViewsDailyInput = {
   fillAttempts?: number
   fillDoubt?: string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Date | string | null
   video: Prisma.VideoCreateNestedOneWithoutMemeInput
   bookmarkedBy?: Prisma.UserBookmarkCreateNestedManyWithoutMemeInput
   categories?: Prisma.MemeCategoryCreateNestedManyWithoutMemeInput
@@ -1325,6 +1360,7 @@ export type MemeUncheckedCreateWithoutViewsDailyInput = {
   fillAttempts?: number
   fillDoubt?: string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Date | string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutMemeInput
   categories?: Prisma.MemeCategoryUncheckedCreateNestedManyWithoutMemeInput
   translations?: Prisma.MemeTranslationUncheckedCreateNestedManyWithoutMemeInput
@@ -1368,6 +1404,7 @@ export type MemeUpdateWithoutViewsDailyInput = {
   fillAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   fillDoubt?: Prisma.StringFieldUpdateOperationsInput | string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   video?: Prisma.VideoUpdateOneRequiredWithoutMemeNestedInput
   bookmarkedBy?: Prisma.UserBookmarkUpdateManyWithoutMemeNestedInput
   categories?: Prisma.MemeCategoryUpdateManyWithoutMemeNestedInput
@@ -1397,6 +1434,7 @@ export type MemeUncheckedUpdateWithoutViewsDailyInput = {
   fillAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   fillDoubt?: Prisma.StringFieldUpdateOperationsInput | string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedUpdateManyWithoutMemeNestedInput
   categories?: Prisma.MemeCategoryUncheckedUpdateManyWithoutMemeNestedInput
   translations?: Prisma.MemeTranslationUncheckedUpdateManyWithoutMemeNestedInput
@@ -1424,6 +1462,7 @@ export type MemeCreateWithoutActionsDailyInput = {
   fillAttempts?: number
   fillDoubt?: string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Date | string | null
   video: Prisma.VideoCreateNestedOneWithoutMemeInput
   bookmarkedBy?: Prisma.UserBookmarkCreateNestedManyWithoutMemeInput
   categories?: Prisma.MemeCategoryCreateNestedManyWithoutMemeInput
@@ -1453,6 +1492,7 @@ export type MemeUncheckedCreateWithoutActionsDailyInput = {
   fillAttempts?: number
   fillDoubt?: string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Date | string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutMemeInput
   categories?: Prisma.MemeCategoryUncheckedCreateNestedManyWithoutMemeInput
   translations?: Prisma.MemeTranslationUncheckedCreateNestedManyWithoutMemeInput
@@ -1496,6 +1536,7 @@ export type MemeUpdateWithoutActionsDailyInput = {
   fillAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   fillDoubt?: Prisma.StringFieldUpdateOperationsInput | string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   video?: Prisma.VideoUpdateOneRequiredWithoutMemeNestedInput
   bookmarkedBy?: Prisma.UserBookmarkUpdateManyWithoutMemeNestedInput
   categories?: Prisma.MemeCategoryUpdateManyWithoutMemeNestedInput
@@ -1525,6 +1566,7 @@ export type MemeUncheckedUpdateWithoutActionsDailyInput = {
   fillAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   fillDoubt?: Prisma.StringFieldUpdateOperationsInput | string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedUpdateManyWithoutMemeNestedInput
   categories?: Prisma.MemeCategoryUncheckedUpdateManyWithoutMemeNestedInput
   translations?: Prisma.MemeTranslationUncheckedUpdateManyWithoutMemeNestedInput
@@ -1552,6 +1594,7 @@ export type MemeCreateWithoutStudioGenerationsInput = {
   fillAttempts?: number
   fillDoubt?: string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Date | string | null
   video: Prisma.VideoCreateNestedOneWithoutMemeInput
   bookmarkedBy?: Prisma.UserBookmarkCreateNestedManyWithoutMemeInput
   categories?: Prisma.MemeCategoryCreateNestedManyWithoutMemeInput
@@ -1581,6 +1624,7 @@ export type MemeUncheckedCreateWithoutStudioGenerationsInput = {
   fillAttempts?: number
   fillDoubt?: string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Date | string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutMemeInput
   categories?: Prisma.MemeCategoryUncheckedCreateNestedManyWithoutMemeInput
   translations?: Prisma.MemeTranslationUncheckedCreateNestedManyWithoutMemeInput
@@ -1624,6 +1668,7 @@ export type MemeUpdateWithoutStudioGenerationsInput = {
   fillAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   fillDoubt?: Prisma.StringFieldUpdateOperationsInput | string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   video?: Prisma.VideoUpdateOneRequiredWithoutMemeNestedInput
   bookmarkedBy?: Prisma.UserBookmarkUpdateManyWithoutMemeNestedInput
   categories?: Prisma.MemeCategoryUpdateManyWithoutMemeNestedInput
@@ -1653,6 +1698,7 @@ export type MemeUncheckedUpdateWithoutStudioGenerationsInput = {
   fillAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   fillDoubt?: Prisma.StringFieldUpdateOperationsInput | string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedUpdateManyWithoutMemeNestedInput
   categories?: Prisma.MemeCategoryUncheckedUpdateManyWithoutMemeNestedInput
   translations?: Prisma.MemeTranslationUncheckedUpdateManyWithoutMemeNestedInput
@@ -1680,6 +1726,7 @@ export type MemeCreateWithoutSubmissionsInput = {
   fillAttempts?: number
   fillDoubt?: string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Date | string | null
   video: Prisma.VideoCreateNestedOneWithoutMemeInput
   bookmarkedBy?: Prisma.UserBookmarkCreateNestedManyWithoutMemeInput
   categories?: Prisma.MemeCategoryCreateNestedManyWithoutMemeInput
@@ -1709,6 +1756,7 @@ export type MemeUncheckedCreateWithoutSubmissionsInput = {
   fillAttempts?: number
   fillDoubt?: string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Date | string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutMemeInput
   categories?: Prisma.MemeCategoryUncheckedCreateNestedManyWithoutMemeInput
   translations?: Prisma.MemeTranslationUncheckedCreateNestedManyWithoutMemeInput
@@ -1752,6 +1800,7 @@ export type MemeUpdateWithoutSubmissionsInput = {
   fillAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   fillDoubt?: Prisma.StringFieldUpdateOperationsInput | string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   video?: Prisma.VideoUpdateOneRequiredWithoutMemeNestedInput
   bookmarkedBy?: Prisma.UserBookmarkUpdateManyWithoutMemeNestedInput
   categories?: Prisma.MemeCategoryUpdateManyWithoutMemeNestedInput
@@ -1781,6 +1830,7 @@ export type MemeUncheckedUpdateWithoutSubmissionsInput = {
   fillAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   fillDoubt?: Prisma.StringFieldUpdateOperationsInput | string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedUpdateManyWithoutMemeNestedInput
   categories?: Prisma.MemeCategoryUncheckedUpdateManyWithoutMemeNestedInput
   translations?: Prisma.MemeTranslationUncheckedUpdateManyWithoutMemeNestedInput
@@ -1808,6 +1858,7 @@ export type MemeCreateWithoutTranslationsInput = {
   fillAttempts?: number
   fillDoubt?: string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Date | string | null
   video: Prisma.VideoCreateNestedOneWithoutMemeInput
   bookmarkedBy?: Prisma.UserBookmarkCreateNestedManyWithoutMemeInput
   categories?: Prisma.MemeCategoryCreateNestedManyWithoutMemeInput
@@ -1837,6 +1888,7 @@ export type MemeUncheckedCreateWithoutTranslationsInput = {
   fillAttempts?: number
   fillDoubt?: string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Date | string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutMemeInput
   categories?: Prisma.MemeCategoryUncheckedCreateNestedManyWithoutMemeInput
   viewsDaily?: Prisma.MemeViewDailyUncheckedCreateNestedManyWithoutMemeInput
@@ -1880,6 +1932,7 @@ export type MemeUpdateWithoutTranslationsInput = {
   fillAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   fillDoubt?: Prisma.StringFieldUpdateOperationsInput | string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   video?: Prisma.VideoUpdateOneRequiredWithoutMemeNestedInput
   bookmarkedBy?: Prisma.UserBookmarkUpdateManyWithoutMemeNestedInput
   categories?: Prisma.MemeCategoryUpdateManyWithoutMemeNestedInput
@@ -1909,6 +1962,7 @@ export type MemeUncheckedUpdateWithoutTranslationsInput = {
   fillAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   fillDoubt?: Prisma.StringFieldUpdateOperationsInput | string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedUpdateManyWithoutMemeNestedInput
   categories?: Prisma.MemeCategoryUncheckedUpdateManyWithoutMemeNestedInput
   viewsDaily?: Prisma.MemeViewDailyUncheckedUpdateManyWithoutMemeNestedInput
@@ -1936,6 +1990,7 @@ export type MemeCreateWithoutActivityEventsInput = {
   fillAttempts?: number
   fillDoubt?: string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Date | string | null
   video: Prisma.VideoCreateNestedOneWithoutMemeInput
   bookmarkedBy?: Prisma.UserBookmarkCreateNestedManyWithoutMemeInput
   categories?: Prisma.MemeCategoryCreateNestedManyWithoutMemeInput
@@ -1965,6 +2020,7 @@ export type MemeUncheckedCreateWithoutActivityEventsInput = {
   fillAttempts?: number
   fillDoubt?: string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Date | string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutMemeInput
   categories?: Prisma.MemeCategoryUncheckedCreateNestedManyWithoutMemeInput
   translations?: Prisma.MemeTranslationUncheckedCreateNestedManyWithoutMemeInput
@@ -2008,6 +2064,7 @@ export type MemeUpdateWithoutActivityEventsInput = {
   fillAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   fillDoubt?: Prisma.StringFieldUpdateOperationsInput | string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   video?: Prisma.VideoUpdateOneRequiredWithoutMemeNestedInput
   bookmarkedBy?: Prisma.UserBookmarkUpdateManyWithoutMemeNestedInput
   categories?: Prisma.MemeCategoryUpdateManyWithoutMemeNestedInput
@@ -2037,6 +2094,7 @@ export type MemeUncheckedUpdateWithoutActivityEventsInput = {
   fillAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   fillDoubt?: Prisma.StringFieldUpdateOperationsInput | string
   fillSuggestion?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  fillWrittenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bookmarkedBy?: Prisma.UserBookmarkUncheckedUpdateManyWithoutMemeNestedInput
   categories?: Prisma.MemeCategoryUncheckedUpdateManyWithoutMemeNestedInput
   translations?: Prisma.MemeTranslationUncheckedUpdateManyWithoutMemeNestedInput
@@ -2159,6 +2217,7 @@ export type MemeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   fillAttempts?: boolean
   fillDoubt?: boolean
   fillSuggestion?: boolean
+  fillWrittenAt?: boolean
   video?: boolean | Prisma.VideoDefaultArgs<ExtArgs>
   bookmarkedBy?: boolean | Prisma.Meme$bookmarkedByArgs<ExtArgs>
   categories?: boolean | Prisma.Meme$categoriesArgs<ExtArgs>
@@ -2190,6 +2249,7 @@ export type MemeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   fillAttempts?: boolean
   fillDoubt?: boolean
   fillSuggestion?: boolean
+  fillWrittenAt?: boolean
   video?: boolean | Prisma.VideoDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["meme"]>
 
@@ -2212,6 +2272,7 @@ export type MemeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   fillAttempts?: boolean
   fillDoubt?: boolean
   fillSuggestion?: boolean
+  fillWrittenAt?: boolean
   video?: boolean | Prisma.VideoDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["meme"]>
 
@@ -2234,9 +2295,10 @@ export type MemeSelectScalar = {
   fillAttempts?: boolean
   fillDoubt?: boolean
   fillSuggestion?: boolean
+  fillWrittenAt?: boolean
 }
 
-export type MemeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "videoId" | "viewCount" | "shareCount" | "downloadCount" | "tweetUrl" | "description" | "keywords" | "contentLocale" | "createdAt" | "updatedAt" | "publishedAt" | "status" | "fillStatus" | "fillAttempts" | "fillDoubt" | "fillSuggestion", ExtArgs["result"]["meme"]>
+export type MemeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "videoId" | "viewCount" | "shareCount" | "downloadCount" | "tweetUrl" | "description" | "keywords" | "contentLocale" | "createdAt" | "updatedAt" | "publishedAt" | "status" | "fillStatus" | "fillAttempts" | "fillDoubt" | "fillSuggestion" | "fillWrittenAt", ExtArgs["result"]["meme"]>
 export type MemeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   video?: boolean | Prisma.VideoDefaultArgs<ExtArgs>
   bookmarkedBy?: boolean | Prisma.Meme$bookmarkedByArgs<ExtArgs>
@@ -2288,6 +2350,7 @@ export type $MemePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     fillAttempts: number
     fillDoubt: string
     fillSuggestion: runtime.JsonValue | null
+    fillWrittenAt: Date | null
   }, ExtArgs["result"]["meme"]>
   composites: {}
 }
@@ -2738,6 +2801,7 @@ export interface MemeFieldRefs {
   readonly fillAttempts: Prisma.FieldRef<"Meme", 'Int'>
   readonly fillDoubt: Prisma.FieldRef<"Meme", 'String'>
   readonly fillSuggestion: Prisma.FieldRef<"Meme", 'Json'>
+  readonly fillWrittenAt: Prisma.FieldRef<"Meme", 'DateTime'>
 }
     
 

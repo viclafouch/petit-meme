@@ -56,7 +56,7 @@ const buildRelease = (fillStatus: MemeFillStatus) => {
 const GUARDED_WRITE_WHERE = {
   id: MEME_ID,
   status: MemeStatus.PENDING,
-  title: DEFAULT_MEME_TITLE,
+  OR: [{ title: DEFAULT_MEME_TITLE }, { fillWrittenAt: { not: null } }],
   fillStatus: MemeFillStatus.RUNNING,
   updatedAt: CLAIMED_AT
 }
@@ -82,21 +82,24 @@ const settleBackgroundRun = async () => {
   await run
 }
 
+const setUpFillRun = () => {
+  vi.useFakeTimers({ toFake: ['Date'], now: CLAIMED_AT })
+  stubFillEnv()
+}
+
+const tearDownFillRun = () => {
+  vi.useRealTimers()
+  vi.unstubAllGlobals()
+  vi.unstubAllEnvs()
+  vi.restoreAllMocks()
+  vi.clearAllMocks()
+}
+
 describe('fillMemeDraft', () => {
-  beforeEach(() => {
-    vi.useFakeTimers({ toFake: ['Date'], now: CLAIMED_AT })
-    stubFillEnv()
-  })
+  beforeEach(setUpFillRun)
+  afterEach(tearDownFillRun)
 
-  afterEach(() => {
-    vi.useRealTimers()
-    vi.unstubAllGlobals()
-    vi.unstubAllEnvs()
-    vi.restoreAllMocks()
-    vi.clearAllMocks()
-  })
-
-  it('should write the Gemini record into a waiting draft, only while nobody saved the pending draft since the claim', async () => {
+  it('should write the Gemini record into an untitled draft, or one the AI wrote and the Creator left untouched, only while nobody saved it since the claim', async () => {
     stubBunnyAndGemini()
     const { updateFillStatus, upsertTranslation, linkCategories } =
       stubDatabase()
@@ -111,7 +114,8 @@ describe('fillMemeDraft', () => {
         keywords: DRAFT.keywords,
         contentLocale: MemeContentLocale.FR,
         fillStatus: MemeFillStatus.FILLED,
-        fillDoubt: ''
+        fillDoubt: '',
+        fillWrittenAt: CLAIMED_AT
       }
     })
     expect(upsertTranslation).toHaveBeenCalledTimes(1)
@@ -142,7 +146,8 @@ describe('fillMemeDraft', () => {
         keywords: ['rigoler', 'chat'],
         contentLocale: MemeContentLocale.FR,
         fillStatus: MemeFillStatus.FILLED,
-        fillDoubt: ''
+        fillDoubt: '',
+        fillWrittenAt: CLAIMED_AT
       }
     })
   })
@@ -372,5 +377,25 @@ describe('fillMemeDraft', () => {
 
     expect(waitUntil).not.toHaveBeenCalled()
     expect(fetchMock).not.toHaveBeenCalled()
+  })
+})
+
+describe('fillMemeDraft Categories', () => {
+  beforeEach(setUpFillRun)
+  afterEach(tearDownFillRun)
+
+  it('should replace the Categories of the draft with the ones Gemini picked', async () => {
+    stubBunnyAndGemini()
+    const { unlinkCategories, linkCategories } = stubDatabase()
+
+    await fillMemeDraft(MEME_ID)
+
+    expect(unlinkCategories).toHaveBeenCalledExactlyOnceWith({
+      where: { memeId: MEME_ID, categoryId: { notIn: ['category-films'] } }
+    })
+    expect(linkCategories).toHaveBeenCalledExactlyOnceWith({
+      data: [{ memeId: MEME_ID, categoryId: 'category-films' }],
+      skipDuplicates: true
+    })
   })
 })

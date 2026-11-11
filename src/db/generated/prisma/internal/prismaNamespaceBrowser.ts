@@ -149,7 +149,8 @@ export const MemeScalarFieldEnum = {
   fillStatus: 'fillStatus',
   fillAttempts: 'fillAttempts',
   fillDoubt: 'fillDoubt',
-  fillSuggestion: 'fillSuggestion'
+  fillSuggestion: 'fillSuggestion',
+  fillWrittenAt: 'fillWrittenAt'
 } as const
 
 export type MemeScalarFieldEnum = (typeof MemeScalarFieldEnum)[keyof typeof MemeScalarFieldEnum]

@@ -271,6 +271,9 @@ export const stubDatabase = ({
     upsertTranslation: vi
       .spyOn(prismaClient.memeTranslation, 'upsert')
       .mockResolvedValue(TRANSLATION_ROW),
+    unlinkCategories: vi
+      .spyOn(prismaClient.memeCategory, 'deleteMany')
+      .mockResolvedValue({ count: 0 }),
     linkCategories: vi
       .spyOn(prismaClient.memeCategory, 'createMany')
       .mockResolvedValue({ count: 1 }),

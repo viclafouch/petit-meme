@@ -1,6 +1,5 @@
 import React from 'react'
 import { getRouteApi, Outlet } from '@tanstack/react-router'
-import { PathBreadcrumbs } from '~/components/path-breadcrumbs'
 import { Container } from '~/components/ui/container'
 import { Separator } from '~/components/ui/separator'
 import {
@@ -11,6 +10,7 @@ import {
 import { useCrumbMatches } from '~/hooks/use-crumb-matches'
 import { AdminNavButton } from '~/routes/admin/-components/admin-nav-button'
 import { AdminSidebar } from '~/routes/admin/-components/admin-sidebar'
+import { PathBreadcrumbs } from '~/routes/admin/-components/path-breadcrumbs'
 import { useThemeStore } from '~/stores/theme.store'
 
 const routeApi = getRouteApi('/admin')

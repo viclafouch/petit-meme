@@ -1,11 +1,11 @@
 import type React from 'react'
 import { useCreateStore } from '@tanstack/react-store'
+import type { ConsentState } from '~/helpers/cookie-consent'
 import {
   CookieConsentStoreProvider,
   createCookieConsentActions,
   getInitialCookieConsentState
-} from './cookie-consent.store'
-import type { ConsentState } from './types'
+} from '~/stores/cookie-consent.store'
 
 type CookieConsentProviderProps = {
   children: React.ReactNode

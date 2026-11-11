@@ -14,9 +14,10 @@ import {
 import { Label } from '~/components/ui/label'
 import { LoadingButton } from '~/components/ui/loading-button'
 import { Separator } from '~/components/ui/separator'
-import { DeleteAccountDialog } from '~/components/User/delete-account-dialog'
-import { UpdatePasswordDialog } from '~/components/User/update-password-dialog'
+import { DeleteAccountDialog } from '~/components/user/delete-account-dialog'
+import { UpdatePasswordDialog } from '~/components/user/update-password-dialog'
 import { getFreePlan, getPremiumPlan } from '~/constants/plan'
+import { matchIsPremiumGranted, type SessionUser } from '~/helpers/role'
 import {
   formatSubscriptionEnding,
   getSubscriptionDisplayInfo,
@@ -24,14 +25,13 @@ import {
   matchIsCancellationPending
 } from '~/helpers/subscription'
 import { useStripeCheckout } from '~/hooks/use-stripe-checkout'
-import { matchIsPremiumGranted, type SessionUser } from '~/lib/role'
+import { downloadBlob } from '~/lib/download'
 import { captureWithFeature } from '~/lib/sentry'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
 import type { ActiveSubscription } from '~/server/subscription/subscription.functions'
 import { exportUserData } from '~/server/user/user.functions'
-import { downloadBlob } from '~/utils/download'
 
 const SETTINGS_ROW_CLASS_NAME =
   'flex md:items-center justify-between gap-6 flex-col md:flex-row'

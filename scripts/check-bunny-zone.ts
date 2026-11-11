@@ -1,7 +1,7 @@
 /* oxlint-disable no-console */
 import { z } from 'zod'
 import { serverEnv } from '~/env/server.server'
-import { fetchWithZod } from '~/lib/utils'
+import { fetchWithZod } from '~/server/http/fetch.server'
 import { buildLibraryApiUrl } from '~/server/platforms/bunny.server'
 import {
   BUNNY_ZONE_PROBES,

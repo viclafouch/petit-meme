@@ -1,5 +1,5 @@
 import { getRouteApi, Link } from '@tanstack/react-router'
-import { MemeVideoPlayer } from '~/components/Meme/meme-video-player'
+import { MemeVideoPlayer } from '~/components/meme/meme-video-player'
 import { LOGO_PATH } from '~/constants/branding'
 import { useMemeHls } from '~/hooks/use-meme-hls'
 import { buildVideoImageUrl } from '~/lib/bunny-public-urls'

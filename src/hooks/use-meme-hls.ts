@@ -4,7 +4,7 @@ import { useHydrated } from '@tanstack/react-router'
 import { HOUR } from '~/constants/time'
 import type { Meme } from '~/db/generated/prisma/client'
 import { getMemePlaybackUrlQueryOpts } from '~/lib/queries'
-import { attachHlsSource } from '~/utils/video'
+import { attachHlsSource } from '~/lib/video'
 
 const PLAYBACK_URL_REFRESH_AFTER_MS = HOUR
 

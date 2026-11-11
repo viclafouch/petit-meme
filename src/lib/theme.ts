@@ -1,6 +1,6 @@
 import { createIsomorphicFn } from '@tanstack/react-start'
 import { getCookie } from '@tanstack/react-start/server'
-import { readClientCookie } from '~/helpers/cookie'
+import { readClientCookie } from '~/lib/cookie'
 
 export type Theme = 'light' | 'dark'
 

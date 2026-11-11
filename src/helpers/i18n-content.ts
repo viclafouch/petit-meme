@@ -4,9 +4,9 @@ import {
 } from '~/db/generated/prisma/enums'
 import type { CategoryTranslationModel } from '~/db/generated/prisma/models/CategoryTranslation'
 import type { MemeTranslationModel } from '~/db/generated/prisma/models/MemeTranslation'
+import { removeDuplicates } from '~/helpers/array'
 import { m } from '~/paraglide/messages.js'
 import { type Locale, locales } from '~/paraglide/runtime'
-import { removeDuplicates } from '~/utils/array'
 
 type LocaleMeta = {
   label: string

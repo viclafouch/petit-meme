@@ -1,4 +1,4 @@
-import { FaqSection } from '~/components/faq-section'
+import { FaqSection } from '~/components/marketing/faq-section'
 import { m } from '~/paraglide/messages.js'
 import { getPricingFaqItems } from './constants'
 

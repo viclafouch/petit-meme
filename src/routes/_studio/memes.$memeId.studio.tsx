@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { StudioLoadingFallback } from '~/components/Meme/studio-fallbacks'
+import { StudioLoadingFallback } from '~/components/studio/studio-fallbacks'
 import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import { getMemeQueryOpts, listRelatedMemesQueryOpts } from '~/lib/queries'
 import { buildMemeSeo } from '~/lib/seo'

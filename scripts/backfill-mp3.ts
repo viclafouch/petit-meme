@@ -10,19 +10,15 @@ import type { Prisma } from '~/db/generated/prisma/client'
 import { MemeStatus } from '~/db/generated/prisma/enums'
 import { serverEnv } from '~/env/server.server'
 import {
-  checkMemeFileExists,
-  uploadMemeFile
-} from '~/server/meme/meme-file.server'
-import {
   FFMPEG_AUDIO_OUTPUT,
   FFMPEG_INPUT_FILE,
   FFMPEG_MP3_ENCODING_ARGS
-} from '~/utils/ffmpeg'
+} from '~/lib/ffmpeg'
+import { buildMp3InputArgs, parseVideoProbe, VIDEO_PROBE_ARGS } from '~/lib/mp3'
 import {
-  buildMp3InputArgs,
-  parseVideoProbe,
-  VIDEO_PROBE_ARGS
-} from '~/utils/mp3'
+  checkMemeFileExists,
+  uploadMemeFile
+} from '~/server/meme/meme-file.server'
 import { countResults, processWithConcurrency } from './lib/concurrency'
 import { logEnvironmentInfo } from './lib/env-guard'
 import { downloadOriginalVideo } from './lib/original-video'

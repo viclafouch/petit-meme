@@ -19,8 +19,8 @@ import {
 } from '~/constants/avatar'
 import { SELECTED_TILE_RING_CLASS_NAME } from '~/constants/ui'
 import { resolveAvatarPath } from '~/helpers/avatar'
+import type { SessionUser } from '~/helpers/role'
 import { useUpdateAvatar } from '~/hooks/use-update-avatar'
-import type { SessionUser } from '~/lib/role'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 

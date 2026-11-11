@@ -15,10 +15,13 @@ import {
 } from '~/db/generated/prisma/enums'
 import { matchIsPrismaError } from '~/db/prisma-error.server'
 import { proposalLogger } from '~/lib/logger'
-import { getTweetByUrl, TweetNoVideoError } from '~/lib/react-tweet'
 import { captureWithFeature } from '~/lib/sentry'
 import { userRequiredMiddleware } from '~/server/auth/auth.middleware'
 import { throwWithStatus } from '~/server/http/http.server'
+import {
+  getTweetByUrl,
+  TweetNoVideoError
+} from '~/server/platforms/twitter.server'
 import { createUserRateLimitMiddleware } from '~/server/rate-limit/rate-limit.middleware'
 
 const USER_PROPOSAL_SELECT = {

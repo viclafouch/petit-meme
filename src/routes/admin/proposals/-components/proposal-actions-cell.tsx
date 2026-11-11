@@ -10,7 +10,6 @@ import {
 import { toast } from 'sonner'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link, useRouter } from '@tanstack/react-router'
-import { ConfirmAlertDialog } from '~/components/confirm-alert-dialog'
 import { Button } from '~/components/ui/button'
 import {
   DropdownMenu,
@@ -27,6 +26,7 @@ import {
 } from '~/db/generated/prisma/enums'
 import { getErrorMessage } from '~/helpers/error'
 import { captureWithFeature } from '~/lib/sentry'
+import { ConfirmAlertDialog } from '~/routes/admin/-components/confirm-alert-dialog'
 import {
   countAdminPendingProposalsQueryOpts,
   listAdminProposalsQueryOpts

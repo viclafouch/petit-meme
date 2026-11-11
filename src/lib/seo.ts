@@ -18,7 +18,7 @@ import type {
   WithContext
 } from 'schema-dts'
 import type { AnyRouteMatch } from '@tanstack/react-router'
-import type { FaqItem } from '~/components/faq-section'
+import type { FaqItem } from '~/components/marketing/faq-section'
 import { LOGO_PATH, SITE_NAME } from '~/constants/branding'
 import { HLS_MIME_TYPE } from '~/constants/bunny'
 import type { MemeWithCategories, MemeWithVideo } from '~/constants/meme'

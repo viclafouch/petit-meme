@@ -11,9 +11,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '~/components/ui/dropdown-menu'
-import { UserAvatar } from '~/components/user-avatar'
+import { UserAvatar } from '~/components/user/user-avatar'
+import type { SessionUser } from '~/helpers/role'
 import { useSignOut } from '~/hooks/use-sign-out'
-import type { SessionUser } from '~/lib/role'
 
 type AdminNavButtonProps = {
   user: SessionUser

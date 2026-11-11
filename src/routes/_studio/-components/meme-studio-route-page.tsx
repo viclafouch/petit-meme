@@ -6,8 +6,8 @@ import { getRouteApi } from '@tanstack/react-router'
 import {
   StudioCrashFallback,
   StudioLoadingFallback
-} from '~/components/Meme/studio-fallbacks'
-import { StudioPage } from '~/components/Meme/Studio/studio-page'
+} from '~/components/studio/studio-fallbacks'
+import { StudioPage } from '~/components/studio/studio-page'
 import { getMemeQueryOpts } from '~/lib/queries'
 
 const memeStudioRouteApi = getRouteApi('/_studio/memes/$memeId/studio')

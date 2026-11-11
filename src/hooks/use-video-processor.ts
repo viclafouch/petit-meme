@@ -28,6 +28,13 @@ import {
 import { getErrorMessage } from '~/helpers/error'
 import { snoozePremiumReminder } from '~/hooks/use-premium-reminder'
 import {
+  FFMPEG_VIDEO_ENCODING_ARGS,
+  FFMPEG_INPUT_FILE,
+  FFMPEG_TEXT_FILE,
+  loadFFmpeg,
+  readAndDeleteFFmpegOutput
+} from '~/lib/ffmpeg'
+import {
   getGenerationQuotaQueryOpts,
   getStudioVideoQueryOpts
 } from '~/lib/queries'
@@ -35,13 +42,6 @@ import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
 import { createGeneration } from '~/server/studio/studio.functions'
 import { dialogStore } from '~/stores/dialog.store'
-import {
-  FFMPEG_VIDEO_ENCODING_ARGS,
-  FFMPEG_INPUT_FILE,
-  FFMPEG_TEXT_FILE,
-  loadFFmpeg,
-  readAndDeleteFFmpegOutput
-} from '~/utils/ffmpeg'
 
 type VideoProcessingParams = {
   text: string

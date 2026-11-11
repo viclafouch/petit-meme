@@ -12,8 +12,8 @@ import { createClientOnlyFn } from '@tanstack/react-start'
 import { ALGOLIA_FAIL_FAST_ON_RATE_LIMIT } from '~/constants/algolia'
 import { COOKIE_ALGOLIA_USER_TOKEN_KEY } from '~/constants/cookie'
 import { clientEnv } from '~/env/client'
-import { readClientCookie } from '~/helpers/cookie'
-import { matchHasAcceptedCookies } from '~/lib/cookie-consent'
+import { readClientCookie } from '~/lib/cookie'
+import { matchIsAnalyticsConsentGiven } from '~/lib/cookie-consent'
 import { getLocale } from '~/paraglide/runtime'
 
 const algoliaInsights = insightsClient(
@@ -29,7 +29,7 @@ function logInsightsError(error: unknown) {
 }
 
 function getUserToken() {
-  if (!matchHasAcceptedCookies()) {
+  if (!matchIsAnalyticsConsentGiven()) {
     return null
   }
 

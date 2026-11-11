@@ -1,12 +1,12 @@
 import type { User } from 'better-auth'
 import { createServerOnlyFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
-import { matchIsActiveSubscriptionStatus } from '~/helpers/subscription'
 import {
   matchIsPremiumGranted,
   matchIsUserAdmin,
   type SessionUser
-} from '~/lib/role'
+} from '~/helpers/role'
+import { matchIsActiveSubscriptionStatus } from '~/helpers/subscription'
 import { auth } from '~/server/auth/auth.server'
 
 export const findActiveSubscription = createServerOnlyFn(

@@ -3,15 +3,15 @@ import { Bookmark, Eye, Tag } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
-import { MemeVideoThumbnail } from '~/components/Meme/meme-video-thumbnail'
+import { MemeVideoThumbnail } from '~/components/meme/meme-video-thumbnail'
 import { Badge } from '~/components/ui/badge'
 import { Skeleton } from '~/components/ui/skeleton'
 import { DEFAULT_MEME_TITLE, MemeStatusMeta } from '~/constants/meme'
 import { cn } from '~/lib/utils'
+import { matchIsVideoPlayable } from '~/lib/video'
 import { m } from '~/paraglide/messages'
 import { getAdminVideoStatusQueryOpts } from '~/routes/admin/-lib/queries'
 import type { AdminMemeRecord } from '~/server/admin/meme/meme.functions'
-import { matchIsVideoPlayable } from '~/utils/video'
 
 const VIDEO_STATUS_POLL_INTERVAL_MS = 30_000
 

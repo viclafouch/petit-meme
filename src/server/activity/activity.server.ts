@@ -7,7 +7,7 @@ import type {
   MemeExportFormat
 } from '~/db/generated/prisma/enums'
 import { extractClientCountry, extractClientIp } from '~/helpers/request'
-import type { SessionUser } from '~/lib/role'
+import type { SessionUser } from '~/helpers/role'
 import { captureWithFeature } from '~/lib/sentry'
 
 type ActivityActor = Pick<SessionUser, 'id'>

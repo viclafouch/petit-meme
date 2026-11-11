@@ -1,4 +1,4 @@
-import { MemeVideoPlayer } from '~/components/Meme/meme-video-player'
+import { MemeVideoPlayer } from '~/components/meme/meme-video-player'
 import { Card } from '~/components/ui/card'
 import type { MemeFullData } from '~/constants/meme'
 import { useMemeHls } from '~/hooks/use-meme-hls'

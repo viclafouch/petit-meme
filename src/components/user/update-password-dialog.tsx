@@ -1,0 +1,212 @@
+import type { User } from 'better-auth'
+import { CircleAlert } from 'lucide-react'
+import { z } from 'zod'
+import { formOptions } from '@tanstack/react-form'
+import { useMutation } from '@tanstack/react-query'
+import type { WithDialog } from '~/@types/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '~/components/animate-ui/base/dialog'
+import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
+import { LoadingButton } from '~/components/ui/loading-button'
+import { getPasswordSchema } from '~/constants/auth'
+import { useAppForm } from '~/hooks/use-app-form'
+import { useErrorFocus } from '~/hooks/use-error-focus'
+import { authClient } from '~/lib/auth-client'
+import {
+  captureUnexpectedAuthError,
+  extractAuthErrorCode,
+  getChangePasswordErrorMessage
+} from '~/lib/auth-errors'
+import { focusFirstInvalidField } from '~/lib/form'
+import { m } from '~/paraglide/messages.js'
+
+const getUpdatePasswordSchema = () => {
+  const passwordField = getPasswordSchema()
+
+  return z
+    .object({
+      currentPassword: z.string().min(1, { error: m.validation_required() }),
+      newPassword: passwordField,
+      confirmPassword: passwordField
+    })
+    .refine(
+      (data) => {
+        return data.newPassword === data.confirmPassword
+      },
+      {
+        error: m.validation_passwords_dont_match(),
+        path: ['confirmPassword']
+      }
+    )
+}
+
+const getUpdatePasswordFormOpts = () => {
+  return formOptions({
+    defaultValues: {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    },
+    validators: {
+      onChange: getUpdatePasswordSchema()
+    }
+  })
+}
+
+const UpdatePasswordForm = () => {
+  const updatePasswordMutation = useMutation({
+    mutationFn: async ({
+      currentPassword,
+      newPassword
+    }: {
+      currentPassword: string
+      newPassword: string
+    }) => {
+      const { error } = await authClient.changePassword({
+        currentPassword,
+        newPassword,
+        revokeOtherSessions: true
+      })
+
+      if (error) {
+        throw new Error(extractAuthErrorCode(error))
+      }
+    },
+    onError: (error) => {
+      captureUnexpectedAuthError(error, 'update-password')
+    },
+    onSuccess: () => {
+      form.reset()
+    }
+  })
+
+  const errorRef = useErrorFocus(updatePasswordMutation.error)
+
+  const form = useAppForm({
+    ...getUpdatePasswordFormOpts(),
+    onSubmitInvalid: focusFirstInvalidField,
+    onSubmit: ({ value }) => {
+      updatePasswordMutation.mutate({
+        currentPassword: value.currentPassword,
+        newPassword: value.newPassword
+      })
+    }
+  })
+
+  return (
+    <form
+      onSubmit={(event) => {
+        event.preventDefault()
+        void form.handleSubmit()
+      }}
+      noValidate
+      className="flex flex-col items-center gap-y-6 w-full"
+    >
+      <div className="flex flex-col items-center gap-y-4 w-full">
+        <form.AppField
+          name="currentPassword"
+          children={(field) => {
+            return (
+              <field.TextField
+                label={m.auth_current_password()}
+                required
+                type="password"
+                autoComplete="current-password"
+                placeholder="******"
+                name="current-password"
+              />
+            )
+          }}
+        />
+        <form.AppField
+          name="newPassword"
+          children={(field) => {
+            return (
+              <field.TextField
+                label={m.auth_new_password()}
+                required
+                type="password"
+                autoComplete="new-password"
+                placeholder="*******"
+                name="password"
+              />
+            )
+          }}
+        />
+        <form.AppField
+          name="confirmPassword"
+          children={(field) => {
+            return (
+              <field.TextField
+                label={m.auth_confirm_password()}
+                required
+                type="password"
+                autoComplete="new-password"
+                placeholder="******"
+              />
+            )
+          }}
+        />
+        <LoadingButton
+          isLoading={updatePasswordMutation.isPending}
+          type="submit"
+          className="w-full"
+        >
+          {m.auth_update()}
+        </LoadingButton>
+        {updatePasswordMutation.error ? (
+          <Alert
+            ref={errorRef}
+            variant="destructive"
+            role="alert"
+            tabIndex={-1}
+          >
+            <CircleAlert aria-hidden="true" />
+            <AlertDescription className="text-destructive-foreground">
+              {getChangePasswordErrorMessage(
+                updatePasswordMutation.error.message
+              )}
+            </AlertDescription>
+          </Alert>
+        ) : null}
+        {updatePasswordMutation.isSuccess ? (
+          <Alert variant="success" className="mt-4">
+            <CircleAlert aria-hidden="true" />
+            <AlertTitle>{m.auth_password_updated_title()}</AlertTitle>
+            <AlertDescription>
+              {m.auth_password_updated_description()}
+            </AlertDescription>
+          </Alert>
+        ) : null}
+      </div>
+    </form>
+  )
+}
+
+type UpdatePasswordDialogProps = WithDialog<{ user: User }>
+
+export const UpdatePasswordDialog = ({
+  open,
+  onOpenChange
+}: UpdatePasswordDialogProps) => {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>{m.settings_change_password()}</DialogTitle>
+          <DialogDescription />
+        </DialogHeader>
+        <div>
+          <UpdatePasswordForm />
+        </div>
+        <DialogFooter />
+      </DialogContent>
+    </Dialog>
+  )
+}

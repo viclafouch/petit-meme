@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { BAN_REASONS, type BanReason } from '~/constants/ban'
 import { getErrorMessage } from '~/helpers/error'
 import { getPremiumStatus, type SubscriptionInfo } from '~/helpers/premium'
-import { matchIsPremiumGranted } from '~/lib/role'
+import { matchIsPremiumGranted } from '~/helpers/role'
 import { captureWithFeature, type SentryFeature } from '~/lib/sentry'
 import {
   getAdminUserQueryOpts,

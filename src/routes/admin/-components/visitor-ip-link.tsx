@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router'
-import { CountryFlag } from '~/components/country-flag'
 import { cn } from '~/lib/utils'
+import { CountryFlag } from '~/routes/admin/-components/country-flag'
 
 type VisitorIpLinkProps = {
   ipAddress: string

@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { ErrorComponent } from '~/components/error-component'
+import { ErrorComponent } from '~/components/app/error-component'
 import { FLAG_CDN_ORIGIN } from '~/helpers/country'
 import { AdminLayout } from '~/routes/admin/-components/admin-layout'
 

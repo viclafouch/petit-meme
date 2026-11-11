@@ -1,4 +1,3 @@
-import { ConfirmAlertDialog } from '~/components/confirm-alert-dialog'
 import {
   Select,
   SelectContent,
@@ -7,6 +6,7 @@ import {
   SelectValue
 } from '~/components/ui/select'
 import { BAN_REASONS } from '~/constants/ban'
+import { ConfirmAlertDialog } from '~/routes/admin/-components/confirm-alert-dialog'
 import type { useUserActions } from './use-user-actions'
 
 type UserActionDialogsProps = {

@@ -1,9 +1,9 @@
 import { getRouteApi, Outlet, useMatchRoute } from '@tanstack/react-router'
 import { StarsBackground } from '~/components/animate-ui/backgrounds/stars'
-import { Footer } from '~/components/footer'
-import { LocaleBanner } from '~/components/locale-banner'
-import { Navbar } from '~/components/navbar'
-import { SentryFeedbackWidget } from '~/components/sentry-feedback-widget'
+import { SentryFeedbackWidget } from '~/components/app/sentry-feedback-widget'
+import { Footer } from '~/components/layout/footer'
+import { LocaleBanner } from '~/components/layout/locale-banner'
+import { Navbar } from '~/components/layout/navbar'
 import { m } from '~/paraglide/messages.js'
 
 const publicRouteApi = getRouteApi('/_public__root')

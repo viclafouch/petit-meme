@@ -16,10 +16,10 @@ import {
   MediaTimeRange,
   MediaVolumeRange
 } from 'media-chrome/react'
+import { mergeRefs } from '~/helpers/merge-ref'
 import { useDoubleClickFullscreen } from '~/hooks/use-double-click-fullscreen'
 import { cn } from '~/lib/utils'
 import { getLocale } from '~/paraglide/runtime'
-import { mergeRefs } from '~/utils/merge-ref'
 
 export type VideoPlayerProps = ComponentProps<typeof MediaController>
 

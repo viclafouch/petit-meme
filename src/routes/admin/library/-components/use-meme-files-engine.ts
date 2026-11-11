@@ -4,7 +4,10 @@ import { MEME_DERIVED_FORMAT_CONTENT_TYPES } from '~/constants/bunny'
 import { PERCENT_SCALE } from '~/constants/number'
 import { WATERMARK_ASSET_PATH } from '~/constants/watermark'
 import type { Meme } from '~/db/generated/prisma/client'
+import { loadFFmpeg } from '~/lib/ffmpeg'
+import { extractMp3 } from '~/lib/mp3'
 import { captureWithFeature } from '~/lib/sentry'
+import { applyWatermark } from '~/lib/watermark'
 import {
   getMissingMemeFilesQueryOpts,
   getAdminMemeOriginalQueryOpts
@@ -14,9 +17,6 @@ import {
   createMemeFileUploads,
   storeMemeFiles
 } from '~/server/admin/meme/meme-file.functions'
-import { loadFFmpeg } from '~/utils/ffmpeg'
-import { extractMp3 } from '~/utils/mp3'
-import { applyWatermark } from '~/utils/watermark'
 
 export type GenerateMemeFilesHandlers = {
   onStep: (step: Exclude<PublishStep, 'saving'>) => void

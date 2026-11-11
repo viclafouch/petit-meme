@@ -8,12 +8,12 @@ import {
   Scripts,
   useMatch
 } from '@tanstack/react-router'
+import { DialogProvider } from '~/components/app/dialog-provider'
+import { TailwindIndicator } from '~/components/app/tailwind-indicator'
+import { ThemeProvider } from '~/components/app/theme-provider'
 import { CookieBanner } from '~/components/cookie-consent/cookie-banner'
 import { CookieConsentProvider } from '~/components/cookie-consent/cookie-provider'
 import { CookieSettings } from '~/components/cookie-consent/cookie-settings'
-import { DialogProvider } from '~/components/dialog-provider'
-import { TailwindIndicator } from '~/components/tailwind-indicator'
-import { ThemeProvider } from '~/components/theme-provider'
 import { Toaster } from '~/components/ui/sonner'
 import { IS_PRODUCTION } from '~/constants/env'
 import { clientEnv } from '~/env/client'

@@ -3,7 +3,6 @@ import { EllipsisVertical } from 'lucide-react'
 import { toast } from 'sonner'
 import * as Sentry from '@sentry/tanstackstart-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { ConfirmAlertDialog } from '~/components/confirm-alert-dialog'
 import { Button } from '~/components/ui/button'
 import {
   Dialog,
@@ -20,6 +19,7 @@ import {
 } from '~/components/ui/dropdown-menu'
 import { getErrorMessage } from '~/helpers/error'
 import { listCategoriesQueryOpts } from '~/lib/queries'
+import { ConfirmAlertDialog } from '~/routes/admin/-components/confirm-alert-dialog'
 import { CategoryForm } from '~/routes/admin/categories/-components/category-form'
 import { deleteCategory } from '~/server/admin/category/category.functions'
 import type { CategoryListItem } from '~/server/category/category.server'

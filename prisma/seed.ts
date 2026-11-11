@@ -3,9 +3,8 @@ import { hashPassword } from 'better-auth/crypto'
 import { z } from 'zod'
 import { MEME_ALGOLIA_INCLUDE } from '~/constants/meme'
 import { prismaClient } from '~/db/client.server'
-import { getTweetByUrl, getTweetMedia } from '~/lib/react-tweet'
-import { fetchWithZod } from '~/lib/utils'
 import { locales } from '~/paraglide/runtime'
+import { fetchWithZod } from '~/server/http/fetch.server'
 import {
   getAlgoliaAdminClient,
   resolveAlgoliaIndexName,
@@ -19,6 +18,7 @@ import {
   uploadVideo
 } from '~/server/platforms/bunny.server'
 import { getStripeClient } from '~/server/platforms/stripe.server'
+import { getTweetByUrl, getTweetMedia } from '~/server/platforms/twitter.server'
 import { logEnvironmentInfo } from '../scripts/lib/env-guard'
 import mocks from './seed-mock.json' with { type: 'json' }
 

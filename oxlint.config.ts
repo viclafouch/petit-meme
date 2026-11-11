@@ -32,6 +32,7 @@ export default defineConfig({
   ],
   rules: {
     'react/no-children-prop': 'off',
+    'unicorn/filename-case': ['error', { case: 'kebabCase', ignore: ['\\$'] }],
     'petit-meme/comment-policy': 'error',
     'petit-meme/utf8-literal': 'error',
     'petit-meme/jsx-blank-line': 'error',

@@ -1,5 +1,4 @@
 import { expect, test as base } from '@playwright/test'
-import type { ConsentState } from '~/components/cookie-consent/types'
 import {
   CONSENT_COOKIE_KEY,
   CONSENT_VERSION,
@@ -7,6 +6,7 @@ import {
 } from '~/constants/cookie'
 import { PREMIUM_REMINDER_STORAGE_KEY } from '~/constants/plan'
 import { prismaClient } from '~/db/client.server'
+import type { ConsentState } from '~/helpers/cookie-consent'
 import { SERVER_FUNCTION_URL_PATTERN } from './server-functions'
 
 const ACCEPTED_CONSENT = {

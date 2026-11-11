@@ -1,4 +1,4 @@
-import { SearchInput } from '~/components/search-input'
+import { SearchInput } from '~/components/form/search-input'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import {

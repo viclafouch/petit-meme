@@ -8,12 +8,11 @@ import {
 import { getRouteApi, Link, useNavigate } from '@tanstack/react-router'
 import { AnimateIcon } from '~/components/animate-ui/icons/icon'
 import { Sparkles } from '~/components/animate-ui/icons/sparkles'
-import { CategoriesList } from '~/components/categories/categories-list'
-import { MemesFilterLanguage } from '~/components/Meme/Filters/memes-filter-language'
-import { MemesPagination } from '~/components/Meme/Filters/memes-pagination'
-import { MemesToggleGrid } from '~/components/Meme/Filters/memes-toggle-grid'
-import { MemesList } from '~/components/Meme/memes-list'
-import { SearchInput } from '~/components/search-input'
+import { SearchInput } from '~/components/form/search-input'
+import { MemesFilterLanguage } from '~/components/meme/filters/memes-filter-language'
+import { MemesPagination } from '~/components/meme/filters/memes-pagination'
+import { MemesToggleGrid } from '~/components/meme/filters/memes-toggle-grid'
+import { MemesList } from '~/components/meme/memes-list'
 import { Button, buttonVariants } from '~/components/ui/button'
 import { LoadingSpinner } from '~/components/ui/spinner'
 import { getVirtualCategories, type MemesFilters } from '~/constants/meme'
@@ -30,6 +29,7 @@ import {
   PageDescription,
   PageHeading
 } from '~/routes/_public__root/-components/page-headers'
+import { CategoriesList } from '~/routes/_public__root/_default/memes/-components/categories-list'
 import type { Route as CategoryRoute } from '~/routes/_public__root/_default/memes/category/$slug'
 
 const DEFAULT_COLUMN_GRID_COUNT = 5

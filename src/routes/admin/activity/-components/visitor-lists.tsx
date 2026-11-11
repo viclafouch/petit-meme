@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { UserAvatar } from '~/components/user-avatar'
+import { UserAvatar } from '~/components/user/user-avatar'
 import { formatRelativeTime } from '~/helpers/date'
 import { getLocale } from '~/paraglide/runtime'
 import { DetailList } from '~/routes/admin/-components/detail-list'

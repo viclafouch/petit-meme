@@ -1,0 +1,23 @@
+import { LoadingSpinner } from '~/components/ui/spinner'
+import { cn } from '~/lib/utils'
+import { m } from '~/paraglide/messages.js'
+
+type DefaultLoadingProps = React.ComponentProps<'div'>
+
+export const DefaultLoading = ({
+  className,
+  ...restProps
+}: DefaultLoadingProps) => {
+  return (
+    <div
+      className={cn(
+        'flex flex-col items-center justify-center gap-3',
+        className
+      )}
+      {...restProps}
+    >
+      <LoadingSpinner className="text-muted-foreground size-6" />
+      <p className="text-muted-foreground text-sm">{m.common_loading()}</p>
+    </div>
+  )
+}

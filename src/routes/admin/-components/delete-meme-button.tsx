@@ -2,10 +2,10 @@ import React from 'react'
 import { toast } from 'sonner'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
-import { ConfirmAlertDialog } from '~/components/confirm-alert-dialog'
 import { Button } from '~/components/ui/button'
 import type { Meme } from '~/db/generated/prisma/client'
 import { getErrorMessage } from '~/helpers/error'
+import { ConfirmAlertDialog } from '~/routes/admin/-components/confirm-alert-dialog'
 import {
   getAdminMemeQueryOpts,
   invalidateAdminMemesOverview

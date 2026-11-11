@@ -16,7 +16,6 @@ import {
   MemeStatus
 } from '~/db/generated/prisma/enums'
 import { adminLogger } from '~/lib/logger'
-import { getTweetByUrl, getTweetMedia } from '~/lib/react-tweet'
 import { captureWithFeature } from '~/lib/sentry'
 import { baseLocale } from '~/paraglide/runtime'
 import { logAuditAction } from '~/server/admin/audit/audit.server'
@@ -30,6 +29,7 @@ import {
   syncMemeToAllIndices
 } from '~/server/platforms/algolia.server'
 import { createVideo, uploadVideo } from '~/server/platforms/bunny.server'
+import { getTweetByUrl, getTweetMedia } from '~/server/platforms/twitter.server'
 
 const TWITTER_MEDIA_HOSTNAME = /^(video|pbs)\.twimg\.com$/u
 

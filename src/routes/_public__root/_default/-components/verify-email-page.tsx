@@ -1,5 +1,5 @@
 import { getRouteApi, Navigate } from '@tanstack/react-router'
-import { VerifyEmailForm } from '~/components/User/verify-email-form'
+import { VerifyEmailForm } from '~/components/auth/verify-email-form'
 
 const verifyEmailRouteApi = getRouteApi('/_public__root/_default/verify-email')
 

@@ -1,8 +1,6 @@
 import { ArrowLeft, EyeOff } from 'lucide-react'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { getRouteApi, Link } from '@tanstack/react-router'
-import { CountryFlag } from '~/components/country-flag'
-import { PageHeader } from '~/components/page-header'
 import { Badge } from '~/components/ui/badge'
 import { buttonVariants } from '~/components/ui/button'
 import { Container } from '~/components/ui/container'
@@ -10,6 +8,8 @@ import { ACTIVITY_IP_RETENTION_DAYS } from '~/constants/activity'
 import { formatDate, DATE_WITH_TIME_OPTIONS } from '~/helpers/date'
 import { getLocale } from '~/paraglide/runtime'
 import { ActivityTimeline } from '~/routes/admin/-components/activity-timeline'
+import { CountryFlag } from '~/routes/admin/-components/country-flag'
+import { PageHeader } from '~/routes/admin/-components/page-header'
 import {
   SectionCard,
   SectionHeading

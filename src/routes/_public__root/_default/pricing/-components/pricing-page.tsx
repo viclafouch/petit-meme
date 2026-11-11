@@ -6,9 +6,9 @@ import {
   getFreePlan,
   getPremiumPlan
 } from '~/constants/plan'
+import { matchIsPremiumGranted } from '~/helpers/role'
 import { useStripeCheckout } from '~/hooks/use-stripe-checkout'
 import { getActiveSubscriptionQueryOpts } from '~/lib/queries'
-import { matchIsPremiumGranted } from '~/lib/role'
 import { m } from '~/paraglide/messages.js'
 import {
   PageDescription,

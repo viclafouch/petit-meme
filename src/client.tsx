@@ -7,8 +7,8 @@ import { z } from 'zod'
 import * as Sentry from '@sentry/tanstackstart-react'
 import { StartClient } from '@tanstack/react-start/client'
 import { reloadOnStaleChunk } from '~/lib/stale-chunk-reload'
+import { preloadHls } from '~/lib/video'
 import { getLocale, type Locale } from '~/paraglide/runtime'
-import { preloadHls } from '~/utils/video'
 
 reloadOnStaleChunk()
 preloadHls()

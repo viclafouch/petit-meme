@@ -2,7 +2,7 @@ import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import { Badge } from '~/components/ui/badge'
 import { Container } from '~/components/ui/container'
-import { UserAvatar } from '~/components/user-avatar'
+import { UserAvatar } from '~/components/user/user-avatar'
 import {
   ACTIVITY_IP_RETENTION_DAYS,
   ACTIVITY_RETENTION_DAYS

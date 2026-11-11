@@ -4,7 +4,7 @@ import { getCache, waitUntil } from '@vercel/functions'
 import { ONE_DAY_IN_SECONDS } from '~/constants/time'
 import { extractClientIp } from '~/helpers/request'
 import { captureWithFeature } from '~/lib/sentry'
-import { fetchWithZod } from '~/lib/utils'
+import { fetchWithZod } from '~/server/http/fetch.server'
 
 const IPV4_FAMILY = 4
 const GOOGLEBOT_IP_RANGES_URL =

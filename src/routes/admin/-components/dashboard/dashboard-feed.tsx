@@ -1,4 +1,4 @@
-import { UserAvatar } from '~/components/user-avatar'
+import { UserAvatar } from '~/components/user/user-avatar'
 import { formatRelativeTime } from '~/helpers/date'
 import { getLocale } from '~/paraglide/runtime'
 import { EmptyMessage } from '~/routes/admin/-components/empty-message'

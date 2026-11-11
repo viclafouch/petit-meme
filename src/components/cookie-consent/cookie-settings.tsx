@@ -14,11 +14,14 @@ import {
 import { Label } from '~/components/ui/label'
 import { Separator } from '~/components/ui/separator'
 import { Switch } from '~/components/ui/switch'
+import {
+  type ConsentCategory,
+  getAllAcceptedCategories,
+  getDefaultCategories
+} from '~/helpers/cookie-consent'
 import { getCookieConsentCategories } from '~/lib/cookie-consent'
 import { m } from '~/paraglide/messages.js'
-import { useCookieConsentStore } from './cookie-consent.store'
-import type { ConsentCategory } from './types'
-import { getAllAcceptedCategories, getDefaultCategories } from './utils'
+import { useCookieConsentStore } from '~/stores/cookie-consent.store'
 
 const CookieSettingsContent = () => {
   const cookieConsentStore = useCookieConsentStore()

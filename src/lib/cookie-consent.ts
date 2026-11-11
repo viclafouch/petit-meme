@@ -1,15 +1,17 @@
-import { createClientOnlyFn, createIsomorphicFn } from '@tanstack/react-start'
+import { createIsomorphicFn } from '@tanstack/react-start'
 import { getCookie } from '@tanstack/react-start/server'
-import type { CategoryConfig } from '~/components/cookie-consent/types'
+import { CONSENT_COOKIE_KEY } from '~/constants/cookie'
+import { ONE_YEAR_IN_SECONDS } from '~/constants/time'
 import {
+  type CategoryConfig,
+  type ConsentState,
   matchIsAnalyticsConsented,
   parseConsentCookie
-} from '~/components/cookie-consent/utils'
-import { CONSENT_COOKIE_KEY } from '~/constants/cookie'
-import { readClientCookie } from '~/helpers/cookie'
+} from '~/helpers/cookie-consent'
+import { createClientCookie, readClientCookie } from '~/lib/cookie'
 import { m } from '~/paraglide/messages.js'
 
-export function getCookieConsentCategories(): readonly CategoryConfig[] {
+export const getCookieConsentCategories = (): readonly CategoryConfig[] => {
   return [
     {
       key: 'necessary',
@@ -33,18 +35,12 @@ export const getConsentState = createIsomorphicFn()
     return parseConsentCookie(readClientCookie(CONSENT_COOKIE_KEY))
   })
 
-export const matchIsAnalyticsConsentGiven = createIsomorphicFn()
-  .server(() => {
-    return matchIsAnalyticsConsented(
-      parseConsentCookie(getCookie(CONSENT_COOKIE_KEY))
-    )
-  })
-  .client(() => {
-    return matchIsAnalyticsConsented(
-      parseConsentCookie(readClientCookie(CONSENT_COOKIE_KEY))
-    )
-  })
+export const matchIsAnalyticsConsentGiven = () => {
+  return matchIsAnalyticsConsented(getConsentState())
+}
 
-export const matchHasAcceptedCookies = createClientOnlyFn(() => {
-  return matchIsAnalyticsConsentGiven()
-})
+export const saveConsentState = (state: ConsentState) => {
+  createClientCookie(CONSENT_COOKIE_KEY, JSON.stringify(state), {
+    maxAge: ONE_YEAR_IN_SECONDS
+  })
+}

@@ -1,4 +1,4 @@
-import { PageHeader } from '~/components/page-header'
+import { PageHeader } from '~/routes/admin/-components/page-header'
 import { ServicesGrid } from './services-grid'
 
 export const ServicesPage = () => {

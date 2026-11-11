@@ -1,5 +1,5 @@
 import type React from 'react'
-import { ClipboardPasteInput } from '~/components/clipboard-paste-input'
+import { ClipboardPasteInput } from '~/components/form/clipboard-paste-input'
 import { FormItem, FormLabel, FormMessage } from '~/components/ui/form'
 import { useFieldContext } from '~/hooks/form-context'
 import { getFieldErrorMessage } from '~/lib/form'

@@ -1,4 +1,5 @@
 import type { BillingPeriod } from '~/constants/plan'
+import { matchIsUserAdmin, type UserRoleHolder } from '~/helpers/role'
 import {
   getBillingPeriodFromInterval,
   getSubscriptionEnding,
@@ -8,7 +9,6 @@ import {
   type SubscriptionEnding,
   type SubscriptionState
 } from '~/helpers/subscription'
-import { matchIsUserAdmin, type UserRoleHolder } from '~/lib/role'
 
 export const PREMIUM_PLAN_LABELS = {
   monthly: 'Premium mensuel',

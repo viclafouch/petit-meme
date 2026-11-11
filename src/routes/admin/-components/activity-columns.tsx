@@ -1,13 +1,13 @@
 import { Link } from '@tanstack/react-router'
 import type { ColumnVisibilityState } from '@tanstack/react-table'
-import { MemeFormatChip } from '~/components/Meme/meme-format-chip'
+import { MemeFormatChip } from '~/components/meme/meme-format-chip'
 import { Badge } from '~/components/ui/badge'
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger
 } from '~/components/ui/tooltip'
-import { UserAvatar } from '~/components/user-avatar'
+import { UserAvatar } from '~/components/user/user-avatar'
 import { ACTIVITY_IP_RETENTION_DAYS } from '~/constants/activity'
 import { DAY } from '~/constants/time'
 import { ActivityTypeIcon } from '~/routes/admin/-components/activity-type-icon'

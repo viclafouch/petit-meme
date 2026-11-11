@@ -3,8 +3,8 @@ import { createFileRoute } from '@tanstack/react-router'
 import { prismaClient } from '~/db/client.server'
 import { serverEnv } from '~/env/server.server'
 import { cronLogger } from '~/lib/logger'
-import { fetchWithZod } from '~/lib/utils'
 import { verifyCronSecret } from '~/server/auth/cron-auth.server'
+import { fetchWithZod } from '~/server/http/fetch.server'
 import {
   buildLibraryApiUrl,
   getBunnyHeaders

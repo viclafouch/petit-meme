@@ -8,7 +8,7 @@ import {
 import { FIVE_MINUTES_IN_SECONDS, SECOND } from '~/constants/time'
 import { serverEnv } from '~/env/server.server'
 import { bunnyLogger } from '~/lib/logger'
-import { fetchWithZod } from '~/lib/utils'
+import { fetchWithZod } from '~/server/http/fetch.server'
 import {
   signVideoFileUrl,
   signVideoPlaybackUrl

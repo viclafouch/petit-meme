@@ -7,14 +7,14 @@ import { getErrorMessage } from '~/helpers/error'
 import { useIsPremium } from '~/hooks/use-is-premium'
 import { snoozePremiumReminder } from '~/hooks/use-premium-reminder'
 import type { InsightsTracking } from '~/lib/algolia-insights'
-import { captureWithFeature } from '~/lib/sentry'
-import { m } from '~/paraglide/messages.js'
-import { dialogStore } from '~/stores/dialog.store'
 import {
   deliverMemeExport,
   fetchMemeExport,
   type ExportableMeme
-} from '~/utils/meme-export'
+} from '~/lib/meme-export'
+import { captureWithFeature } from '~/lib/sentry'
+import { m } from '~/paraglide/messages.js'
+import { dialogStore } from '~/stores/dialog.store'
 
 type UseMemeExportParams = {
   mode: MemeExportMode

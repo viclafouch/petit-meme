@@ -1,6 +1,6 @@
-import { CountryFlag } from '~/components/country-flag'
-import { MemeFormatChip } from '~/components/Meme/meme-format-chip'
+import { MemeFormatChip } from '~/components/meme/meme-format-chip'
 import { ActivityTypeIcon } from '~/routes/admin/-components/activity-type-icon'
+import { CountryFlag } from '~/routes/admin/-components/country-flag'
 import {
   ACTIVITY_TYPE_DISPLAY,
   formatActivityEntry

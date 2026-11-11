@@ -1,5 +1,5 @@
 import React from 'react'
-import { playVideoWhenReady, stopVideo } from '~/utils/video'
+import { playVideoWhenReady, stopVideo } from '~/lib/video'
 
 type UseVideoPlaybackParams = {
   video: HTMLVideoElement | null

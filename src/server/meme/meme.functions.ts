@@ -34,9 +34,10 @@ import {
   resolveVisibleContentLocales
 } from '~/helpers/i18n-content'
 import { extractClientIp } from '~/helpers/request'
+import { matchCanViewMeme, matchIsUserAdmin } from '~/helpers/role'
+import { ensureAlgoliaUserToken } from '~/lib/algolia-user-token'
 import { matchIsAnalyticsConsentGiven } from '~/lib/cookie-consent'
 import { logger } from '~/lib/logger'
-import { matchCanViewMeme, matchIsUserAdmin } from '~/lib/role'
 import { getLocale } from '~/paraglide/runtime'
 import { recordActivityEvent } from '~/server/activity/activity.server'
 import { findCachedSession } from '~/server/auth/auth.server'
@@ -49,7 +50,6 @@ import {
 import { buildSignedStreamUrl } from '~/server/platforms/bunny.server'
 import { createRateLimitMiddleware } from '~/server/rate-limit/rate-limit.middleware'
 import { matchIsUserPremium } from '~/server/subscription/subscription.server'
-import { ensureAlgoliaUserToken } from '~/utils/tracking-cookies'
 
 const ISO_DAY_LENGTH = 'YYYY-MM-DD'.length
 

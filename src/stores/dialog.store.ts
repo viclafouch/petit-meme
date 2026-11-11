@@ -9,7 +9,7 @@ type DialogEntry = {
 const DIALOGS = {
   auth: {
     component: React.lazy(async () => {
-      const { AuthDialog } = await import('~/components/User/auth-dialog')
+      const { AuthDialog } = await import('~/components/auth/auth-dialog')
 
       return { default: AuthDialog }
     })
@@ -17,7 +17,7 @@ const DIALOGS = {
   'watermark-upsell': {
     component: React.lazy(async () => {
       const { WatermarkUpsellDialog } =
-        await import('~/components/Meme/watermark-upsell-dialog')
+        await import('~/components/premium/watermark-upsell-dialog')
 
       return { default: WatermarkUpsellDialog }
     })
@@ -25,7 +25,7 @@ const DIALOGS = {
   'audio-upsell': {
     component: React.lazy(async () => {
       const { AudioUpsellDialog } =
-        await import('~/components/Meme/audio-upsell-dialog')
+        await import('~/components/premium/audio-upsell-dialog')
 
       return { default: AudioUpsellDialog }
     })
@@ -33,7 +33,7 @@ const DIALOGS = {
   'ai-search-upsell': {
     component: React.lazy(async () => {
       const { AiSearchUpsellDialog } =
-        await import('~/components/Meme/ai-search-upsell-dialog')
+        await import('~/components/premium/ai-search-upsell-dialog')
 
       return { default: AiSearchUpsellDialog }
     })
@@ -41,7 +41,7 @@ const DIALOGS = {
   'studio-upsell': {
     component: React.lazy(async () => {
       const { StudioUpsellDialog } =
-        await import('~/components/Meme/studio-upsell-dialog')
+        await import('~/components/premium/studio-upsell-dialog')
 
       return { default: StudioUpsellDialog }
     })
@@ -49,7 +49,7 @@ const DIALOGS = {
   'bookmark-upsell': {
     component: React.lazy(async () => {
       const { BookmarkUpsellDialog } =
-        await import('~/components/Meme/bookmark-upsell-dialog')
+        await import('~/components/premium/bookmark-upsell-dialog')
 
       return { default: BookmarkUpsellDialog }
     })
@@ -57,7 +57,7 @@ const DIALOGS = {
   'premium-reminder': {
     component: React.lazy(async () => {
       const { PremiumReminderDialog } =
-        await import('~/components/premium-reminder-dialog')
+        await import('~/components/premium/premium-reminder-dialog')
 
       return { default: PremiumReminderDialog }
     })

@@ -1,7 +1,7 @@
 import { ArrowRight } from 'lucide-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { getRouteApi, Link } from '@tanstack/react-router'
-import { PageHeader } from '~/components/page-header'
+import { PageHeader } from '~/routes/admin/-components/page-header'
 import { SectionHeading } from '~/routes/admin/-components/section-heading'
 import {
   getAdminDashboardChartQueryOpts,

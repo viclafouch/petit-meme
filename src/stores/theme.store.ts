@@ -1,6 +1,6 @@
 import { createStoreContext, type Store } from '@tanstack/react-store'
 import { ONE_YEAR_IN_SECONDS } from '~/constants/time'
-import { createClientCookie } from '~/helpers/cookie'
+import { createClientCookie } from '~/lib/cookie'
 import { type Theme, THEME_COOKIE_KEY } from '~/lib/theme'
 
 type ThemeState = {

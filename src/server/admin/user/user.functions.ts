@@ -16,10 +16,10 @@ import { AccountUnbannedEmail } from '~/emails/account-unbanned-email'
 import { PremiumGrantedEmail } from '~/emails/premium-granted-email'
 import { emailSubjects } from '~/emails/subjects'
 import { buildSubscriptionInfo, type SubscriptionInfo } from '~/helpers/premium'
+import { matchIsUserAdmin, matchIsUserBanned } from '~/helpers/role'
 import { ACTIVE_SUBSCRIPTION_STATUSES } from '~/helpers/subscription'
 import { buildSubscriptionHistory } from '~/helpers/subscription-history'
 import { adminLogger } from '~/lib/logger'
-import { matchIsUserAdmin, matchIsUserBanned } from '~/lib/role'
 import { captureWithFeature } from '~/lib/sentry'
 import {
   buildRetainedActivityWhere,

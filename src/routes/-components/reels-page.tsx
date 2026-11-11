@@ -1,5 +1,5 @@
-import { DefaultLoading } from '~/components/default-loading'
-import { MemeReels } from '~/components/Meme/meme-reels'
+import { DefaultLoading } from '~/components/app/default-loading'
+import { MemeReels } from '~/components/meme/meme-reels'
 
 export const ReelsPage = () => {
   return (

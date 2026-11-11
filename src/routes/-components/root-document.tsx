@@ -8,12 +8,13 @@ import {
   Scripts,
   useMatch
 } from '@tanstack/react-router'
-import { DialogProvider } from '~/components/app/dialog-provider'
+import { DialogOutlet, DialogProvider } from '~/components/app/dialog-provider'
 import { TailwindIndicator } from '~/components/app/tailwind-indicator'
 import { ThemeProvider } from '~/components/app/theme-provider'
 import { CookieBanner } from '~/components/cookie-consent/cookie-banner'
 import { CookieConsentProvider } from '~/components/cookie-consent/cookie-provider'
 import { CookieSettings } from '~/components/cookie-consent/cookie-settings'
+import { StudioProvider } from '~/components/studio/studio-provider'
 import { Toaster } from '~/components/ui/sonner'
 import { IS_PRODUCTION } from '~/constants/env'
 import { clientEnv } from '~/env/client'
@@ -56,17 +57,20 @@ export const RootDocument = ({ children }: RootDocumentProps) => {
         <MotionConfig reducedMotion="user">
           <ThemeProvider initialTheme={_storedTheme}>
             <CookieConsentProvider storedConsent={_consentState}>
-              <DialogProvider>{children}</DialogProvider>
-              <ClientOnly>
-                <Toaster richColors />
-              </ClientOnly>
-              {embedMatch ? null : (
+              <DialogProvider>
+                <StudioProvider>{children}</StudioProvider>
+                <DialogOutlet />
                 <ClientOnly>
-                  <CookieBanner />
+                  <Toaster richColors />
                 </ClientOnly>
-              )}
-              <CookieSettings />
-              {IS_PRODUCTION ? null : <TailwindIndicator />}
+                {embedMatch ? null : (
+                  <ClientOnly>
+                    <CookieBanner />
+                  </ClientOnly>
+                )}
+                <CookieSettings />
+                {IS_PRODUCTION ? null : <TailwindIndicator />}
+              </DialogProvider>
             </CookieConsentProvider>
           </ThemeProvider>
         </MotionConfig>

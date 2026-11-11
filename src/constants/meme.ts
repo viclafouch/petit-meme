@@ -11,7 +11,7 @@ import { DAY, DAYS_PER_WEEK } from '~/constants/time'
 import type { Prisma } from '~/db/generated/prisma/client'
 import { MemeContentLocale, MemeStatus } from '~/db/generated/prisma/enums'
 import { FILTERABLE_CONTENT_LOCALES } from '~/helpers/i18n-content'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 const MEME_VIDEO_SELECT = {
   id: true,

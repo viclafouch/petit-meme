@@ -182,18 +182,14 @@ export const searchMemesWithAi = createServerFn({ method: 'POST' })
       data.contentLocale === undefined ? undefined : [data.contentLocale]
     )
 
-    let searchPage: Awaited<ReturnType<typeof searchMemes>>
-
-    try {
-      searchPage = await searchMemes({
-        indexName,
-        query,
-        page: 0,
-        hitsPerPage: MAX_AI_SEARCH_RESULTS,
-        filters,
-        removeWordsIfNoResults: 'allOptional'
-      })
-    } catch (error) {
+    const searchPage = await searchMemes({
+      indexName,
+      query,
+      page: 0,
+      hitsPerPage: MAX_AI_SEARCH_RESULTS,
+      filters,
+      removeWordsIfNoResults: 'allOptional'
+    }).catch(async (error: unknown) => {
       captureWithFeature(error, 'ai-search')
       aiSearchLogger.error({ error, query, filters }, 'Algolia search failed')
       await refundAiSearch(reservation.id)
@@ -202,7 +198,7 @@ export const searchMemesWithAi = createServerFn({ method: 'POST' })
         HTTP_STATUS.BAD_GATEWAY,
         new Error('AI search failed', { cause: error })
       )
-    }
+    })
 
     const { memes, queryID } = searchPage
     const memeIds = memes.map((meme) => {

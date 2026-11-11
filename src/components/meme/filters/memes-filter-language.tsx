@@ -14,7 +14,7 @@ import {
   getContentLocaleLabel,
   matchIsDefaultContentLocaleFilter
 } from '~/helpers/i18n-content'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 
 type MemesFilterLanguageProps = {

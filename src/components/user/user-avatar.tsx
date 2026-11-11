@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
 import { getAvatarSlotIdForEmail, resolveAvatarPath } from '~/helpers/avatar'
 import { getUserInitials } from '~/helpers/format'
 import { cn } from '~/lib/utils'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 type UserAvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 

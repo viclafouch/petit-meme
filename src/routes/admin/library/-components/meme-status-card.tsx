@@ -129,7 +129,7 @@ export const MemeStatusCard = ({
   const isBusy = isRunning || isChangingStatus
 
   const handleRegenerate = () => {
-    void publisher.regenerate()
+    publisher.regenerate()
   }
 
   return (
@@ -194,7 +194,7 @@ export const MemeStatusCard = ({
           isLoading={isChangingStatus}
           disabled={isRunning}
           onClick={() => {
-            void publisher.changeStatus(transition)
+            publisher.changeStatus(transition)
           }}
         >
           {transition.label}

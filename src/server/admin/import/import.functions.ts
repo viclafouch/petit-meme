@@ -95,10 +95,8 @@ const createMemeWithVideo = async ({
 }: CreateMemeWithVideoParams) => {
   const title = DEFAULT_MEME_TITLE
   const { videoId } = await createVideo(title)
-  let meme
-
-  try {
-    meme = await prismaClient.meme.create({
+  const meme = await prismaClient.meme
+    .create({
       data: {
         title,
         tweetUrl,
@@ -122,10 +120,10 @@ const createMemeWithVideo = async ({
       },
       include: MEME_ALGOLIA_INCLUDE
     })
-  } catch (error) {
-    await deleteMemeFiles(videoId)
-    throw error
-  }
+    .catch(async (error: unknown) => {
+      await deleteMemeFiles(videoId)
+      throw error
+    })
 
   try {
     await Promise.all([

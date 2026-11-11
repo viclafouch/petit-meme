@@ -30,7 +30,7 @@ import {
 } from '~/constants/studio'
 import { SELECTED_TILE_RING_CLASS_NAME } from '~/constants/ui'
 import { cn } from '~/lib/utils'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 type ColorSwatchesProps<TValue extends string> = {
   colors: StudioColorEntry<TValue>[]

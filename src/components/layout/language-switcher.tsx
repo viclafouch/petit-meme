@@ -10,7 +10,7 @@ import {
 import { getLocaleDisplayName } from '~/helpers/locale'
 import { dismissLocaleBanner } from '~/lib/locale-banner'
 import { cn } from '~/lib/utils'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { getLocale, locales, setLocale, type Locale } from '~/paraglide/runtime'
 import { updateUserLocale } from '~/server/user/user.functions'
 

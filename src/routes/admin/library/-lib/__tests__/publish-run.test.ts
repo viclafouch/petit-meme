@@ -9,7 +9,7 @@ import {
   startPublishRun,
   trackPublishProgress,
   type PublishRun
-} from '../publish-run'
+} from '~/routes/admin/library/-lib/publish-run'
 
 const RUN_ID = 1
 const PROGRESS_PERCENT = 42

@@ -4,7 +4,7 @@ import {
   RadioToggleGroupItem
 } from '~/components/ui/radio-toggle-group'
 import { MEME_GRID_COLUMNS } from '~/constants/meme'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 const DEFAULT_COLUMN_VALUES = [
   MEME_GRID_COLUMNS.SMALL,

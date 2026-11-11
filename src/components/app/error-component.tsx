@@ -17,7 +17,7 @@ import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
 import { Button, buttonVariants } from '~/components/ui/button'
 import { IS_PRODUCTION } from '~/constants/env'
 import { cn } from '~/lib/utils'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 type ErrorComponentProps = Pick<RouterErrorComponentProps, 'error'>
 

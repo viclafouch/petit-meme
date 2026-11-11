@@ -1,4 +1,3 @@
-/* oxlint-disable no-console */
 import { hashPassword } from 'better-auth/crypto'
 import { z } from 'zod'
 import { MEME_ALGOLIA_INCLUDE } from '~/constants/meme'

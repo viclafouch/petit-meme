@@ -21,8 +21,6 @@ import { captureWithFeature } from '~/lib/sentry'
 import { ImportFormFooter } from '~/routes/admin/-components/import-form-footer'
 import { createMemeFromTweet } from '~/server/admin/import/import.functions'
 
-const ignoreReportedError = () => {}
-
 const TWEET_FORM_SCHEMA = z.object({ url: TWEET_LINK_SCHEMA })
 
 type TwitterFormProps = {
@@ -47,8 +45,8 @@ export const TwitterForm = ({ onImported }: TwitterFormProps) => {
     defaultValues: { url: '' },
     validators: { onChange: TWEET_FORM_SCHEMA },
     onSubmitInvalid: focusFirstInvalidField,
-    onSubmit: async ({ value }) => {
-      await importMutation.mutateAsync(value.url).catch(ignoreReportedError)
+    onSubmit: ({ value }) => {
+      importMutation.mutate(value.url)
     }
   })
 
@@ -112,18 +110,9 @@ export const TwitterForm = ({ onImported }: TwitterFormProps) => {
           )
         }}
       />
-      <form.Subscribe
-        selector={(state) => {
-          return state.isSubmitting
-        }}
-        children={(isSubmitting) => {
-          return (
-            <ImportFormFooter
-              error={importMutation.error}
-              isSubmitting={isSubmitting}
-            />
-          )
-        }}
+      <ImportFormFooter
+        error={importMutation.error}
+        isSubmitting={importMutation.isPending}
       />
     </form>
   )

@@ -10,12 +10,13 @@ import {
   PageDescription,
   PageHeading
 } from '~/routes/_public__root/-components/page-headers'
-import { dialogStore } from '~/stores/dialog.store'
+import { useDialogStore } from '~/stores/dialog.store'
 import { ProposalForm } from './proposal-form'
 import { ProposalHistory } from './proposal-history'
 import { ProposalRules } from './proposal-rules'
 
 const NotLoggedIn = () => {
+  const dialogStore = useDialogStore()
   return (
     <Card>
       <CardContent className="flex flex-col items-center gap-4 py-8">

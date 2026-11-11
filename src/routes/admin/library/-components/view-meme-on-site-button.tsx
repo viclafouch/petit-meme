@@ -60,7 +60,7 @@ export const ViewMemeOnSiteButton = ({
   const hasAllFiles = missingFiles?.length === 0
 
   const handleGenerate = () => {
-    void regenerate()
+    regenerate()
   }
 
   if (meme.status === MemeStatus.PUBLISHED) {

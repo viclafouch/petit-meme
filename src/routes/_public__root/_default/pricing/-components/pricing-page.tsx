@@ -8,7 +8,7 @@ import {
   getPremiumPlan
 } from '~/constants/plan'
 import { matchIsPremiumGranted } from '~/helpers/role'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { getActiveSubscriptionQueryOpts } from '~/queries/subscription'
 import {
   PageDescription,

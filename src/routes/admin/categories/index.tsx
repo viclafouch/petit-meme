@@ -5,9 +5,6 @@ import { CategoriesPage } from '~/routes/admin/categories/-components/categories
 
 export const Route = createFileRoute('/admin/categories/')({
   component: CategoriesPage,
-  head: () => {
-    return { meta: [{ title: 'Admin Petit Meme - Catégories' }] }
-  },
   loader: async ({ context }) => {
     await context.queryClient.query({
       ...listCategoriesQueryOpts(baseLocale),
@@ -15,5 +12,8 @@ export const Route = createFileRoute('/admin/categories/')({
     })
 
     return { crumb: 'Catégories' }
+  },
+  head: () => {
+    return { meta: [{ title: 'Admin Petit Meme - Catégories' }] }
   }
 })

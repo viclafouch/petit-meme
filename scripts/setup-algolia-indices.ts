@@ -1,4 +1,3 @@
-/* oxlint-disable no-console */
 import type { SupportedLanguage } from '@algolia/client-search'
 import { locales, type Locale } from '~/paraglide/runtime'
 import {

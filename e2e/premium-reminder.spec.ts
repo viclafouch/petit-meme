@@ -3,7 +3,7 @@ import {
   PREMIUM_REMINDER_DELAY_MS,
   PREMIUM_REMINDER_STORAGE_KEY
 } from '~/constants/plan'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { getAuthDialogSignInButton } from './auth-flows'
 import { E2E_CATEGORIES, E2E_NAMED_MEMES } from './content'
 import { test } from './fixtures'

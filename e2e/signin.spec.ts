@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { openAuthDialog } from './auth-flows'
 import { E2E_PASSWORD, E2E_ROLES, E2E_WRONG_PASSWORD } from './constants'
 import { E2E_BASE_URL } from './env'

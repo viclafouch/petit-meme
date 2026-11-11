@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { CheckoutSuccessPage } from './-components/checkout-success-page'
 
 export const Route = createFileRoute(

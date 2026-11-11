@@ -4,7 +4,7 @@ import { PremiumUpsellDialog } from '~/components/premium/premium-upsell-dialog'
 import type { MemeExportMode } from '~/constants/meme'
 import type { InsightsTracking } from '~/lib/algolia-insights'
 import type { ExportableMeme } from '~/lib/meme-export'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 type WatermarkUpsellDialogProps = WithDialog<{
   meme: ExportableMeme

@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { createEnv } from '@t3-oss/env-core'
-import { IS_TEST } from '../constants/env.ts'
-import { clientEnvSchema } from './client-schema.ts'
+import { IS_TEST } from '~/constants/env'
+import { clientEnvSchema } from './client-schema'
 
 export const clientEnv = createEnv({
   clientPrefix: 'VITE_',

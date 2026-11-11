@@ -19,7 +19,7 @@ import {
 import { MONTHS_IN_YEAR } from '~/constants/time'
 import { convertCentsToEuros, formatCentsToEuros } from '~/helpers/number'
 import { cn } from '~/lib/utils'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 
 type FeatureStatusStaticConfig = {

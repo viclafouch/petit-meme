@@ -11,7 +11,7 @@ import {
   VideoPlayer,
   VideoPlayerContent
 } from '~/components/ui/kibo-ui/video-player'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { PageHeading2 } from '~/routes/_public__root/-components/page-headers'
 
 const tabletVariants: Variants = {

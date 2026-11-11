@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { getAuthDialogSignInButton } from './auth-flows'
 import { E2E_NAMED_MEMES } from './content'
 import { resolveStorageStatePath } from './env'

@@ -15,7 +15,7 @@ import {
 import { getLegalLinks } from '~/constants/navigation'
 import { matchIsUserAdmin, type SessionUser } from '~/helpers/role'
 import { cn } from '~/lib/utils'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
 import { getActiveSubscriptionQueryOpts } from '~/queries/subscription'
 

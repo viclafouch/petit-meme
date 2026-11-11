@@ -1,5 +1,5 @@
 import React from 'react'
-import { createStore } from '@tanstack/react-store'
+import { createStoreContext, type Store } from '@tanstack/react-store'
 import type { WithDialog } from '~/@types/dialog'
 
 type DialogEntry = {
@@ -103,12 +103,14 @@ type DialogState = {
   isOpen: boolean
 }
 
-const INITIAL_DIALOG_STATE: DialogState = {
+export const INITIAL_DIALOG_STATE: DialogState = {
   renderDialog: null,
   isOpen: false
 }
 
-export const dialogStore = createStore(INITIAL_DIALOG_STATE, ({ setState }) => {
+export const createDialogActions = ({
+  setState
+}: Pick<Store<DialogState>, 'setState'>) => {
   return {
     forceCloseDialog: () => {
       setState(() => {
@@ -137,4 +139,11 @@ export const dialogStore = createStore(INITIAL_DIALOG_STATE, ({ setState }) => {
       })
     }
   }
-})
+}
+
+type DialogStore = Store<DialogState, ReturnType<typeof createDialogActions>>
+
+export const {
+  StoreProvider: DialogStoreProvider,
+  useStoreContext: useDialogStore
+} = createStoreContext<DialogStore>()

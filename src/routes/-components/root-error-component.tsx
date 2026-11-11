@@ -6,7 +6,7 @@ import {
   Scripts
 } from '@tanstack/react-router'
 import { IS_PRODUCTION } from '~/constants/env'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { getLocale, getTextDirection, localizeHref } from '~/paraglide/runtime'
 
 type RootErrorComponentProps = ErrorComponentProps

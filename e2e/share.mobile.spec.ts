@@ -1,5 +1,5 @@
 import { expect, type Locator, type Page } from '@playwright/test'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { E2E_NAMED_MEMES } from './content'
 import { expectMemeFileDownloaded } from './downloads'
 import { resolveStorageStatePath } from './env'

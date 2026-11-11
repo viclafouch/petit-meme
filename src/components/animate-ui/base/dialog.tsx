@@ -3,7 +3,7 @@ import { X } from 'lucide-react'
 import { AnimatePresence, motion, type Transition } from 'motion/react'
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
 import { cn } from '~/lib/utils'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 type DialogContextType = {
   isOpen: boolean

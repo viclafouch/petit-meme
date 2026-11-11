@@ -1,6 +1,6 @@
 import { errors, expect } from '@playwright/test'
 import { CONSENT_BANNER_DELAY_MS, CONSENT_COOKIE_KEY } from '~/constants/cookie'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { test } from './fixtures'
 import { repeatUntilVisible } from './hydration'
 
@@ -56,6 +56,7 @@ test.describe('the consent banner', () => {
     })
 
     await expect(
+      // oxlint-disable-next-line playwright/no-action-timeout -- the test asserts that the overlay refuses the click, which Playwright reports only through a timeout
       libraryLink.click({ trial: true, timeout: REFUSED_CLICK_TIMEOUT_MS })
     ).rejects.toThrow(errors.TimeoutError)
 

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { MEME_PROPOSAL_SCHEMA } from '~/constants/meme-proposal'
 import { MemeContentLocale } from '~/db/generated/prisma/enums'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import {
   getLocale,
   type Locale,

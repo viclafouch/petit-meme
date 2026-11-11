@@ -1,4 +1,4 @@
-import { createStore } from '@tanstack/react-store'
+import { createStoreContext, type Store } from '@tanstack/react-store'
 import {
   STUDIO_DEFAULT_SETTINGS,
   STUDIO_TEMPLATE_STYLES,
@@ -17,12 +17,14 @@ type StudioState = {
   activeTemplateId: StudioTemplateId | null
 }
 
-const INITIAL_STUDIO_STATE: StudioState = {
+export const INITIAL_STUDIO_STATE: StudioState = {
   settings: STUDIO_DEFAULT_SETTINGS,
   activeTemplateId: 'caption'
 }
 
-export const studioStore = createStore(INITIAL_STUDIO_STATE, ({ setState }) => {
+export const createStudioActions = ({
+  setState
+}: Pick<Store<StudioState>, 'setState'>) => {
   return {
     setSettings: (updates: Partial<StudioSettings>) => {
       const hasStyleChange = Object.keys(updates).some((key) => {
@@ -53,4 +55,11 @@ export const studioStore = createStore(INITIAL_STUDIO_STATE, ({ setState }) => {
       })
     }
   }
-})
+}
+
+type StudioStore = Store<StudioState, ReturnType<typeof createStudioActions>>
+
+export const {
+  StoreProvider: StudioStoreProvider,
+  useStoreContext: useStudioStore
+} = createStoreContext<StudioStore>()

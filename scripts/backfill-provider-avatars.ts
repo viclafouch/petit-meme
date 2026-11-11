@@ -1,4 +1,3 @@
-/* oxlint-disable no-console */
 import { parseArgs } from 'node:util'
 import { AVATAR_CATALOG, AVATAR_DIRECTORY } from '~/constants/avatar'
 import { prismaClient } from '~/db/client.server'

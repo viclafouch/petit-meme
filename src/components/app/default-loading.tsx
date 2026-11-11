@@ -1,6 +1,6 @@
 import { LoadingSpinner } from '~/components/ui/spinner'
 import { cn } from '~/lib/utils'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 type DefaultLoadingProps = React.ComponentProps<'div'>
 

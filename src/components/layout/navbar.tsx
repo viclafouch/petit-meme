@@ -15,8 +15,8 @@ import {
 import { LOGO_PATH } from '~/constants/branding'
 import { useNeedsScrollFadeFallback } from '~/hooks/use-scroll-fade'
 import { cn } from '~/lib/utils'
-import { m } from '~/paraglide/messages.js'
-import { dialogStore } from '~/stores/dialog.store'
+import { m } from '~/paraglide/messages'
+import { useDialogStore } from '~/stores/dialog.store'
 import { MobileNav } from './mobile-nav'
 
 export type NavigationLink = {
@@ -51,6 +51,7 @@ const NavbarScrollFadeFallback = () => {
 }
 
 export const Navbar = () => {
+  const dialogStore = useDialogStore()
   const { user } = useRouteContext({ from: '__root__' })
   const navigationLinks = getNavigationLinks()
   const needsFallback = useNeedsScrollFadeFallback()

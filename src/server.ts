@@ -8,7 +8,7 @@ import {
   handleStartError
 } from '@tanstack/react-start/server'
 import { createServerEntry } from '@tanstack/react-start/server-entry'
-import { paraglideMiddleware } from './paraglide/server.js'
+import { paraglideMiddleware } from './paraglide/server'
 
 const customHandler = defineHandlerCallback(async (context) => {
   context.responseHeaders.set('Cross-Origin-Opener-Policy', 'same-origin')

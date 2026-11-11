@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test'
 import { CONSENT_BANNER_DELAY_MS, CONSENT_COOKIE_KEY } from '~/constants/cookie'
 import { HTTP_STATUS } from '~/constants/http'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import type { Locale } from '~/paraglide/runtime'
 import { E2E_NAMED_MEMES } from './content'
 import { E2E_BASE_URL } from './env'

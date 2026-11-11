@@ -8,28 +8,29 @@ import type { MemeWithVideo } from '~/constants/meme'
 import { buildCapState } from '~/helpers/cap'
 import { getErrorMessage } from '~/helpers/error'
 import { captureWithFeature } from '~/lib/sentry'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
 import { getMemeQueryOpts } from '~/queries/meme'
 import { toggleBookmark } from '~/server/bookmark/bookmark.functions'
-import { dialogStore } from '~/stores/dialog.store'
+import { useDialogStore } from '~/stores/dialog.store'
 
 type UseToggleBookmarkParams = {
   meme: MemeWithVideo
   bookmarks: MemeWithVideo[] | undefined
 }
 
-const openBookmarkUpsell = () => {
-  snoozePremiumReminder()
-  dialogStore.actions.showDialog('bookmark-upsell')
-}
-
 export function useToggleBookmark({
   meme,
   bookmarks
 }: UseToggleBookmarkParams) {
+  const dialogStore = useDialogStore()
   const queryClient = useQueryClient()
   const isPremium = useIsPremium()
+
+  const openBookmarkUpsell = () => {
+    snoozePremiumReminder()
+    dialogStore.actions.showDialog('bookmark-upsell')
+  }
 
   const isMemeBookmarked = React.useMemo(() => {
     if (!bookmarks) {

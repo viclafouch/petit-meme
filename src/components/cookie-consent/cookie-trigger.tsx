@@ -1,5 +1,5 @@
 import { Button } from '~/components/ui/button'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { useCookieConsentStore } from '~/stores/cookie-consent.store'
 
 export const CookieTrigger = () => {

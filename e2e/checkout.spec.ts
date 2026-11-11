@@ -1,6 +1,6 @@
 import { expect, type Page } from '@playwright/test'
 import { PREMIUM_PLAN_NAME } from '~/constants/plan'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import {
   expectActiveSubscription,
   findSubscription,

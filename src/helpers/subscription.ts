@@ -8,7 +8,7 @@ import {
 import { MONTHS_IN_YEAR } from '~/constants/time'
 import { formatDate } from '~/helpers/date'
 import { formatCentsToEuros } from '~/helpers/number'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import type { Locale } from '~/paraglide/runtime'
 
 export type BillingSubscription = {

@@ -4,20 +4,44 @@ import {
   react,
   hooks,
   jsxA11y,
-  imports,
   tanstackQuery,
+  tanstackStart,
+  paraglide,
   vitest,
+  imports,
   playwright
 } from '@viclafouch/oxc-config'
 
 const TAKUMI_TAILWIND_PROP = 'tw'
 
+const FILES_OUTSIDE_SOURCE_ALIAS = ['e2e/**', 'prisma/**', 'scripts/**']
+
+const FILES_LOADED_BY_VITE_CONFIG = [
+  'src/env/server.server.ts',
+  'src/env/base.server.ts'
+]
+
+const FILES_RUN_IN_TERMINAL = ['scripts/**', 'prisma/seed.ts']
+
+const FILES_RUN_BY_NODE = [
+  'scripts/check-env.ts',
+  'e2e/fake-anthropic.ts',
+  'src/constants/http.ts'
+]
+
 export default defineConfig({
-  extends: [typescript, react, hooks, jsxA11y, imports, tanstackQuery],
-  jsPlugins: [{ name: 'petit-meme', specifier: './lint/petit-meme/index.ts' }],
-  options: {
-    typeAware: true
-  },
+  extends: [
+    typescript,
+    react,
+    hooks,
+    jsxA11y,
+    tanstackQuery,
+    tanstackStart,
+    paraglide,
+    vitest,
+    playwright,
+    imports
+  ],
   ignorePatterns: [
     '**/.output/**',
     '**/.vercel/**',
@@ -31,48 +55,13 @@ export default defineConfig({
     'src/routeTree.gen.ts'
   ],
   rules: {
-    'react/no-children-prop': 'off',
-    'unicorn/filename-case': ['error', { case: 'kebabCase', ignore: ['\\$'] }],
-    'petit-meme/comment-policy': 'error',
-    'petit-meme/utf8-literal': 'error',
-    'petit-meme/jsx-blank-line': 'error',
-    'petit-meme/no-re-export': 'error',
-    'petit-meme/params-type-name': 'error',
-    'petit-meme/optional-last': 'error',
-    'petit-meme/destructure-in-signature': 'error',
-    'petit-meme/boolean-name': 'error',
-    'petit-meme/boolean-function-name': 'error',
-    'petit-meme/functional-update': 'error',
-    'petit-meme/hook-file-name': 'error',
-    'petit-meme/query-naming': 'error',
-    'petit-meme/no-throw-response': 'error',
-    'petit-meme/server-env-scope': 'error',
-    'petit-meme/external-link': 'error',
-    'petit-meme/tailwind-classes': 'error',
-    'petit-meme/route-head': 'error',
-    'petit-meme/as-const-satisfies': 'error',
-    'petit-meme/e2e-names': 'error',
-    'petit-meme/icon-margin': 'error',
-    'petit-meme/child-returns-null': 'error',
-    'react/jsx-handler-names': [
+    'import/no-namespace': [
       'error',
-      { eventHandlerPrefix: 'handle', eventHandlerPropPrefix: 'on' }
+      { ignore: ['@radix-ui/*', '@sentry/tanstackstart-react'] }
     ],
-    'no-magic-numbers': [
-      'error',
-      {
-        ignore: [-1, 0, 1, 2],
-        ignoreArrayIndexes: true,
-        ignoreDefaultValues: true,
-        ignoreClassFieldInitialValues: true,
-        ignoreEnums: true,
-        ignoreNumericLiteralTypes: true,
-        ignoreReadonlyClassProperties: true,
-        ignoreTypeIndexes: true,
-        enforceConst: true,
-        detectObjects: false
-      }
-    ],
+    'viclafouch/app-folders': 'off',
+    'viclafouch/env-file': 'off',
+    'viclafouch/server-function-file': 'off',
     'react/forbid-elements': [
       'error',
       {
@@ -82,64 +71,31 @@ export default defineConfig({
           { element: 'select', message: 'Use the shadcn `Select`.' }
         ]
       }
-    ],
-    'typescript/no-inferrable-types': [
-      'error',
-      { ignoreParameters: false, ignoreProperties: false }
-    ],
-    'typescript/strict-boolean-expressions': [
-      'error',
-      {
-        allowAny: false,
-        allowNullableBoolean: true,
-        allowNullableEnum: false,
-        allowNullableNumber: false,
-        allowNullableObject: true,
-        allowNullableString: true,
-        allowNumber: false,
-        allowString: false
-      }
-    ],
-    'typescript/only-throw-error': [
-      'error',
-      {
-        allow: [
-          {
-            from: 'package',
-            package: '@tanstack/router-core',
-            name: ['Redirect', 'NotFoundError']
-          }
-        ],
-        allowRethrowing: true,
-        allowThrowingAny: false,
-        allowThrowingUnknown: false
-      }
     ]
   },
   overrides: [
-    ...vitest.overrides,
     {
-      files: ['lint/**/*.test.ts'],
-      plugins: ['vitest'],
+      files: [...FILES_OUTSIDE_SOURCE_ALIAS, ...FILES_LOADED_BY_VITE_CONFIG],
       rules: {
-        'vitest/require-hook': ['error', { allowedFunctionCalls: ['testRule'] }]
+        'import/no-relative-parent-imports': 'off'
       }
     },
     {
-      files: ['src/emails/**', 'src/server.ts', 'lint/petit-meme/index.ts'],
+      files: FILES_RUN_IN_TERMINAL,
+      rules: {
+        'no-console': 'off'
+      }
+    },
+    {
+      files: FILES_RUN_BY_NODE,
+      rules: {
+        'import/extensions': ['error', 'always', { ignorePackages: true }]
+      }
+    },
+    {
+      files: ['src/emails/**'],
       rules: {
         'import/no-default-export': 'off'
-      }
-    },
-    {
-      files: ['e2e/**/*.ts'],
-      jsPlugins: playwright.jsPlugins,
-      rules: {
-        ...playwright.rules,
-        'playwright/expect-expect': [
-          'error',
-          { assertFunctionNames: [], assertFunctionPatterns: ['^expect[A-Z]'] }
-        ]
       }
     },
     {

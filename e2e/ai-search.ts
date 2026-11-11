@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 export const AI_SEARCH_PATH = '/memes/ai-search'
 

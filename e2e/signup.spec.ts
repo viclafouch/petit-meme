@@ -1,7 +1,7 @@
 import { expect, type Locator, type Page } from '@playwright/test'
 import { prismaClient } from '~/db/client.server'
 import { UserLocale } from '~/db/generated/prisma/enums'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { buildEmailVerificationUrl, openAuthDialog } from './auth-flows'
 import { E2E_EMAIL_DOMAIN, E2E_PASSWORD, E2E_ROLES } from './constants'
 import { test } from './fixtures'

@@ -4,15 +4,21 @@ export async function withTimeout<TResult>(
   message: string
 ): Promise<TResult> {
   const abortController = new AbortController()
-  let timer: ReturnType<typeof setTimeout> | undefined
+  const timeoutError = new Error(message)
 
   const timeout = new Promise<never>((_resolve, reject) => {
-    timer = setTimeout(() => {
-      const timeoutError = new Error(message)
-      abortController.abort(timeoutError)
-      reject(timeoutError)
-    }, ms)
+    abortController.signal.addEventListener(
+      'abort',
+      () => {
+        reject(timeoutError)
+      },
+      { once: true }
+    )
   })
+
+  const timer = setTimeout(() => {
+    abortController.abort(timeoutError)
+  }, ms)
 
   try {
     return await Promise.race([run(abortController), timeout])

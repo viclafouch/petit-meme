@@ -4,7 +4,7 @@ import { SentryFeedbackWidget } from '~/components/app/sentry-feedback-widget'
 import { Footer } from '~/components/layout/footer'
 import { LocaleBanner } from '~/components/layout/locale-banner'
 import { Navbar } from '~/components/layout/navbar'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 const publicRouteApi = getRouteApi('/_public__root')
 

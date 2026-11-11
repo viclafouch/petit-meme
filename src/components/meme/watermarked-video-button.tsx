@@ -9,7 +9,7 @@ import { getErrorMessage } from '~/helpers/error'
 import type { InsightsTracking } from '~/lib/algolia-insights'
 import { exportMeme, type ExportableMeme } from '~/lib/meme-export'
 import { captureWithFeature } from '~/lib/sentry'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 type WatermarkedVideoButtonProps = {
   meme: ExportableMeme

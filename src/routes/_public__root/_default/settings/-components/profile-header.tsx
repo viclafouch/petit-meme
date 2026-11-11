@@ -8,7 +8,7 @@ import { FOCUS_VISIBLE_RING_CLASS_NAME } from '~/constants/ui'
 import { formatDate } from '~/helpers/date'
 import type { SessionUser } from '~/helpers/role'
 import { cn } from '~/lib/utils'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { AvatarPickerDialog } from './avatar-picker-dialog'
 

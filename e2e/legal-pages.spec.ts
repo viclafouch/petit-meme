@@ -20,11 +20,16 @@ const readMarkdownTitle = (
   pathname: (typeof LEGAL_PATHNAMES)[number],
   locale: Locale
 ) => {
-  const markdown = readFileSync(`md/${locale}${pathname}.md`, 'utf8')
+  const markdown = readFileSync(
+    `src/server/legal/${locale}${pathname}.md`,
+    'utf8'
+  )
   const title = MARKDOWN_TITLE_PATTERN.exec(markdown)?.[1]
 
   if (!title) {
-    throw new Error(`md/${locale}${pathname}.md carries no title.`)
+    throw new Error(
+      `src/server/legal/${locale}${pathname}.md carries no title.`
+    )
   }
 
   return title

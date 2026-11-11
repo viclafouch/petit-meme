@@ -3,7 +3,7 @@ import { MemeVideoPlayer } from '~/components/meme/meme-video-player'
 import { useMemeHls } from '~/components/meme/use-meme-hls'
 import { LOGO_PATH } from '~/constants/branding'
 import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 const embedRouteApi = getRouteApi('/embed/$memeId')
 

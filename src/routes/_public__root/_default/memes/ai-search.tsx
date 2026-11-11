@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { buildSeo } from '~/lib/seo/meta'
 import { buildOgImageUrl } from '~/lib/seo/url'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { AiSearchPage } from '~/routes/_public__root/_default/memes/-components/ai-search-page'
 

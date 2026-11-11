@@ -1,5 +1,5 @@
 import type { FaqItem } from '~/constants/faq'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 export const getHomeFaqItems = (): FaqItem[] => {
   return [

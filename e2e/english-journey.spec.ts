@@ -7,7 +7,7 @@ import { PREMIUM_PLAN_PRICING } from '~/constants/plan'
 import { MONTHS_IN_YEAR } from '~/constants/time'
 import { getLocaleDisplayName } from '~/helpers/locale'
 import { formatCentsToEuros } from '~/helpers/number'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { baseLocale, cookieName, type Locale } from '~/paraglide/runtime'
 import {
   expectActiveSubscription,

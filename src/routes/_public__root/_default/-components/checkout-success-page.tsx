@@ -2,7 +2,7 @@ import React from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 import { Link } from '@tanstack/react-router'
 import { buttonVariants } from '~/components/ui/button'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import {
   PageDescription,
   PageHeading

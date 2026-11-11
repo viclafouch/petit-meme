@@ -72,17 +72,19 @@ export const notifyPaymentFailed = async (
     return
   }
 
-  let billingPortalUrl: string
+  const billingPortalUrl = await createBillingPortalUrl(customerId).catch(
+    (error: unknown) => {
+      captureWithFeature(error, 'stripe-billing-portal')
+      stripeLogger.error(
+        { error, customerId, eventId: event.id },
+        'Failed to create billing portal session'
+      )
 
-  try {
-    billingPortalUrl = await createBillingPortalUrl(customerId)
-  } catch (error) {
-    captureWithFeature(error, 'stripe-billing-portal')
-    stripeLogger.error(
-      { error, customerId, eventId: event.id },
-      'Failed to create billing portal session'
-    )
+      return null
+    }
+  )
 
+  if (billingPortalUrl === null) {
     return
   }
 

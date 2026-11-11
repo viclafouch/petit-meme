@@ -4,9 +4,6 @@ import { AiSearchPage } from '~/routes/admin/ai-search/-components/ai-search-pag
 
 export const Route = createFileRoute('/admin/ai-search/')({
   component: AiSearchPage,
-  head: () => {
-    return { meta: [{ title: 'Admin Petit Meme - Recherche IA' }] }
-  },
   loader: async ({ context }) => {
     await context.queryClient.query({
       ...listAdminAiSearchLogsQueryOpts(),
@@ -14,5 +11,8 @@ export const Route = createFileRoute('/admin/ai-search/')({
     })
 
     return { crumb: 'Recherche IA' }
+  },
+  head: () => {
+    return { meta: [{ title: 'Admin Petit Meme - Recherche IA' }] }
   }
 })

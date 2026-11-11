@@ -27,7 +27,7 @@ import type { AuthProviderId } from '~/constants/auth'
 import { authClient } from '~/lib/auth-client'
 import { getAuthErrorMessage } from '~/lib/auth-errors'
 import { captureWithFeature } from '~/lib/sentry'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { localizeHref } from '~/paraglide/runtime'
 
 type AuthType = 'login' | 'signup'

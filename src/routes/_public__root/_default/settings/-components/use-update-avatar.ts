@@ -7,7 +7,7 @@ import { resolveAvatar } from '~/helpers/avatar'
 import { getErrorMessage, matchIsRateLimitError } from '~/helpers/error'
 import { authClient } from '~/lib/auth-client'
 import { captureWithFeature } from '~/lib/sentry'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { getAuthUserQueryOpts } from '~/queries/auth'
 import { updateUserAvatar } from '~/server/user/user.functions'
 

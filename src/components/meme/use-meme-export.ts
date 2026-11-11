@@ -9,8 +9,8 @@ import { getErrorMessage } from '~/helpers/error'
 import type { InsightsTracking } from '~/lib/algolia-insights'
 import { exportMeme, type ExportableMeme } from '~/lib/meme-export'
 import { captureWithFeature } from '~/lib/sentry'
-import { m } from '~/paraglide/messages.js'
-import { dialogStore } from '~/stores/dialog.store'
+import { m } from '~/paraglide/messages'
+import { useDialogStore } from '~/stores/dialog.store'
 
 type UseMemeExportParams = {
   mode: MemeExportMode
@@ -23,6 +23,7 @@ type MemeExportRequest = {
 }
 
 export const useMemeExport = ({ mode, queryID }: UseMemeExportParams) => {
+  const dialogStore = useDialogStore()
   const { user } = useRouteContext({ from: '__root__' })
   const isPremium = useIsPremium()
   const tracking = {

@@ -13,7 +13,7 @@ import { getErrorMessage, matchIsRateLimitError } from '~/helpers/error'
 import { getAuthErrorMessage } from '~/lib/auth-errors'
 import { focusFirstInvalidField } from '~/lib/form'
 import { captureWithFeature } from '~/lib/sentry'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { verifyEmail } from '~/server/auth/email-verification.functions'
 
 const getVerifyEmailFormOpts = () => {

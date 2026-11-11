@@ -9,7 +9,7 @@ import {
   parseConsentCookie
 } from '~/helpers/cookie-consent'
 import { createClientCookie, readClientCookie } from '~/lib/cookie'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 export const getCookieConsentCategories = (): readonly CategoryConfig[] => {
   return [

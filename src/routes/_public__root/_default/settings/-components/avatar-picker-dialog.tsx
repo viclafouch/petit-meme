@@ -21,7 +21,7 @@ import { SELECTED_TILE_RING_CLASS_NAME } from '~/constants/ui'
 import { resolveAvatarPath } from '~/helpers/avatar'
 import type { SessionUser } from '~/helpers/role'
 import { cn } from '~/lib/utils'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { useUpdateAvatar } from '~/routes/_public__root/_default/settings/-components/use-update-avatar'
 
 const AVATAR_TILE_CLASS_NAME = cn(

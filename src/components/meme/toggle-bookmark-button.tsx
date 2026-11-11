@@ -6,9 +6,9 @@ import { useRouteContext } from '@tanstack/react-router'
 import { IconButtonStars } from '~/components/animate-ui/buttons/icon-button-stars'
 import { useToggleBookmark } from '~/components/meme/use-toggle-bookmark'
 import type { MemeWithVideo } from '~/constants/meme'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
-import { dialogStore } from '~/stores/dialog.store'
+import { useDialogStore } from '~/stores/dialog.store'
 
 type ToggleBookmarkButtonProps = {
   meme: MemeWithVideo
@@ -53,6 +53,7 @@ const ToggleBookmarkButton = ({
   meme,
   ...restProps
 }: ToggleBookmarkButtonProps) => {
+  const dialogStore = useDialogStore()
   const { user } = useRouteContext({ from: '__root__' })
 
   if (!user) {

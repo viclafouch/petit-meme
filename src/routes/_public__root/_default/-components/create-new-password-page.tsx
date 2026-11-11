@@ -2,7 +2,7 @@ import { Ban } from 'lucide-react'
 import { getRouteApi, Link, Navigate } from '@tanstack/react-router'
 import { CreateNewPasswordForm } from '~/components/auth/create-new-password-form'
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 const createNewPasswordRouteApi = getRouteApi(
   '/_public__root/_default/password/create-new'

@@ -3,7 +3,7 @@ import { HTTP_STATUS } from '~/constants/http'
 import { matchIsOwnKey } from '~/helpers/object'
 import type { authClient } from '~/lib/auth-client'
 import { captureWithFeature, type SentryFeature } from '~/lib/sentry'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 type AuthErrorCode = keyof typeof authClient.$ERROR_CODES
 

@@ -14,9 +14,6 @@ export const Route = createFileRoute('/admin/proposals/')({
   validateSearch: (search) => {
     return SEARCH_SCHEMA.parse(search)
   },
-  head: () => {
-    return { meta: [{ title: 'Admin Petit Meme - Propositions' }] }
-  },
   loaderDeps: ({ search }) => {
     return { proposalStatus: search.proposalStatus }
   },
@@ -29,5 +26,8 @@ export const Route = createFileRoute('/admin/proposals/')({
     return {
       crumb: 'Propositions'
     }
+  },
+  head: () => {
+    return { meta: [{ title: 'Admin Petit Meme - Propositions' }] }
   }
 })

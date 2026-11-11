@@ -12,7 +12,7 @@ import { buttonVariants } from '~/components/ui/button'
 import { getPremiumPlan, PREMIUM_PLAN_PRICING } from '~/constants/plan'
 import { formatCentsToEuros } from '~/helpers/number'
 import { cn } from '~/lib/utils'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 
 type PremiumUpsellDialogProps = WithDialog<{

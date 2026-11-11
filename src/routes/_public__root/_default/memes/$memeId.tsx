@@ -4,7 +4,7 @@ import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import { getCrawlerStreamUrl } from '~/lib/crawler-video'
 import { buildBreadcrumbJsonLd, buildMemeJsonLd } from '~/lib/seo/json-ld'
 import { buildMemeSeo } from '~/lib/seo/meta'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { getMemeQueryOpts, getMemePlaybackUrlQueryOpts } from '~/queries/meme'
 import { MemePage } from './-components/meme-page'
 

@@ -9,7 +9,7 @@ import type { Meme } from '~/db/generated/prisma/client'
 import { useContainedSize } from '~/hooks/use-contained-size'
 import { useImageAspectRatio } from '~/hooks/use-image-aspect-ratio'
 import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 type ProcessedRatioState = {
   url: string

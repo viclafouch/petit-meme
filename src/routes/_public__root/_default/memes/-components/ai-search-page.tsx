@@ -20,7 +20,7 @@ import { buildReachedCapState } from '~/helpers/cap'
 import { getErrorMessage } from '~/helpers/error'
 import { captureWithFeature } from '~/lib/sentry'
 import { buildBreadcrumbJsonLd } from '~/lib/seo/json-ld'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { getAiSearchQuotaQueryOpts } from '~/queries/ai-search'
 import {
   PageContainer,
@@ -31,11 +31,12 @@ import {
 import { AiSearchStages } from '~/routes/_public__root/_default/memes/-components/ai-search-stages'
 import { useAiSearchStages } from '~/routes/_public__root/_default/memes/-components/use-ai-search-stages'
 import { searchMemesWithAi } from '~/server/ai-search/ai-search.functions'
-import { dialogStore } from '~/stores/dialog.store'
+import { useDialogStore } from '~/stores/dialog.store'
 
 type AiSearchResult = Awaited<ReturnType<typeof searchMemesWithAi>>
 
 export const AiSearchPage = () => {
+  const dialogStore = useDialogStore()
   const { user } = useRouteContext({ from: '__root__' })
   const queryClient = useQueryClient()
 

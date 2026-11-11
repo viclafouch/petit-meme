@@ -8,10 +8,10 @@ import { DmcaPage } from './-components/legal-pages'
 
 const MARKDOWN_LOADERS = {
   fr: () => {
-    return import('../../../../md/fr/dmca.md?raw')
+    return import('~/server/legal/fr/dmca.md?raw')
   },
   en: () => {
-    return import('../../../../md/en/dmca.md?raw')
+    return import('~/server/legal/en/dmca.md?raw')
   }
 } satisfies Record<Locale, () => Promise<{ default: string }>>
 

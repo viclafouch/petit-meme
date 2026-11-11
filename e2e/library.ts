@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import type { Locale } from '~/paraglide/runtime'
 import type { E2eMeme } from './content'
 import { repeatUntilVisible } from './hydration'

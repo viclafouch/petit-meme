@@ -36,13 +36,13 @@ import {
   readAndDeleteFFmpegOutput
 } from '~/lib/ffmpeg'
 import { captureWithFeature } from '~/lib/sentry'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import {
   getGenerationQuotaQueryOpts,
   getStudioVideoQueryOpts
 } from '~/queries/studio'
 import { createGeneration } from '~/server/studio/studio.functions'
-import { dialogStore } from '~/stores/dialog.store'
+import { useDialogStore } from '~/stores/dialog.store'
 
 type VideoProcessingParams = {
   text: string
@@ -330,6 +330,7 @@ export const useVideoProcessor = (
   ffmpeg: FFmpeg,
   options?: UseVideoProcessorParams
 ) => {
+  const dialogStore = useDialogStore()
   const [progress, setProgress] = React.useState(0)
   const objectUrlRef = React.useRef<string | null>(null)
   const queryClient = useQueryClient()

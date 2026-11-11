@@ -4,7 +4,7 @@ import { IconButtonStars } from '~/components/animate-ui/buttons/icon-button-sta
 import { MemeExportMenu } from '~/components/meme/meme-export-menu'
 import { useMemeExport } from '~/components/meme/use-meme-export'
 import type { MemeWithVideo } from '~/constants/meme'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 type ShareMemeButtonProps = {
   meme: MemeWithVideo

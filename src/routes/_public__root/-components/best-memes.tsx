@@ -5,7 +5,7 @@ import { Link } from '@tanstack/react-router'
 import { MemesList } from '~/components/meme/memes-list'
 import { buttonVariants } from '~/components/ui/button'
 import { cn } from '~/lib/utils'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { listTrendingMemesQueryOpts } from '~/queries/meme'
 
 export const BestMemes = () => {

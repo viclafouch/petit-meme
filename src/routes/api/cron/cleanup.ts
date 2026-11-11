@@ -23,6 +23,11 @@ const ANALYTICS_RETENTION_DAYS = 365
 const AUDIT_LOG_RETENTION_YEARS = 2
 const MASKED_ID_LENGTH = 8
 
+type PrunedViewsRow = {
+  memesAggregated: number
+  viewsDeleted: number
+}
+
 const maskId = (id: string) => {
   return id.slice(0, MASKED_ID_LENGTH)
 }
@@ -51,36 +56,30 @@ const runRetentionCleanup = async () => {
 
   const viewCutoff = new Date(now.getTime() - VIEW_RETENTION_DAYS * DAY)
 
-  const viewCountsByMeme = await prismaClient.memeViewDaily.groupBy({
-    by: ['memeId'],
-    where: { day: { lt: viewCutoff } },
-    _count: { id: true }
-  })
-
-  if (viewCountsByMeme.length > 0) {
-    await prismaClient.$transaction(
-      viewCountsByMeme.map((group) => {
-        return prismaClient.meme.update({
-          where: { id: group.memeId },
-          data: { viewCount: { increment: group._count.id } }
-        })
-      })
+  const [prunedViews] = await prismaClient.$queryRaw<[PrunedViewsRow]>`
+    WITH deleted_views AS (
+      DELETE FROM "meme_view_daily"
+      WHERE "day" < ${viewCutoff}
+      RETURNING "meme_id"
+    ),
+    views_by_meme AS (
+      SELECT "meme_id", COUNT(*)::int AS "views"
+      FROM deleted_views
+      GROUP BY "meme_id"
+    ),
+    aggregated_memes AS (
+      UPDATE "meme"
+      SET "view_count" = "meme"."view_count" + views_by_meme."views"
+      FROM views_by_meme
+      WHERE "meme"."id" = views_by_meme."meme_id"
+      RETURNING "meme"."id"
     )
+    SELECT
+      (SELECT COUNT(*)::int FROM aggregated_memes) AS "memesAggregated",
+      (SELECT COUNT(*)::int FROM deleted_views) AS "viewsDeleted"
+  `
 
-    const deletedViews = await prismaClient.memeViewDaily.deleteMany({
-      where: { day: { lt: viewCutoff } }
-    })
-
-    log.info(
-      {
-        memesAggregated: viewCountsByMeme.length,
-        viewsDeleted: deletedViews.count
-      },
-      'View records aggregated and pruned'
-    )
-  } else {
-    log.debug('No old view records to clean')
-  }
+  log.info(prunedViews, 'View records aggregated and pruned')
 
   const analyticsCutoff = new Date(
     now.getTime() - ANALYTICS_RETENTION_DAYS * DAY
@@ -205,7 +204,7 @@ const runRetentionCleanup = async () => {
   return {
     deletedSessions: deletedSessions.count,
     deletedVerifications: deletedVerifications.count,
-    viewsAggregated: viewCountsByMeme.length,
+    viewsAggregated: prunedViews.memesAggregated,
     deletedGenerations: deletedGenerations.count,
     deletedActions: deletedActions.count,
     deletedAuditLogs: deletedAuditLogs.count,

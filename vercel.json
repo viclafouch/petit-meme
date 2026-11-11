@@ -37,16 +37,41 @@
       ]
     }
   ],
-  "crons": [
-    { "path": "/api/cron/cleanup", "schedule": "0 2 * * *" },
-    { "path": "/api/cron/verification-reminder", "schedule": "0 8 * * *" },
-    { "path": "/api/cron/sync-algolia", "schedule": "0 3 * * *" },
-    { "path": "/api/cron/ai-fill", "schedule": "2 3 * * *" },
-    { "path": "/api/cron/sync-bunny-titles", "schedule": "0 4 * * *" },
-    {
-      "path": "/api/cron/pending-proposals-reminder",
-      "schedule": "0 9 */3 * *"
+  "schedules": {
+    "cleanup": {
+      "schedule": "0 2 * * *",
+      "path": "/api/cron/cleanup",
+      "requestMethod": "GET"
     },
-    { "path": "/api/cron/weekly-recap", "schedule": "0 21 * * 0" }
-  ]
+    "verification-reminder": {
+      "schedule": "0 8 * * *",
+      "path": "/api/cron/verification-reminder",
+      "requestMethod": "GET"
+    },
+    "sync-algolia": {
+      "schedule": "0 3 * * *",
+      "path": "/api/cron/sync-algolia",
+      "requestMethod": "GET"
+    },
+    "ai-fill": {
+      "schedule": "2 3 * * *",
+      "path": "/api/cron/ai-fill",
+      "requestMethod": "GET"
+    },
+    "sync-bunny-titles": {
+      "schedule": "0 4 * * *",
+      "path": "/api/cron/sync-bunny-titles",
+      "requestMethod": "GET"
+    },
+    "pending-proposals-reminder": {
+      "schedule": "0 9 */3 * *",
+      "path": "/api/cron/pending-proposals-reminder",
+      "requestMethod": "GET"
+    },
+    "weekly-recap": {
+      "schedule": "0 21 * * 0",
+      "path": "/api/cron/weekly-recap",
+      "requestMethod": "GET"
+    }
+  }
 }

@@ -114,7 +114,7 @@ test.describe('the HTTP contracts', () => {
     })
   })
 
-  for (const { path } of vercelConfig.crons) {
+  for (const { path } of Object.values(vercelConfig.schedules)) {
     test(`${path} refuses a call without the cron secret`, async ({
       request
     }) => {

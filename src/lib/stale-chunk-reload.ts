@@ -9,12 +9,11 @@ const matchHasReloadedRecently = () => {
 }
 
 export const reloadOnStaleChunk = () => {
-  window.addEventListener('vite:preloadError', (event) => {
+  window.addEventListener('vite:preloadError', () => {
     if (matchHasReloadedRecently()) {
       return
     }
 
-    event.preventDefault()
     sessionStorage.setItem(LAST_RELOAD_STORAGE_KEY, String(Date.now()))
     window.location.reload()
   })

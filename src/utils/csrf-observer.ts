@@ -1,8 +1,10 @@
 import { createServerOnlyFn } from '@tanstack/react-start'
 import { TEN_MINUTES_MS } from '~/constants/time'
 import { extractClientCountry, extractClientIp } from '~/helpers/request'
-import { captureWithFeature } from '~/lib/sentry'
+import { logger } from '~/lib/logger'
 import { checkRateLimit } from '~/utils/rate-limit-store.server'
+
+const csrfLogger = logger.child({ module: 'csrf' })
 
 const CSRF_SAMPLE_CONFIG = {
   action: 'csrf-block',
@@ -18,15 +20,14 @@ export const observeCsrfBlock = createServerOnlyFn((request: Request) => {
     return
   }
 
-  const url = new URL(request.url)
-  const userAgent = request.headers.get('user-agent') ?? 'unknown'
-  const secFetchSite = request.headers.get('sec-fetch-site') ?? 'absent'
-  const country = extractClientCountry(request.headers) ?? 'unknown'
-
-  captureWithFeature(
-    new Error(
-      `CSRF block: ${request.method} ${url.pathname} — country=${country} sec-fetch-site=${secFetchSite} ua=${userAgent}`
-    ),
-    'scraping-detection'
+  csrfLogger.warn(
+    {
+      method: request.method,
+      pathname: new URL(request.url).pathname,
+      country: extractClientCountry(request.headers) ?? 'unknown',
+      secFetchSite: request.headers.get('sec-fetch-site') ?? 'absent',
+      userAgent: request.headers.get('user-agent') ?? 'unknown'
+    },
+    'CSRF block'
   )
 })

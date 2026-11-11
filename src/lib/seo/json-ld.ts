@@ -18,9 +18,9 @@ import type {
   InteractionCounter,
   WithContext
 } from 'schema-dts'
-import type { FaqItem } from '~/components/marketing/faq-section'
 import { LOGO_PATH, SITE_NAME } from '~/constants/branding'
 import { HLS_MIME_TYPE } from '~/constants/bunny'
+import type { FaqItem } from '~/constants/faq'
 import type { MemeWithVideo } from '~/constants/meme'
 import type { Plan } from '~/constants/plan'
 import { ONE_HOUR_IN_SECONDS, SECONDS_PER_MINUTE } from '~/constants/time'

@@ -4,11 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger
 } from '~/components/ui/accordion'
-
-export type FaqItem = {
-  question: string
-  answer: string
-}
+import type { FaqItem } from '~/constants/faq'
 
 type FaqSectionProps = {
   items: readonly FaqItem[]

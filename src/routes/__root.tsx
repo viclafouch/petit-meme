@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 import type { QueryClient } from '@tanstack/react-query'
 import { createRootRouteWithContext } from '@tanstack/react-router'
+import appCss from '~/styles.css?url'
 import { matchIsAnalyticsConsented } from '~/helpers/cookie-consent'
 import { ensureAlgoliaUserToken } from '~/lib/algolia-user-token'
 import { getConsentState } from '~/lib/cookie-consent'
@@ -8,7 +9,6 @@ import { getStoredTheme } from '~/lib/theme'
 import { getLocale } from '~/paraglide/runtime'
 import { getAuthUserQueryOpts } from '~/queries/auth'
 import type { getAuthUser } from '~/server/auth/auth.functions'
-import appCss from '../styles.css?url'
 import { RootComponent } from './-components/root-component'
 import { RootErrorComponent } from './-components/root-error-component'
 

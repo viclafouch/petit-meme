@@ -4,7 +4,7 @@ import { Radio } from '@base-ui/react/radio'
 import { RadioGroup } from '@base-ui/react/radio-group'
 import { ANNUAL_DISCOUNT_PERCENT, type BillingPeriod } from '~/constants/plan'
 import { cn } from '~/lib/utils'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 type BillingToggleProps = {
   billingPeriod: BillingPeriod

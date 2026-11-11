@@ -35,12 +35,12 @@ export const DownloadFromTwitterForm = () => {
   const form = useAppForm({
     ...formOpts,
     onSubmitInvalid: focusFirstInvalidField,
-    onSubmit: async ({ value }) => {
+    onSubmit: ({ value }) => {
       if (downloadFileFromTweetMutation.isPending) {
         return
       }
 
-      await downloadFileFromTweetMutation.mutateAsync({
+      downloadFileFromTweetMutation.mutate({
         url: value.url
       })
     }
@@ -97,13 +97,13 @@ export const DownloadFromTwitterForm = () => {
         <CardFooter>
           <form.Subscribe
             selector={(state) => {
-              return [state.canSubmit, state.isSubmitting] as const
+              return state.canSubmit
             }}
-            children={([canSubmit, isSubmitting]) => {
+            children={(canSubmit) => {
               return (
                 <LoadingButton
                   type="submit"
-                  isLoading={isSubmitting}
+                  isLoading={downloadFileFromTweetMutation.isPending}
                   disabled={!canSubmit}
                 >
                   Extraire et télécharger

@@ -1,6 +1,6 @@
 import type { BetterAuthOptions } from 'better-auth'
 import { z } from 'zod'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 const AUTH_PROVIDER_IDS = [
   'credential',

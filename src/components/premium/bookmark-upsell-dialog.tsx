@@ -1,6 +1,6 @@
 import type { WithDialog } from '~/@types/dialog'
 import { PremiumUpsellDialog } from '~/components/premium/premium-upsell-dialog'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 type BookmarkUpsellDialogProps = WithDialog
 

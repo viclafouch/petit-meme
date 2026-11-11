@@ -6,7 +6,7 @@ import {
 } from '~/constants/ai-search'
 import { HTTP_STATUS } from '~/constants/http'
 import { FREE_CAPS } from '~/helpers/cap'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import {
   AI_SEARCH_PATH,
   getPromptField,

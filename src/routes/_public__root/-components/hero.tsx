@@ -7,7 +7,7 @@ import { TextEffect } from '~/components/ui/text-effect'
 import { NEWS_CATEGORY_SLUG } from '~/constants/meme'
 import { useIsMobile } from '~/hooks/use-mobile'
 import { cn } from '~/lib/utils'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { countRecentMemesQueryOpts } from '~/queries/meme'
 import { FloatingLogos } from './floating-logo'
 import {

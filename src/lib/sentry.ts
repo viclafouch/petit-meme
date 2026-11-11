@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/tanstackstart-react'
 import { wrapMiddlewaresWithSentry } from '@sentry/tanstackstart-react'
 import { IS_DEVELOPMENT } from '~/constants/env'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 export type SentryFeature =
   | 'stripe-checkout'
@@ -41,6 +41,7 @@ export type SentryFeature =
   | 'admin-submission'
   | 'admin-downloader'
   | 'admin-meme-files'
+  | 'admin-category'
   | 'watermark-fallback'
   | 'ai-search'
   | 'activity-event'

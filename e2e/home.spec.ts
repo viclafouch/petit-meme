@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test'
 import { HTTP_STATUS } from '~/constants/http'
 import { TRENDING_MEMES_COUNT } from '~/constants/meme'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { E2E_RECENT_MEMES } from './content'
 import { test } from './fixtures'
 import { getFirstMemePlayButton, getMemePlayButtons } from './library'

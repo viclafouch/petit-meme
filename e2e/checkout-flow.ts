@@ -1,6 +1,6 @@
 import { expect, type Page } from '@playwright/test'
 import { prismaClient } from '~/db/client.server'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import type { Locale } from '~/paraglide/runtime'
 import { STRIPE_TEST_CARD } from './constants'
 import { repeatUntilRequested } from './hydration'

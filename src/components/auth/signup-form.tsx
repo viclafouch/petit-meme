@@ -19,7 +19,7 @@ import {
   getAuthErrorMessage
 } from '~/lib/auth-errors'
 import { focusFirstInvalidField } from '~/lib/form'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { localizeHref } from '~/paraglide/runtime'
 
 const getSignupSchema = () => {

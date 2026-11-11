@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { buildHomeJsonLd } from '~/lib/seo/json-ld'
 import { buildSeo } from '~/lib/seo/meta'
 import { buildOgImageUrl } from '~/lib/seo/url'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
 import {
@@ -15,6 +15,24 @@ import { HomePage } from './-components/home-page'
 export const Route = createFileRoute('/_public__root/')({
   component: HomePage,
   pendingMs: 3000,
+  loader: async ({ context }) => {
+    await Promise.all([
+      context.queryClient.query({
+        ...listTrendingMemesQueryOpts(),
+        staleTime: 'static'
+      }),
+      context.queryClient.query({
+        ...countRecentMemesQueryOpts(),
+        staleTime: 'static'
+      }),
+      context.user
+        ? context.queryClient.query({
+            ...listBookmarkedMemesQueryOpts(),
+            staleTime: 'static'
+          })
+        : undefined
+    ])
+  },
   head: () => {
     const locale = getLocale()
     const description = m.seo_home_description()
@@ -39,23 +57,5 @@ export const Route = createFileRoute('/_public__root/')({
         )
       }
     ]
-  },
-  loader: async ({ context }) => {
-    await Promise.all([
-      context.queryClient.query({
-        ...listTrendingMemesQueryOpts(),
-        staleTime: 'static'
-      }),
-      context.queryClient.query({
-        ...countRecentMemesQueryOpts(),
-        staleTime: 'static'
-      }),
-      context.user
-        ? context.queryClient.query({
-            ...listBookmarkedMemesQueryOpts(),
-            staleTime: 'static'
-          })
-        : undefined
-    ])
   }
 })

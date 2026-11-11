@@ -14,9 +14,6 @@ export const Route = createFileRoute('/admin/users/')({
   validateSearch: (search) => {
     return SEARCH_SCHEMA.parse(search)
   },
-  head: () => {
-    return { meta: [{ title: 'Admin Petit Meme - Utilisateurs' }] }
-  },
   loader: async ({ context }) => {
     await context.queryClient.query({
       ...listAdminUsersQueryOpts(),
@@ -24,5 +21,8 @@ export const Route = createFileRoute('/admin/users/')({
     })
 
     return { crumb: 'Utilisateurs' }
+  },
+  head: () => {
+    return { meta: [{ title: 'Admin Petit Meme - Utilisateurs' }] }
   }
 })

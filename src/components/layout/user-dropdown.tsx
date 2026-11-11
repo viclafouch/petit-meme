@@ -26,7 +26,7 @@ import {
 } from '~/components/ui/dropdown-menu'
 import { UserAvatar } from '~/components/user/user-avatar'
 import { matchIsUserAdmin, type SessionUser } from '~/helpers/role'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
 import { getActiveSubscriptionQueryOpts } from '~/queries/subscription'
 

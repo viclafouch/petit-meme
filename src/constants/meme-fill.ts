@@ -1,5 +1,5 @@
 import type { Prisma } from '~/db/generated/prisma/client'
-import { SECOND } from './time.ts'
+import { SECOND } from './time'
 
 export const MEME_FILL_OMIT = {
   fillStatus: true,

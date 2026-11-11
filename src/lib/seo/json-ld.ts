@@ -33,7 +33,7 @@ import {
   buildUrl,
   websiteOrigin
 } from '~/lib/seo/url'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 const websiteId = `${websiteOrigin}/#website`
 

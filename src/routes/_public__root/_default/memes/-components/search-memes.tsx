@@ -22,7 +22,7 @@ import {
   serializeContentLocalesParam
 } from '~/helpers/i18n-content'
 import { buildBreadcrumbJsonLd, buildCategoryJsonLd } from '~/lib/seo/json-ld'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { listCategoriesQueryOpts } from '~/queries/category'
 import { listMemesQueryOpts } from '~/queries/meme'

@@ -4,7 +4,7 @@ import type { MemeWithCategories, MemeWithVideo } from '~/constants/meme'
 import { OG_IMAGE_HEIGHT, OG_IMAGE_WIDTH } from '~/constants/og'
 import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import { buildEmbedUrl, buildUrl } from '~/lib/seo/url'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import {
   baseLocale,
   getLocale,

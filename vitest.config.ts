@@ -5,7 +5,7 @@ export default defineConfig({
     tsconfigPaths: true
   },
   test: {
-    include: ['src/**/*.test.ts', 'scripts/**/*.test.ts', 'lint/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'scripts/**/*.test.ts'],
     env: {
       VITE_SITE_URL: 'https://www.petit-meme.io',
       VITE_BUNNY_HOSTNAME: 'cdn-test.petit-meme.io'

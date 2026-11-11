@@ -5,7 +5,7 @@ import {
   PREMIUM_REMINDER_STORAGE_KEY
 } from '~/constants/plan'
 import { DAY } from '~/constants/time'
-import { dialogStore } from '~/stores/dialog.store'
+import { useDialogStore } from '~/stores/dialog.store'
 
 const COOLDOWN_DAYS = 3
 const COOLDOWN_MS = COOLDOWN_DAYS * DAY
@@ -19,6 +19,7 @@ export const snoozePremiumReminder = () => {
 }
 
 export const usePremiumReminder = ({ enabled }: UsePremiumReminderParams) => {
+  const dialogStore = useDialogStore()
   const isPremium = useIsPremium()
 
   const matchIsReminderRelevant = React.useEffectEvent(() => {
@@ -67,5 +68,5 @@ export const usePremiumReminder = ({ enabled }: UsePremiumReminderParams) => {
         clearTimeout(timeout)
       }
     }
-  }, [enabled])
+  }, [enabled, dialogStore])
 }

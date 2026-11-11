@@ -3,7 +3,7 @@ import { APIError, createAuthMiddleware } from 'better-auth/api'
 import { z } from 'zod'
 import * as Sentry from '@sentry/tanstackstart-react'
 import { getUserNameSchema } from '~/constants/auth'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 type ValidateUserInfo = NonNullable<
   NonNullable<BetterAuthOptions['user']>['validateUserInfo']

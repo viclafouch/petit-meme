@@ -63,6 +63,16 @@ const matchIsSignedByBunny = (headers: Headers, rawBody: string) => {
   )
 }
 
+const parseJsonBody = (rawBody: string) => {
+  try {
+    const data: unknown = JSON.parse(rawBody)
+
+    return { isValid: true, data } as const
+  } catch (error) {
+    return { isValid: false, error } as const
+  }
+}
+
 export const handleBunnyWebhook = async (request: Request) => {
   const rawBody = await request.text()
 
@@ -75,25 +85,24 @@ export const handleBunnyWebhook = async (request: Request) => {
     )
   }
 
-  let data: unknown
+  const jsonBody = parseJsonBody(rawBody)
 
-  try {
-    data = JSON.parse(rawBody)
-  } catch (error) {
-    bunnyLogger.error({ error }, 'Invalid JSON in webhook body')
+  if (!jsonBody.isValid) {
+    bunnyLogger.error({ error: jsonBody.error }, 'Invalid JSON in webhook body')
 
     return Response.json({ success: false }, { status: 400 })
   }
 
-  let result: z.infer<typeof WEBHOOK_PAYLOAD_SCHEMA>
+  const { data } = jsonBody
+  const payload = WEBHOOK_PAYLOAD_SCHEMA.safeParse(data)
 
-  try {
-    result = WEBHOOK_PAYLOAD_SCHEMA.parse(data)
-  } catch (error) {
-    bunnyLogger.error({ error, data }, 'Invalid webhook payload')
+  if (!payload.success) {
+    bunnyLogger.error({ error: payload.error, data }, 'Invalid webhook payload')
 
     return Response.json({ success: false }, { status: 400 })
   }
+
+  const result = payload.data
 
   if (String(result.VideoLibraryId) !== serverEnv.BUNNY_LIBRARY_ID) {
     bunnyLogger.warn(

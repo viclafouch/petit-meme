@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { createFileRoute } from '@tanstack/react-router'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { VerifyEmailPage } from './-components/verify-email-page'
 
 export const Route = createFileRoute('/_public__root/_default/verify-email')({

@@ -3,7 +3,7 @@ import { Link } from '@tanstack/react-router'
 import { Label } from '~/components/ui/label'
 import type { MemeWithVideo } from '~/constants/meme'
 import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { listRelatedMemesQueryOpts } from '~/queries/meme'
 
 type StudioRelatedMemesProps = {

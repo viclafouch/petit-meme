@@ -32,8 +32,6 @@ const DEFAULT_VALUES: FileFormValues = {
   video: undefined
 }
 
-const ignoreReportedError = () => {}
-
 const handleFileReject = (file: File, message: string) => {
   toast.error(message, { description: file.name })
 }
@@ -59,9 +57,9 @@ export const FileForm = ({ onImported }: FileFormProps) => {
     defaultValues: DEFAULT_VALUES,
     validators: { onChange: MEME_FILE_IMPORT_SCHEMA },
     onSubmitInvalid: focusFirstInvalidField,
-    onSubmit: async ({ value }) => {
+    onSubmit: ({ value }) => {
       const { video } = MEME_FILE_IMPORT_SCHEMA.parse(value)
-      await importMutation.mutateAsync(video).catch(ignoreReportedError)
+      importMutation.mutate(video)
     }
   })
 
@@ -149,18 +147,9 @@ export const FileForm = ({ onImported }: FileFormProps) => {
           )
         }}
       />
-      <form.Subscribe
-        selector={(state) => {
-          return state.isSubmitting
-        }}
-        children={(isSubmitting) => {
-          return (
-            <ImportFormFooter
-              error={importMutation.error}
-              isSubmitting={isSubmitting}
-            />
-          )
-        }}
+      <ImportFormFooter
+        error={importMutation.error}
+        isSubmitting={importMutation.isPending}
       />
     </form>
   )

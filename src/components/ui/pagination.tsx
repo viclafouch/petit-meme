@@ -6,7 +6,7 @@ import { Link } from '@tanstack/react-router'
 import { buttonVariants } from '~/components/ui/button'
 import type { Button } from '~/components/ui/button'
 import { cn } from '~/lib/utils'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 const Pagination = ({ className, ...props }: React.ComponentProps<'nav'>) => {
   return (

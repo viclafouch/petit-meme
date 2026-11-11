@@ -7,10 +7,10 @@ import { getErrorMessage } from '~/helpers/error'
 import { createLatch, type LatchEnd } from '~/helpers/promise'
 import { authClient } from '~/lib/auth-client'
 import { captureWithFeature } from '~/lib/sentry'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { getActiveSubscriptionQueryOpts } from '~/queries/subscription'
-import { dialogStore } from '~/stores/dialog.store'
+import { useDialogStore } from '~/stores/dialog.store'
 
 const openBillingPortal = async () => {
   const { error } = await authClient.subscription.billingPortal({
@@ -70,6 +70,7 @@ const checkoutLatch = createLatch(
 )
 
 export const useStripeCheckout = () => {
+  const dialogStore = useDialogStore()
   const { user } = useRouteContext({ from: '__root__' })
   const queryClient = useQueryClient()
 

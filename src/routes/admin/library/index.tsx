@@ -4,9 +4,6 @@ import { LibraryPage } from '~/routes/admin/library/-components/library-page'
 
 export const Route = createFileRoute('/admin/library/')({
   component: LibraryPage,
-  head: () => {
-    return { meta: [{ title: 'Admin Petit Meme - Librairie' }] }
-  },
   validateSearch: (search) => {
     return ADMIN_MEMES_FILTERS_SCHEMA.parse(search)
   },
@@ -14,5 +11,8 @@ export const Route = createFileRoute('/admin/library/')({
     return {
       crumb: 'Librairie'
     }
+  },
+  head: () => {
+    return { meta: [{ title: 'Admin Petit Meme - Librairie' }] }
   }
 })

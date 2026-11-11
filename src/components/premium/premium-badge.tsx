@@ -2,7 +2,7 @@ import React from 'react'
 import { Sparkles } from 'lucide-react'
 import { Badge } from '~/components/ui/badge'
 import { cn } from '~/lib/utils'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 type PremiumBadgeProps = Omit<
   React.ComponentProps<typeof Badge>,

@@ -8,10 +8,10 @@ import { TermsOfUsePage } from './-components/legal-pages'
 
 const MARKDOWN_LOADERS = {
   fr: () => {
-    return import('../../../../md/fr/terms-of-use.md?raw')
+    return import('~/server/legal/fr/terms-of-use.md?raw')
   },
   en: () => {
-    return import('../../../../md/en/terms-of-use.md?raw')
+    return import('~/server/legal/en/terms-of-use.md?raw')
   }
 } satisfies Record<Locale, () => Promise<{ default: string }>>
 

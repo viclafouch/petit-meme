@@ -1,5 +1,3 @@
-/* oxlint-disable no-console */
-
 const getHost = (url: string) => {
   try {
     const { hostname } = new URL(url)

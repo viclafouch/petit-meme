@@ -1,4 +1,3 @@
-/* oxlint-disable no-console */
 import { z } from 'zod'
 import { serverEnv } from '~/env/server.server'
 import { fetchWithZod } from '~/server/http/fetch.server'

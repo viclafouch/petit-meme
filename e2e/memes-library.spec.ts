@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test'
 import { HTTP_STATUS } from '~/constants/http'
 import { MEMES_PER_PAGE } from '~/constants/meme'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import {
   E2E_FIRST_PAGE_MEMES,
   E2E_NAMED_MEMES,

@@ -96,7 +96,7 @@ export const readAndDeleteFFmpegOutput = async (
   await ffmpeg.deleteFile(output.fileName).catch(() => {})
 
   if (!(outputData instanceof globalThis.Uint8Array)) {
-    throw new Error('Unexpected FFmpeg output format')
+    throw new TypeError('Unexpected FFmpeg output format')
   }
 
   return new Blob([new Uint8Array(outputData)], { type: output.mimeType })

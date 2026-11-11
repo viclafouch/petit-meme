@@ -1,6 +1,6 @@
 import type { Subscription } from '@better-auth/stripe'
 import { FREE_CAPS } from '~/helpers/cap'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 export type BillingPeriod = 'monthly' | 'yearly'
 

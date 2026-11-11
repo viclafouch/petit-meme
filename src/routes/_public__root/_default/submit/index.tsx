@@ -9,6 +9,14 @@ import { SubmitPage } from './-components/submit-page'
 
 export const Route = createFileRoute('/_public__root/_default/submit/')({
   component: SubmitPage,
+  loader: async ({ context }) => {
+    if (context.user) {
+      await context.queryClient.query({
+        ...listUserProposalsQueryOpts(),
+        staleTime: 'static'
+      })
+    }
+  },
   head: () => {
     const locale = getLocale()
 
@@ -36,14 +44,6 @@ export const Route = createFileRoute('/_public__root/_default/submit/')({
           )
         }
       ]
-    }
-  },
-  loader: async ({ context }) => {
-    if (context.user) {
-      await context.queryClient.query({
-        ...listUserProposalsQueryOpts(),
-        staleTime: 'static'
-      })
     }
   }
 })

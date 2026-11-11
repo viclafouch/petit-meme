@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { buttonVariants } from '~/components/ui/button'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 export const NotFound = () => {
   return (

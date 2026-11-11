@@ -7,7 +7,7 @@ import {
   MemeProposalUrlType,
   type MemeProposalStatus
 } from '~/db/generated/prisma/enums'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 const detectUrlType = (url: string): MemeProposalUrlType | null => {
   if (TWEET_LINK_SCHEMA.safeParse(url).success) {

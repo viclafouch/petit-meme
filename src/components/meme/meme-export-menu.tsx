@@ -15,7 +15,7 @@ import {
 import { MEME_DERIVED_FORMATS, type MemeDerivedFormat } from '~/constants/bunny'
 import type { MemeExportMode } from '~/constants/meme'
 import { cn } from '~/lib/utils'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 const MENU_ITEM_CLASS_NAME = 'py-2.5 md:py-1.5'
 

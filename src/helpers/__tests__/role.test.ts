@@ -18,7 +18,10 @@ describe('matchIsPremium', () => {
   })
 
   it('should count a User with a granted Premium as Premium', () => {
-    const user = { role: 'user', premiumGrantedAt: new Date() }
+    const user = {
+      role: 'user',
+      premiumGrantedAt: new Date('2026-01-01T00:00:00Z')
+    }
 
     expect(matchIsPremium({ user, subscription: null })).toBe(true)
   })

@@ -6,6 +6,7 @@ type FormFooterProps = {
   submitLabel: string
   onCancel?: () => void
   isLoadingButton?: boolean
+  isPending?: boolean
   formId?: string
 }
 
@@ -13,6 +14,7 @@ export const FormFooter = ({
   onCancel,
   submitLabel,
   isLoadingButton = false,
+  isPending = false,
   formId
 }: FormFooterProps) => {
   const form = useFormContext()
@@ -29,11 +31,13 @@ export const FormFooter = ({
           return [state.canSubmit, state.isSubmitting] as const
         }}
         children={([canSubmit, isSubmitting]) => {
+          const isBusy = isSubmitting || isPending
+
           return isLoadingButton ? (
             <LoadingButton
               type="submit"
               form={formId}
-              isLoading={isSubmitting}
+              isLoading={isBusy}
               disabled={!canSubmit}
             >
               {submitLabel}
@@ -41,7 +45,7 @@ export const FormFooter = ({
           ) : (
             <Button
               variant="default"
-              disabled={!canSubmit || isSubmitting}
+              disabled={!canSubmit || isBusy}
               type="submit"
               form={formId}
             >

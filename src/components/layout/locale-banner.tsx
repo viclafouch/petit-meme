@@ -7,7 +7,7 @@ import { AnimatedBanner } from '~/components/layout/animated-banner'
 import { Button } from '~/components/ui/button'
 import { getLocaleDisplayName, getSuggestedLocale } from '~/helpers/locale'
 import { dismissLocaleBanner } from '~/lib/locale-banner'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { getLocale, locales, setLocale } from '~/paraglide/runtime'
 import { updateUserLocale } from '~/server/user/user.functions'
 

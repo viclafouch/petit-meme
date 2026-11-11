@@ -45,7 +45,7 @@ export const buildMemeFormValues = (meme: MemeFullData): MemeFormValues => {
 type UseMemeFormParams = {
   meme: MemeFullData
   onChange: (values: MemeFormValues) => void
-  onSubmit: (values: MemeFormValues) => Promise<void>
+  onSubmit: (values: MemeFormValues) => void
 }
 
 export function useMemeForm({ meme, onChange, onSubmit }: UseMemeFormParams) {
@@ -65,7 +65,7 @@ export function useMemeForm({ meme, onChange, onSubmit }: UseMemeFormParams) {
     },
     onSubmitInvalid: focusFirstInvalidField,
     onSubmit: ({ value }) => {
-      return onSubmit(value)
+      onSubmit(value)
     }
   })
 

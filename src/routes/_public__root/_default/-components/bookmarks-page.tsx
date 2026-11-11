@@ -1,6 +1,6 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { MemesList } from '~/components/meme/memes-list'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
 import {
   PageDescription,

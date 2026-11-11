@@ -16,7 +16,6 @@ import {
   startPublishRun,
   trackPublishProgress,
   type MemePublishRun,
-  type PublishRunKind,
   type PublishStep
 } from '~/routes/admin/library/-lib/publish-run'
 import {
@@ -30,6 +29,10 @@ export type StatusTransition = {
   status: MemeStatus
   label: string
   successMessage: string
+}
+
+type GenerateFilesVariables = {
+  valuesToPublish: MemeFormValues | null
 }
 
 export const getMemeEditScope = (memeId: MemeFullData['id']) => {
@@ -50,33 +53,6 @@ export function useMemePublisher(meme: MemeFullData) {
     await router.invalidate()
   }
 
-  const publishMutation = useMutation({
-    mutationKey: ['publish-meme', meme.id],
-    scope: { id: getMemeEditScope(meme.id) },
-    mutationFn: async (values: MemeFormValues) => {
-      await updateMeme({ data: { ...values, id: meme.id } })
-      await updateMemeStatus({
-        data: { id: meme.id, status: MemeStatus.PUBLISHED }
-      })
-    },
-    onSuccess: refreshSavedMeme,
-    onError: (error) => {
-      captureWithFeature(error, 'admin-meme-edit')
-    }
-  })
-
-  const statusMutation = useMutation({
-    mutationKey: ['meme-status', meme.id],
-    scope: { id: getMemeEditScope(meme.id) },
-    mutationFn: (status: MemeStatus) => {
-      return updateMemeStatus({ data: { id: meme.id, status } })
-    },
-    onSuccess: refreshSavedMeme,
-    onError: (error) => {
-      captureWithFeature(error, 'admin-meme-edit')
-    }
-  })
-
   const enterStep = (step: PublishStep) => {
     setRun((current) => {
       return current && enterPublishStep(current, step)
@@ -95,52 +71,90 @@ export function useMemePublisher(meme: MemeFullData) {
     })
   }
 
-  const generateFiles = () => {
-    return filesEngine.generateFiles({
-      onStep: enterStep,
-      onProgress: setProgress
-    })
-  }
-
-  const execute = async (kind: PublishRunKind, task: () => Promise<void>) => {
-    setRun(startPublishRun(kind, Date.now()))
-
-    try {
-      await task()
+  const publishMutation = useMutation({
+    mutationKey: ['publish-meme', meme.id],
+    scope: { id: getMemeEditScope(meme.id) },
+    mutationFn: async (values: MemeFormValues) => {
+      await updateMeme({ data: { ...values, id: meme.id } })
+      await updateMemeStatus({
+        data: { id: meme.id, status: MemeStatus.PUBLISHED }
+      })
+    },
+    onSuccess: async () => {
+      await refreshSavedMeme()
       settleRun(null)
-    } catch (error) {
+    },
+    onError: (error) => {
+      captureWithFeature(error, 'admin-meme-edit')
       settleRun(getErrorMessage(error))
     }
-  }
+  })
+
+  const generateMutation = useMutation({
+    mutationKey: ['generate-meme-files', meme.id],
+    mutationFn: (_variables: GenerateFilesVariables) => {
+      return filesEngine.generateFiles({
+        onStep: enterStep,
+        onProgress: setProgress
+      })
+    },
+    onSuccess: async (_data, { valuesToPublish }) => {
+      await filesEngine.refreshMissingFiles()
+
+      if (valuesToPublish === null) {
+        settleRun(null)
+
+        return
+      }
+
+      enterStep('saving')
+      publishMutation.mutate(valuesToPublish)
+    },
+    onError: async (error) => {
+      captureWithFeature(error, 'admin-meme-files')
+      await filesEngine.refreshMissingFiles()
+      settleRun(getErrorMessage(error))
+    }
+  })
+
+  const statusMutation = useMutation({
+    mutationKey: ['meme-status', meme.id],
+    scope: { id: getMemeEditScope(meme.id) },
+    mutationFn: ({ status }: StatusTransition) => {
+      return updateMemeStatus({ data: { id: meme.id, status } })
+    },
+    onSuccess: async (_data, { successMessage }) => {
+      await refreshSavedMeme()
+      setRun(null)
+      toast.success(successMessage)
+    },
+    onError: (error) => {
+      captureWithFeature(error, 'admin-meme-edit')
+      toast.error(getErrorMessage(error))
+    }
+  })
 
   const publish = (values: MemeFormValues) => {
     const hasAllFiles = filesEngine.missingFiles?.length === 0
 
     if (hasAllFiles) {
-      return execute('publish', async () => {
-        await publishMutation.mutateAsync(values)
-      })
+      setRun(startPublishRun('publish', Date.now()))
+      publishMutation.mutate(values)
+
+      return
     }
 
-    return execute('publish-with-files', async () => {
-      await generateFiles()
-      enterStep('saving')
-      await publishMutation.mutateAsync(values)
-    })
+    setRun(startPublishRun('publish-with-files', Date.now()))
+    generateMutation.mutate({ valuesToPublish: values })
   }
 
-  const changeStatus = async (transition: StatusTransition) => {
-    try {
-      await statusMutation.mutateAsync(transition.status)
-      setRun(null)
-      toast.success(transition.successMessage)
-    } catch (error) {
-      toast.error(getErrorMessage(error))
-    }
+  const changeStatus = (transition: StatusTransition) => {
+    statusMutation.mutate(transition)
   }
 
   const regenerate = () => {
-    return execute('regenerate', generateFiles)
+    setRun(startPublishRun('regenerate', Date.now()))
+    generateMutation.mutate({ valuesToPublish: null })
   }
 
   return {

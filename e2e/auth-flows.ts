@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test'
 import { ONE_HOUR_IN_SECONDS } from '~/constants/time'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { createEmailVerificationPath } from '~/server/auth/email-verification.server'
 import { E2E_AUTH_SECRET } from './env'
 import { repeatUntilVisible } from './hydration'

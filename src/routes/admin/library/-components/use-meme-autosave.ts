@@ -1,5 +1,5 @@
 import { toast } from 'sonner'
-import { useAsyncDebouncer } from '@tanstack/react-pacer'
+import { useDebouncer } from '@tanstack/react-pacer'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useBlocker } from '@tanstack/react-router'
 import type { MemeFullData } from '~/constants/meme'
@@ -34,18 +34,30 @@ export function useMemeAutosave(meme: MemeFullData) {
     mutationFn: (values: MemeFormValues) => {
       return updateMeme({ data: { ...values, id: meme.id } })
     },
-    onSuccess: () => {
-      return Promise.all([
+    onSuccess: async () => {
+      await Promise.all([
         invalidateSavedMeme(queryClient, meme.id),
         markAdminMemesOverviewStale(queryClient)
       ])
+      toast.success('Enregistré', { id: toastId })
     },
-    onError: (error) => {
+    onError: (error, values) => {
       captureWithFeature(error, 'admin-meme-edit')
+      toast.error("Échec de l'enregistrement", {
+        id: toastId,
+        description: getErrorMessage(error),
+        duration: Infinity,
+        action: {
+          label: 'Réessayer',
+          onClick: () => {
+            save(values)
+          }
+        }
+      })
     }
   })
 
-  const save = async (values: MemeFormValues) => {
+  const save = (values: MemeFormValues) => {
     if (!getMemeFormSchema(readSavedStatus()).safeParse(values).success) {
       toast.warning('Non enregistré', {
         id: toastId,
@@ -53,45 +65,20 @@ export function useMemeAutosave(meme: MemeFullData) {
         duration: Infinity
       })
 
-      return false
+      return
     }
 
-    const savePromise = saveMutation.mutateAsync(values)
+    toast.loading('Enregistrement...', { id: toastId })
 
-    toast.promise(savePromise, {
-      id: toastId,
-      loading: 'Enregistrement...',
-      success: 'Enregistré',
-      error: (error) => {
-        return {
-          message: "Échec de l'enregistrement",
-          description: getErrorMessage(error),
-          duration: Infinity,
-          action: {
-            label: 'Réessayer',
-            onClick: () => {
-              void save(values)
-            }
-          }
-        }
-      }
-    })
-
-    try {
-      await savePromise
-
-      return true
-    } catch {
-      return false
-    }
+    saveMutation.mutate(values)
   }
 
-  const debouncer = useAsyncDebouncer<typeof save, { isPending: boolean }>(
+  const debouncer = useDebouncer<typeof save, { isPending: boolean }>(
     save,
     {
       wait: AUTOSAVE_DELAY_MS,
       onUnmount: (pendingDebouncer) => {
-        void pendingDebouncer.flush()
+        pendingDebouncer.flush()
       }
     },
     (state) => {
@@ -110,7 +97,7 @@ export function useMemeAutosave(meme: MemeFullData) {
 
   return {
     schedule: (values: MemeFormValues) => {
-      void debouncer.maybeExecute(values)
+      debouncer.maybeExecute(values)
     },
     matchHasUnsavedValues: () => {
       return (

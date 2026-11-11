@@ -7,7 +7,7 @@ import {
 } from '@playwright/test'
 import { HTTP_STATUS } from '~/constants/http'
 import { FREE_CAPS } from '~/helpers/cap'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { getAuthDialogSignInButton } from './auth-flows'
 import { E2E_NAMED_MEMES } from './content'
 import { resolveStorageStatePath } from './env'

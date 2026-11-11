@@ -8,10 +8,10 @@ import { PrivacyPage } from './-components/legal-pages'
 
 const MARKDOWN_LOADERS = {
   fr: () => {
-    return import('../../../../md/fr/privacy.md?raw')
+    return import('~/server/legal/fr/privacy.md?raw')
   },
   en: () => {
-    return import('../../../../md/en/privacy.md?raw')
+    return import('~/server/legal/en/privacy.md?raw')
   }
 } satisfies Record<Locale, () => Promise<{ default: string }>>
 

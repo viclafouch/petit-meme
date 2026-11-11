@@ -28,9 +28,9 @@ import { Separator } from '~/components/ui/separator'
 import { LOGO_PATH } from '~/constants/branding'
 import type { MemeWithVideo } from '~/constants/meme'
 import { STUDIO_TEXT_MAX_LENGTH } from '~/constants/studio'
-import { m } from '~/paraglide/messages.js'
-import { dialogStore } from '~/stores/dialog.store'
-import { studioStore } from '~/stores/studio.store'
+import { m } from '~/paraglide/messages'
+import { useDialogStore } from '~/stores/dialog.store'
+import { useStudioStore } from '~/stores/studio.store'
 
 type StudioBrandingProps = {
   title: string
@@ -63,6 +63,8 @@ type StudioPageProps = {
 }
 
 export const StudioPage = ({ meme }: StudioPageProps) => {
+  const studioStore = useStudioStore()
+  const dialogStore = useDialogStore()
   const { user } = useRouteContext({ from: '__root__' })
   const ffmpegQuery = useVideoInitializer()
   const { triggerPreload } = useVideoPreloader(ffmpegQuery.data, meme.id)

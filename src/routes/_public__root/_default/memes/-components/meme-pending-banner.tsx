@@ -2,7 +2,7 @@ import { EyeOff, Pencil } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { buttonVariants } from '~/components/ui/button'
 import type { MemeFullData } from '~/constants/meme'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 type MemePendingBannerProps = {
   memeId: MemeFullData['id']

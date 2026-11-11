@@ -12,7 +12,7 @@ import {
   type MemeWithVideo
 } from '~/constants/meme'
 import { sendViewEvent } from '~/lib/algolia-insights'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 type MemeWithHighlight = MemeWithVideo & {
   highlightedTitle?: string

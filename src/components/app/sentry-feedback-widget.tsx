@@ -3,7 +3,7 @@ import { MessageSquarePlus } from 'lucide-react'
 import { motion } from 'motion/react'
 import * as Sentry from '@sentry/tanstackstart-react'
 import { ClientOnly } from '@tanstack/react-router'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 const APPEAR_DELAY_SECONDS = 3
 

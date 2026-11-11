@@ -20,7 +20,7 @@ import {
   getDefaultCategories
 } from '~/helpers/cookie-consent'
 import { getCookieConsentCategories } from '~/lib/cookie-consent'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { useCookieConsentStore } from '~/stores/cookie-consent.store'
 
 const CookieSettingsContent = () => {

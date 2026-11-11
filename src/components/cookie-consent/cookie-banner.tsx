@@ -7,9 +7,9 @@ import { Button } from '~/components/ui/button'
 import { CONSENT_BANNER_DELAY_MS } from '~/constants/cookie'
 import { useIsMobile } from '~/hooks/use-mobile'
 import { useTimeout } from '~/hooks/use-timeout'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { useCookieConsentStore } from '~/stores/cookie-consent.store'
-import { dialogStore } from '~/stores/dialog.store'
+import { useDialogStore } from '~/stores/dialog.store'
 
 const BANNER_VIDEO_SRC = '/videos/want-a-cookie.mp4'
 const BANNER_POSTER_SRC = '/images/want-a-cookie.webp'
@@ -59,6 +59,7 @@ const BannerMedia = ({ isMobile }: BannerMediaProps) => {
 }
 
 export const CookieBanner = () => {
+  const dialogStore = useDialogStore()
   const cookieConsentStore = useCookieConsentStore()
   const isBannerVisible = useSelector(cookieConsentStore, (state) => {
     return state.isBannerVisible

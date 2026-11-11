@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { clientEnvSchema } from '../client-schema'
+import { clientEnvSchema } from '~/env/client-schema'
 
 const matchIsAcceptedBunnyHostname = (value: string) => {
   return clientEnvSchema.VITE_BUNNY_HOSTNAME.safeParse(value).success

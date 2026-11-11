@@ -18,6 +18,7 @@ import {
   LOCALE_META
 } from '~/helpers/i18n-content'
 import { focusFirstInvalidField, getFieldErrorMessage } from '~/lib/form'
+import { captureWithFeature } from '~/lib/sentry'
 import { locales, type Locale } from '~/paraglide/runtime'
 import { KeywordsField } from '~/routes/admin/-components/keywords-field'
 import { useKeywordsField } from '~/routes/admin/-components/use-keywords-field'
@@ -78,7 +79,10 @@ export const CategoryForm = ({
 
       return promise
     },
-    onSuccess
+    onSuccess,
+    onError: (error) => {
+      captureWithFeature(error, 'admin-category')
+    }
   })
 
   const form = useAppForm({
@@ -111,12 +115,12 @@ export const CategoryForm = ({
       onChange: CATEGORY_FORM_SCHEMA
     },
     onSubmitInvalid: focusFirstInvalidField,
-    onSubmit: async ({ value }) => {
+    onSubmit: ({ value }) => {
       if (manageCategoryMutation.isPending) {
         return
       }
 
-      await manageCategoryMutation.mutateAsync(value)
+      manageCategoryMutation.mutate(value)
     }
   })
 
@@ -216,6 +220,7 @@ export const CategoryForm = ({
           }}
           submitLabel="Enregistrer"
           isLoadingButton
+          isPending={manageCategoryMutation.isPending}
         />
       </form.AppForm>
     </form>

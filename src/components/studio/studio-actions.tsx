@@ -7,7 +7,7 @@ import { LoadingButton } from '~/components/ui/loading-button'
 import type { MemeExportMode } from '~/constants/meme'
 import { EASE_OUT } from '~/constants/motion'
 import { deliverMemeBlob } from '~/lib/meme-export'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 const deliverStudioVideo = (
   { blob, title }: ProcessedData,

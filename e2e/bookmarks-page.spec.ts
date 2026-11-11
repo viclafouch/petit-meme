@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test'
 import { HTTP_STATUS } from '~/constants/http'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { E2E_NAMED_MEMES } from './content'
 import { resolveStorageStatePath } from './env'
 import { test } from './fixtures'

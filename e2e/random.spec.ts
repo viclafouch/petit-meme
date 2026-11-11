@@ -1,5 +1,5 @@
 import { expect, type Page } from '@playwright/test'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { E2E_MEMES, E2E_NAMED_MEMES } from './content'
 import { test } from './fixtures'
 import { repeatUntilNavigated } from './hydration'

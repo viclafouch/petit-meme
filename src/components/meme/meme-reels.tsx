@@ -15,7 +15,7 @@ import { LoadingSpinner } from '~/components/ui/spinner'
 import { LOGO_PATH } from '~/constants/branding'
 import type { MemeWithVideo } from '~/constants/meme'
 import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { listReelsQueryOpts } from '~/queries/meme'
 
 const PREFETCH_THRESHOLD_ITEMS = 3

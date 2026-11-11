@@ -1,5 +1,5 @@
 import { type AppErrorCode, getAppErrorCode } from '~/constants/error'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 
 const APP_ERROR_MESSAGES = {
   PREMIUM_REQUIRED: () => {

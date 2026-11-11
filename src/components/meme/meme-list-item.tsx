@@ -24,10 +24,10 @@ import {
   type ConversionEventName
 } from '~/lib/algolia-insights'
 import { cn } from '~/lib/utils'
-import { m } from '~/paraglide/messages.js'
+import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
-import { dialogStore } from '~/stores/dialog.store'
+import { useDialogStore } from '~/stores/dialog.store'
 
 export type MemeListItemProps = {
   meme: MemeWithVideo
@@ -104,6 +104,7 @@ const BookmarkItemGuard = ({
   queryID,
   authenticatedUserToken
 }: BookmarkItemGuardProps) => {
+  const dialogStore = useDialogStore()
   const { user } = useRouteContext({ from: '__root__' })
 
   if (!user) {

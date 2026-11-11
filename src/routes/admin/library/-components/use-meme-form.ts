@@ -1,5 +1,6 @@
 import { toast } from 'sonner'
 import type { z } from 'zod'
+import { revalidateLogic } from '@tanstack/react-form'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import type { MemeFullData } from '~/constants/meme'
 import { getErrorMessage } from '~/helpers/error'
@@ -13,7 +14,11 @@ import { useKeywordsField } from '~/hooks/use-keywords-field'
 import { focusFirstInvalidField } from '~/lib/form'
 import { getCategoriesListQueryOpts } from '~/lib/queries'
 import { baseLocale, isLocale, type Locale } from '~/paraglide/runtime'
-import { MEME_FORM_SCHEMA } from '~/routes/admin/-server/memes'
+import {
+  getMemeFormSchema,
+  type MEME_FORM_SCHEMA,
+  PUBLISHABLE_MEME_FORM_SCHEMA
+} from '~/routes/admin/-server/memes'
 import { translateMemeContent } from '~/server/ai'
 
 export type MemeFormValues = z.infer<typeof MEME_FORM_SCHEMA>
@@ -31,7 +36,6 @@ export const buildMemeFormValues = (meme: MemeFullData): MemeFormValues => {
       }
     }),
     tweetUrl: meme.tweetUrl,
-    status: meme.status,
     categoryIds: meme.categories.map((category) => {
       return category.categoryId
     })
@@ -49,8 +53,10 @@ export function useMemeForm({ meme, onChange, onSubmit }: UseMemeFormParams) {
 
   const form = useAppForm({
     defaultValues: buildMemeFormValues(meme),
+    validationLogic: revalidateLogic(),
     validators: {
-      onChange: MEME_FORM_SCHEMA
+      onChange: getMemeFormSchema(meme.status),
+      onDynamic: PUBLISHABLE_MEME_FORM_SCHEMA
     },
     listeners: {
       onChange: ({ formApi }) => {

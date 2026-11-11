@@ -20,10 +20,56 @@ import { MemeStatus } from '~/db/generated/prisma/enums'
 import type { PublishRunKind } from '~/routes/admin/library/-lib/publish-run'
 import { MemePublishTimeline } from './meme-publish-timeline'
 import { MemeSectionTitle } from './meme-section-title'
-import type { MemePublisher } from './use-meme-publisher'
+import type { MemePublisher, StatusTransition } from './use-meme-publisher'
+
+type StatusCardContent = {
+  description: string
+  canPublish: boolean
+  transition: StatusTransition
+}
+
+const REJECT_TRANSITION = {
+  status: MemeStatus.REJECTED,
+  label: 'Rejeter',
+  successMessage: 'Meme rejeté'
+} as const satisfies StatusTransition
+
+const STATUS_CARD_CONTENT = {
+  [MemeStatus.PENDING]: {
+    description:
+      'Caché du site. Publier génère le MP4 watermarké et le MP3 s’ils manquent, puis met le Meme en ligne.',
+    canPublish: true,
+    transition: REJECT_TRANSITION
+  },
+  [MemeStatus.PUBLISHED]: {
+    description: 'En ligne. Chaque modification part sur le site toute seule.',
+    canPublish: false,
+    transition: {
+      status: MemeStatus.ARCHIVED,
+      label: 'Retirer du site',
+      successMessage: 'Retiré du site'
+    }
+  },
+  [MemeStatus.ARCHIVED]: {
+    description:
+      'Retiré du site, gardé dans la bibliothèque. Publier le remet en ligne.',
+    canPublish: true,
+    transition: REJECT_TRANSITION
+  },
+  [MemeStatus.REJECTED]: {
+    description: 'Écarté, il ne sera pas publié.',
+    canPublish: false,
+    transition: {
+      status: MemeStatus.PENDING,
+      label: 'Remettre en attente',
+      successMessage: 'Remis en attente'
+    }
+  }
+} as const satisfies Record<MemeStatus, StatusCardContent>
 
 const RUNNING_LABELS = {
   publish: 'Publication...',
+  'publish-with-files': 'Publication...',
   regenerate: 'Régénération...'
 } as const satisfies Record<PublishRunKind, string>
 
@@ -61,7 +107,7 @@ export const FileBadge = ({ format, missingFiles }: FileBadgeProps) => {
   )
 }
 
-type MemePublishCardProps = {
+type MemeStatusCardProps = {
   index: number
   meme: MemeFullData
   publisher: MemePublisher
@@ -69,15 +115,18 @@ type MemePublishCardProps = {
   className?: string
 }
 
-export const MemePublishCard = ({
+export const MemeStatusCard = ({
   index,
   meme,
   publisher,
   onPublish,
   className
-}: MemePublishCardProps) => {
-  const { run, isRunning, missingFiles } = publisher
+}: MemeStatusCardProps) => {
+  const { run, isRunning, isChangingStatus, missingFiles } = publisher
   const isPublished = meme.status === MemeStatus.PUBLISHED
+  const { description, canPublish, transition } =
+    STATUS_CARD_CONTENT[meme.status]
+  const isBusy = isRunning || isChangingStatus
 
   const handleRegenerate = () => {
     void publisher.regenerate()
@@ -86,12 +135,8 @@ export const MemePublishCard = ({
   return (
     <Card className={className}>
       <CardHeader>
-        <MemeSectionTitle index={index}>Publication</MemeSectionTitle>
-        <CardDescription>
-          {isPublished
-            ? 'En ligne. Chaque modification part sur le site toute seule.'
-            : 'Le navigateur génère le MP4 watermarké et le MP3, puis met le Meme en ligne.'}
-        </CardDescription>
+        <MemeSectionTitle index={index}>Statut</MemeSectionTitle>
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
         <div className="flex flex-wrap items-center gap-2">
@@ -110,7 +155,7 @@ export const MemePublishCard = ({
               size="sm"
               variant="ghost"
               className="ml-auto"
-              disabled={isRunning || !missingFiles}
+              disabled={isBusy || !missingFiles}
               onClick={handleRegenerate}
             >
               <RefreshCw data-icon="inline-start" aria-hidden />
@@ -127,20 +172,34 @@ export const MemePublishCard = ({
           />
         ) : null}
       </CardContent>
-      {isPublished ? null : (
-        <CardFooter>
+      <CardFooter className="flex-col gap-2">
+        {canPublish ? (
           <LoadingButton
             type="button"
             size="lg"
             className="w-full"
             isLoading={isRunning}
             loadingText={run ? RUNNING_LABELS[run.kind] : undefined}
+            disabled={isChangingStatus || !missingFiles}
             onClick={onPublish}
           >
             Publier
           </LoadingButton>
-        </CardFooter>
-      )}
+        ) : null}
+        <LoadingButton
+          type="button"
+          size="lg"
+          variant={canPublish ? 'ghost' : 'outline'}
+          className="w-full"
+          isLoading={isChangingStatus}
+          disabled={isRunning}
+          onClick={() => {
+            void publisher.changeStatus(transition)
+          }}
+        >
+          {transition.label}
+        </LoadingButton>
+      </CardFooter>
     </Card>
   )
 }

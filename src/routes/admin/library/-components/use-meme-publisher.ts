@@ -1,4 +1,5 @@
 import React from 'react'
+import { toast } from 'sonner'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 import type { MemeFullData } from '~/constants/meme'
@@ -9,7 +10,7 @@ import {
   invalidateAdminMemesOverview,
   invalidateSavedMeme
 } from '~/routes/admin/-lib/queries'
-import { editMeme } from '~/routes/admin/-server/memes'
+import { editMeme, setMemeStatus } from '~/routes/admin/-server/memes'
 import {
   getPublishRunSteps,
   type PublishRun,
@@ -25,6 +26,12 @@ export type MemePublisherRun = PublishRun & {
   error: string | null
 }
 
+export type StatusTransition = {
+  status: MemeStatus
+  label: string
+  successMessage: string
+}
+
 export const getMemeEditScope = (memeId: MemeFullData['id']) => {
   return `edit-meme-${memeId}`
 }
@@ -35,21 +42,36 @@ export function useMemePublisher(meme: MemeFullData) {
   const filesEngine = useMemeFilesEngine(meme.id)
   const [run, setRun] = React.useState<MemePublisherRun | null>(null)
 
+  const refreshSavedMeme = async () => {
+    await Promise.all([
+      invalidateAdminMemesOverview(queryClient),
+      invalidateSavedMeme(queryClient, meme.id)
+    ])
+    await router.invalidate()
+  }
+
   const publishMutation = useMutation({
     mutationKey: ['publish-meme', meme.id],
     scope: { id: getMemeEditScope(meme.id) },
-    mutationFn: (values: MemeFormValues) => {
-      return editMeme({
-        data: { ...values, status: MemeStatus.PUBLISHED, id: meme.id }
+    mutationFn: async (values: MemeFormValues) => {
+      await editMeme({ data: { ...values, id: meme.id } })
+      await setMemeStatus({
+        data: { id: meme.id, status: MemeStatus.PUBLISHED }
       })
     },
-    onSuccess: async () => {
-      await Promise.all([
-        invalidateAdminMemesOverview(queryClient),
-        invalidateSavedMeme(queryClient, meme.id)
-      ])
-      await router.invalidate()
+    onSuccess: refreshSavedMeme,
+    onError: (error) => {
+      captureWithFeature(error, 'admin-meme-edit')
+    }
+  })
+
+  const statusMutation = useMutation({
+    mutationKey: ['meme-status', meme.id],
+    scope: { id: getMemeEditScope(meme.id) },
+    mutationFn: (status: MemeStatus) => {
+      return setMemeStatus({ data: { id: meme.id, status } })
     },
+    onSuccess: refreshSavedMeme,
     onError: (error) => {
       captureWithFeature(error, 'admin-meme-edit')
     }
@@ -106,11 +128,29 @@ export function useMemePublisher(meme: MemeFullData) {
   }
 
   const publish = (values: MemeFormValues) => {
-    return execute('publish', async () => {
+    const hasAllFiles = filesEngine.missingFiles?.length === 0
+
+    if (hasAllFiles) {
+      return execute('publish', async () => {
+        await publishMutation.mutateAsync(values)
+      })
+    }
+
+    return execute('publish-with-files', async () => {
       await generateFiles()
       enterStep('saving')
       await publishMutation.mutateAsync(values)
     })
+  }
+
+  const changeStatus = async (transition: StatusTransition) => {
+    try {
+      await statusMutation.mutateAsync(transition.status)
+      setRun(null)
+      toast.success(transition.successMessage)
+    } catch (error) {
+      toast.error(getErrorMessage(error))
+    }
   }
 
   const regenerate = () => {
@@ -120,9 +160,11 @@ export function useMemePublisher(meme: MemeFullData) {
   return {
     run,
     isRunning: run?.outcome === 'running',
+    isChangingStatus: statusMutation.isPending,
     missingFiles: filesEngine.missingFiles,
     publish,
-    regenerate
+    regenerate,
+    changeStatus
   }
 }
 

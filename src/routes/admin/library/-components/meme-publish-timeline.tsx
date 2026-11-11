@@ -33,7 +33,7 @@ const STEP_LABELS = {
   watermarking: 'Watermark du MP4',
   'extracting-mp3': 'Extraction du MP3',
   uploading: 'Envoi sur Bunny',
-  saving: 'Enregistrement'
+  saving: 'Mise en ligne'
 } as const satisfies Record<PublishStep, string>
 
 const STATUS_LABELS = {
@@ -43,19 +43,24 @@ const STATUS_LABELS = {
   failed: 'échec'
 } as const satisfies Record<PublishStepStatus, string>
 
+type RunSuccessMessage = {
+  title: string
+  description: string
+}
+
+const PUBLISHED_MESSAGE = {
+  title: 'Meme publié',
+  description: 'Il est en ligne avec son MP4 watermarké et son MP3.'
+} as const satisfies RunSuccessMessage
+
 const SUCCESS_MESSAGES = {
-  publish: {
-    title: 'Meme publié',
-    description: 'Il est en ligne avec son MP4 watermarké et son MP3.'
-  },
+  publish: PUBLISHED_MESSAGE,
+  'publish-with-files': PUBLISHED_MESSAGE,
   regenerate: {
     title: 'Fichiers régénérés',
     description: 'Le MP4 et le MP3 sont à jour sur Bunny.'
   }
-} as const satisfies Record<
-  PublishRunKind,
-  { title: string; description: string }
->
+} as const satisfies Record<PublishRunKind, RunSuccessMessage>
 
 const NODE_POP_SCALE = 1.18
 const HALO_SCALE = 1.7

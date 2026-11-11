@@ -14,8 +14,12 @@ const getStatuses = (run: PublishRun) => {
 }
 
 describe('getPublishRunSteps', () => {
-  it('runs the four file steps then the save on a first publish', () => {
-    expect(getPublishRunSteps('publish')).toStrictEqual([
+  it('only saves when the files are already on Bunny', () => {
+    expect(getPublishRunSteps('publish')).toStrictEqual(['saving'])
+  })
+
+  it('runs the four file steps then the save when a file is missing', () => {
+    expect(getPublishRunSteps('publish-with-files')).toStrictEqual([
       'preparing',
       'watermarking',
       'extracting-mp3',
@@ -38,7 +42,7 @@ describe('getPublishStepStatus', () => {
   it('marks the steps before the current one as done and the next ones as pending', () => {
     expect(
       getStatuses({
-        kind: 'publish',
+        kind: 'publish-with-files',
         step: 'watermarking',
         outcome: 'running'
       })
@@ -48,7 +52,7 @@ describe('getPublishStepStatus', () => {
   it('marks the failure on the step that broke and leaves the save pending', () => {
     expect(
       getStatuses({
-        kind: 'publish',
+        kind: 'publish-with-files',
         step: 'uploading',
         outcome: 'failed'
       })
@@ -58,7 +62,7 @@ describe('getPublishStepStatus', () => {
   it('marks every step as done once the run succeeded', () => {
     expect(
       getStatuses({
-        kind: 'publish',
+        kind: 'publish-with-files',
         step: 'saving',
         outcome: 'succeeded'
       })
@@ -71,7 +75,7 @@ describe('pacePublishRun', () => {
     expect(
       getStatuses(
         pacePublishRun(
-          { kind: 'publish', step: 'uploading', outcome: 'running' },
+          { kind: 'publish-with-files', step: 'uploading', outcome: 'running' },
           1
         )
       )
@@ -91,7 +95,7 @@ describe('pacePublishRun', () => {
 
   it('shows the real run once every step has been revealed', () => {
     const run = {
-      kind: 'publish',
+      kind: 'publish-with-files',
       step: 'saving',
       outcome: 'succeeded'
     } as const satisfies PublishRun
@@ -101,7 +105,7 @@ describe('pacePublishRun', () => {
 
   it('reveals a failure on the step that broke', () => {
     const run = {
-      kind: 'publish',
+      kind: 'publish-with-files',
       step: 'watermarking',
       outcome: 'failed'
     } as const satisfies PublishRun

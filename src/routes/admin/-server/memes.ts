@@ -185,30 +185,26 @@ const REQUIRED_MEME_TRANSLATION_SCHEMA = MEME_TRANSLATION_SCHEMA.extend({
   title: z.string().min(MEME_TITLE_MIN_LENGTH).max(MEME_TITLE_MAX_LENGTH)
 })
 
-export const MEME_FORM_SCHEMA = z
-  .object({
-    contentLocale: z.enum(MemeContentLocaleEnum),
-    translations: z.object(
-      buildLocaleRecord(() => {
-        return MEME_TRANSLATION_SCHEMA
+export const MEME_FORM_SCHEMA = z.object({
+  contentLocale: z.enum(MemeContentLocaleEnum),
+  translations: z.object(
+    buildLocaleRecord(() => {
+      return MEME_TRANSLATION_SCHEMA
+    })
+  ),
+  categoryIds: z.array(z.string()).max(MEME_CATEGORIES_MAX_COUNT),
+  tweetUrl: TWEET_LINK_SCHEMA.nullable().or(
+    z
+      .string()
+      .length(0)
+      .transform(() => {
+        return null
       })
-    ),
-    categoryIds: z.array(z.string()).max(MEME_CATEGORIES_MAX_COUNT),
-    status: z.enum(MemeStatus),
-    tweetUrl: TWEET_LINK_SCHEMA.nullable().or(
-      z
-        .string()
-        .length(0)
-        .transform(() => {
-          return null
-        })
-    )
-  })
-  .superRefine((data, refinementContext) => {
-    if (data.status !== MemeStatus.PUBLISHED) {
-      return
-    }
+  )
+})
 
+export const PUBLISHABLE_MEME_FORM_SCHEMA = MEME_FORM_SCHEMA.superRefine(
+  (data, refinementContext) => {
     const requiredLocales = REQUIRED_TRANSLATION_LOCALES[data.contentLocale]
 
     for (const locale of requiredLocales) {
@@ -225,40 +221,26 @@ export const MEME_FORM_SCHEMA = z
         }
       }
     }
-  })
-
-function resolvePublishedAt(
-  newStatus: string,
-  meme: { status: string; publishedAt: Date | null }
-) {
-  if (newStatus === 'PUBLISHED' && meme.status !== 'PUBLISHED') {
-    return new Date()
   }
+)
 
-  if (newStatus !== 'PUBLISHED') {
-    return null
-  }
-
-  return meme.publishedAt
+export const getMemeFormSchema = (status: MemeStatus) => {
+  return status === MemeStatus.PUBLISHED
+    ? PUBLISHABLE_MEME_FORM_SCHEMA
+    : MEME_FORM_SCHEMA
 }
 
 const INITIAL_VIEW_COUNT_MIN = 30
 const INITIAL_VIEW_COUNT_MAX = 120
 
-function resolveInitialViewCount(
-  newStatus: string,
-  meme: { status: string; viewCount: number }
-) {
-  const isFirstPublish =
-    newStatus === 'PUBLISHED' && meme.status !== 'PUBLISHED'
-
-  if (isFirstPublish && meme.viewCount === 0) {
-    const range = INITIAL_VIEW_COUNT_MAX - INITIAL_VIEW_COUNT_MIN + 1
-
-    return Math.floor(Math.random() * range) + INITIAL_VIEW_COUNT_MIN
+function resolveGoLiveViewCount(viewCount: number) {
+  if (viewCount > 0) {
+    return viewCount
   }
 
-  return meme.viewCount
+  const range = INITIAL_VIEW_COUNT_MAX - INITIAL_VIEW_COUNT_MIN + 1
+
+  return Math.floor(Math.random() * range) + INITIAL_VIEW_COUNT_MIN
 }
 
 function computeCategoryDiff(currentIds: string[], newIds: string[]) {
@@ -332,9 +314,6 @@ export const editMeme = createServerFn({ method: 'POST' })
       },
       select: {
         status: true,
-        publishedAt: true,
-        viewCount: true,
-        video: { select: { bunnyId: true } },
         categories: { select: { categoryId: true } }
       }
     })
@@ -345,23 +324,15 @@ export const editMeme = createServerFn({ method: 'POST' })
       throw new Error('Mème introuvable')
     }
 
-    const isGoingLive =
-      values.status === MemeStatus.PUBLISHED &&
-      meme.status !== MemeStatus.PUBLISHED
+    const isPublished = meme.status === MemeStatus.PUBLISHED
 
-    if (isGoingLive) {
-      const missingFiles = await findMissingMemeFiles(meme.video.bunnyId)
-
-      if (missingFiles.length > 0) {
-        setResponseStatus(HTTP_STATUS.UNPROCESSABLE_CONTENT)
-        throw new Error(
-          `Impossible de publier : fichier manquant (${missingFiles.join(', ')})`
-        )
-      }
+    if (
+      isPublished &&
+      !PUBLISHABLE_MEME_FORM_SCHEMA.safeParse(values).success
+    ) {
+      setResponseStatus(HTTP_STATUS.UNPROCESSABLE_CONTENT)
+      throw new Error('Un Meme en ligne garde un titre dans chaque langue')
     }
-
-    const publishedAt = resolvePublishedAt(values.status, meme)
-    const viewCount = resolveInitialViewCount(values.status, meme)
 
     const currentCategoryIds = meme.categories.map(({ categoryId }) => {
       return categoryId
@@ -385,9 +356,6 @@ export const editMeme = createServerFn({ method: 'POST' })
         contentLocale: values.contentLocale,
         title: sourceTranslation.title,
         description: sourceTranslation.description,
-        status: values.status,
-        publishedAt,
-        viewCount,
         categories: {
           deleteMany:
             toRemove.length > 0 ? { categoryId: { in: toRemove } } : undefined,
@@ -417,23 +385,9 @@ export const editMeme = createServerFn({ method: 'POST' })
 
     await safeAlgoliaOp(syncMemeToAllIndices(memeUpdated))
 
-    const isPubliclyVisible =
-      meme.status === MemeStatus.PUBLISHED ||
-      values.status === MemeStatus.PUBLISHED
-
-    if (isPubliclyVisible) {
+    if (isPublished) {
       await invalidateAlgoliaCache()
     }
-
-    const hasLeftPublished =
-      meme.status === MemeStatus.PUBLISHED &&
-      values.status !== MemeStatus.PUBLISHED
-
-    if (hasLeftPublished) {
-      void clearRecommendCache()
-    }
-
-    const hasStatusChanged = meme.status !== values.status
 
     void logAuditAction({
       action: 'edit',
@@ -443,23 +397,105 @@ export const editMeme = createServerFn({ method: 'POST' })
       metadata: { title: sourceTranslation.title }
     })
 
-    if (hasStatusChanged) {
-      void logAuditAction({
-        action: 'status_change',
-        actingAdminId: context.user.id,
-        targetId: memeUpdated.id,
-        targetType: 'meme',
-        metadata: {
-          title: sourceTranslation.title,
-          from: meme.status,
-          to: values.status
-        }
-      })
+    adminLogger.info({ memeId: memeUpdated.id }, 'Meme edited')
+
+    return { id: memeUpdated.id }
+  })
+
+export const setMemeStatus = createServerFn({ method: 'POST' })
+  .validator((data) => {
+    return z.object({ id: z.string(), status: z.enum(MemeStatus) }).parse(data)
+  })
+  .middleware([adminRequiredMiddleware])
+  .handler(async ({ data, context }) => {
+    const meme = await prismaClient.meme.findUnique({
+      where: { id: data.id },
+      select: {
+        status: true,
+        title: true,
+        viewCount: true,
+        contentLocale: true,
+        translations: { select: { locale: true, title: true } },
+        video: { select: { bunnyId: true } }
+      }
+    })
+
+    if (!meme) {
+      adminLogger.warn({ memeId: data.id }, 'Meme not found for status change')
+      setResponseStatus(HTTP_STATUS.NOT_FOUND)
+      throw new Error('Mème introuvable')
     }
 
+    if (meme.status === data.status) {
+      return { id: data.id }
+    }
+
+    const isGoingLive = data.status === MemeStatus.PUBLISHED
+    const isLeavingSite = meme.status === MemeStatus.PUBLISHED
+
+    if (isGoingLive) {
+      const untitledLocales = REQUIRED_TRANSLATION_LOCALES[
+        meme.contentLocale
+      ].filter((locale) => {
+        const translation = meme.translations.find((candidate) => {
+          return candidate.locale === locale
+        })
+
+        return !REQUIRED_MEME_TRANSLATION_SCHEMA.shape.title.safeParse(
+          translation?.title
+        ).success
+      })
+
+      if (untitledLocales.length > 0) {
+        setResponseStatus(HTTP_STATUS.UNPROCESSABLE_CONTENT)
+        throw new Error(
+          `Impossible de publier : titre manquant (${untitledLocales.join(', ')})`
+        )
+      }
+
+      const missingFiles = await findMissingMemeFiles(meme.video.bunnyId)
+
+      if (missingFiles.length > 0) {
+        setResponseStatus(HTTP_STATUS.UNPROCESSABLE_CONTENT)
+        throw new Error(
+          `Impossible de publier : fichier manquant (${missingFiles.join(', ')})`
+        )
+      }
+    }
+
+    const memeUpdated = await prismaClient.meme.update({
+      where: { id: data.id },
+      data: {
+        status: data.status,
+        publishedAt: isGoingLive ? new Date() : null,
+        viewCount: isGoingLive
+          ? resolveGoLiveViewCount(meme.viewCount)
+          : meme.viewCount
+      },
+      include: MEME_ALGOLIA_INCLUDE
+    })
+
+    await safeAlgoliaOp(syncMemeToAllIndices(memeUpdated))
+
+    if (isGoingLive || isLeavingSite) {
+      await invalidateAlgoliaCache()
+    }
+
+    if (isLeavingSite) {
+      void clearRecommendCache()
+    }
+
+    void logAuditAction({
+      action: 'status_change',
+      actingAdminId: context.user.id,
+      targetId: memeUpdated.id,
+      targetType: 'meme',
+      metadata: { title: meme.title, from: meme.status, to: data.status }
+    })
+
     adminLogger.info(
-      { memeId: memeUpdated.id, status: values.status },
-      'Meme edited'
+      { memeId: memeUpdated.id, from: meme.status, to: data.status },
+      'Meme status changed'
     )
 
     return { id: memeUpdated.id }

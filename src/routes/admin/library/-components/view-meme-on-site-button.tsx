@@ -14,8 +14,8 @@ import { LoadingButton } from '~/components/ui/loading-button'
 import { MEME_DERIVED_FORMATS } from '~/constants/bunny'
 import type { MemeFullData } from '~/constants/meme'
 import { MemeStatus } from '~/db/generated/prisma/enums'
-import { FileBadge } from './meme-publish-card'
 import { MemePublishTimeline } from './meme-publish-timeline'
+import { FileBadge } from './meme-status-card'
 import type { MemePublisher } from './use-meme-publisher'
 
 type ViewMemeOnSiteButtonProps = {

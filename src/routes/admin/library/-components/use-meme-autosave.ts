@@ -10,8 +10,7 @@ import {
   invalidateSavedMeme,
   markAdminMemesOverviewStale
 } from '~/routes/admin/-lib/queries'
-import { editMeme, MEME_FORM_SCHEMA } from '~/routes/admin/-server/memes'
-import { resolveAutosaveStatus } from '~/routes/admin/library/-lib/autosave-status'
+import { editMeme, getMemeFormSchema } from '~/routes/admin/-server/memes'
 import type { MemeFormValues } from './use-meme-form'
 import { getMemeEditScope } from './use-meme-publisher'
 
@@ -32,12 +31,7 @@ export function useMemeAutosave(meme: MemeFullData) {
     mutationKey: ['autosave-meme', meme.id],
     scope: { id: getMemeEditScope(meme.id) },
     mutationFn: (values: MemeFormValues) => {
-      const status = resolveAutosaveStatus({
-        savedStatus: readSavedStatus(),
-        selectedStatus: values.status
-      })
-
-      return editMeme({ data: { ...values, status, id: meme.id } })
+      return editMeme({ data: { ...values, id: meme.id } })
     },
     onSuccess: () => {
       return Promise.all([
@@ -51,12 +45,7 @@ export function useMemeAutosave(meme: MemeFullData) {
   })
 
   const save = async (values: MemeFormValues) => {
-    const status = resolveAutosaveStatus({
-      savedStatus: readSavedStatus(),
-      selectedStatus: values.status
-    })
-
-    if (!MEME_FORM_SCHEMA.safeParse({ ...values, status }).success) {
+    if (!getMemeFormSchema(readSavedStatus()).safeParse(values).success) {
       toast.warning('Non enregistré', {
         id: toastId,
         description: 'Un champ est invalide.',

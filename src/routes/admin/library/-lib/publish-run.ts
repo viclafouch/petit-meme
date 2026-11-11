@@ -1,4 +1,4 @@
-export type PublishRunKind = 'publish' | 'regenerate'
+export type PublishRunKind = 'publish' | 'publish-with-files' | 'regenerate'
 
 export type PublishStep =
   | 'preparing'
@@ -15,7 +15,8 @@ const FILE_STEPS = [
 ] as const satisfies readonly PublishStep[]
 
 const PUBLISH_RUN_STEPS = {
-  publish: [...FILE_STEPS, 'saving'],
+  publish: ['saving'],
+  'publish-with-files': [...FILE_STEPS, 'saving'],
   regenerate: FILE_STEPS
 } as const satisfies Record<PublishRunKind, readonly PublishStep[]>
 

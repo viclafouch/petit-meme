@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '~/components/ui/select'
-import { BAN_REASONS } from '~/routes/admin/-lib/ban'
+import { BAN_REASONS } from '~/constants/ban'
 import type { useUserActions } from './use-user-actions'
 
 type UserActionDialogsProps = {

@@ -26,7 +26,7 @@ type PlanPricing = {
 export type Plan = {
   title: string
   maxGenerationsCount: number
-  maxFavoritesCount: number
+  maxBookmarksCount: number
   maxAiSearchesCount: number
   productId: string
   description: string
@@ -36,7 +36,7 @@ export type Plan = {
 }
 
 export const FREE_PLAN_MAX_GENERATIONS = 3
-export const FREE_PLAN_MAX_FAVORITES = 20
+export const FREE_PLAN_MAX_BOOKMARKS = 20
 
 const FREE_PLAN_PRICING = {
   monthly: { priceInCents: 0 },
@@ -56,7 +56,7 @@ export const getFreePlan = (): Plan => {
   return {
     title: m.plan_free_title(),
     maxGenerationsCount: FREE_PLAN_MAX_GENERATIONS,
-    maxFavoritesCount: FREE_PLAN_MAX_FAVORITES,
+    maxBookmarksCount: FREE_PLAN_MAX_BOOKMARKS,
     maxAiSearchesCount: FREE_PLAN_MAX_AI_SEARCHES,
     productId: 'free',
     isExclusive: false,
@@ -64,7 +64,7 @@ export const getFreePlan = (): Plan => {
     features: [
       { label: m.plan_feature_public_memes(), status: 'included' },
       {
-        label: m.plan_feature_favorites(),
+        label: m.plan_feature_bookmarks(),
         status: 'limited',
         note: m.plan_note_20_max()
       },
@@ -89,7 +89,7 @@ export const getPremiumPlan = (): Plan => {
   return {
     title: m.plan_premium_title(),
     maxGenerationsCount: Number.MAX_SAFE_INTEGER,
-    maxFavoritesCount: Number.MAX_SAFE_INTEGER,
+    maxBookmarksCount: Number.MAX_SAFE_INTEGER,
     maxAiSearchesCount: Number.MAX_SAFE_INTEGER,
     productId: PREMIUM_PLAN_PRODUCT_ID,
     isExclusive: true,
@@ -97,7 +97,7 @@ export const getPremiumPlan = (): Plan => {
     features: [
       { label: m.plan_feature_public_memes(), status: 'included' },
       {
-        label: m.plan_feature_favorites(),
+        label: m.plan_feature_bookmarks(),
         status: 'included',
         note: m.plan_note_unlimited()
       },

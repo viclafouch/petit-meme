@@ -19,7 +19,7 @@ import { useClipboardPaste } from '~/hooks/use-clipboard-paste'
 import { focusFirstInvalidField, matchIsFieldInvalid } from '~/lib/form'
 import { captureWithFeature } from '~/lib/sentry'
 import { ImportFormFooter } from '~/routes/admin/-components/import-form-footer'
-import { createMemeFromTwitterUrl } from '~/routes/admin/-server/memes'
+import { createMemeFromTweet } from '~/server/admin/import/import.functions'
 
 const ignoreReportedError = () => {}
 
@@ -33,7 +33,7 @@ export const TwitterForm = ({ onImported }: TwitterFormProps) => {
   const importMutation = useMutation({
     mutationKey: ['import-meme-from-tweet'],
     mutationFn: (url: string) => {
-      return createMemeFromTwitterUrl({ data: url })
+      return createMemeFromTweet({ data: url })
     },
     onSuccess: ({ id }) => {
       return onImported(id)

@@ -24,12 +24,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem
 } from '~/components/ui/sidebar'
-import { getAdminPendingSubmissionCountQueryOpts } from '~/routes/admin/-lib/queries'
+import { countAdminPendingProposalsQueryOpts } from '~/routes/admin/-lib/queries'
 
 type AdminSidebarProps = React.ComponentProps<typeof Sidebar>
 
 export const AdminSidebar = ({ ...props }: AdminSidebarProps) => {
-  const pendingCountQuery = useQuery(getAdminPendingSubmissionCountQueryOpts())
+  const pendingCountQuery = useQuery(countAdminPendingProposalsQueryOpts())
   const pendingCount = pendingCountQuery.data ?? 0
 
   return (
@@ -74,9 +74,9 @@ export const AdminSidebar = ({ ...props }: AdminSidebarProps) => {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton render={<Link to="/admin/submissions" />}>
+                <SidebarMenuButton render={<Link to="/admin/proposals" />}>
                   <MessageSquarePlus />
-                  <span>Soumissions</span>
+                  <span>Propositions</span>
                 </SidebarMenuButton>
                 {pendingCount > 0 ? (
                   <SidebarMenuBadge className="bg-warning text-warning-foreground font-medium">

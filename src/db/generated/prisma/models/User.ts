@@ -366,10 +366,10 @@ export type UserWhereInput = {
   verificationEmailWindowStart?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   accounts?: Prisma.AccountListRelationFilter
   sessions?: Prisma.SessionListRelationFilter
-  bookmarks?: Prisma.UserBookmarkListRelationFilter
+  bookmarks?: Prisma.BookmarkListRelationFilter
   studioGenerations?: Prisma.StudioGenerationListRelationFilter
   adminActions?: Prisma.AdminAuditLogListRelationFilter
-  memeSubmissions?: Prisma.MemeSubmissionListRelationFilter
+  proposals?: Prisma.MemeProposalListRelationFilter
   aiSearchLogs?: Prisma.AiSearchLogListRelationFilter
   activityEvents?: Prisma.ActivityEventListRelationFilter
 }
@@ -400,10 +400,10 @@ export type UserOrderByWithRelationInput = {
   verificationEmailWindowStart?: Prisma.SortOrderInput | Prisma.SortOrder
   accounts?: Prisma.AccountOrderByRelationAggregateInput
   sessions?: Prisma.SessionOrderByRelationAggregateInput
-  bookmarks?: Prisma.UserBookmarkOrderByRelationAggregateInput
+  bookmarks?: Prisma.BookmarkOrderByRelationAggregateInput
   studioGenerations?: Prisma.StudioGenerationOrderByRelationAggregateInput
   adminActions?: Prisma.AdminAuditLogOrderByRelationAggregateInput
-  memeSubmissions?: Prisma.MemeSubmissionOrderByRelationAggregateInput
+  proposals?: Prisma.MemeProposalOrderByRelationAggregateInput
   aiSearchLogs?: Prisma.AiSearchLogOrderByRelationAggregateInput
   activityEvents?: Prisma.ActivityEventOrderByRelationAggregateInput
 }
@@ -437,10 +437,10 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   verificationEmailWindowStart?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   accounts?: Prisma.AccountListRelationFilter
   sessions?: Prisma.SessionListRelationFilter
-  bookmarks?: Prisma.UserBookmarkListRelationFilter
+  bookmarks?: Prisma.BookmarkListRelationFilter
   studioGenerations?: Prisma.StudioGenerationListRelationFilter
   adminActions?: Prisma.AdminAuditLogListRelationFilter
-  memeSubmissions?: Prisma.MemeSubmissionListRelationFilter
+  proposals?: Prisma.MemeProposalListRelationFilter
   aiSearchLogs?: Prisma.AiSearchLogListRelationFilter
   activityEvents?: Prisma.ActivityEventListRelationFilter
 }, "id" | "email">
@@ -531,10 +531,10 @@ export type UserCreateInput = {
   verificationEmailWindowStart?: Date | string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
-  bookmarks?: Prisma.UserBookmarkCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkCreateNestedManyWithoutUserInput
   studioGenerations?: Prisma.StudioGenerationCreateNestedManyWithoutUserInput
   adminActions?: Prisma.AdminAuditLogCreateNestedManyWithoutActingAdminInput
-  memeSubmissions?: Prisma.MemeSubmissionCreateNestedManyWithoutUserInput
+  proposals?: Prisma.MemeProposalCreateNestedManyWithoutUserInput
   aiSearchLogs?: Prisma.AiSearchLogCreateNestedManyWithoutUserInput
   activityEvents?: Prisma.ActivityEventCreateNestedManyWithoutUserInput
 }
@@ -565,10 +565,10 @@ export type UserUncheckedCreateInput = {
   verificationEmailWindowStart?: Date | string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
-  bookmarks?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutUserInput
   studioGenerations?: Prisma.StudioGenerationUncheckedCreateNestedManyWithoutUserInput
   adminActions?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutActingAdminInput
-  memeSubmissions?: Prisma.MemeSubmissionUncheckedCreateNestedManyWithoutUserInput
+  proposals?: Prisma.MemeProposalUncheckedCreateNestedManyWithoutUserInput
   aiSearchLogs?: Prisma.AiSearchLogUncheckedCreateNestedManyWithoutUserInput
   activityEvents?: Prisma.ActivityEventUncheckedCreateNestedManyWithoutUserInput
 }
@@ -599,10 +599,10 @@ export type UserUpdateInput = {
   verificationEmailWindowStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
-  bookmarks?: Prisma.UserBookmarkUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUpdateManyWithoutUserNestedInput
   studioGenerations?: Prisma.StudioGenerationUpdateManyWithoutUserNestedInput
   adminActions?: Prisma.AdminAuditLogUpdateManyWithoutActingAdminNestedInput
-  memeSubmissions?: Prisma.MemeSubmissionUpdateManyWithoutUserNestedInput
+  proposals?: Prisma.MemeProposalUpdateManyWithoutUserNestedInput
   aiSearchLogs?: Prisma.AiSearchLogUpdateManyWithoutUserNestedInput
   activityEvents?: Prisma.ActivityEventUpdateManyWithoutUserNestedInput
 }
@@ -633,10 +633,10 @@ export type UserUncheckedUpdateInput = {
   verificationEmailWindowStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
-  bookmarks?: Prisma.UserBookmarkUncheckedUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutUserNestedInput
   studioGenerations?: Prisma.StudioGenerationUncheckedUpdateManyWithoutUserNestedInput
   adminActions?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutActingAdminNestedInput
-  memeSubmissions?: Prisma.MemeSubmissionUncheckedUpdateManyWithoutUserNestedInput
+  proposals?: Prisma.MemeProposalUncheckedUpdateManyWithoutUserNestedInput
   aiSearchLogs?: Prisma.AiSearchLogUncheckedUpdateManyWithoutUserNestedInput
   activityEvents?: Prisma.ActivityEventUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -899,18 +899,18 @@ export type UserUpdateOneRequiredWithoutStudioGenerationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutStudioGenerationsInput, Prisma.UserUpdateWithoutStudioGenerationsInput>, Prisma.UserUncheckedUpdateWithoutStudioGenerationsInput>
 }
 
-export type UserCreateNestedOneWithoutMemeSubmissionsInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutMemeSubmissionsInput, Prisma.UserUncheckedCreateWithoutMemeSubmissionsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMemeSubmissionsInput
+export type UserCreateNestedOneWithoutProposalsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutProposalsInput, Prisma.UserUncheckedCreateWithoutProposalsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutProposalsInput
   connect?: Prisma.UserWhereUniqueInput
 }
 
-export type UserUpdateOneRequiredWithoutMemeSubmissionsNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutMemeSubmissionsInput, Prisma.UserUncheckedCreateWithoutMemeSubmissionsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMemeSubmissionsInput
-  upsert?: Prisma.UserUpsertWithoutMemeSubmissionsInput
+export type UserUpdateOneRequiredWithoutProposalsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutProposalsInput, Prisma.UserUncheckedCreateWithoutProposalsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutProposalsInput
+  upsert?: Prisma.UserUpsertWithoutProposalsInput
   connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutMemeSubmissionsInput, Prisma.UserUpdateWithoutMemeSubmissionsInput>, Prisma.UserUncheckedUpdateWithoutMemeSubmissionsInput>
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutProposalsInput, Prisma.UserUpdateWithoutProposalsInput>, Prisma.UserUncheckedUpdateWithoutProposalsInput>
 }
 
 export type UserCreateNestedOneWithoutAiSearchLogsInput = {
@@ -971,7 +971,7 @@ export type UserCreateWithoutBookmarksInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   studioGenerations?: Prisma.StudioGenerationCreateNestedManyWithoutUserInput
   adminActions?: Prisma.AdminAuditLogCreateNestedManyWithoutActingAdminInput
-  memeSubmissions?: Prisma.MemeSubmissionCreateNestedManyWithoutUserInput
+  proposals?: Prisma.MemeProposalCreateNestedManyWithoutUserInput
   aiSearchLogs?: Prisma.AiSearchLogCreateNestedManyWithoutUserInput
   activityEvents?: Prisma.ActivityEventCreateNestedManyWithoutUserInput
 }
@@ -1004,7 +1004,7 @@ export type UserUncheckedCreateWithoutBookmarksInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   studioGenerations?: Prisma.StudioGenerationUncheckedCreateNestedManyWithoutUserInput
   adminActions?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutActingAdminInput
-  memeSubmissions?: Prisma.MemeSubmissionUncheckedCreateNestedManyWithoutUserInput
+  proposals?: Prisma.MemeProposalUncheckedCreateNestedManyWithoutUserInput
   aiSearchLogs?: Prisma.AiSearchLogUncheckedCreateNestedManyWithoutUserInput
   activityEvents?: Prisma.ActivityEventUncheckedCreateNestedManyWithoutUserInput
 }
@@ -1053,7 +1053,7 @@ export type UserUpdateWithoutBookmarksInput = {
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   studioGenerations?: Prisma.StudioGenerationUpdateManyWithoutUserNestedInput
   adminActions?: Prisma.AdminAuditLogUpdateManyWithoutActingAdminNestedInput
-  memeSubmissions?: Prisma.MemeSubmissionUpdateManyWithoutUserNestedInput
+  proposals?: Prisma.MemeProposalUpdateManyWithoutUserNestedInput
   aiSearchLogs?: Prisma.AiSearchLogUpdateManyWithoutUserNestedInput
   activityEvents?: Prisma.ActivityEventUpdateManyWithoutUserNestedInput
 }
@@ -1086,7 +1086,7 @@ export type UserUncheckedUpdateWithoutBookmarksInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   studioGenerations?: Prisma.StudioGenerationUncheckedUpdateManyWithoutUserNestedInput
   adminActions?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutActingAdminNestedInput
-  memeSubmissions?: Prisma.MemeSubmissionUncheckedUpdateManyWithoutUserNestedInput
+  proposals?: Prisma.MemeProposalUncheckedUpdateManyWithoutUserNestedInput
   aiSearchLogs?: Prisma.AiSearchLogUncheckedUpdateManyWithoutUserNestedInput
   activityEvents?: Prisma.ActivityEventUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -1117,9 +1117,9 @@ export type UserCreateWithoutAdminActionsInput = {
   verificationEmailWindowStart?: Date | string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
-  bookmarks?: Prisma.UserBookmarkCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkCreateNestedManyWithoutUserInput
   studioGenerations?: Prisma.StudioGenerationCreateNestedManyWithoutUserInput
-  memeSubmissions?: Prisma.MemeSubmissionCreateNestedManyWithoutUserInput
+  proposals?: Prisma.MemeProposalCreateNestedManyWithoutUserInput
   aiSearchLogs?: Prisma.AiSearchLogCreateNestedManyWithoutUserInput
   activityEvents?: Prisma.ActivityEventCreateNestedManyWithoutUserInput
 }
@@ -1150,9 +1150,9 @@ export type UserUncheckedCreateWithoutAdminActionsInput = {
   verificationEmailWindowStart?: Date | string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
-  bookmarks?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutUserInput
   studioGenerations?: Prisma.StudioGenerationUncheckedCreateNestedManyWithoutUserInput
-  memeSubmissions?: Prisma.MemeSubmissionUncheckedCreateNestedManyWithoutUserInput
+  proposals?: Prisma.MemeProposalUncheckedCreateNestedManyWithoutUserInput
   aiSearchLogs?: Prisma.AiSearchLogUncheckedCreateNestedManyWithoutUserInput
   activityEvents?: Prisma.ActivityEventUncheckedCreateNestedManyWithoutUserInput
 }
@@ -1199,9 +1199,9 @@ export type UserUpdateWithoutAdminActionsInput = {
   verificationEmailWindowStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
-  bookmarks?: Prisma.UserBookmarkUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUpdateManyWithoutUserNestedInput
   studioGenerations?: Prisma.StudioGenerationUpdateManyWithoutUserNestedInput
-  memeSubmissions?: Prisma.MemeSubmissionUpdateManyWithoutUserNestedInput
+  proposals?: Prisma.MemeProposalUpdateManyWithoutUserNestedInput
   aiSearchLogs?: Prisma.AiSearchLogUpdateManyWithoutUserNestedInput
   activityEvents?: Prisma.ActivityEventUpdateManyWithoutUserNestedInput
 }
@@ -1232,9 +1232,9 @@ export type UserUncheckedUpdateWithoutAdminActionsInput = {
   verificationEmailWindowStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
-  bookmarks?: Prisma.UserBookmarkUncheckedUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutUserNestedInput
   studioGenerations?: Prisma.StudioGenerationUncheckedUpdateManyWithoutUserNestedInput
-  memeSubmissions?: Prisma.MemeSubmissionUncheckedUpdateManyWithoutUserNestedInput
+  proposals?: Prisma.MemeProposalUncheckedUpdateManyWithoutUserNestedInput
   aiSearchLogs?: Prisma.AiSearchLogUncheckedUpdateManyWithoutUserNestedInput
   activityEvents?: Prisma.ActivityEventUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -1264,10 +1264,10 @@ export type UserCreateWithoutSessionsInput = {
   verificationEmailCount?: number
   verificationEmailWindowStart?: Date | string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
-  bookmarks?: Prisma.UserBookmarkCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkCreateNestedManyWithoutUserInput
   studioGenerations?: Prisma.StudioGenerationCreateNestedManyWithoutUserInput
   adminActions?: Prisma.AdminAuditLogCreateNestedManyWithoutActingAdminInput
-  memeSubmissions?: Prisma.MemeSubmissionCreateNestedManyWithoutUserInput
+  proposals?: Prisma.MemeProposalCreateNestedManyWithoutUserInput
   aiSearchLogs?: Prisma.AiSearchLogCreateNestedManyWithoutUserInput
   activityEvents?: Prisma.ActivityEventCreateNestedManyWithoutUserInput
 }
@@ -1297,10 +1297,10 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   verificationEmailCount?: number
   verificationEmailWindowStart?: Date | string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
-  bookmarks?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutUserInput
   studioGenerations?: Prisma.StudioGenerationUncheckedCreateNestedManyWithoutUserInput
   adminActions?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutActingAdminInput
-  memeSubmissions?: Prisma.MemeSubmissionUncheckedCreateNestedManyWithoutUserInput
+  proposals?: Prisma.MemeProposalUncheckedCreateNestedManyWithoutUserInput
   aiSearchLogs?: Prisma.AiSearchLogUncheckedCreateNestedManyWithoutUserInput
   activityEvents?: Prisma.ActivityEventUncheckedCreateNestedManyWithoutUserInput
 }
@@ -1346,10 +1346,10 @@ export type UserUpdateWithoutSessionsInput = {
   verificationEmailCount?: Prisma.IntFieldUpdateOperationsInput | number
   verificationEmailWindowStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
-  bookmarks?: Prisma.UserBookmarkUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUpdateManyWithoutUserNestedInput
   studioGenerations?: Prisma.StudioGenerationUpdateManyWithoutUserNestedInput
   adminActions?: Prisma.AdminAuditLogUpdateManyWithoutActingAdminNestedInput
-  memeSubmissions?: Prisma.MemeSubmissionUpdateManyWithoutUserNestedInput
+  proposals?: Prisma.MemeProposalUpdateManyWithoutUserNestedInput
   aiSearchLogs?: Prisma.AiSearchLogUpdateManyWithoutUserNestedInput
   activityEvents?: Prisma.ActivityEventUpdateManyWithoutUserNestedInput
 }
@@ -1379,10 +1379,10 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   verificationEmailCount?: Prisma.IntFieldUpdateOperationsInput | number
   verificationEmailWindowStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
-  bookmarks?: Prisma.UserBookmarkUncheckedUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutUserNestedInput
   studioGenerations?: Prisma.StudioGenerationUncheckedUpdateManyWithoutUserNestedInput
   adminActions?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutActingAdminNestedInput
-  memeSubmissions?: Prisma.MemeSubmissionUncheckedUpdateManyWithoutUserNestedInput
+  proposals?: Prisma.MemeProposalUncheckedUpdateManyWithoutUserNestedInput
   aiSearchLogs?: Prisma.AiSearchLogUncheckedUpdateManyWithoutUserNestedInput
   activityEvents?: Prisma.ActivityEventUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -1412,10 +1412,10 @@ export type UserCreateWithoutAccountsInput = {
   verificationEmailCount?: number
   verificationEmailWindowStart?: Date | string | null
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
-  bookmarks?: Prisma.UserBookmarkCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkCreateNestedManyWithoutUserInput
   studioGenerations?: Prisma.StudioGenerationCreateNestedManyWithoutUserInput
   adminActions?: Prisma.AdminAuditLogCreateNestedManyWithoutActingAdminInput
-  memeSubmissions?: Prisma.MemeSubmissionCreateNestedManyWithoutUserInput
+  proposals?: Prisma.MemeProposalCreateNestedManyWithoutUserInput
   aiSearchLogs?: Prisma.AiSearchLogCreateNestedManyWithoutUserInput
   activityEvents?: Prisma.ActivityEventCreateNestedManyWithoutUserInput
 }
@@ -1445,10 +1445,10 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   verificationEmailCount?: number
   verificationEmailWindowStart?: Date | string | null
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
-  bookmarks?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutUserInput
   studioGenerations?: Prisma.StudioGenerationUncheckedCreateNestedManyWithoutUserInput
   adminActions?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutActingAdminInput
-  memeSubmissions?: Prisma.MemeSubmissionUncheckedCreateNestedManyWithoutUserInput
+  proposals?: Prisma.MemeProposalUncheckedCreateNestedManyWithoutUserInput
   aiSearchLogs?: Prisma.AiSearchLogUncheckedCreateNestedManyWithoutUserInput
   activityEvents?: Prisma.ActivityEventUncheckedCreateNestedManyWithoutUserInput
 }
@@ -1494,10 +1494,10 @@ export type UserUpdateWithoutAccountsInput = {
   verificationEmailCount?: Prisma.IntFieldUpdateOperationsInput | number
   verificationEmailWindowStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
-  bookmarks?: Prisma.UserBookmarkUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUpdateManyWithoutUserNestedInput
   studioGenerations?: Prisma.StudioGenerationUpdateManyWithoutUserNestedInput
   adminActions?: Prisma.AdminAuditLogUpdateManyWithoutActingAdminNestedInput
-  memeSubmissions?: Prisma.MemeSubmissionUpdateManyWithoutUserNestedInput
+  proposals?: Prisma.MemeProposalUpdateManyWithoutUserNestedInput
   aiSearchLogs?: Prisma.AiSearchLogUpdateManyWithoutUserNestedInput
   activityEvents?: Prisma.ActivityEventUpdateManyWithoutUserNestedInput
 }
@@ -1527,10 +1527,10 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   verificationEmailCount?: Prisma.IntFieldUpdateOperationsInput | number
   verificationEmailWindowStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
-  bookmarks?: Prisma.UserBookmarkUncheckedUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutUserNestedInput
   studioGenerations?: Prisma.StudioGenerationUncheckedUpdateManyWithoutUserNestedInput
   adminActions?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutActingAdminNestedInput
-  memeSubmissions?: Prisma.MemeSubmissionUncheckedUpdateManyWithoutUserNestedInput
+  proposals?: Prisma.MemeProposalUncheckedUpdateManyWithoutUserNestedInput
   aiSearchLogs?: Prisma.AiSearchLogUncheckedUpdateManyWithoutUserNestedInput
   activityEvents?: Prisma.ActivityEventUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -1561,9 +1561,9 @@ export type UserCreateWithoutStudioGenerationsInput = {
   verificationEmailWindowStart?: Date | string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
-  bookmarks?: Prisma.UserBookmarkCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkCreateNestedManyWithoutUserInput
   adminActions?: Prisma.AdminAuditLogCreateNestedManyWithoutActingAdminInput
-  memeSubmissions?: Prisma.MemeSubmissionCreateNestedManyWithoutUserInput
+  proposals?: Prisma.MemeProposalCreateNestedManyWithoutUserInput
   aiSearchLogs?: Prisma.AiSearchLogCreateNestedManyWithoutUserInput
   activityEvents?: Prisma.ActivityEventCreateNestedManyWithoutUserInput
 }
@@ -1594,9 +1594,9 @@ export type UserUncheckedCreateWithoutStudioGenerationsInput = {
   verificationEmailWindowStart?: Date | string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
-  bookmarks?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutUserInput
   adminActions?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutActingAdminInput
-  memeSubmissions?: Prisma.MemeSubmissionUncheckedCreateNestedManyWithoutUserInput
+  proposals?: Prisma.MemeProposalUncheckedCreateNestedManyWithoutUserInput
   aiSearchLogs?: Prisma.AiSearchLogUncheckedCreateNestedManyWithoutUserInput
   activityEvents?: Prisma.ActivityEventUncheckedCreateNestedManyWithoutUserInput
 }
@@ -1643,9 +1643,9 @@ export type UserUpdateWithoutStudioGenerationsInput = {
   verificationEmailWindowStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
-  bookmarks?: Prisma.UserBookmarkUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUpdateManyWithoutUserNestedInput
   adminActions?: Prisma.AdminAuditLogUpdateManyWithoutActingAdminNestedInput
-  memeSubmissions?: Prisma.MemeSubmissionUpdateManyWithoutUserNestedInput
+  proposals?: Prisma.MemeProposalUpdateManyWithoutUserNestedInput
   aiSearchLogs?: Prisma.AiSearchLogUpdateManyWithoutUserNestedInput
   activityEvents?: Prisma.ActivityEventUpdateManyWithoutUserNestedInput
 }
@@ -1676,14 +1676,14 @@ export type UserUncheckedUpdateWithoutStudioGenerationsInput = {
   verificationEmailWindowStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
-  bookmarks?: Prisma.UserBookmarkUncheckedUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutUserNestedInput
   adminActions?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutActingAdminNestedInput
-  memeSubmissions?: Prisma.MemeSubmissionUncheckedUpdateManyWithoutUserNestedInput
+  proposals?: Prisma.MemeProposalUncheckedUpdateManyWithoutUserNestedInput
   aiSearchLogs?: Prisma.AiSearchLogUncheckedUpdateManyWithoutUserNestedInput
   activityEvents?: Prisma.ActivityEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
-export type UserCreateWithoutMemeSubmissionsInput = {
+export type UserCreateWithoutProposalsInput = {
   id: string
   name: string
   email: string
@@ -1709,14 +1709,14 @@ export type UserCreateWithoutMemeSubmissionsInput = {
   verificationEmailWindowStart?: Date | string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
-  bookmarks?: Prisma.UserBookmarkCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkCreateNestedManyWithoutUserInput
   studioGenerations?: Prisma.StudioGenerationCreateNestedManyWithoutUserInput
   adminActions?: Prisma.AdminAuditLogCreateNestedManyWithoutActingAdminInput
   aiSearchLogs?: Prisma.AiSearchLogCreateNestedManyWithoutUserInput
   activityEvents?: Prisma.ActivityEventCreateNestedManyWithoutUserInput
 }
 
-export type UserUncheckedCreateWithoutMemeSubmissionsInput = {
+export type UserUncheckedCreateWithoutProposalsInput = {
   id: string
   name: string
   email: string
@@ -1742,30 +1742,30 @@ export type UserUncheckedCreateWithoutMemeSubmissionsInput = {
   verificationEmailWindowStart?: Date | string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
-  bookmarks?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutUserInput
   studioGenerations?: Prisma.StudioGenerationUncheckedCreateNestedManyWithoutUserInput
   adminActions?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutActingAdminInput
   aiSearchLogs?: Prisma.AiSearchLogUncheckedCreateNestedManyWithoutUserInput
   activityEvents?: Prisma.ActivityEventUncheckedCreateNestedManyWithoutUserInput
 }
 
-export type UserCreateOrConnectWithoutMemeSubmissionsInput = {
+export type UserCreateOrConnectWithoutProposalsInput = {
   where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutMemeSubmissionsInput, Prisma.UserUncheckedCreateWithoutMemeSubmissionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutProposalsInput, Prisma.UserUncheckedCreateWithoutProposalsInput>
 }
 
-export type UserUpsertWithoutMemeSubmissionsInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutMemeSubmissionsInput, Prisma.UserUncheckedUpdateWithoutMemeSubmissionsInput>
-  create: Prisma.XOR<Prisma.UserCreateWithoutMemeSubmissionsInput, Prisma.UserUncheckedCreateWithoutMemeSubmissionsInput>
+export type UserUpsertWithoutProposalsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutProposalsInput, Prisma.UserUncheckedUpdateWithoutProposalsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutProposalsInput, Prisma.UserUncheckedCreateWithoutProposalsInput>
   where?: Prisma.UserWhereInput
 }
 
-export type UserUpdateToOneWithWhereWithoutMemeSubmissionsInput = {
+export type UserUpdateToOneWithWhereWithoutProposalsInput = {
   where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutMemeSubmissionsInput, Prisma.UserUncheckedUpdateWithoutMemeSubmissionsInput>
+  data: Prisma.XOR<Prisma.UserUpdateWithoutProposalsInput, Prisma.UserUncheckedUpdateWithoutProposalsInput>
 }
 
-export type UserUpdateWithoutMemeSubmissionsInput = {
+export type UserUpdateWithoutProposalsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1791,14 +1791,14 @@ export type UserUpdateWithoutMemeSubmissionsInput = {
   verificationEmailWindowStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
-  bookmarks?: Prisma.UserBookmarkUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUpdateManyWithoutUserNestedInput
   studioGenerations?: Prisma.StudioGenerationUpdateManyWithoutUserNestedInput
   adminActions?: Prisma.AdminAuditLogUpdateManyWithoutActingAdminNestedInput
   aiSearchLogs?: Prisma.AiSearchLogUpdateManyWithoutUserNestedInput
   activityEvents?: Prisma.ActivityEventUpdateManyWithoutUserNestedInput
 }
 
-export type UserUncheckedUpdateWithoutMemeSubmissionsInput = {
+export type UserUncheckedUpdateWithoutProposalsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1824,7 +1824,7 @@ export type UserUncheckedUpdateWithoutMemeSubmissionsInput = {
   verificationEmailWindowStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
-  bookmarks?: Prisma.UserBookmarkUncheckedUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutUserNestedInput
   studioGenerations?: Prisma.StudioGenerationUncheckedUpdateManyWithoutUserNestedInput
   adminActions?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutActingAdminNestedInput
   aiSearchLogs?: Prisma.AiSearchLogUncheckedUpdateManyWithoutUserNestedInput
@@ -1857,10 +1857,10 @@ export type UserCreateWithoutAiSearchLogsInput = {
   verificationEmailWindowStart?: Date | string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
-  bookmarks?: Prisma.UserBookmarkCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkCreateNestedManyWithoutUserInput
   studioGenerations?: Prisma.StudioGenerationCreateNestedManyWithoutUserInput
   adminActions?: Prisma.AdminAuditLogCreateNestedManyWithoutActingAdminInput
-  memeSubmissions?: Prisma.MemeSubmissionCreateNestedManyWithoutUserInput
+  proposals?: Prisma.MemeProposalCreateNestedManyWithoutUserInput
   activityEvents?: Prisma.ActivityEventCreateNestedManyWithoutUserInput
 }
 
@@ -1890,10 +1890,10 @@ export type UserUncheckedCreateWithoutAiSearchLogsInput = {
   verificationEmailWindowStart?: Date | string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
-  bookmarks?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutUserInput
   studioGenerations?: Prisma.StudioGenerationUncheckedCreateNestedManyWithoutUserInput
   adminActions?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutActingAdminInput
-  memeSubmissions?: Prisma.MemeSubmissionUncheckedCreateNestedManyWithoutUserInput
+  proposals?: Prisma.MemeProposalUncheckedCreateNestedManyWithoutUserInput
   activityEvents?: Prisma.ActivityEventUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -1939,10 +1939,10 @@ export type UserUpdateWithoutAiSearchLogsInput = {
   verificationEmailWindowStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
-  bookmarks?: Prisma.UserBookmarkUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUpdateManyWithoutUserNestedInput
   studioGenerations?: Prisma.StudioGenerationUpdateManyWithoutUserNestedInput
   adminActions?: Prisma.AdminAuditLogUpdateManyWithoutActingAdminNestedInput
-  memeSubmissions?: Prisma.MemeSubmissionUpdateManyWithoutUserNestedInput
+  proposals?: Prisma.MemeProposalUpdateManyWithoutUserNestedInput
   activityEvents?: Prisma.ActivityEventUpdateManyWithoutUserNestedInput
 }
 
@@ -1972,10 +1972,10 @@ export type UserUncheckedUpdateWithoutAiSearchLogsInput = {
   verificationEmailWindowStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
-  bookmarks?: Prisma.UserBookmarkUncheckedUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutUserNestedInput
   studioGenerations?: Prisma.StudioGenerationUncheckedUpdateManyWithoutUserNestedInput
   adminActions?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutActingAdminNestedInput
-  memeSubmissions?: Prisma.MemeSubmissionUncheckedUpdateManyWithoutUserNestedInput
+  proposals?: Prisma.MemeProposalUncheckedUpdateManyWithoutUserNestedInput
   activityEvents?: Prisma.ActivityEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -2005,10 +2005,10 @@ export type UserCreateWithoutActivityEventsInput = {
   verificationEmailWindowStart?: Date | string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
-  bookmarks?: Prisma.UserBookmarkCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkCreateNestedManyWithoutUserInput
   studioGenerations?: Prisma.StudioGenerationCreateNestedManyWithoutUserInput
   adminActions?: Prisma.AdminAuditLogCreateNestedManyWithoutActingAdminInput
-  memeSubmissions?: Prisma.MemeSubmissionCreateNestedManyWithoutUserInput
+  proposals?: Prisma.MemeProposalCreateNestedManyWithoutUserInput
   aiSearchLogs?: Prisma.AiSearchLogCreateNestedManyWithoutUserInput
 }
 
@@ -2038,10 +2038,10 @@ export type UserUncheckedCreateWithoutActivityEventsInput = {
   verificationEmailWindowStart?: Date | string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
-  bookmarks?: Prisma.UserBookmarkUncheckedCreateNestedManyWithoutUserInput
+  bookmarks?: Prisma.BookmarkUncheckedCreateNestedManyWithoutUserInput
   studioGenerations?: Prisma.StudioGenerationUncheckedCreateNestedManyWithoutUserInput
   adminActions?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutActingAdminInput
-  memeSubmissions?: Prisma.MemeSubmissionUncheckedCreateNestedManyWithoutUserInput
+  proposals?: Prisma.MemeProposalUncheckedCreateNestedManyWithoutUserInput
   aiSearchLogs?: Prisma.AiSearchLogUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -2087,10 +2087,10 @@ export type UserUpdateWithoutActivityEventsInput = {
   verificationEmailWindowStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
-  bookmarks?: Prisma.UserBookmarkUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUpdateManyWithoutUserNestedInput
   studioGenerations?: Prisma.StudioGenerationUpdateManyWithoutUserNestedInput
   adminActions?: Prisma.AdminAuditLogUpdateManyWithoutActingAdminNestedInput
-  memeSubmissions?: Prisma.MemeSubmissionUpdateManyWithoutUserNestedInput
+  proposals?: Prisma.MemeProposalUpdateManyWithoutUserNestedInput
   aiSearchLogs?: Prisma.AiSearchLogUpdateManyWithoutUserNestedInput
 }
 
@@ -2120,10 +2120,10 @@ export type UserUncheckedUpdateWithoutActivityEventsInput = {
   verificationEmailWindowStart?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
-  bookmarks?: Prisma.UserBookmarkUncheckedUpdateManyWithoutUserNestedInput
+  bookmarks?: Prisma.BookmarkUncheckedUpdateManyWithoutUserNestedInput
   studioGenerations?: Prisma.StudioGenerationUncheckedUpdateManyWithoutUserNestedInput
   adminActions?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutActingAdminNestedInput
-  memeSubmissions?: Prisma.MemeSubmissionUncheckedUpdateManyWithoutUserNestedInput
+  proposals?: Prisma.MemeProposalUncheckedUpdateManyWithoutUserNestedInput
   aiSearchLogs?: Prisma.AiSearchLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -2138,7 +2138,7 @@ export type UserCountOutputType = {
   bookmarks: number
   studioGenerations: number
   adminActions: number
-  memeSubmissions: number
+  proposals: number
   aiSearchLogs: number
   activityEvents: number
 }
@@ -2149,7 +2149,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   bookmarks?: boolean | UserCountOutputTypeCountBookmarksArgs
   studioGenerations?: boolean | UserCountOutputTypeCountStudioGenerationsArgs
   adminActions?: boolean | UserCountOutputTypeCountAdminActionsArgs
-  memeSubmissions?: boolean | UserCountOutputTypeCountMemeSubmissionsArgs
+  proposals?: boolean | UserCountOutputTypeCountProposalsArgs
   aiSearchLogs?: boolean | UserCountOutputTypeCountAiSearchLogsArgs
   activityEvents?: boolean | UserCountOutputTypeCountActivityEventsArgs
 }
@@ -2182,7 +2182,7 @@ export type UserCountOutputTypeCountSessionsArgs<ExtArgs extends runtime.Types.E
  * UserCountOutputType without action
  */
 export type UserCountOutputTypeCountBookmarksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.UserBookmarkWhereInput
+  where?: Prisma.BookmarkWhereInput
 }
 
 /**
@@ -2202,8 +2202,8 @@ export type UserCountOutputTypeCountAdminActionsArgs<ExtArgs extends runtime.Typ
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountMemeSubmissionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.MemeSubmissionWhereInput
+export type UserCountOutputTypeCountProposalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MemeProposalWhereInput
 }
 
 /**
@@ -2250,7 +2250,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   bookmarks?: boolean | Prisma.User$bookmarksArgs<ExtArgs>
   studioGenerations?: boolean | Prisma.User$studioGenerationsArgs<ExtArgs>
   adminActions?: boolean | Prisma.User$adminActionsArgs<ExtArgs>
-  memeSubmissions?: boolean | Prisma.User$memeSubmissionsArgs<ExtArgs>
+  proposals?: boolean | Prisma.User$proposalsArgs<ExtArgs>
   aiSearchLogs?: boolean | Prisma.User$aiSearchLogsArgs<ExtArgs>
   activityEvents?: boolean | Prisma.User$activityEventsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -2341,7 +2341,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   bookmarks?: boolean | Prisma.User$bookmarksArgs<ExtArgs>
   studioGenerations?: boolean | Prisma.User$studioGenerationsArgs<ExtArgs>
   adminActions?: boolean | Prisma.User$adminActionsArgs<ExtArgs>
-  memeSubmissions?: boolean | Prisma.User$memeSubmissionsArgs<ExtArgs>
+  proposals?: boolean | Prisma.User$proposalsArgs<ExtArgs>
   aiSearchLogs?: boolean | Prisma.User$aiSearchLogsArgs<ExtArgs>
   activityEvents?: boolean | Prisma.User$activityEventsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -2354,10 +2354,10 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   objects: {
     accounts: Prisma.$AccountPayload<ExtArgs>[]
     sessions: Prisma.$SessionPayload<ExtArgs>[]
-    bookmarks: Prisma.$UserBookmarkPayload<ExtArgs>[]
+    bookmarks: Prisma.$BookmarkPayload<ExtArgs>[]
     studioGenerations: Prisma.$StudioGenerationPayload<ExtArgs>[]
     adminActions: Prisma.$AdminAuditLogPayload<ExtArgs>[]
-    memeSubmissions: Prisma.$MemeSubmissionPayload<ExtArgs>[]
+    proposals: Prisma.$MemeProposalPayload<ExtArgs>[]
     aiSearchLogs: Prisma.$AiSearchLogPayload<ExtArgs>[]
     activityEvents: Prisma.$ActivityEventPayload<ExtArgs>[]
   }
@@ -2781,10 +2781,10 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   readonly [Symbol.toStringTag]: "PrismaPromise"
   accounts<T extends Prisma.User$accountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$accountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  bookmarks<T extends Prisma.User$bookmarksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$bookmarksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserBookmarkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  bookmarks<T extends Prisma.User$bookmarksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$bookmarksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BookmarkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   studioGenerations<T extends Prisma.User$studioGenerationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$studioGenerationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StudioGenerationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   adminActions<T extends Prisma.User$adminActionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$adminActionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AdminAuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  memeSubmissions<T extends Prisma.User$memeSubmissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$memeSubmissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MemeSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  proposals<T extends Prisma.User$proposalsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$proposalsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MemeProposalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   aiSearchLogs<T extends Prisma.User$aiSearchLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$aiSearchLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiSearchLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   activityEvents<T extends Prisma.User$activityEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$activityEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ActivityEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -3284,23 +3284,23 @@ export type User$sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalA
  */
 export type User$bookmarksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the UserBookmark
+   * Select specific fields to fetch from the Bookmark
    */
-  select?: Prisma.UserBookmarkSelect<ExtArgs> | null
+  select?: Prisma.BookmarkSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the UserBookmark
+   * Omit specific fields from the Bookmark
    */
-  omit?: Prisma.UserBookmarkOmit<ExtArgs> | null
+  omit?: Prisma.BookmarkOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.UserBookmarkInclude<ExtArgs> | null
-  where?: Prisma.UserBookmarkWhereInput
-  orderBy?: Prisma.UserBookmarkOrderByWithRelationInput | Prisma.UserBookmarkOrderByWithRelationInput[]
-  cursor?: Prisma.UserBookmarkWhereUniqueInput
+  include?: Prisma.BookmarkInclude<ExtArgs> | null
+  where?: Prisma.BookmarkWhereInput
+  orderBy?: Prisma.BookmarkOrderByWithRelationInput | Prisma.BookmarkOrderByWithRelationInput[]
+  cursor?: Prisma.BookmarkWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.UserBookmarkScalarFieldEnum | Prisma.UserBookmarkScalarFieldEnum[]
+  distinct?: Prisma.BookmarkScalarFieldEnum | Prisma.BookmarkScalarFieldEnum[]
 }
 
 /**
@@ -3352,27 +3352,27 @@ export type User$adminActionsArgs<ExtArgs extends runtime.Types.Extensions.Inter
 }
 
 /**
- * User.memeSubmissions
+ * User.proposals
  */
-export type User$memeSubmissionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type User$proposalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the MemeSubmission
+   * Select specific fields to fetch from the MemeProposal
    */
-  select?: Prisma.MemeSubmissionSelect<ExtArgs> | null
+  select?: Prisma.MemeProposalSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the MemeSubmission
+   * Omit specific fields from the MemeProposal
    */
-  omit?: Prisma.MemeSubmissionOmit<ExtArgs> | null
+  omit?: Prisma.MemeProposalOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.MemeSubmissionInclude<ExtArgs> | null
-  where?: Prisma.MemeSubmissionWhereInput
-  orderBy?: Prisma.MemeSubmissionOrderByWithRelationInput | Prisma.MemeSubmissionOrderByWithRelationInput[]
-  cursor?: Prisma.MemeSubmissionWhereUniqueInput
+  include?: Prisma.MemeProposalInclude<ExtArgs> | null
+  where?: Prisma.MemeProposalWhereInput
+  orderBy?: Prisma.MemeProposalOrderByWithRelationInput | Prisma.MemeProposalOrderByWithRelationInput[]
+  cursor?: Prisma.MemeProposalWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.MemeSubmissionScalarFieldEnum | Prisma.MemeSubmissionScalarFieldEnum[]
+  distinct?: Prisma.MemeProposalScalarFieldEnum | Prisma.MemeProposalScalarFieldEnum[]
 }
 
 /**

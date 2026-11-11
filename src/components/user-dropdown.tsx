@@ -27,7 +27,7 @@ import { useSignOut } from '~/hooks/use-sign-out'
 import { useStripeCheckout } from '~/hooks/use-stripe-checkout'
 import {
   getActiveSubscriptionQueryOpts,
-  getFavoritesMemesQueryOpts
+  listBookmarkedMemesQueryOpts
 } from '~/lib/queries'
 import { matchIsUserAdmin, type SessionUser } from '~/lib/role'
 import { m } from '~/paraglide/messages.js'
@@ -41,7 +41,7 @@ export const UserDropdown = ({ user }: UserDropdownProps) => {
   const { goToBillingPortal } = useStripeCheckout()
   const { signOut } = useSignOut()
 
-  const favoritesMemesCountQuery = useQuery(getFavoritesMemesQueryOpts())
+  const bookmarkedMemesQuery = useQuery(listBookmarkedMemesQueryOpts())
   const activeSubscriptionQuery = useQuery(getActiveSubscriptionQueryOpts())
   const isPremium = useIsPremium()
 
@@ -103,10 +103,10 @@ export const UserDropdown = ({ user }: UserDropdownProps) => {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuLinkItem render={<Link to="/favorites" />}>
+          <DropdownMenuLinkItem render={<Link to="/bookmarks" />}>
             <Star />
-            {m.nav_favorites({
-              count: String(favoritesMemesCountQuery.data?.count ?? 0)
+            {m.nav_bookmarks({
+              count: String(bookmarkedMemesQuery.data?.count ?? 0)
             })}
           </DropdownMenuLinkItem>
           <DropdownMenuLinkItem render={<Link to="/settings" />}>

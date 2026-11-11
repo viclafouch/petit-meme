@@ -10,13 +10,16 @@ import {
   invalidateAdminMemesOverview,
   invalidateSavedMeme
 } from '~/routes/admin/-lib/queries'
-import { editMeme, setMemeStatus } from '~/routes/admin/-server/memes'
 import {
   getPublishRunSteps,
   type PublishRun,
   type PublishRunKind,
   type PublishStep
 } from '~/routes/admin/library/-lib/publish-run'
+import {
+  updateMeme,
+  updateMemeStatus
+} from '~/server/admin/meme/meme.functions'
 import { useMemeFilesEngine } from './use-meme-files-engine'
 import type { MemeFormValues } from './use-meme-form'
 
@@ -54,8 +57,8 @@ export function useMemePublisher(meme: MemeFullData) {
     mutationKey: ['publish-meme', meme.id],
     scope: { id: getMemeEditScope(meme.id) },
     mutationFn: async (values: MemeFormValues) => {
-      await editMeme({ data: { ...values, id: meme.id } })
-      await setMemeStatus({
+      await updateMeme({ data: { ...values, id: meme.id } })
+      await updateMemeStatus({
         data: { id: meme.id, status: MemeStatus.PUBLISHED }
       })
     },
@@ -69,7 +72,7 @@ export function useMemePublisher(meme: MemeFullData) {
     mutationKey: ['meme-status', meme.id],
     scope: { id: getMemeEditScope(meme.id) },
     mutationFn: (status: MemeStatus) => {
-      return setMemeStatus({ data: { id: meme.id, status } })
+      return updateMemeStatus({ data: { id: meme.id, status } })
     },
     onSuccess: refreshSavedMeme,
     onError: (error) => {

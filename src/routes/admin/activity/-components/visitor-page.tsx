@@ -18,8 +18,8 @@ import { StatTiles } from '~/routes/admin/-components/stat-tiles'
 import { formatEventCount } from '~/routes/admin/-helpers/activity'
 import { buildActivityTiles } from '~/routes/admin/-helpers/activity-tiles'
 import {
-  getAdminVisitorActivityQueryOpts,
-  getAdminVisitorDetailQueryOpts
+  listAdminVisitorActivityQueryOpts,
+  getAdminVisitorQueryOpts
 } from '~/routes/admin/-lib/queries'
 import {
   VisitorAccountList,
@@ -56,9 +56,9 @@ export const VisitorPage = () => {
   const navigate = routeApi.useNavigate()
   const locale = getLocale()
 
-  const detailQuery = useSuspenseQuery(getAdminVisitorDetailQueryOpts(ip))
+  const detailQuery = useSuspenseQuery(getAdminVisitorQueryOpts(ip))
   const activityQuery = useQuery(
-    getAdminVisitorActivityQueryOpts({ ipAddress: ip, page })
+    listAdminVisitorActivityQueryOpts({ ipAddress: ip, page })
   )
 
   const handlePageChange = (nextPage: number) => {

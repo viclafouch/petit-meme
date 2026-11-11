@@ -1,6 +1,6 @@
 import { createFileRoute, notFound } from '@tanstack/react-router'
 import { getVirtualCategories, MEMES_SEARCH_SCHEMA } from '~/constants/meme'
-import { getCategoriesListQueryOpts } from '~/lib/queries'
+import { listCategoriesQueryOpts } from '~/lib/queries'
 import { buildOgImageUrl, seo } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
@@ -27,7 +27,7 @@ export const Route = createFileRoute(
     }
 
     const categories = await context.queryClient.query({
-      ...getCategoriesListQueryOpts(getLocale()),
+      ...listCategoriesQueryOpts(getLocale()),
       staleTime: 'static'
     })
 

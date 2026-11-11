@@ -4,7 +4,7 @@ import {
   buildSitemapResponse,
   type SitemapPage,
   wrapUrlset
-} from '~/lib/sitemap.server'
+} from '~/server/seo/sitemap.server'
 
 const STATIC_PAGES = [
   { pathname: '/' },

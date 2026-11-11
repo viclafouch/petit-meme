@@ -16,10 +16,9 @@ import {
 import { StatTiles } from '~/routes/admin/-components/stat-tiles'
 import { buildActivityTiles } from '~/routes/admin/-helpers/activity-tiles'
 import {
-  getAdminUserActivityQueryOpts,
-  getAdminUserDetailQueryOpts
+  listAdminUserActivityQueryOpts,
+  getAdminUserQueryOpts
 } from '~/routes/admin/-lib/queries'
-import type { AdminUserDetailPayload } from '~/routes/admin/-server/user-detail'
 import { UserAccountPanel } from '~/routes/admin/users/-components/user-account-panel'
 import {
   PremiumBadges,
@@ -27,10 +26,11 @@ import {
 } from '~/routes/admin/users/-components/user-badges'
 import { UserIpList } from '~/routes/admin/users/-components/user-ip-list'
 import { UserSubscriptionHistory } from '~/routes/admin/users/-components/user-subscription-history'
+import type { AdminUser } from '~/server/admin/user/user.functions'
 
 const routeApi = getRouteApi('/admin/users/$userId')
 
-type UserIdentityProps = Pick<AdminUserDetailPayload, 'user' | 'subscription'>
+type UserIdentityProps = Pick<AdminUser, 'user' | 'subscription'>
 
 const UserIdentity = ({ user, subscription }: UserIdentityProps) => {
   return (
@@ -76,9 +76,9 @@ export const UserPage = () => {
   const { page } = routeApi.useSearch()
   const navigate = routeApi.useNavigate()
 
-  const detailQuery = useSuspenseQuery(getAdminUserDetailQueryOpts(userId))
+  const detailQuery = useSuspenseQuery(getAdminUserQueryOpts(userId))
   const activityQuery = useQuery(
-    getAdminUserActivityQueryOpts({ userId, page })
+    listAdminUserActivityQueryOpts({ userId, page })
   )
 
   const handlePageChange = (nextPage: number) => {

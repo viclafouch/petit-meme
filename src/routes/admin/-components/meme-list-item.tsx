@@ -7,10 +7,10 @@ import { MemeVideoThumbnail } from '~/components/Meme/meme-video-thumbnail'
 import { Badge } from '~/components/ui/badge'
 import { Skeleton } from '~/components/ui/skeleton'
 import { DEFAULT_MEME_TITLE, MemeStatusMeta } from '~/constants/meme'
-import { getVideoStatusByIdQueryOpts } from '~/lib/queries'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
-import type { AdminMemeRecord } from '~/routes/admin/-server/memes'
+import { getAdminVideoStatusQueryOpts } from '~/routes/admin/-lib/queries'
+import type { AdminMemeRecord } from '~/server/admin/meme/meme.functions'
 import { matchIsVideoPlayable } from '~/utils/video'
 
 const VIDEO_STATUS_POLL_INTERVAL_MS = 30_000
@@ -23,7 +23,7 @@ export const MemeListItem = React.memo(({ meme }: MemeListItemProps) => {
   const isInitiallyPlayable = matchIsVideoPlayable(meme.video.bunnyStatus)
 
   const videoStatusQuery = useQuery({
-    ...getVideoStatusByIdQueryOpts(meme.video.id),
+    ...getAdminVideoStatusQueryOpts(meme.video.id),
     enabled: !isInitiallyPlayable,
     refetchInterval: ({ state }) => {
       if (state.data !== undefined && matchIsVideoPlayable(state.data.status)) {

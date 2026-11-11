@@ -1,11 +1,10 @@
-
 generator client {
   provider = "prisma-client"
   output   = "../src/db/generated/prisma"
 }
 
 datasource db {
-  provider  = "postgresql"
+  provider = "postgresql"
 }
 
 enum UserLocale {
@@ -13,7 +12,7 @@ enum UserLocale {
   en
 }
 
-model UserBookmark {
+model Bookmark {
   id        String   @id @default(cuid())
   userId    String   @map("user_id")
   memeId    String   @map("meme_id")
@@ -96,33 +95,33 @@ enum MemeContentLocale {
 }
 
 model Meme {
-  id            String         @id @default(cuid())
-  title         String
-  videoId       Int            @unique @map("video_id")
-  viewCount     Int            @default(0) @map("view_count")
-  shareCount    Int            @default(0) @map("share_count")
-  downloadCount Int            @default(0) @map("download_count")
-  tweetUrl      String?        @unique @map("tweet_url")
-  description   String         @default("")
-  keywords      String[]       @default([])
-  contentLocale MemeContentLocale @default(FR) @map("content_locale")
-  createdAt     DateTime       @default(now()) @map("created_at")
-  updatedAt     DateTime       @updatedAt @map("updated_at")
-  publishedAt   DateTime?      @map("published_at")
-  video         Video          @relation(fields: [videoId], references: [id], onDelete: Cascade)
-  bookmarkedBy  UserBookmark[]
-  categories    MemeCategory[]
-  translations  MemeTranslation[]
-  status        MemeStatus     @default(PUBLISHED)
-  fillStatus    MemeFillStatus @default(NONE) @map("fill_status")
-  fillAttempts  Int            @default(0) @map("fill_attempts")
-  fillDoubt     String         @default("") @map("fill_doubt")
-  fillSuggestion Json?         @map("fill_suggestion")
-  viewsDaily          MemeViewDaily[]
-  actionsDaily        MemeActionDaily[]
-  studioGenerations   StudioGeneration[]
-  submissions         MemeSubmission[]
-  activityEvents      ActivityEvent[]
+  id                String             @id @default(cuid())
+  title             String
+  videoId           Int                @unique @map("video_id")
+  viewCount         Int                @default(0) @map("view_count")
+  shareCount        Int                @default(0) @map("share_count")
+  downloadCount     Int                @default(0) @map("download_count")
+  tweetUrl          String?            @unique @map("tweet_url")
+  description       String             @default("")
+  keywords          String[]           @default([])
+  contentLocale     MemeContentLocale  @default(FR) @map("content_locale")
+  createdAt         DateTime           @default(now()) @map("created_at")
+  updatedAt         DateTime           @updatedAt @map("updated_at")
+  publishedAt       DateTime?          @map("published_at")
+  video             Video              @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  bookmarkedBy      Bookmark[]
+  categories        MemeCategory[]
+  translations      MemeTranslation[]
+  status            MemeStatus         @default(PUBLISHED)
+  fillStatus        MemeFillStatus     @default(NONE) @map("fill_status")
+  fillAttempts      Int                @default(0) @map("fill_attempts")
+  fillDoubt         String             @default("") @map("fill_doubt")
+  fillSuggestion    Json?              @map("fill_suggestion")
+  viewsDaily        MemeViewDaily[]
+  actionsDaily      MemeActionDaily[]
+  studioGenerations StudioGeneration[]
+  proposals         MemeProposal[]
+  activityEvents    ActivityEvent[]
 
   @@index([status])
   @@index([status, viewCount])
@@ -164,29 +163,29 @@ model MemeActionDaily {
 }
 
 model User {
-  id              String         @id
+  id              String     @id
   name            String
-  email           String         @unique
-  emailVerified   Boolean        @map("email_verified")
+  email           String     @unique
+  emailVerified   Boolean    @map("email_verified")
   image           String?
-  providerAvatar   String?        @map("provider_avatar")
-  createdAt       DateTime       @map("created_at")
-  updatedAt       DateTime       @map("updated_at")
+  providerAvatar  String?    @map("provider_avatar")
+  createdAt       DateTime   @map("created_at")
+  updatedAt       DateTime   @map("updated_at")
   accounts        Account[]
   sessions        Session[]
-  bookmarks       UserBookmark[]
-  generationCount Int            @default(0) @map("generation_count")
+  bookmarks       Bookmark[]
+  generationCount Int        @default(0) @map("generation_count")
 
   role       String?
   banned     Boolean?
   banReason  String?   @map("ban_reason")
   banExpires DateTime? @map("ban_expires")
 
-  stripeCustomerId         String?   @map("stripe_customer_id")
-  termsAcceptedAt          DateTime? @map("terms_accepted_at")
-  privacyAcceptedAt        DateTime? @map("privacy_accepted_at")
-  verificationReminderSent Boolean   @default(false) @map("verification_reminder_sent")
-  isAnonymized             Boolean   @default(false) @map("is_anonymized")
+  stripeCustomerId         String?    @map("stripe_customer_id")
+  termsAcceptedAt          DateTime?  @map("terms_accepted_at")
+  privacyAcceptedAt        DateTime?  @map("privacy_accepted_at")
+  verificationReminderSent Boolean    @default(false) @map("verification_reminder_sent")
+  isAnonymized             Boolean    @default(false) @map("is_anonymized")
   locale                   UserLocale @default(fr)
   lastActiveAt             DateTime?  @map("last_active_at")
   premiumGrantedAt         DateTime?  @map("premium_granted_at")
@@ -196,7 +195,7 @@ model User {
 
   studioGenerations StudioGeneration[]
   adminActions      AdminAuditLog[]    @relation("AdminActions")
-  memeSubmissions   MemeSubmission[]
+  proposals         MemeProposal[]
   aiSearchLogs      AiSearchLog[]
   activityEvents    ActivityEvent[]
 
@@ -205,13 +204,13 @@ model User {
 }
 
 model AdminAuditLog {
-  id             String   @id @default(cuid())
-  action         String
-  actingAdminId  String   @map("acting_admin_id")
-  targetId       String   @map("target_id")
-  targetType     String   @map("target_type")
-  metadata       Json?
-  createdAt      DateTime @default(now()) @map("created_at")
+  id            String   @id @default(cuid())
+  action        String
+  actingAdminId String   @map("acting_admin_id")
+  targetId      String   @map("target_id")
+  targetType    String   @map("target_type")
+  metadata      Json?
+  createdAt     DateTime @default(now()) @map("created_at")
 
   actingAdmin User @relation("AdminActions", fields: [actingAdminId], references: [id])
 
@@ -238,23 +237,23 @@ model Session {
 }
 
 model Subscription {
-  id                  String   @id
-  plan                String
-  referenceId         String   @map("reference_id")
-  stripeCustomerId    String?  @map("stripe_customer_id")
-  stripeSubscriptionId String? @map("stripe_subscription_id")
-  status              String
-  periodStart         DateTime? @map("period_start")
-  periodEnd           DateTime? @map("period_end")
-  cancelAtPeriodEnd   Boolean?  @map("cancel_at_period_end")
-  cancelAt            DateTime? @map("cancel_at")
-  canceledAt          DateTime? @map("canceled_at")
-  seats               Int?
-  billingInterval     String?   @map("billing_interval")
-  trialStart          DateTime? @map("trial_start")
-  trialEnd            DateTime? @map("trial_end")
-  endedAt             DateTime? @map("ended_at")
-  stripeScheduleId    String?   @map("stripe_schedule_id")
+  id                   String    @id
+  plan                 String
+  referenceId          String    @map("reference_id")
+  stripeCustomerId     String?   @map("stripe_customer_id")
+  stripeSubscriptionId String?   @map("stripe_subscription_id")
+  status               String
+  periodStart          DateTime? @map("period_start")
+  periodEnd            DateTime? @map("period_end")
+  cancelAtPeriodEnd    Boolean?  @map("cancel_at_period_end")
+  cancelAt             DateTime? @map("cancel_at")
+  canceledAt           DateTime? @map("canceled_at")
+  seats                Int?
+  billingInterval      String?   @map("billing_interval")
+  trialStart           DateTime? @map("trial_start")
+  trialEnd             DateTime? @map("trial_end")
+  endedAt              DateTime? @map("ended_at")
+  stripeScheduleId     String?   @map("stripe_schedule_id")
 
   @@index([referenceId, status])
   @@index([status])
@@ -298,7 +297,7 @@ model StudioGeneration {
   memeId    String?  @map("meme_id")
   createdAt DateTime @default(now()) @map("created_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   meme Meme? @relation(fields: [memeId], references: [id], onDelete: SetNull)
 
   @@index([createdAt])
@@ -318,14 +317,14 @@ model RateLimit {
   @@map("rate_limit")
 }
 
-enum MemeSubmissionUrlType {
+enum MemeProposalUrlType {
   TWEET
   YOUTUBE
 
   @@map("meme_submission_url_type")
 }
 
-enum MemeSubmissionStatus {
+enum MemeProposalStatus {
   PENDING
   APPROVED
   REJECTED
@@ -333,18 +332,18 @@ enum MemeSubmissionStatus {
   @@map("meme_submission_status")
 }
 
-model MemeSubmission {
-  id            String               @id @default(cuid())
-  userId        String               @map("user_id")
+model MemeProposal {
+  id            String              @id @default(cuid())
+  userId        String              @map("user_id")
   title         String
-  url           String               @unique
-  urlType       MemeSubmissionUrlType @map("url_type")
-  contentLocale MemeContentLocale     @map("content_locale")
-  status        MemeSubmissionStatus  @default(PENDING)
-  adminNote     String?              @map("admin_note")
-  memeId        String?              @map("meme_id")
-  createdAt     DateTime             @default(now()) @map("created_at")
-  updatedAt     DateTime             @updatedAt @map("updated_at")
+  url           String              @unique
+  urlType       MemeProposalUrlType @map("url_type")
+  contentLocale MemeContentLocale   @map("content_locale")
+  status        MemeProposalStatus  @default(PENDING)
+  adminNote     String?             @map("admin_note")
+  memeId        String?             @map("meme_id")
+  createdAt     DateTime            @default(now()) @map("created_at")
+  updatedAt     DateTime            @updatedAt @map("updated_at")
 
   user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   meme Meme? @relation(fields: [memeId], references: [id], onDelete: SetNull)

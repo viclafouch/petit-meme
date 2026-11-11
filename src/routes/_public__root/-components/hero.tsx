@@ -6,7 +6,7 @@ import { buttonVariants } from '~/components/ui/button'
 import { TextEffect } from '~/components/ui/text-effect'
 import { NEWS_CATEGORY_SLUG } from '~/constants/meme'
 import { useIsMobile } from '~/hooks/use-mobile'
-import { getRecentCountMemesQueryOpts } from '~/lib/queries'
+import { countRecentMemesQueryOpts } from '~/lib/queries'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 import { FloatingLogos } from './floating-logo'
@@ -48,7 +48,7 @@ const variants = {
 const PageDescriptionMotion = motion.create(PageDescription)
 
 const AnnouncementQuery = () => {
-  const recentMemesCountQuery = useSuspenseQuery(getRecentCountMemesQueryOpts())
+  const recentMemesCountQuery = useSuspenseQuery(countRecentMemesQueryOpts())
 
   return recentMemesCountQuery.data > 0 ? (
     <Announcement

@@ -10,7 +10,7 @@ import {
 import { Link } from '@tanstack/react-router'
 import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import { cn } from '~/lib/utils'
-import type { TrendingMeme } from '~/routes/admin/-server/dashboard'
+import type { TrendingMeme } from '~/server/admin/dashboard/dashboard.functions'
 import type { IconConfig } from './types'
 
 type SignalKey = keyof Omit<TrendingMeme, 'meme' | 'rank' | 'score'>

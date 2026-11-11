@@ -1,5 +1,6 @@
 /* oxlint-disable no-console */
 import type { SupportedLanguage } from '@algolia/client-search'
+import { locales, type Locale } from '~/paraglide/runtime'
 import {
   getAlgoliaAdminClient,
   getAlgoliaIndexPrefix,
@@ -7,8 +8,7 @@ import {
   resolveAlgoliaReplicaCreated,
   resolveAlgoliaReplicaPopular,
   resolveAlgoliaReplicaRecent
-} from '~/lib/algolia.server'
-import { locales, type Locale } from '~/paraglide/runtime'
+} from '~/server/platforms/algolia.server'
 import { logEnvironmentInfo } from './lib/env-guard'
 
 const INDEX_LANGUAGES = {

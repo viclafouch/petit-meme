@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { createFileRoute } from '@tanstack/react-router'
-import { PREMIUM_SOURCES } from '~/routes/admin/-lib/premium'
-import { getAdminUsersListQueryOpts } from '~/routes/admin/-lib/queries'
+import { PREMIUM_SOURCES } from '~/helpers/premium'
+import { listAdminUsersQueryOpts } from '~/routes/admin/-lib/queries'
 import { UsersPage } from '~/routes/admin/users/-components/users-page'
 
 const SEARCH_SCHEMA = z.object({
@@ -19,7 +19,7 @@ export const Route = createFileRoute('/admin/users/')({
   },
   loader: async ({ context }) => {
     await context.queryClient.query({
-      ...getAdminUsersListQueryOpts(),
+      ...listAdminUsersQueryOpts(),
       staleTime: 'static'
     })
 

@@ -1,0 +1,29 @@
+import { createFileRoute, redirect } from '@tanstack/react-router'
+import { listBookmarkedMemesQueryOpts } from '~/lib/queries'
+import { m } from '~/paraglide/messages.js'
+import { BookmarksPage } from './-components/bookmarks-page'
+
+export const Route = createFileRoute('/_public__root/_default/bookmarks')({
+  component: BookmarksPage,
+  head: () => {
+    return {
+      meta: [
+        { title: m.settings_bookmarks_title() },
+        { name: 'robots', content: 'noindex,nofollow' }
+      ]
+    }
+  },
+  beforeLoad: ({ context }) => {
+    if (!context.user) {
+      throw redirect({ to: '/memes' })
+    }
+  },
+  loader: async ({ context }) => {
+    void Promise.allSettled([
+      context.queryClient.query({
+        ...listBookmarkedMemesQueryOpts(),
+        staleTime: 'static'
+      })
+    ])
+  }
+})

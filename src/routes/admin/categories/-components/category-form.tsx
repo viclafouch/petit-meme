@@ -9,6 +9,7 @@ import {
   FormMessage
 } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
+import { CATEGORY_FORM_SCHEMA } from '~/constants/category-form'
 import { getErrorMessage } from '~/helpers/error'
 import {
   buildLocaleRecord,
@@ -21,17 +22,16 @@ import { focusFirstInvalidField, getFieldErrorMessage } from '~/lib/form'
 import { locales, type Locale } from '~/paraglide/runtime'
 import { KeywordsField } from '~/routes/admin/-components/keywords-field'
 import {
-  addCategory,
-  CATEGORY_FORM_SCHEMA,
-  editCategory,
-  type EnrichedCategory
-} from '~/server/categories'
+  createCategory,
+  updateCategory
+} from '~/server/admin/category/category.functions'
+import type { CategoryListItem } from '~/server/category/category.server'
 
 export type CategoryFormProps =
   | {
       type: 'edit'
       onClose?: () => void
-      category: EnrichedCategory
+      category: CategoryListItem
       onSuccess?: () => Promise<void>
     }
   | {
@@ -50,7 +50,7 @@ export const CategoryForm = ({
   const manageCategoryMutation = useMutation({
     mutationFn: async (body: z.infer<typeof CATEGORY_FORM_SCHEMA>) => {
       if (type === 'edit') {
-        const promise = editCategory({
+        const promise = updateCategory({
           data: {
             ...body,
             id: category.id
@@ -67,7 +67,7 @@ export const CategoryForm = ({
         return promise
       }
 
-      const promise = addCategory({ data: body })
+      const promise = createCategory({ data: body })
       toast.promise(promise, {
         loading: 'Ajout en cours...',
         success: () => {

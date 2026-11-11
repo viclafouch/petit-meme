@@ -7,9 +7,9 @@ import { emailSubjects } from '~/emails/subjects'
 import { VerificationReminderEmail } from '~/emails/verification-reminder-email'
 import { serverEnv } from '~/env/server.server'
 import { cronLogger } from '~/lib/logger'
-import { sendEmail } from '~/lib/resend.server'
-import { verifyCronSecret } from '~/utils/cron-auth.server'
-import { createEmailVerificationPath } from '~/utils/email-verification.server'
+import { verifyCronSecret } from '~/server/auth/cron-auth.server'
+import { createEmailVerificationPath } from '~/server/auth/email-verification.server'
+import { sendEmail } from '~/server/platforms/resend.server'
 
 const log = cronLogger.child({ job: 'verification-reminder' })
 

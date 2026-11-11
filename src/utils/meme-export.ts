@@ -5,7 +5,10 @@ import {
   type ConversionEventName,
   type InsightsTracking
 } from '~/lib/algolia-insights'
-import { shareMeme, trackMemeAction } from '~/server/meme'
+import {
+  getMemeExportFile,
+  recordMemeExport
+} from '~/server/meme/meme.functions'
 import { downloadBlob, matchIsBlobShareable, shareBlob } from '~/utils/download'
 
 export type ExportableMeme = Pick<MemeWithVideo, 'id' | 'title'>
@@ -29,7 +32,7 @@ export const fetchMemeExport = async ({
   mode,
   format
 }: MemeExportParams) => {
-  const response = await shareMeme({
+  const response = await getMemeExportFile({
     data: { memeId: meme.id, mode, format }
   })
 
@@ -77,7 +80,7 @@ export const deliverMemeExport = async (params: DeliverMemeExportParams) => {
     return false
   }
 
-  void trackMemeAction({
+  void recordMemeExport({
     data: { memeId: params.meme.id, action: params.mode }
   })
   sendConversionEvent({

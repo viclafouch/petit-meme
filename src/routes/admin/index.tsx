@@ -2,10 +2,10 @@ import { z } from 'zod'
 import { createFileRoute } from '@tanstack/react-router'
 import { DashboardPage } from '~/routes/admin/-components/dashboard/dashboard-page'
 import {
-  getAdminRecentActivityEventsQueryOpts,
-  getAdminRecentAuditQueryOpts
+  listAdminRecentActivityQueryOpts,
+  listAdminRecentAuditQueryOpts
 } from '~/routes/admin/-lib/queries'
-import { PERIOD_SCHEMA } from '~/routes/admin/-server/dashboard'
+import { PERIOD_SCHEMA } from '~/server/admin/dashboard/dashboard.functions'
 
 const dashboardSearchSchema = z.object({
   // oxlint-disable-next-line promise/prefer-await-to-then -- Zod's catch() sets the parse fallback, it is no promise
@@ -18,11 +18,11 @@ export const Route = createFileRoute('/admin/')({
   loader: async ({ context }) => {
     await Promise.all([
       context.queryClient.query({
-        ...getAdminRecentAuditQueryOpts(),
+        ...listAdminRecentAuditQueryOpts(),
         staleTime: 'static'
       }),
       context.queryClient.query({
-        ...getAdminRecentActivityEventsQueryOpts(),
+        ...listAdminRecentActivityQueryOpts(),
         staleTime: 'static'
       })
     ])

@@ -4,7 +4,7 @@ import { prismaClient } from '~/db/client.server'
 import {
   replaceAllIndicesWithMemes,
   resolveAlgoliaIndexName
-} from '~/lib/algolia.server'
+} from '~/server/platforms/algolia.server'
 import { logEnvironmentInfo } from './lib/env-guard'
 
 const reindexMemes = async () => {

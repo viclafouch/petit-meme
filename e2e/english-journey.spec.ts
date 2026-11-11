@@ -154,7 +154,7 @@ const ENGLISH_PAGES = [
     title: m.ai_search_seo_title({}, IN_ENGLISH)
   },
   {
-    name: 'Submission',
+    name: 'Proposal',
     pathname: '/submit',
     title: m.submit_heading({}, IN_ENGLISH)
   },

@@ -13,14 +13,12 @@ import {
   FileUploadList,
   FileUploadTrigger
 } from '~/components/ui/file-upload'
+import { MEME_FILE_IMPORT_SCHEMA } from '~/constants/meme-form'
 import { useAppForm } from '~/hooks/use-app-form'
 import { focusFirstInvalidField, matchIsFieldInvalid } from '~/lib/form'
 import { captureWithFeature } from '~/lib/sentry'
 import { ImportFormFooter } from '~/routes/admin/-components/import-form-footer'
-import {
-  CREATE_MEME_FROM_FILE_SCHEMA,
-  createMemeFromFile
-} from '~/routes/admin/-server/memes'
+import { createMemeFromFile } from '~/server/admin/import/import.functions'
 
 type FileFormProps = {
   onImported: (memeId: string) => Promise<void>
@@ -59,10 +57,10 @@ export const FileForm = ({ onImported }: FileFormProps) => {
 
   const form = useAppForm({
     defaultValues: DEFAULT_VALUES,
-    validators: { onChange: CREATE_MEME_FROM_FILE_SCHEMA },
+    validators: { onChange: MEME_FILE_IMPORT_SCHEMA },
     onSubmitInvalid: focusFirstInvalidField,
     onSubmit: async ({ value }) => {
-      const { video } = CREATE_MEME_FROM_FILE_SCHEMA.parse(value)
+      const { video } = MEME_FILE_IMPORT_SCHEMA.parse(value)
       await importMutation.mutateAsync(video).catch(ignoreReportedError)
     }
   })

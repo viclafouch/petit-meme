@@ -12,7 +12,7 @@ import {
   buildUrlEntry,
   VIDEO_SITEMAP_NAMESPACES,
   wrapUrlset
-} from '~/lib/sitemap.server'
+} from '~/server/seo/sitemap.server'
 
 export const Route = createFileRoute('/sitemap-memes.xml')({
   server: {

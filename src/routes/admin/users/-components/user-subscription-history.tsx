@@ -5,14 +5,14 @@ import { LoadingSpinner } from '~/components/ui/spinner'
 import { formatDate } from '~/helpers/date'
 import { getErrorMessage } from '~/helpers/error'
 import { formatCentsToEuros } from '~/helpers/number'
+import { PREMIUM_PLAN_LABELS } from '~/helpers/premium'
 import { formatSubscriptionEnding } from '~/helpers/subscription'
 import { getLocale } from '~/paraglide/runtime'
 import { EmptyMessage } from '~/routes/admin/-components/empty-message'
 import { SectionCard } from '~/routes/admin/-components/section-heading'
 import { SubscriptionStateBadge } from '~/routes/admin/-components/subscription-state-badge'
-import { PREMIUM_PLAN_LABELS } from '~/routes/admin/-lib/premium'
 import { getAdminUserSubscriptionHistoryQueryOpts } from '~/routes/admin/-lib/queries'
-import type { AdminUserSubscriptionHistory } from '~/routes/admin/-server/user-detail'
+import type { AdminUserSubscriptionHistory } from '~/server/admin/user/user.functions'
 
 type HistorySubscription = AdminUserSubscriptionHistory['subscriptions'][number]
 

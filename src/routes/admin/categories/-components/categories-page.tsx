@@ -3,17 +3,17 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { PageHeader } from '~/components/page-header'
 import { Badge } from '~/components/ui/badge'
 import { Container } from '~/components/ui/container'
+import { INITIAL_PAGINATION } from '~/constants/admin'
 import { formatDate } from '~/helpers/date'
-import { getCategoriesListQueryOpts } from '~/lib/queries'
+import { listCategoriesQueryOpts } from '~/lib/queries'
 import { baseLocale, getLocale } from '~/paraglide/runtime'
 import { AdminTable } from '~/routes/admin/-components/admin-table'
-import { INITIAL_PAGINATION } from '~/routes/admin/-lib/constants'
 import { createAppColumnHelper, useAppTable } from '~/routes/admin/-lib/table'
 import { AddCategoryButton } from '~/routes/admin/categories/-components/add-category-button'
 import { CategoryDropdown } from '~/routes/admin/categories/-components/category-dropdown'
-import type { EnrichedCategory } from '~/server/categories'
+import type { CategoryListItem } from '~/server/category/category.server'
 
-const columnHelper = createAppColumnHelper<EnrichedCategory>()
+const columnHelper = createAppColumnHelper<CategoryListItem>()
 
 const columns = columnHelper.columns([
   columnHelper.accessor('title', {
@@ -80,7 +80,7 @@ const columns = columnHelper.columns([
 
 export const CategoriesPage = () => {
   const categoriesListQuery = useSuspenseQuery(
-    getCategoriesListQueryOpts(baseLocale)
+    listCategoriesQueryOpts(baseLocale)
   )
 
   const table = useAppTable({

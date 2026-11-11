@@ -23,7 +23,7 @@ import {
   sendConversionEvent,
   type ConversionEventName
 } from '~/lib/algolia-insights'
-import { getFavoritesMemesQueryOpts } from '~/lib/queries'
+import { listBookmarkedMemesQueryOpts } from '~/lib/queries'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
@@ -53,27 +53,27 @@ const sizes = {
   }
 } as const satisfies Record<string, Record<string, string>>
 
-type FavoriteItemProps = {
+type BookmarkItemProps = {
   meme: MemeWithVideo
   queryID?: string
   authenticatedUserToken?: string
 }
 
-type FavoriteItemGuardProps = FavoriteItemProps
+type BookmarkItemGuardProps = BookmarkItemProps
 
-const FavoriteItem = ({
+const BookmarkItem = ({
   meme,
   queryID,
   authenticatedUserToken
-}: FavoriteItemProps) => {
-  const favoritesMemesQuery = useQuery(getFavoritesMemesQueryOpts())
+}: BookmarkItemProps) => {
+  const bookmarkedMemesQuery = useQuery(listBookmarkedMemesQueryOpts())
 
   const { isMemeBookmarked, isPending, toggleBookmark } = useToggleBookmark({
     meme,
-    bookmarks: favoritesMemesQuery.data?.bookmarks
+    bookmarks: bookmarkedMemesQuery.data?.bookmarks
   })
 
-  const handleToggleFavorite = (event: React.MouseEvent<HTMLDivElement>) => {
+  const handleToggleBookmark = (event: React.MouseEvent<HTMLDivElement>) => {
     event.preventDefault()
 
     if (!isMemeBookmarked) {
@@ -89,21 +89,21 @@ const FavoriteItem = ({
   }
 
   return (
-    <DropdownMenuItem onClick={handleToggleFavorite} disabled={isPending}>
+    <DropdownMenuItem onClick={handleToggleBookmark} disabled={isPending}>
       <Star
         data-active={isMemeBookmarked}
         className="data-[active=true]:fill-muted-foreground"
       />
-      {isMemeBookmarked ? m.meme_remove_favorite() : m.meme_add_favorite()}
+      {isMemeBookmarked ? m.meme_remove_bookmark() : m.meme_add_bookmark()}
     </DropdownMenuItem>
   )
 }
 
-const FavoriteItemGuard = ({
+const BookmarkItemGuard = ({
   meme,
   queryID,
   authenticatedUserToken
-}: FavoriteItemGuardProps) => {
+}: BookmarkItemGuardProps) => {
   const { user } = useRouteContext({ from: '__root__' })
 
   if (!user) {
@@ -115,13 +115,13 @@ const FavoriteItemGuard = ({
         }}
       >
         <Star />
-        {m.meme_add_favorite()}
+        {m.meme_add_bookmark()}
       </DropdownMenuItem>
     )
   }
 
   return (
-    <FavoriteItem
+    <BookmarkItem
       meme={meme}
       queryID={queryID}
       authenticatedUserToken={authenticatedUserToken}
@@ -258,7 +258,7 @@ export const MemeListItem = React.memo(
                     downloadMutation.trigger(meme, format)
                   }}
                 />
-                <FavoriteItemGuard
+                <BookmarkItemGuard
                   meme={meme}
                   queryID={queryID}
                   authenticatedUserToken={authenticatedUserToken}

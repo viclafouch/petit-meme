@@ -7,62 +7,63 @@ import type { ActivityFilters } from '~/constants/activity'
 import type { AdminMemesFilters } from '~/constants/meme'
 import { PRIVATE_QUERY_META } from '~/constants/query'
 import { MINUTE } from '~/constants/time'
-import type { Meme, User } from '~/db/generated/prisma/client'
-import type { MemeSubmissionStatus } from '~/db/generated/prisma/enums'
-import { getMemeByIdQueryOpts } from '~/lib/queries'
+import type { Meme, User, Video } from '~/db/generated/prisma/client'
+import type { MemeProposalStatus } from '~/db/generated/prisma/enums'
+import { getMemeQueryOpts } from '~/lib/queries'
 import {
-  getAdminActivity,
-  getAdminRecentActivityEvents
-} from '~/routes/admin/-server/activity'
-import { getAdminAiSearchLogs } from '~/routes/admin/-server/ai-search-logs'
+  listAdminActivity,
+  listAdminRecentActivity
+} from '~/server/admin/activity/activity.functions'
+import { getAdminMemeFill } from '~/server/admin/ai-assist/ai-assist.functions'
+import { listAdminAiSearchLogs } from '~/server/admin/ai-search/ai-search.functions'
 import {
   type DashboardPeriod,
-  getAdminChartData,
+  getAdminDashboardChart,
   getAdminDashboardTotals,
-  getAdminRecentAudit,
-  getAdminTrendingMemes
-} from '~/routes/admin/-server/dashboard'
+  listAdminRecentAudit,
+  listAdminTrendingMemes
+} from '~/server/admin/dashboard/dashboard.functions'
 import {
-  checkMemeFiles,
-  fetchAdminVideoBlob
-} from '~/routes/admin/-server/meme-files'
+  getMissingMemeFiles,
+  getAdminMemeOriginal
+} from '~/server/admin/meme/meme-file.functions'
 import {
-  getAdminMemeById,
-  getAdminMemeFill,
-  getAdminMemes
-} from '~/routes/admin/-server/memes'
+  getAdminMeme,
+  getAdminVideoStatus,
+  listAdminMemes
+} from '~/server/admin/meme/meme.functions'
 import {
-  getAdminPendingSubmissionCount,
-  getAdminSubmissions
-} from '~/routes/admin/-server/submissions'
+  countAdminPendingProposals,
+  listAdminProposals
+} from '~/server/admin/proposal/proposal.functions'
 import {
   type AdminUserActivityFilters,
-  getAdminUserActivity,
-  getAdminUserDetail,
-  getAdminUserSubscriptionHistory
-} from '~/routes/admin/-server/user-detail'
-import { getListUsers } from '~/routes/admin/-server/users'
+  getAdminUser,
+  getAdminUserSubscriptionHistory,
+  listAdminUserActivity,
+  listAdminUsers
+} from '~/server/admin/user/user.functions'
 import {
   type AdminVisitorActivityFilters,
-  getAdminVisitorActivity,
-  getAdminVisitorDetail
-} from '~/routes/admin/-server/visitor'
+  listAdminVisitorActivity,
+  getAdminVisitor
+} from '~/server/admin/visitor/visitor.functions'
 
 const DASHBOARD_STALE_MINUTES = 10
 const BACKGROUND_STALE_MINUTES = 5
 
-export const getAdminMemeByIdQueryOpts = (memeId: Meme['id']) => {
+export const getAdminMemeQueryOpts = (memeId: Meme['id']) => {
   return queryOptions({
-    queryKey: [...getAdminMemeByIdQueryOpts.all, memeId],
+    queryKey: [...getAdminMemeQueryOpts.all, memeId],
     meta: PRIVATE_QUERY_META,
     queryFn: () => {
-      return getAdminMemeById({ data: memeId })
+      return getAdminMeme({ data: memeId })
     },
     staleTime: 2 * MINUTE
   })
 }
 
-getAdminMemeByIdQueryOpts.all = ['admin-meme'] as const
+getAdminMemeQueryOpts.all = ['admin-meme'] as const
 
 export const getAdminMemeFillQueryOpts = (memeId: Meme['id']) => {
   return queryOptions({
@@ -77,18 +78,31 @@ export const getAdminMemeFillQueryOpts = (memeId: Meme['id']) => {
 
 getAdminMemeFillQueryOpts.all = ['admin-meme-fill'] as const
 
-export const getAdminMemesListQueryOpts = (filters: AdminMemesFilters) => {
+export const getAdminVideoStatusQueryOpts = (videoId: Video['id']) => {
   return queryOptions({
-    queryKey: [...getAdminMemesListQueryOpts.all, filters],
+    queryKey: [...getAdminVideoStatusQueryOpts.all, videoId],
     meta: PRIVATE_QUERY_META,
     queryFn: () => {
-      return getAdminMemes({ data: filters })
+      return getAdminVideoStatus({ data: videoId })
+    },
+    staleTime: MINUTE
+  })
+}
+
+getAdminVideoStatusQueryOpts.all = ['admin-video-status'] as const
+
+export const listAdminMemesQueryOpts = (filters: AdminMemesFilters) => {
+  return queryOptions({
+    queryKey: [...listAdminMemesQueryOpts.all, filters],
+    meta: PRIVATE_QUERY_META,
+    queryFn: () => {
+      return listAdminMemes({ data: filters })
     },
     staleTime: 2 * MINUTE
   })
 }
 
-getAdminMemesListQueryOpts.all = ['admin-memes-list'] as const
+listAdminMemesQueryOpts.all = ['admin-memes-list'] as const
 
 export const getAdminDashboardTotalsQueryOpts = () => {
   return queryOptions({
@@ -103,86 +117,84 @@ export const getAdminDashboardTotalsQueryOpts = () => {
 
 getAdminDashboardTotalsQueryOpts.all = ['admin-dashboard-totals'] as const
 
-export const getAdminChartDataQueryOpts = (period: DashboardPeriod) => {
+export const getAdminDashboardChartQueryOpts = (period: DashboardPeriod) => {
   return queryOptions({
-    queryKey: [...getAdminChartDataQueryOpts.all, period],
+    queryKey: [...getAdminDashboardChartQueryOpts.all, period],
     meta: PRIVATE_QUERY_META,
     queryFn: () => {
-      return getAdminChartData({ data: period })
+      return getAdminDashboardChart({ data: period })
     },
     staleTime: DASHBOARD_STALE_MINUTES * MINUTE
   })
 }
 
-getAdminChartDataQueryOpts.all = ['admin-chart-data'] as const
+getAdminDashboardChartQueryOpts.all = ['admin-chart-data'] as const
 
-export const getAdminRecentAuditQueryOpts = () => {
+export const listAdminRecentAuditQueryOpts = () => {
   return queryOptions({
-    queryKey: [...getAdminRecentAuditQueryOpts.all],
+    queryKey: [...listAdminRecentAuditQueryOpts.all],
     meta: PRIVATE_QUERY_META,
     queryFn: () => {
-      return getAdminRecentAudit()
+      return listAdminRecentAudit()
     },
     staleTime: DASHBOARD_STALE_MINUTES * MINUTE
   })
 }
 
-getAdminRecentAuditQueryOpts.all = ['admin-recent-audit'] as const
+listAdminRecentAuditQueryOpts.all = ['admin-recent-audit'] as const
 
-export const getAdminActivityQueryOpts = (filters: ActivityFilters) => {
+export const listAdminActivityQueryOpts = (filters: ActivityFilters) => {
   return queryOptions({
-    queryKey: [...getAdminActivityQueryOpts.all, filters],
+    queryKey: [...listAdminActivityQueryOpts.all, filters],
     meta: PRIVATE_QUERY_META,
     queryFn: () => {
-      return getAdminActivity({ data: filters })
+      return listAdminActivity({ data: filters })
     },
     placeholderData: keepPreviousData,
     staleTime: MINUTE
   })
 }
 
-getAdminActivityQueryOpts.all = ['admin-activity'] as const
+listAdminActivityQueryOpts.all = ['admin-activity'] as const
 
-export const getAdminRecentActivityEventsQueryOpts = () => {
+export const listAdminRecentActivityQueryOpts = () => {
   return queryOptions({
-    queryKey: [...getAdminRecentActivityEventsQueryOpts.all],
+    queryKey: [...listAdminRecentActivityQueryOpts.all],
     meta: PRIVATE_QUERY_META,
     queryFn: () => {
-      return getAdminRecentActivityEvents()
+      return listAdminRecentActivity()
     },
     staleTime: DASHBOARD_STALE_MINUTES * MINUTE
   })
 }
 
-getAdminRecentActivityEventsQueryOpts.all = [
-  'admin-recent-activity-events'
-] as const
+listAdminRecentActivityQueryOpts.all = ['admin-recent-activity-events'] as const
 
-export const getAdminUsersListQueryOpts = () => {
+export const listAdminUsersQueryOpts = () => {
   return queryOptions({
-    queryKey: [...getAdminUsersListQueryOpts.all],
+    queryKey: [...listAdminUsersQueryOpts.all],
     meta: PRIVATE_QUERY_META,
     queryFn: () => {
-      return getListUsers()
+      return listAdminUsers()
     },
     staleTime: BACKGROUND_STALE_MINUTES * MINUTE
   })
 }
 
-getAdminUsersListQueryOpts.all = ['admin-users-list'] as const
+listAdminUsersQueryOpts.all = ['admin-users-list'] as const
 
-export const getAdminUserDetailQueryOpts = (userId: User['id']) => {
+export const getAdminUserQueryOpts = (userId: User['id']) => {
   return queryOptions({
-    queryKey: [...getAdminUserDetailQueryOpts.all, userId],
+    queryKey: [...getAdminUserQueryOpts.all, userId],
     meta: PRIVATE_QUERY_META,
     queryFn: () => {
-      return getAdminUserDetail({ data: userId })
+      return getAdminUser({ data: userId })
     },
     staleTime: MINUTE
   })
 }
 
-getAdminUserDetailQueryOpts.all = ['admin-user-detail'] as const
+getAdminUserQueryOpts.all = ['admin-user-detail'] as const
 
 export const getAdminUserSubscriptionHistoryQueryOpts = (
   userId: User['id']
@@ -201,113 +213,113 @@ getAdminUserSubscriptionHistoryQueryOpts.all = [
   'admin-user-subscription-history'
 ] as const
 
-export const getAdminUserActivityQueryOpts = (
+export const listAdminUserActivityQueryOpts = (
   filters: AdminUserActivityFilters
 ) => {
   return queryOptions({
-    queryKey: [...getAdminUserActivityQueryOpts.all, filters],
+    queryKey: [...listAdminUserActivityQueryOpts.all, filters],
     meta: PRIVATE_QUERY_META,
     queryFn: () => {
-      return getAdminUserActivity({ data: filters })
+      return listAdminUserActivity({ data: filters })
     },
     placeholderData: keepPreviousData,
     staleTime: MINUTE
   })
 }
 
-getAdminUserActivityQueryOpts.all = ['admin-user-activity'] as const
+listAdminUserActivityQueryOpts.all = ['admin-user-activity'] as const
 
-export const getAdminVisitorDetailQueryOpts = (ipAddress: string) => {
+export const getAdminVisitorQueryOpts = (ipAddress: string) => {
   return queryOptions({
-    queryKey: [...getAdminVisitorDetailQueryOpts.all, ipAddress],
+    queryKey: [...getAdminVisitorQueryOpts.all, ipAddress],
     meta: PRIVATE_QUERY_META,
     queryFn: () => {
-      return getAdminVisitorDetail({ data: ipAddress })
+      return getAdminVisitor({ data: ipAddress })
     },
     staleTime: MINUTE
   })
 }
 
-getAdminVisitorDetailQueryOpts.all = ['admin-visitor-detail'] as const
+getAdminVisitorQueryOpts.all = ['admin-visitor-detail'] as const
 
-export const getAdminVisitorActivityQueryOpts = (
+export const listAdminVisitorActivityQueryOpts = (
   filters: AdminVisitorActivityFilters
 ) => {
   return queryOptions({
-    queryKey: [...getAdminVisitorActivityQueryOpts.all, filters],
+    queryKey: [...listAdminVisitorActivityQueryOpts.all, filters],
     meta: PRIVATE_QUERY_META,
     queryFn: () => {
-      return getAdminVisitorActivity({ data: filters })
+      return listAdminVisitorActivity({ data: filters })
     },
     placeholderData: keepPreviousData,
     staleTime: MINUTE
   })
 }
 
-getAdminVisitorActivityQueryOpts.all = ['admin-visitor-activity'] as const
+listAdminVisitorActivityQueryOpts.all = ['admin-visitor-activity'] as const
 
-export const getAdminTrendingMemesQueryOpts = () => {
+export const listAdminTrendingMemesQueryOpts = () => {
   return queryOptions({
-    queryKey: [...getAdminTrendingMemesQueryOpts.all],
+    queryKey: [...listAdminTrendingMemesQueryOpts.all],
     meta: PRIVATE_QUERY_META,
     queryFn: () => {
-      return getAdminTrendingMemes()
+      return listAdminTrendingMemes()
     },
     staleTime: DASHBOARD_STALE_MINUTES * MINUTE
   })
 }
 
-getAdminTrendingMemesQueryOpts.all = ['admin-trending-memes'] as const
+listAdminTrendingMemesQueryOpts.all = ['admin-trending-memes'] as const
 
-export const getAdminSubmissionsQueryOpts = (
-  statusFilter?: MemeSubmissionStatus
+export const listAdminProposalsQueryOpts = (
+  statusFilter?: MemeProposalStatus
 ) => {
   return queryOptions({
-    queryKey: [...getAdminSubmissionsQueryOpts.all, statusFilter],
+    queryKey: [...listAdminProposalsQueryOpts.all, statusFilter],
     meta: PRIVATE_QUERY_META,
     queryFn: () => {
-      return getAdminSubmissions({ data: statusFilter })
+      return listAdminProposals({ data: statusFilter })
     },
     staleTime: 2 * MINUTE
   })
 }
 
-getAdminSubmissionsQueryOpts.all = ['admin-submissions'] as const
+listAdminProposalsQueryOpts.all = ['admin-proposals'] as const
 
-export const getAdminPendingSubmissionCountQueryOpts = () => {
+export const countAdminPendingProposalsQueryOpts = () => {
   return queryOptions({
-    queryKey: [...getAdminPendingSubmissionCountQueryOpts.all],
+    queryKey: [...countAdminPendingProposalsQueryOpts.all],
     meta: PRIVATE_QUERY_META,
     queryFn: () => {
-      return getAdminPendingSubmissionCount()
+      return countAdminPendingProposals()
     },
     staleTime: BACKGROUND_STALE_MINUTES * MINUTE
   })
 }
 
-getAdminPendingSubmissionCountQueryOpts.all = [
-  'admin-pending-submission-count'
+countAdminPendingProposalsQueryOpts.all = [
+  'admin-pending-proposal-count'
 ] as const
 
-export const getAdminMemeFilesQueryOpts = (memeId: Meme['id']) => {
+export const getMissingMemeFilesQueryOpts = (memeId: Meme['id']) => {
   return queryOptions({
-    queryKey: [...getAdminMemeFilesQueryOpts.all, memeId],
+    queryKey: [...getMissingMemeFilesQueryOpts.all, memeId],
     meta: PRIVATE_QUERY_META,
     queryFn: () => {
-      return checkMemeFiles({ data: memeId })
+      return getMissingMemeFiles({ data: memeId })
     },
     staleTime: BACKGROUND_STALE_MINUTES * MINUTE
   })
 }
 
-getAdminMemeFilesQueryOpts.all = ['admin-meme-files'] as const
+getMissingMemeFilesQueryOpts.all = ['admin-meme-files'] as const
 
-export const getAdminVideoBlobQueryOpts = (memeId: Meme['id']) => {
+export const getAdminMemeOriginalQueryOpts = (memeId: Meme['id']) => {
   return queryOptions({
-    queryKey: [...getAdminVideoBlobQueryOpts.all, memeId],
+    queryKey: [...getAdminMemeOriginalQueryOpts.all, memeId],
     meta: PRIVATE_QUERY_META,
     queryFn: async () => {
-      const response = await fetchAdminVideoBlob({ data: memeId })
+      const response = await getAdminMemeOriginal({ data: memeId })
 
       return response.blob()
     },
@@ -315,34 +327,34 @@ export const getAdminVideoBlobQueryOpts = (memeId: Meme['id']) => {
   })
 }
 
-getAdminVideoBlobQueryOpts.all = ['admin-video-blob'] as const
+getAdminMemeOriginalQueryOpts.all = ['admin-video-blob'] as const
 
-export const getAdminAiSearchLogsQueryOpts = () => {
+export const listAdminAiSearchLogsQueryOpts = () => {
   return queryOptions({
-    queryKey: [...getAdminAiSearchLogsQueryOpts.all],
+    queryKey: [...listAdminAiSearchLogsQueryOpts.all],
     meta: PRIVATE_QUERY_META,
     queryFn: () => {
-      return getAdminAiSearchLogs()
+      return listAdminAiSearchLogs()
     },
     staleTime: 2 * MINUTE
   })
 }
 
-getAdminAiSearchLogsQueryOpts.all = ['admin-ai-search-logs'] as const
+listAdminAiSearchLogsQueryOpts.all = ['admin-ai-search-logs'] as const
 
 export const invalidateSavedMeme = (
   queryClient: QueryClient,
   memeId: Meme['id']
 ) => {
-  queryClient.removeQueries(getMemeByIdQueryOpts(memeId))
+  queryClient.removeQueries(getMemeQueryOpts(memeId))
 
-  return queryClient.invalidateQueries(getAdminMemeByIdQueryOpts(memeId))
+  return queryClient.invalidateQueries(getAdminMemeQueryOpts(memeId))
 }
 
 export const markAdminMemesOverviewStale = (queryClient: QueryClient) => {
   return Promise.all([
     queryClient.invalidateQueries({
-      queryKey: getAdminMemesListQueryOpts.all,
+      queryKey: listAdminMemesQueryOpts.all,
       refetchType: 'none'
     }),
     queryClient.invalidateQueries({
@@ -355,7 +367,7 @@ export const markAdminMemesOverviewStale = (queryClient: QueryClient) => {
 export const invalidateAdminMemesOverview = (queryClient: QueryClient) => {
   return Promise.all([
     queryClient.invalidateQueries({
-      queryKey: getAdminMemesListQueryOpts.all
+      queryKey: listAdminMemesQueryOpts.all
     }),
     queryClient.invalidateQueries({
       queryKey: getAdminDashboardTotalsQueryOpts.all

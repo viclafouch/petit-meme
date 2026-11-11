@@ -1,5 +1,5 @@
 import { MemeStatus } from '~/db/generated/prisma/enums'
-import type { auth } from '~/lib/auth.server'
+import type { auth } from '~/server/auth/auth.server'
 
 export type SessionUser = (typeof auth)['$Infer']['Session']['user']
 
@@ -9,6 +9,10 @@ export type UserRoleHolder = {
 
 export const matchIsUserAdmin = (user: UserRoleHolder) => {
   return user.role === 'admin'
+}
+
+export const matchIsUserBanned = (user: { banned?: boolean | null }) => {
+  return user.banned === true
 }
 
 export type PremiumHolder = UserRoleHolder & {

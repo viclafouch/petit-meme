@@ -29,11 +29,11 @@ import { getErrorMessage } from '~/helpers/error'
 import { snoozePremiumReminder } from '~/hooks/use-premium-reminder'
 import {
   getGenerationQuotaQueryOpts,
-  getVideoBlobQueryOpts
+  getStudioVideoQueryOpts
 } from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
-import { recordGeneration } from '~/server/studio'
+import { createGeneration } from '~/server/studio/studio.functions'
 import { dialogStore } from '~/stores/dialog.store'
 import {
   FFMPEG_VIDEO_ENCODING_ARGS,
@@ -295,7 +295,7 @@ export const useVideoPreloader = (ffmpeg: FFmpeg, memeId: string) => {
 
       const [videoBlob] = await Promise.all([
         queryClient.query({
-          ...getVideoBlobQueryOpts(memeId),
+          ...getStudioVideoQueryOpts(memeId),
           staleTime: 'static'
         }),
         ensureFontFile(ffmpeg, defaultFont)
@@ -361,7 +361,7 @@ export const useVideoProcessor = (
       }
 
       const videoBlob = await queryClient.query({
-        ...getVideoBlobQueryOpts(meme.id),
+        ...getStudioVideoQueryOpts(meme.id),
         staleTime: 'static'
       })
       const blob = await addTextToVideo(ffmpeg, {
@@ -370,7 +370,7 @@ export const useVideoProcessor = (
         ...processingOptions
       })
 
-      await recordGeneration({ data: { memeId: meme.id } })
+      await createGeneration({ data: { memeId: meme.id } })
 
       if (objectUrlRef.current !== null) {
         URL.revokeObjectURL(objectUrlRef.current)

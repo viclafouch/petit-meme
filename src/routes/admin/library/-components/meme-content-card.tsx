@@ -25,7 +25,7 @@ import {
 } from '~/helpers/i18n-content'
 import { matchIsFieldInvalid } from '~/lib/form'
 import type { Locale } from '~/paraglide/runtime'
-import type { AiAssistResult } from '~/server/ai'
+import type { MemeDraftTranslation } from '~/server/admin/ai-assist/meme-draft.server'
 import {
   type AiAssistFieldSelection,
   AiAssistReviewDialog,
@@ -70,7 +70,7 @@ export const MemeContentCard = ({
 
   const handleAiAssistApply = (
     locale: Locale,
-    result: AiAssistResult,
+    result: MemeDraftTranslation,
     fields: AiAssistFieldSelection
   ) => {
     if (fields.title) {

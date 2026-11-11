@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from '~/components/ui/dialog'
-import { getCategoriesListQueryOpts } from '~/lib/queries'
+import { listCategoriesQueryOpts } from '~/lib/queries'
 import { CategoryForm } from '~/routes/admin/categories/-components/category-form'
 
 type AddCategoryButtonProps = Partial<React.ComponentProps<typeof Button>>
@@ -24,7 +24,7 @@ export const AddCategoryButton = ({
     setIsOpen(false)
 
     return queryClient.invalidateQueries({
-      queryKey: getCategoriesListQueryOpts.all
+      queryKey: listCategoriesQueryOpts.all
     })
   }
 

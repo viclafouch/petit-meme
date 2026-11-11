@@ -6,7 +6,7 @@ import {
   type Comparison,
   getWeeklyRecapPeriodLabel
 } from '~/helpers/weekly-recap'
-import type { WeeklyRecap } from '~/server/weekly-recap.server'
+import type { WeeklyRecap } from '~/server/admin/weekly-recap/weekly-recap.server'
 import { EmailLayout } from './email-layout'
 
 type WeeklyRecapEmailProps = {

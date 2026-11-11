@@ -12,7 +12,7 @@ import { dismissLocaleBanner } from '~/lib/locale-banner'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 import { getLocale, locales, setLocale, type Locale } from '~/paraglide/runtime'
-import { updateUserLocale } from '~/server/user-locale'
+import { updateUserLocale } from '~/server/user/user.functions'
 
 type LanguageSwitcherProps = {
   className?: string

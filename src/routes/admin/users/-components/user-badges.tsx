@@ -10,17 +10,17 @@ import {
 } from '~/components/ui/tooltip'
 import type { AuthProviderId } from '~/constants/auth'
 import { formatDate } from '~/helpers/date'
-import { formatSubscriptionEnding } from '~/helpers/subscription'
-import { getLocale } from '~/paraglide/runtime'
-import { SubscriptionStateBadge } from '~/routes/admin/-components/subscription-state-badge'
 import {
   getPremiumStatus,
   PREMIUM_PLAN_LABELS,
   type SubscriptionInfo
-} from '~/routes/admin/-lib/premium'
-import type { EnrichedUser } from '~/routes/admin/-server/users'
+} from '~/helpers/premium'
+import { formatSubscriptionEnding } from '~/helpers/subscription'
+import { getLocale } from '~/paraglide/runtime'
+import { SubscriptionStateBadge } from '~/routes/admin/-components/subscription-state-badge'
+import type { AdminUserListItem } from '~/server/admin/user/user.functions'
 
-type UserStatusBadgesProps = Pick<EnrichedUser, 'banned' | 'emailVerified'>
+type UserStatusBadgesProps = Pick<AdminUserListItem, 'banned' | 'emailVerified'>
 
 export const UserStatusBadges = ({
   banned,
@@ -147,7 +147,10 @@ const GrantedPremiumBadge = ({ grantedAt }: GrantedPremiumBadgeProps) => {
   )
 }
 
-type PremiumBadgesProps = Pick<EnrichedUser, 'role' | 'premiumGrantedAt'> & {
+type PremiumBadgesProps = Pick<
+  AdminUserListItem,
+  'role' | 'premiumGrantedAt'
+> & {
   subscription: SubscriptionInfo
   emptyFallback: React.ReactNode
 }

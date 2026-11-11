@@ -3,17 +3,17 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { useRouteContext } from '@tanstack/react-router'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
-import { MAX_PENDING_SUBMISSIONS } from '~/constants/meme-submission'
-import { getUserSubmissionsQueryOpts } from '~/lib/queries'
+import { MAX_PENDING_PROPOSALS } from '~/constants/meme-proposal'
+import { listUserProposalsQueryOpts } from '~/lib/queries'
 import { m } from '~/paraglide/messages'
 import {
   PageDescription,
   PageHeading
 } from '~/routes/_public__root/-components/page-headers'
 import { dialogStore } from '~/stores/dialog.store'
-import { SubmissionForm } from './submission-form'
-import { SubmissionHistory } from './submission-history'
-import { SubmissionRules } from './submission-rules'
+import { ProposalForm } from './proposal-form'
+import { ProposalHistory } from './proposal-history'
+import { ProposalRules } from './proposal-rules'
 
 const NotLoggedIn = () => {
   return (
@@ -37,21 +37,19 @@ const NotLoggedIn = () => {
 }
 
 const SubmitPageContent = () => {
-  const submissionsQuery = useSuspenseQuery(getUserSubmissionsQueryOpts())
-  const hasSubmissions = submissionsQuery.data.submissions.length > 0
+  const proposalsQuery = useSuspenseQuery(listUserProposalsQueryOpts())
+  const hasProposals = proposalsQuery.data.proposals.length > 0
 
   return (
     <div
       className={
-        hasSubmissions
-          ? 'grid gap-6 lg:grid-cols-submit'
-          : 'flex flex-col gap-6'
+        hasProposals ? 'grid gap-6 lg:grid-cols-submit' : 'flex flex-col gap-6'
       }
     >
       <Card>
         <CardContent>
-          {submissionsQuery.data.pendingCount < MAX_PENDING_SUBMISSIONS ? (
-            <SubmissionForm pendingCount={submissionsQuery.data.pendingCount} />
+          {proposalsQuery.data.pendingCount < MAX_PENDING_PROPOSALS ? (
+            <ProposalForm pendingCount={proposalsQuery.data.pendingCount} />
           ) : (
             <p className="text-sm text-muted-foreground text-center py-4">
               {m.submit_error_limit_reached()}
@@ -59,11 +57,11 @@ const SubmitPageContent = () => {
           )}
         </CardContent>
       </Card>
-      {hasSubmissions ? (
+      {hasProposals ? (
         <aside className="lg:row-span-2 lg:sticky lg:top-20 lg:self-start lg:max-h-sticky-aside lg:overflow-y-auto">
           <Card>
             <CardContent>
-              <SubmissionHistory />
+              <ProposalHistory />
             </CardContent>
           </Card>
         </aside>
@@ -82,7 +80,7 @@ export const SubmitPage = () => {
         <PageDescription>{m.submit_page_intro()}</PageDescription>
       </div>
       {user ? <SubmitPageContent /> : <NotLoggedIn />}
-      <SubmissionRules />
+      <ProposalRules />
     </div>
   )
 }

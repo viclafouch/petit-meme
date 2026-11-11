@@ -12,19 +12,19 @@ import { MemeFillStatus } from '~/db/generated/prisma/enums'
 import { getErrorMessage } from '~/helpers/error'
 import { matchIsFillInFlight } from '~/helpers/meme-fill'
 import {
-  getAdminMemeByIdQueryOpts,
+  getAdminMemeQueryOpts,
   getAdminMemeFillQueryOpts,
   markAdminMemesOverviewStale
 } from '~/routes/admin/-lib/queries'
-import {
-  keepMemeFillSuggestion,
-  settleMemeFillSuggestion
-} from '~/routes/admin/-server/memes'
 import {
   buildFillSuggestionFromMeme,
   resolveFillNotice,
   resolveFillPollInterval
 } from '~/routes/admin/library/-lib/meme-fill'
+import {
+  keepMemeFillSuggestion,
+  settleMemeFillSuggestion
+} from '~/server/admin/ai-assist/ai-assist.functions'
 import { buildMemeFormValues, type MemeFormApi } from './use-meme-form'
 
 const START_FAILURE_MESSAGE = 'AI Assist n’a pas pu démarrer'
@@ -113,7 +113,7 @@ export function useMemeFill({
   const pickUpFilledDraft = async () => {
     const [meme] = await Promise.all([
       queryClient.query({
-        ...getAdminMemeByIdQueryOpts(memeId),
+        ...getAdminMemeQueryOpts(memeId),
         staleTime: 0
       }),
       markAdminMemesOverviewStale(queryClient)

@@ -16,7 +16,7 @@ import { RelativeDateTooltip } from '~/routes/admin/-components/relative-date-to
 import { VisitorIpLink } from '~/routes/admin/-components/visitor-ip-link'
 import { ACTIVITY_TYPE_DISPLAY } from '~/routes/admin/-helpers/activity'
 import { createAppColumnHelper } from '~/routes/admin/-lib/table'
-import type { AdminActivityRow } from '~/routes/admin/-server/activity'
+import type { AdminActivityRow } from '~/server/admin/activity/activity.server'
 
 function getMissingIpReason(
   createdAt: AdminActivityRow['createdAt'],

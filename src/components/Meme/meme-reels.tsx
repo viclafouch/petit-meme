@@ -6,7 +6,7 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { ShareMemeButton } from '~/components/Meme/share-meme-button'
-import { ToggleLikeButton } from '~/components/Meme/toggle-like-button'
+import { ToggleBookmarkButton } from '~/components/Meme/toggle-bookmark-button'
 import { VideoPlaybackError } from '~/components/Meme/video-playback-error'
 import { Button, buttonVariants } from '~/components/ui/button'
 import { LoadingSpinner } from '~/components/ui/spinner'
@@ -15,7 +15,7 @@ import type { MemeWithVideo } from '~/constants/meme'
 import { useMemeHls } from '~/hooks/use-meme-hls'
 import { useVideoPlayback } from '~/hooks/use-video-playback'
 import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
-import { getInfiniteReelsQueryOpts } from '~/lib/queries'
+import { listReelsQueryOpts } from '~/lib/queries'
 import { m } from '~/paraglide/messages.js'
 
 const PREFETCH_THRESHOLD_ITEMS = 3
@@ -118,7 +118,7 @@ const Reel = React.memo(
                 meme={meme}
                 size="iconLg"
               />
-              <ToggleLikeButton meme={meme} size="iconLg" />
+              <ToggleBookmarkButton meme={meme} size="iconLg" />
               <Button
                 aria-label={
                   isPlaying ? m.meme_pause_video() : m.meme_play_video()
@@ -161,7 +161,7 @@ export const MemeReels = () => {
 
   const reelsFragmentRef = React.useRef<React.FragmentInstance>(null)
 
-  const infiniteReelsQuery = useInfiniteQuery(getInfiniteReelsQueryOpts())
+  const infiniteReelsQuery = useInfiniteQuery(listReelsQueryOpts())
 
   const setActiveDebouncer = useDebouncer(
     (index: number) => {

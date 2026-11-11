@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { sendConversionEvent } from '~/lib/algolia-insights'
-import type { shareMeme, trackMemeAction } from '~/server/meme'
+import type {
+  getMemeExportFile,
+  recordMemeExport
+} from '~/server/meme/meme.functions'
 import { downloadBlob, matchIsBlobShareable, shareBlob } from '~/utils/download'
 import { deliverMemeExport, shareOrDownloadBlob } from '~/utils/meme-export'
 
@@ -10,10 +13,10 @@ vi.mock(import('~/lib/algolia-insights'), () => {
   }
 })
 
-vi.mock(import('~/server/meme'), () => {
+vi.mock(import('~/server/meme/meme.functions'), () => {
   return {
-    shareMeme: vi.fn<typeof shareMeme>(),
-    trackMemeAction: vi.fn<typeof trackMemeAction>()
+    getMemeExportFile: vi.fn<typeof getMemeExportFile>(),
+    recordMemeExport: vi.fn<typeof recordMemeExport>()
   }
 })
 

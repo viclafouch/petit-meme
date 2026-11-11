@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { getUserSubmissionsQueryOpts } from '~/lib/queries'
+import { listUserProposalsQueryOpts } from '~/lib/queries'
 import { buildBreadcrumbJsonLd, buildOgImageUrl, seo } from '~/lib/seo'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
@@ -39,7 +39,7 @@ export const Route = createFileRoute('/_public__root/_default/submit/')({
   loader: async ({ context }) => {
     if (context.user) {
       await context.queryClient.query({
-        ...getUserSubmissionsQueryOpts(),
+        ...listUserProposalsQueryOpts(),
         staleTime: 'static'
       })
     }

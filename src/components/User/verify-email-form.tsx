@@ -14,7 +14,7 @@ import { useResetAccountData } from '~/hooks/use-reset-account-data'
 import { focusFirstInvalidField } from '~/lib/form'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
-import { verifyEmail } from '~/server/email-verification'
+import { verifyEmail } from '~/server/auth/email-verification.functions'
 
 const getVerifyEmailFormOpts = () => {
   return formOptions({

@@ -9,7 +9,10 @@ import { prismaClient } from '~/db/client.server'
 import type { Prisma } from '~/db/generated/prisma/client'
 import { MemeStatus } from '~/db/generated/prisma/enums'
 import { serverEnv } from '~/env/server.server'
-import { checkMemeFileExists, uploadMemeFile } from '~/lib/meme-files.server'
+import {
+  checkMemeFileExists,
+  uploadMemeFile
+} from '~/server/meme/meme-file.server'
 import {
   FFMPEG_AUDIO_OUTPUT,
   FFMPEG_INPUT_FILE,

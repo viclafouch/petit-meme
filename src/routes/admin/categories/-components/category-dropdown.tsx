@@ -19,12 +19,13 @@ import {
   DropdownMenuTrigger
 } from '~/components/ui/dropdown-menu'
 import { getErrorMessage } from '~/helpers/error'
-import { getCategoriesListQueryOpts } from '~/lib/queries'
+import { listCategoriesQueryOpts } from '~/lib/queries'
 import { CategoryForm } from '~/routes/admin/categories/-components/category-form'
-import { deleteCategory, type EnrichedCategory } from '~/server/categories'
+import { deleteCategory } from '~/server/admin/category/category.functions'
+import type { CategoryListItem } from '~/server/category/category.server'
 
 type CategoryDropdownProps = {
-  category: EnrichedCategory
+  category: CategoryListItem
 }
 
 export const CategoryDropdown = ({ category }: CategoryDropdownProps) => {
@@ -34,7 +35,7 @@ export const CategoryDropdown = ({ category }: CategoryDropdownProps) => {
 
   const invalidateCategories = () => {
     return queryClient.invalidateQueries({
-      queryKey: getCategoriesListQueryOpts.all
+      queryKey: listCategoriesQueryOpts.all
     })
   }
 

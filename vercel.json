@@ -44,7 +44,7 @@
     { "path": "/api/cron/ai-fill", "schedule": "2 3 * * *" },
     { "path": "/api/cron/sync-bunny-titles", "schedule": "0 4 * * *" },
     {
-      "path": "/api/cron/pending-submissions-reminder",
+      "path": "/api/cron/pending-proposals-reminder",
       "schedule": "0 9 */3 * *"
     },
     { "path": "/api/cron/weekly-recap", "schedule": "0 21 * * 0" }

@@ -2,7 +2,7 @@ import React from 'react'
 import * as Sentry from '@sentry/tanstackstart-react'
 import { SECOND } from '~/constants/time'
 import type { Meme } from '~/db/generated/prisma/client'
-import { registerMemeView } from '~/server/meme'
+import { recordMemeView } from '~/server/meme/meme.functions'
 
 const MAX_TIMEUPDATE_DELTA_SECONDS = 1.1
 
@@ -76,7 +76,7 @@ export function useRegisterMemeView({
       sentRef.current = true
 
       try {
-        await registerMemeView({
+        await recordMemeView({
           data: {
             memeId,
             watchMs: Math.round(watchMsRef.current)

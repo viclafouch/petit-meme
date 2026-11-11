@@ -9,7 +9,7 @@ import { getLocaleDisplayName, getSuggestedLocale } from '~/helpers/locale'
 import { dismissLocaleBanner } from '~/lib/locale-banner'
 import { m } from '~/paraglide/messages.js'
 import { getLocale, locales, setLocale } from '~/paraglide/runtime'
-import { updateUserLocale } from '~/server/user-locale'
+import { updateUserLocale } from '~/server/user/user.functions'
 
 type LocaleBannerContentProps = {
   isInitiallyDismissed: boolean

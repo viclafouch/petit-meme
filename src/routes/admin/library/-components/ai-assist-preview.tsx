@@ -4,14 +4,14 @@ import { Checkbox } from '~/components/ui/checkbox'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { Textarea } from '~/components/ui/textarea'
+import { MEME_DESCRIPTION_MAX_LENGTH } from '~/constants/meme-form'
 import type { useKeywordsField } from '~/hooks/use-keywords-field'
 import { cn } from '~/lib/utils'
-import { MEME_DESCRIPTION_MAX_LENGTH } from '~/routes/admin/-server/memes'
-import type { AiAssistResult } from '~/server/ai'
+import type { MemeDraftTranslation } from '~/server/admin/ai-assist/meme-draft.server'
 import type { AiAssistFieldSelection } from './ai-assist-dialog'
 
 type AiAssistPreviewProps = {
-  currentValues: AiAssistResult
+  currentValues: MemeDraftTranslation
   selectedFields: AiAssistFieldSelection
   editedTitle: string
   editedDescription: string

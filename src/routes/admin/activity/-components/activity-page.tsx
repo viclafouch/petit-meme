@@ -7,7 +7,7 @@ import { Container } from '~/components/ui/container'
 import type { ActivityFilters } from '~/constants/activity'
 import { ActivityTimeline } from '~/routes/admin/-components/activity-timeline'
 import { formatEventCount } from '~/routes/admin/-helpers/activity'
-import { getAdminActivityQueryOpts } from '~/routes/admin/-lib/queries'
+import { listAdminActivityQueryOpts } from '~/routes/admin/-lib/queries'
 import { ActivityFilterBar } from '~/routes/admin/activity/-components/activity-filters'
 
 const routeApi = getRouteApi('/admin/activity/')
@@ -16,7 +16,7 @@ export const ActivityPage = () => {
   const navigate = routeApi.useNavigate()
   const search = routeApi.useSearch()
 
-  const activityQuery = useQuery(getAdminActivityQueryOpts(search))
+  const activityQuery = useQuery(listAdminActivityQueryOpts(search))
 
   const updateSearch = (nextFilters: Partial<ActivityFilters>) => {
     void navigate({

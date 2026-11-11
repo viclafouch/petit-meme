@@ -29,10 +29,10 @@ import {
   PageHeading
 } from '~/routes/_public__root/-components/page-headers'
 import { AiSearchStages } from '~/routes/_public__root/_default/memes/-components/ai-search-stages'
-import { aiSearchMemes } from '~/server/ai-search'
+import { searchMemesWithAi } from '~/server/ai-search/ai-search.functions'
 import { dialogStore } from '~/stores/dialog.store'
 
-type AiSearchResult = Awaited<ReturnType<typeof aiSearchMemes>>
+type AiSearchResult = Awaited<ReturnType<typeof searchMemesWithAi>>
 
 export const AiSearchPage = () => {
   const { user } = useRouteContext({ from: '__root__' })
@@ -45,7 +45,7 @@ export const AiSearchPage = () => {
 
   const searchMutation = useMutation({
     mutationFn: (data: { prompt: string }) => {
-      return aiSearchMemes({ data })
+      return searchMemesWithAi({ data })
     },
     onSuccess: (result) => {
       queryClient.setQueryData(

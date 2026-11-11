@@ -6,7 +6,7 @@ import {
   formatMemeFillDigestSummary,
   formatReadyDraftsLabel
 } from '~/helpers/meme-fill-digest'
-import type { MemeFillDigest } from '~/server/meme-fill-night.server'
+import type { MemeFillDigest } from '~/server/admin/ai-assist/meme-fill-night.server'
 import { BUTTON_CLASS, SITE_URL } from './constants'
 import { EmailLayout } from './email-layout'
 

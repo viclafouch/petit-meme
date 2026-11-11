@@ -13,8 +13,8 @@ export const emailSubjects = {
     accountDeleted: 'Ton compte Petit Meme a été supprimé',
     accountBanned: 'Ton compte Petit Meme a été suspendu',
     accountUnbanned: 'Ton compte Petit Meme a été réactivé',
-    submissionApproved: 'Ta proposition de mème a été acceptée !',
-    submissionRejected: 'Ta proposition de mème n’a pas été retenue'
+    proposalApproved: 'Ta proposition de mème a été acceptée !',
+    proposalRejected: 'Ta proposition de mème n’a pas été retenue'
   },
   en: {
     paymentFailed: 'Payment failed for your Petit Meme subscription',
@@ -28,7 +28,7 @@ export const emailSubjects = {
     accountDeleted: 'Your Petit Meme account has been deleted',
     accountBanned: 'Your Petit Meme account has been suspended',
     accountUnbanned: 'Your Petit Meme account has been reactivated',
-    submissionApproved: 'Your meme submission has been approved!',
-    submissionRejected: 'Your meme submission was not accepted'
+    proposalApproved: 'Your meme proposal has been approved!',
+    proposalRejected: 'Your meme proposal was not accepted'
   }
 } as const satisfies Record<Locale, Record<string, string>>

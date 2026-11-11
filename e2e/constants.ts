@@ -1,6 +1,6 @@
 import { FREE_PLAN_MAX_AI_SEARCHES } from '~/constants/ai-search'
 import {
-  FREE_PLAN_MAX_FAVORITES,
+  FREE_PLAN_MAX_BOOKMARKS,
   FREE_PLAN_MAX_GENERATIONS,
   PREMIUM_PLAN_NAME
 } from '~/constants/plan'
@@ -36,7 +36,7 @@ const SELF_SERVED_NON_CATALOGUE_AVATAR_PATH = '/apple-touch-icon.png'
 
 const CAPPED_BOOKMARK_MEME_IDS = E2E_FILLER_MEMES.slice(
   0,
-  FREE_PLAN_MAX_FAVORITES
+  FREE_PLAN_MAX_BOOKMARKS
 ).map((meme) => {
   return meme.id
 })
@@ -132,26 +132,26 @@ export const E2E_ROLES = {
     subscription: MONTHLY_PREMIUM_SUBSCRIPTION,
     hasStripeCustomer: true
   },
-  favorites: {
-    id: 'e2e-user-favorites',
-    name: 'E2E Favorites',
-    email: `e2e-favorites@${E2E_EMAIL_DOMAIN}`,
+  bookmarks: {
+    id: 'e2e-user-bookmarks',
+    name: 'E2E Bookmarks',
+    email: `e2e-bookmarks@${E2E_EMAIL_DOMAIN}`,
     emailVerified: true,
     bookmarkedMemeIds: [
       E2E_NAMED_MEMES.english.id,
       E2E_NAMED_MEMES.universal.id
     ]
   },
-  submission: {
-    id: 'e2e-user-submission',
-    name: 'E2E Submission',
-    email: `e2e-submission@${E2E_EMAIL_DOMAIN}`,
+  proposal: {
+    id: 'e2e-user-proposal',
+    name: 'E2E Proposal',
+    email: `e2e-proposal@${E2E_EMAIL_DOMAIN}`,
     emailVerified: true
   },
-  submissionConcurrent: {
-    id: 'e2e-user-submission-concurrent',
-    name: 'E2E Submission Concurrent',
-    email: `e2e-submission-concurrent@${E2E_EMAIL_DOMAIN}`,
+  proposalConcurrent: {
+    id: 'e2e-user-proposal-concurrent',
+    name: 'E2E Proposal Concurrent',
+    email: `e2e-proposal-concurrent@${E2E_EMAIL_DOMAIN}`,
     emailVerified: true
   },
   aiSearch: {

@@ -13,7 +13,7 @@ import { MEME_FILL_PATH } from '~/constants/meme-fill'
 import { matchIsUnexpectedError } from '~/lib/expected-error'
 import { logger } from '~/lib/logger'
 import { serverFnFetch } from '~/lib/server-fn-fetch'
-import { observeCsrfBlock } from '~/utils/csrf-observer'
+import { observeCsrfBlock } from '~/server/http/csrf-observer.functions'
 
 const appErrorAdapter = createSerializationAdapter({
   key: 'custom-error',

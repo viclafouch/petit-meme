@@ -3,22 +3,22 @@ import { hashPassword } from 'better-auth/crypto'
 import { z } from 'zod'
 import { MEME_ALGOLIA_INCLUDE } from '~/constants/meme'
 import { prismaClient } from '~/db/client.server'
+import { getTweetByUrl, getTweetMedia } from '~/lib/react-tweet'
+import { fetchWithZod } from '~/lib/utils'
+import { locales } from '~/paraglide/runtime'
 import {
   getAlgoliaAdminClient,
   resolveAlgoliaIndexName,
   syncMemeToAllIndices
-} from '~/lib/algolia.server'
+} from '~/server/platforms/algolia.server'
 import {
   buildLibraryApiUrl,
   createVideo,
   deleteVideo,
   getBunnyHeaders,
   uploadVideo
-} from '~/lib/bunny.server'
-import { getTweetByUrl, getTweetMedia } from '~/lib/react-tweet'
-import { getStripeClient } from '~/lib/stripe.server'
-import { fetchWithZod } from '~/lib/utils'
-import { locales } from '~/paraglide/runtime'
+} from '~/server/platforms/bunny.server'
+import { getStripeClient } from '~/server/platforms/stripe.server'
 import { logEnvironmentInfo } from '../scripts/lib/env-guard'
 import mocks from './seed-mock.json' with { type: 'json' }
 
@@ -72,7 +72,7 @@ const clearDatabase = async () => {
   await prismaClient.memeViewDaily.deleteMany()
   await prismaClient.studioGeneration.deleteMany()
   await prismaClient.adminAuditLog.deleteMany()
-  await prismaClient.userBookmark.deleteMany()
+  await prismaClient.bookmark.deleteMany()
   await prismaClient.memeCategory.deleteMany()
   await prismaClient.meme.deleteMany()
   await prismaClient.video.deleteMany()

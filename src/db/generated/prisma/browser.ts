@@ -18,10 +18,10 @@ export { Prisma }
 export * as $Enums from './enums.ts'
 export * from './enums.ts';
 /**
- * Model UserBookmark
+ * Model Bookmark
  * 
  */
-export type UserBookmark = Prisma.UserBookmarkModel
+export type Bookmark = Prisma.BookmarkModel
 /**
  * Model Category
  * 
@@ -93,10 +93,10 @@ export type StudioGeneration = Prisma.StudioGenerationModel
  */
 export type RateLimit = Prisma.RateLimitModel
 /**
- * Model MemeSubmission
+ * Model MemeProposal
  * 
  */
-export type MemeSubmission = Prisma.MemeSubmissionModel
+export type MemeProposal = Prisma.MemeProposalModel
 /**
  * Model MemeTranslation
  * 

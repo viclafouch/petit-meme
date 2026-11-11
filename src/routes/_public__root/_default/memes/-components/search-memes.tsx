@@ -22,10 +22,7 @@ import {
   parseContentLocalesParam,
   serializeContentLocalesParam
 } from '~/helpers/i18n-content'
-import {
-  getCategoriesListQueryOpts,
-  getMemesListQueryOpts
-} from '~/lib/queries'
+import { listCategoriesQueryOpts, listMemesQueryOpts } from '~/lib/queries'
 import { buildBreadcrumbJsonLd, buildCategoryJsonLd } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
@@ -74,7 +71,7 @@ const MemesListWrapper = ({
     search.contentLocales
   ])
 
-  const memesListQuery = useSuspenseQuery(getMemesListQueryOpts(filters))
+  const memesListQuery = useSuspenseQuery(listMemesQueryOpts(filters))
 
   const categoryJsonLd = buildCategoryJsonLd(selectedCategory, {
     page: memesListQuery.data.page ?? 1,
@@ -148,9 +145,7 @@ export const SearchMemes = () => {
   const { slug: activeSlug } = categoryRoute.useParams()
   const { category: selectedCategory } = categoryRoute.useLoaderData()
 
-  const categoriesQuery = useSuspenseQuery(
-    getCategoriesListQueryOpts(getLocale())
-  )
+  const categoriesQuery = useSuspenseQuery(listCategoriesQueryOpts(getLocale()))
 
   const currentCategory = React.useMemo(() => {
     return [...getVirtualCategories(), ...categoriesQuery.data].find(

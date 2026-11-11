@@ -4,7 +4,7 @@ import { FIVE_MINUTES_IN_SECONDS, SECOND } from '~/constants/time'
 import {
   signVideoFileUrl,
   signVideoPlaybackUrl
-} from '~/lib/bunny-token.server'
+} from '~/server/platforms/bunny-token.server'
 
 export type BunnyZone = {
   hostname: string

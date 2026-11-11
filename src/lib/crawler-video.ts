@@ -1,10 +1,11 @@
 import { createIsomorphicFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
-import { buildCrawlerStreamUrl } from '~/lib/bunny.server'
+import { buildCrawlerStreamUrl } from '~/server/platforms/bunny.server'
 
 export const getCrawlerStreamUrl = createIsomorphicFn()
   .server(async (bunnyId: string) => {
-    const { matchIsVerifiedGooglebot } = await import('~/lib/googlebot.server')
+    const { matchIsVerifiedGooglebot } =
+      await import('~/server/seo/googlebot.server')
     const isVerifiedGooglebot = await matchIsVerifiedGooglebot(
       getRequest().headers
     )

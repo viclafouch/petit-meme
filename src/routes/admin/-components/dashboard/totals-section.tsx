@@ -1,6 +1,6 @@
 import { Clock, Crown, FilePlay, Gift, Users } from 'lucide-react'
 import { StatTiles } from '~/routes/admin/-components/stat-tiles'
-import type { DashboardTotals } from '~/routes/admin/-server/dashboard'
+import type { DashboardTotals } from '~/server/admin/dashboard/dashboard.functions'
 import type { IconConfig } from './types'
 
 const TOTAL_CONFIGS = [

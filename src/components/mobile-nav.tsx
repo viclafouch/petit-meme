@@ -15,7 +15,7 @@ import { useIsPremium } from '~/hooks/use-is-premium'
 import { useStripeCheckout } from '~/hooks/use-stripe-checkout'
 import {
   getActiveSubscriptionQueryOpts,
-  getFavoritesMemesQueryOpts
+  listBookmarkedMemesQueryOpts
 } from '~/lib/queries'
 import { matchIsUserAdmin, type SessionUser } from '~/lib/role'
 import { cn } from '~/lib/utils'
@@ -35,8 +35,8 @@ type MobileNavProps = {
 export const MobileNav = ({ links, user }: MobileNavProps) => {
   const [isOpen, setIsOpen] = React.useState(false)
   const { goToBillingPortal } = useStripeCheckout()
-  const favoritesMemesCountQuery = useQuery({
-    ...getFavoritesMemesQueryOpts(),
+  const bookmarkedMemesQuery = useQuery({
+    ...listBookmarkedMemesQueryOpts(),
     enabled: Boolean(user)
   })
   const activeSubscriptionQuery = useQuery({
@@ -121,13 +121,13 @@ export const MobileNav = ({ links, user }: MobileNavProps) => {
                   </p>
                   <div className="flex flex-col gap-3">
                     <Link
-                      to="/favorites"
+                      to="/bookmarks"
                       className={ACCOUNT_LINK_CLASS}
                       onClick={handleClose}
                     >
                       <Star className="size-5" aria-hidden="true" />
-                      {m.nav_favorites({
-                        count: String(favoritesMemesCountQuery.data?.count ?? 0)
+                      {m.nav_bookmarks({
+                        count: String(bookmarkedMemesQuery.data?.count ?? 0)
                       })}
                     </Link>
                     <Link

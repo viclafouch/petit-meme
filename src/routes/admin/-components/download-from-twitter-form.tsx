@@ -17,7 +17,7 @@ import { getErrorMessage } from '~/helpers/error'
 import { useAppForm } from '~/hooks/use-app-form'
 import { focusFirstInvalidField } from '~/lib/form'
 import { captureWithFeature } from '~/lib/sentry'
-import { fetchTweetVideo, getTweetFromUrl } from '~/server/twitter'
+import { getTweetVideo, getTweet } from '~/server/admin/import/import.functions'
 import { downloadBlob } from '~/utils/download'
 
 const formSchema = z.object({ url: TWEET_LINK_SCHEMA })
@@ -49,8 +49,8 @@ export const DownloadFromTwitterForm = () => {
   const downloadFileFromTweetMutation = useMutation({
     mutationKey: ['download-file-from-tweet'],
     mutationFn: async (body: { url: string }) => {
-      const tweet = await getTweetFromUrl({ data: body.url })
-      const videoBase64 = await fetchTweetVideo({
+      const tweet = await getTweet({ data: body.url })
+      const videoBase64 = await getTweetVideo({
         data: { videoUrl: tweet.video.url }
       })
       const videoBlob = base64ToBlob(videoBase64, 'video/mp4')

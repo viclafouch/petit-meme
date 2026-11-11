@@ -6,7 +6,7 @@ import {
   formatIsoDate,
   type SitemapPage,
   wrapUrlset
-} from '~/lib/sitemap.server'
+} from '~/server/seo/sitemap.server'
 
 export const Route = createFileRoute('/sitemap-categories.xml')({
   server: {

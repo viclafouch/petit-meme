@@ -3,13 +3,13 @@ import { createFileRoute } from '@tanstack/react-router'
 import { OgHomeTemplate } from '~/components/og/og-home-template'
 import { OgTemplate } from '~/components/og/og-template'
 import { serverEnv } from '~/env/server.server'
-import { renderOgImage } from '~/lib/og-image.server'
 import {
   type OgDefaultedType,
   OG_DEFAULTED_TYPE_VALUES,
   OG_TITLED_TYPE_VALUES
 } from '~/lib/seo'
 import { type Locale, locales } from '~/paraglide/runtime'
+import { renderOgImage } from '~/server/seo/og-image.server'
 
 const OG_SUBTITLE_MAX_LENGTH = 500
 const OG_TITLE_MAX_LENGTH = 200
@@ -40,13 +40,13 @@ const OG_DEFAULT_TITLES = {
     'ai-search': 'Recherche IA',
     pricing: 'Tarifs',
     reels: 'Reels',
-    submit: 'Soumettre un mème'
+    submit: 'Proposer un mème'
   },
   en: {
     'ai-search': 'AI Search',
     pricing: 'Pricing',
     reels: 'Reels',
-    submit: 'Submit a meme'
+    submit: 'Suggest a meme'
   }
 } as const satisfies Record<Locale, Record<OgDefaultedType, string>>
 

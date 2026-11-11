@@ -3,14 +3,15 @@ import { useAsyncDebouncer } from '@tanstack/react-pacer'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useBlocker } from '@tanstack/react-router'
 import type { MemeFullData } from '~/constants/meme'
+import { getMemeFormSchema } from '~/constants/meme-form'
 import { getErrorMessage } from '~/helpers/error'
 import { captureWithFeature } from '~/lib/sentry'
 import {
-  getAdminMemeByIdQueryOpts,
+  getAdminMemeQueryOpts,
   invalidateSavedMeme,
   markAdminMemesOverviewStale
 } from '~/routes/admin/-lib/queries'
-import { editMeme, getMemeFormSchema } from '~/routes/admin/-server/memes'
+import { updateMeme } from '~/server/admin/meme/meme.functions'
 import type { MemeFormValues } from './use-meme-form'
 import { getMemeEditScope } from './use-meme-publisher'
 
@@ -22,7 +23,7 @@ export function useMemeAutosave(meme: MemeFullData) {
 
   const readSavedStatus = () => {
     return (
-      queryClient.getQueryData(getAdminMemeByIdQueryOpts(meme.id).queryKey)
+      queryClient.getQueryData(getAdminMemeQueryOpts(meme.id).queryKey)
         ?.status ?? meme.status
     )
   }
@@ -31,7 +32,7 @@ export function useMemeAutosave(meme: MemeFullData) {
     mutationKey: ['autosave-meme', meme.id],
     scope: { id: getMemeEditScope(meme.id) },
     mutationFn: (values: MemeFormValues) => {
-      return editMeme({ data: { ...values, id: meme.id } })
+      return updateMeme({ data: { ...values, id: meme.id } })
     },
     onSuccess: () => {
       return Promise.all([

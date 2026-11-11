@@ -4,9 +4,9 @@ import { WeeklyRecapEmail } from '~/emails/weekly-recap-email'
 import { serverEnv } from '~/env/server.server'
 import { getWeeklyRecapPeriodLabel } from '~/helpers/weekly-recap'
 import { cronLogger } from '~/lib/logger'
-import { sendEmail } from '~/lib/resend.server'
-import { buildWeeklyRecap } from '~/server/weekly-recap.server'
-import { verifyCronSecret } from '~/utils/cron-auth.server'
+import { buildWeeklyRecap } from '~/server/admin/weekly-recap/weekly-recap.server'
+import { verifyCronSecret } from '~/server/auth/cron-auth.server'
+import { sendEmail } from '~/server/platforms/resend.server'
 
 const log = cronLogger.child({ job: 'weekly-recap' })
 

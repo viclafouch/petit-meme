@@ -1,7 +1,7 @@
 /* oxlint-disable no-console */
 import { isDeepStrictEqual } from 'node:util'
 import { serverEnv } from '~/env/server.server'
-import { getStripeClient } from '~/lib/stripe.server'
+import { getStripeClient } from '~/server/platforms/stripe.server'
 import { readStripePriceContract } from './lib/stripe-price-contract'
 
 const checkStripePrices = async () => {

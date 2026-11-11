@@ -21,7 +21,7 @@ import { MemeExportMenu } from '~/components/Meme/meme-export-menu'
 import { MemeLanguageBadge } from '~/components/Meme/meme-language-badge'
 import { MemeVideoPlayer } from '~/components/Meme/meme-video-player'
 import { MemesList } from '~/components/Meme/memes-list'
-import { ToggleLikeButton } from '~/components/Meme/toggle-like-button'
+import { ToggleBookmarkButton } from '~/components/Meme/toggle-bookmark-button'
 import { Badge } from '~/components/ui/badge'
 import { Button, buttonVariants } from '~/components/ui/button'
 import type { MemeFullData } from '~/constants/meme'
@@ -31,13 +31,13 @@ import { useMemeExport } from '~/hooks/use-meme-export'
 import { useMemeHls } from '~/hooks/use-meme-hls'
 import { useRegisterMemeView } from '~/hooks/use-register-meme-view'
 import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
-import { getMemeByIdQueryOpts, getRelatedMemesQueryOpts } from '~/lib/queries'
+import { getMemeQueryOpts, listRelatedMemesQueryOpts } from '~/lib/queries'
 import { matchIsUserAdmin } from '~/lib/role'
 import { buildUrl } from '~/lib/seo'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
-import { getRandomMeme, trackMemeAction } from '~/server/meme'
+import { getRandomMeme, recordMemeExport } from '~/server/meme/meme.functions'
 import { MemePendingBanner } from './meme-pending-banner'
 
 const memeRouteApi = getRouteApi('/_public__root/_default/memes/$memeId')
@@ -107,9 +107,9 @@ const RelatedMemes = ({ memes }: RelatedMemesProps) => {
 export const MemePage = () => {
   const { user } = useRouteContext({ from: '__root__' })
   const { memeId } = memeRouteApi.useParams()
-  const memeQuery = useSuspenseQuery(getMemeByIdQueryOpts(memeId))
+  const memeQuery = useSuspenseQuery(getMemeQueryOpts(memeId))
   const relatedMemesQuery = useQuery(
-    getRelatedMemesQueryOpts({
+    listRelatedMemesQueryOpts({
       memeId: memeQuery.data.id,
       title: memeQuery.data.title
     })
@@ -146,7 +146,7 @@ export const MemePage = () => {
 
     try {
       await navigator.clipboard.writeText(text)
-      void trackMemeAction({
+      void recordMemeExport({
         data: { memeId: memeQuery.data.id, action: 'share' }
       })
       toast.success(m.meme_link_copied(), {
@@ -232,7 +232,7 @@ export const MemePage = () => {
                 {memeQuery.data.title}
               </h1>
               <div className="flex">
-                <ToggleLikeButton size="iconLg" meme={memeQuery.data} />
+                <ToggleBookmarkButton size="iconLg" meme={memeQuery.data} />
                 {user && matchIsUserAdmin(user) ? (
                   <Link
                     className={buttonVariants({

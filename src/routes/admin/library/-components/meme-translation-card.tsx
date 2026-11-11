@@ -21,15 +21,15 @@ import {
   InputGroupTextarea
 } from '~/components/ui/input-group'
 import { LoadingButton } from '~/components/ui/loading-button'
+import {
+  MEME_DESCRIPTION_MAX_LENGTH,
+  MEME_TITLE_MIN_LENGTH
+} from '~/constants/meme-form'
 import { LOCALE_META } from '~/helpers/i18n-content'
 import type { useKeywordsField } from '~/hooks/use-keywords-field'
 import { matchIsFieldInvalid } from '~/lib/form'
 import type { Locale } from '~/paraglide/runtime'
 import { KeywordsField } from '~/routes/admin/-components/keywords-field'
-import {
-  MEME_DESCRIPTION_MAX_LENGTH,
-  MEME_TITLE_MIN_LENGTH
-} from '~/routes/admin/-server/memes'
 import { MemeSectionTitle } from './meme-section-title'
 import type { MemeFormApi } from './use-meme-form'
 

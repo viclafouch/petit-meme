@@ -6,7 +6,7 @@ import {
 import {
   type DashboardPeriod,
   PERIOD_SCHEMA
-} from '~/routes/admin/-server/dashboard'
+} from '~/server/admin/dashboard/dashboard.functions'
 
 const PERIOD_OPTIONS = [
   { value: '7d', label: '7j' },

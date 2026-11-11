@@ -8,38 +8,39 @@ import {
   TEN_MINUTES_MS,
   THIRTY_MINUTES_MS
 } from '~/constants/time'
-import type { Meme, Video } from '~/db/generated/prisma/client'
+import type { Meme } from '~/db/generated/prisma/client'
 import type { Locale } from '~/paraglide/runtime'
-import { checkAiSearchQuota } from '~/server/ai-search'
-import { getCategories } from '~/server/categories'
-import { getActiveSubscription } from '~/server/customer'
+import { getAiSearchQuota } from '~/server/ai-search/ai-search.functions'
+import { getAuthUser } from '~/server/auth/auth.functions'
+import { listBookmarkedMemes } from '~/server/bookmark/bookmark.functions'
+import { listCategories } from '~/server/category/category.functions'
 import {
-  getMemeById,
-  getMemePlaybackUrl,
-  getMemes,
-  getRecentCountMemes,
-  getRelatedMemes,
-  getTrendingMemes,
-  getVideoStatusById,
-  shareMeme
-} from '~/server/meme'
-import { getUserSubmissions } from '~/server/meme-submission'
-import { getInfiniteReels } from '~/server/reels'
-import { checkGenerationQuota } from '~/server/studio'
-import { getFavoritesMemes } from '~/server/user'
-import { getAuthUser } from '~/server/user-auth'
+  countRecentMemes,
+  listMemes,
+  listRelatedMemes,
+  listTrendingMemes
+} from '~/server/meme/meme-list.functions'
+import {
+  getMeme,
+  getMemeExportFile,
+  getMemePlaybackUrl
+} from '~/server/meme/meme.functions'
+import { listReels } from '~/server/meme/reels.functions'
+import { listUserProposals } from '~/server/proposal/proposal.functions'
+import { getGenerationQuota } from '~/server/studio/studio.functions'
+import { getActiveSubscription } from '~/server/subscription/subscription.functions'
 
-export const getMemesListQueryOpts = (filters: MemesFilters) => {
+export const listMemesQueryOpts = (filters: MemesFilters) => {
   return queryOptions({
-    queryKey: [...getMemesListQueryOpts.all, filters],
+    queryKey: [...listMemesQueryOpts.all, filters],
     queryFn: () => {
-      return getMemes({ data: filters })
+      return listMemes({ data: filters })
     },
     staleTime: FIVE_MINUTES_MS
   })
 }
 
-getMemesListQueryOpts.all = ['memes-list'] as const
+listMemesQueryOpts.all = ['memes-list'] as const
 
 export const getMemePlaybackUrlQueryOpts = (memeId: Meme['id']) => {
   return queryOptions({
@@ -55,41 +56,29 @@ export const getMemePlaybackUrlQueryOpts = (memeId: Meme['id']) => {
 
 getMemePlaybackUrlQueryOpts.all = ['meme-playback-url'] as const
 
-export const getTrendingMemesQueryOpts = () => {
+export const listTrendingMemesQueryOpts = () => {
   return queryOptions({
-    queryKey: [...getTrendingMemesQueryOpts.all],
+    queryKey: [...listTrendingMemesQueryOpts.all],
     queryFn: () => {
-      return getTrendingMemes()
+      return listTrendingMemes()
     },
     staleTime: THIRTY_MINUTES_MS
   })
 }
 
-getTrendingMemesQueryOpts.all = ['memes', 'trending'] as const
+listTrendingMemesQueryOpts.all = ['memes', 'trending'] as const
 
-export const getMemeByIdQueryOpts = (memeId: Meme['id']) => {
+export const getMemeQueryOpts = (memeId: Meme['id']) => {
   return queryOptions({
-    queryKey: [...getMemeByIdQueryOpts.all, memeId],
+    queryKey: [...getMemeQueryOpts.all, memeId],
     queryFn: () => {
-      return getMemeById({ data: memeId })
+      return getMeme({ data: memeId })
     },
     staleTime: FIVE_MINUTES_MS
   })
 }
 
-getMemeByIdQueryOpts.all = ['meme'] as const
-
-export const getVideoStatusByIdQueryOpts = (videoId: Video['id']) => {
-  return queryOptions({
-    queryKey: [...getVideoStatusByIdQueryOpts.all, videoId],
-    queryFn: () => {
-      return getVideoStatusById({ data: videoId })
-    },
-    staleTime: MINUTE
-  })
-}
-
-getVideoStatusByIdQueryOpts.all = ['video-status'] as const
+getMemeQueryOpts.all = ['meme'] as const
 
 export const getAuthUserQueryOpts = () => {
   return queryOptions({
@@ -104,42 +93,42 @@ export const getAuthUserQueryOpts = () => {
 
 getAuthUserQueryOpts.all = ['auth-user'] as const
 
-export const getFavoritesMemesQueryOpts = () => {
+export const listBookmarkedMemesQueryOpts = () => {
   return queryOptions({
-    queryKey: [...getFavoritesMemesQueryOpts.all],
+    queryKey: [...listBookmarkedMemesQueryOpts.all],
     meta: PRIVATE_QUERY_META,
     queryFn: () => {
-      return getFavoritesMemes()
+      return listBookmarkedMemes()
     },
     staleTime: FIVE_MINUTES_MS
   })
 }
 
-getFavoritesMemesQueryOpts.all = ['favorites-memes'] as const
+listBookmarkedMemesQueryOpts.all = ['bookmarked-memes'] as const
 
-export const getCategoriesListQueryOpts = (locale: Locale) => {
+export const listCategoriesQueryOpts = (locale: Locale) => {
   return queryOptions({
-    queryKey: [...getCategoriesListQueryOpts.all, locale],
+    queryKey: [...listCategoriesQueryOpts.all, locale],
     queryFn: () => {
-      return getCategories({ data: { locale } })
+      return listCategories({ data: { locale } })
     },
     staleTime: TEN_MINUTES_MS
   })
 }
 
-getCategoriesListQueryOpts.all = ['categories-list'] as const
+listCategoriesQueryOpts.all = ['categories-list'] as const
 
-export const getRecentCountMemesQueryOpts = () => {
+export const countRecentMemesQueryOpts = () => {
   return queryOptions({
-    queryKey: [...getRecentCountMemesQueryOpts.all],
+    queryKey: [...countRecentMemesQueryOpts.all],
     queryFn: () => {
-      return getRecentCountMemes()
+      return countRecentMemes()
     },
     staleTime: TEN_MINUTES_MS
   })
 }
 
-getRecentCountMemesQueryOpts.all = ['recent-count-memes'] as const
+countRecentMemesQueryOpts.all = ['recent-count-memes'] as const
 
 export const getActiveSubscriptionQueryOpts = () => {
   return queryOptions({
@@ -154,11 +143,11 @@ export const getActiveSubscriptionQueryOpts = () => {
 
 getActiveSubscriptionQueryOpts.all = ['active-subscription'] as const
 
-export const getInfiniteReelsQueryOpts = (excludedIds: string[] = []) => {
+export const listReelsQueryOpts = (excludedIds: string[] = []) => {
   return infiniteQueryOptions({
-    queryKey: [...getInfiniteReelsQueryOpts.all],
+    queryKey: [...listReelsQueryOpts.all],
     queryFn: ({ pageParam }) => {
-      return getInfiniteReels({ data: { excludedIds: pageParam } })
+      return listReels({ data: { excludedIds: pageParam } })
     },
     initialPageParam: excludedIds,
     getNextPageParam: (lastPage) => {
@@ -168,46 +157,46 @@ export const getInfiniteReelsQueryOpts = (excludedIds: string[] = []) => {
   })
 }
 
-getInfiniteReelsQueryOpts.all = ['infinite-reels'] as const
+listReelsQueryOpts.all = ['infinite-reels'] as const
 
 type GetRelatedMemesQueryOptsParams = {
   memeId: Meme['id']
   title: string
 }
 
-export const getRelatedMemesQueryOpts = ({
+export const listRelatedMemesQueryOpts = ({
   memeId,
   title
 }: GetRelatedMemesQueryOptsParams) => {
   return queryOptions({
-    queryKey: [...getRelatedMemesQueryOpts.all, memeId, title],
+    queryKey: [...listRelatedMemesQueryOpts.all, memeId, title],
     queryFn: () => {
-      return getRelatedMemes({ data: { memeId, title } })
+      return listRelatedMemes({ data: { memeId, title } })
     },
     staleTime: TEN_MINUTES_MS
   })
 }
 
-getRelatedMemesQueryOpts.all = ['related-memes'] as const
+listRelatedMemesQueryOpts.all = ['related-memes'] as const
 
-export const getUserSubmissionsQueryOpts = () => {
+export const listUserProposalsQueryOpts = () => {
   return queryOptions({
-    queryKey: [...getUserSubmissionsQueryOpts.all],
+    queryKey: [...listUserProposalsQueryOpts.all],
     meta: PRIVATE_QUERY_META,
     queryFn: () => {
-      return getUserSubmissions()
+      return listUserProposals()
     },
     staleTime: FIVE_MINUTES_MS
   })
 }
 
-getUserSubmissionsQueryOpts.all = ['user-submissions'] as const
+listUserProposalsQueryOpts.all = ['user-proposals'] as const
 
-export const getVideoBlobQueryOpts = (memeId: Meme['id']) => {
+export const getStudioVideoQueryOpts = (memeId: Meme['id']) => {
   return queryOptions({
-    queryKey: [...getVideoBlobQueryOpts.all, memeId],
+    queryKey: [...getStudioVideoQueryOpts.all, memeId],
     queryFn: async () => {
-      const response = await shareMeme({
+      const response = await getMemeExportFile({
         data: { memeId, mode: 'studio', format: 'mp4' }
       })
 
@@ -217,14 +206,14 @@ export const getVideoBlobQueryOpts = (memeId: Meme['id']) => {
   })
 }
 
-getVideoBlobQueryOpts.all = ['video-blob'] as const
+getStudioVideoQueryOpts.all = ['video-blob'] as const
 
 export const getAiSearchQuotaQueryOpts = () => {
   return queryOptions({
     queryKey: [...getAiSearchQuotaQueryOpts.all],
     meta: PRIVATE_QUERY_META,
     queryFn: () => {
-      return checkAiSearchQuota()
+      return getAiSearchQuota()
     },
     staleTime: MINUTE
   })
@@ -237,7 +226,7 @@ export const getGenerationQuotaQueryOpts = () => {
     queryKey: [...getGenerationQuotaQueryOpts.all],
     meta: PRIVATE_QUERY_META,
     queryFn: () => {
-      return checkGenerationQuota()
+      return getGenerationQuota()
     },
     staleTime: MINUTE
   })

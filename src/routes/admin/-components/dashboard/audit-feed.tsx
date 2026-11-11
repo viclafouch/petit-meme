@@ -1,6 +1,6 @@
 import { getActionIcon } from '~/routes/admin/-helpers/action-icon'
 import { formatAuditEntry } from '~/routes/admin/-helpers/audit'
-import type { AuditLogEntry } from '~/routes/admin/-server/dashboard'
+import type { AuditLogEntry } from '~/server/admin/dashboard/dashboard.functions'
 import { DashboardFeed, FeedActor } from './dashboard-feed'
 
 type AuditFeedProps = {

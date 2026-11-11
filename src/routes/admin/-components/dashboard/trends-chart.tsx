@@ -19,7 +19,7 @@ import { getLocale, type Locale } from '~/paraglide/runtime'
 import type {
   ChartDataPoint,
   DashboardPeriod
-} from '~/routes/admin/-server/dashboard'
+} from '~/server/admin/dashboard/dashboard.functions'
 import type { IconConfig } from './types'
 
 const HIDDEN_METRIC_OPACITY = 0.35

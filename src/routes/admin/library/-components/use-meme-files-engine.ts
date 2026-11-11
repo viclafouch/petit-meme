@@ -6,14 +6,14 @@ import { WATERMARK_ASSET_PATH } from '~/constants/watermark'
 import type { Meme } from '~/db/generated/prisma/client'
 import { captureWithFeature } from '~/lib/sentry'
 import {
-  getAdminMemeFilesQueryOpts,
-  getAdminVideoBlobQueryOpts
+  getMissingMemeFilesQueryOpts,
+  getAdminMemeOriginalQueryOpts
 } from '~/routes/admin/-lib/queries'
-import {
-  getMemeFilesUploadConfig,
-  storeMemeFiles
-} from '~/routes/admin/-server/meme-files'
 import type { PublishStep } from '~/routes/admin/library/-lib/publish-run'
+import {
+  createMemeFileUploads,
+  storeMemeFiles
+} from '~/server/admin/meme/meme-file.functions'
 import { loadFFmpeg } from '~/utils/ffmpeg'
 import { extractMp3 } from '~/utils/mp3'
 import { applyWatermark } from '~/utils/watermark'
@@ -87,7 +87,7 @@ const transcode = async ({
 
 export function useMemeFilesEngine(memeId: Meme['id']) {
   const queryClient = useQueryClient()
-  const filesQuery = useQuery(getAdminMemeFilesQueryOpts(memeId))
+  const filesQuery = useQuery(getMissingMemeFilesQueryOpts(memeId))
 
   const generateMutation = useMutation({
     mutationKey: ['generate-meme-files', memeId],
@@ -96,7 +96,7 @@ export function useMemeFilesEngine(memeId: Meme['id']) {
 
       const [videoBlob, watermarkBlob] = await Promise.all([
         queryClient.query({
-          ...getAdminVideoBlobQueryOpts(memeId),
+          ...getAdminMemeOriginalQueryOpts(memeId),
           staleTime: 'static'
         }),
         fetchWatermarkAsset()
@@ -110,7 +110,7 @@ export function useMemeFilesEngine(memeId: Meme['id']) {
 
       handlers.onStep('uploading')
       const files = { mp4, mp3 }
-      const { uploads } = await getMemeFilesUploadConfig({ data: memeId })
+      const { uploads } = await createMemeFileUploads({ data: memeId })
 
       await Promise.all(
         uploads.map(({ format, url }) => {
@@ -128,7 +128,7 @@ export function useMemeFilesEngine(memeId: Meme['id']) {
       captureWithFeature(error, 'admin-meme-files')
     },
     onSettled: () => {
-      return queryClient.invalidateQueries(getAdminMemeFilesQueryOpts(memeId))
+      return queryClient.invalidateQueries(getMissingMemeFilesQueryOpts(memeId))
     }
   })
 

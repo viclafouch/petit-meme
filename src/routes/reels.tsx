@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import {
   getActiveSubscriptionQueryOpts,
-  getInfiniteReelsQueryOpts
+  listReelsQueryOpts
 } from '~/lib/queries'
 import { buildOgImageUrl, seo } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
@@ -38,7 +38,7 @@ export const Route = createFileRoute('/reels')({
     }
 
     await context.queryClient.infiniteQuery({
-      ...getInfiniteReelsQueryOpts(),
+      ...listReelsQueryOpts(),
       staleTime: 'static'
     })
   }

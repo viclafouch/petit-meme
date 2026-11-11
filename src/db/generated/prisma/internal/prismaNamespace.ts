@@ -397,7 +397,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 
 export const ModelName = {
-  UserBookmark: 'UserBookmark',
+  Bookmark: 'Bookmark',
   Category: 'Category',
   MemeCategory: 'MemeCategory',
   Video: 'Video',
@@ -412,7 +412,7 @@ export const ModelName = {
   Verification: 'Verification',
   StudioGeneration: 'StudioGeneration',
   RateLimit: 'RateLimit',
-  MemeSubmission: 'MemeSubmission',
+  MemeProposal: 'MemeProposal',
   MemeTranslation: 'MemeTranslation',
   CategoryTranslation: 'CategoryTranslation',
   AiSearchLog: 'AiSearchLog',
@@ -433,81 +433,81 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "userBookmark" | "category" | "memeCategory" | "video" | "meme" | "memeViewDaily" | "memeActionDaily" | "user" | "adminAuditLog" | "session" | "subscription" | "account" | "verification" | "studioGeneration" | "rateLimit" | "memeSubmission" | "memeTranslation" | "categoryTranslation" | "aiSearchLog" | "recommendCache" | "activityEvent"
+    modelProps: "bookmark" | "category" | "memeCategory" | "video" | "meme" | "memeViewDaily" | "memeActionDaily" | "user" | "adminAuditLog" | "session" | "subscription" | "account" | "verification" | "studioGeneration" | "rateLimit" | "memeProposal" | "memeTranslation" | "categoryTranslation" | "aiSearchLog" | "recommendCache" | "activityEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
-    UserBookmark: {
-      payload: Prisma.$UserBookmarkPayload<ExtArgs>
-      fields: Prisma.UserBookmarkFieldRefs
+    Bookmark: {
+      payload: Prisma.$BookmarkPayload<ExtArgs>
+      fields: Prisma.BookmarkFieldRefs
       operations: {
         findUnique: {
-          args: Prisma.UserBookmarkFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserBookmarkPayload> | null
+          args: Prisma.BookmarkFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookmarkPayload> | null
         }
         findUniqueOrThrow: {
-          args: Prisma.UserBookmarkFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserBookmarkPayload>
+          args: Prisma.BookmarkFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookmarkPayload>
         }
         findFirst: {
-          args: Prisma.UserBookmarkFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserBookmarkPayload> | null
+          args: Prisma.BookmarkFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookmarkPayload> | null
         }
         findFirstOrThrow: {
-          args: Prisma.UserBookmarkFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserBookmarkPayload>
+          args: Prisma.BookmarkFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookmarkPayload>
         }
         findMany: {
-          args: Prisma.UserBookmarkFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserBookmarkPayload>[]
+          args: Prisma.BookmarkFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookmarkPayload>[]
         }
         create: {
-          args: Prisma.UserBookmarkCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserBookmarkPayload>
+          args: Prisma.BookmarkCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookmarkPayload>
         }
         createMany: {
-          args: Prisma.UserBookmarkCreateManyArgs<ExtArgs>
+          args: Prisma.BookmarkCreateManyArgs<ExtArgs>
           result: BatchPayload
         }
         createManyAndReturn: {
-          args: Prisma.UserBookmarkCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserBookmarkPayload>[]
+          args: Prisma.BookmarkCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookmarkPayload>[]
         }
         delete: {
-          args: Prisma.UserBookmarkDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserBookmarkPayload>
+          args: Prisma.BookmarkDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookmarkPayload>
         }
         update: {
-          args: Prisma.UserBookmarkUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserBookmarkPayload>
+          args: Prisma.BookmarkUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookmarkPayload>
         }
         deleteMany: {
-          args: Prisma.UserBookmarkDeleteManyArgs<ExtArgs>
+          args: Prisma.BookmarkDeleteManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateMany: {
-          args: Prisma.UserBookmarkUpdateManyArgs<ExtArgs>
+          args: Prisma.BookmarkUpdateManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateManyAndReturn: {
-          args: Prisma.UserBookmarkUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserBookmarkPayload>[]
+          args: Prisma.BookmarkUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookmarkPayload>[]
         }
         upsert: {
-          args: Prisma.UserBookmarkUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserBookmarkPayload>
+          args: Prisma.BookmarkUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookmarkPayload>
         }
         aggregate: {
-          args: Prisma.UserBookmarkAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateUserBookmark>
+          args: Prisma.BookmarkAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBookmark>
         }
         groupBy: {
-          args: Prisma.UserBookmarkGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.UserBookmarkGroupByOutputType>[]
+          args: Prisma.BookmarkGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BookmarkGroupByOutputType>[]
         }
         count: {
-          args: Prisma.UserBookmarkCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.UserBookmarkCountAggregateOutputType> | number
+          args: Prisma.BookmarkCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BookmarkCountAggregateOutputType> | number
         }
       }
     }
@@ -1547,77 +1547,77 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    MemeSubmission: {
-      payload: Prisma.$MemeSubmissionPayload<ExtArgs>
-      fields: Prisma.MemeSubmissionFieldRefs
+    MemeProposal: {
+      payload: Prisma.$MemeProposalPayload<ExtArgs>
+      fields: Prisma.MemeProposalFieldRefs
       operations: {
         findUnique: {
-          args: Prisma.MemeSubmissionFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeSubmissionPayload> | null
+          args: Prisma.MemeProposalFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeProposalPayload> | null
         }
         findUniqueOrThrow: {
-          args: Prisma.MemeSubmissionFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeSubmissionPayload>
+          args: Prisma.MemeProposalFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeProposalPayload>
         }
         findFirst: {
-          args: Prisma.MemeSubmissionFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeSubmissionPayload> | null
+          args: Prisma.MemeProposalFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeProposalPayload> | null
         }
         findFirstOrThrow: {
-          args: Prisma.MemeSubmissionFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeSubmissionPayload>
+          args: Prisma.MemeProposalFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeProposalPayload>
         }
         findMany: {
-          args: Prisma.MemeSubmissionFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeSubmissionPayload>[]
+          args: Prisma.MemeProposalFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeProposalPayload>[]
         }
         create: {
-          args: Prisma.MemeSubmissionCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeSubmissionPayload>
+          args: Prisma.MemeProposalCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeProposalPayload>
         }
         createMany: {
-          args: Prisma.MemeSubmissionCreateManyArgs<ExtArgs>
+          args: Prisma.MemeProposalCreateManyArgs<ExtArgs>
           result: BatchPayload
         }
         createManyAndReturn: {
-          args: Prisma.MemeSubmissionCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeSubmissionPayload>[]
+          args: Prisma.MemeProposalCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeProposalPayload>[]
         }
         delete: {
-          args: Prisma.MemeSubmissionDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeSubmissionPayload>
+          args: Prisma.MemeProposalDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeProposalPayload>
         }
         update: {
-          args: Prisma.MemeSubmissionUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeSubmissionPayload>
+          args: Prisma.MemeProposalUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeProposalPayload>
         }
         deleteMany: {
-          args: Prisma.MemeSubmissionDeleteManyArgs<ExtArgs>
+          args: Prisma.MemeProposalDeleteManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateMany: {
-          args: Prisma.MemeSubmissionUpdateManyArgs<ExtArgs>
+          args: Prisma.MemeProposalUpdateManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateManyAndReturn: {
-          args: Prisma.MemeSubmissionUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeSubmissionPayload>[]
+          args: Prisma.MemeProposalUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeProposalPayload>[]
         }
         upsert: {
-          args: Prisma.MemeSubmissionUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeSubmissionPayload>
+          args: Prisma.MemeProposalUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemeProposalPayload>
         }
         aggregate: {
-          args: Prisma.MemeSubmissionAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateMemeSubmission>
+          args: Prisma.MemeProposalAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMemeProposal>
         }
         groupBy: {
-          args: Prisma.MemeSubmissionGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.MemeSubmissionGroupByOutputType>[]
+          args: Prisma.MemeProposalGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MemeProposalGroupByOutputType>[]
         }
         count: {
-          args: Prisma.MemeSubmissionCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.MemeSubmissionCountAggregateOutputType> | number
+          args: Prisma.MemeProposalCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MemeProposalCountAggregateOutputType> | number
         }
       }
     }
@@ -2030,14 +2030,14 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
-export const UserBookmarkScalarFieldEnum = {
+export const BookmarkScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   memeId: 'memeId',
   createdAt: 'createdAt'
 } as const
 
-export type UserBookmarkScalarFieldEnum = (typeof UserBookmarkScalarFieldEnum)[keyof typeof UserBookmarkScalarFieldEnum]
+export type BookmarkScalarFieldEnum = (typeof BookmarkScalarFieldEnum)[keyof typeof BookmarkScalarFieldEnum]
 
 
 export const CategoryScalarFieldEnum = {
@@ -2250,7 +2250,7 @@ export const RateLimitScalarFieldEnum = {
 export type RateLimitScalarFieldEnum = (typeof RateLimitScalarFieldEnum)[keyof typeof RateLimitScalarFieldEnum]
 
 
-export const MemeSubmissionScalarFieldEnum = {
+export const MemeProposalScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   title: 'title',
@@ -2264,7 +2264,7 @@ export const MemeSubmissionScalarFieldEnum = {
   updatedAt: 'updatedAt'
 } as const
 
-export type MemeSubmissionScalarFieldEnum = (typeof MemeSubmissionScalarFieldEnum)[keyof typeof MemeSubmissionScalarFieldEnum]
+export type MemeProposalScalarFieldEnum = (typeof MemeProposalScalarFieldEnum)[keyof typeof MemeProposalScalarFieldEnum]
 
 
 export const MemeTranslationScalarFieldEnum = {
@@ -2523,30 +2523,30 @@ export type ListBigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMod
 
 
 /**
- * Reference to a field of type 'MemeSubmissionUrlType'
+ * Reference to a field of type 'MemeProposalUrlType'
  */
-export type EnumMemeSubmissionUrlTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MemeSubmissionUrlType'>
+export type EnumMemeProposalUrlTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MemeProposalUrlType'>
     
 
 
 /**
- * Reference to a field of type 'MemeSubmissionUrlType[]'
+ * Reference to a field of type 'MemeProposalUrlType[]'
  */
-export type ListEnumMemeSubmissionUrlTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MemeSubmissionUrlType[]'>
+export type ListEnumMemeProposalUrlTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MemeProposalUrlType[]'>
     
 
 
 /**
- * Reference to a field of type 'MemeSubmissionStatus'
+ * Reference to a field of type 'MemeProposalStatus'
  */
-export type EnumMemeSubmissionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MemeSubmissionStatus'>
+export type EnumMemeProposalStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MemeProposalStatus'>
     
 
 
 /**
- * Reference to a field of type 'MemeSubmissionStatus[]'
+ * Reference to a field of type 'MemeProposalStatus[]'
  */
-export type ListEnumMemeSubmissionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MemeSubmissionStatus[]'>
+export type ListEnumMemeProposalStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MemeProposalStatus[]'>
     
 
 
@@ -2742,7 +2742,7 @@ export interface PrismaClientOptionsWithAdapter extends PrismaClientBaseOptions 
  */
 export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaClientOptionsWithAdapter
 export type GlobalOmitConfig = {
-  userBookmark?: Prisma.UserBookmarkOmit
+  bookmark?: Prisma.BookmarkOmit
   category?: Prisma.CategoryOmit
   memeCategory?: Prisma.MemeCategoryOmit
   video?: Prisma.VideoOmit
@@ -2757,7 +2757,7 @@ export type GlobalOmitConfig = {
   verification?: Prisma.VerificationOmit
   studioGeneration?: Prisma.StudioGenerationOmit
   rateLimit?: Prisma.RateLimitOmit
-  memeSubmission?: Prisma.MemeSubmissionOmit
+  memeProposal?: Prisma.MemeProposalOmit
   memeTranslation?: Prisma.MemeTranslationOmit
   categoryTranslation?: Prisma.CategoryTranslationOmit
   aiSearchLog?: Prisma.AiSearchLogOmit

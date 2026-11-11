@@ -5,10 +5,10 @@ import { getLocale } from '~/paraglide/runtime'
 import { DetailList } from '~/routes/admin/-components/detail-list'
 import { TruncatedText } from '~/routes/admin/-components/truncated-text'
 import { formatEventCount } from '~/routes/admin/-helpers/activity'
-import type { AdminVisitorDetailPayload } from '~/routes/admin/-server/visitor'
+import type { AdminVisitor } from '~/server/admin/visitor/visitor.functions'
 
 type VisitorMemeListProps = {
-  memes: AdminVisitorDetailPayload['memes']
+  memes: AdminVisitor['memes']
 }
 
 export const VisitorMemeList = ({ memes }: VisitorMemeListProps) => {
@@ -35,7 +35,7 @@ export const VisitorMemeList = ({ memes }: VisitorMemeListProps) => {
 }
 
 type VisitorUserAgentListProps = {
-  userAgents: AdminVisitorDetailPayload['userAgents']
+  userAgents: AdminVisitor['userAgents']
 }
 
 export const VisitorUserAgentList = ({
@@ -61,7 +61,7 @@ export const VisitorUserAgentList = ({
 }
 
 type VisitorAccountListProps = {
-  users: AdminVisitorDetailPayload['users']
+  users: AdminVisitor['users']
   now: number
 }
 

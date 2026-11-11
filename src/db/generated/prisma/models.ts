@@ -8,7 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
-export type * from './models/UserBookmark.ts'
+export type * from './models/Bookmark.ts'
 export type * from './models/Category.ts'
 export type * from './models/MemeCategory.ts'
 export type * from './models/Video.ts'
@@ -23,7 +23,7 @@ export type * from './models/Account.ts'
 export type * from './models/Verification.ts'
 export type * from './models/StudioGeneration.ts'
 export type * from './models/RateLimit.ts'
-export type * from './models/MemeSubmission.ts'
+export type * from './models/MemeProposal.ts'
 export type * from './models/MemeTranslation.ts'
 export type * from './models/CategoryTranslation.ts'
 export type * from './models/AiSearchLog.ts'

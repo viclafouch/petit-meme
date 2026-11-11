@@ -9,7 +9,7 @@ import { authClient } from '~/lib/auth-client'
 import { getAuthUserQueryOpts } from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
-import { updateUserAvatar } from '~/server/user'
+import { updateUserAvatar } from '~/server/user/user.functions'
 
 export const useUpdateAvatar = () => {
   const queryClient = useQueryClient()

@@ -22,7 +22,8 @@ import { CONTENT_LOCALE_TO_LOCALE } from '~/helpers/i18n-content'
 import { parseKeywordsInput } from '~/helpers/keywords'
 import { useKeywordsField } from '~/hooks/use-keywords-field'
 import { isLocale, type Locale } from '~/paraglide/runtime'
-import { type AiAssistResult, translateMemeContent } from '~/server/ai'
+import { translateMemeRecord } from '~/server/admin/ai-assist/ai-assist.functions'
+import type { MemeDraftTranslation } from '~/server/admin/ai-assist/meme-draft.server'
 import { removeDuplicates } from '~/utils/array'
 import { AiAssistPreview } from './ai-assist-preview'
 
@@ -127,11 +128,11 @@ const resolveSuggestionLocale = (
 type AiAssistReviewFormProps = {
   suggestion: MemeFillSuggestion
   contentLocale: MemeContentLocale
-  currentValues: AiAssistResult
+  currentValues: MemeDraftTranslation
   isSettling: boolean
   onApply: (
     locale: Locale,
-    result: AiAssistResult,
+    result: MemeDraftTranslation,
     selectedFields: AiAssistFieldSelection
   ) => void
   onSettle: (isApplied: boolean) => void
@@ -165,7 +166,7 @@ const AiAssistReviewForm = ({
   })
   const isTranslationNeeded = sourceLocale !== applyLocale
 
-  const applyAndClose = (result: AiAssistResult) => {
+  const applyAndClose = (result: MemeDraftTranslation) => {
     onApply(applyLocale, result, selectedFields)
     onSettle(true)
     onClose()
@@ -173,8 +174,8 @@ const AiAssistReviewForm = ({
 
   const translateMutation = useMutation({
     mutationKey: ['ai-assist-translate', applyLocale],
-    mutationFn: (result: AiAssistResult) => {
-      return translateMemeContent({
+    mutationFn: (result: MemeDraftTranslation) => {
+      return translateMemeRecord({
         data: {
           sourceLocale: sourceLocale ?? applyLocale,
           targetLocales: [applyLocale],

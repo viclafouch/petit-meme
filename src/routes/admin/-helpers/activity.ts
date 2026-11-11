@@ -12,7 +12,7 @@ import { z } from 'zod'
 import { STRIPE_BILLING_INTERVALS } from '~/constants/plan'
 import { ActivityEventType } from '~/db/generated/prisma/enums'
 import { getLocale } from '~/paraglide/runtime'
-import type { AdminActivityRow } from '~/routes/admin/-server/activity'
+import type { AdminActivityRow } from '~/server/admin/activity/activity.server'
 
 type ActivityTypeDisplay = {
   label: string

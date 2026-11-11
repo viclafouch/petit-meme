@@ -29,8 +29,8 @@ import { captureWithFeature } from '~/lib/sentry'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
-import type { ActiveSubscription } from '~/server/customer'
-import { exportUserData } from '~/server/user'
+import type { ActiveSubscription } from '~/server/subscription/subscription.functions'
+import { exportUserData } from '~/server/user/user.functions'
 import { downloadBlob } from '~/utils/download'
 
 const SETTINGS_ROW_CLASS_NAME =

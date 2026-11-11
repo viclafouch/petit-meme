@@ -27,7 +27,7 @@ import {
 import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import { buildUrl } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
-import { trackMemeAction } from '~/server/meme'
+import { recordMemeExport } from '~/server/meme/meme.functions'
 
 type PlayerDialogProps = {
   meme: MemeWithVideo
@@ -93,7 +93,7 @@ export const PlayerDialog = ({
 
     try {
       await navigator.clipboard.writeText(text)
-      void trackMemeAction({ data: { memeId: meme.id, action: 'share' } })
+      void recordMemeExport({ data: { memeId: meme.id, action: 'share' } })
       toast.success(m.meme_link_copied(), {
         position: 'bottom-center'
       })

@@ -11,13 +11,13 @@ import { getRouteApi, useNavigate } from '@tanstack/react-router'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { DATE_WITH_TIME_OPTIONS, formatDate } from '~/helpers/date'
+import { getPremiumStatus } from '~/helpers/premium'
 import { formatSubscriptionEnding } from '~/helpers/subscription'
 import { getLocale } from '~/paraglide/runtime'
 import { SectionHeading } from '~/routes/admin/-components/section-heading'
-import { getPremiumStatus } from '~/routes/admin/-lib/premium'
 import { buildSentryUserLinks } from '~/routes/admin/-lib/sentry'
-import type { AdminUserDetailPayload } from '~/routes/admin/-server/user-detail'
 import { AuthProviderBadge } from '~/routes/admin/users/-components/user-badges'
+import type { AdminUser } from '~/server/admin/user/user.functions'
 import {
   getUserActionPermissions,
   NO_USER_ACTION_REASON,
@@ -67,7 +67,7 @@ const PanelNote = ({ children }: PanelNoteProps) => {
   return <p className="text-sm text-muted-foreground">{children}</p>
 }
 
-type PremiumSummaryProps = Pick<AdminUserDetailPayload, 'user' | 'subscription'>
+type PremiumSummaryProps = Pick<AdminUser, 'user' | 'subscription'>
 
 const PremiumSummary = ({ user, subscription }: PremiumSummaryProps) => {
   const locale = getLocale()
@@ -122,7 +122,7 @@ const PremiumSummary = ({ user, subscription }: PremiumSummaryProps) => {
 }
 
 type SentryLinksProps = {
-  userId: AdminUserDetailPayload['user']['id']
+  userId: AdminUser['user']['id']
 }
 
 const SentryLinks = ({ userId }: SentryLinksProps) => {
@@ -154,7 +154,7 @@ const SentryLinks = ({ userId }: SentryLinksProps) => {
 }
 
 type UserAccountPanelProps = Pick<
-  AdminUserDetailPayload,
+  AdminUser,
   'user' | 'provider' | 'subscription'
 >
 

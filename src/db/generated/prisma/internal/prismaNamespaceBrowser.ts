@@ -51,7 +51,7 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
-  UserBookmark: 'UserBookmark',
+  Bookmark: 'Bookmark',
   Category: 'Category',
   MemeCategory: 'MemeCategory',
   Video: 'Video',
@@ -66,7 +66,7 @@ export const ModelName = {
   Verification: 'Verification',
   StudioGeneration: 'StudioGeneration',
   RateLimit: 'RateLimit',
-  MemeSubmission: 'MemeSubmission',
+  MemeProposal: 'MemeProposal',
   MemeTranslation: 'MemeTranslation',
   CategoryTranslation: 'CategoryTranslation',
   AiSearchLog: 'AiSearchLog',
@@ -90,14 +90,14 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
-export const UserBookmarkScalarFieldEnum = {
+export const BookmarkScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   memeId: 'memeId',
   createdAt: 'createdAt'
 } as const
 
-export type UserBookmarkScalarFieldEnum = (typeof UserBookmarkScalarFieldEnum)[keyof typeof UserBookmarkScalarFieldEnum]
+export type BookmarkScalarFieldEnum = (typeof BookmarkScalarFieldEnum)[keyof typeof BookmarkScalarFieldEnum]
 
 
 export const CategoryScalarFieldEnum = {
@@ -310,7 +310,7 @@ export const RateLimitScalarFieldEnum = {
 export type RateLimitScalarFieldEnum = (typeof RateLimitScalarFieldEnum)[keyof typeof RateLimitScalarFieldEnum]
 
 
-export const MemeSubmissionScalarFieldEnum = {
+export const MemeProposalScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   title: 'title',
@@ -324,7 +324,7 @@ export const MemeSubmissionScalarFieldEnum = {
   updatedAt: 'updatedAt'
 } as const
 
-export type MemeSubmissionScalarFieldEnum = (typeof MemeSubmissionScalarFieldEnum)[keyof typeof MemeSubmissionScalarFieldEnum]
+export type MemeProposalScalarFieldEnum = (typeof MemeProposalScalarFieldEnum)[keyof typeof MemeProposalScalarFieldEnum]
 
 
 export const MemeTranslationScalarFieldEnum = {

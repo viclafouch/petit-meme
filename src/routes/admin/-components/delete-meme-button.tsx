@@ -6,12 +6,12 @@ import { ConfirmAlertDialog } from '~/components/confirm-alert-dialog'
 import { Button } from '~/components/ui/button'
 import type { Meme } from '~/db/generated/prisma/client'
 import { getErrorMessage } from '~/helpers/error'
-import type { MemeFile } from '~/lib/meme-files.server'
 import {
-  getAdminMemeByIdQueryOpts,
+  getAdminMemeQueryOpts,
   invalidateAdminMemesOverview
 } from '~/routes/admin/-lib/queries'
-import { deleteMemeById } from '~/routes/admin/-server/memes'
+import { deleteMeme } from '~/server/admin/meme/meme.functions'
+import type { MemeFile } from '~/server/meme/meme-file.server'
 
 const MEME_FILE_LABELS = {
   stream: 'la vidéo Bunny Stream',
@@ -35,7 +35,7 @@ export const DeleteMemeButton = ({
   const deleteMutation = useMutation({
     mutationKey: ['delete-meme'],
     mutationFn: async (body: { id: string }) => {
-      const promise = deleteMemeById({ data: body.id })
+      const promise = deleteMeme({ data: body.id })
       toast.promise(promise, {
         loading: 'Suppression...',
         success: () => {
@@ -59,7 +59,7 @@ export const DeleteMemeButton = ({
         })
       }
 
-      queryClient.removeQueries(getAdminMemeByIdQueryOpts(meme.id))
+      queryClient.removeQueries(getAdminMemeQueryOpts(meme.id))
       await invalidateAdminMemesOverview(queryClient)
       await router.navigate({ to: '/admin/library' })
     }

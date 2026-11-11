@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises'
-import { fetchOriginalVideo } from '~/lib/bunny.server'
+import { fetchOriginalVideo } from '~/server/platforms/bunny.server'
 
 const FETCH_TIMEOUT_MS = 30_000
 

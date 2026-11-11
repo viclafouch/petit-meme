@@ -1,6 +1,7 @@
 import React from 'react'
 import type { OnChangeFn, PaginationState } from '@tanstack/react-table'
 import { LoadingSpinner } from '~/components/ui/spinner'
+import { PAGE_SIZE } from '~/constants/admin'
 import { getErrorMessage } from '~/helpers/error'
 import {
   type ActivityTimelineScope,
@@ -8,9 +9,8 @@ import {
   ACTIVITY_TIMELINE_SCOPES
 } from '~/routes/admin/-components/activity-columns'
 import { AdminTable } from '~/routes/admin/-components/admin-table'
-import { PAGE_SIZE } from '~/routes/admin/-lib/constants'
 import { useAppTable } from '~/routes/admin/-lib/table'
-import type { AdminActivityRow } from '~/routes/admin/-server/activity'
+import type { AdminActivityRow } from '~/server/admin/activity/activity.server'
 
 const EMPTY_ROWS: AdminActivityRow[] = []
 

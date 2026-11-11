@@ -217,33 +217,39 @@ export const resolveMemeTranslation = ({
   }
 }
 
-type MemeWithTranslationsToResolve = {
-  translations: Pick<MemeTranslationModel, 'locale' | 'title' | 'description'>[]
+type MemeToLocalize = {
+  translations: (Pick<
+    MemeTranslationModel,
+    'locale' | 'title' | 'description'
+  > &
+    Partial<Pick<MemeTranslationModel, 'keywords'>>)[]
   contentLocale: MemeContentLocale
   title: string
   description: string
+  keywords?: string[]
 }
 
-export const mapMemesWithResolvedTranslations = <
-  TMeme extends MemeWithTranslationsToResolve
->(
-  memes: TMeme[],
+export const localizeMeme = <TMeme extends MemeToLocalize>(
+  { translations, ...meme }: TMeme,
   locale: Locale
 ) => {
-  return memes.map(({ translations, ...meme }) => {
-    const resolved = resolveMemeTranslation({
+  return {
+    ...meme,
+    ...resolveMemeTranslation({
       translations,
       contentLocale: meme.contentLocale,
       requestedLocale: locale,
       fallback: meme
     })
+  }
+}
 
-    return {
-      ...meme,
-      title: resolved.title,
-      description: resolved.description,
-      keywords: resolved.keywords
-    }
+export const localizeMemes = <TMeme extends MemeToLocalize>(
+  memes: TMeme[],
+  locale: Locale
+) => {
+  return memes.map((meme) => {
+    return localizeMeme(meme, locale)
   })
 }
 
@@ -266,5 +272,23 @@ export const resolveCategoryTranslation = ({
   return {
     title: match?.title ?? fallback.title,
     keywords: match?.keywords ?? fallback.keywords
+  }
+}
+
+type CategoryToLocalize = ResolveCategoryTranslationParams['fallback'] & {
+  translations: ResolveCategoryTranslationParams['translations']
+}
+
+export const localizeCategory = <TCategory extends CategoryToLocalize>(
+  category: TCategory,
+  locale: Locale
+) => {
+  return {
+    ...category,
+    ...resolveCategoryTranslation({
+      translations: category.translations,
+      requestedLocale: locale,
+      fallback: category
+    })
   }
 }

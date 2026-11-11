@@ -14,7 +14,7 @@ const APP_ERROR_MESSAGES = {
   RATE_LIMITED: () => {
     return m.error_rate_limited()
   },
-  SUBMISSION_LIMIT_REACHED: () => {
+  PROPOSAL_LIMIT_REACHED: () => {
     return m.submit_error_limit_reached()
   },
   DUPLICATE_URL: () => {

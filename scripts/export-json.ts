@@ -12,7 +12,7 @@ const exportJson = async () => {
       prismaClient.video.findMany(),
       prismaClient.meme.findMany(),
       prismaClient.memeCategory.findMany(),
-      prismaClient.userBookmark.findMany()
+      prismaClient.bookmark.findMany()
     ])
 
   const data = {

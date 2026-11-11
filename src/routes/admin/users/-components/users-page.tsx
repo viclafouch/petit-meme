@@ -5,25 +5,22 @@ import { getRouteApi, Link } from '@tanstack/react-router'
 import { PageHeader } from '~/components/page-header'
 import { Container } from '~/components/ui/container'
 import { UserAvatar } from '~/components/user-avatar'
+import { INITIAL_PAGINATION } from '~/constants/admin'
+import { getPremiumStatus, type PremiumSource } from '~/helpers/premium'
 import { AdminTable } from '~/routes/admin/-components/admin-table'
 import { EmptyCell } from '~/routes/admin/-components/empty-cell'
 import { FilterTab } from '~/routes/admin/-components/filter-tab'
 import { FilterTabs } from '~/routes/admin/-components/filter-tabs'
 import { RelativeDateTooltip } from '~/routes/admin/-components/relative-date-tooltip'
-import { INITIAL_PAGINATION } from '~/routes/admin/-lib/constants'
-import {
-  getPremiumStatus,
-  type PremiumSource
-} from '~/routes/admin/-lib/premium'
-import { getAdminUsersListQueryOpts } from '~/routes/admin/-lib/queries'
+import { listAdminUsersQueryOpts } from '~/routes/admin/-lib/queries'
 import { createAppColumnHelper, useAppTable } from '~/routes/admin/-lib/table'
-import type { EnrichedUser } from '~/routes/admin/-server/users'
 import { UserActionsCell } from '~/routes/admin/users/-components/user-actions-cell'
 import {
   AuthProviderBadge,
   PremiumBadges,
   UserStatusBadges
 } from '~/routes/admin/users/-components/user-badges'
+import type { AdminUserListItem } from '~/server/admin/user/user.functions'
 
 const routeApi = getRouteApi('/admin/users/')
 
@@ -68,7 +65,7 @@ const PremiumFilterTabs = ({
 }
 
 const countUsersByPremiumSource = (
-  users: EnrichedUser[]
+  users: AdminUserListItem[]
 ): Record<PremiumFilter, number> => {
   const usersBySource = Object.groupBy(users, (user) => {
     return getPremiumStatus(user).source
@@ -83,7 +80,7 @@ const countUsersByPremiumSource = (
   }
 }
 
-const columnHelper = createAppColumnHelper<EnrichedUser>()
+const columnHelper = createAppColumnHelper<AdminUserListItem>()
 
 const getColumns = (now: number) => {
   return columnHelper.columns([
@@ -179,7 +176,7 @@ const getColumns = (now: number) => {
 
 export const UsersPage = () => {
   const { premium } = routeApi.useSearch()
-  const usersListQuery = useSuspenseQuery(getAdminUsersListQueryOpts())
+  const usersListQuery = useSuspenseQuery(listAdminUsersQueryOpts())
 
   const columns = React.useMemo(() => {
     return getColumns(usersListQuery.dataUpdatedAt)

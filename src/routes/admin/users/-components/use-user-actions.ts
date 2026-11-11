@@ -1,26 +1,23 @@
 import React from 'react'
 import { toast } from 'sonner'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { BAN_REASONS, type BanReason } from '~/constants/ban'
 import { getErrorMessage } from '~/helpers/error'
+import { getPremiumStatus, type SubscriptionInfo } from '~/helpers/premium'
 import { matchIsPremiumGranted } from '~/lib/role'
 import { captureWithFeature, type SentryFeature } from '~/lib/sentry'
-import { BAN_REASONS, type BanReason } from '~/routes/admin/-lib/ban'
 import {
-  getPremiumStatus,
-  type SubscriptionInfo
-} from '~/routes/admin/-lib/premium'
-import {
-  getAdminUserDetailQueryOpts,
-  getAdminUsersListQueryOpts,
+  getAdminUserQueryOpts,
+  listAdminUsersQueryOpts,
   getAdminUserSubscriptionHistoryQueryOpts
 } from '~/routes/admin/-lib/queries'
 import {
-  banUserById,
-  grantPremiumById,
-  removeUser,
-  revokePremiumById,
-  unbanUserById
-} from '~/routes/admin/-server/users'
+  banUser,
+  grantPremium,
+  deleteUser,
+  revokePremium,
+  unbanUser
+} from '~/server/admin/user/user.functions'
 
 export type UserActionDialog =
   | 'ban'
@@ -48,7 +45,7 @@ type UserAction = {
 const USER_ACTIONS = {
   ban: {
     run: ({ userId, banReason }) => {
-      return banUserById({ data: { userId, banReason } })
+      return banUser({ data: { userId, banReason } })
     },
     loading: 'Bannissement en cours...',
     success: 'Utilisateur banni',
@@ -56,7 +53,7 @@ const USER_ACTIONS = {
   },
   unban: {
     run: ({ userId }) => {
-      return unbanUserById({ data: userId })
+      return unbanUser({ data: userId })
     },
     loading: 'Débannissement en cours...',
     success: 'Utilisateur débanni',
@@ -64,7 +61,7 @@ const USER_ACTIONS = {
   },
   delete: {
     run: ({ userId }) => {
-      return removeUser({ data: userId })
+      return deleteUser({ data: userId })
     },
     loading: 'Suppression en cours...',
     success: 'Utilisateur supprimé',
@@ -72,7 +69,7 @@ const USER_ACTIONS = {
   },
   grantPremium: {
     run: ({ userId }) => {
-      return grantPremiumById({ data: userId })
+      return grantPremium({ data: userId })
     },
     loading: 'Activation de Premium...',
     success: 'Premium offert',
@@ -80,7 +77,7 @@ const USER_ACTIONS = {
   },
   revokePremium: {
     run: ({ userId }) => {
-      return revokePremiumById({ data: userId })
+      return revokePremium({ data: userId })
     },
     loading: 'Retrait de Premium...',
     success: 'Premium retiré',
@@ -153,7 +150,7 @@ export const useUserActions = ({ userId, onDeleted }: UseUserActionsParams) => {
     onSuccess: (_result, dialog) => {
       handleClose()
       const usersListInvalidation = queryClient.invalidateQueries({
-        queryKey: getAdminUsersListQueryOpts.all
+        queryKey: listAdminUsersQueryOpts.all
       })
 
       if (dialog === 'delete') {
@@ -164,7 +161,7 @@ export const useUserActions = ({ userId, onDeleted }: UseUserActionsParams) => {
 
       return Promise.all([
         usersListInvalidation,
-        queryClient.invalidateQueries(getAdminUserDetailQueryOpts(userId)),
+        queryClient.invalidateQueries(getAdminUserQueryOpts(userId)),
         queryClient.invalidateQueries(
           getAdminUserSubscriptionHistoryQueryOpts(userId)
         )

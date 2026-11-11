@@ -4,12 +4,12 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { MemesList } from '~/components/Meme/memes-list'
 import { buttonVariants } from '~/components/ui/button'
-import { getTrendingMemesQueryOpts } from '~/lib/queries'
+import { listTrendingMemesQueryOpts } from '~/lib/queries'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages.js'
 
 export const BestMemes = () => {
-  const trendingMemesQuery = useSuspenseQuery(getTrendingMemesQueryOpts())
+  const trendingMemesQuery = useSuspenseQuery(listTrendingMemesQueryOpts())
   const isReducedMotion = useReducedMotion()
 
   return (

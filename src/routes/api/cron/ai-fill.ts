@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { serverEnv } from '~/env/server.server'
 import { cronLogger } from '~/lib/logger'
-import { runMemeFillNight } from '~/server/meme-fill-night.server'
-import { verifyCronSecret } from '~/utils/cron-auth.server'
+import { runMemeFillNight } from '~/server/admin/ai-assist/meme-fill-night.server'
+import { verifyCronSecret } from '~/server/auth/cron-auth.server'
 
 const log = cronLogger.child({ job: 'ai-fill' })
 

@@ -5,7 +5,7 @@ import {
   ACTIVITY_TYPE_DISPLAY,
   formatActivityEntry
 } from '~/routes/admin/-helpers/activity'
-import type { AdminActivityRow } from '~/routes/admin/-server/activity'
+import type { AdminActivityRow } from '~/server/admin/activity/activity.server'
 import { DashboardFeed, FeedActor } from './dashboard-feed'
 
 type ActivityActorProps = {

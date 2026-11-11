@@ -16,7 +16,7 @@ import { MemesFilterContentLocale } from '~/routes/admin/-components/memes-filte
 import { NewMemeButton } from '~/routes/admin/-components/new-meme-button'
 import {
   getAdminDashboardTotalsQueryOpts,
-  getAdminMemesListQueryOpts
+  listAdminMemesQueryOpts
 } from '~/routes/admin/-lib/queries'
 
 const routeApi = getRouteApi('/admin/library/')
@@ -32,7 +32,7 @@ const MemesListWrapper = () => {
     ready: search.ready
   }
 
-  const memesListQuery = useSuspenseQuery(getAdminMemesListQueryOpts(filters))
+  const memesListQuery = useSuspenseQuery(listAdminMemesQueryOpts(filters))
 
   return (
     <div className="flex flex-col gap-12">

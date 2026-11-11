@@ -4,10 +4,10 @@ import { getLocale } from '~/paraglide/runtime'
 import { DetailList } from '~/routes/admin/-components/detail-list'
 import { VisitorIpLink } from '~/routes/admin/-components/visitor-ip-link'
 import { formatEventCount } from '~/routes/admin/-helpers/activity'
-import type { AdminUserDetailPayload } from '~/routes/admin/-server/user-detail'
+import type { AdminUser } from '~/server/admin/user/user.functions'
 
 type UserIpListProps = {
-  ipAddresses: AdminUserDetailPayload['ipAddresses']
+  ipAddresses: AdminUser['ipAddresses']
   now: number
 }
 

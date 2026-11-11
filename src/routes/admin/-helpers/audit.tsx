@@ -1,4 +1,6 @@
-import type { AuditMetadata } from '~/server/audit.server'
+import type { AuditMetadata } from '~/server/admin/audit/audit.server'
+
+const FEMININE_TARGET_TYPES = new Set(['category', 'proposal'])
 
 function getAuditTargetLabel(targetType: string) {
   switch (targetType) {
@@ -14,8 +16,8 @@ function getAuditTargetLabel(targetType: string) {
       return 'Utilisateur'
     }
 
-    case 'submission': {
-      return 'Soumission'
+    case 'proposal': {
+      return 'Proposition'
     }
 
     default: {
@@ -34,15 +36,15 @@ function getAuditActionVerb({ action, targetType }: AuditActionVerbParams) {
 
   switch (action) {
     case 'create': {
-      return `${label} créé${targetType === 'category' ? 'e' : ''}`
+      return `${label} créé${FEMININE_TARGET_TYPES.has(targetType) ? 'e' : ''}`
     }
 
     case 'edit': {
-      return `${label} modifié${targetType === 'category' ? 'e' : ''}`
+      return `${label} modifié${FEMININE_TARGET_TYPES.has(targetType) ? 'e' : ''}`
     }
 
     case 'delete': {
-      return `${label} supprimé${targetType === 'category' ? 'e' : ''}`
+      return `${label} supprimé${FEMININE_TARGET_TYPES.has(targetType) ? 'e' : ''}`
     }
 
     case 'ban': {

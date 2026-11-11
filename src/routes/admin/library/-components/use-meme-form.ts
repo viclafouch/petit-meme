@@ -3,6 +3,11 @@ import type { z } from 'zod'
 import { revalidateLogic } from '@tanstack/react-form'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import type { MemeFullData } from '~/constants/meme'
+import {
+  getMemeFormSchema,
+  type MEME_FORM_SCHEMA,
+  PUBLISHABLE_MEME_FORM_SCHEMA
+} from '~/constants/meme-form'
 import { getErrorMessage } from '~/helpers/error'
 import {
   buildLocaleRecord,
@@ -12,14 +17,9 @@ import {
 import { useAppForm } from '~/hooks/use-app-form'
 import { useKeywordsField } from '~/hooks/use-keywords-field'
 import { focusFirstInvalidField } from '~/lib/form'
-import { getCategoriesListQueryOpts } from '~/lib/queries'
+import { listCategoriesQueryOpts } from '~/lib/queries'
 import { baseLocale, isLocale, type Locale } from '~/paraglide/runtime'
-import {
-  getMemeFormSchema,
-  type MEME_FORM_SCHEMA,
-  PUBLISHABLE_MEME_FORM_SCHEMA
-} from '~/routes/admin/-server/memes'
-import { translateMemeContent } from '~/server/ai'
+import { translateMemeRecord } from '~/server/admin/ai-assist/ai-assist.functions'
 
 export type MemeFormValues = z.infer<typeof MEME_FORM_SCHEMA>
 
@@ -49,7 +49,7 @@ type UseMemeFormParams = {
 }
 
 export function useMemeForm({ meme, onChange, onSubmit }: UseMemeFormParams) {
-  const categoriesListQuery = useQuery(getCategoriesListQueryOpts(baseLocale))
+  const categoriesListQuery = useQuery(listCategoriesQueryOpts(baseLocale))
 
   const form = useAppForm({
     defaultValues: buildMemeFormValues(meme),
@@ -96,7 +96,7 @@ export function useMemeForm({ meme, onChange, onSubmit }: UseMemeFormParams) {
         }
       )
 
-      return translateMemeContent({
+      return translateMemeRecord({
         data: {
           sourceLocale,
           targetLocales,

@@ -47,21 +47,21 @@ export const MemeContentLocale = {
 export type MemeContentLocale = (typeof MemeContentLocale)[keyof typeof MemeContentLocale]
 
 
-export const MemeSubmissionUrlType = {
+export const MemeProposalUrlType = {
   TWEET: 'TWEET',
   YOUTUBE: 'YOUTUBE'
 } as const
 
-export type MemeSubmissionUrlType = (typeof MemeSubmissionUrlType)[keyof typeof MemeSubmissionUrlType]
+export type MemeProposalUrlType = (typeof MemeProposalUrlType)[keyof typeof MemeProposalUrlType]
 
 
-export const MemeSubmissionStatus = {
+export const MemeProposalStatus = {
   PENDING: 'PENDING',
   APPROVED: 'APPROVED',
   REJECTED: 'REJECTED'
 } as const
 
-export type MemeSubmissionStatus = (typeof MemeSubmissionStatus)[keyof typeof MemeSubmissionStatus]
+export type MemeProposalStatus = (typeof MemeProposalStatus)[keyof typeof MemeProposalStatus]
 
 
 export const ActivityEventType = {

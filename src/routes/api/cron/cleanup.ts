@@ -11,9 +11,9 @@ import {
 import { DAY, DAYS_PER_YEAR } from '~/constants/time'
 import { prismaClient } from '~/db/client.server'
 import { serverEnv } from '~/env/server.server'
-import { auth } from '~/lib/auth.server'
 import { cronLogger } from '~/lib/logger'
-import { verifyCronSecret } from '~/utils/cron-auth.server'
+import { auth } from '~/server/auth/auth.server'
+import { verifyCronSecret } from '~/server/auth/cron-auth.server'
 
 const log = cronLogger.child({ job: 'cleanup' })
 

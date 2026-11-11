@@ -31,8 +31,8 @@ export * from "./enums.ts"
  * const prisma = new PrismaClient({
  *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
  * })
- * // Fetch zero or more UserBookmarks
- * const userBookmarks = await prisma.userBookmark.findMany()
+ * // Fetch zero or more Bookmarks
+ * const bookmarks = await prisma.bookmark.findMany()
  * ```
  * 
  * Read more in our [docs](https://pris.ly/d/client).
@@ -42,10 +42,10 @@ export type PrismaClient<LogOpts extends Prisma.LogLevel = never, OmitOpts exten
 export { Prisma }
 
 /**
- * Model UserBookmark
+ * Model Bookmark
  * 
  */
-export type UserBookmark = Prisma.UserBookmarkModel
+export type Bookmark = Prisma.BookmarkModel
 /**
  * Model Category
  * 
@@ -117,10 +117,10 @@ export type StudioGeneration = Prisma.StudioGenerationModel
  */
 export type RateLimit = Prisma.RateLimitModel
 /**
- * Model MemeSubmission
+ * Model MemeProposal
  * 
  */
-export type MemeSubmission = Prisma.MemeSubmissionModel
+export type MemeProposal = Prisma.MemeProposalModel
 /**
  * Model MemeTranslation
  * 

@@ -12,9 +12,9 @@ The live setup is the source of truth: read it with the commands below on every 
 - **One Stream library per environment**: development, e2e, production. The environment's `BUNNY_LIBRARY_ID` names its library.
 - **Each library owns a pull zone** that Bunny Stream created for it. The pull zone answers on a custom hostname under `petit-meme.io`, and that hostname is `VITE_BUNNY_HOSTNAME`.
 - **The delivery contract** lives in `scripts/lib/bunny-zone-contract.ts`: what each pull zone serves publicly, serves signed, or keeps for the server. Token authentication and the pull zone's Edge Rules enforce it.
-- **Signing** lives in `src/lib/bunny-token.server.ts`. The token signs the path, not the host.
+- **Signing** lives in `src/server/platforms/bunny-token.server.ts`. The token signs the path, not the host.
 - **Exports** (watermarked MP4, MP3) live in a Bunny Storage zone, `BUNNY_STORAGE_ZONE_NAME`.
-- **Webhooks** from Stream land in `src/lib/bunny-webhook.server.ts`.
+- **Webhooks** from Stream land in `src/server/platforms/bunny-webhook.server.ts`.
 - The role of each `BUNNY_*` variable reads from its `serverEnv.BUNNY_` call sites.
 
 ## Tools

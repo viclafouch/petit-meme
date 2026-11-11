@@ -9,7 +9,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger
 } from '~/components/ui/dropdown-menu'
-import type { EnrichedUser } from '~/routes/admin/-server/users'
+import type { AdminUserListItem } from '~/server/admin/user/user.functions'
 import {
   getUserActionPermissions,
   NO_USER_ACTION_REASON,
@@ -20,7 +20,7 @@ import { UserActionDialogs } from './user-action-dialogs'
 const routeApi = getRouteApi('/admin')
 
 type UserActionsCellProps = {
-  user: EnrichedUser
+  user: AdminUserListItem
 }
 
 export const UserActionsCell = ({ user }: UserActionsCellProps) => {

@@ -6,12 +6,12 @@ import { PageHeader } from '~/components/page-header'
 import { Badge } from '~/components/ui/badge'
 import { Container } from '~/components/ui/container'
 import { UserAvatar } from '~/components/user-avatar'
+import { INITIAL_PAGINATION } from '~/constants/admin'
 import { AdminTable } from '~/routes/admin/-components/admin-table'
 import { RelativeDateTooltip } from '~/routes/admin/-components/relative-date-tooltip'
-import { INITIAL_PAGINATION } from '~/routes/admin/-lib/constants'
-import { getAdminAiSearchLogsQueryOpts } from '~/routes/admin/-lib/queries'
+import { listAdminAiSearchLogsQueryOpts } from '~/routes/admin/-lib/queries'
 import { createAppColumnHelper, useAppTable } from '~/routes/admin/-lib/table'
-import type { AdminAiSearchLog } from '~/routes/admin/-server/ai-search-logs'
+import type { AdminAiSearchLog } from '~/server/admin/ai-search/ai-search.functions'
 
 const columnHelper = createAppColumnHelper<AdminAiSearchLog>()
 
@@ -115,7 +115,7 @@ const StatCard = ({ label, value, icon }: StatCardProps) => {
 }
 
 export const AiSearchPage = () => {
-  const logsQuery = useSuspenseQuery(getAdminAiSearchLogsQueryOpts())
+  const logsQuery = useSuspenseQuery(listAdminAiSearchLogsQueryOpts())
 
   const columns = React.useMemo(() => {
     return getColumns(logsQuery.dataUpdatedAt)

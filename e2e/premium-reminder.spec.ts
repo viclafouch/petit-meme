@@ -64,7 +64,7 @@ test.describe('the Premium reminder', () => {
     const signInButton = getAuthDialogSignInButton(page)
 
     await repeatUntilVisible(() => {
-      return page.getByRole('button', { name: m.meme_add_favorite() }).click()
+      return page.getByRole('button', { name: m.meme_add_bookmark() }).click()
     }, signInButton)
 
     await page.clock.runFor(TWO_REMINDER_CHECKS_MS)

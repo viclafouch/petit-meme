@@ -3,7 +3,7 @@ import { Link } from '@tanstack/react-router'
 import { Label } from '~/components/ui/label'
 import type { MemeWithVideo } from '~/constants/meme'
 import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
-import { getRelatedMemesQueryOpts } from '~/lib/queries'
+import { listRelatedMemesQueryOpts } from '~/lib/queries'
 import { m } from '~/paraglide/messages.js'
 
 type StudioRelatedMemesProps = {
@@ -49,7 +49,7 @@ const StudioRelatedMemesGrid = ({ memes }: StudioRelatedMemesGridProps) => {
 
 export const StudioRelatedMemes = ({ meme }: StudioRelatedMemesProps) => {
   const relatedMemesQuery = useSuspenseQuery(
-    getRelatedMemesQueryOpts({ memeId: meme.id, title: meme.title })
+    listRelatedMemesQueryOpts({ memeId: meme.id, title: meme.title })
   )
 
   const filteredMemes = relatedMemesQuery.data.filter((relatedMeme) => {

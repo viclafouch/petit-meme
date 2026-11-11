@@ -4,13 +4,13 @@ import { getRouteApi, Link } from '@tanstack/react-router'
 import { PageHeader } from '~/components/page-header'
 import { SectionHeading } from '~/routes/admin/-components/section-heading'
 import {
-  getAdminChartDataQueryOpts,
+  getAdminDashboardChartQueryOpts,
   getAdminDashboardTotalsQueryOpts,
-  getAdminRecentActivityEventsQueryOpts,
-  getAdminRecentAuditQueryOpts,
-  getAdminTrendingMemesQueryOpts
+  listAdminRecentActivityQueryOpts,
+  listAdminRecentAuditQueryOpts,
+  listAdminTrendingMemesQueryOpts
 } from '~/routes/admin/-lib/queries'
-import type { DashboardPeriod } from '~/routes/admin/-server/dashboard'
+import type { DashboardPeriod } from '~/server/admin/dashboard/dashboard.functions'
 import { ActivityEventsFeed } from './activity-events-feed'
 import { AuditFeed } from './audit-feed'
 import { DashboardSection } from './dashboard-section'
@@ -33,7 +33,7 @@ type ChartContentProps = {
 }
 
 const ChartContent = ({ period }: ChartContentProps) => {
-  const chartQuery = useSuspenseQuery(getAdminChartDataQueryOpts(period))
+  const chartQuery = useSuspenseQuery(getAdminDashboardChartQueryOpts(period))
 
   return <TrendsChart data={chartQuery.data} period={period} />
 }
@@ -45,21 +45,19 @@ const TotalsContent = () => {
 }
 
 const TrendingContent = () => {
-  const trendingQuery = useSuspenseQuery(getAdminTrendingMemesQueryOpts())
+  const trendingQuery = useSuspenseQuery(listAdminTrendingMemesQueryOpts())
 
   return <TrendingMemes entries={trendingQuery.data} />
 }
 
 const AuditContent = () => {
-  const auditQuery = useSuspenseQuery(getAdminRecentAuditQueryOpts())
+  const auditQuery = useSuspenseQuery(listAdminRecentAuditQueryOpts())
 
   return <AuditFeed entries={auditQuery.data} now={auditQuery.dataUpdatedAt} />
 }
 
 const ActivityContent = () => {
-  const activityQuery = useSuspenseQuery(
-    getAdminRecentActivityEventsQueryOpts()
-  )
+  const activityQuery = useSuspenseQuery(listAdminRecentActivityQueryOpts())
 
   return (
     <ActivityEventsFeed

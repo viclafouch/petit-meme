@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { ACTIVITY_PAGE_SCHEMA } from '~/constants/activity'
-import { getAdminUserDetailQueryOpts } from '~/routes/admin/-lib/queries'
+import { getAdminUserQueryOpts } from '~/routes/admin/-lib/queries'
 import { UserPage } from '~/routes/admin/users/-components/user-page'
 
 export const Route = createFileRoute('/admin/users/$userId')({
@@ -8,7 +8,7 @@ export const Route = createFileRoute('/admin/users/$userId')({
   validateSearch: ACTIVITY_PAGE_SCHEMA,
   loader: async ({ params, context }) => {
     const detail = await context.queryClient.query({
-      ...getAdminUserDetailQueryOpts(params.userId),
+      ...getAdminUserQueryOpts(params.userId),
       staleTime: 'static'
     })
 

@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import {
-  getFavoritesMemesQueryOpts,
-  getRecentCountMemesQueryOpts,
-  getTrendingMemesQueryOpts
+  listBookmarkedMemesQueryOpts,
+  countRecentMemesQueryOpts,
+  listTrendingMemesQueryOpts
 } from '~/lib/queries'
 import { buildHomeJsonLd, buildOgImageUrl, seo } from '~/lib/seo'
 import { m } from '~/paraglide/messages.js'
@@ -41,16 +41,16 @@ export const Route = createFileRoute('/_public__root/')({
   loader: async ({ context }) => {
     await Promise.all([
       context.queryClient.query({
-        ...getTrendingMemesQueryOpts(),
+        ...listTrendingMemesQueryOpts(),
         staleTime: 'static'
       }),
       context.queryClient.query({
-        ...getRecentCountMemesQueryOpts(),
+        ...countRecentMemesQueryOpts(),
         staleTime: 'static'
       }),
       context.user
         ? context.queryClient.query({
-            ...getFavoritesMemesQueryOpts(),
+            ...listBookmarkedMemesQueryOpts(),
             staleTime: 'static'
           })
         : undefined

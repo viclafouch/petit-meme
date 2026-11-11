@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import {
   getActiveSubscriptionQueryOpts,
-  getCategoriesListQueryOpts,
-  getFavoritesMemesQueryOpts
+  listCategoriesQueryOpts,
+  listBookmarkedMemesQueryOpts
 } from '~/lib/queries'
 import { getLocale } from '~/paraglide/runtime'
 import { DefaultLayout } from './-components/default-layout'
@@ -13,7 +13,7 @@ export const Route = createFileRoute('/_public__root/_default')({
     const userQueries = context.user
       ? [
           context.queryClient.query({
-            ...getFavoritesMemesQueryOpts(),
+            ...listBookmarkedMemesQueryOpts(),
             staleTime: 'static'
           }),
           context.queryClient.query({
@@ -26,7 +26,7 @@ export const Route = createFileRoute('/_public__root/_default')({
     void Promise.allSettled([
       ...userQueries,
       context.queryClient.query({
-        ...getCategoriesListQueryOpts(getLocale()),
+        ...listCategoriesQueryOpts(getLocale()),
         staleTime: 'static'
       })
     ])

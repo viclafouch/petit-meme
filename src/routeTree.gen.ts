@@ -29,8 +29,8 @@ import { Route as ApiBunnyRouteImport } from './routes/api/bunny'
 import { Route as ApiMemeFillRouteImport } from './routes/api/meme-fill'
 import { Route as ApiOgRouteImport } from './routes/api/og'
 import { Route as EmbedMemeIdRouteImport } from './routes/embed/$memeId'
+import { Route as Public__rootDefaultBookmarksRouteImport } from './routes/_public__root/_default/bookmarks'
 import { Route as Public__rootDefaultDmcaRouteImport } from './routes/_public__root/_default/dmca'
-import { Route as Public__rootDefaultFavoritesRouteImport } from './routes/_public__root/_default/favorites'
 import { Route as Public__rootDefaultMentionsLegalesRouteImport } from './routes/_public__root/_default/mentions-legales'
 import { Route as Public__rootDefaultPrivacyRouteImport } from './routes/_public__root/_default/privacy'
 import { Route as Public__rootDefaultSettingsRouteRouteImport } from './routes/_public__root/_default/settings/route'
@@ -42,13 +42,13 @@ import { Route as AdminAiSearchIndexRouteImport } from './routes/admin/ai-search
 import { Route as AdminCategoriesIndexRouteImport } from './routes/admin/categories/index'
 import { Route as AdminLibraryIndexRouteImport } from './routes/admin/library/index'
 import { Route as AdminLibraryMemeIdRouteImport } from './routes/admin/library/$memeId'
-import { Route as AdminSubmissionsIndexRouteImport } from './routes/admin/submissions/index'
+import { Route as AdminProposalsIndexRouteImport } from './routes/admin/proposals/index'
 import { Route as AdminUsersIndexRouteImport } from './routes/admin/users/index'
 import { Route as AdminUsersUserIdRouteImport } from './routes/admin/users/$userId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as ApiCronAiFillRouteImport } from './routes/api/cron/ai-fill'
 import { Route as ApiCronCleanupRouteImport } from './routes/api/cron/cleanup'
-import { Route as ApiCronPendingSubmissionsReminderRouteImport } from './routes/api/cron/pending-submissions-reminder'
+import { Route as ApiCronPendingProposalsReminderRouteImport } from './routes/api/cron/pending-proposals-reminder'
 import { Route as ApiCronSyncAlgoliaRouteImport } from './routes/api/cron/sync-algolia'
 import { Route as ApiCronSyncBunnyTitlesRouteImport } from './routes/api/cron/sync-bunny-titles'
 import { Route as ApiCronVerificationReminderRouteImport } from './routes/api/cron/verification-reminder'
@@ -164,17 +164,17 @@ const EmbedMemeIdRoute = EmbedMemeIdRouteImport.update({
   path: '/embed/$memeId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Public__rootDefaultBookmarksRoute =
+  Public__rootDefaultBookmarksRouteImport.update({
+    id: '/bookmarks',
+    path: '/bookmarks',
+    getParentRoute: () => Public__rootDefaultRouteRoute,
+  } as any)
 const Public__rootDefaultDmcaRoute = Public__rootDefaultDmcaRouteImport.update({
   id: '/dmca',
   path: '/dmca',
   getParentRoute: () => Public__rootDefaultRouteRoute,
 } as any)
-const Public__rootDefaultFavoritesRoute =
-  Public__rootDefaultFavoritesRouteImport.update({
-    id: '/favorites',
-    path: '/favorites',
-    getParentRoute: () => Public__rootDefaultRouteRoute,
-  } as any)
 const Public__rootDefaultMentionsLegalesRoute =
   Public__rootDefaultMentionsLegalesRouteImport.update({
     id: '/mentions-legales',
@@ -235,9 +235,9 @@ const AdminLibraryMemeIdRoute = AdminLibraryMemeIdRouteImport.update({
   path: '/library/$memeId',
   getParentRoute: () => AdminRouteRoute,
 } as any)
-const AdminSubmissionsIndexRoute = AdminSubmissionsIndexRouteImport.update({
-  id: '/submissions/',
-  path: '/submissions/',
+const AdminProposalsIndexRoute = AdminProposalsIndexRouteImport.update({
+  id: '/proposals/',
+  path: '/proposals/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminUsersIndexRoute = AdminUsersIndexRouteImport.update({
@@ -265,10 +265,10 @@ const ApiCronCleanupRoute = ApiCronCleanupRouteImport.update({
   path: '/api/cron/cleanup',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiCronPendingSubmissionsReminderRoute =
-  ApiCronPendingSubmissionsReminderRouteImport.update({
-    id: '/api/cron/pending-submissions-reminder',
-    path: '/api/cron/pending-submissions-reminder',
+const ApiCronPendingProposalsReminderRoute =
+  ApiCronPendingProposalsReminderRouteImport.update({
+    id: '/api/cron/pending-proposals-reminder',
+    path: '/api/cron/pending-proposals-reminder',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiCronSyncAlgoliaRoute = ApiCronSyncAlgoliaRouteImport.update({
@@ -383,8 +383,8 @@ export interface FileRoutesByFullPath {
   '/embed/$memeId': typeof EmbedMemeIdRoute
   '/admin/': typeof AdminIndexRoute
   '/settings': typeof Public__rootDefaultSettingsRouteRouteWithChildren
+  '/bookmarks': typeof Public__rootDefaultBookmarksRoute
   '/dmca': typeof Public__rootDefaultDmcaRoute
-  '/favorites': typeof Public__rootDefaultFavoritesRoute
   '/mentions-legales': typeof Public__rootDefaultMentionsLegalesRoute
   '/privacy': typeof Public__rootDefaultPrivacyRoute
   '/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
@@ -395,7 +395,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/cron/ai-fill': typeof ApiCronAiFillRoute
   '/api/cron/cleanup': typeof ApiCronCleanupRoute
-  '/api/cron/pending-submissions-reminder': typeof ApiCronPendingSubmissionsReminderRoute
+  '/api/cron/pending-proposals-reminder': typeof ApiCronPendingProposalsReminderRoute
   '/api/cron/sync-algolia': typeof ApiCronSyncAlgoliaRoute
   '/api/cron/sync-bunny-titles': typeof ApiCronSyncBunnyTitlesRoute
   '/api/cron/verification-reminder': typeof ApiCronVerificationReminderRoute
@@ -404,7 +404,7 @@ export interface FileRoutesByFullPath {
   '/admin/ai-search/': typeof AdminAiSearchIndexRoute
   '/admin/categories/': typeof AdminCategoriesIndexRoute
   '/admin/library/': typeof AdminLibraryIndexRoute
-  '/admin/submissions/': typeof AdminSubmissionsIndexRoute
+  '/admin/proposals/': typeof AdminProposalsIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
   '/checkout/success': typeof Public__rootDefaultCheckoutSuccessRoute
   '/memes/$memeId': typeof Public__rootDefaultMemesMemeIdRoute
@@ -436,8 +436,8 @@ export interface FileRoutesByTo {
   '/api/og': typeof ApiOgRoute
   '/embed/$memeId': typeof EmbedMemeIdRoute
   '/admin': typeof AdminIndexRoute
+  '/bookmarks': typeof Public__rootDefaultBookmarksRoute
   '/dmca': typeof Public__rootDefaultDmcaRoute
-  '/favorites': typeof Public__rootDefaultFavoritesRoute
   '/mentions-legales': typeof Public__rootDefaultMentionsLegalesRoute
   '/privacy': typeof Public__rootDefaultPrivacyRoute
   '/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
@@ -448,7 +448,7 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/cron/ai-fill': typeof ApiCronAiFillRoute
   '/api/cron/cleanup': typeof ApiCronCleanupRoute
-  '/api/cron/pending-submissions-reminder': typeof ApiCronPendingSubmissionsReminderRoute
+  '/api/cron/pending-proposals-reminder': typeof ApiCronPendingProposalsReminderRoute
   '/api/cron/sync-algolia': typeof ApiCronSyncAlgoliaRoute
   '/api/cron/sync-bunny-titles': typeof ApiCronSyncBunnyTitlesRoute
   '/api/cron/verification-reminder': typeof ApiCronVerificationReminderRoute
@@ -457,7 +457,7 @@ export interface FileRoutesByTo {
   '/admin/ai-search': typeof AdminAiSearchIndexRoute
   '/admin/categories': typeof AdminCategoriesIndexRoute
   '/admin/library': typeof AdminLibraryIndexRoute
-  '/admin/submissions': typeof AdminSubmissionsIndexRoute
+  '/admin/proposals': typeof AdminProposalsIndexRoute
   '/admin/users': typeof AdminUsersIndexRoute
   '/checkout/success': typeof Public__rootDefaultCheckoutSuccessRoute
   '/memes/$memeId': typeof Public__rootDefaultMemesMemeIdRoute
@@ -495,8 +495,8 @@ export interface FileRoutesById {
   '/_public__root/': typeof Public__rootIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/_public__root/_default/settings': typeof Public__rootDefaultSettingsRouteRouteWithChildren
+  '/_public__root/_default/bookmarks': typeof Public__rootDefaultBookmarksRoute
   '/_public__root/_default/dmca': typeof Public__rootDefaultDmcaRoute
-  '/_public__root/_default/favorites': typeof Public__rootDefaultFavoritesRoute
   '/_public__root/_default/mentions-legales': typeof Public__rootDefaultMentionsLegalesRoute
   '/_public__root/_default/privacy': typeof Public__rootDefaultPrivacyRoute
   '/_public__root/_default/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
@@ -507,7 +507,7 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/cron/ai-fill': typeof ApiCronAiFillRoute
   '/api/cron/cleanup': typeof ApiCronCleanupRoute
-  '/api/cron/pending-submissions-reminder': typeof ApiCronPendingSubmissionsReminderRoute
+  '/api/cron/pending-proposals-reminder': typeof ApiCronPendingProposalsReminderRoute
   '/api/cron/sync-algolia': typeof ApiCronSyncAlgoliaRoute
   '/api/cron/sync-bunny-titles': typeof ApiCronSyncBunnyTitlesRoute
   '/api/cron/verification-reminder': typeof ApiCronVerificationReminderRoute
@@ -516,7 +516,7 @@ export interface FileRoutesById {
   '/admin/ai-search/': typeof AdminAiSearchIndexRoute
   '/admin/categories/': typeof AdminCategoriesIndexRoute
   '/admin/library/': typeof AdminLibraryIndexRoute
-  '/admin/submissions/': typeof AdminSubmissionsIndexRoute
+  '/admin/proposals/': typeof AdminProposalsIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
   '/_public__root/_default/checkout/success': typeof Public__rootDefaultCheckoutSuccessRoute
   '/_public__root/_default/memes/$memeId': typeof Public__rootDefaultMemesMemeIdRoute
@@ -552,8 +552,8 @@ export interface FileRouteTypes {
     | '/embed/$memeId'
     | '/admin/'
     | '/settings'
+    | '/bookmarks'
     | '/dmca'
-    | '/favorites'
     | '/mentions-legales'
     | '/privacy'
     | '/terms-of-use'
@@ -564,7 +564,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/cron/ai-fill'
     | '/api/cron/cleanup'
-    | '/api/cron/pending-submissions-reminder'
+    | '/api/cron/pending-proposals-reminder'
     | '/api/cron/sync-algolia'
     | '/api/cron/sync-bunny-titles'
     | '/api/cron/verification-reminder'
@@ -573,7 +573,7 @@ export interface FileRouteTypes {
     | '/admin/ai-search/'
     | '/admin/categories/'
     | '/admin/library/'
-    | '/admin/submissions/'
+    | '/admin/proposals/'
     | '/admin/users/'
     | '/checkout/success'
     | '/memes/$memeId'
@@ -605,8 +605,8 @@ export interface FileRouteTypes {
     | '/api/og'
     | '/embed/$memeId'
     | '/admin'
+    | '/bookmarks'
     | '/dmca'
-    | '/favorites'
     | '/mentions-legales'
     | '/privacy'
     | '/terms-of-use'
@@ -617,7 +617,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/cron/ai-fill'
     | '/api/cron/cleanup'
-    | '/api/cron/pending-submissions-reminder'
+    | '/api/cron/pending-proposals-reminder'
     | '/api/cron/sync-algolia'
     | '/api/cron/sync-bunny-titles'
     | '/api/cron/verification-reminder'
@@ -626,7 +626,7 @@ export interface FileRouteTypes {
     | '/admin/ai-search'
     | '/admin/categories'
     | '/admin/library'
-    | '/admin/submissions'
+    | '/admin/proposals'
     | '/admin/users'
     | '/checkout/success'
     | '/memes/$memeId'
@@ -663,8 +663,8 @@ export interface FileRouteTypes {
     | '/_public__root/'
     | '/admin/'
     | '/_public__root/_default/settings'
+    | '/_public__root/_default/bookmarks'
     | '/_public__root/_default/dmca'
-    | '/_public__root/_default/favorites'
     | '/_public__root/_default/mentions-legales'
     | '/_public__root/_default/privacy'
     | '/_public__root/_default/terms-of-use'
@@ -675,7 +675,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/cron/ai-fill'
     | '/api/cron/cleanup'
-    | '/api/cron/pending-submissions-reminder'
+    | '/api/cron/pending-proposals-reminder'
     | '/api/cron/sync-algolia'
     | '/api/cron/sync-bunny-titles'
     | '/api/cron/verification-reminder'
@@ -684,7 +684,7 @@ export interface FileRouteTypes {
     | '/admin/ai-search/'
     | '/admin/categories/'
     | '/admin/library/'
-    | '/admin/submissions/'
+    | '/admin/proposals/'
     | '/admin/users/'
     | '/_public__root/_default/checkout/success'
     | '/_public__root/_default/memes/$memeId'
@@ -719,7 +719,7 @@ export interface RootRouteChildren {
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiCronAiFillRoute: typeof ApiCronAiFillRoute
   ApiCronCleanupRoute: typeof ApiCronCleanupRoute
-  ApiCronPendingSubmissionsReminderRoute: typeof ApiCronPendingSubmissionsReminderRoute
+  ApiCronPendingProposalsReminderRoute: typeof ApiCronPendingProposalsReminderRoute
   ApiCronSyncAlgoliaRoute: typeof ApiCronSyncAlgoliaRoute
   ApiCronSyncBunnyTitlesRoute: typeof ApiCronSyncBunnyTitlesRoute
   ApiCronVerificationReminderRoute: typeof ApiCronVerificationReminderRoute
@@ -868,18 +868,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EmbedMemeIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_public__root/_default/bookmarks': {
+      id: '/_public__root/_default/bookmarks'
+      path: '/bookmarks'
+      fullPath: '/bookmarks'
+      preLoaderRoute: typeof Public__rootDefaultBookmarksRouteImport
+      parentRoute: typeof Public__rootDefaultRouteRoute
+    }
     '/_public__root/_default/dmca': {
       id: '/_public__root/_default/dmca'
       path: '/dmca'
       fullPath: '/dmca'
       preLoaderRoute: typeof Public__rootDefaultDmcaRouteImport
-      parentRoute: typeof Public__rootDefaultRouteRoute
-    }
-    '/_public__root/_default/favorites': {
-      id: '/_public__root/_default/favorites'
-      path: '/favorites'
-      fullPath: '/favorites'
-      preLoaderRoute: typeof Public__rootDefaultFavoritesRouteImport
       parentRoute: typeof Public__rootDefaultRouteRoute
     }
     '/_public__root/_default/mentions-legales': {
@@ -959,11 +959,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLibraryMemeIdRouteImport
       parentRoute: typeof AdminRouteRoute
     }
-    '/admin/submissions/': {
-      id: '/admin/submissions/'
-      path: '/submissions'
-      fullPath: '/admin/submissions/'
-      preLoaderRoute: typeof AdminSubmissionsIndexRouteImport
+    '/admin/proposals/': {
+      id: '/admin/proposals/'
+      path: '/proposals'
+      fullPath: '/admin/proposals/'
+      preLoaderRoute: typeof AdminProposalsIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/users/': {
@@ -1001,11 +1001,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCronCleanupRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/cron/pending-submissions-reminder': {
-      id: '/api/cron/pending-submissions-reminder'
-      path: '/api/cron/pending-submissions-reminder'
-      fullPath: '/api/cron/pending-submissions-reminder'
-      preLoaderRoute: typeof ApiCronPendingSubmissionsReminderRouteImport
+    '/api/cron/pending-proposals-reminder': {
+      id: '/api/cron/pending-proposals-reminder'
+      path: '/api/cron/pending-proposals-reminder'
+      fullPath: '/api/cron/pending-proposals-reminder'
+      preLoaderRoute: typeof ApiCronPendingProposalsReminderRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/cron/sync-algolia': {
@@ -1140,8 +1140,8 @@ const Public__rootDefaultSettingsRouteRouteWithChildren =
 
 interface Public__rootDefaultRouteRouteChildren {
   Public__rootDefaultSettingsRouteRoute: typeof Public__rootDefaultSettingsRouteRouteWithChildren
+  Public__rootDefaultBookmarksRoute: typeof Public__rootDefaultBookmarksRoute
   Public__rootDefaultDmcaRoute: typeof Public__rootDefaultDmcaRoute
-  Public__rootDefaultFavoritesRoute: typeof Public__rootDefaultFavoritesRoute
   Public__rootDefaultMentionsLegalesRoute: typeof Public__rootDefaultMentionsLegalesRoute
   Public__rootDefaultPrivacyRoute: typeof Public__rootDefaultPrivacyRoute
   Public__rootDefaultTermsOfUseRoute: typeof Public__rootDefaultTermsOfUseRoute
@@ -1162,8 +1162,8 @@ const Public__rootDefaultRouteRouteChildren: Public__rootDefaultRouteRouteChildr
   {
     Public__rootDefaultSettingsRouteRoute:
       Public__rootDefaultSettingsRouteRouteWithChildren,
+    Public__rootDefaultBookmarksRoute: Public__rootDefaultBookmarksRoute,
     Public__rootDefaultDmcaRoute: Public__rootDefaultDmcaRoute,
-    Public__rootDefaultFavoritesRoute: Public__rootDefaultFavoritesRoute,
     Public__rootDefaultMentionsLegalesRoute:
       Public__rootDefaultMentionsLegalesRoute,
     Public__rootDefaultPrivacyRoute: Public__rootDefaultPrivacyRoute,
@@ -1215,7 +1215,7 @@ interface AdminRouteRouteChildren {
   AdminAiSearchIndexRoute: typeof AdminAiSearchIndexRoute
   AdminCategoriesIndexRoute: typeof AdminCategoriesIndexRoute
   AdminLibraryIndexRoute: typeof AdminLibraryIndexRoute
-  AdminSubmissionsIndexRoute: typeof AdminSubmissionsIndexRoute
+  AdminProposalsIndexRoute: typeof AdminProposalsIndexRoute
   AdminUsersIndexRoute: typeof AdminUsersIndexRoute
 }
 
@@ -1230,7 +1230,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminAiSearchIndexRoute: AdminAiSearchIndexRoute,
   AdminCategoriesIndexRoute: AdminCategoriesIndexRoute,
   AdminLibraryIndexRoute: AdminLibraryIndexRoute,
-  AdminSubmissionsIndexRoute: AdminSubmissionsIndexRoute,
+  AdminProposalsIndexRoute: AdminProposalsIndexRoute,
   AdminUsersIndexRoute: AdminUsersIndexRoute,
 }
 
@@ -1268,8 +1268,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiCronAiFillRoute: ApiCronAiFillRoute,
   ApiCronCleanupRoute: ApiCronCleanupRoute,
-  ApiCronPendingSubmissionsReminderRoute:
-    ApiCronPendingSubmissionsReminderRoute,
+  ApiCronPendingProposalsReminderRoute: ApiCronPendingProposalsReminderRoute,
   ApiCronSyncAlgoliaRoute: ApiCronSyncAlgoliaRoute,
   ApiCronSyncBunnyTitlesRoute: ApiCronSyncBunnyTitlesRoute,
   ApiCronVerificationReminderRoute: ApiCronVerificationReminderRoute,

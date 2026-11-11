@@ -8,13 +8,13 @@ import {
   StudioLoadingFallback
 } from '~/components/Meme/studio-fallbacks'
 import { StudioPage } from '~/components/Meme/Studio/studio-page'
-import { getMemeByIdQueryOpts } from '~/lib/queries'
+import { getMemeQueryOpts } from '~/lib/queries'
 
 const memeStudioRouteApi = getRouteApi('/_studio/memes/$memeId/studio')
 
 export const MemeStudioRoutePage = () => {
   const { memeId } = memeStudioRouteApi.useParams()
-  const memeQuery = useSuspenseQuery(getMemeByIdQueryOpts(memeId))
+  const memeQuery = useSuspenseQuery(getMemeQueryOpts(memeId))
 
   return (
     <ErrorBoundary

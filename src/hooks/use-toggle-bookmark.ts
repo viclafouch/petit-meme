@@ -3,14 +3,14 @@ import { toast } from 'sonner'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { getAppErrorCode } from '~/constants/error'
 import type { MemeWithVideo } from '~/constants/meme'
-import { FREE_PLAN_MAX_FAVORITES } from '~/constants/plan'
+import { FREE_PLAN_MAX_BOOKMARKS } from '~/constants/plan'
 import { getErrorMessage } from '~/helpers/error'
 import { useIsPremium } from '~/hooks/use-is-premium'
 import { snoozePremiumReminder } from '~/hooks/use-premium-reminder'
-import { getFavoritesMemesQueryOpts, getMemeByIdQueryOpts } from '~/lib/queries'
+import { listBookmarkedMemesQueryOpts, getMemeQueryOpts } from '~/lib/queries'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
-import { toggleBookmarkByMemeId } from '~/server/user'
+import { toggleBookmark } from '~/server/bookmark/bookmark.functions'
 import { dialogStore } from '~/stores/dialog.store'
 
 type UseToggleBookmarkParams = {
@@ -41,31 +41,34 @@ export function useToggleBookmark({
   }, [bookmarks, meme.id])
 
   const toggleMutation = useMutation({
-    mutationFn: toggleBookmarkByMemeId,
+    mutationFn: toggleBookmark,
     onMutate: async () => {
       const isBookmarkedAfterToggle = !isMemeBookmarked
 
       await queryClient.cancelQueries({
-        queryKey: getFavoritesMemesQueryOpts.all
+        queryKey: listBookmarkedMemesQueryOpts.all
       })
 
-      queryClient.setQueryData(getFavoritesMemesQueryOpts().queryKey, (old) => {
-        if (!old) {
-          return old
+      queryClient.setQueryData(
+        listBookmarkedMemesQueryOpts().queryKey,
+        (old) => {
+          if (!old) {
+            return old
+          }
+
+          return isBookmarkedAfterToggle
+            ? {
+                bookmarks: [meme, ...old.bookmarks],
+                count: old.count + 1
+              }
+            : {
+                bookmarks: old.bookmarks.filter((bookmark) => {
+                  return bookmark.id !== meme.id
+                }),
+                count: old.count - 1
+              }
         }
-
-        return isBookmarkedAfterToggle
-          ? {
-              bookmarks: [meme, ...old.bookmarks],
-              count: old.count + 1
-            }
-          : {
-              bookmarks: old.bookmarks.filter((bookmark) => {
-                return bookmark.id !== meme.id
-              }),
-              count: old.count - 1
-            }
-      })
+      )
     },
     onError: (error) => {
       const errorCode = getAppErrorCode(error)
@@ -93,8 +96,8 @@ export function useToggleBookmark({
     },
     onSettled: () => {
       return Promise.all([
-        queryClient.invalidateQueries(getMemeByIdQueryOpts(meme.id)),
-        queryClient.invalidateQueries(getFavoritesMemesQueryOpts())
+        queryClient.invalidateQueries(getMemeQueryOpts(meme.id)),
+        queryClient.invalidateQueries(listBookmarkedMemesQueryOpts())
       ])
     }
   })
@@ -103,10 +106,10 @@ export function useToggleBookmark({
     isMemeBookmarked,
     isPending: toggleMutation.isPending,
     toggleBookmark: () => {
-      const isFavoritesFull =
-        (bookmarks?.length ?? 0) >= FREE_PLAN_MAX_FAVORITES
+      const isBookmarkCapReached =
+        (bookmarks?.length ?? 0) >= FREE_PLAN_MAX_BOOKMARKS
 
-      if (!isMemeBookmarked && !isPremium && isFavoritesFull) {
+      if (!isMemeBookmarked && !isPremium && isBookmarkCapReached) {
         openBookmarkUpsell()
 
         return

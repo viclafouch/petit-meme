@@ -9,7 +9,7 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link, useParams, useSearch } from '@tanstack/react-router'
 import { buttonVariants } from '~/components/ui/button'
 import { getVirtualCategories, type MemesFilters } from '~/constants/meme'
-import { getCategoriesListQueryOpts } from '~/lib/queries'
+import { listCategoriesQueryOpts } from '~/lib/queries'
 import { cn } from '~/lib/utils'
 import { getLocale } from '~/paraglide/runtime'
 
@@ -29,9 +29,7 @@ const BUBBLE_TRANSITION_SPRING = {
 } as const satisfies Transition
 
 export const CategoriesList = () => {
-  const categoriesQuery = useSuspenseQuery(
-    getCategoriesListQueryOpts(getLocale())
-  )
+  const categoriesQuery = useSuspenseQuery(listCategoriesQueryOpts(getLocale()))
   const { slug: activeSlug } = useParams({ strict: false })
   const { query } = useSearch({ strict: false })
   const hasSearchQuery = Boolean(query)

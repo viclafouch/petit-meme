@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { getCategoriesListQueryOpts } from '~/lib/queries'
+import { listCategoriesQueryOpts } from '~/lib/queries'
 import { baseLocale } from '~/paraglide/runtime'
 import { CategoriesPage } from '~/routes/admin/categories/-components/categories-page'
 
@@ -10,7 +10,7 @@ export const Route = createFileRoute('/admin/categories/')({
   },
   loader: async ({ context }) => {
     await context.queryClient.query({
-      ...getCategoriesListQueryOpts(baseLocale),
+      ...listCategoriesQueryOpts(baseLocale),
       staleTime: 'static'
     })
 

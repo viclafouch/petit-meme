@@ -7,8 +7,8 @@ import { TRENDING_CATEGORY_DAYS } from '~/constants/meme'
 import { DAY, THIRTY_DAYS_MS } from '~/constants/time'
 import { DATABASE_POOL_MAX_CONNECTIONS, prismaClient } from '~/db/client.server'
 import { MemeStatus, UserLocale } from '~/db/generated/prisma/enums'
-import { findMissingMemeFiles } from '~/lib/meme-files.server'
-import { getStripeClient } from '~/lib/stripe.server'
+import { findMissingMemeFiles } from '~/server/meme/meme-file.server'
+import { getStripeClient } from '~/server/platforms/stripe.server'
 import { clearDatabase } from './clear-database'
 import { E2E_PASSWORD, E2E_ROLES, type E2eRole } from './constants'
 import {
@@ -89,7 +89,7 @@ const createBookmarks = async (role: E2eRole) => {
     return
   }
 
-  await prismaClient.userBookmark.createMany({
+  await prismaClient.bookmark.createMany({
     data: role.bookmarkedMemeIds.map((memeId) => {
       return {
         userId: role.id,

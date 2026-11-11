@@ -2,32 +2,20 @@ import { z } from 'zod'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
-import { AppError } from '~/constants/error'
-import { HTTP_STATUS } from '~/constants/http'
-import { FREE_PLAN_MAX_GENERATIONS } from '~/constants/plan'
 import { prismaClient } from '~/db/client.server'
 import { ActivityEventType } from '~/db/generated/prisma/enums'
+import { FREE_CAPS } from '~/helpers/cap'
 import { matchCanViewMeme } from '~/helpers/role'
 import { authLogger } from '~/lib/logger'
 import { recordActivityEvent } from '~/server/activity/activity.server'
 import { userRequiredMiddleware } from '~/server/auth/auth.middleware'
-import { throwWithStatus } from '~/server/http/http.server'
+import { findCapState, throwCapReached } from '~/server/cap/cap.server'
 import { matchIsUserPremium } from '~/server/subscription/subscription.server'
 
 export const getGenerationQuota = createServerFn({ method: 'GET' })
   .middleware([userRequiredMiddleware])
-  .handler(async ({ context }) => {
-    const [{ generationCount }, isPremium] = await Promise.all([
-      prismaClient.user.findUniqueOrThrow({
-        where: { id: context.user.id },
-        select: { generationCount: true }
-      }),
-      matchIsUserPremium(context.user)
-    ])
-
-    return {
-      canGenerate: isPremium || generationCount < FREE_PLAN_MAX_GENERATIONS
-    }
+  .handler(({ context }) => {
+    return findCapState({ user: context.user, kind: 'generation' })
   })
 
 export const createGeneration = createServerFn({ method: 'POST' })
@@ -56,9 +44,7 @@ export const createGeneration = createServerFn({ method: 'POST' })
       const { count } = await transaction.user.updateMany({
         where: {
           id: userId,
-          generationCount: isPremium
-            ? undefined
-            : { lt: FREE_PLAN_MAX_GENERATIONS }
+          generationCount: isPremium ? undefined : { lt: FREE_CAPS.generation }
         },
         data: { generationCount: { increment: 1 } }
       })
@@ -66,10 +52,7 @@ export const createGeneration = createServerFn({ method: 'POST' })
       if (count === 0) {
         authLogger.warn({ userId }, 'Generation limit reached')
 
-        return throwWithStatus(
-          HTTP_STATUS.FORBIDDEN,
-          new AppError('premium_required', { code: 'PREMIUM_REQUIRED' })
-        )
+        return throwCapReached('generation')
       }
 
       await transaction.studioGeneration.create({

@@ -2,7 +2,6 @@ import { z } from 'zod'
 import { MemeContentLocale } from '~/db/generated/prisma/enums'
 
 export const AI_SEARCH_MODEL = 'claude-haiku-5-5'
-export const FREE_PLAN_MAX_AI_SEARCHES = 3
 export const MAX_PROMPT_LENGTH = 300
 export const MAX_AI_SEARCH_RESULTS = 20
 export const DAILY_GLOBAL_AI_SEARCH_CAP = 500

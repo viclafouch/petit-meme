@@ -26,6 +26,7 @@ import {
   type StudioFontSizeValue,
   type StudioTextPosition
 } from '~/constants/studio'
+import { buildReachedCapState } from '~/helpers/cap'
 import { getErrorMessage } from '~/helpers/error'
 import {
   FFMPEG_VIDEO_ENCODING_ARGS,
@@ -352,11 +353,11 @@ export const useVideoProcessor = (
       ffmpeg.on('progress', handleProgress)
     },
     mutationFn: async ({ meme, ...processingOptions }: ProcessVideoParams) => {
-      const { canGenerate } = await queryClient.query(
+      const generationCap = await queryClient.query(
         getGenerationQuotaQueryOpts()
       )
 
-      if (!canGenerate) {
+      if (generationCap.isReached) {
         throw new AppError('premium_required', { code: 'PREMIUM_REQUIRED' })
       }
 
@@ -399,9 +400,10 @@ export const useVideoProcessor = (
       }
 
       if (errorCode === 'PREMIUM_REQUIRED') {
-        queryClient.setQueryData(getGenerationQuotaQueryOpts().queryKey, {
-          canGenerate: false
-        })
+        queryClient.setQueryData(
+          getGenerationQuotaQueryOpts().queryKey,
+          buildReachedCapState('generation')
+        )
         snoozePremiumReminder()
         dialogStore.actions.showDialog('studio-upsell')
 

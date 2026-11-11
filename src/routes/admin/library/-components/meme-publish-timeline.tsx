@@ -19,13 +19,12 @@ import type { MemeFullData } from '~/constants/meme'
 import { MemeStatus } from '~/db/generated/prisma/enums'
 import { cn } from '~/lib/utils'
 import {
-  getPublishRunSteps,
-  getPublishStepStatus,
+  buildPublishTimeline,
+  type MemePublishRun,
   type PublishRunKind,
   type PublishStep,
   type PublishStepStatus
 } from '~/routes/admin/library/-lib/publish-run'
-import type { MemePublisherRun } from './use-meme-publisher'
 import { usePacedPublishRun } from './use-paced-publish-run'
 
 const STEP_LABELS = {
@@ -164,7 +163,7 @@ const StepNode = ({ status }: StepNodeProps) => {
 }
 
 type RunResultProps = {
-  run: MemePublisherRun
+  run: MemePublishRun
   meme: MemeFullData
   onRetry: () => void
 }
@@ -210,7 +209,7 @@ const RunResult = ({ run, meme, onRetry }: RunResultProps) => {
 }
 
 type MemePublishTimelineProps = {
-  run: MemePublisherRun
+  run: MemePublishRun
   meme: MemeFullData
   onRetry: () => void
 }
@@ -221,15 +220,14 @@ export const MemePublishTimeline = ({
   onRetry
 }: MemePublishTimelineProps) => {
   const pacedRun = usePacedPublishRun(run)
-  const steps = getPublishRunSteps(pacedRun.kind)
+  const timeline = buildPublishTimeline(pacedRun)
 
   return (
     <MotionConfig reducedMotion="user">
       <div className="flex flex-col gap-4" aria-live="polite">
         <ol className="flex flex-col">
-          {steps.map((step, index) => {
-            const status = getPublishStepStatus(pacedRun, step)
-            const isLast = index === steps.length - 1
+          {timeline.map(({ step, status }, index) => {
+            const isLast = index === timeline.length - 1
             const isProgressVisible =
               status === 'active' &&
               pacedRun.step === run.step &&

@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import type { RecommendationsRequest } from '@algolia/recommend'
 import { createServerFn } from '@tanstack/react-start'
 import {
   MEMES_FILTERS_SCHEMA,
@@ -27,53 +26,24 @@ import {
 import { algoliaLogger } from '~/lib/logger'
 import { baseLocale, getLocale, type Locale } from '~/paraglide/runtime'
 import {
-  readCachedMemeHits,
-  writeRecommendCache
-} from '~/server/meme/recommend-cache.server'
+  countMemes,
+  recommendMemes,
+  searchMemes
+} from '~/server/meme/meme-index.server'
 import {
   findMemesInOrder,
   findMostViewedMemes,
   findTrendingFirstPageIds
 } from '~/server/meme/trending.server'
-import { createAlgoliaCache } from '~/server/platforms/algolia-cache.server'
 import {
-  ALGOLIA_MEMES_PAGE_SCHEMA,
-  ALGOLIA_SEARCH_PARAMS_BASE,
-  ALGOLIA_SEARCH_RETRIEVE,
   buildAlgoliaExclusionFilter,
   buildAlgoliaPublishedFilter,
-  getAlgoliaRecommendClient,
-  getAlgoliaSearchClient,
-  getHighlightedTitle,
-  normalizeAlgoliaHit,
-  normalizeAlgoliaMemesPage,
-  parseAlgoliaMemeHit,
-  parseAlgoliaMemeHits,
   readConsentedAlgoliaUserToken,
   resolveAlgoliaIndexName,
   resolveAlgoliaReplicaPopular,
   resolveAlgoliaReplicaRecent,
-  safeAlgoliaOp,
-  type AlgoliaMemeRecord
+  safeAlgoliaOp
 } from '~/server/platforms/algolia.server'
-
-type FetchTrendingMemesPageParams = {
-  indexName: string
-  algoliaPage: number
-  algoliaFilters: string
-  userToken: string | undefined
-  query: string | undefined
-}
-
-type FetchSearchMemesPageParams = {
-  indexName: string
-  category: string | undefined
-  contentLocales: MemeContentLocale[] | undefined
-  query: string | undefined
-  page: number | undefined
-  userToken: string | undefined
-  hasQuery: boolean
-}
 
 type ResolveSearchIndexParams = {
   category: string | undefined
@@ -88,12 +58,6 @@ type ListTrendingCategoryMemesParams = {
   contentLocalesParam: string | undefined
   query: string | undefined
   page: number
-}
-
-type ReadRecommendedMemesParams = {
-  cacheKey: string
-  ttl: number
-  request: RecommendationsRequest
 }
 
 const resolveEffectiveLocale = (
@@ -143,114 +107,6 @@ const buildSearchFilters = (
   return filters.join(' AND ')
 }
 
-const fetchTrendingMemesPage = async ({
-  indexName,
-  algoliaPage,
-  algoliaFilters,
-  userToken,
-  query
-}: FetchTrendingMemesPageParams) => {
-  const response =
-    await getAlgoliaSearchClient().searchSingleIndex<AlgoliaMemeRecord>({
-      indexName,
-      searchParams: {
-        query: '',
-        page: algoliaPage,
-        hitsPerPage: MEMES_PER_PAGE,
-        filters: algoliaFilters,
-        clickAnalytics: true,
-        userToken,
-        ...ALGOLIA_SEARCH_PARAMS_BASE
-      }
-    })
-
-  return {
-    memes: parseAlgoliaMemeHits(response.hits),
-    query,
-    queryID: response.queryID,
-    page: (response.page ?? 0) + 1,
-    totalPages: 1 + (response.nbPages ?? 0)
-  }
-}
-
-const readTrendingMemesPage = createAlgoliaCache({
-  schema: ALGOLIA_MEMES_PAGE_SCHEMA,
-  fetchFresh: fetchTrendingMemesPage
-})
-
-const fetchSearchMemesPage = async ({
-  indexName,
-  category,
-  contentLocales,
-  query,
-  page,
-  userToken,
-  hasQuery
-}: FetchSearchMemesPageParams) => {
-  const response =
-    await getAlgoliaSearchClient().searchSingleIndex<AlgoliaMemeRecord>({
-      indexName,
-      searchParams: {
-        query,
-        page: page === undefined || page === 0 ? 0 : page - 1,
-        hitsPerPage: MEMES_PER_PAGE,
-        filters: buildSearchFilters(category, contentLocales),
-        clickAnalytics: true,
-        userToken,
-        ...ALGOLIA_SEARCH_PARAMS_BASE
-      }
-    })
-
-  return {
-    memes: response.hits.flatMap((hit) => {
-      const meme = parseAlgoliaMemeHit(hit)
-
-      if (!meme) {
-        return []
-      }
-
-      return [
-        {
-          ...meme,
-          highlightedTitle: hasQuery ? getHighlightedTitle(hit) : undefined
-        }
-      ]
-    }),
-    query,
-    queryID: response.queryID,
-    page: response.page,
-    totalPages: response.nbPages
-  }
-}
-
-const readSearchMemesPage = createAlgoliaCache({
-  schema: ALGOLIA_MEMES_PAGE_SCHEMA,
-  fetchFresh: fetchSearchMemesPage
-})
-
-const fetchRecentMemesCount = async (locale: Locale) => {
-  const response = await getAlgoliaSearchClient().searchSingleIndex({
-    indexName: resolveAlgoliaIndexName(locale),
-    searchParams: {
-      filters: [
-        `status:${MemeStatus.PUBLISHED}`,
-        `publishedAtTime >= ${Date.now() - THIRTY_DAYS_MS}`
-      ].join(' AND '),
-      hitsPerPage: 0,
-      attributesToRetrieve: [],
-      attributesToHighlight: [],
-      attributesToSnippet: []
-    }
-  })
-
-  return response.nbHits ?? 0
-}
-
-const readRecentMemesCount = createAlgoliaCache({
-  schema: z.number(),
-  fetchFresh: fetchRecentMemesCount
-})
-
 const listTrendingCategoryMemes = async ({
   locale,
   contentLocales,
@@ -261,7 +117,7 @@ const listTrendingCategoryMemes = async ({
   const firstPageIds = await findTrendingFirstPageIds(
     resolveVisibleContentLocales(locale, contentLocales)
   )
-  const algoliaFilters = [
+  const filters = [
     buildAlgoliaPublishedFilter(contentLocales),
     buildAlgoliaExclusionFilter(firstPageIds)
   ]
@@ -272,16 +128,9 @@ const listTrendingCategoryMemes = async ({
   )
 
   if (page <= 1) {
-    const [memes, remainingResponse] = await Promise.all([
+    const [memes, remainingCount] = await Promise.all([
       findMemesInOrder(firstPageIds, locale),
-      getAlgoliaSearchClient().searchSingleIndex<AlgoliaMemeRecord>({
-        indexName,
-        searchParams: {
-          query: '',
-          hitsPerPage: 0,
-          filters: algoliaFilters
-        }
-      })
+      countMemes({ indexName, filters })
     ])
 
     return {
@@ -289,48 +138,27 @@ const listTrendingCategoryMemes = async ({
       query,
       queryID: undefined,
       page: 0,
-      totalPages:
-        1 + Math.ceil((remainingResponse.nbHits ?? 0) / MEMES_PER_PAGE)
+      totalPages: 1 + Math.ceil(remainingCount / MEMES_PER_PAGE)
     }
   }
 
-  const trendingPage = await readTrendingMemesPage({
-    key: `trending-page:${indexName}:${page}:${contentLocalesParam ?? ''}`,
-    params: {
-      indexName,
-      algoliaPage: page - 2,
-      algoliaFilters,
-      userToken: readConsentedAlgoliaUserToken(),
-      query
-    }
+  const trendingPage = await searchMemes({
+    cacheKey: `trending-page:${indexName}:${page}:${contentLocalesParam ?? ''}`,
+    indexName,
+    query: '',
+    page: page - 2,
+    hitsPerPage: MEMES_PER_PAGE,
+    filters,
+    userToken: readConsentedAlgoliaUserToken()
   })
 
-  return normalizeAlgoliaMemesPage(trendingPage)
-}
-
-const readRecommendedMemes = async ({
-  cacheKey,
-  ttl,
-  request
-}: ReadRecommendedMemesParams) => {
-  const cachedMemes = await readCachedMemeHits(cacheKey)
-
-  if (cachedMemes) {
-    return cachedMemes
+  return {
+    memes: trendingPage.memes,
+    query,
+    queryID: trendingPage.queryID,
+    page: trendingPage.page + 1,
+    totalPages: trendingPage.totalPages + 1
   }
-
-  const response = await getAlgoliaRecommendClient().getRecommendations({
-    requests: [request]
-  })
-  const memes = parseAlgoliaMemeHits(response.results[0]?.hits ?? []).map(
-    normalizeAlgoliaHit
-  )
-
-  if (memes.length > 0) {
-    void writeRecommendCache({ key: cacheKey, data: memes, ttl })
-  }
-
-  return memes
 }
 
 export const listMemes = createServerFn({ method: 'GET' })
@@ -359,20 +187,24 @@ export const listMemes = createServerFn({ method: 'GET' })
       contentLocales
     })
 
-    const searchPage = await readSearchMemesPage({
-      key: `${indexName}:${data.query ?? ''}:${data.page ?? 1}:${data.category ?? ''}:${data.contentLocales ?? ''}`,
-      params: {
-        indexName,
-        category: data.category,
-        contentLocales,
-        query: data.query,
-        page: data.page,
-        userToken: readConsentedAlgoliaUserToken(),
-        hasQuery
-      }
+    const searchPage = await searchMemes({
+      cacheKey: `${indexName}:${data.query ?? ''}:${data.page ?? 1}:${data.category ?? ''}:${data.contentLocales ?? ''}`,
+      indexName,
+      query: data.query,
+      page: data.page === undefined || data.page === 0 ? 0 : data.page - 1,
+      hitsPerPage: MEMES_PER_PAGE,
+      filters: buildSearchFilters(data.category, contentLocales),
+      userToken: readConsentedAlgoliaUserToken(),
+      isHighlighted: hasQuery
     })
 
-    return normalizeAlgoliaMemesPage(searchPage)
+    return {
+      memes: searchPage.memes,
+      query: data.query,
+      queryID: searchPage.queryID,
+      page: searchPage.page,
+      totalPages: searchPage.totalPages
+    }
   })
 
 export const countRecentMemes = createServerFn({ method: 'GET' }).handler(
@@ -380,9 +212,13 @@ export const countRecentMemes = createServerFn({ method: 'GET' }).handler(
     const locale = getLocale()
 
     const recentMemesCount = await safeAlgoliaOp(
-      readRecentMemesCount({
-        key: `recent-count:${locale}`,
-        params: locale
+      countMemes({
+        cacheKey: `recent-count:${locale}`,
+        indexName: resolveAlgoliaIndexName(locale),
+        filters: [
+          `status:${MemeStatus.PUBLISHED}`,
+          `publishedAtTime >= ${Date.now() - THIRTY_DAYS_MS}`
+        ].join(' AND ')
       })
     )
 
@@ -394,27 +230,17 @@ export const listRelatedMemes = createServerFn({ method: 'GET' })
   .validator(z.object({ memeId: z.string(), title: z.string() }))
   .handler(async ({ data }) => {
     const locale = getLocale()
-    const filters = buildAlgoliaPublishedFilter(VISIBLE_CONTENT_LOCALES[locale])
 
     try {
-      return await readRecommendedMemes({
+      return await recommendMemes({
         cacheKey: `related:${locale}:${data.memeId}`,
         ttl: RECOMMEND_RELATED_CACHE_TTL,
-        request: {
-          indexName: resolveAlgoliaIndexName(locale),
-          model: 'related-products',
-          objectID: data.memeId,
-          threshold: 0,
-          maxRecommendations: RELATED_MEMES_COUNT,
-          queryParameters: {
-            filters,
-            attributesToRetrieve: [...ALGOLIA_SEARCH_RETRIEVE]
-          },
-          fallbackParameters: {
-            query: data.title,
-            filters
-          }
-        }
+        indexName: resolveAlgoliaIndexName(locale),
+        model: 'related-products',
+        objectID: data.memeId,
+        fallbackQuery: data.title,
+        maxRecommendations: RELATED_MEMES_COUNT,
+        filters: buildAlgoliaPublishedFilter(VISIBLE_CONTENT_LOCALES[locale])
       })
     } catch {
       algoliaLogger.warn('Related-products recommendation unavailable')
@@ -429,19 +255,13 @@ export const listTrendingMemes = createServerFn({ method: 'GET' }).handler(
     const visibleLocales = VISIBLE_CONTENT_LOCALES[locale]
 
     try {
-      const memes = await readRecommendedMemes({
+      const memes = await recommendMemes({
         cacheKey: `trending:${locale}`,
         ttl: RECOMMEND_TRENDING_CACHE_TTL,
-        request: {
-          indexName: resolveAlgoliaIndexName(locale),
-          model: 'trending-items',
-          threshold: 0,
-          maxRecommendations: TRENDING_MEMES_COUNT,
-          queryParameters: {
-            filters: buildAlgoliaPublishedFilter(visibleLocales),
-            attributesToRetrieve: [...ALGOLIA_SEARCH_RETRIEVE]
-          }
-        }
+        indexName: resolveAlgoliaIndexName(locale),
+        model: 'trending-items',
+        maxRecommendations: TRENDING_MEMES_COUNT,
+        filters: buildAlgoliaPublishedFilter(visibleLocales)
       })
 
       if (memes.length > 0) {

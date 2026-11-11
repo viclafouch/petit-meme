@@ -19,10 +19,10 @@ import {
   stubDatabase,
   stubFillEnv
 } from '~/server/admin/ai-assist/__tests__/meme-fill.fakes'
-import { syncMemeToAllIndices } from '~/server/platforms/algolia.server'
+import { syncMemeToAllIndices } from '~/server/meme/meme-index.server'
 import { sendEmail } from '~/server/platforms/resend.server'
 
-vi.mock(import('~/server/platforms/algolia.server'), async (importOriginal) => {
+vi.mock(import('~/server/meme/meme-index.server'), async (importOriginal) => {
   return {
     ...(await importOriginal()),
     syncMemeToAllIndices: vi.fn<typeof syncMemeToAllIndices>()

@@ -2,20 +2,18 @@ import { z } from 'zod'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
-import { AppError } from '~/constants/error'
-import { HTTP_STATUS } from '~/constants/http'
 import { MEME_TRANSLATION_SELECT, MEME_VIDEO_INCLUDE } from '~/constants/meme'
-import { FREE_PLAN_MAX_BOOKMARKS } from '~/constants/plan'
 import { prismaClient } from '~/db/client.server'
 import type { Meme } from '~/db/generated/prisma/client'
 import { ActivityEventType, MemeStatus } from '~/db/generated/prisma/enums'
+import { FREE_CAPS } from '~/helpers/cap'
 import { localizeMemes } from '~/helpers/i18n-content'
 import type { SessionUser } from '~/helpers/role'
 import { authLogger } from '~/lib/logger'
 import { getLocale } from '~/paraglide/runtime'
 import { recordActivityEvent } from '~/server/activity/activity.server'
 import { userRequiredMiddleware } from '~/server/auth/auth.middleware'
-import { throwWithStatus } from '~/server/http/http.server'
+import { throwCapReached } from '~/server/cap/cap.server'
 import { matchIsUserPremium } from '~/server/subscription/subscription.server'
 
 type ToggleUserBookmarkParams = {
@@ -34,7 +32,7 @@ export const listBookmarkedMemes = createServerFn({ method: 'GET' })
         meme: { status: MemeStatus.PUBLISHED }
       },
       orderBy: { createdAt: 'desc' },
-      take: isPremium ? undefined : FREE_PLAN_MAX_BOOKMARKS,
+      take: isPremium ? undefined : FREE_CAPS.bookmark,
       select: {
         meme: {
           include: {
@@ -76,15 +74,12 @@ const toggleUserBookmark = createServerOnlyFn(
       })
 
       if (
-        bookmarkCount >= FREE_PLAN_MAX_BOOKMARKS &&
+        bookmarkCount >= FREE_CAPS.bookmark &&
         !(await matchIsUserPremium(user))
       ) {
         authLogger.warn({ userId: user.id }, 'Bookmark limit reached')
 
-        return throwWithStatus(
-          HTTP_STATUS.FORBIDDEN,
-          new AppError('premium_required', { code: 'PREMIUM_REQUIRED' })
-        )
+        return throwCapReached('bookmark')
       }
 
       await transaction.bookmark.create({

@@ -75,7 +75,7 @@ const MemesListWrapper = ({
   const memesListQuery = useSuspenseQuery(listMemesQueryOpts(filters))
 
   const categoryJsonLd = buildCategoryJsonLd(selectedCategory, {
-    page: memesListQuery.data.page ?? 1,
+    page: memesListQuery.data.page,
     memes: memesListQuery.data.memes
   })
 
@@ -103,8 +103,8 @@ const MemesListWrapper = ({
       />
       <div className="flex justify-end z-0">
         <MemesPagination
-          currentPage={(memesListQuery.data.page ?? 0) + 1}
-          totalPages={memesListQuery.data.totalPages ?? 0}
+          currentPage={memesListQuery.data.page + 1}
+          totalPages={memesListQuery.data.totalPages}
           slug={slug}
         />
       </div>

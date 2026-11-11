@@ -32,19 +32,19 @@ import {
   deleteMemeFiles,
   findMissingMemeFiles
 } from '~/server/meme/meme-file.server'
+import {
+  buildMemeRecord,
+  deleteMemeFromAllIndices,
+  searchAdminMemes,
+  syncMemeToAllIndices,
+  type MemeRecord
+} from '~/server/meme/meme-index.server'
 import { clearRecommendCache } from '~/server/meme/recommend-cache.server'
 import { invalidateAlgoliaCache } from '~/server/platforms/algolia-cache.server'
 import {
-  ALGOLIA_ADMIN_SEARCH_PARAMS,
-  deleteMemeFromAllIndices,
-  getAlgoliaSearchClient,
-  memeToAlgoliaRecord,
-  normalizeAlgoliaHit,
   resolveAlgoliaIndexName,
   resolveAlgoliaReplicaCreated,
-  safeAlgoliaOp,
-  syncMemeToAllIndices,
-  type AlgoliaMemeRecord
+  safeAlgoliaOp
 } from '~/server/platforms/algolia.server'
 
 const throwMemeNotFound = () => {
@@ -412,7 +412,7 @@ export const deleteMeme = createServerFn({ method: 'POST' })
     return { id: meme.id, undeletedFiles }
   })
 
-export type AdminMemeRecord = AlgoliaMemeRecord & {
+export type AdminMemeRecord = MemeRecord & {
   bookmarkCount: number
 }
 
@@ -442,46 +442,30 @@ const searchReadyDrafts = async ({
 
   return {
     hits: memes.map((meme) => {
-      return memeToAlgoliaRecord(meme, baseLocale)
+      return buildMemeRecord(meme, baseLocale)
     }),
     page: pageIndex,
     totalPages: Math.ceil(total / MEMES_PER_PAGE)
   }
 }
 
-const searchAlgoliaMemes = async ({
-  pageIndex,
-  ...filters
-}: AdminMemesSearch) => {
-  const filterParts: string[] = []
+const searchIndexedMemes = ({ pageIndex, ...filters }: AdminMemesSearch) => {
+  const filterParts = [
+    filters.status === undefined ? undefined : `status:${filters.status}`,
+    filters.contentLocale === undefined
+      ? undefined
+      : `contentLocale:${filters.contentLocale}`
+  ].filter(Boolean)
 
-  if (filters.status !== undefined) {
-    filterParts.push(`status:${filters.status}`)
-  }
-
-  if (filters.contentLocale !== undefined) {
-    filterParts.push(`contentLocale:${filters.contentLocale}`)
-  }
-
-  const response =
-    await getAlgoliaSearchClient().searchSingleIndex<AlgoliaMemeRecord>({
-      indexName: filters.query
-        ? resolveAlgoliaIndexName(baseLocale)
-        : resolveAlgoliaReplicaCreated(baseLocale),
-      searchParams: {
-        query: filters.query,
-        page: pageIndex,
-        hitsPerPage: MEMES_PER_PAGE,
-        filters: filterParts.length > 0 ? filterParts.join(' AND ') : undefined,
-        ...ALGOLIA_ADMIN_SEARCH_PARAMS
-      }
-    })
-
-  return {
-    hits: response.hits.map(normalizeAlgoliaHit),
-    page: response.page,
-    totalPages: response.nbPages
-  }
+  return searchAdminMemes({
+    indexName: filters.query
+      ? resolveAlgoliaIndexName(baseLocale)
+      : resolveAlgoliaReplicaCreated(baseLocale),
+    query: filters.query,
+    page: pageIndex,
+    hitsPerPage: MEMES_PER_PAGE,
+    filters: filterParts.length > 0 ? filterParts.join(' AND ') : undefined
+  })
 }
 
 export const listAdminMemes = createServerFn({ method: 'GET' })
@@ -494,7 +478,7 @@ export const listAdminMemes = createServerFn({ method: 'GET' })
     }
     const { hits, page, totalPages } = data.ready
       ? await searchReadyDrafts(search)
-      : await searchAlgoliaMemes(search)
+      : await searchIndexedMemes(search)
     const memeIds = hits.map((hit) => {
       return hit.id
     })

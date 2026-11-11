@@ -23,9 +23,9 @@ import {
   fillMemeDraft,
   startMemeFill
 } from '~/server/admin/ai-assist/meme-fill.server'
-import { syncMemeToAllIndices } from '~/server/platforms/algolia.server'
+import { syncMemeToAllIndices } from '~/server/meme/meme-index.server'
 
-vi.mock(import('~/server/platforms/algolia.server'), async (importOriginal) => {
+vi.mock(import('~/server/meme/meme-index.server'), async (importOriginal) => {
   return {
     ...(await importOriginal()),
     syncMemeToAllIndices: vi.fn<typeof syncMemeToAllIndices>()

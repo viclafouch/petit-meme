@@ -22,12 +22,12 @@ import { logAuditAction } from '~/server/admin/audit/audit.server'
 import { adminRequiredMiddleware } from '~/server/auth/auth.middleware'
 import { throwWithStatus } from '~/server/http/http.server'
 import { deleteMemeFiles } from '~/server/meme/meme-file.server'
-import { invalidateAlgoliaCache } from '~/server/platforms/algolia-cache.server'
 import {
   deleteMemeFromAllIndices,
-  safeAlgoliaOp,
   syncMemeToAllIndices
-} from '~/server/platforms/algolia.server'
+} from '~/server/meme/meme-index.server'
+import { invalidateAlgoliaCache } from '~/server/platforms/algolia-cache.server'
+import { safeAlgoliaOp } from '~/server/platforms/algolia.server'
 import { createVideo, uploadVideo } from '~/server/platforms/bunny.server'
 import { getTweetByUrl, getTweetMedia } from '~/server/platforms/twitter.server'
 

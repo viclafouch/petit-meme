@@ -7,11 +7,7 @@ import type { MemeDerivedFormat } from '~/constants/bunny'
 import type { MemeExportMode } from '~/constants/meme'
 import { getErrorMessage } from '~/helpers/error'
 import type { InsightsTracking } from '~/lib/algolia-insights'
-import {
-  deliverMemeExport,
-  fetchMemeExport,
-  type ExportableMeme
-} from '~/lib/meme-export'
+import { exportMeme, type ExportableMeme } from '~/lib/meme-export'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
 import { dialogStore } from '~/stores/dialog.store'
@@ -35,20 +31,18 @@ export const useMemeExport = ({ mode, queryID }: UseMemeExportParams) => {
   } satisfies InsightsTracking
 
   const exportMutation = useMutation({
-    mutationFn: async ({ meme, format }: MemeExportRequest) => {
-      const blobPromise = fetchMemeExport({ meme, mode, format })
-
-      toast.promise(blobPromise, {
-        loading: m.common_loading(),
-        error: getErrorMessage
-      })
-
-      await deliverMemeExport({
-        blob: await blobPromise,
+    mutationFn: ({ meme, format }: MemeExportRequest) => {
+      return exportMeme({
         meme,
         mode,
         format,
-        tracking
+        tracking,
+        onFileRequested: (filePromise) => {
+          toast.promise(filePromise, {
+            loading: m.common_loading(),
+            error: getErrorMessage
+          })
+        }
       })
     },
     onError: (error) => {

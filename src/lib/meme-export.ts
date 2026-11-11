@@ -27,11 +27,7 @@ type MemeExportParams = {
   format: MemeDerivedFormat
 }
 
-export const fetchMemeExport = async ({
-  meme,
-  mode,
-  format
-}: MemeExportParams) => {
+const fetchMemeExport = async ({ meme, mode, format }: MemeExportParams) => {
   const response = await getMemeExportFile({
     data: { memeId: meme.id, mode, format }
   })
@@ -39,24 +35,24 @@ export const fetchMemeExport = async ({
   return response.blob()
 }
 
-type DeliverMemeExportParams = MemeExportParams & {
-  blob: Blob
+type ExportMemeParams = MemeExportParams & {
   tracking: InsightsTracking
+  onFileRequested?: (filePromise: Promise<Blob>) => void
 }
 
-type ShareOrDownloadBlobParams = {
+type DeliverMemeBlobParams = {
   blob: Blob
   title: string
   mode: MemeExportMode
   format: MemeDerivedFormat
 }
 
-export const shareOrDownloadBlob = async ({
+export const deliverMemeBlob = async ({
   blob,
   title,
   mode,
   format
-}: ShareOrDownloadBlobParams): Promise<MemeExportMode | null> => {
+}: DeliverMemeBlobParams): Promise<MemeExportMode | null> => {
   if (mode === 'share' && matchIsBlobShareable(blob, title, format)) {
     const wasShared = await shareBlob(blob, title, format)
 
@@ -68,25 +64,33 @@ export const shareOrDownloadBlob = async ({
   return 'download'
 }
 
-export const deliverMemeExport = async (params: DeliverMemeExportParams) => {
-  const deliveredMode = await shareOrDownloadBlob({
-    blob: params.blob,
-    title: params.meme.title,
-    mode: params.mode,
-    format: params.format
+export const exportMeme = async ({
+  meme,
+  mode,
+  format,
+  tracking,
+  onFileRequested
+}: ExportMemeParams) => {
+  const filePromise = fetchMemeExport({ meme, mode, format })
+
+  onFileRequested?.(filePromise)
+
+  const deliveredMode = await deliverMemeBlob({
+    blob: await filePromise,
+    title: meme.title,
+    mode,
+    format
   })
 
   if (deliveredMode === null) {
     return false
   }
 
-  void recordMemeExport({
-    data: { memeId: params.meme.id, action: params.mode }
-  })
+  void recordMemeExport({ data: { memeId: meme.id, action: mode } })
   sendConversionEvent({
-    eventName: EXPORT_CONVERSION_EVENT_NAMES[deliveredMode][params.format],
-    objectID: params.meme.id,
-    ...params.tracking
+    eventName: EXPORT_CONVERSION_EVENT_NAMES[deliveredMode][format],
+    objectID: meme.id,
+    ...tracking
   })
 
   return true

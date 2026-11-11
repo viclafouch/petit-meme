@@ -5,10 +5,10 @@ import { MEME_ALGOLIA_INCLUDE } from '~/constants/meme'
 import { prismaClient } from '~/db/client.server'
 import { locales } from '~/paraglide/runtime'
 import { fetchWithZod } from '~/server/http/fetch.server'
+import { syncMemeToAllIndices } from '~/server/meme/meme-index.server'
 import {
   getAlgoliaAdminClient,
-  resolveAlgoliaIndexName,
-  syncMemeToAllIndices
+  resolveAlgoliaIndexName
 } from '~/server/platforms/algolia.server'
 import {
   buildLibraryApiUrl,

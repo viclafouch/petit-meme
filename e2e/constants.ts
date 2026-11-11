@@ -1,10 +1,6 @@
-import { FREE_PLAN_MAX_AI_SEARCHES } from '~/constants/ai-search'
-import {
-  FREE_PLAN_MAX_BOOKMARKS,
-  FREE_PLAN_MAX_GENERATIONS,
-  PREMIUM_PLAN_NAME
-} from '~/constants/plan'
+import { PREMIUM_PLAN_NAME } from '~/constants/plan'
 import type { Meme, Subscription, User } from '~/db/generated/prisma/client'
+import { FREE_CAPS } from '~/helpers/cap'
 import { E2E_FILLER_MEMES, E2E_NAMED_MEMES } from './content'
 
 export const E2E_EMAIL_DOMAIN = 'e2e.petitmeme.invalid'
@@ -36,7 +32,7 @@ const SELF_SERVED_NON_CATALOGUE_AVATAR_PATH = '/apple-touch-icon.png'
 
 const CAPPED_BOOKMARK_MEME_IDS = E2E_FILLER_MEMES.slice(
   0,
-  FREE_PLAN_MAX_BOOKMARKS
+  FREE_CAPS.bookmark
 ).map((meme) => {
   return meme.id
 })
@@ -184,7 +180,7 @@ export const E2E_ROLES = {
     name: 'E2E Ai Search Capped',
     email: `e2e-ai-search-capped@${E2E_EMAIL_DOMAIN}`,
     emailVerified: true,
-    aiSearchCount: FREE_PLAN_MAX_AI_SEARCHES
+    aiSearchCount: FREE_CAPS.aiSearch
   },
   aiSearchPremium: {
     id: 'e2e-user-ai-search-premium',
@@ -192,7 +188,7 @@ export const E2E_ROLES = {
     email: `e2e-ai-search-premium@${E2E_EMAIL_DOMAIN}`,
     emailVerified: true,
     subscription: MONTHLY_PREMIUM_SUBSCRIPTION,
-    aiSearchCount: FREE_PLAN_MAX_AI_SEARCHES
+    aiSearchCount: FREE_CAPS.aiSearch
   },
   studio: {
     id: 'e2e-user-studio',
@@ -205,7 +201,7 @@ export const E2E_ROLES = {
     name: 'E2E Studio Capped',
     email: `e2e-studio-capped@${E2E_EMAIL_DOMAIN}`,
     emailVerified: true,
-    generationCount: FREE_PLAN_MAX_GENERATIONS
+    generationCount: FREE_CAPS.generation
   },
   studioPremium: {
     id: 'e2e-user-studio-premium',
@@ -213,7 +209,7 @@ export const E2E_ROLES = {
     email: `e2e-studio-premium@${E2E_EMAIL_DOMAIN}`,
     emailVerified: true,
     subscription: MONTHLY_PREMIUM_SUBSCRIPTION,
-    generationCount: FREE_PLAN_MAX_GENERATIONS
+    generationCount: FREE_CAPS.generation
   },
   premiumAnnualLegacy: {
     id: 'e2e-user-premium-annual-legacy',

@@ -6,14 +6,14 @@ import { Button } from '~/components/ui/button'
 import { LoadingButton } from '~/components/ui/loading-button'
 import type { MemeExportMode } from '~/constants/meme'
 import { EASE_OUT } from '~/constants/motion'
-import { shareOrDownloadBlob } from '~/lib/meme-export'
+import { deliverMemeBlob } from '~/lib/meme-export'
 import { m } from '~/paraglide/messages.js'
 
 const deliverStudioVideo = (
   { blob, title }: ProcessedData,
   mode: MemeExportMode
 ) => {
-  void shareOrDownloadBlob({ blob, title, mode, format: 'mp4' })
+  void deliverMemeBlob({ blob, title, mode, format: 'mp4' })
 }
 
 type StudioMobileActionsProps = {

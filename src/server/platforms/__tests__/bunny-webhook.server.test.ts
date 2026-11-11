@@ -6,22 +6,26 @@ import { prismaClient } from '~/db/client.server'
 import { Prisma } from '~/db/generated/prisma/client'
 import { captureWithFeature } from '~/lib/sentry'
 import { fillMemeDraft } from '~/server/admin/ai-assist/meme-fill.server'
+import { syncMemeToAllIndices } from '~/server/meme/meme-index.server'
 import { invalidateAlgoliaCache } from '~/server/platforms/algolia-cache.server'
-import { syncMemeToAllIndices } from '~/server/platforms/algolia.server'
 import { handleBunnyWebhook } from '~/server/platforms/bunny-webhook.server'
 
-vi.mock(import('~/server/platforms/algolia.server'), async (importOriginal) => {
+vi.mock(import('~/server/meme/meme-index.server'), async (importOriginal) => {
   return {
     ...(await importOriginal()),
     syncMemeToAllIndices: vi.fn<typeof syncMemeToAllIndices>()
   }
 })
 
-vi.mock(import('~/server/platforms/algolia-cache.server'), () => {
-  return {
-    invalidateAlgoliaCache: vi.fn<typeof invalidateAlgoliaCache>()
+vi.mock(
+  import('~/server/platforms/algolia-cache.server'),
+  async (importOriginal) => {
+    return {
+      ...(await importOriginal()),
+      invalidateAlgoliaCache: vi.fn<typeof invalidateAlgoliaCache>()
+    }
   }
-})
+)
 
 vi.mock(import('~/server/admin/ai-assist/meme-fill.server'), () => {
   return {

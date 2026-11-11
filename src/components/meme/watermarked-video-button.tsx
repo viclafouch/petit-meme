@@ -7,11 +7,7 @@ import { LoadingSpinner } from '~/components/ui/spinner'
 import type { MemeExportMode } from '~/constants/meme'
 import { getErrorMessage } from '~/helpers/error'
 import type { InsightsTracking } from '~/lib/algolia-insights'
-import {
-  deliverMemeExport,
-  fetchMemeExport,
-  type ExportableMeme
-} from '~/lib/meme-export'
+import { exportMeme, type ExportableMeme } from '~/lib/meme-export'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
 
@@ -36,16 +32,8 @@ export const WatermarkedVideoButton = ({
   onExported
 }: WatermarkedVideoButtonProps) => {
   const exportMutation = useMutation({
-    mutationFn: async () => {
-      const blob = await fetchMemeExport({ meme, mode, format: 'mp4' })
-
-      return deliverMemeExport({
-        blob,
-        meme,
-        mode,
-        format: 'mp4',
-        tracking
-      })
+    mutationFn: () => {
+      return exportMeme({ meme, mode, format: 'mp4', tracking })
     },
     onSuccess: (wasExported) => {
       if (wasExported) {

@@ -27,10 +27,8 @@ import {
   translateMemeDraft,
   writeMemeDraft
 } from '~/server/admin/ai-assist/meme-draft.server'
-import {
-  safeAlgoliaOp,
-  syncMemeToAllIndices
-} from '~/server/platforms/algolia.server'
+import { syncMemeToAllIndices } from '~/server/meme/meme-index.server'
+import { safeAlgoliaOp } from '~/server/platforms/algolia.server'
 
 const FILL_RUN_TIMEOUT_MS = 740_000
 const FILL_VIDEO_TIMEOUT_MS = 540_000

@@ -1,15 +1,22 @@
 import { describe, expect, it } from 'vitest'
 import {
+  buildPublishTimeline,
+  enterPublishStep,
   getPublishRunSteps,
   getPublishRunTarget,
-  getPublishStepStatus,
   pacePublishRun,
+  settlePublishRun,
+  startPublishRun,
+  trackPublishProgress,
   type PublishRun
 } from '../publish-run'
 
+const RUN_ID = 1
+const PROGRESS_PERCENT = 42
+
 const getStatuses = (run: PublishRun) => {
-  return getPublishRunSteps(run.kind).map((step) => {
-    return getPublishStepStatus(run, step)
+  return buildPublishTimeline(run).map(({ status }) => {
+    return status
   })
 }
 
@@ -38,7 +45,7 @@ describe('getPublishRunSteps', () => {
   })
 })
 
-describe('getPublishStepStatus', () => {
+describe('buildPublishTimeline', () => {
   it('marks the steps before the current one as done and the next ones as pending', () => {
     expect(
       getStatuses({
@@ -113,5 +120,43 @@ describe('pacePublishRun', () => {
     expect(
       getStatuses(pacePublishRun(run, getPublishRunTarget(run)))
     ).toStrictEqual(['done', 'failed', 'pending', 'pending', 'pending'])
+  })
+})
+
+describe('the publish run lifecycle', () => {
+  it('starts on the first step of its kind', () => {
+    expect(startPublishRun('publish-with-files', RUN_ID)).toStrictEqual({
+      id: RUN_ID,
+      kind: 'publish-with-files',
+      step: 'preparing',
+      outcome: 'running',
+      progress: null,
+      error: null
+    })
+  })
+
+  it('drops the progress of the previous step on a new step', () => {
+    const run = trackPublishProgress(
+      startPublishRun('regenerate', RUN_ID),
+      PROGRESS_PERCENT
+    )
+
+    expect(enterPublishStep(run, 'watermarking')).toMatchObject({
+      step: 'watermarking',
+      progress: null
+    })
+  })
+
+  it('fails with the reason and succeeds without one', () => {
+    const run = startPublishRun('publish', RUN_ID)
+
+    expect(settlePublishRun(run, 'Bunny is down')).toMatchObject({
+      outcome: 'failed',
+      error: 'Bunny is down'
+    })
+    expect(settlePublishRun(run, null)).toMatchObject({
+      outcome: 'succeeded',
+      error: null
+    })
   })
 })

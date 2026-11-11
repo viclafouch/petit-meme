@@ -11,8 +11,11 @@ import {
   invalidateSavedMeme
 } from '~/queries/admin/meme'
 import {
-  getPublishRunSteps,
-  type PublishRun,
+  enterPublishStep,
+  settlePublishRun,
+  startPublishRun,
+  trackPublishProgress,
+  type MemePublishRun,
   type PublishRunKind,
   type PublishStep
 } from '~/routes/admin/library/-lib/publish-run'
@@ -22,12 +25,6 @@ import {
 } from '~/server/admin/meme/meme.functions'
 import { useMemeFilesEngine } from './use-meme-files-engine'
 import type { MemeFormValues } from './use-meme-form'
-
-export type MemePublisherRun = PublishRun & {
-  id: number
-  progress: number | null
-  error: string | null
-}
 
 export type StatusTransition = {
   status: MemeStatus
@@ -43,7 +40,7 @@ export function useMemePublisher(meme: MemeFullData) {
   const queryClient = useQueryClient()
   const router = useRouter()
   const filesEngine = useMemeFilesEngine(meme.id)
-  const [run, setRun] = React.useState<MemePublisherRun | null>(null)
+  const [run, setRun] = React.useState<MemePublishRun | null>(null)
 
   const refreshSavedMeme = async () => {
     await Promise.all([
@@ -82,13 +79,19 @@ export function useMemePublisher(meme: MemeFullData) {
 
   const enterStep = (step: PublishStep) => {
     setRun((current) => {
-      return current && { ...current, step, progress: null }
+      return current && enterPublishStep(current, step)
     })
   }
 
   const setProgress = (progress: number) => {
     setRun((current) => {
-      return current && { ...current, progress }
+      return current && trackPublishProgress(current, progress)
+    })
+  }
+
+  const settleRun = (error: string | null) => {
+    setRun((current) => {
+      return current && settlePublishRun(current, error)
     })
   }
 
@@ -100,33 +103,13 @@ export function useMemePublisher(meme: MemeFullData) {
   }
 
   const execute = async (kind: PublishRunKind, task: () => Promise<void>) => {
-    const [firstStep] = getPublishRunSteps(kind)
-
-    setRun({
-      id: Date.now(),
-      kind,
-      step: firstStep,
-      outcome: 'running',
-      progress: null,
-      error: null
-    })
+    setRun(startPublishRun(kind, Date.now()))
 
     try {
       await task()
-      setRun((current) => {
-        return current && { ...current, outcome: 'succeeded', progress: null }
-      })
+      settleRun(null)
     } catch (error) {
-      setRun((current) => {
-        return (
-          current && {
-            ...current,
-            outcome: 'failed',
-            progress: null,
-            error: getErrorMessage(error)
-          }
-        )
-      })
+      settleRun(getErrorMessage(error))
     }
   }
 

@@ -16,6 +16,7 @@ import {
 } from '~/constants/ai-search'
 import { getAppErrorCode } from '~/constants/error'
 import { EASE_OUT } from '~/constants/motion'
+import { buildReachedCapState } from '~/helpers/cap'
 import { getErrorMessage } from '~/helpers/error'
 import { captureWithFeature } from '~/lib/sentry'
 import { buildBreadcrumbJsonLd } from '~/lib/seo/json-ld'
@@ -59,11 +60,10 @@ export const AiSearchPage = () => {
       const errorCode = getAppErrorCode(error)
 
       if (errorCode === 'AI_SEARCH_QUOTA_EXCEEDED') {
-        queryClient.setQueryData(getAiSearchQuotaQueryOpts().queryKey, {
-          canSearch: false,
-          remainingSearches: 0,
-          isPremium: false
-        })
+        queryClient.setQueryData(
+          getAiSearchQuotaQueryOpts().queryKey,
+          buildReachedCapState('aiSearch')
+        )
         snoozePremiumReminder()
         dialogStore.actions.showDialog('ai-search-upsell')
 
@@ -115,7 +115,7 @@ export const AiSearchPage = () => {
         return
       }
 
-      if (quotaQuery.data && !quotaQuery.data.canSearch) {
+      if (quotaQuery.data?.isReached) {
         snoozePremiumReminder()
         dialogStore.actions.showDialog('ai-search-upsell')
 
@@ -188,11 +188,9 @@ export const AiSearchPage = () => {
           />
           <div className="flex items-start justify-between">
             <div>
-              {quotaQuery.data &&
-              !quotaQuery.data.isPremium &&
-              quotaQuery.data.remainingSearches !== null ? (
+              {quotaQuery.data && !quotaQuery.data.isPremium ? (
                 <RemainingSearches
-                  remainingSearches={quotaQuery.data.remainingSearches}
+                  remainingSearches={quotaQuery.data.remaining}
                 />
               ) : null}
             </div>

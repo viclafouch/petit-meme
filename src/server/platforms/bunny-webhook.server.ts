@@ -10,11 +10,9 @@ import { serverEnv } from '~/env/server.server'
 import { bunnyLogger } from '~/lib/logger'
 import { captureWithFeature } from '~/lib/sentry'
 import { fillMemeDraft } from '~/server/admin/ai-assist/meme-fill.server'
+import { syncMemeToAllIndices } from '~/server/meme/meme-index.server'
 import { invalidateAlgoliaCache } from '~/server/platforms/algolia-cache.server'
-import {
-  safeAlgoliaOp,
-  syncMemeToAllIndices
-} from '~/server/platforms/algolia.server'
+import { safeAlgoliaOp } from '~/server/platforms/algolia.server'
 import { getVideoPlayData } from '~/server/platforms/bunny.server'
 
 const WEBHOOK_PAYLOAD_SCHEMA = z.object({

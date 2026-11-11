@@ -3,10 +3,6 @@ import { createServerOnlyFn } from '@tanstack/react-start'
 import { prismaClient } from '~/db/client.server'
 import type { Prisma } from '~/db/generated/prisma/client'
 import { algoliaLogger } from '~/lib/logger'
-import {
-  normalizeAlgoliaHit,
-  parseAlgoliaMemeHits
-} from '~/server/platforms/algolia.server'
 
 type WriteRecommendCacheParams = {
   key: string
@@ -16,7 +12,7 @@ type WriteRecommendCacheParams = {
 
 const CACHED_MEME_IDS_SCHEMA = z.array(z.string())
 
-const readRecommendCache = createServerOnlyFn(async (key: string) => {
+export const readRecommendCache = createServerOnlyFn(async (key: string) => {
   const cached = await prismaClient.recommendCache.findUnique({
     where: { key },
     select: { data: true, expiresAt: true }
@@ -56,16 +52,6 @@ export const writeRecommendCache = createServerOnlyFn(
     }
   }
 )
-
-export const readCachedMemeHits = createServerOnlyFn(async (key: string) => {
-  const data = await readRecommendCache(key)
-
-  if (!Array.isArray(data)) {
-    return null
-  }
-
-  return parseAlgoliaMemeHits(data).map(normalizeAlgoliaHit)
-})
 
 export const readCachedMemeIds = createServerOnlyFn(async (key: string) => {
   const parsedIds = CACHED_MEME_IDS_SCHEMA.safeParse(

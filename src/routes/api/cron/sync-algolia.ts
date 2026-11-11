@@ -4,7 +4,7 @@ import { prismaClient } from '~/db/client.server'
 import { serverEnv } from '~/env/server.server'
 import { cronLogger } from '~/lib/logger'
 import { verifyCronSecret } from '~/server/auth/cron-auth.server'
-import { replaceAllIndicesWithMemes } from '~/server/platforms/algolia.server'
+import { replaceAllIndicesWithMemes } from '~/server/meme/meme-index.server'
 
 const log = cronLogger.child({ job: 'sync-algolia' })
 

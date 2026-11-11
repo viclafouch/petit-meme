@@ -1,5 +1,5 @@
 import type { Subscription } from '@better-auth/stripe'
-import { FREE_PLAN_MAX_AI_SEARCHES } from '~/constants/ai-search'
+import { FREE_CAPS } from '~/helpers/cap'
 import { m } from '~/paraglide/messages.js'
 
 export type BillingPeriod = 'monthly' | 'yearly'
@@ -35,9 +35,6 @@ export type Plan = {
   pricing: Record<BillingPeriod, PlanPricing>
 }
 
-export const FREE_PLAN_MAX_GENERATIONS = 3
-export const FREE_PLAN_MAX_BOOKMARKS = 20
-
 const FREE_PLAN_PRICING = {
   monthly: { priceInCents: 0 },
   yearly: { priceInCents: 0 }
@@ -55,9 +52,9 @@ export { PREMIUM_PLAN_PRICING }
 export const getFreePlan = (): Plan => {
   return {
     title: m.plan_free_title(),
-    maxGenerationsCount: FREE_PLAN_MAX_GENERATIONS,
-    maxBookmarksCount: FREE_PLAN_MAX_BOOKMARKS,
-    maxAiSearchesCount: FREE_PLAN_MAX_AI_SEARCHES,
+    maxGenerationsCount: FREE_CAPS.generation,
+    maxBookmarksCount: FREE_CAPS.bookmark,
+    maxAiSearchesCount: FREE_CAPS.aiSearch,
     productId: 'free',
     isExclusive: false,
     description: m.plan_free_description(),

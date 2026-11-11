@@ -2,10 +2,10 @@ import { expect, type Page } from '@playwright/test'
 import {
   AI_SEARCH_STAGE_KEYS,
   AI_SEARCH_STAGE_LINGER_MS,
-  AI_SEARCH_STAGE_MAX_DELAY_MS,
-  FREE_PLAN_MAX_AI_SEARCHES
+  AI_SEARCH_STAGE_MAX_DELAY_MS
 } from '~/constants/ai-search'
 import { HTTP_STATUS } from '~/constants/http'
+import { FREE_CAPS } from '~/helpers/cap'
 import { m } from '~/paraglide/messages.js'
 import {
   AI_SEARCH_PATH,
@@ -27,7 +27,7 @@ import {
 } from './server-functions'
 
 const UNANSWERABLE_PROMPT = 'zzzzqqqqxxxx'
-const CONCURRENT_SEARCH_COUNT = FREE_PLAN_MAX_AI_SEARCHES * 2
+const CONCURRENT_SEARCH_COUNT = FREE_CAPS.aiSearch * 2
 
 const SERVER_ROUND_TRIP_BUDGET_MS = 5000
 const RESULTS_TIMEOUT_MS =
@@ -62,7 +62,7 @@ test.describe('a free User with searches left', () => {
     await expect(
       page.getByRole('heading', { level: 1, name: m.ai_search_title() })
     ).toBeVisible()
-    await expectRemainingSearches(page, FREE_PLAN_MAX_AI_SEARCHES)
+    await expectRemainingSearches(page, FREE_CAPS.aiSearch)
 
     await submitPrompt(page, E2E_UNIQUE_SEARCH_WORD)
 
@@ -72,11 +72,11 @@ test.describe('a free User with searches left', () => {
     await expect(
       page.getByText(m.ai_search_result_count({ count: 1 }), { exact: true })
     ).toBeVisible()
-    await expectRemainingSearches(page, FREE_PLAN_MAX_AI_SEARCHES - 1)
+    await expectRemainingSearches(page, FREE_CAPS.aiSearch - 1)
 
     await page.reload()
 
-    await expectRemainingSearches(page, FREE_PLAN_MAX_AI_SEARCHES - 1)
+    await expectRemainingSearches(page, FREE_CAPS.aiSearch - 1)
   })
 })
 
@@ -85,7 +85,7 @@ test.describe('a free User who sends several searches at once', () => {
 
   test('gets their three searches and not one more', async ({ page }) => {
     await page.goto(AI_SEARCH_PATH)
-    await expectRemainingSearches(page, FREE_PLAN_MAX_AI_SEARCHES)
+    await expectRemainingSearches(page, FREE_CAPS.aiSearch)
 
     const call = await holdServerFunctionCall(page, () => {
       return submitPrompt(page, E2E_UNIQUE_SEARCH_WORD)
@@ -98,10 +98,10 @@ test.describe('a free User who sends several searches at once', () => {
     })
 
     expect(statuses).toStrictEqual([
-      ...repeat(HTTP_STATUS.OK, FREE_PLAN_MAX_AI_SEARCHES),
+      ...repeat(HTTP_STATUS.OK, FREE_CAPS.aiSearch),
       ...repeat(
         HTTP_STATUS.TOO_MANY_REQUESTS,
-        CONCURRENT_SEARCH_COUNT - FREE_PLAN_MAX_AI_SEARCHES
+        CONCURRENT_SEARCH_COUNT - FREE_CAPS.aiSearch
       )
     ])
 
@@ -120,7 +120,7 @@ test.describe('a free User whose search finds nothing', () => {
     await page.goto(AI_SEARCH_PATH)
 
     await expect(getQuotaCounter(page)).toHaveText(
-      m.ai_search_remaining_searches({ count: FREE_PLAN_MAX_AI_SEARCHES })
+      m.ai_search_remaining_searches({ count: FREE_CAPS.aiSearch })
     )
 
     await submitPrompt(page, UNANSWERABLE_PROMPT)

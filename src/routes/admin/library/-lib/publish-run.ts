@@ -32,9 +32,15 @@ export type PublishRun = {
   outcome: PublishRunOutcome
 }
 
+export type MemePublishRun = PublishRun & {
+  id: number
+  progress: number | null
+  error: string | null
+}
+
 export type PublishStepStatus = 'pending' | 'active' | 'done' | 'failed'
 
-export const getPublishStepStatus = (
+const getPublishStepStatus = (
   run: PublishRun,
   step: PublishStep
 ): PublishStepStatus => {
@@ -76,4 +82,52 @@ export const pacePublishRun = <TRun extends PublishRun>(
     step: getPublishRunSteps(run.kind)[revealedCount],
     outcome: 'running'
   }
+}
+
+export const startPublishRun = (
+  kind: PublishRunKind,
+  id: number
+): MemePublishRun => {
+  const [firstStep] = getPublishRunSteps(kind)
+
+  return {
+    id,
+    kind,
+    step: firstStep,
+    outcome: 'running',
+    progress: null,
+    error: null
+  }
+}
+
+export const enterPublishStep = (
+  run: MemePublishRun,
+  step: PublishStep
+): MemePublishRun => {
+  return { ...run, step, progress: null }
+}
+
+export const trackPublishProgress = (
+  run: MemePublishRun,
+  progress: number
+): MemePublishRun => {
+  return { ...run, progress }
+}
+
+export const settlePublishRun = (
+  run: MemePublishRun,
+  error: string | null
+): MemePublishRun => {
+  return {
+    ...run,
+    outcome: error === null ? 'succeeded' : 'failed',
+    progress: null,
+    error
+  }
+}
+
+export const buildPublishTimeline = (run: PublishRun) => {
+  return getPublishRunSteps(run.kind).map((step) => {
+    return { step, status: getPublishStepStatus(run, step) }
+  })
 }

@@ -5,7 +5,7 @@ import { useIsPremium } from '~/components/premium/use-is-premium'
 import { snoozePremiumReminder } from '~/components/premium/use-premium-reminder'
 import { getAppErrorCode } from '~/constants/error'
 import type { MemeWithVideo } from '~/constants/meme'
-import { FREE_PLAN_MAX_BOOKMARKS } from '~/constants/plan'
+import { buildCapState } from '~/helpers/cap'
 import { getErrorMessage } from '~/helpers/error'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages.js'
@@ -107,10 +107,13 @@ export function useToggleBookmark({
     isMemeBookmarked,
     isPending: toggleMutation.isPending,
     toggleBookmark: () => {
-      const isBookmarkCapReached =
-        (bookmarks?.length ?? 0) >= FREE_PLAN_MAX_BOOKMARKS
+      const { isReached } = buildCapState({
+        kind: 'bookmark',
+        usedCount: bookmarks?.length ?? 0,
+        isPremium
+      })
 
-      if (!isMemeBookmarked && !isPremium && isBookmarkCapReached) {
+      if (!isMemeBookmarked && isReached) {
         openBookmarkUpsell()
 
         return

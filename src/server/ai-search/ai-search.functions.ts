@@ -7,7 +7,6 @@ import {
   AI_SEARCH_MODEL,
   AI_SEARCH_TIMEOUT_MS,
   DAILY_GLOBAL_AI_SEARCH_CAP,
-  FREE_PLAN_MAX_AI_SEARCHES,
   MAX_AI_SEARCH_RESULTS
 } from '~/constants/ai-search'
 import { AppError } from '~/constants/error'
@@ -18,7 +17,7 @@ import { prismaClient } from '~/db/client.server'
 import type { Prisma } from '~/db/generated/prisma/client'
 import { ActivityEventType } from '~/db/generated/prisma/enums'
 import { serverEnv } from '~/env/server.server'
-import { buildAiSearchQuota } from '~/helpers/ai-search'
+import { buildCapState, FREE_CAPS } from '~/helpers/cap'
 import { truncateToUtcDay, truncateToUtcMonth } from '~/helpers/date'
 import { withTimeout } from '~/helpers/promise'
 import { aiSearchLogger } from '~/lib/logger'
@@ -27,14 +26,12 @@ import { getLocale, type Locale } from '~/paraglide/runtime'
 import { recordActivityEvent } from '~/server/activity/activity.server'
 import { requestSearchKeywords } from '~/server/ai-search/ai-search.server'
 import { userRequiredMiddleware } from '~/server/auth/auth.middleware'
+import { findCapState, throwCapReached } from '~/server/cap/cap.server'
 import { throwWithStatus } from '~/server/http/http.server'
+import { searchMemes } from '~/server/meme/meme-index.server'
 import {
-  ALGOLIA_SEARCH_PARAMS_BASE,
   buildAlgoliaPublishedFilter,
-  getAlgoliaSearchClient,
-  normalizeAlgoliaHit,
-  resolveAlgoliaIndexName,
-  type AlgoliaMemeRecord
+  resolveAlgoliaIndexName
 } from '~/server/platforms/algolia.server'
 import {
   createRateLimitMiddleware,
@@ -111,13 +108,8 @@ const reserveAiSearch = ({
       where: { userId, createdAt: { gte: truncateToUtcMonth(now) } }
     })
 
-    if (!isPremium && monthlyCount >= FREE_PLAN_MAX_AI_SEARCHES) {
-      return throwWithStatus(
-        HTTP_STATUS.TOO_MANY_REQUESTS,
-        new AppError('ai_search_quota_exceeded', {
-          code: 'AI_SEARCH_QUOTA_EXCEEDED'
-        })
-      )
+    if (!isPremium && monthlyCount >= FREE_CAPS.aiSearch) {
+      return throwCapReached('aiSearch')
     }
 
     const { id } = await transaction.aiSearchLog.create({
@@ -190,21 +182,17 @@ export const searchMemesWithAi = createServerFn({ method: 'POST' })
       data.contentLocale === undefined ? undefined : [data.contentLocale]
     )
 
-    let response
+    let searchPage: Awaited<ReturnType<typeof searchMemes>>
 
     try {
-      response =
-        await getAlgoliaSearchClient().searchSingleIndex<AlgoliaMemeRecord>({
-          indexName,
-          searchParams: {
-            query,
-            hitsPerPage: MAX_AI_SEARCH_RESULTS,
-            filters,
-            clickAnalytics: true,
-            removeWordsIfNoResults: 'allOptional',
-            ...ALGOLIA_SEARCH_PARAMS_BASE
-          }
-        })
+      searchPage = await searchMemes({
+        indexName,
+        query,
+        page: 0,
+        hitsPerPage: MAX_AI_SEARCH_RESULTS,
+        filters,
+        removeWordsIfNoResults: 'allOptional'
+      })
     } catch (error) {
       captureWithFeature(error, 'ai-search')
       aiSearchLogger.error({ error, query, filters }, 'Algolia search failed')
@@ -216,15 +204,16 @@ export const searchMemesWithAi = createServerFn({ method: 'POST' })
       )
     }
 
-    const memeIds = response.hits.map((hit) => {
-      return hit.objectID
+    const { memes, queryID } = searchPage
+    const memeIds = memes.map((meme) => {
+      return meme.id
     })
 
     waitUntil(
       completeAiSearchLog(reservation.id, {
         keywords,
         memeIds,
-        resultCount: response.hits.length
+        resultCount: memes.length
       })
     )
 
@@ -239,17 +228,18 @@ export const searchMemesWithAi = createServerFn({ method: 'POST' })
       {
         userId,
         query,
-        resultCount: response.hits.length
+        resultCount: memes.length
       },
       'AI search completed'
     )
 
     return {
-      memes: response.hits.map(normalizeAlgoliaHit),
+      memes,
       keywords,
-      queryID: response.queryID,
-      quota: buildAiSearchQuota({
-        monthlyCount: reservation.monthlyCount,
+      queryID,
+      quota: buildCapState({
+        kind: 'aiSearch',
+        usedCount: reservation.monthlyCount,
         isPremium
       })
     }
@@ -257,17 +247,6 @@ export const searchMemesWithAi = createServerFn({ method: 'POST' })
 
 export const getAiSearchQuota = createServerFn({ method: 'GET' })
   .middleware([userRequiredMiddleware])
-  .handler(async ({ context }) => {
-    const monthStart = truncateToUtcMonth(new Date())
-    const [monthlyCount, isPremium] = await Promise.all([
-      prismaClient.aiSearchLog.count({
-        where: {
-          userId: context.user.id,
-          createdAt: { gte: monthStart }
-        }
-      }),
-      matchIsUserPremium(context.user)
-    ])
-
-    return buildAiSearchQuota({ monthlyCount, isPremium })
+  .handler(({ context }) => {
+    return findCapState({ user: context.user, kind: 'aiSearch' })
   })

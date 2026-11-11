@@ -6,7 +6,7 @@ import {
   type Request
 } from '@playwright/test'
 import { HTTP_STATUS } from '~/constants/http'
-import { FREE_PLAN_MAX_GENERATIONS } from '~/constants/plan'
+import { FREE_CAPS } from '~/helpers/cap'
 import { m } from '~/paraglide/messages.js'
 import { getAuthDialogSignInButton } from './auth-flows'
 import { E2E_NAMED_MEMES } from './content'
@@ -26,8 +26,8 @@ const STUDIO_PATHNAME = `/memes/${STUDIO_MEME.id}/studio`
 const CAPTION_TEXT = 'Le e2e a parlé'
 const TRANSCODE_TIMEOUT_MS = 60_000
 const GENERATION_TEST_TIMEOUT_MS = 120_000
-const CONCURRENT_GENERATION_COUNT = FREE_PLAN_MAX_GENERATIONS * 2
-const GENERATIONS_LEFT_AFTER_THE_FIRST = FREE_PLAN_MAX_GENERATIONS - 1
+const CONCURRENT_GENERATION_COUNT = FREE_CAPS.generation * 2
+const GENERATIONS_LEFT_AFTER_THE_FIRST = FREE_CAPS.generation - 1
 
 test.use({ viewport: devices['iPhone 15'].viewport })
 

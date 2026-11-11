@@ -1,13 +1,13 @@
 import React from 'react'
 import {
   getPublishRunTarget,
-  pacePublishRun
+  pacePublishRun,
+  type MemePublishRun
 } from '~/routes/admin/library/-lib/publish-run'
-import type { MemePublisherRun } from './use-meme-publisher'
 
 const STEP_REVEAL_MS = 450
 
-export function usePacedPublishRun(run: MemePublisherRun) {
+export function usePacedPublishRun(run: MemePublishRun) {
   const [revealedCount, setRevealedCount] = React.useState(0)
   const target = getPublishRunTarget(run)
 

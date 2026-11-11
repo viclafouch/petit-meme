@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { buildOgImageUrl, seo } from '~/lib/seo'
+import { buildSeo } from '~/lib/seo/meta'
+import { buildOgImageUrl } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages'
 import { getLocale, type Locale } from '~/paraglide/runtime'
 import { MentionsLegalesPage } from './-components/legal-pages'
@@ -33,7 +34,7 @@ export const Route = createFileRoute(
     const locale = getLocale()
     const title = m.legal_mentions_title()
 
-    return seo({
+    return buildSeo({
       title,
       pathname: '/mentions-legales',
       description: m.legal_mentions_description(),

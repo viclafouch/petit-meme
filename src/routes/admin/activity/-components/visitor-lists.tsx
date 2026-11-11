@@ -4,7 +4,7 @@ import { formatRelativeTime } from '~/helpers/date'
 import { getLocale } from '~/paraglide/runtime'
 import { DetailList } from '~/routes/admin/-components/detail-list'
 import { TruncatedText } from '~/routes/admin/-components/truncated-text'
-import { formatEventCount } from '~/routes/admin/-helpers/activity'
+import { formatEventCount } from '~/routes/admin/-lib/activity'
 import type { AdminVisitor } from '~/server/admin/visitor/visitor.functions'
 
 type VisitorMemeListProps = {

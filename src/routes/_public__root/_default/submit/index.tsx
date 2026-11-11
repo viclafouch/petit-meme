@@ -1,5 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { buildBreadcrumbJsonLd, buildOgImageUrl, seo } from '~/lib/seo'
+import { buildBreadcrumbJsonLd } from '~/lib/seo/json-ld'
+import { buildSeo } from '~/lib/seo/meta'
+import { buildOgImageUrl } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { listUserProposalsQueryOpts } from '~/queries/proposal'
@@ -11,7 +13,7 @@ export const Route = createFileRoute('/_public__root/_default/submit/')({
     const locale = getLocale()
 
     return {
-      ...seo({
+      ...buildSeo({
         title: m.submit_heading(),
         pathname: '/submit',
         description: m.submit_description(),

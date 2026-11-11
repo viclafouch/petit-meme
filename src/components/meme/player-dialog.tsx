@@ -25,7 +25,7 @@ import {
   type ConversionEventName
 } from '~/lib/algolia-insights'
 import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
-import { buildUrl } from '~/lib/seo'
+import { buildUrl } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages.js'
 import { recordMemeExport } from '~/server/meme/meme.functions'
 

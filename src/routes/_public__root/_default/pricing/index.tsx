@@ -1,6 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { getFreePlan, getPremiumPlan } from '~/constants/plan'
-import { buildOgImageUrl, buildPricingJsonLd, seo } from '~/lib/seo'
+import { buildPricingJsonLd } from '~/lib/seo/json-ld'
+import { buildSeo } from '~/lib/seo/meta'
+import { buildOgImageUrl } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
 import { getActiveSubscriptionQueryOpts } from '~/queries/subscription'
@@ -31,7 +33,7 @@ export const Route = createFileRoute('/_public__root/_default/pricing/')({
   head: () => {
     const locale = getLocale()
 
-    return seo({
+    return buildSeo({
       title: m.seo_pricing_title(),
       pathname: '/pricing',
       description: m.seo_pricing_description(),

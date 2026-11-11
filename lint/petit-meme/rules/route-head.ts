@@ -27,7 +27,7 @@ const matchIsPathlessLayout = (routeCall: ESTree.CallExpression) => {
 export const routeHead = defineRule({
   meta: {
     type: 'suggestion',
-    messages: { head: 'Give the route a `head()` with `seo()`.' },
+    messages: { head: 'Give the route a `head()` with `buildSeo()`.' },
     schema: []
   },
   createOnce(context) {

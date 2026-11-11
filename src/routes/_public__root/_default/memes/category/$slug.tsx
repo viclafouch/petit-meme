@@ -1,6 +1,7 @@
 import { createFileRoute, notFound } from '@tanstack/react-router'
 import { getVirtualCategories, MEMES_SEARCH_SCHEMA } from '~/constants/meme'
-import { buildOgImageUrl, seo } from '~/lib/seo'
+import { buildSeo } from '~/lib/seo/meta'
+import { buildOgImageUrl } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
 import { listCategoriesQueryOpts } from '~/queries/category'
@@ -49,7 +50,7 @@ export const Route = createFileRoute(
       const title = m.meme_seo_library_title()
       const description = m.meme_seo_library_description()
 
-      return seo({
+      return buildSeo({
         title,
         pathname: '/memes/category/all',
         description,
@@ -67,7 +68,7 @@ export const Route = createFileRoute(
       title: category.title
     })
 
-    return seo({
+    return buildSeo({
       title: m.meme_seo_category_title({ title: category.title }),
       pathname: `/memes/category/${category.slug}`,
       description,

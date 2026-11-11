@@ -7,7 +7,7 @@ import {
   type OgDefaultedType,
   OG_DEFAULTED_TYPE_VALUES,
   OG_TITLED_TYPE_VALUES
-} from '~/lib/seo'
+} from '~/lib/seo/url'
 import { type Locale, locales } from '~/paraglide/runtime'
 import { renderOgImage } from '~/server/seo/og-image.server'
 

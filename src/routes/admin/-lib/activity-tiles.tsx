@@ -1,7 +1,7 @@
 import { ActivityEventType } from '~/db/generated/prisma/enums'
 import { ActivityTypeIcon } from '~/routes/admin/-components/activity-type-icon'
 import type { StatTileEntry } from '~/routes/admin/-components/stat-tiles'
-import { ACTIVITY_TYPE_DISPLAY } from '~/routes/admin/-helpers/activity'
+import { ACTIVITY_TYPE_DISPLAY } from '~/routes/admin/-lib/activity'
 import type { ActivityTotals } from '~/server/admin/activity/activity.server'
 
 const ACTIVITY_TILE_TYPES = [

@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { websiteOrigin } from '~/lib/seo'
+import { websiteOrigin } from '~/lib/seo/url'
 
 export const Route = createFileRoute('/robots.txt')({
   server: {

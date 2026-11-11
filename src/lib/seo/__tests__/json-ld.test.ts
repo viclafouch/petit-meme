@@ -35,7 +35,7 @@ const findVideoObject = (graph: readonly Thing[]) => {
 }
 
 const importSeo = () => {
-  return import('~/lib/seo')
+  return import('~/lib/seo/json-ld')
 }
 
 describe('video structured data', () => {

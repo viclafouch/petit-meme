@@ -1,5 +1,5 @@
 import type { ActivityEventType } from '~/db/generated/prisma/enums'
-import { ACTIVITY_TYPE_DISPLAY } from '~/routes/admin/-helpers/activity'
+import { ACTIVITY_TYPE_DISPLAY } from '~/routes/admin/-lib/activity'
 
 type ActivityTypeIconProps = {
   type: ActivityEventType

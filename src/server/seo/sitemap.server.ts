@@ -1,4 +1,4 @@
-import { buildUrl } from '~/lib/seo'
+import { buildUrl } from '~/lib/seo/url'
 import { baseLocale, type Locale, locales } from '~/paraglide/runtime'
 
 export type SitemapPage = {

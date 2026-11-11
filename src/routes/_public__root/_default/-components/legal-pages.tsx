@@ -2,7 +2,7 @@ import React from 'react'
 import { parseMarkdown } from '@tanstack/markdown/parser'
 import { Markdown } from '@tanstack/markdown/react'
 import { getRouteApi } from '@tanstack/react-router'
-import { BASE_MARKDOWN_COMPONENTS } from '~/constants/markdown'
+import { BASE_MARKDOWN_COMPONENTS } from '~/routes/_public__root/_default/-components/markdown-components'
 
 const dmcaRouteApi = getRouteApi('/_public__root/_default/dmca')
 const privacyRouteApi = getRouteApi('/_public__root/_default/privacy')

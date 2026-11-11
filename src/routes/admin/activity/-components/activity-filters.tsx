@@ -18,7 +18,7 @@ import type { ActivityEventType } from '~/db/generated/prisma/enums'
 import {
   ACTIVITY_TYPE_DISPLAY,
   ACTIVITY_TYPE_OPTIONS
-} from '~/routes/admin/-helpers/activity'
+} from '~/routes/admin/-lib/activity'
 
 const SCOPE_LABELS = {
   all: 'Tous',

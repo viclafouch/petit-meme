@@ -18,7 +18,7 @@ import { getAppErrorCode } from '~/constants/error'
 import { EASE_OUT } from '~/constants/motion'
 import { getErrorMessage } from '~/helpers/error'
 import { captureWithFeature } from '~/lib/sentry'
-import { buildBreadcrumbJsonLd } from '~/lib/seo'
+import { buildBreadcrumbJsonLd } from '~/lib/seo/json-ld'
 import { m } from '~/paraglide/messages.js'
 import { getAiSearchQuotaQueryOpts } from '~/queries/ai-search'
 import {

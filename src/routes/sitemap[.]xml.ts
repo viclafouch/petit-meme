@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { websiteOrigin } from '~/lib/seo'
+import { websiteOrigin } from '~/lib/seo/url'
 import { buildSitemapResponse } from '~/server/seo/sitemap.server'
 
 const SUB_SITEMAPS = [

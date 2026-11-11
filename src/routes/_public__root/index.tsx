@@ -1,5 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { buildHomeJsonLd, buildOgImageUrl, seo } from '~/lib/seo'
+import { buildHomeJsonLd } from '~/lib/seo/json-ld'
+import { buildSeo } from '~/lib/seo/meta'
+import { buildOgImageUrl } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
 import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
@@ -17,7 +19,7 @@ export const Route = createFileRoute('/_public__root/')({
     const locale = getLocale()
     const description = m.seo_home_description()
 
-    return seo({
+    return buildSeo({
       title: m.seo_home_title(),
       keywords: m.seo_home_keywords(),
       description,

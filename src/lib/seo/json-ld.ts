@@ -15,30 +15,26 @@ import type {
   WebPage,
   WebSite,
   WithActionConstraints,
+  InteractionCounter,
   WithContext
 } from 'schema-dts'
-import type { AnyRouteMatch } from '@tanstack/react-router'
 import type { FaqItem } from '~/components/marketing/faq-section'
 import { LOGO_PATH, SITE_NAME } from '~/constants/branding'
 import { HLS_MIME_TYPE } from '~/constants/bunny'
-import type { MemeWithCategories, MemeWithVideo } from '~/constants/meme'
-import { OG_IMAGE_HEIGHT, OG_IMAGE_WIDTH } from '~/constants/og'
+import type { MemeWithVideo } from '~/constants/meme'
 import type { Plan } from '~/constants/plan'
 import { ONE_HOUR_IN_SECONDS, SECONDS_PER_MINUTE } from '~/constants/time'
 import type { CategoryModel } from '~/db/generated/prisma/models'
-import { clientEnv } from '~/env/client'
 import { convertCentsToEuros } from '~/helpers/number'
 import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
-import { m } from '~/paraglide/messages.js'
 import {
-  baseLocale,
-  getLocale,
-  locales,
-  localizeUrl,
-  type Locale
-} from '~/paraglide/runtime'
+  buildEmbedUrl,
+  buildMemeUrl,
+  buildUrl,
+  websiteOrigin
+} from '~/lib/seo/url'
+import { m } from '~/paraglide/messages.js'
 
-export const websiteOrigin = clientEnv.VITE_SITE_URL
 const websiteId = `${websiteOrigin}/#website`
 
 const websiteSearchAction = {
@@ -50,237 +46,12 @@ const websiteSearchAction = {
   'query-input': 'required name=search_term_string'
 } satisfies WithActionConstraints<SearchAction>
 
-const OG_VERSION = 3
-
-export const OG_DEFAULTED_TYPE_VALUES = [
-  'ai-search',
-  'pricing',
-  'reels',
-  'submit'
-] as const satisfies readonly string[]
-
-export const OG_TITLED_TYPE_VALUES = [
-  'category',
-  'legal'
-] as const satisfies readonly string[]
-
-export type OgDefaultedType = (typeof OG_DEFAULTED_TYPE_VALUES)[number]
-type OgTitledType = (typeof OG_TITLED_TYPE_VALUES)[number]
-
-type BuildOgImageUrlParams = {
-  subtitle?: string
-  locale: Locale
-} & (
-  | { type: 'home'; title?: never }
-  | { type: OgDefaultedType; title?: string }
-  | { type: OgTitledType; title: string }
-)
-
-export const buildOgImageUrl = ({
-  type,
-  title,
-  subtitle,
-  locale
-}: BuildOgImageUrlParams): string => {
-  const url = new URL('/api/og', websiteOrigin)
-  url.searchParams.set('type', type)
-  url.searchParams.set('locale', locale)
-  url.searchParams.set('v', String(OG_VERSION))
-
-  if (title) {
-    url.searchParams.set('title', title)
-  }
-
-  if (subtitle) {
-    url.searchParams.set('subtitle', subtitle)
-  }
-
-  return url.href
-}
-
-export const OG_LOCALE_MAP = {
-  fr: 'fr_FR',
-  en: 'en_US'
-} as const satisfies Record<Locale, string>
-
-const ADMIN_SITE_NAME = `Admin ${SITE_NAME}`
-
-export const buildPageTitle = (title: string, siteName = SITE_NAME) => {
-  return `${siteName} - ${title}`
-}
-
-export const buildEmbedUrl = (memeId: string, locale: Locale = getLocale()) => {
-  return buildUrl(`/embed/${memeId}`, locale)
-}
-
-export const buildUrl = (pathname: string, locale?: Locale): string => {
-  try {
-    const baseUrl = new URL(pathname, websiteOrigin).href
-
-    if (locale === undefined || locale === baseLocale) {
-      return baseUrl
-    }
-
-    const localized = localizeUrl(baseUrl, { locale })
-
-    return localized instanceof URL ? localized.href : localized
-  } catch {
-    return websiteOrigin
-  }
-}
-
-type SeoParams = {
-  title: string
-  description?: string
-  image?: string
-  imageAlt?: string
-  imageType?: 'image/png' | 'image/jpeg'
-  keywords?: string
-  isAdmin?: boolean
-  pathname?: string
-  noindex?: boolean
-  canonicalPathname?: string
-  ogType?: 'website' | 'video.other'
-}
-
-type SeoResult = {
-  meta: NonNullable<AnyRouteMatch['meta']>
-  links: NonNullable<AnyRouteMatch['links']>
-}
-
-export const seo = ({
-  title,
-  description,
-  keywords,
-  image,
-  imageAlt,
-  imageType = 'image/png',
-  isAdmin = false,
-  pathname = '/',
-  noindex = false,
-  canonicalPathname,
-  ogType = 'website'
-}: SeoParams): SeoResult => {
-  const locale = getLocale()
-  const titlePrefixed = isAdmin
-    ? buildPageTitle(title, ADMIN_SITE_NAME)
-    : buildPageTitle(title)
-
-  const canonicalBase = canonicalPathname ?? pathname
-  const canonicalUrl = buildUrl(canonicalBase, locale)
-  const alternateLocales = locales.filter((loc) => {
-    return loc !== locale
-  })
-
-  const meta = [
-    { title: titlePrefixed },
-    ...(keywords ? [{ name: 'keywords', content: keywords }] : []),
-    { name: 'author', content: 'Victor de la Fouchardière' },
-    { name: 'twitter:title', content: titlePrefixed },
-    { name: 'twitter:creator', content: '@TrustedSheriff' },
-    { name: 'twitter:site', content: '@TrustedSheriff' },
-    { property: 'og:type', content: ogType },
-    { property: 'og:site_name', content: SITE_NAME },
-    { property: 'og:title', content: titlePrefixed },
-    { property: 'og:url', content: canonicalUrl },
-    { property: 'og:locale', content: OG_LOCALE_MAP[locale] },
-    ...alternateLocales.map((alternateLocale) => {
-      return {
-        property: 'og:locale:alternate',
-        content: OG_LOCALE_MAP[alternateLocale]
-      }
-    }),
-    ...(description
-      ? [
-          { name: 'description', content: description },
-          { name: 'twitter:description', content: description },
-          { property: 'og:description', content: description }
-        ]
-      : []),
-    ...(noindex ? [{ name: 'robots', content: 'noindex, follow' }] : []),
-    {
-      name: 'twitter:card',
-      content: image ? 'summary_large_image' : 'summary'
-    },
-    ...(image
-      ? [
-          { name: 'twitter:image', content: image },
-          { property: 'og:image', content: image },
-          { property: 'og:image:width', content: String(OG_IMAGE_WIDTH) },
-          { property: 'og:image:height', content: String(OG_IMAGE_HEIGHT) },
-          { property: 'og:image:type', content: imageType },
-          ...(imageAlt
-            ? [
-                { name: 'twitter:image:alt', content: imageAlt },
-                { property: 'og:image:alt', content: imageAlt }
-              ]
-            : [])
-        ]
-      : [])
-  ] satisfies AnyRouteMatch['meta']
-
-  const links: NonNullable<AnyRouteMatch['links']> = isAdmin
-    ? []
-    : [
-        { rel: 'canonical', href: canonicalUrl },
-        ...locales.map((hreflangLocale) => {
-          return {
-            rel: 'alternate',
-            hrefLang: hreflangLocale,
-            href: buildUrl(canonicalBase, hreflangLocale)
-          }
-        }),
-        {
-          rel: 'alternate',
-          hrefLang: 'x-default',
-          href: buildUrl(canonicalBase, baseLocale)
-        }
-      ]
-
-  return { meta, links }
-}
-
-const buildDescription = (meme: MemeWithVideo & MemeWithCategories) => {
-  if (meme.description !== '') {
-    return meme.description
-  }
-
-  return m.seo_meme_fallback_description({ title: meme.title })
-}
-
-export const buildMemeSeo = (
-  meme: MemeWithVideo & MemeWithCategories,
-  overrideOptions: Partial<Omit<SeoParams, 'ogType'>> = {}
-): SeoResult => {
-  const categoryKeywords = meme.categories.flatMap((category) => {
-    return category.category.keywords
-  })
-
-  const description = buildDescription(meme)
-  const embedUrl = buildEmbedUrl(meme.id)
-
-  const result = seo({
-    title: meme.title,
-    keywords: [...meme.keywords, ...categoryKeywords].join(', '),
-    image: buildVideoImageUrl(meme.video.bunnyId),
-    imageAlt: m.seo_meme_image_alt({ title: meme.title }),
-    imageType: 'image/jpeg',
-    description,
-    ogType: 'video.other',
-    ...overrideOptions
-  })
-
+const buildWatchCounter = (viewCount: number) => {
   return {
-    ...result,
-    meta: [
-      ...result.meta,
-      { property: 'og:video', content: embedUrl },
-      { property: 'og:video:secure_url', content: embedUrl },
-      { property: 'og:video:type', content: 'text/html' },
-      { property: 'og:video:width', content: '1280' },
-      { property: 'og:video:height', content: '720' }
-    ]
-  }
+    '@type': 'InteractionCounter',
+    interactionType: { '@type': 'WatchAction' },
+    userInteractionCount: viewCount
+  } satisfies InteractionCounter
 }
 
 const formatSchemaDuration = (totalSeconds: number) => {
@@ -309,7 +80,7 @@ export const buildMemeJsonLd = (
   meme: MemeWithVideo,
   crawlerStreamUrl: string | null
 ): SchemaGraph => {
-  const memeUrl = `${websiteOrigin}/memes/${meme.id}`
+  const memeUrl = buildMemeUrl(meme.id)
   const thumbnailUrl = buildVideoImageUrl(meme.video.bunnyId)
 
   return {
@@ -341,11 +112,7 @@ export const buildMemeJsonLd = (
         ...(crawlerStreamUrl === null
           ? {}
           : { contentUrl: crawlerStreamUrl, encodingFormat: HLS_MIME_TYPE }),
-        interactionStatistic: {
-          '@type': 'InteractionCounter',
-          interactionType: { '@type': 'WatchAction' },
-          userInteractionCount: meme.viewCount
-        }
+        interactionStatistic: buildWatchCounter(meme.viewCount)
       } satisfies VideoObject
     ]
   }
@@ -386,18 +153,14 @@ export const buildCategoryJsonLd = (
             position: index + 1,
             item: {
               '@type': 'VideoObject',
-              '@id': `${websiteOrigin}/memes/${meme.id}#video`,
+              '@id': `${buildMemeUrl(meme.id)}#video`,
               name: meme.title,
               description: meme.description,
               embedUrl: buildEmbedUrl(meme.id),
               thumbnailUrl: buildVideoImageUrl(meme.video.bunnyId),
               uploadDate: meme.publishedAt?.toISOString(),
-              url: `${websiteOrigin}/memes/${meme.id}`,
-              interactionStatistic: {
-                '@type': 'InteractionCounter',
-                interactionType: { '@type': 'WatchAction' },
-                userInteractionCount: meme.viewCount
-              }
+              url: buildMemeUrl(meme.id),
+              interactionStatistic: buildWatchCounter(meme.viewCount)
             } satisfies VideoObject
           }
         })

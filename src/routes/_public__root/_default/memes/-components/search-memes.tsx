@@ -21,7 +21,7 @@ import {
   parseContentLocalesParam,
   serializeContentLocalesParam
 } from '~/helpers/i18n-content'
-import { buildBreadcrumbJsonLd, buildCategoryJsonLd } from '~/lib/seo'
+import { buildBreadcrumbJsonLd, buildCategoryJsonLd } from '~/lib/seo/json-ld'
 import { m } from '~/paraglide/messages.js'
 import { getLocale } from '~/paraglide/runtime'
 import { listCategoriesQueryOpts } from '~/queries/category'

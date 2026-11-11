@@ -19,8 +19,8 @@ import {
   SectionHeading
 } from '~/routes/admin/-components/section-heading'
 import { StatTiles } from '~/routes/admin/-components/stat-tiles'
-import { formatEventCount } from '~/routes/admin/-helpers/activity'
-import { buildActivityTiles } from '~/routes/admin/-helpers/activity-tiles'
+import { formatEventCount } from '~/routes/admin/-lib/activity'
+import { buildActivityTiles } from '~/routes/admin/-lib/activity-tiles'
 import {
   VisitorAccountList,
   VisitorMemeList,

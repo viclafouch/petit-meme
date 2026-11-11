@@ -7,7 +7,7 @@ import type { ActivityFilters } from '~/constants/activity'
 import { listAdminActivityQueryOpts } from '~/queries/admin/activity'
 import { ActivityTimeline } from '~/routes/admin/-components/activity-timeline'
 import { PageHeader } from '~/routes/admin/-components/page-header'
-import { formatEventCount } from '~/routes/admin/-helpers/activity'
+import { formatEventCount } from '~/routes/admin/-lib/activity'
 import { ActivityFilterBar } from '~/routes/admin/activity/-components/activity-filters'
 
 const routeApi = getRouteApi('/admin/activity/')

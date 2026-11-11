@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { buildMemeSeo } from '~/lib/seo'
+import { buildMemeSeo } from '~/lib/seo/meta'
 import { getAdminMemeFillQueryOpts } from '~/queries/admin/ai-assist'
 import { getAdminMemeQueryOpts } from '~/queries/admin/meme'
 import { MemePage } from '~/routes/admin/library/-components/meme-page'

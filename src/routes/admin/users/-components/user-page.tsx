@@ -18,7 +18,7 @@ import {
   SectionHeading
 } from '~/routes/admin/-components/section-heading'
 import { StatTiles } from '~/routes/admin/-components/stat-tiles'
-import { buildActivityTiles } from '~/routes/admin/-helpers/activity-tiles'
+import { buildActivityTiles } from '~/routes/admin/-lib/activity-tiles'
 import { UserAccountPanel } from '~/routes/admin/users/-components/user-account-panel'
 import {
   PremiumBadges,

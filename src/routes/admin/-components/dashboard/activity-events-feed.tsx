@@ -4,7 +4,7 @@ import { CountryFlag } from '~/routes/admin/-components/country-flag'
 import {
   ACTIVITY_TYPE_DISPLAY,
   formatActivityEntry
-} from '~/routes/admin/-helpers/activity'
+} from '~/routes/admin/-lib/activity'
 import type { AdminActivityRow } from '~/server/admin/activity/activity.server'
 import { DashboardFeed, FeedActor } from './dashboard-feed'
 

@@ -6,7 +6,7 @@ import {
   resolveMemeTranslation
 } from '~/helpers/i18n-content'
 import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
-import { buildEmbedUrl, buildUrl } from '~/lib/seo'
+import { buildEmbedUrl, buildUrl } from '~/lib/seo/url'
 import {
   buildSitemapResponse,
   buildUrlEntry,

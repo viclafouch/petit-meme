@@ -7,7 +7,7 @@ testRule({
   tests: {
     valid: [
       {
-        code: "export const Route = createFileRoute('/pricing')({ component: PricingPage, head: () => { return seo({ title }) } })",
+        code: "export const Route = createFileRoute('/pricing')({ component: PricingPage, head: () => { return buildSeo({ title }) } })",
         filename: '/repo/src/routes/pricing.tsx'
       },
       {

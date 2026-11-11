@@ -3,7 +3,7 @@ import { formatRelativeTime } from '~/helpers/date'
 import { getLocale } from '~/paraglide/runtime'
 import { DetailList } from '~/routes/admin/-components/detail-list'
 import { VisitorIpLink } from '~/routes/admin/-components/visitor-ip-link'
-import { formatEventCount } from '~/routes/admin/-helpers/activity'
+import { formatEventCount } from '~/routes/admin/-lib/activity'
 import type { AdminUser } from '~/server/admin/user/user.functions'
 
 type UserIpListProps = {

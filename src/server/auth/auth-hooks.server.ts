@@ -1,8 +1,14 @@
-import type { BetterAuthOptions } from 'better-auth'
-import { APIError, createAuthMiddleware } from 'better-auth/api'
+import type { BetterAuthOptions, GenericEndpointContext } from 'better-auth'
+import {
+  APIError,
+  createAuthMiddleware,
+  getSessionFromCtx
+} from 'better-auth/api'
 import { z } from 'zod'
 import * as Sentry from '@sentry/tanstackstart-react'
 import { getUserNameSchema } from '~/constants/auth'
+import { ALREADY_SUBSCRIBED_ERROR_CODE } from '~/constants/plan'
+import { PREMIUM_SUBSCRIPTION_STATUSES } from '~/helpers/subscription'
 import { m } from '~/paraglide/messages'
 
 type ValidateUserInfo = NonNullable<
@@ -23,11 +29,7 @@ const GET_SESSION_RESPONSE_SCHEMA = z.object({
   user: z.object({ id: z.string() })
 })
 
-export const signUpGuard = createAuthMiddleware(async (endpointContext) => {
-  if (endpointContext.path !== '/sign-up/email') {
-    return
-  }
-
+const guardSignUp = (endpointContext: GenericEndpointContext) => {
   const result = getSignUpBodySchema().safeParse(endpointContext.body)
 
   if (!result.success) {
@@ -42,7 +44,48 @@ export const signUpGuard = createAuthMiddleware(async (endpointContext) => {
       body: result.data
     }
   }
-})
+}
+
+const refuseSecondSubscription = async (
+  endpointContext: GenericEndpointContext
+) => {
+  const session = await getSessionFromCtx(endpointContext)
+
+  if (!session) {
+    return
+  }
+
+  const premiumSubscription = await endpointContext.context.adapter.findOne({
+    model: 'subscription',
+    where: [
+      { field: 'referenceId', value: session.user.id },
+      {
+        field: 'status',
+        operator: 'in',
+        value: [...PREMIUM_SUBSCRIPTION_STATUSES]
+      }
+    ]
+  })
+
+  if (premiumSubscription) {
+    throw new APIError('BAD_REQUEST', {
+      code: ALREADY_SUBSCRIBED_ERROR_CODE,
+      message: 'The User already holds a Premium subscription'
+    })
+  }
+}
+
+export const guardAuthEndpoints = createAuthMiddleware(
+  async (endpointContext) => {
+    if (endpointContext.path === '/sign-up/email') {
+      return guardSignUp(endpointContext)
+    }
+
+    if (endpointContext.path === '/subscription/upgrade') {
+      return refuseSecondSubscription(endpointContext)
+    }
+  }
+)
 
 export const identifySentryUser = createAuthMiddleware(
   async (endpointContext) => {

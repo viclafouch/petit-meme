@@ -1,8 +1,18 @@
 import { betterAuth } from 'better-auth'
 import { memoryAdapter } from 'better-auth/adapters/memory'
+import { convertSetCookieToCookie } from 'better-auth/test'
+import { Stripe } from 'stripe'
 import { describe, expect, it } from 'vitest'
+import { stripe, type Subscription } from '@better-auth/stripe'
 import { USER_NAME_MAX_LENGTH } from '~/constants/auth'
-import { signUpGuard } from '~/server/auth/auth-hooks.server'
+import { HTTP_STATUS } from '~/constants/http'
+import {
+  ALREADY_SUBSCRIBED_ERROR_CODE,
+  PREMIUM_PLAN_NAME
+} from '~/constants/plan'
+import { STRIPE_API_VERSION } from '~/constants/stripe'
+import { matchIsOwnKey } from '~/helpers/object'
+import { guardAuthEndpoints } from '~/server/auth/auth-hooks.server'
 
 const VALID_SIGN_UP_BODY = {
   name: 'Alan',
@@ -16,11 +26,11 @@ const createTestAuth = () => {
     baseURL: 'http://localhost:3000',
     database: memoryAdapter({ user: [], session: [], account: [] }),
     emailAndPassword: { enabled: true },
-    hooks: { before: signUpGuard }
+    hooks: { before: guardAuthEndpoints }
   })
 }
 
-describe('signUpGuard', () => {
+describe('signing up', () => {
   it('should create the User from the fields the sign up form sends', async () => {
     const auth = createTestAuth()
 
@@ -76,5 +86,152 @@ describe('signUpGuard', () => {
     })
 
     expect(user.name).toBe('Alan')
+  })
+})
+
+const CHECKOUT_URL = 'https://checkout.stripe.test/cs_test'
+
+const STRIPE_RESPONSES = {
+  'GET /v1/customers/search': {
+    object: 'search_result',
+    data: [],
+    has_more: false
+  },
+  'POST /v1/customers': { id: 'cus_test', object: 'customer', metadata: {} },
+  'GET /v1/subscriptions': { object: 'list', data: [], has_more: false },
+  'GET /v1/prices/price_monthly': {
+    id: 'price_monthly',
+    object: 'price',
+    recurring: { interval: 'month', usage_type: 'licensed' }
+  },
+  'POST /v1/checkout/sessions': {
+    id: 'cs_test',
+    object: 'checkout.session',
+    url: CHECKOUT_URL
+  }
+} as const
+
+const respondLikeStripe = async (
+  input: string | URL | Request,
+  init?: RequestInit
+) => {
+  const { pathname } = new URL(input instanceof Request ? input.url : input)
+  const route = `${init?.method ?? 'GET'} ${pathname}`
+
+  if (!matchIsOwnKey(STRIPE_RESPONSES, route)) {
+    return Response.json(
+      { error: { message: `No fake for ${route}` } },
+      { status: HTTP_STATUS.NOT_FOUND }
+    )
+  }
+
+  return Response.json(STRIPE_RESPONSES[route])
+}
+
+const createSubscriptionTestAuth = () => {
+  const subscription: Record<string, unknown>[] = []
+  const database = {
+    user: [],
+    session: [],
+    account: [],
+    verification: [],
+    subscription
+  }
+  const stripeClient = new Stripe('sk_test_fake', {
+    apiVersion: STRIPE_API_VERSION,
+    maxNetworkRetries: 0,
+    httpClient: Stripe.createFetchHttpClient(respondLikeStripe)
+  })
+  const auth = betterAuth({
+    secret: 'auth-guard-test-secret-0000000001',
+    baseURL: 'http://localhost:3000',
+    database: memoryAdapter(database),
+    emailAndPassword: { enabled: true },
+    hooks: { before: guardAuthEndpoints },
+    plugins: [
+      stripe({
+        stripeClient,
+        stripeWebhookSecret: 'whsec_test',
+        subscription: {
+          enabled: true,
+          plans: [
+            {
+              name: PREMIUM_PLAN_NAME,
+              priceId: 'price_monthly',
+              annualDiscountPriceId: 'price_yearly'
+            }
+          ]
+        }
+      })
+    ]
+  })
+
+  return { auth, database }
+}
+
+const signUpWithSubscriptions = async (statuses: Subscription['status'][]) => {
+  const { auth, database } = createSubscriptionTestAuth()
+  const { headers, response } = await auth.api.signUpEmail({
+    body: VALID_SIGN_UP_BODY,
+    returnHeaders: true
+  })
+
+  for (const status of statuses) {
+    database.subscription.push({
+      id: `sub-row-${status}`,
+      plan: PREMIUM_PLAN_NAME,
+      referenceId: response.user.id,
+      stripeCustomerId: 'cus_test',
+      stripeSubscriptionId: `sub_${status}`,
+      status,
+      seats: 1
+    })
+  }
+
+  return { auth, headers: convertSetCookieToCookie(headers) }
+}
+
+const UPGRADE_BODY = {
+  plan: PREMIUM_PLAN_NAME,
+  successUrl: '/checkout/success',
+  cancelUrl: '/pricing',
+  disableRedirect: true
+}
+
+describe('upgrading to Premium', () => {
+  it.each(['active', 'trialing', 'past_due'] as const)(
+    'should refuse a checkout to a User whose subscription is %s',
+    async (status) => {
+      const { auth, headers } = await signUpWithSubscriptions([status])
+
+      await expect(
+        auth.api.upgradeSubscription({ body: UPGRADE_BODY, headers })
+      ).rejects.toMatchObject({
+        statusCode: 400,
+        body: { code: ALREADY_SUBSCRIBED_ERROR_CODE }
+      })
+    }
+  )
+
+  it('should send a User who never subscribed to the Stripe checkout', async () => {
+    const { auth, headers } = await signUpWithSubscriptions([])
+
+    const checkout = await auth.api.upgradeSubscription({
+      body: UPGRADE_BODY,
+      headers
+    })
+
+    expect(checkout.url).toBe(CHECKOUT_URL)
+  })
+
+  it('should send a User whose last subscription ended to the Stripe checkout', async () => {
+    const { auth, headers } = await signUpWithSubscriptions(['canceled'])
+
+    const checkout = await auth.api.upgradeSubscription({
+      body: UPGRADE_BODY,
+      headers
+    })
+
+    expect(checkout.url).toBe(CHECKOUT_URL)
   })
 })

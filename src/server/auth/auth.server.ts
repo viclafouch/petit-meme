@@ -36,9 +36,9 @@ import { authLogger, stripeLogger } from '~/lib/logger'
 import { getLocale } from '~/paraglide/runtime'
 import { recordActivityEvent } from '~/server/activity/activity.server'
 import {
+  guardAuthEndpoints,
   identifySentryUser,
-  rejectUnverifiedDiscordEmail,
-  signUpGuard
+  rejectUnverifiedDiscordEmail
 } from '~/server/auth/auth-hooks.server'
 import { claimEmailVerificationSend } from '~/server/auth/email-verification-quota.server'
 import { buildEmailVerificationPath } from '~/server/auth/email-verification.server'
@@ -137,7 +137,7 @@ const getAuthConfig = createServerOnlyFn(() => {
     secret: serverEnv.BETTER_AUTH_SECRET,
     disabledPaths: ['/update-user', '/verify-email'],
     hooks: {
-      before: signUpGuard,
+      before: guardAuthEndpoints,
       after: identifySentryUser
     },
     database: prismaAdapter(prismaClient, {

@@ -7,7 +7,8 @@ export const E2E_EMAIL_DOMAIN = 'e2e.petitmeme.invalid'
 export const E2E_PASSWORD = 'e2e-password-2026'
 export const E2E_WRONG_PASSWORD = 'not-the-e2e-password'
 
-type E2eSubscription = Pick<Subscription, 'plan' | 'billingInterval'>
+type E2eSubscription = Pick<Subscription, 'plan' | 'billingInterval'> &
+  Partial<Pick<Subscription, 'status'>>
 
 export type E2eRole = Pick<User, 'id' | 'name' | 'email' | 'emailVerified'> & {
   subscription?: E2eSubscription
@@ -21,6 +22,11 @@ export type E2eRole = Pick<User, 'id' | 'name' | 'email' | 'emailVerified'> & {
 const MONTHLY_PREMIUM_SUBSCRIPTION = {
   plan: PREMIUM_PLAN_NAME,
   billingInterval: 'month'
+} as const satisfies E2eSubscription
+
+const PAYMENT_FAILING_PREMIUM_SUBSCRIPTION = {
+  ...MONTHLY_PREMIUM_SUBSCRIPTION,
+  status: 'past_due'
 } as const satisfies E2eSubscription
 
 const LEGACY_ANNUAL_PREMIUM_SUBSCRIPTION = {
@@ -210,6 +216,13 @@ export const E2E_ROLES = {
     emailVerified: true,
     subscription: MONTHLY_PREMIUM_SUBSCRIPTION,
     generationCount: FREE_CAPS.generation
+  },
+  premiumPaymentFailing: {
+    id: 'e2e-user-premium-payment-failing',
+    name: 'E2E Premium Payment Failing',
+    email: `e2e-premium-payment-failing@${E2E_EMAIL_DOMAIN}`,
+    emailVerified: true,
+    subscription: PAYMENT_FAILING_PREMIUM_SUBSCRIPTION
   },
   premiumAnnualLegacy: {
     id: 'e2e-user-premium-annual-legacy',

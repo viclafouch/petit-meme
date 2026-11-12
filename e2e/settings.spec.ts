@@ -3,16 +3,20 @@ import { HTTP_STATUS } from '~/constants/http'
 import { getBillingPeriodLabel, PREMIUM_PLAN_PRICING } from '~/constants/plan'
 import { formatCentsToEuros } from '~/helpers/number'
 import { m } from '~/paraglide/messages'
+import type { Locale } from '~/paraglide/runtime'
 import { openAuthDialog } from './auth-flows'
 import { E2E_PASSWORD, E2E_ROLES, E2E_WRONG_PASSWORD } from './constants'
 import { expectDownloadIsNotEmpty } from './downloads'
 import { resolveStorageStatePath } from './env'
 import { test } from './fixtures'
 import { repeatUntilRequested, repeatUntilVisible } from './hydration'
-import { E2E_LOCALE } from './locales'
+import { E2E_ENGLISH_LOCALE, E2E_LOCALE } from './locales'
 import { SERVER_FUNCTION_URL_PATTERN } from './server-functions'
 
 const NEW_PASSWORD = 'e2e-settings-password-2026'
+const IN_ENGLISH = { locale: E2E_ENGLISH_LOCALE } as const satisfies {
+  locale: Locale
+}
 const AVATAR_SLOT_NUMBER = '3'
 const SESSION_URL_PATTERN = /auth\/get-session/u
 const STRIPE_BILLING_PORTAL_ORIGIN = 'https://billing.stripe.com'
@@ -287,6 +291,40 @@ test.describe('a Premium still on the former annual plan', () => {
     await page.goto('/settings')
 
     await expect(page.getByRole('main').getByText(yearlyPrice)).toBeVisible()
+  })
+})
+
+test.describe('a Premium whose renewal fails', () => {
+  test.use({ storageState: resolveStorageStatePath('premiumPaymentFailing') })
+
+  test('keeps Premium and finds the way to fix the payment', async ({
+    page
+  }) => {
+    await page.goto('/settings')
+
+    await expect(page.getByText(m.settings_badge_premium())).toBeVisible()
+    await expect(
+      page.getByText(m.settings_subscription_payment_failing())
+    ).toBeVisible()
+    await expect(
+      getSettingsButton(page, m.nav_manage_subscription())
+    ).toBeVisible()
+    await expect(
+      page
+        .getByRole('main')
+        .getByRole('link', { name: m.nav_upgrade_premium() })
+    ).toBeHidden()
+  })
+
+  test('reads the failing payment in English', async ({ page }) => {
+    await page.goto(`/${E2E_ENGLISH_LOCALE}/settings`)
+
+    await expect(
+      page.getByText(m.settings_badge_premium({}, IN_ENGLISH))
+    ).toBeVisible()
+    await expect(
+      page.getByText(m.settings_subscription_payment_failing({}, IN_ENGLISH))
+    ).toBeVisible()
   })
 })
 

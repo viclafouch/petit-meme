@@ -76,7 +76,7 @@ const createSubscription = async (
       plan: role.subscription.plan,
       referenceId: role.id,
       stripeCustomerId,
-      status: 'active',
+      status: role.subscription.status ?? 'active',
       billingInterval: role.subscription.billingInterval,
       periodStart: now,
       periodEnd: new Date(now.getTime() + THIRTY_DAYS_MS)

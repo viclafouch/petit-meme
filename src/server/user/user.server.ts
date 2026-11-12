@@ -63,20 +63,30 @@ type SyncUserLocaleParams = {
 
 export const syncUserLocale = createServerOnlyFn(
   async ({ userId, locale }: SyncUserLocaleParams) => {
-    const [changedUser] = await prismaClient.user.updateManyAndReturn({
-      where: { id: userId, NOT: { locale } },
-      data: { locale },
-      select: { stripeCustomerId: true }
+    const user = await prismaClient.user.findUnique({
+      where: { id: userId },
+      select: { locale: true, stripeCustomerId: true }
     })
 
-    if (!changedUser?.stripeCustomerId) {
+    if (!user || user.locale === locale) {
       return
     }
 
-    await updateStripeCustomerLocale({
-      stripeClient: getStripeClient(),
-      customerId: changedUser.stripeCustomerId,
-      locale
+    if (user.stripeCustomerId) {
+      const isLocaleGiven = await updateStripeCustomerLocale({
+        stripeClient: getStripeClient(),
+        customerId: user.stripeCustomerId,
+        locale
+      })
+
+      if (!isLocaleGiven) {
+        return
+      }
+    }
+
+    await prismaClient.user.update({
+      where: { id: userId },
+      data: { locale }
     })
   }
 )

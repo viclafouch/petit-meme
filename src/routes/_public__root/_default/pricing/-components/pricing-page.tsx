@@ -9,7 +9,7 @@ import {
 } from '~/constants/plan'
 import { matchIsPremiumGranted } from '~/helpers/role'
 import { m } from '~/paraglide/messages'
-import { getActiveSubscriptionQueryOpts } from '~/queries/subscription'
+import { getPremiumSubscriptionQueryOpts } from '~/queries/subscription'
 import {
   PageDescription,
   PageHeading
@@ -27,15 +27,16 @@ export const PricingPage = () => {
   const [billingPeriod, setBillingPeriod] =
     React.useState<BillingPeriod>('monthly')
 
-  const activeSubscriptionQuery = useSuspenseQuery(
-    getActiveSubscriptionQueryOpts()
+  const premiumSubscriptionQuery = useSuspenseQuery(
+    getPremiumSubscriptionQueryOpts()
   )
 
   const isLoggedIn = user !== null
-  const hasActiveSubscription =
-    isLoggedIn && activeSubscriptionQuery.data !== null
+  const hasPremiumSubscription =
+    isLoggedIn && premiumSubscriptionQuery.data !== null
   const isPremiumGranted = isLoggedIn && matchIsPremiumGranted(user)
-  const isOnFreePlan = isLoggedIn && !hasActiveSubscription && !isPremiumGranted
+  const isOnFreePlan =
+    isLoggedIn && !hasPremiumSubscription && !isPremiumGranted
 
   return (
     <div className="flex flex-col items-center gap-8 pb-16">
@@ -67,9 +68,9 @@ export const PricingPage = () => {
           onChangePlan={() => {
             void checkoutPremium(billingPeriod)
           }}
-          isActive={hasActiveSubscription || isPremiumGranted}
+          isActive={hasPremiumSubscription || isPremiumGranted}
           activeLabel={
-            hasActiveSubscription
+            hasPremiumSubscription
               ? m.pricing_active()
               : m.premium_granted_for_life()
           }

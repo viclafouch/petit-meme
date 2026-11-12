@@ -13,7 +13,6 @@ import {
   truncateToGranularity,
   truncateToUtcDay
 } from '~/helpers/date'
-import { ACTIVE_SUBSCRIPTION_STATUSES } from '~/helpers/subscription'
 import { READY_MEME_DRAFT_WHERE } from '~/server/admin/ai-assist/meme-fill.server'
 import type { AuditMetadata } from '~/server/admin/audit/audit.server'
 import { adminRequiredMiddleware } from '~/server/auth/auth.middleware'
@@ -22,6 +21,7 @@ import {
   TRENDING_ACTIVITY_SQL,
   TRENDING_SCORE_SQL
 } from '~/server/meme/trending.server'
+import { PREMIUM_SUBSCRIPTION_WHERE } from '~/server/subscription/subscription.server'
 
 export const PERIOD_SCHEMA = z.enum(['7d', '30d', '90d', 'all'])
 
@@ -57,7 +57,7 @@ const findTotals = async () => {
     prismaClient.meme.count({ where: READY_MEME_DRAFT_WHERE }),
     prismaClient.user.count(),
     prismaClient.subscription.count({
-      where: { status: { in: [...ACTIVE_SUBSCRIPTION_STATUSES] } }
+      where: PREMIUM_SUBSCRIPTION_WHERE
     }),
     prismaClient.user.count({ where: { premiumGrantedAt: { not: null } } })
   ])

@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { getLocale } from '~/paraglide/runtime'
 import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
 import { listCategoriesQueryOpts } from '~/queries/category'
-import { getActiveSubscriptionQueryOpts } from '~/queries/subscription'
+import { getPremiumSubscriptionQueryOpts } from '~/queries/subscription'
 import { DefaultLayout } from './-components/default-layout'
 
 export const Route = createFileRoute('/_public__root/_default')({
@@ -15,7 +15,7 @@ export const Route = createFileRoute('/_public__root/_default')({
             staleTime: 'static'
           }),
           context.queryClient.query({
-            ...getActiveSubscriptionQueryOpts(),
+            ...getPremiumSubscriptionQueryOpts(),
             staleTime: 'static'
           })
         ]

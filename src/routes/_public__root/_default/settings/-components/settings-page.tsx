@@ -3,14 +3,14 @@ import { ProfileContent } from './profile-content'
 import { ProfileHeader } from './profile-header'
 
 export const SettingsPage = () => {
-  const { user, activeSubscription } = useRouteContext({
+  const { user, premiumSubscription } = useRouteContext({
     from: '/_public__root/_default/settings/'
   })
 
   return (
     <div className="mx-auto flex flex-col gap-6">
       <ProfileHeader user={user} />
-      <ProfileContent user={user} activeSubscription={activeSubscription} />
+      <ProfileContent user={user} premiumSubscription={premiumSubscription} />
     </div>
   )
 }

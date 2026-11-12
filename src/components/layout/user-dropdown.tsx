@@ -28,7 +28,7 @@ import { UserAvatar } from '~/components/user/user-avatar'
 import { matchIsUserAdmin, type SessionUser } from '~/helpers/role'
 import { m } from '~/paraglide/messages'
 import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
-import { getActiveSubscriptionQueryOpts } from '~/queries/subscription'
+import { getPremiumSubscriptionQueryOpts } from '~/queries/subscription'
 
 type UserDropdownProps = {
   user: SessionUser
@@ -40,7 +40,7 @@ export const UserDropdown = ({ user }: UserDropdownProps) => {
   const { signOut } = useSignOut()
 
   const bookmarkedMemesQuery = useQuery(listBookmarkedMemesQueryOpts())
-  const activeSubscriptionQuery = useQuery(getActiveSubscriptionQueryOpts())
+  const premiumSubscriptionQuery = useQuery(getPremiumSubscriptionQueryOpts())
   const isPremium = useIsPremium()
 
   return (
@@ -85,7 +85,7 @@ export const UserDropdown = ({ user }: UserDropdownProps) => {
               {m.nav_upgrade_premium()}
             </DropdownMenuLinkItem>
           )}
-          {activeSubscriptionQuery.data ? (
+          {premiumSubscriptionQuery.data ? (
             <DropdownMenuItem
               onClick={() => {
                 void goToBillingPortal()

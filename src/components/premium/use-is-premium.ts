@@ -1,14 +1,14 @@
 import { useQuery } from '@tanstack/react-query'
 import { useRouteContext } from '@tanstack/react-router'
 import { matchIsPremium } from '~/helpers/role'
-import { getActiveSubscriptionQueryOpts } from '~/queries/subscription'
+import { getPremiumSubscriptionQueryOpts } from '~/queries/subscription'
 
 export const useIsPremium = () => {
   const { user } = useRouteContext({ from: '__root__' })
-  const activeSubscriptionQuery = useQuery({
-    ...getActiveSubscriptionQueryOpts(),
+  const premiumSubscriptionQuery = useQuery({
+    ...getPremiumSubscriptionQueryOpts(),
     enabled: Boolean(user)
   })
 
-  return matchIsPremium({ user, subscription: activeSubscriptionQuery.data })
+  return matchIsPremium({ user, subscription: premiumSubscriptionQuery.data })
 }

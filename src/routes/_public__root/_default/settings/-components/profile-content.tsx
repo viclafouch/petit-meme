@@ -23,6 +23,7 @@ import {
   formatSubscriptionEnding,
   getSubscriptionDisplayInfo,
   getSubscriptionEnding,
+  getSubscriptionState,
   matchIsCancellationPending
 } from '~/helpers/subscription'
 import { downloadBlob } from '~/lib/download'
@@ -30,7 +31,7 @@ import { captureWithFeature } from '~/lib/sentry'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
-import type { ActiveSubscription } from '~/server/subscription/subscription.functions'
+import type { PremiumSubscription } from '~/server/subscription/subscription.functions'
 import { exportUserData } from '~/server/user/user.functions'
 
 const SETTINGS_ROW_CLASS_NAME =
@@ -38,25 +39,34 @@ const SETTINGS_ROW_CLASS_NAME =
 
 type ProfileContentProps = {
   user: SessionUser
-  activeSubscription: ActiveSubscription | null
+  premiumSubscription: PremiumSubscription | null
 }
 
 type SubscriptionRowProps = {
   user: SessionUser
-  activeSubscription: ActiveSubscription | null
+  premiumSubscription: PremiumSubscription | null
 }
 
 const SubscriptionRow = ({
   user,
-  activeSubscription
+  premiumSubscription
 }: SubscriptionRowProps) => {
   const { goToBillingPortal } = useStripeCheckout()
 
-  if (activeSubscription) {
-    const endingText = formatSubscriptionEnding(
-      getSubscriptionEnding(activeSubscription),
-      getLocale()
-    )
+  if (premiumSubscription) {
+    const subscriptionNote =
+      getSubscriptionState(premiumSubscription) === 'failing'
+        ? {
+            text: m.settings_subscription_payment_failing(),
+            className: 'text-destructive'
+          }
+        : {
+            text: formatSubscriptionEnding(
+              getSubscriptionEnding(premiumSubscription),
+              getLocale()
+            ),
+            className: 'text-info'
+          }
 
     return (
       <div className={SETTINGS_ROW_CLASS_NAME}>
@@ -68,14 +78,17 @@ const SubscriptionRow = ({
             {getPremiumPlan().title} -{' '}
             {
               getSubscriptionDisplayInfo({
-                billingInterval: activeSubscription.billingInterval,
+                billingInterval: premiumSubscription.billingInterval,
                 locale: getLocale()
               }).displayPrice
             }
-            {endingText ? (
+            {subscriptionNote.text ? (
               <>
                 {' '}
-                - <span className="text-info">{endingText}</span>
+                -{' '}
+                <span className={subscriptionNote.className}>
+                  {subscriptionNote.text}
+                </span>
               </>
             ) : null}
           </p>
@@ -136,7 +149,7 @@ const SubscriptionRow = ({
 
 export const ProfileContent = ({
   user,
-  activeSubscription
+  premiumSubscription
 }: ProfileContentProps) => {
   const [isUpdatePasswordOpened, setIsUpdatePasswordOpened] =
     React.useState(false)
@@ -184,7 +197,7 @@ export const ProfileContent = ({
           <CardContent className="space-y-6">
             <SubscriptionRow
               user={user}
-              activeSubscription={activeSubscription}
+              premiumSubscription={premiumSubscription}
             />
             <Separator />
             <div className={SETTINGS_ROW_CLASS_NAME}>
@@ -246,8 +259,8 @@ export const ProfileContent = ({
                 variant="destructive"
                 onClick={() => {
                   if (
-                    activeSubscription &&
-                    !matchIsCancellationPending(activeSubscription)
+                    premiumSubscription &&
+                    !matchIsCancellationPending(premiumSubscription)
                   ) {
                     toast.error(m.settings_cancel_subscription_first())
 

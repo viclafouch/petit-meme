@@ -5,7 +5,7 @@ import { buildSeo } from '~/lib/seo/meta'
 import { buildOgImageUrl } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
-import { getActiveSubscriptionQueryOpts } from '~/queries/subscription'
+import { getPremiumSubscriptionQueryOpts } from '~/queries/subscription'
 import { getPricingFaqItems } from './-components/constants'
 import { PricingPage } from './-components/pricing-page'
 
@@ -13,7 +13,7 @@ export const Route = createFileRoute('/_public__root/_default/pricing/')({
   component: PricingPage,
   loader: async ({ context }) => {
     await context.queryClient.query({
-      ...getActiveSubscriptionQueryOpts(),
+      ...getPremiumSubscriptionQueryOpts(),
       staleTime: 'static'
     })
   },

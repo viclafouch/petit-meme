@@ -17,7 +17,7 @@ import { matchIsUserAdmin, type SessionUser } from '~/helpers/role'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
 import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
-import { getActiveSubscriptionQueryOpts } from '~/queries/subscription'
+import { getPremiumSubscriptionQueryOpts } from '~/queries/subscription'
 
 const ACCOUNT_LINK_CLASS = 'flex items-center gap-3 text-lg font-medium'
 const LEGAL_LINK_CLASS =
@@ -37,8 +37,8 @@ export const MobileNav = ({ links, user }: MobileNavProps) => {
     ...listBookmarkedMemesQueryOpts(),
     enabled: Boolean(user)
   })
-  const activeSubscriptionQuery = useQuery({
-    ...getActiveSubscriptionQueryOpts(),
+  const premiumSubscriptionQuery = useQuery({
+    ...getPremiumSubscriptionQueryOpts(),
     enabled: Boolean(user)
   })
   const isPremium = useIsPremium()
@@ -136,7 +136,7 @@ export const MobileNav = ({ links, user }: MobileNavProps) => {
                       <Settings className="size-5" aria-hidden="true" />
                       {m.nav_my_account()}
                     </Link>
-                    {activeSubscriptionQuery.data ? (
+                    {premiumSubscriptionQuery.data ? (
                       <Button
                         variant="ghost"
                         className={cn(

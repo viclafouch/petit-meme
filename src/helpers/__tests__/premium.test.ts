@@ -9,7 +9,7 @@ describe('getPremiumStatus', () => {
       getPremiumStatus({
         role: 'admin',
         premiumGrantedAt: null,
-        subscription: { state: null }
+        subscription: { isPremium: false }
       })
     ).toStrictEqual({ source: 'admin' })
   })
@@ -18,7 +18,7 @@ describe('getPremiumStatus', () => {
     expect(
       getPremiumStatus({
         premiumGrantedAt: null,
-        subscription: { state: 'active' }
+        subscription: { isPremium: true }
       })
     ).toStrictEqual({ source: 'paid' })
   })
@@ -27,7 +27,7 @@ describe('getPremiumStatus', () => {
     expect(
       getPremiumStatus({
         premiumGrantedAt: GRANTED_AT,
-        subscription: { state: 'active' }
+        subscription: { isPremium: true }
       })
     ).toStrictEqual({ source: 'paid' })
   })
@@ -36,7 +36,7 @@ describe('getPremiumStatus', () => {
     expect(
       getPremiumStatus({
         premiumGrantedAt: GRANTED_AT,
-        subscription: { state: 'ended' }
+        subscription: { isPremium: false }
       })
     ).toStrictEqual({ source: 'granted', grantedAt: GRANTED_AT })
   })
@@ -45,7 +45,7 @@ describe('getPremiumStatus', () => {
     expect(
       getPremiumStatus({
         premiumGrantedAt: null,
-        subscription: { state: null }
+        subscription: { isPremium: false }
       })
     ).toStrictEqual({ source: 'none' })
   })
@@ -73,12 +73,31 @@ describe('buildSubscriptionInfo', () => {
 
     expect(info).toStrictEqual({
       state: 'ending',
+      isPremium: true,
       billingPeriod: 'monthly',
       ending: { kind: 'ends', date: PERIOD_END }
     })
     expect(
       getPremiumStatus({ premiumGrantedAt: null, subscription: info })
     ).toStrictEqual({ source: 'paid' })
+  })
+
+  it('should keep a subscriber Premium while Stripe retries the payment', () => {
+    const info = buildSubscriptionInfo([buildRow({ status: 'past_due' })])
+
+    expect(info.state).toBe('failing')
+    expect(
+      getPremiumStatus({ premiumGrantedAt: null, subscription: info })
+    ).toStrictEqual({ source: 'paid' })
+  })
+
+  it('should close Premium once Stripe stops retrying the payment', () => {
+    const info = buildSubscriptionInfo([buildRow({ status: 'unpaid' })])
+
+    expect(info.state).toBe('failing')
+    expect(
+      getPremiumStatus({ premiumGrantedAt: null, subscription: info })
+    ).toStrictEqual({ source: 'none' })
   })
 
   it('should show a failed payment rather than a former subscriber', () => {
@@ -107,6 +126,7 @@ describe('buildSubscriptionInfo', () => {
 
     expect(info).toStrictEqual({
       state: 'ended',
+      isPremium: false,
       billingPeriod: 'monthly',
       ending: { kind: 'ends', date: new Date('2026-10-10T00:00:00.000Z') }
     })
@@ -117,6 +137,7 @@ describe('buildSubscriptionInfo', () => {
 
     expect(info).toStrictEqual({
       state: null,
+      isPremium: false,
       billingPeriod: null,
       ending: null
     })

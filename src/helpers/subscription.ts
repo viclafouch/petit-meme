@@ -33,9 +33,14 @@ export type BillingInvoice = {
   billingReason: Stripe.Invoice.BillingReason | null
 }
 
-export const ACTIVE_SUBSCRIPTION_STATUSES = [
+const ACTIVE_SUBSCRIPTION_STATUSES = [
   'active',
   'trialing'
+] as const satisfies readonly Subscription['status'][]
+
+export const PREMIUM_SUBSCRIPTION_STATUSES = [
+  ...ACTIVE_SUBSCRIPTION_STATUSES,
+  'past_due'
 ] as const satisfies readonly Subscription['status'][]
 
 const NEVER_PAID_STATUSES = [
@@ -54,10 +59,16 @@ const BILLING_PERIOD_REASONS = [
   'subscription_cycle'
 ] as const satisfies readonly Stripe.Invoice.BillingReason[]
 
-export const matchIsActiveSubscriptionStatus = (status: string) => {
-  return ACTIVE_SUBSCRIPTION_STATUSES.some((activeStatus) => {
-    return activeStatus === status
-  })
+const matchIsStatusIn = (statuses: readonly string[], status: string) => {
+  return statuses.includes(status)
+}
+
+const matchIsActiveSubscriptionStatus = (status: string) => {
+  return matchIsStatusIn(ACTIVE_SUBSCRIPTION_STATUSES, status)
+}
+
+export const matchIsPremiumSubscriptionStatus = (status: string) => {
+  return matchIsStatusIn(PREMIUM_SUBSCRIPTION_STATUSES, status)
 }
 
 type SubscriptionStatusParams = {
@@ -65,15 +76,11 @@ type SubscriptionStatusParams = {
 }
 
 export const matchHasBeenPaid = ({ status }: SubscriptionStatusParams) => {
-  return !NEVER_PAID_STATUSES.some((neverPaidStatus) => {
-    return neverPaidStatus === status
-  })
+  return !matchIsStatusIn(NEVER_PAID_STATUSES, status)
 }
 
 const matchIsPaymentFailed = ({ status }: SubscriptionStatusParams) => {
-  return PAYMENT_FAILED_STATUSES.some((paymentFailedStatus) => {
-    return paymentFailedStatus === status
-  })
+  return matchIsStatusIn(PAYMENT_FAILED_STATUSES, status)
 }
 
 type MatchIsPayingAtParams = Pick<
@@ -186,10 +193,6 @@ export const getSubscriptionState = (
   }
 
   return matchIsPaymentFailed(subscription) ? 'failing' : 'ended'
-}
-
-export const matchIsPremiumState = (state: SubscriptionState) => {
-  return state === 'active' || state === 'ending'
 }
 
 export const formatSubscriptionEnding = (

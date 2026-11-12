@@ -8,7 +8,8 @@ import {
   getCustomerSince,
   getSubscriptionEnding,
   getSubscriptionState,
-  matchIsCancellationPending
+  matchIsCancellationPending,
+  matchIsPremiumSubscriptionStatus
 } from '~/helpers/subscription'
 
 describe('getBillingPeriodFromInterval', () => {
@@ -221,5 +222,16 @@ describe('getSubscriptionState', () => {
     expect(
       getSubscriptionState({ status: 'canceled', endedAt: PERIOD_END })
     ).toBe('ended')
+  })
+})
+
+describe('matchIsPremiumSubscriptionStatus', () => {
+  it('should keep Premium while Stripe retries a failed renewal', () => {
+    expect(matchIsPremiumSubscriptionStatus('past_due')).toBe(true)
+  })
+
+  it('should close Premium once Stripe stops retrying', () => {
+    expect(matchIsPremiumSubscriptionStatus('unpaid')).toBe(false)
+    expect(matchIsPremiumSubscriptionStatus('paused')).toBe(false)
   })
 })

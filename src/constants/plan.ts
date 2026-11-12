@@ -12,6 +12,8 @@ type PlanFeature = {
 
 export const PREMIUM_PLAN_NAME = 'premium'
 
+export const ALREADY_SUBSCRIBED_ERROR_CODE = 'ALREADY_SUBSCRIBED'
+
 export const STRIPE_BILLING_INTERVALS = [
   'day',
   'week',

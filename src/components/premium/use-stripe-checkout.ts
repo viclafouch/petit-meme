@@ -2,7 +2,11 @@ import React from 'react'
 import { toast } from 'sonner'
 import { type QueryClient, useQueryClient } from '@tanstack/react-query'
 import { type LinkOptions, useRouteContext } from '@tanstack/react-router'
-import { type BillingPeriod, PREMIUM_PLAN_NAME } from '~/constants/plan'
+import {
+  ALREADY_SUBSCRIBED_ERROR_CODE,
+  type BillingPeriod,
+  PREMIUM_PLAN_NAME
+} from '~/constants/plan'
 import { getErrorMessage } from '~/helpers/error'
 import { createLatch, type LatchEnd } from '~/helpers/promise'
 import { authClient } from '~/lib/auth-client'
@@ -23,6 +27,12 @@ const openBillingPortal = async () => {
   }
 }
 
+const showAlreadySubscribed = (): LatchEnd => {
+  toast.success(m.error_already_subscribed())
+
+  return 'release'
+}
+
 const startCheckout = async (
   queryClient: QueryClient,
   billingPeriod: BillingPeriod
@@ -36,9 +46,7 @@ const startCheckout = async (
   )
 
   if (premiumSubscription) {
-    toast.success(m.error_already_subscribed())
-
-    return 'release'
+    return showAlreadySubscribed()
   }
 
   const { error } = await authClient.subscription.upgrade({
@@ -48,6 +56,10 @@ const startCheckout = async (
     cancelUrl: '/pricing' satisfies LinkOptions['to'],
     returnUrl: '/settings' satisfies LinkOptions['to']
   })
+
+  if (error?.code === ALREADY_SUBSCRIBED_ERROR_CODE) {
+    return showAlreadySubscribed()
+  }
 
   if (error) {
     throw new Error(getErrorMessage(error), { cause: error })

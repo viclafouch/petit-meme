@@ -219,7 +219,7 @@ export const MemeListItem = React.memo(
           </div>
           <div className="flex items-center gap-1 shrink-0">
             <DropdownMenu>
-              <DropdownMenuTrigger>
+              <DropdownMenuTrigger className="relative after:absolute after:-inset-x-3 after:-inset-y-2">
                 <EllipsisVertical className={cn(sizes[size].icon)} />
                 <span className="sr-only">{m.meme_open_options()}</span>
               </DropdownMenuTrigger>

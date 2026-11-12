@@ -499,6 +499,8 @@
   "settings_delete_account_description": "Supprimer définitivement votre compte et toutes vos données",
   "settings_download_data": "Télécharger mes données",
   "settings_bookmarks_description": "Tes mèmes préférés, toujours sous la main : retrouve-les ici.",
+  "settings_bookmarks_empty_cta": "Découvrir les mèmes",
+  "settings_bookmarks_empty_description": "Ajoute un mème à tes favoris, il t'attendra ici.",
   "settings_bookmarks_heading": "Favoris",
   "settings_bookmarks_title": "Petit Meme - Favoris",
   "settings_member_since": "Membre depuis le {date}",

@@ -499,6 +499,8 @@
   "settings_delete_account_description": "Permanently delete your account and all your data",
   "settings_download_data": "Download my data",
   "settings_bookmarks_description": "Your favorite memes, always at hand: find them here.",
+  "settings_bookmarks_empty_cta": "Browse the memes",
+  "settings_bookmarks_empty_description": "Add a meme to your favorites, and it waits for you here.",
   "settings_bookmarks_heading": "Favorites",
   "settings_bookmarks_title": "Petit Meme - Favorites",
   "settings_member_since": "Member since {date}",

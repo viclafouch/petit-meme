@@ -79,7 +79,7 @@ export const Navbar = () => {
             />
           </Link>
         </div>
-        <NavigationMenu className="max-md:hidden" aria-label={m.nav_menu()}>
+        <NavigationMenu className="max-lg:hidden" aria-label={m.nav_menu()}>
           <NavigationMenuList>
             {navigationLinks.map((link) => {
               return (
@@ -101,7 +101,7 @@ export const Navbar = () => {
         </NavigationMenu>
         <div className="flex flex-1 items-center justify-end gap-3">
           <LanguageSwitcher />
-          <ThemeSwitcher className="max-md:hidden" />
+          <ThemeSwitcher className="max-lg:hidden" />
           {user ? (
             <UserDropdown user={user} />
           ) : (
@@ -112,10 +112,10 @@ export const Navbar = () => {
               }}
               variant="default"
               size="lg"
-              className="max-md:size-9 max-md:p-0"
+              className="max-lg:size-9 max-lg:p-0"
             >
               <User aria-hidden="true" />
-              <span className="max-md:hidden">{m.nav_sign_in()}</span>
+              <span className="max-lg:hidden">{m.nav_sign_in()}</span>
             </Button>
           )}
         </div>

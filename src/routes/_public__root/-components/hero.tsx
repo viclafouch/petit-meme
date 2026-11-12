@@ -1,9 +1,7 @@
 import { ErrorBoundary } from 'react-error-boundary'
-import { type Variants, motion, useReducedMotion } from 'motion/react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { buttonVariants } from '~/components/ui/button'
-import { TextEffect } from '~/components/ui/text-effect'
 import { NEWS_CATEGORY_SLUG } from '~/constants/meme'
 import { useIsMobile } from '~/hooks/use-mobile'
 import { cn } from '~/lib/utils'
@@ -18,34 +16,78 @@ import {
   PageHeading
 } from './page-headers'
 
-const DEFAULT_ENTRANCE_DURATION = 0.6
+const HEADING_WORD_STAGGER_MS = 55
 
-const h1Transition = {
-  delay: 0,
-  speedReveal: 0.9,
-  speedSegment: 0.3
+const RISE_IN_CLASS_NAME =
+  'animate-in fade-in slide-in-from-bottom-5 fill-mode-both motion-reduce:animate-none'
+
+const ENTRANCE_CLASS_NAME = cn(
+  RISE_IN_CLASS_NAME,
+  'blur-in-[15px] duration-600'
+)
+
+const HEADING_WORD_CLASS_NAME = cn(
+  RISE_IN_CLASS_NAME,
+  'inline-block whitespace-pre blur-in-[12px] duration-1000'
+)
+
+type HeadingPart = {
+  text: string
+  isEmphasized: boolean
 }
 
-const variants = {
-  hidden: {
-    opacity: 0,
-    y: 20,
-    filter: 'blur(15px)'
-  },
-  visible: (custom: { delay?: number; duration?: number }) => {
-    return {
-      opacity: 1,
-      y: 0,
-      filter: 'blur(0px)',
-      transition: {
-        delay: custom.delay ?? 0,
-        duration: custom.duration ?? DEFAULT_ENTRANCE_DURATION
-      }
-    }
-  }
-} as const satisfies Variants
+const HeroHeading = () => {
+  const parts: HeadingPart[] = [
+    { text: m.home_hero_h1_1(), isEmphasized: true },
+    { text: m.home_hero_h1_2(), isEmphasized: false },
+    { text: m.home_hero_h1_3(), isEmphasized: true },
+    { text: m.home_hero_h1_4(), isEmphasized: false },
+    { text: m.home_hero_h1_5(), isEmphasized: true }
+  ]
 
-const PageDescriptionMotion = motion.create(PageDescription)
+  const words = parts
+    .flatMap((part) => {
+      return part.text.split(/(\s+)/u).map((text) => {
+        return { text, isEmphasized: part.isEmphasized }
+      })
+    })
+    .filter((word) => {
+      return word.text !== ''
+    })
+    .map((word, position) => {
+      return { ...word, position }
+    })
+
+  return (
+    <PageHeading className="text-foreground/70">
+      <span className="sr-only">
+        {parts
+          .map((part) => {
+            return part.text
+          })
+          .join('')}
+      </span>
+      <span aria-hidden="true">
+        {words.map((word) => {
+          return (
+            <span
+              key={word.position}
+              className={cn(
+                HEADING_WORD_CLASS_NAME,
+                word.isEmphasized && 'text-foreground'
+              )}
+              style={{
+                animationDelay: `${word.position * HEADING_WORD_STAGGER_MS}ms`
+              }}
+            >
+              {word.text}
+            </span>
+          )
+        })}
+      </span>
+    </PageHeading>
+  )
+}
 
 const AnnouncementQuery = () => {
   const recentMemesCountQuery = useSuspenseQuery(countRecentMemesQueryOpts())
@@ -65,50 +107,24 @@ const AnnouncementQuery = () => {
 
 export const Hero = () => {
   const isMobile = useIsMobile()
-  const isReducedMotion = useReducedMotion()
 
   return (
     <PageHeader as="div" className="container">
-      <motion.div
-        variants={variants}
-        initial={isReducedMotion ? false : 'hidden'}
-        animate="visible"
-        custom={{ delay: 0.5 }}
-      >
+      <div className={cn(ENTRANCE_CLASS_NAME, 'delay-500')}>
         <ErrorBoundary fallback={null}>
           <AnnouncementQuery />
         </ErrorBoundary>
-      </motion.div>
-      <PageHeading className="text-foreground/70">
-        <TextEffect
-          as="span"
-          preset="fade-in-blur"
-          speedReveal={h1Transition.speedReveal}
-          speedSegment={h1Transition.speedSegment}
-          delay={h1Transition.delay}
-        >
-          <span className="text-foreground">{m.home_hero_h1_1()}</span>
-          {m.home_hero_h1_2()}
-          <span className="text-foreground">{m.home_hero_h1_3()}</span>
-          {m.home_hero_h1_4()}
-          <span className="text-foreground">{m.home_hero_h1_5()}</span>
-        </TextEffect>
-      </PageHeading>
-      <PageDescriptionMotion
-        variants={variants}
-        initial={isReducedMotion ? false : 'hidden'}
-        animate="visible"
-        custom={{ delay: 0.8 }}
-      >
+      </div>
+      <HeroHeading />
+      <PageDescription className={cn(ENTRANCE_CLASS_NAME, 'delay-800')}>
         {m.home_hero_description()}
-      </PageDescriptionMotion>
+      </PageDescription>
       <PageActions className="w-full max-w-sm md:max-w-none justify-center">
-        <motion.div
-          variants={variants}
-          initial={isReducedMotion ? false : 'hidden'}
-          animate="visible"
-          className="flex gap-2 flex-col md:flex-row w-full justify-center"
-          custom={{ delay: 1.1 }}
+        <div
+          className={cn(
+            ENTRANCE_CLASS_NAME,
+            'delay-1100 flex gap-2 flex-col md:flex-row w-full justify-center'
+          )}
         >
           <Link
             viewTransition
@@ -140,9 +156,9 @@ export const Hero = () => {
               🎉
             </span>
           </Link>
-        </motion.div>
+        </div>
       </PageActions>
-      {!isMobile ? <FloatingLogos variants={variants} /> : null}
+      {!isMobile ? <FloatingLogos /> : null}
     </PageHeader>
   )
 }

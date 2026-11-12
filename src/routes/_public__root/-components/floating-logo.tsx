@@ -88,11 +88,25 @@ const positionRandoms = logoPositions.map(() => {
   }
 })
 
-type FloatingLogosProps = {
-  variants: Variants
-}
+const ENTRANCE_DURATION_SECONDS = 0.6
 
-export const FloatingLogos = ({ variants }: FloatingLogosProps) => {
+const entranceVariants = {
+  hidden: {
+    opacity: 0,
+    y: 20,
+    filter: 'blur(15px)'
+  },
+  visible: (delay: number) => {
+    return {
+      opacity: 1,
+      y: 0,
+      filter: 'blur(0px)',
+      transition: { delay, duration: ENTRANCE_DURATION_SECONDS }
+    }
+  }
+} as const satisfies Variants
+
+export const FloatingLogos = () => {
   const isReducedMotion = useReducedMotion()
   const logosPerPosition = Math.floor(MEME_LOGOS.length / logoPositions.length)
   const remainingLogos = MEME_LOGOS.length % logoPositions.length
@@ -122,12 +136,10 @@ export const FloatingLogos = ({ variants }: FloatingLogosProps) => {
       {positionsWithLogos.map((position, index) => {
         return (
           <motion.div
-            variants={variants}
+            variants={entranceVariants}
             initial={isReducedMotion ? false : 'hidden'}
             animate="visible"
-            custom={{
-              delay: 1 + LOGO_ENTRANCE_STAGGER * index
-            }}
+            custom={1 + LOGO_ENTRANCE_STAGGER * index}
             key={position.index}
             className={`absolute ${position.x} ${position.y}`}
           >

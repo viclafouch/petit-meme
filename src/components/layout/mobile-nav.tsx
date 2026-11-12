@@ -54,7 +54,7 @@ export const MobileNav = ({ links, user }: MobileNavProps) => {
           <Button
             variant="ghost"
             size="icon"
-            className="block size-8 touch-manipulation items-center justify-start gap-2.5 hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 active:bg-transparent md:hidden dark:hover:bg-transparent"
+            className="block size-8 touch-manipulation items-center justify-start gap-2.5 hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 active:bg-transparent lg:hidden dark:hover:bg-transparent"
           />
         }
       >

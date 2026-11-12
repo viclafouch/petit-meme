@@ -55,8 +55,8 @@ export const UserDropdown = ({ user }: UserDropdownProps) => {
           size="sm"
           shape="rounded"
         />
-        <div className="truncate max-md:hidden">{user.name}</div>
-        <ChevronDown className="max-md:hidden" />
+        <div className="max-w-32 truncate max-lg:hidden">{user.name}</div>
+        <ChevronDown className="max-lg:hidden" />
       </DropdownMenuTrigger>
       <DropdownMenuContent className="min-w-56 rounded-lg" sideOffset={4}>
         <DropdownMenuGroup>

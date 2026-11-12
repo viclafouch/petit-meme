@@ -48,6 +48,10 @@ import {
 } from '~/server/platforms/resend.server'
 import { getStripeClient } from '~/server/platforms/stripe.server'
 import {
+  buildStripeCustomerCreateParams,
+  giveUserLocaleToStripeCustomer
+} from '~/server/subscription/stripe-customer.server'
+import {
   notifyPaymentFailed,
   notifySubscriptionConfirmed
 } from '~/server/subscription/stripe-webhook.server'
@@ -288,6 +292,7 @@ const getAuthConfig = createServerOnlyFn(() => {
         stripeClient: getStripeClient(),
         stripeWebhookSecret: serverEnv.STRIPE_WEBHOOK_SECRET,
         createCustomerOnSignUp: true,
+        getCustomerCreateParams: buildStripeCustomerCreateParams,
         subscription: {
           enabled: true,
           plans: [
@@ -297,17 +302,21 @@ const getAuthConfig = createServerOnlyFn(() => {
               annualDiscountPriceId: serverEnv.STRIPE_ANNUAL_PRICE_ID
             }
           ],
-          onSubscriptionComplete: async ({
-            event,
-            subscription,
-            stripeSubscription,
-            plan
-          }) => {
+          onSubscriptionComplete: async (
+            { event, subscription, stripeSubscription, plan },
+            endpointContext
+          ) => {
             await notifySubscriptionConfirmed({
               eventId: event.id,
               userId: subscription.referenceId,
               planName: plan.name,
               billingInterval: subscription.billingInterval,
+              stripeSubscription
+            })
+            await giveUserLocaleToStripeCustomer({
+              stripeClient: getStripeClient(),
+              endpointContext,
+              userId: subscription.referenceId,
               stripeSubscription
             })
           }

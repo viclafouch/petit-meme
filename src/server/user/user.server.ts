@@ -7,6 +7,7 @@ import { captureWithFeature } from '~/lib/sentry'
 import type { Locale } from '~/paraglide/runtime'
 import { sendEmailInBackground } from '~/server/platforms/resend.server'
 import { getStripeClient } from '~/server/platforms/stripe.server'
+import { updateStripeCustomerLocale } from '~/server/subscription/stripe-customer.server'
 
 type CleanupUserDataParams = {
   userId: string
@@ -51,6 +52,31 @@ export const cleanupUserData = createServerOnlyFn(
     await prismaClient.adminAuditLog.updateMany({
       where: { targetId: userId },
       data: { targetId: '[deleted]' }
+    })
+  }
+)
+
+type SyncUserLocaleParams = {
+  userId: string
+  locale: Locale
+}
+
+export const syncUserLocale = createServerOnlyFn(
+  async ({ userId, locale }: SyncUserLocaleParams) => {
+    const [changedUser] = await prismaClient.user.updateManyAndReturn({
+      where: { id: userId, NOT: { locale } },
+      data: { locale },
+      select: { stripeCustomerId: true }
+    })
+
+    if (!changedUser?.stripeCustomerId) {
+      return
+    }
+
+    await updateStripeCustomerLocale({
+      stripeClient: getStripeClient(),
+      customerId: changedUser.stripeCustomerId,
+      locale
     })
   }
 )

@@ -1,34 +1,32 @@
 import type { User } from 'better-auth'
 import { createServerOnlyFn } from '@tanstack/react-start'
-import { getRequest } from '@tanstack/react-start/server'
+import { prismaClient } from '~/db/client.server'
+import type { Prisma } from '~/db/generated/prisma/client'
 import {
   matchIsPremiumGranted,
   matchIsUserAdmin,
   type SessionUser
 } from '~/helpers/role'
-import { matchIsActiveSubscriptionStatus } from '~/helpers/subscription'
-import { auth } from '~/server/auth/auth.server'
+import { PREMIUM_SUBSCRIPTION_STATUSES } from '~/helpers/subscription'
 
-export const findActiveSubscription = createServerOnlyFn(
+export const PREMIUM_SUBSCRIPTION_WHERE = {
+  status: { in: [...PREMIUM_SUBSCRIPTION_STATUSES] }
+} as const satisfies Prisma.SubscriptionWhereInput
+
+export const findPremiumSubscription = createServerOnlyFn(
   async (userId: User['id']) => {
-    const subscriptions = await auth.api.listActiveSubscriptions({
-      headers: getRequest().headers,
-      query: {
-        referenceId: userId
+    return prismaClient.subscription.findFirst({
+      where: { ...PREMIUM_SUBSCRIPTION_WHERE, referenceId: userId },
+      orderBy: { periodEnd: 'desc' },
+      select: {
+        status: true,
+        billingInterval: true,
+        periodEnd: true,
+        cancelAt: true,
+        cancelAtPeriodEnd: true,
+        endedAt: true
       }
     })
-
-    const activeSubscription = subscriptions.find((subscription) => {
-      return matchIsActiveSubscriptionStatus(subscription.status)
-    })
-
-    if (!activeSubscription) {
-      return null
-    }
-
-    const { limits: unusedLimits, ...rest } = activeSubscription
-
-    return rest
   }
 )
 
@@ -38,6 +36,6 @@ export const matchIsUserPremium = createServerOnlyFn(
       return true
     }
 
-    return Boolean(await findActiveSubscription(user.id))
+    return Boolean(await findPremiumSubscription(user.id))
   }
 )

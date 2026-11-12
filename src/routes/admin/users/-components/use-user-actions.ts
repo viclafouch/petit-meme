@@ -92,7 +92,7 @@ type UserActionTarget = {
   banned: boolean | null
   role: string | null
   premiumGrantedAt: Date | null
-  subscription: Pick<SubscriptionInfo, 'state'>
+  subscription: Pick<SubscriptionInfo, 'isPremium'>
 }
 
 type UserActionPermissionsParams = {

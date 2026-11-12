@@ -17,7 +17,7 @@ import { PremiumGrantedEmail } from '~/emails/premium-granted-email'
 import { emailSubjects } from '~/emails/subjects'
 import { buildSubscriptionInfo, type SubscriptionInfo } from '~/helpers/premium'
 import { matchIsUserAdmin, matchIsUserBanned } from '~/helpers/role'
-import { ACTIVE_SUBSCRIPTION_STATUSES } from '~/helpers/subscription'
+import { matchIsPremiumSubscriptionStatus } from '~/helpers/subscription'
 import { buildSubscriptionHistory } from '~/helpers/subscription-history'
 import { adminLogger } from '~/lib/logger'
 import { captureWithFeature } from '~/lib/sentry'
@@ -38,6 +38,7 @@ import {
   fetchCustomerBilling,
   getStripeClient
 } from '~/server/platforms/stripe.server'
+import { PREMIUM_SUBSCRIPTION_WHERE } from '~/server/subscription/subscription.server'
 
 const USER_IP_LIST_SIZE = 8
 
@@ -168,25 +169,25 @@ const recordUserAction = ({
   adminLogger.info({ userId, adminId, banReason }, message)
 }
 
-const cancelActiveSubscription = async (stripeCustomerId: string | null) => {
+const cancelPremiumSubscription = async (stripeCustomerId: string | null) => {
   if (!stripeCustomerId) {
     return false
   }
 
   try {
     const subscriptions = await getStripeClient().subscriptions.list({
-      customer: stripeCustomerId,
-      status: 'active',
-      limit: 1
+      customer: stripeCustomerId
     })
 
-    const activeSubscription = subscriptions.data[0]
+    const premiumSubscription = subscriptions.data.find((subscription) => {
+      return matchIsPremiumSubscriptionStatus(subscription.status)
+    })
 
-    if (!activeSubscription) {
+    if (!premiumSubscription) {
       return false
     }
 
-    await getStripeClient().subscriptions.update(activeSubscription.id, {
+    await getStripeClient().subscriptions.update(premiumSubscription.id, {
       cancel_at_period_end: true
     })
 
@@ -206,7 +207,7 @@ const cancelSubscriptionAndNotifyBan = async ({
   bannedUser,
   banReason
 }: CancelSubscriptionAndNotifyBanParams) => {
-  const hasActiveSubscription = await cancelActiveSubscription(
+  const hasActiveSubscription = await cancelPremiumSubscription(
     bannedUser.stripeCustomerId
   )
 
@@ -491,14 +492,11 @@ export const grantPremium = createServerFn({ method: 'POST' })
       )
     }
 
-    const activeSubscriptionCount = await prismaClient.subscription.count({
-      where: {
-        referenceId: userId,
-        status: { in: [...ACTIVE_SUBSCRIPTION_STATUSES] }
-      }
+    const premiumSubscriptionCount = await prismaClient.subscription.count({
+      where: { ...PREMIUM_SUBSCRIPTION_WHERE, referenceId: userId }
     })
 
-    if (activeSubscriptionCount > 0) {
+    if (premiumSubscriptionCount > 0) {
       return rejectUserAction('Abonnement payant en cours')
     }
 

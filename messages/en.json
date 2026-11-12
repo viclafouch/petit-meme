@@ -505,6 +505,7 @@
   "settings_page_title": "Petit Meme - Settings",
   "settings_password_description": "Change your password",
   "settings_subscription_ends": "Ends on {date}",
+  "settings_subscription_payment_failing": "Payment failed: update your payment method",
   "settings_subscription_renews": "Renews on {date}",
   "studio_add_text_placeholder": "Add text...",
   "studio_back_to_meme": "Back to meme",

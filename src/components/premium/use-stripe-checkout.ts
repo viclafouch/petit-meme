@@ -9,7 +9,7 @@ import { authClient } from '~/lib/auth-client'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
-import { getActiveSubscriptionQueryOpts } from '~/queries/subscription'
+import { getPremiumSubscriptionQueryOpts } from '~/queries/subscription'
 import { useDialogStore } from '~/stores/dialog.store'
 
 const openBillingPortal = async () => {
@@ -31,11 +31,11 @@ const startCheckout = async (
     setTimeout(resolve, 1)
   })
 
-  const activeSubscription = await queryClient.query(
-    getActiveSubscriptionQueryOpts()
+  const premiumSubscription = await queryClient.query(
+    getPremiumSubscriptionQueryOpts()
   )
 
-  if (activeSubscription) {
+  if (premiumSubscription) {
     toast.success(m.error_already_subscribed())
 
     return 'release'

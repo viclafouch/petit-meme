@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { getActiveSubscriptionQueryOpts } from '~/queries/subscription'
+import { getPremiumSubscriptionQueryOpts } from '~/queries/subscription'
 
 export const Route = createFileRoute('/_public__root/_default/settings')({
   beforeLoad: async ({ context }) => {
@@ -7,11 +7,11 @@ export const Route = createFileRoute('/_public__root/_default/settings')({
       throw redirect({ to: '/' })
     }
 
-    const activeSubscription = await context.queryClient.query({
-      ...getActiveSubscriptionQueryOpts(),
+    const premiumSubscription = await context.queryClient.query({
+      ...getPremiumSubscriptionQueryOpts(),
       staleTime: 'static'
     })
 
-    return { user: context.user, activeSubscription }
+    return { user: context.user, premiumSubscription }
   }
 })

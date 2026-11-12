@@ -22,7 +22,7 @@ Premium is pushed in the right place and at the right moment, and never blocks. 
 - **Plans.** Monthly or yearly. The yearly plan costs less per month.
 - **Start.** Payment through Stripe. Premium opens as soon as the payment goes through.
 - **Cancellation.** One click, through the Stripe customer portal. Premium stays until the end of the period already paid, and the screens say "ends on" instead of "renews on". A cancelled subscription can be restored before that date.
-- **Failed payment.** Premium closes while the payment fails, and comes back when Stripe collects it.
+- **Failed payment.** Premium holds while Stripe retries the payment, and closes when Stripe gives up and cancels the subscription. A failed renewal is almost always involuntary, like an expired card, so the person keeps what they meant to pay for. The screens say the payment fails and lead to the Stripe customer portal to fix it.
 - **Invoices.** Stripe sends and keeps them. The Creator reads a User's full subscription and invoice history in the administration, read from Stripe when the page opens.
 - **Account deletion.** A User who pays cancels first. Deleting the account also deletes the Stripe customer.
 
@@ -36,7 +36,7 @@ Every screen that shows a subscription uses the same states and the same figures
 
 - **Active**: Premium, renews on a date
 - **Ending**: cancelled, still Premium until a date
-- **Payment failing**: no Premium until Stripe collects
+- **Payment failing**: still Premium while Stripe retries
 - **Ended**: the subscription is over
 - **Offered**: lifetime Premium from the Creator
 

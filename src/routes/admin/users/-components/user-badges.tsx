@@ -174,15 +174,18 @@ export const PremiumBadges = ({
 
     case 'paid': {
       return (
-        <EndingTooltip ending={subscription.ending}>
+        <EndingTooltip
+          ending={subscription.state === 'failing' ? null : subscription.ending}
+        >
           <Badge variant="amber" size="sm">
             <Crown className="size-3" aria-hidden />
             {subscription.billingPeriod === null
               ? 'Premium'
               : PREMIUM_PLAN_LABELS[subscription.billingPeriod]}
           </Badge>
-          {subscription.state === 'ending' ? (
-            <SubscriptionStateBadge state="ending" />
+          {subscription.state === 'ending' ||
+          subscription.state === 'failing' ? (
+            <SubscriptionStateBadge state={subscription.state} />
           ) : null}
         </EndingTooltip>
       )

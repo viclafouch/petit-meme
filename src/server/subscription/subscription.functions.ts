@@ -1,9 +1,9 @@
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
 import { findFreshSession } from '~/server/auth/auth.server'
-import { findActiveSubscription } from '~/server/subscription/subscription.server'
+import { findPremiumSubscription } from '~/server/subscription/subscription.server'
 
-export const getActiveSubscription = createServerFn({ method: 'GET' }).handler(
+export const getPremiumSubscription = createServerFn({ method: 'GET' }).handler(
   async () => {
     const session = await findFreshSession(getRequest().headers)
 
@@ -11,10 +11,10 @@ export const getActiveSubscription = createServerFn({ method: 'GET' }).handler(
       return null
     }
 
-    return findActiveSubscription(session.user.id)
+    return findPremiumSubscription(session.user.id)
   }
 )
 
-export type ActiveSubscription = NonNullable<
-  Awaited<ReturnType<typeof getActiveSubscription>>
+export type PremiumSubscription = NonNullable<
+  Awaited<ReturnType<typeof getPremiumSubscription>>
 >

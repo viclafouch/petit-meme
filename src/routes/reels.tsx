@@ -4,7 +4,7 @@ import { buildOgImageUrl } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { listReelsQueryOpts } from '~/queries/meme'
-import { getActiveSubscriptionQueryOpts } from '~/queries/subscription'
+import { getPremiumSubscriptionQueryOpts } from '~/queries/subscription'
 import { ReelsPage, ReelsPending } from './-components/reels-page'
 
 export const Route = createFileRoute('/reels')({
@@ -15,7 +15,7 @@ export const Route = createFileRoute('/reels')({
     if (context.user) {
       void Promise.allSettled([
         context.queryClient.query({
-          ...getActiveSubscriptionQueryOpts(),
+          ...getPremiumSubscriptionQueryOpts(),
           staleTime: 'static'
         })
       ])

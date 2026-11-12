@@ -87,6 +87,14 @@ const PremiumSummary = ({ user, subscription }: PremiumSummaryProps) => {
     }
 
     case 'paid': {
+      if (subscription.state === 'failing') {
+        return (
+          <PanelNote>
+            Abonnement payant, le dernier paiement a échoué et Stripe relance.
+          </PanelNote>
+        )
+      }
+
       return (
         <PanelNote>
           Abonnement payant.{endingText ? ` ${endingText}.` : null}

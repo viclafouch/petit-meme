@@ -5,7 +5,7 @@ import {
   getSubscriptionEnding,
   getSubscriptionState,
   matchHasBeenPaid,
-  matchIsPremiumState,
+  matchIsPremiumSubscriptionStatus,
   type SubscriptionEnding,
   type SubscriptionState
 } from '~/helpers/subscription'
@@ -26,12 +26,14 @@ type SubscriptionRow = {
 
 export type SubscriptionInfo = {
   state: SubscriptionState | null
+  isPremium: boolean
   billingPeriod: BillingPeriod | null
   ending: SubscriptionEnding | null
 }
 
 const NO_SUBSCRIPTION: SubscriptionInfo = {
   state: null,
+  isPremium: false,
   billingPeriod: null,
   ending: null
 }
@@ -55,6 +57,7 @@ export function buildSubscriptionInfo(
     .map((subscription) => {
       return {
         state: getSubscriptionState(subscription),
+        isPremium: matchIsPremiumSubscriptionStatus(subscription.status),
         billingPeriod: getBillingPeriodFromInterval(
           subscription.billingInterval
         ),
@@ -90,7 +93,7 @@ type PremiumStatus =
 
 type GetPremiumStatusParams = UserRoleHolder & {
   premiumGrantedAt: Date | null
-  subscription: Pick<SubscriptionInfo, 'state'>
+  subscription: Pick<SubscriptionInfo, 'isPremium'>
 }
 
 export function getPremiumStatus({
@@ -102,7 +105,7 @@ export function getPremiumStatus({
     return { source: 'admin' }
   }
 
-  if (subscription.state !== null && matchIsPremiumState(subscription.state)) {
+  if (subscription.isPremium) {
     return { source: 'paid' }
   }
 

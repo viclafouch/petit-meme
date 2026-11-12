@@ -1,9 +1,9 @@
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
 import { waitUntil } from '@vercel/functions'
-import { prismaClient } from '~/db/client.server'
 import { getLocale } from '~/paraglide/runtime'
 import { findFreshSession } from '~/server/auth/auth.server'
+import { syncUserLocale } from '~/server/user/user.server'
 
 export const getAuthUser = createServerFn({ method: 'GET' }).handler(
   async () => {
@@ -13,14 +13,7 @@ export const getAuthUser = createServerFn({ method: 'GET' }).handler(
       return null
     }
 
-    const locale = getLocale()
-
-    waitUntil(
-      prismaClient.user.updateMany({
-        where: { id: session.user.id, NOT: { locale } },
-        data: { locale }
-      })
-    )
+    waitUntil(syncUserLocale({ userId: session.user.id, locale: getLocale() }))
 
     return session.user
   }

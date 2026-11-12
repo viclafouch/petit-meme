@@ -28,6 +28,7 @@ import { test } from './fixtures'
 import { repeatUntilVisible } from './hydration'
 import { getMemeLink, getMemePlayButtons } from './library'
 import { E2E_ENGLISH_LOCALE } from './locales'
+import { findStripeCustomerLocales } from './stripe-customer'
 import { buildE2eUrl, localizePathname } from './urls'
 
 const IN_ENGLISH = { locale: E2E_ENGLISH_LOCALE } as const satisfies {
@@ -115,6 +116,22 @@ type EnglishPage = {
   name: string
   pathname: string
   title: string
+}
+
+const switchToEnglish = async (page: Page) => {
+  const englishOption = page.getByRole('menuitem', {
+    name: getLocaleDisplayName(E2E_ENGLISH_LOCALE, E2E_ENGLISH_LOCALE),
+    exact: true
+  })
+
+  await repeatUntilVisible(() => {
+    return page
+      .getByRole('banner')
+      .getByRole('button', { name: m.nav_switch_language() })
+      .click()
+  }, englishOption)
+
+  await englishOption.click()
 }
 
 const ENGLISH_PAGES = [
@@ -298,20 +315,7 @@ test.describe('the English journey', () => {
     page
   }) => {
     await page.goto(FRENCH_TRENDING_PATHNAME)
-
-    const englishOption = page.getByRole('menuitem', {
-      name: getLocaleDisplayName(E2E_ENGLISH_LOCALE, E2E_ENGLISH_LOCALE),
-      exact: true
-    })
-
-    await repeatUntilVisible(() => {
-      return page
-        .getByRole('banner')
-        .getByRole('button', { name: m.nav_switch_language() })
-        .click()
-    }, englishOption)
-
-    await englishOption.click()
+    await switchToEnglish(page)
 
     await expect(page).toHaveURL(ENGLISH_TRENDING_PATHNAME)
     await expect(
@@ -389,6 +393,22 @@ test.describe('the English journey', () => {
     await page.goto('/')
 
     await expect(page).toHaveURL(ENGLISH_HOME_PATHNAME)
+  })
+
+  test.describe('a User who switches language', () => {
+    test.use({ storageState: resolveStorageStatePath('localeSwitch') })
+
+    test('gives the new language to the Stripe customer', async ({ page }) => {
+      await page.goto(FRENCH_TRENDING_PATHNAME)
+      await switchToEnglish(page)
+
+      await expect(page).toHaveURL(ENGLISH_TRENDING_PATHNAME)
+      await expect
+        .poll(() => {
+          return findStripeCustomerLocales(E2E_ROLES.localeSwitch.id)
+        })
+        .toStrictEqual([E2E_ENGLISH_LOCALE])
+    })
   })
 
   test.describe('an English checkout', () => {

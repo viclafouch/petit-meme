@@ -7,18 +7,18 @@ import {
   type AvatarSelection
 } from '~/constants/avatar'
 import { HTTP_STATUS } from '~/constants/http'
+import { LOCALE_SCHEMA } from '~/constants/locale'
 import { RATE_LIMIT_UPDATE_AVATAR } from '~/constants/rate-limit'
 import { prismaClient } from '~/db/client.server'
 import { matchIsAvatarPath, resolveAvatar } from '~/helpers/avatar'
 import { resolveMemeTranslation } from '~/helpers/i18n-content'
 import { authLogger } from '~/lib/logger'
-import { getLocale, locales } from '~/paraglide/runtime'
+import { getLocale } from '~/paraglide/runtime'
 import { userRequiredMiddleware } from '~/server/auth/auth.middleware'
 import { findCachedSession } from '~/server/auth/auth.server'
 import { throwWithStatus } from '~/server/http/http.server'
 import { createRateLimitMiddleware } from '~/server/rate-limit/rate-limit.middleware'
-
-const LOCALE_SCHEMA = z.object({ locale: z.enum(locales) })
+import { syncUserLocale } from '~/server/user/user.server'
 
 export const updateUserLocale = createServerFn({ method: 'POST' })
   .validator((data) => {
@@ -31,10 +31,7 @@ export const updateUserLocale = createServerFn({ method: 'POST' })
       return
     }
 
-    await prismaClient.user.update({
-      where: { id: session.user.id },
-      data: { locale: data.locale }
-    })
+    await syncUserLocale({ userId: session.user.id, locale: data.locale })
   })
 
 const AVATAR_SELECTION_SCHEMA = z.enum([

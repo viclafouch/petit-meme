@@ -134,6 +134,13 @@ export const E2E_ROLES = {
     subscription: MONTHLY_PREMIUM_SUBSCRIPTION,
     hasStripeCustomer: true
   },
+  localeSwitch: {
+    id: 'e2e-user-locale-switch',
+    name: 'E2E Locale Switch',
+    email: `e2e-locale-switch@${E2E_EMAIL_DOMAIN}`,
+    emailVerified: true,
+    hasStripeCustomer: true
+  },
   bookmarks: {
     id: 'e2e-user-bookmarks',
     name: 'E2E Bookmarks',

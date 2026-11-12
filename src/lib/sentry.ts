@@ -7,6 +7,7 @@ export type SentryFeature =
   | 'stripe-checkout'
   | 'stripe-payment'
   | 'stripe-billing-portal'
+  | 'stripe-customer-locale'
   | 'bunny-webhook'
   | 'bunny-cleanup'
   | 'resend-email'

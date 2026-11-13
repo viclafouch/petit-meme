@@ -31,6 +31,8 @@ const SEARCH_RESULTS_LIMIT = 8
 
 const SECTION_HEADING_CLASS = 'text-sm font-medium text-muted-foreground'
 
+const SWIPE_BLUR_THRESHOLD_PX = 10
+
 const searchDrawerHandle = DrawerPrimitive.createHandle()
 
 const closeSearchDrawer = () => {
@@ -233,6 +235,31 @@ export const SearchDrawer = () => {
     })
   }
 
+  const blurSearchWhenSwiped = (popup: HTMLDivElement | null) => {
+    if (!popup) {
+      return () => {}
+    }
+
+    const swipeObserver = new MutationObserver(() => {
+      const swipeMovement = Number.parseFloat(
+        popup.style.getPropertyValue('--drawer-swipe-movement-y')
+      )
+
+      if (swipeMovement > SWIPE_BLUR_THRESHOLD_PX) {
+        inputRef.current?.blur()
+      }
+    })
+
+    swipeObserver.observe(popup, {
+      attributes: true,
+      attributeFilter: ['style']
+    })
+
+    return () => {
+      swipeObserver.disconnect()
+    }
+  }
+
   return (
     <Drawer
       handle={searchDrawerHandle}
@@ -248,7 +275,11 @@ export const SearchDrawer = () => {
         {m.nav_search()}
       </DrawerTrigger>
       <DrawerPrimitive.VirtualKeyboardProvider>
-        <DrawerContent initialFocus={false} className="h-[calc(100dvh-6rem)]">
+        <DrawerContent
+          initialFocus={false}
+          className="h-[calc(100dvh-6rem)]"
+          ref={blurSearchWhenSwiped}
+        >
           <DrawerTitle className="sr-only">{m.nav_search()}</DrawerTitle>
           <search className="shrink-0 px-4 pt-2 pb-3">
             <form onSubmit={handleSubmit} className="flex items-center gap-2">

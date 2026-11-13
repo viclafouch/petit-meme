@@ -262,6 +262,8 @@ export const MemePage = () => {
               </Link>
               <div className="flex gap-2 flex-wrap">
                 <MemeExportMenu
+                  mode="share"
+                  memeTitle={memeQuery.data.title}
                   onExport={(format) => {
                     pauseVideo()
                     shareMutation.trigger(memeQuery.data, format)
@@ -270,7 +272,7 @@ export const MemePage = () => {
                     <Button
                       disabled={shareMutation.isPending}
                       variant="outline"
-                      className="md:hidden shrink-0 flex-1"
+                      className="pointer-fine:hidden shrink-0 flex-1"
                     />
                   }
                 >
@@ -279,6 +281,8 @@ export const MemePage = () => {
                   <ChevronDown className="text-muted-foreground" />
                 </MemeExportMenu>
                 <MemeExportMenu
+                  mode="download"
+                  memeTitle={memeQuery.data.title}
                   onExport={(format) => {
                     pauseVideo()
                     downloadMutation.trigger(memeQuery.data, format)

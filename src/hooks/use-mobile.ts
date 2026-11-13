@@ -1,25 +1,7 @@
-import React from 'react'
+import { useMediaQuery } from '~/hooks/use-media-query'
 
 const MOBILE_BREAKPOINT = 768
-const QUERY = `(max-width: ${MOBILE_BREAKPOINT - 1}px)`
-
-const subscribe = (onStoreChange: () => void) => {
-  const mql = window.matchMedia(QUERY)
-  mql.addEventListener('change', onStoreChange)
-
-  return () => {
-    mql.removeEventListener('change', onStoreChange)
-  }
-}
-
-const getSnapshot = () => {
-  return window.matchMedia(QUERY).matches
-}
-
-const getServerSnapshot = () => {
-  return false
-}
 
 export function useIsMobile() {
-  return React.useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
+  return useMediaQuery(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
 }

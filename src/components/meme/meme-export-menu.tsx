@@ -1,8 +1,24 @@
 import React from 'react'
-import { AudioLines, Download, Film, Share2 } from 'lucide-react'
+import { AudioLines, Film } from 'lucide-react'
 import { MemeFormatChip } from '~/components/meme/meme-format-chip'
+import {
+  MEME_EXPORT_MODE_DISPLAY,
+  SHEET_BODY_CLASS_NAME,
+  SHEET_HEADER_CLASS_NAME,
+  SHEET_TILE_CLASS_NAME,
+  SHEET_TITLE_CLASS_NAME
+} from '~/components/meme/meme-sheet'
 import { PremiumBadge } from '~/components/premium/premium-badge'
 import { useIsPremium } from '~/components/premium/use-is-premium'
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger
+} from '~/components/ui/drawer'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +30,8 @@ import {
 } from '~/components/ui/dropdown-menu'
 import { MEME_DERIVED_FORMATS, type MemeDerivedFormat } from '~/constants/bunny'
 import type { MemeExportMode } from '~/constants/meme'
+import { useActionAfterClose } from '~/hooks/use-action-after-close'
+import { useIsCoarsePointer } from '~/hooks/use-is-coarse-pointer'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
 
@@ -39,13 +57,29 @@ const FORMATS = {
   }
 >
 
-const MODES = {
-  download: { icon: Download, label: m.meme_download },
-  share: { icon: Share2, label: m.meme_share }
-} as const satisfies Record<
-  MemeExportMode,
-  { icon: React.ElementType; label: () => string }
->
+const matchIsFormatLocked = (format: MemeDerivedFormat, isPremium: boolean) => {
+  return format === 'mp3' && !isPremium
+}
+
+type FormatContentProps = {
+  format: MemeDerivedFormat
+  isLocked: boolean
+}
+
+const FormatContent = ({ format, isLocked }: FormatContentProps) => {
+  const { icon: FormatIcon, label, iconClassName } = FORMATS[format]
+
+  return (
+    <>
+      <FormatIcon className={iconClassName} />
+      {label()}
+      <span className="ml-auto flex items-center gap-1.5 pl-4">
+        <MemeFormatChip format={format} />
+        {isLocked ? <PremiumBadge /> : null}
+      </span>
+    </>
+  )
+}
 
 type MemeExportMenuItemsProps = {
   onExport: (format: MemeDerivedFormat) => void
@@ -55,8 +89,7 @@ const MemeExportMenuItems = ({ onExport }: MemeExportMenuItemsProps) => {
   const isPremium = useIsPremium()
 
   return MEME_DERIVED_FORMATS.map((format) => {
-    const isLocked = format === 'mp3' && !isPremium
-    const { icon: FormatIcon, label, iconClassName } = FORMATS[format]
+    const isLocked = matchIsFormatLocked(format, isPremium)
 
     return (
       <DropdownMenuItem
@@ -69,15 +102,48 @@ const MemeExportMenuItems = ({ onExport }: MemeExportMenuItemsProps) => {
           onExport(format)
         }}
       >
-        <FormatIcon className={iconClassName} />
-        {label()}
-        <span className="ml-auto flex items-center gap-1.5 pl-4">
-          <MemeFormatChip format={format} />
-          {isLocked ? <PremiumBadge /> : null}
-        </span>
+        <FormatContent format={format} isLocked={isLocked} />
       </DropdownMenuItem>
     )
   })
+}
+
+type MemeExportFormatTilesProps = {
+  onSelect: (format: MemeDerivedFormat) => void
+}
+
+export const MemeExportFormatTiles = ({
+  onSelect
+}: MemeExportFormatTilesProps) => {
+  const isPremium = useIsPremium()
+
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      {MEME_DERIVED_FORMATS.map((format) => {
+        const { icon: FormatIcon, label, iconClassName } = FORMATS[format]
+        const isLocked = matchIsFormatLocked(format, isPremium)
+
+        return (
+          <DrawerClose
+            key={format}
+            className={SHEET_TILE_CLASS_NAME}
+            onClick={() => {
+              onSelect(format)
+            }}
+          >
+            <FormatIcon className={cn('size-8', iconClassName)} />
+            <span className="text-base font-semibold">{label()}</span>
+            <span className="flex h-6 items-center gap-1.5">
+              <span className="font-mono text-xs text-muted-foreground uppercase">
+                {format}
+              </span>
+              {isLocked ? <PremiumBadge /> : null}
+            </span>
+          </DrawerClose>
+        )
+      })}
+    </div>
+  )
 }
 
 type MemeExportSubmenuProps = MemeExportMenuItemsProps & {
@@ -90,7 +156,7 @@ export const MemeExportSubmenu = ({
   onExport,
   className
 }: MemeExportSubmenuProps) => {
-  const { icon: ModeIcon, label } = MODES[mode]
+  const { icon: ModeIcon, label } = MEME_EXPORT_MODE_DISPLAY[mode]
 
   return (
     <DropdownMenuSub>
@@ -106,25 +172,77 @@ export const MemeExportSubmenu = ({
 }
 
 type MemeExportMenuProps = MemeExportMenuItemsProps & {
+  mode: MemeExportMode
+  memeTitle: string
   render: React.ReactElement
   children: React.ReactNode
   align?: React.ComponentProps<typeof DropdownMenuContent>['align']
 }
 
-export const MemeExportMenu = ({
+type MemeExportSheetProps = Omit<MemeExportMenuProps, 'align'>
+
+const MemeExportSheet = ({
+  mode,
+  memeTitle,
   onExport,
   render,
-  children,
-  align = 'center'
+  children
+}: MemeExportSheetProps) => {
+  const isPremium = useIsPremium()
+  const { runAfterClose, handleOpenChangeComplete } = useActionAfterClose()
+
+  return (
+    <Drawer showSwipeHandle onOpenChangeComplete={handleOpenChangeComplete}>
+      <DrawerTrigger render={render}>{children}</DrawerTrigger>
+      <DrawerContent>
+        <DrawerHeader className={SHEET_HEADER_CLASS_NAME}>
+          <DrawerTitle className={SHEET_TITLE_CLASS_NAME}>
+            {MEME_EXPORT_MODE_DISPLAY[mode].label()}
+          </DrawerTitle>
+          <DrawerDescription className="line-clamp-1">
+            {memeTitle}
+          </DrawerDescription>
+        </DrawerHeader>
+        <div className={SHEET_BODY_CLASS_NAME}>
+          <MemeExportFormatTiles
+            onSelect={(format) => {
+              if (isPremium) {
+                onExport(format)
+
+                return
+              }
+
+              runAfterClose(() => {
+                onExport(format)
+              })
+            }}
+          />
+        </div>
+      </DrawerContent>
+    </Drawer>
+  )
+}
+
+export const MemeExportMenu = ({
+  align = 'center',
+  ...props
 }: MemeExportMenuProps) => {
+  const isCoarsePointer = useIsCoarsePointer()
+
+  if (isCoarsePointer) {
+    return <MemeExportSheet {...props} />
+  }
+
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger render={render}>{children}</DropdownMenuTrigger>
+      <DropdownMenuTrigger render={props.render}>
+        {props.children}
+      </DropdownMenuTrigger>
       <DropdownMenuContent
         align={align}
         className="w-auto min-w-(--anchor-width)"
       >
-        <MemeExportMenuItems onExport={onExport} />
+        <MemeExportMenuItems onExport={props.onExport} />
       </DropdownMenuContent>
     </DropdownMenu>
   )

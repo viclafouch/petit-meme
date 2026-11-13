@@ -4,3 +4,4 @@ export const CONSENT_BANNER_DELAY_MS = 3500
 export const COOKIE_ANON_ID_KEY = 'anonId'
 export const COOKIE_ALGOLIA_USER_TOKEN_KEY = 'algoliaUserToken'
 export const COOKIE_LOCALE_BANNER_DISMISSED_KEY = 'localeBannerDismissed'
+export const COOKIE_REELS_POSITION_KEY = 'reelsPosition'

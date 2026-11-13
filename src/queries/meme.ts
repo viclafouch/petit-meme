@@ -1,5 +1,6 @@
 import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
 import type { MemesFilters } from '~/constants/meme'
+import type { ReelsCursor } from '~/constants/reels'
 import {
   FIVE_MINUTES_MS,
   HOUR,
@@ -83,21 +84,24 @@ export const countRecentMemesQueryOpts = () => {
 
 countRecentMemesQueryOpts.all = ['recent-count-memes'] as const
 
-export const listReelsQueryOpts = (excludedIds: string[] = []) => {
+export const listReelsQueryOpts = () => {
   return infiniteQueryOptions({
     queryKey: [...listReelsQueryOpts.all],
     queryFn: ({ pageParam }) => {
-      return listReels({ data: { excludedIds: pageParam } })
+      return listReels({ data: pageParam })
     },
-    initialPageParam: excludedIds,
+    initialPageParam: null as ReelsCursor,
     getNextPageParam: (lastPage) => {
-      return lastPage.excludedIds
+      return lastPage.nextCursor ?? undefined
     },
-    staleTime: FIVE_MINUTES_MS
+    staleTime: 'static',
+    gcTime: THIRTY_MINUTES_MS,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false
   })
 }
 
-listReelsQueryOpts.all = ['infinite-reels'] as const
+listReelsQueryOpts.all = ['reels'] as const
 
 export const listRelatedMemesQueryOpts = ({
   memeId,

@@ -361,6 +361,44 @@
 @utility shine-size {
   background-size: 200% 100%;
 }
+@utility reels-page {
+  --reels-viewport-height: 100svh;
+  --reels-height: round(
+    down,
+    calc(var(--reels-viewport-height) - var(--tab-bar-space)),
+    1px
+  );
+  height: var(--reels-viewport-height);
+  overflow: hidden;
+}
+@utility max-w-reels {
+  max-width: calc(var(--reels-height) * 9 / 16);
+}
+@utility reels-feed {
+  display: grid;
+  grid-auto-rows: var(--reels-height);
+  height: var(--reels-height);
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+  touch-action: manipulation;
+}
+@utility reel-slot {
+  position: relative;
+  overflow: hidden;
+  contain: strict;
+  container-type: size;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+@utility reel-video {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: min(100cqw, 100cqh * var(--video-ratio, 100));
+  height: min(100cqh, 100cqw / var(--video-ratio, 0.01));
+  object-fit: contain;
+}
 @utility touch-tap {
   user-select: none;
   touch-action: manipulation;

@@ -5,7 +5,6 @@ import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
 import { MEME_DERIVED_FORMATS } from '~/constants/bunny'
 import {
-  DEFAULT_MEME_TITLE,
   MEME_EXPORT_MODES,
   MEME_FULL_INCLUDE,
   MEME_VIDEO_INTENTS,
@@ -33,6 +32,7 @@ import {
   parseContentLocalesParam,
   resolveVisibleContentLocales
 } from '~/helpers/i18n-content'
+import { withDefaultMemeTitle } from '~/helpers/meme'
 import { extractClientIp } from '~/helpers/request'
 import { matchCanViewMeme, matchIsUserAdmin } from '~/helpers/role'
 import { ensureAlgoliaUserToken } from '~/lib/algolia-user-token'
@@ -110,12 +110,8 @@ export const getMeme = createServerFn({ method: 'GET' })
     }
 
     const locale = getLocale()
-    const localizedMeme = localizeMeme(meme, locale)
-
     return {
-      ...localizedMeme,
-      title:
-        localizedMeme.title === '' ? DEFAULT_MEME_TITLE : localizedMeme.title,
+      ...withDefaultMemeTitle(localizeMeme(meme, locale)),
       categories: meme.categories.map((memeCategory) => {
         return {
           ...memeCategory,

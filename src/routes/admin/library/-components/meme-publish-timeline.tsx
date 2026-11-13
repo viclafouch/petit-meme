@@ -14,7 +14,7 @@ import {
 import { Link } from '@tanstack/react-router'
 import { Progress } from '~/components/animate-ui/base/progress'
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
-import { Button } from '~/components/ui/button'
+import { Button, buttonVariants } from '~/components/ui/button'
 import type { MemeFullData } from '~/constants/meme'
 import { MemeStatus } from '~/db/generated/prisma/enums'
 import { cn } from '~/lib/utils'
@@ -193,15 +193,14 @@ const RunResult = ({ run, meme, onRetry }: RunResultProps) => {
       <AlertDescription className="flex flex-col items-start gap-2">
         {message.description}
         {meme.status === MemeStatus.PUBLISHED ? (
-          <Button
-            variant="link"
-            className="h-auto p-0"
-            nativeButton={false}
-            render={<Link to="/memes/$memeId" params={{ memeId: meme.id }} />}
+          <Link
+            to="/memes/$memeId"
+            params={{ memeId: meme.id }}
+            className={cn(buttonVariants({ variant: 'link' }), 'h-auto p-0')}
           >
             Voir sur le site
             <ExternalLink data-icon="inline-end" aria-hidden />
-          </Button>
+          </Link>
         ) : null}
       </AlertDescription>
     </Alert>

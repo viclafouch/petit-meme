@@ -5,8 +5,8 @@ import {
   LogOutIcon,
   Shield,
   SparklesIcon,
-  Star,
-  User
+  Settings,
+  Star
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
@@ -103,13 +103,16 @@ export const UserDropdown = ({ user }: UserDropdownProps) => {
         <DropdownMenuGroup>
           <DropdownMenuLinkItem render={<Link to="/bookmarks" />}>
             <Star />
-            {m.nav_bookmarks({
-              count: String(bookmarkedMemesQuery.data?.count ?? 0)
-            })}
+            {m.nav_my_bookmarks()}
+            {bookmarkedMemesQuery.data?.count ? (
+              <span className="ml-auto text-xs text-muted-foreground tabular-nums">
+                {bookmarkedMemesQuery.data.count}
+              </span>
+            ) : null}
           </DropdownMenuLinkItem>
           <DropdownMenuLinkItem render={<Link to="/settings" />}>
-            <User />
-            {m.nav_my_account()}
+            <Settings />
+            {m.nav_settings()}
           </DropdownMenuLinkItem>
           {matchIsUserAdmin(user) ? (
             <DropdownMenuLinkItem render={<Link to="/admin" />}>

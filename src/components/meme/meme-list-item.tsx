@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link, useRouteContext } from '@tanstack/react-router'
 import { BunnyPlayIcon } from '~/components/icon/play'
 import { MemeExportSubmenu } from '~/components/meme/meme-export-menu'
+import { MemeHighlightedTitle } from '~/components/meme/meme-highlighted-title'
 import { MemeLanguageBadge } from '~/components/meme/meme-language-badge'
 import { MemeVideoThumbnail } from '~/components/meme/meme-video-thumbnail'
 import { useMemeExport } from '~/components/meme/use-meme-export'
@@ -198,15 +199,10 @@ export const MemeListItem = React.memo(
               className={cn('line-clamp-1 text-primary', sizes[size].title)}
               onClick={handleTrackClick}
             >
-              {highlightedTitle ? (
-                <span
-                  className="[&>em]:not-italic [&>em]:bg-yellow-200 [&>em]:text-black [&>em]:rounded-sm"
-                  // oxlint-disable-next-line react/no-danger -- Algolia returns the highlighted title as HTML with <em> tags
-                  dangerouslySetInnerHTML={{ __html: highlightedTitle }}
-                />
-              ) : (
-                meme.title
-              )}
+              <MemeHighlightedTitle
+                title={meme.title}
+                highlightedTitle={highlightedTitle}
+              />
             </Link>
             <div className="flex flex-row items-center gap-1.5 text-muted-foreground">
               {matchIsContentLocaleForeign(meme.contentLocale, getLocale()) ? (

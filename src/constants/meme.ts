@@ -46,6 +46,7 @@ export const MEME_TRANSLATION_SELECT = {
 export const DEFAULT_MEME_TITLE = 'Sans titre'
 
 export const TRENDING_CATEGORY_SLUG = 'trending'
+export const ALL_CATEGORY_SLUG = 'all'
 export const NEWS_CATEGORY_SLUG = 'news'
 export const POPULAR_CATEGORY_SLUG = 'popular'
 

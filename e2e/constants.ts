@@ -53,20 +53,20 @@ export const E2E_ROLES = {
   checkout: {
     id: 'e2e-user-checkout',
     name: 'E2E Checkout',
-    email: `e2e-checkout@${E2E_EMAIL_DOMAIN}`,
+    email: `e2e-checkout+location_fr@${E2E_EMAIL_DOMAIN}`,
     emailVerified: true,
     bookmarkedMemeIds: CAPPED_BOOKMARK_MEME_IDS
   },
   checkoutAnnual: {
     id: 'e2e-user-checkout-annual',
     name: 'E2E Checkout Annual',
-    email: `e2e-checkout-annual@${E2E_EMAIL_DOMAIN}`,
+    email: `e2e-checkout-annual+location_fr@${E2E_EMAIL_DOMAIN}`,
     emailVerified: true
   },
   checkoutEnglish: {
     id: 'e2e-user-checkout-english',
     name: 'E2E Checkout English',
-    email: `e2e-checkout-english@${E2E_EMAIL_DOMAIN}`,
+    email: `e2e-checkout-english+location_fr@${E2E_EMAIL_DOMAIN}`,
     emailVerified: true
   },
   passwordReset: {
@@ -255,5 +255,6 @@ export const matchIsE2eRoleName = (name: string): name is E2eRoleName => {
 export const STRIPE_TEST_CARD = {
   number: '4242424242424242',
   expiry: '12/34',
-  cvc: '123'
+  cvc: '123',
+  billingCountry: 'FR'
 } as const satisfies Record<string, string>

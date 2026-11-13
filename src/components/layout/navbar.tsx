@@ -17,7 +17,6 @@ import { useNeedsScrollFadeFallback } from '~/hooks/use-scroll-fade'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
 import { useDialogStore } from '~/stores/dialog.store'
-import { MobileNav } from './mobile-nav'
 
 export type NavigationLink = {
   to: LinkOptions['to']
@@ -62,7 +61,6 @@ export const Navbar = () => {
       {needsFallback && !isReducedMotion ? <NavbarScrollFadeFallback /> : null}
       <div className="container relative flex h-full items-center justify-between gap-4">
         <div className="flex flex-1 items-center justify-start gap-2">
-          <MobileNav links={navigationLinks} user={user} />
           <Link
             to="/"
             className={cn(
@@ -100,24 +98,25 @@ export const Navbar = () => {
           </NavigationMenuList>
         </NavigationMenu>
         <div className="flex flex-1 items-center justify-end gap-3">
-          <LanguageSwitcher />
+          <LanguageSwitcher className="max-lg:hidden" />
           <ThemeSwitcher className="max-lg:hidden" />
-          {user ? (
-            <UserDropdown user={user} />
-          ) : (
-            <Button
-              onClick={(event) => {
-                event.preventDefault()
-                dialogStore.actions.showDialog('auth')
-              }}
-              variant="default"
-              size="lg"
-              className="max-lg:size-9 max-lg:p-0"
-            >
-              <User aria-hidden="true" />
-              <span className="max-lg:hidden">{m.nav_sign_in()}</span>
-            </Button>
-          )}
+          <div className="max-lg:hidden">
+            {user ? (
+              <UserDropdown user={user} />
+            ) : (
+              <Button
+                onClick={(event) => {
+                  event.preventDefault()
+                  dialogStore.actions.showDialog('auth')
+                }}
+                variant="default"
+                size="lg"
+              >
+                <User aria-hidden="true" />
+                {m.nav_sign_in()}
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </header>

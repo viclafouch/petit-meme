@@ -1,7 +1,7 @@
 import React from 'react'
 import { ExternalLink } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
-import { Button } from '~/components/ui/button'
+import { Button, buttonVariants } from '~/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -34,20 +34,17 @@ const ViewOnSiteLabel = () => {
 
 type SiteLinkButtonProps = {
   memeId: MemeFullData['id']
-} & Omit<React.ComponentProps<typeof Button>, 'render' | 'nativeButton'>
+}
 
-const SiteLinkButton = ({
-  memeId,
-  ...restButtonProps
-}: SiteLinkButtonProps) => {
+const SiteLinkButton = ({ memeId }: SiteLinkButtonProps) => {
   return (
-    <Button
-      {...restButtonProps}
-      nativeButton={false}
-      render={<Link to="/memes/$memeId" params={{ memeId }} />}
+    <Link
+      to="/memes/$memeId"
+      params={{ memeId }}
+      className={buttonVariants({ variant: 'outline', size: 'sm' })}
     >
       <ViewOnSiteLabel />
-    </Button>
+    </Link>
   )
 }
 
@@ -64,7 +61,7 @@ export const ViewMemeOnSiteButton = ({
   }
 
   if (meme.status === MemeStatus.PUBLISHED) {
-    return <SiteLinkButton memeId={meme.id} variant="outline" size="sm" />
+    return <SiteLinkButton memeId={meme.id} />
   }
 
   if (meme.status !== MemeStatus.PENDING) {
@@ -78,7 +75,7 @@ export const ViewMemeOnSiteButton = ({
   return (
     <>
       {hasAllFiles ? (
-        <SiteLinkButton memeId={meme.id} variant="outline" size="sm" />
+        <SiteLinkButton memeId={meme.id} />
       ) : (
         <Button
           type="button"

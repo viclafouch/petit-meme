@@ -1,6 +1,7 @@
 import { expect } from '@playwright/test'
 import { m } from '~/paraglide/messages'
 import { E2E_NAMED_MEMES } from './content'
+import { resolveStorageStatePath } from './env'
 import { test } from './fixtures'
 import { repeatUntilVisible } from './hydration'
 import { getFirstMemePlayButton, openMemePlayer } from './library'
@@ -8,25 +9,73 @@ import { getFirstMemePlayButton, openMemePlayer } from './library'
 const PLAYABLE_MEME_PATHNAME = `/memes/${E2E_NAMED_MEMES.mostViewed.id}`
 
 test.describe('the phone journey', () => {
-  test('the burger menu is the way to the library on a phone', async ({
-    page
-  }) => {
+  test('the tab bar is the way to the library on a phone', async ({ page }) => {
     await page.goto('/')
 
-    const mobileNav = page.getByTestId('mobile-nav')
-    const memesLink = mobileNav.getByRole('link', {
+    const tabBar = page.getByTestId('tab-bar')
+    const memesLink = tabBar.getByRole('link', {
       name: m.nav_memes(),
       exact: true
     })
 
-    await repeatUntilVisible(() => {
-      return page.getByRole('button', { name: m.nav_toggle_menu() }).click()
-    }, memesLink)
+    await expect(
+      tabBar.getByRole('link', { name: m.nav_home(), exact: true })
+    ).toHaveAttribute('aria-current', 'page')
 
     await memesLink.click()
 
     await expect(page).toHaveURL('/memes/category/trending')
-    await expect(mobileNav).toBeHidden()
+    await expect(memesLink).toHaveAttribute('aria-current', 'page')
+    await expect(page.getByRole('contentinfo')).toBeHidden()
+  })
+
+  test('the search tab finds a Meme by its title', async ({ page }) => {
+    await page.goto('/')
+
+    const searchDrawer = page.getByRole('dialog', { name: m.nav_search() })
+
+    await repeatUntilVisible(() => {
+      return page
+        .getByTestId('tab-bar')
+        .getByRole('button', { name: m.nav_search(), exact: true })
+        .click()
+    }, searchDrawer)
+
+    await searchDrawer
+      .getByRole('searchbox', { name: m.nav_search() })
+      .fill('cookie')
+    await searchDrawer
+      .getByRole('link', { name: E2E_NAMED_MEMES.mostViewed.title })
+      .click()
+
+    await expect(page).toHaveURL(PLAYABLE_MEME_PATHNAME)
+    await expect(searchDrawer).toBeHidden()
+  })
+
+  test('a Visitor signs in from the account tab', async ({ page }) => {
+    await page.goto('/')
+
+    const accountDrawer = page.getByRole('dialog', { name: m.nav_account() })
+
+    await repeatUntilVisible(() => {
+      return page
+        .getByTestId('tab-bar')
+        .getByRole('button', { name: m.nav_account(), exact: true })
+        .click()
+    }, accountDrawer)
+
+    await expect(
+      accountDrawer
+        .getByRole('navigation', { name: m.nav_legal() })
+        .getByRole('link', { name: m.footer_privacy() })
+    ).toBeVisible()
+
+    await accountDrawer
+      .getByRole('button', { name: m.nav_sign_in(), exact: true })
+      .click()
+
+    await expect(accountDrawer).toBeHidden()
+    await expect(page.getByRole('dialog').getByRole('tabpanel')).toBeVisible()
   })
 
   test('a tap on a Meme of the home page opens the player', async ({
@@ -68,5 +117,30 @@ test.describe('the phone journey', () => {
         })
       })
       .toBeGreaterThan(0)
+  })
+})
+
+test.describe('the phone journey of a User', () => {
+  test.use({ storageState: resolveStorageStatePath('premium') })
+
+  test('a User reaches the settings from the account tab', async ({ page }) => {
+    await page.goto('/')
+
+    const accountTab = page
+      .getByTestId('tab-bar')
+      .getByRole('button', { name: m.nav_account(), exact: true })
+    const accountDrawer = page.getByRole('dialog', { name: m.nav_account() })
+
+    await repeatUntilVisible(() => {
+      return accountTab.click()
+    }, accountDrawer)
+
+    await accountDrawer
+      .getByRole('link', { name: m.nav_settings(), exact: true })
+      .click()
+
+    await expect(page).toHaveURL('/settings')
+    await expect(accountDrawer).toBeHidden()
+    await expect(accountTab).toHaveAttribute('data-current', '')
   })
 })

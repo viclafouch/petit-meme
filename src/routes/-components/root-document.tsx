@@ -61,7 +61,11 @@ export const RootDocument = ({ children }: RootDocumentProps) => {
                 <StudioProvider>{children}</StudioProvider>
                 <DialogOutlet />
                 <ClientOnly>
-                  <Toaster richColors />
+                  <Toaster
+                    richColors
+                    offset={{ bottom: 'var(--toast-offset-bottom)' }}
+                    mobileOffset={{ bottom: 'var(--toast-offset-bottom)' }}
+                  />
                 </ClientOnly>
                 {embedMatch ? null : (
                   <ClientOnly>

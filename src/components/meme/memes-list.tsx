@@ -14,7 +14,7 @@ import {
 import { sendViewEvent } from '~/lib/algolia-insights'
 import { m } from '~/paraglide/messages'
 
-type MemeWithHighlight = MemeWithVideo & {
+export type MemeWithHighlight = MemeWithVideo & {
   highlightedTitle?: string
 }
 

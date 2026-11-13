@@ -9,7 +9,8 @@ export default defineConfig({
     'project.inlang/paraglide.config.ts',
     'scripts/*.ts',
     'e2e/*.setup.ts',
-    'e2e/fake-anthropic.ts'
+    'e2e/fake-anthropic.ts',
+    '.claude/skills/*/scripts/*.mjs'
   ],
   vite: { config: [] },
   playwright: { config: [] },
@@ -19,7 +20,7 @@ export default defineConfig({
     'src/components/ui/**': ['exports', 'types'],
     'src/components/animate-ui/**': ['exports', 'types']
   },
-  ignoreBinaries: ['run', 'vercel'],
+  ignoreBinaries: ['run', 'vercel', 'ffmpeg'],
   ignoreDependencies: [
     '@ffmpeg/core',
     '@dicebear/styles',

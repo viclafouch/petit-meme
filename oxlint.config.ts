@@ -53,7 +53,8 @@ export default defineConfig({
     '**/components/animate-ui/**',
     'public/ffmpeg/**',
     '**/paraglide/**',
-    'src/routeTree.gen.ts'
+    'src/routeTree.gen.ts',
+    '.claude/**'
   ],
   rules: {
     'import/no-namespace': [

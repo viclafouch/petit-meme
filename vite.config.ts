@@ -97,6 +97,9 @@ export default defineConfig(async ({ mode }) => {
   processEnvironment.VITE_VERCEL_ENV ??=
     processEnvironment.VERCEL_ENV ?? 'development'
 
+  processEnvironment.VITE_VERCEL_OBSERVABILITY_CLIENT_CONFIG ??=
+    processEnvironment.VERCEL_OBSERVABILITY_CLIENT_CONFIG
+
   const { serverEnv } = await import('./src/env/server.server')
 
   return {

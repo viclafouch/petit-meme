@@ -65,6 +65,7 @@
     "@tanstack/react-start": "1.169.4",
     "@tanstack/react-store": "0.11.2",
     "@tanstack/react-table": "^9.3.1",
+    "@vercel/analytics": "^2.0.1",
     "@vercel/blob": "^2.8.2",
     "@vercel/functions": "^3.10.1",
     "better-auth": "^1.7.13",

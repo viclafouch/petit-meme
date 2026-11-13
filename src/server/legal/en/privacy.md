@@ -1,6 +1,6 @@
 # Privacy Policy - Petit Meme
 
-Last updated: **October 2026**
+Last updated: **November 2026**
 
 This Privacy Policy describes how **Petit Meme**
 (accessible at [https://petit-meme.io](https://petit-meme.io))
@@ -117,6 +117,29 @@ point, the record carries no location data at all. The record itself is
 deleted after **90 days**. You may object to this processing at the address
 given in section 11.
 
+### 2.10. Audience measurement (Vercel Web Analytics)
+
+To know which pages are visited, we use **Vercel Web Analytics**, an audience
+measurement tool that sets no cookie. For each page displayed, it sends to
+Vercel:
+
+- The page address, without its parameters or its anchor: no token and no
+  search text is part of it
+- The page you came from (referrer)
+- The approximate location inferred from your IP address (country, region,
+  city)
+- The device type, operating system and browser
+
+Vercel tells visitors apart with a fingerprint computed from the request,
+discarded after **24 hours**. It can neither identify you nor follow your
+browsing across other websites, and your IP address is not stored. This data
+only produces anonymous statistics, on behalf of Petit Meme alone. The
+administration pages are not measured.
+
+In line with the CNIL's guidance on audience measurement tools, this
+measurement is exempt from consent: it runs whether you accept or decline
+cookies.
+
 ---
 
 ## 3. Purposes and legal bases
@@ -127,6 +150,7 @@ given in section 11.
 | Authentication and security | Legitimate interest | Session data, IP |
 | Unique view counting | Legitimate interest | Daily fingerprint derived from the IP address |
 | Audience measurement, security and abuse prevention | Legitimate interest | IP address, country inferred from the IP, user-agent, actions performed and their date |
+| Page traffic statistics (Vercel Web Analytics) | Legitimate interest | Page address, referrer, approximate location, device, operating system and browser |
 | Search improvement (Algolia Insights) | Consent | Anonymous identifier, view and click events |
 | Payment processing | Performance of contract | Data transmitted to Stripe |
 | Sending transactional emails | Performance of contract | Email address |
@@ -155,7 +179,8 @@ given in section 11.
 You can manage your cookie preferences at any time. If you decline analytics
 cookies, the `algoliaUserToken` cookie will not be set and no events will be
 sent to Algolia. View counting itself relies on no cookie at all (see
-section 2.3).
+section 2.3), and neither does the Vercel Web Analytics audience measurement
+(see section 2.10).
 
 ---
 
@@ -173,7 +198,7 @@ We use the following sub-processors for the operation of the service:
 | **Sentry** | Error tracking and stability monitoring | Germany (European Union) |
 | **Google Fonts** | Loading display fonts (IP address transmitted) | United States (standard contractual clauses) |
 | **Neon** | Database hosting | United States (standard contractual clauses) |
-| **Vercel** | Application hosting and execution | United States (standard contractual clauses) |
+| **Vercel** | Application hosting and execution, audience measurement (Vercel Web Analytics) | United States (standard contractual clauses) |
 | **Anthropic** | AI search by natural language | United States (standard contractual clauses) |
 
 For data transfers outside the European Union, appropriate safeguards are in
@@ -199,6 +224,8 @@ place (European Commission standard contractual clauses).
 | AI search data | 365 days, then automatically deleted |
 | Activity log — IP address and inferred country | 30 days, then permanently erased |
 | Activity log — full record | 90 days, then automatically deleted |
+| Vercel Web Analytics visitor fingerprint | 24 hours, then discarded by Vercel |
+| Vercel Web Analytics statistics | Per Vercel's retention policy (12-month reporting window) |
 | Last activity date | Cleared upon account deletion or anonymization |
 | Payment data (Stripe) | Per Stripe's legal obligations |
 | Transactional emails | Per Resend's retention policy |

@@ -1,6 +1,6 @@
 # Politique de confidentialité - Petit Meme
 
-Dernière mise à jour : **Octobre 2026**
+Dernière mise à jour : **Novembre 2026**
 
 La présente Politique de confidentialité décrit la manière dont **Petit Meme**
 (accessible à l'adresse [https://petit-meme.io](https://petit-meme.io))
@@ -124,6 +124,30 @@ délai, l'enregistrement ne porte plus aucune donnée de localisation.
 L'enregistrement lui-même est supprimé au bout de **90 jours**. Vous pouvez
 vous opposer à ce traitement à l'adresse indiquée en section 11.
 
+### 2.10. Mesure d'audience (Vercel Web Analytics)
+
+Pour savoir quelles pages sont consultées, nous utilisons **Vercel Web
+Analytics**, un outil de mesure d'audience qui ne dépose aucun cookie. À chaque
+page affichée, il transmet à Vercel :
+
+- L'adresse de la page, sans ses paramètres ni son ancre : aucun jeton ni texte
+  de recherche n'en fait partie
+- La page d'où vous venez (referrer)
+- La localisation approximative déduite de votre adresse IP (pays, région,
+  ville)
+- Le type d'appareil, le système d'exploitation et le navigateur
+
+Vercel distingue les visiteurs par une empreinte calculée à partir de la
+requête, effacée au bout de **24 heures**. Elle ne permet ni de vous identifier
+ni de suivre votre navigation sur d'autres sites, et votre adresse IP n'est pas
+conservée. Ces données produisent uniquement des statistiques anonymes, pour le
+compte exclusif de Petit Meme. Les pages de l'administration ne sont pas
+mesurées.
+
+Conformément aux recommandations de la CNIL sur les outils de mesure
+d'audience, cette mesure est exemptée de consentement : elle fonctionne que
+vous acceptiez ou refusiez les cookies.
+
 ---
 
 ## 3. Finalités et bases légales
@@ -134,6 +158,7 @@ vous opposer à ce traitement à l'adresse indiquée en section 11.
 | Authentification et sécurité | Intérêt légitime | Données de session, IP |
 | Comptage des vues uniques | Intérêt légitime | Empreinte quotidienne dérivée de l'adresse IP |
 | Mesure d'audience, sécurité et prévention des abus | Intérêt légitime | Adresse IP, pays déduit de l'IP, user-agent, actions réalisées et leur date |
+| Statistiques de fréquentation des pages (Vercel Web Analytics) | Intérêt légitime | Adresse de la page, referrer, localisation approximative, appareil, système et navigateur |
 | Amélioration de la recherche (Algolia Insights) | Consentement | Identifiant anonyme, événements de vue et de clic |
 | Traitement des paiements | Exécution du contrat | Données transmises à Stripe |
 | Envoi d'e-mails transactionnels | Exécution du contrat | Adresse e-mail |
@@ -162,7 +187,8 @@ vous opposer à ce traitement à l'adresse indiquée en section 11.
 Vous pouvez gérer vos préférences cookies à tout moment. Si vous refusez les
 cookies analytiques, le cookie `algoliaUserToken` ne sera pas posé et aucun
 événement ne sera transmis à Algolia. Le comptage des vues, lui, ne dépend
-d'aucun cookie (voir section 2.3).
+d'aucun cookie (voir section 2.3), pas plus que la mesure d'audience de Vercel
+Web Analytics (voir section 2.10).
 
 ---
 
@@ -181,7 +207,7 @@ service :
 | **Sentry** | Suivi des erreurs et monitoring de la stabilité | Allemagne (Union européenne) |
 | **Google Fonts** | Chargement des polices d'affichage (adresse IP transmise) | États-Unis (clauses contractuelles types) |
 | **Neon** | Hébergement de la base de données | États-Unis (clauses contractuelles types) |
-| **Vercel** | Hébergement et exécution de l'application | États-Unis (clauses contractuelles types) |
+| **Vercel** | Hébergement et exécution de l'application, mesure d'audience (Vercel Web Analytics) | États-Unis (clauses contractuelles types) |
 | **Anthropic** | Recherche IA par langage naturel | États-Unis (clauses contractuelles types) |
 
 Pour les transferts de données hors de l'Union européenne, des garanties
@@ -208,6 +234,8 @@ européenne).
 | Données de recherche IA | 365 jours, puis supprimées automatiquement |
 | Journal d'activité — adresse IP et pays déduit | 30 jours, puis effacés définitivement |
 | Journal d'activité — enregistrement complet | 90 jours, puis supprimé automatiquement |
+| Empreinte de visiteur Vercel Web Analytics | 24 heures, puis effacée par Vercel |
+| Statistiques Vercel Web Analytics | Selon la politique de rétention de Vercel (12 mois de consultation) |
 | Date de dernière activité | Effacée à la suppression ou à l'anonymisation du compte |
 | Données de paiement (Stripe) | Selon les obligations légales de Stripe |
 | E-mails transactionnels | Selon la politique de rétention de Resend |

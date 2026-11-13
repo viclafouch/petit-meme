@@ -1,6 +1,7 @@
 ---
 name: phone
-description: Drive Chrome on the user's Android phone or an emulator over adb and the Chrome DevTools Protocol, to debug a page or to capture it as screenshots and video. Use when a bug or a check concerns a phone, a tap, the software keyboard, a PWA or a Custom Tab, when the user asks to test something on their phone, or to record the site on a phone.
+description: Debug or record the site on the user's Android phone or an emulator, driven over adb and the Chrome DevTools Protocol.
+disable-model-invocation: true
 ---
 
 # Phone

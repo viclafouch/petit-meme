@@ -1,5 +1,6 @@
 import { expect } from '@playwright/test'
 import { HTTP_STATUS } from '~/constants/http'
+import { m } from '~/paraglide/messages'
 import { E2E_MEMES } from './content'
 import { test } from './fixtures'
 import { getReelAt } from './library'
@@ -35,6 +36,9 @@ test.describe('the Reels', () => {
     await expect(currentReel).toBeInViewport({ ratio: REEL_ON_SCREEN_RATIO })
     await expect(nextReel).not.toBeInViewport({ ratio: REEL_ON_SCREEN_RATIO })
 
+    await expect(
+      page.getByRole('feed', { name: m.meme_video_feed() })
+    ).toBeFocused()
     await page.keyboard.press('ArrowDown')
 
     await expect(nextReel).toBeInViewport({ ratio: REEL_ON_SCREEN_RATIO })

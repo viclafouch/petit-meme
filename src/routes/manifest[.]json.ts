@@ -22,7 +22,7 @@ export const Route = createFileRoute('/manifest.json')({
           name: 'Petit Meme',
           short_name: 'Petit Meme',
           start_url: `${getLocalizedPathname('/memes')}?utm_medium=PWA&utm_source=launcher`,
-          scope: getLocalizedPathname('/'),
+          scope: '/',
           display: 'standalone',
           orientation: 'portrait-primary',
           background_color: '#000000',

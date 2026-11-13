@@ -24,7 +24,9 @@ const openShareMenu = async ({
   shareButton,
   formatLabel
 }: OpenShareMenuParams) => {
-  const formatItem = page.getByRole('menuitem', { name: formatLabel })
+  const formatItem = page
+    .getByRole('dialog', { name: m.meme_share() })
+    .getByRole('button', { name: formatLabel })
 
   await repeatUntilVisible(() => {
     return shareButton.click()

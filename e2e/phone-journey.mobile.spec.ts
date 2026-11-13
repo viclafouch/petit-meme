@@ -29,6 +29,30 @@ test.describe('the phone journey', () => {
     await expect(page.getByRole('contentinfo')).toBeHidden()
   })
 
+  test('the Reels tab opens the feed, and the tab bar leads back out', async ({
+    page
+  }) => {
+    await page.goto('/')
+
+    const tabBar = page.getByTestId('tab-bar')
+    const reelsLink = tabBar.getByRole('link', {
+      name: m.nav_reels(),
+      exact: true
+    })
+
+    await reelsLink.click()
+
+    await expect(page).toHaveURL('/reels')
+    await expect(reelsLink).toHaveAttribute('aria-current', 'page')
+    await expect(
+      page.getByRole('feed', { name: m.meme_video_feed() })
+    ).toBeVisible()
+
+    await tabBar.getByRole('link', { name: m.nav_home(), exact: true }).click()
+
+    await expect(page).toHaveURL('/')
+  })
+
   test('the search tab finds a Meme by its title', async ({ page }) => {
     await page.goto('/')
 

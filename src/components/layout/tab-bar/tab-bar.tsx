@@ -1,5 +1,5 @@
 import React from 'react'
-import { House, LayoutGrid } from 'lucide-react'
+import { Clapperboard, House, LayoutGrid } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { AccountDrawer } from '~/components/layout/tab-bar/account-drawer'
 import { SearchDrawer } from '~/components/layout/tab-bar/search-drawer'
@@ -20,7 +20,7 @@ export const TabBar = () => {
       aria-label={m.nav_tabs()}
       className="fixed inset-x-0 bottom-0 z-40 border-t bg-background pr-[env(safe-area-inset-right,0px)] pb-[env(safe-area-inset-bottom,0px)] pl-[env(safe-area-inset-left,0px)] lg:hidden"
     >
-      <ul className="grid h-(--tab-bar-height) grid-cols-4">
+      <ul className="grid h-(--tab-bar-height) grid-cols-5">
         <li>
           <Link
             to="/"
@@ -36,6 +36,12 @@ export const TabBar = () => {
           <Link to="/memes" preload="intent" className={TAB_ITEM_CLASS}>
             <LayoutGrid aria-hidden="true" />
             {m.nav_memes()}
+          </Link>
+        </li>
+        <li>
+          <Link to="/reels" preload="intent" className={TAB_ITEM_CLASS}>
+            <Clapperboard aria-hidden="true" />
+            {m.nav_reels()}
           </Link>
         </li>
         <li>

@@ -9,6 +9,7 @@ The life of Petit Meme, for someone who never opens the code. Read in this order
 3. [The life of a Meme](meme-lifecycle.md): from discovery to archive
 4. [The offer](offer.md): what free keeps, what Premium lifts, and how the subscription runs
 5. [Languages](languages.md): French, English, and universal Memes
+6. [Reels](reels.md): the phone feed, and the rules it borrows from Instagram and X
 
 ## How it runs
 

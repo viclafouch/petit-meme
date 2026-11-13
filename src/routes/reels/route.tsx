@@ -3,17 +3,20 @@ import { buildSeo } from '~/lib/seo/meta'
 import { buildOgImageUrl } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
+import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
 import { listReelsQueryOpts } from '~/queries/meme'
 import { getPremiumSubscriptionQueryOpts } from '~/queries/subscription'
-import { ReelsPage, ReelsPending } from './-components/reels-page'
+import { ReelsPage } from './-components/reels-page'
 
 export const Route = createFileRoute('/reels')({
   component: ReelsPage,
-  ssr: 'data-only',
-  pendingComponent: ReelsPending,
   loader: async ({ context }) => {
     if (context.user) {
       void Promise.allSettled([
+        context.queryClient.query({
+          ...listBookmarkedMemesQueryOpts(),
+          staleTime: 'static'
+        }),
         context.queryClient.query({
           ...getPremiumSubscriptionQueryOpts(),
           staleTime: 'static'
@@ -21,10 +24,7 @@ export const Route = createFileRoute('/reels')({
       ])
     }
 
-    await context.queryClient.infiniteQuery({
-      ...listReelsQueryOpts(),
-      staleTime: 'static'
-    })
+    await context.queryClient.infiniteQuery(listReelsQueryOpts())
   },
   head: () => {
     const locale = getLocale()

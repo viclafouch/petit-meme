@@ -24,6 +24,12 @@ export const RATE_LIMIT_PLAYBACK = {
   windowMs: FIVE_MINUTES_MS
 } as const satisfies RateLimitConfig
 
+export const RATE_LIMIT_REELS = {
+  action: 'reels',
+  maxRequests: 25,
+  windowMs: FIVE_MINUTES_MS
+} as const satisfies RateLimitConfig
+
 export const RATE_LIMIT_TRACK = {
   action: 'track',
   maxRequests: 30,

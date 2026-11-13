@@ -8,25 +8,41 @@ import { getMemePlaybackUrlQueryOpts } from '~/queries/meme'
 
 const PLAYBACK_URL_REFRESH_AFTER_MS = HOUR
 
-type UseMemeHlsParams = {
-  memeId: Meme['id']
+export type SignedStream = {
+  url: string
+  signedAt: number
 }
 
-export const useMemeHls = ({ memeId }: UseMemeHlsParams) => {
+type UseMemeHlsParams = {
+  memeId: Meme['id']
+  signedStream?: SignedStream
+  isEnabled?: boolean
+}
+
+export const useMemeHls = ({
+  memeId,
+  signedStream,
+  isEnabled = true
+}: UseMemeHlsParams) => {
   const [video, setVideo] = React.useState<HTMLVideoElement | null>(null)
   const [failedStreamUrl, setFailedStreamUrl] = React.useState<string | null>(
     null
   )
   const queryClient = useQueryClient()
   const isHydrated = useHydrated()
-  const playbackUrlQuery = useQuery(getMemePlaybackUrlQueryOpts(memeId))
+  const playbackUrlQuery = useQuery({
+    ...getMemePlaybackUrlQueryOpts(memeId),
+    initialData: signedStream?.url,
+    initialDataUpdatedAt: signedStream?.signedAt,
+    enabled: isEnabled
+  })
   const streamUrl = playbackUrlQuery.data ?? null
   const hasPlaybackFailed =
     (streamUrl !== null && failedStreamUrl === streamUrl) ||
     (isHydrated && playbackUrlQuery.isError)
 
   React.useEffect(() => {
-    if (!video || streamUrl === null || hasPlaybackFailed) {
+    if (!isEnabled || !video || streamUrl === null || hasPlaybackFailed) {
       return () => {}
     }
 
@@ -55,7 +71,7 @@ export const useMemeHls = ({ memeId }: UseMemeHlsParams) => {
       video.removeAttribute('src')
       video.load()
     }
-  }, [video, streamUrl, hasPlaybackFailed, memeId, queryClient])
+  }, [isEnabled, video, streamUrl, hasPlaybackFailed, memeId, queryClient])
 
   const handleRetryPlayback = () => {
     void queryClient.resetQueries(getMemePlaybackUrlQueryOpts(memeId))

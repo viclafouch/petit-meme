@@ -1,15 +1,15 @@
 import React from 'react'
 import { ArrowRight, Clapperboard, EllipsisVertical, Star } from 'lucide-react'
 import { motion } from 'motion/react'
-import { useQuery } from '@tanstack/react-query'
-import { Link, useRouteContext } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import { BunnyPlayIcon } from '~/components/icon/play'
+import { MemeActionsSheet } from '~/components/meme/meme-actions-sheet'
 import { MemeExportSubmenu } from '~/components/meme/meme-export-menu'
 import { MemeHighlightedTitle } from '~/components/meme/meme-highlighted-title'
 import { MemeLanguageBadge } from '~/components/meme/meme-language-badge'
 import { MemeVideoThumbnail } from '~/components/meme/meme-video-thumbnail'
+import { useBookmarkAction } from '~/components/meme/use-bookmark-action'
 import { useMemeExport } from '~/components/meme/use-meme-export'
-import { useToggleBookmark } from '~/components/meme/use-toggle-bookmark'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +19,7 @@ import {
 } from '~/components/ui/dropdown-menu'
 import type { MemeWithVideo } from '~/constants/meme'
 import { matchIsContentLocaleForeign } from '~/helpers/i18n-content'
+import { useIsCoarsePointer } from '~/hooks/use-is-coarse-pointer'
 import {
   sendClickEvent,
   sendConversionEvent,
@@ -27,8 +28,6 @@ import {
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
-import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
-import { useDialogStore } from '~/stores/dialog.store'
 
 export type MemeListItemProps = {
   meme: MemeWithVideo
@@ -54,80 +53,37 @@ const sizes = {
   }
 } as const satisfies Record<string, Record<string, string>>
 
-type BookmarkItemProps = {
+type BookmarkMenuItemProps = {
   meme: MemeWithVideo
   queryID?: string
   authenticatedUserToken?: string
 }
 
-type BookmarkItemGuardProps = BookmarkItemProps
-
-const BookmarkItem = ({
+const BookmarkMenuItem = ({
   meme,
   queryID,
   authenticatedUserToken
-}: BookmarkItemProps) => {
-  const bookmarkedMemesQuery = useQuery(listBookmarkedMemesQueryOpts())
-
-  const { isMemeBookmarked, isPending, toggleBookmark } = useToggleBookmark({
+}: BookmarkMenuItemProps) => {
+  const bookmarkAction = useBookmarkAction({
     meme,
-    bookmarks: bookmarkedMemesQuery.data?.bookmarks
+    queryID,
+    authenticatedUserToken
   })
 
-  const handleToggleBookmark = (event: React.MouseEvent<HTMLDivElement>) => {
-    event.preventDefault()
-
-    if (!isMemeBookmarked) {
-      sendConversionEvent({
-        queryID,
-        objectID: meme.id,
-        eventName: 'Meme Bookmarked',
-        authenticatedUserToken
-      })
-    }
-
-    toggleBookmark()
-  }
-
   return (
-    <DropdownMenuItem onClick={handleToggleBookmark} disabled={isPending}>
+    <DropdownMenuItem
+      disabled={bookmarkAction.isPending}
+      onClick={(event) => {
+        event.preventDefault()
+        bookmarkAction.selectBookmark()
+      }}
+    >
       <Star
-        data-active={isMemeBookmarked}
+        data-active={bookmarkAction.isMemeBookmarked}
         className="data-[active=true]:fill-muted-foreground"
       />
-      {isMemeBookmarked ? m.meme_remove_bookmark() : m.meme_add_bookmark()}
+      {bookmarkAction.label}
     </DropdownMenuItem>
-  )
-}
-
-const BookmarkItemGuard = ({
-  meme,
-  queryID,
-  authenticatedUserToken
-}: BookmarkItemGuardProps) => {
-  const dialogStore = useDialogStore()
-  const { user } = useRouteContext({ from: '__root__' })
-
-  if (!user) {
-    return (
-      <DropdownMenuItem
-        onClick={(event) => {
-          event.preventDefault()
-          dialogStore.actions.showDialog('auth')
-        }}
-      >
-        <Star />
-        {m.meme_add_bookmark()}
-      </DropdownMenuItem>
-    )
-  }
-
-  return (
-    <BookmarkItem
-      meme={meme}
-      queryID={queryID}
-      authenticatedUserToken={authenticatedUserToken}
-    />
   )
 }
 
@@ -142,6 +98,7 @@ export const MemeListItem = React.memo(
     position,
     authenticatedUserToken
   }: MemeListItemProps) => {
+    const isCoarsePointer = useIsCoarsePointer()
     const shareMutation = useMemeExport({ mode: 'share', queryID })
     const downloadMutation = useMemeExport({ mode: 'download', queryID })
 
@@ -214,54 +171,80 @@ export const MemeListItem = React.memo(
             </div>
           </div>
           <div className="flex items-center gap-1 shrink-0">
-            <DropdownMenu>
-              <DropdownMenuTrigger className="relative after:absolute after:-inset-x-3 after:-inset-y-2">
+            {isCoarsePointer ? (
+              <MemeActionsSheet
+                meme={meme}
+                queryID={queryID}
+                authenticatedUserToken={authenticatedUserToken}
+                onStudioOpen={() => {
+                  handleTrackConversion('Meme Studio Opened')
+                }}
+                onExport={(mode, format) => {
+                  const exportMutation =
+                    mode === 'share' ? shareMutation : downloadMutation
+
+                  exportMutation.trigger(meme, format)
+                }}
+                render={
+                  <button
+                    type="button"
+                    aria-label={m.meme_open_options()}
+                    className="relative touch-tap after:absolute after:-inset-x-3 after:-inset-y-2"
+                  />
+                }
+              >
                 <EllipsisVertical className={cn(sizes[size].icon)} />
-                <span className="sr-only">{m.meme_open_options()}</span>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-auto">
-                <DropdownMenuLinkItem
-                  render={
-                    <Link to="/memes/$memeId" params={{ memeId: meme.id }} />
-                  }
-                >
-                  <ArrowRight />
-                  {m.meme_details()}
-                </DropdownMenuLinkItem>
-                <DropdownMenuLinkItem
-                  render={
-                    <Link
-                      to="/memes/$memeId/studio"
-                      params={{ memeId: meme.id }}
-                    />
-                  }
-                  onClick={() => {
-                    handleTrackConversion('Meme Studio Opened')
-                  }}
-                >
-                  <Clapperboard />
-                  {m.meme_open_studio()}
-                </DropdownMenuLinkItem>
-                <MemeExportSubmenu
-                  mode="share"
-                  className="md:hidden"
-                  onExport={(format) => {
-                    shareMutation.trigger(meme, format)
-                  }}
-                />
-                <MemeExportSubmenu
-                  mode="download"
-                  onExport={(format) => {
-                    downloadMutation.trigger(meme, format)
-                  }}
-                />
-                <BookmarkItemGuard
-                  meme={meme}
-                  queryID={queryID}
-                  authenticatedUserToken={authenticatedUserToken}
-                />
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </MemeActionsSheet>
+            ) : (
+              <DropdownMenu>
+                <DropdownMenuTrigger className="relative after:absolute after:-inset-x-3 after:-inset-y-2">
+                  <EllipsisVertical className={cn(sizes[size].icon)} />
+                  <span className="sr-only">{m.meme_open_options()}</span>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-auto">
+                  <DropdownMenuLinkItem
+                    render={
+                      <Link to="/memes/$memeId" params={{ memeId: meme.id }} />
+                    }
+                  >
+                    <ArrowRight />
+                    {m.meme_details()}
+                  </DropdownMenuLinkItem>
+                  <DropdownMenuLinkItem
+                    render={
+                      <Link
+                        to="/memes/$memeId/studio"
+                        params={{ memeId: meme.id }}
+                      />
+                    }
+                    onClick={() => {
+                      handleTrackConversion('Meme Studio Opened')
+                    }}
+                  >
+                    <Clapperboard />
+                    {m.meme_open_studio()}
+                  </DropdownMenuLinkItem>
+                  <MemeExportSubmenu
+                    mode="share"
+                    className="pointer-fine:hidden"
+                    onExport={(format) => {
+                      shareMutation.trigger(meme, format)
+                    }}
+                  />
+                  <MemeExportSubmenu
+                    mode="download"
+                    onExport={(format) => {
+                      downloadMutation.trigger(meme, format)
+                    }}
+                  />
+                  <BookmarkMenuItem
+                    meme={meme}
+                    queryID={queryID}
+                    authenticatedUserToken={authenticatedUserToken}
+                  />
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
       </motion.li>

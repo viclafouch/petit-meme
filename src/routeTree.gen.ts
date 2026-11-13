@@ -14,7 +14,7 @@ import { Route as StudioRouteImport } from './routes/_studio'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as ManifestDotjsonRouteImport } from './routes/manifest[.]json'
-import { Route as ReelsRouteImport } from './routes/reels'
+import { Route as ReelsRouteRouteImport } from './routes/reels/route'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapCategoriesDotxmlRouteImport } from './routes/sitemap-categories[.]xml'
 import { Route as SitemapMemesDotxmlRouteImport } from './routes/sitemap-memes[.]xml'
@@ -89,7 +89,7 @@ const ManifestDotjsonRoute = ManifestDotjsonRouteImport.update({
   path: '/manifest.json',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ReelsRoute = ReelsRouteImport.update({
+const ReelsRouteRoute = ReelsRouteRouteImport.update({
   id: '/reels',
   path: '/reels',
   getParentRoute: () => rootRouteImport,
@@ -367,9 +367,9 @@ const Public__rootDefaultMemesCategorySlugRoute =
 export interface FileRoutesByFullPath {
   '/': typeof Public__rootIndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
+  '/reels': typeof ReelsRouteRoute
   '/health': typeof HealthRoute
   '/manifest.json': typeof ManifestDotjsonRoute
-  '/reels': typeof ReelsRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap-categories.xml': typeof SitemapCategoriesDotxmlRoute
   '/sitemap-memes.xml': typeof SitemapMemesDotxmlRoute
@@ -420,10 +420,10 @@ export interface FileRoutesByFullPath {
   '/memes/category/$slug': typeof Public__rootDefaultMemesCategorySlugRoute
 }
 export interface FileRoutesByTo {
+  '/reels': typeof ReelsRouteRoute
   '/': typeof Public__rootIndexRoute
   '/health': typeof HealthRoute
   '/manifest.json': typeof ManifestDotjsonRoute
-  '/reels': typeof ReelsRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap-categories.xml': typeof SitemapCategoriesDotxmlRoute
   '/sitemap-memes.xml': typeof SitemapMemesDotxmlRoute
@@ -476,10 +476,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_public__root': typeof Public__rootRouteRouteWithChildren
   '/admin': typeof AdminRouteRouteWithChildren
+  '/reels': typeof ReelsRouteRoute
   '/_studio': typeof StudioRouteWithChildren
   '/health': typeof HealthRoute
   '/manifest.json': typeof ManifestDotjsonRoute
-  '/reels': typeof ReelsRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap-categories.xml': typeof SitemapCategoriesDotxmlRoute
   '/sitemap-memes.xml': typeof SitemapMemesDotxmlRoute
@@ -536,9 +536,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/reels'
     | '/health'
     | '/manifest.json'
-    | '/reels'
     | '/robots.txt'
     | '/sitemap-categories.xml'
     | '/sitemap-memes.xml'
@@ -589,10 +589,10 @@ export interface FileRouteTypes {
     | '/memes/category/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/reels'
     | '/'
     | '/health'
     | '/manifest.json'
-    | '/reels'
     | '/robots.txt'
     | '/sitemap-categories.xml'
     | '/sitemap-memes.xml'
@@ -644,10 +644,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_public__root'
     | '/admin'
+    | '/reels'
     | '/_studio'
     | '/health'
     | '/manifest.json'
-    | '/reels'
     | '/robots.txt'
     | '/sitemap-categories.xml'
     | '/sitemap-memes.xml'
@@ -703,10 +703,10 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   Public__rootRouteRoute: typeof Public__rootRouteRouteWithChildren
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
+  ReelsRouteRoute: typeof ReelsRouteRoute
   StudioRoute: typeof StudioRouteWithChildren
   HealthRoute: typeof HealthRoute
   ManifestDotjsonRoute: typeof ManifestDotjsonRoute
-  ReelsRoute: typeof ReelsRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapCategoriesDotxmlRoute: typeof SitemapCategoriesDotxmlRoute
   SitemapMemesDotxmlRoute: typeof SitemapMemesDotxmlRoute
@@ -767,7 +767,7 @@ declare module '@tanstack/react-router' {
       id: '/reels'
       path: '/reels'
       fullPath: '/reels'
-      preLoaderRoute: typeof ReelsRouteImport
+      preLoaderRoute: typeof ReelsRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/robots.txt': {
@@ -1252,10 +1252,10 @@ const StudioRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   Public__rootRouteRoute: Public__rootRouteRouteWithChildren,
   AdminRouteRoute: AdminRouteRouteWithChildren,
+  ReelsRouteRoute: ReelsRouteRoute,
   StudioRoute: StudioRouteWithChildren,
   HealthRoute: HealthRoute,
   ManifestDotjsonRoute: ManifestDotjsonRoute,
-  ReelsRoute: ReelsRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapCategoriesDotxmlRoute: SitemapCategoriesDotxmlRoute,
   SitemapMemesDotxmlRoute: SitemapMemesDotxmlRoute,

@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { serverEnv } from '~/env/server.server'
 import { fetchWithZod } from '~/server/http/fetch.server'
+import { checkMemeFileExists } from '~/server/meme/meme-file.server'
 import { buildLibraryApiUrl } from '~/server/platforms/bunny.server'
 import {
   BUNNY_ZONE_PROBES,
@@ -29,26 +30,42 @@ const findPlayableVideoId = async () => {
       }
     }
   )
-  const finishedVideo = items.find((video) => {
-    return video.status === API_FINISHED_VIDEO_STATUS
+  const finishedVideoIds = items
+    .filter((video) => {
+      return video.status === API_FINISHED_VIDEO_STATUS
+    })
+    .map((video) => {
+      return video.guid
+    })
+  const hasFirstFrameByVideo = await Promise.all(
+    finishedVideoIds.map((videoId) => {
+      return checkMemeFileExists(videoId, 'first-frame')
+    })
+  )
+  const probedVideoId = finishedVideoIds.find((_videoId, index) => {
+    return hasFirstFrameByVideo[index]
   })
 
-  if (finishedVideo === undefined) {
-    throw new Error('The library holds no finished video to probe')
+  if (probedVideoId === undefined) {
+    throw new Error(
+      'The library holds no finished video with a first frame to probe'
+    )
   }
 
-  return finishedVideo.guid
+  return probedVideoId
 }
 
 const checkBunnyZone = async () => {
   const zone = {
     hostname: serverEnv.VITE_BUNNY_HOSTNAME,
+    imagesHostname: serverEnv.VITE_BUNNY_IMAGES_HOSTNAME,
     videoId: await findPlayableVideoId(),
     tokenAuthKey: serverEnv.BUNNY_TOKEN_AUTH_KEY,
     originalAccessKey: serverEnv.BUNNY_ORIGINAL_ACCESS_KEY
   } satisfies BunnyZone
 
   console.log(`Pull zone:       ${zone.hostname}`)
+  console.log(`Images zone:     ${zone.imagesHostname}`)
   console.log(`Bunny library:   ${serverEnv.BUNNY_LIBRARY_ID}`)
   console.log(`Probed video:    ${zone.videoId}\n`)
 

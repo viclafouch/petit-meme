@@ -8,7 +8,8 @@ export default defineConfig({
     include: ['src/**/*.test.ts', 'scripts/**/*.test.ts'],
     env: {
       VITE_SITE_URL: 'https://www.petit-meme.io',
-      VITE_BUNNY_HOSTNAME: 'cdn-test.petit-meme.io'
+      VITE_BUNNY_HOSTNAME: 'cdn-test.petit-meme.io',
+      VITE_BUNNY_IMAGES_HOSTNAME: 'images-test.petit-meme.io'
     },
     pool: 'threads',
     isolate: false,

@@ -14,6 +14,7 @@ export const clientEnv = createEnv({
   runtimeEnvStrict: {
     VITE_SITE_URL: import.meta.env.VITE_SITE_URL,
     VITE_BUNNY_HOSTNAME: import.meta.env.VITE_BUNNY_HOSTNAME,
+    VITE_BUNNY_IMAGES_HOSTNAME: import.meta.env.VITE_BUNNY_IMAGES_HOSTNAME,
     VITE_ALGOLIA_APP_ID: import.meta.env.VITE_ALGOLIA_APP_ID,
     VITE_ALGOLIA_INSIGHTS_KEY: import.meta.env.VITE_ALGOLIA_INSIGHTS_KEY,
     VITE_ALGOLIA_INDEX: import.meta.env.VITE_ALGOLIA_INDEX,

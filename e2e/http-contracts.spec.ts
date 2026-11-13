@@ -12,6 +12,7 @@ import vercelConfig from '../vercel.json' with { type: 'json' }
 import {
   E2E_BASE_URL,
   E2E_BUNNY_HOSTNAME,
+  E2E_BUNNY_IMAGES_HOSTNAME,
   E2E_BUNNY_ORIGINAL_ACCESS_KEY,
   E2E_BUNNY_TOKEN_AUTH_KEY,
   E2E_STRIPE_PRICE_IDS,
@@ -27,6 +28,7 @@ const CHILD_SITEMAPS = [
 
 const E2E_BUNNY_ZONE = {
   hostname: E2E_BUNNY_HOSTNAME,
+  imagesHostname: E2E_BUNNY_IMAGES_HOSTNAME,
   videoId: E2E_VIDEO_BUNNY_ID,
   tokenAuthKey: E2E_BUNNY_TOKEN_AUTH_KEY,
   originalAccessKey: E2E_BUNNY_ORIGINAL_ACCESS_KEY

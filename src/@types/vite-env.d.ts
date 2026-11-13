@@ -9,6 +9,7 @@ interface ViteTypeOptions {
 interface ImportMetaEnv {
   readonly VITE_SITE_URL: string | undefined
   readonly VITE_BUNNY_HOSTNAME: string | undefined
+  readonly VITE_BUNNY_IMAGES_HOSTNAME: string | undefined
   readonly VITE_ALGOLIA_APP_ID: string | undefined
   readonly VITE_ALGOLIA_INSIGHTS_KEY: string | undefined
   readonly VITE_ALGOLIA_INDEX: string | undefined

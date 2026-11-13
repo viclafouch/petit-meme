@@ -24,6 +24,8 @@ export const serverEnvSchema = {
   BUNNY_ORIGINAL_ACCESS_KEY: z.string().min(TOKEN_MIN_LENGTH),
   BUNNY_STORAGE_API_KEY: z.string(),
   BUNNY_STORAGE_ZONE_NAME: z.string(),
+  BUNNY_IMAGES_STORAGE_API_KEY: z.string(),
+  BUNNY_IMAGES_STORAGE_ZONE_NAME: z.string(),
   ALGOLIA_ADMIN_KEY: z.string(),
   ALGOLIA_SEARCH_KEY: z.string(),
   ANTHROPIC_API_KEY: z.string(),

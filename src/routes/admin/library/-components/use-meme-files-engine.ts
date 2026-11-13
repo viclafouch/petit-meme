@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import type { Meme } from '~/db/generated/prisma/client'
+import type { MemeFullData } from '~/constants/meme'
 import {
   getAdminMemeOriginalQueryOpts,
   getMissingMemeFilesQueryOpts
@@ -10,17 +10,18 @@ import {
   type GenerateMemeFilesHandlers
 } from '~/routes/admin/library/-lib/meme-files'
 
-export function useMemeFilesEngine(memeId: Meme['id']) {
+export function useMemeFilesEngine(meme: Pick<MemeFullData, 'id' | 'video'>) {
   const queryClient = useQueryClient()
-  const filesQuery = useQuery(getMissingMemeFilesQueryOpts(memeId))
+  const filesQuery = useQuery(getMissingMemeFilesQueryOpts(meme.id))
 
   const generateFiles = async (handlers: GenerateMemeFilesHandlers) => {
     handlers.onStep('preparing')
 
     const files = await buildMemeFiles({
+      bunnyId: meme.video.bunnyId,
       readOriginal: () => {
         return queryClient.query({
-          ...getAdminMemeOriginalQueryOpts(memeId),
+          ...getAdminMemeOriginalQueryOpts(meme.id),
           staleTime: 'static'
         })
       },
@@ -28,11 +29,11 @@ export function useMemeFilesEngine(memeId: Meme['id']) {
     })
 
     handlers.onStep('uploading')
-    await uploadMemeFiles(memeId, files)
+    await uploadMemeFiles(meme.id, files)
   }
 
   const refreshMissingFiles = () => {
-    return queryClient.invalidateQueries(getMissingMemeFilesQueryOpts(memeId))
+    return queryClient.invalidateQueries(getMissingMemeFilesQueryOpts(meme.id))
   }
 
   return {

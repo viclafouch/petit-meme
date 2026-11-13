@@ -1,4 +1,7 @@
-import { ORIGINAL_ACCESS_HEADER } from '~/constants/bunny'
+import {
+  MEME_FIRST_FRAME_FILE_NAME,
+  ORIGINAL_ACCESS_HEADER
+} from '~/constants/bunny'
 import { HTTP_STATUS } from '~/constants/http'
 import { FIVE_MINUTES_IN_SECONDS, SECOND } from '~/constants/time'
 import {
@@ -8,6 +11,7 @@ import {
 
 export type BunnyZone = {
   hostname: string
+  imagesHostname: string
   videoId: string
   tokenAuthKey: string
   originalAccessKey: string
@@ -39,6 +43,10 @@ const EXPECTED_STATUSES = {
 
 const buildZoneUrl = (zone: BunnyZone, file: string) => {
   return `https://${zone.hostname}/${zone.videoId}/${file}`
+}
+
+const buildImagesZoneUrl = (zone: BunnyZone, file: string) => {
+  return `https://${zone.imagesHostname}/${zone.videoId}/${file}`
 }
 
 const getExpiresAt = () => {
@@ -131,6 +139,13 @@ export const BUNNY_ZONE_PROBES = [
     expectation: 'served',
     buildRequest: async (zone) => {
       return { url: buildZoneUrl(zone, 'preview.webp') }
+    }
+  },
+  {
+    name: 'the first frame is public',
+    expectation: 'served',
+    buildRequest: async (zone) => {
+      return { url: buildImagesZoneUrl(zone, MEME_FIRST_FRAME_FILE_NAME) }
     }
   },
   {

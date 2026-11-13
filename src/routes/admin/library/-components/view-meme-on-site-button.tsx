@@ -11,7 +11,7 @@ import {
   DialogTitle
 } from '~/components/ui/dialog'
 import { LoadingButton } from '~/components/ui/loading-button'
-import { MEME_DERIVED_FORMATS } from '~/constants/bunny'
+import { MEME_STORED_FILES } from '~/constants/bunny'
 import type { MemeFullData } from '~/constants/meme'
 import { MemeStatus } from '~/db/generated/prisma/enums'
 import { MemePublishTimeline } from './meme-publish-timeline'
@@ -91,20 +91,17 @@ export const ViewMemeOnSiteButton = ({
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Génère le MP4 et le MP3</DialogTitle>
+            <DialogTitle>Génère les fichiers du Meme</DialogTitle>
             <DialogDescription>
               L’aperçu sur le site sert à télécharger et partager le Meme avant
-              sa publication. Il lui faut le MP4 watermarké et le MP3.
+              sa publication. Il lui faut le MP4 watermarké, le MP3 et la
+              première frame.
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-wrap gap-2">
-            {MEME_DERIVED_FORMATS.map((format) => {
+            {MEME_STORED_FILES.map((file) => {
               return (
-                <FileBadge
-                  key={format}
-                  format={format}
-                  missingFiles={missingFiles}
-                />
+                <FileBadge key={file} file={file} missingFiles={missingFiles} />
               )
             })}
           </div>

@@ -1,7 +1,7 @@
 import { hashPassword } from 'better-auth/crypto'
 import { z } from 'zod'
 import { type APIRequestContext, expect, test as setup } from '@playwright/test'
-import { BUNNY_STATUS, type MemeDerivedFormat } from '~/constants/bunny'
+import { BUNNY_STATUS, type MemeStoredFile } from '~/constants/bunny'
 import { HTTP_STATUS } from '~/constants/http'
 import { TRENDING_CATEGORY_DAYS } from '~/constants/meme'
 import { DAY, THIRTY_DAYS_MS } from '~/constants/time'
@@ -24,8 +24,10 @@ const SEED_TIMEOUT_MS = 180_000
 
 const MEME_FILE_BACKFILL_COMMANDS = {
   mp4: 'pnpm exec vite-node --mode e2e scripts/watermark-videos.ts',
-  mp3: 'pnpm exec vite-node --mode e2e scripts/backfill-mp3.ts'
-} as const satisfies Record<MemeDerivedFormat, string>
+  mp3: 'pnpm exec vite-node --mode e2e scripts/backfill-mp3.ts',
+  'first-frame':
+    'pnpm exec vite-node --mode e2e scripts/backfill-first-frames.ts'
+} as const satisfies Record<MemeStoredFile, string>
 
 const createWithinPool = async <TItem>(
   items: readonly TItem[],
@@ -246,13 +248,13 @@ setup.describe('the e2e environment', () => {
   })
 
   setup('holds every file of its playable Meme', async () => {
-    const missingFormats = await findMissingMemeFiles(E2E_VIDEO_BUNNY_ID)
-    const backfillCommands = missingFormats.map((format) => {
-      return MEME_FILE_BACKFILL_COMMANDS[format]
+    const missingFiles = await findMissingMemeFiles(E2E_VIDEO_BUNNY_ID)
+    const backfillCommands = missingFiles.map((file) => {
+      return MEME_FILE_BACKFILL_COMMANDS[file]
     })
 
     expect(
-      missingFormats,
+      missingFiles,
       `Bunny Storage misses files of the e2e Meme, run: ${backfillCommands.join(' && ')}`
     ).toStrictEqual([])
   })

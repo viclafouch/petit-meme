@@ -50,6 +50,10 @@ Turns a description in plain words into a search. Picked because it answers fast
 
 Collects the errors from the site and the server. Expected errors and browser noise are filtered out, so a real error stands out. Some signals stay visible on purpose: blocked scraping attempts, and Gemini timing out.
 
+### Vercel Web Analytics: audience
+
+Counts the visitors and the pages they open. It sets no cookie, so it needs no consent. The administration is not counted.
+
 ### GitHub: code and decisions
 
 Holds the code, the issues and the pull requests. Plans and decisions live in the issues. GitHub runs the checks that guard production.

@@ -20,6 +20,7 @@ const BUNNY_ID = 'bunny-video-id'
 const STREAM_VIDEO_URL = `https://video.bunnycdn.com/library/4242/videos/${BUNNY_ID}`
 const MP4_URL = `https://storage.bunnycdn.com/petit-meme/${BUNNY_ID}.mp4`
 const MP3_URL = `https://storage.bunnycdn.com/petit-meme/${BUNNY_ID}.mp3`
+const FIRST_FRAME_URL = `https://storage.bunnycdn.com/petit-meme-images/${BUNNY_ID}/first-frame.webp`
 const ORIGINAL_URL = `https://cdn-test.petit-meme.io/${BUNNY_ID}/original`
 const ORIGINAL_ACCESS_KEY = 'original-access-key'
 
@@ -52,6 +53,8 @@ const stubBunnyEnv = () => {
   vi.stubEnv('BUNNY_ACCESS_KEY', 'stream-access-key')
   vi.stubEnv('BUNNY_STORAGE_API_KEY', 'storage-access-key')
   vi.stubEnv('BUNNY_STORAGE_ZONE_NAME', 'petit-meme')
+  vi.stubEnv('BUNNY_IMAGES_STORAGE_API_KEY', 'images-storage-access-key')
+  vi.stubEnv('BUNNY_IMAGES_STORAGE_ZONE_NAME', 'petit-meme-images')
   vi.spyOn(console, 'error').mockImplementation(() => {})
 }
 
@@ -90,6 +93,21 @@ describe('checkMemeFileExists', () => {
       )
     }
   )
+
+  it('should look for the first frame in the images zone with its own key', async () => {
+    const fetchMock = stubBunny({ [FIRST_FRAME_URL]: HTTP_STATUS.NOT_FOUND })
+
+    expect(await checkMemeFileExists(BUNNY_ID, 'first-frame')).toBe(false)
+    expect(fetchMock).toHaveBeenCalledWith(
+      FIRST_FRAME_URL,
+      expect.objectContaining({
+        headers: new Headers({
+          AccessKey: 'images-storage-access-key',
+          Range: 'bytes=0-0'
+        })
+      })
+    )
+  })
 })
 
 describe('findMissingMemeFiles', () => {
@@ -102,19 +120,30 @@ describe('findMissingMemeFiles', () => {
     expect(await findMissingMemeFiles(BUNNY_ID)).toStrictEqual(['mp3'])
   })
 
-  it('should report nothing when Bunny Storage holds both files', async () => {
+  it('should report the first frame when the images zone misses it', async () => {
+    stubBunny({ [FIRST_FRAME_URL]: HTTP_STATUS.NOT_FOUND })
+
+    expect(await findMissingMemeFiles(BUNNY_ID)).toStrictEqual(['first-frame'])
+  })
+
+  it('should report nothing when Bunny Storage holds every file', async () => {
     stubBunny()
 
     expect(await findMissingMemeFiles(BUNNY_ID)).toStrictEqual([])
   })
 
-  it('should report both files when Bunny Storage holds neither', async () => {
+  it('should report every file when Bunny Storage holds none', async () => {
     stubBunny({
       [MP4_URL]: HTTP_STATUS.NOT_FOUND,
-      [MP3_URL]: HTTP_STATUS.NOT_FOUND
+      [MP3_URL]: HTTP_STATUS.NOT_FOUND,
+      [FIRST_FRAME_URL]: HTTP_STATUS.NOT_FOUND
     })
 
-    expect(await findMissingMemeFiles(BUNNY_ID)).toStrictEqual(['mp4', 'mp3'])
+    expect(await findMissingMemeFiles(BUNNY_ID)).toStrictEqual([
+      'mp4',
+      'mp3',
+      'first-frame'
+    ])
   })
 })
 
@@ -122,13 +151,13 @@ describe('deleteMemeFiles', () => {
   beforeEach(stubBunnyEnv)
   afterEach(restoreStubs)
 
-  it('should delete the Stream video, the MP4 and the MP3 of a Meme', async () => {
+  it('should delete the Stream video, the MP4, the MP3 and the first frame of a Meme', async () => {
     const fetchMock = stubBunny()
 
     await deleteMemeFiles(BUNNY_ID)
 
     expect(new Set(readDeletedUrls(fetchMock))).toStrictEqual(
-      new Set([STREAM_VIDEO_URL, MP4_URL, MP3_URL])
+      new Set([STREAM_VIDEO_URL, MP4_URL, MP3_URL, FIRST_FRAME_URL])
     )
   })
 
@@ -141,7 +170,8 @@ describe('deleteMemeFiles', () => {
   it('should count a file Bunny Storage does not hold as deleted', async () => {
     stubBunny({
       [MP4_URL]: HTTP_STATUS.NOT_FOUND,
-      [MP3_URL]: HTTP_STATUS.NOT_FOUND
+      [MP3_URL]: HTTP_STATUS.NOT_FOUND,
+      [FIRST_FRAME_URL]: HTTP_STATUS.NOT_FOUND
     })
 
     expect(await deleteMemeFiles(BUNNY_ID)).toStrictEqual([])

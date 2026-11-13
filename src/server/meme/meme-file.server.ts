@@ -2,9 +2,11 @@ import { createServerOnlyFn } from '@tanstack/react-start'
 import { del, get, issueSignedToken, presignUrl } from '@vercel/blob'
 import {
   BUNNY_STORAGE_ENDPOINT,
-  MEME_DERIVED_FORMAT_CONTENT_TYPES,
-  MEME_DERIVED_FORMATS,
-  type MemeDerivedFormat
+  MEME_FIRST_FRAME_FILE_NAME,
+  MEME_STORED_FILE_CONTENT_TYPES,
+  MEME_STORED_FILES,
+  type MemeDerivedFormat,
+  type MemeStoredFile
 } from '~/constants/bunny'
 import { AppError } from '~/constants/error'
 import { HTTP_STATUS } from '~/constants/http'
@@ -22,22 +24,30 @@ import {
 const STORAGE_TIMEOUT_MS = 15_000
 const STORAGE_UPLOAD_TIMEOUT_MS = 120_000
 
-export type MemeFile = 'stream' | MemeDerivedFormat
+export type MemeFile = 'stream' | MemeStoredFile
 
 const MEME_FILES = [
   'stream',
-  ...MEME_DERIVED_FORMATS
+  ...MEME_STORED_FILES
 ] as const satisfies readonly MemeFile[]
 
-const buildMemeFileUrl = createServerOnlyFn(
-  (bunnyId: string, format: MemeDerivedFormat) => {
-    return `${BUNNY_STORAGE_ENDPOINT}/${serverEnv.BUNNY_STORAGE_ZONE_NAME}/${bunnyId}.${format}`
+const buildMemeFileStorage = createServerOnlyFn(
+  (bunnyId: string, file: MemeStoredFile) => {
+    if (file === 'first-frame') {
+      return {
+        url: `${BUNNY_STORAGE_ENDPOINT}/${serverEnv.BUNNY_IMAGES_STORAGE_ZONE_NAME}/${bunnyId}/${MEME_FIRST_FRAME_FILE_NAME}`,
+        headers: new Headers({
+          AccessKey: serverEnv.BUNNY_IMAGES_STORAGE_API_KEY
+        })
+      }
+    }
+
+    return {
+      url: `${BUNNY_STORAGE_ENDPOINT}/${serverEnv.BUNNY_STORAGE_ZONE_NAME}/${bunnyId}.${file}`,
+      headers: new Headers({ AccessKey: serverEnv.BUNNY_STORAGE_API_KEY })
+    }
   }
 )
-
-const getStorageHeaders = () => {
-  return new Headers({ AccessKey: serverEnv.BUNNY_STORAGE_API_KEY })
-}
 
 const fetchWithHeadersTimeout = async (
   sendRequest: (signal: AbortSignal) => Promise<Response>
@@ -55,9 +65,10 @@ const fetchWithHeadersTimeout = async (
 }
 
 const fetchMemeFile = async (bunnyId: string, format: MemeDerivedFormat) => {
+  const { url, headers } = buildMemeFileStorage(bunnyId, format)
   const response = await fetchWithHeadersTimeout((signal) => {
-    return fetch(buildMemeFileUrl(bunnyId, format), {
-      headers: getStorageHeaders(),
+    return fetch(url, {
+      headers,
       signal
     })
   })
@@ -153,13 +164,13 @@ export const serveMemeExport = createServerOnlyFn(
 export const uploadMemeFile = createServerOnlyFn(
   async (
     bunnyId: string,
-    format: MemeDerivedFormat,
+    file: MemeStoredFile,
     fileBuffer: Buffer<ArrayBuffer>
   ) => {
-    const headers = getStorageHeaders()
+    const { url, headers } = buildMemeFileStorage(bunnyId, file)
     headers.set('Content-Type', 'application/octet-stream')
 
-    const response = await fetch(buildMemeFileUrl(bunnyId, format), {
+    const response = await fetch(url, {
       method: 'PUT',
       headers,
       body: fileBuffer,
@@ -173,23 +184,20 @@ export const uploadMemeFile = createServerOnlyFn(
     }
 
     bunnyLogger.info(
-      { bunnyId, format, sizeBytes: fileBuffer.length },
+      { bunnyId, file, sizeBytes: fileBuffer.length },
       'Meme file uploaded to Storage'
     )
   }
 )
 
-const buildMemeFileBlobPathname = (
-  bunnyId: string,
-  format: MemeDerivedFormat
-) => {
-  return `meme-files/${bunnyId}.${format}`
+const buildMemeFileBlobPathname = (bunnyId: string, file: MemeStoredFile) => {
+  return `meme-files/${bunnyId}/${file}`
 }
 
 export const presignMemeFileUpload = createServerOnlyFn(
-  async (bunnyId: string, format: MemeDerivedFormat) => {
-    const pathname = buildMemeFileBlobPathname(bunnyId, format)
-    const allowedContentTypes = [MEME_DERIVED_FORMAT_CONTENT_TYPES[format]]
+  async (bunnyId: string, file: MemeStoredFile) => {
+    const pathname = buildMemeFileBlobPathname(bunnyId, file)
+    const allowedContentTypes = [MEME_STORED_FILE_CONTENT_TYPES[file]]
     const signedToken = await issueSignedToken({
       pathname,
       operations: ['put'],
@@ -212,8 +220,8 @@ export const presignMemeFileUpload = createServerOnlyFn(
 )
 
 export const moveMemeFileFromBlobToStorage = createServerOnlyFn(
-  async (bunnyId: string, format: MemeDerivedFormat) => {
-    const pathname = buildMemeFileBlobPathname(bunnyId, format)
+  async (bunnyId: string, file: MemeStoredFile) => {
+    const pathname = buildMemeFileBlobPathname(bunnyId, file)
     const result = await get(pathname, { access: 'private', useCache: false })
 
     if (result?.statusCode !== HTTP_STATUS.OK) {
@@ -224,17 +232,17 @@ export const moveMemeFileFromBlobToStorage = createServerOnlyFn(
       await new Response(result.stream).arrayBuffer()
     )
 
-    await uploadMemeFile(bunnyId, format, fileBuffer)
+    await uploadMemeFile(bunnyId, file, fileBuffer)
     await del(pathname)
   }
 )
 
 export const checkMemeFileExists = createServerOnlyFn(
-  async (bunnyId: string, format: MemeDerivedFormat) => {
-    const headers = getStorageHeaders()
+  async (bunnyId: string, file: MemeStoredFile) => {
+    const { url, headers } = buildMemeFileStorage(bunnyId, file)
     headers.set('Range', 'bytes=0-0')
 
-    const response = await fetch(buildMemeFileUrl(bunnyId, format), {
+    const response = await fetch(url, {
       headers,
       signal: AbortSignal.timeout(STORAGE_TIMEOUT_MS)
     })
@@ -256,21 +264,22 @@ export const checkMemeFileExists = createServerOnlyFn(
 export const findMissingMemeFiles = createServerOnlyFn(
   async (bunnyId: string) => {
     const presence = await Promise.all(
-      MEME_DERIVED_FORMATS.map(async (format) => {
-        return { format, exists: await checkMemeFileExists(bunnyId, format) }
+      MEME_STORED_FILES.map(async (file) => {
+        return { file, exists: await checkMemeFileExists(bunnyId, file) }
       })
     )
 
-    return presence.flatMap(({ format, exists }) => {
-      return exists ? [] : [format]
+    return presence.flatMap(({ file, exists }) => {
+      return exists ? [] : [file]
     })
   }
 )
 
-const deleteMemeFile = async (bunnyId: string, format: MemeDerivedFormat) => {
-  const response = await fetch(buildMemeFileUrl(bunnyId, format), {
+const deleteMemeFile = async (bunnyId: string, file: MemeStoredFile) => {
+  const { url, headers } = buildMemeFileStorage(bunnyId, file)
+  const response = await fetch(url, {
     method: 'DELETE',
-    headers: getStorageHeaders(),
+    headers,
     signal: AbortSignal.timeout(STORAGE_TIMEOUT_MS)
   })
 
@@ -280,7 +289,7 @@ const deleteMemeFile = async (bunnyId: string, format: MemeDerivedFormat) => {
     )
   }
 
-  bunnyLogger.info({ bunnyId, format }, 'Meme file deleted from Storage')
+  bunnyLogger.info({ bunnyId, file }, 'Meme file deleted from Storage')
 }
 
 const deleteOrReportMemeFile = async (bunnyId: string, file: MemeFile) => {

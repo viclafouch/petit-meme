@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { createServerFn } from '@tanstack/react-start'
-import { MEME_DERIVED_FORMATS } from '~/constants/bunny'
+import { MEME_STORED_FILES } from '~/constants/bunny'
 import { HTTP_STATUS } from '~/constants/http'
 import { prismaClient } from '~/db/client.server'
 import type { Meme, Prisma } from '~/db/generated/prisma/client'
@@ -54,8 +54,8 @@ export const createMemeFileUploads = createServerFn({ method: 'POST' })
   .handler(async ({ data: memeId }) => {
     const bunnyId = await findMemeBunnyId(memeId)
     const uploads = await Promise.all(
-      MEME_DERIVED_FORMATS.map(async (format) => {
-        return { format, url: await presignMemeFileUpload(bunnyId, format) }
+      MEME_STORED_FILES.map(async (file) => {
+        return { file, url: await presignMemeFileUpload(bunnyId, file) }
       })
     )
 
@@ -71,8 +71,8 @@ export const storeMemeFiles = createServerFn({ method: 'POST' })
     const bunnyId = await findMemeBunnyId(memeId)
 
     await Promise.all(
-      MEME_DERIVED_FORMATS.map((format) => {
-        return moveMemeFileFromBlobToStorage(bunnyId, format)
+      MEME_STORED_FILES.map((file) => {
+        return moveMemeFileFromBlobToStorage(bunnyId, file)
       })
     )
 

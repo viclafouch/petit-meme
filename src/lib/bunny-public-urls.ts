@@ -1,16 +1,27 @@
+import { MEME_FIRST_FRAME_FILE_NAME } from '~/constants/bunny'
 import { clientEnv } from '~/env/client'
 
-const buildBunnyUrl = (pathname: `/${string}`) => {
-  return new URL(
-    pathname,
-    `https://${clientEnv.VITE_BUNNY_HOSTNAME}`
-  ).toString()
+const buildPublicUrl = (hostname: string, pathname: `/${string}`) => {
+  return new URL(pathname, `https://${hostname}`).toString()
 }
 
 export const buildVideoImageUrl = (videoId: string) => {
-  return buildBunnyUrl(`/${videoId}/thumbnail.jpg`)
+  return buildPublicUrl(
+    clientEnv.VITE_BUNNY_HOSTNAME,
+    `/${videoId}/thumbnail.jpg`
+  )
 }
 
 export const buildVideoPreviewUrl = (videoId: string) => {
-  return buildBunnyUrl(`/${videoId}/preview.webp`)
+  return buildPublicUrl(
+    clientEnv.VITE_BUNNY_HOSTNAME,
+    `/${videoId}/preview.webp`
+  )
+}
+
+export const buildVideoFirstFrameUrl = (videoId: string) => {
+  return buildPublicUrl(
+    clientEnv.VITE_BUNNY_IMAGES_HOSTNAME,
+    `/${videoId}/${MEME_FIRST_FRAME_FILE_NAME}`
+  )
 }

@@ -42,7 +42,7 @@ export const getMemeEditScope = (memeId: MemeFullData['id']) => {
 export function useMemePublisher(meme: MemeFullData) {
   const queryClient = useQueryClient()
   const router = useRouter()
-  const filesEngine = useMemeFilesEngine(meme.id)
+  const filesEngine = useMemeFilesEngine(meme)
   const [run, setRun] = React.useState<MemePublishRun | null>(null)
 
   const refreshSavedMeme = async () => {

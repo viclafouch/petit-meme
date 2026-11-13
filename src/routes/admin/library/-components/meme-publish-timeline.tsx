@@ -31,6 +31,7 @@ const STEP_LABELS = {
   preparing: 'Préparation de la vidéo',
   watermarking: 'Watermark du MP4',
   'extracting-mp3': 'Extraction du MP3',
+  'extracting-first-frame': 'Extraction de la première frame',
   uploading: 'Envoi sur Bunny',
   saving: 'Mise en ligne'
 } as const satisfies Record<PublishStep, string>
@@ -49,7 +50,8 @@ type RunSuccessMessage = {
 
 const PUBLISHED_MESSAGE = {
   title: 'Meme publié',
-  description: 'Il est en ligne avec son MP4 watermarké et son MP3.'
+  description:
+    'Il est en ligne avec son MP4 watermarké, son MP3 et sa première frame.'
 } as const satisfies RunSuccessMessage
 
 const SUCCESS_MESSAGES = {
@@ -57,7 +59,7 @@ const SUCCESS_MESSAGES = {
   'publish-with-files': PUBLISHED_MESSAGE,
   regenerate: {
     title: 'Fichiers régénérés',
-    description: 'Le MP4 et le MP3 sont à jour sur Bunny.'
+    description: 'Le MP4, le MP3 et la première frame sont à jour sur Bunny.'
   }
 } as const satisfies Record<PublishRunKind, RunSuccessMessage>
 

@@ -4,6 +4,7 @@ export type PublishStep =
   | 'preparing'
   | 'watermarking'
   | 'extracting-mp3'
+  | 'extracting-first-frame'
   | 'uploading'
   | 'saving'
 
@@ -11,6 +12,7 @@ const FILE_STEPS = [
   'preparing',
   'watermarking',
   'extracting-mp3',
+  'extracting-first-frame',
   'uploading'
 ] as const satisfies readonly PublishStep[]
 

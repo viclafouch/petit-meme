@@ -1,9 +1,10 @@
 import type { ProgressEvent } from '@ffmpeg/ffmpeg'
-import { MEME_DERIVED_FORMAT_CONTENT_TYPES } from '~/constants/bunny'
+import { MEME_STORED_FILE_CONTENT_TYPES } from '~/constants/bunny'
 import { PERCENT_SCALE } from '~/constants/number'
 import { WATERMARK_ASSET_PATH } from '~/constants/watermark'
 import type { Meme } from '~/db/generated/prisma/client'
 import { loadFFmpeg } from '~/lib/ffmpeg'
+import { extractFirstFrame, fetchThumbnailBytes } from '~/lib/first-frame'
 import { extractMp3 } from '~/lib/mp3'
 import { applyWatermark } from '~/lib/watermark'
 import type { PublishStep } from '~/routes/admin/library/-lib/publish-run'
@@ -51,12 +52,14 @@ const uploadToBlob = async ({ url, contentType, blob }: UploadToBlobParams) => {
 type TranscodeParams = {
   videoBlob: Blob
   watermarkBlob: Blob
+  thumbnailBytes: number
   handlers: GenerateMemeFilesHandlers
 }
 
 const transcode = async ({
   videoBlob,
   watermarkBlob,
+  thumbnailBytes,
   handlers
 }: TranscodeParams) => {
   const ffmpeg = await loadFFmpeg('FFmpeg loading timeout')
@@ -73,13 +76,21 @@ const transcode = async ({
     handlers.onStep('extracting-mp3')
     const mp3 = await extractMp3({ ffmpeg, videoBlob })
 
-    return { mp4, mp3 }
+    handlers.onStep('extracting-first-frame')
+    const firstFrame = await extractFirstFrame({
+      ffmpeg,
+      videoBlob,
+      maxBytes: thumbnailBytes
+    })
+
+    return { mp4, mp3, 'first-frame': firstFrame }
   } finally {
     ffmpeg.terminate()
   }
 }
 
 type BuildMemeFilesParams = {
+  bunnyId: string
   readOriginal: () => Promise<Blob>
   handlers: GenerateMemeFilesHandlers
 }
@@ -87,26 +98,28 @@ type BuildMemeFilesParams = {
 type MemeFiles = Awaited<ReturnType<typeof transcode>>
 
 export const buildMemeFiles = async ({
+  bunnyId,
   readOriginal,
   handlers
 }: BuildMemeFilesParams) => {
-  const [videoBlob, watermarkBlob] = await Promise.all([
+  const [videoBlob, watermarkBlob, thumbnailBytes] = await Promise.all([
     readOriginal(),
-    fetchWatermarkAsset()
+    fetchWatermarkAsset(),
+    fetchThumbnailBytes(bunnyId)
   ])
 
-  return transcode({ videoBlob, watermarkBlob, handlers })
+  return transcode({ videoBlob, watermarkBlob, thumbnailBytes, handlers })
 }
 
 export const uploadMemeFiles = async (memeId: Meme['id'], files: MemeFiles) => {
   const { uploads } = await createMemeFileUploads({ data: memeId })
 
   await Promise.all(
-    uploads.map(({ format, url }) => {
+    uploads.map(({ file, url }) => {
       return uploadToBlob({
         url,
-        contentType: MEME_DERIVED_FORMAT_CONTENT_TYPES[format],
-        blob: files[format]
+        contentType: MEME_STORED_FILE_CONTENT_TYPES[file],
+        blob: files[file]
       })
     })
   )

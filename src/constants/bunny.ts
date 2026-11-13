@@ -33,10 +33,20 @@ export const MEME_DERIVED_FORMATS = [
 
 export type MemeDerivedFormat = (typeof MEME_DERIVED_FORMATS)[number]
 
-export const MEME_DERIVED_FORMAT_CONTENT_TYPES = {
+export const MEME_STORED_FILES = [
+  ...MEME_DERIVED_FORMATS,
+  'first-frame'
+] as const satisfies readonly string[]
+
+export type MemeStoredFile = (typeof MEME_STORED_FILES)[number]
+
+export const MEME_STORED_FILE_CONTENT_TYPES = {
   mp4: 'video/mp4',
-  mp3: 'audio/mpeg'
-} as const satisfies Record<MemeDerivedFormat, string>
+  mp3: 'audio/mpeg',
+  'first-frame': 'image/webp'
+} as const satisfies Record<MemeStoredFile, string>
+
+export const MEME_FIRST_FRAME_FILE_NAME = 'first-frame.webp'
 
 const PLAYBACK_TOKEN_TTL_HOURS = 6
 

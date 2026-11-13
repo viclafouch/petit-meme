@@ -25,21 +25,23 @@ describe('getPublishRunSteps', () => {
     expect(getPublishRunSteps('publish')).toStrictEqual(['saving'])
   })
 
-  it('runs the four file steps then the save when a file is missing', () => {
+  it('runs the five file steps then the save when a file is missing', () => {
     expect(getPublishRunSteps('publish-with-files')).toStrictEqual([
       'preparing',
       'watermarking',
       'extracting-mp3',
+      'extracting-first-frame',
       'uploading',
       'saving'
     ])
   })
 
-  it('runs the four file steps without saving on a regeneration', () => {
+  it('runs the five file steps without saving on a regeneration', () => {
     expect(getPublishRunSteps('regenerate')).toStrictEqual([
       'preparing',
       'watermarking',
       'extracting-mp3',
+      'extracting-first-frame',
       'uploading'
     ])
   })
@@ -53,7 +55,14 @@ describe('buildPublishTimeline', () => {
         step: 'watermarking',
         outcome: 'running'
       })
-    ).toStrictEqual(['done', 'active', 'pending', 'pending', 'pending'])
+    ).toStrictEqual([
+      'done',
+      'active',
+      'pending',
+      'pending',
+      'pending',
+      'pending'
+    ])
   })
 
   it('marks the failure on the step that broke and leaves the save pending', () => {
@@ -63,7 +72,7 @@ describe('buildPublishTimeline', () => {
         step: 'uploading',
         outcome: 'failed'
       })
-    ).toStrictEqual(['done', 'done', 'done', 'failed', 'pending'])
+    ).toStrictEqual(['done', 'done', 'done', 'done', 'failed', 'pending'])
   })
 
   it('marks every step as done once the run succeeded', () => {
@@ -73,7 +82,7 @@ describe('buildPublishTimeline', () => {
         step: 'saving',
         outcome: 'succeeded'
       })
-    ).toStrictEqual(['done', 'done', 'done', 'done', 'done'])
+    ).toStrictEqual(['done', 'done', 'done', 'done', 'done', 'done'])
   })
 })
 
@@ -86,7 +95,14 @@ describe('pacePublishRun', () => {
           1
         )
       )
-    ).toStrictEqual(['done', 'active', 'pending', 'pending', 'pending'])
+    ).toStrictEqual([
+      'done',
+      'active',
+      'pending',
+      'pending',
+      'pending',
+      'pending'
+    ])
   })
 
   it('holds a success back until every step has been revealed', () => {
@@ -97,7 +113,7 @@ describe('pacePublishRun', () => {
           getPublishRunSteps('regenerate').length - 1
         )
       )
-    ).toStrictEqual(['done', 'done', 'done', 'active'])
+    ).toStrictEqual(['done', 'done', 'done', 'done', 'active'])
   })
 
   it('shows the real run once every step has been revealed', () => {
@@ -119,7 +135,14 @@ describe('pacePublishRun', () => {
 
     expect(
       getStatuses(pacePublishRun(run, getPublishRunTarget(run)))
-    ).toStrictEqual(['done', 'failed', 'pending', 'pending', 'pending'])
+    ).toStrictEqual([
+      'done',
+      'failed',
+      'pending',
+      'pending',
+      'pending',
+      'pending'
+    ])
   })
 })
 

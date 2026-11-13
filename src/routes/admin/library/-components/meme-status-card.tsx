@@ -14,7 +14,7 @@ import {
   CardHeader
 } from '~/components/ui/card'
 import { LoadingButton } from '~/components/ui/loading-button'
-import { MEME_DERIVED_FORMATS, type MemeDerivedFormat } from '~/constants/bunny'
+import { MEME_STORED_FILES, type MemeStoredFile } from '~/constants/bunny'
 import type { MemeFullData } from '~/constants/meme'
 import { MemeStatus } from '~/db/generated/prisma/enums'
 import type { PublishRunKind } from '~/routes/admin/library/-lib/publish-run'
@@ -73,28 +73,44 @@ const RUNNING_LABELS = {
   regenerate: 'Régénération...'
 } as const satisfies Record<PublishRunKind, string>
 
-type FileBadgeProps = {
-  format: MemeDerivedFormat
-  missingFiles: MemeDerivedFormat[] | undefined
+type FileBadgeLabels = {
+  name: string
+  missing: string
+  ready: string
 }
 
-export const FileBadge = ({ format, missingFiles }: FileBadgeProps) => {
-  const label = format.toUpperCase()
+const FILE_BADGE_LABELS = {
+  mp4: { name: 'MP4', missing: 'MP4 manquant', ready: 'MP4 prêt' },
+  mp3: { name: 'MP3', missing: 'MP3 manquant', ready: 'MP3 prêt' },
+  'first-frame': {
+    name: 'Première frame',
+    missing: 'Première frame manquante',
+    ready: 'Première frame prête'
+  }
+} as const satisfies Record<MemeStoredFile, FileBadgeLabels>
+
+type FileBadgeProps = {
+  file: MemeStoredFile
+  missingFiles: MemeStoredFile[] | undefined
+}
+
+export const FileBadge = ({ file, missingFiles }: FileBadgeProps) => {
+  const labels = FILE_BADGE_LABELS[file]
 
   if (!missingFiles) {
     return (
       <Badge variant="secondary" size="md">
         <LoaderCircle className="animate-spin" aria-hidden />
-        {label}
+        {labels.name}
       </Badge>
     )
   }
 
-  if (missingFiles.includes(format)) {
+  if (missingFiles.includes(file)) {
     return (
       <Badge variant="warning" size="md">
         <TriangleAlert aria-hidden />
-        {label} manquant
+        {labels.missing}
       </Badge>
     )
   }
@@ -102,7 +118,7 @@ export const FileBadge = ({ format, missingFiles }: FileBadgeProps) => {
   return (
     <Badge variant="success" size="md">
       <CircleCheckBig aria-hidden />
-      {label} prêt
+      {labels.ready}
     </Badge>
   )
 }
@@ -140,13 +156,9 @@ export const MemeStatusCard = ({
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
         <div className="flex flex-wrap items-center gap-2">
-          {MEME_DERIVED_FORMATS.map((format) => {
+          {MEME_STORED_FILES.map((file) => {
             return (
-              <FileBadge
-                key={format}
-                format={format}
-                missingFiles={missingFiles}
-              />
+              <FileBadge key={file} file={file} missingFiles={missingFiles} />
             )
           })}
           {isPublished ? (

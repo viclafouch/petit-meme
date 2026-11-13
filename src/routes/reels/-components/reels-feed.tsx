@@ -3,7 +3,7 @@ import { useHotkeys } from '@tanstack/react-hotkeys'
 import { useDebouncedCallback } from '@tanstack/react-pacer'
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
 import { Button } from '~/components/ui/button'
-import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
+import { buildVideoFirstFrameUrl } from '~/lib/bunny-public-urls'
 import { m } from '~/paraglide/messages'
 import { listReelsQueryOpts } from '~/queries/meme'
 import { findReelSnapshotImage } from '~/routes/reels/-lib/reel-snapshot'
@@ -246,7 +246,7 @@ export const ReelsFeed = () => {
                 <img
                   src={
                     findReelSnapshotImage(reel.meme.id) ??
-                    buildVideoImageUrl(reel.meme.video.bunnyId)
+                    buildVideoFirstFrameUrl(reel.meme.video.bunnyId)
                   }
                   alt=""
                   decoding="async"

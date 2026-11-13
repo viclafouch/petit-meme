@@ -16,7 +16,8 @@ import type { MemeFile } from '~/server/meme/meme-file.server'
 const MEME_FILE_LABELS = {
   stream: 'la vidéo Bunny Stream',
   mp4: 'le MP4 watermarké',
-  mp3: 'le MP3'
+  mp3: 'le MP3',
+  'first-frame': 'la première frame'
 } as const satisfies Record<MemeFile, string>
 
 type DeleteMemeButtonProps = {

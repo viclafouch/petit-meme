@@ -13,7 +13,7 @@ How the code is organised and named. Formatting, lint rules and file-name case a
 
 - `src/server/<domain>/` holds everything that runs on the server. `src/server/platforms/` holds the adapters of outside services; a domain module builds on them, as `meme/meme-index.server.ts` builds on `platforms/algolia.server.ts`.
 - `src/queries/<domain>.ts` holds the TanStack Query options of a domain.
-- `src/components/<domain>/` holds the components of a domain and its hooks. `src/components/ui/` stays shadcn's.
+- `src/components/<domain>/` holds the components of a domain and its hooks. `src/components/ui/` starts from shadcn's components; an edit there serves every caller, as a performance or accessibility fix does.
 - `src/hooks/` holds generic hooks, tied to no domain.
 - `src/helpers/` holds pure functions: input in, value out, with no I/O, no `window` and no environment.
 - `src/lib/` holds the app infrastructure and the browser code: clients, cookies, media, export.

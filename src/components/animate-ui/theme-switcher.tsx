@@ -5,6 +5,7 @@ import { motion } from 'motion/react'
 import { Switch } from '@base-ui/react/switch'
 import { useSelector } from '@tanstack/react-store'
 import { cn } from '~/lib/utils'
+import { m } from '~/paraglide/messages'
 import { useThemeStore } from '~/stores/theme.store'
 
 const SPRING_NO_BOUNCE = {
@@ -55,9 +56,7 @@ export const ThemeSwitcher = ({ className }: { className?: string }) => {
         className
       )}
     >
-      <span className="sr-only">
-        Activer thème {isDark ? 'clair' : 'sombre'}
-      </span>
+      <span className="sr-only">{m.nav_dark_mode()}</span>
       <motion.div
         data-slot="switch-left-icon"
         animate={isDark ? VISIBLE : HIDDEN}

@@ -1,0 +1,2 @@
+export const TAB_ITEM_CLASS =
+  'flex size-full flex-col items-center justify-center gap-1 text-2xs font-medium text-muted-foreground outline-none touch-tap focus-visible:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset aria-[current=page]:text-foreground data-current:text-foreground [&_svg]:size-6 [&_svg]:transition-transform [&_svg]:duration-100 [&_svg]:ease-out active:[&_svg]:scale-90 aria-[current=page]:[&_svg]:stroke-[2.5] data-current:[&_svg]:stroke-[2.5]'

@@ -4,6 +4,24 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@property --drawer-swipe-movement-x {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --drawer-swipe-movement-y {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --drawer-swipe-progress {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+
 @theme inline {
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
@@ -56,6 +74,16 @@
 
 :root {
   --navbar-height: 3.5rem;
+  --tab-bar-height: 3.5rem;
+  --tab-bar-space: calc(
+    var(--tab-bar-height) + env(safe-area-inset-bottom, 0px)
+  );
+  --toast-offset-bottom: calc(var(--tab-bar-space) + 1rem);
+
+  @media (width >= 64rem) {
+    --tab-bar-space: 0px;
+    --toast-offset-bottom: 1.5rem;
+  }
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -156,11 +184,7 @@
   body {
     @apply bg-background text-foreground;
   }
-  body:has([data-mobile-nav][data-open]) {
-    overflow: hidden;
-  }
-
-  body:not(:has([data-mobile-nav][data-open])) .navbar-scroll-fade {
+  .navbar-scroll-fade {
     @supports (animation-timeline: scroll()) {
       animation: navbar-fade-to-solid linear both;
       animation-timeline: scroll(root);
@@ -168,11 +192,21 @@
     }
   }
 
-  body:has([data-mobile-nav][data-open]) .navbar-scroll-fade {
-    background-color: var(--background);
+  html {
+    container-type: scroll-state;
+  }
 
-    [data-navbar-bg] {
-      visibility: hidden;
+  [data-tab-bar] {
+    transition: translate 200ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  [data-tab-bar][data-hidden]:not(:has(:focus-visible)) {
+    translate: 0 100%;
+  }
+
+  @container scroll-state(scrolled: bottom) and scroll-state(scrollable: top) {
+    [data-tab-bar]:not(:has(:focus-visible)) {
+      translate: 0 100%;
     }
   }
 
@@ -326,6 +360,11 @@
 }
 @utility shine-size {
   background-size: 200% 100%;
+}
+@utility touch-tap {
+  user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 @utility banner-gap {
   --banner-gap: 0.625rem;

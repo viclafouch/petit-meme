@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 import { getRouteApi, useNavigate } from '@tanstack/react-router'
 import { Badge } from '~/components/ui/badge'
-import { Button } from '~/components/ui/button'
+import { Button, buttonVariants } from '~/components/ui/button'
 import { DATE_WITH_TIME_OPTIONS, formatDate } from '~/helpers/date'
 import { getPremiumStatus } from '~/helpers/premium'
 import { formatSubscriptionEnding } from '~/helpers/subscription'
@@ -138,23 +138,17 @@ const SentryLinks = ({ userId }: SentryLinksProps) => {
     <div className="flex flex-wrap gap-2">
       {buildSentryUserLinks(userId).map((link) => {
         return (
-          <Button
+          <a
             key={link.label}
-            variant="outline"
-            size="sm"
-            nativeButton={false}
-            render={
-              <a
-                href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`${link.label} Sentry (ouvre dans un nouvel onglet)`}
-              />
-            }
+            href={link.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${link.label} Sentry (ouvre dans un nouvel onglet)`}
+            className={buttonVariants({ variant: 'outline', size: 'sm' })}
           >
             <ExternalLink data-icon="inline-start" aria-hidden />
             {link.label}
-          </Button>
+          </a>
         )
       })}
     </div>

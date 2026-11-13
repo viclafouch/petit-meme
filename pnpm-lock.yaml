@@ -359,6 +359,9 @@ importers:
       '@inlang/paraglide-js':
         specifier: 2.29.1
         version: 2.29.1(eslint@9.39.4(jiti@2.7.0)(supports-color@7.2.0))(typescript@7.0.2)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
+      '@oxlint/plugins':
+        specifier: ~1.93.0
+        version: 1.93.0
       '@playwright/test':
         specifier: 1.64.1
         version: 1.64.1

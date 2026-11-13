@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test'
+import { expect, type FrameLocator, type Page } from '@playwright/test'
 import { prismaClient } from '~/db/client.server'
 import { m } from '~/paraglide/messages'
 import type { Locale } from '~/paraglide/runtime'
@@ -30,36 +30,44 @@ export const startCheckout = async (
   await page.waitForURL(/checkout\.stripe\.com/u)
 }
 
-type StripeHostedFieldId =
-  | 'cardNumber'
-  | 'cardExpiry'
-  | 'cardCvc'
-  | 'billingName'
+const STRIPE_PAYMENT_FORM_FRAME = 'iframe[src*="elements-inner-habanero"]'
 
-const getStripeHostedField = (page: Page, fieldId: StripeHostedFieldId) => {
-  return page.locator(`#${fieldId}`)
+const getStripePaymentForm = (page: Page) => {
+  return page.locator(STRIPE_PAYMENT_FORM_FRAME).contentFrame()
 }
 
-const fillStripeHostedCardForm = async (page: Page, cardholderName: string) => {
-  const cardNumber = getStripeHostedField(page, 'cardNumber')
-  const isCardFormFoldedBehindWalletPicker = !(await cardNumber.isVisible())
+type StripeFieldId =
+  | 'payment-numberInput'
+  | 'payment-expiryInput'
+  | 'payment-cvcInput'
+  | 'payment-nameInput'
+  | 'payment-countryInput'
+  | 'payment-linkOptInInput'
 
-  if (isCardFormFoldedBehindWalletPicker) {
-    await page.getByTestId('card-accordion-item').click()
-  }
-
-  await cardNumber.fill(STRIPE_TEST_CARD.number)
-  await getStripeHostedField(page, 'cardExpiry').fill(STRIPE_TEST_CARD.expiry)
-  await getStripeHostedField(page, 'cardCvc').fill(STRIPE_TEST_CARD.cvc)
-  await getStripeHostedField(page, 'billingName').fill(cardholderName)
+const getStripeField = (form: FrameLocator, fieldId: StripeFieldId) => {
+  return form.locator(`#${fieldId}`)
 }
 
 export const payWithTestCard = async (page: Page, cardholderName: string) => {
-  const submitButton = page.getByTestId('hosted-payment-submit-button')
-  await submitButton.waitFor()
+  const form = getStripePaymentForm(page)
 
-  await fillStripeHostedCardForm(page, cardholderName)
-  await submitButton.click()
+  await form
+    .getByRole('button')
+    .filter({ has: form.getByTestId('visa') })
+    .click()
+  await getStripeField(form, 'payment-numberInput').fill(
+    STRIPE_TEST_CARD.number
+  )
+  await getStripeField(form, 'payment-expiryInput').fill(
+    STRIPE_TEST_CARD.expiry
+  )
+  await getStripeField(form, 'payment-cvcInput').fill(STRIPE_TEST_CARD.cvc)
+  await getStripeField(form, 'payment-nameInput').fill(cardholderName)
+  await getStripeField(form, 'payment-countryInput').selectOption(
+    STRIPE_TEST_CARD.billingCountry
+  )
+  await getStripeField(form, 'payment-linkOptInInput').setChecked(false)
+  await form.getByTestId('payment-form-submit-button').click()
 
   await page.waitForURL('**/checkout/success')
 }

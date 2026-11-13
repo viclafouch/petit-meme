@@ -8,11 +8,10 @@ import {
   DropdownMenuTrigger
 } from '~/components/ui/dropdown-menu'
 import { getLocaleDisplayName } from '~/helpers/locale'
-import { dismissLocaleBanner } from '~/lib/locale-banner'
+import { changeLocale } from '~/lib/change-locale'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
-import { getLocale, locales, setLocale, type Locale } from '~/paraglide/runtime'
-import { updateUserLocale } from '~/server/user/user.functions'
+import { getLocale, locales } from '~/paraglide/runtime'
 
 type LanguageSwitcherProps = {
   className?: string
@@ -21,16 +20,6 @@ type LanguageSwitcherProps = {
 export const LanguageSwitcher = ({ className }: LanguageSwitcherProps) => {
   const currentLocale = getLocale()
   const CurrentFlag = LOCALE_FLAGS[currentLocale]
-
-  const handleLocaleChange = (locale: Locale) => {
-    if (locale === currentLocale) {
-      return
-    }
-
-    void updateUserLocale({ data: { locale } })
-    dismissLocaleBanner()
-    void setLocale(locale)
-  }
 
   return (
     <DropdownMenu>
@@ -56,7 +45,7 @@ export const LanguageSwitcher = ({ className }: LanguageSwitcherProps) => {
             <DropdownMenuItem
               key={locale}
               onClick={() => {
-                handleLocaleChange(locale)
+                changeLocale(locale)
               }}
               className="justify-between gap-3"
             >

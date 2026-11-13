@@ -43,7 +43,7 @@ const FeedbackWidgetInner = () => {
       animate={APPEAR_ANIMATION}
       whileHover={{ scale: 1.04 }}
       whileTap={{ scale: 0.97 }}
-      className="fixed right-4 bottom-4 z-40 flex cursor-pointer items-center gap-2 rounded-full border border-border/40 bg-card px-3 py-2 text-sm font-medium text-foreground shadow-lg backdrop-blur-sm transition-shadow hover:shadow-xl sm:px-4 sm:py-2.5"
+      className="fixed right-4 bottom-[calc(var(--tab-bar-space)+1rem)] z-40 flex cursor-pointer items-center gap-2 rounded-full border border-border/40 bg-card px-3 py-2 text-sm font-medium text-foreground shadow-lg backdrop-blur-sm transition-shadow hover:shadow-xl sm:px-4 sm:py-2.5"
       aria-label={m.sentry_trigger_aria()}
     >
       <MessageSquarePlus className="size-4 shrink-0" />

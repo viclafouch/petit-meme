@@ -21,6 +21,7 @@ A video meme library, live with real accounts, subscriptions and invoices, and n
 1. **The shortest path to the video.** An ad, a popup or an account asked before watching is Victor's call, argued out loud.
 2. **Premium never blocks.** Free keeps the whole library.
 3. **The video files.** Raw video URLs stay out of the DOM, the sitemap, the structured data and every API response.
+4. **The phone's bytes.** Petit Meme is a phone app first, often on a thin connection. Video is the heaviest thing it sends, so a video loads only when someone watches it, and every other byte earns its place.
 
 ## Cost
 
@@ -61,9 +62,8 @@ The most common defect here is a change that works on the tested path and is mis
 
 Victor likes simple systems and code that looks obvious. Find the real constraint, then write the smallest thing that makes the correct behaviour unsurprising.
 
-- A TanStack library comes first when it covers the need.
 - Writes that must all land run one after the other, so a failure stops the next one.
-- The UI stays minimal, and feedback goes through the site's toasts. UI work runs the `frontend-design` skill.
+- The UI stays minimal.
 - A CI or config file may keep a comment that states a constraint the file cannot show.
 
 ## Reporting back

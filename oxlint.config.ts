@@ -42,6 +42,7 @@ export default defineConfig({
     playwright,
     imports
   ],
+  jsPlugins: ['./scripts/oxlint/plugin.ts'],
   ignorePatterns: [
     '**/.output/**',
     '**/.vercel/**',
@@ -62,6 +63,7 @@ export default defineConfig({
     'viclafouch/app-folders': 'off',
     'viclafouch/env-file': 'off',
     'viclafouch/server-function-file': 'off',
+    'petit-meme/no-link-as-button': 'error',
     'react/forbid-elements': [
       'error',
       {
@@ -93,9 +95,19 @@ export default defineConfig({
       }
     },
     {
-      files: ['src/emails/**'],
+      files: ['src/emails/**', 'scripts/oxlint/plugin.ts'],
       rules: {
         'import/no-default-export': 'off'
+      }
+    },
+    {
+      files: ['scripts/oxlint/__tests__/**'],
+      plugins: ['vitest'],
+      rules: {
+        'vitest/require-hook': [
+          'error',
+          { allowedFunctionCalls: ['ruleTester.run'] }
+        ]
       }
     },
     {

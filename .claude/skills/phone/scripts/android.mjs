@@ -37,7 +37,7 @@ const findPage = async (urlPart) => {
     }
     await sleep(500)
   }
-  throw new Error(`No Chrome tab matches "${urlPart}". Open it first with: phone.mjs open <url>`)
+  throw new Error(`No Chrome tab matches "${urlPart}". Open it first with: android.mjs open <url>`)
 }
 
 const connect = async (urlPart) => {
@@ -149,7 +149,7 @@ const commands = {
     console.log(`saved ${file}`)
   },
   sheet: async (video, out, fps = '4') => {
-    execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-i', video, '-vf', `fps=${fps},scale=180:-1,tile=10x2`, out])
+    execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-i', video, '-vf', `fps=${fps},scale=180:-1,tile=10x2`, '-frames:v', '1', out])
     console.log(`saved ${out}`)
   },
   connect: async (port) => {
@@ -181,7 +181,7 @@ const commands = {
 
 const [command, ...args] = process.argv.slice(2)
 if (!commands[command]) {
-  console.log('Usage: node phone.mjs <connect|devices|awake|pages|open|tap|eval|frames|shot|record|sheet|adb|clean> [args]')
+  console.log('Usage: node android.mjs <connect|devices|awake|pages|open|tap|eval|frames|shot|record|sheet|adb|clean> [args]')
   process.exit(1)
 }
 await commands[command](...args)

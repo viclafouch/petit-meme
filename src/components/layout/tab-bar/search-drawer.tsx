@@ -234,16 +234,21 @@ export const SearchDrawer = () => {
   }
 
   return (
-    <Drawer handle={searchDrawerHandle} showSwipeHandle>
+    <Drawer
+      handle={searchDrawerHandle}
+      showSwipeHandle
+      onOpenChangeComplete={(isOpen) => {
+        if (isOpen) {
+          inputRef.current?.focus()
+        }
+      }}
+    >
       <DrawerTrigger className={TAB_ITEM_CLASS}>
         <Search aria-hidden="true" />
         {m.nav_search()}
       </DrawerTrigger>
       <DrawerPrimitive.VirtualKeyboardProvider>
-        <DrawerContent
-          initialFocus={inputRef}
-          className="h-[calc(100dvh-6rem)]"
-        >
+        <DrawerContent initialFocus={false} className="h-[calc(100dvh-6rem)]">
           <DrawerTitle className="sr-only">{m.nav_search()}</DrawerTitle>
           <search className="shrink-0 px-4 pt-2 pb-3">
             <form onSubmit={handleSubmit} className="flex items-center gap-2">

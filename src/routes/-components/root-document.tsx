@@ -19,6 +19,7 @@ import { Toaster } from '~/components/ui/sonner'
 import { IS_PRODUCTION } from '~/constants/env'
 import { clientEnv } from '~/env/client'
 import { getLocale, getTextDirection } from '~/paraglide/runtime'
+import { WebAnalytics } from './web-analytics'
 
 const rootRouteApi = getRouteApi('__root__')
 
@@ -74,6 +75,9 @@ export const RootDocument = ({ children }: RootDocumentProps) => {
                 )}
                 <CookieSettings />
                 {IS_PRODUCTION ? null : <TailwindIndicator />}
+                {clientEnv.VITE_VERCEL_ENV === 'production' ? (
+                  <WebAnalytics />
+                ) : null}
               </DialogProvider>
             </CookieConsentProvider>
           </ThemeProvider>

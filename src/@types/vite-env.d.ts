@@ -15,6 +15,7 @@ interface ImportMetaEnv {
   readonly VITE_ALGOLIA_INDEX: string | undefined
   readonly VITE_SENTRY_DSN: string | undefined
   readonly VITE_VERCEL_ENV: string | undefined
+  readonly VITE_VERCEL_OBSERVABILITY_CLIENT_CONFIG: string | undefined
 }
 
 // oxlint-disable-next-line typescript/consistent-type-definitions -- Vite types import.meta.env through interface merging, a type alias cannot merge

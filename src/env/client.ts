@@ -9,7 +9,8 @@ export const clientEnv = createEnv({
     ...clientEnvSchema,
     VITE_VERCEL_ENV: z
       .enum(['production', 'preview', 'development'])
-      .default('development')
+      .default('development'),
+    VITE_VERCEL_OBSERVABILITY_CLIENT_CONFIG: z.string().optional()
   },
   runtimeEnvStrict: {
     VITE_SITE_URL: import.meta.env.VITE_SITE_URL,
@@ -19,7 +20,9 @@ export const clientEnv = createEnv({
     VITE_ALGOLIA_INSIGHTS_KEY: import.meta.env.VITE_ALGOLIA_INSIGHTS_KEY,
     VITE_ALGOLIA_INDEX: import.meta.env.VITE_ALGOLIA_INDEX,
     VITE_SENTRY_DSN: import.meta.env.VITE_SENTRY_DSN,
-    VITE_VERCEL_ENV: import.meta.env.VITE_VERCEL_ENV
+    VITE_VERCEL_ENV: import.meta.env.VITE_VERCEL_ENV,
+    VITE_VERCEL_OBSERVABILITY_CLIENT_CONFIG: import.meta.env
+      .VITE_VERCEL_OBSERVABILITY_CLIENT_CONFIG
   },
   emptyStringAsUndefined: true,
   skipValidation: IS_TEST

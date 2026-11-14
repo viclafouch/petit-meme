@@ -24,6 +24,8 @@ export const InstallAppDialog = ({
   onOpenChange,
   method
 }: InstallAppDialogProps) => {
+  const guide = getInstallGuide(method)
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm">
@@ -34,10 +36,10 @@ export const InstallAppDialog = ({
               {m.install_guide_title()}
             </DialogTitle>
             <DialogDescription className="text-center text-balance">
-              {getInstallGuide(method).description}
+              {guide.description}
             </DialogDescription>
           </DialogHeader>
-          <InstallGuideSteps method={method} className="w-full" />
+          <InstallGuideSteps steps={guide.steps} className="w-full" />
           <Button
             size="lg"
             className="w-full"

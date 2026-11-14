@@ -2,7 +2,7 @@ import { expect } from '@playwright/test'
 import { m } from '~/paraglide/messages'
 import { E2E_NAMED_MEMES } from './content'
 import { test } from './fixtures'
-import { getMemeList, openMemePlayer } from './library'
+import { getFirstMemePlayLink, getMemeList, openMemePlayer } from './library'
 
 const LIBRARY_PATHNAME = '/memes/category/trending'
 const PLAYABLE_MEME = E2E_NAMED_MEMES.mostViewed
@@ -44,6 +44,22 @@ test.describe('the player', () => {
         })
       })
       .toBeGreaterThan(0)
+  })
+
+  test('closing the player hands focus back to the card it came from', async ({
+    page
+  }) => {
+    await page.goto(LIBRARY_PATHNAME)
+
+    const playLink = getFirstMemePlayLink(page)
+    const playerDialog = await openMemePlayer(page)
+
+    await expect(page).toHaveURL(LIBRARY_PATHNAME)
+
+    await playerDialog.getByRole('button', { name: m.common_close() }).click()
+
+    await expect(playerDialog).toBeHidden()
+    await expect(playLink).toBeFocused()
   })
 
   test('escape closes the player and gives the library back', async ({

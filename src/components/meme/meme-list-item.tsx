@@ -25,6 +25,7 @@ import {
   sendConversionEvent,
   type ConversionEventName
 } from '~/lib/algolia-insights'
+import { matchIsCoarsePointer } from '~/lib/pointer'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
@@ -34,7 +35,7 @@ export type MemeListItemProps = {
   layoutContext: string
   size: keyof typeof sizes
   position: number
-  onPlayClick: (meme: MemeWithVideo, trigger: HTMLButtonElement) => void
+  onOpenPlayer: (meme: MemeWithVideo, trigger: HTMLElement) => void
   highlightedTitle?: string
   queryID?: string
   authenticatedUserToken?: string
@@ -91,7 +92,7 @@ export const MemeListItem = React.memo(
   ({
     meme,
     highlightedTitle,
-    onPlayClick,
+    onOpenPlayer,
     layoutContext,
     size,
     queryID,
@@ -109,6 +110,19 @@ export const MemeListItem = React.memo(
         position,
         authenticatedUserToken
       })
+    }
+
+    const handlePlayClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+      handleTrackClick()
+
+      const isPlainClick =
+        event.button === 0 &&
+        !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey)
+
+      if (isPlainClick && !matchIsCoarsePointer()) {
+        event.preventDefault()
+        onOpenPlayer(meme, event.currentTarget)
+      }
     }
 
     const handleTrackConversion = (eventName: ConversionEventName) => {
@@ -131,20 +145,18 @@ export const MemeListItem = React.memo(
             alt={meme.title}
             duration={meme.video.duration}
           >
-            <button
-              className="size-full delay-75 cursor-pointer text-white/80 place-items-center outline-none grid"
-              type="button"
-              onClick={(event) => {
-                event.preventDefault()
-                handleTrackClick()
-                onPlayClick(meme, event.currentTarget)
-              }}
+            <Link
+              to="/memes/$memeId"
+              params={{ memeId: meme.id }}
+              preload={false}
+              className="touch-tap size-full delay-75 cursor-pointer text-white/80 place-items-center outline-none grid"
+              onClick={handlePlayClick}
             >
               <div className="sr-only">{m.meme_play_video()}</div>
               <div className="rounded-full text-white size-8 md:size-10 flex justify-center items-center bg-black/70 opacity-90 border border-muted-foreground md:opacity-0 group-hover:opacity-100 duration-300 transition-all group-focus-within:opacity-100">
                 <BunnyPlayIcon className="fill-white w-3.5 md:w-4.5" />
               </div>
-            </button>
+            </Link>
           </MemeVideoThumbnail>
         </motion.div>
         <div className="flex items-start justify-between gap-3">

@@ -4,7 +4,7 @@ import { m } from '~/paraglide/messages'
 import { E2E_NAMED_MEMES } from './content'
 import { resolveStorageStatePath } from './env'
 import { test } from './fixtures'
-import { getMemeLink, getMemePlayButtons } from './library'
+import { getMemeLink, getMemePlayLinks } from './library'
 
 const BOOKMARKED_MEMES = [E2E_NAMED_MEMES.english, E2E_NAMED_MEMES.universal]
 
@@ -20,7 +20,7 @@ test.describe('a signed in User', () => {
     await expect(
       page.getByRole('heading', { name: m.settings_bookmarks_heading() })
     ).toBeVisible()
-    await expect(getMemePlayButtons(page)).toHaveCount(BOOKMARKED_MEMES.length)
+    await expect(getMemePlayLinks(page)).toHaveCount(BOOKMARKED_MEMES.length)
 
     await Promise.all(
       BOOKMARKED_MEMES.map((meme) => {

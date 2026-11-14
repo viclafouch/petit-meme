@@ -1,12 +1,31 @@
+import { z } from 'zod'
 import { expect } from '@playwright/test'
+import { COOKIE_ALGOLIA_USER_TOKEN_KEY } from '~/constants/cookie'
 import { m } from '~/paraglide/messages'
-import { E2E_NAMED_MEMES } from './content'
+import {
+  AI_SEARCH_PATH,
+  AI_SEARCH_RESULTS_TIMEOUT_MS,
+  getPromptField,
+  submitPrompt
+} from './ai-search'
+import { E2E_NAMED_MEMES, E2E_UNIQUE_SEARCH_WORD } from './content'
 import { resolveStorageStatePath } from './env'
 import { test } from './fixtures'
 import { repeatUntilVisible } from './hydration'
-import { getFirstMemePlayButton, openMemePlayer } from './library'
+import { getFirstMemePlayLink, getMemeLink, getMemePlayLinks } from './library'
 
 const PLAYABLE_MEME_PATHNAME = `/memes/${E2E_NAMED_MEMES.mostViewed.id}`
+
+const LIBRARY_PATHNAME = '/memes/category/trending'
+
+const ALGOLIA_INSIGHTS_EVENTS_URL =
+  /insights\.(?:[a-z]+\.)?algolia\.io\/1\/events/u
+
+const ALGOLIA_INSIGHTS_BODY_SCHEMA = z.object({
+  events: z.array(
+    z.object({ eventType: z.string(), objectIDs: z.array(z.string()) })
+  )
+})
 
 test.describe('the phone journey', () => {
   test('the tab bar is the way to the library on a phone', async ({ page }) => {
@@ -102,31 +121,99 @@ test.describe('the phone journey', () => {
     await expect(page.getByRole('dialog').getByRole('tabpanel')).toBeVisible()
   })
 
-  test('a tap on a Meme of the home page opens the player', async ({
+  test('a tap on a Meme opens its page, and back returns to the same spot in the list', async ({
     page
   }) => {
-    await page.goto('/')
+    await page.goto(LIBRARY_PATHNAME)
 
-    const playerDialog = await openMemePlayer(page)
+    // oxlint-disable-next-line playwright/no-nth-methods -- the last Meme sits furthest down the list: its scroll position is the one to restore
+    const lastPlayLink = getMemePlayLinks(page).last()
+    const memePathname = await lastPlayLink.getAttribute('href')
 
-    await expect(
-      playerDialog.getByRole('button', { name: m.meme_share(), exact: true })
-    ).toBeVisible()
-    await expect(playerDialog.getByTestId('meme-video-player')).toBeVisible()
+    await lastPlayLink.scrollIntoViewIfNeeded()
+
+    const listScrollY = await page.evaluate(() => {
+      return window.scrollY
+    })
+
+    expect(listScrollY).toBeGreaterThan(0)
+
+    await lastPlayLink.tap()
+
+    await expect(page).toHaveURL(memePathname ?? '')
+    await expect(page.getByTestId('meme-video-player')).toBeVisible()
+
+    await page.goBack()
+
+    await expect(page).toHaveURL(LIBRARY_PATHNAME)
+    await expect
+      .poll(() => {
+        return page.evaluate(() => {
+          return window.scrollY
+        })
+      })
+      .toBe(listScrollY)
   })
 
-  test('closing the player hands focus back to the card it came from', async ({
+  test('a tap on a Meme tells Algolia which Meme was clicked', async ({
+    page,
+    baseURL
+  }) => {
+    await page.context().addCookies([
+      {
+        name: COOKIE_ALGOLIA_USER_TOKEN_KEY,
+        value: 'e2e-phone',
+        url: baseURL
+      }
+    ])
+    await page.route(ALGOLIA_INSIGHTS_EVENTS_URL, (route) => {
+      return route.fulfill({ json: { status: 200, message: 'OK' } })
+    })
+    await page.goto(LIBRARY_PATHNAME)
+
+    const firstPlayLink = getFirstMemePlayLink(page)
+    const memePathname = await firstPlayLink.getAttribute('href')
+    const memeId = memePathname?.split('/').at(-1)
+
+    const clickEventRequest = page.waitForRequest((request) => {
+      if (!ALGOLIA_INSIGHTS_EVENTS_URL.test(request.url())) {
+        return false
+      }
+
+      const { events } = ALGOLIA_INSIGHTS_BODY_SCHEMA.parse(
+        request.postDataJSON()
+      )
+
+      return events.some((event) => {
+        return (
+          event.eventType === 'click' &&
+          memeId !== undefined &&
+          event.objectIDs.includes(memeId)
+        )
+      })
+    })
+
+    await firstPlayLink.tap()
+
+    await clickEventRequest
+    await expect(page).toHaveURL(memePathname ?? '')
+  })
+
+  test('the back link of a Meme page returns to the screen the Meme was opened from', async ({
     page
   }) => {
     await page.goto('/')
 
-    const playButton = getFirstMemePlayButton(page)
-    const playerDialog = await openMemePlayer(page)
+    const firstPlayLink = getFirstMemePlayLink(page)
+    const memePathname = await firstPlayLink.getAttribute('href')
 
-    await playerDialog.getByRole('button', { name: m.common_close() }).click()
+    await firstPlayLink.tap()
 
-    await expect(playerDialog).toBeHidden()
-    await expect(playButton).toBeFocused()
+    await expect(page).toHaveURL(memePathname ?? '')
+
+    await page.getByRole('link', { name: m.meme_back(), exact: true }).tap()
+
+    await expect(page).toHaveURL('/')
   })
 
   test('a Meme page loads its Video on Safari', async ({ page }) => {
@@ -166,5 +253,37 @@ test.describe('the phone journey of a User', () => {
     await expect(page).toHaveURL('/settings')
     await expect(accountDrawer).toBeHidden()
     await expect(accountTab).toHaveAttribute('data-current', '')
+  })
+})
+
+test.describe('the phone journey of a Premium on the AI search', () => {
+  test.use({ storageState: resolveStorageStatePath('aiSearchPremium') })
+
+  test('a Meme opened from the AI search results hands the results back', async ({
+    page
+  }) => {
+    await page.goto(AI_SEARCH_PATH)
+    await submitPrompt(page, E2E_UNIQUE_SEARCH_WORD)
+
+    const resultLink = getMemeLink(page, E2E_NAMED_MEMES.searchTarget)
+
+    await expect(resultLink).toBeVisible({
+      timeout: AI_SEARCH_RESULTS_TIMEOUT_MS
+    })
+
+    await getFirstMemePlayLink(page).tap()
+
+    await expect(
+      page.getByRole('heading', {
+        level: 1,
+        name: E2E_NAMED_MEMES.searchTarget.title,
+        exact: true
+      })
+    ).toBeVisible()
+
+    await page.goBack()
+
+    await expect(resultLink).toBeVisible()
+    await expect(getPromptField(page)).toHaveValue(E2E_UNIQUE_SEARCH_WORD)
   })
 })

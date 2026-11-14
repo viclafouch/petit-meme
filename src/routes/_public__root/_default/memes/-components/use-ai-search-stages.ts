@@ -15,7 +15,6 @@ export type Stage = {
 type StagesState = {
   isActive: boolean
   stages: readonly Stage[]
-  isAllCompleted: boolean
   reset: () => void
 }
 
@@ -54,7 +53,6 @@ export function useAiSearchStages(isPending: boolean): StagesState {
   const [activeIndex, setActiveIndex] = React.useState(
     isPending ? 0 : IDLE_INDEX
   )
-  const [isAllCompleted, setIsAllCompleted] = React.useState(false)
   const [previousIsPending, setPreviousIsPending] = React.useState(isPending)
 
   if (isPending !== previousIsPending) {
@@ -62,10 +60,8 @@ export function useAiSearchStages(isPending: boolean): StagesState {
 
     if (isPending) {
       setActiveIndex(0)
-      setIsAllCompleted(false)
     } else if (activeIndex === LAST_STAGE_INDEX) {
       setActiveIndex(COMPLETED_INDEX)
-      setIsAllCompleted(true)
     }
   }
 
@@ -81,10 +77,6 @@ export function useAiSearchStages(isPending: boolean): StagesState {
       setActiveIndex((previousIndex) => {
         return previousIndex + 1
       })
-
-      if (isWaitingToComplete) {
-        setIsAllCompleted(true)
-      }
     }, getRandomStageDelay())
 
     return () => {
@@ -108,11 +100,10 @@ export function useAiSearchStages(isPending: boolean): StagesState {
 
   const reset = () => {
     setActiveIndex(IDLE_INDEX)
-    setIsAllCompleted(false)
   }
 
   const isActive = activeIndex >= 0
   const stages = isActive ? buildStages(activeIndex) : INITIAL_STAGES
 
-  return { isActive, stages, isAllCompleted, reset }
+  return { isActive, stages, reset }
 }

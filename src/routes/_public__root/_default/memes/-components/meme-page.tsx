@@ -14,8 +14,10 @@ import { useMutation, useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import {
   getRouteApi,
   Link,
+  useCanGoBack,
   useLinkProps,
-  useRouteContext
+  useRouteContext,
+  useRouter
 } from '@tanstack/react-router'
 import { MemeExportMenu } from '~/components/meme/meme-export-menu'
 import { MemeLanguageBadge } from '~/components/meme/meme-language-badge'
@@ -118,6 +120,8 @@ export const MemePage = () => {
     memeId: memeQuery.data.id
   })
   const navigate = memeRouteApi.useNavigate()
+  const router = useRouter()
+  const canGoBack = useCanGoBack()
   const memeLink = useLinkProps({
     to: '/memes/$memeId',
     params: { memeId: memeQuery.data.id }
@@ -176,6 +180,13 @@ export const MemePage = () => {
     ]
   }, [memeQuery.data])
 
+  const handleBackClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    if (canGoBack) {
+      event.preventDefault()
+      router.history.back()
+    }
+  }
+
   const handleNavigateToRandomMeme = () => {
     pauseVideo()
     randomMemeMutation.mutate(undefined, {
@@ -201,9 +212,10 @@ export const MemePage = () => {
         <Link
           to="/memes"
           className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}
+          onClick={handleBackClick}
         >
           <ArrowLeft className="size-5" />
-          <span>{m.meme_back_to_memes()}</span>
+          <span>{m.meme_back()}</span>
         </Link>
         <div className="w-full grid md:grid-cols-meme-page gap-x-2.5 gap-y-4">
           <div className="w-full flex flex-col gap-y-2 md:gap-y-2 items-center md:items-start">

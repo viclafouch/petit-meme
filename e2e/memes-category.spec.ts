@@ -9,7 +9,7 @@ import {
   type E2eCategory
 } from './content'
 import { test } from './fixtures'
-import { getMemeLink, getMemePlayButtons } from './library'
+import { getMemeLink, getMemePlayLinks } from './library'
 
 const CATS_CATEGORY = E2E_CATEGORIES.chats
 const POLITICS_CATEGORY = E2E_CATEGORIES.politique
@@ -34,7 +34,7 @@ test.describe('the Categories', () => {
     await expect(
       page.getByRole('heading', { name: CATS_CATEGORY.title })
     ).toBeVisible()
-    await expect(getMemePlayButtons(page)).toHaveCount(
+    await expect(getMemePlayLinks(page)).toHaveCount(
       countMemesOfCategory(CATS_CATEGORY)
     )
   })
@@ -65,7 +65,7 @@ test.describe('the Categories', () => {
       .click()
 
     await expect(page).toHaveURL(`/memes/category/${POLITICS_CATEGORY.slug}`)
-    await expect(getMemePlayButtons(page)).toHaveCount(
+    await expect(getMemePlayLinks(page)).toHaveCount(
       countMemesOfCategory(POLITICS_CATEGORY)
     )
     await expect(
@@ -79,7 +79,7 @@ test.describe('the Categories', () => {
   }) => {
     await page.goto(`/memes/category/${NEWS_CATEGORY_SLUG}`)
 
-    await expect(getMemePlayButtons(page)).toHaveCount(E2E_RECENT_MEMES.length)
+    await expect(getMemePlayLinks(page)).toHaveCount(E2E_RECENT_MEMES.length)
 
     await Promise.all(
       E2E_RECENT_MEMES.map((meme) => {
@@ -99,6 +99,6 @@ test.describe('the Categories', () => {
     await expect(
       page.getByRole('heading', { name: `${HTTP_STATUS.NOT_FOUND}` })
     ).toBeVisible()
-    await expect(getMemePlayButtons(page)).toHaveCount(0)
+    await expect(getMemePlayLinks(page)).toHaveCount(0)
   })
 })

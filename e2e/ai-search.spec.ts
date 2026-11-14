@@ -1,14 +1,10 @@
 import { expect, type Page } from '@playwright/test'
-import {
-  AI_SEARCH_STAGE_KEYS,
-  AI_SEARCH_STAGE_LINGER_MS,
-  AI_SEARCH_STAGE_MAX_DELAY_MS
-} from '~/constants/ai-search'
 import { HTTP_STATUS } from '~/constants/http'
 import { FREE_CAPS } from '~/helpers/cap'
 import { m } from '~/paraglide/messages'
 import {
   AI_SEARCH_PATH,
+  AI_SEARCH_RESULTS_TIMEOUT_MS,
   getPromptField,
   getSubmitButton,
   submitPrompt
@@ -28,12 +24,6 @@ import {
 
 const UNANSWERABLE_PROMPT = 'zzzzqqqqxxxx'
 const CONCURRENT_SEARCH_COUNT = FREE_CAPS.aiSearch * 2
-
-const SERVER_ROUND_TRIP_BUDGET_MS = 5000
-const RESULTS_TIMEOUT_MS =
-  AI_SEARCH_STAGE_KEYS.length * AI_SEARCH_STAGE_MAX_DELAY_MS +
-  AI_SEARCH_STAGE_LINGER_MS +
-  SERVER_ROUND_TRIP_BUDGET_MS
 
 const getQuotaCounter = (page: Page) => {
   return page.getByRole('status')
@@ -67,7 +57,7 @@ test.describe('a free User with searches left', () => {
     await submitPrompt(page, E2E_UNIQUE_SEARCH_WORD)
 
     await expect(getMemeLink(page, E2E_NAMED_MEMES.searchTarget)).toBeVisible({
-      timeout: RESULTS_TIMEOUT_MS
+      timeout: AI_SEARCH_RESULTS_TIMEOUT_MS
     })
     await expect(
       page.getByText(m.ai_search_result_count({ count: 1 }), { exact: true })
@@ -126,7 +116,7 @@ test.describe('a free User whose search finds nothing', () => {
     await submitPrompt(page, UNANSWERABLE_PROMPT)
 
     await expect(page.getByText(m.ai_search_no_results())).toBeVisible({
-      timeout: RESULTS_TIMEOUT_MS
+      timeout: AI_SEARCH_RESULTS_TIMEOUT_MS
     })
   })
 })
@@ -189,7 +179,7 @@ test.describe('a Premium who is past the free cap', () => {
     await submitPrompt(page, E2E_UNIQUE_SEARCH_WORD)
 
     await expect(getMemeLink(page, E2E_NAMED_MEMES.searchTarget)).toBeVisible({
-      timeout: RESULTS_TIMEOUT_MS
+      timeout: AI_SEARCH_RESULTS_TIMEOUT_MS
     })
     await expect(
       page.getByRole('dialog', { name: m.ai_search_upsell_title() })

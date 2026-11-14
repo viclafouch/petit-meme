@@ -27,7 +27,7 @@ import {
 import { E2E_STRIPE_PRICE_IDS, resolveStorageStatePath } from './env'
 import { test } from './fixtures'
 import { repeatUntilVisible } from './hydration'
-import { getMemeLink, getMemePlayButtons } from './library'
+import { getMemeLink, getMemePlayLinks } from './library'
 import { E2E_ENGLISH_LOCALE } from './locales'
 import { findStripeCustomerLocales } from './stripe-customer'
 import { buildE2eUrl, localizePathname } from './urls'
@@ -218,7 +218,7 @@ test.describe('the English journey', () => {
         name: m.meme_category_trending({}, IN_ENGLISH)
       })
     ).toBeVisible()
-    await expect(getMemePlayButtons(page, E2E_ENGLISH_LOCALE)).toHaveCount(
+    await expect(getMemePlayLinks(page, E2E_ENGLISH_LOCALE)).toHaveCount(
       MEMES_PER_PAGE
     )
   })
@@ -248,7 +248,7 @@ test.describe('the English journey', () => {
     await expect(page).toHaveURL(
       `${ENGLISH_TRENDING_PATHNAME}?page=${SECOND_PAGE_NUMBER}`
     )
-    await expect(getMemePlayButtons(page, E2E_ENGLISH_LOCALE)).toHaveCount(
+    await expect(getMemePlayLinks(page, E2E_ENGLISH_LOCALE)).toHaveCount(
       E2E_ENGLISH_SECOND_PAGE_MEMES.length
     )
 

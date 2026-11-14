@@ -2,7 +2,13 @@ import React from 'react'
 import { SparklesIcon } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { toast } from 'sonner'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  useMutation,
+  useMutationState,
+  useQuery,
+  useQueryClient,
+  type Mutation
+} from '@tanstack/react-query'
 import { useRouteContext } from '@tanstack/react-router'
 import { useAppForm } from '~/components/form/use-app-form'
 import { MemesList } from '~/components/meme/memes-list'
@@ -35,6 +41,10 @@ import { useDialogStore } from '~/stores/dialog.store'
 
 type AiSearchResult = Awaited<ReturnType<typeof searchMemesWithAi>>
 
+type AiSearchVariables = { prompt: string }
+
+const AI_SEARCH_MUTATION_KEY = ['ai-search'] as const
+
 export const AiSearchPage = () => {
   const dialogStore = useDialogStore()
   const { user } = useRouteContext({ from: '__root__' })
@@ -46,7 +56,8 @@ export const AiSearchPage = () => {
   })
 
   const searchMutation = useMutation({
-    mutationFn: (data: { prompt: string }) => {
+    mutationKey: AI_SEARCH_MUTATION_KEY,
+    mutationFn: (data: AiSearchVariables) => {
       return searchMemesWithAi({ data })
     },
     onSuccess: (result) => {
@@ -94,6 +105,13 @@ export const AiSearchPage = () => {
     }
   })
 
+  const latestSearch = useMutationState({
+    filters: { mutationKey: AI_SEARCH_MUTATION_KEY, status: 'success' },
+    select: (mutation: Mutation<AiSearchResult, Error, AiSearchVariables>) => {
+      return mutation.state
+    }
+  }).at(-1)
+
   const searchStages = useAiSearchStages(searchMutation.isPending)
   const searchStagesResetRef = React.useRef(searchStages.reset)
   React.useEffect(() => {
@@ -101,7 +119,7 @@ export const AiSearchPage = () => {
   }, [searchStages.reset])
 
   const form = useAppForm({
-    defaultValues: { prompt: '' },
+    defaultValues: { prompt: latestSearch?.variables?.prompt ?? '' },
     onSubmit: ({ value }) => {
       const trimmed = value.prompt.trim()
 
@@ -213,12 +231,10 @@ export const AiSearchPage = () => {
             {searchStages.isActive ? (
               <AiSearchStages key="stages" stages={searchStages.stages} />
             ) : null}
-            {!searchStages.isActive &&
-            searchMutation.data &&
-            searchStages.isAllCompleted ? (
+            {!searchStages.isActive && latestSearch?.data ? (
               <AiSearchResultsAnimated
                 key="results"
-                result={searchMutation.data}
+                result={latestSearch.data}
               />
             ) : null}
           </AnimatePresence>

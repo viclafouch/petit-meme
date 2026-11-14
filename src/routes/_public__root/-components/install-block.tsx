@@ -24,7 +24,7 @@ export const InstallBlock = () => {
         </p>
       </div>
       <div className="flex w-full max-w-xs flex-col items-center gap-2">
-        <InstallAppButton className="w-full" />
+        <InstallAppButton surface="home" className="w-full" />
         <Link
           to="/app"
           className="inline-flex min-h-11 items-center text-sm text-muted-foreground underline-offset-4 touch-tap active:text-foreground"

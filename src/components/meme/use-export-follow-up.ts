@@ -3,7 +3,7 @@ import { useMatchRoute } from '@tanstack/react-router'
 import { useInstallApp } from '~/components/install/use-install-app'
 import { useIsPremium } from '~/components/premium/use-is-premium'
 import { resolveExportFollowUp } from '~/helpers/export-follow-up'
-import { markInstallOffered, matchWasInstallOffered } from '~/lib/install-app'
+import { recordInstallOffer, matchWasInstallOffered } from '~/lib/install-app'
 import {
   readPremiumReminderSnoozedAt,
   snoozePremiumReminder
@@ -22,14 +22,14 @@ export const useExportFollowUp = () => {
   const isInstallable = installMethod !== null && installMethod !== 'installed'
 
   const offerInstall = () => {
-    markInstallOffered()
+    recordInstallOffer()
     toast(m.install_offer_title(), {
       description: m.install_offer_description(),
       duration: INSTALL_OFFER_DURATION_MS,
       action: {
         label: m.install_cta(),
         onClick: () => {
-          void install()
+          void install('export-toast')
         }
       }
     })

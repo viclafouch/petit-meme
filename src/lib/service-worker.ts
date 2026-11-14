@@ -1,6 +1,7 @@
 import { IS_PRODUCTION } from '~/constants/env'
 import { SERVICE_WORKER_PATHNAME } from '~/constants/pwa'
 import { HOUR } from '~/constants/time'
+import { captureWithFeature } from '~/lib/sentry'
 
 const checkForUpdate = async (registration: ServiceWorkerRegistration) => {
   try {
@@ -34,7 +35,9 @@ const registerWorker = async () => {
       scope: '/',
       updateViaCache: 'none'
     })
-  } catch {
+  } catch (error) {
+    captureWithFeature(error, 'service-worker')
+
     return null
   }
 }

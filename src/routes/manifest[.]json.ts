@@ -153,6 +153,7 @@ const buildManifest = () => {
     share_target: {
       action: getLocalizedPathname('/submit'),
       method: 'GET',
+      enctype: 'application/x-www-form-urlencoded',
       params: {
         url: 'url',
         text: 'text'

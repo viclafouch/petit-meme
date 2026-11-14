@@ -4,6 +4,8 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@custom-variant standalone (@media (display-mode: standalone));
+
 @property --drawer-swipe-movement-x {
   syntax: '<length>';
   inherits: false;

@@ -14,6 +14,7 @@ type InstallableNavigator = Navigator & {
 }
 
 export type InstallSurface =
+  | 'header'
   | 'account-drawer'
   | 'home'
   | 'app-page'

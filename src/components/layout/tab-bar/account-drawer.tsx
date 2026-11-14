@@ -153,15 +153,11 @@ type InstallAfterCloseProps = {
 type InstallAppRowProps = InstallAfterCloseProps
 
 const InstallAppRow = ({ onInstall }: InstallAppRowProps) => {
-  const { method, install } = useInstallApp()
-
-  if (method === null || method === 'installed') {
-    return null
-  }
+  const { install } = useInstallApp()
 
   return (
     <DrawerClose
-      className={ROW_CLASS}
+      className={cn(ROW_CLASS, 'standalone:hidden')}
       onClick={() => {
         onInstall(() => {
           return install('account-drawer')

@@ -3,6 +3,7 @@ import { User } from 'lucide-react'
 import { motion, useScroll, useTransform, useReducedMotion } from 'motion/react'
 import { type LinkOptions, Link, useRouteContext } from '@tanstack/react-router'
 import { ThemeSwitcher } from '~/components/animate-ui/theme-switcher'
+import { InstallAppButton } from '~/components/install/install-app-button'
 import { LanguageSwitcher } from '~/components/layout/language-switcher'
 import { UserDropdown } from '~/components/layout/user-dropdown'
 import { Button, buttonVariants } from '~/components/ui/button'
@@ -98,6 +99,12 @@ export const Navbar = () => {
           </NavigationMenuList>
         </NavigationMenu>
         <div className="flex flex-1 items-center justify-end gap-3">
+          <InstallAppButton
+            surface="header"
+            size="sm"
+            variant="secondary"
+            className="touch-tap lg:hidden"
+          />
           <LanguageSwitcher />
           <ThemeSwitcher className="max-lg:hidden" />
           <div className="max-lg:hidden">

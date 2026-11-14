@@ -2,14 +2,15 @@ import { expect, type Page } from '@playwright/test'
 import { PREMIUM_PLAN_NAME } from '~/constants/plan'
 import { m } from '~/paraglide/messages'
 import {
+  completeCheckout,
   expectActiveSubscription,
+  expectCheckoutSession,
   findSubscription,
-  payWithTestCard,
   startCheckout
 } from './checkout-flow'
 import { E2E_ROLES } from './constants'
 import { E2E_NAMED_MEMES } from './content'
-import { resolveStorageStatePath } from './env'
+import { E2E_STRIPE_PRICE_IDS, resolveStorageStatePath } from './env'
 import { test } from './fixtures'
 import { expectVisibleAfterReload, repeatUntilVisible } from './hydration'
 
@@ -40,8 +41,12 @@ test.describe('a monthly checkout', () => {
     page
   }) => {
     await page.goto('/pricing')
-    await startCheckout(page)
-    await payWithTestCard(page, E2E_ROLES.checkout.name)
+    const checkoutSession = await startCheckout(page)
+    await expectCheckoutSession(checkoutSession, {
+      referenceId: E2E_ROLES.checkout.id,
+      priceId: E2E_STRIPE_PRICE_IDS.monthly
+    })
+    await completeCheckout(page, checkoutSession)
 
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
     await expectActiveSubscription(E2E_ROLES.checkout.id)
@@ -78,8 +83,12 @@ test.describe('an annual checkout', () => {
       page.getByRole('radio', { name: m.pricing_yearly(), checked: true })
     )
 
-    await startCheckout(page)
-    await payWithTestCard(page, E2E_ROLES.checkoutAnnual.name)
+    const checkoutSession = await startCheckout(page)
+    await expectCheckoutSession(checkoutSession, {
+      referenceId: E2E_ROLES.checkoutAnnual.id,
+      priceId: E2E_STRIPE_PRICE_IDS.yearly
+    })
+    await completeCheckout(page, checkoutSession)
 
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
     await expectActiveSubscription(E2E_ROLES.checkoutAnnual.id)

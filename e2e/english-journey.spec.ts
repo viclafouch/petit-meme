@@ -10,8 +10,9 @@ import { formatCentsToEuros } from '~/helpers/number'
 import { m } from '~/paraglide/messages'
 import { baseLocale, cookieName, type Locale } from '~/paraglide/runtime'
 import {
+  completeCheckout,
   expectActiveSubscription,
-  payWithTestCard,
+  expectCheckoutSession,
   startCheckout
 } from './checkout-flow'
 import { E2E_ROLES } from './constants'
@@ -23,7 +24,7 @@ import {
   getE2eCategoryTitle,
   localizeE2eMeme
 } from './content'
-import { resolveStorageStatePath } from './env'
+import { E2E_STRIPE_PRICE_IDS, resolveStorageStatePath } from './env'
 import { test } from './fixtures'
 import { repeatUntilVisible } from './hydration'
 import { getMemeLink, getMemePlayButtons } from './library'
@@ -454,8 +455,12 @@ test.describe('the English journey', () => {
         )
       ).toBeVisible()
 
-      await startCheckout(page, E2E_ENGLISH_LOCALE)
-      await payWithTestCard(page, E2E_ROLES.checkoutEnglish.name)
+      const checkoutSession = await startCheckout(page, E2E_ENGLISH_LOCALE)
+      await expectCheckoutSession(checkoutSession, {
+        referenceId: E2E_ROLES.checkoutEnglish.id,
+        priceId: E2E_STRIPE_PRICE_IDS.yearly
+      })
+      await completeCheckout(page, checkoutSession)
 
       await expectActiveSubscription(E2E_ROLES.checkoutEnglish.id)
 

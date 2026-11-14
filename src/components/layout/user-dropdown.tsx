@@ -3,6 +3,7 @@ import {
   ChevronDown,
   CreditCard,
   LogOutIcon,
+  Plus,
   Shield,
   SparklesIcon,
   Settings,
@@ -109,6 +110,10 @@ export const UserDropdown = ({ user }: UserDropdownProps) => {
                 {bookmarkedMemesQuery.data.count}
               </span>
             ) : null}
+          </DropdownMenuLinkItem>
+          <DropdownMenuLinkItem render={<Link to="/submit" />}>
+            <Plus />
+            {m.nav_submit_meme()}
           </DropdownMenuLinkItem>
           <DropdownMenuLinkItem render={<Link to="/settings" />}>
             <Settings />

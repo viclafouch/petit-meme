@@ -31,3 +31,7 @@ export const buildSplashScreenSize = (
     ? `${shortSide}x${longSide}`
     : `${longSide}x${shortSide}`
 }
+
+export const buildAppQrCodePath = (locale: string) => {
+  return `/images/app/qr-code-${locale}.svg`
+}

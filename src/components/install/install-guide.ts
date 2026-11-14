@@ -1,4 +1,10 @@
-import { EllipsisVertical, MonitorDown, Share, SquarePlus } from 'lucide-react'
+import {
+  EllipsisVertical,
+  type LucideIcon,
+  MonitorDown,
+  Share,
+  SquarePlus
+} from 'lucide-react'
 import type { InstallMethod } from '~/helpers/install-app'
 import { m } from '~/paraglide/messages'
 
@@ -7,8 +13,8 @@ export type InstallGuideMethod = Extract<
   'ios-guide' | 'browser-guide'
 >
 
-type InstallGuideStep = {
-  Icon: typeof Share | null
+export type InstallGuideStep = {
+  Icon: LucideIcon | null
   text: string
 }
 

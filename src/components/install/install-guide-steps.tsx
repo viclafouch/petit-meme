@@ -1,21 +1,18 @@
-import {
-  getInstallGuide,
-  type InstallGuideMethod
-} from '~/components/install/install-guide'
+import type { InstallGuideStep } from '~/components/install/install-guide'
 import { cn } from '~/lib/utils'
 
 type InstallGuideStepsProps = {
-  method: InstallGuideMethod
+  steps: InstallGuideStep[]
   className?: string
 }
 
 export const InstallGuideSteps = ({
-  method,
+  steps,
   className
 }: InstallGuideStepsProps) => {
   return (
     <ol className={cn('flex flex-col gap-3', className)}>
-      {getInstallGuide(method).steps.map(({ Icon, text }, index) => {
+      {steps.map(({ Icon, text }, index) => {
         return (
           <li key={text} className="flex items-start gap-3 text-left">
             <span

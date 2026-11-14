@@ -252,9 +252,4 @@ export const matchIsE2eRoleName = (name: string): name is E2eRoleName => {
   return Object.hasOwn(E2E_ROLES, name)
 }
 
-export const STRIPE_TEST_CARD = {
-  number: '4242424242424242',
-  expiry: '12/34',
-  cvc: '123',
-  billingCountry: 'FR'
-} as const satisfies Record<string, string>
+export const STRIPE_TEST_PAYMENT_METHOD = 'pm_card_visa'

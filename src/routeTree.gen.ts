@@ -14,6 +14,7 @@ import { Route as StudioRouteImport } from './routes/_studio'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as ManifestDotjsonRouteImport } from './routes/manifest[.]json'
+import { Route as OfflineRouteImport } from './routes/offline'
 import { Route as ReelsRouteRouteImport } from './routes/reels/route'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapCategoriesDotxmlRouteImport } from './routes/sitemap-categories[.]xml'
@@ -53,6 +54,7 @@ import { Route as ApiCronSyncAlgoliaRouteImport } from './routes/api/cron/sync-a
 import { Route as ApiCronSyncBunnyTitlesRouteImport } from './routes/api/cron/sync-bunny-titles'
 import { Route as ApiCronVerificationReminderRouteImport } from './routes/api/cron/verification-reminder'
 import { Route as ApiCronWeeklyRecapRouteImport } from './routes/api/cron/weekly-recap'
+import { Route as Public__rootDefaultAppIndexRouteImport } from './routes/_public__root/_default/app/index'
 import { Route as Public__rootDefaultCheckoutSuccessRouteImport } from './routes/_public__root/_default/checkout.success'
 import { Route as Public__rootDefaultMemesIndexRouteImport } from './routes/_public__root/_default/memes/index'
 import { Route as Public__rootDefaultMemesMemeIdRouteImport } from './routes/_public__root/_default/memes/$memeId'
@@ -87,6 +89,11 @@ const HealthRoute = HealthRouteImport.update({
 const ManifestDotjsonRoute = ManifestDotjsonRouteImport.update({
   id: '/manifest.json',
   path: '/manifest.json',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OfflineRoute = OfflineRouteImport.update({
+  id: '/offline',
+  path: '/offline',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReelsRouteRoute = ReelsRouteRouteImport.update({
@@ -292,6 +299,12 @@ const ApiCronWeeklyRecapRoute = ApiCronWeeklyRecapRouteImport.update({
   path: '/api/cron/weekly-recap',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Public__rootDefaultAppIndexRoute =
+  Public__rootDefaultAppIndexRouteImport.update({
+    id: '/app/',
+    path: '/app/',
+    getParentRoute: () => Public__rootDefaultRouteRoute,
+  } as any)
 const Public__rootDefaultCheckoutSuccessRoute =
   Public__rootDefaultCheckoutSuccessRouteImport.update({
     id: '/checkout/success',
@@ -370,6 +383,7 @@ export interface FileRoutesByFullPath {
   '/reels': typeof ReelsRouteRoute
   '/health': typeof HealthRoute
   '/manifest.json': typeof ManifestDotjsonRoute
+  '/offline': typeof OfflineRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap-categories.xml': typeof SitemapCategoriesDotxmlRoute
   '/sitemap-memes.xml': typeof SitemapMemesDotxmlRoute
@@ -412,6 +426,7 @@ export interface FileRoutesByFullPath {
   '/password/create-new': typeof Public__rootDefaultPasswordCreateNewRoute
   '/password/reset': typeof Public__rootDefaultPasswordResetRoute
   '/memes/$memeId/studio': typeof StudioMemesMemeIdStudioRoute
+  '/app/': typeof Public__rootDefaultAppIndexRoute
   '/memes/': typeof Public__rootDefaultMemesIndexRoute
   '/pricing/': typeof Public__rootDefaultPricingIndexRoute
   '/random/': typeof Public__rootDefaultRandomIndexRoute
@@ -424,6 +439,7 @@ export interface FileRoutesByTo {
   '/': typeof Public__rootIndexRoute
   '/health': typeof HealthRoute
   '/manifest.json': typeof ManifestDotjsonRoute
+  '/offline': typeof OfflineRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap-categories.xml': typeof SitemapCategoriesDotxmlRoute
   '/sitemap-memes.xml': typeof SitemapMemesDotxmlRoute
@@ -465,6 +481,7 @@ export interface FileRoutesByTo {
   '/password/create-new': typeof Public__rootDefaultPasswordCreateNewRoute
   '/password/reset': typeof Public__rootDefaultPasswordResetRoute
   '/memes/$memeId/studio': typeof StudioMemesMemeIdStudioRoute
+  '/app': typeof Public__rootDefaultAppIndexRoute
   '/memes': typeof Public__rootDefaultMemesIndexRoute
   '/pricing': typeof Public__rootDefaultPricingIndexRoute
   '/random': typeof Public__rootDefaultRandomIndexRoute
@@ -480,6 +497,7 @@ export interface FileRoutesById {
   '/_studio': typeof StudioRouteWithChildren
   '/health': typeof HealthRoute
   '/manifest.json': typeof ManifestDotjsonRoute
+  '/offline': typeof OfflineRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap-categories.xml': typeof SitemapCategoriesDotxmlRoute
   '/sitemap-memes.xml': typeof SitemapMemesDotxmlRoute
@@ -524,6 +542,7 @@ export interface FileRoutesById {
   '/_public__root/_default/password/create-new': typeof Public__rootDefaultPasswordCreateNewRoute
   '/_public__root/_default/password/reset': typeof Public__rootDefaultPasswordResetRoute
   '/_studio/memes/$memeId/studio': typeof StudioMemesMemeIdStudioRoute
+  '/_public__root/_default/app/': typeof Public__rootDefaultAppIndexRoute
   '/_public__root/_default/memes/': typeof Public__rootDefaultMemesIndexRoute
   '/_public__root/_default/pricing/': typeof Public__rootDefaultPricingIndexRoute
   '/_public__root/_default/random/': typeof Public__rootDefaultRandomIndexRoute
@@ -539,6 +558,7 @@ export interface FileRouteTypes {
     | '/reels'
     | '/health'
     | '/manifest.json'
+    | '/offline'
     | '/robots.txt'
     | '/sitemap-categories.xml'
     | '/sitemap-memes.xml'
@@ -581,6 +601,7 @@ export interface FileRouteTypes {
     | '/password/create-new'
     | '/password/reset'
     | '/memes/$memeId/studio'
+    | '/app/'
     | '/memes/'
     | '/pricing/'
     | '/random/'
@@ -593,6 +614,7 @@ export interface FileRouteTypes {
     | '/'
     | '/health'
     | '/manifest.json'
+    | '/offline'
     | '/robots.txt'
     | '/sitemap-categories.xml'
     | '/sitemap-memes.xml'
@@ -634,6 +656,7 @@ export interface FileRouteTypes {
     | '/password/create-new'
     | '/password/reset'
     | '/memes/$memeId/studio'
+    | '/app'
     | '/memes'
     | '/pricing'
     | '/random'
@@ -648,6 +671,7 @@ export interface FileRouteTypes {
     | '/_studio'
     | '/health'
     | '/manifest.json'
+    | '/offline'
     | '/robots.txt'
     | '/sitemap-categories.xml'
     | '/sitemap-memes.xml'
@@ -692,6 +716,7 @@ export interface FileRouteTypes {
     | '/_public__root/_default/password/create-new'
     | '/_public__root/_default/password/reset'
     | '/_studio/memes/$memeId/studio'
+    | '/_public__root/_default/app/'
     | '/_public__root/_default/memes/'
     | '/_public__root/_default/pricing/'
     | '/_public__root/_default/random/'
@@ -707,6 +732,7 @@ export interface RootRouteChildren {
   StudioRoute: typeof StudioRouteWithChildren
   HealthRoute: typeof HealthRoute
   ManifestDotjsonRoute: typeof ManifestDotjsonRoute
+  OfflineRoute: typeof OfflineRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapCategoriesDotxmlRoute: typeof SitemapCategoriesDotxmlRoute
   SitemapMemesDotxmlRoute: typeof SitemapMemesDotxmlRoute
@@ -761,6 +787,13 @@ declare module '@tanstack/react-router' {
       path: '/manifest.json'
       fullPath: '/manifest.json'
       preLoaderRoute: typeof ManifestDotjsonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/offline': {
+      id: '/offline'
+      path: '/offline'
+      fullPath: '/offline'
+      preLoaderRoute: typeof OfflineRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reels': {
@@ -1036,6 +1069,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCronWeeklyRecapRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_public__root/_default/app/': {
+      id: '/_public__root/_default/app/'
+      path: '/app'
+      fullPath: '/app/'
+      preLoaderRoute: typeof Public__rootDefaultAppIndexRouteImport
+      parentRoute: typeof Public__rootDefaultRouteRoute
+    }
     '/_public__root/_default/checkout/success': {
       id: '/_public__root/_default/checkout/success'
       path: '/checkout/success'
@@ -1151,6 +1191,7 @@ interface Public__rootDefaultRouteRouteChildren {
   Public__rootDefaultMemesAiSearchRoute: typeof Public__rootDefaultMemesAiSearchRoute
   Public__rootDefaultPasswordCreateNewRoute: typeof Public__rootDefaultPasswordCreateNewRoute
   Public__rootDefaultPasswordResetRoute: typeof Public__rootDefaultPasswordResetRoute
+  Public__rootDefaultAppIndexRoute: typeof Public__rootDefaultAppIndexRoute
   Public__rootDefaultMemesIndexRoute: typeof Public__rootDefaultMemesIndexRoute
   Public__rootDefaultPricingIndexRoute: typeof Public__rootDefaultPricingIndexRoute
   Public__rootDefaultRandomIndexRoute: typeof Public__rootDefaultRandomIndexRoute
@@ -1178,6 +1219,7 @@ const Public__rootDefaultRouteRouteChildren: Public__rootDefaultRouteRouteChildr
       Public__rootDefaultPasswordCreateNewRoute,
     Public__rootDefaultPasswordResetRoute:
       Public__rootDefaultPasswordResetRoute,
+    Public__rootDefaultAppIndexRoute: Public__rootDefaultAppIndexRoute,
     Public__rootDefaultMemesIndexRoute: Public__rootDefaultMemesIndexRoute,
     Public__rootDefaultPricingIndexRoute: Public__rootDefaultPricingIndexRoute,
     Public__rootDefaultRandomIndexRoute: Public__rootDefaultRandomIndexRoute,
@@ -1256,6 +1298,7 @@ const rootRouteChildren: RootRouteChildren = {
   StudioRoute: StudioRouteWithChildren,
   HealthRoute: HealthRoute,
   ManifestDotjsonRoute: ManifestDotjsonRoute,
+  OfflineRoute: OfflineRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapCategoriesDotxmlRoute: SitemapCategoriesDotxmlRoute,
   SitemapMemesDotxmlRoute: SitemapMemesDotxmlRoute,

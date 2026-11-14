@@ -27,6 +27,8 @@ const FILES_RUN_BY_NODE = [
   'scripts/check-env.ts',
   'e2e/fake-anthropic.ts',
   'vite.config.ts',
+  'pwa-assets.config.ts',
+  'src/constants/pwa.ts',
   'src/constants/env.ts',
   'src/constants/http.ts',
   'src/constants/meme-fill.ts',

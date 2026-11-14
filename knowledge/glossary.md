@@ -39,13 +39,14 @@ One word, one meaning, across the product, the administration and these document
 - **AI search**: a search from a description in plain words.
 - **Reels**: the phone feed that chains Memes one after the other.
 - **Embed**: a Meme played on another site through Petit Meme's player page.
+- **Install**: adding Petit Meme to a phone's home screen, where it opens as an app, full screen.
 
 ## The offer
 
 - **Free**: the plan without payment. The whole library, with caps.
 - **Cap**: the limit Free puts on bookmarks, generations and AI searches.
 - **Invitation** (to subscribe): the dialog shown when a free person reaches for a Premium feature.
-- **Reminder**: the occasional prompt that suggests Premium, once, without blocking.
+- **Reminder**: the prompt that suggests Premium after an export, at most once every few days, without blocking.
 - **Subscription states**: Active, Ending, Payment failing, Ended, Offered. See [the offer](offer.md).
 - **Offered Premium**: lifetime Premium the Creator gives, with no payment.
 - **Paid months**: the months a User really paid for.

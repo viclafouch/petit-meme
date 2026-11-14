@@ -106,7 +106,7 @@ test.describe('the native share', () => {
       ])
 
       await expect(
-        page.getByRole('dialog', { name: m.watermark_upsell_title_share() })
+        page.getByRole('dialog', { name: m.premium_reminder_title() })
       ).toBeHidden()
     })
   })
@@ -145,7 +145,7 @@ test.describe('the native share', () => {
       await recordShares({ page })
     })
 
-    test('is offered Premium and still shares the video', async ({ page }) => {
+    test('shares the video straight away', async ({ page }) => {
       await page.goto(SHARED_MEME_PATHNAME)
 
       const videoItem = await openShareMenu({
@@ -156,20 +156,11 @@ test.describe('the native share', () => {
 
       await videoItem.click()
 
-      const upsellDialog = page.getByRole('dialog', {
-        name: m.watermark_upsell_title_share()
-      })
-
-      await upsellDialog
-        .getByRole('button', { name: m.watermark_share_with_watermark() })
-        .click()
-
       await expectFileWasShared({
         page,
         title: SHARED_MEME.title,
         format: 'mp4'
       })
-      await expect(upsellDialog).toBeHidden()
     })
 
     test('is offered Premium for the sound and still shares the video', async ({

@@ -2,15 +2,36 @@
 import type { QueryClient } from '@tanstack/react-query'
 import { createRootRouteWithContext } from '@tanstack/react-router'
 import appCss from '~/styles.css?url'
+import {
+  APPLE_SPLASH_SCREEN_VIEWPORTS,
+  WEB_APP_THEME_COLOR
+} from '~/constants/pwa'
 import { matchIsAnalyticsConsented } from '~/helpers/cookie-consent'
+import { buildSplashScreenSize } from '~/helpers/web-app-assets'
 import { ensureAlgoliaUserToken } from '~/lib/algolia-user-token'
 import { getConsentState } from '~/lib/cookie-consent'
 import { getStoredTheme } from '~/lib/theme'
-import { getLocale } from '~/paraglide/runtime'
+import { getLocale, localizeHref } from '~/paraglide/runtime'
 import { getAuthUserQueryOpts } from '~/queries/auth'
 import type { getAuthUser } from '~/server/auth/auth.functions'
 import { RootComponent } from './-components/root-component'
 import { RootErrorComponent } from './-components/root-error-component'
+
+const SPLASH_SCREEN_ORIENTATIONS = ['portrait', 'landscape'] as const
+
+const buildAppleSplashScreenLinks = () => {
+  return APPLE_SPLASH_SCREEN_VIEWPORTS.flatMap((viewport) => {
+    const screen = `screen and (device-width: ${viewport.width}px) and (device-height: ${viewport.height}px) and (-webkit-device-pixel-ratio: ${viewport.pixelRatio})`
+
+    return SPLASH_SCREEN_ORIENTATIONS.map((orientation) => {
+      return {
+        rel: 'apple-touch-startup-image',
+        media: `${screen} and (orientation: ${orientation})`,
+        href: `/images/splash/${orientation}-${buildSplashScreenSize(viewport, orientation)}.png`
+      }
+    })
+  })
+}
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
@@ -39,7 +60,7 @@ export const Route = createRootRouteWithContext<{
         { charSet: 'utf8' },
         {
           name: 'theme-color',
-          content: '#000000'
+          content: WEB_APP_THEME_COLOR
         },
         {
           name: 'color-scheme',
@@ -101,9 +122,10 @@ export const Route = createRootRouteWithContext<{
         },
         {
           rel: 'manifest',
-          href: '/manifest.json',
+          href: localizeHref('/manifest.json'),
           crossOrigin: 'use-credentials'
-        }
+        },
+        ...buildAppleSplashScreenLinks()
       ]
     }
   },

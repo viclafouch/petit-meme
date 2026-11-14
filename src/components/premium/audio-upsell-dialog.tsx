@@ -1,4 +1,5 @@
 import type { WithDialog } from '~/@types/dialog'
+import { useExportFollowUp } from '~/components/meme/use-export-follow-up'
 import { WatermarkedVideoButton } from '~/components/meme/watermarked-video-button'
 import { PremiumUpsellDialog } from '~/components/premium/premium-upsell-dialog'
 import type { MemeExportMode } from '~/constants/meme'
@@ -29,6 +30,8 @@ export const AudioUpsellDialog = ({
   mode,
   tracking
 }: AudioUpsellDialogProps) => {
+  const followUpExport = useExportFollowUp()
+
   return (
     <PremiumUpsellDialog
       open={open}
@@ -44,6 +47,7 @@ export const AudioUpsellDialog = ({
           label={VIDEO_LABELS[mode]()}
           onExported={() => {
             onOpenChange(false)
+            followUpExport()
           }}
         />
       }

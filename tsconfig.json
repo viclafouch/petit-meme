@@ -1,6 +1,6 @@
 {
   "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules", ".tanstack"],
+  "exclude": ["node_modules", ".tanstack", "src/service-worker"],
   "compilerOptions": {
     "strict": true,
     "esModuleInterop": true,

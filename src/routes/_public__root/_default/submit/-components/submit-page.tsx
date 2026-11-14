@@ -1,9 +1,10 @@
 import { LogIn } from 'lucide-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { useRouteContext } from '@tanstack/react-router'
+import { useRouteContext, useSearch } from '@tanstack/react-router'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
 import { MAX_PENDING_PROPOSALS } from '~/constants/meme-proposal'
+import { getSharedLink } from '~/helpers/share-target'
 import { m } from '~/paraglide/messages'
 import { listUserProposalsQueryOpts } from '~/queries/proposal'
 import {
@@ -39,6 +40,10 @@ const NotLoggedIn = () => {
 
 const SubmitPageContent = () => {
   const proposalsQuery = useSuspenseQuery(listUserProposalsQueryOpts())
+  const sharedLink = useSearch({
+    from: '/_public__root/_default/submit/',
+    select: getSharedLink
+  })
   const hasProposals = proposalsQuery.data.proposals.length > 0
 
   return (
@@ -50,7 +55,10 @@ const SubmitPageContent = () => {
       <Card>
         <CardContent>
           {proposalsQuery.data.pendingCount < MAX_PENDING_PROPOSALS ? (
-            <ProposalForm pendingCount={proposalsQuery.data.pendingCount} />
+            <ProposalForm
+              pendingCount={proposalsQuery.data.pendingCount}
+              sharedLink={sharedLink}
+            />
           ) : (
             <p className="text-sm text-muted-foreground text-center py-4">
               {m.submit_error_limit_reached()}

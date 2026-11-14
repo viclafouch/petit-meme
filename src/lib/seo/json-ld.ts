@@ -12,6 +12,7 @@ import type {
   Product,
   SearchAction,
   VideoObject,
+  WebApplication,
   WebPage,
   WebSite,
   WithActionConstraints,
@@ -26,6 +27,7 @@ import type { Plan } from '~/constants/plan'
 import { ONE_HOUR_IN_SECONDS, SECONDS_PER_MINUTE } from '~/constants/time'
 import type { CategoryModel } from '~/db/generated/prisma/models'
 import { convertCentsToEuros } from '~/helpers/number'
+import { buildScreenshotPath } from '~/helpers/web-app-assets'
 import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import {
   buildEmbedUrl,
@@ -34,6 +36,7 @@ import {
   websiteOrigin
 } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages'
+import { getLocale } from '~/paraglide/runtime'
 
 const websiteId = `${websiteOrigin}/#website`
 
@@ -363,5 +366,30 @@ export const buildPricingJsonLd = ({
       } satisfies Product,
       buildFaqPageJsonLd({ faqItems, pageUrl: pricingUrl })
     ]
+  }
+}
+
+export const buildWebApplicationJsonLd = (): WithContext<WebApplication> => {
+  const locale = getLocale()
+  const appUrl = buildUrl('/app', locale)
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    '@id': `${appUrl}#webapplication`,
+    name: SITE_NAME,
+    url: appUrl,
+    description: m.app_page_description(),
+    applicationCategory: 'EntertainmentApplication',
+    operatingSystem: 'Android, iOS, Windows, macOS, ChromeOS',
+    browserRequirements: 'Requires a modern web browser',
+    image: `${websiteOrigin}/android-chrome-512x512.png`,
+    screenshot: `${websiteOrigin}${buildScreenshotPath({ locale, formFactor: 'narrow', name: 'home' })}`,
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'EUR'
+    },
+    publisher: { '@id': `${websiteOrigin}/#organization` }
   }
 }

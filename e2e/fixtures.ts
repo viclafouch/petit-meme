@@ -5,6 +5,7 @@ import {
   COOKIE_LOCALE_BANNER_DISMISSED_KEY
 } from '~/constants/cookie'
 import { PREMIUM_REMINDER_STORAGE_KEY } from '~/constants/plan'
+import { INSTALL_OFFER_STORAGE_KEY } from '~/constants/pwa'
 import { prismaClient } from '~/db/client.server'
 import type { ConsentState } from '~/helpers/cookie-consent'
 import { SERVER_FUNCTION_URL_PATTERN } from './server-functions'
@@ -44,9 +45,14 @@ export const test = base.extend<object, E2eWorkerFixtures>({
       }
     ])
 
-    await context.addInitScript((storageKey) => {
-      localStorage.setItem(storageKey, String(Date.now()))
-    }, PREMIUM_REMINDER_STORAGE_KEY)
+    await context.addInitScript(
+      (storageKeys) => {
+        for (const storageKey of storageKeys) {
+          localStorage.setItem(storageKey, String(Date.now()))
+        }
+      },
+      [PREMIUM_REMINDER_STORAGE_KEY, INSTALL_OFFER_STORAGE_KEY]
+    )
 
     const pageErrors: string[] = []
 

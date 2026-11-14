@@ -13,6 +13,7 @@ import { Dialog } from '@base-ui/react/dialog'
 import { Link, useLinkProps } from '@tanstack/react-router'
 import { MemeExportMenu } from '~/components/meme/meme-export-menu'
 import { MemeVideoPlayer } from '~/components/meme/meme-video-player'
+import { useMediaSession } from '~/components/meme/use-media-session'
 import { useMemeExport } from '~/components/meme/use-meme-export'
 import { useMemeHls } from '~/components/meme/use-meme-hls'
 import { useRegisterMemeView } from '~/components/meme/use-register-meme-view'
@@ -46,6 +47,12 @@ export const PlayerDialog = ({
 }: PlayerDialogProps) => {
   const { video, videoCallbackRef, playbackFailure } = useMemeHls({
     memeId: meme.id
+  })
+
+  useMediaSession({
+    video,
+    isActive: true,
+    meme
   })
   const isReducedMotion = useReducedMotion()
   const shareMutation = useMemeExport({ mode: 'share', queryID })

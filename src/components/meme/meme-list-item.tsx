@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger
 } from '~/components/ui/dropdown-menu'
 import type { MemeWithVideo } from '~/constants/meme'
+import { MEME_PLAYER_TRANSITION_NAME } from '~/constants/motion'
 import { matchIsContentLocaleForeign } from '~/helpers/i18n-content'
 import { useIsCoarsePointer } from '~/hooks/use-is-coarse-pointer'
 import {
@@ -39,6 +40,14 @@ export type MemeListItemProps = {
   highlightedTitle?: string
   queryID?: string
   authenticatedUserToken?: string
+}
+
+const nameMorphingThumbnail = (link: HTMLElement) => {
+  const thumbnail = link.closest<HTMLElement>('[data-meme-thumbnail]')
+
+  if (thumbnail) {
+    thumbnail.style.viewTransitionName = MEME_PLAYER_TRANSITION_NAME
+  }
 }
 
 const sizes = {
@@ -119,10 +128,18 @@ export const MemeListItem = React.memo(
         event.button === 0 &&
         !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey)
 
-      if (isPlainClick && !matchIsCoarsePointer()) {
-        event.preventDefault()
-        onOpenPlayer(meme, event.currentTarget)
+      if (!isPlainClick) {
+        return
       }
+
+      if (matchIsCoarsePointer()) {
+        nameMorphingThumbnail(event.currentTarget)
+
+        return
+      }
+
+      event.preventDefault()
+      onOpenPlayer(meme, event.currentTarget)
     }
 
     const handleTrackConversion = (eventName: ConversionEventName) => {
@@ -149,6 +166,7 @@ export const MemeListItem = React.memo(
               to="/memes/$memeId"
               params={{ memeId: meme.id }}
               preload={false}
+              viewTransition
               className="touch-tap size-full delay-75 cursor-pointer text-white/80 place-items-center outline-none grid"
               onClick={handlePlayClick}
             >

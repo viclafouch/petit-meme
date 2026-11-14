@@ -3,9 +3,11 @@ import { Download, Play, Share2 } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { MemeExportMenu } from '~/components/meme/meme-export-menu'
 import { ToggleBookmarkButton } from '~/components/meme/toggle-bookmark-button'
+import { useMediaSession } from '~/components/meme/use-media-session'
 import { useMemeExport } from '~/components/meme/use-meme-export'
 import { type SignedStream, useMemeHls } from '~/components/meme/use-meme-hls'
 import { useRegisterMemeView } from '~/components/meme/use-register-meme-view'
+import { useScreenWakeLock } from '~/components/meme/use-screen-wake-lock'
 import { VideoPlaybackError } from '~/components/meme/video-playback-error'
 import { LoadingSpinner } from '~/components/ui/spinner'
 import type { MemeWithVideo } from '~/constants/meme'
@@ -46,6 +48,7 @@ type ReelProps = {
   sound: ReelsSound
   onSoundChange: (sound: ReelsSound) => void
   onBuffered: (index: number) => void
+  onStep: (step: number) => void
   isOnScreen: boolean
 }
 
@@ -57,6 +60,7 @@ export const Reel = ({
   sound,
   onSoundChange,
   onBuffered,
+  onStep,
   isOnScreen
 }: ReelProps) => {
   const isActive = loading === 'play'
@@ -78,6 +82,18 @@ export const Reel = ({
   }
 
   useRegisterMemeView({ memeId: meme.id, video, enabled: isActive })
+  useMediaSession({
+    video,
+    isActive,
+    meme,
+    onNextTrack: () => {
+      onStep(1)
+    },
+    onPreviousTrack: () => {
+      onStep(-1)
+    }
+  })
+  useScreenWakeLock({ enabled: shouldPlay && videoState === 'playing' })
 
   React.useLayoutEffect(() => {
     if (video) {

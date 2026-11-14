@@ -268,6 +268,7 @@ export const ReelsFeed = () => {
                   sound={sound}
                   onSoundChange={setSound}
                   onBuffered={setBufferedIndex}
+                  onStep={scrollFeedBy}
                   isOnScreen={visibleDistance === 0}
                 />
               ) : null}

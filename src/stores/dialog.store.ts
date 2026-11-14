@@ -14,12 +14,12 @@ const DIALOGS = {
       return { default: AuthDialog }
     })
   },
-  'watermark-upsell': {
+  'install-app': {
     component: React.lazy(async () => {
-      const { WatermarkUpsellDialog } =
-        await import('~/components/premium/watermark-upsell-dialog')
+      const { InstallAppDialog } =
+        await import('~/components/install/install-app-dialog')
 
-      return { default: WatermarkUpsellDialog }
+      return { default: InstallAppDialog }
     })
   },
   'audio-upsell': {
@@ -88,7 +88,7 @@ type DialogComponentMap = {
 
 const DIALOG_COMPONENTS: DialogComponentMap = {
   auth: DIALOGS.auth.component,
-  'watermark-upsell': DIALOGS['watermark-upsell'].component,
+  'install-app': DIALOGS['install-app'].component,
   'audio-upsell': DIALOGS['audio-upsell'].component,
   'ai-search-upsell': DIALOGS['ai-search-upsell'].component,
   'studio-upsell': DIALOGS['studio-upsell'].component,

@@ -50,7 +50,7 @@ const InstallAction = () => {
   }
 
   if (method === 'native') {
-    return <InstallAppButton className="w-full max-w-xs" />
+    return <InstallAppButton surface="app-page" className="w-full max-w-xs" />
   }
 
   return (

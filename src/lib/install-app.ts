@@ -1,6 +1,8 @@
 import { track } from '@vercel/analytics'
 import { INSTALL_OFFER_STORAGE_KEY } from '~/constants/pwa'
 import { resolveInstallMethod, type InstallMethod } from '~/helpers/install-app'
+import { matchIsStandalone, subscribeToDisplayMode } from '~/lib/display-mode'
+import { captureWithFeature } from '~/lib/sentry'
 
 type InstallPromptEvent = Event & {
   prompt: () => Promise<void>
@@ -9,8 +11,26 @@ type InstallPromptEvent = Event & {
 
 type InstallableNavigator = Navigator & {
   install?: () => Promise<void>
-  standalone?: boolean
 }
+
+export type InstallSurface =
+  | 'account-drawer'
+  | 'home'
+  | 'app-page'
+  | 'export-toast'
+
+type NativeInstallOutcome = 'accepted' | 'dismissed' | 'unavailable'
+
+const INSTALL_ANALYTICS_EVENTS = {
+  offerShown: 'Install Offer Shown',
+  clicked: 'Install Clicked',
+  promptAnswered: 'Install Prompt Answered',
+  installed: 'App Installed',
+  launched: 'App Launched',
+  firstLaunch: 'App First Launch'
+} as const
+
+const FIRST_LAUNCH_STORAGE_KEY = 'app-first-launch-at'
 
 const matchIsInstallPromptEvent = (
   event: Event
@@ -18,10 +38,9 @@ const matchIsInstallPromptEvent = (
   return 'prompt' in event && 'userChoice' in event
 }
 
-const STANDALONE_QUERY = '(display-mode: standalone)'
-
-const APP_INSTALLED_EVENT = 'App Installed'
-const APP_LAUNCHED_EVENT = 'App Launched'
+const matchIsDismissal = (error: unknown) => {
+  return error instanceof DOMException && error.name === 'AbortError'
+}
 
 let deferredPrompt: InstallPromptEvent | null = null
 const listeners = new Set<() => void>()
@@ -36,19 +55,12 @@ const getNavigator = () => {
   return navigator as InstallableNavigator
 }
 
-const matchIsStandalone = () => {
-  return (
-    window.matchMedia(STANDALONE_QUERY).matches ||
-    getNavigator().standalone === true
-  )
-}
-
 export const getInstallMethod = (): InstallMethod => {
   return resolveInstallMethod({
     isStandalone: matchIsStandalone(),
     hasInstallApi: typeof getNavigator().install === 'function',
     hasDeferredPrompt: deferredPrompt !== null,
-    hasIosHomeScreenFlag: 'standalone' in getNavigator()
+    hasIosHomeScreenFlag: 'standalone' in navigator
   })
 }
 
@@ -60,19 +72,18 @@ export const matchWasInstallOffered = () => {
   return localStorage.getItem(INSTALL_OFFER_STORAGE_KEY) !== null
 }
 
-export const markInstallOffered = () => {
+export const recordInstallOffer = () => {
   localStorage.setItem(INSTALL_OFFER_STORAGE_KEY, String(Date.now()))
+  track(INSTALL_ANALYTICS_EVENTS.offerShown, { surface: 'export-toast' })
 }
 
 export const subscribeToInstallMethod = (listener: () => void) => {
-  const standaloneQuery = window.matchMedia(STANDALONE_QUERY)
-
   listeners.add(listener)
-  standaloneQuery.addEventListener('change', listener)
+  const unsubscribeFromDisplayMode = subscribeToDisplayMode(listener)
 
   return () => {
     listeners.delete(listener)
-    standaloneQuery.removeEventListener('change', listener)
+    unsubscribeFromDisplayMode()
   }
 }
 
@@ -94,12 +105,21 @@ export const captureInstallPrompt = () => {
 }
 
 const trackAppInstalled = () => {
-  track(APP_INSTALLED_EVENT)
+  track(INSTALL_ANALYTICS_EVENTS.installed)
+}
+
+const trackStandaloneLaunch = () => {
+  track(INSTALL_ANALYTICS_EVENTS.launched)
+
+  if (localStorage.getItem(FIRST_LAUNCH_STORAGE_KEY) === null) {
+    localStorage.setItem(FIRST_LAUNCH_STORAGE_KEY, String(Date.now()))
+    track(INSTALL_ANALYTICS_EVENTS.firstLaunch)
+  }
 }
 
 export const trackAppInstallation = () => {
   if (matchIsStandalone()) {
-    track(APP_LAUNCHED_EVENT)
+    trackStandaloneLaunch()
   }
 
   window.addEventListener('appinstalled', trackAppInstalled)
@@ -109,40 +129,79 @@ export const trackAppInstallation = () => {
   }
 }
 
-const installWithBrowserApi = async () => {
+type TrackInstallClickedParams = {
+  surface: InstallSurface
+  method: Exclude<InstallMethod, 'installed'>
+}
+
+export const trackInstallClicked = ({
+  surface,
+  method
+}: TrackInstallClickedParams) => {
+  track(INSTALL_ANALYTICS_EVENTS.clicked, { surface, method })
+}
+
+type TrackInstallPromptAnsweredParams = {
+  surface: InstallSurface
+  outcome: Exclude<NativeInstallOutcome, 'unavailable'>
+}
+
+export const trackInstallPromptAnswered = ({
+  surface,
+  outcome
+}: TrackInstallPromptAnsweredParams) => {
+  track(INSTALL_ANALYTICS_EVENTS.promptAnswered, { surface, outcome })
+}
+
+const installWithBrowserApi = async (): Promise<NativeInstallOutcome> => {
   const { install } = getNavigator()
 
   if (typeof install !== 'function') {
-    return false
+    return 'unavailable'
   }
 
   try {
     await install.call(navigator)
 
-    return true
-  } catch {
-    return deferredPrompt === null
+    return 'accepted'
+  } catch (error) {
+    if (matchIsDismissal(error)) {
+      return 'dismissed'
+    }
+
+    captureWithFeature(error, 'install-app')
+
+    return 'unavailable'
   }
 }
 
-const installWithDeferredPrompt = async () => {
+const installWithDeferredPrompt = async (): Promise<NativeInstallOutcome> => {
   const prompt = deferredPrompt
 
   if (prompt === null) {
-    return false
+    return 'unavailable'
   }
 
   deferredPrompt = null
   notify()
-  await prompt.prompt()
-  await prompt.userChoice
 
-  return true
+  try {
+    await prompt.prompt()
+    const { outcome } = await prompt.userChoice
+
+    return outcome
+  } catch (error) {
+    captureWithFeature(error, 'install-app')
+
+    return 'unavailable'
+  }
 }
 
 export const promptNativeInstall = async () => {
-  if (await installWithBrowserApi()) {
-    return true
+  const browserApiOutcome = await installWithBrowserApi()
+
+  if (browserApiOutcome !== 'unavailable') {
+    return browserApiOutcome
   }
 
   return installWithDeferredPrompt()

@@ -3,8 +3,11 @@ import { toInstallGuideMethod } from '~/components/install/install-guide'
 import {
   getInstallMethod,
   getServerInstallMethod,
+  type InstallSurface,
   promptNativeInstall,
-  subscribeToInstallMethod
+  subscribeToInstallMethod,
+  trackInstallClicked,
+  trackInstallPromptAnswered
 } from '~/lib/install-app'
 import { useDialogStore } from '~/stores/dialog.store'
 
@@ -20,13 +23,21 @@ export const useInstallApp = () => {
   const dialogStore = useDialogStore()
   const method = useInstallMethod()
 
-  const install = async () => {
+  const install = async (surface: InstallSurface) => {
     if (method === null || method === 'installed') {
       return
     }
 
-    if (method === 'native' && (await promptNativeInstall())) {
-      return
+    trackInstallClicked({ surface, method })
+
+    if (method === 'native') {
+      const outcome = await promptNativeInstall()
+
+      if (outcome !== 'unavailable') {
+        trackInstallPromptAnswered({ surface, outcome })
+
+        return
+      }
     }
 
     dialogStore.actions.showDialog('install-app', {

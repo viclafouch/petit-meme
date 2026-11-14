@@ -163,7 +163,9 @@ const InstallAppRow = ({ onInstall }: InstallAppRowProps) => {
     <DrawerClose
       className={ROW_CLASS}
       onClick={() => {
-        onInstall(install)
+        onInstall(() => {
+          return install('account-drawer')
+        })
       }}
     >
       <MonitorDown />

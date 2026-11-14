@@ -9,6 +9,7 @@ import {
   SENTRY_TRACES_SAMPLE_RATE
 } from '~/constants/sentry'
 import { clientEnv } from '~/env/client'
+import { getDisplayMode, subscribeToDisplayMode } from '~/lib/display-mode'
 import { dropExpectedError } from '~/lib/expected-error'
 import {
   getFeedbackOptions,
@@ -44,7 +45,14 @@ Sentry.init({
     ...BROWSER_NOISE_ERRORS
   ],
   beforeSend: dropExpectedError,
-  beforeBreadcrumb: scrubSensitiveBreadcrumbs
+  beforeBreadcrumb: scrubSensitiveBreadcrumbs,
+  initialScope: {
+    tags: { display_mode: getDisplayMode() }
+  }
+})
+
+subscribeToDisplayMode(() => {
+  Sentry.setTag('display_mode', getDisplayMode())
 })
 
 const addReplayIntegration = async () => {

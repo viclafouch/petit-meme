@@ -4,6 +4,7 @@ import { paraglideVitePlugin } from '@inlang/paraglide-js'
 import { sentryTanstackStart } from '@sentry/tanstackstart-react/vite'
 import tailwindcss from '@tailwindcss/vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
+import { TanStackNitroPWAPlugin } from '@vite-pwa/tanstack/vite/nitro'
 import react from '@vitejs/plugin-react'
 import {
   IMMUTABLE_CACHE_CONTROL,
@@ -13,6 +14,11 @@ import {
   MEME_FILL_MAX_DURATION_SECONDS,
   MEME_FILL_PATH
 } from './src/constants/meme-fill.ts'
+import {
+  OFFLINE_ICON_PATHNAME,
+  OFFLINE_PAGE_PATH_BY_LOCALE,
+  SERVICE_WORKER_PATHNAME
+} from './src/constants/pwa.ts'
 import {
   SENTRY_APPLICATION_KEY,
   SENTRY_ORG,
@@ -47,6 +53,42 @@ const staticAssetRouteRules = Object.fromEntries(
     return [route, { headers: IMMUTABLE_ASSET_HEADERS }]
   })
 )
+
+const OFFLINE_PAGE_ROBOTS_HEADERS = {
+  'X-Robots-Tag': 'noindex'
+}
+
+const OFFLINE_PAGE_PATHS = Object.values(OFFLINE_PAGE_PATH_BY_LOCALE)
+
+const offlinePageRouteRules = Object.fromEntries(
+  OFFLINE_PAGE_PATHS.map((path) => {
+    return [path, { prerender: true, headers: OFFLINE_PAGE_ROBOTS_HEADERS }]
+  })
+)
+
+const toPublicFilePattern = (pathname: string) => {
+  return pathname.slice(1)
+}
+
+const INDEX_FILE_SUFFIX = /\/index\.html$/u
+
+const stripIndexHtmlFromPrecacheUrls = async <TEntry extends { url: string }>(
+  entries: TEntry[]
+) => {
+  return {
+    manifest: entries.map((entry) => {
+      return { ...entry, url: entry.url.replace(INDEX_FILE_SUFFIX, '') }
+    }),
+    warnings: []
+  }
+}
+
+const SERVICE_WORKER_PRECACHE_PATTERNS = [
+  ...OFFLINE_PAGE_PATHS.map((path) => {
+    return `${toPublicFilePattern(path)}/index.html`
+  }),
+  toPublicFilePattern(OFFLINE_ICON_PATHNAME)
+]
 
 const NODE_RUNTIME_PACKAGES = ['takumi-js', '@takumi-rs/core']
 
@@ -150,13 +192,6 @@ export default defineConfig(async ({ mode }) => {
         sourcemap: true,
         exportConditions: ['!unwasm'],
         traceDeps: NODE_RUNTIME_PACKAGES,
-        rolldownConfig: {
-          onLog: (level, log, handler) => {
-            if (log.code !== 'MODULE_LEVEL_DIRECTIVE') {
-              handler(level, log)
-            }
-          }
-        },
         vercel: {
           functionRules: {
             '/api/bunny': { maxDuration: MEME_FILL_MAX_DURATION_SECONDS },
@@ -185,7 +220,19 @@ export default defineConfig(async ({ mode }) => {
               ...SECURITY_HEADERS,
               'X-Robots-Tag': 'noindex, nofollow'
             }
-          }
+          },
+          ...offlinePageRouteRules
+        }
+      }),
+      TanStackNitroPWAPlugin({
+        strategies: 'build-sw',
+        registerType: 'autoUpdate',
+        manifest: false,
+        filename: toPublicFilePattern(SERVICE_WORKER_PATHNAME),
+        buildSW: {
+          swSrc: 'src/service-worker/sw.ts',
+          globPatterns: SERVICE_WORKER_PRECACHE_PATTERNS,
+          manifestTransforms: [stripIndexHtmlFromPrecacheUrls]
         }
       }),
       sentryTanstackStart({

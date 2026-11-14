@@ -64,22 +64,12 @@ test.describe('a Premium', () => {
 test.describe('a free User', () => {
   test.use({ storageState: resolveStorageStatePath('free') })
 
-  test('is offered Premium and still leaves with the video', async ({
-    page
-  }) => {
+  test('leaves with the video straight away', async ({ page }) => {
     await page.goto(EXPORTABLE_MEME_PATHNAME)
-
-    await pickDownloadFormat(page, m.meme_format_video())
-
-    const upsellDialog = page.getByRole('dialog', {
-      name: m.watermark_upsell_title_download()
-    })
 
     const downloadPromise = page.waitForEvent('download')
 
-    await upsellDialog
-      .getByRole('button', { name: m.watermark_download_with_watermark() })
-      .click()
+    await pickDownloadFormat(page, m.meme_format_video())
 
     await expectMemeFileDownloaded({
       download: await downloadPromise,
@@ -158,10 +148,13 @@ test.describe('a Visitor', () => {
 
     await expect(audioUpsellDialog).toBeHidden()
 
+    const downloadPromise = page.waitForEvent('download')
+
     await pickDownloadFormat(page, m.meme_format_video())
 
-    await expect(
-      page.getByRole('dialog', { name: m.watermark_upsell_title_download() })
-    ).toBeVisible()
+    await expectMemeFileDownloaded({
+      download: await downloadPromise,
+      format: 'mp4'
+    })
   })
 })

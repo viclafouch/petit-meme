@@ -12,6 +12,7 @@ const OG_VERSION = 3
 
 export const OG_DEFAULTED_TYPE_VALUES = [
   'ai-search',
+  'app',
   'pricing',
   'reels',
   'submit'

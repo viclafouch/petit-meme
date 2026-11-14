@@ -1,6 +1,7 @@
 import { BestMemes } from './best-memes'
 import { Faq } from './faq'
 import { Hero } from './hero'
+import { InstallBlock } from './install-block'
 import { PageContainer } from './page-headers'
 import { Responsive } from './responsive'
 
@@ -11,7 +12,10 @@ export const HomePage = () => {
         <Hero />
         <div className="container lg:mt-36 mt-24">
           <BestMemes />
-          <div className="mt-16">
+          <div className="mt-16 lg:hidden">
+            <InstallBlock />
+          </div>
+          <div className="mt-16 hidden lg:block">
             <Responsive />
           </div>
           <div className="mt-16 lg:mt-40">

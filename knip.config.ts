@@ -3,6 +3,7 @@ import { defineConfig } from 'knip/config'
 export default defineConfig({
   entry: [
     'vite.config.ts',
+    'src/service-worker/sw.ts',
     'playwright.config.ts',
     'prisma.config.ts',
     'prisma/seed.ts',

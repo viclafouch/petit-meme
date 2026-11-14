@@ -1,6 +1,7 @@
 import { Download, Share2, Sparkles } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 import { toast } from 'sonner'
+import { useExportFollowUp } from '~/components/meme/use-export-follow-up'
 import type { ProcessedData } from '~/components/studio/use-video-processor'
 import { Button } from '~/components/ui/button'
 import { LoadingButton } from '~/components/ui/loading-button'
@@ -9,11 +10,21 @@ import { EASE_OUT } from '~/constants/motion'
 import { deliverMemeBlob } from '~/lib/meme-export'
 import { m } from '~/paraglide/messages'
 
-const deliverStudioVideo = (
-  { blob, title }: ProcessedData,
-  mode: MemeExportMode
-) => {
-  void deliverMemeBlob({ blob, title, mode, format: 'mp4' })
+const useDeliverStudioVideo = () => {
+  const followUpExport = useExportFollowUp()
+
+  return async ({ blob, title }: ProcessedData, mode: MemeExportMode) => {
+    const deliveredMode = await deliverMemeBlob({
+      blob,
+      title,
+      mode,
+      format: 'mp4'
+    })
+
+    if (deliveredMode !== null) {
+      followUpExport()
+    }
+  }
 }
 
 type StudioMobileActionsProps = {
@@ -24,6 +35,7 @@ export const StudioMobileActions = ({
   processedData
 }: StudioMobileActionsProps) => {
   const isReducedMotion = useReducedMotion()
+  const deliverStudioVideo = useDeliverStudioVideo()
 
   return (
     <motion.div
@@ -35,7 +47,7 @@ export const StudioMobileActions = ({
       <Button
         className="flex-1"
         onClick={() => {
-          deliverStudioVideo(processedData, 'share')
+          void deliverStudioVideo(processedData, 'share')
         }}
       >
         <Share2 />
@@ -45,7 +57,7 @@ export const StudioMobileActions = ({
         variant="outline"
         className="flex-1"
         onClick={() => {
-          deliverStudioVideo(processedData, 'download')
+          void deliverStudioVideo(processedData, 'download')
         }}
       >
         <Download />
@@ -66,6 +78,8 @@ export const StudioActions = ({
   processedData,
   onGenerate
 }: StudioActionsProps) => {
+  const deliverStudioVideo = useDeliverStudioVideo()
+
   const handleShareClick = () => {
     if (processedData === null) {
       toast.error(m.studio_generate_first())
@@ -73,7 +87,7 @@ export const StudioActions = ({
       return
     }
 
-    deliverStudioVideo(processedData, 'share')
+    void deliverStudioVideo(processedData, 'share')
   }
 
   const handleDownloadClick = () => {
@@ -83,7 +97,7 @@ export const StudioActions = ({
       return
     }
 
-    deliverStudioVideo(processedData, 'download')
+    void deliverStudioVideo(processedData, 'download')
   }
 
   return (

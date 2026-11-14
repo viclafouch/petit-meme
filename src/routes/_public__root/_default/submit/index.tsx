@@ -6,9 +6,13 @@ import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { listUserProposalsQueryOpts } from '~/queries/proposal'
 import { SubmitPage } from './-components/submit-page'
+import { SUBMIT_SEARCH_SCHEMA } from './-lib/submit-search'
 
 export const Route = createFileRoute('/_public__root/_default/submit/')({
   component: SubmitPage,
+  validateSearch: (search) => {
+    return SUBMIT_SEARCH_SCHEMA.parse(search)
+  },
   loader: async ({ context }) => {
     if (context.user) {
       await context.queryClient.query({

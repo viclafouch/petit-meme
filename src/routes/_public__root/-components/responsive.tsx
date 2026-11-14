@@ -138,6 +138,7 @@ export const Responsive = () => {
                 crossOrigin=""
                 className="size-full"
                 playsInline
+                preload="none"
                 loop
                 muted
                 ref={desktopVideoRef}
@@ -166,6 +167,7 @@ export const Responsive = () => {
                 crossOrigin=""
                 className="size-full"
                 playsInline
+                preload="none"
                 loop
                 muted
                 src="/videos/mobile.mp4"
@@ -194,6 +196,7 @@ export const Responsive = () => {
                 crossOrigin=""
                 className="size-full"
                 playsInline
+                preload="none"
                 loop
                 muted
                 ref={tabletVideoRef}

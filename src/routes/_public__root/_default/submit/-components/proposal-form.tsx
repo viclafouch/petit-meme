@@ -65,9 +65,13 @@ const getProposalErrorMessage = (error: Error) => {
 
 type ProposalFormProps = {
   pendingCount: number
+  sharedLink?: string
 }
 
-export const ProposalForm = ({ pendingCount }: ProposalFormProps) => {
+export const ProposalForm = ({
+  pendingCount,
+  sharedLink
+}: ProposalFormProps) => {
   const contentLocaleOptions = getContentLocaleOptions()
   const queryClient = useQueryClient()
   const remaining = MAX_PENDING_PROPOSALS - pendingCount
@@ -91,6 +95,10 @@ export const ProposalForm = ({ pendingCount }: ProposalFormProps) => {
 
   const form = useAppForm({
     ...proposalFormOpts,
+    defaultValues: {
+      ...PROPOSAL_FORM_DEFAULT_VALUES,
+      url: sharedLink ?? PROPOSAL_FORM_DEFAULT_VALUES.url
+    },
     onSubmitInvalid: focusFirstInvalidField,
     onSubmit: ({ value }) => {
       submitMutation.mutate({

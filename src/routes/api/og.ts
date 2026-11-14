@@ -38,12 +38,14 @@ const OG_QUERY_SCHEMA = z.discriminatedUnion('type', [
 const OG_DEFAULT_TITLES = {
   fr: {
     'ai-search': 'Recherche IA',
+    app: "L'app Petit Meme",
     pricing: 'Tarifs',
     reels: 'Reels',
     submit: 'Proposer un mème'
   },
   en: {
     'ai-search': 'AI Search',
+    app: 'The Petit Meme app',
     pricing: 'Pricing',
     reels: 'Reels',
     submit: 'Suggest a meme'

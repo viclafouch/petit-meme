@@ -3,6 +3,7 @@ import {
   CircleUser,
   CreditCard,
   LogOut,
+  MonitorDown,
   Plus,
   Settings,
   Shield,
@@ -21,6 +22,7 @@ import { useSelector } from '@tanstack/react-store'
 import { ThemeSwitcher } from '~/components/animate-ui/theme-switcher'
 import { useSignOut } from '~/components/auth/use-sign-out'
 import { FLAG_ICON_CLASS, LOCALE_FLAGS } from '~/components/icon/flags'
+import { useInstallApp } from '~/components/install/use-install-app'
 import { TAB_ITEM_CLASS } from '~/components/layout/tab-bar/tab-item-class'
 import { useIsPremium } from '~/components/premium/use-is-premium'
 import { useStripeCheckout } from '~/components/premium/use-stripe-checkout'
@@ -144,13 +146,40 @@ const PreferencesSection = () => {
   )
 }
 
-type OfferLinksProps = {
+type InstallAfterCloseProps = {
+  onInstall: (install: () => Promise<void>) => void
+}
+
+type InstallAppRowProps = InstallAfterCloseProps
+
+const InstallAppRow = ({ onInstall }: InstallAppRowProps) => {
+  const { method, install } = useInstallApp()
+
+  if (method === null || method === 'installed') {
+    return null
+  }
+
+  return (
+    <DrawerClose
+      className={ROW_CLASS}
+      onClick={() => {
+        onInstall(install)
+      }}
+    >
+      <MonitorDown />
+      {m.install_cta()}
+    </DrawerClose>
+  )
+}
+
+type OfferLinksProps = InstallAfterCloseProps & {
   isPremium: boolean
 }
 
-const OfferLinks = ({ isPremium }: OfferLinksProps) => {
+const OfferLinks = ({ isPremium, onInstall }: OfferLinksProps) => {
   return (
     <div className={SECTION_CLASS}>
+      <InstallAppRow onInstall={onInstall} />
       {isPremium ? null : (
         <AccountLink to="/pricing">
           <SparklesIcon />
@@ -165,11 +194,11 @@ const OfferLinks = ({ isPremium }: OfferLinksProps) => {
   )
 }
 
-type UserSectionsProps = {
+type UserSectionsProps = InstallAfterCloseProps & {
   user: SessionUser
 }
 
-const UserSections = ({ user }: UserSectionsProps) => {
+const UserSections = ({ user, onInstall }: UserSectionsProps) => {
   const { goToBillingPortal } = useStripeCheckout()
   const { signOut } = useSignOut()
   const bookmarkedMemesQuery = useQuery(listBookmarkedMemesQueryOpts())
@@ -225,7 +254,7 @@ const UserSections = ({ user }: UserSectionsProps) => {
           </AccountLink>
         ) : null}
       </div>
-      <OfferLinks isPremium={isPremium} />
+      <OfferLinks isPremium={isPremium} onInstall={onInstall} />
       <PreferencesSection />
       <div className={SECTION_CLASS}>
         <DrawerClose
@@ -242,11 +271,11 @@ const UserSections = ({ user }: UserSectionsProps) => {
   )
 }
 
-type VisitorSectionsProps = {
+type VisitorSectionsProps = InstallAfterCloseProps & {
   onSignIn: () => void
 }
 
-const VisitorSections = ({ onSignIn }: VisitorSectionsProps) => {
+const VisitorSections = ({ onSignIn, onInstall }: VisitorSectionsProps) => {
   return (
     <>
       <div className="px-2 pb-3">
@@ -260,7 +289,7 @@ const VisitorSections = ({ onSignIn }: VisitorSectionsProps) => {
           {m.nav_sign_in()}
         </DrawerClose>
       </div>
-      <OfferLinks isPremium={false} />
+      <OfferLinks isPremium={false} onInstall={onInstall} />
       <PreferencesSection />
     </>
   )
@@ -272,6 +301,16 @@ export const AccountDrawer = () => {
   const matchRoute = useMatchRoute()
   const { openSettings } = useCookieConsentStore().actions
   const pendingActionRef = React.useRef<(() => void) | null>(null)
+  const runAfterClose = (action: () => void) => {
+    pendingActionRef.current = action
+  }
+
+  const installAfterClose = (install: () => Promise<void>) => {
+    runAfterClose(() => {
+      void install()
+    })
+  }
+
   const isAccountPage = Boolean(
     matchRoute({ to: '/settings' }) || matchRoute({ to: '/bookmarks' })
   )
@@ -313,19 +352,20 @@ export const AccountDrawer = () => {
         <DrawerTitle className="sr-only">{m.nav_account()}</DrawerTitle>
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pt-2 pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
           {user ? (
-            <UserSections user={user} />
+            <UserSections user={user} onInstall={installAfterClose} />
           ) : (
             <VisitorSections
+              onInstall={installAfterClose}
               onSignIn={() => {
-                pendingActionRef.current = () => {
+                runAfterClose(() => {
                   dialogStore.actions.showDialog('auth')
-                }
+                })
               }}
             />
           )}
           <LegalSection
             onManageCookies={() => {
-              pendingActionRef.current = openSettings
+              runAfterClose(openSettings)
             }}
           />
         </div>

@@ -1,0 +1,19 @@
+{
+  "include": ["./**/*.ts"],
+  "compilerOptions": {
+    "strict": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["WebWorker", "ES2025"],
+    "types": [],
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "target": "ES2022",
+    "noUncheckedIndexedAccess": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "paths": {
+      "~/*": ["../*"]
+    }
+  }
+}

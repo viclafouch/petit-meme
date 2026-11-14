@@ -24,12 +24,14 @@ import { MemeLanguageBadge } from '~/components/meme/meme-language-badge'
 import { MemeVideoPlayer } from '~/components/meme/meme-video-player'
 import { MemesList } from '~/components/meme/memes-list'
 import { ToggleBookmarkButton } from '~/components/meme/toggle-bookmark-button'
+import { useMediaSession } from '~/components/meme/use-media-session'
 import { useMemeExport } from '~/components/meme/use-meme-export'
 import { useMemeHls } from '~/components/meme/use-meme-hls'
 import { useRegisterMemeView } from '~/components/meme/use-register-meme-view'
 import { Badge } from '~/components/ui/badge'
 import { Button, buttonVariants } from '~/components/ui/button'
 import type { MemeFullData } from '~/constants/meme'
+import { MEME_PLAYER_TRANSITION_NAME } from '~/constants/motion'
 import { MemeStatus } from '~/db/generated/prisma/enums'
 import { formatDate } from '~/helpers/date'
 import { matchIsUserAdmin } from '~/helpers/role'
@@ -118,6 +120,12 @@ export const MemePage = () => {
   )
   const { video, videoCallbackRef, playbackFailure } = useMemeHls({
     memeId: memeQuery.data.id
+  })
+
+  useMediaSession({
+    video,
+    isActive: true,
+    meme: memeQuery.data
   })
   const navigate = memeRouteApi.useNavigate()
   const router = useRouter()
@@ -219,7 +227,10 @@ export const MemePage = () => {
         </Link>
         <div className="w-full grid md:grid-cols-meme-page gap-x-2.5 gap-y-4">
           <div className="w-full flex flex-col gap-y-2 md:gap-y-2 items-center md:items-start">
-            <div className="aspect-video w-full flex relative isolate border rounded-lg border-input overflow-hidden">
+            <div
+              className="aspect-video w-full flex relative isolate border rounded-lg border-input overflow-hidden"
+              style={{ viewTransitionName: MEME_PLAYER_TRANSITION_NAME }}
+            >
               <div className="absolute top-0 left-0 size-full bg-muted/50">
                 <img
                   src={buildVideoImageUrl(memeQuery.data.video.bunnyId)}

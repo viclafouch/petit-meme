@@ -11,6 +11,7 @@ It started from the Creator's own need: find a video meme fast and send it to fr
 - **Take away.** Every Meme exports as a video, by download or through the phone's share sheet. Premium also exports its sound.
 - **Make your own.** The Studio adds a caption to a Meme and exports the result.
 - **Keep.** Signed-in Users bookmark the Memes they want to find again.
+- **Install.** Petit Meme installs as an app on the phone's home screen, with no app store. It opens full screen, and a lost connection shows a page that waits for the network instead of the browser's error.
 
 ## Who runs it
 

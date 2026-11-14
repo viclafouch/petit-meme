@@ -8,7 +8,6 @@ import {
   useQueryClient,
   useSuspenseQuery
 } from '@tanstack/react-query'
-import { snoozePremiumReminder } from '~/components/premium/use-premium-reminder'
 import { getAppErrorCode, AppError } from '~/constants/error'
 import type { MemeWithVideo } from '~/constants/meme'
 import { PERCENT_SCALE } from '~/constants/number'
@@ -35,6 +34,7 @@ import {
   loadFFmpeg,
   readAndDeleteFFmpegOutput
 } from '~/lib/ffmpeg'
+import { snoozePremiumReminder } from '~/lib/premium-reminder'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages'
 import {

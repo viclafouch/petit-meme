@@ -92,17 +92,25 @@ type PhoneFrameProps = {
   platform: keyof typeof PLATFORM_DESIGNS
   children: React.ReactNode
   className?: string
+  screenClassName?: string
+  style?: React.CSSProperties
 }
 
 export const PhoneFrame = ({
   platform,
   className,
+  screenClassName,
+  style,
   children
 }: PhoneFrameProps) => {
   const design = PLATFORM_DESIGNS[platform]
 
   return (
-    <div className={cn('@container', className)}>
+    <div
+      aria-hidden="true"
+      className={cn('@container', className)}
+      style={style}
+    >
       <div
         className={cn(
           'relative shadow-[0_2.5cqw_8cqw_-2cqw_rgb(0_0_0/0.55),0_0_0_0.35cqw_rgb(255_255_255/0.08)]',
@@ -114,7 +122,8 @@ export const PhoneFrame = ({
           <div
             className={cn(
               'relative isolate size-full overflow-hidden bg-neutral-950 text-white [contain:paint] select-none',
-              design.screenClassName
+              design.screenClassName,
+              screenClassName
             )}
           >
             <div

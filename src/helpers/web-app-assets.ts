@@ -35,3 +35,11 @@ export const buildSplashScreenSize = (
 export const buildAppQrCodePath = (locale: string) => {
   return `/images/app/qr-code-${locale}.svg`
 }
+
+export const APP_SCREEN_SIZE = { width: 393, height: 759 } as const
+
+export type AppScreenName = 'meme' | 'home'
+
+export const buildAppScreenPath = (locale: string, name: AppScreenName) => {
+  return `/images/app/screens/${locale}/${name}.webp`
+}

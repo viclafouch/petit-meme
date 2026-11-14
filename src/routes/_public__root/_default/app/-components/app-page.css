@@ -1,0 +1,264 @@
+.share-demo,
+.launch-demo {
+  --demo-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --demo-ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.share-demo {
+  --demo-cycle: 10s;
+}
+
+.share-demo-tap,
+.launch-demo-tap {
+  opacity: 0;
+}
+
+.launch-demo-app {
+  opacity: 0;
+}
+
+.share-demo-friend-chat {
+  transform: translateX(100%);
+}
+
+.launch-demo {
+  --launch-cycle: 10s;
+}
+
+.launch-demo-app {
+  transform-origin: var(--launch-origin);
+}
+
+.platform-phone-reveal {
+  transform: rotate(var(--phone-tilt));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .share-demo-tap {
+    animation: share-demo-tap var(--demo-cycle) var(--demo-ease-out)
+      calc(var(--demo-cycle) * var(--demo-moment, 0)) infinite both;
+  }
+
+  .share-demo-group-chat {
+    animation: share-demo-group-chat var(--demo-cycle) var(--demo-ease-drawer)
+      infinite both;
+  }
+
+  .share-demo-friend-chat {
+    animation: share-demo-friend-chat var(--demo-cycle) var(--demo-ease-drawer)
+      infinite both;
+  }
+
+  .share-demo-video-message {
+    animation: share-demo-video-message var(--demo-cycle) var(--demo-ease-out)
+      infinite both;
+  }
+
+  .share-demo-laugh-message {
+    animation: share-demo-laugh-message var(--demo-cycle) var(--demo-ease-out)
+      infinite both;
+  }
+
+  .share-demo-audio-message {
+    animation: share-demo-audio-message var(--demo-cycle) var(--demo-ease-out)
+      infinite both;
+  }
+
+  .share-demo-reply-message {
+    animation: share-demo-reply-message var(--demo-cycle) var(--demo-ease-out)
+      infinite both;
+  }
+
+  .launch-demo-tap {
+    animation: launch-demo-tap var(--launch-cycle) var(--demo-ease-out)
+      var(--launch-delay, 0s) infinite both;
+  }
+
+  .launch-demo-app {
+    animation: launch-demo-app var(--launch-cycle) var(--demo-ease-drawer)
+      var(--launch-delay, 0s) infinite both;
+  }
+
+  .launch-demo-content {
+    animation: launch-demo-content var(--launch-cycle) ease
+      var(--launch-delay, 0s) infinite both;
+  }
+
+  @supports (animation-timeline: view()) {
+    .platform-phone-reveal {
+      animation: platform-phone-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 45%;
+    }
+  }
+}
+
+@keyframes share-demo-tap {
+  0% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+  1.5% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  3% {
+    opacity: 1;
+    transform: scale(0.8);
+  }
+  5%,
+  100% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes share-demo-group-chat {
+  0%,
+  9% {
+    transform: translateX(100%);
+  }
+  14%,
+  36% {
+    transform: translateX(0);
+  }
+  41%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes share-demo-friend-chat {
+  0%,
+  49% {
+    transform: translateX(100%);
+  }
+  54%,
+  86% {
+    transform: translateX(0);
+  }
+  91%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes share-demo-video-message {
+  0%,
+  16% {
+    opacity: 0;
+    transform: translateY(1.5cqw) scale(0.96);
+  }
+  19%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes share-demo-laugh-message {
+  0%,
+  23% {
+    opacity: 0;
+    transform: translateY(1.5cqw) scale(0.96);
+  }
+  26%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes share-demo-audio-message {
+  0%,
+  57% {
+    opacity: 0;
+    transform: translateY(1.5cqw) scale(0.96);
+  }
+  60%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes share-demo-reply-message {
+  0%,
+  65% {
+    opacity: 0;
+    transform: translateY(1.5cqw) scale(0.96);
+  }
+  68%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes launch-demo-tap {
+  0%,
+  20% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+  23% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  26% {
+    opacity: 1;
+    transform: scale(0.8);
+  }
+  30%,
+  100% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes launch-demo-app {
+  0%,
+  26% {
+    opacity: 0;
+    transform: scale(0.18);
+  }
+  28% {
+    opacity: 1;
+  }
+  34%,
+  78% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  85% {
+    opacity: 1;
+    transform: scale(0.18);
+  }
+  87%,
+  100% {
+    opacity: 0;
+    transform: scale(0.18);
+  }
+}
+
+@keyframes launch-demo-content {
+  0%,
+  40% {
+    opacity: 0;
+  }
+  46%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes platform-phone-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(18%) rotate(0deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(var(--phone-tilt));
+  }
+}

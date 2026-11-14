@@ -17,6 +17,8 @@ Every Meme, watched, downloaded and shared, with no account. The downloaded vide
 
 Premium is pushed in the right place and at the right moment, and never blocks. An invitation appears when a free person reaches for a Premium feature, and its secondary choice still gives them what Free allows: asking for the sound offers the video instead. Premium never speaks on its own: a free person who downloads or shares the video gets it straight away, watermark included, and only then may hear about Premium. It speaks once every few days at most, never over a dialog already open, and takes no for an answer. The very first export offers the app instead.
 
+Every screenshot and video that shows Petit Meme, on the site, in the browser's install dialog or in a pull request, is taken as a Premium persona: no watermark, no Premium badge, the whole product at its best.
+
 ## The subscription
 
 - **Plans.** Monthly or yearly. The yearly plan costs less per month.

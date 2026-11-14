@@ -192,24 +192,6 @@
     }
   }
 
-  html {
-    container-type: scroll-state;
-  }
-
-  [data-tab-bar] {
-    transition: translate 200ms cubic-bezier(0.23, 1, 0.32, 1);
-  }
-
-  [data-tab-bar][data-hidden]:not(:has(:focus-visible)) {
-    translate: 0 100%;
-  }
-
-  @container scroll-state(scrolled: bottom) and scroll-state(scrollable: top) {
-    [data-tab-bar]:not(:has(:focus-visible)) {
-      translate: 0 100%;
-    }
-  }
-
   @keyframes navbar-fade-to-solid {
     from {
       background-color: transparent;

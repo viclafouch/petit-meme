@@ -98,7 +98,7 @@ export const Navbar = () => {
           </NavigationMenuList>
         </NavigationMenu>
         <div className="flex flex-1 items-center justify-end gap-3">
-          <LanguageSwitcher className="max-lg:hidden" />
+          <LanguageSwitcher />
           <ThemeSwitcher className="max-lg:hidden" />
           <div className="max-lg:hidden">
             {user ? (

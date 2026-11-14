@@ -37,7 +37,7 @@ export const MemesList = ({
 }: MemesListProps) => {
   const { user } = useRouteContext({ from: '__root__' })
   const [selectedId, setSelectedId] = React.useState<string | null>(null)
-  const triggerRef = React.useRef<HTMLButtonElement | null>(null)
+  const triggerRef = React.useRef<HTMLElement | null>(null)
 
   const authenticatedUserToken = user?.id
 
@@ -64,7 +64,7 @@ export const MemesList = ({
     return <p className="text-muted-foreground">{m.common_no_results()}</p>
   }
 
-  const handleSelect = (meme: MemeWithVideo, trigger: HTMLButtonElement) => {
+  const handleSelect = (meme: MemeWithVideo, trigger: HTMLElement) => {
     triggerRef.current = trigger
     setSelectedId(meme.id)
   }
@@ -92,7 +92,7 @@ export const MemesList = ({
         {memes.map((meme, index) => {
           return (
             <MemeListItem
-              onPlayClick={handleSelect}
+              onOpenPlayer={handleSelect}
               key={meme.id}
               size={size}
               layoutContext={layoutContext}

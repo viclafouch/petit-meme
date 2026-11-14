@@ -5,8 +5,8 @@ import type { E2eMeme } from './content'
 import { repeatUntilVisible } from './hydration'
 import { E2E_LOCALE } from './locales'
 
-export const getMemePlayButtons = (page: Page, locale: Locale = E2E_LOCALE) => {
-  return page.getByRole('button', {
+export const getMemePlayLinks = (page: Page, locale: Locale = E2E_LOCALE) => {
+  return page.getByRole('link', {
     name: m.meme_play_video({}, { locale })
   })
 }
@@ -20,19 +20,21 @@ export const getMemeList = (page: Page) => {
 }
 
 export const getMemeTitleLinks = (page: Page) => {
-  return getMemeList(page).getByRole('link')
+  return getMemeList(page)
+    .getByRole('link')
+    .filter({ hasNotText: m.meme_play_video() })
 }
 
-export const getFirstMemePlayButton = (page: Page) => {
+export const getFirstMemePlayLink = (page: Page) => {
   // oxlint-disable-next-line playwright/no-nth-methods -- any Meme of the list will do: the first one is the one a Visitor reaches first
-  return getMemePlayButtons(page).first()
+  return getMemePlayLinks(page).first()
 }
 
 export const openMemePlayer = async (page: Page) => {
   const playerDialog = page.getByRole('dialog')
 
   await repeatUntilVisible(() => {
-    return getFirstMemePlayButton(page).click()
+    return getFirstMemePlayLink(page).click()
   }, playerDialog)
 
   return playerDialog

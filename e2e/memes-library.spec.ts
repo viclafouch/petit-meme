@@ -10,7 +10,7 @@ import {
 } from './content'
 import { test } from './fixtures'
 import { repeatUntilNavigated, repeatUntilVisible } from './hydration'
-import { getMemeLink, getMemePlayButtons, getMemeTitleLinks } from './library'
+import { getMemeLink, getMemePlayLinks, getMemeTitleLinks } from './library'
 
 const LIBRARY_PATHNAME = '/memes/category/all'
 
@@ -31,7 +31,7 @@ test.describe('the library', () => {
     await expect(
       page.getByRole('heading', { name: m.meme_category_trending() })
     ).toBeVisible()
-    await expect(getMemePlayButtons(page)).toHaveCount(MEMES_PER_PAGE)
+    await expect(getMemePlayLinks(page)).toHaveCount(MEMES_PER_PAGE)
   })
 
   test('a word typed in the search field narrows the library to what matches', async ({
@@ -51,7 +51,7 @@ test.describe('the library', () => {
       { page, from: LIBRARY_PATHNAME }
     )
 
-    await expect(getMemePlayButtons(page)).toHaveCount(1)
+    await expect(getMemePlayLinks(page)).toHaveCount(1)
     await expect(getMemeLink(page, E2E_NAMED_MEMES.searchTarget)).toBeVisible()
     await expect(getMemeLink(page, E2E_NAMED_MEMES.mostViewed)).toBeHidden()
   })
@@ -71,7 +71,7 @@ test.describe('the library', () => {
     await expect(page).toHaveURL(
       `/memes/category/trending?page=${SECOND_PAGE_NUMBER}`
     )
-    await expect(getMemePlayButtons(page)).toHaveCount(
+    await expect(getMemePlayLinks(page)).toHaveCount(
       E2E_SECOND_PAGE_MEMES.length
     )
 
@@ -139,8 +139,6 @@ test.describe('the library', () => {
       getMemeLink(page, E2E_NAMED_MEMES.recentlyPublished)
     ).toBeHidden()
     await expect(getMemeLink(page, E2E_NAMED_MEMES.english)).toBeVisible()
-    await expect(getMemePlayButtons(page)).toHaveCount(
-      FILTERED_FIRST_PAGE_COUNT
-    )
+    await expect(getMemePlayLinks(page)).toHaveCount(FILTERED_FIRST_PAGE_COUNT)
   })
 })

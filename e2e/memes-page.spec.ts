@@ -30,10 +30,23 @@ test.describe('a Meme page', () => {
     await expect(page.getByLabel(AUDIO_LANGUAGE_LABEL)).toBeVisible()
   })
 
-  test('hands back to the library', async ({ page }) => {
+  test('hands back to the library when the visit starts on it', async ({
+    page
+  }) => {
     await page.goto(PLAYABLE_MEME_PATHNAME)
 
-    await page.getByRole('link', { name: m.meme_back_to_memes() }).click()
+    await page.getByRole('link', { name: m.meme_back(), exact: true }).click()
+
+    await expect(page).toHaveURL('/memes/category/trending')
+  })
+
+  test('hands back to the library, not to the site a Visitor came from', async ({
+    page
+  }) => {
+    await page.goto('/')
+    await page.goto(PLAYABLE_MEME_PATHNAME)
+
+    await page.getByRole('link', { name: m.meme_back(), exact: true }).click()
 
     await expect(page).toHaveURL('/memes/category/trending')
   })

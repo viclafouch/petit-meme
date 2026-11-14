@@ -1,7 +1,7 @@
 import { createEnv } from '@t3-oss/env-core'
 import { vercel } from '@t3-oss/env-core/presets-zod'
-import { IS_TEST } from '../constants/env'
-import { baseEnvSchema } from './server-schema.server'
+import { IS_TEST } from '../constants/env.ts'
+import { baseEnvSchema } from './server-schema.server.ts'
 
 export const baseEnv = createEnv({
   server: baseEnvSchema,

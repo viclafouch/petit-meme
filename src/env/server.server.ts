@@ -1,8 +1,8 @@
 import { createEnv } from '@t3-oss/env-core'
-import { IS_PRODUCTION, IS_TEST } from '../constants/env'
-import { baseEnv } from './base.server'
-import { clientEnvSchema } from './client-schema'
-import { serverEnvSchema } from './server-schema.server'
+import { IS_PRODUCTION, IS_TEST } from '../constants/env.ts'
+import { baseEnv } from './base.server.ts'
+import { clientEnvSchema } from './client-schema.ts'
+import { serverEnvSchema } from './server-schema.server.ts'
 
 export const serverEnv = createEnv({
   server: serverEnvSchema,

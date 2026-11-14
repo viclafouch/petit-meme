@@ -26,7 +26,16 @@ const FILES_RUN_IN_TERMINAL = ['scripts/**', 'prisma/seed.ts']
 const FILES_RUN_BY_NODE = [
   'scripts/check-env.ts',
   'e2e/fake-anthropic.ts',
-  'src/constants/http.ts'
+  'vite.config.ts',
+  'src/constants/env.ts',
+  'src/constants/http.ts',
+  'src/constants/meme-fill.ts',
+  'src/constants/sentry.ts',
+  'src/constants/time.ts',
+  'src/env/base.server.ts',
+  'src/env/client-schema.ts',
+  'src/env/server-schema.server.ts',
+  'src/env/server.server.ts'
 ]
 
 export default defineConfig({

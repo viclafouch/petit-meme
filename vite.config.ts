@@ -8,16 +8,16 @@ import react from '@vitejs/plugin-react'
 import {
   IMMUTABLE_CACHE_CONTROL,
   WEEKLY_CACHE_CONTROL
-} from './src/constants/http'
+} from './src/constants/http.ts'
 import {
   MEME_FILL_MAX_DURATION_SECONDS,
   MEME_FILL_PATH
-} from './src/constants/meme-fill'
+} from './src/constants/meme-fill.ts'
 import {
   SENTRY_APPLICATION_KEY,
   SENTRY_ORG,
   SENTRY_PROJECT
-} from './src/constants/sentry'
+} from './src/constants/sentry.ts'
 
 const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
@@ -100,7 +100,7 @@ export default defineConfig(async ({ mode }) => {
   processEnvironment.VITE_VERCEL_OBSERVABILITY_CLIENT_CONFIG ??=
     processEnvironment.VERCEL_OBSERVABILITY_CLIENT_CONFIG
 
-  const { serverEnv } = await import('./src/env/server.server')
+  const { serverEnv } = await import('./src/env/server.server.ts')
 
   return {
     resolve: {

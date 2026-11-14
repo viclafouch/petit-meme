@@ -37,7 +37,7 @@ export const BestMemes = () => {
         </p>
       </div>
       <section>
-        <MemesList layoutContext="index" memes={trendingMemesQuery.data} />
+        <MemesList memes={trendingMemesQuery.data} />
       </section>
     </motion.div>
   )

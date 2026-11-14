@@ -96,7 +96,7 @@ const MemesListWrapper = ({
       </script>
       <MemesList
         columnGridCount={columnGridCount}
-        layoutContext="library"
+
         memes={memesListQuery.data.memes}
         queryID={memesListQuery.data.queryID}
         page={memesListQuery.data.page}

@@ -31,7 +31,6 @@ import { useRegisterMemeView } from '~/components/meme/use-register-meme-view'
 import { Badge } from '~/components/ui/badge'
 import { Button, buttonVariants } from '~/components/ui/button'
 import type { MemeFullData } from '~/constants/meme'
-import { MEME_PLAYER_TRANSITION_NAME } from '~/constants/motion'
 import { MemeStatus } from '~/db/generated/prisma/enums'
 import { formatDate } from '~/helpers/date'
 import { matchIsUserAdmin } from '~/helpers/role'
@@ -103,7 +102,7 @@ const RelatedMemes = ({ memes }: RelatedMemesProps) => {
   return (
     <div className="mt-8">
       <h2 className="text-base font-medium mb-4">{m.meme_related()}</h2>
-      <MemesList layoutContext="recommend" memes={memes} columnGridCount={4} />
+      <MemesList memes={memes} columnGridCount={4} />
     </div>
   )
 }
@@ -227,10 +226,7 @@ export const MemePage = () => {
         </Link>
         <div className="w-full grid md:grid-cols-meme-page gap-x-2.5 gap-y-4">
           <div className="w-full flex flex-col gap-y-2 md:gap-y-2 items-center md:items-start">
-            <div
-              className="aspect-video w-full flex relative isolate border rounded-lg border-input overflow-hidden"
-              style={{ viewTransitionName: MEME_PLAYER_TRANSITION_NAME }}
-            >
+            <div className="aspect-video w-full flex relative isolate border rounded-lg border-input overflow-hidden">
               <div className="absolute top-0 left-0 size-full bg-muted/50">
                 <img
                   src={buildVideoImageUrl(memeQuery.data.video.bunnyId)}

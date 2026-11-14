@@ -18,7 +18,7 @@ export const MemeVideoThumbnail = ({
   children
 }: MemeVideoThumbnailProps) => {
   return (
-    <div data-meme-thumbnail className="relative size-full isolate">
+    <div className="relative size-full isolate">
       <img
         src={buildVideoImageUrl(bunnyId)}
         alt={alt}

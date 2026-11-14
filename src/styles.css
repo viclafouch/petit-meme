@@ -221,17 +221,6 @@
   }
 }
 
-::view-transition-group(meme-player) {
-  animation-duration: 280ms;
-  animation-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
-}
-
-::view-transition-old(meme-player),
-::view-transition-new(meme-player) {
-  height: 100%;
-  object-fit: cover;
-}
-
 @theme {
   --font-sans:
     ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',

@@ -305,7 +305,7 @@ const AiSearchResults = ({ result }: AiSearchResultsProps) => {
       </div>
       <MemesList
         memes={result.memes}
-        layoutContext="ai-search"
+
         queryID={result.queryID}
       />
     </div>

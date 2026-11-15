@@ -6,6 +6,8 @@
 
 @custom-variant standalone (@media (display-mode: standalone));
 
+@custom-variant mouse (@media (hover: hover) and (pointer: fine));
+
 @font-face {
   font-family: 'Bricolage Grotesque';
   font-style: normal;

@@ -17,9 +17,13 @@ test.describe('a signed in User', () => {
   }) => {
     await page.goto(BOOKMARKED_MEME_PATHNAME)
 
-    const addButton = page.getByRole('button', { name: m.meme_add_bookmark() })
+    const addButton = page.getByRole('button', {
+      name: m.meme_add_bookmark(),
+      pressed: false
+    })
     const removeButton = page.getByRole('button', {
-      name: m.meme_remove_bookmark()
+      name: m.meme_add_bookmark(),
+      pressed: true
     })
 
     await repeatUntilVisible(() => {

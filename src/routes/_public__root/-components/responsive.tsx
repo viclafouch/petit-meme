@@ -104,7 +104,7 @@ export const Responsive = () => {
   }, [isInView])
 
   return (
-    <div className="relative dark" ref={containerRef}>
+    <div className="relative" ref={containerRef}>
       <div className="mx-auto mb-10 max-w-3xl text-center">
         <Badge variant="secondary">{m.home_responsive_badge()}</Badge>
         <PageHeading2 className="mb-4 mt-2 scroll-m-20">
@@ -115,7 +115,7 @@ export const Responsive = () => {
         </p>
       </div>
       <motion.div
-        className="relative mx-auto max-w-5xl lg:[&_video]:blur-sm max-lg:[&_video+div]:hidden [&:not(:has(video:hover))]:[&>:first-child_video]:blur-none [&_video]:hover:blur-none [&_video:hover]:[&+div]:scale-0 video-filter-transition [&_video]:duration-500 [&:not(:has(video:hover))]:[&>:first-child_video+div]:scale-0"
+        className="dark relative mx-auto max-w-5xl lg:[&_video]:blur-sm max-lg:[&_video+div]:hidden [&:not(:has(video:hover))]:[&>:first-child_video]:blur-none [&_video]:hover:blur-none [&_video:hover]:[&+div]:scale-0 video-filter-transition [&_video]:duration-500 [&:not(:has(video:hover))]:[&>:first-child_video+div]:scale-0"
         initial={isReducedMotion ? false : 'offscreen'}
         whileInView="onscreen"
         viewport={{ amount: 0.4, once: true }}
@@ -217,7 +217,7 @@ export const Responsive = () => {
         >
           <div
             data-slot="card"
-            className="bg-card text-card-foreground flex flex-col gap-2 rounded-xl border shadow-sm animate-float-slow md:p-4 p-3"
+            className="bg-card text-card-foreground flex flex-col gap-2 rounded-xl border shadow-sm md:p-4 p-3"
           >
             <div className="flex items-center gap-3">
               <div className="bg-primary/10 flex size-8 items-center justify-center rounded-full">

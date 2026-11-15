@@ -8,6 +8,7 @@ import {
   THIRTY_MINUTES_MS
 } from '~/constants/time'
 import type { Meme } from '~/db/generated/prisma/client'
+import { lowPriorityServerFnFetch } from '~/lib/server-fn-fetch'
 import {
   countRecentMemes,
   listMemes,
@@ -88,7 +89,10 @@ export const listReelsQueryOpts = () => {
   return infiniteQueryOptions({
     queryKey: [...listReelsQueryOpts.all],
     queryFn: ({ pageParam }) => {
-      return listReels({ data: pageParam })
+      return listReels({
+        data: pageParam,
+        fetch: pageParam === null ? undefined : lowPriorityServerFnFetch
+      })
     },
     initialPageParam: null as ReelsCursor,
     getNextPageParam: (lastPage) => {

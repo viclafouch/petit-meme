@@ -1,5 +1,6 @@
 import type { MarkdownComponents } from '@tanstack/markdown/react'
 import { Separator } from '~/components/ui/separator'
+import { m } from '~/paraglide/messages'
 import { baseLocale, getLocale } from '~/paraglide/runtime'
 
 export const BASE_MARKDOWN_COMPONENTS = {
@@ -25,10 +26,10 @@ export const BASE_MARKDOWN_COMPONENTS = {
     )
   },
   p: (props) => {
-    return <p className="my-3" {...props} />
+    return <p className="my-3 text-pretty" {...props} />
   },
   ul: (props) => {
-    return <ul className="my-3 ml-3 list-disc" {...props} />
+    return <ul className="my-3 ml-3 list-disc text-pretty" {...props} />
   },
   code: (props) => {
     return (
@@ -40,9 +41,14 @@ export const BASE_MARKDOWN_COMPONENTS = {
   },
   table: (props) => {
     return (
-      <div className="my-4 overflow-x-auto">
+      <section
+        aria-label={m.legal_table_label()}
+        // oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- the scroll region must take focus so the keyboard can scroll a table wider than the phone
+        tabIndex={0}
+        className="my-4 overflow-x-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+      >
         <table className="w-full border-collapse text-sm" {...props} />
-      </div>
+      </section>
     )
   },
   thead: (props) => {
@@ -57,7 +63,9 @@ export const BASE_MARKDOWN_COMPONENTS = {
     )
   },
   td: (props) => {
-    return <td className="border border-border px-3 py-2" {...props} />
+    return (
+      <td className="border border-border px-3 py-2 text-pretty" {...props} />
+    )
   },
   hr: () => {
     return <Separator className="my-4" />

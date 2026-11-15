@@ -8,11 +8,13 @@ import { cn } from '~/lib/utils'
 const useFormField = () => {
   const itemContext = React.useContext(FormItemContext)
 
-  const { id, error } = itemContext
+  const { id, error, hasDescription, setHasDescription } = itemContext
 
   return {
     id,
     error,
+    hasDescription,
+    setHasDescription,
     formItemId: `${id}-form-item`,
     formDescriptionId: `${id}-form-item-description`,
     formMessageId: `${id}-form-item-message`
@@ -22,6 +24,8 @@ const useFormField = () => {
 type FormItemContextValue = {
   id: string
   error?: string
+  hasDescription: boolean
+  setHasDescription: (hasDescription: boolean) => void
 }
 
 const FormItemContext = React.createContext<FormItemContextValue>(
@@ -34,13 +38,16 @@ const FormItem = ({
   ...props
 }: React.ComponentProps<'div'> & { error?: string }) => {
   const id = React.useId()
+  const [hasDescription, setHasDescription] = React.useState(false)
 
   const value = React.useMemo(() => {
     return {
       id,
-      error
+      error,
+      hasDescription,
+      setHasDescription
     }
-  }, [id, error])
+  }, [id, error, hasDescription])
 
   return (
     <FormItemContext value={value}>
@@ -71,16 +78,25 @@ const FormLabel = ({
 }
 
 const FormControl = ({ render, ...props }: useRender.ComponentProps<'div'>) => {
-  const { error, formItemId, formDescriptionId, formMessageId } = useFormField()
+  const {
+    error,
+    hasDescription,
+    formItemId,
+    formDescriptionId,
+    formMessageId
+  } = useFormField()
+  const describedByIds = [
+    hasDescription ? formDescriptionId : null,
+    error ? formMessageId : null
+  ].filter(Boolean)
 
   return useRender({
     render,
     props: mergeProps<'div'>(
       {
         id: formItemId,
-        'aria-describedby': !error
-          ? formDescriptionId
-          : `${formDescriptionId} ${formMessageId}`,
+        'aria-describedby':
+          describedByIds.length > 0 ? describedByIds.join(' ') : undefined,
         'aria-invalid': Boolean(error)
       },
       props
@@ -95,7 +111,15 @@ const FormDescription = ({
   className,
   ...props
 }: React.ComponentProps<'p'>) => {
-  const { formDescriptionId } = useFormField()
+  const { formDescriptionId, setHasDescription } = useFormField()
+
+  React.useEffect(() => {
+    setHasDescription(true)
+
+    return () => {
+      setHasDescription(false)
+    }
+  }, [setHasDescription])
 
   return (
     <p
@@ -119,7 +143,6 @@ const FormMessage = ({ className, ...props }: React.ComponentProps<'p'>) => {
     <p
       data-slot="form-message"
       id={formMessageId}
-      role="alert"
       className={cn(
         'text-destructive text-sm flex items-start gap-1.5',
         className

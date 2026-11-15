@@ -21,7 +21,7 @@ const LegalMarkdown = ({ markdown }: LegalMarkdownProps) => {
   }, [markdown])
 
   return (
-    <article>
+    <article className="[font-size-adjust:from-font]">
       <Markdown components={BASE_MARKDOWN_COMPONENTS}>{document}</Markdown>
     </article>
   )

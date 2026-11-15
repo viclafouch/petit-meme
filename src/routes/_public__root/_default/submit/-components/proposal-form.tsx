@@ -1,7 +1,7 @@
 import { CircleAlert } from 'lucide-react'
 import { toast } from 'sonner'
 import type { z } from 'zod'
-import { formOptions } from '@tanstack/react-form'
+import { formOptions, revalidateLogic } from '@tanstack/react-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useAppForm } from '~/components/form/use-app-form'
@@ -50,8 +50,9 @@ const PROPOSAL_FORM_DEFAULT_VALUES: ProposalFormValues = {
 
 const proposalFormOpts = formOptions({
   defaultValues: PROPOSAL_FORM_DEFAULT_VALUES,
+  validationLogic: revalidateLogic(),
   validators: {
-    onSubmit: MEME_PROPOSAL_SCHEMA
+    onDynamic: MEME_PROPOSAL_SCHEMA
   }
 })
 
@@ -152,7 +153,7 @@ export const ProposalForm = ({
         name="contentLocale"
         children={(field) => {
           return (
-            <FormItem error={getFieldErrorMessage(field.state.meta)}>
+            <FormItem error={getFieldErrorMessage(field)}>
               <FormLabel>{m.submit_field_language()}</FormLabel>
               <Select
                 items={contentLocaleOptions}

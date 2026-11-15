@@ -63,7 +63,7 @@ export const CategoriesList = () => {
                     search={resetPageSearch}
                     className={cn(
                       buttonVariants({ variant: 'outline', size: 'sm' }),
-                      'relative'
+                      'relative isolate forced-colors:outline-2 forced-colors:-outline-offset-2 forced-colors:outline-solid'
                     )}
                   >
                     <motion.span
@@ -71,7 +71,7 @@ export const CategoriesList = () => {
                       className="absolute inset-0 bg-primary rounded-md"
                       transition={bubbleTransition}
                     />
-                    <span className="relative z-10 text-white mix-blend-difference">
+                    <span className="relative z-10 text-white mix-blend-difference forced-colors:mix-blend-normal">
                       {category.title}
                     </span>
                   </Link>

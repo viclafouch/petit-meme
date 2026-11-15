@@ -6,7 +6,6 @@ import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { Skeleton } from '~/components/ui/skeleton'
 import type { Meme } from '~/db/generated/prisma/client'
-import { useContainedSize } from '~/hooks/use-contained-size'
 import { useImageAspectRatio } from '~/hooks/use-image-aspect-ratio'
 import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import { m } from '~/paraglide/messages'
@@ -79,7 +78,6 @@ export const StudioPreview = ({
   processedVideoUrl,
   onCancel
 }: StudioPreviewProps) => {
-  const containerRef = React.useRef<HTMLDivElement>(null)
   const posterUrl = buildVideoImageUrl(bunnyId)
   const posterRatio = useImageAspectRatio(posterUrl)
   const [processedRatio, setProcessedRatio] =
@@ -89,9 +87,6 @@ export const StudioPreview = ({
     processedRatio?.url === processedVideoUrl
       ? processedRatio.ratio
       : posterRatio
-  const size = useContainedSize(containerRef, effectiveRatio)
-
-  const hasValidSize = size.width > 0 && size.height > 0
 
   const renderContent = () => {
     if (isProcessing) {
@@ -102,14 +97,10 @@ export const StudioPreview = ({
               src={posterUrl}
               className="blur-xl size-full opacity-60 object-cover"
               alt={title}
-              loading="eager"
               decoding="async"
             />
           </Skeleton>
-          <output
-            className="absolute flex flex-col gap-2 px-4 w-full text-center max-w-md items-center justify-center"
-            aria-live="polite"
-          >
+          <div className="absolute flex flex-col gap-2 px-4 w-full text-center max-w-md items-center justify-center">
             <Badge variant="outline">
               {m.studio_processing({ progress: String(progress) })}
             </Badge>
@@ -128,7 +119,7 @@ export const StudioPreview = ({
             >
               {m.common_cancel()}
             </Button>
-          </output>
+          </div>
         </div>
       )
     }
@@ -148,17 +139,10 @@ export const StudioPreview = ({
   }
 
   return (
-    <div
-      ref={containerRef}
-      className="size-full flex items-center justify-center"
-    >
+    <div className="size-full flex items-center justify-center @container-size">
       <div
-        className="relative overflow-hidden bg-black rounded-lg border border-white/10 md:border-border md:bg-muted/50"
-        style={
-          hasValidSize
-            ? { width: size.width, height: size.height }
-            : { width: '100%', height: '100%' }
-        }
+        className="relative overflow-hidden bg-black rounded-lg border border-white/10 md:border-border md:bg-muted/50 w-[min(100cqw,100cqh*var(--video-ratio))] h-[min(100cqh,100cqw/var(--video-ratio))]"
+        style={{ '--video-ratio': effectiveRatio }}
       >
         {renderContent()}
       </div>

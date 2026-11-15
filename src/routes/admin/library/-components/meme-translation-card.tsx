@@ -70,7 +70,7 @@ export const MemeTranslationCard = ({
           <form.Field
             name={`translations.${locale}.title`}
             children={(field) => {
-              const isInvalid = matchIsFieldInvalid(field.state.meta)
+              const isInvalid = matchIsFieldInvalid(field)
 
               return (
                 <Field data-invalid={isInvalid}>
@@ -80,7 +80,11 @@ export const MemeTranslationCard = ({
                     name={field.name}
                     required
                     autoComplete="off"
+                    lang={locale}
                     aria-invalid={isInvalid}
+                    aria-describedby={
+                      isInvalid ? `${field.name}-error` : undefined
+                    }
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(event) => {
@@ -88,7 +92,10 @@ export const MemeTranslationCard = ({
                     }}
                   />
                   {isInvalid ? (
-                    <FieldError errors={field.state.meta.errors} />
+                    <FieldError
+                      id={`${field.name}-error`}
+                      errors={field.state.meta.errors}
+                    />
                   ) : null}
                 </Field>
               )
@@ -97,7 +104,7 @@ export const MemeTranslationCard = ({
           <form.Field
             name={`translations.${locale}.description`}
             children={(field) => {
-              const isInvalid = matchIsFieldInvalid(field.state.meta)
+              const isInvalid = matchIsFieldInvalid(field)
 
               return (
                 <Field data-invalid={isInvalid}>
@@ -107,8 +114,12 @@ export const MemeTranslationCard = ({
                       id={field.name}
                       name={field.name}
                       rows={3}
+                      lang={locale}
                       className="min-h-20"
                       aria-invalid={isInvalid}
+                      aria-describedby={
+                        isInvalid ? `${field.name}-error` : undefined
+                      }
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChange={(event) => {
@@ -122,7 +133,10 @@ export const MemeTranslationCard = ({
                     </InputGroupAddon>
                   </InputGroup>
                   {isInvalid ? (
-                    <FieldError errors={field.state.meta.errors} />
+                    <FieldError
+                      id={`${field.name}-error`}
+                      errors={field.state.meta.errors}
+                    />
                   ) : null}
                 </Field>
               )

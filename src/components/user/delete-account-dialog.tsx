@@ -9,8 +9,6 @@ import type { WithDialog } from '~/@types/dialog'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle
 } from '~/components/animate-ui/base/dialog'
@@ -19,6 +17,7 @@ import { useAppForm } from '~/components/form/use-app-form'
 import { useErrorFocus } from '~/components/form/use-error-focus'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import { Button } from '~/components/ui/button'
+import { Input } from '~/components/ui/input'
 import { LoadingButton } from '~/components/ui/loading-button'
 import { authClient } from '~/lib/auth-client'
 import {
@@ -47,10 +46,11 @@ const getDeleteAccountFormOpts = () => {
 }
 
 type DeleteAccountFormProps = {
+  email: string
   onCancel: () => void
 }
 
-const DeleteAccountForm = ({ onCancel }: DeleteAccountFormProps) => {
+const DeleteAccountForm = ({ email, onCancel }: DeleteAccountFormProps) => {
   const router = useRouter()
   const resetAccountData = useResetAccountData()
 
@@ -90,6 +90,14 @@ const DeleteAccountForm = ({ onCancel }: DeleteAccountFormProps) => {
       noValidate
       className="flex flex-col items-center gap-y-6 w-full"
     >
+      <Input
+        type="email"
+        autoComplete="username"
+        aria-label={m.common_email()}
+        value={email}
+        readOnly
+        className="hidden"
+      />
       <div className="flex flex-col items-center gap-y-4 w-full">
         <form.Subscribe
           selector={(state) => {
@@ -175,23 +183,23 @@ type DeleteAccountDialogProps = WithDialog<{ user: User }>
 
 export const DeleteAccountDialog = ({
   open,
-  onOpenChange
+  onOpenChange,
+  user
 }: DeleteAccountDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>{m.settings_delete_account()}</DialogTitle>
-          <DialogDescription />
         </DialogHeader>
         <div>
           <DeleteAccountForm
+            email={user.email}
             onCancel={() => {
               onOpenChange(false)
             }}
           />
         </div>
-        <DialogFooter />
       </DialogContent>
     </Dialog>
   )

@@ -5,17 +5,19 @@ import {
   MemeListItem,
   type MemeListItemProps
 } from '~/components/meme/meme-list-item'
+import type { ThumbnailPriority } from '~/components/meme/meme-video-thumbnail'
 import { PlayerDialog } from '~/components/meme/player-dialog'
 import {
   MEME_GRID_COLUMNS,
   MEMES_PER_PAGE,
   type MemeWithVideo
 } from '~/constants/meme'
+import type { HighlightedText } from '~/helpers/highlight'
 import { sendViewEvent } from '~/lib/algolia-insights'
 import { m } from '~/paraglide/messages'
 
 export type MemeWithHighlight = MemeWithVideo & {
-  highlightedTitle?: string
+  highlightedTitle?: HighlightedText
 }
 
 type MemesListProps = {
@@ -24,6 +26,7 @@ type MemesListProps = {
   columnGridCount?: number
   queryID?: string
   page?: number
+  isAboveTheFold?: boolean
 }
 
 const MEME_IDS_KEY_SEPARATOR = ','
@@ -33,7 +36,8 @@ export const MemesList = ({
   layoutContext,
   columnGridCount = 4,
   queryID,
-  page = 0
+  page = 0,
+  isAboveTheFold = true
 }: MemesListProps) => {
   const { user } = useRouteContext({ from: '__root__' })
   const [selectedId, setSelectedId] = React.useState<string | null>(null)
@@ -82,6 +86,14 @@ export const MemesList = ({
   const size: MemeListItemProps['size'] =
     columnGridCount < MEME_GRID_COLUMNS.MEDIUM ? 'md' : 'sm'
 
+  const getThumbnailPriority = (index: number): ThumbnailPriority => {
+    if (!isAboveTheFold || index >= columnGridCount) {
+      return 'lazy'
+    }
+
+    return index === 0 ? 'lcp' : 'eager'
+  }
+
   return (
     <div className="w-full">
       <ul
@@ -101,6 +113,7 @@ export const MemesList = ({
               queryID={queryID}
               position={page * MEMES_PER_PAGE + index + 1}
               authenticatedUserToken={authenticatedUserToken}
+              thumbnailPriority={getThumbnailPriority(index)}
             />
           )
         })}

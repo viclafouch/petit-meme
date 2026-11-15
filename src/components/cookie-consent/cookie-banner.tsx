@@ -1,6 +1,6 @@
 import React from 'react'
 import { Cookie } from 'lucide-react'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { Link } from '@tanstack/react-router'
 import { useSelector } from '@tanstack/react-store'
 import { Button } from '~/components/ui/button'
@@ -28,13 +28,13 @@ const VideoCurve = () => {
 }
 
 type BannerMediaProps = {
-  isMobile: boolean
+  isStill: boolean
 }
 
-const BannerMedia = ({ isMobile }: BannerMediaProps) => {
+const BannerMedia = ({ isStill }: BannerMediaProps) => {
   return (
     <div className="relative shrink-0">
-      {isMobile ? (
+      {isStill ? (
         <img
           src={BANNER_POSTER_SRC}
           alt=""
@@ -48,7 +48,7 @@ const BannerMedia = ({ isMobile }: BannerMediaProps) => {
           playsInline
           preload="metadata"
           poster={BANNER_POSTER_SRC}
-          className="aspect-4/3 max-h-dvh-40 w-full object-cover object-top sm:rounded-t-(--banner-radius) motion-reduce:hidden"
+          className="aspect-4/3 max-h-dvh-40 w-full object-cover object-top sm:rounded-t-(--banner-radius)"
           src={BANNER_VIDEO_SRC}
           aria-hidden="true"
         />
@@ -66,6 +66,7 @@ export const CookieBanner = () => {
   })
   const { acceptAll, openSettings } = cookieConsentStore.actions
   const isMobile = useIsMobile()
+  const isReducedMotion = useReducedMotion()
   const isDialogOpen = useSelector(dialogStore, (state) => {
     return state.isOpen
   })
@@ -118,26 +119,25 @@ export const CookieBanner = () => {
               transition: { type: 'spring', damping: 32, stiffness: 300 }
             }}
             className="fixed bottom-0 left-0 z-50 w-full bg-transparent text-inherit sm:bottom-5 sm:left-5 sm:w-banner"
-            aria-modal="true"
             aria-label={m.cookie_title()}
           >
             <div
               className="flex max-h-dvh flex-col overflow-hidden bg-card shadow-2xl sm:max-h-banner sm:rounded-(--banner-radius) sm:ring-1 sm:ring-border/30"
               style={{ '--banner-radius': '1.5rem' }}
             >
-              <BannerMedia isMobile={isMobile} />
-              <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-7 pb-5 pt-1">
+              <BannerMedia isStill={isMobile || isReducedMotion === true} />
+              <div className="flex flex-1 flex-col gap-4 overflow-y-auto overscroll-contain px-7 pb-5 pt-1">
                 <div className="space-y-0.5">
                   <p className="text-sm text-muted-foreground">
                     {m.cookie_greeting()}
                   </p>
-                  <h3 className="text-2xl font-extrabold tracking-tight">
+                  <h2 className="text-2xl font-extrabold tracking-tight">
                     {m.cookie_title()}{' '}
                     <Cookie
                       className="mb-0.5 inline size-6"
                       aria-hidden="true"
                     />
-                  </h3>
+                  </h2>
                 </div>
                 <p className="text-banner leading-relaxed text-muted-foreground">
                   {m.cookie_description()}{' '}

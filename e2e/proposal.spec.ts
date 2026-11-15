@@ -5,7 +5,7 @@ import { FIVE_MINUTES_MS } from '~/constants/time'
 import { prismaClient } from '~/db/client.server'
 import type { MemeProposal } from '~/db/generated/prisma/client'
 import { MemeProposalUrlType } from '~/db/generated/prisma/enums'
-import { truncateUrl } from '~/helpers/format'
+import { formatDisplayUrl } from '~/helpers/format'
 import { m } from '~/paraglide/messages'
 import { getAuthDialogSignInButton } from './auth-flows'
 import { E2E_ROLES } from './constants'
@@ -113,7 +113,7 @@ const expectHistoryToHoldTheProposal = async (page: Page) => {
   ).toBeVisible()
   await expect(getHistoryStatus(page)).toHaveText(m.submit_status_pending())
   await expect(
-    page.getByRole('link', { name: truncateUrl(PROPOSED_PROPOSAL.url) })
+    page.getByRole('link', { name: formatDisplayUrl(PROPOSED_PROPOSAL.url) })
   ).toHaveAttribute('href', PROPOSED_PROPOSAL.url)
 }
 

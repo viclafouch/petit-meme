@@ -14,6 +14,7 @@ import { COOKIE_ALGOLIA_USER_TOKEN_KEY } from '~/constants/cookie'
 import { clientEnv } from '~/env/client'
 import { readClientCookie } from '~/lib/cookie'
 import { matchIsAnalyticsConsentGiven } from '~/lib/cookie-consent'
+import { runInBackground } from '~/lib/main-thread'
 import { getLocale } from '~/paraglide/runtime'
 
 const algoliaInsights = insightsClient(
@@ -42,12 +43,14 @@ function getInsightsIndex() {
   return `${clientEnv.VITE_ALGOLIA_INDEX}_${getLocale()}`
 }
 
-async function pushEvent(event: EventsItems) {
-  try {
-    await algoliaInsights.pushEvents({ events: [event] })
-  } catch (error) {
-    logInsightsError(error)
-  }
+const pushEvent = (event: EventsItems) => {
+  runInBackground(async () => {
+    try {
+      await algoliaInsights.pushEvents({ events: [event] })
+    } catch (error) {
+      logInsightsError(error)
+    }
+  })
 }
 
 export type ConversionEventName =
@@ -95,13 +98,13 @@ export const sendClickEvent = createClientOnlyFn(
     }
 
     if (queryID) {
-      void pushEvent({
+      pushEvent({
         ...base,
         queryID,
         positions: [position]
       } satisfies ClickedObjectIDsAfterSearch)
     } else {
-      void pushEvent(base satisfies ClickedObjectIDs)
+      pushEvent(base satisfies ClickedObjectIDs)
     }
   }
 )
@@ -133,12 +136,12 @@ export const sendConversionEvent = createClientOnlyFn(
     }
 
     if (queryID) {
-      void pushEvent({
+      pushEvent({
         ...base,
         queryID
       } satisfies ConvertedObjectIDsAfterSearch)
     } else {
-      void pushEvent(base satisfies ConvertedObjectIDs)
+      pushEvent(base satisfies ConvertedObjectIDs)
     }
   }
 )
@@ -161,7 +164,7 @@ export const sendViewEvent = createClientOnlyFn(
       offset < objectIDs.length;
       offset += ALGOLIA_MAX_OBJECTS_PER_EVENT
     ) {
-      void pushEvent({
+      pushEvent({
         eventType: 'view',
         eventName: 'Memes Viewed',
         index: getInsightsIndex(),

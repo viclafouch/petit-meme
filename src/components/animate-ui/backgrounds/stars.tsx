@@ -1,20 +1,11 @@
-/* oxlint-disable react/no-object-type-as-default-prop */
 /* oxlint-disable id-length */
 import * as React from 'react'
-import {
-  type HTMLMotionProps,
-  motion,
-  type SpringOptions,
-  type Transition,
-  useMotionValue,
-  useSpring
-} from 'motion/react'
 import { cn } from '~/lib/utils'
 
-type StarLayerProps = HTMLMotionProps<'div'> & {
+type StarLayerProps = {
   count: number
   size: number
-  transition: Transition
+  durationInSeconds: number
   starColor: string
   animated: boolean
 }
@@ -34,11 +25,9 @@ function generateStars(count: number, starColor: string) {
 const StarLayer = ({
   count,
   size,
-  transition,
+  durationInSeconds,
   starColor,
-  animated,
-  className,
-  ...props
+  animated
 }: StarLayerProps) => {
   const [boxShadow, setBoxShadow] = React.useState<string>('')
 
@@ -47,15 +36,15 @@ const StarLayer = ({
   }, [count, starColor])
 
   return (
-    <motion.div
+    <div
       data-slot="star-layer"
-      animate={animated ? { y: [0, -2000] } : undefined}
-      transition={animated ? transition : undefined}
       className={cn(
-        'absolute top-0 left-0 w-full h-500 will-change-transform',
-        className
+        'absolute top-0 left-0 w-full h-500',
+        animated && 'motion-safe:animate-stars-drift'
       )}
-      {...props}
+      style={
+        animated ? { animationDuration: `${durationInSeconds}s` } : undefined
+      }
     >
       <div
         className="absolute bg-transparent rounded-full"
@@ -73,14 +62,12 @@ const StarLayer = ({
           boxShadow
         }}
       />
-    </motion.div>
+    </div>
   )
 }
 
 type StarsBackgroundProps = React.ComponentProps<'div'> & {
-  factor?: number
   speed?: number
-  transition?: SpringOptions
   starColor?: string
   animated?: boolean
 }
@@ -89,17 +76,10 @@ export const StarsBackground = ({
   children,
   className,
   speed = 50,
-  transition = { stiffness: 50, damping: 20 },
   starColor = '#fff',
   animated = true,
   ...props
 }: StarsBackgroundProps) => {
-  const offsetX = useMotionValue(1)
-  const offsetY = useMotionValue(1)
-
-  const springX = useSpring(offsetX, transition)
-  const springY = useSpring(offsetY, transition)
-
   return (
     <div
       data-slot="stars-background"
@@ -110,37 +90,29 @@ export const StarsBackground = ({
       {...props}
       role="presentation"
     >
-      <motion.div style={{ x: springX, y: springY }} className="max-lg:hidden">
+      <div className="max-lg:hidden">
         <StarLayer
           count={1000}
           size={1}
-          transition={{ repeat: Infinity, duration: speed, ease: 'linear' }}
+          durationInSeconds={speed}
           starColor={starColor}
           animated={animated}
         />
         <StarLayer
           count={400}
           size={2}
-          transition={{
-            repeat: Infinity,
-            duration: speed * 2,
-            ease: 'linear'
-          }}
+          durationInSeconds={speed * 2}
           starColor={starColor}
           animated={animated}
         />
         <StarLayer
           count={200}
           size={3}
-          transition={{
-            repeat: Infinity,
-            duration: speed * 3,
-            ease: 'linear'
-          }}
+          durationInSeconds={speed * 3}
           starColor={starColor}
           animated={animated}
         />
-      </motion.div>
+      </div>
       {children}
     </div>
   )

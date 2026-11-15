@@ -18,7 +18,7 @@ export const HomePage = () => {
           <div className="mt-16 hidden lg:block">
             <Responsive />
           </div>
-          <div className="mt-16 lg:mt-40">
+          <div className="mt-16 [contain-intrinsic-size:auto_none_auto_500px] [content-visibility:auto] lg:mt-40">
             <Faq />
           </div>
         </div>

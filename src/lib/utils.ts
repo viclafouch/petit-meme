@@ -11,11 +11,10 @@ export const cn = createCn({
             'dialog',
             'sticky-aside',
             'banner',
-            { dvh: [validators.isInteger], vh: [validators.isInteger] }
+            { dvh: [validators.isInteger] }
           ]
         }
       ],
-      'max-w': [{ 'max-w': [{ vw: [validators.isInteger] }] }],
       w: [{ w: ['banner'] }],
       'grid-cols': [{ 'grid-cols': ['submit', 'meme-page'] }],
       rounded: [{ rounded: ['swatch'] }],

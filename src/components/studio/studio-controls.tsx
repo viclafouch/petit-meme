@@ -2,6 +2,7 @@ import React from 'react'
 import { Radio } from '@base-ui/react/radio'
 import { RadioGroup } from '@base-ui/react/radio-group'
 import { StudioTemplates } from '~/components/studio/studio-templates'
+import { FieldError } from '~/components/ui/field'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import {
@@ -87,6 +88,8 @@ type StudioControlsProps = {
   bunnyId: string
   hideTextInput?: boolean
   onTextInputFocus?: () => void
+  textInputRef?: React.Ref<HTMLInputElement>
+  textError?: string
 }
 
 export const StudioControls = ({
@@ -95,7 +98,9 @@ export const StudioControls = ({
   disabled,
   bunnyId,
   hideTextInput = false,
-  onTextInputFocus
+  onTextInputFocus,
+  textInputRef,
+  textError
 }: StudioControlsProps) => {
   const fontSizes = getStudioFontSizes()
   const colors = getStudioColors()
@@ -145,10 +150,12 @@ export const StudioControls = ({
 
   return (
     <fieldset disabled={disabled} className="flex flex-col gap-4">
+      <legend className="sr-only">{m.studio_settings()}</legend>
       {!hideTextInput ? (
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="studio-text">{m.studio_text_label()}</Label>
           <Input
+            ref={textInputRef}
             id="studio-text"
             value={settings.text}
             onChange={handleTextChange}
@@ -157,12 +164,19 @@ export const StudioControls = ({
             autoComplete="off"
             type="text"
             maxLength={STUDIO_TEXT_MAX_LENGTH}
-            aria-describedby="studio-text-count"
+            aria-invalid={textError !== undefined}
+            aria-describedby={
+              textError === undefined
+                ? 'studio-text-count'
+                : 'studio-text-error studio-text-count'
+            }
           />
+          {textError === undefined ? null : (
+            <FieldError id="studio-text-error">{textError}</FieldError>
+          )}
           <span
             id="studio-text-count"
             className="text-xs text-muted-foreground"
-            aria-live="polite"
           >
             {settings.text.length}/{STUDIO_TEXT_MAX_LENGTH}
           </span>

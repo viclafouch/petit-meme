@@ -117,7 +117,7 @@ export const PricingCard = ({
       data-highlighted={isHighlighted || undefined}
       className={cn(
         'grid row-span-4 grid-rows-subgrid py-8',
-        'data-highlighted:animate-background-shine data-highlighted:border-amber-700/25 data-highlighted:shine-gradient-light data-highlighted:shine-size data-highlighted:transition-colors dark:data-highlighted:border-amber-400/20 dark:data-highlighted:shine-gradient-dark',
+        'data-highlighted:relative data-highlighted:isolate data-highlighted:overflow-hidden data-highlighted:border-amber-700/25 data-highlighted:transition-colors data-highlighted:before:shine-layer data-highlighted:before:shine-gradient-light data-highlighted:before:animate-background-shine dark:data-highlighted:border-amber-400/20 dark:data-highlighted:before:shine-gradient-dark',
         className
       )}
     >

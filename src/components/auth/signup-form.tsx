@@ -10,7 +10,10 @@ import { LoadingButton } from '~/components/ui/loading-button'
 import {
   getEmailSchema,
   getPasswordWithConfirmationSchema,
-  getUserNameSchema
+  getUserNameSchema,
+  PASSWORD_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH,
+  USER_NAME_MAX_LENGTH
 } from '~/constants/auth'
 import { authClient } from '~/lib/auth-client'
 import {
@@ -120,7 +123,11 @@ export const SignupForm = () => {
               label={m.auth_username()}
               required
               type="text"
-              autoComplete="name"
+              autoComplete="nickname"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              maxLength={USER_NAME_MAX_LENGTH}
               placeholder={m.auth_name_placeholder()}
             />
           )
@@ -134,7 +141,8 @@ export const SignupForm = () => {
               label={m.common_email()}
               required
               type="email"
-              autoComplete="email"
+              autoComplete="username"
+              spellCheck={false}
               placeholder={m.auth_email_placeholder()}
             />
           )
@@ -149,6 +157,8 @@ export const SignupForm = () => {
               required
               type="password"
               autoComplete="new-password"
+              minLength={PASSWORD_MIN_LENGTH}
+              maxLength={PASSWORD_MAX_LENGTH}
               placeholder="******"
             />
           )
@@ -163,6 +173,8 @@ export const SignupForm = () => {
               required
               type="password"
               autoComplete="new-password"
+              minLength={PASSWORD_MIN_LENGTH}
+              maxLength={PASSWORD_MAX_LENGTH}
               placeholder="******"
             />
           )

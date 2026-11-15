@@ -18,7 +18,10 @@ test.describe('the seed', () => {
     await page.goto('/memes/category/trending')
 
     await expect(
-      page.getByRole('link', { name: E2E_NAMED_MEMES.mostViewed.title })
+      page.getByRole('link', {
+        name: E2E_NAMED_MEMES.mostViewed.title,
+        exact: true
+      })
     ).toBeVisible()
   })
 
@@ -28,10 +31,16 @@ test.describe('the seed', () => {
     await page.goto(`/memes/category/all?${search}`)
 
     await expect(
-      page.getByRole('link', { name: E2E_NAMED_MEMES.searchTarget.title })
+      page.getByRole('link', {
+        name: E2E_NAMED_MEMES.searchTarget.title,
+        exact: true
+      })
     ).toBeVisible()
     await expect(
-      page.getByRole('link', { name: E2E_NAMED_MEMES.mostViewed.title })
+      page.getByRole('link', {
+        name: E2E_NAMED_MEMES.mostViewed.title,
+        exact: true
+      })
     ).toBeHidden()
   })
 })

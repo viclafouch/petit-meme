@@ -1,3 +1,4 @@
+import type React from 'react'
 import { Plus, X } from 'lucide-react'
 import { useFieldContext } from '~/components/form/form-context'
 import { Badge } from '~/components/ui/badge'
@@ -14,6 +15,7 @@ type KeywordsFieldProps = {
   keywordValue: string
   setKeywordValue: (value: string) => void
   handleAddKeyword: () => void
+  handleKeywordKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void
   handleRemoveKeyword: (index: number) => void
 }
 
@@ -21,10 +23,11 @@ export const KeywordsField = ({
   keywordValue,
   setKeywordValue,
   handleAddKeyword,
+  handleKeywordKeyDown,
   handleRemoveKeyword
 }: KeywordsFieldProps) => {
   const field = useFieldContext<string[]>()
-  const isInvalid = matchIsFieldInvalid(field.state.meta)
+  const isInvalid = matchIsFieldInvalid(field)
 
   return (
     <Field data-invalid={isInvalid}>
@@ -49,13 +52,7 @@ export const KeywordsField = ({
           onChange={(event) => {
             setKeywordValue(event.target.value)
           }}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') {
-              event.preventDefault()
-              event.stopPropagation()
-              handleAddKeyword()
-            }
-          }}
+          onKeyDown={handleKeywordKeyDown}
         />
         <InputGroupAddon align="inline-end">
           <InputGroupButton

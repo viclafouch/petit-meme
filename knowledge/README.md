@@ -15,6 +15,7 @@ The life of Petit Meme, for someone who never opens the code. Read in this order
 
 1. [Content rules](content-rules.md): rights, takedown, and protecting the files
 2. [Platforms](platforms.md): the services Petit Meme runs on, and why each one
-3. [Shipping](shipping.md): how a change reaches production, and what the Creator hears about
-4. [Vision](vision.md): what Petit Meme protects, and where it goes
-5. [Glossary](glossary.md): the words, one meaning each
+3. [Browsers](browsers.md): which browsers Petit Meme supports, and how it stays modern
+4. [Shipping](shipping.md): how a change reaches production, and what the Creator hears about
+5. [Vision](vision.md): what Petit Meme protects, and where it goes
+6. [Glossary](glossary.md): the words, one meaning each

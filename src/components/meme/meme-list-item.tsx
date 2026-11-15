@@ -1,13 +1,16 @@
 import React from 'react'
 import { ArrowRight, Clapperboard, EllipsisVertical, Star } from 'lucide-react'
 import { motion } from 'motion/react'
-import { Link } from '@tanstack/react-router'
+import { Link, useRouter } from '@tanstack/react-router'
 import { BunnyPlayIcon } from '~/components/icon/play'
 import { MemeActionsSheet } from '~/components/meme/meme-actions-sheet'
 import { MemeExportSubmenu } from '~/components/meme/meme-export-menu'
 import { MemeHighlightedTitle } from '~/components/meme/meme-highlighted-title'
 import { MemeLanguageBadge } from '~/components/meme/meme-language-badge'
-import { MemeVideoThumbnail } from '~/components/meme/meme-video-thumbnail'
+import {
+  MemeVideoThumbnail,
+  type ThumbnailPriority
+} from '~/components/meme/meme-video-thumbnail'
 import { useBookmarkAction } from '~/components/meme/use-bookmark-action'
 import { useMemeExport } from '~/components/meme/use-meme-export'
 import {
@@ -19,6 +22,7 @@ import {
 } from '~/components/ui/dropdown-menu'
 import type { MemeWithVideo } from '~/constants/meme'
 import { MEME_PLAYER_TRANSITION_NAME } from '~/constants/motion'
+import type { HighlightedText } from '~/helpers/highlight'
 import { matchIsContentLocaleForeign } from '~/helpers/i18n-content'
 import { useIsCoarsePointer } from '~/hooks/use-is-coarse-pointer'
 import {
@@ -28,6 +32,7 @@ import {
 } from '~/lib/algolia-insights'
 import { matchIsCoarsePointer } from '~/lib/pointer'
 import { cn } from '~/lib/utils'
+import { nameViewTransitionUntilResolved } from '~/lib/view-transition'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 
@@ -37,17 +42,10 @@ export type MemeListItemProps = {
   size: keyof typeof sizes
   position: number
   onOpenPlayer: (meme: MemeWithVideo, trigger: HTMLElement) => void
-  highlightedTitle?: string
+  highlightedTitle?: HighlightedText
   queryID?: string
   authenticatedUserToken?: string
-}
-
-const nameMorphingThumbnail = (link: HTMLElement) => {
-  const thumbnail = link.closest<HTMLElement>('[data-meme-thumbnail]')
-
-  if (thumbnail) {
-    thumbnail.style.viewTransitionName = MEME_PLAYER_TRANSITION_NAME
-  }
+  thumbnailPriority?: ThumbnailPriority
 }
 
 const sizes = {
@@ -57,8 +55,8 @@ const sizes = {
     icon: 'size-4'
   },
   md: {
-    title: 'font-medium text-md leading-none',
-    views: 'text-md',
+    title: 'font-medium text-sm leading-none',
+    views: 'text-sm',
     icon: 'size-5'
   }
 } as const satisfies Record<string, Record<string, string>>
@@ -106,8 +104,10 @@ export const MemeListItem = React.memo(
     size,
     queryID,
     position,
-    authenticatedUserToken
+    authenticatedUserToken,
+    thumbnailPriority
   }: MemeListItemProps) => {
+    const router = useRouter()
     const isCoarsePointer = useIsCoarsePointer()
     const shareMutation = useMemeExport({ mode: 'share', queryID })
     const downloadMutation = useMemeExport({ mode: 'download', queryID })
@@ -133,7 +133,17 @@ export const MemeListItem = React.memo(
       }
 
       if (matchIsCoarsePointer()) {
-        nameMorphingThumbnail(event.currentTarget)
+        const thumbnail = event.currentTarget.closest<HTMLElement>(
+          '[data-meme-thumbnail]'
+        )
+
+        if (thumbnail) {
+          nameViewTransitionUntilResolved(
+            thumbnail,
+            MEME_PLAYER_TRANSITION_NAME,
+            router
+          )
+        }
 
         return
       }
@@ -159,19 +169,21 @@ export const MemeListItem = React.memo(
         <motion.div className="group relative aspect-video w-full text-sm overflow-hidden rounded-lg border border-white/10">
           <MemeVideoThumbnail
             bunnyId={meme.video.bunnyId}
-            alt={meme.title}
             duration={meme.video.duration}
+            priority={thumbnailPriority}
           >
             <Link
               to="/memes/$memeId"
               params={{ memeId: meme.id }}
               preload={false}
               viewTransition
-              className="touch-tap size-full delay-75 cursor-pointer text-white/80 place-items-center outline-none grid"
+              className="touch-tap size-full delay-75 cursor-pointer text-white/80 place-items-center outline-none rounded-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset grid"
               onClick={handlePlayClick}
             >
-              <div className="sr-only">{m.meme_play_video()}</div>
-              <div className="rounded-full text-white size-8 md:size-10 flex justify-center items-center bg-black/70 opacity-90 border border-muted-foreground md:opacity-0 group-hover:opacity-100 duration-300 transition-all group-focus-within:opacity-100">
+              <span className="sr-only">
+                {m.meme_play_video_named({ title: meme.title })}
+              </span>
+              <div className="rounded-full text-white size-8 md:size-10 flex justify-center items-center bg-black/70 opacity-90 border border-muted-foreground pointer-fine:md:opacity-0 group-hover:opacity-100 duration-300 transition-all group-focus-within:opacity-100">
                 <BunnyPlayIcon className="fill-white w-3.5 md:w-4.5" />
               </div>
             </Link>
@@ -218,8 +230,10 @@ export const MemeListItem = React.memo(
                 render={
                   <button
                     type="button"
-                    aria-label={m.meme_open_options()}
-                    className="relative touch-tap after:absolute after:-inset-x-3 after:-inset-y-2"
+                    aria-label={m.meme_open_options_named({
+                      title: meme.title
+                    })}
+                    className="relative touch-tap rounded-md data-popup-open:bg-muted after:absolute after:-inset-x-3 after:-inset-y-2"
                   />
                 }
               >
@@ -227,9 +241,11 @@ export const MemeListItem = React.memo(
               </MemeActionsSheet>
             ) : (
               <DropdownMenu>
-                <DropdownMenuTrigger className="relative after:absolute after:-inset-x-3 after:-inset-y-2">
+                <DropdownMenuTrigger className="relative rounded-md data-popup-open:bg-muted after:absolute after:-inset-x-3 after:-inset-y-2">
                   <EllipsisVertical className={cn(sizes[size].icon)} />
-                  <span className="sr-only">{m.meme_open_options()}</span>
+                  <span className="sr-only">
+                    {m.meme_open_options_named({ title: meme.title })}
+                  </span>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-auto">
                   <DropdownMenuLinkItem

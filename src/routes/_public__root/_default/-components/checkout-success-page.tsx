@@ -30,14 +30,18 @@ export const CheckoutSuccessPage = () => {
   React.useEffect(() => {
     const canvas = canvasRef.current
 
-    if (!canvas) {
-      return
+    if (!canvas || isReducedMotion) {
+      return () => {}
     }
 
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       void showCanvas(canvas)
     }, CONFETTI_DELAY_MS)
-  }, [])
+
+    return () => {
+      clearTimeout(timeoutId)
+    }
+  }, [isReducedMotion])
 
   return (
     <motion.div

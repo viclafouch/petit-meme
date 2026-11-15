@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { sendConversionEvent } from '~/lib/algolia-insights'
 import { downloadBlob, matchIsBlobShareable, shareBlob } from '~/lib/download'
 import { deliverMemeBlob, exportMeme } from '~/lib/meme-export'
+import { lowPriorityServerFnFetch } from '~/lib/server-fn-fetch'
 import {
   getMemeExportFile,
   recordMemeExport
@@ -117,7 +118,8 @@ describe('exportMeme counting', () => {
 
     expect(wasExported).toBe(true)
     expect(recordMemeExport).toHaveBeenCalledExactlyOnceWith({
-      data: { memeId: 'meme-1', action: 'download' }
+      data: { memeId: 'meme-1', action: 'download' },
+      fetch: lowPriorityServerFnFetch
     })
   })
 

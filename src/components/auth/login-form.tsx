@@ -112,7 +112,8 @@ export const LoginForm = ({
               label={m.common_email()}
               required
               type="email"
-              autoComplete="email"
+              autoComplete="username"
+              spellCheck={false}
               placeholder={m.auth_email_placeholder()}
             />
           )

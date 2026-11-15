@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { MemeStatus } from '~/db/generated/prisma/enums'
+import { serializeJsonLd } from '~/helpers/json-ld'
 import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import { getCrawlerStreamUrl } from '~/lib/crawler-video'
 import { buildBreadcrumbJsonLd, buildMemeJsonLd } from '~/lib/seo/json-ld'
@@ -41,13 +42,13 @@ export const Route = createFileRoute('/_public__root/_default/memes/$memeId')({
       return [
         {
           type: 'application/ld+json',
-          children: JSON.stringify(
+          children: serializeJsonLd(
             buildMemeJsonLd(meme, loaderData.crawlerStreamUrl)
           )
         },
         {
           type: 'application/ld+json',
-          children: JSON.stringify(
+          children: serializeJsonLd(
             buildBreadcrumbJsonLd([
               { name: m.meme_breadcrumb_home(), pathname: '/' },
               {
@@ -77,6 +78,7 @@ export const Route = createFileRoute('/_public__root/_default/memes/$memeId')({
           {
             rel: 'preload',
             as: 'image',
+            fetchPriority: 'high',
             href: buildVideoImageUrl(loaderData.meme.video.bunnyId)
           }
         ]

@@ -91,7 +91,7 @@ export const MemeClassificationCard = ({
           <form.Field
             name="categoryIds"
             children={(field) => {
-              const isInvalid = matchIsFieldInvalid(field.state.meta)
+              const isInvalid = matchIsFieldInvalid(field)
 
               return (
                 <Field data-invalid={isInvalid}>
@@ -121,6 +121,9 @@ export const MemeClassificationCard = ({
                               <ComboboxChipsInput
                                 id={CATEGORIES_FIELD_ID}
                                 aria-invalid={isInvalid}
+                                aria-describedby={
+                                  isInvalid ? `${field.name}-error` : undefined
+                                }
                                 placeholder={
                                   categoryIds.length > 0
                                     ? undefined
@@ -151,7 +154,10 @@ export const MemeClassificationCard = ({
                     </ComboboxContent>
                   </Combobox>
                   {isInvalid ? (
-                    <FieldError errors={field.state.meta.errors} />
+                    <FieldError
+                      id={`${field.name}-error`}
+                      errors={field.state.meta.errors}
+                    />
                   ) : null}
                 </Field>
               )
@@ -160,7 +166,7 @@ export const MemeClassificationCard = ({
           <form.Field
             name="tweetUrl"
             children={(field) => {
-              const isInvalid = matchIsFieldInvalid(field.state.meta)
+              const isInvalid = matchIsFieldInvalid(field)
 
               return (
                 <Field data-invalid={isInvalid}>
@@ -173,19 +179,29 @@ export const MemeClassificationCard = ({
                     type="url"
                     inputMode="url"
                     autoComplete="off"
+                    spellCheck={false}
+                    autoCapitalize="none"
                     placeholder="https://x.com/..."
                     aria-invalid={isInvalid}
+                    aria-describedby={
+                      isInvalid
+                        ? `${field.name}-description ${field.name}-error`
+                        : `${field.name}-description`
+                    }
                     value={field.state.value ?? ''}
                     onBlur={field.handleBlur}
                     onChange={(event) => {
                       field.handleChange(event.target.value)
                     }}
                   />
-                  <FieldDescription>
+                  <FieldDescription id={`${field.name}-description`}>
                     Optionnel. Rempli tout seul pour un import depuis X.
                   </FieldDescription>
                   {isInvalid ? (
-                    <FieldError errors={field.state.meta.errors} />
+                    <FieldError
+                      id={`${field.name}-error`}
+                      errors={field.state.meta.errors}
+                    />
                   ) : null}
                 </Field>
               )

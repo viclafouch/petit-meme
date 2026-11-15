@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { getFreePlan, getPremiumPlan } from '~/constants/plan'
+import { serializeJsonLd } from '~/helpers/json-ld'
 import { buildPricingJsonLd } from '~/lib/seo/json-ld'
 import { buildSeo } from '~/lib/seo/meta'
 import { buildOgImageUrl } from '~/lib/seo/url'
@@ -21,7 +22,7 @@ export const Route = createFileRoute('/_public__root/_default/pricing/')({
     return [
       {
         type: 'application/ld+json',
-        children: JSON.stringify(
+        children: serializeJsonLd(
           buildPricingJsonLd({
             plans: [getFreePlan(), getPremiumPlan()],
             faqItems: getPricingFaqItems()

@@ -44,6 +44,7 @@ const matchIsDismissal = (error: unknown) => {
 }
 
 let deferredPrompt: InstallPromptEvent | null = null
+let isInstalledFromThisTab = false
 const listeners = new Set<() => void>()
 
 const notify = () => {
@@ -56,7 +57,17 @@ const getNavigator = () => {
   return navigator as InstallableNavigator
 }
 
+const markInstalledFromThisTab = () => {
+  isInstalledFromThisTab = true
+  deferredPrompt = null
+  notify()
+}
+
 export const getInstallMethod = (): InstallMethod => {
+  if (isInstalledFromThisTab) {
+    return 'installed'
+  }
+
   return resolveInstallMethod({
     isStandalone: matchIsStandalone(),
     hasInstallApi: typeof getNavigator().install === 'function',
@@ -99,10 +110,7 @@ export const captureInstallPrompt = () => {
     notify()
   })
 
-  window.addEventListener('appinstalled', () => {
-    deferredPrompt = null
-    notify()
-  })
+  window.addEventListener('appinstalled', markInstalledFromThisTab)
 }
 
 const trackAppInstalled = () => {
@@ -198,7 +206,7 @@ const installWithDeferredPrompt = async (): Promise<NativeInstallOutcome> => {
   }
 }
 
-export const promptNativeInstall = async () => {
+const installWithAvailableApi = async () => {
   const browserApiOutcome = await installWithBrowserApi()
 
   if (browserApiOutcome !== 'unavailable') {
@@ -206,4 +214,14 @@ export const promptNativeInstall = async () => {
   }
 
   return installWithDeferredPrompt()
+}
+
+export const promptNativeInstall = async () => {
+  const outcome = await installWithAvailableApi()
+
+  if (outcome === 'accepted') {
+    markInstalledFromThisTab()
+  }
+
+  return outcome
 }

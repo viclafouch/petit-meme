@@ -11,39 +11,33 @@ import {
   TooltipContent,
   TooltipTrigger
 } from '~/components/ui/tooltip'
-import { SECONDS_PER_MINUTE } from '~/constants/time'
+import { formatClockDuration, splitMinutesAndSeconds } from '~/helpers/duration'
 import { m } from '~/paraglide/messages'
+import { getLocale } from '~/paraglide/runtime'
 
 const OVERLAY_BUTTON_CLASS =
   'rounded-full bg-black/50 hover:bg-black/70 text-white size-9 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/50'
-
-const formatVideoDuration = (seconds: number) => {
-  const minutes = Math.floor(seconds / SECONDS_PER_MINUTE)
-  const remainingSeconds = Math.floor(seconds % SECONDS_PER_MINUTE)
-
-  return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`
-}
 
 type RemainingTimeBadgeProps = {
   remainingTime: number
 }
 
 const RemainingTimeBadge = ({ remainingTime }: RemainingTimeBadgeProps) => {
-  const remainingMinutes = Math.floor(remainingTime / SECONDS_PER_MINUTE)
-  const remainingSeconds = Math.floor(remainingTime % SECONDS_PER_MINUTE)
-  const ariaLabel = m.meme_time_remaining({
-    minutes: remainingMinutes,
-    minuteUnit: m.meme_minutes({ count: remainingMinutes }),
-    seconds: remainingSeconds,
-    secondUnit: m.meme_seconds({ count: remainingSeconds })
-  })
+  const { minutes, seconds } = splitMinutesAndSeconds(remainingTime)
 
   return (
-    <span
-      className="absolute bottom-3 left-3 text-xs font-medium text-white bg-black/50 rounded-md px-2 py-1"
-      aria-label={ariaLabel}
-    >
-      {formatVideoDuration(remainingTime)}
+    <span className="absolute bottom-3 left-3 text-xs font-medium text-white bg-black/50 rounded-md px-2 py-1">
+      <span aria-hidden="true">
+        {formatClockDuration(remainingTime, getLocale())}
+      </span>
+      <span className="sr-only">
+        {m.meme_time_remaining({
+          minutes,
+          minuteUnit: m.meme_minutes({ count: minutes }),
+          seconds,
+          secondUnit: m.meme_seconds({ count: seconds })
+        })}
+      </span>
     </span>
   )
 }
@@ -117,7 +111,6 @@ export const VideoOverlay = ({
   const fullscreenLabel = isFullscreen
     ? m.meme_exit_fullscreen()
     : m.meme_fullscreen()
-  const muteLabel = isMuted ? m.meme_unmute() : m.meme_mute()
 
   return (
     <div className="absolute inset-0 z-10">
@@ -161,7 +154,8 @@ export const VideoOverlay = ({
                 variant="ghost"
                 className={OVERLAY_BUTTON_CLASS}
                 onClick={handleMuteClick}
-                aria-label={muteLabel}
+                aria-label={m.meme_mute()}
+                aria-pressed={isMuted}
               />
             }
           >
@@ -171,7 +165,7 @@ export const VideoOverlay = ({
               <Volume2 className="size-4" />
             )}
           </TooltipTrigger>
-          <TooltipContent side="left">{muteLabel}</TooltipContent>
+          <TooltipContent side="left">{m.meme_mute()}</TooltipContent>
         </Tooltip>
       </div>
     </div>

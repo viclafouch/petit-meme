@@ -67,7 +67,7 @@ export const MemesFilterLanguage = React.memo(
               return (
                 <label
                   key={contentLocale}
-                  className="flex items-center gap-2 cursor-pointer"
+                  className="flex items-center gap-2 cursor-pointer pointer-coarse:min-h-11"
                 >
                   <Checkbox
                     checked={isChecked}

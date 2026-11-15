@@ -15,6 +15,17 @@ vi.mock(import('~/lib/sentry'), () => {
   return { captureWithFeature: vi.fn<typeof captureWithFeature>() }
 })
 
+vi.mock(import('~/lib/display-mode'), () => {
+  return {
+    matchIsStandalone: () => {
+      return false
+    },
+    subscribeToDisplayMode: () => {
+      return () => {}
+    }
+  }
+})
+
 const stubInstallApi = (install: () => Promise<void>) => {
   vi.stubGlobal('navigator', { install })
 }
@@ -73,5 +84,56 @@ describe('install analytics', () => {
       surface: 'home',
       outcome: 'dismissed'
     })
+  })
+})
+
+const loadFreshInstallApp = async () => {
+  vi.resetModules()
+
+  return import('~/lib/install-app')
+}
+
+describe('getInstallMethod', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.clearAllMocks()
+  })
+
+  it('should report the app as installed once an install is accepted in this tab', async () => {
+    stubInstallApi(async () => {})
+    const installApp = await loadFreshInstallApp()
+
+    expect(installApp.getInstallMethod()).toBe('native')
+
+    await installApp.promptNativeInstall()
+
+    expect(installApp.getInstallMethod()).toBe('installed')
+  })
+
+  it('should keep offering the install after a dismissal', async () => {
+    stubInstallApi(async () => {
+      throw new DOMException('Dismissed', 'AbortError')
+    })
+    const installApp = await loadFreshInstallApp()
+
+    await installApp.promptNativeInstall()
+
+    expect(installApp.getInstallMethod()).toBe('native')
+  })
+
+  it('should report the app as installed once the browser announces the install', async () => {
+    const fakeWindow = new EventTarget()
+
+    vi.stubGlobal('window', fakeWindow)
+    vi.stubGlobal('navigator', {})
+    const installApp = await loadFreshInstallApp()
+
+    installApp.captureInstallPrompt()
+
+    expect(installApp.getInstallMethod()).toBe('browser-guide')
+
+    fakeWindow.dispatchEvent(new Event('appinstalled'))
+
+    expect(installApp.getInstallMethod()).toBe('installed')
   })
 })

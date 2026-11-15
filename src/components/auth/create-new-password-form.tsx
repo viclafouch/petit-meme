@@ -7,7 +7,11 @@ import { useAppForm } from '~/components/form/use-app-form'
 import { useErrorFocus } from '~/components/form/use-error-focus'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import { LoadingButton } from '~/components/ui/loading-button'
-import { getPasswordWithConfirmationSchema } from '~/constants/auth'
+import {
+  getPasswordWithConfirmationSchema,
+  PASSWORD_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH
+} from '~/constants/auth'
 import { authClient } from '~/lib/auth-client'
 import {
   captureUnexpectedAuthError,
@@ -89,6 +93,8 @@ export const CreateNewPasswordForm = ({
               required
               type="password"
               autoComplete="new-password"
+              minLength={PASSWORD_MIN_LENGTH}
+              maxLength={PASSWORD_MAX_LENGTH}
               placeholder="******"
             />
           )
@@ -103,6 +109,8 @@ export const CreateNewPasswordForm = ({
               required
               type="password"
               autoComplete="new-password"
+              minLength={PASSWORD_MIN_LENGTH}
+              maxLength={PASSWORD_MAX_LENGTH}
               placeholder="******"
             />
           )

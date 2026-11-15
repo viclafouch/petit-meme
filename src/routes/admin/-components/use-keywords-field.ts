@@ -1,5 +1,6 @@
 import React from 'react'
 import { removeDuplicates } from '~/helpers/array'
+import { matchIsImeComposing } from '~/helpers/keyboard'
 import { parseKeywordsInput } from '~/helpers/keywords'
 
 type UseKeywordsFieldParams = {
@@ -22,6 +23,21 @@ export function useKeywordsField({ setKeywordsValue }: UseKeywordsFieldParams) {
     setKeywordValue('')
   }
 
+  const handleKeywordKeyDown = (
+    event: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (event.key !== 'Enter') {
+      return
+    }
+
+    event.preventDefault()
+    event.stopPropagation()
+
+    if (!matchIsImeComposing(event)) {
+      handleAddKeyword()
+    }
+  }
+
   const handleRemoveKeyword = (keywordIndex: number) => {
     setKeywordsValue((prevState) => {
       return prevState.filter((_, index) => {
@@ -34,6 +50,7 @@ export function useKeywordsField({ setKeywordsValue }: UseKeywordsFieldParams) {
     keywordValue,
     setKeywordValue,
     handleAddKeyword,
+    handleKeywordKeyDown,
     handleRemoveKeyword
   }
 }

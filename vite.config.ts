@@ -127,6 +127,14 @@ const SERVER_ONLY_PACKAGES = [
 
 const BROWSER_ONLY_PACKAGES = ['@ffmpeg/ffmpeg', 'hls.js']
 
+const BROWSER_FLOOR_TARGETS = [
+  'chrome111',
+  'edge111',
+  'firefox128',
+  'safari16.4',
+  'ios16.4'
+]
+
 export default defineConfig(async ({ mode }) => {
   // oxlint-disable-next-line node/no-process-env -- the Vite config is the build boundary that loads the mode's env files into the process environment
   const processEnvironment = process.env
@@ -147,6 +155,9 @@ export default defineConfig(async ({ mode }) => {
   return {
     resolve: {
       tsconfigPaths: true
+    },
+    build: {
+      target: BROWSER_FLOOR_TARGETS
     },
     server: {
       port: 3000,

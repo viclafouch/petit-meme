@@ -88,7 +88,10 @@ test.describe('the phone journey', () => {
       .getByRole('searchbox', { name: m.nav_search() })
       .fill('cookie')
     await searchDrawer
-      .getByRole('link', { name: E2E_NAMED_MEMES.mostViewed.title })
+      .getByRole('link', {
+        name: E2E_NAMED_MEMES.mostViewed.title,
+        exact: true
+      })
       .click()
 
     await expect(page).toHaveURL(PLAYABLE_MEME_PATHNAME)

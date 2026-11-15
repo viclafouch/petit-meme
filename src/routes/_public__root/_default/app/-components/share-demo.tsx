@@ -90,7 +90,7 @@ const VideoBubble = () => {
           alt=""
           width={640}
           height={349}
-          loading="lazy"
+          fetchPriority="low"
           decoding="async"
           className="size-full object-cover"
         />

@@ -3,11 +3,12 @@ import { ChevronRightIcon, EllipsisIcon } from 'lucide-react'
 import { mergeProps } from '@base-ui/react/merge-props'
 import { useRender } from '@base-ui/react/use-render'
 import { cn } from '~/lib/utils'
+import { m } from '~/paraglide/messages'
 
 function Breadcrumb({ className, ...props }: React.ComponentProps<'nav'>) {
   return (
     <nav
-      aria-label="breadcrumb"
+      aria-label={m.common_breadcrumb()}
       data-slot="breadcrumb"
       className={cn(className)}
       {...props}
@@ -32,7 +33,7 @@ function BreadcrumbItem({ className, ...props }: React.ComponentProps<'li'>) {
   return (
     <li
       data-slot="breadcrumb-item"
-      className={cn('inline-flex items-center gap-1.5', className)}
+      className={cn('inline-flex items-center gap-1.5 sm:gap-2.5', className)}
       {...props}
     />
   )
@@ -58,34 +59,41 @@ function BreadcrumbLink({
   })
 }
 
-function BreadcrumbPage({ className, ...props }: React.ComponentProps<'span'>) {
-  return (
-    <span
-      data-slot="breadcrumb-page"
-      role="link"
-      aria-disabled="true"
-      aria-current="page"
-      className={cn('font-normal text-foreground', className)}
-      {...props}
-    />
-  )
+function BreadcrumbPage({
+  className,
+  render,
+  ...props
+}: useRender.ComponentProps<'a'>) {
+  return useRender({
+    defaultTagName: 'a',
+    props: mergeProps<'a'>(
+      {
+        'aria-current': 'page',
+        className: cn('font-normal text-foreground', className)
+      },
+      props
+    ),
+    render,
+    state: {
+      slot: 'breadcrumb-page'
+    }
+  })
 }
 
 function BreadcrumbSeparator({
   children,
   className,
   ...props
-}: React.ComponentProps<'li'>) {
+}: React.ComponentProps<'span'>) {
   return (
-    <li
+    <span
       data-slot="breadcrumb-separator"
-      role="presentation"
       aria-hidden="true"
       className={cn('[&>svg]:size-3.5', className)}
       {...props}
     >
       {children ?? <ChevronRightIcon />}
-    </li>
+    </span>
   )
 }
 

@@ -10,6 +10,7 @@ import {
 import { getErrorMessage } from '~/helpers/error'
 import { createLatch, type LatchEnd } from '~/helpers/promise'
 import { authClient } from '~/lib/auth-client'
+import { yieldToMain } from '~/lib/main-thread'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
@@ -37,9 +38,7 @@ const startCheckout = async (
   queryClient: QueryClient,
   billingPeriod: BillingPeriod
 ): Promise<LatchEnd> => {
-  await new Promise((resolve) => {
-    setTimeout(resolve, 1)
-  })
+  await yieldToMain()
 
   const premiumSubscription = await queryClient.query(
     getPremiumSubscriptionQueryOpts()

@@ -1,6 +1,10 @@
 import { cn } from '~/lib/utils'
 
-export const LoadingSpinner = ({ className }: { className?: string }) => {
+export const LoadingSpinner = ({
+  className,
+  'aria-label': ariaLabel,
+  ...props
+}: React.ComponentProps<'svg'>) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -12,6 +16,9 @@ export const LoadingSpinner = ({ className }: { className?: string }) => {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
+      aria-hidden={ariaLabel ? undefined : true}
+      aria-label={ariaLabel}
+      {...props}
       className={cn('animate-spin', className)}
     >
       <path d="M21 12a9 9 0 1 1-6.219-8.56" />

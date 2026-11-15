@@ -155,7 +155,9 @@ test.describe('an anonymous Visitor', () => {
 
     await getGenerateButton(page).click()
 
-    await expect(page.getByText(m.studio_enter_text())).toBeVisible()
+    await expect(
+      page.getByText(m.studio_enter_text()).filter({ visible: true })
+    ).toBeVisible()
     await expect(getCancelProcessingButton(page)).toBeHidden()
   })
 

@@ -23,12 +23,16 @@ export const PublicLayout = () => {
         >
           {m.common_skip_to_content()}
         </a>
-        <div className="fixed top-0 right-0 left-0 z-50">
+        <div className="fixed top-0 right-0 left-0 z-50 pt-[env(safe-area-inset-top,0px)]">
           <LocaleBanner isInitiallyDismissed={_localeBannerDismissed} />
           <Navbar />
         </div>
-        <div className="h-(--navbar-height)" aria-hidden="true" />
-        <main id="main-content" className="flex flex-1 flex-col">
+        <div className="h-(--navbar-space)" aria-hidden="true" />
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="flex flex-1 flex-col outline-none"
+        >
           <Outlet />
         </main>
         <Footer className={isHomePage ? undefined : 'max-lg:hidden'} />

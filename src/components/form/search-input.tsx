@@ -16,15 +16,19 @@ export const SearchInput = React.memo(
     })
 
     return (
-      <div className="flex w-full sm:max-w-xs items-center gap-2">
+      <search className="flex w-full sm:max-w-xs items-center gap-2">
         <Input
           ref={inputRef}
           defaultValue={defaultValue}
           onChange={handleChange}
           type="search"
+          enterKeyHint="search"
+          spellCheck={false}
+          autoCapitalize="none"
           placeholder={placeholder}
+          aria-label={placeholder}
         />
-      </div>
+      </search>
     )
   }
 )

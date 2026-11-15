@@ -18,3 +18,7 @@ export const serverFnFetch: CustomFetch = async (input, init) => {
 
   return response
 }
+
+export const lowPriorityServerFnFetch: CustomFetch = (input, init) => {
+  return serverFnFetch(input, { ...init, priority: 'low' })
+}

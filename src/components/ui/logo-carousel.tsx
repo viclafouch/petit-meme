@@ -1,16 +1,13 @@
 /* oxlint-disable id-length */
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 
-// Define the structure for our logo objects
 export type Logo = {
   name: string
   id: number
   img: string
 }
 
-// Utility function to randomly shuffle an array
-// This is used to mix up the order of logos for a more dynamic display
 const shuffleArray = <T,>(array: T[]): T[] => {
   const shuffled = [...array]
 
@@ -23,20 +20,16 @@ const shuffleArray = <T,>(array: T[]): T[] => {
   return shuffled
 }
 
-// Utility function to distribute logos across multiple columns
-// This ensures each column has a balanced number of logos
 const distributeLogos = (allLogos: Logo[], columnCount: number): Logo[][] => {
   const shuffled = shuffleArray(allLogos)
   const columns: Logo[][] = Array.from({ length: columnCount }, () => {
     return []
   })
 
-  // Distribute logos evenly across columns
   for (const [index, logo] of shuffled.entries()) {
     columns[index % columnCount]!.push(logo)
   }
 
-  // Ensure all columns have the same number of logos by filling shorter columns
   const maxLength = Math.max(
     ...columns.map((col) => {
       return col.length
@@ -52,7 +45,6 @@ const distributeLogos = (allLogos: Logo[], columnCount: number): Logo[][] => {
   return columns
 }
 
-// Props for the LogoColumn component
 type LogoColumnProps = {
   logos: Logo[]
   index: number
@@ -60,17 +52,14 @@ type LogoColumnProps = {
   cycleInterval: number
 }
 
-// LogoColumn component: Displays a single column of animated logos
 const LogoColumn: React.FC<LogoColumnProps> = React.memo(
   ({ logos, index, currentTime, cycleInterval }) => {
     const columnDelay = index * 200
-    // Calculate which logo should be displayed based on the current time
     const adjustedTime =
       (currentTime + columnDelay) % (cycleInterval * logos.length)
     const currentIndex = Math.floor(adjustedTime / cycleInterval)
 
     return (
-      // Framer Motion component for the column container
       <div className="relative overflow-hidden md:h-24 md:w-48">
         {/* AnimatePresence enables animation of components that are removed from the DOM */}
         <AnimatePresence mode="wait">
@@ -78,9 +67,7 @@ const LogoColumn: React.FC<LogoColumnProps> = React.memo(
           <motion.div
             key={`${logos[currentIndex]!.id}-${currentIndex}`}
             className="absolute inset-0 flex items-center justify-center"
-            // Animation for when the logo enters
             initial={{ y: '10%', opacity: 0, filter: 'blur(8px)' }}
-            // Animation for when the logo is displayed
             animate={{
               y: '0%',
               opacity: 1,
@@ -94,7 +81,6 @@ const LogoColumn: React.FC<LogoColumnProps> = React.memo(
                 duration: 0.5
               }
             }}
-            // Animation for when the logo exits
             exit={{
               y: '-20%',
               opacity: 0,
@@ -109,7 +95,9 @@ const LogoColumn: React.FC<LogoColumnProps> = React.memo(
             <img
               src={logos[currentIndex]!.img}
               className="object-contain w-full h-full"
-              alt={logos[currentIndex]!.name}
+              alt=""
+              loading="lazy"
+              decoding="async"
             />
           </motion.div>
         </AnimatePresence>
@@ -120,7 +108,6 @@ const LogoColumn: React.FC<LogoColumnProps> = React.memo(
 
 LogoColumn.displayName = 'LogoColumn'
 
-// Main LogoCarousel component
 const LogoCarousel = ({
   columnCount = 2,
   logos,
@@ -134,23 +121,22 @@ const LogoCarousel = ({
 }) => {
   const [logoSets, setLogoSets] = useState<Logo[][]>([])
   const [currentTime, setCurrentTime] = useState(0)
+  const [isOnScreen, setIsOnScreen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   if (!logos || logos.length === 0) {
     throw new Error('No logos provided to LogoCarousel')
   }
 
-  // Memoize the array of logos to prevent unnecessary re-renders
   const allLogos: Logo[] = useMemo(() => {
     return logos.length > 0 ? logos : []
   }, [logos])
 
-  // Distribute logos across columns when the component mounts
   useEffect(() => {
     const distributedLogos = distributeLogos(allLogos, columnCount)
     setLogoSets(distributedLogos)
   }, [allLogos])
 
-  // Function to update the current time (used for logo cycling)
   const updateTime = useCallback(() => {
     setCurrentTime((prevTime) => {
       return prevTime + 100
@@ -158,23 +144,42 @@ const LogoCarousel = ({
   }, [])
 
   useEffect(() => {
-    // Apply initial delay before starting the timer
-    const timeoutId = setTimeout(() => {
-      const intervalId = setInterval(updateTime, 100)
+    const container = containerRef.current
 
-      return () => {
-        return clearInterval(intervalId)
-      }
+    if (!container) {
+      return () => {}
+    }
+
+    const observer = new IntersectionObserver(([entry]) => {
+      setIsOnScreen(entry?.isIntersecting ?? false)
+    })
+
+    observer.observe(container)
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!isOnScreen) {
+      return () => {}
+    }
+
+    let intervalId: ReturnType<typeof setInterval> | undefined
+
+    const timeoutId = setTimeout(() => {
+      intervalId = setInterval(updateTime, 100)
     }, initialDelay)
 
     return () => {
-      return clearTimeout(timeoutId)
+      clearTimeout(timeoutId)
+      clearInterval(intervalId)
     }
-  }, [updateTime, initialDelay])
+  }, [updateTime, initialDelay, isOnScreen])
 
-  // Render the logo columns
   return (
-    <div className="flex space-x-4">
+    <div ref={containerRef} aria-hidden="true" className="flex space-x-4">
       {logoSets.map((logoItems, index) => {
         return (
           <LogoColumn

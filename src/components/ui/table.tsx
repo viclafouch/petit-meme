@@ -1,11 +1,24 @@
 import * as React from 'react'
 import { cn } from '~/lib/utils'
 
-const Table = ({ className, ...props }: React.ComponentProps<'table'>) => {
+type TableProps = React.ComponentProps<'table'> & {
+  scrollRegionLabelledBy?: string
+}
+
+const Table = ({ className, scrollRegionLabelledBy, ...props }: TableProps) => {
+  const scrollRegionProps = scrollRegionLabelledBy
+    ? {
+        role: 'region',
+        tabIndex: 0,
+        'aria-labelledby': scrollRegionLabelledBy
+      }
+    : {}
+
   return (
     <div
       data-slot="table-container"
-      className="relative w-full overflow-x-auto"
+      className="relative w-full overflow-x-auto focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
+      {...scrollRegionProps}
     >
       <table
         data-slot="table"
@@ -68,10 +81,15 @@ const TableRow = ({ className, ...props }: React.ComponentProps<'tr'>) => {
   )
 }
 
-const TableHead = ({ className, ...props }: React.ComponentProps<'th'>) => {
+const TableHead = ({
+  className,
+  scope = 'col',
+  ...props
+}: React.ComponentProps<'th'>) => {
   return (
     <th
       data-slot="table-head"
+      scope={scope}
       className={cn(
         'text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]',
         className

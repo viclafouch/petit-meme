@@ -163,7 +163,7 @@ const StatusFilterTabs = ({
             search={{
               proposalStatus: option.value === 'all' ? undefined : option.value
             }}
-            aria-selected={option.value === currentStatus}
+            isCurrent={option.value === currentStatus}
             count={statusCounts[option.value]}
           >
             {option.label}

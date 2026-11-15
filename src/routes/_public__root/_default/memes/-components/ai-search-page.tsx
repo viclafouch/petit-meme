@@ -23,6 +23,7 @@ import { getAppErrorCode } from '~/constants/error'
 import { EASE_OUT } from '~/constants/motion'
 import { buildReachedCapState } from '~/helpers/cap'
 import { getErrorMessage } from '~/helpers/error'
+import { serializeJsonLd } from '~/helpers/json-ld'
 import { snoozePremiumReminder } from '~/lib/premium-reminder'
 import { captureWithFeature } from '~/lib/sentry'
 import { buildBreadcrumbJsonLd } from '~/lib/seo/json-ld'
@@ -164,7 +165,7 @@ export const AiSearchPage = () => {
   return (
     <PageContainer as="main">
       <script type="application/ld+json">
-        {JSON.stringify(breadcrumbJsonLd)}
+        {serializeJsonLd(breadcrumbJsonLd)}
       </script>
       <PageHeader>
         <PageHeading>{m.ai_search_title()}</PageHeading>
@@ -192,7 +193,7 @@ export const AiSearchPage = () => {
                     onBlur={field.handleBlur}
                     placeholder={m.ai_search_placeholder()}
                     maxLength={MAX_PROMPT_LENGTH}
-                    className="min-h-28 resize-none text-base"
+                    className="min-h-28 resize-y text-base supports-[field-sizing:content]:resize-none"
                     aria-label={m.ai_search_title()}
                   />
                   <span
@@ -226,7 +227,7 @@ export const AiSearchPage = () => {
             </Button>
           </div>
         </form>
-        <section aria-live="polite" aria-label={m.ai_search_title()}>
+        <section aria-label={m.ai_search_title()}>
           <AnimatePresence mode="wait">
             {searchStages.isActive ? (
               <AiSearchStages key="stages" stages={searchStages.stages} />

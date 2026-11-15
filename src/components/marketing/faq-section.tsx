@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   Accordion,
   AccordionContent,
@@ -19,10 +20,14 @@ export const FaqSection = ({
   headingClassName = 'mb-4 text-3xl font-semibold md:mb-11 md:text-4xl',
   className
 }: FaqSectionProps) => {
+  const headingId = React.useId()
+
   return (
-    <section className={className}>
-      <h2 className={headingClassName}>{heading}</h2>
-      <Accordion hiddenUntilFound>
+    <section aria-labelledby={headingId} className={className}>
+      <h2 id={headingId} className={headingClassName}>
+        {heading}
+      </h2>
+      <Accordion multiple hiddenUntilFound>
         {items.map((item) => {
           return (
             <AccordionItem key={item.question} value={item.question}>

@@ -1,15 +1,10 @@
-const TRUNCATED_URL_MAX_LENGTH = 50
-
-export function truncateUrl(url: string) {
+export const formatDisplayUrl = (url: string) => {
   try {
     const parsed = new URL(url)
 
-    return `${parsed.hostname}${parsed.pathname}`.slice(
-      0,
-      TRUNCATED_URL_MAX_LENGTH
-    )
+    return `${parsed.hostname}${parsed.pathname}`
   } catch {
-    return url.slice(0, TRUNCATED_URL_MAX_LENGTH)
+    return url
   }
 }
 

@@ -7,16 +7,19 @@ import type { WithDialog } from '~/@types/dialog'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle
 } from '~/components/animate-ui/base/dialog'
 import { useAppForm } from '~/components/form/use-app-form'
 import { useErrorFocus } from '~/components/form/use-error-focus'
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
+import { Input } from '~/components/ui/input'
 import { LoadingButton } from '~/components/ui/loading-button'
-import { getPasswordSchema } from '~/constants/auth'
+import {
+  getPasswordSchema,
+  PASSWORD_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH
+} from '~/constants/auth'
 import { authClient } from '~/lib/auth-client'
 import {
   captureUnexpectedAuthError,
@@ -59,7 +62,11 @@ const getUpdatePasswordFormOpts = () => {
   })
 }
 
-const UpdatePasswordForm = () => {
+type UpdatePasswordFormProps = {
+  email: string
+}
+
+const UpdatePasswordForm = ({ email }: UpdatePasswordFormProps) => {
   const updatePasswordMutation = useMutation({
     mutationFn: async ({
       currentPassword,
@@ -108,6 +115,14 @@ const UpdatePasswordForm = () => {
       noValidate
       className="flex flex-col items-center gap-y-6 w-full"
     >
+      <Input
+        type="email"
+        autoComplete="username"
+        aria-label={m.common_email()}
+        value={email}
+        readOnly
+        className="hidden"
+      />
       <div className="flex flex-col items-center gap-y-4 w-full">
         <form.AppField
           name="currentPassword"
@@ -133,6 +148,8 @@ const UpdatePasswordForm = () => {
                 required
                 type="password"
                 autoComplete="new-password"
+                minLength={PASSWORD_MIN_LENGTH}
+                maxLength={PASSWORD_MAX_LENGTH}
                 placeholder="*******"
                 name="password"
               />
@@ -148,6 +165,8 @@ const UpdatePasswordForm = () => {
                 required
                 type="password"
                 autoComplete="new-password"
+                minLength={PASSWORD_MIN_LENGTH}
+                maxLength={PASSWORD_MAX_LENGTH}
                 placeholder="******"
               />
             )
@@ -193,19 +212,18 @@ type UpdatePasswordDialogProps = WithDialog<{ user: User }>
 
 export const UpdatePasswordDialog = ({
   open,
-  onOpenChange
+  onOpenChange,
+  user
 }: UpdatePasswordDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>{m.settings_change_password()}</DialogTitle>
-          <DialogDescription />
         </DialogHeader>
         <div>
-          <UpdatePasswordForm />
+          <UpdatePasswordForm email={user.email} />
         </div>
-        <DialogFooter />
       </DialogContent>
     </Dialog>
   )

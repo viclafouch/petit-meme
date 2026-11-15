@@ -7,6 +7,7 @@ import type {
 import type { RecommendationsRequest } from '@algolia/recommend'
 import type { MemeAlgoliaData } from '~/constants/meme'
 import { MemeContentLocale, MemeStatus } from '~/db/generated/prisma/enums'
+import { parseHighlightedHtml } from '~/helpers/highlight'
 import {
   CONTENT_LOCALE_TO_SITE_LOCALES,
   resolveCategoryTranslation,
@@ -69,7 +70,7 @@ const getHighlightedTitle = (hit: Hit<MemeRecord>) => {
     matchIsHighlightResultOption(titleHighlight) &&
     titleHighlight.matchLevel !== 'none'
 
-  return isTitleMatched ? titleHighlight.value : undefined
+  return isTitleMatched ? parseHighlightedHtml(titleHighlight.value) : undefined
 }
 
 const MEME_HIT_SCHEMA = z.object({
@@ -121,7 +122,11 @@ const parseMemeHits = (hits: unknown[]) => {
 
 const MEMES_PAGE_SCHEMA = z.object({
   memes: z.array(
-    MEME_HIT_SCHEMA.extend({ highlightedTitle: z.string().optional() })
+    MEME_HIT_SCHEMA.extend({
+      highlightedTitle: z
+        .array(z.object({ text: z.string(), isHighlighted: z.boolean() }))
+        .optional()
+    })
   ),
   queryID: z.string().optional(),
   page: z.number(),

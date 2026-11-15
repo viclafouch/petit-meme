@@ -79,7 +79,6 @@ export const AiAssistStartDialog = ({
           <Label htmlFor="ai-assist-prompt">Contexte (optionnel)</Label>
           <Textarea
             id="ai-assist-prompt"
-            className="field-sizing-content"
             placeholder="Ex: C'est le mème du chat qui regarde la caméra..."
             rows={2}
             maxLength={MEME_FILL_CUSTOM_PROMPT_MAX_LENGTH}
@@ -277,7 +276,7 @@ export const AiAssistReviewDialog = ({
 }: AiAssistReviewDialogProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-dialog overflow-y-auto sm:max-w-xl">
+      <DialogContent className="max-h-dialog overflow-y-auto overscroll-contain sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="size-5" aria-hidden />

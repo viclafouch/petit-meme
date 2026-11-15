@@ -32,3 +32,14 @@ export const getSuggestedLocale = ({
 
   return null
 }
+
+export const parseAcceptLanguage = (header: string) => {
+  return header
+    .split(',')
+    .map((entry) => {
+      return entry.split(';').at(0)?.trim() ?? ''
+    })
+    .filter((language) => {
+      return language !== ''
+    })
+}

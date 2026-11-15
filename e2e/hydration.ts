@@ -51,3 +51,13 @@ export const repeatUntilRequested = async (
     ])
   }).toPass({ timeout: HYDRATION_GIVE_UP_MS })
 }
+
+export const repeatUntilHidden = async (
+  act: () => Promise<void>,
+  target: Locator
+) => {
+  await expect(async () => {
+    await act()
+    await expect(target).toBeHidden({ timeout: HYDRATED_ACTION_MS })
+  }).toPass({ timeout: HYDRATION_GIVE_UP_MS })
+}

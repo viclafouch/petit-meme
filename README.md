@@ -216,6 +216,7 @@ Previews share the rest with production, since none of it holds data: the Sentry
 - The preview build applies pending migrations to the `preview` branch before it builds, through `vercel.sh`.
 - Stripe and Bunny send their webhooks to one fixed URL, so none reaches a preview. A test checkout still turns the account Premium on its return URL, but a cancellation or a renewal never syncs back, and a new upload waits for its first frame.
 - Vercel keeps the schedules of a preview inactive, so nothing wakes the `preview` branch.
+- A preview sits behind Vercel Authentication, and the firewall's "Challenge suspicious bots" rule answers `429` to `curl` and `vercel curl`, bypass included. To test a preview from a script, open a share link in a real browser such as Playwright's Chromium, then call the app from the page.
 
 `.env.preview`, kept out of Git, holds every Preview value, since Vercel keeps the Secrets write-only. `pnpm run env:check` compares it with Vercel Preview.
 

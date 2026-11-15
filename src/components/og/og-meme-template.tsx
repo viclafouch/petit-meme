@@ -1,35 +1,9 @@
-import { OG_MEME_THUMBNAIL_SOURCE } from '~/constants/og'
 import { OgBrandBar } from './og-backdrop'
-
-const BACKDROP_BLEED = '-8%'
+import { OgThumbnailFrame } from './og-thumbnail-frame'
 
 export const OgMemeTemplate = () => {
   return (
-    <div
-      tw="flex w-full h-full relative items-center justify-center overflow-hidden"
-      style={{ backgroundColor: '#0a0a0a' }}
-    >
-      <img
-        src={OG_MEME_THUMBNAIL_SOURCE}
-        alt=""
-        tw="absolute"
-        style={{
-          top: BACKDROP_BLEED,
-          right: BACKDROP_BLEED,
-          bottom: BACKDROP_BLEED,
-          left: BACKDROP_BLEED,
-          width: '116%',
-          height: '116%',
-          objectFit: 'cover',
-          filter: 'blur(40px) brightness(0.5)'
-        }}
-      />
-      <img
-        src={OG_MEME_THUMBNAIL_SOURCE}
-        alt=""
-        tw="absolute inset-0 w-full h-full"
-        style={{ objectFit: 'contain' }}
-      />
+    <OgThumbnailFrame>
       <div
         tw="relative flex items-center justify-center"
         style={{
@@ -52,6 +26,6 @@ export const OgMemeTemplate = () => {
         />
       </div>
       <OgBrandBar />
-    </div>
+    </OgThumbnailFrame>
   )
 }

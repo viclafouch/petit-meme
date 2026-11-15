@@ -5,6 +5,13 @@ import type { MemeWithVideo } from '~/constants/meme'
 const BUNNY_ID = 'video-guid'
 const CRAWLER_STREAM_URL = `https://cdn-test.petit-meme.io/bcdn_token=HS256-token&token_path=%2F${BUNNY_ID}%2F&expires=4102444800/${BUNNY_ID}/playlist.m3u8`
 const EMBED_URL = 'https://www.petit-meme.io/embed/meme-id'
+const RAW_THUMBNAIL_URL = `https://cdn-test.petit-meme.io/${BUNNY_ID}/thumbnail.jpg`
+const THUMBNAIL_URLS = [
+  RAW_THUMBNAIL_URL,
+  'https://www.petit-meme.io/api/og?type=thumbnail&id=meme-id&ratio=1x1',
+  'https://www.petit-meme.io/api/og?type=thumbnail&id=meme-id&ratio=4x3',
+  'https://www.petit-meme.io/api/og?type=thumbnail&id=meme-id&ratio=16x9'
+]
 
 const MEME = {
   id: 'meme-id',
@@ -60,6 +67,22 @@ describe('video structured data', () => {
       contentUrl: CRAWLER_STREAM_URL,
       encodingFormat: 'application/vnd.apple.mpegurl'
     })
+  })
+
+  it('should offer Google the raw thumbnail first, then a filled one per aspect ratio', async () => {
+    const { buildMemeJsonLd } = await importSeo()
+
+    const videoObject = findVideoObject(buildMemeJsonLd(MEME, null)['@graph'])
+
+    expect(videoObject).toMatchObject({ thumbnailUrl: THUMBNAIL_URLS })
+  })
+
+  it('should give a category Meme the same thumbnails as its own page', async () => {
+    const { buildCategoryJsonLd } = await importSeo()
+
+    const graph = buildCategoryJsonLd(undefined, { page: 1, memes: [MEME] })
+
+    expect(JSON.stringify(graph)).toContain(JSON.stringify(THUMBNAIL_URLS))
   })
 
   it('should list category Memes without a video file URL', async () => {

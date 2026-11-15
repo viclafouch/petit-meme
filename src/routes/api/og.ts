@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { createFileRoute } from '@tanstack/react-router'
 import { HTTP_STATUS, UNCACHED_CDN_HEADERS } from '~/constants/http'
+import { THUMBNAIL_RATIOS } from '~/constants/og'
 import {
   type OgDefaultedType,
   OG_DEFAULTED_TYPE_VALUES,
@@ -20,11 +21,18 @@ const OG_TITLE = z.string().min(1).max(OG_TITLE_MAX_LENGTH)
 
 const MEME_ID_MAX_LENGTH = 64
 
+const MEME_ID = z.string().min(1).max(MEME_ID_MAX_LENGTH)
+
 const OG_QUERY_SCHEMA = z.discriminatedUnion('type', [
   z.object({ type: z.literal('home'), ...OG_SHARED_SHAPE }),
   z.object({
     type: z.literal('meme'),
-    id: z.string().min(1).max(MEME_ID_MAX_LENGTH)
+    id: MEME_ID
+  }),
+  z.object({
+    type: z.literal('thumbnail'),
+    id: MEME_ID,
+    ratio: z.enum(THUMBNAIL_RATIOS)
   }),
   z.object({
     type: z.enum(OG_DEFAULTED_TYPE_VALUES),
@@ -57,7 +65,7 @@ const OG_DEFAULT_TITLES = {
 
 type OgPageQuery = Exclude<
   z.infer<typeof OG_QUERY_SCHEMA>,
-  { type: 'home' } | { type: 'meme' }
+  { type: 'home' } | { type: 'meme' } | { type: 'thumbnail' }
 >
 
 const resolvePageTitle = (query: OgPageQuery) => {
@@ -88,7 +96,8 @@ export const Route = createFileRoute('/api/og')({
         const {
           renderHomeOgImage,
           renderPageOgImage,
-          renderPublishedMemeOgImage
+          renderPublishedMemeOgImage,
+          renderPublishedThumbnail
         } = await import('~/server/seo/og-image.server')
 
         if (query.type === 'home') {
@@ -97,6 +106,10 @@ export const Route = createFileRoute('/api/og')({
 
         if (query.type === 'meme') {
           return renderPublishedMemeOgImage(query.id)
+        }
+
+        if (query.type === 'thumbnail') {
+          return renderPublishedThumbnail(query.id, query.ratio)
         }
 
         return renderPageOgImage({

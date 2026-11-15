@@ -2,11 +2,13 @@ import { createElement } from 'react'
 import { render } from 'takumi-js'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { HTTP_STATUS } from '~/constants/http'
+import { THUMBNAIL_RATIOS } from '~/constants/og'
 import { captureWithFeature } from '~/lib/sentry'
 import {
   renderHomeOgImage,
   renderMemeOgImage,
-  renderPageOgImage
+  renderPageOgImage,
+  renderThumbnail
 } from '~/server/seo/og-image.server'
 
 vi.mock(import('~/lib/sentry'), async (importOriginal) => {
@@ -80,6 +82,22 @@ describe('the share images', () => {
     expect(await readSignature(response)).toMatch(JPEG_SIGNATURE)
     expect(fetchSpy).not.toHaveBeenCalled()
   })
+
+  it.each(THUMBNAIL_RATIOS)(
+    'should render a %s video thumbnail as a JPEG the CDN keeps for a day',
+    async (ratio) => {
+      const thumbnail = await renderPortraitThumbnail()
+
+      const response = await renderThumbnail(thumbnail, ratio)
+
+      expect(response.status).toBe(HTTP_STATUS.OK)
+      expect(response.headers.get('Content-Type')).toBe('image/jpeg')
+      expect(response.headers.get('Vercel-CDN-Cache-Control')).toBe(
+        ONE_DAY_CDN_TTL
+      )
+      expect(await readSignature(response)).toMatch(JPEG_SIGNATURE)
+    }
+  )
 
   it('should answer a thumbnail that fails to render with a 500 the CDN never keeps', async () => {
     const response = await renderMemeOgImage(NOT_AN_IMAGE)

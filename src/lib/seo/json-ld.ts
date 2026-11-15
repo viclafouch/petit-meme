@@ -23,6 +23,7 @@ import { LOGO_PATH, SITE_NAME } from '~/constants/branding'
 import { HLS_MIME_TYPE } from '~/constants/bunny'
 import type { FaqItem } from '~/constants/faq'
 import type { MemeWithVideo } from '~/constants/meme'
+import { THUMBNAIL_RATIOS } from '~/constants/og'
 import type { Plan } from '~/constants/plan'
 import { ONE_HOUR_IN_SECONDS, SECONDS_PER_MINUTE } from '~/constants/time'
 import type { CategoryModel } from '~/db/generated/prisma/models'
@@ -33,6 +34,7 @@ import {
   buildEmbedUrl,
   buildMemeUrl,
   buildUrl,
+  buildThumbnailUrl,
   websiteOrigin
 } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages'
@@ -79,6 +81,15 @@ const formatSchemaDuration = (totalSeconds: number) => {
 
 type SchemaGraph = Graph & { '@context': 'https://schema.org' }
 
+const buildThumbnailUrls = (meme: MemeWithVideo) => {
+  return [
+    buildVideoImageUrl(meme.video.bunnyId),
+    ...THUMBNAIL_RATIOS.map((ratio) => {
+      return buildThumbnailUrl(meme.id, ratio)
+    })
+  ]
+}
+
 export const buildMemeJsonLd = (
   meme: MemeWithVideo,
   crawlerStreamUrl: string | null
@@ -105,7 +116,7 @@ export const buildMemeJsonLd = (
         '@id': `${memeUrl}#video`,
         name: meme.title,
         description: meme.description,
-        thumbnailUrl,
+        thumbnailUrl: buildThumbnailUrls(meme),
         uploadDate: meme.createdAt.toISOString(),
         embedUrl: buildEmbedUrl(meme.id),
         duration: formatSchemaDuration(meme.video.duration),
@@ -160,7 +171,7 @@ export const buildCategoryJsonLd = (
               name: meme.title,
               description: meme.description,
               embedUrl: buildEmbedUrl(meme.id),
-              thumbnailUrl: buildVideoImageUrl(meme.video.bunnyId),
+              thumbnailUrl: buildThumbnailUrls(meme),
               uploadDate: meme.publishedAt?.toISOString(),
               url: buildMemeUrl(meme.id),
               interactionStatistic: buildWatchCounter(meme.viewCount)

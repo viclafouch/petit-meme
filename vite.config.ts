@@ -8,6 +8,7 @@ import { TanStackNitroPWAPlugin } from '@vite-pwa/tanstack/vite/nitro'
 import react from '@vitejs/plugin-react'
 import {
   IMMUTABLE_CACHE_CONTROL,
+  REVALIDATE_CACHE_CONTROL,
   WEEKLY_CACHE_CONTROL
 } from './src/constants/http.ts'
 import {
@@ -41,6 +42,26 @@ const AVATAR_ASSET_HEADERS = {
   ...SECURITY_HEADERS,
   'Cache-Control': WEEKLY_CACHE_CONTROL
 }
+
+const CDN_CACHED_HEADERS = {
+  ...SECURITY_HEADERS,
+  'Cache-Control': REVALIDATE_CACHE_CONTROL
+}
+
+const CDN_CACHED_ROUTES = [
+  '/api/og',
+  '/api/oembed',
+  '/sitemap.xml',
+  '/sitemap-static.xml',
+  '/sitemap-categories.xml',
+  '/sitemap-memes.xml'
+]
+
+const cdnCachedRouteRules = Object.fromEntries(
+  CDN_CACHED_ROUTES.map((route) => {
+    return [route, { headers: CDN_CACHED_HEADERS }]
+  })
+)
 
 const STATIC_ASSET_ROUTES = [
   '/images/**',
@@ -90,8 +111,6 @@ const SERVICE_WORKER_PRECACHE_PATTERNS = [
   }),
   toPublicFilePattern(OFFLINE_ICON_PATHNAME)
 ]
-
-const NODE_RUNTIME_PACKAGES = ['takumi-js', '@takumi-rs/core']
 
 const PACKAGES_SHARING_PG_INSTANCE = ['@prisma/adapter-pg']
 
@@ -167,18 +186,10 @@ export default defineConfig(async ({ mode }) => {
       strictPort: true
     },
     ssr: {
-      external: NODE_RUNTIME_PACKAGES,
       noExternal: PACKAGES_SHARING_PG_INSTANCE
     },
     optimizeDeps: {
-      exclude: [
-        '@ffmpeg/ffmpeg',
-        '@ffmpeg/core',
-        '@ffmpeg/util',
-        'hls.js',
-        'takumi-js',
-        '@takumi-rs/core'
-      ]
+      exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/core', '@ffmpeg/util', 'hls.js']
     },
     assetsInclude: ['**/*.md'],
     plugins: [
@@ -205,7 +216,6 @@ export default defineConfig(async ({ mode }) => {
         preset: mode === 'e2e' ? 'node-server' : 'vercel',
         sourcemap: true,
         exportConditions: ['!unwasm'],
-        traceDeps: NODE_RUNTIME_PACKAGES,
         vercel: {
           functionRules: {
             '/api/bunny': { maxDuration: MEME_FILL_MAX_DURATION_SECONDS },
@@ -226,9 +236,7 @@ export default defineConfig(async ({ mode }) => {
           '/avatars/**': {
             headers: AVATAR_ASSET_HEADERS
           },
-          '/api/og': {
-            headers: IMMUTABLE_ASSET_HEADERS
-          },
+          ...cdnCachedRouteRules,
           '/admin/**': {
             headers: {
               ...SECURITY_HEADERS,

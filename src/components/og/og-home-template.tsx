@@ -1,11 +1,16 @@
 import type { Locale } from '~/paraglide/runtime'
+import andrasArato from './assets/andras-arato.png?inline'
+import cat from './assets/cat.png?inline'
+import doge from './assets/doge.png?inline'
+import homerSimpson from './assets/homer-simpson.png?inline'
+import ogLogo from './assets/og-logo.png?inline'
+import pepeTheFrog from './assets/pepe-the-frog.png?inline'
+import rollSafe from './assets/roll-safe.png?inline'
 import { OgBackdrop } from './og-backdrop'
 
 type OgHomeTemplateProps = {
   locale: Locale
-  siteUrl: string
   hostname: string
-  logoUrl: string
 }
 
 type TitleSegment = {
@@ -52,7 +57,7 @@ const HOME_CONTENT = {
 } as const satisfies Record<Locale, { description: string; buttonText: string }>
 
 type FloatingMeme = {
-  path: string
+  image: string
   top: number
   left: number
   rotate: number
@@ -60,25 +65,25 @@ type FloatingMeme = {
 }
 
 const FLOATING_MEMES = [
-  { path: '/images/cat.png', top: 55, left: 60, rotate: -8, size: 100 },
-  { path: '/images/roll-safe.png', top: 240, left: 35, rotate: 5, size: 105 },
+  { image: cat, top: 55, left: 60, rotate: -8, size: 100 },
+  { image: rollSafe, top: 240, left: 35, rotate: 5, size: 105 },
   {
-    path: '/images/pepe-the-frog.png',
+    image: pepeTheFrog,
     top: 410,
     left: 75,
     rotate: -10,
     size: 110
   },
-  { path: '/images/doge.png', top: 45, left: 1050, rotate: 10, size: 100 },
+  { image: doge, top: 45, left: 1050, rotate: 10, size: 100 },
   {
-    path: '/images/homer-simpson.png',
+    image: homerSimpson,
     top: 230,
     left: 1040,
     rotate: -6,
     size: 110
   },
   {
-    path: '/images/andras-arato.png',
+    image: andrasArato,
     top: 400,
     left: 1030,
     rotate: 7,
@@ -89,12 +94,7 @@ const FLOATING_MEMES = [
 const HIGHLIGHT_COLOR = '#ffffff'
 const MUTED_COLOR = '#a1a1aa'
 
-export const OgHomeTemplate = ({
-  locale,
-  siteUrl,
-  hostname,
-  logoUrl
-}: OgHomeTemplateProps) => {
+export const OgHomeTemplate = ({ locale, hostname }: OgHomeTemplateProps) => {
   const lines = TITLE_LINES[locale]
   const content = HOME_CONTENT[locale]
 
@@ -107,8 +107,8 @@ export const OgHomeTemplate = ({
       {FLOATING_MEMES.map((meme) => {
         return (
           <img
-            key={meme.path}
-            src={`${siteUrl}${meme.path}`}
+            key={meme.image}
+            src={meme.image}
             alt=""
             width={meme.size}
             height={meme.size}
@@ -125,7 +125,7 @@ export const OgHomeTemplate = ({
       <div tw="flex flex-col items-center justify-center flex-1">
         <div tw="flex flex-col items-center" style={{ width: '760px' }}>
           <img
-            src={logoUrl}
+            src={ogLogo}
             alt=""
             height={44}
             style={{ objectFit: 'contain' }}

@@ -1,20 +1,14 @@
+import ogLogo from './assets/og-logo.png?inline'
+import willSmithFlipped from './assets/will-smith-flipped.png?inline'
 import { OgBackdrop } from './og-backdrop'
 
 type OgTemplateProps = {
   title: string
   hostname: string
-  logoUrl: string
-  heroImageUrl: string
   subtitle?: string
 }
 
-export const OgTemplate = ({
-  title,
-  subtitle,
-  hostname,
-  logoUrl,
-  heroImageUrl
-}: OgTemplateProps) => {
+export const OgTemplate = ({ title, subtitle, hostname }: OgTemplateProps) => {
   return (
     <div
       tw="flex flex-col w-full h-full p-[60px] relative"
@@ -22,12 +16,7 @@ export const OgTemplate = ({
     >
       <OgBackdrop />
       <div tw="flex items-center">
-        <img
-          src={logoUrl}
-          alt=""
-          height={50}
-          style={{ objectFit: 'contain' }}
-        />
+        <img src={ogLogo} alt="" height={50} style={{ objectFit: 'contain' }} />
       </div>
       <div tw="flex flex-1 items-center">
         <div tw="flex flex-col flex-1 justify-center gap-4">
@@ -56,7 +45,7 @@ export const OgTemplate = ({
           ) : null}
         </div>
         <img
-          src={heroImageUrl}
+          src={willSmithFlipped}
           alt=""
           width={300}
           height={300}

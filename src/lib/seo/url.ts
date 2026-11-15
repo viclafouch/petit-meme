@@ -8,7 +8,7 @@ import {
 
 export const websiteOrigin = clientEnv.VITE_SITE_URL
 
-const OG_VERSION = 3
+const OG_VERSION = 4
 
 export const OG_DEFAULTED_TYPE_VALUES = [
   'ai-search',
@@ -35,24 +35,39 @@ type BuildOgImageUrlParams = {
   | { type: OgTitledType; title: string }
 )
 
-export const buildOgImageUrl = ({
-  type,
-  title,
-  subtitle,
-  locale
-}: BuildOgImageUrlParams): string => {
+const buildOgEndpointUrl = (params: Record<string, string | undefined>) => {
   const url = new URL('/api/og', websiteOrigin)
-  url.searchParams.set('type', type)
-  url.searchParams.set('locale', locale)
+
+  for (const [key, value] of Object.entries(params)) {
+    if (value) {
+      url.searchParams.set(key, value)
+    }
+  }
+
   url.searchParams.set('v', String(OG_VERSION))
 
-  if (title) {
-    url.searchParams.set('title', title)
-  }
+  return url.href
+}
 
-  if (subtitle) {
-    url.searchParams.set('subtitle', subtitle)
-  }
+export const buildOgImage = (
+  { type, locale, title, subtitle }: BuildOgImageUrlParams,
+  alt: string
+) => {
+  return {
+    url: buildOgEndpointUrl({ type, locale, title, subtitle }),
+    alt,
+    type: 'image/png'
+  } as const
+}
+
+export const buildMemeOgImageUrl = (memeId: string) => {
+  return buildOgEndpointUrl({ type: 'meme', id: memeId })
+}
+
+export const buildOembedUrl = (pageUrl: string) => {
+  const url = new URL('/api/oembed', websiteOrigin)
+  url.searchParams.set('url', pageUrl)
+  url.searchParams.set('format', 'json')
 
   return url.href
 }

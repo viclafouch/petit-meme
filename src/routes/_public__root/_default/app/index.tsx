@@ -5,7 +5,7 @@ import {
   buildWebApplicationJsonLd
 } from '~/lib/seo/json-ld'
 import { buildSeo } from '~/lib/seo/meta'
-import { buildOgImageUrl } from '~/lib/seo/url'
+import { buildOgImage } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { AppPage } from './-components/app-page'
@@ -21,12 +21,14 @@ export const Route = createFileRoute('/_public__root/_default/app/')({
       pathname: '/app',
       description: m.app_page_description(),
       keywords: m.seo_app_keywords(),
-      image: buildOgImageUrl({
-        type: 'app',
-        subtitle: m.app_page_description(),
-        locale
-      }),
-      imageAlt: m.app_page_title()
+      image: buildOgImage(
+        {
+          type: 'app',
+          subtitle: m.app_page_description(),
+          locale
+        },
+        m.app_page_title()
+      )
     })
 
     return {

@@ -1,12 +1,13 @@
 import { createElement } from 'react'
-import { describe, expect, it, vi } from 'vitest'
-import {
-  HTTP_STATUS,
-  IMMUTABLE_CACHE_CONTROL,
-  NO_STORE_CACHE_CONTROL
-} from '~/constants/http'
+import { render } from 'takumi-js'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { HTTP_STATUS } from '~/constants/http'
 import { captureWithFeature } from '~/lib/sentry'
-import { renderOgImage } from '~/server/seo/og-image.server'
+import {
+  renderHomeOgImage,
+  renderMemeOgImage,
+  renderPageOgImage
+} from '~/server/seo/og-image.server'
 
 vi.mock(import('~/lib/sentry'), async (importOriginal) => {
   return {
@@ -15,44 +16,79 @@ vi.mock(import('~/lib/sentry'), async (importOriginal) => {
   }
 })
 
-const UNREACHABLE_FONT_URL = 'http://127.0.0.1:1/missing-font.ttf'
+const NOT_AN_IMAGE = new TextEncoder().encode('<html>Not found</html>')
 
 const PNG_SIGNATURE = /^\x89PNG/u
+const JPEG_SIGNATURE = /^\xFF\xD8\xFF/u
+const ONE_DAY_CDN_TTL = 'max-age=86400'
+const ONE_YEAR_CDN_TTL = 'max-age=31536000'
 
-const renderBrokenOgImage = () => {
-  return renderOgImage({
-    template: createElement('div'),
-    fontUrls: [UNREACHABLE_FONT_URL]
-  })
+const readSignature = async (response: Response) => {
+  return Buffer.from(await response.arrayBuffer()).toString('latin1')
 }
 
-describe('renderOgImage', () => {
-  it('should answer a failed render with an uncached 500', async () => {
-    const response = await renderBrokenOgImage()
+const renderPortraitThumbnail = () => {
+  return render(
+    createElement('div', {
+      style: { width: '100%', height: '100%', backgroundColor: '#e11d48' }
+    }),
+    { width: 720, height: 1280, format: 'jpeg' }
+  )
+}
 
-    expect(response.status).toBe(HTTP_STATUS.INTERNAL_SERVER_ERROR)
-    expect(response.headers.get('Cache-Control')).toBe(NO_STORE_CACHE_CONTROL)
+describe('the share images', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
   })
 
-  it('should report a failed render to Sentry', async () => {
-    await renderBrokenOgImage()
+  it('should render a page image from the bundle, without a request', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
 
+    const response = await renderHomeOgImage('en')
+
+    expect(response.status).toBe(HTTP_STATUS.OK)
+    expect(response.headers.get('Content-Type')).toBe('image/png')
+    expect(await readSignature(response)).toMatch(PNG_SIGNATURE)
+    expect(fetchSpy).not.toHaveBeenCalled()
+  })
+
+  it('should render a titled page image the CDN keeps for a year', async () => {
+    const response = await renderPageOgImage({
+      title: 'Reaction memes',
+      subtitle: 'Every reaction meme, ready to share'
+    })
+
+    expect(response.status).toBe(HTTP_STATUS.OK)
+    expect(response.headers.get('Content-Type')).toBe('image/png')
+    expect(response.headers.get('Vercel-CDN-Cache-Control')).toBe(
+      ONE_YEAR_CDN_TTL
+    )
+    expect(await readSignature(response)).toMatch(PNG_SIGNATURE)
+  })
+
+  it('should render a Meme image as a JPEG the CDN keeps for a day', async () => {
+    const thumbnail = await renderPortraitThumbnail()
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+
+    const response = await renderMemeOgImage(thumbnail)
+
+    expect(response.status).toBe(HTTP_STATUS.OK)
+    expect(response.headers.get('Content-Type')).toBe('image/jpeg')
+    expect(response.headers.get('Vercel-CDN-Cache-Control')).toBe(
+      ONE_DAY_CDN_TTL
+    )
+    expect(await readSignature(response)).toMatch(JPEG_SIGNATURE)
+    expect(fetchSpy).not.toHaveBeenCalled()
+  })
+
+  it('should answer a thumbnail that fails to render with a 500 the CDN never keeps', async () => {
+    const response = await renderMemeOgImage(NOT_AN_IMAGE)
+
+    expect(response.status).toBe(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+    expect(response.headers.get('Vercel-CDN-Cache-Control')).toBe('no-store')
     expect(captureWithFeature).toHaveBeenCalledWith(
       expect.any(Error),
       'og-image'
     )
-  })
-
-  it('should answer a successful render with an immutable PNG', async () => {
-    const response = await renderOgImage({
-      template: createElement('div'),
-      fontUrls: []
-    })
-    const image = Buffer.from(await response.arrayBuffer()).toString('latin1')
-
-    expect(response.status).toBe(HTTP_STATUS.OK)
-    expect(response.headers.get('Content-Type')).toBe('image/png')
-    expect(response.headers.get('Cache-Control')).toBe(IMMUTABLE_CACHE_CONTROL)
-    expect(image).toMatch(PNG_SIGNATURE)
   })
 })

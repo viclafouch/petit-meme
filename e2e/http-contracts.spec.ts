@@ -88,13 +88,18 @@ test.describe('the HTTP contracts', () => {
     })
   }
 
-  test('robots.txt answers and hands over the sitemap', async ({ request }) => {
+  test('robots.txt answers, hands over the sitemap and lets crawlers fetch the link previews', async ({
+    request
+  }) => {
     const response = await request.get('/robots.txt')
 
     expect(response.status()).toBe(HTTP_STATUS.OK)
     expect(response.headers()['content-type']).toContain('text/plain')
-    expect(await response.text()).toContain(
-      `Sitemap: ${E2E_BASE_URL}/sitemap.xml`
+    const robots = await response.text()
+
+    expect(robots).toContain(`Sitemap: ${E2E_BASE_URL}/sitemap.xml`)
+    expect(robots).toContain(
+      'Allow: /api/og\nAllow: /api/oembed\nDisallow: /api/'
     )
   })
 
@@ -125,17 +130,6 @@ test.describe('the HTTP contracts', () => {
       expect(response.status()).toBe(HTTP_STATUS.UNAUTHORIZED)
     })
   }
-
-  test('the OG endpoint renders an image', async ({ request }) => {
-    const response = await request.get('/api/og?type=home')
-
-    expect(response.status()).toBe(HTTP_STATUS.OK)
-    expect(response.headers()['content-type']).toContain('image/')
-
-    const image = await response.body()
-
-    expect(image.byteLength).toBeGreaterThan(0)
-  })
 })
 
 test.describe('the Bunny zone contract', () => {

@@ -1,7 +1,7 @@
 import { createFileRoute, notFound } from '@tanstack/react-router'
 import { getVirtualCategories, MEMES_SEARCH_SCHEMA } from '~/constants/meme'
 import { buildSeo } from '~/lib/seo/meta'
-import { buildOgImageUrl } from '~/lib/seo/url'
+import { buildOgImage } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { listCategoriesQueryOpts } from '~/queries/category'
@@ -54,13 +54,15 @@ export const Route = createFileRoute(
         title,
         pathname: '/memes/category/all',
         description,
-        image: buildOgImageUrl({
-          type: 'category',
-          title,
-          subtitle: description,
-          locale
-        }),
-        imageAlt: title
+        image: buildOgImage(
+          {
+            type: 'category',
+            title,
+            subtitle: description,
+            locale
+          },
+          title
+        )
       })
     }
 
@@ -73,13 +75,15 @@ export const Route = createFileRoute(
       pathname: `/memes/category/${category.slug}`,
       description,
       keywords: category.keywords.join(', '),
-      image: buildOgImageUrl({
-        type: 'category',
-        title: category.title,
-        subtitle: description,
-        locale
-      }),
-      imageAlt: category.title
+      image: buildOgImage(
+        {
+          type: 'category',
+          title: category.title,
+          subtitle: description,
+          locale
+        },
+        category.title
+      )
     })
   }
 })

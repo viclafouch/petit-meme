@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { buildSeo } from '~/lib/seo/meta'
-import { buildOgImageUrl } from '~/lib/seo/url'
+import { buildOgImage } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages'
 import { getLocale, type Locale } from '~/paraglide/runtime'
 import { PrivacyPage } from './-components/legal-pages'
@@ -36,13 +36,15 @@ export const Route = createFileRoute('/_public__root/_default/privacy')({
       title,
       pathname: '/privacy',
       description: m.legal_privacy_description(),
-      image: buildOgImageUrl({
-        type: 'legal',
-        title,
-        subtitle: m.legal_privacy_description(),
-        locale
-      }),
-      imageAlt: title
+      image: buildOgImage(
+        {
+          type: 'legal',
+          title,
+          subtitle: m.legal_privacy_description(),
+          locale
+        },
+        title
+      )
     })
   }
 })

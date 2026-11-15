@@ -325,6 +325,7 @@
   --text-2xs: 0.625rem;
   --animate-background-shine: background-shine 2s linear infinite;
   --animate-stars-drift: stars-drift linear infinite;
+  --animate-aurora-drift: aurora-drift linear infinite;
 
   @keyframes background-shine {
     from {
@@ -332,6 +333,15 @@
     }
     to {
       translate: 50% 0;
+    }
+  }
+
+  @keyframes aurora-drift {
+    from {
+      translate: 0 0;
+    }
+    to {
+      translate: -50% 0;
     }
   }
 
@@ -426,6 +436,71 @@
     55%,
     #000103
   );
+}
+@utility aurora {
+  --aurora-green: rgb(52 211 153 / 0.6);
+  --aurora-teal: rgb(34 211 238 / 0.5);
+  --aurora-violet: rgb(167 139 250 / 0.5);
+  --aurora-pink: rgb(244 114 182 / 0.35);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+
+  @variant dark {
+    --aurora-green: rgb(16 185 129 / 0.55);
+    --aurora-teal: rgb(8 145 178 / 0.55);
+    --aurora-violet: rgb(124 58 237 / 0.55);
+    --aurora-pink: rgb(219 39 119 / 0.35);
+  }
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    z-index: -1;
+    width: 200%;
+    background-repeat: repeat-x;
+    background-size: 50% 100%;
+    pointer-events: none;
+    animation: var(--animate-aurora-drift);
+  }
+
+  &::before {
+    background-image:
+      radial-gradient(18% 130% at 20% 0%, var(--aurora-green), transparent 70%),
+      radial-gradient(10% 135% at 42% 0%, var(--aurora-teal), transparent 70%),
+      radial-gradient(
+        16% 120% at 66% 0%,
+        var(--aurora-violet),
+        transparent 70%
+      ),
+      radial-gradient(9% 135% at 86% 0%, var(--aurora-green), transparent 70%);
+    animation-duration: 28s;
+  }
+
+  &::after {
+    opacity: 0.8;
+    background-image:
+      radial-gradient(
+        13% 110% at 10% 0%,
+        var(--aurora-violet),
+        transparent 70%
+      ),
+      radial-gradient(20% 135% at 38% 0%, var(--aurora-teal), transparent 70%),
+      radial-gradient(12% 120% at 62% 0%, var(--aurora-pink), transparent 70%),
+      radial-gradient(18% 130% at 82% 0%, var(--aurora-green), transparent 70%);
+    animation-duration: 41s;
+    animation-direction: reverse;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::before,
+    &::after {
+      animation: none;
+    }
+  }
 }
 @utility shine-layer {
   position: absolute;

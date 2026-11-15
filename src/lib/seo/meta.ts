@@ -2,8 +2,8 @@ import type { AnyRouteMatch } from '@tanstack/react-router'
 import { SITE_NAME } from '~/constants/branding'
 import type { MemeWithCategories, MemeWithVideo } from '~/constants/meme'
 import { OG_IMAGE_HEIGHT, OG_IMAGE_WIDTH } from '~/constants/og'
-import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
-import { buildEmbedUrl, buildUrl } from '~/lib/seo/url'
+import { MemeStatus } from '~/db/generated/prisma/enums'
+import { buildMemeOgImageUrl, buildOembedUrl, buildUrl } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages'
 import {
   baseLocale,
@@ -23,12 +23,16 @@ const buildPageTitle = (title: string, siteName = SITE_NAME) => {
   return `${siteName} - ${title}`
 }
 
+type SeoImage = {
+  url: string
+  alt: string
+  type: 'image/png' | 'image/jpeg'
+}
+
 type SeoParams = {
   title: string
   description?: string
-  image?: string
-  imageAlt?: string
-  imageType?: 'image/png' | 'image/jpeg'
+  image?: SeoImage
   keywords?: string
   isAdmin?: boolean
   pathname?: string
@@ -47,8 +51,6 @@ export const buildSeo = ({
   description,
   keywords,
   image,
-  imageAlt,
-  imageType = 'image/png',
   isAdmin = false,
   pathname = '/',
   noindex = false,
@@ -70,12 +72,12 @@ export const buildSeo = ({
     { title: titlePrefixed },
     ...(keywords ? [{ name: 'keywords', content: keywords }] : []),
     { name: 'author', content: 'Victor de la Fouchardière' },
-    { name: 'twitter:title', content: titlePrefixed },
+    { name: 'twitter:title', content: title },
     { name: 'twitter:creator', content: '@TrustedSheriff' },
     { name: 'twitter:site', content: '@TrustedSheriff' },
     { property: 'og:type', content: ogType },
     { property: 'og:site_name', content: SITE_NAME },
-    { property: 'og:title', content: titlePrefixed },
+    { property: 'og:title', content: title },
     { property: 'og:url', content: canonicalUrl },
     { property: 'og:locale', content: OG_LOCALE_MAP[locale] },
     ...alternateLocales.map((alternateLocale) => {
@@ -98,17 +100,13 @@ export const buildSeo = ({
     },
     ...(image
       ? [
-          { name: 'twitter:image', content: image },
-          { property: 'og:image', content: image },
+          { name: 'twitter:image', content: image.url },
+          { name: 'twitter:image:alt', content: image.alt },
+          { property: 'og:image', content: image.url },
           { property: 'og:image:width', content: String(OG_IMAGE_WIDTH) },
           { property: 'og:image:height', content: String(OG_IMAGE_HEIGHT) },
-          { property: 'og:image:type', content: imageType },
-          ...(imageAlt
-            ? [
-                { name: 'twitter:image:alt', content: imageAlt },
-                { property: 'og:image:alt', content: imageAlt }
-              ]
-            : [])
+          { property: 'og:image:type', content: image.type },
+          { property: 'og:image:alt', content: image.alt }
         ]
       : [])
   ] satisfies AnyRouteMatch['meta']
@@ -149,30 +147,37 @@ export const buildMemeSeo = (
   const categoryKeywords = meme.categories.flatMap((category) => {
     return category.category.keywords
   })
-
-  const description = buildDescription(meme)
-  const embedUrl = buildEmbedUrl(meme.id)
+  const isPublished = meme.status === MemeStatus.PUBLISHED
 
   const result = buildSeo({
     title: meme.title,
     keywords: [...meme.keywords, ...categoryKeywords].join(', '),
-    image: buildVideoImageUrl(meme.video.bunnyId),
-    imageAlt: m.seo_meme_image_alt({ title: meme.title }),
-    imageType: 'image/jpeg',
-    description,
+    image: isPublished
+      ? {
+          url: buildMemeOgImageUrl(meme.id),
+          alt: m.seo_meme_image_alt({ title: meme.title }),
+          type: 'image/jpeg'
+        }
+      : undefined,
+    description: buildDescription(meme),
     ogType: 'video.other',
     ...overrideOptions
   })
 
+  if (!isPublished || overrideOptions.isAdmin) {
+    return result
+  }
+
   return {
     ...result,
-    meta: [
-      ...result.meta,
-      { property: 'og:video', content: embedUrl },
-      { property: 'og:video:secure_url', content: embedUrl },
-      { property: 'og:video:type', content: 'text/html' },
-      { property: 'og:video:width', content: '1280' },
-      { property: 'og:video:height', content: '720' }
+    links: [
+      ...result.links,
+      {
+        rel: 'alternate',
+        type: 'application/json+oembed',
+        href: buildOembedUrl(buildUrl(`/memes/${meme.id}`, getLocale())),
+        title: meme.title
+      }
     ]
   }
 }

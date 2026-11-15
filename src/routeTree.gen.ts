@@ -28,6 +28,7 @@ import { Route as AdminDownloaderRouteImport } from './routes/admin/downloader'
 import { Route as AdminServicesRouteImport } from './routes/admin/services'
 import { Route as ApiBunnyRouteImport } from './routes/api/bunny'
 import { Route as ApiMemeFillRouteImport } from './routes/api/meme-fill'
+import { Route as ApiOembedRouteImport } from './routes/api/oembed'
 import { Route as ApiOgRouteImport } from './routes/api/og'
 import { Route as EmbedMemeIdRouteImport } from './routes/embed/$memeId'
 import { Route as Public__rootDefaultBookmarksRouteImport } from './routes/_public__root/_default/bookmarks'
@@ -159,6 +160,11 @@ const ApiBunnyRoute = ApiBunnyRouteImport.update({
 const ApiMemeFillRoute = ApiMemeFillRouteImport.update({
   id: '/api/meme-fill',
   path: '/api/meme-fill',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiOembedRoute = ApiOembedRouteImport.update({
+  id: '/api/oembed',
+  path: '/api/oembed',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiOgRoute = ApiOgRouteImport.update({
@@ -393,6 +399,7 @@ export interface FileRoutesByFullPath {
   '/admin/services': typeof AdminServicesRoute
   '/api/bunny': typeof ApiBunnyRoute
   '/api/meme-fill': typeof ApiMemeFillRoute
+  '/api/oembed': typeof ApiOembedRoute
   '/api/og': typeof ApiOgRoute
   '/embed/$memeId': typeof EmbedMemeIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -449,6 +456,7 @@ export interface FileRoutesByTo {
   '/admin/services': typeof AdminServicesRoute
   '/api/bunny': typeof ApiBunnyRoute
   '/api/meme-fill': typeof ApiMemeFillRoute
+  '/api/oembed': typeof ApiOembedRoute
   '/api/og': typeof ApiOgRoute
   '/embed/$memeId': typeof EmbedMemeIdRoute
   '/admin': typeof AdminIndexRoute
@@ -508,6 +516,7 @@ export interface FileRoutesById {
   '/admin/services': typeof AdminServicesRoute
   '/api/bunny': typeof ApiBunnyRoute
   '/api/meme-fill': typeof ApiMemeFillRoute
+  '/api/oembed': typeof ApiOembedRoute
   '/api/og': typeof ApiOgRoute
   '/embed/$memeId': typeof EmbedMemeIdRoute
   '/_public__root/': typeof Public__rootIndexRoute
@@ -568,6 +577,7 @@ export interface FileRouteTypes {
     | '/admin/services'
     | '/api/bunny'
     | '/api/meme-fill'
+    | '/api/oembed'
     | '/api/og'
     | '/embed/$memeId'
     | '/admin/'
@@ -624,6 +634,7 @@ export interface FileRouteTypes {
     | '/admin/services'
     | '/api/bunny'
     | '/api/meme-fill'
+    | '/api/oembed'
     | '/api/og'
     | '/embed/$memeId'
     | '/admin'
@@ -682,6 +693,7 @@ export interface FileRouteTypes {
     | '/admin/services'
     | '/api/bunny'
     | '/api/meme-fill'
+    | '/api/oembed'
     | '/api/og'
     | '/embed/$memeId'
     | '/_public__root/'
@@ -740,6 +752,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiBunnyRoute: typeof ApiBunnyRoute
   ApiMemeFillRoute: typeof ApiMemeFillRoute
+  ApiOembedRoute: typeof ApiOembedRoute
   ApiOgRoute: typeof ApiOgRoute
   EmbedMemeIdRoute: typeof EmbedMemeIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -885,6 +898,13 @@ declare module '@tanstack/react-router' {
       path: '/api/meme-fill'
       fullPath: '/api/meme-fill'
       preLoaderRoute: typeof ApiMemeFillRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/oembed': {
+      id: '/api/oembed'
+      path: '/api/oembed'
+      fullPath: '/api/oembed'
+      preLoaderRoute: typeof ApiOembedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/og': {
@@ -1306,6 +1326,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiBunnyRoute: ApiBunnyRoute,
   ApiMemeFillRoute: ApiMemeFillRoute,
+  ApiOembedRoute: ApiOembedRoute,
   ApiOgRoute: ApiOgRoute,
   EmbedMemeIdRoute: EmbedMemeIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,

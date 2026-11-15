@@ -1,15 +1,12 @@
 import { z } from 'zod'
 import { createFileRoute } from '@tanstack/react-router'
-import { OgHomeTemplate } from '~/components/og/og-home-template'
-import { OgTemplate } from '~/components/og/og-template'
-import { serverEnv } from '~/env/server.server'
+import { HTTP_STATUS, UNCACHED_CDN_HEADERS } from '~/constants/http'
 import {
   type OgDefaultedType,
   OG_DEFAULTED_TYPE_VALUES,
   OG_TITLED_TYPE_VALUES
 } from '~/lib/seo/url'
 import { type Locale, locales } from '~/paraglide/runtime'
-import { renderOgImage } from '~/server/seo/og-image.server'
 
 const OG_SUBTITLE_MAX_LENGTH = 500
 const OG_TITLE_MAX_LENGTH = 200
@@ -21,8 +18,14 @@ const OG_SHARED_SHAPE = {
 
 const OG_TITLE = z.string().min(1).max(OG_TITLE_MAX_LENGTH)
 
+const MEME_ID_MAX_LENGTH = 64
+
 const OG_QUERY_SCHEMA = z.discriminatedUnion('type', [
   z.object({ type: z.literal('home'), ...OG_SHARED_SHAPE }),
+  z.object({
+    type: z.literal('meme'),
+    id: z.string().min(1).max(MEME_ID_MAX_LENGTH)
+  }),
   z.object({
     type: z.enum(OG_DEFAULTED_TYPE_VALUES),
     title: OG_TITLE.optional(),
@@ -38,21 +41,24 @@ const OG_QUERY_SCHEMA = z.discriminatedUnion('type', [
 const OG_DEFAULT_TITLES = {
   fr: {
     'ai-search': 'Recherche IA',
-    app: "L'app Petit Meme",
+    app: "L'application Petit Meme",
     pricing: 'Tarifs',
     reels: 'Reels',
     submit: 'Proposer un mème'
   },
   en: {
     'ai-search': 'AI Search',
-    app: 'The Petit Meme app',
+    app: 'The Petit Meme application',
     pricing: 'Pricing',
     reels: 'Reels',
     submit: 'Suggest a meme'
   }
 } as const satisfies Record<Locale, Record<OgDefaultedType, string>>
 
-type OgPageQuery = Exclude<z.infer<typeof OG_QUERY_SCHEMA>, { type: 'home' }>
+type OgPageQuery = Exclude<
+  z.infer<typeof OG_QUERY_SCHEMA>,
+  { type: 'home' } | { type: 'meme' }
+>
 
 const resolvePageTitle = (query: OgPageQuery) => {
   if (query.type === 'category' || query.type === 'legal') {
@@ -72,32 +78,31 @@ export const Route = createFileRoute('/api/og')({
         )
 
         if (!parsed.success) {
-          return new Response('Invalid parameters', { status: 400 })
+          return new Response('Invalid parameters', {
+            status: HTTP_STATUS.BAD_REQUEST,
+            headers: UNCACHED_CDN_HEADERS
+          })
         }
 
         const query = parsed.data
-        const siteUrl = serverEnv.VITE_SITE_URL
-        const logoUrl = `${siteUrl}/images/og-logo.png`
-        const fontUrl = `${siteUrl}/fonts/bricolage-grotesque-bold.ttf`
-        const { hostname } = new URL(siteUrl)
+        const {
+          renderHomeOgImage,
+          renderPageOgImage,
+          renderPublishedMemeOgImage
+        } = await import('~/server/seo/og-image.server')
 
-        const template =
-          query.type === 'home'
-            ? OgHomeTemplate({
-                locale: query.locale,
-                siteUrl,
-                hostname,
-                logoUrl
-              })
-            : OgTemplate({
-                title: resolvePageTitle(query),
-                subtitle: query.subtitle,
-                hostname,
-                logoUrl,
-                heroImageUrl: `${siteUrl}/images/will-smith-flipped.png`
-              })
+        if (query.type === 'home') {
+          return renderHomeOgImage(query.locale)
+        }
 
-        return renderOgImage({ template, fontUrls: [fontUrl] })
+        if (query.type === 'meme') {
+          return renderPublishedMemeOgImage(query.id)
+        }
+
+        return renderPageOgImage({
+          title: resolvePageTitle(query),
+          subtitle: query.subtitle
+        })
       }
     }
   }

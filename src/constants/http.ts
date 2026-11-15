@@ -1,10 +1,26 @@
-import { ONE_YEAR_IN_SECONDS, SEVEN_DAYS_IN_SECONDS } from './time.ts'
+import {
+  ONE_DAY_IN_SECONDS,
+  ONE_YEAR_IN_SECONDS,
+  SEVEN_DAYS_IN_SECONDS
+} from './time.ts'
 
 export const IMMUTABLE_CACHE_CONTROL = `public, max-age=${ONE_YEAR_IN_SECONDS}, immutable`
 
+export const REVALIDATE_CACHE_CONTROL = 'public, max-age=0, must-revalidate'
+
 export const WEEKLY_CACHE_CONTROL = `public, max-age=${SEVEN_DAYS_IN_SECONDS}`
 
-export const NO_STORE_CACHE_CONTROL = 'no-store'
+const NO_STORE_CACHE_CONTROL = 'no-store'
+
+export const CDN_CACHE_CONTROL_HEADER = 'Vercel-CDN-Cache-Control'
+
+export const YEARLY_CDN_CACHE_CONTROL = `max-age=${ONE_YEAR_IN_SECONDS}`
+
+export const DAILY_CDN_CACHE_CONTROL = `max-age=${ONE_DAY_IN_SECONDS}`
+
+export const UNCACHED_CDN_HEADERS = {
+  [CDN_CACHE_CONTROL_HEADER]: NO_STORE_CACHE_CONTROL
+}
 
 export const HTTP_STATUS = {
   OK: 200,
@@ -18,6 +34,7 @@ export const HTTP_STATUS = {
   UNPROCESSABLE_CONTENT: 422,
   TOO_MANY_REQUESTS: 429,
   INTERNAL_SERVER_ERROR: 500,
+  NOT_IMPLEMENTED: 501,
   BAD_GATEWAY: 502,
   SERVICE_UNAVAILABLE: 503,
   GATEWAY_TIMEOUT: 504

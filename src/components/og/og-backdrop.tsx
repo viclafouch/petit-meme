@@ -1,5 +1,16 @@
 import { STAR_SHADOWS } from './og-stars'
 
+export const OgBrandBar = () => {
+  return (
+    <div
+      tw="flex absolute bottom-0 left-0 right-0 h-[4px]"
+      style={{
+        background: 'linear-gradient(90deg, #6366f1, #a855f7, #ec4899)'
+      }}
+    />
+  )
+}
+
 export const OgBackdrop = () => {
   return (
     <>
@@ -13,12 +24,7 @@ export const OgBackdrop = () => {
           boxShadow: STAR_SHADOWS
         }}
       />
-      <div
-        tw="flex absolute bottom-0 left-0 right-0 h-[4px]"
-        style={{
-          background: 'linear-gradient(90deg, #6366f1, #a855f7, #ec4899)'
-        }}
-      />
+      <OgBrandBar />
     </>
   )
 }

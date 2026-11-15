@@ -1,3 +1,5 @@
+import { CDN_CACHE_CONTROL_HEADER } from '~/constants/http'
+import { escapeMarkup } from '~/helpers/markup'
 import { buildUrl } from '~/lib/seo/url'
 import { baseLocale, type Locale, locales } from '~/paraglide/runtime'
 
@@ -63,15 +65,6 @@ export const formatIsoDate = (date: Date) => {
   return date.toISOString().slice(0, ISO_DATE_LENGTH)
 }
 
-const escapeXml = (text: string) => {
-  return text
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&apos;')
-}
-
 const buildHreflangLinks = (
   pathname: string,
   targetLocales: readonly Locale[]
@@ -88,7 +81,7 @@ const buildImageTag = ({ loc, title }: SitemapImageParams) => {
   return [
     '    <image:image>',
     `      <image:loc>${loc}</image:loc>`,
-    `      <image:title>${escapeXml(title)}</image:title>`,
+    `      <image:title>${escapeMarkup(title)}</image:title>`,
     '    </image:image>'
   ].join('\n')
 }
@@ -103,9 +96,9 @@ const buildVideoTag = ({
 }: SitemapVideoParams) => {
   return [
     '    <video:video>',
-    `      <video:title>${escapeXml(title)}</video:title>`,
+    `      <video:title>${escapeMarkup(title)}</video:title>`,
     `      <video:thumbnail_loc>${thumbnailLoc}</video:thumbnail_loc>`,
-    `      <video:description>${escapeXml(description)}</video:description>`,
+    `      <video:description>${escapeMarkup(description)}</video:description>`,
     `      <video:player_loc>${playerLoc}</video:player_loc>`,
     `      <video:duration>${duration}</video:duration>`,
     ...(publicationDate
@@ -189,7 +182,7 @@ export const buildSitemapResponse = ({
   return new Response(body, {
     headers: {
       'Content-Type': 'application/xml',
-      'Cache-Control': `public, max-age=${maxAge}, s-maxage=${maxAge}`
+      [CDN_CACHE_CONTROL_HEADER]: `max-age=${maxAge}`
     }
   })
 }

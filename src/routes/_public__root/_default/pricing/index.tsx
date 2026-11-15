@@ -3,7 +3,7 @@ import { getFreePlan, getPremiumPlan } from '~/constants/plan'
 import { serializeJsonLd } from '~/helpers/json-ld'
 import { buildPricingJsonLd } from '~/lib/seo/json-ld'
 import { buildSeo } from '~/lib/seo/meta'
-import { buildOgImageUrl } from '~/lib/seo/url'
+import { buildOgImage } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { getPremiumSubscriptionQueryOpts } from '~/queries/subscription'
@@ -39,12 +39,14 @@ export const Route = createFileRoute('/_public__root/_default/pricing/')({
       pathname: '/pricing',
       description: m.seo_pricing_description(),
       keywords: m.seo_pricing_keywords(),
-      image: buildOgImageUrl({
-        type: 'pricing',
-        subtitle: m.seo_pricing_description(),
-        locale
-      }),
-      imageAlt: m.seo_pricing_title()
+      image: buildOgImage(
+        {
+          type: 'pricing',
+          subtitle: m.seo_pricing_description(),
+          locale
+        },
+        m.seo_pricing_title()
+      )
     })
   }
 })

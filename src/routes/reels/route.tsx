@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { buildSeo } from '~/lib/seo/meta'
-import { buildOgImageUrl } from '~/lib/seo/url'
+import { buildOgImage } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
@@ -33,12 +33,14 @@ export const Route = createFileRoute('/reels')({
       title: m.seo_reels_title(),
       pathname: '/reels',
       description: m.meme_seo_library_description(),
-      image: buildOgImageUrl({
-        type: 'reels',
-        subtitle: m.meme_seo_library_description(),
-        locale
-      }),
-      imageAlt: m.seo_reels_title()
+      image: buildOgImage(
+        {
+          type: 'reels',
+          subtitle: m.meme_seo_library_description(),
+          locale
+        },
+        m.seo_reels_title()
+      )
     })
   }
 })

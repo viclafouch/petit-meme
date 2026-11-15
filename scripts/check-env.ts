@@ -11,18 +11,34 @@ import { compareEnvKeys, parseVercelEnvList } from './lib/env-parity.ts'
 
 const ENV_SCHEMA = { ...baseEnvSchema, ...serverEnvSchema, ...clientEnvSchema }
 
-const VERCEL_ENV_SCHEMA = {
+const VERCEL_PRODUCTION_ENV_SCHEMA = {
   ...ENV_SCHEMA,
   CRON_SECRET: z.string(),
   BLOB_STORE_ID: z.string()
 }
 
-const LOCAL_ENV_FILES = ['.env.development', '.env.e2e']
-const VERCEL_TARGETS = ['production', 'preview']
+const {
+  VITE_SITE_URL: _siteUrlDerivedFromBranchUrl,
+  ...VERCEL_PREVIEW_ENV_SCHEMA
+} = VERCEL_PRODUCTION_ENV_SCHEMA
+
+const LOCAL_ENV_FILES = ['.env.development', '.env.e2e', '.env.preview']
+
+type EnvSchema = Record<string, z.ZodType>
+
+type VercelTarget = {
+  target: string
+  schema: EnvSchema
+}
+
+const VERCEL_TARGETS = [
+  { target: 'production', schema: VERCEL_PRODUCTION_ENV_SCHEMA },
+  { target: 'preview', schema: VERCEL_PREVIEW_ENV_SCHEMA }
+] as const satisfies readonly VercelTarget[]
 
 type EnvSource = {
   name: string
-  schema: Record<string, z.ZodType>
+  schema: EnvSchema
   readKeys: () => string[]
 }
 
@@ -40,10 +56,10 @@ const fromEnvFile = (path: string): EnvSource => {
   }
 }
 
-const fromVercelTarget = (target: string): EnvSource => {
+const fromVercelTarget = ({ target, schema }: VercelTarget): EnvSource => {
   return {
     name: `Vercel ${target}`,
-    schema: VERCEL_ENV_SCHEMA,
+    schema,
     readKeys: () => {
       return parseVercelEnvList(
         execFileSync('vercel', ['env', 'ls', target], {

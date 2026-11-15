@@ -24,6 +24,7 @@ import {
   SENTRY_ORG,
   SENTRY_PROJECT
 } from './src/constants/sentry.ts'
+import { applyDeploymentSiteUrl } from './src/env/deployment-url.ts'
 
 const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
@@ -143,6 +144,8 @@ export default defineConfig(async ({ mode }) => {
     processEnvironment,
     loadEnv(mode, process.cwd(), WITHOUT_PREFIX_FILTER)
   )
+
+  applyDeploymentSiteUrl(processEnvironment)
 
   processEnvironment.VITE_VERCEL_ENV ??=
     processEnvironment.VERCEL_ENV ?? 'development'

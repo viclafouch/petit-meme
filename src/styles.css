@@ -375,7 +375,7 @@
   grid-template-columns: minmax(0, 1fr) 22rem;
 }
 @utility grid-cols-meme-page {
-  grid-template-columns: auto 300px;
+  grid-template-columns: auto 18.75rem;
 }
 @utility chart-tooltip-popover {
   --ts-chart-tooltip-background: var(--popover);

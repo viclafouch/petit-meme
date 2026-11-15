@@ -92,6 +92,7 @@ const renderOfflinePage = (locale: Locale) => {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="text-scale" content="scale">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="${WEB_APP_THEME_COLOR}">
 <title>${SITE_NAME} - ${title}</title>

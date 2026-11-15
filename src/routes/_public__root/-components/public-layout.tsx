@@ -2,32 +2,35 @@ import { getRouteApi, Outlet, useMatchRoute } from '@tanstack/react-router'
 import { StarsBackground } from '~/components/animate-ui/backgrounds/stars'
 import { SentryFeedbackWidget } from '~/components/app/sentry-feedback-widget'
 import { Footer } from '~/components/layout/footer'
-import { LocaleBanner } from '~/components/layout/locale-banner'
 import { Navbar } from '~/components/layout/navbar'
+import { SiteBanners } from '~/components/layout/site-banners'
 import { TabBar } from '~/components/layout/tab-bar/tab-bar'
 import { m } from '~/paraglide/messages'
 
 const publicRouteApi = getRouteApi('/_public__root')
 
 export const PublicLayout = () => {
-  const { _localeBannerDismissed } = publicRouteApi.useLoaderData()
+  const { _localeBannerDismissed, _announcementDismissed } =
+    publicRouteApi.useLoaderData()
   const matchRoute = useMatchRoute()
   const isHomePage = matchRoute({ to: '/' }) !== false
 
   return (
     <StarsBackground animated={isHomePage}>
-      <div className="z-10 relative min-h-dvh flex flex-col pb-(--tab-bar-space)">
+      <div className="z-10 relative min-h-dvh flex flex-col pt-[env(safe-area-inset-top,0px)] pb-(--tab-bar-space)">
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:z-60 focus:top-4 focus:left-4 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:text-sm focus:font-medium"
         >
           {m.common_skip_to_content()}
         </a>
-        <div className="fixed top-0 right-0 left-0 z-50 pt-[env(safe-area-inset-top,0px)]">
-          <LocaleBanner isInitiallyDismissed={_localeBannerDismissed} />
+        <SiteBanners
+          isLocaleBannerInitiallyDismissed={_localeBannerDismissed}
+          isAnnouncementInitiallyDismissed={_announcementDismissed}
+        />
+        <div className="sticky top-[env(safe-area-inset-top,0px)] z-50">
           <Navbar />
         </div>
-        <div className="h-(--navbar-space)" aria-hidden="true" />
         <main
           id="main-content"
           tabIndex={-1}

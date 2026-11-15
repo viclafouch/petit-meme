@@ -241,6 +241,7 @@
   "legal_terms_title": "Conditions d'utilisation",
   "locale_banner_available": "Ce site est aussi disponible en {language}.",
   "locale_banner_switch": "Passer en {language}",
+  "announcement_banner_message": "{date} : vous êtes de plus en plus nombreux, merci du fond du cœur ❤️",
   "manifest_category_creation": "Création",
   "manifest_category_entertainment": "Divertissement",
   "manifest_category_humor": "Humour",

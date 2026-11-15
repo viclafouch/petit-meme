@@ -1,7 +1,9 @@
 import { expect, test as base } from '@playwright/test'
+import { ANNOUNCEMENT_DAY } from '~/constants/announcement'
 import {
   CONSENT_COOKIE_KEY,
   CONSENT_VERSION,
+  COOKIE_ANNOUNCEMENT_DISMISSED_KEY,
   COOKIE_LOCALE_BANNER_DISMISSED_KEY
 } from '~/constants/cookie'
 import { PREMIUM_REMINDER_STORAGE_KEY } from '~/constants/plan'
@@ -41,6 +43,11 @@ export const test = base.extend<object, E2eWorkerFixtures>({
       {
         name: COOKIE_LOCALE_BANNER_DISMISSED_KEY,
         value: '1',
+        url: baseURL
+      },
+      {
+        name: COOKIE_ANNOUNCEMENT_DISMISSED_KEY,
+        value: ANNOUNCEMENT_DAY,
         url: baseURL
       }
     ])

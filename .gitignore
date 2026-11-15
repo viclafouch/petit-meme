@@ -64,3 +64,8 @@ watermarked/
 
 # Turbo
 .turbo
+
+# Pull request evidence
+/.artifacts
+e2e/evidence.spec.ts
+e2e/evidence.mobile.spec.ts

@@ -5,6 +5,7 @@ import { ActivityEventType } from '~/db/generated/prisma/enums'
 import { PaymentFailedEmail } from '~/emails/payment-failed-email'
 import { emailSubjects } from '~/emails/subjects'
 import { SubscriptionConfirmedEmail } from '~/emails/subscription-confirmed-email'
+import { SubscriptionEndedEmail } from '~/emails/subscription-ended-email'
 import { serverEnv } from '~/env/server.server'
 import { formatCentsToEuros } from '~/helpers/number'
 import {
@@ -20,6 +21,13 @@ import {
   toBillingSubscription
 } from '~/server/platforms/stripe.server'
 
+type PaymentFailedEvent = {
+  id: string
+  data: {
+    object: Pick<Stripe.Invoice, 'id' | 'customer' | 'attempt_count'>
+  }
+}
+
 type NotifySubscriptionConfirmedParams = {
   eventId: string
   userId: string
@@ -28,11 +36,23 @@ type NotifySubscriptionConfirmedParams = {
   stripeSubscription: Stripe.Subscription
 }
 
+type NotifySubscriptionEndedParams = {
+  userId: string
+  stripeSubscription: Pick<Stripe.Subscription, 'id' | 'cancellation_details'>
+}
+
 const USER_EMAIL_SELECT = {
   email: true,
   name: true,
   locale: true
 } as const satisfies Prisma.UserSelect
+
+const findEmailRecipient = (userId: string) => {
+  return prismaClient.user.findUnique({
+    where: { id: userId },
+    select: USER_EMAIL_SELECT
+  })
+}
 
 const createBillingPortalUrl = async (customerId: string) => {
   const portalSession = await getStripeClient().billingPortal.sessions.create({
@@ -43,12 +63,17 @@ const createBillingPortalUrl = async (customerId: string) => {
   return portalSession.url
 }
 
-export const notifyPaymentFailed = async (
-  event: Stripe.InvoicePaymentFailedEvent
+const matchIsRetryOfFailedInvoice = (
+  invoice: Pick<Stripe.Invoice, 'attempt_count'>
 ) => {
-  const customerId = event.data.object.customer
+  return invoice.attempt_count > 1
+}
 
-  if (typeof customerId !== 'string') {
+export const notifyPaymentFailed = async (event: PaymentFailedEvent) => {
+  const invoice = event.data.object
+  const customerId = invoice.customer
+
+  if (typeof customerId !== 'string' || matchIsRetryOfFailedInvoice(invoice)) {
     return
   }
 
@@ -97,7 +122,7 @@ export const notifyPaymentFailed = async (
       locale: user.locale
     }),
     logMessage: 'Sending payment failed email to',
-    idempotencyKey: `payment-failed/${event.id}`
+    idempotencyKey: `payment-failed/${invoice.id}`
   })
 }
 
@@ -110,10 +135,7 @@ export const notifySubscriptionConfirmed = async ({
 }: NotifySubscriptionConfirmedParams) => {
   stripeLogger.info({ userId, plan: planName }, 'Subscription completed')
 
-  const user = await prismaClient.user.findUnique({
-    where: { id: userId },
-    select: USER_EMAIL_SELECT
-  })
+  const user = await findEmailRecipient(userId)
 
   if (!user) {
     return
@@ -145,5 +167,36 @@ export const notifySubscriptionConfirmed = async ({
     }),
     logMessage: 'Sending subscription confirmed email to',
     idempotencyKey: `subscription-confirmed/${eventId}`
+  })
+}
+
+export const notifySubscriptionEnded = async ({
+  userId,
+  stripeSubscription
+}: NotifySubscriptionEndedParams) => {
+  if (stripeSubscription.cancellation_details?.reason !== 'payment_failed') {
+    return
+  }
+
+  stripeLogger.info(
+    { userId, subscriptionId: stripeSubscription.id },
+    'Subscription ended for non-payment'
+  )
+
+  const user = await findEmailRecipient(userId)
+
+  if (!user) {
+    return
+  }
+
+  sendEmailInBackground({
+    to: user.email,
+    subject: emailSubjects[user.locale].subscriptionEnded,
+    react: SubscriptionEndedEmail({
+      username: user.name,
+      locale: user.locale
+    }),
+    logMessage: 'Sending subscription ended email to',
+    idempotencyKey: `subscription-ended/${stripeSubscription.id}`
   })
 }

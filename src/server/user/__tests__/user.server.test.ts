@@ -7,6 +7,7 @@ import {
   type FakeStripeFailure
 } from '~/server/platforms/__tests__/stripe.fakes'
 import { getStripeClient } from '~/server/platforms/stripe.server'
+import { FRENCH_USER } from '~/server/user/__tests__/user.fakes'
 import { syncUserLocale } from '~/server/user/user.server'
 
 vi.mock(import('~/server/platforms/stripe.server'), async (importOriginal) => {
@@ -17,34 +18,6 @@ vi.mock(import('~/server/platforms/stripe.server'), async (importOriginal) => {
 })
 
 const CUSTOMER_LOCALE_ROUTE = 'POST /v1/customers/cus_test'
-
-const CREATED_AT = new Date('2026-11-12T00:00:00Z')
-
-const FRENCH_USER = {
-  id: 'user-id',
-  name: 'Alan',
-  email: 'alan@example.test',
-  emailVerified: true,
-  image: null,
-  providerAvatar: null,
-  createdAt: CREATED_AT,
-  updatedAt: CREATED_AT,
-  generationCount: 0,
-  role: 'user',
-  banned: false,
-  banReason: null,
-  banExpires: null,
-  stripeCustomerId: 'cus_test',
-  termsAcceptedAt: CREATED_AT,
-  privacyAcceptedAt: CREATED_AT,
-  verificationReminderSent: false,
-  isAnonymized: false,
-  locale: 'fr',
-  lastActiveAt: null,
-  premiumGrantedAt: null,
-  verificationEmailCount: 0,
-  verificationEmailWindowStart: null
-} as const satisfies User
 
 const STRIPE_OUTAGE = {
   status: HTTP_STATUS.INTERNAL_SERVER_ERROR,

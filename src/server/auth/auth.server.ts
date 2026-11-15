@@ -54,7 +54,8 @@ import {
 } from '~/server/subscription/stripe-customer.server'
 import {
   notifyPaymentFailed,
-  notifySubscriptionConfirmed
+  notifySubscriptionConfirmed,
+  notifySubscriptionEnded
 } from '~/server/subscription/stripe-webhook.server'
 import { cleanupUserData } from '~/server/user/user.server'
 
@@ -324,6 +325,15 @@ const getAuthConfig = createServerOnlyFn(() => {
             await giveUserLocaleToCheckoutStripeCustomer({
               stripeClient: getStripeClient(),
               endpointContext,
+              userId: subscription.referenceId,
+              stripeSubscription
+            })
+          },
+          onSubscriptionDeleted: async ({
+            subscription,
+            stripeSubscription
+          }) => {
+            await notifySubscriptionEnded({
               userId: subscription.referenceId,
               stripeSubscription
             })

@@ -30,7 +30,8 @@ export const ReelsTopBar = ({ sound, onSoundChange }: ReelsTopBarProps) => {
       </Link>
       <Button
         variant="ghost"
-        aria-label={isSoundOn ? m.meme_mute() : m.meme_unmute()}
+        aria-label={sound === 'blocked' ? undefined : m.meme_mute()}
+        aria-pressed={sound === 'blocked' ? undefined : !isSoundOn}
         className="pointer-events-auto h-12 min-w-12 rounded-full px-3 text-white touch-tap [&>svg]:size-6! [&>svg]:drop-shadow-md"
         onClick={() => {
           onSoundChange(isSoundOn ? 'muted' : 'on')

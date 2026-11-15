@@ -83,7 +83,7 @@ const Hero = () => {
 
 const Destinations = () => {
   return (
-    <section className="grid items-center gap-10 lg:grid-cols-2">
+    <section className="grid items-center gap-10 [contain-intrinsic-size:auto_none_auto_400px] [content-visibility:auto] lg:grid-cols-2">
       <div className="flex flex-col gap-4">
         <h2 className={SECTION_HEADING_CLASS_NAME}>
           {m.app_page_destinations_heading()}
@@ -248,7 +248,7 @@ const InstallSteps = () => {
   ]
 
   return (
-    <section className="flex flex-col gap-10 pointer-coarse:hidden">
+    <section className="flex flex-col gap-10 [contain-intrinsic-size:auto_none_auto_450px] [content-visibility:auto] pointer-coarse:hidden">
       <h2 className={SECTION_HEADING_CLASS_NAME}>
         {m.app_page_install_heading()}
       </h2>

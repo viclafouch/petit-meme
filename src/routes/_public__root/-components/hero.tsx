@@ -3,7 +3,6 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { buttonVariants } from '~/components/ui/button'
 import { NEWS_CATEGORY_SLUG } from '~/constants/meme'
-import { useIsMobile } from '~/hooks/use-mobile'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
 import { countRecentMemesQueryOpts } from '~/queries/meme'
@@ -106,8 +105,6 @@ const AnnouncementQuery = () => {
 }
 
 export const Hero = () => {
-  const isMobile = useIsMobile()
-
   return (
     <PageHeader as="div" className="container">
       <div className={cn(ENTRANCE_CLASS_NAME, 'delay-500')}>
@@ -158,7 +155,9 @@ export const Hero = () => {
           </Link>
         </div>
       </PageActions>
-      {!isMobile ? <FloatingLogos /> : null}
+      <div className="contents max-md:hidden">
+        <FloatingLogos />
+      </div>
     </PageHeader>
   )
 }

@@ -22,11 +22,14 @@ const bookmarkTheMemeOverTheFreeCap = async (page: Page) => {
   await page.goto(CAP_LIFT_MEME_PATHNAME)
 
   const removeBookmarkButton = page.getByRole('button', {
-    name: m.meme_remove_bookmark()
+    name: m.meme_add_bookmark(),
+    pressed: true
   })
 
   await repeatUntilVisible(() => {
-    return page.getByRole('button', { name: m.meme_add_bookmark() }).click()
+    return page
+      .getByRole('button', { name: m.meme_add_bookmark(), pressed: false })
+      .click()
   }, removeBookmarkButton)
 
   await expectVisibleAfterReload(page, removeBookmarkButton)

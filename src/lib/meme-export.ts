@@ -6,6 +6,7 @@ import {
   type InsightsTracking
 } from '~/lib/algolia-insights'
 import { downloadBlob, matchIsBlobShareable, shareBlob } from '~/lib/download'
+import { lowPriorityServerFnFetch } from '~/lib/server-fn-fetch'
 import {
   getMemeExportFile,
   recordMemeExport
@@ -86,7 +87,10 @@ export const exportMeme = async ({
     return false
   }
 
-  void recordMemeExport({ data: { memeId: meme.id, action: mode } })
+  void recordMemeExport({
+    data: { memeId: meme.id, action: mode },
+    fetch: lowPriorityServerFnFetch
+  })
   sendConversionEvent({
     eventName: EXPORT_CONVERSION_EVENT_NAMES[deliveredMode][format],
     objectID: meme.id,

@@ -1,4 +1,3 @@
-import React from 'react'
 import { House } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import {
@@ -20,32 +19,40 @@ export const PathBreadcrumbs = ({ crumbMatches }: PathBreadcrumbsProps) => {
     <Breadcrumb>
       <BreadcrumbList>
         <BreadcrumbItem className="shrink-0">
-          <BreadcrumbLink render={<Link to="/admin" />}>
-            <House className="size-4" />
+          <BreadcrumbLink
+            render={<Link to="/admin" activeOptions={{ exact: true }} />}
+          >
+            <House className="size-4" aria-hidden />
+            <span className="sr-only">Accueil</span>
           </BreadcrumbLink>
         </BreadcrumbItem>
-        <BreadcrumbSeparator className="shrink-0" />
         {crumbMatches.map((match, index) => {
           const isLast = index === crumbMatches.length - 1
 
           return (
-            <React.Fragment key={match.fullPath}>
-              <BreadcrumbItem>
-                {isLast ? (
-                  <BreadcrumbPage className="truncate">
-                    {match.loaderData?.crumb}
-                  </BreadcrumbPage>
-                ) : (
-                  <BreadcrumbLink
-                    className="truncate"
-                    render={<Link from={match.fullPath} />}
-                  >
-                    {match.loaderData?.crumb}
-                  </BreadcrumbLink>
-                )}
-              </BreadcrumbItem>
-              {!isLast ? <BreadcrumbSeparator /> : null}
-            </React.Fragment>
+            <BreadcrumbItem key={match.fullPath} className="min-w-0">
+              <BreadcrumbSeparator className="shrink-0" />
+              {isLast ? (
+                <BreadcrumbPage
+                  className="truncate"
+                  render={<Link from={match.fullPath} />}
+                >
+                  {match.loaderData?.crumb}
+                </BreadcrumbPage>
+              ) : (
+                <BreadcrumbLink
+                  className="truncate"
+                  render={
+                    <Link
+                      from={match.fullPath}
+                      activeOptions={{ exact: true }}
+                    />
+                  }
+                >
+                  {match.loaderData?.crumb}
+                </BreadcrumbLink>
+              )}
+            </BreadcrumbItem>
           )
         })}
       </BreadcrumbList>

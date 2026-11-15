@@ -68,7 +68,7 @@ export const TwitterForm = ({ onImported }: TwitterFormProps) => {
       <form.Field
         name="url"
         children={(field) => {
-          const isInvalid = matchIsFieldInvalid(field.state.meta)
+          const isInvalid = matchIsFieldInvalid(field)
 
           return (
             <Field data-invalid={isInvalid}>
@@ -80,8 +80,15 @@ export const TwitterForm = ({ onImported }: TwitterFormProps) => {
                   type="url"
                   inputMode="url"
                   autoComplete="off"
+                  spellCheck={false}
+                  autoCapitalize="none"
                   placeholder="https://x.com/compte/status/..."
                   aria-invalid={isInvalid}
+                  aria-describedby={
+                    isInvalid
+                      ? `${field.name}-description ${field.name}-error`
+                      : `${field.name}-description`
+                  }
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(event) => {
@@ -99,12 +106,15 @@ export const TwitterForm = ({ onImported }: TwitterFormProps) => {
                   </InputGroupButton>
                 </InputGroupAddon>
               </InputGroup>
-              <FieldDescription>
+              <FieldDescription id={`${field.name}-description`}>
                 La vidéo du tweet part sur Bunny, puis la page du Meme
                 s&apos;ouvre.
               </FieldDescription>
               {isInvalid ? (
-                <FieldError errors={field.state.meta.errors} />
+                <FieldError
+                  id={`${field.name}-error`}
+                  errors={field.state.meta.errors}
+                />
               ) : null}
             </Field>
           )

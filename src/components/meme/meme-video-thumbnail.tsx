@@ -1,28 +1,33 @@
 import { Badge } from '~/components/ui/badge'
+import { formatSeconds } from '~/helpers/duration'
 import {
   buildVideoImageUrl,
   buildVideoPreviewUrl
 } from '~/lib/bunny-public-urls'
+import { getLocale } from '~/paraglide/runtime'
+
+export type ThumbnailPriority = 'lcp' | 'eager' | 'lazy'
 
 type MemeVideoThumbnailProps = {
   bunnyId: string
-  alt: string
   duration: number
   children: React.ReactNode
+  priority?: ThumbnailPriority
 }
 
 export const MemeVideoThumbnail = ({
   bunnyId,
-  alt,
   duration,
+  priority = 'lazy',
   children
 }: MemeVideoThumbnailProps) => {
   return (
     <div data-meme-thumbnail className="relative size-full isolate">
       <img
         src={buildVideoImageUrl(bunnyId)}
-        alt={alt}
-        loading="lazy"
+        alt=""
+        loading={priority === 'lazy' ? 'lazy' : undefined}
+        fetchPriority={priority === 'lcp' ? 'high' : undefined}
         decoding="async"
         className="absolute size-full inset-0 object-cover"
       />
@@ -31,12 +36,11 @@ export const MemeVideoThumbnail = ({
         alt=""
         loading="lazy"
         decoding="async"
-        className="absolute size-full inset-0 hidden duration-600 group-hover:block transition-discrete z-10 object-cover opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 group-focus-within:block"
-        aria-hidden="true"
+        className="absolute size-full inset-0 z-10 object-cover hidden opacity-0 transition-[opacity,display] transition-discrete duration-600 group-hover:block group-hover:opacity-100 group-hover:starting:opacity-0 group-focus-within:block group-focus-within:opacity-100 group-focus-within:starting:opacity-0"
       />
       <div className="absolute bottom-1 left-1 z-30">
         <Badge size="sm" variant="black">
-          {duration} sec
+          {formatSeconds(duration, getLocale())}
         </Badge>
       </div>
       <div className="absolute inset-0 z-40">{children}</div>

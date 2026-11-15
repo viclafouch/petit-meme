@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { serializeJsonLd } from '~/helpers/json-ld'
 import {
   buildBreadcrumbJsonLd,
   buildWebApplicationJsonLd
@@ -34,11 +35,11 @@ export const Route = createFileRoute('/_public__root/_default/app/')({
       scripts: [
         {
           type: 'application/ld+json',
-          children: JSON.stringify(buildWebApplicationJsonLd())
+          children: serializeJsonLd(buildWebApplicationJsonLd())
         },
         {
           type: 'application/ld+json',
-          children: JSON.stringify(
+          children: serializeJsonLd(
             buildBreadcrumbJsonLd([
               { name: m.meme_breadcrumb_home(), pathname: '/' },
               { name: m.app_page_title(), pathname: '/app' }

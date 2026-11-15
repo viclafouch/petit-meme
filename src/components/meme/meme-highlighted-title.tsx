@@ -1,6 +1,9 @@
+import React from 'react'
+import type { HighlightedText } from '~/helpers/highlight'
+
 type MemeHighlightedTitleProps = {
   title: string
-  highlightedTitle?: string
+  highlightedTitle?: HighlightedText
 }
 
 export const MemeHighlightedTitle = ({
@@ -11,11 +14,15 @@ export const MemeHighlightedTitle = ({
     return title
   }
 
-  return (
-    <span
-      className="[&>em]:not-italic [&>em]:bg-yellow-200 [&>em]:text-black [&>em]:rounded-sm"
-      // oxlint-disable-next-line react/no-danger -- Algolia returns the highlighted title as HTML with <em> tags
-      dangerouslySetInnerHTML={{ __html: highlightedTitle }}
-    />
-  )
+  return highlightedTitle.map((segment, index) => {
+    const key = `${index}-${segment.text}`
+
+    return segment.isHighlighted ? (
+      <mark key={key} className="rounded-sm bg-yellow-200 text-black">
+        {segment.text}
+      </mark>
+    ) : (
+      <React.Fragment key={key}>{segment.text}</React.Fragment>
+    )
+  })
 }

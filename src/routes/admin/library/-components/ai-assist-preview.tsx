@@ -140,13 +140,7 @@ export const AiAssistPreview = ({
             keywordsField.setKeywordValue(event.target.value)
           }}
           enterKeyHint="done"
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') {
-              event.preventDefault()
-              event.stopPropagation()
-              keywordsField.handleAddKeyword()
-            }
-          }}
+          onKeyDown={keywordsField.handleKeywordKeyDown}
         />
         {editedKeywords.length > 0 ? (
           <div className="flex flex-wrap gap-2">

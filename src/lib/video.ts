@@ -82,6 +82,15 @@ type StartHlsPlayerParams = AttachHlsJsSourceParams & {
   Hls: NonNullable<Awaited<ReturnType<typeof loadHls>>>
 }
 
+const PRELOADS_LOADING_ON_PLAY = new Set(['none', 'metadata'])
+
+const matchIsLoadingOnPlay = (video: HTMLVideoElement) => {
+  return (
+    !bufferingByVideo.has(video) &&
+    PRELOADS_LOADING_ON_PLAY.has(video.getAttribute('preload') ?? '')
+  )
+}
+
 const recordBandwidthEstimate = (hls: HlsPlayer) => {
   if (Number.isFinite(hls.bandwidthEstimate)) {
     lastBandwidthEstimate = hls.bandwidthEstimate
@@ -101,8 +110,10 @@ const startHlsPlayer = ({
   onFatalError,
   signal
 }: StartHlsPlayerParams) => {
+  const isLoadingOnPlay = matchIsLoadingOnPlay(video)
   const hls = new Hls({
     workerPath: hlsWorkerUrl,
+    autoStartLoad: !isLoadingOnPlay,
     loopBackBufferFlush: false,
     capLevelToPlayerSize: true,
     maxDevicePixelRatio: MAX_DEVICE_PIXEL_RATIO,
@@ -150,6 +161,16 @@ const startHlsPlayer = ({
     },
     { once: true }
   )
+
+  if (isLoadingOnPlay) {
+    video.addEventListener(
+      'play',
+      () => {
+        hls.startLoad()
+      },
+      { once: true, signal }
+    )
+  }
 
   hls.loadSource(videoSrc)
   hls.attachMedia(video)

@@ -17,12 +17,16 @@ const routeApi = getRouteApi('/admin')
 
 export const AdminLayout = () => {
   const { user } = routeApi.useRouteContext()
-  const { setTheme } = useThemeStore().actions
+  const { forceTheme, releaseForcedTheme } = useThemeStore().actions
   const crumbMatches = useCrumbMatches()
 
   React.useLayoutEffect(() => {
-    setTheme('dark')
-  }, [setTheme])
+    forceTheme('dark')
+
+    return () => {
+      releaseForcedTheme()
+    }
+  }, [forceTheme, releaseForcedTheme])
 
   return (
     <SidebarProvider style={{ '--sidebar-width': 'calc(var(--spacing) * 72)' }}>

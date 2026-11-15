@@ -1,32 +1,31 @@
 import React from 'react'
 import { User } from 'lucide-react'
-import { motion, useScroll, useTransform, useReducedMotion } from 'motion/react'
+import { motion, useScroll, useTransform } from 'motion/react'
 import { type LinkOptions, Link, useRouteContext } from '@tanstack/react-router'
 import { ThemeSwitcher } from '~/components/animate-ui/theme-switcher'
 import { InstallAppButton } from '~/components/install/install-app-button'
 import { LanguageSwitcher } from '~/components/layout/language-switcher'
 import { UserDropdown } from '~/components/layout/user-dropdown'
 import { Button, buttonVariants } from '~/components/ui/button'
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList
-} from '~/components/ui/navigation-menu'
 import { LOGO_PATH } from '~/constants/branding'
 import { useNeedsScrollFadeFallback } from '~/hooks/use-scroll-fade'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
 import { useDialogStore } from '~/stores/dialog.store'
 
-export type NavigationLink = {
+type NavigationLink = {
   to: LinkOptions['to']
   label: string
-  className?: string
   preload: LinkOptions['preload']
 }
 
 const NAVBAR_SCROLL_FADE_RANGE = 180
+
+const NAVBAR_BACKDROP_CLASS_NAME =
+  'navbar-scroll-fade absolute inset-0 bg-background'
+
+const NAVIGATION_LINK_CLASS_NAME =
+  'flex items-center rounded-md px-3 py-1.5 text-sm font-medium decoration-2 underline-offset-4 transition-[color,background-color,box-shadow] outline-none hover:bg-muted focus-visible:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 aria-[current=page]:underline'
 
 const getNavigationLinks = (): NavigationLink[] => {
   return [
@@ -42,8 +41,7 @@ const NavbarScrollFadeFallback = () => {
 
   return (
     <motion.div
-      data-navbar-bg
-      className="absolute inset-0 bg-background"
+      className={NAVBAR_BACKDROP_CLASS_NAME}
       style={{ opacity }}
       aria-hidden="true"
     />
@@ -55,11 +53,14 @@ export const Navbar = () => {
   const { user } = useRouteContext({ from: '__root__' })
   const navigationLinks = getNavigationLinks()
   const needsFallback = useNeedsScrollFadeFallback()
-  const isReducedMotion = useReducedMotion()
 
   return (
-    <header className="navbar-scroll-fade relative h-(--navbar-height)">
-      {needsFallback && !isReducedMotion ? <NavbarScrollFadeFallback /> : null}
+    <header className="relative h-(--navbar-height) pr-[env(safe-area-inset-right,0px)] pl-[env(safe-area-inset-left,0px)]">
+      {needsFallback ? (
+        <NavbarScrollFadeFallback />
+      ) : (
+        <div className={NAVBAR_BACKDROP_CLASS_NAME} aria-hidden="true" />
+      )}
       <div className="container relative flex h-full items-center justify-between gap-4">
         <div className="flex flex-1 items-center justify-start gap-2">
           <Link
@@ -78,26 +79,23 @@ export const Navbar = () => {
             />
           </Link>
         </div>
-        <NavigationMenu className="max-lg:hidden" aria-label={m.nav_menu()}>
-          <NavigationMenuList>
+        <nav className="max-lg:hidden" aria-label={m.nav_menu()}>
+          <ul className="flex items-center">
             {navigationLinks.map((link) => {
               return (
-                <NavigationMenuItem key={link.to}>
-                  <NavigationMenuLink
-                    data-active={false}
-                    className={cn(
-                      'rounded-md px-3 py-1.5 font-medium',
-                      link.className
-                    )}
-                    render={<Link to={link.to} preload={link.preload} />}
+                <li key={link.to}>
+                  <Link
+                    to={link.to}
+                    preload={link.preload}
+                    className={NAVIGATION_LINK_CLASS_NAME}
                   >
                     {link.label}
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
+                  </Link>
+                </li>
               )
             })}
-          </NavigationMenuList>
-        </NavigationMenu>
+          </ul>
+        </nav>
         <div className="flex flex-1 items-center justify-end gap-3">
           <InstallAppButton
             surface="header"

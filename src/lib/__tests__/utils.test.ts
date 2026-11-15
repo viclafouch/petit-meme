@@ -16,8 +16,6 @@ const CONFLICTING_CLASSES = [
   ['max-h-sticky-aside', 'max-h-screen'],
   ['max-h-banner', 'max-h-full'],
   ['max-h-dvh-80', 'max-h-40'],
-  ['max-h-vh-50', 'max-h-40'],
-  ['max-w-vw-90', 'max-w-sm'],
   ['w-banner', 'w-full'],
   ['grid-cols-submit', 'grid-cols-2'],
   ['grid-cols-meme-page', 'grid-cols-1'],

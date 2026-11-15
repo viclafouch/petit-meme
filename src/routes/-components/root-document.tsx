@@ -18,6 +18,7 @@ import { StudioProvider } from '~/components/studio/studio-provider'
 import { Toaster } from '~/components/ui/sonner'
 import { IS_PRODUCTION } from '~/constants/env'
 import { clientEnv } from '~/env/client'
+import { m } from '~/paraglide/messages'
 import { getLocale, getTextDirection } from '~/paraglide/runtime'
 import { WebAnalytics } from './web-analytics'
 
@@ -30,30 +31,22 @@ type RootDocumentProps = {
 export const RootDocument = ({ children }: RootDocumentProps) => {
   const { _storedTheme, _consentState } = rootRouteApi.useLoaderData()
   const embedMatch = useMatch({ from: '/embed/$memeId', shouldThrow: false })
+  const adminMatch = useMatch({ from: '/admin', shouldThrow: false })
+  const documentTheme = adminMatch ? 'dark' : _storedTheme
 
   return (
     <html lang={getLocale()} suppressHydrationWarning dir={getTextDirection()}>
       <head>
         <meta name="algolia-site-verification" content="57C07DF31C29F6D0" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin=""
-        />
         <link
           rel="preconnect"
           href={`https://${clientEnv.VITE_BUNNY_HOSTNAME}`}
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap"
-          rel="stylesheet"
         />
         <HeadContent />
       </head>
       <body>
         <ScriptOnce>
-          {`document.documentElement.className = ${JSON.stringify(_storedTheme)};`}
+          {`document.documentElement.className = ${JSON.stringify(documentTheme)};`}
         </ScriptOnce>
         <MotionConfig reducedMotion="user">
           <ThemeProvider initialTheme={_storedTheme}>
@@ -64,6 +57,8 @@ export const RootDocument = ({ children }: RootDocumentProps) => {
                 <ClientOnly>
                   <Toaster
                     richColors
+                    closeButton
+                    toastOptions={{ closeButtonAriaLabel: m.common_close() }}
                     offset={{ bottom: 'var(--toast-offset-bottom)' }}
                     mobileOffset={{ bottom: 'var(--toast-offset-bottom)' }}
                   />

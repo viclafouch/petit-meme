@@ -161,7 +161,7 @@ export const CategoryForm = ({
           name="slug"
           children={(field) => {
             return (
-              <FormItem error={getFieldErrorMessage(field.state.meta)}>
+              <FormItem error={getFieldErrorMessage(field)}>
                 <FormLabel>Slug</FormLabel>
                 <FormControl
                   render={

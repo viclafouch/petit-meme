@@ -1,24 +1,46 @@
-import type { AnyFieldMeta } from '@tanstack/react-form'
+import type { AnyFieldMeta, AnyFormApi } from '@tanstack/react-form'
 import { createClientOnlyFn } from '@tanstack/react-start'
 
-type FieldErrorMeta = Pick<AnyFieldMeta, 'isTouched' | 'isValid'> & {
-  errors: ({ message: string } | undefined)[]
+type FieldInteractionSource = {
+  state: { meta: Pick<AnyFieldMeta, 'isBlurred' | 'isValid'> }
 }
 
-export function matchIsFieldInvalid(
-  meta: Pick<AnyFieldMeta, 'isTouched' | 'isValid'>
-) {
-  return meta.isTouched && !meta.isValid
+type FieldErrorSource = {
+  state: {
+    meta: Pick<AnyFieldMeta, 'isBlurred' | 'isValid'> & {
+      errors: ({ message: string } | undefined)[]
+    }
+  }
 }
 
-export function getFieldErrorMessage(meta: FieldErrorMeta) {
-  return matchIsFieldInvalid(meta) ? (meta.errors[0]?.message ?? '') : ''
+export const matchIsFieldInvalid = (field: FieldInteractionSource) => {
+  return field.state.meta.isBlurred && !field.state.meta.isValid
+}
+
+export const getFieldErrorMessage = (field: FieldErrorSource) => {
+  return matchIsFieldInvalid(field)
+    ? (field.state.meta.errors[0]?.message ?? '')
+    : ''
 }
 
 const focusFirstRenderedInvalidField = () => {
   document.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus()
 }
 
-export const focusFirstInvalidField = createClientOnlyFn(() => {
-  requestAnimationFrame(focusFirstRenderedInvalidField)
-})
+type SubmitInvalidProps = {
+  formApi: AnyFormApi
+}
+
+export const focusFirstInvalidField = createClientOnlyFn(
+  ({ formApi }: SubmitInvalidProps) => {
+    for (const fieldName of Object.keys(formApi.fieldInfo)) {
+      if (formApi.getFieldMeta(fieldName) !== undefined) {
+        formApi.setFieldMeta(fieldName, (meta) => {
+          return { ...meta, isBlurred: true }
+        })
+      }
+    }
+
+    requestAnimationFrame(focusFirstRenderedInvalidField)
+  }
+)

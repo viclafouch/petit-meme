@@ -282,7 +282,13 @@ export const SearchMemes = () => {
                   onReset={reset}
                   FallbackComponent={MemesListErrorFallback}
                 >
-                  <React.Suspense fallback={<LoadingSpinner />}>
+                  <React.Suspense
+                    fallback={
+                      <output aria-label={m.common_loading()}>
+                        <LoadingSpinner />
+                      </output>
+                    }
+                  >
                     <MemesListWrapper
                       columnGridCount={columnGridCount}
                       slug={activeSlug}

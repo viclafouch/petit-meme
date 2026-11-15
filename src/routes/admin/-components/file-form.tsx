@@ -75,7 +75,7 @@ export const FileForm = ({ onImported }: FileFormProps) => {
       <form.Field
         name="video"
         children={(field) => {
-          const isInvalid = matchIsFieldInvalid(field.state.meta)
+          const isInvalid = matchIsFieldInvalid(field)
 
           return (
             <Field data-invalid={isInvalid}>

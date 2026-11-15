@@ -47,6 +47,18 @@ const findResumeIndex = (firstPage: object | undefined) => {
   return (firstPage && resumeIndexByFeed.get(firstPage)) ?? 0
 }
 
+const resolveThumbnailPriority = (visibleDistance: number) => {
+  if (visibleDistance === 0) {
+    return 'high'
+  }
+
+  if (Math.abs(visibleDistance) === 1) {
+    return 'auto'
+  }
+
+  return 'low'
+}
+
 type ResolveReelLoadingParams = {
   distance: number
   isActiveReelBuffered: boolean
@@ -81,6 +93,7 @@ export const ReelsFeed = () => {
   const [visibleIndex, setVisibleIndex] = React.useState(activeIndex)
   const [bufferedIndex, setBufferedIndex] = React.useState<number | null>(null)
   const [sound, setSound] = React.useState<ReelsSound>('on')
+  const scrollFrameRequestIdRef = React.useRef<number | null>(null)
 
   const reels = reelsQuery.data.pages.flatMap((page, pageIndex) => {
     return page.reels.map((reel, reelIndex) => {
@@ -109,7 +122,7 @@ export const ReelsFeed = () => {
       top: findResumeIndex(firstPage) * feed.clientHeight,
       behavior: 'instant'
     })
-    feed.focus({ preventScroll: true })
+    feed.focus({ preventScroll: true, focusVisible: false })
   }, [firstPage])
 
   const fetchNextPageNear = (index: number) => {
@@ -144,7 +157,9 @@ export const ReelsFeed = () => {
     { wait: SCROLL_SETTLE_FALLBACK_MS }
   )
 
-  const followScroll = () => {
+  const followVisibleReel = () => {
+    scrollFrameRequestIdRef.current = null
+
     const feed = feedRef.current
 
     if (!feed) {
@@ -155,11 +170,23 @@ export const ReelsFeed = () => {
 
     setVisibleIndex(index)
     fetchNextPageNear(index)
+  }
+
+  const followScroll = () => {
+    scrollFrameRequestIdRef.current ??= requestAnimationFrame(followVisibleReel)
 
     if (!IS_SCROLL_END_SUPPORTED) {
       activateSnappedReelAfterScroll()
     }
   }
+
+  React.useEffect(() => {
+    return () => {
+      if (scrollFrameRequestIdRef.current !== null) {
+        cancelAnimationFrame(scrollFrameRequestIdRef.current)
+      }
+    }
+  }, [])
 
   React.useEffect(() => {
     if (firstPage) {
@@ -225,7 +252,7 @@ export const ReelsFeed = () => {
         aria-busy={reelsQuery.isFetchingNextPage}
         // oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- the feed is the scroll container the arrow keys move through
         tabIndex={0}
-        className="reels-feed outline-none motion-safe:scroll-smooth"
+        className="reels-feed outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring motion-safe:scroll-smooth"
         onScrollEnd={activateSnappedReel}
         onScroll={followScroll}
       >
@@ -250,9 +277,7 @@ export const ReelsFeed = () => {
                   }
                   alt=""
                   decoding="async"
-                  fetchPriority={
-                    Math.abs(visibleDistance) <= 1 ? 'high' : 'low'
-                  }
+                  fetchPriority={resolveThumbnailPriority(visibleDistance)}
                   className="absolute inset-0 size-full object-contain"
                 />
               ) : null}

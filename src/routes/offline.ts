@@ -17,6 +17,24 @@ const OFFLINE_PAGE_STYLE = `
   --primary: light-dark(oklch(0.205 0 0), oklch(0.922 0 0));
   --primary-foreground: light-dark(oklch(0.985 0 0), oklch(0.205 0 0));
 }
+@supports not (color: light-dark(#000, #fff)) {
+  :root {
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.145 0 0);
+    --muted-foreground: oklch(0.556 0 0);
+    --primary: oklch(0.205 0 0);
+    --primary-foreground: oklch(0.985 0 0);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: oklch(0.145 0 0);
+      --foreground: oklch(0.985 0 0);
+      --muted-foreground: oklch(0.708 0 0);
+      --primary: oklch(0.922 0 0);
+      --primary-foreground: oklch(0.205 0 0);
+    }
+  }
+}
 * { box-sizing: border-box; margin: 0; }
 html {
   -webkit-tap-highlight-color: transparent;
@@ -52,9 +70,10 @@ button {
   touch-action: manipulation;
   user-select: none;
   -webkit-user-select: none;
-  transition: transform 120ms ease-out;
+  scale: 1;
+  transition: scale 120ms ease-out;
 }
-button:active { transform: scale(0.97); }
+button:active { scale: 0.97; }
 button:focus-visible { outline: 2px solid var(--foreground); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { button { transition: none; } }
 `

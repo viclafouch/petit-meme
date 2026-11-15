@@ -1,6 +1,6 @@
 import React from 'react'
+import ReactDOM from 'react-dom'
 import { ArrowLeft, Pencil, SlidersHorizontal, Sparkles } from 'lucide-react'
-import { toast } from 'sonner'
 import { Link, useRouteContext } from '@tanstack/react-router'
 import { useSelector } from '@tanstack/react-store'
 import {
@@ -22,6 +22,7 @@ import {
   DrawerHeader,
   DrawerTitle
 } from '~/components/ui/drawer'
+import { FieldError } from '~/components/ui/field'
 import { Input } from '~/components/ui/input'
 import { LoadingButton } from '~/components/ui/loading-button'
 import { Separator } from '~/components/ui/separator'
@@ -74,18 +75,28 @@ export const StudioPage = ({ meme }: StudioPageProps) => {
   })
   const { setSettings } = studioStore.actions
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false)
+  const [isTextRequested, setIsTextRequested] = React.useState(false)
+  const desktopTextInputRef = React.useRef<HTMLInputElement>(null)
+  const mobileTextInputRef = React.useRef<HTMLInputElement>(null)
 
   const { progress, processVideo, isProcessing, processedData, cancel, reset } =
     useVideoProcessor(ffmpegQuery.data)
 
   const hasText = settings.text.trim().length > 0
+  const textError =
+    isTextRequested && !hasText ? m.studio_enter_text() : undefined
 
-  const handleGenerate = () => {
+  const handleGenerate = (textInput: HTMLInputElement | null) => {
     if (!hasText) {
-      toast.error(m.studio_enter_text())
+      ReactDOM.flushSync(() => {
+        setIsTextRequested(true)
+      })
+      textInput?.focus()
 
       return
     }
+
+    setIsTextRequested(false)
 
     if (!user) {
       dialogStore.actions.showDialog('auth')
@@ -137,6 +148,7 @@ export const StudioPage = ({ meme }: StudioPageProps) => {
           ) : (
             <>
               <Input
+                ref={mobileTextInputRef}
                 value={settings.text}
                 onChange={handleTextChange}
                 onFocus={triggerPreload}
@@ -146,7 +158,21 @@ export const StudioPage = ({ meme }: StudioPageProps) => {
                 maxLength={STUDIO_TEXT_MAX_LENGTH}
                 className="text-center"
                 aria-label={m.studio_text_aria()}
+                aria-invalid={textError !== undefined}
+                aria-describedby={
+                  textError === undefined
+                    ? undefined
+                    : 'studio-mobile-text-error'
+                }
               />
+              {textError === undefined ? null : (
+                <FieldError
+                  id="studio-mobile-text-error"
+                  className="text-center"
+                >
+                  {textError}
+                </FieldError>
+              )}
               <div className="flex gap-2">
                 <Button
                   variant="outline"
@@ -161,7 +187,9 @@ export const StudioPage = ({ meme }: StudioPageProps) => {
                 </Button>
                 <LoadingButton
                   isLoading={isProcessing}
-                  onClick={handleGenerate}
+                  onClick={() => {
+                    handleGenerate(mobileTextInputRef.current)
+                  }}
                   className="flex-1"
                 >
                   <Sparkles />
@@ -214,13 +242,17 @@ export const StudioPage = ({ meme }: StudioPageProps) => {
             onSettingsChange={setSettings}
             disabled={isProcessing}
             onTextInputFocus={triggerPreload}
+            textInputRef={desktopTextInputRef}
+            textError={textError}
             bunnyId={meme.video.bunnyId}
           />
           <Separator />
           <StudioActions
             isProcessing={isProcessing}
             processedData={processedData}
-            onGenerate={handleGenerate}
+            onGenerate={() => {
+              handleGenerate(desktopTextInputRef.current)
+            }}
           />
           <Separator />
           <React.Suspense fallback={null}>

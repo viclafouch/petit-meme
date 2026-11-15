@@ -18,7 +18,7 @@ export const ClipboardPasteField = ({
   const field = useFieldContext<string>()
 
   return (
-    <FormItem error={getFieldErrorMessage(field.state.meta)}>
+    <FormItem error={getFieldErrorMessage(field)}>
       <FormLabel>{label}</FormLabel>
       <ClipboardPasteInput
         name={field.name}

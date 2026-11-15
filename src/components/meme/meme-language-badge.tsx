@@ -13,16 +13,15 @@ export const MemeLanguageBadge = ({
   showLabel = false
 }: MemeLanguageBadgeProps) => {
   const label = getContentLocaleLabel(contentLocale)
-  const ariaLabel = m.meme_audio_language({ language: label })
   const Flag = CONTENT_LOCALE_FLAGS[contentLocale]
 
   return (
-    <span
-      className="inline-flex items-center gap-1 text-muted-foreground text-xs"
-      aria-label={ariaLabel}
-    >
-      <Flag className="size-3.5 shrink-0 rounded-sm" />
-      {showLabel ? label : null}
+    <span className="inline-flex items-center gap-1 text-muted-foreground text-xs">
+      <Flag aria-hidden="true" className="size-3.5 shrink-0 rounded-sm" />
+      {showLabel ? <span aria-hidden="true">{label}</span> : null}
+      <span className="sr-only">
+        {m.meme_audio_language({ language: label })}
+      </span>
     </span>
   )
 }

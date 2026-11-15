@@ -28,24 +28,19 @@ export const FormFooter = ({
       ) : null}
       <form.Subscribe
         selector={(state) => {
-          return [state.canSubmit, state.isSubmitting] as const
+          return state.isSubmitting
         }}
-        children={([canSubmit, isSubmitting]) => {
+        children={(isSubmitting) => {
           const isBusy = isSubmitting || isPending
 
           return isLoadingButton ? (
-            <LoadingButton
-              type="submit"
-              form={formId}
-              isLoading={isBusy}
-              disabled={!canSubmit}
-            >
+            <LoadingButton type="submit" form={formId} isLoading={isBusy}>
               {submitLabel}
             </LoadingButton>
           ) : (
             <Button
               variant="default"
-              disabled={!canSubmit || isBusy}
+              disabled={isBusy}
               type="submit"
               form={formId}
             >

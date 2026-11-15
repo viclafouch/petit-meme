@@ -17,7 +17,7 @@ export const TextField = ({ label, ...inputProps }: TextFieldProps) => {
   const field = useFieldContext<string>()
 
   return (
-    <FormItem error={getFieldErrorMessage(field.state.meta)}>
+    <FormItem error={getFieldErrorMessage(field)}>
       <FormLabel>{label}</FormLabel>
       <FormControl
         render={

@@ -28,7 +28,7 @@ export const LanguageSwitcher = ({ className }: LanguageSwitcherProps) => {
           <Button
             variant="ghost"
             size="sm"
-            aria-label={m.nav_switch_language()}
+            aria-label={`${currentLocale.toUpperCase()}, ${m.nav_switch_language()}`}
             className={cn('gap-1.5 px-2 text-xs font-medium', className)}
           />
         }
@@ -51,7 +51,7 @@ export const LanguageSwitcher = ({ className }: LanguageSwitcherProps) => {
             >
               <span className="flex items-center gap-2">
                 <Flag className={FLAG_ICON_CLASS} />
-                <span className="capitalize">
+                <span lang={locale} className="capitalize">
                   {getLocaleDisplayName(locale, locale)}
                 </span>
               </span>

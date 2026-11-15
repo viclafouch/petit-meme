@@ -27,7 +27,9 @@ test.describe('a Meme page', () => {
       })
     ).toBeVisible()
     await expect(page.getByText(PLAYABLE_MEME.description)).toBeVisible()
-    await expect(page.getByLabel(AUDIO_LANGUAGE_LABEL)).toBeVisible()
+    await expect(
+      page.getByText(AUDIO_LANGUAGE_LABEL, { exact: true })
+    ).toBeVisible()
   })
 
   test('hands back to the library when the visit starts on it', async ({

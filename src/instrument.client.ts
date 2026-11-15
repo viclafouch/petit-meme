@@ -61,7 +61,7 @@ const addReplayIntegration = async () => {
 
     Sentry.addIntegration(
       replayIntegration({
-        maskAllText: false,
+        maskAllText: true,
         blockAllMedia: false,
         networkDetailDenyUrls: SENSITIVE_API_PATTERNS
       })

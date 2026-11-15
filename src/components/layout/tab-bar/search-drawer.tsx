@@ -155,9 +155,12 @@ const SearchResults = ({ query }: SearchResultsProps) => {
 
   if (!resultsQuery.data) {
     return (
-      <div className="flex justify-center py-10">
+      <output
+        aria-label={m.common_loading()}
+        className="flex justify-center py-10"
+      >
         <LoadingSpinner />
-      </div>
+      </output>
     )
   }
 
@@ -276,6 +279,7 @@ export const SearchDrawer = () => {
       </DrawerTrigger>
       <DrawerPrimitive.VirtualKeyboardProvider>
         <DrawerContent
+          showCloseButton={false}
           initialFocus={false}
           className="h-[calc(100dvh-6rem)]"
           ref={blurSearchWhenSwiped}

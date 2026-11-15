@@ -47,11 +47,7 @@ const SubmitPageContent = () => {
   const hasProposals = proposalsQuery.data.proposals.length > 0
 
   return (
-    <div
-      className={
-        hasProposals ? 'grid gap-6 lg:grid-cols-submit' : 'flex flex-col gap-6'
-      }
-    >
+    <div className="grid gap-6 lg:has-[>aside]:grid-cols-submit">
       <Card>
         <CardContent>
           {proposalsQuery.data.pendingCount < MAX_PENDING_PROPOSALS ? (
@@ -67,7 +63,7 @@ const SubmitPageContent = () => {
         </CardContent>
       </Card>
       {hasProposals ? (
-        <aside className="lg:row-span-2 lg:sticky lg:top-20 lg:self-start lg:max-h-sticky-aside lg:overflow-y-auto">
+        <aside className="lg:row-span-2 lg:sticky lg:top-20 lg:self-start lg:max-h-sticky-aside lg:overflow-y-auto lg:overscroll-contain">
           <Card>
             <CardContent>
               <ProposalHistory />

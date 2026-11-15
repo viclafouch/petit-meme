@@ -39,6 +39,7 @@ export const Route = createFileRoute('/_studio/memes/$memeId/studio')({
           {
             rel: 'preload',
             as: 'image',
+            fetchPriority: 'high',
             href: buildVideoImageUrl(meme.video.bunnyId)
           }
         ]

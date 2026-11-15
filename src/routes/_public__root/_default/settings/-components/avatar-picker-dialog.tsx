@@ -116,7 +116,7 @@ export const AvatarPickerDialog = ({
           }}
           aria-label={m.settings_avatar_change()}
           aria-busy={updateAvatarMutation.isPending}
-          className="flex max-h-dvh-60 w-full flex-col items-stretch gap-4 overflow-y-auto p-1"
+          className="flex max-h-dvh-60 w-full flex-col items-stretch gap-4 overflow-y-auto overscroll-contain p-1"
         >
           {providerAvatar ? (
             <>

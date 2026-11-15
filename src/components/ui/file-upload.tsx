@@ -1227,7 +1227,7 @@ const FileUploadItemMetadata = (props: FileUploadItemMetadataProps) => {
             id={itemContext.nameId}
             className={cn(
               'truncate font-medium text-sm',
-              size === 'sm' && 'font-normal text-[13px] leading-snug'
+              size === 'sm' && 'font-normal text-[0.8125rem] leading-snug'
             )}
           >
             {itemContext.fileState.file.name}
@@ -1236,7 +1236,7 @@ const FileUploadItemMetadata = (props: FileUploadItemMetadataProps) => {
             id={itemContext.sizeId}
             className={cn(
               'truncate text-muted-foreground text-xs',
-              size === 'sm' && 'text-[11px] leading-snug'
+              size === 'sm' && 'text-[0.6875rem] leading-snug'
             )}
           >
             {formatBytes(itemContext.fileState.file.size)}
@@ -1282,6 +1282,15 @@ const FileUploadItemProgress = (props: FileUploadItemProgressProps) => {
     return null
   }
 
+  const progressElement = (
+    <progress
+      value={itemContext.fileState.progress}
+      max={100}
+      aria-labelledby={itemContext.nameId}
+      className="sr-only"
+    />
+  )
+
   switch (variant) {
     case 'circular': {
       const circumference = 2 * Math.PI * ((size - 4) / 2)
@@ -1290,12 +1299,6 @@ const FileUploadItemProgress = (props: FileUploadItemProgressProps) => {
 
       return (
         <div
-          role="progressbar"
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={itemContext.fileState.progress}
-          aria-valuetext={`${itemContext.fileState.progress}%`}
-          aria-labelledby={itemContext.nameId}
           data-slot="file-upload-progress"
           {...progressProps}
           className={cn(
@@ -1303,7 +1306,9 @@ const FileUploadItemProgress = (props: FileUploadItemProgressProps) => {
             className
           )}
         >
+          {progressElement}
           <svg
+            aria-hidden="true"
             className="rotate-[-90deg] transform"
             width={size}
             height={size}
@@ -1339,46 +1344,34 @@ const FileUploadItemProgress = (props: FileUploadItemProgressProps) => {
 
       return (
         <div
-          role="progressbar"
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={progressPercentage}
-          aria-valuetext={`${progressPercentage}%`}
-          aria-labelledby={itemContext.nameId}
           data-slot="file-upload-progress"
           {...progressProps}
-          className={cn(
-            'absolute inset-0 bg-primary/50 transition-[clip-path] duration-300 ease-linear',
-            className
-          )}
-          style={{
-            clipPath: `inset(${topInset}% 0% 0% 0%)`
-          }}
-        />
+          className={cn('absolute inset-0', className)}
+        >
+          {progressElement}
+          <div
+            aria-hidden="true"
+            className="size-full bg-primary/50 transition-[clip-path] duration-300 ease-linear"
+            style={{
+              clipPath: `inset(${topInset}% 0% 0% 0%)`
+            }}
+          />
+        </div>
       )
     }
 
     default:
       return (
         <div
-          role="progressbar"
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={itemContext.fileState.progress}
-          aria-valuetext={`${itemContext.fileState.progress}%`}
-          aria-labelledby={itemContext.nameId}
           data-slot="file-upload-progress"
           {...progressProps}
-          className={cn(
-            'relative h-1.5 w-full overflow-hidden rounded-full bg-primary/20',
-            className
-          )}
+          className={cn('h-1.5 w-full', className)}
         >
-          <div
-            className="h-full w-full flex-1 bg-primary transition-transform duration-300 ease-linear"
-            style={{
-              transform: `translateX(-${100 - itemContext.fileState.progress}%)`
-            }}
+          <progress
+            value={itemContext.fileState.progress}
+            max={100}
+            aria-labelledby={itemContext.nameId}
+            className="block size-full appearance-none overflow-clip rounded-full border-0 bg-primary/20 [&::-moz-progress-bar]:bg-primary [&::-webkit-progress-bar]:bg-transparent [&::-webkit-progress-value]:bg-primary [&::-webkit-progress-value]:transition-[inline-size] [&::-webkit-progress-value]:duration-300 [&::-webkit-progress-value]:ease-linear"
           />
         </div>
       )

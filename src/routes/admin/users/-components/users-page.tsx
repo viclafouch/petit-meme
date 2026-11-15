@@ -5,6 +5,7 @@ import { getRouteApi, Link } from '@tanstack/react-router'
 import { Container } from '~/components/ui/container'
 import { UserAvatar } from '~/components/user/user-avatar'
 import { INITIAL_PAGINATION } from '~/constants/admin'
+import { groupToMap } from '~/helpers/array'
 import { getPremiumStatus, type PremiumSource } from '~/helpers/premium'
 import { listAdminUsersQueryOpts } from '~/queries/admin/user'
 import { AdminTable } from '~/routes/admin/-components/admin-table'
@@ -53,7 +54,7 @@ const PremiumFilterTabs = ({
             search={{
               premium: option.value === 'all' ? undefined : option.value
             }}
-            aria-selected={option.value === currentFilter}
+            isCurrent={option.value === currentFilter}
             count={counts[option.value]}
           >
             {option.label}
@@ -67,16 +68,16 @@ const PremiumFilterTabs = ({
 const countUsersByPremiumSource = (
   users: AdminUserListItem[]
 ): Record<PremiumFilter, number> => {
-  const usersBySource = Object.groupBy(users, (user) => {
+  const usersBySource = groupToMap(users, (user) => {
     return getPremiumStatus(user).source
   })
 
   return {
     all: users.length,
-    admin: usersBySource.admin?.length ?? 0,
-    paid: usersBySource.paid?.length ?? 0,
-    granted: usersBySource.granted?.length ?? 0,
-    none: usersBySource.none?.length ?? 0
+    admin: usersBySource.get('admin')?.length ?? 0,
+    paid: usersBySource.get('paid')?.length ?? 0,
+    granted: usersBySource.get('granted')?.length ?? 0,
+    none: usersBySource.get('none')?.length ?? 0
   }
 }
 

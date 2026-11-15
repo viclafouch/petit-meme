@@ -3,22 +3,20 @@ import {
   ArrowLeft,
   ChevronDown,
   Clapperboard,
-  Clipboard,
   Download,
   Pencil,
   Share2,
   Shuffle
 } from 'lucide-react'
-import { toast } from 'sonner'
 import { useMutation, useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import {
   getRouteApi,
   Link,
   useCanGoBack,
-  useLinkProps,
   useRouteContext,
   useRouter
 } from '@tanstack/react-router'
+import { CopyMemeLinkButton } from '~/components/meme/copy-meme-link-button'
 import { MemeExportMenu } from '~/components/meme/meme-export-menu'
 import { MemeLanguageBadge } from '~/components/meme/meme-language-badge'
 import { MemeVideoPlayer } from '~/components/meme/meme-video-player'
@@ -36,12 +34,11 @@ import { MemeStatus } from '~/db/generated/prisma/enums'
 import { formatDate } from '~/helpers/date'
 import { matchIsUserAdmin } from '~/helpers/role'
 import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
-import { buildUrl } from '~/lib/seo/url'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { getMemeQueryOpts, listRelatedMemesQueryOpts } from '~/queries/meme'
-import { getRandomMeme, recordMemeExport } from '~/server/meme/meme.functions'
+import { getRandomMeme } from '~/server/meme/meme.functions'
 import { MemePendingBanner } from './meme-pending-banner'
 
 const memeRouteApi = getRouteApi('/_public__root/_default/memes/$memeId')
@@ -103,7 +100,12 @@ const RelatedMemes = ({ memes }: RelatedMemesProps) => {
   return (
     <div className="mt-8">
       <h2 className="text-base font-medium mb-4">{m.meme_related()}</h2>
-      <MemesList layoutContext="recommend" memes={memes} columnGridCount={4} />
+      <MemesList
+        layoutContext="recommend"
+        memes={memes}
+        columnGridCount={4}
+        isAboveTheFold={false}
+      />
     </div>
   )
 }
@@ -130,10 +132,6 @@ export const MemePage = () => {
   const navigate = memeRouteApi.useNavigate()
   const router = useRouter()
   const canGoBack = useCanGoBack()
-  const memeLink = useLinkProps({
-    to: '/memes/$memeId',
-    params: { memeId: memeQuery.data.id }
-  })
 
   useRegisterMemeView({
     memeId: memeQuery.data.id,
@@ -145,28 +143,6 @@ export const MemePage = () => {
 
   const pauseVideo = () => {
     video?.pause()
-  }
-
-  const handleCopyMemeLink = async () => {
-    pauseVideo()
-
-    if (memeLink.href === undefined) {
-      return
-    }
-
-    const text = buildUrl(memeLink.href)
-
-    try {
-      await navigator.clipboard.writeText(text)
-      void recordMemeExport({
-        data: { memeId: memeQuery.data.id, action: 'share' }
-      })
-      toast.success(m.meme_link_copied(), {
-        position: 'bottom-center'
-      })
-    } catch {
-      toast.error(m.meme_link_copy_error())
-    }
   }
 
   const shareMutation = useMemeExport({ mode: 'share' })
@@ -236,7 +212,6 @@ export const MemePage = () => {
                   src={buildVideoImageUrl(memeQuery.data.video.bunnyId)}
                   className="blur-2xl size-full opacity-40 object-cover"
                   alt={memeQuery.data.title}
-                  loading="eager"
                   fetchPriority="high"
                   decoding="async"
                 />
@@ -323,15 +298,11 @@ export const MemePage = () => {
                   <ChevronDown className="text-muted-foreground" />
                 </MemeExportMenu>
               </div>
-              <Button
+              <CopyMemeLinkButton
+                memeId={memeQuery.data.id}
                 variant="outline"
-                onClick={() => {
-                  void handleCopyMemeLink()
-                }}
-              >
-                <Clipboard />
-                {m.meme_copy_link()}
-              </Button>
+                onCopy={pauseVideo}
+              />
               <Button
                 variant="outline"
                 disabled={randomMemeMutation.isPending}

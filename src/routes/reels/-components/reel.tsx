@@ -40,6 +40,42 @@ const RAIL_ITEM_CLASS_NAME =
 const RAIL_BUTTON_CLASS_NAME =
   'size-12 rounded-full touch-tap transition-transform duration-100 ease-out active:scale-90 [&>svg]:size-7! [&>svg]:drop-shadow-md'
 
+type ReelPlaybackStatusProps = {
+  isPausedByUser: boolean
+  isWaiting: boolean
+}
+
+const ReelPlaybackStatus = ({
+  isPausedByUser,
+  isWaiting
+}: ReelPlaybackStatusProps) => {
+  return (
+    <div className="pointer-events-none absolute inset-0 grid place-items-center">
+      {isPausedByUser ? (
+        <Play
+          aria-hidden="true"
+          className="size-16 fill-white/90 text-white/90 drop-shadow-lg animate-in fade-in zoom-in-75 duration-150"
+        />
+      ) : (
+        <output
+          aria-label={m.common_loading()}
+          aria-hidden={!isWaiting}
+          className="grid"
+        >
+          <LoadingSpinner
+            className={cn(
+              'size-10 text-white/80 transition-opacity',
+              isWaiting
+                ? 'opacity-100 delay-500 duration-200'
+                : 'opacity-0 duration-0'
+            )}
+          />
+        </output>
+      )}
+    </div>
+  )
+}
+
 type ReelProps = {
   index: number
   meme: MemeWithVideo
@@ -257,23 +293,10 @@ export const Reel = ({
         className="absolute inset-0 size-full touch-tap outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
         onClick={handleTap}
       />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 grid place-items-center"
-      >
-        {isPausedByUser ? (
-          <Play className="size-16 fill-white/90 text-white/90 drop-shadow-lg animate-in fade-in zoom-in-75 duration-150" />
-        ) : (
-          <LoadingSpinner
-            className={cn(
-              'size-10 text-white/80 transition-opacity',
-              isWaiting
-                ? 'opacity-100 delay-500 duration-200'
-                : 'opacity-0 duration-0'
-            )}
-          />
-        )}
-      </div>
+      <ReelPlaybackStatus
+        isPausedByUser={isPausedByUser}
+        isWaiting={isWaiting}
+      />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-end gap-3 bg-linear-to-t from-black/70 via-black/25 to-transparent pt-24 pr-2 pb-4 pl-4">
         <Link
           to="/memes/$memeId"

@@ -2,12 +2,14 @@ import React from 'react'
 
 type FlagGbProps = React.ComponentProps<'svg'>
 
-export const FlagGb = (props: FlagGbProps) => {
+export const FlagGb = ({ 'aria-label': ariaLabel, ...props }: FlagGbProps) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 640 480"
-      aria-hidden="true"
+      role={ariaLabel ? 'img' : undefined}
+      aria-label={ariaLabel}
+      aria-hidden={ariaLabel ? undefined : true}
       {...props}
     >
       <path fill="#012169" d="M0 0h640v480H0z" />

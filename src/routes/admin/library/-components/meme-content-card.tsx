@@ -123,7 +123,7 @@ export const MemeContentCard = ({
         <form.Field
           name="contentLocale"
           children={(field) => {
-            const isInvalid = matchIsFieldInvalid(field.state.meta)
+            const isInvalid = matchIsFieldInvalid(field)
 
             return (
               <Field data-invalid={isInvalid}>
@@ -142,6 +142,9 @@ export const MemeContentCard = ({
                   <SelectTrigger
                     id={CONTENT_LOCALE_FIELD_ID}
                     aria-invalid={isInvalid}
+                    aria-describedby={
+                      isInvalid ? `${field.name}-error` : undefined
+                    }
                     className="w-full"
                   >
                     <SelectValue />
@@ -159,7 +162,10 @@ export const MemeContentCard = ({
                   </SelectContent>
                 </Select>
                 {isInvalid ? (
-                  <FieldError errors={field.state.meta.errors} />
+                  <FieldError
+                    id={`${field.name}-error`}
+                    errors={field.state.meta.errors}
+                  />
                 ) : null}
               </Field>
             )

@@ -40,9 +40,8 @@ const AuthBookmarkButton = ({
       {...restProps}
       active={isMemeBookmarked}
       onClick={handleToggleBookmark}
-      aria-label={
-        isMemeBookmarked ? m.meme_remove_bookmark() : m.meme_add_bookmark()
-      }
+      aria-label={m.meme_add_bookmark()}
+      aria-pressed={isMemeBookmarked}
     >
       <Star />
     </IconButtonStars>
@@ -66,6 +65,7 @@ const ToggleBookmarkButton = ({
           dialogStore.actions.showDialog('auth')
         }}
         aria-label={m.meme_add_bookmark()}
+        aria-pressed={false}
       >
         <Star />
       </IconButtonStars>

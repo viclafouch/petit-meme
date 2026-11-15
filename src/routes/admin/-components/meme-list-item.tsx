@@ -1,5 +1,5 @@
 import React from 'react'
-import { Bookmark, Eye, Tag } from 'lucide-react'
+import { Bookmark, Eye, type LucideIcon, Tag } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
@@ -14,6 +14,27 @@ import { getAdminVideoStatusQueryOpts } from '~/queries/admin/meme'
 import type { AdminMemeRecord } from '~/server/admin/meme/meme.functions'
 
 const VIDEO_STATUS_POLL_INTERVAL_MS = 30_000
+
+type MemeStatProps = {
+  icon: LucideIcon
+  label: string
+  value: number
+}
+
+const MemeStat = ({ icon: Icon, label, value }: MemeStatProps) => {
+  return (
+    <span
+      className="flex items-center gap-1 text-xs tabular-nums"
+      title={label}
+    >
+      <span className="sr-only">{label}</span>
+      <span aria-hidden className="flex items-center gap-1">
+        <Icon className="size-3.5" />
+        {value}
+      </span>
+    </span>
+  )
+}
 
 type MemeListItemProps = {
   meme: AdminMemeRecord
@@ -55,7 +76,6 @@ export const MemeListItem = React.memo(({ meme }: MemeListItemProps) => {
           >
             <MemeVideoThumbnail
               bunnyId={meme.video.bunnyId}
-              alt={meme.title}
               duration={meme.video.duration}
             >
               <Link
@@ -94,30 +114,21 @@ export const MemeListItem = React.memo(({ meme }: MemeListItemProps) => {
             {meme.title}
           </Link>
           <div className="flex items-center gap-3 text-muted-foreground">
-            <span
-              className="flex items-center gap-1 text-xs tabular-nums"
-              title={m.meme_views({ count: meme.viewCount })}
-              aria-label={m.meme_views({ count: meme.viewCount })}
-            >
-              <Eye className="size-3.5" aria-hidden />
-              {meme.viewCount}
-            </span>
-            <span
-              className="flex items-center gap-1 text-xs tabular-nums"
-              title={categoryLabel}
-              aria-label={categoryLabel}
-            >
-              <Tag className="size-3.5" aria-hidden />
-              {meme.categoryCount}
-            </span>
-            <span
-              className="flex items-center gap-1 text-xs tabular-nums"
-              title={m.meme_bookmarks({ count: meme.bookmarkCount })}
-              aria-label={m.meme_bookmarks({ count: meme.bookmarkCount })}
-            >
-              <Bookmark className="size-3.5" aria-hidden />
-              {meme.bookmarkCount}
-            </span>
+            <MemeStat
+              icon={Eye}
+              label={m.meme_views({ count: meme.viewCount })}
+              value={meme.viewCount}
+            />
+            <MemeStat
+              icon={Tag}
+              label={categoryLabel}
+              value={meme.categoryCount}
+            />
+            <MemeStat
+              icon={Bookmark}
+              label={m.meme_bookmarks({ count: meme.bookmarkCount })}
+              value={meme.bookmarkCount}
+            />
           </div>
         </div>
       </div>

@@ -7,13 +7,14 @@ import { z } from 'zod'
 import * as Sentry from '@sentry/tanstackstart-react'
 import { StartClient } from '@tanstack/react-start/client'
 import { captureInstallPrompt } from '~/lib/install-app'
+import { runInBackground } from '~/lib/main-thread'
 import { registerServiceWorker } from '~/lib/service-worker'
 import { reloadOnStaleChunk } from '~/lib/stale-chunk-reload'
 import { preloadHls } from '~/lib/video'
 import { getLocale, type Locale } from '~/paraglide/runtime'
 
 reloadOnStaleChunk()
-preloadHls()
+runInBackground(preloadHls)
 registerServiceWorker()
 captureInstallPrompt()
 

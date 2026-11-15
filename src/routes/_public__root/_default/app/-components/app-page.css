@@ -30,7 +30,8 @@
 }
 
 .platform-phone-reveal {
-  transform: rotate(var(--phone-tilt));
+  translate: 0 0;
+  rotate: var(--phone-tilt);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -84,7 +85,7 @@
       var(--launch-delay, 0s) infinite both;
   }
 
-  @supports (animation-timeline: view()) {
+  @supports ((animation-timeline: view()) and (animation-range: entry)) {
     .platform-phone-reveal {
       animation: platform-phone-reveal linear both;
       animation-timeline: view();
@@ -255,10 +256,10 @@
 @keyframes platform-phone-reveal {
   from {
     opacity: 0;
-    transform: translateY(18%) rotate(0deg);
+    translate: 0 18%;
   }
   to {
     opacity: 1;
-    transform: translateY(0) rotate(var(--phone-tilt));
+    translate: 0 0;
   }
 }

@@ -5,7 +5,7 @@ import { expectMemeFileDownloaded } from './downloads'
 import { resolveStorageStatePath } from './env'
 import { test } from './fixtures'
 import { repeatUntilVisible } from './hydration'
-import { getMemeList } from './library'
+import { buildNamedMemeActionPattern, getMemeList } from './library'
 
 const EXPORTABLE_MEME = E2E_NAMED_MEMES.mostViewed
 const EXPORTABLE_MEME_PATHNAME = `/memes/${EXPORTABLE_MEME.id}`
@@ -25,7 +25,9 @@ const pickDownloadFormat = async (page: Page, formatLabel: string) => {
 const getFirstMemeCardOptionsButton = (page: Page) => {
   return (
     getMemeList(page)
-      .getByRole('button', { name: m.meme_open_options() })
+      .getByRole('button', {
+        name: buildNamedMemeActionPattern(m.meme_open_options_named)
+      })
       // oxlint-disable-next-line playwright/no-nth-methods -- any Meme card will do: every card carries the same menu
       .first()
   )

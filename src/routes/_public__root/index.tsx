@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { serializeJsonLd } from '~/helpers/json-ld'
 import { buildHomeJsonLd } from '~/lib/seo/json-ld'
 import { buildSeo } from '~/lib/seo/meta'
 import { buildOgImageUrl } from '~/lib/seo/url'
@@ -52,7 +53,7 @@ export const Route = createFileRoute('/_public__root/')({
     return [
       {
         type: 'application/ld+json',
-        children: JSON.stringify(
+        children: serializeJsonLd(
           buildHomeJsonLd({ faqItems: getHomeFaqItems() })
         )
       }

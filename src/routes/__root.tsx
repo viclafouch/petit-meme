@@ -54,7 +54,7 @@ export const Route = createRootRouteWithContext<{
       _consentState: consentState
     }
   },
-  head: () => {
+  head: ({ loaderData }) => {
     return {
       meta: [
         { charSet: 'utf8' },
@@ -64,7 +64,7 @@ export const Route = createRootRouteWithContext<{
         },
         {
           name: 'color-scheme',
-          content: 'dark light'
+          content: loaderData?._storedTheme ?? 'dark light'
         },
         {
           name: 'robots',

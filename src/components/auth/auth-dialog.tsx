@@ -1,12 +1,9 @@
 import React from 'react'
-import { toast } from 'sonner'
+import { CircleAlert } from 'lucide-react'
 import type { WithDialog } from '~/@types/dialog'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle
 } from '~/components/animate-ui/base/dialog'
 import { LastLoginBadge } from '~/components/auth/last-login-badge'
@@ -15,6 +12,7 @@ import { SignupForm } from '~/components/auth/signup-form'
 import { useLastLoginMethod } from '~/components/auth/use-last-login-method'
 import { DiscordIcon } from '~/components/icon/discord'
 import { XTwitterIcon } from '~/components/icon/x-twitter'
+import { Alert, AlertDescription } from '~/components/ui/alert'
 import { Button } from '~/components/ui/button'
 import {
   Tabs,
@@ -72,7 +70,7 @@ const SOCIAL_PROVIDERS = [
   }
 ] as const satisfies readonly SocialProvider[]
 
-const handleSignInWithSocial = async (
+const signInWithSocial = async (
   provider: (typeof SOCIAL_PROVIDERS)[number]
 ) => {
   try {
@@ -80,13 +78,14 @@ const handleSignInWithSocial = async (
       provider: provider.id,
       callbackURL: localizeHref('/')
     })
+
+    return null
   } catch (error) {
     captureWithFeature(error, `sign-in-${provider.id}`)
-    toast.error(
-      error instanceof Error
-        ? getAuthErrorMessage(error.message)
-        : provider.errorMessage()
-    )
+
+    return error instanceof Error
+      ? getAuthErrorMessage(error.message)
+      : provider.errorMessage()
   }
 }
 
@@ -94,15 +93,27 @@ type AuthDialogProps = WithDialog
 
 export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
   const [authType, setAuthType] = React.useState<AuthType>('login')
+  const [socialErrorMessage, setSocialErrorMessage] = React.useState<
+    string | null
+  >(null)
   const lastLoginMethod = useLastLoginMethod()
 
+  const handleSocialSignIn = async (
+    provider: (typeof SOCIAL_PROVIDERS)[number]
+  ) => {
+    setSocialErrorMessage(null)
+    setSocialErrorMessage(await signInWithSocial(provider))
+  }
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-vh-90 overflow-y-auto p-4 sm:p-6">
-        <DialogHeader>
-          <DialogTitle />
-          <DialogDescription />
-        </DialogHeader>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        setSocialErrorMessage(null)
+        onOpenChange(nextOpen)
+      }}
+    >
+      <DialogContent className="max-w-lg max-h-dvh-90 overflow-y-auto overscroll-contain p-4 sm:p-6">
         <div className="flex flex-col items-center gap-y-3 sm:gap-y-5 w-full">
           <img
             src="/images/petit-meme-logo.png"
@@ -110,9 +121,9 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
             className="size-10 sm:size-14"
             aria-hidden="true"
           />
-          <h1 className="text-lg sm:text-xl font-semibold text-center">
+          <DialogTitle className="text-lg sm:text-xl font-semibold text-center tracking-normal text-foreground">
             {m.auth_welcome_title()}
-          </h1>
+          </DialogTitle>
           <Tabs
             value={authType}
             onValueChange={(value) => {
@@ -134,6 +145,7 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
             <div className="grid interpolate-size-keywords pt-4">
               <TabsContent
                 keepMounted
+                inert={authType !== 'login'}
                 aria-hidden={authType !== 'login'}
                 value="login"
                 className={ANIMATED_TAB_CONTENT_CLASS}
@@ -145,6 +157,7 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
               </TabsContent>
               <TabsContent
                 keepMounted
+                inert={authType !== 'signup'}
                 aria-hidden={authType !== 'signup'}
                 value="signup"
                 className={ANIMATED_TAB_CONTENT_CLASS}
@@ -168,7 +181,7 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                   variant="outline"
                   className="w-full relative"
                   onClick={() => {
-                    void handleSignInWithSocial(provider)
+                    void handleSocialSignIn(provider)
                   }}
                 >
                   <provider.icon />
@@ -178,8 +191,13 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
               )
             })}
           </div>
+          {socialErrorMessage ? (
+            <Alert variant="destructive">
+              <CircleAlert aria-hidden="true" />
+              <AlertDescription>{socialErrorMessage}</AlertDescription>
+            </Alert>
+          ) : null}
         </div>
-        <DialogFooter />
       </DialogContent>
     </Dialog>
   )

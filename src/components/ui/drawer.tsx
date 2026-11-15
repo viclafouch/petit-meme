@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Drawer as DrawerPrimitive } from '@base-ui/react/drawer'
 import { cn } from '~/lib/utils'
+import { m } from '~/paraglide/messages'
 
 type DrawerContextProps = {
   hasSnapPoints: boolean
@@ -97,8 +98,11 @@ function DrawerSwipeHandle({
 function DrawerContent({
   className,
   children,
+  showCloseButton = true,
   ...props
-}: DrawerPrimitive.Popup.Props) {
+}: DrawerPrimitive.Popup.Props & {
+  showCloseButton?: boolean
+}) {
   const { hasSnapPoints, modal, showSwipeHandle, swipeDirection } = useDrawer()
   const swipeAxis =
     swipeDirection === 'down' || swipeDirection === 'up' ? 'y' : 'x'
@@ -154,6 +158,14 @@ function DrawerContent({
             )}
           >
             {children}
+            {showCloseButton ? (
+              <DrawerPrimitive.Close
+                data-slot="drawer-close"
+                className="sr-only focus-visible:not-sr-only focus-visible:absolute focus-visible:top-3 focus-visible:right-3 focus-visible:z-10 focus-visible:rounded-md focus-visible:bg-background focus-visible:px-3 focus-visible:py-1.5 focus-visible:font-medium focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+              >
+                {m.common_close()}
+              </DrawerPrimitive.Close>
+            ) : null}
           </DrawerPrimitive.Content>
         </DrawerPrimitive.Popup>
       </DrawerPrimitive.Viewport>

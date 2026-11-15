@@ -113,6 +113,7 @@ const LegalSection = ({ onManageCookies }: LegalSectionProps) => {
 
 const PreferencesSection = () => {
   const currentLocale = getLocale()
+  const themeSwitcherId = React.useId()
 
   return (
     <div className={cn(SECTION_CLASS, 'gap-3 px-2')}>
@@ -133,14 +134,16 @@ const PreferencesSection = () => {
               className="h-11 gap-2 capitalize"
             >
               <Flag className={FLAG_ICON_CLASS} />
-              {getLocaleDisplayName(locale, locale)}
+              <span lang={locale}>{getLocaleDisplayName(locale, locale)}</span>
             </RadioToggleGroupItem>
           )
         })}
       </RadioToggleGroup>
       <div className="flex min-h-11 items-center justify-between">
-        <span className="text-base font-medium">{m.nav_dark_mode()}</span>
-        <ThemeSwitcher />
+        <label htmlFor={themeSwitcherId} className="text-base font-medium">
+          {m.nav_dark_mode()}
+        </label>
+        <ThemeSwitcher id={themeSwitcherId} />
       </div>
     </div>
   )

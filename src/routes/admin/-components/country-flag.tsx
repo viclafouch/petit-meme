@@ -24,7 +24,7 @@ export const CountryFlag = ({ countryCode, size = 'sm' }: CountryFlagProps) => {
   )
 
   return (
-    <span className="inline-flex items-center" title={label}>
+    <span className="inline-flex items-center">
       {countryName !== null ? (
         <img
           src={getCountryFlagUrl(countryCode)}

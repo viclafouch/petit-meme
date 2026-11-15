@@ -1,3 +1,4 @@
+import { groupToMap } from '~/helpers/array'
 import {
   type BillingInvoice,
   type BillingSubscription,
@@ -25,7 +26,7 @@ export function buildSubscriptionHistory({
   subscriptions,
   invoices
 }: BuildSubscriptionHistoryParams) {
-  const invoicesBySubscriptionId = Map.groupBy(
+  const invoicesBySubscriptionId = groupToMap(
     sortByNewest(invoices, (invoice) => {
       return invoice.paidAt
     }),

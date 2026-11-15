@@ -1,16 +1,9 @@
 import React from 'react'
-import {
-  ChevronDown,
-  Clapperboard,
-  Clipboard,
-  Download,
-  Share2,
-  X
-} from 'lucide-react'
+import { ChevronDown, Clapperboard, Download, Share2, X } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
-import { toast } from 'sonner'
 import { Dialog } from '@base-ui/react/dialog'
-import { Link, useLinkProps } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
+import { CopyMemeLinkButton } from '~/components/meme/copy-meme-link-button'
 import { MemeExportMenu } from '~/components/meme/meme-export-menu'
 import { MemeVideoPlayer } from '~/components/meme/meme-video-player'
 import { useMediaSession } from '~/components/meme/use-media-session'
@@ -26,9 +19,7 @@ import {
   type ConversionEventName
 } from '~/lib/algolia-insights'
 import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
-import { buildUrl } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages'
-import { recordMemeExport } from '~/server/meme/meme.functions'
 
 type PlayerDialogProps = {
   meme: MemeWithVideo
@@ -57,10 +48,6 @@ export const PlayerDialog = ({
   const isReducedMotion = useReducedMotion()
   const shareMutation = useMemeExport({ mode: 'share', queryID })
   const downloadMutation = useMemeExport({ mode: 'download', queryID })
-  const memeLink = useLinkProps({
-    to: '/memes/$memeId',
-    params: { memeId: meme.id }
-  })
 
   const [isPlaybackRequested, setIsPlaybackRequested] = React.useState(false)
 
@@ -91,24 +78,6 @@ export const PlayerDialog = ({
     })
   }
 
-  const handleCopyMemeLink = async () => {
-    if (memeLink.href === undefined) {
-      return
-    }
-
-    const text = buildUrl(memeLink.href)
-
-    try {
-      await navigator.clipboard.writeText(text)
-      void recordMemeExport({ data: { memeId: meme.id, action: 'share' } })
-      toast.success(m.meme_link_copied(), {
-        position: 'bottom-center'
-      })
-    } catch {
-      toast.error(m.meme_link_copy_error())
-    }
-  }
-
   const handleClose = () => {
     pauseVideo()
     onClose()
@@ -128,10 +97,9 @@ export const PlayerDialog = ({
     shareMutation.trigger(meme, format)
   }
 
-  const handleCopyClick = () => {
+  const handleCopy = () => {
     pauseVideo()
     handleTrackConversion('Meme Link Copied')
-    void handleCopyMemeLink()
   }
 
   const handleDownload = (format: MemeDerivedFormat) => {
@@ -151,7 +119,7 @@ export const PlayerDialog = ({
       <Dialog.Portal>
         <Dialog.Popup
           finalFocus={false}
-          className="fixed inset-0 flex size-full items-center justify-center z-50 overflow-hidden bg-transparent text-inherit outline-none dark"
+          className="fixed inset-0 flex size-full items-center justify-center z-50 overflow-hidden bg-transparent text-foreground outline-none dark"
         >
           <motion.div
             initial={isReducedMotion ? false : { opacity: 0 }}
@@ -162,7 +130,7 @@ export const PlayerDialog = ({
             className="bg-black/90 absolute inset-0"
           />
           <motion.div
-            className="absolute top-4 right-4"
+            className="absolute top-[max(--spacing(4),env(safe-area-inset-top))] right-[max(--spacing(4),env(safe-area-inset-right))]"
             animate={{ opacity: 1 }}
             initial={isReducedMotion ? false : { opacity: 0 }}
             exit={{ opacity: 0 }}
@@ -178,7 +146,7 @@ export const PlayerDialog = ({
           <motion.div
             layoutId={`${layoutContext}-item-${meme.id}`}
             onLayoutAnimationComplete={handlePlayVideo}
-            className="relative w-200 max-w-vw-90"
+            className="relative w-200 max-w-[90%]"
           >
             <div className="size-full flex flex-col items-center gap-y-4">
               <Dialog.Title className="text-center w-full text-balance text-lg font-bold text-primary">
@@ -225,15 +193,13 @@ export const PlayerDialog = ({
                     {m.meme_share()}
                     <ChevronDown className="text-muted-foreground" />
                   </MemeExportMenu>
-                  <Button
+                  <CopyMemeLinkButton
+                    memeId={meme.id}
                     size="lg"
                     variant="secondary"
                     className="w-full"
-                    onClick={handleCopyClick}
-                  >
-                    <Clipboard />
-                    {m.meme_copy_link()}
-                  </Button>
+                    onCopy={handleCopy}
+                  />
                   <MemeExportMenu
                     mode="download"
                     memeTitle={meme.title}

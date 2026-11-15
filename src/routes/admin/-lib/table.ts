@@ -1,15 +1,28 @@
 import {
   columnVisibilityFeature,
+  constructSortFn,
   createPaginatedRowModel,
   createSortedRowModel,
   createTableHook,
   rowPaginationFeature,
   rowSortingFeature,
-  sortFn_alphanumeric,
   sortFn_datetime,
-  sortFn_text,
   tableFeatures
 } from '@tanstack/react-table'
+
+const TEXT_COLLATOR = new Intl.Collator('fr', {
+  numeric: true,
+  sensitivity: 'base'
+})
+
+const sortFnCollatedText = constructSortFn({
+  resolveDataValue: (dataValue) => {
+    return typeof dataValue === 'string' ? dataValue : ''
+  },
+  sort: (dataValueA: string, dataValueB: string) => {
+    return TEXT_COLLATOR.compare(dataValueA, dataValueB)
+  }
+})
 
 const ADMIN_TABLE_FEATURES = tableFeatures({
   columnVisibilityFeature,
@@ -18,9 +31,9 @@ const ADMIN_TABLE_FEATURES = tableFeatures({
   paginatedRowModel: createPaginatedRowModel(),
   sortedRowModel: createSortedRowModel(),
   sortFns: {
-    alphanumeric: sortFn_alphanumeric,
+    alphanumeric: sortFnCollatedText,
     datetime: sortFn_datetime,
-    text: sortFn_text
+    text: sortFnCollatedText
   }
 })
 

@@ -6,7 +6,7 @@ import { Separator } from '~/components/ui/separator'
 import { PROPOSAL_STATUS_BADGE_VARIANT } from '~/constants/meme-proposal'
 import { MemeProposalStatus } from '~/db/generated/prisma/enums'
 import { formatRelativeTime } from '~/helpers/date'
-import { truncateUrl } from '~/helpers/format'
+import { formatDisplayUrl } from '~/helpers/format'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { listUserProposalsQueryOpts } from '~/queries/proposal'
@@ -48,7 +48,7 @@ export const ProposalHistory = () => {
                     rel="noopener noreferrer"
                     className="text-xs text-muted-foreground hover:text-foreground truncate"
                   >
-                    {truncateUrl(proposal.url)}
+                    {formatDisplayUrl(proposal.url)}
                   </a>
                   <div className="flex items-center gap-2 mt-0.5">
                     <Badge

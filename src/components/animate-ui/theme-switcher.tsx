@@ -20,7 +20,12 @@ const THUMB_SPRING = {
 const VISIBLE = { scale: 1, opacity: 1 } as const satisfies TargetAndTransition
 const HIDDEN = { scale: 0, opacity: 0 } as const satisfies TargetAndTransition
 
-export const ThemeSwitcher = ({ className }: { className?: string }) => {
+type ThemeSwitcherProps = {
+  id?: string
+  className?: string
+}
+
+export const ThemeSwitcher = ({ id, className }: ThemeSwitcherProps) => {
   const themeStore = useThemeStore()
   const theme = useSelector(themeStore, (state) => {
     return state.theme
@@ -31,6 +36,7 @@ export const ThemeSwitcher = ({ className }: { className?: string }) => {
 
   return (
     <Switch.Root
+      id={id}
       checked={isDark}
       onCheckedChange={(checked) => {
         return setTheme(checked ? 'dark' : 'light')
@@ -56,7 +62,7 @@ export const ThemeSwitcher = ({ className }: { className?: string }) => {
         className
       )}
     >
-      <span className="sr-only">{m.nav_dark_mode()}</span>
+      {id ? null : <span className="sr-only">{m.nav_dark_mode()}</span>}
       <motion.div
         data-slot="switch-left-icon"
         animate={isDark ? VISIBLE : HIDDEN}

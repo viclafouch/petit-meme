@@ -6,6 +6,38 @@
 
 @custom-variant standalone (@media (display-mode: standalone));
 
+@font-face {
+  font-family: 'Bricolage Grotesque';
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url('/fonts/bricolage-grotesque-latin-v9.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Bricolage Grotesque';
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url('/fonts/bricolage-grotesque-latin-ext-v9.woff2') format('woff2');
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
+    U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
+    U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Bricolage Grotesque Fallback';
+  src: local('Arial'), local('Helvetica Neue'), local('Roboto');
+  ascent-override: 93%;
+  descent-override: 27%;
+  line-gap-override: 0%;
+}
+
 @property --drawer-swipe-movement-x {
   syntax: '<length>';
   inherits: false;
@@ -76,6 +108,7 @@
 
 :root {
   --navbar-height: 3.5rem;
+  --navbar-space: calc(var(--navbar-height) + env(safe-area-inset-top, 0px));
   --tab-bar-height: 3.5rem;
   --tab-bar-space: calc(
     var(--tab-bar-height) + env(safe-area-inset-bottom, 0px)
@@ -86,6 +119,7 @@
     --tab-bar-space: 0px;
     --toast-offset-bottom: 1.5rem;
   }
+  color-scheme: light;
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -127,9 +161,19 @@
   --destructive-foreground: oklch(1 0 0);
   --success: oklch(0.694 0.201 142.15);
   --success-foreground: oklch(0.203 0.045 142.33);
+
+  @media (prefers-contrast: more) {
+    --border: oklch(0.556 0 0);
+    --input: oklch(0.556 0 0);
+  }
+}
+
+:root:has(#main-content) {
+  scroll-padding-block: var(--navbar-space) var(--tab-bar-space);
 }
 
 .dark {
+  color-scheme: dark;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -170,6 +214,11 @@
   --destructive-foreground: oklch(1 0 0);
   --info: oklch(0.618 0.089 203.75);
   --info-foreground: oklch(1 0 0);
+
+  @media (prefers-contrast: more) {
+    --border: oklch(0.556 0 0);
+    --input: oklch(0.556 0 0);
+  }
 }
 
 @layer base {
@@ -186,8 +235,16 @@
   body {
     @apply bg-background text-foreground;
   }
+  .dark {
+    color: var(--foreground);
+  }
+  :where(h1, h2, h3) {
+    text-wrap: balance;
+  }
   .navbar-scroll-fade {
-    @supports (animation-timeline: scroll()) {
+    opacity: 0;
+
+    @supports ((animation-timeline: scroll()) and (animation-range: 0% 100%)) {
       animation: navbar-fade-to-solid linear both;
       animation-timeline: scroll(root);
       animation-range: 0px 180px;
@@ -196,28 +253,51 @@
 
   @keyframes navbar-fade-to-solid {
     from {
-      background-color: transparent;
+      opacity: 0;
     }
     to {
-      background-color: var(--background);
+      opacity: 1;
     }
   }
+}
 
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
-    }
+@media (forced-colors: active) {
+  :focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+}
 
-    ::view-transition-group(*),
-    ::view-transition-old(*),
-    ::view-transition-new(*) {
-      animation: none !important;
-    }
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --animate-spin: spin 3s linear infinite;
+    --animate-pulse: pulse 6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    --animate-ping: none;
+    --animate-background-shine: none;
+  }
+
+  *,
+  ::before,
+  ::after {
+    --tw-enter-translate-x: 0;
+    --tw-enter-translate-y: 0;
+    --tw-enter-scale: 1;
+    --tw-enter-rotate: 0;
+    --tw-exit-translate-x: 0;
+    --tw-exit-translate-y: 0;
+    --tw-exit-scale: 1;
+    --tw-exit-rotate: 0;
+    transition-property:
+      color, background-color, border-color, outline-color,
+      text-decoration-color, fill, stroke, --tw-gradient-from,
+      --tw-gradient-via, --tw-gradient-to, opacity, box-shadow, filter,
+      backdrop-filter, visibility, display, overlay, content-visibility !important;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }
 
@@ -236,37 +316,29 @@
   --font-sans:
     ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
     'Segoe UI Symbol', 'Noto Color Emoji';
-  --font-bricolage: 'Bricolage Grotesque', 'Bricolage Grotesque Fallback';
+  --font-bricolage:
+    'Bricolage Grotesque', 'Bricolage Grotesque Fallback', ui-sans-serif,
+    system-ui, sans-serif;
   --text-3xs: 0.5rem;
   --text-2xs: 0.625rem;
   --animate-background-shine: background-shine 2s linear infinite;
-  --animate-ping-slow: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
-  --animate-bounce-subtle: bounce-subtle 3s ease-in-out infinite;
+  --animate-stars-drift: stars-drift linear infinite;
 
   @keyframes background-shine {
     from {
-      background-position: 0 0;
+      translate: 0 0;
     }
     to {
-      background-position: -200% 0;
+      translate: 50% 0;
     }
   }
 
-  @keyframes ping {
-    75%,
-    100% {
-      transform: scale(2);
-      opacity: 0;
+  @keyframes stars-drift {
+    from {
+      translate: 0 0;
     }
-  }
-
-  @keyframes bounce-subtle {
-    0%,
-    100% {
-      transform: translateY(0px);
-    }
-    50% {
-      transform: translateY(-4px);
+    to {
+      translate: 0 -2000px;
     }
   }
 }
@@ -280,12 +352,6 @@
 @utility max-h-dvh-* {
   max-height: calc(--value(integer) * 1dvh);
 }
-@utility max-h-vh-* {
-  max-height: calc(--value(integer) * 1vh);
-}
-@utility max-w-vw-* {
-  max-width: calc(--value(integer) * 1vw);
-}
 @utility bg-hatch {
   background-image: repeating-linear-gradient(
     -45deg,
@@ -297,7 +363,7 @@
   max-height: calc(100dvh - 2rem);
 }
 @utility max-h-sticky-aside {
-  max-height: calc(100vh - 5rem);
+  max-height: calc(100dvh - 5rem);
 }
 @utility grid-cols-submit {
   grid-template-columns: 7fr 3fr;
@@ -328,7 +394,7 @@
   line-height: 1.2;
 }
 @utility text-caption {
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 @utility rounded-swatch {
   border-radius: 2px;
@@ -359,16 +425,26 @@
     #000103
   );
 }
-@utility shine-size {
-  background-size: 200% 100%;
+@utility shine-layer {
+  position: absolute;
+  inset-block: 0;
+  left: -200%;
+  z-index: -1;
+  width: 400%;
+  background-size: 50% 100%;
+  pointer-events: none;
 }
 @utility reels-page {
   --reels-viewport-height: 100svh;
-  --reels-height: round(
-    down,
-    calc(var(--reels-viewport-height) - var(--tab-bar-space)),
-    1px
-  );
+  --reels-height: calc(var(--reels-viewport-height) - var(--tab-bar-space));
+
+  @supports (width: round(down, 1px, 1px)) {
+    --reels-height: round(
+      down,
+      calc(var(--reels-viewport-height) - var(--tab-bar-space)),
+      1px
+    );
+  }
   height: var(--reels-viewport-height);
   overflow: hidden;
 }
@@ -407,6 +483,7 @@
 }
 @utility banner-gap {
   --banner-gap: 0.625rem;
+  --banner-inner-radius: calc(var(--banner-radius, 1.5rem) - var(--banner-gap));
 }
 @utility w-banner {
   width: 24rem;
@@ -421,23 +498,21 @@
   padding-bottom: calc(var(--banner-gap) + env(safe-area-inset-bottom));
 }
 @utility rounded-bl-banner {
-  border-bottom-left-radius: calc(
-    var(--banner-radius, 1.5rem) - var(--banner-gap, 0.625rem)
-  );
+  border-bottom-left-radius: var(--banner-inner-radius);
 }
 @utility rounded-br-banner {
-  border-bottom-right-radius: calc(
-    var(--banner-radius, 1.5rem) - var(--banner-gap, 0.625rem)
-  );
+  border-bottom-right-radius: var(--banner-inner-radius);
 }
 
-@layer base {
-  input:-webkit-autofill,
-  input:-webkit-autofill:hover,
-  input:-webkit-autofill:focus {
-    -webkit-box-shadow: 0 0 0px 1000px var(--background) inset;
-    -webkit-text-fill-color: var(--foreground);
-    caret-color: var(--foreground);
-    transition: background-color 5000s ease-in-out 0s;
-  }
+input:autofill {
+  box-shadow:
+    var(--tw-inset-shadow, 0 0 #0000),
+    var(--tw-inset-ring-shadow, 0 0 #0000),
+    var(--tw-ring-offset-shadow, 0 0 #0000),
+    var(--tw-ring-shadow, 0 0 #0000),
+    var(--tw-shadow, 0 0 #0000),
+    inset 0 0 0 2px var(--ring),
+    inset 0 0 0 100vmax var(--background);
+  -webkit-text-fill-color: var(--foreground);
+  caret-color: var(--foreground);
 }

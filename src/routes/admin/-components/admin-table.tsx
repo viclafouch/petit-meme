@@ -1,5 +1,7 @@
+import React from 'react'
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 import {
+  type Column,
   type Header,
   type ReactTable,
   type RowData,
@@ -10,6 +12,7 @@ import { Button } from '~/components/ui/button'
 import {
   Table,
   TableBody,
+  TableCaption,
   TableCell,
   TableFooter,
   TableHead,
@@ -39,16 +42,45 @@ const SORT_ARIA_MAP = {
   desc: 'descending'
 } as const satisfies Record<SortDirection, string>
 
-function getAriaSortValue<TData extends RowData>(
+const SORT_ANNOUNCEMENT_MAP = {
+  asc: 'croissant',
+  desc: 'décroissant'
+} as const satisfies Record<SortDirection, string>
+
+const getColumnLabel = <TData extends RowData>(
+  column: Column<AdminTableFeatures, TData>
+) => {
+  const { header } = column.columnDef
+
+  return typeof header === 'string' ? header : column.id
+}
+
+const getAriaSortValue = <TData extends RowData>(
   header: Header<AdminTableFeatures, TData>
-): 'ascending' | 'descending' | 'none' | undefined {
+) => {
   const sortDirection = header.column.getIsSorted()
 
-  if (sortDirection !== false) {
-    return SORT_ARIA_MAP[sortDirection]
+  return sortDirection === false ? undefined : SORT_ARIA_MAP[sortDirection]
+}
+
+const getSortAnnouncement = <TData extends RowData>(
+  table: ReactTable<AdminTableFeatures, TData>
+) => {
+  const [sorting] = table.state.sorting
+
+  if (!sorting) {
+    return ''
   }
 
-  return header.column.getCanSort() ? 'none' : undefined
+  const column = table.getColumn(sorting.id)
+
+  if (!column) {
+    return ''
+  }
+
+  const direction = sorting.desc ? 'desc' : 'asc'
+
+  return `Trié par ${getColumnLabel(column)}, ${SORT_ANNOUNCEMENT_MAP[direction]}`
 }
 
 type SortableHeaderProps<TData extends RowData> = {
@@ -71,7 +103,6 @@ const SortableHeader = <TData extends RowData>({
       type="button"
       className="flex min-h-11 items-center gap-1 py-2 hover:text-foreground transition-colors"
       onClick={header.column.getToggleSortingHandler()}
-      aria-label={`Trier par ${typeof header.column.columnDef.header === 'string' ? header.column.columnDef.header : header.column.id}`}
     >
       <FlexRender header={header} />
       <SortIcon direction={sortDirection} />
@@ -142,10 +173,17 @@ export const AdminTable = <TData extends RowData>({
   caption
 }: AdminTableProps<TData>) => {
   const hasPagination = table.getPageCount() > 0
+  const captionId = React.useId()
 
   return (
     <div className="w-full overflow-hidden rounded-lg border">
-      <Table aria-label={caption}>
+      <output className="sr-only">{getSortAnnouncement(table)}</output>
+      <Table scrollRegionLabelledBy={caption ? captionId : undefined}>
+        {caption ? (
+          <TableCaption id={captionId} className="sr-only">
+            {caption}
+          </TableCaption>
+        ) : null}
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => {
             return (

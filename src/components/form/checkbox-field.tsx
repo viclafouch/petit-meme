@@ -13,7 +13,7 @@ export const CheckboxField = ({ label }: CheckboxFieldProps) => {
   const checkboxId = React.useId()
 
   return (
-    <FormItem error={getFieldErrorMessage(field.state.meta)} className="w-full">
+    <FormItem error={getFieldErrorMessage(field)} className="w-full">
       <div className="flex items-start gap-2">
         <FormControl
           render={

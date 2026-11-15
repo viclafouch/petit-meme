@@ -65,6 +65,7 @@ Victor likes simple systems and code that looks obvious. Find the real constrain
 
 - Writes that must all land run one after the other, so a failure stops the next one.
 - The UI stays minimal.
+- Follow the browser list.
 - A CI or config file may keep a comment that states a constraint the file cannot show.
 
 ## Reporting back

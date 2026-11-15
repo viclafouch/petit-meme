@@ -5,9 +5,21 @@ import type { E2eMeme } from './content'
 import { repeatUntilVisible } from './hydration'
 import { E2E_LOCALE } from './locales'
 
+const TITLE_SLOT = '\u0000'
+
+export const buildNamedMemeActionPattern = (
+  message: (inputs: { title: string }) => string
+) => {
+  const [prefix = ''] = message({ title: TITLE_SLOT }).split(TITLE_SLOT)
+
+  return new RegExp(`^${RegExp.escape(prefix)}`, 'u')
+}
+
 export const getMemePlayLinks = (page: Page, locale: Locale = E2E_LOCALE) => {
   return page.getByRole('link', {
-    name: m.meme_play_video({}, { locale })
+    name: buildNamedMemeActionPattern((inputs) => {
+      return m.meme_play_video_named(inputs, { locale })
+    })
   })
 }
 
@@ -22,7 +34,9 @@ export const getMemeList = (page: Page) => {
 export const getMemeTitleLinks = (page: Page) => {
   return getMemeList(page)
     .getByRole('link')
-    .filter({ hasNotText: m.meme_play_video() })
+    .filter({
+      hasNotText: buildNamedMemeActionPattern(m.meme_play_video_named)
+    })
 }
 
 export const getFirstMemePlayLink = (page: Page) => {

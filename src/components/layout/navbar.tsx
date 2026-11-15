@@ -25,7 +25,7 @@ const NAVBAR_BACKDROP_CLASS_NAME =
   'navbar-scroll-fade absolute inset-0 bg-background'
 
 const NAVIGATION_LINK_CLASS_NAME =
-  'flex items-center rounded-md px-3 py-1.5 text-sm font-medium decoration-2 underline-offset-4 transition-[color,background-color,box-shadow] outline-none hover:bg-muted focus-visible:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 aria-[current=page]:underline'
+  'flex items-center rounded-md px-3 py-1.5 text-sm font-medium transition-[color,background-color,box-shadow] outline-none hover:bg-muted focus-visible:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50'
 
 const getNavigationLinks = (): NavigationLink[] => {
   return [

@@ -24,6 +24,7 @@ import { PasswordChangedEmail } from '~/emails/password-changed-email'
 import { ResetPassword } from '~/emails/reset-password'
 import { emailSubjects } from '~/emails/subjects'
 import { WelcomeEmail } from '~/emails/welcome-email'
+import { resolveTrustedOrigins } from '~/env/deployment-url'
 import {
   matchIsDeployed,
   matchIsProductionDeployment,
@@ -286,7 +287,7 @@ const getAuthConfig = createServerOnlyFn(() => {
         update: { after: touchUserLastActive }
       }
     },
-    trustedOrigins: [serverEnv.VITE_SITE_URL],
+    trustedOrigins: resolveTrustedOrigins(serverEnv),
     plugins: [
       admin({ defaultRole: 'user' }),
       lastLoginMethod(),

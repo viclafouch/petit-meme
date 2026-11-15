@@ -1,1 +1,0 @@
-export const ANNOUNCEMENT_DAY = '2026-11-15'

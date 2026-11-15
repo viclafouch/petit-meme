@@ -40,3 +40,10 @@ How the code is organised and named. Formatting, lint rules and file-name case a
 - Logic written twice becomes one function: a pure one in `helpers/`, or a private helper of its module. `throwWithStatus` sets the response status and throws in one call.
 - Functions are arrow functions bound to a `const`.
 - A test lives in the `__tests__/` folder next to its source and drives the module through its interface.
+
+## Styles and motion
+
+- CSS carries every motion it can express: transitions, entry styles, keyframes, scroll-driven timelines. The motion library carries what CSS cannot: gestures, springs, values a person interrupts mid-flight, and exits that wait on component state.
+- Motion holds 60 FPS on a phone: a running animation moves `transform` and `opacity`, which the compositor carries without layout or paint.
+- The browser floor is the build target. A feature above the floor ships with the fallback that keeps the same rendering on the floor.
+- A visual effect renders the same in WebKit and Chromium, checked in both: blend modes, masks, filters, gradients and wide-gamut colours are where engines part ways.

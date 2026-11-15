@@ -48,19 +48,21 @@ for (const theme of ['light', 'dark'] satisfies Theme[]) {
 
 - The role is the Premium persona `knowledge/offer.md` asks for, unless the change targets another audience. Every role lives in `e2e/constants.ts`.
 - Each expected state gets an `expect`, so a red run leaves no misleading media.
-- A video needs `test.use({ video: 'on', reducedMotion: 'no-preference' })`. Playwright writes it to `e2e/.results/<test>/video.webm`.
-- Run `pnpm exec playwright test e2e/evidence.spec.ts --project=chromium --no-deps`, or `--project=mobile-safari` for the phone. A failed sign-in means the test branch lost its seed, which `--project=seed` restores. Delete the spec after the run.
+- Each media frames the surface the change touches. Seeded placeholders in view read as bugs to a reviewer.
+- A video needs `test.use({ video: 'on', reducedMotion: 'no-preference' })`. Playwright writes it to `e2e/.results/<test>/video.webm`. It records one frame pixel per CSS pixel, so a video shows the motion and a screenshot shows the detail at the device's pixel density.
+- Run `pnpm exec playwright test e2e/evidence.spec.ts --project=chromium --no-deps`, or `--project=mobile-safari` for the phone. A change to how something looks (colour, gradient, blend, mask, filter) runs on both projects, since the two engines render apart. A failed sign-in means the test branch lost its seed, which `--project=seed` restores. Delete the spec after the run.
+- Every run empties `e2e/.results/`: copy each media into `.artifacts/<branch>/` before the next run.
 
 **An email** renders in a `.artifacts/<branch>/email.ts` script run with `pnpm dlx tsx`, which resolves `~/`. The script renders `createElement(<Email>, <Email>.PreviewProps)` with `render` from `react-email`, passes the HTML to `page.setContent` in a `chromium` page, and screenshots it. The Playwright runner is skipped here because it would build the whole app.
 
-**Assemble** with ffmpeg:
+**Assemble** with ffmpeg. Each clip starts at its first expected state, so both themes play in step, and the video keeps its recorded size, since upscaling only enlarges the blur:
 
 ```sh
 ffmpeg -i light.png -i dark.png -filter_complex hstack after.png
-ffmpeg -i light.webm -i dark.webm -filter_complex "hstack=shortest=1,scale=1920:-2" -c:v libx264 -pix_fmt yuv420p -movflags +faststart -an flow.mp4
+ffmpeg -ss <light start> -i light.webm -ss <dark start> -i dark.webm -filter_complex "hstack=shortest=1" -c:v libx264 -crf 18 -pix_fmt yuv420p -movflags +faststart -an flow.mp4
 ```
 
-Done when every media sits in `.artifacts/<branch>/` under 10 MB, and you opened each screenshot and each claim's frame (`ffmpeg -ss <seconds> -i flow.mp4 -frames:v 1 frame.png`): the state and its label are visible in both themes, and only e2e accounts and test data appear, because the repository is public.
+Done when every media sits in `.artifacts/<branch>/` under 10 MB, and you opened each screenshot and each claim's frame (`ffmpeg -ss <seconds> -i flow.mp4 -frames:v 1 frame.png`): the state and its label are visible in both themes, the change looks exactly as intended, and only e2e accounts and test data appear, because the repository is public. A media that shows anything else, such as a glitch, an artefact, or one theme or engine rendering apart, gets fixed, or named to Victor, before step 4.
 
 ## 4. Open
 

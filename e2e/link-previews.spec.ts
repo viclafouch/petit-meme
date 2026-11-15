@@ -9,7 +9,7 @@ import { HTTP_STATUS } from '~/constants/http'
 import { BYTES_PER_KILOBYTE } from '~/constants/number'
 import { OG_IMAGE_HEIGHT, OG_IMAGE_WIDTH } from '~/constants/og'
 import { locales } from '~/paraglide/runtime'
-import { E2E_NAMED_MEMES } from './content'
+import { E2E_MISSING_MEME_ID, E2E_NAMED_MEMES } from './content'
 import { E2E_BUNNY_HOSTNAME } from './env'
 import { buildE2eUrl, localizePathname } from './urls'
 
@@ -30,7 +30,6 @@ const PUBLIC_PATHNAMES = [
 
 const SHARED_MEME = E2E_NAMED_MEMES.mostViewed
 const MEME_PATHNAME = `/memes/${SHARED_MEME.id}`
-const MISSING_MEME_ID = 'e2e-meme-missing'
 
 const WHATSAPP_MAX_IMAGE_KILOBYTES = 600
 const WHATSAPP_MAX_IMAGE_BYTES =
@@ -189,7 +188,7 @@ test.describe('the link previews', () => {
 
   test('a Meme that is not Published gets no image', async ({ request }) => {
     const response = await request.get(
-      `/api/og?type=meme&id=${MISSING_MEME_ID}`
+      `/api/og?type=meme&id=${E2E_MISSING_MEME_ID}`
     )
 
     expect(response.status()).toBe(HTTP_STATUS.NOT_FOUND)
@@ -200,7 +199,7 @@ test.describe('the link previews', () => {
   }) => {
     const response = await request.get('/api/oembed', {
       params: {
-        url: buildE2eUrl(`/memes/${MISSING_MEME_ID}`, 'fr'),
+        url: buildE2eUrl(`/memes/${E2E_MISSING_MEME_ID}`, 'fr'),
         format: 'json'
       }
     })

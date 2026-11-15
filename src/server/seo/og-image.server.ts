@@ -4,6 +4,7 @@ import bricolageGrotesqueBold from '~/components/og/assets/bricolage-grotesque-b
 import { OgHomeTemplate } from '~/components/og/og-home-template'
 import { OgMemeTemplate } from '~/components/og/og-meme-template'
 import { OgTemplate } from '~/components/og/og-template'
+import { OgThumbnailFrame } from '~/components/og/og-thumbnail-frame'
 import {
   CDN_CACHE_CONTROL_HEADER,
   DAILY_CDN_CACHE_CONTROL,
@@ -14,7 +15,10 @@ import {
 import {
   OG_IMAGE_HEIGHT,
   OG_IMAGE_WIDTH,
-  OG_MEME_THUMBNAIL_SOURCE
+  type ImageSize,
+  OG_MEME_THUMBNAIL_SOURCE,
+  THUMBNAIL_SIZES,
+  type ThumbnailRatio
 } from '~/constants/og'
 import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import { captureWithFeature } from '~/lib/sentry'
@@ -28,6 +32,7 @@ type RenderOgImageParams = {
   template: React.ReactElement
   output: OgImageOutput
   cdnCacheControl: string
+  size?: ImageSize
   images?: ImageResponseOptions['images']
 }
 
@@ -47,15 +52,21 @@ const OG_HOSTNAME = new URL(websiteOrigin).hostname
 
 const THUMBNAIL_FETCH_TIMEOUT_MS = 5000
 
-const PAGE_IMAGE_OUTPUT = { format: 'png' } as const satisfies OgImageOutput
+const ILLUSTRATION_OUTPUT = { format: 'png' } as const satisfies OgImageOutput
 
-const MEME_IMAGE_OUTPUT = {
+const PHOTO_OUTPUT = {
   format: 'jpeg',
   quality: 80
 } as const satisfies OgImageOutput
 
+const OG_IMAGE_SIZE = {
+  width: OG_IMAGE_WIDTH,
+  height: OG_IMAGE_HEIGHT
+} as const satisfies ImageSize
+
 const renderOgImage = async ({
   template,
+  size = OG_IMAGE_SIZE,
   output,
   cdnCacheControl,
   images
@@ -63,8 +74,7 @@ const renderOgImage = async ({
   const { default: ImageResponse } = await import('takumi-js/response')
 
   const response = new ImageResponse(template, {
-    width: OG_IMAGE_WIDTH,
-    height: OG_IMAGE_HEIGHT,
+    ...size,
     ...output,
     fonts: OG_FONTS,
     images,
@@ -89,7 +99,7 @@ const renderOgImage = async ({
 export const renderHomeOgImage = (locale: Locale) => {
   return renderOgImage({
     template: OgHomeTemplate({ locale, hostname: OG_HOSTNAME }),
-    output: PAGE_IMAGE_OUTPUT,
+    output: ILLUSTRATION_OUTPUT,
     cdnCacheControl: YEARLY_CDN_CACHE_CONTROL
   })
 }
@@ -105,17 +115,36 @@ export const renderPageOgImage = ({
 }: RenderPageOgImageParams) => {
   return renderOgImage({
     template: OgTemplate({ title, subtitle, hostname: OG_HOSTNAME }),
-    output: PAGE_IMAGE_OUTPUT,
+    output: ILLUSTRATION_OUTPUT,
     cdnCacheControl: YEARLY_CDN_CACHE_CONTROL
   })
+}
+
+const buildThumbnailSources = (thumbnail: Uint8Array) => {
+  return [
+    { src: OG_MEME_THUMBNAIL_SOURCE, data: thumbnail, cache: 'none' as const }
+  ]
 }
 
 export const renderMemeOgImage = (thumbnail: Uint8Array) => {
   return renderOgImage({
     template: OgMemeTemplate(),
-    output: MEME_IMAGE_OUTPUT,
+    output: PHOTO_OUTPUT,
     cdnCacheControl: DAILY_CDN_CACHE_CONTROL,
-    images: [{ src: OG_MEME_THUMBNAIL_SOURCE, data: thumbnail, cache: 'none' }]
+    images: buildThumbnailSources(thumbnail)
+  })
+}
+
+export const renderThumbnail = (
+  thumbnail: Uint8Array,
+  ratio: ThumbnailRatio
+) => {
+  return renderOgImage({
+    template: OgThumbnailFrame({}),
+    size: THUMBNAIL_SIZES[ratio],
+    output: PHOTO_OUTPUT,
+    cdnCacheControl: DAILY_CDN_CACHE_CONTROL,
+    images: buildThumbnailSources(thumbnail)
   })
 }
 
@@ -137,7 +166,10 @@ const fetchThumbnail = async (bunnyId: string) => {
   }
 }
 
-export const renderPublishedMemeOgImage = async (memeId: string) => {
+const renderFromPublishedMeme = async (
+  memeId: string,
+  render: (thumbnail: Uint8Array) => Promise<Response>
+) => {
   const meme = await findPublishedMeme(memeId)
 
   if (meme === null) {
@@ -156,5 +188,18 @@ export const renderPublishedMemeOgImage = async (memeId: string) => {
     })
   }
 
-  return renderMemeOgImage(thumbnail)
+  return render(thumbnail)
+}
+
+export const renderPublishedMemeOgImage = (memeId: string) => {
+  return renderFromPublishedMeme(memeId, renderMemeOgImage)
+}
+
+export const renderPublishedThumbnail = (
+  memeId: string,
+  ratio: ThumbnailRatio
+) => {
+  return renderFromPublishedMeme(memeId, (thumbnail) => {
+    return renderThumbnail(thumbnail, ratio)
+  })
 }

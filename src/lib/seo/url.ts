@@ -1,3 +1,4 @@
+import type { ThumbnailRatio } from '~/constants/og'
 import { clientEnv } from '~/env/client'
 import {
   baseLocale,
@@ -44,8 +45,6 @@ const buildOgEndpointUrl = (params: Record<string, string | undefined>) => {
     }
   }
 
-  url.searchParams.set('v', String(OG_VERSION))
-
   return url.href
 }
 
@@ -54,14 +53,24 @@ export const buildOgImage = (
   alt: string
 ) => {
   return {
-    url: buildOgEndpointUrl({ type, locale, title, subtitle }),
+    url: buildOgEndpointUrl({
+      type,
+      locale,
+      title,
+      subtitle,
+      v: String(OG_VERSION)
+    }),
     alt,
     type: 'image/png'
   } as const
 }
 
 export const buildMemeOgImageUrl = (memeId: string) => {
-  return buildOgEndpointUrl({ type: 'meme', id: memeId })
+  return buildOgEndpointUrl({ type: 'meme', id: memeId, v: String(OG_VERSION) })
+}
+
+export const buildThumbnailUrl = (memeId: string, ratio: ThumbnailRatio) => {
+  return buildOgEndpointUrl({ type: 'thumbnail', id: memeId, ratio })
 }
 
 export const buildOembedUrl = (pageUrl: string) => {

@@ -73,6 +73,8 @@ export const E2E_CATEGORIES = {
 
 export const E2E_UNIQUE_SEARCH_WORD = 'ornithorynque'
 
+export const E2E_MISSING_MEME_ID = 'e2e-meme-missing'
+
 export const E2E_NAMED_MEMES = {
   mostViewed: {
     id: 'e2e-meme-most-viewed',

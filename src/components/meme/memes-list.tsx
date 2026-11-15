@@ -1,4 +1,5 @@
 import React from 'react'
+import { AnimatePresence } from 'motion/react'
 import { useRouteContext } from '@tanstack/react-router'
 import {
   MemeListItem,
@@ -19,6 +20,7 @@ export type MemeWithHighlight = MemeWithVideo & {
 
 type MemesListProps = {
   memes: MemeWithHighlight[]
+  layoutContext: string
   columnGridCount?: number
   queryID?: string
   page?: number
@@ -28,6 +30,7 @@ const MEME_IDS_KEY_SEPARATOR = ','
 
 export const MemesList = ({
   memes,
+  layoutContext,
   columnGridCount = 4,
   queryID,
   page = 0
@@ -92,6 +95,7 @@ export const MemesList = ({
               onOpenPlayer={handleSelect}
               key={meme.id}
               size={size}
+              layoutContext={layoutContext}
               meme={meme}
               highlightedTitle={meme.highlightedTitle}
               queryID={queryID}
@@ -101,14 +105,17 @@ export const MemesList = ({
           )
         })}
       </ul>
-      {selectedMeme ? (
-        <PlayerDialog
-          meme={selectedMeme}
-          onClose={handleDeselect}
-          queryID={queryID}
-          authenticatedUserToken={authenticatedUserToken}
-        />
-      ) : null}
+      <AnimatePresence>
+        {selectedMeme ? (
+          <PlayerDialog
+            meme={selectedMeme}
+            layoutContext={layoutContext}
+            onClose={handleDeselect}
+            queryID={queryID}
+            authenticatedUserToken={authenticatedUserToken}
+          />
+        ) : null}
+      </AnimatePresence>
     </div>
   )
 }

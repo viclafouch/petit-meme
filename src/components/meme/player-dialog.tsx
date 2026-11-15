@@ -7,6 +7,7 @@ import {
   Share2,
   X
 } from 'lucide-react'
+import { motion, useReducedMotion } from 'motion/react'
 import { toast } from 'sonner'
 import { Dialog } from '@base-ui/react/dialog'
 import { Link, useLinkProps } from '@tanstack/react-router'
@@ -31,6 +32,7 @@ import { recordMemeExport } from '~/server/meme/meme.functions'
 
 type PlayerDialogProps = {
   meme: MemeWithVideo
+  layoutContext: string
   onClose: () => void
   queryID?: string
   authenticatedUserToken?: string
@@ -38,6 +40,7 @@ type PlayerDialogProps = {
 
 export const PlayerDialog = ({
   meme,
+  layoutContext,
   onClose,
   queryID,
   authenticatedUserToken
@@ -51,6 +54,7 @@ export const PlayerDialog = ({
     isActive: true,
     meme
   })
+  const isReducedMotion = useReducedMotion()
   const shareMutation = useMemeExport({ mode: 'share', queryID })
   const downloadMutation = useMemeExport({ mode: 'download', queryID })
   const memeLink = useLinkProps({
@@ -58,7 +62,7 @@ export const PlayerDialog = ({
     params: { memeId: meme.id }
   })
 
-  const [isPlaybackRequested, setIsPlaybackRequested] = React.useState(true)
+  const [isPlaybackRequested, setIsPlaybackRequested] = React.useState(false)
 
   useVideoPlayback({
     video,
@@ -110,6 +114,10 @@ export const PlayerDialog = ({
     onClose()
   }
 
+  const handlePlayVideo = () => {
+    setIsPlaybackRequested(true)
+  }
+
   const handleStudioClick = () => {
     pauseVideo()
     handleTrackConversion('Meme Studio Opened')
@@ -145,12 +153,20 @@ export const PlayerDialog = ({
           finalFocus={false}
           className="fixed inset-0 flex size-full items-center justify-center z-50 overflow-hidden bg-transparent text-inherit outline-none dark"
         >
-          <div
+          <motion.div
+            initial={isReducedMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             onClick={handleClose}
             role="presentation"
             className="bg-black/90 absolute inset-0"
           />
-          <div className="absolute top-4 right-4">
+          <motion.div
+            className="absolute top-4 right-4"
+            animate={{ opacity: 1 }}
+            initial={isReducedMotion ? false : { opacity: 0 }}
+            exit={{ opacity: 0 }}
+          >
             <Button
               size="icon"
               onClick={handleClose}
@@ -158,8 +174,12 @@ export const PlayerDialog = ({
             >
               <X />
             </Button>
-          </div>
-          <div className="relative w-200 max-w-vw-90">
+          </motion.div>
+          <motion.div
+            layoutId={`${layoutContext}-item-${meme.id}`}
+            onLayoutAnimationComplete={handlePlayVideo}
+            className="relative w-200 max-w-vw-90"
+          >
             <div className="size-full flex flex-col items-center gap-y-4">
               <Dialog.Title className="text-center w-full text-balance text-lg font-bold text-primary">
                 {meme.title}
@@ -234,7 +254,7 @@ export const PlayerDialog = ({
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </Dialog.Popup>
       </Dialog.Portal>
     </Dialog.Root>

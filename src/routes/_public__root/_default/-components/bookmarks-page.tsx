@@ -37,7 +37,10 @@ export const BookmarksPage = () => {
         {bookmarkedMemesQuery.data.bookmarks.length === 0 ? (
           <BookmarksEmpty />
         ) : (
-          <MemesList memes={bookmarkedMemesQuery.data.bookmarks} />
+          <MemesList
+            layoutContext="bookmarks"
+            memes={bookmarkedMemesQuery.data.bookmarks}
+          />
         )}
       </div>
     </div>

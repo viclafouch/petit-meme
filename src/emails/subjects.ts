@@ -3,6 +3,7 @@ import type { Locale } from '~/paraglide/runtime'
 export const emailSubjects = {
   fr: {
     paymentFailed: 'Échec de paiement pour ton abonnement Petit Meme',
+    subscriptionEnded: 'Ton abonnement Premium Petit Meme a pris fin',
     resetPassword: 'Réinitialise ton mot de passe Petit Meme',
     passwordChanged: 'Ton mot de passe Petit Meme a été modifié',
     verifyEmail: 'Confirme ton inscription à Petit Meme',
@@ -18,6 +19,7 @@ export const emailSubjects = {
   },
   en: {
     paymentFailed: 'Payment failed for your Petit Meme subscription',
+    subscriptionEnded: 'Your Petit Meme Premium subscription has ended',
     resetPassword: 'Reset your Petit Meme password',
     passwordChanged: 'Your Petit Meme password has been changed',
     verifyEmail: 'Confirm your Petit Meme registration',

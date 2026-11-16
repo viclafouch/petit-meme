@@ -11,32 +11,23 @@ import { buildNamedMemeActionPattern, getMemeList } from './library'
 const EXPORTABLE_MEME = E2E_NAMED_MEMES.mostViewed
 const EXPORTABLE_MEME_PATHNAME = `/memes/${EXPORTABLE_MEME.id}`
 
-const DOWNLOAD_LABELS = {
-  mp4: { format: m.meme_format_video, action: m.meme_download_video },
-  mp3: { format: m.meme_format_audio, action: m.meme_download_sound }
-} as const satisfies Record<
-  MemeDerivedFormat,
-  { format: () => string; action: () => string }
->
+const FORMAT_LABELS = {
+  mp4: m.meme_format_video,
+  mp3: m.meme_format_audio
+} as const satisfies Record<MemeDerivedFormat, () => string>
 
 const pickDownloadFormat = async (page: Page, format: MemeDerivedFormat) => {
-  const formatRadio = page.getByRole('radio', {
-    name: DOWNLOAD_LABELS[format].format()
-  })
+  const formatTile = page
+    .getByRole('dialog', { name: m.meme_download() })
+    .getByRole('button', { name: FORMAT_LABELS[format]() })
 
   await repeatUntilVisible(() => {
     return page
       .getByRole('button', { name: m.meme_download(), exact: true })
       .click()
-  }, formatRadio)
+  }, formatTile)
 
-  await formatRadio.click()
-  await page
-    .getByRole('button', {
-      name: DOWNLOAD_LABELS[format].action(),
-      exact: true
-    })
-    .click()
+  await formatTile.click()
 }
 
 const getFirstMemeCardOptionsButton = (page: Page) => {

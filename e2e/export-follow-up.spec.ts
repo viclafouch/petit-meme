@@ -20,19 +20,19 @@ const forgetFollowUps = (page: Page, storageKeys: string[]) => {
 }
 
 const downloadVideo = async (page: Page) => {
-  const formatItem = page.getByRole('menuitem', {
-    name: m.meme_format_video()
-  })
+  const videoTile = page
+    .getByRole('dialog', { name: m.meme_download() })
+    .getByRole('button', { name: m.meme_format_video() })
 
   await repeatUntilVisible(() => {
     return page
       .getByRole('button', { name: m.meme_download(), exact: true })
       .click()
-  }, formatItem)
+  }, videoTile)
 
   const downloadPromise = page.waitForEvent('download')
 
-  await formatItem.click()
+  await videoTile.click()
 
   await expectMemeFileDownloaded({
     download: await downloadPromise,

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Download, Play, Share2 } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
-import { MemeExportMenu } from '~/components/meme/meme-export-menu'
+import { MemeExportPanel } from '~/components/meme/meme-export-panel'
 import { ToggleBookmarkButton } from '~/components/meme/toggle-bookmark-button'
 import { useMediaSession } from '~/components/meme/use-media-session'
 import { useMemeExport } from '~/components/meme/use-meme-export'
@@ -310,10 +310,10 @@ export const Reel = ({
             meme={meme}
             className={RAIL_BUTTON_CLASS_NAME}
           />
-          <MemeExportMenu
+          <MemeExportPanel
             mode="share"
-            memeTitle={meme.title}
-            align="end"
+            meme={meme}
+            isPending={shareMutation.isPending}
             onExport={(format) => {
               shareMutation.trigger(meme, format)
             }}
@@ -326,11 +326,11 @@ export const Reel = ({
             }
           >
             <Share2 aria-hidden="true" />
-          </MemeExportMenu>
-          <MemeExportMenu
+          </MemeExportPanel>
+          <MemeExportPanel
             mode="download"
-            memeTitle={meme.title}
-            align="end"
+            meme={meme}
+            isPending={downloadMutation.isPending}
             onExport={(format) => {
               downloadMutation.trigger(meme, format)
             }}
@@ -343,7 +343,7 @@ export const Reel = ({
             }
           >
             <Download aria-hidden="true" />
-          </MemeExportMenu>
+          </MemeExportPanel>
         </div>
       </div>
       {isActive ? <ReelProgress video={video} /> : null}

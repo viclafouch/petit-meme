@@ -1,7 +1,7 @@
 import React from 'react'
 import { ArrowRight, ChevronRight, Clapperboard, Star } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
-import { MemeExportFormatTiles } from '~/components/meme/meme-export-menu'
+import { MemeExportPanelBody } from '~/components/meme/meme-export-panel'
 import {
   MEME_EXPORT_MODE_DISPLAY,
   SHEET_BODY_CLASS_NAME,
@@ -91,8 +91,11 @@ export const MemeActionsSheet = ({
                       </DrawerDescription>
                     </DrawerHeader>
                     <div className={SHEET_BODY_CLASS_NAME}>
-                      <MemeExportFormatTiles
-                        onSelect={(format) => {
+                      <MemeExportPanelBody
+                        mode={mode}
+                        meme={meme}
+                        isPending={false}
+                        onSelectFormat={(format) => {
                           if (isPremium) {
                             onExport(mode, format)
                           } else {
@@ -101,6 +104,9 @@ export const MemeActionsSheet = ({
                             })
                           }
 
+                          setIsOpen(false)
+                        }}
+                        onDone={() => {
                           setIsOpen(false)
                         }}
                       />

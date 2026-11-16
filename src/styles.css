@@ -584,104 +584,15 @@ input:autofill {
 }
 
 @layer components {
-  .format-row {
-    --format-from: var(--color-violet-400);
-    --format-to: var(--color-violet-600);
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    width: 100%;
-    min-height: 4rem;
-    padding: 0.625rem 0.75rem 0.625rem 0.625rem;
-    border-radius: 1rem;
-    background: var(--secondary);
-    text-align: start;
-    cursor: pointer;
-    outline: none;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-    -webkit-user-select: none;
-    user-select: none;
-    transition:
-      background-color 150ms ease,
-      scale 120ms cubic-bezier(0.23, 1, 0.32, 1);
-
-    &[data-format='mp3'] {
-      --format-from: var(--color-emerald-400);
-      --format-to: var(--color-emerald-600);
-    }
-
-    &:not(:disabled):active {
-      scale: 0.98;
-    }
-
-    &:disabled {
-      cursor: default;
-      opacity: 0.5;
-    }
-
-    &:focus-visible {
-      outline: 2px solid var(--ring);
-      outline-offset: 2px;
-    }
-  }
-
-  .format-row-icon {
-    display: grid;
-    flex-shrink: 0;
-    place-items: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    border-radius: 0.8125rem;
-    color: white;
-    background: linear-gradient(150deg, var(--format-from), var(--format-to));
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.3),
-      0 6px 16px -8px var(--format-to);
-
-    & > svg {
-      grid-area: 1 / 1;
-      width: 1.375rem;
-      height: 1.375rem;
-      overflow: visible;
-      transition:
-        opacity 150ms ease-out,
-        scale 200ms cubic-bezier(0.23, 1, 0.32, 1);
-    }
-
-    & > [data-hover-icon] {
-      opacity: 0;
-      scale: 0.8;
-    }
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    .format-row:not(:disabled):is(:hover, :focus-visible) {
-      background: color-mix(in oklab, var(--secondary), var(--format-from) 16%);
-
-      & .format-row-icon:has(> [data-hover-icon]) {
-        & > svg:not([data-hover-icon]) {
-          opacity: 0;
-          scale: 0.8;
-        }
-
-        & > [data-hover-icon] {
-          opacity: 1;
-          scale: 1;
-        }
-      }
-    }
-  }
-
   @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-    .format-row:not(:disabled):is(:hover, :focus-visible) {
+    button[data-format]:enabled:is(:hover, :focus-visible) {
       & [data-hover-icon] > :is(:nth-child(1), :nth-child(2), :nth-child(4)) {
         transform-box: view-box;
         transform-origin: 3px 11px;
         animation: format-row-clap 420ms 80ms both;
       }
 
-      &[data-format='mp3'] .format-row-icon path {
+      &[data-format='mp3'] path {
         transform-box: fill-box;
         transform-origin: center;
         animation: format-row-equalizer 560ms ease-in-out infinite alternate;

@@ -21,7 +21,7 @@ const openShareMenu = async ({
   formatLabel
 }: OpenShareMenuParams) => {
   const formatItem = page
-    .getByRole('dialog', { name: m.meme_share() })
+    .getByRole('dialog', { name: m.meme_share_heading() })
     .getByRole('button', { name: formatLabel })
 
   await repeatUntilVisible(() => {

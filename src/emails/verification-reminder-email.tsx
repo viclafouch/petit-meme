@@ -1,29 +1,32 @@
-import { Button, Section, Text } from 'react-email'
 import type { Locale } from '~/paraglide/runtime'
-import { BUTTON_CLASS } from './constants'
-import { BoldText, EmailFallbackLink, EmailLayout } from './email-layout'
+import {
+  BoldText,
+  EmailButton,
+  EmailCallout,
+  EmailFallbackLink,
+  EmailNote,
+  EmailParagraph
+} from './email-blocks'
+import { EmailLayout } from './email-layout'
 
 const translations = {
   fr: {
-    preview: 'Rappel : confirme ton email Petit Meme',
-    title: 'Rappel : confirme ton adresse e-mail',
-    subtitle: 'Tu n’as pas encore confirmé ton adresse e-mail.',
-    body: 'Salut, tu t’es inscrit sur **Petit Meme** mais tu n’as pas encore confirmé ton adresse e-mail. Clique sur le bouton ci-dessous pour confirmer et accéder à toutes les fonctionnalités.',
+    preview: 'Confirme ton adresse e-mail pour garder ton compte.',
+    heading: 'Ton adresse e-mail attend sa confirmation',
+    body: 'Ton inscription sur **Petit Meme** n’est pas encore confirmée. Confirme ton adresse e-mail pour garder ton compte et toutes ses fonctionnalités.',
     warning:
-      'Si tu ne confirmes pas dans les 30 jours suivant ton inscription, ton compte sera automatiquement supprimé.',
-    cta: 'Confirmer mon adresse e-mail',
-    ignore: 'Si tu n’as pas créé de compte sur Petit Meme, ignore ce message.'
+      'Sans confirmation dans les 30 jours qui suivent l’inscription, le compte est supprimé automatiquement.',
+    cta: 'Confirmer mon adresse',
+    ignore: 'Tu n’as pas créé de compte sur Petit Meme ? Ignore ce message.'
   },
   en: {
-    preview: 'Reminder: confirm your Petit Meme email',
-    title: 'Reminder: confirm your email address',
-    subtitle: 'You have not yet confirmed your email address.',
-    body: 'Hi, you signed up on **Petit Meme** but have not yet confirmed your email address. Click the button below to confirm and access all features.',
+    preview: 'Confirm your email address to keep your account.',
+    heading: 'Your email address is waiting for confirmation',
+    body: 'Your **Petit Meme** sign-up is not confirmed yet. Confirm your email address to keep your account and all its features.',
     warning:
-      'If you do not confirm within 30 days of signing up, your account will be automatically deleted.',
-    cta: 'Confirm my email address',
-    ignore:
-      'If you didn’t create an account on Petit Meme, ignore this message.'
+      'Without confirmation within 30 days of signing up, the account is deleted automatically.',
+    cta: 'Confirm my address',
+    ignore: 'Didn’t create a Petit Meme account? Ignore this message.'
   }
 } as const satisfies Record<Locale, Record<string, unknown>>
 
@@ -39,30 +42,14 @@ export const VerificationReminderEmail = ({
   const tr = translations[locale]
 
   return (
-    <EmailLayout preview={tr.preview} locale={locale}>
-      <Section>
-        <Text className="m-0 mb-2 text-lg font-semibold text-brand">
-          {tr.title}
-        </Text>
-        <Text className="m-0 mb-6 text-sm leading-6 text-brand-muted-dark">
-          {tr.subtitle}
-        </Text>
-        <Text className="m-0 mb-4 text-sm leading-6 text-neutral-600">
-          <BoldText text={tr.body} />
-        </Text>
-        <Text className="m-0 mb-6 text-sm leading-6 text-brand-danger">
-          {tr.warning}
-        </Text>
-        <Section className="mb-6 mt-2">
-          <Button className={BUTTON_CLASS} href={verificationUrl}>
-            {tr.cta}
-          </Button>
-        </Section>
-        <EmailFallbackLink href={verificationUrl} locale={locale} />
-        <Text className="m-0 mt-6 text-xs leading-5 text-brand-muted">
-          {tr.ignore}
-        </Text>
-      </Section>
+    <EmailLayout preview={tr.preview} heading={tr.heading} locale={locale}>
+      <EmailParagraph>
+        <BoldText text={tr.body} />
+      </EmailParagraph>
+      <EmailCallout tone="danger">{tr.warning}</EmailCallout>
+      <EmailButton href={verificationUrl}>{tr.cta}</EmailButton>
+      <EmailFallbackLink href={verificationUrl} locale={locale} />
+      <EmailNote>{tr.ignore}</EmailNote>
     </EmailLayout>
   )
 }

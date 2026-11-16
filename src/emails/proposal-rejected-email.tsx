@@ -1,36 +1,33 @@
-import { Section, Text } from 'react-email'
 import type { Locale } from '~/paraglide/runtime'
 import { CONTACT_EMAIL } from './constants'
-import { BoldText, EmailLayout } from './email-layout'
+import { BoldText, EmailNote, EmailParagraph } from './email-blocks'
+import { EmailLayout } from './email-layout'
 
 const translations = {
   fr: {
-    preview: 'Ta proposition de mème n’a pas été retenue',
-    title: 'Proposition non retenue',
-    subtitle: 'Ton mème n’a pas été ajouté au site.',
+    preview: 'Ton mème ne rejoindra pas la bibliothèque.',
+    heading: 'Ta proposition n’a pas été retenue',
     body: (username: string, memeTitle: string) => {
-      return `Salut ${username}, ta proposition **${memeTitle}** n’a malheureusement pas été retenue.`
+      return `Salut ${username}, **${memeTitle}** ne rejoindra pas la bibliothèque de **Petit Meme**.`
     },
     reasons:
-      'Les raisons peuvent inclure : contenu déjà présent, qualité insuffisante, ou non-conformité aux règles du site.',
-    encourage:
-      'N’hésite pas à proposer d’autres mèmes, chaque contribution compte !',
+      'Le plus souvent, le mème y est déjà, la vidéo manque de qualité ou elle ne respecte pas les règles du site.',
+    encourage: 'Tu peux proposer d’autres mèmes à tout moment.',
     contact: (email: string) => {
-      return `Si tu as des questions, contacte-nous à **${email}**.`
+      return `Une question ? Écris-nous à **${email}**.`
     }
   },
   en: {
-    preview: 'Your meme proposal was not accepted',
-    title: 'Proposal not accepted',
-    subtitle: 'Your meme was not added to the site.',
+    preview: 'Your meme won’t join the library.',
+    heading: 'Your proposal wasn’t accepted',
     body: (username: string, memeTitle: string) => {
-      return `Hi ${username}, your proposal **${memeTitle}** was unfortunately not accepted.`
+      return `Hi ${username}, **${memeTitle}** won’t join the **Petit Meme** library.`
     },
     reasons:
-      'Possible reasons include: content already present, insufficient quality, or non-compliance with site rules.',
-    encourage: 'Feel free to propose other memes, every contribution counts!',
+      'Most often, the meme is already there, the video lacks quality or it breaks the site rules.',
+    encourage: 'You can propose other memes at any time.',
     contact: (email: string) => {
-      return `If you have any questions, contact us at **${email}**.`
+      return `A question? Write to us at **${email}**.`
     }
   }
 } as const satisfies Record<Locale, Record<string, unknown>>
@@ -49,27 +46,15 @@ export const ProposalRejectedEmail = ({
   const tr = translations[locale]
 
   return (
-    <EmailLayout preview={tr.preview} locale={locale}>
-      <Section>
-        <Text className="m-0 mb-2 text-lg font-semibold text-brand-danger">
-          {tr.title}
-        </Text>
-        <Text className="m-0 mb-6 text-sm leading-6 text-brand-muted-dark">
-          {tr.subtitle}
-        </Text>
-        <Text className="m-0 mb-4 text-sm leading-6 text-neutral-600">
-          <BoldText text={tr.body(username, memeTitle)} />
-        </Text>
-        <Text className="m-0 mb-4 text-sm leading-6 text-neutral-600">
-          {tr.reasons}
-        </Text>
-        <Text className="m-0 mb-4 text-sm leading-6 text-neutral-600">
-          {tr.encourage}
-        </Text>
-        <Text className="m-0 text-sm leading-6 text-neutral-600">
-          <BoldText text={tr.contact(CONTACT_EMAIL)} />
-        </Text>
-      </Section>
+    <EmailLayout preview={tr.preview} heading={tr.heading} locale={locale}>
+      <EmailParagraph>
+        <BoldText text={tr.body(username, memeTitle)} />
+      </EmailParagraph>
+      <EmailParagraph>{tr.reasons}</EmailParagraph>
+      <EmailParagraph>{tr.encourage}</EmailParagraph>
+      <EmailNote>
+        <BoldText text={tr.contact(CONTACT_EMAIL)} />
+      </EmailNote>
     </EmailLayout>
   )
 }

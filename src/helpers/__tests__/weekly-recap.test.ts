@@ -7,10 +7,9 @@ import {
 import {
   countDatesWithin,
   countCancellations,
-  countNewSubscriptions,
   getRecapWindows,
   summarizeSubscribersAt,
-  sumPaidCentsWithin
+  tallyPaymentsWithin
 } from '~/helpers/weekly-recap'
 
 const NOW = new Date('2026-11-08T08:00:00.000Z')
@@ -79,9 +78,8 @@ describe('summarizeSubscribersAt', () => {
     )
 
     expect(summary).toStrictEqual({
-      monthly: 1,
-      yearly: 0,
-      mrrCents: MONTHLY_PRICE_CENTS
+      monthly: { count: 1, cents: MONTHLY_PRICE_CENTS },
+      yearly: { count: 0, cents: 0 }
     })
   })
 
@@ -91,10 +89,12 @@ describe('summarizeSubscribersAt', () => {
       endedAt: new Date('2026-11-04T00:00:00.000Z')
     })
 
-    expect(summarizeSubscribersAt([ended], WINDOWS.current.start).monthly).toBe(
-      1
-    )
-    expect(summarizeSubscribersAt([ended], WINDOWS.current.end).monthly).toBe(0)
+    expect(
+      summarizeSubscribersAt([ended], WINDOWS.current.start).monthly.count
+    ).toBe(1)
+    expect(
+      summarizeSubscribersAt([ended], WINDOWS.current.end).monthly.count
+    ).toBe(0)
   })
 
   it('should leave out unpaid and abandoned subscriptions', () => {
@@ -110,30 +110,9 @@ describe('summarizeSubscribersAt', () => {
     const summary = summarizeSubscribersAt(subscriptions, WINDOWS.current.end)
 
     expect(summary).toStrictEqual({
-      monthly: 0,
-      yearly: 1,
-      mrrCents: YEARLY_MONTHLY_CENTS
+      monthly: { count: 0, cents: 0 },
+      yearly: { count: 1, cents: YEARLY_MONTHLY_CENTS }
     })
-  })
-})
-
-describe('countNewSubscriptions', () => {
-  it('should count the subscriptions started during the week', () => {
-    const subscriptions = [
-      buildSubscription({ startedAt: new Date('2026-11-03T00:00:00.000Z') }),
-      buildSubscription({ startedAt: new Date('2026-10-20T00:00:00.000Z') })
-    ]
-
-    expect(countNewSubscriptions(subscriptions, WINDOWS.current)).toBe(1)
-  })
-
-  it('should ignore an abandoned checkout', () => {
-    const abandoned = buildSubscription({
-      status: 'incomplete_expired',
-      startedAt: new Date('2026-11-03T00:00:00.000Z')
-    })
-
-    expect(countNewSubscriptions([abandoned], WINDOWS.current)).toBe(0)
   })
 })
 
@@ -155,8 +134,8 @@ describe('countCancellations', () => {
   })
 })
 
-describe('sumPaidCentsWithin', () => {
-  it('should only sum the invoices paid during the window', () => {
+describe('tallyPaymentsWithin', () => {
+  it('should only tally the payments made during the window', () => {
     const invoices = [
       buildInvoice({ paidAt: new Date('2026-11-02T10:00:00.000Z') }),
       buildInvoice({
@@ -166,9 +145,52 @@ describe('sumPaidCentsWithin', () => {
       buildInvoice({ paidAt: new Date('2026-10-31T10:00:00.000Z') })
     ]
 
-    expect(sumPaidCentsWithin(invoices, WINDOWS.current)).toBe(
-      MONTHLY_PRICE_CENTS + YEARLY_PRICE_CENTS
-    )
+    expect(tallyPaymentsWithin(invoices, WINDOWS.current)).toStrictEqual({
+      count: 2,
+      cents: MONTHLY_PRICE_CENTS + YEARLY_PRICE_CENTS
+    })
+  })
+
+  it('should split first payments from renewals', () => {
+    const invoices = [
+      buildInvoice({ billingReason: 'subscription_create' }),
+      buildInvoice({ billingReason: 'subscription_cycle' }),
+      buildInvoice({ billingReason: 'subscription_cycle' }),
+      buildInvoice({
+        billingReason: 'subscription_update',
+        amountPaidCents: YEARLY_PRICE_CENTS
+      })
+    ]
+
+    expect(
+      tallyPaymentsWithin(invoices, WINDOWS.current, 'subscription_create')
+    ).toStrictEqual({ count: 1, cents: MONTHLY_PRICE_CENTS })
+    expect(
+      tallyPaymentsWithin(invoices, WINDOWS.current, 'subscription_cycle')
+    ).toStrictEqual({
+      count: 2,
+      cents: MONTHLY_PRICE_CENTS + MONTHLY_PRICE_CENTS
+    })
+    expect(tallyPaymentsWithin(invoices, WINDOWS.current)).toStrictEqual({
+      count: invoices.length,
+      cents:
+        MONTHLY_PRICE_CENTS +
+        MONTHLY_PRICE_CENTS +
+        MONTHLY_PRICE_CENTS +
+        YEARLY_PRICE_CENTS
+    })
+  })
+
+  it('should leave out invoices with nothing paid', () => {
+    const free = buildInvoice({
+      billingReason: 'subscription_create',
+      amountPaidCents: 0
+    })
+
+    expect(tallyPaymentsWithin([free], WINDOWS.current)).toStrictEqual({
+      count: 0,
+      cents: 0
+    })
   })
 })
 

@@ -1,33 +1,39 @@
-import { Button, Section, Text } from 'react-email'
 import type { Locale } from '~/paraglide/runtime'
-import { BUTTON_CLASS, SITE_URL } from './constants'
+import { buildEmailUrl } from './constants'
+import { EmailButton, EmailDetails, EmailParagraph } from './email-blocks'
 import { EmailLayout } from './email-layout'
 
 const translations = {
   fr: {
-    preview: 'Ton abonnement Premium est activé !',
-    title: 'Abonnement activé',
-    subtitle: (username: string) => {
-      return `Bienvenue dans le mode premium, ${username} !`
+    preview: 'Ton abonnement Premium est actif.',
+    heading: (username: string) => {
+      return `Bienvenue dans Premium, ${username} !`
     },
+    body: 'Ton abonnement est actif : vidéos sans watermark, son des mèmes, et plus aucune limite sur les favoris, le Studio et la recherche IA.',
     planLabel: 'Abonnement',
     amountLabel: 'Montant',
-    periodAnnual: '/an',
-    periodMonthly: '/mois',
-    body: 'Tu as désormais accès à toutes les fonctionnalités premium. Profite bien de Petit Meme !',
+    perYear: (amount: string) => {
+      return `${amount} par an`
+    },
+    perMonth: (amount: string) => {
+      return `${amount} par mois`
+    },
     cta: 'Explorer Petit Meme'
   },
   en: {
-    preview: 'Your Premium subscription is active!',
-    title: 'Subscription active',
-    subtitle: (username: string) => {
-      return `Welcome to premium, ${username}!`
+    preview: 'Your Premium subscription is active.',
+    heading: (username: string) => {
+      return `Welcome to Premium, ${username}!`
     },
+    body: 'Your subscription is active: videos without watermark, meme sounds, and no more limits on bookmarks, the Studio and AI search.',
     planLabel: 'Subscription',
     amountLabel: 'Amount',
-    periodAnnual: '/yr',
-    periodMonthly: '/mo',
-    body: 'You now have access to all premium features. Enjoy Petit Meme!',
+    perYear: (amount: string) => {
+      return `${amount} per year`
+    },
+    perMonth: (amount: string) => {
+      return `${amount} per month`
+    },
     cta: 'Explore Petit Meme'
   }
 } as const satisfies Record<Locale, Record<string, unknown>>
@@ -48,38 +54,24 @@ export const SubscriptionConfirmedEmail = ({
   locale
 }: SubscriptionConfirmedEmailProps) => {
   const tr = translations[locale]
-  const periodSuffix = isAnnual ? tr.periodAnnual : tr.periodMonthly
 
   return (
-    <EmailLayout preview={tr.preview} locale={locale}>
-      <Section>
-        <Text className="m-0 mb-2 text-lg font-semibold text-brand">
-          {tr.title}
-        </Text>
-        <Text className="m-0 mb-6 text-sm leading-6 text-brand-muted-dark">
-          {tr.subtitle(username)}
-        </Text>
-        <Section className="mb-6 rounded-lg border border-solid border-brand-success-border bg-brand-success-bg p-4">
-          <Text className="m-0 text-sm leading-6 text-brand-success">
-            {tr.planLabel} : <b>{planTitle}</b>
-          </Text>
-          <Text className="m-0 mt-1 text-sm leading-6 text-brand-success">
-            {tr.amountLabel} :{' '}
-            <b>
-              {amount}
-              {periodSuffix}
-            </b>
-          </Text>
-        </Section>
-        <Text className="m-0 mb-4 text-sm leading-6 text-neutral-600">
-          {tr.body}
-        </Text>
-        <Section className="mt-2">
-          <Button className={BUTTON_CLASS} href={SITE_URL}>
-            {tr.cta}
-          </Button>
-        </Section>
-      </Section>
+    <EmailLayout
+      preview={tr.preview}
+      heading={tr.heading(username)}
+      locale={locale}
+    >
+      <EmailParagraph>{tr.body}</EmailParagraph>
+      <EmailDetails
+        details={[
+          { label: tr.planLabel, value: planTitle },
+          {
+            label: tr.amountLabel,
+            value: isAnnual ? tr.perYear(amount) : tr.perMonth(amount)
+          }
+        ]}
+      />
+      <EmailButton href={buildEmailUrl('/', locale)}>{tr.cta}</EmailButton>
     </EmailLayout>
   )
 }

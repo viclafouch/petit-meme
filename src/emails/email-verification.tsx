@@ -1,25 +1,27 @@
-import { Button, Section, Text } from 'react-email'
 import type { Locale } from '~/paraglide/runtime'
-import { BUTTON_CLASS } from './constants'
-import { BoldText, EmailFallbackLink, EmailLayout } from './email-layout'
+import {
+  BoldText,
+  EmailButton,
+  EmailFallbackLink,
+  EmailNote,
+  EmailParagraph
+} from './email-blocks'
+import { EmailLayout } from './email-layout'
 
 const translations = {
   fr: {
-    preview: 'Confirme ton inscription à Petit Meme',
-    title: 'Confirme ton adresse e-mail',
-    subtitle: 'Plus qu’une étape pour rejoindre Petit Meme.',
-    body: 'Salut, bienvenue sur **Petit Meme** ! Clique sur le bouton ci-dessous pour confirmer ton adresse e-mail et commencer à explorer les mèmes.',
-    cta: 'Confirmer mon inscription',
-    ignore: 'Si tu n’as pas créé de compte sur Petit Meme, ignore ce message.'
+    preview: 'Plus qu’une étape pour rejoindre Petit Meme.',
+    heading: 'Confirme ton adresse e-mail',
+    body: 'Plus qu’une étape pour rejoindre **Petit Meme** : confirme ton adresse e-mail et commence à explorer les mèmes.',
+    cta: 'Confirmer mon adresse',
+    ignore: 'Tu n’as pas créé de compte sur Petit Meme ? Ignore ce message.'
   },
   en: {
-    preview: 'Confirm your Petit Meme registration',
-    title: 'Confirm your email address',
-    subtitle: 'One more step to join Petit Meme.',
-    body: 'Hi, welcome to **Petit Meme**! Click the button below to confirm your email address and start exploring memes.',
-    cta: 'Confirm my registration',
-    ignore:
-      'If you didn’t create an account on Petit Meme, ignore this message.'
+    preview: 'One more step to join Petit Meme.',
+    heading: 'Confirm your email address',
+    body: 'One more step to join **Petit Meme**: confirm your email address and start exploring memes.',
+    cta: 'Confirm my address',
+    ignore: 'Didn’t create a Petit Meme account? Ignore this message.'
   }
 } as const satisfies Record<Locale, Record<string, unknown>>
 
@@ -35,27 +37,13 @@ export const EmailVerification = ({
   const tr = translations[locale]
 
   return (
-    <EmailLayout preview={tr.preview} locale={locale}>
-      <Section>
-        <Text className="m-0 mb-2 text-lg font-semibold text-brand">
-          {tr.title}
-        </Text>
-        <Text className="m-0 mb-6 text-sm leading-6 text-brand-muted-dark">
-          {tr.subtitle}
-        </Text>
-        <Text className="m-0 mb-4 text-sm leading-6 text-neutral-600">
-          <BoldText text={tr.body} />
-        </Text>
-        <Section className="mb-6 mt-2">
-          <Button className={BUTTON_CLASS} href={verificationUrl}>
-            {tr.cta}
-          </Button>
-        </Section>
-        <EmailFallbackLink href={verificationUrl} locale={locale} />
-        <Text className="m-0 mt-6 text-xs leading-5 text-brand-muted">
-          {tr.ignore}
-        </Text>
-      </Section>
+    <EmailLayout preview={tr.preview} heading={tr.heading} locale={locale}>
+      <EmailParagraph>
+        <BoldText text={tr.body} />
+      </EmailParagraph>
+      <EmailButton href={verificationUrl}>{tr.cta}</EmailButton>
+      <EmailFallbackLink href={verificationUrl} locale={locale} />
+      <EmailNote>{tr.ignore}</EmailNote>
     </EmailLayout>
   )
 }

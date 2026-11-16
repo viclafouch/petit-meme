@@ -1,35 +1,39 @@
-import { Button, Section, Text } from 'react-email'
 import type { Locale } from '~/paraglide/runtime'
-import { BUTTON_CLASS, CONTACT_EMAIL } from './constants'
-import { BoldText, EmailLayout } from './email-layout'
+import { CONTACT_EMAIL } from './constants'
+import {
+  BoldText,
+  EmailButton,
+  EmailCallout,
+  EmailNote,
+  EmailParagraph
+} from './email-blocks'
+import { EmailLayout } from './email-layout'
 
 const translations = {
   fr: {
-    preview: 'Échec de paiement pour ton abonnement Petit Meme',
-    title: 'Échec de paiement',
-    subtitle: 'Ton dernier paiement n’a pas pu être traité.',
+    preview: 'Mets à jour ton moyen de paiement pour garder Premium.',
+    heading: 'Ton paiement n’est pas passé',
     body: (username: string) => {
-      return `Salut ${username}, nous n’avons pas pu traiter le paiement de ton abonnement **Petit Meme**.`
+      return `Salut ${username}, le paiement de ton abonnement **Petit Meme** a échoué. Premium reste actif pendant que nous réessayons.`
     },
     warning:
-      'Sans mise à jour de ton moyen de paiement, tu perdras l’accès aux fonctionnalités premium.',
+      'Sans mise à jour de ton moyen de paiement, ton abonnement Premium prendra fin.',
     cta: 'Mettre à jour mon paiement',
     contact: (email: string) => {
-      return `Si tu penses qu’il s’agit d’une erreur, contacte-nous à **${email}**.`
+      return `Une erreur ? Écris-nous à **${email}**.`
     }
   },
   en: {
-    preview: 'Payment failed for your Petit Meme subscription',
-    title: 'Payment failed',
-    subtitle: 'Your last payment could not be processed.',
+    preview: 'Update your payment method to keep Premium.',
+    heading: 'Your payment didn’t go through',
     body: (username: string) => {
-      return `Hi ${username}, we could not process the payment for your **Petit Meme** subscription.`
+      return `Hi ${username}, the payment for your **Petit Meme** subscription failed. Premium stays active while we try again.`
     },
     warning:
-      'Without updating your payment method, you will lose access to premium features.',
+      'Without an updated payment method, your Premium subscription will end.',
     cta: 'Update my payment',
     contact: (email: string) => {
-      return `If you think this is an error, contact us at **${email}**.`
+      return `A mistake? Write to us at **${email}**.`
     }
   }
 } as const satisfies Record<Locale, Record<string, unknown>>
@@ -48,31 +52,15 @@ export const PaymentFailedEmail = ({
   const tr = translations[locale]
 
   return (
-    <EmailLayout preview={tr.preview} locale={locale}>
-      <Section>
-        <Text className="m-0 mb-2 text-lg font-semibold text-brand">
-          {tr.title}
-        </Text>
-        <Text className="m-0 mb-6 text-sm leading-6 text-brand-muted-dark">
-          {tr.subtitle}
-        </Text>
-        <Text className="m-0 mb-4 text-sm leading-6 text-neutral-600">
-          <BoldText text={tr.body(username)} />
-        </Text>
-        <Section className="mb-6 rounded-lg border border-solid border-brand-danger-border bg-brand-danger-bg p-4">
-          <Text className="m-0 text-xs leading-5 text-brand-danger">
-            {tr.warning}
-          </Text>
-        </Section>
-        <Section className="mb-6 mt-2">
-          <Button className={BUTTON_CLASS} href={billingPortalUrl}>
-            {tr.cta}
-          </Button>
-        </Section>
-        <Text className="m-0 text-xs leading-5 text-brand-muted">
-          <BoldText text={tr.contact(CONTACT_EMAIL)} />
-        </Text>
-      </Section>
+    <EmailLayout preview={tr.preview} heading={tr.heading} locale={locale}>
+      <EmailParagraph>
+        <BoldText text={tr.body(username)} />
+      </EmailParagraph>
+      <EmailCallout tone="danger">{tr.warning}</EmailCallout>
+      <EmailButton href={billingPortalUrl}>{tr.cta}</EmailButton>
+      <EmailNote>
+        <BoldText text={tr.contact(CONTACT_EMAIL)} />
+      </EmailNote>
     </EmailLayout>
   )
 }

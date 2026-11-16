@@ -1,32 +1,30 @@
-import { Section, Text } from 'react-email'
 import type { Locale } from '~/paraglide/runtime'
 import { CONTACT_EMAIL } from './constants'
-import { BoldText, EmailLayout } from './email-layout'
+import { BoldText, EmailNote, EmailParagraph } from './email-blocks'
+import { EmailLayout } from './email-layout'
 
 const translations = {
   fr: {
-    preview: 'Ton compte Petit Meme a été supprimé',
-    title: 'Compte supprimé',
-    subtitle: 'Ton compte a bien été supprimé.',
+    preview: 'Toutes tes données personnelles ont été effacées.',
+    heading: 'Ton compte a été supprimé',
     body: (username: string) => {
-      return `Salut ${username}, ton compte **Petit Meme** a été supprimé avec succès. Toutes tes données personnelles ont été effacées.`
+      return `Salut ${username}, ton compte **Petit Meme** a été supprimé et toutes tes données personnelles ont été effacées.`
     },
+    thanks: 'Merci d’avoir utilisé Petit Meme.',
     contact: (email: string) => {
-      return `Si tu penses que cette suppression est une erreur, contacte-nous rapidement à **${email}** pour que nous puissions t’aider.`
-    },
-    thanks: 'Merci d’avoir utilisé Petit Meme.'
+      return `Une erreur ? Écris-nous vite à **${email}** pour qu’on t’aide.`
+    }
   },
   en: {
-    preview: 'Your Petit Meme account has been deleted',
-    title: 'Account deleted',
-    subtitle: 'Your account has been successfully deleted.',
+    preview: 'All your personal data has been erased.',
+    heading: 'Your account has been deleted',
     body: (username: string) => {
-      return `Hi ${username}, your **Petit Meme** account has been deleted successfully. All your personal data has been erased.`
+      return `Hi ${username}, your **Petit Meme** account has been deleted and all your personal data has been erased.`
     },
+    thanks: 'Thanks for using Petit Meme.',
     contact: (email: string) => {
-      return `If you think this deletion was a mistake, contact us quickly at **${email}** so we can help.`
-    },
-    thanks: 'Thanks for using Petit Meme.'
+      return `A mistake? Write to us quickly at **${email}** so we can help.`
+    }
   }
 } as const satisfies Record<Locale, Record<string, unknown>>
 
@@ -42,24 +40,14 @@ export const AccountDeletedEmail = ({
   const tr = translations[locale]
 
   return (
-    <EmailLayout preview={tr.preview} locale={locale}>
-      <Section>
-        <Text className="m-0 mb-2 text-lg font-semibold text-brand">
-          {tr.title}
-        </Text>
-        <Text className="m-0 mb-6 text-sm leading-6 text-brand-muted-dark">
-          {tr.subtitle}
-        </Text>
-        <Text className="m-0 mb-4 text-sm leading-6 text-neutral-600">
-          <BoldText text={tr.body(username)} />
-        </Text>
-        <Text className="m-0 mb-4 text-sm leading-6 text-neutral-600">
-          <BoldText text={tr.contact(CONTACT_EMAIL)} />
-        </Text>
-        <Text className="m-0 text-sm leading-6 text-neutral-600">
-          {tr.thanks}
-        </Text>
-      </Section>
+    <EmailLayout preview={tr.preview} heading={tr.heading} locale={locale}>
+      <EmailParagraph>
+        <BoldText text={tr.body(username)} />
+      </EmailParagraph>
+      <EmailParagraph>{tr.thanks}</EmailParagraph>
+      <EmailNote>
+        <BoldText text={tr.contact(CONTACT_EMAIL)} />
+      </EmailNote>
     </EmailLayout>
   )
 }

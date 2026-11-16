@@ -1,29 +1,23 @@
-import { Link, Section, Text } from 'react-email'
 import type { Locale } from '~/paraglide/runtime'
-import { buildEmailUrl, BUTTON_CLASS } from './constants'
-import { BoldText, EmailLayout } from './email-layout'
+import { buildEmailUrl } from './constants'
+import { BoldText, EmailButton, EmailParagraph } from './email-blocks'
+import { EmailLayout } from './email-layout'
 
 const translations = {
   fr: {
-    preview: 'Ta proposition de mème a été acceptée !',
-    title: 'Proposition acceptée',
-    subtitle: 'Ton mème a été ajouté au site.',
+    preview: 'Ton mème a rejoint la bibliothèque.',
+    heading: 'Ta proposition est en ligne',
     body: (username: string, memeTitle: string) => {
-      return `Salut ${username}, ta proposition **${memeTitle}** a été acceptée et ajoutée à **Petit Meme** !`
+      return `Salut ${username}, **${memeTitle}** a rejoint la bibliothèque de **Petit Meme**. Merci pour ta contribution !`
     },
-    thanks:
-      'Merci pour ta contribution, elle aide à enrichir la collection de mèmes.',
     cta: 'Voir le mème'
   },
   en: {
-    preview: 'Your meme proposal has been approved!',
-    title: 'Proposal approved',
-    subtitle: 'Your meme has been added to the site.',
+    preview: 'Your meme has joined the library.',
+    heading: 'Your proposal is live',
     body: (username: string, memeTitle: string) => {
-      return `Hi ${username}, your proposal **${memeTitle}** has been approved and added to **Petit Meme**!`
+      return `Hi ${username}, **${memeTitle}** has joined the **Petit Meme** library. Thanks for your contribution!`
     },
-    thanks:
-      'Thanks for your contribution, it helps enrich the meme collection.',
     cta: 'View the meme'
   }
 } as const satisfies Record<Locale, Record<string, unknown>>
@@ -42,29 +36,15 @@ export const ProposalApprovedEmail = ({
   locale
 }: ProposalApprovedEmailProps) => {
   const tr = translations[locale]
-  const memeUrl = buildEmailUrl(`/memes/${memeId}`, locale)
 
   return (
-    <EmailLayout preview={tr.preview} locale={locale}>
-      <Section>
-        <Text className="m-0 mb-2 text-lg font-semibold text-brand-success">
-          {tr.title}
-        </Text>
-        <Text className="m-0 mb-6 text-sm leading-6 text-brand-muted-dark">
-          {tr.subtitle}
-        </Text>
-        <Text className="m-0 mb-4 text-sm leading-6 text-neutral-600">
-          <BoldText text={tr.body(username, memeTitle)} />
-        </Text>
-        <Text className="m-0 mb-4 text-sm leading-6 text-neutral-600">
-          {tr.thanks}
-        </Text>
-        <Section className="mb-6 text-center">
-          <Link href={memeUrl} className={BUTTON_CLASS}>
-            {tr.cta}
-          </Link>
-        </Section>
-      </Section>
+    <EmailLayout preview={tr.preview} heading={tr.heading} locale={locale}>
+      <EmailParagraph>
+        <BoldText text={tr.body(username, memeTitle)} />
+      </EmailParagraph>
+      <EmailButton href={buildEmailUrl(`/memes/${memeId}`, locale)}>
+        {tr.cta}
+      </EmailButton>
     </EmailLayout>
   )
 }

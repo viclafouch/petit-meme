@@ -2,13 +2,15 @@ import type { MemeExportMode } from '~/constants/meme'
 import { THIRTY_DAYS_MS } from '~/constants/time'
 import { prismaClient } from '~/db/client.server'
 import {
+  type Comparison,
   countDatesWithin,
   countCancellations,
-  countNewSubscriptions,
   getRecapWindows,
   type RecapWindow,
   summarizeSubscribersAt,
-  sumPaidCentsWithin
+  type Tally,
+  type TallyComparison,
+  tallyPaymentsWithin
 } from '~/helpers/weekly-recap'
 import {
   fromUnixSeconds,
@@ -109,26 +111,38 @@ export const buildWeeklyRecap = async (now: Date) => {
     fetchStripeActivity(windows.previous.start),
     findActivity(windows)
   ])
-  const { subscriptions } = stripeActivity
+  const { subscriptions, invoices } = stripeActivity
 
-  const compare = (measure: (window: RecapWindow) => number) => {
+  const compare = (measure: (window: RecapWindow) => number): Comparison => {
     return {
       current: measure(windows.current),
       previous: measure(windows.previous)
     }
   }
 
+  const compareTally = (
+    measure: (window: RecapWindow) => Tally
+  ): TallyComparison => {
+    const current = measure(windows.current)
+    const previous = measure(windows.previous)
+
+    return {
+      count: { current: current.count, previous: previous.count },
+      cents: { current: current.cents, previous: previous.cents }
+    }
+  }
+
   const compareSubscribers = (
-    pick: (summary: ReturnType<typeof summarizeSubscribersAt>) => number
+    pick: (summary: ReturnType<typeof summarizeSubscribersAt>) => Tally
   ) => {
-    return compare(({ end }) => {
+    return compareTally(({ end }) => {
       return pick(summarizeSubscribersAt(subscriptions, end))
     })
   }
 
   return {
     window: windows.current,
-    activeSubscriptions: {
+    subscribers: {
       monthly: compareSubscribers(({ monthly }) => {
         return monthly
       }),
@@ -136,16 +150,24 @@ export const buildWeeklyRecap = async (now: Date) => {
         return yearly
       }),
       total: compareSubscribers(({ monthly, yearly }) => {
-        return monthly + yearly
-      }),
-      mrrCents: compareSubscribers(({ mrrCents }) => {
-        return mrrCents
+        return {
+          count: monthly.count + yearly.count,
+          cents: monthly.cents + yearly.cents
+        }
       })
     },
-    week: {
-      newSubscriptions: compare((window) => {
-        return countNewSubscriptions(subscriptions, window)
+    payments: {
+      newSubscriptions: compareTally((window) => {
+        return tallyPaymentsWithin(invoices, window, 'subscription_create')
       }),
+      renewals: compareTally((window) => {
+        return tallyPaymentsWithin(invoices, window, 'subscription_cycle')
+      }),
+      total: compareTally((window) => {
+        return tallyPaymentsWithin(invoices, window)
+      })
+    },
+    activity: {
       cancellations: compare((window) => {
         return countCancellations(subscriptions, window)
       }),
@@ -155,10 +177,7 @@ export const buildWeeklyRecap = async (now: Date) => {
       }),
       views: activity.views,
       downloads: activity.downloads,
-      shares: activity.shares,
-      collectedCents: compare((window) => {
-        return sumPaidCentsWithin(stripeActivity.invoices, window)
-      })
+      shares: activity.shares
     }
   }
 }

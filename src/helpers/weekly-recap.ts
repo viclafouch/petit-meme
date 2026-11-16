@@ -1,3 +1,4 @@
+import type { Stripe } from 'stripe'
 import { DAY, DAYS_PER_WEEK } from '~/constants/time'
 import { formatDate, truncateToUtcDay } from '~/helpers/date'
 import {
@@ -20,6 +21,13 @@ export type Comparison = {
   previous: number
 }
 
+export type Tally = {
+  count: number
+  cents: number
+}
+
+export type TallyComparison = Record<keyof Tally, Comparison>
+
 const WEEK = DAYS_PER_WEEK * DAY
 
 export const getRecapWindows = (now: Date) => {
@@ -39,6 +47,17 @@ const matchIsWithinWindow = (
   return date !== null && date >= start && date < end
 }
 
+const tallySubscribers = (subscriptions: BillingSubscription[]): Tally => {
+  return {
+    count: subscriptions.length,
+    cents: subscriptions.reduce((total, subscription) => {
+      return (
+        total + toMonthlyCents(subscription.amountCents, subscription.interval)
+      )
+    }, 0)
+  }
+}
+
 export const summarizeSubscribersAt = (
   subscriptions: BillingSubscription[],
   date: Date
@@ -48,30 +67,33 @@ export const summarizeSubscribersAt = (
   })
 
   return {
-    monthly: paying.filter((subscription) => {
-      return !matchIsYearlyInterval(subscription.interval)
-    }).length,
-    yearly: paying.filter((subscription) => {
-      return matchIsYearlyInterval(subscription.interval)
-    }).length,
-    mrrCents: paying.reduce((total, subscription) => {
-      return (
-        total + toMonthlyCents(subscription.amountCents, subscription.interval)
-      )
-    }, 0)
+    monthly: tallySubscribers(
+      paying.filter((subscription) => {
+        return !matchIsYearlyInterval(subscription.interval)
+      })
+    ),
+    yearly: tallySubscribers(
+      paying.filter((subscription) => {
+        return matchIsYearlyInterval(subscription.interval)
+      })
+    )
   }
 }
 
-export const countNewSubscriptions = (
-  subscriptions: BillingSubscription[],
-  window: RecapWindow
-) => {
-  return subscriptions.filter((subscription) => {
+export const tallyPaymentsWithin = (
+  invoices: BillingInvoice[],
+  window: RecapWindow,
+  billingReason?: Stripe.Invoice.BillingReason
+): Tally => {
+  const payments = invoices.filter((invoice) => {
     return (
-      matchHasBeenPaid(subscription) &&
-      matchIsWithinWindow(subscription.startedAt, window)
+      invoice.amountPaidCents > 0 &&
+      matchIsWithinWindow(invoice.paidAt, window) &&
+      (billingReason === undefined || invoice.billingReason === billingReason)
     )
-  }).length
+  })
+
+  return { count: payments.length, cents: sumPaidCents(payments) }
 }
 
 export const countCancellations = (
@@ -84,17 +106,6 @@ export const countCancellations = (
       matchIsWithinWindow(subscription.canceledAt, window)
     )
   }).length
-}
-
-export const sumPaidCentsWithin = (
-  invoices: BillingInvoice[],
-  window: RecapWindow
-) => {
-  return sumPaidCents(
-    invoices.filter((invoice) => {
-      return matchIsWithinWindow(invoice.paidAt, window)
-    })
-  )
 }
 
 export const countDatesWithin = (dates: Date[], window: RecapWindow) => {

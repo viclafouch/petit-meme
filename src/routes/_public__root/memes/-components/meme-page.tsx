@@ -222,6 +222,7 @@ export const MemePage = () => {
             <MemeWatchPlayer
               bunnyId={meme.video.bunnyId}
               title={meme.title}
+              video={video}
               onVideoChange={videoCallbackRef}
               playbackFailure={playbackFailure}
             />

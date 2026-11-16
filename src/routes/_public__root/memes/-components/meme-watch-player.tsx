@@ -170,9 +170,80 @@ const getBufferedEnd = (buffered: [number, number][] | undefined) => {
   )
 }
 
-const Scrubber = () => {
+const PLAYBACK_PROGRESS_PROPERTY = '--meme-scrubber-progress'
+
+const readPlaybackProgress = (video: HTMLVideoElement) => {
+  return Number.isFinite(video.duration) && video.duration > 0
+    ? video.currentTime / video.duration
+    : 0
+}
+
+const useFollowPlaybackProgress = (video: HTMLVideoElement | null) => {
+  const indicatorRef = React.useRef<HTMLSpanElement>(null)
+  const thumbRef = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    if (!video) {
+      return () => {}
+    }
+
+    let frameRequestId = 0
+
+    const writeProgress = () => {
+      const progress = String(readPlaybackProgress(video))
+
+      for (const element of [indicatorRef.current, thumbRef.current]) {
+        element?.style.setProperty(PLAYBACK_PROGRESS_PROPERTY, progress)
+      }
+    }
+
+    const followFrame = () => {
+      writeProgress()
+      frameRequestId = requestAnimationFrame(followFrame)
+    }
+
+    const startFollowing = () => {
+      cancelAnimationFrame(frameRequestId)
+      frameRequestId = requestAnimationFrame(followFrame)
+    }
+
+    const stopFollowing = () => {
+      cancelAnimationFrame(frameRequestId)
+      writeProgress()
+    }
+
+    writeProgress()
+
+    if (!video.paused) {
+      startFollowing()
+    }
+
+    const listeners = new AbortController()
+    const { signal } = listeners
+
+    video.addEventListener('play', startFollowing, { signal })
+    video.addEventListener('pause', stopFollowing, { signal })
+    video.addEventListener('seeking', writeProgress, { signal })
+    video.addEventListener('durationchange', writeProgress, { signal })
+    video.addEventListener('emptied', writeProgress, { signal })
+
+    return () => {
+      listeners.abort()
+      cancelAnimationFrame(frameRequestId)
+    }
+  }, [video])
+
+  return { indicatorRef, thumbRef }
+}
+
+type ScrubberProps = {
+  video: HTMLVideoElement | null
+}
+
+const Scrubber = ({ video }: ScrubberProps) => {
   const dispatch = useMediaDispatch()
   const { currentTime, duration, hasDuration } = useMediaTimes()
+  const { indicatorRef, thumbRef } = useFollowPlaybackProgress(video)
   const buffered = useMediaSelector((state) => {
     return state.mediaBuffered
   })
@@ -204,8 +275,11 @@ const Scrubber = () => {
             className="meme-scrubber-buffered"
             style={{ width: `${bufferedPercent}%` }}
           />
-          <Slider.Indicator className="meme-scrubber-indicator" />
+          <span aria-hidden="true" className="meme-scrubber-fill">
+            <span ref={indicatorRef} className="meme-scrubber-indicator" />
+          </span>
           <Slider.Thumb
+            ref={thumbRef}
             className="meme-scrubber-thumb"
             aria-label={m.meme_video_position()}
             getAriaValueText={(_formattedValue, value) => {
@@ -238,7 +312,11 @@ const TimeDisplay = () => {
   )
 }
 
-const PlayerControls = () => {
+type PlayerControlsProps = {
+  video: HTMLVideoElement | null
+}
+
+const PlayerControls = ({ video }: PlayerControlsProps) => {
   const dispatch = useMediaDispatch()
   const isPaused =
     useMediaSelector((state) => {
@@ -279,7 +357,7 @@ const PlayerControls = () => {
 
   return (
     <div className="meme-player-chrome">
-      <Scrubber />
+      <Scrubber video={video} />
       <div className="flex items-center gap-1">
         <PlayerButton
           label={isPaused ? m.meme_play_video() : m.meme_pause_video()}
@@ -355,6 +433,7 @@ const LoadingIndicator = ({ isStarting }: LoadingIndicatorProps) => {
 type MemeWatchPlayerProps = {
   bunnyId: string
   title: string
+  video: HTMLVideoElement | null
   onVideoChange: (video: HTMLVideoElement | null) => void
   playbackFailure: PlaybackFailure | null
 }
@@ -362,6 +441,7 @@ type MemeWatchPlayerProps = {
 export const MemeWatchPlayer = ({
   bunnyId,
   title,
+  video,
   onVideoChange,
   playbackFailure
 }: MemeWatchPlayerProps) => {
@@ -396,7 +476,7 @@ export const MemeWatchPlayer = ({
       <ClientOnly>
         {isStarting ? null : <PausedIndicator />}
         <LoadingIndicator isStarting={isStarting} />
-        <PlayerControls />
+        <PlayerControls video={video} />
       </ClientOnly>
       {playbackFailure ? (
         <VideoPlaybackError onRetry={playbackFailure.handleRetry} />

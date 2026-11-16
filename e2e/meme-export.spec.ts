@@ -12,8 +12,8 @@ const EXPORTABLE_MEME = E2E_NAMED_MEMES.mostViewed
 const EXPORTABLE_MEME_PATHNAME = `/memes/${EXPORTABLE_MEME.id}`
 
 const FORMAT_LABELS = {
-  mp4: m.meme_format_video,
-  mp3: m.meme_format_audio
+  mp4: m.meme_download_video,
+  mp3: m.meme_export_sound_only
 } as const satisfies Record<MemeDerivedFormat, () => string>
 
 const pickDownloadFormat = async (page: Page, format: MemeDerivedFormat) => {

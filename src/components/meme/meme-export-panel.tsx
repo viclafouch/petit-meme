@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link2 } from 'lucide-react'
+import { Clapperboard, Link2, Lock } from 'lucide-react'
 import { toast } from 'sonner'
 import { MessagingAppIcon } from '~/components/icon/messaging-app-icon'
 import {
@@ -9,8 +9,8 @@ import {
   SHEET_HEADER_CLASS_NAME,
   SHEET_TITLE_CLASS_NAME
 } from '~/components/meme/meme-sheet'
-import { PremiumBadge } from '~/components/premium/premium-badge'
 import { useIsPremium } from '~/components/premium/use-is-premium'
+import { Badge } from '~/components/ui/badge'
 import {
   Drawer,
   DrawerContent,
@@ -29,10 +29,11 @@ import {
 import { MEME_DERIVED_FORMATS, type MemeDerivedFormat } from '~/constants/bunny'
 import type { MemeExportMode, MemeWithVideo } from '~/constants/meme'
 import { MESSAGING_APPS, type MessagingApp } from '~/constants/messaging-apps'
+import { formatClockDuration } from '~/helpers/duration'
 import { useActionAfterClose } from '~/hooks/use-action-after-close'
 import { useIsCoarsePointer } from '~/hooks/use-is-coarse-pointer'
+import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import { buildUrl } from '~/lib/seo/url'
-import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { recordMemeExport } from '~/server/meme/meme.functions'
@@ -53,10 +54,18 @@ const SHARE_URL_BUILDERS: Partial<
 
 const PHONE_ONLY_SHARE_APP_IDS = new Set<MessagingApp['id']>(['messenger'])
 
-const FORMAT_TILE_TINTS = {
-  mp4: 'bg-violet-500/15',
-  mp3: 'bg-emerald-500/15'
-} as const satisfies Record<MemeDerivedFormat, string>
+const FORMAT_ROW_HOVER_ICONS = {
+  mp4: Clapperboard,
+  mp3: null
+} as const satisfies Record<MemeDerivedFormat, React.ElementType | null>
+
+const FORMAT_ROW_LABELS = {
+  download: { mp4: m.meme_download_video, mp3: m.meme_export_sound_only },
+  share: { mp4: m.meme_share_video, mp3: m.meme_export_sound_only }
+} as const satisfies Record<
+  MemeExportMode,
+  Record<MemeDerivedFormat, () => string>
+>
 
 const SECTION_HEADING_CLASS_NAME = 'text-xs font-medium text-muted-foreground'
 
@@ -71,22 +80,46 @@ const buildMemeUrl = (memeId: string) => {
   return buildUrl(`/memes/${memeId}`, getLocale())
 }
 
-type FormatTilesProps = {
+const formatMemeDuration = (meme: MemeWithVideo) => {
+  return formatClockDuration(meme.video.duration, getLocale())
+}
+
+type FormatDetailParams = {
+  format: MemeDerivedFormat
+  isPremium: boolean
+  duration: string
+}
+
+const getFormatDetail = ({
+  format,
+  isPremium,
+  duration
+}: FormatDetailParams) => {
+  if (format === 'mp3') {
+    return m.meme_export_sound_detail()
+  }
+
+  return isPremium
+    ? m.meme_export_video_detail_original({ duration })
+    : m.meme_export_video_detail_watermarked({ duration })
+}
+
+type FormatRowsProps = {
+  mode: MemeExportMode
+  meme: MemeWithVideo
   isPending: boolean
   onSelect: (format: MemeDerivedFormat) => void
 }
 
-const FormatTiles = ({ isPending, onSelect }: FormatTilesProps) => {
+const FormatRows = ({ mode, meme, isPending, onSelect }: FormatRowsProps) => {
   const isPremium = useIsPremium()
+  const duration = formatMemeDuration(meme)
 
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="flex flex-col gap-1.5">
       {MEME_DERIVED_FORMATS.map((format) => {
-        const {
-          icon: FormatIcon,
-          label,
-          iconClassName
-        } = MEME_FORMAT_DISPLAY[format]
+        const FormatIcon = MEME_FORMAT_DISPLAY[format].icon
+        const HoverIcon = FORMAT_ROW_HOVER_ICONS[format]
         const isLocked = format === 'mp3' && !isPremium
 
         return (
@@ -94,32 +127,84 @@ const FormatTiles = ({ isPending, onSelect }: FormatTilesProps) => {
             key={format}
             type="button"
             disabled={isPending}
-            className="flex min-h-32 flex-col items-center justify-center gap-2 rounded-2xl bg-secondary px-3 py-4 touch-tap select-none transition-[background-color,scale] duration-100 ease-out outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] disabled:opacity-50 pointer-fine:hover:bg-muted"
+            data-format={format}
+            className="format-row"
             onClick={() => {
               onSelect(format)
             }}
           >
-            <span
-              className={cn(
-                'grid size-12 place-items-center rounded-full',
-                FORMAT_TILE_TINTS[format]
-              )}
-            >
-              <FormatIcon
-                aria-hidden="true"
-                className={cn('size-6', iconClassName)}
-              />
+            <span className="format-row-icon">
+              <FormatIcon aria-hidden="true" />
+              {HoverIcon ? (
+                <HoverIcon aria-hidden="true" data-hover-icon="" />
+              ) : null}
             </span>
-            <span className="text-base font-semibold">{label()}</span>
-            <span className="flex h-5 items-center gap-1.5">
-              <span className="font-mono text-xs text-muted-foreground uppercase">
-                {format}
+            <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+              <span className="truncate text-[0.9375rem] font-semibold">
+                {FORMAT_ROW_LABELS[mode][format]()}
               </span>
-              {isLocked ? <PremiumBadge /> : null}
+              <span className="truncate text-xs text-muted-foreground">
+                {getFormatDetail({ format, isPremium, duration })}
+              </span>
             </span>
+            {isLocked ? (
+              <Badge variant="amber" size="md" className="rounded-full">
+                <Lock aria-hidden="true" />
+                {m.premium_badge()}
+              </Badge>
+            ) : null}
           </button>
         )
       })}
+    </div>
+  )
+}
+
+type HeadingSlotProps = {
+  className?: string
+  children?: React.ReactNode
+}
+
+type MemeDownloadHeadingProps = {
+  meme: MemeWithVideo
+  Title: React.ComponentType<HeadingSlotProps>
+  Description: React.ComponentType<HeadingSlotProps>
+}
+
+const MemeDownloadHeading = ({
+  meme,
+  Title,
+  Description
+}: MemeDownloadHeadingProps) => {
+  const isCoarsePointer = useIsCoarsePointer()
+
+  return (
+    <div className="flex items-center gap-3 text-start">
+      <span className="relative aspect-video w-26 shrink-0 overflow-hidden rounded-[0.625rem] bg-black ring-1 ring-border">
+        <img
+          src={buildVideoImageUrl(meme.video.bunnyId)}
+          alt=""
+          decoding="async"
+          className="size-full object-contain"
+        />
+        <Badge
+          variant="black"
+          size="sm"
+          className="absolute right-1 bottom-1 font-semibold tabular-nums"
+        >
+          {formatMemeDuration(meme)}
+        </Badge>
+      </span>
+      <div className="flex min-w-0 flex-col gap-1">
+        <Title className="text-base leading-snug font-semibold">
+          {m.meme_download()}
+        </Title>
+        <Description className="text-sm text-pretty text-muted-foreground">
+          {isCoarsePointer
+            ? m.meme_export_saves_to_phone()
+            : m.meme_export_saves_to_computer()}
+        </Description>
+      </div>
     </div>
   )
 }
@@ -243,6 +328,39 @@ const ShareLink = ({ meme, onDone }: ShareLinkProps) => {
   )
 }
 
+type MemeExportSheetHeaderProps = {
+  mode: MemeExportMode
+  meme: MemeWithVideo
+}
+
+export const MemeExportSheetHeader = ({
+  mode,
+  meme
+}: MemeExportSheetHeaderProps) => {
+  if (mode === 'download') {
+    return (
+      <DrawerHeader className={SHEET_HEADER_CLASS_NAME}>
+        <MemeDownloadHeading
+          meme={meme}
+          Title={DrawerTitle}
+          Description={DrawerDescription}
+        />
+      </DrawerHeader>
+    )
+  }
+
+  return (
+    <DrawerHeader className={SHEET_HEADER_CLASS_NAME}>
+      <DrawerTitle className={SHEET_TITLE_CLASS_NAME}>
+        {MEME_EXPORT_MODE_DISPLAY[mode].label()}
+      </DrawerTitle>
+      <DrawerDescription className="line-clamp-1">
+        {meme.title}
+      </DrawerDescription>
+    </DrawerHeader>
+  )
+}
+
 type MemeExportPanelBodyProps = {
   mode: MemeExportMode
   meme: MemeWithVideo
@@ -261,7 +379,14 @@ export const MemeExportPanelBody = ({
   const isCoarsePointer = useIsCoarsePointer()
 
   if (mode === 'download') {
-    return <FormatTiles isPending={isPending} onSelect={onSelectFormat} />
+    return (
+      <FormatRows
+        mode={mode}
+        meme={meme}
+        isPending={isPending}
+        onSelect={onSelectFormat}
+      />
+    )
   }
 
   if (!isCoarsePointer) {
@@ -274,7 +399,12 @@ export const MemeExportPanelBody = ({
         <h3 className={SECTION_HEADING_CLASS_NAME}>
           {m.meme_share_file_heading()}
         </h3>
-        <FormatTiles isPending={isPending} onSelect={onSelectFormat} />
+        <FormatRows
+          mode={mode}
+          meme={meme}
+          isPending={isPending}
+          onSelect={onSelectFormat}
+        />
       </section>
       <section className="flex flex-col gap-2">
         <h3 className={SECTION_HEADING_CLASS_NAME}>
@@ -336,7 +466,6 @@ export const MemeExportPanel = ({
 
   const { handleSelectFormat, handleOpenChangeComplete } =
     useMemeExportSelection(onExport, handleClose)
-  const title = MEME_EXPORT_MODE_DISPLAY[mode].label()
   const body = (
     <MemeExportPanelBody
       mode={mode}
@@ -357,14 +486,7 @@ export const MemeExportPanel = ({
       >
         <DrawerTrigger render={render}>{children}</DrawerTrigger>
         <DrawerContent>
-          <DrawerHeader className={SHEET_HEADER_CLASS_NAME}>
-            <DrawerTitle className={SHEET_TITLE_CLASS_NAME}>
-              {title}
-            </DrawerTitle>
-            <DrawerDescription className="line-clamp-1">
-              {meme.title}
-            </DrawerDescription>
-          </DrawerHeader>
+          <MemeExportSheetHeader mode={mode} meme={meme} />
           <div className={SHEET_BODY_CLASS_NAME}>{body}</div>
         </DrawerContent>
       </Drawer>
@@ -383,14 +505,22 @@ export const MemeExportPanel = ({
         sideOffset={8}
         className="w-88 max-w-[calc(100vw-2rem)] gap-4 rounded-2xl p-4"
       >
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <PopoverTitle className="text-base font-semibold">
-            {title}
-          </PopoverTitle>
-          <PopoverDescription className="truncate text-sm">
-            {meme.title}
-          </PopoverDescription>
-        </div>
+        {mode === 'download' ? (
+          <MemeDownloadHeading
+            meme={meme}
+            Title={PopoverTitle}
+            Description={PopoverDescription}
+          />
+        ) : (
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <PopoverTitle className="text-base font-semibold">
+              {MEME_EXPORT_MODE_DISPLAY[mode].label()}
+            </PopoverTitle>
+            <PopoverDescription className="truncate text-sm">
+              {meme.title}
+            </PopoverDescription>
+          </div>
+        )}
         {body}
       </PopoverContent>
     </Popover>

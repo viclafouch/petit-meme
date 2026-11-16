@@ -49,7 +49,7 @@ test.describe('the native share', () => {
         shareButton: getReelAt(page, FIRST_REEL_INDEX).getByRole('button', {
           name: m.meme_share()
         }),
-        formatLabel: m.meme_format_video()
+        formatLabel: m.meme_share_video()
       })
 
       await Promise.all([

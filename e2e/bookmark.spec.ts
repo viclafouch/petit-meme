@@ -18,11 +18,11 @@ test.describe('a signed in User', () => {
     await page.goto(BOOKMARKED_MEME_PATHNAME)
 
     const addButton = page.getByRole('button', {
-      name: m.meme_add_bookmark(),
+      name: m.meme_bookmark(),
       pressed: false
     })
     const removeButton = page.getByRole('button', {
-      name: m.meme_add_bookmark(),
+      name: m.meme_bookmarked(),
       pressed: true
     })
 
@@ -46,7 +46,7 @@ test.describe('a User who reached the free cap', () => {
   test('is offered Premium instead of one more Bookmark', async ({ page }) => {
     await page.goto(UNBOOKMARKED_MEME_PATHNAME)
 
-    const addButton = page.getByRole('button', { name: m.meme_add_bookmark() })
+    const addButton = page.getByRole('button', { name: m.meme_bookmark() })
     const dialog = page.getByRole('dialog', {
       name: m.bookmark_upsell_title()
     })
@@ -69,7 +69,7 @@ test.describe('an anonymous Visitor', () => {
     const signInButton = getAuthDialogSignInButton(page)
 
     await repeatUntilVisible(() => {
-      return page.getByRole('button', { name: m.meme_add_bookmark() }).click()
+      return page.getByRole('button', { name: m.meme_bookmark() }).click()
     }, signInButton)
 
     await expect(signInButton).toBeVisible()

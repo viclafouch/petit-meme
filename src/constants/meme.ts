@@ -108,7 +108,9 @@ export const MEME_GRID_COLUMNS = {
   LARGE: 6
 } as const satisfies Record<string, number>
 
-export const RELATED_MEMES_COUNT = 4
+export const RELATED_MEMES_COUNT = 20
+
+export const STUDIO_RELATED_MEMES_COUNT = 4
 export const TRENDING_MEMES_COUNT = 12
 
 export const RECOMMEND_TRENDING_CACHE_TTL = DAY

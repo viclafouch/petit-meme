@@ -22,13 +22,13 @@ const bookmarkTheMemeOverTheFreeCap = async (page: Page) => {
   await page.goto(CAP_LIFT_MEME_PATHNAME)
 
   const removeBookmarkButton = page.getByRole('button', {
-    name: m.meme_add_bookmark(),
+    name: m.meme_bookmarked(),
     pressed: true
   })
 
   await repeatUntilVisible(() => {
     return page
-      .getByRole('button', { name: m.meme_add_bookmark(), pressed: false })
+      .getByRole('button', { name: m.meme_bookmark(), pressed: false })
       .click()
   }, removeBookmarkButton)
 

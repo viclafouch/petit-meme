@@ -2,77 +2,89 @@ import { expect } from '@playwright/test'
 import { m } from '~/paraglide/messages'
 import { E2E_NAMED_MEMES } from './content'
 import { test } from './fixtures'
-import { getFirstMemePlayLink, getMemeList, openMemePlayer } from './library'
+import { repeatUntilNavigated } from './hydration'
+import { getFirstMemePlayLink } from './library'
 
 const LIBRARY_PATHNAME = '/memes/category/trending'
 const PLAYABLE_MEME = E2E_NAMED_MEMES.mostViewed
+const PLAYABLE_MEME_PATHNAME = `/memes/${PLAYABLE_MEME.id}`
 
 test.describe('the player', () => {
-  test('puts the library out of reach and gives it back', async ({ page }) => {
-    await page.goto(LIBRARY_PATHNAME)
-
-    const memeList = getMemeList(page)
-
-    await expect(memeList).toBeVisible()
-
-    const playerDialog = await openMemePlayer(page)
-
-    await expect(memeList).toHaveCount(0)
-
-    await playerDialog.getByRole('button', { name: m.common_close() }).click()
-
-    await expect(playerDialog).toBeHidden()
-    await expect(memeList).toBeVisible()
-  })
-
-  test('plays the Video of the Meme on its own', async ({ page }) => {
-    await page.goto(LIBRARY_PATHNAME)
-
-    const playerDialog = await openMemePlayer(page)
-    const video = playerDialog.getByTestId('meme-video')
-
-    await expect(
-      playerDialog.getByRole('heading', {
-        name: PLAYABLE_MEME.title,
-        exact: true
-      })
-    ).toBeVisible()
-    await expect
-      .poll(() => {
-        return video.evaluate((element: HTMLVideoElement) => {
-          return element.currentTime
-        })
-      })
-      .toBeGreaterThan(0)
-  })
-
-  test('closing the player hands focus back to the card it came from', async ({
-    page
-  }) => {
+  test('a Meme of the library opens on its own page', async ({ page }) => {
     await page.goto(LIBRARY_PATHNAME)
 
     const playLink = getFirstMemePlayLink(page)
-    const playerDialog = await openMemePlayer(page)
+    const memePathname = await playLink.getAttribute('href')
 
-    await expect(page).toHaveURL(LIBRARY_PATHNAME)
+    await repeatUntilNavigated(
+      () => {
+        return playLink.click()
+      },
+      { page, from: LIBRARY_PATHNAME }
+    )
 
-    await playerDialog.getByRole('button', { name: m.common_close() }).click()
-
-    await expect(playerDialog).toBeHidden()
-    await expect(playLink).toBeFocused()
+    await expect(page).toHaveURL(memePathname ?? '')
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+    await expect(page.getByRole('dialog')).toHaveCount(0)
   })
 
-  test('escape closes the player and gives the library back', async ({
-    page
-  }) => {
-    await page.goto(LIBRARY_PATHNAME)
+  test('a similar Meme opens on its own page', async ({ page }) => {
+    await page.goto(PLAYABLE_MEME_PATHNAME)
 
-    const memeList = getMemeList(page)
-    const playerDialog = await openMemePlayer(page)
+    const firstRelatedMeme = page
+      .getByRole('complementary', { name: m.meme_related() })
+      .getByRole('link')
+      // oxlint-disable-next-line playwright/no-nth-methods -- the rail order is Algolia's: the first similar Meme is the one a Visitor reaches first
+      .first()
 
-    await page.keyboard.press('Escape')
+    await expect(firstRelatedMeme).toBeVisible()
 
-    await expect(playerDialog).toBeHidden()
-    await expect(memeList).toBeVisible()
+    await repeatUntilNavigated(
+      () => {
+        return firstRelatedMeme.click()
+      },
+      { page, from: PLAYABLE_MEME_PATHNAME }
+    )
+
+    await expect(page).toHaveURL(/\/memes\/[^/]+$/u)
+    await expect(page.getByRole('heading', { level: 1 })).not.toHaveText(
+      PLAYABLE_MEME.title
+    )
+  })
+
+  test('pauses and plays the Video from its controls', async ({ page }) => {
+    await page.goto(PLAYABLE_MEME_PATHNAME)
+
+    const player = page.getByTestId('meme-video-player')
+    const video = player.getByTestId('meme-video')
+    const pauseButton = player.getByRole('button', {
+      name: m.meme_pause_video(),
+      exact: true
+    })
+
+    await expect(pauseButton).toBeVisible()
+    await player.hover()
+    await pauseButton.click()
+
+    await expect
+      .poll(() => {
+        return video.evaluate((element: HTMLVideoElement) => {
+          return element.paused
+        })
+      })
+      .toBe(true)
+
+    await player.hover()
+    await player
+      .getByRole('button', { name: m.meme_play_video(), exact: true })
+      .click()
+
+    await expect
+      .poll(() => {
+        return video.evaluate((element: HTMLVideoElement) => {
+          return element.paused
+        })
+      })
+      .toBe(false)
   })
 })

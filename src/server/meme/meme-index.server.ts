@@ -40,6 +40,15 @@ const PUBLIC_RETRIEVE = [
   '-imageURL'
 ] as const satisfies readonly string[]
 
+const RECOMMEND_KEPT_ATTRIBUTES = new Set<string>([
+  '-categoryTitles',
+  '-categorySlugs'
+])
+
+const RECOMMEND_RETRIEVE = PUBLIC_RETRIEVE.filter((attribute) => {
+  return !RECOMMEND_KEPT_ATTRIBUTES.has(attribute)
+})
+
 const PUBLIC_SEARCH_PARAMS = {
   attributesToRetrieve: [...PUBLIC_RETRIEVE],
   attributesToSnippet: [] satisfies string[]
@@ -94,7 +103,9 @@ const MEME_HIT_SCHEMA = z.object({
     bunnyId: z.string(),
     duration: z.number(),
     bunnyStatus: z.number()
-  })
+  }),
+  categoryTitles: z.array(z.string()).default([]),
+  categorySlugs: z.array(z.string()).default([])
 })
 
 const parseMemeHit = (hit: unknown) => {
@@ -407,7 +418,7 @@ const buildRecommendationRequest = (
 ): RecommendationsRequest => {
   const queryParameters = {
     filters: params.filters,
-    attributesToRetrieve: [...PUBLIC_RETRIEVE]
+    attributesToRetrieve: [...RECOMMEND_RETRIEVE]
   }
 
   if (params.model === 'trending-items') {

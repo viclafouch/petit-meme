@@ -1,7 +1,6 @@
 import React from 'react'
 import { ArrowRight, Clapperboard, EllipsisVertical, Star } from 'lucide-react'
-import { motion } from 'motion/react'
-import { Link, useRouter } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import { BunnyPlayIcon } from '~/components/icon/play'
 import { MemeActionsSheet } from '~/components/meme/meme-actions-sheet'
 import { MemeExportSubmenu } from '~/components/meme/meme-export-menu'
@@ -21,7 +20,6 @@ import {
   DropdownMenuTrigger
 } from '~/components/ui/dropdown-menu'
 import type { MemeWithVideo } from '~/constants/meme'
-import { MEME_PLAYER_TRANSITION_NAME } from '~/constants/motion'
 import type { HighlightedText } from '~/helpers/highlight'
 import { matchIsContentLocaleForeign } from '~/helpers/i18n-content'
 import { useIsCoarsePointer } from '~/hooks/use-is-coarse-pointer'
@@ -30,18 +28,14 @@ import {
   sendConversionEvent,
   type ConversionEventName
 } from '~/lib/algolia-insights'
-import { matchIsCoarsePointer } from '~/lib/pointer'
 import { cn } from '~/lib/utils'
-import { nameViewTransitionUntilResolved } from '~/lib/view-transition'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 
 export type MemeListItemProps = {
   meme: MemeWithVideo
-  layoutContext: string
   size: keyof typeof sizes
   position: number
-  onOpenPlayer: (meme: MemeWithVideo, trigger: HTMLElement) => void
   highlightedTitle?: HighlightedText
   queryID?: string
   authenticatedUserToken?: string
@@ -99,15 +93,12 @@ export const MemeListItem = React.memo(
   ({
     meme,
     highlightedTitle,
-    onOpenPlayer,
-    layoutContext,
     size,
     queryID,
     position,
     authenticatedUserToken,
     thumbnailPriority
   }: MemeListItemProps) => {
-    const router = useRouter()
     const isCoarsePointer = useIsCoarsePointer()
     const shareMutation = useMemeExport({ mode: 'share', queryID })
     const downloadMutation = useMemeExport({ mode: 'download', queryID })
@@ -121,37 +112,6 @@ export const MemeListItem = React.memo(
       })
     }
 
-    const handlePlayClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
-      handleTrackClick()
-
-      const isPlainClick =
-        event.button === 0 &&
-        !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey)
-
-      if (!isPlainClick) {
-        return
-      }
-
-      if (matchIsCoarsePointer()) {
-        const thumbnail = event.currentTarget.closest<HTMLElement>(
-          '[data-meme-thumbnail]'
-        )
-
-        if (thumbnail) {
-          nameViewTransitionUntilResolved(
-            thumbnail,
-            MEME_PLAYER_TRANSITION_NAME,
-            router
-          )
-        }
-
-        return
-      }
-
-      event.preventDefault()
-      onOpenPlayer(meme, event.currentTarget)
-    }
-
     const handleTrackConversion = (eventName: ConversionEventName) => {
       sendConversionEvent({
         queryID,
@@ -162,11 +122,8 @@ export const MemeListItem = React.memo(
     }
 
     return (
-      <motion.li
-        className="relative flex w-full flex-col gap-2 text-sm sm:min-w-0 group"
-        layoutId={`${layoutContext}-item-${meme.id}`}
-      >
-        <motion.div className="group relative aspect-video w-full text-sm overflow-hidden rounded-lg border border-white/10">
+      <li className="relative flex w-full flex-col gap-2 text-sm sm:min-w-0 group">
+        <div className="group relative aspect-video w-full text-sm overflow-hidden rounded-lg border border-white/10">
           <MemeVideoThumbnail
             bunnyId={meme.video.bunnyId}
             duration={meme.video.duration}
@@ -176,9 +133,8 @@ export const MemeListItem = React.memo(
               to="/memes/$memeId"
               params={{ memeId: meme.id }}
               preload={false}
-              viewTransition
               className="touch-tap size-full delay-75 cursor-pointer text-white/80 place-items-center outline-none rounded-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset grid"
-              onClick={handlePlayClick}
+              onClick={handleTrackClick}
             >
               <span className="sr-only">
                 {m.meme_play_video_named({ title: meme.title })}
@@ -188,7 +144,7 @@ export const MemeListItem = React.memo(
               </div>
             </Link>
           </MemeVideoThumbnail>
-        </motion.div>
+        </div>
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col gap-y-1">
             <Link
@@ -293,7 +249,7 @@ export const MemeListItem = React.memo(
             )}
           </div>
         </div>
-      </motion.li>
+      </li>
     )
   }
 )

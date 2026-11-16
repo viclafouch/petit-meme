@@ -1,8 +1,8 @@
 import React from 'react'
-import { AudioLines, Film } from 'lucide-react'
 import { MemeFormatChip } from '~/components/meme/meme-format-chip'
 import {
   MEME_EXPORT_MODE_DISPLAY,
+  MEME_FORMAT_DISPLAY,
   SHEET_BODY_CLASS_NAME,
   SHEET_HEADER_CLASS_NAME,
   SHEET_TILE_CLASS_NAME,
@@ -33,29 +33,8 @@ import type { MemeExportMode } from '~/constants/meme'
 import { useActionAfterClose } from '~/hooks/use-action-after-close'
 import { useIsCoarsePointer } from '~/hooks/use-is-coarse-pointer'
 import { cn } from '~/lib/utils'
-import { m } from '~/paraglide/messages'
 
 const MENU_ITEM_CLASS_NAME = 'py-2.5 md:py-1.5'
-
-const FORMATS = {
-  mp4: {
-    icon: Film,
-    label: m.meme_format_video,
-    iconClassName: 'text-violet-600! dark:text-violet-400!'
-  },
-  mp3: {
-    icon: AudioLines,
-    label: m.meme_format_audio,
-    iconClassName: 'text-emerald-600! dark:text-emerald-400!'
-  }
-} as const satisfies Record<
-  MemeDerivedFormat,
-  {
-    icon: React.ElementType
-    label: () => string
-    iconClassName: string
-  }
->
 
 const matchIsFormatLocked = (format: MemeDerivedFormat, isPremium: boolean) => {
   return format === 'mp3' && !isPremium
@@ -67,7 +46,7 @@ type FormatContentProps = {
 }
 
 const FormatContent = ({ format, isLocked }: FormatContentProps) => {
-  const { icon: FormatIcon, label, iconClassName } = FORMATS[format]
+  const { icon: FormatIcon, label, iconClassName } = MEME_FORMAT_DISPLAY[format]
 
   return (
     <>
@@ -120,7 +99,11 @@ export const MemeExportFormatTiles = ({
   return (
     <div className="grid grid-cols-2 gap-3">
       {MEME_DERIVED_FORMATS.map((format) => {
-        const { icon: FormatIcon, label, iconClassName } = FORMATS[format]
+        const {
+          icon: FormatIcon,
+          label,
+          iconClassName
+        } = MEME_FORMAT_DISPLAY[format]
         const isLocked = matchIsFormatLocked(format, isPremium)
 
         return (

@@ -1,7 +1,10 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { Label } from '~/components/ui/label'
-import type { MemeWithVideo } from '~/constants/meme'
+import {
+  STUDIO_RELATED_MEMES_COUNT,
+  type MemeWithVideo
+} from '~/constants/meme'
 import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import { m } from '~/paraglide/messages'
 import { listRelatedMemesQueryOpts } from '~/queries/meme'
@@ -52,9 +55,11 @@ export const StudioRelatedMemes = ({ meme }: StudioRelatedMemesProps) => {
     listRelatedMemesQueryOpts({ memeId: meme.id, title: meme.title })
   )
 
-  const filteredMemes = relatedMemesQuery.data.filter((relatedMeme) => {
-    return relatedMeme.id !== meme.id
-  })
+  const filteredMemes = relatedMemesQuery.data
+    .filter((relatedMeme) => {
+      return relatedMeme.id !== meme.id
+    })
+    .slice(0, STUDIO_RELATED_MEMES_COUNT)
 
   return filteredMemes.length > 0 ? (
     <StudioRelatedMemesGrid memes={filteredMemes} />

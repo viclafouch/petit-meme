@@ -202,23 +202,6 @@ test.describe('the phone journey', () => {
     await expect(page).toHaveURL(memePathname ?? '')
   })
 
-  test('the back link of a Meme page returns to the screen the Meme was opened from', async ({
-    page
-  }) => {
-    await page.goto('/')
-
-    const firstPlayLink = getFirstMemePlayLink(page)
-    const memePathname = await firstPlayLink.getAttribute('href')
-
-    await firstPlayLink.tap()
-
-    await expect(page).toHaveURL(memePathname ?? '')
-
-    await page.getByRole('link', { name: m.meme_back(), exact: true }).tap()
-
-    await expect(page).toHaveURL('/')
-  })
-
   test('a Meme page loads its Video on Safari', async ({ page }) => {
     await page.goto(PLAYABLE_MEME_PATHNAME)
 

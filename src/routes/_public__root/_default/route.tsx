@@ -1,32 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { getLocale } from '~/paraglide/runtime'
-import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
-import { listCategoriesQueryOpts } from '~/queries/category'
-import { getPremiumSubscriptionQueryOpts } from '~/queries/subscription'
+import { prefetchPublicPageQueries } from '~/routes/_public__root/-lib/prefetch-public-page-queries'
 import { DefaultLayout } from './-components/default-layout'
 
 export const Route = createFileRoute('/_public__root/_default')({
   component: DefaultLayout,
   loader: ({ context }) => {
-    const userQueries = context.user
-      ? [
-          context.queryClient.query({
-            ...listBookmarkedMemesQueryOpts(),
-            staleTime: 'static'
-          }),
-          context.queryClient.query({
-            ...getPremiumSubscriptionQueryOpts(),
-            staleTime: 'static'
-          })
-        ]
-      : []
-
-    void Promise.allSettled([
-      ...userQueries,
-      context.queryClient.query({
-        ...listCategoriesQueryOpts(getLocale()),
-        staleTime: 'static'
-      })
-    ])
+    prefetchPublicPageQueries({
+      queryClient: context.queryClient,
+      isSignedIn: Boolean(context.user)
+    })
   }
 })

@@ -24,7 +24,7 @@ Two groups, with the same weight:
 - people who send a meme in a conversation or a group
 - content creators who drop a meme into their own video
 
-Both need the meme as a file. The terms of use let them reuse what they download, resale included, because Petit Meme does not own the videos.
+Most are between 15 and 40. Both need the meme as a file. The terms of use let them reuse what they download, resale included, because Petit Meme does not own the videos.
 
 ## How it makes money
 

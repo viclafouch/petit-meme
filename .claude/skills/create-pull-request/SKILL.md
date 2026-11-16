@@ -7,13 +7,19 @@ description: Every Petit Meme pull request starts here, ahead of mattpocock-skil
 
 The pull request opens as `AGENTS.md` describes `go pr`, and its body carries **evidence**: the change shown working, not claimed. Everything here lands in `.artifacts/<branch>/`, which Git ignores.
 
-## 1. Write the body
+## 1. Check the knowledge
+
+`knowledge/` holds the vision, and a change can outgrow it. When the branch shifts what a person sees, does or pays, re-read the topics it touches. A topic it now contradicts, or a wish Victor keeps repeating that the change answers, earns one question to Victor: should `knowledge/` change, with the line you would write. A bug fix, a refactor or tooling skips this step.
+
+Done when the step is skipped, or Victor has answered and an approved line sits on the branch.
+
+## 2. Write the body
 
 Run `mattpocock-skills:pr` and write its template to `.artifacts/<branch>/body.md`, with one `Closes #<n>` per issue the branch closes.
 
 Done when every section of the template is filled or cut.
 
-## 2. Choose the evidence
+## 3. Choose the evidence
 
 Evidence is proportional to the change:
 
@@ -27,7 +33,7 @@ Two media at most. Every screen media shows light and dark side by side. Evidenc
 
 Done when each media has its one-line claim, or the body says why the evidence is text.
 
-## 3. Capture
+## 4. Capture
 
 Playwright drives, ffmpeg assembles.
 
@@ -62,9 +68,9 @@ ffmpeg -i light.png -i dark.png -filter_complex hstack after.png
 ffmpeg -ss <light start> -i light.webm -ss <dark start> -i dark.webm -filter_complex "hstack=shortest=1" -c:v libx264 -crf 18 -pix_fmt yuv420p -movflags +faststart -an flow.mp4
 ```
 
-Done when every media sits in `.artifacts/<branch>/` under 10 MB, and you opened each screenshot and each claim's frame (`ffmpeg -ss <seconds> -i flow.mp4 -frames:v 1 frame.png`): the state and its label are visible in both themes, the change looks exactly as intended, and only e2e accounts and test data appear, because the repository is public. A media that shows anything else, such as a glitch, an artefact, or one theme or engine rendering apart, gets fixed, or named to Victor, before step 4.
+Done when every media sits in `.artifacts/<branch>/` under 10 MB, and you opened each screenshot and each claim's frame (`ffmpeg -ss <seconds> -i flow.mp4 -frames:v 1 frame.png`): the state and its label are visible in both themes, the change looks exactly as intended, and only e2e accounts and test data appear, because the repository is public. A media that shows anything else, such as a glitch, an artefact, or one theme or engine rendering apart, gets fixed, or named to Victor, before step 5.
 
-## 4. Open
+## 5. Open
 
 The body references each media by its path relative to `body.md`, and `--attach` uploads it and rewrites that reference in place. An image reads `![<what it shows>](after.png)`. A video plays inline when `![](flow.mp4)` stands alone in its paragraph. Each media carries the revision it shows: `git rev-parse --short HEAD` on `git branch --show-current`.
 
@@ -76,3 +82,9 @@ gh pr merge <number> --auto --rebase
 The labels are those of the closed issues. The media go to this pull request only.
 
 Done when `gh pr view --json body` shows a `user-attachments` URL for each media and no local path left, and auto-merge is armed.
+
+## 6. Land
+
+A red check runs `mattpocock-skills:diagnosing-bugs`, and its root cause gets fixed on the branch. A rerun that turns it green hides the cause.
+
+Done when every check is green on the last push.

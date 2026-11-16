@@ -41,6 +41,11 @@ One word, one meaning, across the product, the administration and these document
 - **Embed**: a Meme played on another site through Petit Meme's player page.
 - **Install**: adding Petit Meme to a phone's home screen, where it opens as an app, full screen.
 
+## The look
+
+- **Glow**: a soft spot of colour behind a page.
+- **Aurora**: the coloured banner above the header, for an announcement.
+
 ## The offer
 
 - **Free**: the plan without payment. The whole library, with caps.

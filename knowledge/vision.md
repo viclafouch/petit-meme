@@ -2,14 +2,17 @@
 
 ## What Petit Meme protects
 
-Petit Meme stands out by being plain. It opens on a video, the video plays, and nothing asks anything of the Visitor. That plainness is the product, and it is what to protect as the rest grows.
+Petit Meme stands out by being plain. A tap opens a video, the video plays, and nothing asks anything of the Visitor. That plainness is the product, and it is what to protect as the rest grows.
+
+The heart: on a phone, a Meme reaches a friend's chat in one gesture, video or sound.
 
 For the people who come:
 
 1. **The path to the video stays the shortest one.** The consent banner is the only interruption that earns its place, and it earns it legally. An ad, a popup or an account asked before watching competes with the video. Each one has to win that comparison out loud before it ships.
 2. **Premium sells itself, and never blocks.** Visitors and free Users keep the whole library. Saying no to Premium leaves them with everything they had.
 3. **Two languages, from the start.** A feature in one language is half a feature.
-4. **The phone first, every browser.** Design starts on the phone. Safari on an iPhone counts as much as Chrome on a desktop.
+4. **The phone first, as an app.** Design starts on the phone. People want an app, not a site to type into a browser, so on the phone Petit Meme feels installed. Safari on an iPhone counts as much as Chrome on a desktop.
+5. **The phone's bytes.** Video is heavy, so it loads only when someone watches it.
 
 For what Petit Meme holds:
 
@@ -18,13 +21,24 @@ For what Petit Meme holds:
 
 ## How it should feel
 
+- **Colourful.** Petit Meme still lacks colour: white on black, with colour only in the videos. Glows and the colours of the apps people share to bring it in, page after page.
+- **Smooth.** A video starts at once, with no flash. A wait shows only when it lasts.
+- **Few actions, plain words.** Only what matters shows first, and every label says what it does.
 - **Calm.** Feedback waits for a pause, like a document that saves itself. One notification at a time, in one place.
 - **Readable.** Colour carries meaning, and text keeps enough contrast to read.
 - **Honest.** Figures show what really happened. A chart does not dip because the period is not over, and the same figure reads the same on every screen.
 
+## How decisions get made
+
+- **Inspired, never copied.** YouTube, Instagram, X, Vercel and Apple set the bar. Petit Meme takes the idea and improves it, so nobody can say it copied.
+- **The biggest as a benchmark.** An open product question is checked against what they do.
+- **Real figures.** A decision rests on production data and audience figures. One missing its number gets it first.
+
 ## Where it goes
 
+- **On the phone.** Phone Visitors watch more Memes and come back more often.
+- **Keep people watching.** There is always a new Meme to watch next.
 - **More Memes, with less effort.** Today the record of each Meme is the bottleneck. The Creator should add a Meme and walk away, then publish by default, with AI writing the record.
-- **Found on Google.** Video search brings people in. Nothing that protects the files may cost that.
+- **Found on Google.** Many sites compete for the same memes, and video search brings people in. Nothing that protects the files may cost that.
 - **More subscribers.** Premium grows by being worth it, never by taking from Free.
 - **Still simple.** Growth adds Memes and comfort, never friction on the way to the video.

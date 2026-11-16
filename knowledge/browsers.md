@@ -4,7 +4,9 @@ Petit Meme works on every browser people use today: Safari on iPhone and Mac, Ch
 
 ## Modern first
 
-Petit Meme uses what the browser already knows how to do before building its own version. It is faster, lighter on the phone, and accessible from the start.
+Petit Meme follows the newest web standards, as Chrome's Modern Web Guidance teaches them. The web moves fast, and what once took a script, the browser now does on its own, from dialogs to motion that follows the scroll. The more native Petit Meme is, the faster, lighter on the phone and more accessible it gets.
+
+Modern never costs a supported browser. A new feature first checks that the browser has it, and falls back to an older way, with a script only as the last resort.
 
 Newer browsers get extras on top: smoother transitions, a steadier page while it loads. Older ones keep a site that works and looks right, only plainer. Nobody is left with a broken page because their browser is a little behind.
 

@@ -657,7 +657,7 @@ input:autofill {
 
   @media (hover: hover) and (pointer: fine) {
     .format-row:not(:disabled):is(:hover, :focus-visible) {
-      background: color-mix(in oklch, var(--secondary), var(--format-from) 16%);
+      background: color-mix(in oklab, var(--secondary), var(--format-from) 16%);
 
       & .format-row-icon:has(> [data-hover-icon]) {
         & > svg:not([data-hover-icon]) {

@@ -17,6 +17,7 @@ import { E2E_VIDEO_BUNNY_ID } from './env'
 import { E2E_ENGLISH_LOCALE } from './locales'
 
 export const E2E_VIDEO_DURATION = 6
+export const E2E_VIDEO_DIMENSIONS = { width: 600, height: 710 } as const
 
 export type E2eCategory = {
   id: Category['id']

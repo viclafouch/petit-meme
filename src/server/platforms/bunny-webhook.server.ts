@@ -13,7 +13,10 @@ import { fillMemeDraft } from '~/server/admin/ai-assist/meme-fill.server'
 import { syncMemeToAllIndices } from '~/server/meme/meme-index.server'
 import { invalidateAlgoliaCache } from '~/server/platforms/algolia-cache.server'
 import { safeAlgoliaOp } from '~/server/platforms/algolia.server'
-import { getVideoPlayData } from '~/server/platforms/bunny.server'
+import {
+  getVideoPlayData,
+  toVideoDimensions
+} from '~/server/platforms/bunny.server'
 
 const WEBHOOK_PAYLOAD_SCHEMA = z.object({
   VideoLibraryId: z.number(),
@@ -36,14 +39,18 @@ const DRAFT_FILL_STATUSES: readonly number[] = [
   BUNNY_STATUS.RESOLUTION_FINISHED
 ]
 
-const buildVideoUpdate = async (videoId: string, status: number) => {
+const fetchVideoUpdate = async (videoId: string, status: number) => {
   if (status === BUNNY_STATUS.VIDEO_DELETED) {
     return { bunnyStatus: status }
   }
 
-  const videoPlayData = await getVideoPlayData(videoId)
+  const { video } = await getVideoPlayData(videoId)
 
-  return { bunnyStatus: status, duration: videoPlayData.video.length }
+  return {
+    bunnyStatus: status,
+    duration: video.length,
+    ...toVideoDimensions(video)
+  }
 }
 
 const matchIsSignedByBunny = (headers: Headers, rawBody: string) => {
@@ -147,7 +154,7 @@ export const handleBunnyWebhook = async (request: Request) => {
           bunnyId: result.VideoGuid,
           bunnyStatus: { lt: result.Status }
         },
-        data: await buildVideoUpdate(result.VideoGuid, result.Status),
+        data: await fetchVideoUpdate(result.VideoGuid, result.Status),
         include: {
           meme: {
             include: MEME_ALGOLIA_INCLUDE

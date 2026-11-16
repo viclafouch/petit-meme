@@ -93,7 +93,9 @@ export const deleteVideo = createServerOnlyFn(async (videoId: string) => {
 
 const VIDEO_PLAY_DATA_SCHEMA = z.object({
   video: z.object({
-    length: z.number()
+    length: z.number(),
+    width: z.number(),
+    height: z.number()
   })
 })
 
@@ -106,6 +108,55 @@ export const getVideoPlayData = createServerOnlyFn(async (videoId: string) => {
       headers: getBunnyHeaders()
     }
   )
+})
+
+const LIBRARY_VIDEOS_PAGE_SIZE = 1000
+
+type ToVideoDimensionsParams = {
+  width: number
+  height: number
+}
+
+export const toVideoDimensions = ({
+  width,
+  height
+}: ToVideoDimensionsParams) => {
+  return width > 0 && height > 0 ? { width, height } : null
+}
+
+const LIBRARY_VIDEOS_PAGE_SCHEMA = z.object({
+  totalItems: z.number(),
+  items: z.array(
+    z.object({
+      guid: z.string(),
+      width: z.number(),
+      height: z.number()
+    })
+  )
+})
+
+type LibraryVideo = z.output<typeof LIBRARY_VIDEOS_PAGE_SCHEMA>['items'][number]
+
+const fetchLibraryVideosFrom = async (
+  page: number
+): Promise<LibraryVideo[]> => {
+  const { totalItems, items } = await fetchWithZod(
+    LIBRARY_VIDEOS_PAGE_SCHEMA,
+    buildLibraryApiUrl(
+      `/videos?page=${page}&itemsPerPage=${LIBRARY_VIDEOS_PAGE_SIZE}`
+    ),
+    { method: 'GET', headers: getBunnyHeaders() }
+  )
+
+  if (page * LIBRARY_VIDEOS_PAGE_SIZE >= totalItems) {
+    return items
+  }
+
+  return [...items, ...(await fetchLibraryVideosFrom(page + 1))]
+}
+
+export const listLibraryVideos = createServerOnlyFn(() => {
+  return fetchLibraryVideosFrom(1)
 })
 
 const UPLOAD_RESPONSE_SCHEMA = z.object({

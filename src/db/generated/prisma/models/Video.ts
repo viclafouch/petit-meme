@@ -29,12 +29,16 @@ export type AggregateVideo = {
 export type VideoAvgAggregateOutputType = {
   id: number | null
   duration: number | null
+  width: number | null
+  height: number | null
   bunnyStatus: number | null
 }
 
 export type VideoSumAggregateOutputType = {
   id: number | null
   duration: number | null
+  width: number | null
+  height: number | null
   bunnyStatus: number | null
 }
 
@@ -42,6 +46,8 @@ export type VideoMinAggregateOutputType = {
   id: number | null
   bunnyId: string | null
   duration: number | null
+  width: number | null
+  height: number | null
   bunnyStatus: number | null
 }
 
@@ -49,6 +55,8 @@ export type VideoMaxAggregateOutputType = {
   id: number | null
   bunnyId: string | null
   duration: number | null
+  width: number | null
+  height: number | null
   bunnyStatus: number | null
 }
 
@@ -56,6 +64,8 @@ export type VideoCountAggregateOutputType = {
   id: number
   bunnyId: number
   duration: number
+  width: number
+  height: number
   bunnyStatus: number
   _all: number
 }
@@ -64,12 +74,16 @@ export type VideoCountAggregateOutputType = {
 export type VideoAvgAggregateInputType = {
   id?: true
   duration?: true
+  width?: true
+  height?: true
   bunnyStatus?: true
 }
 
 export type VideoSumAggregateInputType = {
   id?: true
   duration?: true
+  width?: true
+  height?: true
   bunnyStatus?: true
 }
 
@@ -77,6 +91,8 @@ export type VideoMinAggregateInputType = {
   id?: true
   bunnyId?: true
   duration?: true
+  width?: true
+  height?: true
   bunnyStatus?: true
 }
 
@@ -84,6 +100,8 @@ export type VideoMaxAggregateInputType = {
   id?: true
   bunnyId?: true
   duration?: true
+  width?: true
+  height?: true
   bunnyStatus?: true
 }
 
@@ -91,6 +109,8 @@ export type VideoCountAggregateInputType = {
   id?: true
   bunnyId?: true
   duration?: true
+  width?: true
+  height?: true
   bunnyStatus?: true
   _all?: true
 }
@@ -185,6 +205,8 @@ export type VideoGroupByOutputType = {
   id: number
   bunnyId: string
   duration: number
+  width: number | null
+  height: number | null
   bunnyStatus: number
   _count: VideoCountAggregateOutputType | null
   _avg: VideoAvgAggregateOutputType | null
@@ -215,6 +237,8 @@ export type VideoWhereInput = {
   id?: Prisma.IntFilter<"Video"> | number
   bunnyId?: Prisma.StringFilter<"Video"> | string
   duration?: Prisma.IntFilter<"Video"> | number
+  width?: Prisma.IntNullableFilter<"Video"> | number | null
+  height?: Prisma.IntNullableFilter<"Video"> | number | null
   bunnyStatus?: Prisma.IntFilter<"Video"> | number
   meme?: Prisma.XOR<Prisma.MemeNullableScalarRelationFilter, Prisma.MemeWhereInput> | null
 }
@@ -223,6 +247,8 @@ export type VideoOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   bunnyId?: Prisma.SortOrder
   duration?: Prisma.SortOrder
+  width?: Prisma.SortOrderInput | Prisma.SortOrder
+  height?: Prisma.SortOrderInput | Prisma.SortOrder
   bunnyStatus?: Prisma.SortOrder
   meme?: Prisma.MemeOrderByWithRelationInput
 }
@@ -234,6 +260,8 @@ export type VideoWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.VideoWhereInput[]
   NOT?: Prisma.VideoWhereInput | Prisma.VideoWhereInput[]
   duration?: Prisma.IntFilter<"Video"> | number
+  width?: Prisma.IntNullableFilter<"Video"> | number | null
+  height?: Prisma.IntNullableFilter<"Video"> | number | null
   bunnyStatus?: Prisma.IntFilter<"Video"> | number
   meme?: Prisma.XOR<Prisma.MemeNullableScalarRelationFilter, Prisma.MemeWhereInput> | null
 }, "id" | "bunnyId">
@@ -242,6 +270,8 @@ export type VideoOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   bunnyId?: Prisma.SortOrder
   duration?: Prisma.SortOrder
+  width?: Prisma.SortOrderInput | Prisma.SortOrder
+  height?: Prisma.SortOrderInput | Prisma.SortOrder
   bunnyStatus?: Prisma.SortOrder
   _count?: Prisma.VideoCountOrderByAggregateInput
   _avg?: Prisma.VideoAvgOrderByAggregateInput
@@ -257,12 +287,16 @@ export type VideoScalarWhereWithAggregatesInput = {
   id?: Prisma.IntWithAggregatesFilter<"Video"> | number
   bunnyId?: Prisma.StringWithAggregatesFilter<"Video"> | string
   duration?: Prisma.IntWithAggregatesFilter<"Video"> | number
+  width?: Prisma.IntNullableWithAggregatesFilter<"Video"> | number | null
+  height?: Prisma.IntNullableWithAggregatesFilter<"Video"> | number | null
   bunnyStatus?: Prisma.IntWithAggregatesFilter<"Video"> | number
 }
 
 export type VideoCreateInput = {
   bunnyId: string
   duration: number
+  width?: number | null
+  height?: number | null
   bunnyStatus?: number
   meme?: Prisma.MemeCreateNestedOneWithoutVideoInput
 }
@@ -271,6 +305,8 @@ export type VideoUncheckedCreateInput = {
   id?: number
   bunnyId: string
   duration: number
+  width?: number | null
+  height?: number | null
   bunnyStatus?: number
   meme?: Prisma.MemeUncheckedCreateNestedOneWithoutVideoInput
 }
@@ -278,6 +314,8 @@ export type VideoUncheckedCreateInput = {
 export type VideoUpdateInput = {
   bunnyId?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.IntFieldUpdateOperationsInput | number
+  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bunnyStatus?: Prisma.IntFieldUpdateOperationsInput | number
   meme?: Prisma.MemeUpdateOneWithoutVideoNestedInput
 }
@@ -286,6 +324,8 @@ export type VideoUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   bunnyId?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.IntFieldUpdateOperationsInput | number
+  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bunnyStatus?: Prisma.IntFieldUpdateOperationsInput | number
   meme?: Prisma.MemeUncheckedUpdateOneWithoutVideoNestedInput
 }
@@ -294,12 +334,16 @@ export type VideoCreateManyInput = {
   id?: number
   bunnyId: string
   duration: number
+  width?: number | null
+  height?: number | null
   bunnyStatus?: number
 }
 
 export type VideoUpdateManyMutationInput = {
   bunnyId?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.IntFieldUpdateOperationsInput | number
+  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bunnyStatus?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
@@ -307,6 +351,8 @@ export type VideoUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   bunnyId?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.IntFieldUpdateOperationsInput | number
+  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bunnyStatus?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
@@ -314,12 +360,16 @@ export type VideoCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   bunnyId?: Prisma.SortOrder
   duration?: Prisma.SortOrder
+  width?: Prisma.SortOrder
+  height?: Prisma.SortOrder
   bunnyStatus?: Prisma.SortOrder
 }
 
 export type VideoAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   duration?: Prisma.SortOrder
+  width?: Prisma.SortOrder
+  height?: Prisma.SortOrder
   bunnyStatus?: Prisma.SortOrder
 }
 
@@ -327,6 +377,8 @@ export type VideoMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   bunnyId?: Prisma.SortOrder
   duration?: Prisma.SortOrder
+  width?: Prisma.SortOrder
+  height?: Prisma.SortOrder
   bunnyStatus?: Prisma.SortOrder
 }
 
@@ -334,12 +386,16 @@ export type VideoMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   bunnyId?: Prisma.SortOrder
   duration?: Prisma.SortOrder
+  width?: Prisma.SortOrder
+  height?: Prisma.SortOrder
   bunnyStatus?: Prisma.SortOrder
 }
 
 export type VideoSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   duration?: Prisma.SortOrder
+  width?: Prisma.SortOrder
+  height?: Prisma.SortOrder
   bunnyStatus?: Prisma.SortOrder
 }
 
@@ -350,6 +406,14 @@ export type VideoScalarRelationFilter = {
 
 export type IntFieldUpdateOperationsInput = {
   set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
   increment?: number
   decrement?: number
   multiply?: number
@@ -373,6 +437,8 @@ export type VideoUpdateOneRequiredWithoutMemeNestedInput = {
 export type VideoCreateWithoutMemeInput = {
   bunnyId: string
   duration: number
+  width?: number | null
+  height?: number | null
   bunnyStatus?: number
 }
 
@@ -380,6 +446,8 @@ export type VideoUncheckedCreateWithoutMemeInput = {
   id?: number
   bunnyId: string
   duration: number
+  width?: number | null
+  height?: number | null
   bunnyStatus?: number
 }
 
@@ -402,6 +470,8 @@ export type VideoUpdateToOneWithWhereWithoutMemeInput = {
 export type VideoUpdateWithoutMemeInput = {
   bunnyId?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.IntFieldUpdateOperationsInput | number
+  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bunnyStatus?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
@@ -409,6 +479,8 @@ export type VideoUncheckedUpdateWithoutMemeInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   bunnyId?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.IntFieldUpdateOperationsInput | number
+  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bunnyStatus?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
@@ -418,6 +490,8 @@ export type VideoSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   id?: boolean
   bunnyId?: boolean
   duration?: boolean
+  width?: boolean
+  height?: boolean
   bunnyStatus?: boolean
   meme?: boolean | Prisma.Video$memeArgs<ExtArgs>
 }, ExtArgs["result"]["video"]>
@@ -426,6 +500,8 @@ export type VideoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   id?: boolean
   bunnyId?: boolean
   duration?: boolean
+  width?: boolean
+  height?: boolean
   bunnyStatus?: boolean
 }, ExtArgs["result"]["video"]>
 
@@ -433,6 +509,8 @@ export type VideoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   id?: boolean
   bunnyId?: boolean
   duration?: boolean
+  width?: boolean
+  height?: boolean
   bunnyStatus?: boolean
 }, ExtArgs["result"]["video"]>
 
@@ -440,10 +518,12 @@ export type VideoSelectScalar = {
   id?: boolean
   bunnyId?: boolean
   duration?: boolean
+  width?: boolean
+  height?: boolean
   bunnyStatus?: boolean
 }
 
-export type VideoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "bunnyId" | "duration" | "bunnyStatus", ExtArgs["result"]["video"]>
+export type VideoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "bunnyId" | "duration" | "width" | "height" | "bunnyStatus", ExtArgs["result"]["video"]>
 export type VideoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   meme?: boolean | Prisma.Video$memeArgs<ExtArgs>
 }
@@ -459,6 +539,8 @@ export type $VideoPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     id: number
     bunnyId: string
     duration: number
+    width: number | null
+    height: number | null
     bunnyStatus: number
   }, ExtArgs["result"]["video"]>
   composites: {}
@@ -887,6 +969,8 @@ export interface VideoFieldRefs {
   readonly id: Prisma.FieldRef<"Video", 'Int'>
   readonly bunnyId: Prisma.FieldRef<"Video", 'String'>
   readonly duration: Prisma.FieldRef<"Video", 'Int'>
+  readonly width: Prisma.FieldRef<"Video", 'Int'>
+  readonly height: Prisma.FieldRef<"Video", 'Int'>
   readonly bunnyStatus: Prisma.FieldRef<"Video", 'Int'>
 }
     

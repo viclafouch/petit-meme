@@ -43,10 +43,13 @@ vi.mock(import('~/lib/sentry'), async (importOriginal) => {
 const VIDEO_GUID = 'bunny-video-guid'
 const MEME_ID = 'meme-id'
 const VIDEO_LENGTH_SECONDS = 12
+const VERTICAL_VIDEO_DIMENSIONS = { width: 1080, height: 1920 }
 const FINISHED_VIDEO = {
   id: 1,
   bunnyId: VIDEO_GUID,
   duration: 0,
+  width: null,
+  height: null,
   bunnyStatus: BUNNY_STATUS.FINISHED
 }
 
@@ -92,11 +95,13 @@ const postWebhook = ({
   )
 }
 
-const stubBunnyPlayData = () => {
+const stubBunnyPlayData = (videoDimensions = VERTICAL_VIDEO_DIMENSIONS) => {
   vi.stubGlobal(
     'fetch',
     vi.fn(async () => {
-      return Response.json({ video: { length: VIDEO_LENGTH_SECONDS } })
+      return Response.json({
+        video: { length: VIDEO_LENGTH_SECONDS, ...videoDimensions }
+      })
     })
   )
 }
@@ -117,9 +122,10 @@ describe('handleBunnyWebhook', () => {
     vi.clearAllMocks()
   })
 
-  it('should update the video only from an older status', async () => {
+  it('should store the duration and the dimensions of the video from an older status', async () => {
     const update = vi.spyOn(prismaClient.video, 'update').mockResolvedValue({
       ...FINISHED_VIDEO,
+      ...VERTICAL_VIDEO_DIMENSIONS,
       bunnyStatus: BUNNY_STATUS.RESOLUTION_FINISHED,
       duration: VIDEO_LENGTH_SECONDS
     })
@@ -137,6 +143,30 @@ describe('handleBunnyWebhook', () => {
         },
         data: {
           bunnyStatus: BUNNY_STATUS.RESOLUTION_FINISHED,
+          duration: VIDEO_LENGTH_SECONDS,
+          ...VERTICAL_VIDEO_DIMENSIONS
+        }
+      })
+    )
+  })
+
+  it('should leave the dimensions unknown while Bunny reports them as zero', async () => {
+    stubBunnyPlayData({ width: 0, height: 0 })
+    vi.spyOn(prismaClient.video, 'findUnique').mockResolvedValue({
+      ...FINISHED_VIDEO,
+      bunnyStatus: BUNNY_STATUS.QUEUED
+    })
+    const update = vi.spyOn(prismaClient.video, 'update').mockResolvedValue({
+      ...FINISHED_VIDEO,
+      bunnyStatus: BUNNY_STATUS.PROCESSING
+    })
+
+    await postWebhook({ status: BUNNY_STATUS.PROCESSING })
+
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: {
+          bunnyStatus: BUNNY_STATUS.PROCESSING,
           duration: VIDEO_LENGTH_SECONDS
         }
       })

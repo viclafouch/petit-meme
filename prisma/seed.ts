@@ -2,6 +2,7 @@ import { randomBytes } from 'node:crypto'
 import { setTimeout as wait } from 'node:timers/promises'
 import type { MemeStatus } from '~/db/generated/prisma/enums'
 import { logEnvironmentInfo } from '../scripts/lib/env-guard'
+import { backfillVideoDimensions } from '../scripts/lib/video-dimensions'
 import seedMemes from './seed-memes.json' with { type: 'json' }
 import { createActivity } from './seed/activity'
 import {
@@ -80,11 +81,14 @@ const seed = async () => {
   const { views, events } = await createActivity(people)
   console.log(`  ${views} views, ${events} activity events`)
 
-  console.log('Indexing published Memes...')
-  await indexPublishedMemes()
-
   console.log('Waiting for Bunny to encode every video...')
   await waitForEncodedVideos()
+
+  console.log('Storing the dimensions of every video...')
+  await backfillVideoDimensions(false)
+
+  console.log('Indexing published Memes...')
+  await indexPublishedMemes()
 
   console.log('\nSeed complete')
   process.exit(0)

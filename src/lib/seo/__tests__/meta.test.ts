@@ -21,7 +21,14 @@ const PUBLISHED_MEME = {
   updatedAt: new Date('2026-01-01T00:00:00Z'),
   publishedAt: new Date('2026-01-02T00:00:00Z'),
   status: 'PUBLISHED',
-  video: { id: 1, bunnyId: 'video-guid', duration: 12, bunnyStatus: 3 },
+  video: {
+    id: 1,
+    bunnyId: 'video-guid',
+    duration: 12,
+    width: null,
+    height: null,
+    bunnyStatus: 3
+  },
   categories: []
 } as const satisfies MemeWithVideo & MemeWithCategories
 

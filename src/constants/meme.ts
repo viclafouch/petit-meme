@@ -17,6 +17,8 @@ const MEME_VIDEO_SELECT = {
   id: true,
   bunnyId: true,
   duration: true,
+  width: true,
+  height: true,
   bunnyStatus: true
 } as const satisfies Prisma.VideoSelect
 

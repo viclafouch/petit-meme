@@ -102,6 +102,8 @@ const MEME_HIT_SCHEMA = z.object({
     id: z.number(),
     bunnyId: z.string(),
     duration: z.number(),
+    width: z.number().nullable().default(null),
+    height: z.number().nullable().default(null),
     bunnyStatus: z.number()
   }),
   categoryTitles: z.array(z.string()).default([]),
@@ -204,6 +206,8 @@ export const buildMemeRecord = (meme: MemeAlgoliaData, locale: Locale) => {
       id: meme.video.id,
       bunnyId: meme.video.bunnyId,
       duration: meme.video.duration,
+      width: meme.video.width,
+      height: meme.video.height,
       bunnyStatus: meme.video.bunnyStatus
     },
     categoryTitles: resolvedCategories.map(({ title }) => {

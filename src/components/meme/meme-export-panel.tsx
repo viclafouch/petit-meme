@@ -1,14 +1,16 @@
 import React from 'react'
-import { Clapperboard, Link2, Lock } from 'lucide-react'
+import { Clapperboard, Link2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { MessagingAppIcon } from '~/components/icon/messaging-app-icon'
 import {
   MEME_EXPORT_MODE_DISPLAY,
   MEME_FORMAT_DISPLAY,
+  MEME_FORMAT_EXPORT_LABELS,
   SHEET_BODY_CLASS_NAME,
   SHEET_HEADER_CLASS_NAME,
   SHEET_TITLE_CLASS_NAME
 } from '~/components/meme/meme-sheet'
+import { PremiumLockBadge } from '~/components/premium/premium-lock-badge'
 import { useIsPremium } from '~/components/premium/use-is-premium'
 import { Badge } from '~/components/ui/badge'
 import {
@@ -58,14 +60,6 @@ const FORMAT_ROW_HOVER_ICONS = {
   mp4: Clapperboard,
   mp3: null
 } as const satisfies Record<MemeDerivedFormat, React.ElementType | null>
-
-const FORMAT_ROW_LABELS = {
-  download: { mp4: m.meme_download_video, mp3: m.meme_export_sound_only },
-  share: { mp4: m.meme_share_video, mp3: m.meme_export_sound_only }
-} as const satisfies Record<
-  MemeExportMode,
-  Record<MemeDerivedFormat, () => string>
->
 
 const SECTION_HEADING_CLASS_NAME = 'text-xs font-medium text-muted-foreground'
 
@@ -141,18 +135,13 @@ const FormatRows = ({ mode, meme, isPending, onSelect }: FormatRowsProps) => {
             </span>
             <span className="flex min-w-0 flex-1 flex-col gap-0.5">
               <span className="truncate text-[0.9375rem] font-semibold">
-                {FORMAT_ROW_LABELS[mode][format]()}
+                {MEME_FORMAT_EXPORT_LABELS[mode][format]()}
               </span>
               <span className="truncate text-xs text-muted-foreground">
                 {getFormatDetail({ format, isPremium, duration })}
               </span>
             </span>
-            {isLocked ? (
-              <Badge variant="amber" size="md" className="rounded-full">
-                <Lock aria-hidden="true" />
-                {m.premium_badge()}
-              </Badge>
-            ) : null}
+            {isLocked ? <PremiumLockBadge /> : null}
           </button>
         )
       })}

@@ -57,9 +57,12 @@ const MODE_VERBS = {
 } as const satisfies Record<MemeExportMode, string>
 
 const FORMAT_LABELS = {
-  mp4: m.meme_format_video,
-  mp3: m.meme_format_audio
-} as const satisfies Record<MemeDerivedFormat, () => string>
+  download: { mp4: m.meme_download_video, mp3: m.meme_export_sound_only },
+  share: { mp4: m.meme_share_video, mp3: m.meme_export_sound_only }
+} as const satisfies Record<
+  MemeExportMode,
+  Record<MemeDerivedFormat, () => string>
+>
 
 type VideoQuality = 'original' | 'watermarked'
 
@@ -82,7 +85,7 @@ const pickFormat = async (
 ) => {
   const formatTile = page
     .getByRole('dialog', { name: PANEL_NAMES[mode]() })
-    .getByRole('button', { name: FORMAT_LABELS[format]() })
+    .getByRole('button', { name: FORMAT_LABELS[mode][format]() })
 
   await repeatUntilVisible(() => {
     return page

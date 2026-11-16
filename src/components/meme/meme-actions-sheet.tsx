@@ -1,7 +1,10 @@
 import React from 'react'
 import { ArrowRight, ChevronRight, Clapperboard, Star } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
-import { MemeExportPanelBody } from '~/components/meme/meme-export-panel'
+import {
+  MemeExportPanelBody,
+  MemeExportSheetHeader
+} from '~/components/meme/meme-export-panel'
 import {
   MEME_EXPORT_MODE_DISPLAY,
   SHEET_BODY_CLASS_NAME,
@@ -16,7 +19,6 @@ import {
   Drawer,
   DrawerClose,
   DrawerContent,
-  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger
@@ -82,14 +84,7 @@ export const MemeActionsSheet = ({
                     <ChevronRight className="ml-auto text-muted-foreground" />
                   </DrawerTrigger>
                   <DrawerContent>
-                    <DrawerHeader className={SHEET_HEADER_CLASS_NAME}>
-                      <DrawerTitle className={SHEET_TITLE_CLASS_NAME}>
-                        {label()}
-                      </DrawerTitle>
-                      <DrawerDescription className="line-clamp-1">
-                        {meme.title}
-                      </DrawerDescription>
-                    </DrawerHeader>
+                    <MemeExportSheetHeader mode={mode} meme={meme} />
                     <div className={SHEET_BODY_CLASS_NAME}>
                       <MemeExportPanelBody
                         mode={mode}

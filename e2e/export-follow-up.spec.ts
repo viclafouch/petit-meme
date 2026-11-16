@@ -22,7 +22,7 @@ const forgetFollowUps = (page: Page, storageKeys: string[]) => {
 const downloadVideo = async (page: Page) => {
   const videoTile = page
     .getByRole('dialog', { name: m.meme_download() })
-    .getByRole('button', { name: m.meme_format_video() })
+    .getByRole('button', { name: m.meme_download_video() })
 
   await repeatUntilVisible(() => {
     return page

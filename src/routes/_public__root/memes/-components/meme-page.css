@@ -537,6 +537,7 @@
       animation:
         meme-rail-reveal-fade-start linear both,
         meme-rail-hide-fade-end linear both;
+      animation-duration: auto;
       animation-timeline: scroll(self block);
       animation-range:
         0 var(--meme-rail-fade-size),
@@ -679,6 +680,7 @@
 
 .meme-scrubber-track {
   position: relative;
+  container-type: inline-size;
   width: 100%;
   height: var(--meme-scrubber-track);
   border-radius: 999px;
@@ -694,14 +696,34 @@
   background: rgb(255 255 255 / 0.45);
 }
 
+.meme-scrubber-fill {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
 .meme-scrubber-indicator {
+  display: block;
+  width: 100%;
+  height: 100%;
   border-radius: inherit;
   background: var(--meme-studio-gradient);
+  translate: calc((var(--meme-scrubber-progress, 0) - 1) * 100%) 0;
+  will-change: translate;
 }
 
 .meme-scrubber-thumb {
-  width: 0.875rem;
-  height: 0.875rem;
+  --meme-scrubber-thumb-size: 0.875rem;
+  inset-inline-start: 0 !important;
+  width: var(--meme-scrubber-thumb-size);
+  height: var(--meme-scrubber-thumb-size);
+  translate: calc(
+      var(--meme-scrubber-progress, 0) *
+        (100cqi - var(--meme-scrubber-thumb-size))
+    )
+    -50% !important;
+  will-change: translate;
   border-radius: 999px;
   background: white;
   box-shadow: 0 1px 4px rgb(0 0 0 / 0.4);

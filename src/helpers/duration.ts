@@ -14,14 +14,6 @@ export const splitMinutesAndSeconds = (
   }
 }
 
-export const formatSeconds = (seconds: number, locale: string) => {
-  return new Intl.NumberFormat(locale, {
-    style: 'unit',
-    unit: 'second',
-    unitDisplay: 'short'
-  }).format(seconds)
-}
-
 export const formatClockDuration = (totalSeconds: number, locale: string) => {
   const duration = splitMinutesAndSeconds(totalSeconds)
 

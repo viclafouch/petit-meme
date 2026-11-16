@@ -52,7 +52,7 @@ const RELATIVE_TIME_THRESHOLDS = [
 }[]
 
 export function formatRelativeTime(date: Date, locale: Locale, now: number) {
-  const elapsed = date.getTime() - now
+  const elapsed = Math.min(date.getTime() - now, 0)
   const absoluteElapsed = Math.abs(elapsed)
 
   const threshold = RELATIVE_TIME_THRESHOLDS.find((entry) => {

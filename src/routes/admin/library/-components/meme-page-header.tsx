@@ -2,6 +2,7 @@ import { Trash } from 'lucide-react'
 import { Badge } from '~/components/ui/badge'
 import { type MemeFullData, MemeStatusMeta } from '~/constants/meme'
 import { formatDate } from '~/helpers/date'
+import { formatCount } from '~/helpers/number'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { DeleteMemeButton } from '~/routes/admin/-components/delete-meme-button'
@@ -24,7 +25,14 @@ export const MemePageHeader = ({ meme, publisher }: MemePageHeaderProps) => {
             {statusMeta.label}
           </Badge>
           <span className="tabular-nums">
-            {m.meme_views({ count: meme.viewCount })}
+            {m.meme_views({
+              count: meme.viewCount,
+              formattedCount: formatCount(
+                meme.viewCount,
+                getLocale(),
+                'standard'
+              )
+            })}
             {' · '}
             {m.meme_bookmarks({ count: meme._count.bookmarkedBy })}
           </span>

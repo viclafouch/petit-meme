@@ -10,7 +10,8 @@ import {
 } from '@tanstack/react-router'
 import { Badge } from '~/components/ui/badge'
 import { Skeleton } from '~/components/ui/skeleton'
-import { formatSeconds } from '~/helpers/duration'
+import { formatClockDuration } from '~/helpers/duration'
+import { formatCount } from '~/helpers/number'
 import { useIsCoarsePointer } from '~/hooks/use-is-coarse-pointer'
 import { sendClickEvent, sendViewEvent } from '~/lib/algolia-insights'
 import {
@@ -20,6 +21,10 @@ import {
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { listRelatedMemesQueryOpts } from '~/queries/meme'
+import {
+  applyBreakUiRelatedMemes,
+  useBreakUiDataset
+} from '~/routes/_public__root/memes/-lib/break-ui-fixtures'
 import { getCategoryHue } from '~/routes/_public__root/memes/-lib/category-hue'
 import {
   appendSeenMemeId,
@@ -83,7 +88,7 @@ const RelatedThumb = ({ meme }: RelatedThumbProps) => {
         variant="black"
         className="absolute right-1.5 bottom-1.5"
       >
-        {formatSeconds(meme.video.duration, getLocale())}
+        {formatClockDuration(meme.video.duration, getLocale())}
       </Badge>
     </span>
   )
@@ -126,19 +131,27 @@ const RelatedMemeItem = ({
       >
         <RelatedThumb meme={meme} />
         <span className="flex min-w-0 flex-col gap-1 py-0.5">
-          <span className="line-clamp-2 text-sm leading-snug font-semibold">
+          <span className="line-clamp-2 text-sm leading-snug font-semibold wrap-anywhere">
             {meme.title}
           </span>
           {categoryTitle && categorySlug ? (
             <span
               className="meme-rail-category"
               style={{ '--hue': getCategoryHue(categorySlug) }}
+              title={categoryTitle}
             >
-              {categoryTitle}
+              <span className="truncate">{categoryTitle}</span>
             </span>
           ) : null}
           <span className="text-xs text-muted-foreground">
-            {m.meme_views({ count: meme.viewCount })}
+            {m.meme_views({
+              count: meme.viewCount,
+              formattedCount: formatCount(
+                meme.viewCount,
+                getLocale(),
+                'compact'
+              )
+            })}
           </span>
         </span>
       </Link>
@@ -163,10 +176,13 @@ const RelatedMemesList = ({ memeId, title }: RelatedMemesListProps) => {
   })
   const isCoarsePointer = useIsCoarsePointer()
   const nextSeenState = useNextSeenState(memeId)
+  const breakUiDataset = useBreakUiDataset()
   const relatedMemes = orderUnseenFirst(
-    relatedMemesQuery.data.filter((relatedMeme) => {
-      return relatedMeme.id !== memeId
-    }),
+    applyBreakUiRelatedMemes(relatedMemesQuery.data, breakUiDataset).filter(
+      (relatedMeme) => {
+        return relatedMeme.id !== memeId
+      }
+    ),
     seenMemeIds
   )
   const relatedMemeIdsKey = relatedMemes
@@ -185,6 +201,12 @@ const RelatedMemesList = ({ memeId, title }: RelatedMemesListProps) => {
       authenticatedUserToken: user?.id
     })
   }, [relatedMemeIdsKey, user?.id])
+
+  if (relatedMemes.length === 0) {
+    return (
+      <p className="text-sm text-muted-foreground">{m.meme_related_empty()}</p>
+    )
+  }
 
   return (
     <ul className="meme-rail-list" aria-labelledby="meme-related-heading">

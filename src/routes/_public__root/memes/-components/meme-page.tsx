@@ -1,3 +1,4 @@
+import React from 'react'
 import { Search } from 'lucide-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { getRouteApi, Link } from '@tanstack/react-router'
@@ -10,13 +11,19 @@ import type { MemeDerivedFormat } from '~/constants/bunny'
 import { TRENDING_CATEGORY_SLUG, type MemeExportMode } from '~/constants/meme'
 import { MemeStatus } from '~/db/generated/prisma/enums'
 import { formatDate, formatRelativeTime } from '~/helpers/date'
+import { formatCount } from '~/helpers/number'
 import { buildVideoFirstFrameUrl } from '~/lib/bunny-public-urls'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { getMemeQueryOpts } from '~/queries/meme'
+import {
+  applyBreakUiMeme,
+  useBreakUiDataset
+} from '~/routes/_public__root/memes/-lib/break-ui-fixtures'
 import { getCategoryHue } from '~/routes/_public__root/memes/-lib/category-hue'
 import { getVideoAspectRatio } from '~/routes/_public__root/memes/-lib/video-aspect-ratio'
 import type { getMeme } from '~/server/meme/meme.functions'
+import { BreakUiToggle } from './break-ui-toggle'
 import { MemeActions } from './meme-actions'
 import { MemePendingBanner } from './meme-pending-banner'
 import { MemeWatchPlayer } from './meme-watch-player'
@@ -39,7 +46,12 @@ const MemeMeta = ({ meme, now }: MemeMetaProps) => {
 
   return (
     <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-      <span>{m.meme_views({ count: meme.viewCount })}</span>
+      <span>
+        {m.meme_views({
+          count: meme.viewCount,
+          formattedCount: formatCount(meme.viewCount, locale, 'standard')
+        })}
+      </span>
       {publishedAt ? (
         <time
           dateTime={publishedAt.toISOString()}
@@ -52,6 +64,35 @@ const MemeMeta = ({ meme, now }: MemeMetaProps) => {
         <MemeLanguageBadge contentLocale={meme.contentLocale} showLabel />
       )}
     </p>
+  )
+}
+
+type MemeTitleProps = {
+  title: string
+}
+
+const MemeTitle = ({ title }: MemeTitleProps) => {
+  const [isExpanded, setIsExpanded] = React.useState(false)
+
+  const handleToggle = () => {
+    setIsExpanded((wasExpanded) => {
+      return !wasExpanded
+    })
+  }
+
+  return (
+    <h1 className="font-bricolage text-xl leading-heading font-semibold text-balance lg:text-2xl">
+      <button
+        type="button"
+        className="meme-title-toggle"
+        aria-expanded={isExpanded}
+        onClick={handleToggle}
+      >
+        <span className={isExpanded ? undefined : 'max-lg:line-clamp-2'}>
+          {title}
+        </span>
+      </button>
+    </h1>
   )
 }
 
@@ -110,9 +151,10 @@ const MemeDetails = ({ meme }: MemeDetailsProps) => {
                   params={{ slug: TRENDING_CATEGORY_SLUG }}
                   search={{ query: keyword }}
                   className="meme-keyword"
+                  title={keyword}
                 >
                   <Search aria-hidden="true" />
-                  {keyword}
+                  <span className="truncate">{keyword}</span>
                 </Link>
               </li>
             )
@@ -126,15 +168,16 @@ const MemeDetails = ({ meme }: MemeDetailsProps) => {
 export const MemePage = () => {
   const { memeId } = memeRouteApi.useParams()
   const memeQuery = useSuspenseQuery(getMemeQueryOpts(memeId))
+  const meme = applyBreakUiMeme(memeQuery.data, useBreakUiDataset())
   const { video, videoCallbackRef, playbackFailure } = useMemeHls({
-    memeId: memeQuery.data.id
+    memeId: meme.id
   })
   const shareMutation = useMemeExport({ mode: 'share' })
   const downloadMutation = useMemeExport({ mode: 'download' })
 
-  useMediaSession({ video, isActive: true, meme: memeQuery.data })
+  useMediaSession({ video, isActive: true, meme })
   useRegisterMemeView({
-    memeId: memeQuery.data.id,
+    memeId: meme.id,
     video,
     ratio: 0.3,
     minMs: 2500,
@@ -149,35 +192,36 @@ export const MemePage = () => {
     handlePause()
     const exportMutation = mode === 'share' ? shareMutation : downloadMutation
 
-    exportMutation.trigger(memeQuery.data, format)
+    exportMutation.trigger(meme, format)
   }
 
   return (
     <div className="meme-page">
+      <BreakUiToggle />
       <div className="meme-grid">
         <div className="relative isolate min-w-0">
           <div aria-hidden="true" className="meme-glow" />
-          {memeQuery.data.status === MemeStatus.PUBLISHED ? null : (
+          {meme.status === MemeStatus.PUBLISHED ? null : (
             <div className="px-4 pb-4 lg:px-0">
-              <MemePendingBanner memeId={memeQuery.data.id} />
+              <MemePendingBanner memeId={meme.id} />
             </div>
           )}
           <div
             className="meme-stage"
             style={{
-              '--meme-video-ratio': getVideoAspectRatio(memeQuery.data.video)
+              '--meme-video-ratio': getVideoAspectRatio(meme.video)
             }}
           >
             <div aria-hidden="true" className="meme-stage-fill">
               <img
-                src={buildVideoFirstFrameUrl(memeQuery.data.video.bunnyId)}
+                src={buildVideoFirstFrameUrl(meme.video.bunnyId)}
                 alt=""
                 decoding="async"
               />
             </div>
             <MemeWatchPlayer
-              bunnyId={memeQuery.data.video.bunnyId}
-              title={memeQuery.data.title}
+              bunnyId={meme.video.bunnyId}
+              title={meme.title}
               onVideoChange={videoCallbackRef}
               playbackFailure={playbackFailure}
             />
@@ -186,16 +230,11 @@ export const MemePage = () => {
             <div className="meme-heading-row">
               <div className="meme-heading">
                 <div className="flex min-w-0 flex-col gap-1">
-                  <h1 className="font-bricolage text-xl leading-heading font-semibold text-balance lg:text-2xl">
-                    {memeQuery.data.title}
-                  </h1>
-                  <MemeMeta
-                    meme={memeQuery.data}
-                    now={memeQuery.dataUpdatedAt}
-                  />
+                  <MemeTitle key={meme.id} title={meme.title} />
+                  <MemeMeta meme={meme} now={memeQuery.dataUpdatedAt} />
                 </div>
                 <MemeActions
-                  meme={memeQuery.data}
+                  meme={meme}
                   isSharing={shareMutation.isPending}
                   isDownloading={downloadMutation.isPending}
                   onPause={handlePause}
@@ -203,13 +242,10 @@ export const MemePage = () => {
                 />
               </div>
             </div>
-            <MemeDetails meme={memeQuery.data} />
+            <MemeDetails meme={meme} />
           </div>
         </div>
-        <RelatedMemesRail
-          memeId={memeQuery.data.id}
-          title={memeQuery.data.title}
-        />
+        <RelatedMemesRail memeId={meme.id} title={meme.title} />
       </div>
     </div>
   )

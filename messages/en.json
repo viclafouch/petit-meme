@@ -340,6 +340,7 @@
   "meme_ai_search_cta": "AI",
   "meme_ai_search_cta_mobile": "Search with AI",
   "meme_related": "Similar memes",
+  "meme_related_empty": "No similar memes yet, try shuffle.",
   "meme_remove_bookmark": "Remove from favorites",
   "meme_search_description": "Type, click, laugh: discover all memes in one place.",
   "meme_search_placeholder": "Search by keywords, tags...",
@@ -371,14 +372,15 @@
     {
       "declarations": [
         "input count",
+        "input formattedCount",
         "local countPlural = count: plural"
       ],
       "selectors": [
         "countPlural"
       ],
       "match": {
-        "countPlural=one": "{count} view",
-        "countPlural=other": "{count} views"
+        "countPlural=one": "{formattedCount} view",
+        "countPlural=other": "{formattedCount} views"
       }
     }
   ],

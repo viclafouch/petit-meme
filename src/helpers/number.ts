@@ -37,3 +37,11 @@ export function formatCentsToEuros(
 
   return formatEuros(euros, params)
 }
+
+export const formatCount = (
+  count: number,
+  locale: Locale,
+  notation: 'standard' | 'compact'
+) => {
+  return new Intl.NumberFormat(locale, { notation }).format(count)
+}

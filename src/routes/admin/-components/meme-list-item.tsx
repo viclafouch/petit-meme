@@ -7,9 +7,11 @@ import { MemeVideoThumbnail } from '~/components/meme/meme-video-thumbnail'
 import { Badge } from '~/components/ui/badge'
 import { Skeleton } from '~/components/ui/skeleton'
 import { DEFAULT_MEME_TITLE, MemeStatusMeta } from '~/constants/meme'
+import { formatCount } from '~/helpers/number'
 import { cn } from '~/lib/utils'
 import { matchIsVideoPlayable } from '~/lib/video'
 import { m } from '~/paraglide/messages'
+import { getLocale } from '~/paraglide/runtime'
 import { getAdminVideoStatusQueryOpts } from '~/queries/admin/meme'
 import type { AdminMemeRecord } from '~/server/admin/meme/meme.functions'
 
@@ -116,7 +118,14 @@ export const MemeListItem = React.memo(({ meme }: MemeListItemProps) => {
           <div className="flex items-center gap-3 text-muted-foreground">
             <MemeStat
               icon={Eye}
-              label={m.meme_views({ count: meme.viewCount })}
+              label={m.meme_views({
+                count: meme.viewCount,
+                formattedCount: formatCount(
+                  meme.viewCount,
+                  getLocale(),
+                  'standard'
+                )
+              })}
               value={meme.viewCount}
             />
             <MemeStat

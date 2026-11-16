@@ -163,8 +163,8 @@ The CLI outputs a webhook signing secret (`whsec_...`). Add it to your `.env.dev
 | `pnpm run env:check` | Compare the env schemas with every env file and Vercel |
 | `pnpm run prisma:migrate:dev` | Apply pending migrations (via `.env.development`) |
 | `pnpm run prisma:migrate:prod` | Apply pending migrations (via `.env.production`) |
-| `pnpm run prisma:seed:dev` | Seed database (via `.env.development`) |
-| `pnpm run prisma:seed:preview` | Reseed the Preview stack (via `.env.preview`) |
+| `pnpm run prisma:seed:dev` | Reseed dev with real Memes (via `.env.development`) |
+| `pnpm run prisma:seed:preview` | Reseed the Preview stack with real Memes (via `.env.preview`) |
 | `pnpm run email:dev` | Preview email templates on port 3001 |
 
 ## Project Structure
@@ -222,20 +222,20 @@ Previews share the rest with production, since none of it holds data: the Sentry
 
 ### Reseed the Preview stack
 
-The seed empties the Preview database, Algolia indices, Stripe customers and Bunny videos, then imports the mock Memes and the admin account it prints:
+The seed rebuilds Preview, or dev, from real Memes:
 
 ```bash
 pnpm run prisma:seed:preview
+pnpm run prisma:seed:dev
 ```
 
-Once Bunny has encoded the videos, about a minute later, generate their stored files:
+1. It reads production, read only: the categories and the Memes listed in `prisma/seed-memes.json`, with their record, translations and counters, and each original video. The production values come from `.env.production`, kept out of Git: `DATABASE_URL`, `VITE_BUNNY_HOSTNAME`, `BUNNY_TOKEN_AUTH_KEY` and `BUNNY_ORIGINAL_ACCESS_KEY`. Read the last two from the Bunny API: the production pull zone's `ZoneSecurityKey` and the original access key of its "Server only files" Edge Rule.
+2. It refuses a target that shares the production database or Bunny hostname, holds a live Stripe key, or sends emails to real recipients.
+3. It empties the target database, Stripe customers, Bunny videos and their stored files, then copies the Memes. The listed `pending` and `archived` Memes take that status, and every date shifts so the newest Meme went out yesterday.
+4. It creates one account per audience, `admin@`, `user@`, `premium@` (Stripe monthly), `ending@` (Stripe yearly, cancelled) and `offered@petit-meme.dev`, plus figurants. No account comes from production. They all share one password: `SEED_PASSWORD` from the shell, or a random one the seed prints.
+5. It synthesizes the last 30 days of views, exports, bookmarks, Studio generations, AI searches and proposals, indexes Algolia, waits for Bunny to encode, then builds the first frames, watermarked videos and sounds.
 
-```bash
-pnpm exec vite-node --mode preview scripts/backfill-first-frames.ts
-pnpm exec vite-node --mode preview scripts/watermark-videos.ts
-pnpm exec vite-node --mode preview scripts/backfill-mp3.ts
-pnpm exec vite-node --mode preview scripts/check-bunny-zone.ts
-```
+The page holds 30 Memes, so the list keeps the French site past two pages, and the English site and one Category past one. A Meme that leaves production stops the seed: replace its id in the list.
 
 A migration from a branch that never merges stays on `preview`. Reset the branch to its parent, then reseed:
 

@@ -14,7 +14,14 @@ import {
 
 const TAKUMI_TAILWIND_PROP = 'tw'
 
-const FILES_OUTSIDE_SOURCE_ALIAS = ['e2e/**', 'prisma/**', 'scripts/**']
+const FILES_OUTSIDE_SOURCE_ALIAS = [
+  'e2e/**',
+  'prisma/**',
+  'scripts/**',
+  'vite-plugins/**'
+]
+
+const BUILD_WORKAROUND_FILES = ['vite-plugins/*.ts']
 
 const FILES_LOADED_BY_VITE_CONFIG = [
   'src/env/server.server.ts',
@@ -27,6 +34,7 @@ const FILES_RUN_BY_NODE = [
   'scripts/check-env.ts',
   'e2e/fake-anthropic.ts',
   'vite.config.ts',
+  'vite-plugins/*.ts',
   'pwa-assets.config.ts',
   'src/constants/pwa.ts',
   'src/constants/env.ts',
@@ -92,6 +100,12 @@ export default defineConfig({
       files: [...FILES_OUTSIDE_SOURCE_ALIAS, ...FILES_LOADED_BY_VITE_CONFIG],
       rules: {
         'import/no-relative-parent-imports': 'off'
+      }
+    },
+    {
+      files: BUILD_WORKAROUND_FILES,
+      rules: {
+        'viclafouch/comment-policy': 'off'
       }
     },
     {

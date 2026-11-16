@@ -537,6 +537,11 @@
       animation:
         meme-rail-reveal-fade-start linear both,
         meme-rail-hide-fade-end linear both;
+      /* Lightning CSS turns this two-animation shorthand into
+         animation-duration: 0s at build, which ends a scroll-driven fade at
+         once: https://github.com/parcel-bundler/lightningcss/issues/1012.
+         vite-plugins/scroll-driven-css-guard.ts fails the build if it comes
+         back. */
       animation-duration: auto;
       animation-timeline: scroll(self block);
       animation-range:

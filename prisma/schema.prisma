@@ -62,6 +62,8 @@ model Video {
   meme        Meme?
   bunnyId     String @unique @map("bunny_id")
   duration    Int
+  width       Int?
+  height      Int?
   bunnyStatus Int    @default(0) @map("bunny_status")
 
   @@map("video")

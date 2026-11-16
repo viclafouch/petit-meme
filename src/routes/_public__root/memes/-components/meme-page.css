@@ -38,8 +38,18 @@
     #c4b5fd
   );
   --meme-stage-max-height: calc(100svh - var(--navbar-space) - 14rem);
+  --meme-heading-and-actions-height: 12rem;
+  --meme-site-banner-height: 0px;
+  --meme-stage-phone-max-height: calc(
+    100svh - var(--meme-site-banner-height) - var(--navbar-space) -
+      var(--tab-bar-space) - var(--meme-heading-and-actions-height)
+  );
   overflow-x: clip;
   padding-bottom: 2.5rem;
+}
+
+:root:has([data-site-banner]:not([data-collapsed])) .meme-page {
+  --meme-site-banner-height: 3rem;
 }
 
 .meme-page :is(button, [role='button'], summary):not(:disabled) {
@@ -60,18 +70,13 @@
   mask-image: radial-gradient(farthest-side, black 62%, transparent);
 }
 
-.meme-stage-sticky {
-  position: sticky;
-  top: var(--navbar-space);
-  z-index: 20;
-}
-
 .meme-stage {
   position: relative;
   isolation: isolate;
   overflow: hidden;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  max-height: max(var(--meme-stage-phone-max-height), 100vw * 9 / 16);
+  aspect-ratio: var(--meme-video-ratio);
   background: var(--meme-stage-background);
 }
 
@@ -441,13 +446,10 @@
     margin-inline: auto;
   }
 
-  .meme-stage-sticky {
-    position: relative;
-    top: auto;
-  }
-
   .meme-stage {
     width: min(100%, var(--meme-stage-max-height) * 16 / 9);
+    max-height: none;
+    aspect-ratio: 16 / 9;
     margin-inline: auto;
     border-radius: 1.25rem;
     box-shadow:

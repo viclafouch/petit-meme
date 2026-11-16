@@ -28,7 +28,14 @@ const MEME = {
   updatedAt: new Date('2026-01-01T00:00:00Z'),
   publishedAt: new Date('2026-01-02T00:00:00Z'),
   status: 'PUBLISHED',
-  video: { id: 1, bunnyId: BUNNY_ID, duration: 12, bunnyStatus: 3 }
+  video: {
+    id: 1,
+    bunnyId: BUNNY_ID,
+    duration: 12,
+    width: null,
+    height: null,
+    bunnyStatus: 3
+  }
 } as const satisfies MemeWithVideo
 
 const findVideoObject = (graph: readonly Thing[]) => {

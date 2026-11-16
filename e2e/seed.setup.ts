@@ -14,6 +14,7 @@ import { E2E_PASSWORD, E2E_ROLES, type E2eRole } from './constants'
 import {
   E2E_CATEGORIES,
   E2E_MEMES,
+  E2E_VIDEO_DIMENSIONS,
   E2E_VIDEO_DURATION,
   type E2eCategory,
   type E2eMeme
@@ -192,6 +193,7 @@ const createMeme = async (meme: E2eMeme) => {
         create: {
           bunnyId: meme.bunnyId,
           duration: E2E_VIDEO_DURATION,
+          ...E2E_VIDEO_DIMENSIONS,
           bunnyStatus: BUNNY_STATUS.RESOLUTION_FINISHED
         }
       },

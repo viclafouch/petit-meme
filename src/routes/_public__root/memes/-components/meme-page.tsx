@@ -15,6 +15,7 @@ import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { getMemeQueryOpts } from '~/queries/meme'
 import { getCategoryHue } from '~/routes/_public__root/memes/-lib/category-hue'
+import { getVideoAspectRatio } from '~/routes/_public__root/memes/-lib/video-aspect-ratio'
 import type { getMeme } from '~/server/meme/meme.functions'
 import { MemeActions } from './meme-actions'
 import { MemePendingBanner } from './meme-pending-banner'
@@ -161,22 +162,25 @@ export const MemePage = () => {
               <MemePendingBanner memeId={memeQuery.data.id} />
             </div>
           )}
-          <div className="meme-stage-sticky">
-            <div className="meme-stage">
-              <div aria-hidden="true" className="meme-stage-fill">
-                <img
-                  src={buildVideoFirstFrameUrl(memeQuery.data.video.bunnyId)}
-                  alt=""
-                  decoding="async"
-                />
-              </div>
-              <MemeWatchPlayer
-                bunnyId={memeQuery.data.video.bunnyId}
-                title={memeQuery.data.title}
-                onVideoChange={videoCallbackRef}
-                playbackFailure={playbackFailure}
+          <div
+            className="meme-stage"
+            style={{
+              '--meme-video-ratio': getVideoAspectRatio(memeQuery.data.video)
+            }}
+          >
+            <div aria-hidden="true" className="meme-stage-fill">
+              <img
+                src={buildVideoFirstFrameUrl(memeQuery.data.video.bunnyId)}
+                alt=""
+                decoding="async"
               />
             </div>
+            <MemeWatchPlayer
+              bunnyId={memeQuery.data.video.bunnyId}
+              title={memeQuery.data.title}
+              onVideoChange={videoCallbackRef}
+              playbackFailure={playbackFailure}
+            />
           </div>
           <div className="relative flex flex-col gap-4 px-4 pt-4 lg:px-0 lg:pt-5">
             <div className="meme-heading-row">

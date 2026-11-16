@@ -231,7 +231,7 @@ pnpm run prisma:seed:dev
 
 1. It reads production, read only: the categories and the Memes listed in `prisma/seed-memes.json`, with their record, translations and counters, and each original video. The production values come from `.env.production`, kept out of Git: `DATABASE_URL`, `VITE_BUNNY_HOSTNAME`, `BUNNY_TOKEN_AUTH_KEY` and `BUNNY_ORIGINAL_ACCESS_KEY`. Read the last two from the Bunny API: the production pull zone's `ZoneSecurityKey` and the original access key of its "Server only files" Edge Rule.
 2. It refuses a target that shares the production database or Bunny hostname, holds a live Stripe key, or sends emails to real recipients.
-3. It empties the target database, Stripe customers, Bunny videos and their stored files, then copies the Memes. The listed `pending` and `archived` Memes take that status, and every date shifts so the newest Meme went out yesterday.
+3. It deletes the Stripe customers of its own accounts, never those of another environment sharing the Stripe account such as e2e, then empties the target database, Bunny videos and their stored files, and copies the Memes. The listed `pending` and `archived` Memes take that status, and every date shifts so the newest Meme went out yesterday.
 4. It creates one account per audience, `admin@`, `user@`, `premium@` (Stripe monthly), `ending@` (Stripe yearly, cancelled) and `offered@petit-meme.dev`, plus figurants. No account comes from production. They all share one password: `SEED_PASSWORD` from the shell, or a random one the seed prints.
 5. It synthesizes the last 30 days of views, exports, bookmarks, Studio generations, AI searches and proposals, indexes Algolia, waits for Bunny to encode, then builds the first frames, watermarked videos and sounds.
 

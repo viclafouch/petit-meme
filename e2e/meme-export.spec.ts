@@ -1,4 +1,5 @@
 import { expect, type Page } from '@playwright/test'
+import type { MemeDerivedFormat } from '~/constants/bunny'
 import { m } from '~/paraglide/messages'
 import { E2E_NAMED_MEMES } from './content'
 import { expectMemeFileDownloaded } from './downloads'
@@ -10,16 +11,32 @@ import { buildNamedMemeActionPattern, getMemeList } from './library'
 const EXPORTABLE_MEME = E2E_NAMED_MEMES.mostViewed
 const EXPORTABLE_MEME_PATHNAME = `/memes/${EXPORTABLE_MEME.id}`
 
-const pickDownloadFormat = async (page: Page, formatLabel: string) => {
-  const formatItem = page.getByRole('menuitem', { name: formatLabel })
+const DOWNLOAD_LABELS = {
+  mp4: { format: m.meme_format_video, action: m.meme_download_video },
+  mp3: { format: m.meme_format_audio, action: m.meme_download_sound }
+} as const satisfies Record<
+  MemeDerivedFormat,
+  { format: () => string; action: () => string }
+>
+
+const pickDownloadFormat = async (page: Page, format: MemeDerivedFormat) => {
+  const formatRadio = page.getByRole('radio', {
+    name: DOWNLOAD_LABELS[format].format()
+  })
 
   await repeatUntilVisible(() => {
     return page
       .getByRole('button', { name: m.meme_download(), exact: true })
       .click()
-  }, formatItem)
+  }, formatRadio)
 
-  await formatItem.click()
+  await formatRadio.click()
+  await page
+    .getByRole('button', {
+      name: DOWNLOAD_LABELS[format].action(),
+      exact: true
+    })
+    .click()
 }
 
 const getFirstMemeCardOptionsButton = (page: Page) => {
@@ -41,7 +58,7 @@ test.describe('a Premium', () => {
 
     const downloadPromise = page.waitForEvent('download')
 
-    await pickDownloadFormat(page, m.meme_format_video())
+    await pickDownloadFormat(page, 'mp4')
 
     await expectMemeFileDownloaded({
       download: await downloadPromise,
@@ -54,7 +71,7 @@ test.describe('a Premium', () => {
 
     const downloadPromise = page.waitForEvent('download')
 
-    await pickDownloadFormat(page, m.meme_format_audio())
+    await pickDownloadFormat(page, 'mp3')
 
     await expectMemeFileDownloaded({
       download: await downloadPromise,
@@ -71,7 +88,7 @@ test.describe('a free User', () => {
 
     const downloadPromise = page.waitForEvent('download')
 
-    await pickDownloadFormat(page, m.meme_format_video())
+    await pickDownloadFormat(page, 'mp4')
 
     await expectMemeFileDownloaded({
       download: await downloadPromise,
@@ -112,7 +129,7 @@ test.describe('a free User', () => {
   }) => {
     await page.goto(EXPORTABLE_MEME_PATHNAME)
 
-    await pickDownloadFormat(page, m.meme_format_audio())
+    await pickDownloadFormat(page, 'mp3')
 
     const upsellDialog = page.getByRole('dialog', {
       name: m.audio_upsell_title_download()
@@ -138,7 +155,7 @@ test.describe('a Visitor', () => {
   }) => {
     await page.goto(EXPORTABLE_MEME_PATHNAME)
 
-    await pickDownloadFormat(page, m.meme_format_audio())
+    await pickDownloadFormat(page, 'mp3')
 
     const audioUpsellDialog = page.getByRole('dialog', {
       name: m.audio_upsell_title_download()
@@ -152,7 +169,7 @@ test.describe('a Visitor', () => {
 
     const downloadPromise = page.waitForEvent('download')
 
-    await pickDownloadFormat(page, m.meme_format_video())
+    await pickDownloadFormat(page, 'mp4')
 
     await expectMemeFileDownloaded({
       download: await downloadPromise,

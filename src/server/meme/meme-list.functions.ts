@@ -226,51 +226,133 @@ export const countRecentMemes = createServerFn({ method: 'GET' }).handler(
   }
 )
 
+type FetchTrendingMemesParams = {
+  locale: Locale
+  count: number
+}
+
+const fetchTrendingMemes = async ({
+  locale,
+  count
+}: FetchTrendingMemesParams) => {
+  const visibleLocales = VISIBLE_CONTENT_LOCALES[locale]
+
+  try {
+    const memes = await recommendMemes({
+      cacheKey: `trending:${locale}:${count}`,
+      ttl: RECOMMEND_TRENDING_CACHE_TTL,
+      indexName: resolveAlgoliaIndexName(locale),
+      model: 'trending-items',
+      maxRecommendations: count,
+      filters: buildAlgoliaPublishedFilter(visibleLocales)
+    })
+
+    if (memes.length > 0) {
+      return memes
+    }
+  } catch {
+    algoliaLogger.warn('Trending-items recommendation unavailable')
+  }
+
+  return findMostViewedMemes({ locale, visibleLocales, count })
+}
+
+type FetchRelatedMemesParams = {
+  locale: Locale
+  memeId: string
+  title: string
+}
+
+const fetchRelatedMemes = async ({
+  locale,
+  memeId,
+  title
+}: FetchRelatedMemesParams) => {
+  try {
+    return await recommendMemes({
+      cacheKey: `related:${locale}:${memeId}:${RELATED_MEMES_COUNT}`,
+      ttl: RECOMMEND_RELATED_CACHE_TTL,
+      indexName: resolveAlgoliaIndexName(locale),
+      model: 'related-products',
+      objectID: memeId,
+      fallbackQuery: title,
+      maxRecommendations: RELATED_MEMES_COUNT,
+      filters: buildAlgoliaPublishedFilter(VISIBLE_CONTENT_LOCALES[locale])
+    })
+  } catch {
+    algoliaLogger.warn('Related-products recommendation unavailable')
+
+    return []
+  }
+}
+
+const readStrings = (value: unknown) => {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => {
+        return typeof item === 'string'
+      })
+    : []
+}
+
+const readMemeCategories = (meme: object) => {
+  return {
+    categoryTitles: readStrings(
+      'categoryTitles' in meme ? meme.categoryTitles : undefined
+    ),
+    categorySlugs: readStrings(
+      'categorySlugs' in meme ? meme.categorySlugs : undefined
+    )
+  }
+}
+
+const fetchTrendingTopUp = async (locale: Locale) => {
+  try {
+    const trendingMemes = await fetchTrendingMemes({
+      locale,
+      count: RELATED_MEMES_COUNT
+    })
+
+    return trendingMemes.map((meme) => {
+      return { ...meme, ...readMemeCategories(meme) }
+    })
+  } catch {
+    algoliaLogger.warn('Trending top-up of related Memes unavailable')
+
+    return []
+  }
+}
+
 export const listRelatedMemes = createServerFn({ method: 'GET' })
   .validator(z.object({ memeId: z.string(), title: z.string() }))
   .handler(async ({ data }) => {
     const locale = getLocale()
+    const relatedMemes = await fetchRelatedMemes({ locale, ...data })
 
-    try {
-      return await recommendMemes({
-        cacheKey: `related:${locale}:${data.memeId}`,
-        ttl: RECOMMEND_RELATED_CACHE_TTL,
-        indexName: resolveAlgoliaIndexName(locale),
-        model: 'related-products',
-        objectID: data.memeId,
-        fallbackQuery: data.title,
-        maxRecommendations: RELATED_MEMES_COUNT,
-        filters: buildAlgoliaPublishedFilter(VISIBLE_CONTENT_LOCALES[locale])
-      })
-    } catch {
-      algoliaLogger.warn('Related-products recommendation unavailable')
-
-      return []
+    if (relatedMemes.length >= RELATED_MEMES_COUNT) {
+      return relatedMemes
     }
+
+    const takenIds = new Set([
+      data.memeId,
+      ...relatedMemes.map((meme) => {
+        return meme.id
+      })
+    ])
+    const topUpMemes = await fetchTrendingTopUp(locale)
+
+    return [
+      ...relatedMemes,
+      ...topUpMemes.filter((meme) => {
+        return !takenIds.has(meme.id)
+      })
+    ].slice(0, RELATED_MEMES_COUNT)
   })
 
 export const listTrendingMemes = createServerFn({ method: 'GET' }).handler(
   async () => {
-    const locale = getLocale()
-    const visibleLocales = VISIBLE_CONTENT_LOCALES[locale]
-
-    try {
-      const memes = await recommendMemes({
-        cacheKey: `trending:${locale}`,
-        ttl: RECOMMEND_TRENDING_CACHE_TTL,
-        indexName: resolveAlgoliaIndexName(locale),
-        model: 'trending-items',
-        maxRecommendations: TRENDING_MEMES_COUNT,
-        filters: buildAlgoliaPublishedFilter(visibleLocales)
-      })
-
-      if (memes.length > 0) {
-        return memes
-      }
-    } catch {
-      algoliaLogger.warn('Trending-items recommendation unavailable')
-    }
-
-    return findMostViewedMemes({ locale, visibleLocales })
+    return fetchTrendingMemes({
+      locale: getLocale(),
+      count: TRENDING_MEMES_COUNT
+    })
   }
 )

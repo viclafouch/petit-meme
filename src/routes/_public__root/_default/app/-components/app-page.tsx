@@ -6,19 +6,19 @@ import {
   ScanLine,
   Send
 } from 'lucide-react'
+import { MessagingAppIcon } from '~/components/icon/messaging-app-icon'
 import { AppIcon } from '~/components/install/app-icon'
 import {
   getInstallGuide,
   type InstallGuideStep
 } from '~/components/install/install-guide'
 import { InstallGuideSteps } from '~/components/install/install-guide-steps'
+import { MESSAGING_APPS } from '~/constants/messaging-apps'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
-import { MESSAGING_APPS } from '~/routes/_public__root/_default/app/-lib/messaging-apps'
 import { AppQrCode } from './app-qr-code'
 import { PhoneInstallAction } from './install-action'
 import { LaunchDemo } from './launch-demo'
-import { MessagingAppIcon } from './messaging-app-icon'
 import { ShareDemo } from './share-demo'
 
 const SECTION_HEADING_CLASS_NAME =

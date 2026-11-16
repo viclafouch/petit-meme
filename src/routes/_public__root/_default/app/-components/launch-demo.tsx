@@ -7,15 +7,15 @@ import {
   Phone,
   Search
 } from 'lucide-react'
+import { MessagingAppIcon } from '~/components/icon/messaging-app-icon'
 import { AppIcon } from '~/components/install/app-icon'
 import { SITE_NAME } from '~/constants/branding'
+import { MESSAGING_APPS } from '~/constants/messaging-apps'
 import { APP_SCREEN_SIZE, buildAppScreenPath } from '~/helpers/web-app-assets'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { DEMO_CLOCK } from '~/routes/_public__root/_default/app/-lib/demo'
-import { MESSAGING_APPS } from '~/routes/_public__root/_default/app/-lib/messaging-apps'
-import { MessagingAppIcon } from './messaging-app-icon'
 import { PhoneFrame } from './phone-frame'
 
 const HOME_SCREENS = {

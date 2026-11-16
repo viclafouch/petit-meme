@@ -2,7 +2,6 @@ import type { Page } from '@playwright/test'
 import { m } from '~/paraglide/messages'
 import type { Locale } from '~/paraglide/runtime'
 import type { E2eMeme } from './content'
-import { repeatUntilVisible } from './hydration'
 import { E2E_LOCALE } from './locales'
 
 const TITLE_SLOT = '\u0000'
@@ -42,16 +41,6 @@ export const getMemeTitleLinks = (page: Page) => {
 export const getFirstMemePlayLink = (page: Page) => {
   // oxlint-disable-next-line playwright/no-nth-methods -- any Meme of the list will do: the first one is the one a Visitor reaches first
   return getMemePlayLinks(page).first()
-}
-
-export const openMemePlayer = async (page: Page) => {
-  const playerDialog = page.getByRole('dialog')
-
-  await repeatUntilVisible(() => {
-    return getFirstMemePlayLink(page).click()
-  }, playerDialog)
-
-  return playerDialog
 }
 
 const getReels = (page: Page) => {

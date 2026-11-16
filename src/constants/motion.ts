@@ -7,5 +7,3 @@ export const EASE_OUT = [
   EASE_OUT_SECOND_CONTROL_X,
   1
 ] as const satisfies readonly [number, number, number, number]
-
-export const MEME_PLAYER_TRANSITION_NAME = 'meme-player'

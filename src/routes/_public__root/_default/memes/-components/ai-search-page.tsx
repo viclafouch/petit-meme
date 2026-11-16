@@ -304,11 +304,7 @@ const AiSearchResults = ({ result }: AiSearchResultsProps) => {
           {m.ai_search_result_count({ count: result.memes.length })}
         </p>
       </div>
-      <MemesList
-        memes={result.memes}
-        layoutContext="ai-search"
-        queryID={result.queryID}
-      />
+      <MemesList memes={result.memes} queryID={result.queryID} />
     </div>
   )
 }

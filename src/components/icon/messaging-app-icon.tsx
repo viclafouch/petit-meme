@@ -1,6 +1,8 @@
+import {
+  MESSAGING_APPS_SPRITE_PATH,
+  type MessagingApp
+} from '~/constants/messaging-apps'
 import { cn } from '~/lib/utils'
-import { DEMO_ASSET_PATHS } from '~/routes/_public__root/_default/app/-lib/demo'
-import type { MessagingApp } from '~/routes/_public__root/_default/app/-lib/messaging-apps'
 
 type MessagingAppIconProps = {
   app: MessagingApp
@@ -18,7 +20,7 @@ export const MessagingAppIcon = ({ app, className }: MessagingAppIconProps) => {
       )}
     >
       <svg viewBox="0 0 24 24" fill="currentColor" className="size-[58%]">
-        <use href={`${DEMO_ASSET_PATHS.messagingAppsSprite}#${app.id}`} />
+        <use href={`${MESSAGING_APPS_SPRITE_PATH}#${app.id}`} />
       </svg>
     </span>
   )

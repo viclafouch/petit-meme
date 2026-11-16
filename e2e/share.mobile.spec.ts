@@ -1,7 +1,6 @@
 import { expect, type Locator, type Page } from '@playwright/test'
 import { m } from '~/paraglide/messages'
 import { E2E_NAMED_MEMES } from './content'
-import { expectMemeFileDownloaded } from './downloads'
 import { resolveStorageStatePath } from './env'
 import { test } from './fixtures'
 import { repeatUntilVisible } from './hydration'
@@ -55,7 +54,7 @@ test.describe('the native share', () => {
       const videoItem = await openShareMenu({
         page,
         shareButton: getMemePageShareButton(page),
-        formatLabel: m.meme_format_video()
+        formatLabel: m.meme_send_video()
       })
 
       await videoItem.click()
@@ -64,26 +63,6 @@ test.describe('the native share', () => {
         page,
         title: SHARED_MEME.title,
         format: 'mp4'
-      })
-    })
-
-    test('hands the sound of a Meme page over to the phone as an MP3', async ({
-      page
-    }) => {
-      await page.goto(SHARED_MEME_PATHNAME)
-
-      const audioItem = await openShareMenu({
-        page,
-        shareButton: getMemePageShareButton(page),
-        formatLabel: m.meme_format_audio()
-      })
-
-      await audioItem.click()
-
-      await expectFileWasShared({
-        page,
-        title: SHARED_MEME.title,
-        format: 'mp3'
       })
     })
 
@@ -111,33 +90,6 @@ test.describe('the native share', () => {
     })
   })
 
-  test.describe('a Premium whose phone refuses the MP3', () => {
-    test.use({ storageState: resolveStorageStatePath('premium') })
-
-    test.beforeEach(async ({ page }) => {
-      await recordShares({ page, isFileShareable: false })
-    })
-
-    test('downloads the sound instead', async ({ page }) => {
-      await page.goto(SHARED_MEME_PATHNAME)
-
-      const audioItem = await openShareMenu({
-        page,
-        shareButton: getMemePageShareButton(page),
-        formatLabel: m.meme_format_audio()
-      })
-
-      const downloadPromise = page.waitForEvent('download')
-
-      await audioItem.click()
-
-      await expectMemeFileDownloaded({
-        download: await downloadPromise,
-        format: 'mp3'
-      })
-    })
-  })
-
   test.describe('a free User', () => {
     test.use({ storageState: resolveStorageStatePath('free') })
 
@@ -151,7 +103,7 @@ test.describe('the native share', () => {
       const videoItem = await openShareMenu({
         page,
         shareButton: getMemePageShareButton(page),
-        formatLabel: m.meme_format_video()
+        formatLabel: m.meme_send_video()
       })
 
       await videoItem.click()
@@ -161,35 +113,6 @@ test.describe('the native share', () => {
         title: SHARED_MEME.title,
         format: 'mp4'
       })
-    })
-
-    test('is offered Premium for the sound and still shares the video', async ({
-      page
-    }) => {
-      await page.goto(SHARED_MEME_PATHNAME)
-
-      const audioItem = await openShareMenu({
-        page,
-        shareButton: getMemePageShareButton(page),
-        formatLabel: m.meme_format_audio()
-      })
-
-      await audioItem.click()
-
-      const upsellDialog = page.getByRole('dialog', {
-        name: m.audio_upsell_title_share()
-      })
-
-      await upsellDialog
-        .getByRole('button', { name: m.audio_upsell_share_video() })
-        .click()
-
-      await expectFileWasShared({
-        page,
-        title: SHARED_MEME.title,
-        format: 'mp4'
-      })
-      await expect(upsellDialog).toBeHidden()
     })
   })
 })

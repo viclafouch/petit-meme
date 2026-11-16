@@ -27,6 +27,7 @@ type TrendingMemeRow = {
 type FindMostViewedMemesParams = {
   locale: Locale
   visibleLocales: MemeContentLocale[]
+  count?: number
 }
 
 const MEME_WITH_VIDEO_AND_TRANSLATIONS_INCLUDE = {
@@ -176,9 +177,13 @@ export const findMemesInOrder = createServerOnlyFn(
 )
 
 export const findMostViewedMemes = createServerOnlyFn(
-  async ({ locale, visibleLocales }: FindMostViewedMemesParams) => {
+  async ({
+    locale,
+    visibleLocales,
+    count = TRENDING_MEMES_COUNT
+  }: FindMostViewedMemesParams) => {
     const memes = await prismaClient.meme.findMany({
-      take: TRENDING_MEMES_COUNT,
+      take: count,
       include: MEME_WITH_VIDEO_AND_TRANSLATIONS_INCLUDE,
       orderBy: { viewCount: 'desc' },
       where: {

@@ -247,16 +247,6 @@ export const matchIsVideoBuffered = ({
   )
 }
 
-const tryPlayVideo = async (video: HTMLVideoElement) => {
-  try {
-    await video.play()
-
-    return true
-  } catch {
-    return false
-  }
-}
-
 export const seekVideoOnceReady = (video: HTMLVideoElement, time: number) => {
   if (video.readyState >= HTMLMediaElement.HAVE_METADATA) {
     video.currentTime = time
@@ -276,28 +266,4 @@ export const seekVideoOnceReady = (video: HTMLVideoElement, time: number) => {
 export const stopVideo = (video: HTMLVideoElement) => {
   video.pause()
   video.currentTime = 0
-}
-
-type PlayVideoWhenReadyParams = {
-  video: HTMLVideoElement
-  signal: AbortSignal
-}
-
-export const playVideoWhenReady = async ({
-  video,
-  signal
-}: PlayVideoWhenReadyParams) => {
-  const hasStarted = await tryPlayVideo(video)
-
-  if (hasStarted || signal.aborted) {
-    return
-  }
-
-  video.addEventListener(
-    'canplay',
-    () => {
-      void tryPlayVideo(video)
-    },
-    { once: true, signal }
-  )
 }

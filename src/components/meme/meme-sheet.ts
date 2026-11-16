@@ -1,5 +1,6 @@
 import type React from 'react'
-import { Download, Share2 } from 'lucide-react'
+import { AudioLines, Download, Film, Share2 } from 'lucide-react'
+import type { MemeDerivedFormat } from '~/constants/bunny'
 import type { MemeExportMode } from '~/constants/meme'
 import { m } from '~/paraglide/messages'
 
@@ -26,4 +27,20 @@ export const MEME_EXPORT_MODE_DISPLAY = {
 } as const satisfies Record<
   MemeExportMode,
   { icon: React.ElementType; label: () => string }
+>
+
+export const MEME_FORMAT_DISPLAY = {
+  mp4: {
+    icon: Film,
+    label: m.meme_format_video,
+    iconClassName: 'text-violet-600! dark:text-violet-400!'
+  },
+  mp3: {
+    icon: AudioLines,
+    label: m.meme_format_audio,
+    iconClassName: 'text-emerald-600! dark:text-emerald-400!'
+  }
+} as const satisfies Record<
+  MemeDerivedFormat,
+  { icon: React.ElementType; label: () => string; iconClassName: string }
 >

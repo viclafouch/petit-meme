@@ -1,13 +1,15 @@
 import { expect } from '@playwright/test'
 import { HTTP_STATUS } from '~/constants/http'
 import { m } from '~/paraglide/messages'
-import { E2E_NAMED_MEMES } from './content'
-import { E2E_BUNNY_HOSTNAME } from './env'
+import { E2E_CATEGORIES, E2E_NAMED_MEMES } from './content'
+import { E2E_BUNNY_IMAGES_HOSTNAME } from './env'
 import { test } from './fixtures'
 
 const PLAYABLE_MEME = E2E_NAMED_MEMES.mostViewed
+const PLAYABLE_MEME_CATEGORY = E2E_CATEGORIES.chats
+const PLAYABLE_MEME_KEYWORD = 'cookie'
 const PLAYABLE_MEME_PATHNAME = `/memes/${PLAYABLE_MEME.id}`
-const PLAYABLE_MEME_POSTER_URL = `https://${E2E_BUNNY_HOSTNAME}/${PLAYABLE_MEME.bunnyId}/thumbnail.jpg`
+const PLAYABLE_MEME_POSTER_URL = `https://${E2E_BUNNY_IMAGES_HOSTNAME}/${PLAYABLE_MEME.bunnyId}/first-frame.webp`
 const AUDIO_LANGUAGE_LABEL = m.meme_audio_language({
   language: m.meme_content_locale_FR()
 })
@@ -32,25 +34,32 @@ test.describe('a Meme page', () => {
     ).toBeVisible()
   })
 
-  test('hands back to the library when the visit starts on it', async ({
-    page
-  }) => {
+  test('a category of the Meme opens its category page', async ({ page }) => {
     await page.goto(PLAYABLE_MEME_PATHNAME)
 
-    await page.getByRole('link', { name: m.meme_back(), exact: true }).click()
+    await page
+      .getByRole('list', { name: m.meme_categories_label() })
+      .getByRole('link', { name: PLAYABLE_MEME_CATEGORY.title, exact: true })
+      .click()
 
-    await expect(page).toHaveURL('/memes/category/trending')
+    await expect(page).toHaveURL(
+      `/memes/category/${PLAYABLE_MEME_CATEGORY.slug}`
+    )
   })
 
-  test('hands back to the library, not to the site a Visitor came from', async ({
+  test('a keyword of the Meme searches the library for it', async ({
     page
   }) => {
-    await page.goto('/')
     await page.goto(PLAYABLE_MEME_PATHNAME)
 
-    await page.getByRole('link', { name: m.meme_back(), exact: true }).click()
+    await page
+      .getByRole('list', { name: m.meme_related_searches() })
+      .getByRole('link', { name: PLAYABLE_MEME_KEYWORD, exact: true })
+      .click()
 
-    await expect(page).toHaveURL('/memes/category/trending')
+    await expect(page).toHaveURL(
+      `/memes/category/trending?query=${PLAYABLE_MEME_KEYWORD}`
+    )
   })
 
   test('the player carries the Video of the Meme and plays it on its own', async ({
@@ -61,7 +70,10 @@ test.describe('a Meme page', () => {
     const player = page.getByTestId('meme-video-player')
     const video = player.getByTestId('meme-video')
 
-    await expect(video).toHaveAttribute('poster', PLAYABLE_MEME_POSTER_URL)
+    await expect(player.getByTestId('meme-poster')).toHaveAttribute(
+      'src',
+      PLAYABLE_MEME_POSTER_URL
+    )
     await expect(
       player.getByRole('button', { name: m.meme_pause_video(), exact: true })
     ).toBeVisible()

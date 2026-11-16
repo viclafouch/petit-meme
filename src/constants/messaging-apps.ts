@@ -1,3 +1,5 @@
+export const MESSAGING_APPS_SPRITE_PATH = '/images/app/messaging-apps.svg'
+
 export const MESSAGING_APPS = [
   {
     id: 'whatsapp',

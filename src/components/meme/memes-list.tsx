@@ -1,12 +1,10 @@
 import React from 'react'
-import { AnimatePresence } from 'motion/react'
 import { useRouteContext } from '@tanstack/react-router'
 import {
   MemeListItem,
   type MemeListItemProps
 } from '~/components/meme/meme-list-item'
 import type { ThumbnailPriority } from '~/components/meme/meme-video-thumbnail'
-import { PlayerDialog } from '~/components/meme/player-dialog'
 import {
   MEME_GRID_COLUMNS,
   MEMES_PER_PAGE,
@@ -22,7 +20,6 @@ export type MemeWithHighlight = MemeWithVideo & {
 
 type MemesListProps = {
   memes: MemeWithHighlight[]
-  layoutContext: string
   columnGridCount?: number
   queryID?: string
   page?: number
@@ -33,15 +30,12 @@ const MEME_IDS_KEY_SEPARATOR = ','
 
 export const MemesList = ({
   memes,
-  layoutContext,
   columnGridCount = 4,
   queryID,
   page = 0,
   isAboveTheFold = true
 }: MemesListProps) => {
   const { user } = useRouteContext({ from: '__root__' })
-  const [selectedId, setSelectedId] = React.useState<string | null>(null)
-  const triggerRef = React.useRef<HTMLElement | null>(null)
 
   const authenticatedUserToken = user?.id
 
@@ -68,21 +62,6 @@ export const MemesList = ({
     return <p className="text-muted-foreground">{m.common_no_results()}</p>
   }
 
-  const handleSelect = (meme: MemeWithVideo, trigger: HTMLElement) => {
-    triggerRef.current = trigger
-    setSelectedId(meme.id)
-  }
-
-  const handleDeselect = () => {
-    triggerRef.current?.focus()
-    triggerRef.current = null
-    setSelectedId(null)
-  }
-
-  const selectedMeme = memes.find((meme) => {
-    return meme.id === selectedId
-  })
-
   const size: MemeListItemProps['size'] =
     columnGridCount < MEME_GRID_COLUMNS.MEDIUM ? 'md' : 'sm'
 
@@ -104,10 +83,8 @@ export const MemesList = ({
         {memes.map((meme, index) => {
           return (
             <MemeListItem
-              onOpenPlayer={handleSelect}
               key={meme.id}
               size={size}
-              layoutContext={layoutContext}
               meme={meme}
               highlightedTitle={meme.highlightedTitle}
               queryID={queryID}
@@ -118,17 +95,6 @@ export const MemesList = ({
           )
         })}
       </ul>
-      <AnimatePresence>
-        {selectedMeme ? (
-          <PlayerDialog
-            meme={selectedMeme}
-            layoutContext={layoutContext}
-            onClose={handleDeselect}
-            queryID={queryID}
-            authenticatedUserToken={authenticatedUserToken}
-          />
-        ) : null}
-      </AnimatePresence>
     </div>
   )
 }

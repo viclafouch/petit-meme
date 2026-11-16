@@ -33,7 +33,7 @@ test.describe('the random draw', () => {
 
     await repeatUntilNavigated(
       () => {
-        return page.getByRole('button', { name: m.meme_random() }).click()
+        return page.getByRole('button', { name: m.meme_shuffle() }).click()
       },
       { page, from: SHUFFLE_SOURCE_PATHNAME }
     )

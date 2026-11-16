@@ -54,7 +54,7 @@ test.describe('the native share', () => {
       const videoItem = await openShareMenu({
         page,
         shareButton: getMemePageShareButton(page),
-        formatLabel: m.meme_send_video()
+        formatLabel: m.meme_format_video()
       })
 
       await videoItem.click()
@@ -63,6 +63,26 @@ test.describe('the native share', () => {
         page,
         title: SHARED_MEME.title,
         format: 'mp4'
+      })
+    })
+
+    test('hands the sound of a Meme page over to the phone', async ({
+      page
+    }) => {
+      await page.goto(SHARED_MEME_PATHNAME)
+
+      const soundItem = await openShareMenu({
+        page,
+        shareButton: getMemePageShareButton(page),
+        formatLabel: m.meme_format_audio()
+      })
+
+      await soundItem.click()
+
+      await expectFileWasShared({
+        page,
+        title: SHARED_MEME.title,
+        format: 'mp3'
       })
     })
 
@@ -103,7 +123,7 @@ test.describe('the native share', () => {
       const videoItem = await openShareMenu({
         page,
         shareButton: getMemePageShareButton(page),
-        formatLabel: m.meme_send_video()
+        formatLabel: m.meme_format_video()
       })
 
       await videoItem.click()

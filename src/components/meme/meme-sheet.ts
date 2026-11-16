@@ -18,9 +18,6 @@ export const SHEET_GROUP_CLASS_NAME =
 export const SHEET_ROW_CLASS_NAME =
   'flex min-h-14 w-full items-center gap-3 px-4 text-left text-base font-medium touch-tap transition-colors duration-100 active:bg-muted disabled:opacity-50 [&_svg]:size-5 [&_svg]:shrink-0'
 
-export const SHEET_TILE_CLASS_NAME =
-  'flex min-h-36 flex-col items-center justify-center gap-2 rounded-2xl bg-secondary px-3 py-5 touch-tap transition-transform duration-100 ease-out active:scale-[0.97] active:bg-muted'
-
 export const MEME_EXPORT_MODE_DISPLAY = {
   download: { icon: Download, label: m.meme_download },
   share: { icon: Share2, label: m.meme_share }

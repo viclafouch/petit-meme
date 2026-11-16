@@ -38,7 +38,7 @@ const readVideoThumbnailUrls = async (request: APIRequestContext) => {
 }
 
 test.describe('the video thumbnails Google reads', () => {
-  test('the raw thumbnail leads, and matches the sitemap and the poster', async ({
+  test('the raw thumbnail leads, and matches the sitemap and any poster', async ({
     request
   }) => {
     const { html, thumbnailUrls } = await readVideoThumbnailUrls(request)
@@ -49,7 +49,16 @@ test.describe('the video thumbnails Google reads', () => {
     expect(await sitemap.text()).toContain(
       `<video:thumbnail_loc>${rawThumbnailUrl}</video:thumbnail_loc>`
     )
-    expect(html).toContain(`poster="${rawThumbnailUrl}"`)
+    const otherPosterUrls = Array.from(
+      html.matchAll(/ poster="([^"]+)"/gu),
+      ([, posterUrl]) => {
+        return posterUrl
+      }
+    ).filter((posterUrl) => {
+      return posterUrl !== rawThumbnailUrl
+    })
+
+    expect(otherPosterUrls).toStrictEqual([])
   })
 
   for (const [index, ratio] of THUMBNAIL_RATIOS.entries()) {

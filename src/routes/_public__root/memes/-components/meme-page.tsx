@@ -7,7 +7,7 @@ import { useMemeExport } from '~/components/meme/use-meme-export'
 import { useMemeHls } from '~/components/meme/use-meme-hls'
 import { useRegisterMemeView } from '~/components/meme/use-register-meme-view'
 import type { MemeDerivedFormat } from '~/constants/bunny'
-import { TRENDING_CATEGORY_SLUG } from '~/constants/meme'
+import { TRENDING_CATEGORY_SLUG, type MemeExportMode } from '~/constants/meme'
 import { MemeStatus } from '~/db/generated/prisma/enums'
 import { formatDate, formatRelativeTime } from '~/helpers/date'
 import { buildVideoFirstFrameUrl } from '~/lib/bunny-public-urls'
@@ -144,14 +144,11 @@ export const MemePage = () => {
     video?.pause()
   }
 
-  const handleShareVideo = () => {
+  const handleExport = (mode: MemeExportMode, format: MemeDerivedFormat) => {
     handlePause()
-    shareMutation.trigger(memeQuery.data, 'mp4')
-  }
+    const exportMutation = mode === 'share' ? shareMutation : downloadMutation
 
-  const handleDownload = (format: MemeDerivedFormat) => {
-    handlePause()
-    downloadMutation.trigger(memeQuery.data, format)
+    exportMutation.trigger(memeQuery.data, format)
   }
 
   return (
@@ -198,8 +195,7 @@ export const MemePage = () => {
                   isSharing={shareMutation.isPending}
                   isDownloading={downloadMutation.isPending}
                   onPause={handlePause}
-                  onShareVideo={handleShareVideo}
-                  onDownload={handleDownload}
+                  onExport={handleExport}
                 />
               </div>
             </div>

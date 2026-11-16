@@ -237,11 +237,25 @@
 }
 
 .meme-actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.5rem;
-  overflow-x: auto;
-  scrollbar-width: none;
-  overscroll-behavior-x: contain;
+}
+
+.meme-actions > .meme-pill {
+  justify-content: center;
+  min-width: 0;
+  padding-inline: 0.75rem;
+}
+
+.meme-actions > .meme-pill-edit {
+  grid-column: 1 / -1;
+}
+
+@container meme-heading (width >= 34rem) {
+  .meme-actions {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
 @container meme-heading (width >= 46rem) {
@@ -256,42 +270,13 @@
   }
 
   .meme-heading > .meme-actions {
+    display: flex;
     flex-shrink: 0;
-    overflow: visible;
-    margin-inline: 0;
-    padding-inline: 0;
   }
-}
 
-.meme-app {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.375rem;
-  width: 4.25rem;
-  margin-inline: auto;
-  font-size: 0.75rem;
-  font-weight: 500;
-  touch-action: manipulation;
-  -webkit-user-select: none;
-  user-select: none;
-}
-
-.meme-app > span:first-child {
-  transition: transform 120ms var(--meme-ease-out);
-}
-
-.meme-app:active > span:first-child {
-  transform: scale(0.94);
-}
-
-.meme-app:focus-visible {
-  outline: none;
-}
-
-.meme-app:focus-visible > span:first-child {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
+  .meme-heading > .meme-actions > .meme-pill {
+    padding-inline: 1rem;
+  }
 }
 
 .meme-tags {

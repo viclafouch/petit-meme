@@ -23,7 +23,6 @@ import {
 import { getCategoryHue } from '~/routes/_public__root/memes/-lib/category-hue'
 import { getVideoAspectRatio } from '~/routes/_public__root/memes/-lib/video-aspect-ratio'
 import type { getMeme } from '~/server/meme/meme.functions'
-import { BreakUiToggle } from './break-ui-toggle'
 import { MemeActions } from './meme-actions'
 import { MemePendingBanner } from './meme-pending-banner'
 import { MemeWatchPlayer } from './meme-watch-player'
@@ -197,7 +196,6 @@ export const MemePage = () => {
 
   return (
     <div className="meme-page">
-      <BreakUiToggle />
       <div className="meme-grid">
         <div className="relative isolate min-w-0">
           <div aria-hidden="true" className="meme-glow" />

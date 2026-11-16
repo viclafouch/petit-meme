@@ -4,6 +4,8 @@ export default defineConfig({
   entry: [
     'vite.config.ts',
     'src/service-worker/sw.ts',
+    'src/**/*.dev.ts',
+    'src/**/*.dev.server.ts',
     'playwright.config.ts',
     'prisma.config.ts',
     'prisma/seed.ts',

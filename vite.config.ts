@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url'
 import { nitro } from 'nitro/vite'
 import { defineConfig, loadEnv } from 'vite'
 import { paraglideVitePlugin } from '@inlang/paraglide-js'
@@ -148,6 +149,24 @@ const SERVER_ONLY_PACKAGES = [
 
 const BROWSER_ONLY_PACKAGES = ['@ffmpeg/ffmpeg', 'hls.js']
 
+const DEV_TOOLBAR_ALIASES = [
+  {
+    find: /^~\/components\/premium\/use-is-premium$/u,
+    replacement: fileURLToPath(
+      new URL('src/components/premium/use-is-premium.dev.ts', import.meta.url)
+    )
+  },
+  {
+    find: /^~\/server\/subscription\/subscription\.server$/u,
+    replacement: fileURLToPath(
+      new URL(
+        'src/server/subscription/subscription.dev.server.ts',
+        import.meta.url
+      )
+    )
+  }
+]
+
 const BROWSER_FLOOR_TARGETS = [
   'chrome111',
   'edge111',
@@ -156,7 +175,7 @@ const BROWSER_FLOOR_TARGETS = [
   'ios16.4'
 ]
 
-export default defineConfig(async ({ mode }) => {
+export default defineConfig(async ({ command, mode }) => {
   // oxlint-disable-next-line node/no-process-env -- the Vite config is the build boundary that loads the mode's env files into the process environment
   const processEnvironment = process.env
 
@@ -177,7 +196,8 @@ export default defineConfig(async ({ mode }) => {
 
   return {
     resolve: {
-      tsconfigPaths: true
+      tsconfigPaths: true,
+      alias: command === 'serve' ? DEV_TOOLBAR_ALIASES : []
     },
     build: {
       target: BROWSER_FLOOR_TARGETS

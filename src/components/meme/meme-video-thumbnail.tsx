@@ -1,5 +1,5 @@
 import { Badge } from '~/components/ui/badge'
-import { formatSeconds } from '~/helpers/duration'
+import { formatClockDuration } from '~/helpers/duration'
 import {
   buildVideoImageUrl,
   buildVideoPreviewUrl
@@ -40,7 +40,7 @@ export const MemeVideoThumbnail = ({
       />
       <div className="absolute bottom-1 left-1 z-30">
         <Badge size="sm" variant="black">
-          {formatSeconds(duration, getLocale())}
+          {formatClockDuration(duration, getLocale())}
         </Badge>
       </div>
       <div className="absolute inset-0 z-40">{children}</div>

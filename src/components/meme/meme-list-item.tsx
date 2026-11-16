@@ -22,6 +22,7 @@ import {
 import type { MemeWithVideo } from '~/constants/meme'
 import type { HighlightedText } from '~/helpers/highlight'
 import { matchIsContentLocaleForeign } from '~/helpers/i18n-content'
+import { formatCount } from '~/helpers/number'
 import { useIsCoarsePointer } from '~/hooks/use-is-coarse-pointer'
 import {
   sendClickEvent,
@@ -164,7 +165,14 @@ export const MemeListItem = React.memo(
                 <MemeLanguageBadge contentLocale={meme.contentLocale} />
               ) : null}
               <span className={cn(sizes[size].views)}>
-                {m.meme_views({ count: meme.viewCount })}
+                {m.meme_views({
+                  count: meme.viewCount,
+                  formattedCount: formatCount(
+                    meme.viewCount,
+                    getLocale(),
+                    'compact'
+                  )
+                })}
               </span>
             </div>
           </div>

@@ -340,6 +340,7 @@
   "meme_ai_search_cta": "IA",
   "meme_ai_search_cta_mobile": "Chercher avec l'IA",
   "meme_related": "Memes similaires",
+  "meme_related_empty": "Pas encore de mème similaire, tente le hasard.",
   "meme_remove_bookmark": "Retirer des favoris",
   "meme_search_description": "Tape, clique, rigole : découvre tous les mèmes en un seul endroit.",
   "meme_search_placeholder": "Rechercher par mots-clés, tags...",
@@ -371,14 +372,15 @@
     {
       "declarations": [
         "input count",
+        "input formattedCount",
         "local countPlural = count: plural"
       ],
       "selectors": [
         "countPlural"
       ],
       "match": {
-        "countPlural=one": "{count} vue",
-        "countPlural=other": "{count} vues"
+        "countPlural=one": "{formattedCount} vue",
+        "countPlural=other": "{formattedCount} vues"
       }
     }
   ],

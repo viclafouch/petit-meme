@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
+import path from 'node:path'
 import type { Download } from '@playwright/test'
 import { ORIGINAL_ACCESS_HEADER } from '~/constants/bunny'
 import { FIVE_MINUTES_IN_SECONDS, SECOND } from '~/constants/time'
@@ -49,7 +50,7 @@ export const readDownloadedFile = async (download: Download) => {
   const bytes = await readFile(await download.path())
 
   return {
-    fileName: download.suggestedFilename(),
+    extension: path.extname(download.suggestedFilename()),
     sha256: hashBytes(bytes),
     isEmpty: bytes.length === 0
   }

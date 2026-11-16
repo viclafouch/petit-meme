@@ -1,3 +1,4 @@
+import path from 'node:path'
 import { expect, type Page } from '@playwright/test'
 import {
   MEME_STORED_FILE_CONTENT_TYPES,
@@ -103,26 +104,28 @@ const DELIVERIES = {
   share: async (page: Page, format: MemeDerivedFormat) => {
     await pickFormat(page, 'share', format)
 
-    const { title, type, ...sharedFile } = await readShareAttempt(page)
+    const { title, type, fileName, ...sharedFile } =
+      await readShareAttempt(page)
 
-    expect({ title, type }).toStrictEqual({
+    expect({ title, type, fileName }).toStrictEqual({
       title: EXPORTED_MEME.title,
-      type: MEME_STORED_FILE_CONTENT_TYPES[format]
+      type: MEME_STORED_FILE_CONTENT_TYPES[format],
+      fileName: `${EXPORTED_MEME.title}.${format}`
     })
 
-    return sharedFile
+    return { extension: path.extname(fileName), ...sharedFile }
   }
 } as const satisfies Record<
   MemeExportMode,
   (
     page: Page,
     format: MemeDerivedFormat
-  ) => Promise<{ fileName: string; sha256: string; isEmpty: boolean }>
+  ) => Promise<{ extension: string; sha256: string; isEmpty: boolean }>
 >
 
 const buildExpectedFile = (format: MemeDerivedFormat) => {
   return {
-    fileName: `${EXPORTED_MEME.title}.${format}`,
+    extension: `.${format}`,
     sha256: expect.any(String),
     isEmpty: false
   }

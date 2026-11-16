@@ -29,15 +29,21 @@ export const MEME_EXPORT_MODE_DISPLAY = {
 export const MEME_FORMAT_DISPLAY = {
   mp4: {
     icon: Film,
-    label: m.meme_format_video,
     iconClassName: 'text-violet-600! dark:text-violet-400!'
   },
   mp3: {
     icon: AudioLines,
-    label: m.meme_format_audio,
     iconClassName: 'text-emerald-600! dark:text-emerald-400!'
   }
 } as const satisfies Record<
   MemeDerivedFormat,
-  { icon: React.ElementType; label: () => string; iconClassName: string }
+  { icon: React.ElementType; iconClassName: string }
+>
+
+export const MEME_FORMAT_EXPORT_LABELS = {
+  download: { mp4: m.meme_download_video, mp3: m.meme_export_sound_only },
+  share: { mp4: m.meme_share_video, mp3: m.meme_export_sound_only }
+} as const satisfies Record<
+  MemeExportMode,
+  Record<MemeDerivedFormat, () => string>
 >

@@ -104,7 +104,7 @@ test.describe('a free User', () => {
     await downloadSubmenu.press('ArrowRight')
 
     const audioItem = page.getByRole('menuitem', {
-      name: m.meme_format_audio()
+      name: m.meme_export_sound_only()
     })
 
     await expect(audioItem).toBeVisible()

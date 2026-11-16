@@ -27,6 +27,7 @@ Before anything that runs on a schedule, holds a connection or calls a paid API 
 ## Environments
 
 - **The dev server is Victor's.** Start or stop it only on request. Hand Victor anything interactive.
+- **To see a change render**, drive the e2e build from a throwaway `e2e/evidence.spec.ts` (git-ignored), as the `create-pull-request` skill shows.
 - **Victor's phone is his.** Never connect to it on your own. When only a real phone can settle a check (software keyboard, viewport, touch, PWA), recommend that Victor runs `/phone`.
 - **Use the CLIs and MCPs yourself** before handing Victor a command or a dashboard step.
 - **Read production freely, write it only when Victor asks.** Production migrations stay Victor's. Before a write, say which environment the command hits: database tooling aims at production by default.

@@ -66,10 +66,16 @@ export default defineConfig({
       dependencies: ['auth']
     },
     {
+      name: 'mobile-chrome',
+      testMatch: /meme-files\.mobile\.spec\.ts/u,
+      use: { ...devices['Pixel 7'], locale: 'fr-FR' },
+      dependencies: ['auth']
+    },
+    {
       name: 'last',
       testMatch: /.*\.last\.spec\.ts/u,
       use: { ...devices['Desktop Chrome'], locale: 'fr-FR' },
-      dependencies: ['chromium', 'mobile-safari']
+      dependencies: ['chromium', 'mobile-safari', 'mobile-chrome']
     }
   ]
 })

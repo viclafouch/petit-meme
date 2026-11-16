@@ -82,10 +82,10 @@ const fetchMemeFile = async (bunnyId: string, format: MemeDerivedFormat) => {
 
 const buildMemeFileProxyResponse = (
   upstream: Response,
-  contentType: string
+  format: MemeDerivedFormat
 ) => {
   const headers: HeadersInit = {
-    'Content-Type': contentType,
+    'Content-Type': MEME_STORED_FILE_CONTENT_TYPES[format],
     'Cache-Control': 'no-cache'
   }
 
@@ -142,10 +142,7 @@ export const serveMemeExport = createServerOnlyFn(
     if (format === 'mp4') {
       const response = await fetchVideoExport(bunnyId, isPremium)
 
-      return buildMemeFileProxyResponse(
-        response,
-        response.headers.get('Content-Type') ?? 'video/mp4'
-      )
+      return buildMemeFileProxyResponse(response, format)
     }
 
     if (!isPremium) {
@@ -157,7 +154,7 @@ export const serveMemeExport = createServerOnlyFn(
 
     const response = await fetchMemeFile(bunnyId, format)
 
-    return buildMemeFileProxyResponse(response, 'audio/mpeg')
+    return buildMemeFileProxyResponse(response, format)
   }
 )
 

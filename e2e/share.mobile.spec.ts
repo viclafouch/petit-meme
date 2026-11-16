@@ -1,15 +1,12 @@
 import { expect, type Locator, type Page } from '@playwright/test'
 import { m } from '~/paraglide/messages'
-import { E2E_NAMED_MEMES } from './content'
 import { resolveStorageStatePath } from './env'
 import { test } from './fixtures'
 import { repeatUntilVisible } from './hydration'
 import { getReelAt } from './library'
 import { SERVER_FUNCTION_URL_PATTERN } from './server-functions'
-import { expectFileWasShared, recordShares } from './share'
+import { recordShares } from './share'
 
-const SHARED_MEME = E2E_NAMED_MEMES.mostViewed
-const SHARED_MEME_PATHNAME = `/memes/${SHARED_MEME.id}`
 const FIRST_REEL_INDEX = 0
 
 type OpenShareMenuParams = {
@@ -34,56 +31,12 @@ const openShareMenu = async ({
   return formatItem
 }
 
-const getMemePageShareButton = (page: Page) => {
-  return page.getByRole('button', { name: m.meme_share(), exact: true })
-}
-
 test.describe('the native share', () => {
   test.describe('a Premium', () => {
     test.use({ storageState: resolveStorageStatePath('premium') })
 
     test.beforeEach(async ({ page }) => {
       await recordShares({ page })
-    })
-
-    test('hands the Video of a Meme page over to the phone', async ({
-      page
-    }) => {
-      await page.goto(SHARED_MEME_PATHNAME)
-
-      const videoItem = await openShareMenu({
-        page,
-        shareButton: getMemePageShareButton(page),
-        formatLabel: m.meme_format_video()
-      })
-
-      await videoItem.click()
-
-      await expectFileWasShared({
-        page,
-        title: SHARED_MEME.title,
-        format: 'mp4'
-      })
-    })
-
-    test('hands the sound of a Meme page over to the phone', async ({
-      page
-    }) => {
-      await page.goto(SHARED_MEME_PATHNAME)
-
-      const soundItem = await openShareMenu({
-        page,
-        shareButton: getMemePageShareButton(page),
-        formatLabel: m.meme_format_audio()
-      })
-
-      await soundItem.click()
-
-      await expectFileWasShared({
-        page,
-        title: SHARED_MEME.title,
-        format: 'mp3'
-      })
     })
 
     test('asks for the Video of the Meme Reels is showing', async ({
@@ -107,32 +60,6 @@ test.describe('the native share', () => {
       await expect(
         page.getByRole('dialog', { name: m.premium_reminder_title() })
       ).toBeHidden()
-    })
-  })
-
-  test.describe('a free User', () => {
-    test.use({ storageState: resolveStorageStatePath('free') })
-
-    test.beforeEach(async ({ page }) => {
-      await recordShares({ page })
-    })
-
-    test('shares the video straight away', async ({ page }) => {
-      await page.goto(SHARED_MEME_PATHNAME)
-
-      const videoItem = await openShareMenu({
-        page,
-        shareButton: getMemePageShareButton(page),
-        formatLabel: m.meme_format_video()
-      })
-
-      await videoItem.click()
-
-      await expectFileWasShared({
-        page,
-        title: SHARED_MEME.title,
-        format: 'mp4'
-      })
     })
   })
 })

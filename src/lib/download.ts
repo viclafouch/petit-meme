@@ -1,10 +1,11 @@
+import {
+  MEME_STORED_FILE_CONTENT_TYPES,
+  type MemeDerivedFormat
+} from '~/constants/bunny'
 import { captureWithFeature } from '~/lib/sentry'
 
 const matchIsUserCancelError = (error: unknown) => {
-  return (
-    error instanceof DOMException &&
-    (error.name === 'AbortError' || error.name === 'NotAllowedError')
-  )
+  return error instanceof DOMException && error.name === 'AbortError'
 }
 
 export function downloadBlob(blob: Blob, filename: string) {
@@ -18,9 +19,17 @@ export function downloadBlob(blob: Blob, filename: string) {
   URL.revokeObjectURL(url)
 }
 
-const buildShareData = (blob: Blob, title: string, extension: string) => {
+const buildShareData = (
+  blob: Blob,
+  title: string,
+  format: MemeDerivedFormat
+) => {
   return {
-    files: [new File([blob], `${title}.${extension}`, { type: blob.type })],
+    files: [
+      new File([blob], `${title}.${format}`, {
+        type: MEME_STORED_FILE_CONTENT_TYPES[format]
+      })
+    ],
     title
   } satisfies ShareData
 }
@@ -28,17 +37,21 @@ const buildShareData = (blob: Blob, title: string, extension: string) => {
 export const matchIsBlobShareable = (
   blob: Blob,
   title: string,
-  extension: string
+  format: MemeDerivedFormat
 ) => {
   return (
     'canShare' in navigator &&
-    navigator.canShare(buildShareData(blob, title, extension))
+    navigator.canShare(buildShareData(blob, title, format))
   )
 }
 
-export async function shareBlob(blob: Blob, title: string, extension = 'mp4') {
+export async function shareBlob(
+  blob: Blob,
+  title: string,
+  format: MemeDerivedFormat
+) {
   try {
-    await navigator.share(buildShareData(blob, title, extension))
+    await navigator.share(buildShareData(blob, title, format))
 
     return true
   } catch (error) {

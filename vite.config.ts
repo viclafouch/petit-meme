@@ -1,5 +1,5 @@
 import { nitro } from 'nitro/vite'
-import { defineConfig, loadEnv } from 'vite'
+import { defineConfig, loadEnv, type Plugin } from 'vite'
 import { paraglideVitePlugin } from '@inlang/paraglide-js'
 import { sentryTanstackStart } from '@sentry/tanstackstart-react/vite'
 import tailwindcss from '@tailwindcss/vite'
@@ -26,6 +26,34 @@ import {
   SENTRY_PROJECT
 } from './src/constants/sentry.ts'
 import { applyDeploymentSiteUrl } from './src/env/deployment-url.ts'
+import { findScrollDrivenBreakages } from './src/helpers/scroll-driven-css.ts'
+
+const scrollDrivenCssGuard = (): Plugin => {
+  return {
+    name: 'petit-meme:scroll-driven-css-guard',
+    apply: 'build',
+    enforce: 'post',
+    generateBundle(_options, bundle) {
+      const breakages = Object.values(bundle).flatMap((output) => {
+        if (output.type !== 'asset' || !output.fileName.endsWith('.css')) {
+          return []
+        }
+
+        return findScrollDrivenBreakages(String(output.source)).map(
+          ({ selector, problem }) => {
+            return `${output.fileName} ${selector}: ${problem}`
+          }
+        )
+      })
+
+      if (breakages.length > 0) {
+        this.error(
+          `The CSS build broke a scroll-driven animation:\n${breakages.join('\n')}`
+        )
+      }
+    }
+  }
+}
 
 const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
@@ -194,6 +222,7 @@ export default defineConfig(async ({ mode }) => {
     assetsInclude: ['**/*.md'],
     plugins: [
       tailwindcss(),
+      scrollDrivenCssGuard(),
       tanstackStart({
         importProtection: {
           client: {

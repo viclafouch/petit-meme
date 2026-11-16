@@ -243,6 +243,25 @@ describe('serveMemeExport', () => {
     expect(await response.text()).toBe('original-bytes')
   })
 
+  it('should serve an original Bunny types with its codecs as a bare video/mp4, the only MP4 type Chrome shares', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        return new Response('original-bytes', {
+          headers: { 'Content-Type': 'video/mp4; codecs=avc1' }
+        })
+      })
+    )
+
+    const response = await serveMemeExport({
+      bunnyId: BUNNY_ID,
+      format: 'mp4',
+      isPremium: true
+    })
+
+    expect(response.headers.get('Content-Type')).toBe('video/mp4')
+  })
+
   it('should serve the watermarked MP4 from Bunny Storage to a non-Premium caller', async () => {
     const fetchMock = vi.fn(async () => {
       return new Response('watermarked-bytes')

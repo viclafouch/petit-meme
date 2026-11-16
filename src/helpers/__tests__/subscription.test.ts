@@ -4,7 +4,9 @@ import {
   type BillingInvoice,
   type BillingSubscription,
   countPaidMonths,
+  countRenewalsUntil,
   getBillingPeriodFromInterval,
+  getPaymentKind,
   getCustomerSince,
   getSubscriptionEnding,
   getSubscriptionState,
@@ -171,6 +173,58 @@ describe('countPaidMonths', () => {
     ]
 
     expect(countPaidMonths([...SUBSCRIPTIONS], invoices)).toBe(0)
+  })
+})
+
+describe('getPaymentKind', () => {
+  it.each([
+    ['subscription_create', 'new'],
+    ['subscription_cycle', 'renewal'],
+    ['subscription_update', 'other'],
+    [null, 'other']
+  ] as const)(
+    'should read a %s invoice as a %s payment',
+    (billingReason, kind) => {
+      expect(getPaymentKind(billingReason)).toBe(kind)
+    }
+  )
+})
+
+describe('countRenewalsUntil', () => {
+  const firstPayment = buildInvoice({
+    id: 'in_first',
+    paidAt: new Date('2026-01-10T00:00:00.000Z'),
+    billingReason: 'subscription_create'
+  })
+  const thirdPayment = buildInvoice({
+    id: 'in_third',
+    paidAt: new Date('2026-03-10T00:00:00.000Z')
+  })
+  const invoices = [
+    firstPayment,
+    buildInvoice({
+      id: 'in_second',
+      paidAt: new Date('2026-02-10T00:00:00.000Z')
+    }),
+    buildInvoice({
+      id: 'in_proration',
+      paidAt: new Date('2026-02-20T00:00:00.000Z'),
+      billingReason: 'subscription_update'
+    }),
+    thirdPayment,
+    buildInvoice({
+      id: 'in_other_subscription',
+      subscriptionId: 'sub_yearly',
+      paidAt: new Date('2026-03-01T00:00:00.000Z')
+    })
+  ]
+
+  it('should rank a renewal among the renewals of its subscription', () => {
+    expect(countRenewalsUntil(invoices, thirdPayment)).toBe(2)
+  })
+
+  it('should count no renewal for the first payment', () => {
+    expect(countRenewalsUntil(invoices, firstPayment)).toBe(0)
   })
 })
 

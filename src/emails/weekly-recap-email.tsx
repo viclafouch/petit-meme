@@ -1,4 +1,3 @@
-import type React from 'react'
 import { Column, Row, Section, Text } from 'react-email'
 import { PREMIUM_PLAN_PRICING } from '~/constants/plan'
 import { formatCentsToEuros } from '~/helpers/number'
@@ -7,170 +6,266 @@ import {
   getWeeklyRecapPeriodLabel
 } from '~/helpers/weekly-recap'
 import type { WeeklyRecap } from '~/server/admin/weekly-recap/weekly-recap.server'
+import { TABULAR_STYLE } from './constants'
+import { EmailParagraph, EmailSection } from './email-blocks'
 import { EmailLayout } from './email-layout'
 
 type WeeklyRecapEmailProps = {
   recap: WeeklyRecap
 }
 
-const TABULAR_STYLE = {
-  fontVariantNumeric: 'tabular-nums'
-} as const satisfies React.CSSProperties
-
 const countFormatter = new Intl.NumberFormat('fr')
 const countDeltaFormatter = new Intl.NumberFormat('fr', {
   signDisplay: 'exceptZero'
 })
 
-const VALUE_FORMATTERS = {
-  count: {
-    value: (count: number) => {
-      return countFormatter.format(count)
-    },
-    delta: (count: number) => {
-      return countDeltaFormatter.format(count)
-    }
-  },
-  money: {
-    value: (cents: number) => {
-      return formatCentsToEuros(cents, {
-        locale: 'fr',
-        maximumFractionDigits: 2
-      })
-    },
-    delta: (cents: number) => {
-      return formatCentsToEuros(cents, {
-        locale: 'fr',
-        maximumFractionDigits: 2,
-        signDisplay: 'exceptZero'
-      })
-    }
-  }
-} as const satisfies Record<
-  string,
-  Record<'value' | 'delta', (amount: number) => string>
->
-
-const NUMBER_CELL_CLASS = 'w-24 py-2.5 text-right align-top text-sm'
-
-const HEADER_CELL_CLASS =
-  'w-24 pb-2 text-right align-bottom text-xs text-brand-muted-dark'
-
-const getDeltaClass = (delta: number, isIncreaseBad: boolean) => {
-  if (delta === 0) {
-    return 'text-brand-muted'
-  }
-
-  return delta > 0 !== isIncreaseBad
-    ? 'text-brand-success'
-    : 'text-brand-danger'
+const formatCount = (count: number) => {
+  return countFormatter.format(count)
 }
 
-type ComparisonRowProps = {
+const formatCountDelta = (count: number) => {
+  return countDeltaFormatter.format(count)
+}
+
+const formatMoney = (cents: number) => {
+  return formatCentsToEuros(cents, {
+    locale: 'fr',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
+}
+
+const formatMoneyDelta = (cents: number) => {
+  return formatCentsToEuros(cents, {
+    locale: 'fr',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+    signDisplay: 'exceptZero'
+  })
+}
+
+const SUBSCRIBERS_PREVIOUS_LABEL = 'Il y a une semaine'
+const WEEK_PREVIOUS_LABEL = 'Semaine précédente'
+
+type DeltaBadgeProps = {
+  delta: number
   label: string
-  comparison: Comparison
-  unit?: keyof typeof VALUE_FORMATTERS
-  isIncreaseBad?: boolean
+  isIncreaseBad: boolean
 }
 
-const ComparisonRow = ({
-  label,
-  comparison,
-  unit = 'count',
-  isIncreaseBad = false
-}: ComparisonRowProps) => {
-  const formatters = VALUE_FORMATTERS[unit]
-  const delta = comparison.current - comparison.previous
+const DeltaBadge = ({ delta, label, isIncreaseBad }: DeltaBadgeProps) => {
+  const isGood = delta > 0 !== isIncreaseBad
 
   return (
-    <Row className="border-0 border-b border-solid border-brand-border">
-      <Column className="py-2.5 align-top text-sm text-brand">{label}</Column>
-      <Column
-        className={`${NUMBER_CELL_CLASS} font-semibold text-brand`}
-        style={TABULAR_STYLE}
-      >
-        {formatters.value(comparison.current)}
-      </Column>
-      <Column
-        className={`${NUMBER_CELL_CLASS} ${getDeltaClass(delta, isIncreaseBad)}`}
-        style={TABULAR_STYLE}
-      >
-        {delta === 0 ? '=' : formatters.delta(delta)}
-      </Column>
-    </Row>
+    <span
+      className={`ml-2 rounded-full px-2 py-0.5 text-xs font-semibold ${isGood ? 'bg-brand-success-bg text-brand-success' : 'bg-brand-danger-bg text-brand-danger'}`}
+      style={TABULAR_STYLE}
+    >
+      {label}
+    </span>
   )
 }
 
-type RecapTableProps = {
-  title: string
-  children: React.ReactNode
+type MetricProps = {
+  name: string
+  previousLabel: string
+  count: Comparison
+  detail?: string
+  cents?: Comparison
+  isIncreaseBad?: boolean
 }
 
-const RecapTable = ({ title, children }: RecapTableProps) => {
+const Metric = ({
+  name,
+  detail,
+  previousLabel,
+  count,
+  cents,
+  isIncreaseBad = false
+}: MetricProps) => {
+  const delta = cents
+    ? cents.current - cents.previous
+    : count.current - count.previous
+  const deltaLabel = cents ? formatMoneyDelta(delta) : formatCountDelta(delta)
+
+  const badge =
+    delta === 0 ? null : (
+      <DeltaBadge
+        delta={delta}
+        label={deltaLabel}
+        isIncreaseBad={isIncreaseBad}
+      />
+    )
+  const detailText =
+    detail === undefined ? null : (
+      <Text className="m-0 text-sm leading-5 text-brand-muted-dark">
+        {detail}
+      </Text>
+    )
+
+  if (!cents) {
+    return (
+      <Section className="border-0 border-b border-solid border-brand-border py-4">
+        <Row>
+          <Column className="align-top">
+            <Text className="m-0 text-base leading-6 font-semibold text-brand">
+              {name}
+              {badge}
+            </Text>
+            {detailText}
+          </Column>
+          <Column
+            className="w-20 text-right align-top text-base leading-6 font-semibold text-brand"
+            style={TABULAR_STYLE}
+          >
+            {formatCount(count.current)}
+          </Column>
+        </Row>
+        <Text
+          className="m-0 mt-1 text-xs leading-5 text-brand-muted-dark"
+          style={TABULAR_STYLE}
+        >
+          {previousLabel} : {formatCount(count.previous)}
+        </Text>
+      </Section>
+    )
+  }
+
   return (
-    <Section className="mb-10">
-      <Row className="border-0 border-b-2 border-solid border-brand">
-        <Column className="pb-2 align-bottom text-base font-semibold text-brand">
-          {title}
+    <Section className="border-0 border-b border-solid border-brand-border py-5">
+      <Text className="m-0 text-base leading-6 font-semibold text-brand">
+        {name}
+        {badge}
+      </Text>
+      {detailText}
+      <Row className="mt-3">
+        <Column
+          className="text-base leading-6 text-brand"
+          style={TABULAR_STYLE}
+        >
+          {formatCount(count.current)}
         </Column>
-        <Column className={HEADER_CELL_CLASS}>Cette semaine</Column>
-        <Column className={HEADER_CELL_CLASS}>Évolution</Column>
+        <Column
+          className="text-right text-base leading-6 font-semibold text-brand"
+          style={TABULAR_STYLE}
+        >
+          {formatMoney(cents.current)}
+        </Column>
       </Row>
-      {children}
+      <Text className="m-0 mt-3 text-xs leading-5 text-brand-muted-dark">
+        {previousLabel}
+      </Text>
+      <Row>
+        <Column
+          className="text-sm leading-5 text-brand-muted-dark"
+          style={TABULAR_STYLE}
+        >
+          {formatCount(count.previous)}
+        </Column>
+        <Column
+          className="text-right text-sm leading-5 text-brand-muted-dark"
+          style={TABULAR_STYLE}
+        >
+          {formatMoney(cents.previous)}
+        </Column>
+      </Row>
     </Section>
   )
 }
 
 export const WeeklyRecapEmail = ({ recap }: WeeklyRecapEmailProps) => {
-  const { activeSubscriptions, week } = recap
+  const { subscribers, payments, activity } = recap
   const periodLabel = getWeeklyRecapPeriodLabel(recap.window)
 
   return (
-    <EmailLayout preview={`Récap ${periodLabel}`} locale="fr">
-      <Text className="m-0 mb-8 text-sm text-brand-muted-dark">
-        Semaine {periodLabel}
-      </Text>
-      <RecapTable title="Abonnements en cours">
-        <ComparisonRow
-          label={`Mensuels à ${VALUE_FORMATTERS.money.value(PREMIUM_PLAN_PRICING.monthly.priceInCents)}`}
-          comparison={activeSubscriptions.monthly}
+    <EmailLayout
+      preview={`Semaine ${periodLabel}`}
+      heading="Récap de la semaine"
+      locale="fr"
+    >
+      <EmailParagraph>
+        Semaine {periodLabel}, comparée à la semaine précédente.
+      </EmailParagraph>
+      <EmailSection
+        title="Abonnés payants"
+        caption="Abonnés à gauche, revenu mensuel récurrent à droite."
+      >
+        <Metric
+          name="Mensuels"
+          detail={`${formatMoney(PREMIUM_PLAN_PRICING.monthly.priceInCents)} par mois`}
+          previousLabel={SUBSCRIBERS_PREVIOUS_LABEL}
+          {...subscribers.monthly}
         />
-        <ComparisonRow
-          label={`Annuels à ${VALUE_FORMATTERS.money.value(PREMIUM_PLAN_PRICING.yearly.priceInCents)}`}
-          comparison={activeSubscriptions.yearly}
+        <Metric
+          name="Annuels"
+          detail={`${formatMoney(PREMIUM_PLAN_PRICING.yearly.priceInCents)} par an`}
+          previousLabel={SUBSCRIBERS_PREVIOUS_LABEL}
+          {...subscribers.yearly}
         />
-        <ComparisonRow label="Total" comparison={activeSubscriptions.total} />
-        <ComparisonRow
-          label="MRR"
-          comparison={activeSubscriptions.mrrCents}
-          unit="money"
+        <Metric
+          name="Total"
+          previousLabel={SUBSCRIBERS_PREVIOUS_LABEL}
+          {...subscribers.total}
         />
-      </RecapTable>
-      <RecapTable title="Activité">
-        <ComparisonRow
-          label="Nouveaux abonnements"
-          comparison={week.newSubscriptions}
+      </EmailSection>
+      <EmailSection
+        title="Paiements"
+        caption="Nombre de paiements à gauche, montant encaissé à droite."
+      >
+        <Metric
+          name="Nouveaux abonnements"
+          detail="Premier paiement d’un abonnement"
+          previousLabel={WEEK_PREVIOUS_LABEL}
+          {...payments.newSubscriptions}
         />
-        <ComparisonRow
-          label="Résiliations"
-          comparison={week.cancellations}
+        <Metric
+          name="Renouvellements"
+          detail="Paiement d’une nouvelle période"
+          previousLabel={WEEK_PREVIOUS_LABEL}
+          {...payments.renewals}
+        />
+        <Metric
+          name="Total encaissé"
+          detail="Tous les paiements, changements de formule compris"
+          previousLabel={WEEK_PREVIOUS_LABEL}
+          {...payments.total}
+        />
+      </EmailSection>
+      <EmailSection title="Activité">
+        <Metric
+          name="Résiliations"
+          detail="Annoncées cette semaine, effectives en fin de période"
+          previousLabel={WEEK_PREVIOUS_LABEL}
+          count={activity.cancellations}
           isIncreaseBad
         />
-        <ComparisonRow label="Inscriptions" comparison={week.signups} />
-        <ComparisonRow
-          label="Comptes supprimés"
-          comparison={week.accountDeletions}
+        <Metric
+          name="Inscriptions"
+          previousLabel={WEEK_PREVIOUS_LABEL}
+          count={activity.signups}
+        />
+        <Metric
+          name="Comptes supprimés"
+          previousLabel={WEEK_PREVIOUS_LABEL}
+          count={activity.accountDeletions}
           isIncreaseBad
         />
-        <ComparisonRow label="Vues" comparison={week.views} />
-        <ComparisonRow label="Téléchargements" comparison={week.downloads} />
-        <ComparisonRow label="Partages" comparison={week.shares} />
-        <ComparisonRow
-          label="Encaissé"
-          comparison={week.collectedCents}
-          unit="money"
+        <Metric
+          name="Vues"
+          previousLabel={WEEK_PREVIOUS_LABEL}
+          count={activity.views}
         />
-      </RecapTable>
+        <Metric
+          name="Téléchargements"
+          previousLabel={WEEK_PREVIOUS_LABEL}
+          count={activity.downloads}
+        />
+        <Metric
+          name="Partages"
+          previousLabel={WEEK_PREVIOUS_LABEL}
+          count={activity.shares}
+        />
+      </EmailSection>
     </EmailLayout>
   )
 }
@@ -181,21 +276,41 @@ WeeklyRecapEmail.PreviewProps = {
       start: new Date('2026-11-02T00:00:00.000Z'),
       end: new Date('2026-11-09T00:00:00.000Z')
     },
-    activeSubscriptions: {
-      monthly: { current: 9, previous: 8 },
-      yearly: { current: 3, previous: 3 },
-      total: { current: 12, previous: 11 },
-      mrrCents: { current: 4386, previous: 3988 }
+    subscribers: {
+      monthly: {
+        count: { current: 9, previous: 8 },
+        cents: { current: 3591, previous: 3192 }
+      },
+      yearly: {
+        count: { current: 3, previous: 3 },
+        cents: { current: 749.75, previous: 749.75 }
+      },
+      total: {
+        count: { current: 12, previous: 11 },
+        cents: { current: 4340.75, previous: 3941.75 }
+      }
     },
-    week: {
-      newSubscriptions: { current: 2, previous: 1 },
+    payments: {
+      newSubscriptions: {
+        count: { current: 2, previous: 1 },
+        cents: { current: 798, previous: 399 }
+      },
+      renewals: {
+        count: { current: 1, previous: 4 },
+        cents: { current: 399, previous: 3399 }
+      },
+      total: {
+        count: { current: 3, previous: 5 },
+        cents: { current: 1197, previous: 3798 }
+      }
+    },
+    activity: {
       cancellations: { current: 1, previous: 0 },
       signups: { current: 41, previous: 36 },
       accountDeletions: { current: 2, previous: 1 },
       views: { current: 500, previous: 443 },
       downloads: { current: 524, previous: 561 },
-      shares: { current: 143, previous: 120 },
-      collectedCents: { current: 1197, previous: 3798 }
+      shares: { current: 143, previous: 120 }
     }
   }
 } satisfies WeeklyRecapEmailProps

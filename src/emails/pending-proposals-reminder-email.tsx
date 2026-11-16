@@ -1,5 +1,6 @@
-import { Link, Section, Text } from 'react-email'
-import { BUTTON_CLASS, SITE_URL } from './constants'
+import { Section, Text } from 'react-email'
+import { SITE_URL } from './constants'
+import { EmailButton, EmailParagraph, EmailSectionItem } from './email-blocks'
 import { EmailLayout } from './email-layout'
 
 type PendingProposal = {
@@ -15,43 +16,39 @@ type PendingProposalsReminderEmailProps = {
 
 const ADMIN_PROPOSALS_URL = `${SITE_URL}/admin/proposals?status=PENDING`
 
+const formatPendingCount = (count: number) => {
+  return count > 1
+    ? `${count} propositions en attente`
+    : `${count} proposition en attente`
+}
+
 export const PendingProposalsReminderEmail = ({
   proposals
 }: PendingProposalsReminderEmailProps) => {
+  const pendingCount = formatPendingCount(proposals.length)
+
   return (
-    <EmailLayout
-      preview={`${String(proposals.length)} proposition${proposals.length > 1 ? 's' : ''} en attente`}
-      locale="fr"
-    >
-      <Section>
-        <Text className="m-0 mb-2 text-lg font-semibold text-brand">
-          Propositions en attente
-        </Text>
-        <Text className="m-0 mb-6 text-sm leading-6 text-brand-muted-dark">
-          {proposals.length} proposition{proposals.length > 1 ? 's' : ''} en
-          attente de modération.
-        </Text>
+    <EmailLayout preview={pendingCount} heading={pendingCount} locale="fr">
+      <EmailParagraph>
+        Ces mèmes attendent ta décision avant de rejoindre la bibliothèque.
+      </EmailParagraph>
+      <Section className="mt-6 border-0 border-t border-solid border-brand-border">
         {proposals.map((proposal) => {
           return (
-            <Section
-              key={proposal.id}
-              className="mb-3 rounded-lg border border-brand-border bg-neutral-50 px-4 py-3"
-            >
-              <Text className="m-0 text-sm font-medium text-brand">
+            <EmailSectionItem key={proposal.id}>
+              <Text className="m-0 text-sm leading-5 font-semibold text-brand">
                 {proposal.title}
               </Text>
-              <Text className="m-0 mt-1 text-xs text-brand-muted">
-                par {proposal.userName} · {proposal.createdAt}
+              <Text className="m-0 mt-1 text-xs leading-5 text-brand-muted-dark">
+                Proposé par {proposal.userName} le {proposal.createdAt}
               </Text>
-            </Section>
+            </EmailSectionItem>
           )
         })}
-        <Section className="mt-6 text-center">
-          <Link href={ADMIN_PROPOSALS_URL} className={BUTTON_CLASS}>
-            Voir les propositions
-          </Link>
-        </Section>
       </Section>
+      <EmailButton href={ADMIN_PROPOSALS_URL}>
+        Voir les propositions
+      </EmailButton>
     </EmailLayout>
   )
 }

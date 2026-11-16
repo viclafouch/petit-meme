@@ -1,33 +1,27 @@
-import { Section, Text } from 'react-email'
 import type { Locale } from '~/paraglide/runtime'
 import { CONTACT_EMAIL } from './constants'
-import { BoldText, EmailLayout } from './email-layout'
+import { BoldText, EmailCallout, EmailParagraph } from './email-blocks'
+import { EmailLayout } from './email-layout'
 
 const translations = {
   fr: {
-    preview: 'Ton mot de passe Petit Meme a été modifié',
-    title: 'Mot de passe modifié',
-    subtitle: (changedAt: string) => {
-      return `Modification effectuée le ${changedAt}.`
-    },
-    body: (username: string) => {
-      return `Salut ${username}, ton mot de passe **Petit Meme** a été modifié avec succès. Toutes les sessions actives ont été déconnectées par mesure de sécurité.`
+    preview: 'Toutes tes sessions ont été déconnectées par sécurité.',
+    heading: 'Ton mot de passe a changé',
+    body: (username: string, changedAt: string) => {
+      return `Salut ${username}, le mot de passe de ton compte **Petit Meme** a été modifié le ${changedAt}. Toutes tes sessions ont été déconnectées par sécurité.`
     },
     warning: (email: string) => {
-      return `Si tu n’es pas à l’origine de ce changement, contacte-nous immédiatement à **${email}**.`
+      return `Ce n’est pas toi ? Écris-nous tout de suite à **${email}**.`
     }
   },
   en: {
-    preview: 'Your Petit Meme password has been changed',
-    title: 'Password changed',
-    subtitle: (changedAt: string) => {
-      return `Changed on ${changedAt}.`
-    },
-    body: (username: string) => {
-      return `Hi ${username}, your **Petit Meme** password has been changed successfully. All active sessions have been signed out for security.`
+    preview: 'All your sessions were signed out for security.',
+    heading: 'Your password has changed',
+    body: (username: string, changedAt: string) => {
+      return `Hi ${username}, the password of your **Petit Meme** account was changed on ${changedAt}. All your sessions were signed out for security.`
     },
     warning: (email: string) => {
-      return `If you did not make this change, contact us immediately at **${email}**.`
+      return `Wasn’t you? Write to us right away at **${email}**.`
     }
   }
 } as const satisfies Record<Locale, Record<string, unknown>>
@@ -46,23 +40,13 @@ export const PasswordChangedEmail = ({
   const tr = translations[locale]
 
   return (
-    <EmailLayout preview={tr.preview} locale={locale}>
-      <Section>
-        <Text className="m-0 mb-2 text-lg font-semibold text-brand">
-          {tr.title}
-        </Text>
-        <Text className="m-0 mb-6 text-sm leading-6 text-brand-muted-dark">
-          {tr.subtitle(changedAt)}
-        </Text>
-        <Text className="m-0 mb-4 text-sm leading-6 text-neutral-600">
-          <BoldText text={tr.body(username)} />
-        </Text>
-        <Section className="rounded-lg border border-solid border-brand-danger-border bg-brand-danger-bg p-4">
-          <Text className="m-0 text-xs leading-5 text-brand-danger">
-            <BoldText text={tr.warning(CONTACT_EMAIL)} />
-          </Text>
-        </Section>
-      </Section>
+    <EmailLayout preview={tr.preview} heading={tr.heading} locale={locale}>
+      <EmailParagraph>
+        <BoldText text={tr.body(username, changedAt)} />
+      </EmailParagraph>
+      <EmailCallout tone="danger">
+        <BoldText text={tr.warning(CONTACT_EMAIL)} />
+      </EmailCallout>
     </EmailLayout>
   )
 }

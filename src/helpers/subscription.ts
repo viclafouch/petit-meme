@@ -263,3 +263,33 @@ export const getCustomerSince = (
         : earliest
     }, null)
 }
+
+export type PaymentKind = 'new' | 'renewal' | 'other'
+
+export const getPaymentKind = (
+  billingReason: BillingInvoice['billingReason']
+): PaymentKind => {
+  if (billingReason === 'subscription_create') {
+    return 'new'
+  }
+
+  if (billingReason === 'subscription_cycle') {
+    return 'renewal'
+  }
+
+  return 'other'
+}
+
+export const countRenewalsUntil = (
+  invoices: BillingInvoice[],
+  payment: BillingInvoice
+) => {
+  return invoices.filter((invoice) => {
+    return (
+      invoice.subscriptionId === payment.subscriptionId &&
+      invoice.amountPaidCents > 0 &&
+      getPaymentKind(invoice.billingReason) === 'renewal' &&
+      invoice.paidAt <= payment.paidAt
+    )
+  }).length
+}

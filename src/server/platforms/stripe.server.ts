@@ -55,7 +55,22 @@ export const toBillingSubscription = (
   }
 }
 
-export const toBillingInvoice = (invoice: Stripe.Invoice): BillingInvoice => {
+export type StripePaidInvoice = Pick<
+  Stripe.Invoice,
+  | 'id'
+  | 'customer'
+  | 'customer_name'
+  | 'customer_email'
+  | 'parent'
+  | 'status_transitions'
+  | 'created'
+  | 'amount_paid'
+  | 'billing_reason'
+>
+
+export const toBillingInvoice = (
+  invoice: StripePaidInvoice
+): BillingInvoice => {
   const subscription = invoice.parent?.subscription_details?.subscription
 
   return {

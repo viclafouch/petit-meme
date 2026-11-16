@@ -1,12 +1,19 @@
 import type { Stripe } from 'stripe'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { prismaClient } from '~/db/client.server'
+import { formatPaymentAmount } from '~/helpers/payment-received'
 import type { Locale } from '~/paraglide/runtime'
 import { createFakeStripeClient } from '~/server/platforms/__tests__/stripe.fakes'
 import { sendEmailInBackground } from '~/server/platforms/resend.server'
-import { getStripeClient } from '~/server/platforms/stripe.server'
+import {
+  fetchCustomerBilling,
+  getStripeClient,
+  type StripePaidInvoice,
+  toBillingInvoice
+} from '~/server/platforms/stripe.server'
 import {
   notifyPaymentFailed,
+  notifyPaymentReceived,
   notifySubscriptionEnded
 } from '~/server/subscription/stripe-webhook.server'
 import { FRENCH_USER } from '~/server/user/__tests__/user.fakes'
@@ -14,7 +21,8 @@ import { FRENCH_USER } from '~/server/user/__tests__/user.fakes'
 vi.mock(import('~/server/platforms/stripe.server'), async (importOriginal) => {
   return {
     ...(await importOriginal()),
-    getStripeClient: vi.fn<typeof getStripeClient>()
+    getStripeClient: vi.fn<typeof getStripeClient>(),
+    fetchCustomerBilling: vi.fn<typeof fetchCustomerBilling>()
   }
 })
 
@@ -195,4 +203,141 @@ describe('a subscription that ends', () => {
       expect(sendEmailInBackground).not.toHaveBeenCalled()
     }
   )
+})
+
+const MONTHLY_PRICE_CENTS = 399
+const MONTHLY_PRICE = formatPaymentAmount(MONTHLY_PRICE_CENTS)
+
+type BuildPaidInvoiceParams = {
+  id: string
+  paidAt: number
+  billingReason: Stripe.Invoice.BillingReason
+}
+
+const buildPaidInvoice = ({
+  id,
+  paidAt,
+  billingReason
+}: BuildPaidInvoiceParams): StripePaidInvoice => {
+  return {
+    id,
+    customer: 'cus_test',
+    customer_name: null,
+    customer_email: 'alan@example.test',
+    created: paidAt,
+    amount_paid: MONTHLY_PRICE_CENTS,
+    billing_reason: billingReason,
+    status_transitions: {
+      finalized_at: paidAt,
+      marked_uncollectible_at: null,
+      paid_at: paidAt,
+      voided_at: null
+    },
+    parent: {
+      type: 'subscription_details',
+      quote_details: null,
+      subscription_details: { metadata: null, subscription: 'sub_test' }
+    }
+  }
+}
+
+const FIRST_PAYMENT = buildPaidInvoice({
+  id: 'in_first',
+  paidAt: 1_786_000_000,
+  billingReason: 'subscription_create'
+})
+
+const SECOND_PAYMENT = buildPaidInvoice({
+  id: 'in_second',
+  paidAt: 1_788_600_000,
+  billingReason: 'subscription_cycle'
+})
+
+const THIRD_PAYMENT = buildPaidInvoice({
+  id: 'in_third',
+  paidAt: 1_791_200_000,
+  billingReason: 'subscription_cycle'
+})
+
+const stubCustomerBilling = (invoices: StripePaidInvoice[]) => {
+  vi.mocked(fetchCustomerBilling).mockResolvedValue({
+    subscriptions: [
+      {
+        id: 'sub_test',
+        customerId: 'cus_test',
+        status: 'active',
+        interval: 'month',
+        amountCents: MONTHLY_PRICE_CENTS,
+        startedAt: new Date('2026-08-06T00:00:00.000Z'),
+        canceledAt: null,
+        cancelAt: null,
+        cancelAtPeriodEnd: false,
+        endedAt: null,
+        periodEnd: null
+      }
+    ],
+    invoices: invoices.map((invoice) => {
+      return toBillingInvoice(invoice)
+    })
+  })
+}
+
+const toPaidEvent = (invoice: StripePaidInvoice) => {
+  return { data: { object: invoice } }
+}
+
+describe('a paid invoice', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+    vi.mocked(sendEmailInBackground).mockClear()
+    stubUser('fr')
+  })
+
+  it('should tell the Creator about a new subscription', async () => {
+    stubCustomerBilling([FIRST_PAYMENT])
+
+    await notifyPaymentReceived(toPaidEvent(FIRST_PAYMENT))
+
+    expect(sendEmailInBackground).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({
+        to: 'hello@petit-meme.io',
+        subject: `Nouvel abonnement : ${MONTHLY_PRICE} de Alan`,
+        idempotencyKey: 'payment-received/in_first'
+      })
+    )
+  })
+
+  it('should number a renewal among the renewals of its subscription', async () => {
+    stubCustomerBilling([THIRD_PAYMENT, SECOND_PAYMENT, FIRST_PAYMENT])
+
+    await notifyPaymentReceived(toPaidEvent(THIRD_PAYMENT))
+
+    expect(sendEmailInBackground).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({
+        subject: `Renouvellement n°2 : ${MONTHLY_PRICE} de Alan`
+      })
+    )
+  })
+
+  it('should count the renewal even before Stripe lists its invoice', async () => {
+    stubCustomerBilling([FIRST_PAYMENT])
+
+    await notifyPaymentReceived(toPaidEvent(SECOND_PAYMENT))
+
+    expect(sendEmailInBackground).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({
+        subject: `Renouvellement n°1 : ${MONTHLY_PRICE} de Alan`
+      })
+    )
+  })
+
+  it('should send nothing for an invoice with nothing paid', async () => {
+    stubCustomerBilling([])
+
+    await notifyPaymentReceived(
+      toPaidEvent({ ...FIRST_PAYMENT, amount_paid: 0 })
+    )
+
+    expect(sendEmailInBackground).not.toHaveBeenCalled()
+  })
 })

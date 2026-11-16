@@ -2,22 +2,34 @@ import type { Stripe } from 'stripe'
 import { prismaClient } from '~/db/client.server'
 import type { Prisma } from '~/db/generated/prisma/client'
 import { ActivityEventType } from '~/db/generated/prisma/enums'
+import { CONTACT_EMAIL } from '~/emails/constants'
 import { PaymentFailedEmail } from '~/emails/payment-failed-email'
+import { PaymentReceivedEmail } from '~/emails/payment-received-email'
 import { emailSubjects } from '~/emails/subjects'
 import { SubscriptionConfirmedEmail } from '~/emails/subscription-confirmed-email'
 import { SubscriptionEndedEmail } from '~/emails/subscription-ended-email'
 import { serverEnv } from '~/env/server.server'
 import { formatCentsToEuros } from '~/helpers/number'
 import {
+  formatPaymentAmount,
+  formatPaymentReceivedTitle
+} from '~/helpers/payment-received'
+import {
+  countRenewalsUntil,
+  getPaymentKind,
   getSubscriptionPriceCents,
   matchIsYearlyInterval
 } from '~/helpers/subscription'
+import { buildSubscriptionHistory } from '~/helpers/subscription-history'
 import { stripeLogger } from '~/lib/logger'
 import { captureWithFeature } from '~/lib/sentry'
 import { recordActivityEvent } from '~/server/activity/activity.server'
 import { sendEmailInBackground } from '~/server/platforms/resend.server'
 import {
+  fetchCustomerBilling,
   getStripeClient,
+  type StripePaidInvoice,
+  toBillingInvoice,
   toBillingSubscription
 } from '~/server/platforms/stripe.server'
 
@@ -25,6 +37,12 @@ type PaymentFailedEvent = {
   id: string
   data: {
     object: Pick<Stripe.Invoice, 'id' | 'customer' | 'attempt_count'>
+  }
+}
+
+type PaymentReceivedEvent = {
+  data: {
+    object: StripePaidInvoice
   }
 }
 
@@ -198,5 +216,68 @@ export const notifySubscriptionEnded = async ({
     }),
     logMessage: 'Sending subscription ended email to',
     idempotencyKey: `subscription-ended/${stripeSubscription.id}`
+  })
+}
+
+export const notifyPaymentReceived = async (event: PaymentReceivedEvent) => {
+  const invoice = event.data.object
+  const customerId = invoice.customer
+
+  if (typeof customerId !== 'string' || invoice.amount_paid === 0) {
+    return
+  }
+
+  const payment = toBillingInvoice(invoice)
+  const [billing, user] = await Promise.all([
+    fetchCustomerBilling(customerId),
+    prismaClient.user.findFirst({
+      where: { stripeCustomerId: customerId },
+      select: { id: true, name: true, email: true }
+    })
+  ])
+  const invoices = [
+    payment,
+    ...billing.invoices.filter((paidInvoice) => {
+      return paidInvoice.id !== payment.id
+    })
+  ]
+  const history = buildSubscriptionHistory({
+    subscriptions: billing.subscriptions,
+    invoices
+  })
+  const subscription = billing.subscriptions.find((candidate) => {
+    return candidate.id === payment.subscriptionId
+  })
+  const kind = getPaymentKind(payment.billingReason)
+  const renewalCount = countRenewalsUntil(invoices, payment)
+  const customerName =
+    user?.name ?? invoice.customer_name ?? invoice.customer_email ?? customerId
+
+  stripeLogger.info(
+    { customerId, invoiceId: invoice.id, kind, renewalCount },
+    'Payment received'
+  )
+
+  sendEmailInBackground({
+    to: CONTACT_EMAIL,
+    subject: `${formatPaymentReceivedTitle({ kind, renewalCount })} : ${formatPaymentAmount(payment.amountPaidCents)} de ${customerName}`,
+    react: PaymentReceivedEmail({
+      kind,
+      renewalCount,
+      amountCents: payment.amountPaidCents,
+      interval: subscription?.interval ?? null,
+      customer: {
+        name: customerName,
+        email: user?.email ?? invoice.customer_email,
+        userId: user?.id ?? null
+      },
+      history: {
+        customerSince: history.customerSince,
+        paidMonthCount: history.paidMonthCount,
+        collectedCents: history.collectedCents
+      }
+    }),
+    logMessage: 'Sending payment received email to',
+    idempotencyKey: `payment-received/${invoice.id}`
   })
 }

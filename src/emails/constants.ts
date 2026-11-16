@@ -1,3 +1,4 @@
+import type React from 'react'
 import { pixelBasedPreset } from 'react-email'
 import { LOGO_PATH } from '~/constants/branding'
 import type { Locale } from '~/paraglide/runtime'
@@ -11,8 +12,9 @@ export const buildEmailUrl = (path: string, locale: Locale) => {
 export const LOGO_URL = `${SITE_URL}${LOGO_PATH}`
 export const CONTACT_EMAIL = 'hello@petit-meme.io'
 
-export const BUTTON_CLASS =
-  'box-border inline-block rounded-xl bg-brand-button px-8 py-4 text-center text-sm font-semibold text-brand-button-foreground no-underline'
+export const TABULAR_STYLE = {
+  fontVariantNumeric: 'tabular-nums'
+} as const satisfies React.CSSProperties
 
 export const TAILWIND_CONFIG = {
   presets: [pixelBasedPreset],

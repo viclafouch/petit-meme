@@ -55,6 +55,7 @@ import {
 } from '~/server/subscription/stripe-customer.server'
 import {
   notifyPaymentFailed,
+  notifyPaymentReceived,
   notifySubscriptionConfirmed,
   notifySubscriptionEnded
 } from '~/server/subscription/stripe-webhook.server'
@@ -348,6 +349,10 @@ const getAuthConfig = createServerOnlyFn(() => {
 
           if (event.type === 'invoice.payment_failed') {
             await notifyPaymentFailed(event)
+          }
+
+          if (event.type === 'invoice.paid') {
+            await notifyPaymentReceived(event)
           }
         }
       }),

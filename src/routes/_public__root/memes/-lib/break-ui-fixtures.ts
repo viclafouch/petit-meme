@@ -9,7 +9,7 @@ export const BREAK_UI_DATASETS = ['demo', 'worst', 'empty', 'one'] as const
 
 export type BreakUiDataset = (typeof BREAK_UI_DATASETS)[number]
 
-export const IS_BREAK_UI_ENABLED = import.meta.env.DEV
+const IS_BREAK_UI_ENABLED = import.meta.env.DEV
 
 export const useBreakUiDataset = (): BreakUiDataset => {
   const dataset = useLocation({

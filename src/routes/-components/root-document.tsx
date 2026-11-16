@@ -1,4 +1,4 @@
-import type React from 'react'
+import React from 'react'
 import { MotionConfig } from 'motion/react'
 import {
   ClientOnly,
@@ -9,20 +9,27 @@ import {
   useMatch
 } from '@tanstack/react-router'
 import { DialogOutlet, DialogProvider } from '~/components/app/dialog-provider'
-import { TailwindIndicator } from '~/components/app/tailwind-indicator'
 import { ThemeProvider } from '~/components/app/theme-provider'
 import { CookieBanner } from '~/components/cookie-consent/cookie-banner'
 import { CookieConsentProvider } from '~/components/cookie-consent/cookie-provider'
 import { CookieSettings } from '~/components/cookie-consent/cookie-settings'
 import { StudioProvider } from '~/components/studio/studio-provider'
 import { Toaster } from '~/components/ui/sonner'
-import { IS_PRODUCTION } from '~/constants/env'
 import { clientEnv } from '~/env/client'
 import { m } from '~/paraglide/messages'
 import { getLocale, getTextDirection } from '~/paraglide/runtime'
 import { WebAnalytics } from './web-analytics'
 
 const rootRouteApi = getRouteApi('__root__')
+
+const DevToolbar = import.meta.env.DEV
+  ? React.lazy(async () => {
+      const devToolbarModule =
+        await import('~/components/dev-toolbar/dev-toolbar')
+
+      return { default: devToolbarModule.DevToolbar }
+    })
+  : null
 
 type RootDocumentProps = {
   children: React.ReactNode
@@ -69,7 +76,13 @@ export const RootDocument = ({ children }: RootDocumentProps) => {
                   </ClientOnly>
                 )}
                 <CookieSettings />
-                {IS_PRODUCTION ? null : <TailwindIndicator />}
+                {DevToolbar ? (
+                  <ClientOnly>
+                    <React.Suspense>
+                      <DevToolbar />
+                    </React.Suspense>
+                  </ClientOnly>
+                ) : null}
                 {clientEnv.VITE_VERCEL_ENV === 'production' ? (
                   <WebAnalytics />
                 ) : null}

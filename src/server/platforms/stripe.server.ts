@@ -23,7 +23,7 @@ export const fromUnixSeconds = (seconds: number) => {
   return new Date(seconds * SECOND)
 }
 
-const fromNullableUnixSeconds = (seconds: number | null) => {
+export const fromNullableUnixSeconds = (seconds: number | null) => {
   return seconds === null ? null : fromUnixSeconds(seconds)
 }
 

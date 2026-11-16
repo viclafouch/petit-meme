@@ -21,7 +21,7 @@ const FILES_LOADED_BY_VITE_CONFIG = [
   'src/env/base.server.ts'
 ]
 
-const FILES_RUN_IN_TERMINAL = ['scripts/**', 'prisma/seed.ts']
+const FILES_RUN_IN_TERMINAL = ['scripts/**', 'prisma/seed.ts', 'prisma/seed/**']
 
 const FILES_RUN_BY_NODE = [
   'scripts/check-env.ts',

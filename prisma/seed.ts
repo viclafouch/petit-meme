@@ -1,201 +1,92 @@
-import { hashPassword } from 'better-auth/crypto'
-import { z } from 'zod'
-import { MEME_ALGOLIA_INCLUDE } from '~/constants/meme'
-import { prismaClient } from '~/db/client.server'
-import { locales } from '~/paraglide/runtime'
-import { fetchWithZod } from '~/server/http/fetch.server'
-import { syncMemeToAllIndices } from '~/server/meme/meme-index.server'
-import {
-  getAlgoliaAdminClient,
-  resolveAlgoliaIndexName
-} from '~/server/platforms/algolia.server'
-import {
-  buildLibraryApiUrl,
-  createVideo,
-  deleteVideo,
-  getBunnyHeaders,
-  uploadVideo
-} from '~/server/platforms/bunny.server'
-import { getStripeClient } from '~/server/platforms/stripe.server'
-import { getTweetByUrl, getTweetMedia } from '~/server/platforms/twitter.server'
+import { randomBytes } from 'node:crypto'
+import { setTimeout as wait } from 'node:timers/promises'
+import type { MemeStatus } from '~/db/generated/prisma/enums'
 import { logEnvironmentInfo } from '../scripts/lib/env-guard'
-import mocks from './seed-mock.json' with { type: 'json' }
+import seedMemes from './seed-memes.json' with { type: 'json' }
+import { createActivity } from './seed/activity'
+import {
+  copyCategories,
+  copyMemes,
+  indexPublishedMemes,
+  waitForEncodedVideos
+} from './seed/library'
+import { createPeople, SEED_LOGIN_HINT } from './seed/people'
+import {
+  assertSeedTargetIsNotProduction,
+  loadProductionSource,
+  readProductionLibrary
+} from './seed/production-source'
+import { resetTarget } from './seed/reset'
 
 const ABORT_GRACE_PERIOD_MS = 5000
+const GENERATED_PASSWORD_BYTES = 12
 
-const createMemeFromTwitterUrl = async (tweetUrl: string, title: string) => {
-  const tweet = await getTweetByUrl(tweetUrl)
-  const media = await getTweetMedia(tweet.video.url, tweet.poster.url)
+const resolveSeedPassword = () => {
+  // oxlint-disable-next-line node/no-process-env -- the seed password stays out of every env file and of Git
+  const { SEED_PASSWORD } = process.env
 
-  const buffer = Buffer.from(await media.video.blob.arrayBuffer())
-
-  const { videoId } = await createVideo(title)
-
-  const meme = await prismaClient.meme.create({
-    data: {
-      title,
-      tweetUrl: tweet.url,
-      status: 'PUBLISHED',
-      publishedAt: new Date(),
-      video: {
-        create: {
-          duration: 0,
-          bunnyStatus: 4,
-          bunnyId: videoId
-        }
-      },
-      translations: {
-        create: {
-          locale: 'fr',
-          title,
-          description: '',
-          keywords: []
-        }
-      }
-    },
-    include: MEME_ALGOLIA_INCLUDE
-  })
-
-  try {
-    await syncMemeToAllIndices(meme)
-  } catch (error) {
-    console.error(error)
-  }
-
-  await uploadVideo(videoId, buffer)
+  return (
+    SEED_PASSWORD ?? randomBytes(GENERATED_PASSWORD_BYTES).toString('base64url')
+  )
 }
 
-const clearDatabase = async () => {
-  console.log('Clearing all database tables...')
-  await prismaClient.memeActionDaily.deleteMany()
-  await prismaClient.memeViewDaily.deleteMany()
-  await prismaClient.studioGeneration.deleteMany()
-  await prismaClient.adminAuditLog.deleteMany()
-  await prismaClient.bookmark.deleteMany()
-  await prismaClient.memeCategory.deleteMany()
-  await prismaClient.meme.deleteMany()
-  await prismaClient.video.deleteMany()
-  await prismaClient.subscription.deleteMany()
-  await prismaClient.category.deleteMany()
-  await prismaClient.rateLimit.deleteMany()
-  await prismaClient.session.deleteMany()
-  await prismaClient.account.deleteMany()
-  await prismaClient.verification.deleteMany()
-  await prismaClient.user.deleteMany()
-  console.log('  Database cleared')
-}
-
-const clearAlgolia = async () => {
-  console.log('Clearing Algolia indices...')
-  await Promise.all(
-    locales.map((locale) => {
-      return getAlgoliaAdminClient().replaceAllObjects({
-        indexName: resolveAlgoliaIndexName(locale),
-        objects: []
-      })
+const buildStatusById = () => {
+  return new Map<string, MemeStatus>([
+    ...seedMemes.pending.map((id) => {
+      return [id, 'PENDING'] as const
+    }),
+    ...seedMemes.archived.map((id) => {
+      return [id, 'ARCHIVED'] as const
     })
-  )
-  console.log('  Algolia cleared')
-}
-
-const clearStripe = async () => {
-  console.log('Clearing Stripe test customers...')
-  const customers = await getStripeClient().customers.list()
-
-  for (const customer of customers.data) {
-    // oxlint-disable-next-line no-await-in-loop -- sequential deletion required by Stripe API
-    await getStripeClient().customers.del(customer.id)
-  }
-
-  console.log(`  ${customers.data.length} customers deleted`)
-}
-
-const bunnyVideoSchema = z.object({ guid: z.string() })
-const bunnyVideosSchema = z.object({ items: z.array(bunnyVideoSchema) })
-
-const clearBunny = async () => {
-  console.log('Clearing Bunny CDN videos...')
-  const { items } = await fetchWithZod(
-    bunnyVideosSchema,
-    buildLibraryApiUrl('/videos'),
-    {
-      method: 'GET',
-      headers: getBunnyHeaders()
-    }
-  )
-
-  for (const bunnyVideo of items) {
-    // oxlint-disable-next-line no-await-in-loop -- sequential deletion required by Bunny API
-    await deleteVideo(bunnyVideo.guid)
-  }
-
-  console.log(`  ${items.length} videos deleted`)
+  ])
 }
 
 const seed = async () => {
   logEnvironmentInfo()
+  const source = loadProductionSource()
+  assertSeedTargetIsNotProduction(source)
+  await wait(ABORT_GRACE_PERIOD_MS)
 
-  await new Promise((resolve) => {
-    setTimeout(resolve, ABORT_GRACE_PERIOD_MS)
-  })
+  const memeIds = [
+    ...seedMemes.published,
+    ...seedMemes.pending,
+    ...seedMemes.archived
+  ]
+  console.log('Reading production, read only...')
+  const { categories, memes } = await readProductionLibrary(source, memeIds)
 
-  await clearDatabase()
-  await clearAlgolia()
-  await clearStripe()
-  await clearBunny()
-
-  console.log(`Creating ${mocks.categories.length} categories...`)
-
-  for (const category of mocks.categories) {
-    // oxlint-disable-next-line no-await-in-loop -- sequential creation to preserve ordering
-    await prismaClient.category.create({
-      data: category
-    })
+  if (memes.length !== memeIds.length) {
+    throw new Error(
+      `${memeIds.length - memes.length} seed Memes are no longer published in production: update prisma/seed-memes.json`
+    )
   }
 
-  console.log(`Creating and uploading ${mocks.memes.length} memes...`)
+  console.log('Resetting the target...')
+  await resetTarget()
 
-  for (const meme of mocks.memes) {
-    // oxlint-disable-next-line no-await-in-loop -- sequential upload to avoid rate limiting
-    await createMemeFromTwitterUrl(meme.tweetUrl, meme.title)
-  }
+  console.log(`Copying ${categories.length} categories...`)
+  await copyCategories(categories)
 
-  const adminEmail = 'admin@petit-meme.dev'
-  const adminPassword = 'admin1234'
+  console.log(`Copying ${memes.length} Memes with their original video...`)
+  await copyMemes({ source, memes, statusById: buildStatusById() })
 
-  console.log('Creating admin user...')
-  const hashedPassword = await hashPassword(adminPassword)
-  const now = new Date()
-  const adminId = 'seed-admin-user'
+  const password = resolveSeedPassword()
+  console.log('Creating people...')
+  const people = await createPeople(password)
+  console.log(`  Password: ${password}`)
+  console.log(`  Accounts: ${SEED_LOGIN_HINT}`)
 
-  await prismaClient.user.create({
-    data: {
-      id: adminId,
-      name: 'Admin',
-      email: adminEmail,
-      emailVerified: true,
-      role: 'admin',
-      createdAt: now,
-      updatedAt: now,
-      termsAcceptedAt: now,
-      privacyAcceptedAt: now
-    }
-  })
+  console.log('Synthesizing activity...')
+  const { views, events } = await createActivity(people)
+  console.log(`  ${views} views, ${events} activity events`)
 
-  await prismaClient.account.create({
-    data: {
-      id: 'seed-admin-account',
-      accountId: adminId,
-      providerId: 'credential',
-      userId: adminId,
-      password: hashedPassword,
-      createdAt: now,
-      updatedAt: now
-    }
-  })
+  console.log('Indexing published Memes...')
+  await indexPublishedMemes()
 
-  console.log(`\nSeed complete`)
-  console.log(`  Admin: ${adminEmail} / ${adminPassword}`)
+  console.log('Waiting for Bunny to encode every video...')
+  await waitForEncodedVideos()
+
+  console.log('\nSeed complete')
   process.exit(0)
 }
 

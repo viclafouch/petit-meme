@@ -20,7 +20,7 @@ The end-to-end tests share one test database and one account per audience, so tw
 
 ## Previews
 
-Each change gets a preview on Vercel, open to the Creator only. A preview is isolated from production: it runs on its own database filled with sample Memes, test payments, its own search and its own video storage, and every email it sends goes to the Creator. Nothing a preview does reaches a real account, a real payment or the live library.
+Each change gets a preview on Vercel, open to the Creator only. A preview is isolated from production: it runs on its own database, with real Memes copied from production and made-up accounts and activity. It has test payments, its own search and its own video storage, and every email it sends goes to the Creator. Nothing a preview does reaches a real account, a real payment or the live library.
 
 The Creator signs in to a preview with an email and a password. A test payment turns the account Premium, but what the payment service and the video host report afterwards never comes back to a preview: a cancellation, a renewal, or a new video's first frame.
 

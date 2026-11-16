@@ -17,7 +17,7 @@ type UpdateStripeCustomerLocaleParams = {
   locale: Locale
 }
 
-const matchIsMissingStripeCustomer = (error: unknown) => {
+export const matchIsMissingStripeCustomer = (error: unknown) => {
   return (
     error instanceof Stripe.errors.StripeInvalidRequestError &&
     error.code === 'resource_missing'

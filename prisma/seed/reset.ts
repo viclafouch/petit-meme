@@ -8,6 +8,7 @@ import {
   getBunnyHeaders
 } from '~/server/platforms/bunny.server'
 import { getStripeClient } from '~/server/platforms/stripe.server'
+import { matchIsMissingStripeCustomer } from '~/server/subscription/stripe-customer.server'
 
 const BUNNY_PAGE_SIZE = 1000
 
@@ -23,21 +24,26 @@ const clearDatabase = async () => {
   await prismaClient.recommendCache.deleteMany()
 }
 
-const clearStripe = async () => {
-  const customerIds: string[] = []
+const deleteTargetStripeCustomers = async () => {
+  const users = await prismaClient.user.findMany({
+    where: { stripeCustomerId: { not: null } },
+    select: { stripeCustomerId: true }
+  })
 
-  for await (const customer of getStripeClient().customers.list({
-    limit: 100
-  })) {
-    customerIds.push(customer.id)
+  for (const { stripeCustomerId } of users) {
+    if (stripeCustomerId) {
+      // oxlint-disable-next-line no-await-in-loop -- sequential deletion keeps under the Stripe rate limit
+      await getStripeClient()
+        .customers.del(stripeCustomerId)
+        .catch((error: unknown) => {
+          if (!matchIsMissingStripeCustomer(error)) {
+            throw error
+          }
+        })
+    }
   }
 
-  for (const customerId of customerIds) {
-    // oxlint-disable-next-line no-await-in-loop -- sequential deletion keeps under the Stripe rate limit
-    await getStripeClient().customers.del(customerId)
-  }
-
-  return customerIds.length
+  return users.length
 }
 
 const BUNNY_VIDEOS_SCHEMA = z.object({
@@ -62,8 +68,10 @@ const clearBunny = async () => {
 }
 
 export const resetTarget = async () => {
+  console.log(
+    `  ${await deleteTargetStripeCustomers()} Stripe customers deleted`
+  )
   await clearDatabase()
   console.log('  Database cleared')
-  console.log(`  ${await clearStripe()} Stripe customers deleted`)
   console.log(`  ${await clearBunny()} Bunny videos deleted`)
 }

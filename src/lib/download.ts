@@ -34,6 +34,17 @@ const buildShareData = (
   } satisfies ShareData
 }
 
+export const matchCanShareFiles = () => {
+  return (
+    'canShare' in navigator &&
+    navigator.canShare({
+      files: [
+        new File([], 'meme.mp4', { type: MEME_STORED_FILE_CONTENT_TYPES.mp4 })
+      ]
+    })
+  )
+}
+
 export const matchIsBlobShareable = (
   blob: Blob,
   title: string,

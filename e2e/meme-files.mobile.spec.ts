@@ -41,9 +41,14 @@ const EXPORT_MODES = [
   'share'
 ] as const satisfies readonly MemeExportMode[]
 
-const PANEL_NAMES = {
+const TRIGGER_NAMES = {
   download: m.meme_download,
   share: m.meme_share
+} as const satisfies Record<MemeExportMode, () => string>
+
+const PANEL_NAMES = {
+  download: m.meme_download,
+  share: m.meme_share_heading
 } as const satisfies Record<MemeExportMode, () => string>
 
 const UPSELL_TITLES = {
@@ -89,7 +94,7 @@ const pickFormat = async (
 
   await repeatUntilVisible(() => {
     return page
-      .getByRole('button', { name: PANEL_NAMES[mode](), exact: true })
+      .getByRole('button', { name: TRIGGER_NAMES[mode](), exact: true })
       .click()
   }, formatTile)
 

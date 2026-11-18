@@ -4,13 +4,14 @@ import { Plus, X } from 'lucide-react'
 import { CaptionStage } from '~/components/studio/caption-stage'
 import { ExportActions, RenderIssue } from '~/components/studio/export-actions'
 import { LookTiles } from '~/components/studio/look-tiles'
-import type { Studio, StudioMeme } from '~/components/studio/use-studio'
+import type { Studio } from '~/components/studio/use-studio'
 import {
   CAPTION_SLOT_LABELS,
   CAPTION_SLOTS,
   type Caption,
   type CaptionLookId,
-  type CaptionSlot
+  type CaptionSlot,
+  type StudioMeme
 } from '~/constants/studio'
 import {
   getCaptionLook,

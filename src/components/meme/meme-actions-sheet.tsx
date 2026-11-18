@@ -126,11 +126,10 @@ export const MemeActionsSheet = ({
               {bookmarkAction.label}
             </DrawerClose>
             <DrawerClose
-              render={
-                <Link to="/memes/$memeId/studio" params={{ memeId: meme.id }} />
-              }
               className={SHEET_ROW_CLASS_NAME}
-              onClick={onStudioOpen}
+              onClick={() => {
+                runAfterClose(onStudioOpen)
+              }}
             >
               <Clapperboard />
               {m.meme_open_studio()}

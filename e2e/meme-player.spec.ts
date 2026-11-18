@@ -4,6 +4,7 @@ import { E2E_NAMED_MEMES } from './content'
 import { test } from './fixtures'
 import { repeatUntilNavigated } from './hydration'
 import { getFirstMemePlayLink } from './library'
+import { readVideoIsPaused } from './video'
 
 const LIBRARY_PATHNAME = '/memes/category/trending'
 const PLAYABLE_MEME = E2E_NAMED_MEMES.mostViewed
@@ -68,9 +69,7 @@ test.describe('the player', () => {
 
     await expect
       .poll(() => {
-        return video.evaluate((element: HTMLVideoElement) => {
-          return element.paused
-        })
+        return readVideoIsPaused(video)
       })
       .toBe(true)
 
@@ -81,9 +80,7 @@ test.describe('the player', () => {
 
     await expect
       .poll(() => {
-        return video.evaluate((element: HTMLVideoElement) => {
-          return element.paused
-        })
+        return readVideoIsPaused(video)
       })
       .toBe(false)
   })

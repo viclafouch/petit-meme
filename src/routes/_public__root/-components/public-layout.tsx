@@ -5,6 +5,8 @@ import { Footer } from '~/components/layout/footer'
 import { Navbar } from '~/components/layout/navbar'
 import { SiteBanners } from '~/components/layout/site-banners'
 import { TabBar } from '~/components/layout/tab-bar/tab-bar'
+import { StudioSheetHost } from '~/components/studio/studio-sheet-host'
+import { useIsStudioOpen } from '~/components/studio/use-studio-history'
 import { m } from '~/paraglide/messages'
 
 const publicRouteApi = getRouteApi('/_public__root')
@@ -14,7 +16,7 @@ export const PublicLayout = () => {
     publicRouteApi.useLoaderData()
   const matchRoute = useMatchRoute()
   const isHomePage = matchRoute({ to: '/' }) !== false
-  const isStudio = matchRoute({ to: '/memes/$memeId/studio' }) !== false
+  const isStudioOpen = useIsStudioOpen()
 
   return (
     <StarsBackground animated={isHomePage}>
@@ -48,7 +50,8 @@ export const PublicLayout = () => {
         <Footer className={isHomePage ? undefined : 'max-lg:hidden'} />
       </div>
       <TabBar />
-      {isStudio ? null : <SentryFeedbackWidget />}
+      <StudioSheetHost />
+      {isStudioOpen ? null : <SentryFeedbackWidget />}
     </StarsBackground>
   )
 }

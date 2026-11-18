@@ -35,6 +35,16 @@ const makeOutsideInert = (dialog: HTMLElement) => {
   }
 }
 
+const pauseMediaOutside = (dialog: HTMLElement) => {
+  for (const media of document.querySelectorAll<HTMLMediaElement>(
+    'video, audio'
+  )) {
+    if (!dialog.contains(media)) {
+      media.pause()
+    }
+  }
+}
+
 const matchIsFocusInside = (dialog: HTMLElement) => {
   const { activeElement } = document
 
@@ -57,6 +67,8 @@ export const useSheetDialog = (onClose: () => void) => {
     }
 
     const restoreOutside = makeOutsideInert(dialog)
+
+    pauseMediaOutside(dialog)
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (

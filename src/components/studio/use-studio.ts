@@ -6,20 +6,13 @@ import { useCaptionRender } from '~/components/studio/use-caption-render'
 import { useStudioExport } from '~/components/studio/use-studio-export'
 import {
   INITIAL_CAPTION,
+  type StudioMeme,
   type Caption,
   type CaptionLookId,
   type CaptionSlot
 } from '~/constants/studio'
 import { bindFrenchPunctuation, moveCaptionToLook } from '~/helpers/caption'
 import { getGenerationQuotaQueryOpts } from '~/queries/studio'
-
-export type StudioMeme = {
-  id: string
-  title: string
-  bunnyId: string
-  width: number
-  height: number
-}
 
 export const useStudio = (meme: StudioMeme) => {
   const { user } = useRouteContext({ from: '__root__' })

@@ -1,8 +1,7 @@
 import { getRouteApi, Link } from '@tanstack/react-router'
-import { MemeVideoPlayer } from '~/components/meme/meme-video-player'
+import { MemePlayer } from '~/components/meme/meme-player'
 import { useMemeHls } from '~/components/meme/use-meme-hls'
 import { LOGO_PATH } from '~/constants/branding'
-import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import { m } from '~/paraglide/messages'
 
 const embedRouteApi = getRouteApi('/embed/$memeId')
@@ -15,13 +14,13 @@ export const EmbedPage = () => {
 
   return (
     <main className="dark relative h-dvh w-full overflow-hidden bg-black">
-      <MemeVideoPlayer
-        ref={videoCallbackRef}
-        poster={buildVideoImageUrl(meme.video.bunnyId)}
-        playbackFailure={playbackFailure}
+      <MemePlayer
+        bunnyId={meme.video.bunnyId}
+        title={meme.title}
         preload="metadata"
-        aria-label={meme.title}
-        className="h-dvh rounded-none"
+        onVideoChange={videoCallbackRef}
+        playbackFailure={playbackFailure}
+        className="block h-dvh w-full"
       />
       <Link
         to="/memes/$memeId"

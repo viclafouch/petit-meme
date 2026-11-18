@@ -1,8 +1,7 @@
-import { MemeVideoPlayer } from '~/components/meme/meme-video-player'
+import { MemePlayer } from '~/components/meme/meme-player'
 import { useMemeHls } from '~/components/meme/use-meme-hls'
 import { Card } from '~/components/ui/card'
 import type { MemeFullData } from '~/constants/meme'
-import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import { cn } from '~/lib/utils'
 
 type MemeVideoCardProps = {
@@ -17,13 +16,14 @@ export const MemeVideoCard = ({ meme, className }: MemeVideoCardProps) => {
 
   return (
     <Card className={cn('overflow-hidden py-0', className)}>
-      <MemeVideoPlayer
-        ref={videoCallbackRef}
-        poster={buildVideoImageUrl(meme.video.bunnyId)}
-        playbackFailure={playbackFailure}
+      <MemePlayer
+        bunnyId={meme.video.bunnyId}
+        title={meme.title}
         preload="metadata"
         muted
-        className="aspect-video bg-muted dark"
+        onVideoChange={videoCallbackRef}
+        playbackFailure={playbackFailure}
+        className="block aspect-video w-full bg-black"
       />
     </Card>
   )

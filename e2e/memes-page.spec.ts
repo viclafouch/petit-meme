@@ -4,6 +4,7 @@ import { m } from '~/paraglide/messages'
 import { E2E_CATEGORIES, E2E_NAMED_MEMES } from './content'
 import { E2E_BUNNY_IMAGES_HOSTNAME } from './env'
 import { test } from './fixtures'
+import { readVideoCurrentTime } from './video'
 
 const PLAYABLE_MEME = E2E_NAMED_MEMES.mostViewed
 const PLAYABLE_MEME_CATEGORY = E2E_CATEGORIES.chats
@@ -79,9 +80,7 @@ test.describe('a Meme page', () => {
     ).toBeVisible()
     await expect
       .poll(() => {
-        return video.evaluate((element: HTMLVideoElement) => {
-          return element.currentTime
-        })
+        return readVideoCurrentTime(video)
       })
       .toBeGreaterThan(0)
   })

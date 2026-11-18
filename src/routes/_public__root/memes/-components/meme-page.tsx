@@ -3,6 +3,7 @@ import { Search } from 'lucide-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { getRouteApi, Link, Outlet, useMatch } from '@tanstack/react-router'
 import { MemeLanguageBadge } from '~/components/meme/meme-language-badge'
+import { MemePlayer } from '~/components/meme/meme-player'
 import { useMediaSession } from '~/components/meme/use-media-session'
 import { useMemeExport } from '~/components/meme/use-meme-export'
 import { useMemeHls } from '~/components/meme/use-meme-hls'
@@ -13,6 +14,7 @@ import { MemeStatus } from '~/db/generated/prisma/enums'
 import { formatDate, formatRelativeTime } from '~/helpers/date'
 import { formatCount } from '~/helpers/number'
 import { buildVideoFirstFrameUrl } from '~/lib/bunny-public-urls'
+import { setVideoBuffering } from '~/lib/video'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { getMemeQueryOpts } from '~/queries/meme'
@@ -25,7 +27,6 @@ import { getVideoAspectRatio } from '~/routes/_public__root/memes/-lib/video-asp
 import type { getMeme } from '~/server/meme/meme.functions'
 import { MemeActions } from './meme-actions'
 import { MemePendingBanner } from './meme-pending-banner'
-import { MemeWatchPlayer } from './meme-watch-player'
 import { RelatedMemesRail } from './related-memes-rail'
 
 const memeRouteApi = getRouteApi('/_public__root/memes/$memeId')
@@ -174,9 +175,22 @@ export const MemePage = () => {
       shouldThrow: false
     })
   )
+  const [isPlaybackWanted, setIsPlaybackWanted] = React.useState(!isStudioOpen)
+  const [memeIdPausedByStudio, setMemeIdPausedByStudio] = React.useState(
+    isStudioOpen ? meme.id : null
+  )
+
+  if (!isStudioOpen && !isPlaybackWanted) {
+    setIsPlaybackWanted(true)
+  }
+
+  if (isStudioOpen && memeIdPausedByStudio !== meme.id) {
+    setMemeIdPausedByStudio(meme.id)
+  }
+
   const { video, videoCallbackRef, playbackFailure } = useMemeHls({
     memeId: meme.id,
-    isEnabled: !isStudioOpen
+    isEnabled: isPlaybackWanted
   })
   const shareMutation = useMemeExport({ mode: 'share' })
   const downloadMutation = useMemeExport({ mode: 'download' })
@@ -193,6 +207,12 @@ export const MemePage = () => {
   const handlePause = () => {
     video?.pause()
   }
+
+  React.useEffect(() => {
+    if (video) {
+      setVideoBuffering(video, isStudioOpen ? 'preload' : 'play')
+    }
+  }, [isStudioOpen, video])
 
   const handleExport = (mode: MemeExportMode, format: MemeDerivedFormat) => {
     handlePause()
@@ -212,6 +232,7 @@ export const MemePage = () => {
             </div>
           )}
           <div
+            data-testid="meme-stage"
             className="meme-stage"
             style={{
               '--meme-video-ratio': getVideoAspectRatio(meme.video)
@@ -224,12 +245,13 @@ export const MemePage = () => {
                 decoding="async"
               />
             </div>
-            <MemeWatchPlayer
+            <MemePlayer
               bunnyId={meme.video.bunnyId}
               title={meme.title}
-              video={video}
+              autoPlay={memeIdPausedByStudio !== meme.id}
               onVideoChange={videoCallbackRef}
               playbackFailure={playbackFailure}
+              className="absolute inset-0 size-full"
             />
           </div>
           <div className="relative flex flex-col gap-4 px-4 pt-4 lg:px-0 lg:pt-5">

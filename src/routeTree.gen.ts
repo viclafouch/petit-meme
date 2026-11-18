@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as Public__rootRouteRouteImport } from './routes/_public__root/route'
-import { Route as StudioRouteImport } from './routes/_studio'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as ManifestDotjsonRouteImport } from './routes/manifest[.]json'
@@ -66,15 +65,11 @@ import { Route as Public__rootDefaultPricingIndexRouteImport } from './routes/_p
 import { Route as Public__rootDefaultRandomIndexRouteImport } from './routes/_public__root/_default/random/index'
 import { Route as Public__rootDefaultSettingsIndexRouteImport } from './routes/_public__root/_default/settings/index'
 import { Route as Public__rootDefaultSubmitIndexRouteImport } from './routes/_public__root/_default/submit/index'
-import { Route as StudioMemesMemeIdStudioRouteImport } from './routes/_studio/memes.$memeId.studio'
+import { Route as Public__rootMemesMemeIdStudioRouteImport } from './routes/_public__root/memes/$memeId.studio'
 import { Route as Public__rootDefaultMemesCategorySlugRouteImport } from './routes/_public__root/_default/memes/category/$slug'
 
 const Public__rootRouteRoute = Public__rootRouteRouteImport.update({
   id: '/_public__root',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StudioRoute = StudioRouteImport.update({
-  id: '/_studio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRouteRoute = AdminRouteRouteImport.update({
@@ -370,11 +365,12 @@ const Public__rootDefaultSubmitIndexRoute =
     path: '/submit/',
     getParentRoute: () => Public__rootDefaultRouteRoute,
   } as any)
-const StudioMemesMemeIdStudioRoute = StudioMemesMemeIdStudioRouteImport.update({
-  id: '/memes/$memeId/studio',
-  path: '/memes/$memeId/studio',
-  getParentRoute: () => StudioRoute,
-} as any)
+const Public__rootMemesMemeIdStudioRoute =
+  Public__rootMemesMemeIdStudioRouteImport.update({
+    id: '/studio',
+    path: '/studio',
+    getParentRoute: () => Public__rootMemesMemeIdRoute,
+  } as any)
 const Public__rootDefaultMemesCategorySlugRoute =
   Public__rootDefaultMemesCategorySlugRouteImport.update({
     id: '/memes/category/$slug',
@@ -409,7 +405,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof Public__rootDefaultPrivacyRoute
   '/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
   '/verify-email': typeof Public__rootDefaultVerifyEmailRoute
-  '/memes/$memeId': typeof Public__rootMemesMemeIdRoute
+  '/memes/$memeId': typeof Public__rootMemesMemeIdRouteWithChildren
   '/admin/activity/$ip': typeof AdminActivityIpRoute
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
@@ -431,7 +427,7 @@ export interface FileRoutesByFullPath {
   '/memes/ai-search': typeof Public__rootDefaultMemesAiSearchRoute
   '/password/create-new': typeof Public__rootDefaultPasswordCreateNewRoute
   '/password/reset': typeof Public__rootDefaultPasswordResetRoute
-  '/memes/$memeId/studio': typeof StudioMemesMemeIdStudioRoute
+  '/memes/$memeId/studio': typeof Public__rootMemesMemeIdStudioRoute
   '/app/': typeof Public__rootDefaultAppIndexRoute
   '/memes/': typeof Public__rootDefaultMemesIndexRoute
   '/pricing/': typeof Public__rootDefaultPricingIndexRoute
@@ -442,7 +438,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/reels': typeof ReelsRouteRoute
-  '/': typeof Public__rootIndexRoute
   '/health': typeof HealthRoute
   '/manifest.json': typeof ManifestDotjsonRoute
   '/offline': typeof OfflineRoute
@@ -451,6 +446,7 @@ export interface FileRoutesByTo {
   '/sitemap-memes.xml': typeof SitemapMemesDotxmlRoute
   '/sitemap-static.xml': typeof SitemapStaticDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/': typeof Public__rootIndexRoute
   '/admin/downloader': typeof AdminDownloaderRoute
   '/admin/services': typeof AdminServicesRoute
   '/api/bunny': typeof ApiBunnyRoute
@@ -465,7 +461,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof Public__rootDefaultPrivacyRoute
   '/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
   '/verify-email': typeof Public__rootDefaultVerifyEmailRoute
-  '/memes/$memeId': typeof Public__rootMemesMemeIdRoute
+  '/memes/$memeId': typeof Public__rootMemesMemeIdRouteWithChildren
   '/admin/activity/$ip': typeof AdminActivityIpRoute
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
@@ -487,7 +483,7 @@ export interface FileRoutesByTo {
   '/memes/ai-search': typeof Public__rootDefaultMemesAiSearchRoute
   '/password/create-new': typeof Public__rootDefaultPasswordCreateNewRoute
   '/password/reset': typeof Public__rootDefaultPasswordResetRoute
-  '/memes/$memeId/studio': typeof StudioMemesMemeIdStudioRoute
+  '/memes/$memeId/studio': typeof Public__rootMemesMemeIdStudioRoute
   '/app': typeof Public__rootDefaultAppIndexRoute
   '/memes': typeof Public__rootDefaultMemesIndexRoute
   '/pricing': typeof Public__rootDefaultPricingIndexRoute
@@ -501,7 +497,6 @@ export interface FileRoutesById {
   '/_public__root': typeof Public__rootRouteRouteWithChildren
   '/admin': typeof AdminRouteRouteWithChildren
   '/reels': typeof ReelsRouteRoute
-  '/_studio': typeof StudioRouteWithChildren
   '/health': typeof HealthRoute
   '/manifest.json': typeof ManifestDotjsonRoute
   '/offline': typeof OfflineRoute
@@ -527,7 +522,7 @@ export interface FileRoutesById {
   '/_public__root/_default/privacy': typeof Public__rootDefaultPrivacyRoute
   '/_public__root/_default/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
   '/_public__root/_default/verify-email': typeof Public__rootDefaultVerifyEmailRoute
-  '/_public__root/memes/$memeId': typeof Public__rootMemesMemeIdRoute
+  '/_public__root/memes/$memeId': typeof Public__rootMemesMemeIdRouteWithChildren
   '/admin/activity/$ip': typeof AdminActivityIpRoute
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
@@ -549,7 +544,7 @@ export interface FileRoutesById {
   '/_public__root/_default/memes/ai-search': typeof Public__rootDefaultMemesAiSearchRoute
   '/_public__root/_default/password/create-new': typeof Public__rootDefaultPasswordCreateNewRoute
   '/_public__root/_default/password/reset': typeof Public__rootDefaultPasswordResetRoute
-  '/_studio/memes/$memeId/studio': typeof StudioMemesMemeIdStudioRoute
+  '/_public__root/memes/$memeId/studio': typeof Public__rootMemesMemeIdStudioRoute
   '/_public__root/_default/app/': typeof Public__rootDefaultAppIndexRoute
   '/_public__root/_default/memes/': typeof Public__rootDefaultMemesIndexRoute
   '/_public__root/_default/pricing/': typeof Public__rootDefaultPricingIndexRoute
@@ -620,7 +615,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/reels'
-    | '/'
     | '/health'
     | '/manifest.json'
     | '/offline'
@@ -629,6 +623,7 @@ export interface FileRouteTypes {
     | '/sitemap-memes.xml'
     | '/sitemap-static.xml'
     | '/sitemap.xml'
+    | '/'
     | '/admin/downloader'
     | '/admin/services'
     | '/api/bunny'
@@ -678,7 +673,6 @@ export interface FileRouteTypes {
     | '/_public__root'
     | '/admin'
     | '/reels'
-    | '/_studio'
     | '/health'
     | '/manifest.json'
     | '/offline'
@@ -726,7 +720,7 @@ export interface FileRouteTypes {
     | '/_public__root/_default/memes/ai-search'
     | '/_public__root/_default/password/create-new'
     | '/_public__root/_default/password/reset'
-    | '/_studio/memes/$memeId/studio'
+    | '/_public__root/memes/$memeId/studio'
     | '/_public__root/_default/app/'
     | '/_public__root/_default/memes/'
     | '/_public__root/_default/pricing/'
@@ -740,7 +734,6 @@ export interface RootRouteChildren {
   Public__rootRouteRoute: typeof Public__rootRouteRouteWithChildren
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
   ReelsRouteRoute: typeof ReelsRouteRoute
-  StudioRoute: typeof StudioRouteWithChildren
   HealthRoute: typeof HealthRoute
   ManifestDotjsonRoute: typeof ManifestDotjsonRoute
   OfflineRoute: typeof OfflineRoute
@@ -771,13 +764,6 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof Public__rootRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_studio': {
-      id: '/_studio'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof StudioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -1165,12 +1151,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Public__rootDefaultSubmitIndexRouteImport
       parentRoute: typeof Public__rootDefaultRouteRoute
     }
-    '/_studio/memes/$memeId/studio': {
-      id: '/_studio/memes/$memeId/studio'
-      path: '/memes/$memeId/studio'
+    '/_public__root/memes/$memeId/studio': {
+      id: '/_public__root/memes/$memeId/studio'
+      path: '/studio'
       fullPath: '/memes/$memeId/studio'
-      preLoaderRoute: typeof StudioMemesMemeIdStudioRouteImport
-      parentRoute: typeof StudioRoute
+      preLoaderRoute: typeof Public__rootMemesMemeIdStudioRouteImport
+      parentRoute: typeof Public__rootMemesMemeIdRoute
     }
     '/_public__root/_default/memes/category/$slug': {
       id: '/_public__root/_default/memes/category/$slug'
@@ -1250,16 +1236,30 @@ const Public__rootDefaultRouteRouteWithChildren =
     Public__rootDefaultRouteRouteChildren,
   )
 
+interface Public__rootMemesMemeIdRouteChildren {
+  Public__rootMemesMemeIdStudioRoute: typeof Public__rootMemesMemeIdStudioRoute
+}
+
+const Public__rootMemesMemeIdRouteChildren: Public__rootMemesMemeIdRouteChildren =
+  {
+    Public__rootMemesMemeIdStudioRoute: Public__rootMemesMemeIdStudioRoute,
+  }
+
+const Public__rootMemesMemeIdRouteWithChildren =
+  Public__rootMemesMemeIdRoute._addFileChildren(
+    Public__rootMemesMemeIdRouteChildren,
+  )
+
 interface Public__rootRouteRouteChildren {
   Public__rootDefaultRouteRoute: typeof Public__rootDefaultRouteRouteWithChildren
   Public__rootIndexRoute: typeof Public__rootIndexRoute
-  Public__rootMemesMemeIdRoute: typeof Public__rootMemesMemeIdRoute
+  Public__rootMemesMemeIdRoute: typeof Public__rootMemesMemeIdRouteWithChildren
 }
 
 const Public__rootRouteRouteChildren: Public__rootRouteRouteChildren = {
   Public__rootDefaultRouteRoute: Public__rootDefaultRouteRouteWithChildren,
   Public__rootIndexRoute: Public__rootIndexRoute,
-  Public__rootMemesMemeIdRoute: Public__rootMemesMemeIdRoute,
+  Public__rootMemesMemeIdRoute: Public__rootMemesMemeIdRouteWithChildren,
 }
 
 const Public__rootRouteRouteWithChildren =
@@ -1299,22 +1299,10 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
   AdminRouteRouteChildren,
 )
 
-interface StudioRouteChildren {
-  StudioMemesMemeIdStudioRoute: typeof StudioMemesMemeIdStudioRoute
-}
-
-const StudioRouteChildren: StudioRouteChildren = {
-  StudioMemesMemeIdStudioRoute: StudioMemesMemeIdStudioRoute,
-}
-
-const StudioRouteWithChildren =
-  StudioRoute._addFileChildren(StudioRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   Public__rootRouteRoute: Public__rootRouteRouteWithChildren,
   AdminRouteRoute: AdminRouteRouteWithChildren,
   ReelsRouteRoute: ReelsRouteRoute,
-  StudioRoute: StudioRouteWithChildren,
   HealthRoute: HealthRoute,
   ManifestDotjsonRoute: ManifestDotjsonRoute,
   OfflineRoute: OfflineRoute,

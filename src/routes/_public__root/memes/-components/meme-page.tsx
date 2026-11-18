@@ -1,7 +1,7 @@
 import React from 'react'
 import { Search } from 'lucide-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { getRouteApi, Link } from '@tanstack/react-router'
+import { getRouteApi, Link, Outlet, useMatch } from '@tanstack/react-router'
 import { MemeLanguageBadge } from '~/components/meme/meme-language-badge'
 import { useMediaSession } from '~/components/meme/use-media-session'
 import { useMemeExport } from '~/components/meme/use-meme-export'
@@ -168,8 +168,15 @@ export const MemePage = () => {
   const { memeId } = memeRouteApi.useParams()
   const memeQuery = useSuspenseQuery(getMemeQueryOpts(memeId))
   const meme = applyBreakUiMeme(memeQuery.data, useBreakUiDataset())
+  const isStudioOpen = Boolean(
+    useMatch({
+      from: '/_public__root/memes/$memeId/studio',
+      shouldThrow: false
+    })
+  )
   const { video, videoCallbackRef, playbackFailure } = useMemeHls({
-    memeId: meme.id
+    memeId: meme.id,
+    isEnabled: !isStudioOpen
   })
   const shareMutation = useMemeExport({ mode: 'share' })
   const downloadMutation = useMemeExport({ mode: 'download' })
@@ -246,6 +253,7 @@ export const MemePage = () => {
         </div>
         <RelatedMemesRail memeId={meme.id} title={meme.title} />
       </div>
+      <Outlet />
     </div>
   )
 }

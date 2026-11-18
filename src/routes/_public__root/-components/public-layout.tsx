@@ -14,10 +14,14 @@ export const PublicLayout = () => {
     publicRouteApi.useLoaderData()
   const matchRoute = useMatchRoute()
   const isHomePage = matchRoute({ to: '/' }) !== false
+  const isStudio = matchRoute({ to: '/memes/$memeId/studio' }) !== false
 
   return (
     <StarsBackground animated={isHomePage}>
-      <div className="z-10 relative min-h-dvh flex flex-col pt-[env(safe-area-inset-top,0px)] pb-(--tab-bar-space)">
+      <div
+        data-public-shell
+        className="z-10 relative min-h-dvh flex flex-col pt-[env(safe-area-inset-top,0px)] pb-(--tab-bar-space)"
+      >
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:z-60 focus:top-4 focus:left-4 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:text-sm focus:font-medium"
@@ -28,7 +32,10 @@ export const PublicLayout = () => {
           suggestedLocale={_suggestedLocale}
           isAnnouncementInitiallyDismissed={_announcementDismissed}
         />
-        <div className="sticky top-[env(safe-area-inset-top,0px)] z-50">
+        <div
+          data-public-navbar
+          className="sticky top-[env(safe-area-inset-top,0px)] z-50"
+        >
           <Navbar />
         </div>
         <main
@@ -41,7 +48,7 @@ export const PublicLayout = () => {
         <Footer className={isHomePage ? undefined : 'max-lg:hidden'} />
       </div>
       <TabBar />
-      <SentryFeedbackWidget />
+      {isStudio ? null : <SentryFeedbackWidget />}
     </StarsBackground>
   )
 }

@@ -1,11 +1,7 @@
 import type { FFmpeg, LogEvent } from '@ffmpeg/ffmpeg'
 import { fetchFile } from '@ffmpeg/util'
-import {
-  WATERMARK_MARGIN_RATIO,
-  WATERMARK_MAX_MARGIN_IN_PIXELS,
-  WATERMARK_OPACITY,
-  WATERMARK_WIDTH_RATIO
-} from '~/constants/watermark'
+import { WATERMARK_OPACITY, WATERMARK_WIDTH_RATIO } from '~/constants/watermark'
+import { getWatermarkMargin } from '~/helpers/watermark'
 import {
   FFMPEG_VIDEO_ENCODING_ARGS,
   FFMPEG_INPUT_FILE,
@@ -84,10 +80,7 @@ const buildWasmWatermarkFilter = ({
   const targetHeight = roundUpToEven(
     targetWidth * (watermark.height / watermark.width)
   )
-  const margin = Math.min(
-    Math.round(minSide * WATERMARK_MARGIN_RATIO),
-    WATERMARK_MAX_MARGIN_IN_PIXELS
-  )
+  const margin = getWatermarkMargin(minSide)
   const posX = video.width - targetWidth - margin
   const posY = video.height - targetHeight - margin
 

@@ -13,7 +13,6 @@ import { ThemeProvider } from '~/components/app/theme-provider'
 import { CookieBanner } from '~/components/cookie-consent/cookie-banner'
 import { CookieConsentProvider } from '~/components/cookie-consent/cookie-provider'
 import { CookieSettings } from '~/components/cookie-consent/cookie-settings'
-import { StudioProvider } from '~/components/studio/studio-provider'
 import { Toaster } from '~/components/ui/sonner'
 import { clientEnv } from '~/env/client'
 import { m } from '~/paraglide/messages'
@@ -59,7 +58,7 @@ export const RootDocument = ({ children }: RootDocumentProps) => {
           <ThemeProvider initialTheme={_storedTheme}>
             <CookieConsentProvider storedConsent={_consentState}>
               <DialogProvider>
-                <StudioProvider>{children}</StudioProvider>
+                {children}
                 <DialogOutlet />
                 <ClientOnly>
                   <Toaster

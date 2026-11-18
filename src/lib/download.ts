@@ -56,19 +56,33 @@ export const matchIsBlobShareable = (
   )
 }
 
+export const shareBlobOrThrow = async (
+  blob: Blob,
+  title: string,
+  format: MemeDerivedFormat
+) => {
+  try {
+    await navigator.share(buildShareData(blob, title, format))
+
+    return true
+  } catch (error) {
+    if (matchIsUserCancelError(error)) {
+      return false
+    }
+
+    throw error
+  }
+}
+
 export async function shareBlob(
   blob: Blob,
   title: string,
   format: MemeDerivedFormat
 ) {
   try {
-    await navigator.share(buildShareData(blob, title, format))
-
-    return true
+    return await shareBlobOrThrow(blob, title, format)
   } catch (error) {
-    if (!matchIsUserCancelError(error)) {
-      captureWithFeature(error, 'share')
-    }
+    captureWithFeature(error, 'share')
 
     return false
   }

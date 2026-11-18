@@ -5,6 +5,7 @@ import { Link, useRouteContext } from '@tanstack/react-router'
 import { MessagingAppIcon } from '~/components/icon/messaging-app-icon'
 import { MemeExportPanel } from '~/components/meme/meme-export-panel'
 import { useBookmarkAction } from '~/components/meme/use-bookmark-action'
+import { markStudioEntry } from '~/components/studio/use-studio-history'
 import type { MemeDerivedFormat } from '~/constants/bunny'
 import type { MemeExportMode, MemeWithVideo } from '~/constants/meme'
 import { MESSAGING_APPS, type MessagingApp } from '~/constants/messaging-apps'
@@ -193,6 +194,8 @@ export const MemeActions = ({
       <Link
         to="/memes/$memeId/studio"
         params={{ memeId: meme.id }}
+        state={markStudioEntry}
+        resetScroll={false}
         className="meme-pill meme-pill-studio"
         onClick={onPause}
       >

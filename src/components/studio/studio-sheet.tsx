@@ -1,14 +1,26 @@
 import React from 'react'
+import ReactDOM from 'react-dom'
 import { X } from 'lucide-react'
 import { useHydrated } from '@tanstack/react-router'
 import { StudioEditor } from '~/components/studio/studio-editor'
+import studioCss from '~/components/studio/studio.css?url'
 import { useSheetDialog } from '~/components/studio/use-sheet-dialog'
 import { useSheetDrag } from '~/components/studio/use-sheet-drag'
 import { useSheetKeyboard } from '~/components/studio/use-sheet-keyboard'
-import { useStudio, type StudioMeme } from '~/components/studio/use-studio'
-import { useStudioHistory } from '~/components/studio/use-studio-history'
+import { useStudio } from '~/components/studio/use-studio'
 import { LOGO_PATH, SITE_NAME } from '~/constants/branding'
+import { CAPTION_FONT_FILES, type StudioMeme } from '~/constants/studio'
 import { m } from '~/paraglide/messages'
+
+const preloadCaptionFonts = () => {
+  for (const { url } of CAPTION_FONT_FILES) {
+    ReactDOM.preload(url, {
+      as: 'font',
+      type: 'font/woff2',
+      crossOrigin: 'anonymous'
+    })
+  }
+}
 
 const blurFocusedField = () => {
   if (document.activeElement instanceof HTMLElement) {
@@ -64,18 +76,20 @@ const StudioHeader = ({ meme, titleId, onClose }: StudioHeaderProps) => {
 
 type StudioSheetProps = {
   meme: StudioMeme
+  onClose: () => void
 }
 
-export const StudioSheet = ({ meme }: StudioSheetProps) => {
+export const StudioSheet = ({ meme, onClose }: StudioSheetProps) => {
   const isHydrated = useHydrated()
   const studio = useStudio(meme)
-  const { close } = useStudioHistory()
-  const dialogRef = useSheetDialog(close)
+  const dialogRef = useSheetDialog(onClose)
   const sheetRef = useSheetKeyboard()
   const scrimRef = React.useRef<HTMLDivElement>(null)
   const titleId = React.useId()
 
-  useSheetDrag({ sheetRef, scrimRef, onDismiss: close })
+  preloadCaptionFonts()
+
+  useSheetDrag({ sheetRef, scrimRef, onDismiss: onClose })
 
   return (
     <dialog
@@ -85,15 +99,16 @@ export const StudioSheet = ({ meme }: StudioSheetProps) => {
       className="studio dark"
       data-entering={isHydrated || undefined}
     >
+      <link rel="stylesheet" href={studioCss} precedence="default" />
       <div
         ref={scrimRef}
         aria-hidden="true"
         className="studio-scrim"
-        onClick={close}
+        onClick={onClose}
       />
       <div ref={sheetRef} className="studio-sheet">
         <span aria-hidden="true" className="studio-sheet-grabber" />
-        <StudioHeader meme={meme} titleId={titleId} onClose={close} />
+        <StudioHeader meme={meme} titleId={titleId} onClose={onClose} />
         <StudioEditor studio={studio} meme={meme} />
       </div>
     </dialog>

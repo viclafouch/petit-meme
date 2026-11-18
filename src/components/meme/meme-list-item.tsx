@@ -12,6 +12,7 @@ import {
 } from '~/components/meme/meme-video-thumbnail'
 import { useBookmarkAction } from '~/components/meme/use-bookmark-action'
 import { useMemeExport } from '~/components/meme/use-meme-export'
+import { useOpenStudioSheet } from '~/components/studio/use-studio-history'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +24,7 @@ import type { MemeWithVideo } from '~/constants/meme'
 import type { HighlightedText } from '~/helpers/highlight'
 import { matchIsContentLocaleForeign } from '~/helpers/i18n-content'
 import { formatCount } from '~/helpers/number'
+import { toStudioMeme } from '~/helpers/studio-meme'
 import { useIsCoarsePointer } from '~/hooks/use-is-coarse-pointer'
 import {
   sendClickEvent,
@@ -103,6 +105,7 @@ export const MemeListItem = React.memo(
     const isCoarsePointer = useIsCoarsePointer()
     const shareMutation = useMemeExport({ mode: 'share', queryID })
     const downloadMutation = useMemeExport({ mode: 'download', queryID })
+    const openStudioSheet = useOpenStudioSheet()
 
     const handleTrackClick = () => {
       sendClickEvent({
@@ -120,6 +123,11 @@ export const MemeListItem = React.memo(
         eventName,
         authenticatedUserToken
       })
+    }
+
+    const handleOpenStudio = () => {
+      handleTrackConversion('Meme Studio Opened')
+      openStudioSheet(toStudioMeme(meme))
     }
 
     return (
@@ -182,9 +190,7 @@ export const MemeListItem = React.memo(
                 meme={meme}
                 queryID={queryID}
                 authenticatedUserToken={authenticatedUserToken}
-                onStudioOpen={() => {
-                  handleTrackConversion('Meme Studio Opened')
-                }}
+                onStudioOpen={handleOpenStudio}
                 onExport={(mode, format) => {
                   const exportMutation =
                     mode === 'share' ? shareMutation : downloadMutation
@@ -220,20 +226,10 @@ export const MemeListItem = React.memo(
                     <ArrowRight />
                     {m.meme_details()}
                   </DropdownMenuLinkItem>
-                  <DropdownMenuLinkItem
-                    render={
-                      <Link
-                        to="/memes/$memeId/studio"
-                        params={{ memeId: meme.id }}
-                      />
-                    }
-                    onClick={() => {
-                      handleTrackConversion('Meme Studio Opened')
-                    }}
-                  >
+                  <DropdownMenuItem onClick={handleOpenStudio}>
                     <Clapperboard />
                     {m.meme_open_studio()}
-                  </DropdownMenuLinkItem>
+                  </DropdownMenuItem>
                   <MemeExportSubmenu
                     mode="share"
                     className="pointer-fine:hidden"

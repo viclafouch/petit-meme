@@ -7,10 +7,6 @@ import {
   useReducedMotion
 } from 'motion/react'
 import { Badge } from '~/components/ui/badge'
-import {
-  VideoPlayer,
-  VideoPlayerContent
-} from '~/components/ui/kibo-ui/video-player'
 import { m } from '~/paraglide/messages'
 import { PageHeading2 } from '~/routes/_public__root/-components/page-headers'
 
@@ -133,8 +129,8 @@ export const Responsive = () => {
             </div>
           </div>
           <div className="bg-muted aspect-video relative">
-            <VideoPlayer className="overflow-hidden size-full max-h-full dark relative">
-              <VideoPlayerContent
+            <div className="relative size-full overflow-hidden">
+              <video
                 crossOrigin=""
                 className="size-full"
                 playsInline
@@ -146,11 +142,12 @@ export const Responsive = () => {
                 disablePictureInPicture
                 disableRemotePlayback
                 tabIndex={-1}
+                aria-hidden="true"
               />
               <div className="absolute top-1/2 left-1/2 size-10 z-10 rounded-full bg-white/30 flex items-center justify-center -translate-1/2 transition-transform">
                 <Eye />
               </div>
-            </VideoPlayer>
+            </div>
           </div>
         </motion.div>
         <motion.div
@@ -162,8 +159,8 @@ export const Responsive = () => {
             <div className="bg-muted-foreground/20 h-1 md:h-2 w-10 md:w-16 rounded-full" />
           </div>
           <div className="bg-muted aspect-video">
-            <VideoPlayer className="overflow-hidden size-full max-h-full dark">
-              <VideoPlayerContent
+            <div className="relative size-full overflow-hidden">
+              <video
                 crossOrigin=""
                 className="size-full"
                 playsInline
@@ -175,11 +172,12 @@ export const Responsive = () => {
                 disablePictureInPicture
                 disableRemotePlayback
                 tabIndex={-1}
+                aria-hidden="true"
               />
               <div className="absolute top-1/2 left-1/2 size-10 z-10 rounded-full bg-white/30 flex items-center justify-center -translate-1/2 transition-transform">
                 <Eye />
               </div>
-            </VideoPlayer>
+            </div>
           </div>
         </motion.div>
         <motion.div
@@ -191,8 +189,8 @@ export const Responsive = () => {
             <div className="bg-muted-foreground/20 size-2 rounded-full" />
           </div>
           <div className="bg-muted aspect-4/3">
-            <VideoPlayer className="overflow-hidden size-full max-h-full dark">
-              <VideoPlayerContent
+            <div className="relative size-full overflow-hidden">
+              <video
                 crossOrigin=""
                 className="size-full"
                 playsInline
@@ -204,11 +202,12 @@ export const Responsive = () => {
                 disablePictureInPicture
                 disableRemotePlayback
                 tabIndex={-1}
+                aria-hidden="true"
               />
               <div className="absolute top-1/2 left-1/2 size-10 z-10 rounded-full bg-white/30 flex items-center justify-center -translate-1/2 transition-transform">
                 <Eye />
               </div>
-            </VideoPlayer>
+            </div>
           </div>
         </motion.div>
         <motion.div

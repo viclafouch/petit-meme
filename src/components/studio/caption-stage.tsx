@@ -1,12 +1,12 @@
 import React from 'react'
+import { MemePlayer } from '~/components/meme/meme-player'
 import { useMemeHls } from '~/components/meme/use-meme-hls'
-import { StageControls } from '~/components/studio/stage-controls'
-import type { StudioMeme } from '~/components/studio/use-studio'
 import {
   CAPTION_SLOT_LABELS,
   CAPTION_TEXT_MAX_LENGTH,
   type Caption,
-  type CaptionSlot
+  type CaptionSlot,
+  type StudioMeme
 } from '~/constants/studio'
 import {
   WATERMARK_ASSET_PATH,
@@ -221,29 +221,23 @@ type StageVideoProps = {
 }
 
 const StageVideo = ({ meme, watermark }: StageVideoProps) => {
-  const { video, videoCallbackRef } = useMemeHls({ memeId: meme.id })
-  const [isPlaying, setIsPlaying] = React.useState(false)
+  const { videoCallbackRef, playbackFailure } = useMemeHls({
+    memeId: meme.id
+  })
 
   return (
-    <>
-      <video
-        ref={videoCallbackRef}
-        className="studio-video"
-        muted
-        autoPlay
-        loop
-        playsInline
-        disablePictureInPicture
-        tabIndex={-1}
-        aria-hidden="true"
-        data-playing={isPlaying || undefined}
-        onPlaying={() => {
-          setIsPlaying(true)
-        }}
-      />
+    <MemePlayer
+      bunnyId={meme.bunnyId}
+      title={meme.title}
+      autoPlay
+      muted
+      hasFullscreen={false}
+      onVideoChange={videoCallbackRef}
+      playbackFailure={playbackFailure}
+      className="studio-player"
+    >
       {watermark}
-      <StageControls video={video} />
-    </>
+    </MemePlayer>
   )
 }
 
@@ -312,17 +306,18 @@ export const CaptionStage = ({
           height: toCqw(layout.videoHeight, layout.width)
         }}
       >
-        <img
-          src={buildVideoFirstFrameUrl(meme.bunnyId)}
-          alt=""
-          className="studio-video-poster"
-          fetchPriority={isEditable ? 'high' : undefined}
-          decoding="async"
-        />
         {isEditable ? (
           <StageVideo meme={meme} watermark={watermark} />
         ) : (
-          watermark
+          <>
+            <img
+              src={buildVideoFirstFrameUrl(meme.bunnyId)}
+              alt=""
+              className="studio-video-poster"
+              decoding="async"
+            />
+            {watermark}
+          </>
         )}
       </div>
       {layout.blocks.map((block) => {

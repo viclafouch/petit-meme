@@ -1,4 +1,15 @@
+import { z } from 'zod'
 import { m } from '~/paraglide/messages'
+
+export const studioMemeSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  bunnyId: z.string(),
+  width: z.number(),
+  height: z.number()
+})
+
+export type StudioMeme = z.infer<typeof studioMemeSchema>
 
 export type CaptionLookId = 'white-band' | 'black-band' | 'impact' | 'subtitle'
 

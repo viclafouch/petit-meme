@@ -16,6 +16,7 @@ import { expectMemeFileDownloaded } from './downloads'
 import { resolveStorageStatePath } from './env'
 import { test } from './fixtures'
 import { repeatUntilVisible } from './hydration'
+import { buildNamedMemeActionPattern, getMemeList } from './library'
 import { E2E_ENGLISH_LOCALE } from './locales'
 import {
   collectServerFunctionCalls,
@@ -25,10 +26,12 @@ import {
   sendServerFunctionCallsAtOnce
 } from './server-functions'
 import { localizePathname } from './urls'
+import { readVideoCurrentTime, readVideoIsPaused } from './video'
 
 const STUDIO_MEME = E2E_NAMED_MEMES.mostViewed
 const MEME_PATHNAME = `/memes/${STUDIO_MEME.id}`
 const STUDIO_PATHNAME = `${MEME_PATHNAME}/studio`
+const LIBRARY_PATHNAME = '/memes/category/trending'
 const CAPTION_TEXT = 'Le e2e a parlé'
 const RENDER_TIMEOUT_MS = 60_000
 const EXPORT_TEST_TIMEOUT_MS = 120_000
@@ -66,6 +69,23 @@ const getPreviewFrame = (page: Page) => {
   return getStudio(page)
     .getByRole('region', { name: m.studio_preview_label() })
     .getByTestId('studio-frame')
+}
+
+const openStudioFromTheList = async (page: Page) => {
+  const studioItem = page.getByRole('menuitem', { name: m.meme_open_studio() })
+
+  await repeatUntilVisible(() => {
+    return (
+      getMemeList(page)
+        .getByRole('button', {
+          name: buildNamedMemeActionPattern(m.meme_open_options_named)
+        })
+        // oxlint-disable-next-line playwright/no-nth-methods -- any Meme card will do: every card carries the same menu
+        .first()
+        .click()
+    )
+  }, studioItem)
+  await studioItem.click()
 }
 
 const matchIsGenerationRecord = (request: Request) => {
@@ -275,6 +295,52 @@ test.describe('an anonymous Visitor', () => {
     await expect(page).toHaveURL(MEME_PATHNAME)
   })
 
+  test('leaves the Meme paused where it stopped once the Studio closes', async ({
+    page
+  }) => {
+    await page.goto(MEME_PATHNAME)
+
+    const stage = page.getByTestId('meme-stage')
+    const video = stage.getByTestId('meme-video')
+
+    await expect
+      .poll(() => {
+        return readVideoCurrentTime(video)
+      })
+      .toBeGreaterThan(0)
+    await repeatUntilVisible(() => {
+      return page
+        .getByRole('link', { name: m.meme_studio(), exact: true })
+        .click()
+    }, getStudio(page))
+
+    await expect
+      .poll(() => {
+        return readVideoIsPaused(video)
+      })
+      .toBe(true)
+
+    const pausedAt = await readVideoCurrentTime(video)
+
+    await getStudio(page)
+      .getByRole('button', { name: m.studio_close() })
+      .click()
+
+    await expect(
+      stage.getByRole('button', { name: m.meme_play_video(), exact: true })
+    ).toBeAttached()
+    await expect
+      .poll(() => {
+        return readVideoIsPaused(video)
+      })
+      .toBe(true)
+    await expect
+      .poll(() => {
+        return readVideoCurrentTime(video)
+      })
+      .toBe(pausedAt)
+  })
+
   test('closes the field with Escape, then the Studio', async ({ page }) => {
     await page.goto(STUDIO_PATHNAME)
     await writeCaption(page, getCaptionSample(page))
@@ -289,6 +355,39 @@ test.describe('an anonymous Visitor', () => {
 
     await expect(getStudio(page)).toBeHidden()
     await expect(page).toHaveURL(MEME_PATHNAME)
+  })
+
+  test('opens the Studio over a list of Memes at the same address, and going back closes it', async ({
+    page
+  }) => {
+    await page.goto(LIBRARY_PATHNAME)
+    await openStudioFromTheList(page)
+
+    await expect(getStudio(page)).toBeVisible()
+    await expect(page).toHaveURL(LIBRARY_PATHNAME)
+
+    await page.goBack()
+
+    await expect(getStudio(page)).toBeHidden()
+    await expect(page).toHaveURL(LIBRARY_PATHNAME)
+  })
+
+  test('closes the Studio opened from a list, and a refresh leaves the list alone', async ({
+    page
+  }) => {
+    await page.goto(LIBRARY_PATHNAME)
+    await openStudioFromTheList(page)
+    await getStudio(page)
+      .getByRole('button', { name: m.studio_close() })
+      .click()
+
+    await expect(getStudio(page)).toBeHidden()
+
+    await openStudioFromTheList(page)
+    await page.reload()
+
+    await expect(getMemeList(page)).toBeVisible()
+    await expect(getStudio(page)).toBeHidden()
   })
 
   test('reads the Studio in English under /en/', async ({ page }) => {

@@ -13,6 +13,7 @@ import { resolveStorageStatePath } from './env'
 import { test } from './fixtures'
 import { repeatUntilVisible } from './hydration'
 import { getFirstMemePlayLink, getMemeLink, getMemePlayLinks } from './library'
+import { readVideoDuration } from './video'
 
 const PLAYABLE_MEME_PATHNAME = `/memes/${E2E_NAMED_MEMES.mostViewed.id}`
 
@@ -209,9 +210,7 @@ test.describe('the phone journey', () => {
 
     await expect
       .poll(() => {
-        return video.evaluate((element: HTMLVideoElement) => {
-          return element.duration
-        })
+        return readVideoDuration(video)
       })
       .toBeGreaterThan(0)
   })

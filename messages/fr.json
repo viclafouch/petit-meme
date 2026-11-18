@@ -313,21 +313,6 @@
   "meme_link_copied": "Lien copié",
   "meme_link_copy_error": "Impossible de copier le lien",
   "meme_list_label": "Mèmes",
-  "meme_minutes": [
-    {
-      "declarations": [
-        "input count",
-        "local countPlural = count: plural"
-      ],
-      "selectors": [
-        "countPlural"
-      ],
-      "match": {
-        "countPlural=one": "minute",
-        "countPlural=other": "minutes"
-      }
-    }
-  ],
   "meme_mute": "Couper le son",
   "meme_open_studio": "Ouvrir dans Studio",
   "meme_pending_banner_title": "Ce Meme est en attente",
@@ -348,21 +333,6 @@
   "meme_remove_bookmark": "Retirer des favoris",
   "meme_search_description": "Tape, clique, rigole : découvre tous les mèmes en un seul endroit.",
   "meme_search_placeholder": "Rechercher par mots-clés, tags...",
-  "meme_seconds": [
-    {
-      "declarations": [
-        "input count",
-        "local countPlural = count: plural"
-      ],
-      "selectors": [
-        "countPlural"
-      ],
-      "match": {
-        "countPlural=one": "seconde",
-        "countPlural=other": "secondes"
-      }
-    }
-  ],
   "meme_seo_category_description": "Retrouvez les meilleurs mèmes vidéo de la catégorie {title} sur Petit Meme. Parcourez, partagez et générez vos vidéos préférées. Gratuit et accessible à tous !",
   "meme_seo_category_title": "Mèmes {title}",
   "meme_seo_library_description": "Découvre la plus grande bibliothèque de mèmes : crée, explore et partage des mèmes légendaires sur Petit Meme. Gratuit et accessible à tous !",
@@ -374,7 +344,6 @@
   "meme_share_heading": "Partager à tes amis",
   "meme_share_link_on_computer": "Copie le lien et colle-le dans WhatsApp, Instagram, Snapchat… le mème s’ouvre avec un bouton lecture.",
   "meme_share_video": "Partager la vidéo",
-  "meme_time_remaining": "{minutes} {minuteUnit} {seconds} {secondUnit} restantes",
   "meme_unmute": "Activer le son",
   "meme_video_feed": "Fil de vidéos",
   "meme_views": [

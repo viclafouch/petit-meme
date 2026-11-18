@@ -1,11 +1,12 @@
 import { Radio } from '@base-ui/react/radio'
 import { RadioGroup } from '@base-ui/react/radio-group'
 import { CaptionStage } from '~/components/studio/caption-stage'
-import type { Studio, StudioMeme } from '~/components/studio/use-studio'
+import type { Studio } from '~/components/studio/use-studio'
 import {
   CAPTION_LOOKS,
   type Caption,
-  type CaptionLookId
+  type CaptionLookId,
+  type StudioMeme
 } from '~/constants/studio'
 import { getCaptionLook, matchHasCaptionText } from '~/helpers/caption'
 import { m } from '~/paraglide/messages'

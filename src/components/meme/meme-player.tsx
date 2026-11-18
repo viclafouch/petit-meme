@@ -26,15 +26,38 @@ import {
 import { PERCENT_SCALE } from '~/constants/number'
 import { formatClockDuration } from '~/helpers/duration'
 import { buildVideoFirstFrameUrl } from '~/lib/bunny-public-urls'
+import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
+import memePlayerCss from './meme-player.css?url'
 
 const SCRUBBER_STEP_SECONDS = 0.01
 
 const LOADING_SPINNER_DELAY = { delay: 700, minDuration: 300 }
 
+const PLAYBACK_PROGRESS_PROPERTY = '--meme-scrubber-progress'
+
 type PlaybackFailure = {
   handleRetry: () => void
+}
+
+const usePlayback = () => {
+  const dispatch = useMediaDispatch()
+  const isPaused =
+    useMediaSelector((state) => {
+      return state.mediaPaused
+    }) ?? true
+
+  return {
+    isPaused,
+    togglePlay: () => {
+      dispatch({
+        type: isPaused
+          ? MediaActionTypes.MEDIA_PLAY_REQUEST
+          : MediaActionTypes.MEDIA_PAUSE_REQUEST
+      })
+    }
+  }
 }
 
 const playOrReportBlocked = async (
@@ -50,18 +73,30 @@ const playOrReportBlocked = async (
   }
 }
 
+type VideoPreload = React.ComponentProps<'video'>['preload']
+
 type MemeVideoElementProps = {
   title: string
+  autoPlay: boolean
+  muted: boolean
+  preload: VideoPreload
   onVideoChange: (video: HTMLVideoElement | null) => void
   onStart: () => void
+  onAutoplayBlocked: () => void
 }
 
 const MemeVideoElement = ({
   title,
+  autoPlay,
+  muted,
+  preload,
   onVideoChange,
-  onStart
+  onStart,
+  onAutoplayBlocked
 }: MemeVideoElementProps) => {
   const dispatch = useMediaDispatch()
+  const { togglePlay } = usePlayback()
+  const pointerTypeRef = React.useRef('')
   const videoRef = React.useCallback(
     (video: HTMLVideoElement | null) => {
       onVideoChange(video)
@@ -76,7 +111,15 @@ const MemeVideoElement = ({
   const handleLoadedMetadata = (
     event: React.SyntheticEvent<HTMLVideoElement>
   ) => {
-    void playOrReportBlocked(event.currentTarget, onStart)
+    if (autoPlay) {
+      void playOrReportBlocked(event.currentTarget, onAutoplayBlocked)
+    }
+  }
+
+  const handleTouchTap = () => {
+    if (pointerTypeRef.current === 'touch') {
+      togglePlay()
+    }
   }
 
   return (
@@ -87,15 +130,20 @@ const MemeVideoElement = ({
       ref={videoRef}
       tabIndex={-1}
       crossOrigin=""
-      className="size-full"
+      className="meme-player-video"
       playsInline
       disablePictureInPicture
       disableRemotePlayback
-      preload="auto"
-      autoPlay
+      preload={preload}
+      autoPlay={autoPlay}
+      muted={muted}
       loop
       onPlaying={onStart}
       onLoadedMetadata={handleLoadedMetadata}
+      onPointerDown={(event) => {
+        pointerTypeRef.current = event.pointerType
+      }}
+      onClick={handleTouchTap}
     />
   )
 }
@@ -169,8 +217,6 @@ const getBufferedEnd = (buffered: [number, number][] | undefined) => {
     }, 0) ?? 0
   )
 }
-
-const PLAYBACK_PROGRESS_PROPERTY = '--meme-scrubber-progress'
 
 const readPlaybackProgress = (video: HTMLVideoElement) => {
   return Number.isFinite(video.duration) && video.duration > 0
@@ -312,40 +358,12 @@ const TimeDisplay = () => {
   )
 }
 
-type PlayerControlsProps = {
-  video: HTMLVideoElement | null
-}
-
-const PlayerControls = ({ video }: PlayerControlsProps) => {
+const FullscreenButton = () => {
   const dispatch = useMediaDispatch()
-  const isPaused =
-    useMediaSelector((state) => {
-      return state.mediaPaused
-    }) ?? true
-  const isMuted =
-    useMediaSelector((state) => {
-      return state.mediaMuted
-    }) ?? false
   const isFullscreen =
     useMediaSelector((state) => {
       return state.mediaIsFullscreen
     }) ?? false
-
-  const handleTogglePlay = () => {
-    dispatch({
-      type: isPaused
-        ? MediaActionTypes.MEDIA_PLAY_REQUEST
-        : MediaActionTypes.MEDIA_PAUSE_REQUEST
-    })
-  }
-
-  const handleToggleMute = () => {
-    dispatch({
-      type: isMuted
-        ? MediaActionTypes.MEDIA_UNMUTE_REQUEST
-        : MediaActionTypes.MEDIA_MUTE_REQUEST
-    })
-  }
 
   const handleToggleFullscreen = () => {
     dispatch({
@@ -356,12 +374,43 @@ const PlayerControls = ({ video }: PlayerControlsProps) => {
   }
 
   return (
+    <PlayerButton
+      label={isFullscreen ? m.meme_exit_fullscreen() : m.meme_fullscreen()}
+      onClick={handleToggleFullscreen}
+    >
+      {isFullscreen ? <Minimize /> : <Maximize />}
+    </PlayerButton>
+  )
+}
+
+type PlayerControlsProps = {
+  video: HTMLVideoElement | null
+  hasFullscreen: boolean
+}
+
+const PlayerControls = ({ video, hasFullscreen }: PlayerControlsProps) => {
+  const dispatch = useMediaDispatch()
+  const { isPaused, togglePlay } = usePlayback()
+  const isMuted =
+    useMediaSelector((state) => {
+      return state.mediaMuted
+    }) ?? false
+
+  const handleToggleMute = () => {
+    dispatch({
+      type: isMuted
+        ? MediaActionTypes.MEDIA_UNMUTE_REQUEST
+        : MediaActionTypes.MEDIA_MUTE_REQUEST
+    })
+  }
+
+  return (
     <div className="meme-player-chrome">
       <Scrubber video={video} />
       <div className="flex items-center gap-1">
         <PlayerButton
           label={isPaused ? m.meme_play_video() : m.meme_pause_video()}
-          onClick={handleTogglePlay}
+          onClick={togglePlay}
         >
           {isPaused ? (
             <Play className="fill-current" />
@@ -378,21 +427,14 @@ const PlayerControls = ({ video }: PlayerControlsProps) => {
         </PlayerButton>
         <TimeDisplay />
         <span className="flex-1" />
-        <PlayerButton
-          label={isFullscreen ? m.meme_exit_fullscreen() : m.meme_fullscreen()}
-          onClick={handleToggleFullscreen}
-        >
-          {isFullscreen ? <Minimize /> : <Maximize />}
-        </PlayerButton>
+        {hasFullscreen ? <FullscreenButton /> : null}
       </div>
     </div>
   )
 }
 
 const PausedIndicator = () => {
-  const isPaused = useMediaSelector((state) => {
-    return state.mediaPaused
-  })
+  const { isPaused } = usePlayback()
 
   if (!isPaused) {
     return null
@@ -406,15 +448,15 @@ const PausedIndicator = () => {
 }
 
 type LoadingIndicatorProps = {
-  isStarting: boolean
+  isAwaitingAutoplay: boolean
 }
 
-const LoadingIndicator = ({ isStarting }: LoadingIndicatorProps) => {
+const LoadingIndicator = ({ isAwaitingAutoplay }: LoadingIndicatorProps) => {
   const isBuffering = useMediaSelector((state) => {
     return state.mediaPaused === false && state.mediaLoading === true
   })
   const isSpinnerVisible = useSpinDelay(
-    isStarting || isBuffering,
+    isAwaitingAutoplay || isBuffering,
     LOADING_SPINNER_DELAY
   )
 
@@ -430,40 +472,71 @@ const LoadingIndicator = ({ isStarting }: LoadingIndicatorProps) => {
   )
 }
 
-type MemeWatchPlayerProps = {
+type MemePlayerProps = {
   bunnyId: string
   title: string
-  video: HTMLVideoElement | null
   onVideoChange: (video: HTMLVideoElement | null) => void
-  playbackFailure: PlaybackFailure | null
+  playbackFailure?: PlaybackFailure | null
+  autoPlay?: boolean
+  muted?: boolean
+  preload?: VideoPreload
+  hasFullscreen?: boolean
+  className?: string
+  children?: React.ReactNode
 }
 
-export const MemeWatchPlayer = ({
+export const MemePlayer = ({
   bunnyId,
   title,
-  video,
   onVideoChange,
-  playbackFailure
-}: MemeWatchPlayerProps) => {
+  playbackFailure = null,
+  autoPlay = false,
+  muted = false,
+  preload = 'auto',
+  hasFullscreen = true,
+  className,
+  children
+}: MemePlayerProps) => {
+  const [video, setVideo] = React.useState<HTMLVideoElement | null>(null)
   const [startedBunnyId, setStartedBunnyId] = React.useState<string | null>(
     null
   )
-  const isStarting = startedBunnyId !== bunnyId
+  const [blockedBunnyId, setBlockedBunnyId] = React.useState<string | null>(
+    null
+  )
+  const hasStarted = startedBunnyId === bunnyId
+  const isAwaitingAutoplay =
+    autoPlay && !hasStarted && blockedBunnyId !== bunnyId
 
-  const handleStart = () => {
-    setStartedBunnyId(bunnyId)
-  }
+  const handleVideoChange = React.useCallback(
+    (nextVideo: HTMLVideoElement | null) => {
+      setVideo(nextVideo)
+      onVideoChange(nextVideo)
+    },
+    [onVideoChange]
+  )
 
   return (
     <VideoPlayer
       data-testid="meme-video-player"
-      data-starting={isStarting ? '' : undefined}
-      className="meme-player dark absolute inset-0 size-full"
+      data-started={hasStarted || undefined}
+      data-awaiting-autoplay={isAwaitingAutoplay || undefined}
+      hotkeys={hasFullscreen ? undefined : 'nof'}
+      className={cn('meme-player dark', className)}
     >
+      <link rel="stylesheet" href={memePlayerCss} precedence="default" />
       <MemeVideoElement
         title={title}
-        onVideoChange={onVideoChange}
-        onStart={handleStart}
+        autoPlay={autoPlay}
+        muted={muted}
+        preload={preload}
+        onVideoChange={handleVideoChange}
+        onStart={() => {
+          setStartedBunnyId(bunnyId)
+        }}
+        onAutoplayBlocked={() => {
+          setBlockedBunnyId(bunnyId)
+        }}
       />
       <img
         data-testid="meme-poster"
@@ -473,10 +546,11 @@ export const MemeWatchPlayer = ({
         decoding="async"
         className="meme-player-poster"
       />
+      {children}
       <ClientOnly>
-        {isStarting ? null : <PausedIndicator />}
-        <LoadingIndicator isStarting={isStarting} />
-        <PlayerControls video={video} />
+        {isAwaitingAutoplay ? null : <PausedIndicator />}
+        <LoadingIndicator isAwaitingAutoplay={isAwaitingAutoplay} />
+        <PlayerControls video={video} hasFullscreen={hasFullscreen} />
       </ClientOnly>
       {playbackFailure ? (
         <VideoPlaybackError onRetry={playbackFailure.handleRetry} />

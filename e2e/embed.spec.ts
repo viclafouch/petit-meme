@@ -8,6 +8,7 @@ import { E2E_BASE_URL } from './env'
 import { test } from './fixtures'
 import { repeatUntilVisible } from './hydration'
 import { E2E_ENGLISH_LOCALE } from './locales'
+import { readVideoCurrentTime } from './video'
 
 const PLAYABLE_MEME = E2E_NAMED_MEMES.mostViewed
 const EMBED_PATHNAME = `/embed/${PLAYABLE_MEME.id}`
@@ -46,9 +47,7 @@ test.describe('the embed player', () => {
     )
     await expect
       .poll(() => {
-        return video.evaluate((element: HTMLVideoElement) => {
-          return element.currentTime
-        })
+        return readVideoCurrentTime(video)
       })
       .toBeGreaterThan(0)
   })

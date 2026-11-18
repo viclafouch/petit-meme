@@ -1,20 +1,45 @@
 import React from 'react'
-import { useRouter, type HistoryState } from '@tanstack/react-router'
+import { z } from 'zod'
+import {
+  useLocation,
+  useMatchRoute,
+  useNavigate,
+  useRouter,
+  type HistoryState
+} from '@tanstack/react-router'
+import { studioMemeSchema, type StudioMeme } from '~/constants/studio'
 
-const STUDIO_ENTRY_KEY = 'isStudioAboveMemePage'
+const STUDIO_ROUTE_ENTRY_KEY = 'isStudioAboveMemePage'
+const STUDIO_SHEET_ENTRY_KEY = 'studioSheet'
 const STUDIO_PATH_SUFFIX = /\/studio\/?$/u
+const PAGE_LIFE_ID = performance.timeOrigin
 
-const matchIsStudioEntry = (state: unknown) => {
+const studioSheetEntrySchema = z.object({
+  pageLifeId: z.literal(PAGE_LIFE_ID),
+  meme: studioMemeSchema
+})
+
+const matchIsStudioRouteEntry = (state: unknown) => {
   return (
     typeof state === 'object' &&
     state !== null &&
-    STUDIO_ENTRY_KEY in state &&
-    state[STUDIO_ENTRY_KEY] === true
+    STUDIO_ROUTE_ENTRY_KEY in state &&
+    state[STUDIO_ROUTE_ENTRY_KEY] === true
   )
 }
 
+const readStudioSheetMeme = (state: object) => {
+  if (!(STUDIO_SHEET_ENTRY_KEY in state)) {
+    return null
+  }
+
+  const entry = studioSheetEntrySchema.safeParse(state[STUDIO_SHEET_ENTRY_KEY])
+
+  return entry.success ? entry.data.meme : null
+}
+
 export const markStudioEntry = (previousState: HistoryState) => {
-  const nextState = { ...previousState, [STUDIO_ENTRY_KEY]: true }
+  const nextState = { ...previousState, [STUDIO_ROUTE_ENTRY_KEY]: true }
 
   return nextState
 }
@@ -37,25 +62,60 @@ const placeMemePageBelow = () => {
     key,
     __TSR_key: key,
     __TSR_index: readTanStackIndex(pageState) + 1,
-    [STUDIO_ENTRY_KEY]: true
+    [STUDIO_ROUTE_ENTRY_KEY]: true
   }
 
   window.history.replaceState(pageState, '', memeUrl)
   window.history.pushState(studioState, '', studioUrl)
 }
 
-export const useStudioHistory = () => {
+export const useCloseStudio = () => {
   const router = useRouter()
 
+  return () => {
+    router.history.back()
+  }
+}
+
+export const usePlaceMemePageBelowStudio = () => {
   React.useEffect(() => {
-    if (!matchIsStudioEntry(window.history.state)) {
+    if (!matchIsStudioRouteEntry(window.history.state)) {
       placeMemePageBelow()
     }
   }, [])
+}
 
-  return {
-    close: () => {
-      router.history.back()
-    }
+export const useOpenStudioSheet = () => {
+  const navigate = useNavigate()
+
+  return (meme: StudioMeme) => {
+    void navigate({
+      to: '.',
+      params: true,
+      search: true,
+      hash: true,
+      resetScroll: false,
+      state: (previousState) => {
+        return {
+          ...previousState,
+          [STUDIO_SHEET_ENTRY_KEY]: { pageLifeId: PAGE_LIFE_ID, meme }
+        }
+      }
+    })
   }
+}
+
+export const useStudioSheetMeme = () => {
+  return useLocation({
+    select: (location) => {
+      return readStudioSheetMeme(location.state)
+    }
+  })
+}
+
+export const useIsStudioOpen = () => {
+  const matchRoute = useMatchRoute()
+  const isStudioRoute = matchRoute({ to: '/memes/$memeId/studio' }) !== false
+
+  return useStudioSheetMeme() !== null || isStudioRoute
 }

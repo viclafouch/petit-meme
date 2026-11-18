@@ -1,197 +1,124 @@
 import { m } from '~/paraglide/messages'
 
-export const STUDIO_DEFAULT_BAND_HEIGHT = 100
-export const STUDIO_DEFAULT_FONT_SIZE = 36
-export const STUDIO_DEFAULT_FONT_COLOR = 'black'
-export const STUDIO_DEFAULT_MAX_CHARS_PER_LINE = 50
-export const STUDIO_TEXT_MAX_LENGTH = 150
-export const STUDIO_LINE_SPACING = 4
-export const STUDIO_BASELINE_RATIO = 0.2
+export type CaptionLookId = 'white-band' | 'black-band' | 'impact' | 'subtitle'
 
-export const STUDIO_TEXT_POSITIONS = [
+export type CaptionSlot = 'top' | 'bottom'
+
+export type Caption = {
+  look: CaptionLookId
+  top: string
+  bottom: string
+}
+
+export type CaptionLook = {
+  id: CaptionLookId
+  isBand: boolean
+  fontFamily: string
+  isUppercase: boolean
+  textColor: string
+  backgroundColor: string | null
+  strokeColor: string | null
+  maxFontRatio: number
+  minFontRatio: number
+  maxLinesAtMaxSize: number
+  defaultSlot: CaptionSlot
+}
+
+export const CAPTION_SLOTS = [
   'top',
   'bottom'
-] as const satisfies readonly string[]
+] as const satisfies readonly CaptionSlot[]
 
-export type StudioTextPosition = (typeof STUDIO_TEXT_POSITIONS)[number]
+const CAPTION_FONT_FAMILIES = {
+  arial: 'Studio Arial',
+  impact: 'Studio Impact'
+} as const
 
-type StudioFontSize = {
-  id: string
-  label: string
-  value: StudioFontSizeValue
-}
+export const CAPTION_FONT_FILES = [
+  { family: CAPTION_FONT_FAMILIES.arial, url: '/fonts/studio-arial.woff2' },
+  { family: CAPTION_FONT_FAMILIES.impact, url: '/fonts/studio-impact.woff2' }
+] as const
 
-export type StudioFontSizeValue = 24 | 36 | 48
-
-export const getStudioFontSizes = (): StudioFontSize[] => {
-  return [
-    { id: 'small', label: m.studio_size_small(), value: 24 },
-    { id: 'medium', label: m.studio_size_medium(), value: 36 },
-    { id: 'large', label: m.studio_size_large(), value: 48 }
-  ]
-}
-
-export type StudioFontColorValue = 'black' | 'white' | 'red' | 'blue'
-
-export type StudioColorEntry<TValue extends string = StudioFontColorValue> = {
-  id: string
-  label: string
-  value: TValue
-  className: string
-}
-
-export const getStudioColors = (): StudioColorEntry[] => {
-  return [
-    {
-      id: 'black',
-      label: m.studio_color_black(),
-      value: 'black',
-      className: 'bg-black'
-    },
-    {
-      id: 'white',
-      label: m.studio_color_white(),
-      value: 'white',
-      className: 'bg-white'
-    },
-    {
-      id: 'red',
-      label: m.studio_color_red(),
-      value: 'red',
-      className: 'bg-red-600'
-    },
-    {
-      id: 'blue',
-      label: m.studio_color_blue(),
-      value: 'blue',
-      className: 'bg-blue-600'
-    }
-  ]
-}
-
-type StudioFont = {
-  id: string
-  label: string
-  ffmpegFile: string
-  fontPath: string
-  cssFamily: string
-}
-
-export const STUDIO_FONTS = [
+export const CAPTION_LOOKS = [
   {
-    id: 'arial',
-    label: 'Arial',
-    ffmpegFile: 'arial.ttf',
-    fontPath: '/fonts/arial.ttf',
-    cssFamily: 'Arial, sans-serif'
+    id: 'white-band',
+    isBand: true,
+    fontFamily: CAPTION_FONT_FAMILIES.arial,
+    isUppercase: false,
+    textColor: '#000000',
+    backgroundColor: '#ffffff',
+    strokeColor: null,
+    maxFontRatio: 0.072,
+    minFontRatio: 0.042,
+    maxLinesAtMaxSize: 2,
+    defaultSlot: 'top'
+  },
+  {
+    id: 'black-band',
+    isBand: true,
+    fontFamily: CAPTION_FONT_FAMILIES.arial,
+    isUppercase: false,
+    textColor: '#ffffff',
+    backgroundColor: '#000000',
+    strokeColor: null,
+    maxFontRatio: 0.072,
+    minFontRatio: 0.042,
+    maxLinesAtMaxSize: 2,
+    defaultSlot: 'top'
   },
   {
     id: 'impact',
-    label: 'Impact',
-    ffmpegFile: 'impact.ttf',
-    fontPath: '/fonts/impact.ttf',
-    cssFamily: 'Impact, sans-serif'
-  }
-] as const satisfies readonly StudioFont[]
-
-export type StudioFontFamilyId = (typeof STUDIO_FONTS)[number]['id']
-
-export type StudioBandColorValue = 'white' | 'black' | 'red' | 'blue'
-
-const BAND_COLOR_ORDER: StudioBandColorValue[] = [
-  'white',
-  'black',
-  'red',
-  'blue'
-]
-
-export const getStudioBandColors =
-  (): StudioColorEntry<StudioBandColorValue>[] => {
-    const allColors = getStudioColors()
-
-    return BAND_COLOR_ORDER.flatMap((id) => {
-      const match = allColors.find((color) => {
-        return color.id === id
-      })
-
-      return match ? [match] : []
-    })
-  }
-
-type StudioTemplateStyle = {
-  id: StudioTemplateId
-  fontFamily: StudioFontFamilyId
-  fontSize: StudioFontSizeValue
-  fontColor: StudioFontColorValue
-  textPosition: StudioTextPosition
-  bandColor: StudioBandColorValue
-  bandOpacity: number
-}
-
-export type StudioTemplate = StudioTemplateStyle & {
-  label: string
-  description: string
-}
-
-export type StudioTemplateId = 'caption' | 'subtitle'
-
-export const STUDIO_TEMPLATE_STYLES = [
-  {
-    id: 'caption',
-    fontFamily: 'arial',
-    fontSize: 36,
-    fontColor: 'black',
-    textPosition: 'top',
-    bandColor: 'white',
-    bandOpacity: 1
+    isBand: false,
+    fontFamily: CAPTION_FONT_FAMILIES.impact,
+    isUppercase: true,
+    textColor: '#ffffff',
+    backgroundColor: null,
+    strokeColor: '#000000',
+    maxFontRatio: 0.11,
+    minFontRatio: 0.06,
+    maxLinesAtMaxSize: 2,
+    defaultSlot: 'top'
   },
   {
     id: 'subtitle',
-    fontFamily: 'impact',
-    fontSize: 36,
-    fontColor: 'white',
-    textPosition: 'bottom',
-    bandColor: 'black',
-    bandOpacity: 0.6
+    isBand: false,
+    fontFamily: CAPTION_FONT_FAMILIES.arial,
+    isUppercase: false,
+    textColor: '#ffffff',
+    backgroundColor: 'rgb(0 0 0 / 0.62)',
+    strokeColor: null,
+    maxFontRatio: 0.058,
+    minFontRatio: 0.038,
+    maxLinesAtMaxSize: 2,
+    defaultSlot: 'bottom'
   }
-] as const satisfies readonly StudioTemplateStyle[]
+] as const satisfies readonly CaptionLook[]
 
-export const getStudioTemplates = (): StudioTemplate[] => {
-  const labels: Record<
-    StudioTemplateId,
-    { label: string; description: string }
-  > = {
-    caption: {
-      label: m.studio_template_caption(),
-      description: m.studio_template_caption_desc()
-    },
-    subtitle: {
-      label: m.studio_template_subtitle(),
-      description: m.studio_template_subtitle_desc()
-    }
-  }
-
-  return STUDIO_TEMPLATE_STYLES.map((style) => {
-    return { ...style, ...labels[style.id] }
-  })
+export const INITIAL_CAPTION: Caption = {
+  look: 'white-band',
+  top: '',
+  bottom: ''
 }
 
-export type StudioSettings = {
-  text: string
-  textPosition: StudioTextPosition
-  fontSize: StudioFontSizeValue
-  fontColor: StudioFontColorValue
-  fontFamily: StudioFontFamilyId
-  bandColor: StudioBandColorValue
-  bandOpacity: number
-}
+export const CAPTION_TEXT_MAX_LENGTH = 120
 
-export const STUDIO_DEFAULT_SETTINGS = {
-  text: '',
-  textPosition: 'top',
-  fontSize: STUDIO_DEFAULT_FONT_SIZE,
-  fontColor: STUDIO_DEFAULT_FONT_COLOR,
-  fontFamily: 'arial',
-  bandColor: 'white',
-  bandOpacity: 1
-} as const satisfies StudioSettings
+export const CAPTION_MAX_LINE_BREAKS = 3
+
+export const CAPTION_LINE_HEIGHT = 1.18
+
+export const CAPTION_STROKE_RATIO = 0.14
+
+export const CAPTION_MIN_STROKE = 2
+
+export const STUDIO_RENDER_DEBOUNCE_MS = 600
+
+export type StudioPlan = 'free' | 'premium'
+
+export const CAPTION_SLOT_LABELS = {
+  top: () => {
+    return m.studio_add_top()
+  },
+  bottom: () => {
+    return m.studio_add_bottom()
+  }
+} as const satisfies Record<CaptionSlot, () => string>

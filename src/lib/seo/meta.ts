@@ -19,7 +19,7 @@ const OG_LOCALE_MAP = {
 
 const ADMIN_SITE_NAME = `Admin ${SITE_NAME}`
 
-const buildPageTitle = (title: string, siteName = SITE_NAME) => {
+export const buildPageTitle = (title: string, siteName = SITE_NAME) => {
   return `${siteName} - ${title}`
 }
 

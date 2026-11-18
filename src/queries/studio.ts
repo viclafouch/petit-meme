@@ -1,25 +1,9 @@
 import { queryOptions } from '@tanstack/react-query'
 import { PRIVATE_QUERY_META } from '~/constants/query'
+import type { StudioPlan } from '~/constants/studio'
 import { MINUTE } from '~/constants/time'
-import type { Meme } from '~/db/generated/prisma/client'
-import { getMemeExportFile } from '~/server/meme/meme.functions'
+import { fetchStudioSource } from '~/lib/studio/studio-source'
 import { getGenerationQuota } from '~/server/studio/studio.functions'
-
-export const getStudioVideoQueryOpts = (memeId: Meme['id']) => {
-  return queryOptions({
-    queryKey: [...getStudioVideoQueryOpts.all, memeId],
-    queryFn: async () => {
-      const response = await getMemeExportFile({
-        data: { memeId, mode: 'studio', format: 'mp4' }
-      })
-
-      return response.blob()
-    },
-    staleTime: Infinity
-  })
-}
-
-getStudioVideoQueryOpts.all = ['video-blob'] as const
 
 export const getGenerationQuotaQueryOpts = () => {
   return queryOptions({
@@ -33,3 +17,18 @@ export const getGenerationQuotaQueryOpts = () => {
 }
 
 getGenerationQuotaQueryOpts.all = ['generation-quota'] as const
+
+export const getStudioSourceQueryOpts = (memeId: string, plan: StudioPlan) => {
+  return queryOptions({
+    queryKey: [...getStudioSourceQueryOpts.all, memeId, plan],
+    queryFn: () => {
+      return fetchStudioSource({ memeId, plan })
+    },
+    staleTime: Infinity,
+    retry: false,
+    retryOnMount: false,
+    refetchOnWindowFocus: false
+  })
+}
+
+getStudioSourceQueryOpts.all = ['studio-source'] as const

@@ -8,6 +8,8 @@ Petit Meme follows the newest web standards, as Chrome's Modern Web Guidance tea
 
 Modern never costs a supported browser. A new feature first checks that the browser has it, and falls back to an older way, with a script only as the last resort.
 
+One exception: the Studio makes its video with the browser's own video encoder, so a browser without one (Firefox on Android today) shows that it cannot make the video, and keeps everything else.
+
 Newer browsers get extras on top: smoother transitions, a steadier page while it loads. Older ones keep a site that works and looks right, only plainer. Nobody is left with a broken page because their browser is a little behind.
 
 ## What people notice

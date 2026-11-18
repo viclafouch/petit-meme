@@ -122,8 +122,16 @@ export const DevToolbar = () => {
     from: '/_public__root/memes/$memeId',
     shouldThrow: false
   })
+  const publicLayoutMatch = useMatch({
+    from: '/_public__root',
+    shouldThrow: false
+  })
   const embedMatch = useMatch({ from: '/embed/$memeId', shouldThrow: false })
   const adminMatch = useMatch({ from: '/admin', shouldThrow: false })
+  const studioMatch = useMatch({
+    from: '/_public__root/memes/$memeId/studio',
+    shouldThrow: false
+  })
   const [isCollapsed, setIsCollapsed] = React.useState(() => {
     return localStorage.getItem(COLLAPSED_STORAGE_KEY) === 'true'
   })
@@ -136,7 +144,7 @@ export const DevToolbar = () => {
     })
   }
 
-  if (embedMatch || adminMatch) {
+  if (embedMatch || adminMatch || studioMatch) {
     return null
   }
 
@@ -171,7 +179,7 @@ export const DevToolbar = () => {
                 <span className="dev-toolbar-visitor">Visiteur</span>
               </div>
             )}
-            <BannerControl />
+            {publicLayoutMatch ? <BannerControl /> : null}
             {memeMatch ? <DatasetControl /> : null}
           </>
         )}

@@ -37,7 +37,7 @@ Done when each media has its one-line claim, or the body says why the evidence i
 
 Playwright drives, ffmpeg assembles.
 
-**A screen or a flow** runs as a throwaway `e2e/evidence.spec.ts`, or `e2e/evidence.mobile.spec.ts` for the phone. Git ignores both. Playwright builds and serves the e2e stack, and `e2e/fixtures.ts` clears the consent banner and the invitations, so the dev server stays Victor's.
+**A screen or a flow** runs as a throwaway `e2e/evidence.spec.ts`, or `e2e/evidence.mobile.spec.ts` for the phone. Git ignores both. Playwright builds and serves the e2e stack, and `e2e/fixtures.ts` clears the consent banner and the invitations.
 
 ```ts
 for (const theme of ['light', 'dark'] satisfies Theme[]) {

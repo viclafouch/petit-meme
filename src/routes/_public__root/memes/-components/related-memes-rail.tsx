@@ -274,11 +274,11 @@ const RandomMemeButton = ({ memeId }: RandomMemeButtonProps) => {
   return (
     <button
       type="button"
-      className="meme-pill min-h-8 px-3 text-xs"
+      className="pill"
       disabled={randomMemeMutation.isPending}
       onClick={handleClick}
     >
-      <Shuffle aria-hidden="true" className="size-4!" />
+      <Shuffle aria-hidden="true" className="size-4" />
       {m.meme_shuffle()}
     </button>
   )

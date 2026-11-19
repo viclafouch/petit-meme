@@ -45,11 +45,13 @@ export const useStudio = (meme: StudioMeme) => {
     exporter,
     isPremium,
     setText: (slot: CaptionSlot, text: string) => {
+      exporter.dismissCompletion()
       setCaption((previous) => {
         return { ...previous, [slot]: bindFrenchPunctuation(text) }
       })
     },
     setLook: (lookId: CaptionLookId) => {
+      exporter.dismissCompletion()
       setCaption((previous) => {
         return isPlacementChosen
           ? { ...previous, look: lookId }
@@ -57,6 +59,7 @@ export const useStudio = (meme: StudioMeme) => {
       })
     },
     choosePlacement: () => {
+      exporter.dismissCompletion()
       setIsPlacementChosen(true)
     }
   }

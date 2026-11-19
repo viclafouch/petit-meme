@@ -54,7 +54,7 @@ const StudioHeader = ({ meme, titleId, onClose }: StudioHeaderProps) => {
       </div>
       <button
         type="button"
-        className="studio-done"
+        className="pill studio-done"
         onPointerDown={(event) => {
           event.preventDefault()
         }}
@@ -66,7 +66,7 @@ const StudioHeader = ({ meme, titleId, onClose }: StudioHeaderProps) => {
         type="button"
         onClick={onClose}
         aria-label={m.studio_close()}
-        className="studio-close"
+        className="icon-button icon-button-veil"
       >
         <X aria-hidden="true" />
       </button>

@@ -139,7 +139,7 @@ export const Announcement = ({
     <Link
       {...linkOptions}
       className={cn(
-        'bg-muted/50 border-border focus-ring relative flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-semibold',
+        'bg-muted/50 border-border focus-visible:focus-ring relative flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-semibold',
         className
       )}
     >

@@ -1,5 +1,6 @@
 import React from 'react'
-import { MemePlayer } from '~/components/meme/meme-player'
+import { MediaProvider } from 'media-chrome/react/media-store'
+import { MemePlayer, MemePlayerTransport } from '~/components/meme/meme-player'
 import { useMemeHls } from '~/components/meme/use-meme-hls'
 import {
   CAPTION_SLOT_LABELS,
@@ -10,6 +11,7 @@ import {
 } from '~/constants/studio'
 import {
   WATERMARK_ASSET_PATH,
+  WATERMARK_OPACITY,
   WATERMARK_WIDTH_RATIO
 } from '~/constants/watermark'
 import {
@@ -29,7 +31,6 @@ import {
   measureCaptionText
 } from '~/lib/studio/caption-canvas'
 
-const PLACEHOLDER_SIZING_TEXT = 'Mg'
 const CARET_LINE_TEXT = '\u200B'
 const IOS_NO_ZOOM_FONT_PX = 16
 const CAPTION_INNER_WIDTH_RATIO = 0.9
@@ -123,6 +124,7 @@ const CaptionText = ({
         field.inputRef(slot, element)
       }}
       className="studio-caption-input"
+      name={`caption-${slot}`}
       style={{ ...style, ...buildZoomSafeStyle(block, layout, framePx) }}
       data-stroke={hasStroke}
       value={caption[slot]}
@@ -211,33 +213,44 @@ const getWatermarkStyle = (meme: StudioMeme) => {
   return {
     width: toCqw(minSide * WATERMARK_WIDTH_RATIO, meme.width),
     right: margin,
-    bottom: margin
+    bottom: margin,
+    opacity: WATERMARK_OPACITY
   }
 }
 
-type StageVideoProps = {
+type StagePlaybackProps = {
   meme: StudioMeme
   watermark: React.ReactNode
+  renderFrame: (media: React.ReactNode) => React.ReactNode
 }
 
-const StageVideo = ({ meme, watermark }: StageVideoProps) => {
-  const { videoCallbackRef, playbackFailure } = useMemeHls({
+const StagePlayback = ({
+  meme,
+  watermark,
+  renderFrame
+}: StagePlaybackProps) => {
+  const { video, videoCallbackRef, playbackFailure } = useMemeHls({
     memeId: meme.id
   })
 
   return (
-    <MemePlayer
-      bunnyId={meme.bunnyId}
-      title={meme.title}
-      autoPlay
-      muted
-      hasFullscreen={false}
-      onVideoChange={videoCallbackRef}
-      playbackFailure={playbackFailure}
-      className="studio-player"
-    >
-      {watermark}
-    </MemePlayer>
+    <MediaProvider>
+      {renderFrame(
+        <MemePlayer
+          bunnyId={meme.bunnyId}
+          title={meme.title}
+          autoPlay
+          hasFullscreen={false}
+          hasControls={false}
+          onVideoChange={videoCallbackRef}
+          playbackFailure={playbackFailure}
+          className="studio-player"
+        >
+          {watermark}
+        </MemePlayer>
+      )}
+      <MemePlayerTransport video={video} className="studio-transport" />
+    </MediaProvider>
   )
 }
 
@@ -247,7 +260,6 @@ type CaptionStageProps = {
   showWatermark: boolean
   openSlots?: CaptionSlot[]
   field?: CaptionFieldProps
-  renderSlotAction?: (slot: CaptionSlot) => React.ReactNode
 }
 
 export const CaptionStage = ({
@@ -255,8 +267,7 @@ export const CaptionStage = ({
   caption,
   showWatermark,
   openSlots = NO_OPEN_SLOTS,
-  field,
-  renderSlotAction
+  field
 }: CaptionStageProps) => {
   const areFontsReady = useCaptionFontsReady()
   const [frameRef, framePx] = useElementWidth()
@@ -276,7 +287,7 @@ export const CaptionStage = ({
     const text = caption[slot]
 
     if (text.trim() === '') {
-      return openSlots.includes(slot) ? PLACEHOLDER_SIZING_TEXT : text
+      return openSlots.includes(slot) ? (field?.placeholder ?? text) : text
     }
 
     return isEditable && text.endsWith('\n')
@@ -292,23 +303,63 @@ export const CaptionStage = ({
     sharedSlotCount: listFilledCaptionSlots(caption).length
   })
 
+  const renderFrame = (media: React.ReactNode) => {
+    return (
+      <div ref={frameRef} data-testid="studio-frame" className="studio-frame">
+        <div
+          className="studio-video-box"
+          style={{
+            top: toCqw(layout.topBandHeight, layout.width),
+            height: toCqw(layout.videoHeight, layout.width)
+          }}
+        >
+          {media}
+        </div>
+        {layout.blocks.map((block) => {
+          return (
+            <div
+              key={block.slot}
+              className="studio-caption-block"
+              data-slot={block.slot}
+              data-band={look.isBand || undefined}
+              style={{
+                top: toCqw(getBlockTop(layout, block), layout.width),
+                height: toCqw(block.blockHeight, layout.width),
+                '--caption-background': look.backgroundColor ?? undefined,
+                '--caption-color': look.textColor,
+                '--caption-stroke-color': look.strokeColor ?? undefined
+              }}
+            >
+              <CaptionText
+                block={block}
+                layout={layout}
+                caption={caption}
+                framePx={framePx}
+                field={field}
+              />
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+
   return (
     <div
-      ref={frameRef}
-      data-testid="studio-frame"
-      className="studio-frame"
-      style={{ '--frame-ratio': `${layout.width} / ${layout.outputHeight}` }}
+      className="studio-preview"
+      style={{
+        '--frame-ratio': `${layout.width} / ${layout.outputHeight}`,
+        '--caption-inset-inline': `${((1 - CAPTION_INNER_WIDTH_RATIO) / 2) * PERCENT}cqw`
+      }}
     >
-      <div
-        className="studio-video-box"
-        style={{
-          top: toCqw(layout.topBandHeight, layout.width),
-          height: toCqw(layout.videoHeight, layout.width)
-        }}
-      >
-        {isEditable ? (
-          <StageVideo meme={meme} watermark={watermark} />
-        ) : (
+      {isEditable ? (
+        <StagePlayback
+          meme={meme}
+          watermark={watermark}
+          renderFrame={renderFrame}
+        />
+      ) : (
+        renderFrame(
           <>
             <img
               src={buildVideoFirstFrameUrl(meme.bunnyId)}
@@ -318,33 +369,8 @@ export const CaptionStage = ({
             />
             {watermark}
           </>
-        )}
-      </div>
-      {layout.blocks.map((block) => {
-        return (
-          <div
-            key={block.slot}
-            className="studio-caption-block"
-            data-slot={block.slot}
-            data-band={look.isBand || undefined}
-            style={{
-              top: toCqw(getBlockTop(layout, block), layout.width),
-              height: toCqw(block.blockHeight, layout.width),
-              '--caption-background': look.backgroundColor ?? undefined,
-              '--caption-color': look.textColor
-            }}
-          >
-            <CaptionText
-              block={block}
-              layout={layout}
-              caption={caption}
-              framePx={framePx}
-              field={field}
-            />
-            {renderSlotAction?.(block.slot)}
-          </div>
         )
-      })}
+      )}
     </div>
   )
 }

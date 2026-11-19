@@ -131,7 +131,7 @@ const MemeDetails = ({ meme }: MemeDetailsProps) => {
                 <Link
                   to="/memes/category/$slug"
                   params={{ slug: category.slug }}
-                  className="meme-category"
+                  className="pill pill-sm pill-hue"
                   style={{ '--hue': getCategoryHue(category.slug) }}
                 >
                   {category.title}
@@ -150,7 +150,7 @@ const MemeDetails = ({ meme }: MemeDetailsProps) => {
                   to="/memes/category/$slug"
                   params={{ slug: TRENDING_CATEGORY_SLUG }}
                   search={{ query: keyword }}
-                  className="meme-keyword"
+                  className="pill pill-sm pill-outline meme-keyword"
                   title={keyword}
                 >
                   <Search aria-hidden="true" />

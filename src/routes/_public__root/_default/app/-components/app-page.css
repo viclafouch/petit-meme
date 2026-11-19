@@ -1,7 +1,5 @@
 .share-demo,
 .launch-demo {
-  --demo-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  --demo-ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .share-demo {
@@ -36,47 +34,47 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .share-demo-tap {
-    animation: share-demo-tap var(--demo-cycle) var(--demo-ease-out)
+    animation: share-demo-tap var(--demo-cycle) var(--ease-out-strong)
       calc(var(--demo-cycle) * var(--demo-moment, 0)) infinite both;
   }
 
   .share-demo-group-chat {
-    animation: share-demo-group-chat var(--demo-cycle) var(--demo-ease-drawer)
+    animation: share-demo-group-chat var(--demo-cycle) var(--ease-drawer)
       infinite both;
   }
 
   .share-demo-friend-chat {
-    animation: share-demo-friend-chat var(--demo-cycle) var(--demo-ease-drawer)
+    animation: share-demo-friend-chat var(--demo-cycle) var(--ease-drawer)
       infinite both;
   }
 
   .share-demo-video-message {
-    animation: share-demo-video-message var(--demo-cycle) var(--demo-ease-out)
+    animation: share-demo-video-message var(--demo-cycle) var(--ease-out-strong)
       infinite both;
   }
 
   .share-demo-laugh-message {
-    animation: share-demo-laugh-message var(--demo-cycle) var(--demo-ease-out)
+    animation: share-demo-laugh-message var(--demo-cycle) var(--ease-out-strong)
       infinite both;
   }
 
   .share-demo-audio-message {
-    animation: share-demo-audio-message var(--demo-cycle) var(--demo-ease-out)
+    animation: share-demo-audio-message var(--demo-cycle) var(--ease-out-strong)
       infinite both;
   }
 
   .share-demo-reply-message {
-    animation: share-demo-reply-message var(--demo-cycle) var(--demo-ease-out)
+    animation: share-demo-reply-message var(--demo-cycle) var(--ease-out-strong)
       infinite both;
   }
 
   .launch-demo-tap {
-    animation: launch-demo-tap var(--launch-cycle) var(--demo-ease-out)
+    animation: launch-demo-tap var(--launch-cycle) var(--ease-out-strong)
       var(--launch-delay, 0s) infinite both;
   }
 
   .launch-demo-app {
-    animation: launch-demo-app var(--launch-cycle) var(--demo-ease-drawer)
+    animation: launch-demo-app var(--launch-cycle) var(--ease-drawer)
       var(--launch-delay, 0s) infinite both;
   }
 

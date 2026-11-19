@@ -167,7 +167,7 @@ const PlayerButton = ({
         render={
           <button
             type="button"
-            className="meme-player-button"
+            className="icon-button"
             aria-label={label}
             aria-pressed={isPressed}
             onClick={onClick}
@@ -383,14 +383,25 @@ const FullscreenButton = () => {
   )
 }
 
-type PlayerControlsProps = {
-  video: HTMLVideoElement | null
-  hasFullscreen: boolean
+const PlayButton = () => {
+  const { isPaused, togglePlay } = usePlayback()
+
+  return (
+    <PlayerButton
+      label={isPaused ? m.meme_play_video() : m.meme_pause_video()}
+      onClick={togglePlay}
+    >
+      {isPaused ? (
+        <Play className="fill-current" />
+      ) : (
+        <Pause className="fill-current" />
+      )}
+    </PlayerButton>
+  )
 }
 
-const PlayerControls = ({ video, hasFullscreen }: PlayerControlsProps) => {
+const MuteButton = () => {
   const dispatch = useMediaDispatch()
-  const { isPaused, togglePlay } = usePlayback()
   const isMuted =
     useMediaSelector((state) => {
       return state.mediaMuted
@@ -405,30 +416,55 @@ const PlayerControls = ({ video, hasFullscreen }: PlayerControlsProps) => {
   }
 
   return (
+    <PlayerButton
+      label={isMuted ? m.meme_unmute() : m.meme_mute()}
+      isPressed={isMuted}
+      onClick={handleToggleMute}
+    >
+      {isMuted ? <VolumeX /> : <Volume2 />}
+    </PlayerButton>
+  )
+}
+
+type PlayerControlsProps = {
+  video: HTMLVideoElement | null
+  hasFullscreen: boolean
+}
+
+const PlayerControls = ({ video, hasFullscreen }: PlayerControlsProps) => {
+  return (
     <div className="meme-player-chrome">
       <Scrubber video={video} />
       <div className="flex items-center gap-1">
-        <PlayerButton
-          label={isPaused ? m.meme_play_video() : m.meme_pause_video()}
-          onClick={togglePlay}
-        >
-          {isPaused ? (
-            <Play className="fill-current" />
-          ) : (
-            <Pause className="fill-current" />
-          )}
-        </PlayerButton>
-        <PlayerButton
-          label={isMuted ? m.meme_unmute() : m.meme_mute()}
-          isPressed={isMuted}
-          onClick={handleToggleMute}
-        >
-          {isMuted ? <VolumeX /> : <Volume2 />}
-        </PlayerButton>
+        <PlayButton />
+        <MuteButton />
         <TimeDisplay />
         <span className="flex-1" />
         {hasFullscreen ? <FullscreenButton /> : null}
       </div>
+    </div>
+  )
+}
+
+type MemePlayerTransportProps = {
+  video: HTMLVideoElement | null
+  className?: string
+}
+
+export const MemePlayerTransport = ({
+  video,
+  className
+}: MemePlayerTransportProps) => {
+  return (
+    <div className={cn('meme-player-transport dark', className)}>
+      <ClientOnly>
+        <PlayButton />
+        <MuteButton />
+        <div className="meme-player-transport-scrubber">
+          <Scrubber video={video} />
+        </div>
+        <TimeDisplay />
+      </ClientOnly>
     </div>
   )
 }
@@ -481,6 +517,7 @@ type MemePlayerProps = {
   muted?: boolean
   preload?: VideoPreload
   hasFullscreen?: boolean
+  hasControls?: boolean
   className?: string
   children?: React.ReactNode
 }
@@ -494,6 +531,7 @@ export const MemePlayer = ({
   muted = false,
   preload = 'auto',
   hasFullscreen = true,
+  hasControls = true,
   className,
   children
 }: MemePlayerProps) => {
@@ -550,7 +588,9 @@ export const MemePlayer = ({
       <ClientOnly>
         {isAwaitingAutoplay ? null : <PausedIndicator />}
         <LoadingIndicator isAwaitingAutoplay={isAwaitingAutoplay} />
-        <PlayerControls video={video} hasFullscreen={hasFullscreen} />
+        {hasControls ? (
+          <PlayerControls video={video} hasFullscreen={hasFullscreen} />
+        ) : null}
       </ClientOnly>
       {playbackFailure ? (
         <VideoPlaybackError onRetry={playbackFailure.handleRetry} />

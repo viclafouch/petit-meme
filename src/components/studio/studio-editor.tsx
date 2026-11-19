@@ -19,6 +19,7 @@ import {
   listFilledCaptionSlots,
   matchHasSlotText
 } from '~/helpers/caption'
+import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
 
 const REMOVE_SLOT_LABELS = {
@@ -92,27 +93,48 @@ const useOpenSlots = (caption: Caption) => {
   }
 }
 
-type AddSlotRowProps = {
+type SlotRowProps = {
   slot: CaptionSlot
-  isClosed: boolean
+  isOpen: boolean
+  canRemove: boolean
   onAdd: (slot: CaptionSlot) => void
+  onRemove: (slot: CaptionSlot) => void
 }
 
-const AddSlotRow = ({ slot, isClosed, onAdd }: AddSlotRowProps) => {
+const preventFieldBlur = (event: React.PointerEvent) => {
+  event.preventDefault()
+}
+
+const SlotRow = ({
+  slot,
+  isOpen,
+  canRemove,
+  onAdd,
+  onRemove
+}: SlotRowProps) => {
   return (
-    <div className="studio-add-row">
-      <button
-        type="button"
-        onClick={() => {
-          onAdd(slot)
-        }}
-        aria-hidden={!isClosed || undefined}
-        tabIndex={isClosed ? undefined : -1}
-        className="studio-chip studio-add-chip"
-      >
-        <Plus className="size-4" aria-hidden="true" />
-        {CAPTION_SLOT_LABELS[slot]()}
-      </button>
+    <div className="studio-slot-row">
+      {isOpen && !canRemove ? null : (
+        <button
+          type="button"
+          onPointerDown={isOpen ? preventFieldBlur : undefined}
+          onClick={() => {
+            if (isOpen) {
+              onRemove(slot)
+            } else {
+              onAdd(slot)
+            }
+          }}
+          className={cn(
+            'pill pill-sm studio-slot-chip',
+            isOpen ? 'pill-quiet' : 'pill-veil'
+          )}
+          data-action={isOpen ? 'remove' : 'add'}
+        >
+          {isOpen ? <X aria-hidden="true" /> : <Plus aria-hidden="true" />}
+          {isOpen ? REMOVE_SLOT_LABELS[slot]() : CAPTION_SLOT_LABELS[slot]()}
+        </button>
+      )}
     </div>
   )
 }
@@ -137,12 +159,27 @@ export const StudioEditor = ({ studio, meme }: StudioEditorProps) => {
 
   const removeSlot = (slot: CaptionSlot) => {
     studio.choosePlacement()
-    studio.setText(slot, '')
-    slots.remove(slot)
+    ReactDOM.flushSync(() => {
+      studio.setText(slot, '')
+      slots.remove(slot)
+    })
+    inputsRef.current.get(slot)?.focus()
   }
 
   const canRemove = (slot: CaptionSlot) => {
     return matchHasSlotText(studio.caption, slot) || openSlots.length > 1
+  }
+
+  const renderSlotRow = (slot: CaptionSlot) => {
+    return (
+      <SlotRow
+        slot={slot}
+        isOpen={openSlots.includes(slot)}
+        canRemove={canRemove(slot)}
+        onAdd={addSlot}
+        onRemove={removeSlot}
+      />
+    )
   }
 
   return (
@@ -151,11 +188,7 @@ export const StudioEditor = ({ studio, meme }: StudioEditorProps) => {
         aria-label={m.studio_preview_label()}
         className="studio-editor-stage"
       >
-        <AddSlotRow
-          slot="top"
-          isClosed={!openSlots.includes('top')}
-          onAdd={addSlot}
-        />
+        {renderSlotRow('top')}
         <CaptionStage
           meme={meme}
           caption={studio.caption}
@@ -173,33 +206,8 @@ export const StudioEditor = ({ studio, meme }: StudioEditorProps) => {
               }
             }
           }}
-          renderSlotAction={(slot) => {
-            if (!canRemove(slot)) {
-              return null
-            }
-
-            return (
-              <button
-                type="button"
-                className="studio-slot-remove"
-                aria-label={REMOVE_SLOT_LABELS[slot]()}
-                onPointerDown={(event) => {
-                  event.preventDefault()
-                }}
-                onClick={() => {
-                  removeSlot(slot)
-                }}
-              >
-                <X aria-hidden="true" />
-              </button>
-            )
-          }}
         />
-        <AddSlotRow
-          slot="bottom"
-          isClosed={!openSlots.includes('bottom')}
-          onAdd={addSlot}
-        />
+        {renderSlotRow('bottom')}
       </section>
       <div className="studio-editor-tools">
         <LookTiles studio={studio} meme={meme} />

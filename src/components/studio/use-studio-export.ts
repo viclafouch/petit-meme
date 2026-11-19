@@ -8,6 +8,7 @@ import type {
 } from '~/components/studio/use-caption-render'
 import { getAppErrorCode } from '~/constants/error'
 import type { MemeExportMode } from '~/constants/meme'
+import { STUDIO_CELEBRATION_MS } from '~/constants/studio'
 import {
   downloadBlob,
   matchIsBlobShareable,
@@ -19,6 +20,12 @@ import { createGeneration } from '~/server/studio/studio.functions'
 import { useDialogStore } from '~/stores/dialog.store'
 
 const COMPLETE_HOLD_MS = 320
+
+export type ExportCompletion = {
+  id: number
+  mode: MemeExportMode
+  isVisible: boolean
+}
 
 const matchIsActivationError = (error: unknown) => {
   return error instanceof DOMException && error.name === 'NotAllowedError'
@@ -55,7 +62,51 @@ export const useStudioExport = ({
   const [shareKeyAwaitingTap, setShareKeyAwaitingTap] = React.useState<
     string | null
   >(null)
+  const [completion, setCompletion] = React.useState<ExportCompletion | null>(
+    null
+  )
+  const isFollowUpOwedRef = React.useRef(false)
   const { file } = render
+  const celebratedId = completion?.isVisible ? completion.id : null
+
+  const settleFollowUp = React.useEffectEvent(() => {
+    if (!isFollowUpOwedRef.current) {
+      return
+    }
+
+    isFollowUpOwedRef.current = false
+    followUpExport()
+  })
+
+  React.useEffect(() => {
+    if (celebratedId === null) {
+      settleFollowUp()
+    }
+  }, [celebratedId])
+
+  React.useEffect(() => {
+    return () => {
+      settleFollowUp()
+    }
+  }, [])
+
+  React.useEffect(() => {
+    if (celebratedId === null) {
+      return () => {}
+    }
+
+    const timer = window.setTimeout(() => {
+      setCompletion((previous) => {
+        return previous?.id === celebratedId
+          ? { ...previous, isVisible: false }
+          : previous
+      })
+    }, STUDIO_CELEBRATION_MS)
+
+    return () => {
+      window.clearTimeout(timer)
+    }
+  }, [celebratedId])
 
   const recordGeneration = async () => {
     await Promise.allSettled([createGeneration({ data: { memeId } })])
@@ -63,7 +114,12 @@ export const useStudioExport = ({
   }
 
   const deliver = async (rendered: RenderedFile, mode: MemeExportMode) => {
-    if (mode === 'share' && matchIsBlobShareable(rendered.blob, title, 'mp4')) {
+    const deliveredMode: MemeExportMode =
+      mode === 'share' && matchIsBlobShareable(rendered.blob, title, 'mp4')
+        ? 'share'
+        : 'download'
+
+    if (deliveredMode === 'share') {
       const wasShared = await shareBlobOrThrow(rendered.blob, title, 'mp4')
 
       if (!wasShared) {
@@ -73,8 +129,15 @@ export const useStudioExport = ({
       downloadBlob(rendered.blob, `${title}.mp4`)
     }
 
+    setCompletion((previous) => {
+      return {
+        id: (previous?.id ?? 0) + 1,
+        mode: deliveredMode,
+        isVisible: true
+      }
+    })
+    isFollowUpOwedRef.current = true
     void recordGeneration()
-    followUpExport()
   }
 
   const deliverReadyFile = async (
@@ -166,6 +229,14 @@ export const useStudioExport = ({
   }
 
   return {
+    completion,
+    dismissCompletion: () => {
+      setCompletion((previous) => {
+        return previous?.isVisible
+          ? { ...previous, isVisible: false }
+          : previous
+      })
+    },
     pendingMode,
     isCompleting,
     isShareAwaitingTap: file !== null && shareKeyAwaitingTap === file.key,

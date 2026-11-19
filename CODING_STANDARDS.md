@@ -1,49 +1,27 @@
 # Coding standards
 
-How the code is organised and named. Formatting, lint rules and file-name case are enforced by tooling; this file holds the conventions no tool checks.
+The conventions no tool checks. Formatting, lint and file names belong to the tooling.
 
-## Domains
+## One name per concept
 
-- A domain is a word of `knowledge/glossary.md`, in the singular: `meme`, `bookmark`, `proposal`, `subscription`, `cap`. The same domain name splits `src/server`, `src/queries` and `src/components`, so one concept lives under one name in every layer.
-- A domain module holds the operations on one item and on many items together.
-- Code only the administration uses lives under the `admin/` folder of its layer: `src/server/admin/<domain>`, `src/queries/admin/<domain>`, `src/routes/admin`.
-- A file used by a single route lives next to that route, in its `-components/` or `-lib/` folder.
+A domain is a glossary word in the singular (`meme`, `bookmark`, `cap`), and it names the same slice in every layer: `src/server/<domain>`, `src/queries/<domain>.ts`, `src/components/<domain>`. Code only the administration uses sits under `admin/` in its layer, and code one route uses sits beside that route in `-components/` or `-lib/`. Shared code takes the most specific home that fits: pure functions in `helpers/`, browser and infrastructure code in `lib/`, values and shared schemas in `constants/`, outside services in `server/platforms/`.
 
-## Layers
+## Names say what happens
 
-- `src/server/<domain>/` holds everything that runs on the server. `src/server/platforms/` holds the adapters of outside services; a domain module builds on them, as `meme/meme-index.server.ts` builds on `platforms/algolia.server.ts`.
-- `src/queries/<domain>.ts` holds the TanStack Query options of a domain.
-- `src/components/<domain>/` holds the components of a domain and its hooks. `src/components/ui/` starts from shadcn's components; an edit there serves every caller, as a performance or accessibility fix does.
-- `src/hooks/` holds generic hooks, tied to no domain.
-- `src/helpers/` holds pure functions: input in, value out, with no I/O, no `window` and no environment.
-- `src/lib/` holds the app infrastructure and the browser code: clients, cookies, media, export.
-- `src/constants/` holds values, and the schemas a client form shares with the server.
+- A server function opens on its verb: `get`, `list`, `count`, `create`, `update`, `delete`, `toggle`, or a domain verb (`ban`, `grant`, `export`) where CRUD would mislead. An administration read adds `Admin` (`listAdminUsers`), and a query option is its function name plus `QueryOpts`.
+- Inside a `.server.ts` file, `find` reads the database, `fetch` calls a service, `build` and `to` compute, `match` answers a boolean.
+- `.functions.ts` holds server functions importable anywhere, `.server.ts` stays on the server, `.middleware.ts` holds middlewares. Browser-only code a server-rendered component imports wraps its body in `createClientOnlyFn` under a plain `.ts` name, since a `.client.ts` import breaks the production build.
 
-## File suffixes
+## Deep modules
 
-- `<subject>.functions.ts`: `createServerFn` and `createServerOnlyFn` wrappers, safe to import from any environment.
-- `<subject>.server.ts`: server-only code, kept out of the client bundle by import protection.
-- `<subject>.middleware.ts`: function middlewares.
-- Browser-only code that a server-rendered component imports wraps its body in `createClientOnlyFn` and keeps a plain `.ts` name: a production build fails on a `.client.ts` import from that component.
+A module is a small interface over its mechanics: callers of the Meme index pass a query and get Memes, never Algolia hits. Logic written twice becomes one function. Functions are arrow functions bound to a `const`. A test sits in `__tests__/` beside its source and drives the interface.
 
-## Names
+## The theme decides
 
-- A server function opens on the verb of what it does: `get` reads one item, `list` reads several, `count` counts, and `create`, `update`, `delete`, `toggle` write. A domain verb (`ban`, `grant`, `record`, `store`, `export`) takes over where a CRUD verb would mislead.
-- An administration read carries `Admin` after its verb (`getAdminMeme`, `listAdminUsers`), so it reads apart from its public twin.
-- Inside a `.server.ts` file, `find` reads the database, `fetch` calls an outside service, `build` and `to` compute without I/O, and `match` answers a boolean.
-- A query option takes the name of its server function: `listMemes` gives `listMemesQueryOpts`.
-- Identifiers use the glossary word: Bookmark, Proposal, Cap, Premium, Generation, Export.
+`src/styles.css` is the design system. Every colour, size, radius, shadow, duration, easing, z-index and breakpoint is a named token there, and shared controls are its primitives: `.pill`, `.icon-button`, `focus-ring`. A component composes tokens and primitives, and a missing value joins the theme first. Code passes CSS only what comes from data, such as caption sizes, the frame ratio and export constants, as custom properties.
 
-## Shape
+A stylesheet one surface needs ships with that surface. It starts with `@reference` and the layer order, keeps its rules in `@layer components` except those overriding a page it does not own, and writes breakpoints and input capabilities as Tailwind variants. Sizes run on the spacing scale, `px` draws hairlines, `cqw` follows a video frame.
 
-- A domain module is deep: a small interface over its mechanics. Callers of the Meme index pass a query and get Memes back, without Algolia hits, parameters or caches; callers of the Free caps read one cap state.
-- Logic written twice becomes one function: a pure one in `helpers/`, or a private helper of its module. `throwWithStatus` sets the response status and throws in one call.
-- Functions are arrow functions bound to a `const`.
-- A test lives in the `__tests__/` folder next to its source and drives the module through its interface.
+## Motion and browsers
 
-## Styles and motion
-
-- CSS carries every motion it can express: transitions, entry styles, keyframes, scroll-driven timelines. The motion library carries what CSS cannot: gestures, springs, values a person interrupts mid-flight, and exits that wait on component state.
-- Motion holds 60 FPS on a phone: a running animation moves `transform` and `opacity`, which the compositor carries without layout or paint.
-- The browser floor is the build target. A feature above the floor ships with the fallback that keeps the same rendering on the floor.
-- A visual effect renders the same in WebKit and Chromium, checked in both: blend modes, masks, filters, gradients and wide-gamut colours are where engines part ways.
+CSS carries every motion it can express, and the motion library takes gestures, springs and values interrupted mid-flight. An animation moves `transform` and `opacity` to hold 60 FPS on a phone. The browser floor is the build target: a newer feature ships with a fallback that renders the same, and a visual effect is checked in both WebKit and Chromium.

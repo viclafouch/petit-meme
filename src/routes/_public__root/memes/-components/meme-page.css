@@ -1,3 +1,7 @@
+@reference '../../../../styles.css';
+
+@layer theme, base, components, utilities;
+
 @property --meme-rail-fade-start {
   syntax: '<length>';
   inherits: false;
@@ -19,174 +23,6 @@
 @keyframes meme-rail-hide-fade-end {
   from {
     --meme-rail-fade-end: var(--meme-rail-fade-size);
-  }
-}
-
-.meme-page {
-  --meme-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  --meme-stage-background: oklch(0.08 0 0);
-  --meme-studio-gradient: linear-gradient(
-    110deg,
-    #34d399,
-    #22d3ee 45%,
-    #a78bfa
-  );
-  --meme-studio-gradient-hover: linear-gradient(
-    110deg,
-    #6ee7b7,
-    #67e8f9 45%,
-    #c4b5fd
-  );
-  --meme-stage-max-height: calc(100svh - var(--navbar-space) - 14rem);
-  --meme-heading-and-actions-height: 13rem;
-  --meme-site-banner-height: 0px;
-  --meme-edit-row-height: 0px;
-  --meme-stage-phone-max-height: calc(
-    100svh - var(--meme-site-banner-height) - var(--navbar-space) -
-      var(--tab-bar-space) - var(--meme-heading-and-actions-height) -
-      var(--meme-edit-row-height)
-  );
-  overflow-x: clip;
-  padding-bottom: 2.5rem;
-}
-
-:root:has([data-site-banner]:not([data-collapsed])) .meme-page {
-  --meme-site-banner-height: 3rem;
-}
-
-.meme-page:has(.meme-pill-edit) {
-  --meme-edit-row-height: 3.25rem;
-}
-
-.meme-title-toggle {
-  display: block;
-  width: 100%;
-  text-align: start;
-  touch-action: manipulation;
-}
-
-.meme-title-toggle:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
-  border-radius: 0.25rem;
-}
-
-.meme-page :is(button, [role='button'], summary):not(:disabled) {
-  cursor: pointer;
-}
-
-.meme-glow {
-  position: absolute;
-  inset: -8rem -10rem auto;
-  z-index: -1;
-  height: min(60rem, 110svh);
-  pointer-events: none;
-  background:
-    radial-gradient(34% 30% at 82% 22%, rgb(251 200 80 / 0.3), transparent),
-    radial-gradient(30% 36% at 14% 58%, rgb(122 178 200 / 0.26), transparent),
-    radial-gradient(34% 26% at 58% 88%, rgb(214 41 118 / 0.2), transparent);
-  -webkit-mask-image: radial-gradient(farthest-side, black 62%, transparent);
-  mask-image: radial-gradient(farthest-side, black 62%, transparent);
-}
-
-.meme-stage {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  width: 100%;
-  max-height: max(var(--meme-stage-phone-max-height), 100vw * 9 / 16);
-  aspect-ratio: var(--meme-video-ratio);
-  background: var(--meme-stage-background);
-}
-
-.meme-stage-fill {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-}
-
-.meme-stage-fill img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  filter: blur(28px) brightness(0.55) saturate(1.3);
-  transform: scale(1.2);
-}
-
-.meme-pill {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 0.5rem;
-  min-height: 2.5rem;
-  padding-inline: 1rem;
-  border-radius: 999px;
-  background: var(--secondary);
-  color: var(--secondary-foreground);
-  font-size: 0.875rem;
-  font-weight: 600;
-  white-space: nowrap;
-  touch-action: manipulation;
-  -webkit-user-select: none;
-  user-select: none;
-  transition:
-    transform 120ms var(--meme-ease-out),
-    background-color 150ms ease-out;
-}
-
-.meme-pill svg {
-  width: 1.125rem;
-  height: 1.125rem;
-  flex-shrink: 0;
-}
-
-.meme-pill:active {
-  transform: scale(0.97);
-}
-
-.meme-pill:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
-}
-
-.meme-pill:disabled {
-  opacity: 0.6;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .meme-pill:hover {
-    background: color-mix(in oklch, var(--secondary), var(--foreground) 8%);
-  }
-}
-
-.meme-pill-studio {
-  background: var(--meme-studio-gradient);
-  color: oklch(0.18 0 0);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .meme-pill-studio:hover {
-    background: var(--meme-studio-gradient-hover);
-  }
-}
-
-.meme-pill-bookmark[aria-pressed='true'] {
-  background: oklch(0.82 0.16 85 / 0.18);
-  color: oklch(0.55 0.13 75);
-}
-
-.dark .meme-pill-bookmark[aria-pressed='true'] {
-  color: oklch(0.86 0.15 90);
-}
-
-.meme-pill-bookmark[aria-pressed='true'] > span > svg {
-  fill: oklch(0.84 0.17 85);
-  stroke: oklch(0.78 0.16 80);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .meme-pill-bookmark[aria-pressed='true']:hover {
-    background: oklch(0.82 0.16 85 / 0.28);
   }
 }
 
@@ -212,358 +48,386 @@
   }
 }
 
-.meme-sparkle {
-  position: absolute;
-  color: oklch(0.88 0.16 90);
-  pointer-events: none;
-  filter: drop-shadow(0 0 3px oklch(0.88 0.16 90 / 0.8));
-  animation: meme-sparkle-burst 700ms var(--meme-ease-out) both;
-  animation-delay: var(--sparkle-delay);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .meme-sparkle {
-    display: none;
-  }
-}
-
-.meme-avatars {
-  display: flex;
-}
-
-.meme-avatars > * {
-  border-radius: 999px;
-  box-shadow: 0 0 0 2px var(--secondary);
-}
-
-.meme-avatars > * + * {
-  margin-inline-start: -0.4rem;
-}
-
-@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  .meme-avatars > * {
-    transition: margin 200ms var(--meme-ease-out);
-  }
-
-  .meme-pill:hover .meme-avatars > * + * {
-    margin-inline-start: -0.15rem;
-  }
-}
-
-.meme-heading-row {
-  container: meme-heading / inline-size;
-}
-
-.meme-heading {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.meme-actions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.5rem;
-}
-
-.meme-actions > .meme-pill {
-  justify-content: center;
-  min-width: 0;
-  padding-inline: 0.75rem;
-}
-
-.meme-actions > .meme-pill-edit {
-  grid-column: 1 / -1;
-}
-
-@container meme-heading (width >= 34rem) {
-  .meme-actions {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-@container meme-heading (width >= 46rem) {
-  .meme-heading {
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 1.5rem;
-  }
-
-  .meme-heading > :first-child {
-    flex: 1;
-  }
-
-  .meme-heading > .meme-actions {
-    display: flex;
-    flex-shrink: 0;
-  }
-
-  .meme-heading > .meme-actions > .meme-pill {
-    padding-inline: 1rem;
-  }
-}
-
-.meme-tags {
-  display: flex;
-  flex-wrap: wrap;
-  flex-wrap: balance;
-  gap: 0.375rem;
-}
-
-.meme-category {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2rem;
-  padding-inline: 0.75rem;
-  border-radius: 999px;
-  background: oklch(0.7 0.14 var(--hue) / 0.16);
-  color: oklch(0.42 0.14 var(--hue));
-  font-size: 0.8125rem;
-  font-weight: 600;
-  transition: background-color 150ms ease-out;
-}
-
-.dark .meme-category {
-  color: oklch(0.85 0.11 var(--hue));
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .meme-category:hover {
-    background: oklch(0.7 0.14 var(--hue) / 0.28);
-  }
-}
-
-.meme-keyword {
-  display: inline-flex;
-  max-width: 100%;
-  align-items: center;
-  gap: 0.375rem;
-  min-height: 2rem;
-  padding-inline: 0.625rem;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  color: var(--muted-foreground);
-  font-size: 0.8125rem;
-  transition:
-    color 150ms ease-out,
-    border-color 150ms ease-out;
-}
-
-.meme-keyword svg {
-  flex-shrink: 0;
-  width: 0.875rem;
-  height: 0.875rem;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .meme-keyword:hover {
-    color: var(--foreground);
-    border-color: var(--ring);
-  }
-}
-
-:is(.meme-category, .meme-keyword):focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
-}
-
-.meme-rail-list {
-  display: grid;
-  gap: 0.75rem;
-}
-
-.meme-rail-item {
-  display: grid;
-  grid-template-columns: minmax(0, 11rem) minmax(0, 1fr);
-  gap: 0.75rem;
-  border-radius: 0.5rem;
-  outline: none;
-}
-
-.meme-rail-list > li {
-  container-type: inline-size;
-}
-
-@container (width < 20rem) {
-  .meme-rail-item {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-.meme-rail-item:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
-}
-
-.meme-rail-category {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 0.375rem;
-  font-size: 0.75rem;
-  color: var(--muted-foreground);
-}
-
-.meme-rail-category::before {
-  flex-shrink: 0;
-  content: '';
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 999px;
-  background: oklch(0.72 0.16 var(--hue));
-}
-
-.meme-thumb {
-  position: relative;
-  isolation: isolate;
-  aspect-ratio: 16 / 9;
-  overflow: hidden;
-  border-radius: 0.625rem;
-  background: var(--meme-stage-background);
-}
-
-.meme-thumb > img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.meme-thumb-fill {
-  object-fit: cover;
-  filter: blur(16px) brightness(0.6);
-  transform: scale(1.2);
-}
-
-.meme-thumb-image {
-  object-fit: contain;
-}
-
-.meme-thumb-preview {
-  display: none;
-  object-fit: contain;
-  opacity: 0;
-  transition:
-    opacity 200ms ease-out,
-    display 200ms allow-discrete;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .meme-rail-item:is(:hover, :focus-visible) .meme-thumb-preview {
-    display: block;
-    opacity: 1;
-
-    @starting-style {
-      opacity: 0;
-    }
-  }
-}
-
-@media (width >= 40rem) and (width < 64rem) {
-  .meme-rail-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (width >= 64rem) {
+@layer components {
   .meme-page {
-    padding: 1.5rem clamp(1.5rem, 3vw, 3rem) 3rem;
+    --meme-stage-chrome-height: --spacing(56);
+    --meme-heading-and-actions-height: --spacing(52);
+    --meme-site-banner-height: 0px;
+    --meme-edit-row-height: 0px;
+    --meme-rail-width: --spacing(100);
+    --meme-grid-max-width: --spacing(440);
+    --meme-backdrop-overscan: 1.2;
+    --meme-stage-max-height: calc(
+      100svh - var(--navbar-space) - var(--meme-stage-chrome-height)
+    );
+    --meme-stage-phone-max-height: calc(
+      100svh - var(--meme-site-banner-height) - var(--navbar-space) -
+        var(--tab-bar-space) - var(--meme-heading-and-actions-height) -
+        var(--meme-edit-row-height)
+    );
+    overflow-x: clip;
+    padding-bottom: --spacing(10);
+
+    :root:has([data-site-banner]:not([data-collapsed])) & {
+      --meme-site-banner-height: --spacing(12);
+    }
+
+    &:has(.meme-pill-edit) {
+      --meme-edit-row-height: --spacing(13);
+    }
+
+    & :is(button, [role='button'], summary):not(:disabled) {
+      cursor: pointer;
+    }
+
+    @variant lg {
+      padding: --spacing(6) clamp(--spacing(6), 3vw, --spacing(12))
+        --spacing(12);
+    }
   }
 
   .meme-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 25rem;
-    align-items: start;
-    gap: 1.5rem;
-    max-width: 110rem;
-    margin-inline: auto;
+    @variant lg {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) var(--meme-rail-width);
+      align-items: start;
+      gap: --spacing(6);
+      max-width: var(--meme-grid-max-width);
+      margin-inline: auto;
+    }
   }
 
-  .meme-page .meme-title-toggle {
-    cursor: auto;
+  .meme-title-toggle {
+    display: block;
+    width: 100%;
+    text-align: start;
+    touch-action: manipulation;
+
+    &:focus-visible {
+      @apply focus-ring;
+      border-radius: --theme(--radius-sm);
+    }
+
+    @variant lg {
+      .meme-page & {
+        cursor: auto;
+      }
+    }
+  }
+
+  .meme-glow {
+    position: absolute;
+    inset: --spacing(-32) --spacing(-40) auto;
+    z-index: var(--z-behind);
+    height: min(--spacing(240), 110svh);
+    pointer-events: none;
+    background: var(--gradient-glow);
+    -webkit-mask-image: radial-gradient(farthest-side, black 62%, transparent);
+    mask-image: radial-gradient(farthest-side, black 62%, transparent);
   }
 
   .meme-stage {
-    width: min(100%, var(--meme-stage-max-height) * 16 / 9);
-    max-height: none;
-    aspect-ratio: 16 / 9;
-    margin-inline: auto;
-    border-radius: 1.25rem;
-    box-shadow:
-      0 0 0 1px oklch(0 0 0 / 0.08),
-      0 1px 2px oklch(0 0 0 / 0.12),
-      0 24px 48px -16px oklch(0 0 0 / 0.35);
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    width: 100%;
+    max-height: max(
+      var(--meme-stage-phone-max-height),
+      100vw / (--theme(--aspect-video))
+    );
+    aspect-ratio: var(--meme-video-ratio);
+    background: var(--color-stage);
+
+    @variant lg {
+      width: min(
+        100%,
+        var(--meme-stage-max-height) * (--theme(--aspect-video))
+      );
+      max-height: none;
+      aspect-ratio: --theme(--aspect-video);
+      margin-inline: auto;
+      border-radius: --theme(--radius-3xl);
+      box-shadow: var(--shadow-stage);
+    }
   }
 
-  .dark .meme-stage {
-    box-shadow:
-      0 0 0 1px oklch(1 0 0 / 0.12),
-      0 1px 2px oklch(0 0 0 / 0.5),
-      0 32px 64px -20px oklch(0 0 0 / 0.8);
+  .meme-stage-fill {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+
+    & img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: var(--filter-backdrop);
+      transform: scale(var(--meme-backdrop-overscan));
+    }
+  }
+
+  .meme-pill-bookmark[aria-pressed='true'] {
+    background: var(--color-bookmark-surface);
+    color: --theme(--color-bookmark-foreground);
+
+    & > span > svg {
+      fill: var(--color-bookmark-fill);
+      stroke: var(--color-bookmark-stroke);
+    }
+
+    @variant mouse {
+      &:hover:not(:disabled) {
+        background: var(--color-bookmark-surface-hover);
+      }
+    }
+  }
+
+  .meme-sparkle {
+    position: absolute;
+    color: var(--color-bookmark-spark);
+    pointer-events: none;
+    filter: var(--filter-spark-glow);
+    animation: meme-sparkle-burst var(--duration-sparkle) var(--ease-out-strong)
+      both;
+    animation-delay: var(--sparkle-delay);
+
+    @variant motion-reduce {
+      display: none;
+    }
+  }
+
+  .meme-avatars {
+    display: flex;
+
+    & > * {
+      border-radius: var(--radius-pill);
+      box-shadow: var(--shadow-avatar-ring);
+    }
+
+    & > * + * {
+      margin-inline-start: --spacing(-1.6);
+    }
+
+    @variant mouse {
+      @variant motion-safe {
+        & > * {
+          transition: margin var(--duration-base) var(--ease-out-strong);
+        }
+
+        .pill:hover & > * + * {
+          margin-inline-start: --spacing(-0.6);
+        }
+      }
+    }
+  }
+
+  .meme-heading-row {
+    container: meme-heading / inline-size;
+  }
+
+  .meme-heading {
+    display: flex;
+    flex-direction: column;
+    gap: --spacing(3);
+
+    @container meme-heading (width >= --theme(--container-meme-heading)) {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: --spacing(6);
+
+      & > :first-child {
+        flex: 1;
+      }
+    }
+  }
+
+  .meme-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: --spacing(2);
+
+    & > .pill {
+      min-width: 0;
+      padding-inline: --spacing(3);
+    }
+
+    & > .meme-pill-edit {
+      grid-column: 1 / -1;
+    }
+
+    @container meme-heading (width >= --theme(--container-meme-actions)) {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    @container meme-heading (width >= --theme(--container-meme-heading)) {
+      .meme-heading > & {
+        display: flex;
+        flex-shrink: 0;
+
+        & > .pill {
+          padding-inline: --spacing(4);
+        }
+      }
+    }
+  }
+
+  .meme-tags {
+    display: flex;
+    flex-wrap: wrap;
+    flex-wrap: balance;
+    gap: --spacing(1.5);
+  }
+
+  .meme-keyword {
+    justify-content: flex-start;
+    max-width: 100%;
+    padding-inline: --spacing(2.5);
   }
 
   .meme-rail {
-    position: sticky;
-    top: calc(var(--navbar-space) + 1.5rem);
-    display: flex;
-    flex-direction: column;
-    max-height: calc(100svh - var(--navbar-space) - 3rem);
+    @variant lg {
+      position: sticky;
+      top: calc(var(--navbar-space) + --spacing(6));
+      display: flex;
+      flex-direction: column;
+      max-height: calc(100svh - var(--navbar-space) - --spacing(12));
+    }
   }
 
   .meme-rail-list {
-    min-height: 0;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-width: thin;
-    scrollbar-gutter: stable;
-  }
+    display: grid;
+    gap: --spacing(3);
 
-  @supports (animation-timeline: scroll()) {
-    .meme-rail-list {
-      --meme-rail-fade-size: 4rem;
-      scroll-padding-block: var(--meme-rail-fade-size);
-      -webkit-mask:
-        linear-gradient(black, black) no-clip subtract,
-        linear-gradient(to bottom, black, transparent) 0 0 / 100%
-          var(--meme-rail-fade-start) no-repeat no-clip,
-        linear-gradient(to bottom, transparent, black) 0 100% / 100%
-          var(--meme-rail-fade-end) no-repeat no-clip;
-      mask:
-        linear-gradient(black, black) no-clip subtract,
-        linear-gradient(to bottom, black, transparent) 0 0 / 100%
-          var(--meme-rail-fade-start) no-repeat no-clip,
-        linear-gradient(to bottom, transparent, black) 0 100% / 100%
-          var(--meme-rail-fade-end) no-repeat no-clip;
-      animation:
-        meme-rail-reveal-fade-start linear both,
-        meme-rail-hide-fade-end linear both;
-      /* Lightning CSS turns this two-animation shorthand into
-         animation-duration: 0s at build, which ends a scroll-driven fade at
-         once: https://github.com/parcel-bundler/lightningcss/issues/1012.
-         vite-plugins/scroll-driven-css-guard.ts fails the build if it comes
-         back. */
-      animation-duration: auto;
-      animation-timeline: scroll(self block);
-      animation-range:
-        0 var(--meme-rail-fade-size),
-        calc(100% - var(--meme-rail-fade-size)) 100%;
+    & > li {
+      container-type: inline-size;
+    }
+
+    @variant sm {
+      @variant max-lg {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @variant lg {
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+      scrollbar-gutter: stable;
+
+      @supports (animation-timeline: scroll()) {
+        --meme-rail-fade-size: --spacing(16);
+        scroll-padding-block: var(--meme-rail-fade-size);
+        -webkit-mask:
+          linear-gradient(black, black) no-clip subtract,
+          linear-gradient(to bottom, black, transparent) 0 0 / 100%
+            var(--meme-rail-fade-start) no-repeat no-clip,
+          linear-gradient(to bottom, transparent, black) 0 100% / 100%
+            var(--meme-rail-fade-end) no-repeat no-clip;
+        mask:
+          linear-gradient(black, black) no-clip subtract,
+          linear-gradient(to bottom, black, transparent) 0 0 / 100%
+            var(--meme-rail-fade-start) no-repeat no-clip,
+          linear-gradient(to bottom, transparent, black) 0 100% / 100%
+            var(--meme-rail-fade-end) no-repeat no-clip;
+        animation:
+          meme-rail-reveal-fade-start linear both,
+          meme-rail-hide-fade-end linear both;
+        /* Lightning CSS turns this two-animation shorthand into
+           animation-duration: 0s at build, which ends a scroll-driven fade at
+           once: https://github.com/parcel-bundler/lightningcss/issues/1012.
+           vite-plugins/scroll-driven-css-guard.ts fails the build if it comes
+           back. */
+        animation-duration: auto;
+        animation-timeline: scroll(self block);
+        animation-range:
+          0 var(--meme-rail-fade-size),
+          calc(100% - var(--meme-rail-fade-size)) 100%;
+      }
     }
   }
 
   .meme-rail-item {
-    grid-template-columns: 10.5rem minmax(0, 1fr);
-    gap: 0.625rem;
-  }
-}
+    display: grid;
+    grid-template-columns: minmax(0, --spacing(44)) minmax(0, 1fr);
+    gap: --spacing(3);
+    border-radius: --theme(--radius-md);
+    outline: none;
 
-@media (pointer: coarse) {
-  .meme-pill {
-    min-height: 2.75rem;
-  }
-}
+    &:focus-visible {
+      @apply focus-ring;
+    }
 
-@media (prefers-reduced-motion: reduce) {
-  .meme-pill {
-    transition: none;
+    @container (width < --theme(--container-xs)) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    @variant lg {
+      grid-template-columns: --spacing(42) minmax(0, 1fr);
+      gap: --spacing(2.5);
+    }
+  }
+
+  .meme-rail-category {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: --spacing(1.5);
+    font-size: --theme(--text-xs);
+    color: --theme(--color-muted-foreground);
+
+    &::before {
+      flex-shrink: 0;
+      content: '';
+      width: --spacing(2);
+      height: --spacing(2);
+      border-radius: var(--radius-pill);
+      background: oklch(var(--chip-dot-tone) var(--hue));
+    }
+  }
+
+  .meme-thumb {
+    position: relative;
+    isolation: isolate;
+    aspect-ratio: --theme(--aspect-video);
+    overflow: hidden;
+    border-radius: --theme(--radius-lg);
+    background: var(--color-stage);
+
+    & > img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .meme-thumb-fill {
+    object-fit: cover;
+    filter: var(--filter-backdrop-thumb);
+    transform: scale(var(--meme-backdrop-overscan));
+  }
+
+  .meme-thumb-image {
+    object-fit: contain;
+  }
+
+  .meme-thumb-preview {
+    display: none;
+    object-fit: contain;
+    opacity: 0;
+    transition:
+      opacity var(--duration-base) ease-out,
+      display var(--duration-base) allow-discrete;
+
+    @variant mouse {
+      .meme-rail-item:is(:hover, :focus-visible) & {
+        display: block;
+        opacity: 1;
+
+        @starting-style {
+          opacity: 0;
+        }
+      }
+    }
   }
 }

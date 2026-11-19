@@ -1,7 +1,10 @@
 import React from 'react'
-import { Download, Share } from 'lucide-react'
+import { Check, Download, Share, X } from 'lucide-react'
+import { useConfettiBurst } from '~/components/studio/use-confetti-burst'
 import type { Studio } from '~/components/studio/use-studio'
+import type { ExportCompletion } from '~/components/studio/use-studio-export'
 import type { MemeExportMode } from '~/constants/meme'
+import { STUDIO_CELEBRATION_MS } from '~/constants/studio'
 import { m } from '~/paraglide/messages'
 
 const CATCH_UP_RATE = 0.08
@@ -67,6 +70,66 @@ const CatchUpProgress = ({ target, hasLabel }: CatchUpProgressProps) => {
   )
 }
 
+const DONE_LABELS = {
+  share: () => {
+    return m.studio_shared()
+  },
+  download: () => {
+    return m.studio_downloaded()
+  }
+} as const satisfies Record<MemeExportMode, () => string>
+
+const DONE_TITLES = {
+  share: () => {
+    return m.studio_export_done_share()
+  },
+  download: () => {
+    return m.studio_export_done_download()
+  }
+} as const satisfies Record<MemeExportMode, () => string>
+
+type ExportCelebrationProps = {
+  completion: ExportCompletion | null
+  onDismiss: () => void
+}
+
+const ExportCelebration = ({
+  completion,
+  onDismiss
+}: ExportCelebrationProps) => {
+  if (completion === null) {
+    return null
+  }
+
+  return (
+    <div
+      key={completion.id}
+      className="studio-done-card"
+      hidden={!completion.isVisible}
+      style={{ '--celebration-hold': `${STUDIO_CELEBRATION_MS}ms` }}
+    >
+      <span className="studio-done-badge" aria-hidden="true">
+        <Check />
+      </span>
+      <div className="min-w-0">
+        <p className="studio-done-title">{DONE_TITLES[completion.mode]()}</p>
+        <p className="studio-done-hint">{m.studio_export_done_hint()}</p>
+      </div>
+      <button
+        type="button"
+        className="icon-button icon-button-sm"
+        aria-label={m.common_close()}
+        onClick={onDismiss}
+      >
+        <X aria-hidden="true" />
+      </button>
+      <span className="studio-done-timer" aria-hidden="true">
+        <span />
+      </span>
+    </div>
+  )
+}
+
 const EXPORT_ICONS = {
   share: Share,
   download: Download
@@ -87,6 +150,10 @@ const ExportButton = ({
 }: ExportButtonProps) => {
   const { exporter, render } = studio
   const isPending = exporter.pendingMode === mode
+  const isDone =
+    !isPending &&
+    exporter.completion?.isVisible === true &&
+    exporter.completion.mode === mode
   const isDisabled =
     render.status === 'idle' ||
     render.status === 'unsupported' ||
@@ -94,6 +161,10 @@ const ExportButton = ({
   const Icon = EXPORT_ICONS[mode]
 
   const getLabel = () => {
+    if (isDone) {
+      return DONE_LABELS[mode]()
+    }
+
     if (isPending) {
       return mode === 'share'
         ? m.studio_preparing_share()
@@ -116,6 +187,8 @@ const ExportButton = ({
       disabled={isDisabled}
       aria-label={isLabelHidden ? getLabel() : undefined}
       aria-busy={isPending || undefined}
+      data-export-mode={mode}
+      data-done={isDone || undefined}
       onClick={mode === 'share' ? exporter.share : exporter.download}
     >
       {isPending ? (
@@ -127,9 +200,11 @@ const ExportButton = ({
           }
           hasLabel={!isCompact}
         />
-      ) : (
-        <Icon className="size-[1.125rem]" aria-hidden="true" />
-      )}
+      ) : null}
+      {isDone ? (
+        <Check className="studio-done-check" aria-hidden="true" />
+      ) : null}
+      {isPending || isDone ? null : <Icon aria-hidden="true" />}
       {isLabelHidden ? null : getLabel()}
     </button>
   )
@@ -140,24 +215,37 @@ type ExportActionsProps = {
 }
 
 export const ExportActions = ({ studio }: ExportActionsProps) => {
+  const { completion, dismissCompletion } = studio.exporter
+  const actionsRef = useConfettiBurst(completion)
+
   return (
-    <div className="studio-editor-actions studio-hide-while-typing">
+    <div
+      ref={actionsRef}
+      className="studio-editor-actions studio-hide-while-typing"
+    >
+      <ExportCelebration
+        completion={completion}
+        onDismiss={dismissCompletion}
+      />
+      <output className="sr-only">
+        {completion?.isVisible ? DONE_TITLES[completion.mode]() : ''}
+      </output>
       <div className="studio-export-row">
         <ExportButton
           studio={studio}
           mode="share"
-          className="studio-gradient-button studio-export-touch"
+          className="pill pill-brand studio-export-main studio-export-touch"
         />
         <ExportButton
           studio={studio}
           mode="download"
-          className="studio-soft-button studio-export-touch studio-export-icon"
+          className="pill pill-veil pill-icon studio-export-touch"
           isCompact
         />
         <ExportButton
           studio={studio}
           mode="download"
-          className="studio-gradient-button studio-export-pointer"
+          className="pill pill-brand studio-export-main studio-export-pointer"
         />
       </div>
     </div>

@@ -1,5 +1,6 @@
-import type { ComponentProps, CSSProperties } from 'react'
+import { use, type ComponentProps, type CSSProperties } from 'react'
 import {
+  MediaContext,
   MediaProvider,
   useMediaRef
 } from 'media-chrome/dist/react/media-store.js'
@@ -36,8 +37,10 @@ const variables = {
 } as CSSProperties
 
 export const VideoPlayer = ({ style, ...props }: VideoPlayerProps) => {
+  const outerMediaStore = use(MediaContext)
+
   return (
-    <MediaProvider>
+    <MediaProvider mediaStore={outerMediaStore ?? undefined}>
       <MediaController
         lang={getLocale()}
         style={{

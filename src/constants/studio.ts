@@ -123,6 +123,8 @@ export const CAPTION_MIN_STROKE = 2
 
 export const STUDIO_RENDER_DEBOUNCE_MS = 600
 
+export const STUDIO_CELEBRATION_MS = 5200
+
 export type StudioPlan = 'free' | 'premium'
 
 export const CAPTION_SLOT_LABELS = {

@@ -1,3 +1,4 @@
+import React from 'react'
 import { Radio } from '@base-ui/react/radio'
 import { RadioGroup } from '@base-ui/react/radio-group'
 import { CaptionStage } from '~/components/studio/caption-stage'
@@ -47,37 +48,44 @@ type LookTilesProps = {
 }
 
 export const LookTiles = ({ studio, meme }: LookTilesProps) => {
+  const labelId = React.useId()
+
   return (
-    <RadioGroup<CaptionLookId>
-      aria-label={m.studio_looks_label()}
-      value={studio.caption.look}
-      onValueChange={(lookId) => {
-        studio.setLook(lookId)
-      }}
-      className="studio-look-tiles studio-hide-while-typing"
-    >
-      {CAPTION_LOOKS.map((look) => {
-        return (
-          <Radio.Root
-            key={look.id}
-            value={look.id}
-            className="studio-look-tile"
-          >
-            <span className="studio-look-tile-preview" aria-hidden="true">
-              <span className="studio-stage-fit">
-                <CaptionStage
-                  meme={meme}
-                  caption={buildSampleCaption(studio.caption, look.id)}
-                  showWatermark={false}
-                />
+    <div className="studio-look-group studio-hide-while-typing">
+      <p id={labelId} className="studio-look-label">
+        {m.studio_looks_label()}
+      </p>
+      <RadioGroup<CaptionLookId>
+        aria-labelledby={labelId}
+        value={studio.caption.look}
+        onValueChange={(lookId) => {
+          studio.setLook(lookId)
+        }}
+        className="studio-look-tiles"
+      >
+        {CAPTION_LOOKS.map((look) => {
+          return (
+            <Radio.Root
+              key={look.id}
+              value={look.id}
+              className="studio-look-tile"
+            >
+              <span className="studio-look-tile-preview" aria-hidden="true">
+                <span className="studio-stage-fit">
+                  <CaptionStage
+                    meme={meme}
+                    caption={buildSampleCaption(studio.caption, look.id)}
+                    showWatermark={false}
+                  />
+                </span>
               </span>
-            </span>
-            <span className="studio-look-tile-label">
-              {LOOK_LABELS[look.id]()}
-            </span>
-          </Radio.Root>
-        )
-      })}
-    </RadioGroup>
+              <span className="studio-look-tile-label">
+                {LOOK_LABELS[look.id]()}
+              </span>
+            </Radio.Root>
+          )
+        })}
+      </RadioGroup>
+    </div>
   )
 }

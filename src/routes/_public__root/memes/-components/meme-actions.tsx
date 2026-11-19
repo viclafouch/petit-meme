@@ -96,7 +96,7 @@ const BookmarkPill = ({ meme }: BookmarkPillProps) => {
   return (
     <button
       type="button"
-      className="meme-pill meme-pill-bookmark"
+      className="pill meme-pill-bookmark"
       aria-pressed={bookmark.isMemeBookmarked}
       disabled={bookmark.isPending}
       onClick={handleBookmark}
@@ -129,7 +129,7 @@ const SignedInBookmarkPill = ({ meme }: SignedInBookmarkPillProps) => {
 
 const BookmarkPillPlaceholder = () => {
   return (
-    <button type="button" className="meme-pill meme-pill-bookmark" disabled>
+    <button type="button" className="pill meme-pill-bookmark" disabled>
       <Star aria-hidden="true" />
       {m.meme_bookmark()}
     </button>
@@ -181,11 +181,7 @@ export const MemeActions = ({
           onExport('share', format)
         }}
         render={
-          <button
-            type="button"
-            aria-label={m.meme_share()}
-            className="meme-pill"
-          />
+          <button type="button" aria-label={m.meme_share()} className="pill" />
         }
       >
         <ShareAvatars />
@@ -196,7 +192,7 @@ export const MemeActions = ({
         params={{ memeId: meme.id }}
         state={markStudioEntry}
         resetScroll={false}
-        className="meme-pill meme-pill-studio"
+        className="pill pill-brand"
         onClick={onPause}
       >
         <Clapperboard aria-hidden="true" />
@@ -213,7 +209,7 @@ export const MemeActions = ({
           <button
             type="button"
             aria-label={m.meme_download()}
-            className="meme-pill"
+            className="pill"
           />
         }
       >
@@ -225,7 +221,7 @@ export const MemeActions = ({
         <Link
           to="/admin/library/$memeId"
           params={{ memeId: meme.id }}
-          className="meme-pill meme-pill-edit px-3"
+          className="pill meme-pill-edit"
           aria-label={m.meme_edit_aria()}
         >
           <Pencil aria-hidden="true" />

@@ -4,7 +4,7 @@ const DISMISS_DISTANCE_RATIO = 0.25
 const DISMISS_VELOCITY_PX_PER_MS = 0.5
 const START_THRESHOLD_PX = 6
 const UPWARD_RESISTANCE = 0.15
-const SHEET_EASE = 'var(--studio-sheet-ease)'
+const SHEET_EASE = 'var(--ease-drawer)'
 const SETTLE_MS = 500
 const DISMISS_MS = 280
 

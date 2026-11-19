@@ -149,9 +149,12 @@ test.describe('a free User with generations left', () => {
     await writeCaption(page, getCaptionSample(page))
     await expect(getDownloadButton(page)).toBeEnabled()
 
-    const recordRequest = page.waitForRequest(matchIsGenerationRecord, {
-      timeout: RENDER_TIMEOUT_MS
-    })
+    const recordResponse = page.waitForResponse(
+      (response) => {
+        return matchIsGenerationRecord(response.request())
+      },
+      { timeout: RENDER_TIMEOUT_MS }
+    )
     const downloadPromise = page.waitForEvent('download', {
       timeout: RENDER_TIMEOUT_MS
     })
@@ -168,7 +171,8 @@ test.describe('a free User with generations left', () => {
       Math.abs(exportedRatio - (await readPreviewRatio(page)))
     ).toBeLessThan(RATIO_TOLERANCE)
 
-    const call = readServerFunctionCall(await recordRequest)
+    const firstGeneration = await recordResponse
+    const call = readServerFunctionCall(firstGeneration.request())
     const statuses = await sendServerFunctionCallsAtOnce({
       page,
       call,

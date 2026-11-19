@@ -56,7 +56,6 @@
     --meme-edit-row-height: 0px;
     --meme-rail-width: --spacing(100);
     --meme-grid-max-width: --spacing(440);
-    --meme-backdrop-overscan: 1.2;
     --meme-stage-max-height: calc(
       100svh - var(--navbar-space) - var(--meme-stage-chrome-height)
     );
@@ -155,14 +154,27 @@
     position: absolute;
     inset: 0;
     overflow: hidden;
+  }
 
-    & img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      filter: var(--filter-backdrop);
-      transform: scale(var(--meme-backdrop-overscan));
-    }
+  .meme-stage-fill > img,
+  .meme-thumb > .meme-thumb-fill {
+    --backdrop-offset: calc(
+      (1 - var(--backdrop-overscan)) / 2 * var(--backdrop-downscale) * 100%
+    );
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: calc(100% / var(--backdrop-downscale));
+    height: calc(100% / var(--backdrop-downscale));
+    object-fit: cover;
+    filter: var(--backdrop-filter);
+    transform-origin: 0 0;
+    transform: translate(var(--backdrop-offset), var(--backdrop-offset))
+      scale(calc(var(--backdrop-downscale) * var(--backdrop-overscan)));
+    will-change: transform;
+  }
+
+  .meme-stage-fill > img {
+    --backdrop-filter: var(--filter-backdrop);
   }
 
   .meme-pill-bookmark[aria-pressed='true'] {
@@ -401,10 +413,8 @@
     }
   }
 
-  .meme-thumb-fill {
-    object-fit: cover;
-    filter: var(--filter-backdrop-thumb);
-    transform: scale(var(--meme-backdrop-overscan));
+  .meme-thumb > .meme-thumb-fill {
+    --backdrop-filter: var(--filter-backdrop-thumb);
   }
 
   .meme-thumb-image {

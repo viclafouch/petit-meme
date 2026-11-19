@@ -231,7 +231,7 @@ const RelatedMemesSkeleton = () => {
       {Array.from({ length: SKELETON_ITEM_COUNT }, (_, index) => {
         return (
           <li key={index} className="meme-rail-item">
-            <Skeleton className="aspect-video rounded-[0.625rem]" />
+            <Skeleton className="aspect-video rounded-lg" />
             <span className="flex flex-col gap-2 py-0.5">
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-3 w-1/2" />

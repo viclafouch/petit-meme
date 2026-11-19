@@ -139,7 +139,7 @@ html:has(.studio[open]) {
 
         @starting-style {
           opacity: 0;
-          transform: scale(var(--scale-press));
+          transform: scale(var(--scale-enter));
         }
       }
     }
@@ -332,7 +332,6 @@ html:has(.studio[open]) {
 
   .studio-transport {
     height: var(--transport-height);
-    min-height: 0;
   }
 
   .studio-frame {
@@ -415,7 +414,7 @@ html:has(.studio[open]) {
     }
 
     &:has(.studio-caption-input:focus)::after {
-      border: var(--focus-width) solid var(--color-focus);
+      border: var(--focus-width) solid var(--focus-color);
     }
   }
 
@@ -651,7 +650,7 @@ html:has(.studio[open]) {
     gap: --spacing(2.5);
   }
 
-  .studio .studio-export-main {
+  .studio-export-main {
     flex: 1;
   }
 
@@ -704,12 +703,12 @@ html:has(.studio[open]) {
     &[hidden] {
       display: none;
       opacity: 0;
-      transform: translateY(--spacing(2)) scale(var(--scale-press));
+      transform: translateY(--spacing(2)) scale(var(--scale-enter));
     }
 
     @starting-style {
       opacity: 0;
-      transform: translateY(--spacing(2)) scale(var(--scale-press));
+      transform: translateY(--spacing(2)) scale(var(--scale-enter));
     }
 
     @variant pointer-coarse {

@@ -109,7 +109,7 @@
     }
 
     @variant lg {
-      .meme-page & {
+      .meme-page &:not(:disabled) {
         cursor: auto;
       }
     }

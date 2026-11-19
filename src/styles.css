@@ -61,7 +61,11 @@
 }
 
 @theme inline {
-  --color-secondary-hover: var(--secondary-hover);
+  --color-secondary-hover: color-mix(
+    in oklch,
+    var(--secondary),
+    var(--foreground) 8%
+  );
   --color-bookmark-foreground: var(--bookmark-foreground);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
@@ -129,6 +133,8 @@
   --duration-sparkle: 700ms;
   --duration-spin: 800ms;
   --scale-press: 0.97;
+  --scale-enter: 0.97;
+  --focus-color: oklch(0.52 0.105 223);
   --opacity-disabled: 50%;
   --opacity-placeholder: 55%;
   --opacity-dashed: 28%;
@@ -173,11 +179,6 @@
     radial-gradient(30% 36% at 14% 58%, rgb(122 178 200 / 0.26), transparent),
     radial-gradient(34% 26% at 58% 88%, rgb(214 41 118 / 0.2), transparent);
 
-  --secondary-hover: color-mix(
-    in oklch,
-    var(--secondary),
-    var(--foreground) 8%
-  );
   --bookmark-foreground: oklch(0.55 0.13 75);
   --chip-surface-tone: 0.7 0.14;
   --chip-surface-alpha: 16%;
@@ -256,6 +257,7 @@
 
 .dark {
   color-scheme: dark;
+  --focus-color: var(--color-brand-cyan);
   --bookmark-foreground: oklch(0.86 0.15 90);
   --chip-text-tone: 0.85 0.11;
   --shadow-stage:
@@ -396,7 +398,9 @@
   --color-brand-cyan-light: #67e8f9;
   --color-brand-violet-light: #c4b5fd;
   --color-brand-foreground: oklch(0.18 0 0);
-  --color-focus: var(--color-brand-cyan);
+  --text-md: 0.9375rem;
+  --text-md--line-height: calc(1.25 / 0.9375);
+  --container-measure: 72ch;
 
   --color-veil-subtle: oklch(1 0 0 / 6%);
   --color-veil: oklch(1 0 0 / 10%);
@@ -472,7 +476,7 @@
   }
 }
 @utility focus-ring {
-  outline: var(--focus-width) solid var(--color-focus);
+  outline: var(--focus-width) solid var(--focus-color);
   outline-offset: var(--focus-offset);
 }
 

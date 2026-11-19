@@ -119,7 +119,7 @@ const MemeDetails = ({ meme }: MemeDetailsProps) => {
   return (
     <>
       {meme.description === '' ? null : (
-        <p className="max-w-[72ch] text-sm text-pretty text-muted-foreground">
+        <p className="max-w-measure text-sm text-pretty text-muted-foreground">
           {meme.description}
         </p>
       )}

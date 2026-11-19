@@ -16,3 +16,7 @@ Newer browsers get extras on top: smoother transitions, a steadier page while it
 
 - **Their settings win.** Someone who turns off animations on their phone gets a calm site. Dark mode reaches every corner of the screen.
 - **The page holds still.** Videos, images and titles keep their place while the page loads.
+
+## Light on a modest phone
+
+A Meme page comes alive fast on an ordinary phone, not only on a recent one. Decoration pays its way: a blur, a glow or a shadow is drawn once and kept, never redrawn while the video plays, because a phone without a strong graphics chip spends its power there instead of starting the video. The automated tests stand in for that phone, with Safari on a slow machine. When they wait too long for a video to start, the page got heavier, and the fix belongs in the page, never in a longer wait in the test.

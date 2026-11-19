@@ -135,7 +135,7 @@ const FormatRows = ({ mode, isPending, onSelect }: FormatRowsProps) => {
               ) : null}
             </span>
             <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-              <span className="truncate text-[0.9375rem] font-semibold">
+              <span className="truncate text-md font-semibold">
                 {MEME_FORMAT_EXPORT_LABELS[mode][format]()}
               </span>
               <span className="truncate text-xs text-muted-foreground">
@@ -186,7 +186,7 @@ const CopyLinkField = ({ meme, onDone }: CopyLinkFieldProps) => {
       <span className="min-w-0 flex-1 truncate text-muted-foreground">
         {memeUrl.replace(/^https?:\/\//u, '')}
       </span>
-      <span className="shrink-0 rounded-[0.625rem] bg-background px-3 py-2 font-semibold shadow-xs">
+      <span className="shrink-0 rounded-lg bg-background px-3 py-2 font-semibold shadow-xs">
         {m.meme_copy_link()}
       </span>
     </button>
@@ -264,7 +264,7 @@ const MemeExportHeading = ({
 
   return (
     <div className="flex items-center gap-3 text-start">
-      <span className="relative aspect-video w-26 shrink-0 overflow-hidden rounded-[0.625rem] bg-black ring-1 ring-border">
+      <span className="relative aspect-video w-26 shrink-0 overflow-hidden rounded-lg bg-black ring-1 ring-border">
         <img
           src={buildVideoImageUrl(meme.video.bunnyId)}
           alt=""

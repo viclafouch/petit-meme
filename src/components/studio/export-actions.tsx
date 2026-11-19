@@ -188,7 +188,6 @@ const ExportButton = ({
       aria-label={isLabelHidden ? getLabel() : undefined}
       aria-busy={isPending || undefined}
       data-export-mode={mode}
-      data-done={isDone || undefined}
       onClick={mode === 'share' ? exporter.share : exporter.download}
     >
       {isPending ? (

@@ -46,7 +46,7 @@ const StudioHeader = ({ meme, titleId, onClose }: StudioHeaderProps) => {
         className="size-7 shrink-0"
       />
       <div className="min-w-0 flex-1 leading-tight">
-        <h2 id={titleId} className="font-bricolage text-[0.9375rem] font-bold">
+        <h2 id={titleId} className="font-bricolage text-md font-bold">
           {m.meme_studio()}{' '}
           <span className="font-semibold text-white/50">· {SITE_NAME}</span>
         </h2>

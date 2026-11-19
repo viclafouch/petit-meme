@@ -6,10 +6,10 @@ const CONFETTI_COLORS = [
   'var(--color-brand-green)',
   'var(--color-brand-cyan)',
   'var(--color-brand-violet)',
-  '#ffffff',
+  'var(--color-brand-cyan-light)',
   'var(--color-brand-green-light)',
   'var(--color-brand-violet-light)'
-]
+] as const
 const CONFETTI_COUNT = 28
 const CONFETTI_SPREAD_DEG = 150
 const CONFETTI_UPWARD_DEG = -90
@@ -24,7 +24,6 @@ const CONFETTI_EXTRA_DURATION_MS = 260
 const CONFETTI_MAX_SPIN_DEG = 720
 const HALF_TURN_DEG = 180
 const DEGREES_TO_RADIANS = Math.PI / HALF_TURN_DEG
-const FALLBACK_COLOR = '#ffffff'
 
 const findVisibleExportButton = (
   actions: HTMLElement,
@@ -37,11 +36,17 @@ const findVisibleExportButton = (
   })
 }
 
-const launchPiece = (layer: HTMLElement, origin: DOMRect, index: number) => {
+type Burst = {
+  layer: HTMLElement
+  origin: DOMRect
+  easing: string
+}
+
+const launchPiece = ({ layer, origin, easing }: Burst, index: number) => {
   const piece = document.createElement('span')
   piece.className = 'studio-confetti'
   piece.style.background =
-    CONFETTI_COLORS[index % CONFETTI_COLORS.length] ?? FALLBACK_COLOR
+    CONFETTI_COLORS[index % CONFETTI_COLORS.length] ?? CONFETTI_COLORS[0]
   piece.style.left = `${origin.left + origin.width * HALF}px`
   piece.style.top = `${origin.top + origin.height * HALF}px`
   layer.append(piece)
@@ -75,7 +80,7 @@ const launchPiece = (layer: HTMLElement, origin: DOMRect, index: number) => {
     {
       duration:
         CONFETTI_MIN_DURATION_MS + Math.random() * CONFETTI_EXTRA_DURATION_MS,
-      easing: 'cubic-bezier(0.23, 1, 0.32, 1)',
+      easing,
       fill: 'forwards'
     }
   )
@@ -86,8 +91,9 @@ const burstConfetti = (origin: DOMRect, host: HTMLElement) => {
   layer.className = 'studio-confetti-layer'
   host.append(layer)
 
+  const easing = getComputedStyle(host).getPropertyValue('--ease-out-strong')
   const animations = Array.from({ length: CONFETTI_COUNT }, (_, index) => {
-    return launchPiece(layer, origin, index)
+    return launchPiece({ layer, origin, easing }, index)
   })
 
   const removeWhenLanded = async () => {

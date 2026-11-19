@@ -1,96 +1,6 @@
-.share-demo,
-.launch-demo {
-}
+@reference '../../../../../styles.css';
 
-.share-demo {
-  --demo-cycle: 10s;
-}
-
-.share-demo-tap,
-.launch-demo-tap {
-  opacity: 0;
-}
-
-.launch-demo-app {
-  opacity: 0;
-}
-
-.share-demo-friend-chat {
-  transform: translateX(100%);
-}
-
-.launch-demo {
-  --launch-cycle: 10s;
-}
-
-.launch-demo-app {
-  transform-origin: var(--launch-origin);
-}
-
-.platform-phone-reveal {
-  translate: 0 0;
-  rotate: var(--phone-tilt);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .share-demo-tap {
-    animation: share-demo-tap var(--demo-cycle) var(--ease-out-strong)
-      calc(var(--demo-cycle) * var(--demo-moment, 0)) infinite both;
-  }
-
-  .share-demo-group-chat {
-    animation: share-demo-group-chat var(--demo-cycle) var(--ease-drawer)
-      infinite both;
-  }
-
-  .share-demo-friend-chat {
-    animation: share-demo-friend-chat var(--demo-cycle) var(--ease-drawer)
-      infinite both;
-  }
-
-  .share-demo-video-message {
-    animation: share-demo-video-message var(--demo-cycle) var(--ease-out-strong)
-      infinite both;
-  }
-
-  .share-demo-laugh-message {
-    animation: share-demo-laugh-message var(--demo-cycle) var(--ease-out-strong)
-      infinite both;
-  }
-
-  .share-demo-audio-message {
-    animation: share-demo-audio-message var(--demo-cycle) var(--ease-out-strong)
-      infinite both;
-  }
-
-  .share-demo-reply-message {
-    animation: share-demo-reply-message var(--demo-cycle) var(--ease-out-strong)
-      infinite both;
-  }
-
-  .launch-demo-tap {
-    animation: launch-demo-tap var(--launch-cycle) var(--ease-out-strong)
-      var(--launch-delay, 0s) infinite both;
-  }
-
-  .launch-demo-app {
-    animation: launch-demo-app var(--launch-cycle) var(--ease-drawer)
-      var(--launch-delay, 0s) infinite both;
-  }
-
-  .launch-demo-content {
-    animation: launch-demo-content var(--launch-cycle) ease
-      var(--launch-delay, 0s) infinite both;
-  }
-
-  @supports ((animation-timeline: view()) and (animation-range: entry)) {
-    .platform-phone-reveal {
-      animation: platform-phone-reveal linear both;
-      animation-timeline: view();
-      animation-range: entry 10% cover 45%;
-    }
-  }
-}
+@layer theme, base, components, utilities;
 
 @keyframes share-demo-tap {
   0% {
@@ -259,5 +169,107 @@
   to {
     opacity: 1;
     translate: 0 0;
+  }
+}
+
+@layer components {
+  .share-demo {
+    --demo-cycle: 10s;
+  }
+
+  .launch-demo {
+    --launch-cycle: 10s;
+  }
+
+  .share-demo-tap {
+    opacity: 0;
+
+    @variant motion-safe {
+      animation: share-demo-tap var(--demo-cycle) var(--ease-out-strong)
+        calc(var(--demo-cycle) * var(--demo-moment, 0)) infinite both;
+    }
+  }
+
+  .share-demo-group-chat {
+    @variant motion-safe {
+      animation: share-demo-group-chat var(--demo-cycle) var(--ease-drawer)
+        infinite both;
+    }
+  }
+
+  .share-demo-friend-chat {
+    transform: translateX(100%);
+
+    @variant motion-safe {
+      animation: share-demo-friend-chat var(--demo-cycle) var(--ease-drawer)
+        infinite both;
+    }
+  }
+
+  .share-demo-video-message {
+    @variant motion-safe {
+      animation: share-demo-video-message var(--demo-cycle)
+        var(--ease-out-strong) infinite both;
+    }
+  }
+
+  .share-demo-laugh-message {
+    @variant motion-safe {
+      animation: share-demo-laugh-message var(--demo-cycle)
+        var(--ease-out-strong) infinite both;
+    }
+  }
+
+  .share-demo-audio-message {
+    @variant motion-safe {
+      animation: share-demo-audio-message var(--demo-cycle)
+        var(--ease-out-strong) infinite both;
+    }
+  }
+
+  .share-demo-reply-message {
+    @variant motion-safe {
+      animation: share-demo-reply-message var(--demo-cycle)
+        var(--ease-out-strong) infinite both;
+    }
+  }
+
+  .launch-demo-tap {
+    opacity: 0;
+
+    @variant motion-safe {
+      animation: launch-demo-tap var(--launch-cycle) var(--ease-out-strong)
+        var(--launch-delay, 0s) infinite both;
+    }
+  }
+
+  .launch-demo-app {
+    opacity: 0;
+    transform-origin: var(--launch-origin);
+
+    @variant motion-safe {
+      animation: launch-demo-app var(--launch-cycle) var(--ease-drawer)
+        var(--launch-delay, 0s) infinite both;
+    }
+  }
+
+  .launch-demo-content {
+    @variant motion-safe {
+      animation: launch-demo-content var(--launch-cycle) ease
+        var(--launch-delay, 0s) infinite both;
+    }
+  }
+
+  .platform-phone-reveal {
+    translate: 0 0;
+    rotate: var(--phone-tilt);
+
+    @variant motion-safe {
+      @supports ((animation-timeline: view()) and (animation-range: entry)) {
+        animation: platform-phone-reveal linear both;
+        animation-timeline: view();
+        animation-range: entry 10% cover 45%;
+      }
+    }
   }
 }

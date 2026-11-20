@@ -44,6 +44,7 @@
     width: 100%;
     height: 100%;
     cursor: pointer;
+    touch-action: manipulation;
   }
 
   .meme-player-poster {
@@ -72,21 +73,36 @@
     z-index: var(--z-controls);
     display: flex;
     flex-direction: column;
-    gap: --spacing(1);
     padding: --spacing(12) --spacing(3) --spacing(2.5);
     background: var(--gradient-player-chrome);
     color: --theme(--color-white);
+    --meme-player-controls-pointer-events: auto;
+    pointer-events: none;
     transition: opacity var(--duration-base) var(--ease-out-strong);
 
+    & :is(button, .meme-scrubber-control) {
+      pointer-events: var(--meme-player-controls-pointer-events);
+    }
+
+    & .meme-scrubber-control {
+      align-items: end;
+      padding-block-end: --spacing(1);
+
+      @variant pointer-coarse {
+        height: --spacing(8);
+        padding-block-end: --spacing(1.5);
+      }
+    }
+
     .meme-player[data-awaiting-autoplay] & {
+      --meme-player-controls-pointer-events: none;
       opacity: 0;
-      pointer-events: none;
       transition: none;
     }
 
     .meme-player[userinactive]:not([mediapaused]) & {
+      --meme-player-controls-pointer-events: none;
       opacity: 0;
-      pointer-events: none;
     }
 
     @variant motion-reduce {

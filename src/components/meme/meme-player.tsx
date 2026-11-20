@@ -86,6 +86,51 @@ type MemeVideoElementProps = {
   onAutoplayBlocked: () => void
 }
 
+const listenToVideoTaps = (video: HTMLVideoElement, onTap: () => void) => {
+  const player = video.closest<HTMLElement>('media-controller')
+
+  if (!player) {
+    return () => {}
+  }
+
+  let isVideoTap = false
+  const listeners = new AbortController()
+  const { signal } = listeners
+
+  player.addEventListener(
+    'pointerdown',
+    (event) => {
+      isVideoTap = event.pointerType === 'touch' && event.target === video
+    },
+    { signal }
+  )
+  player.addEventListener(
+    'pointercancel',
+    () => {
+      isVideoTap = false
+    },
+    { signal }
+  )
+  player.addEventListener(
+    'click',
+    (event) => {
+      if (!isVideoTap) {
+        return
+      }
+
+      isVideoTap = false
+      event.stopPropagation()
+      event.preventDefault()
+      onTap()
+    },
+    { signal, capture: true }
+  )
+
+  return () => {
+    listeners.abort()
+  }
+}
+
 const MemeVideoElement = ({
   title,
   autoPlay,
@@ -97,15 +142,29 @@ const MemeVideoElement = ({
   onAutoplayBlocked
 }: MemeVideoElementProps) => {
   const dispatch = useMediaDispatch()
-  const { togglePlay } = usePlayback()
-  const pointerTypeRef = React.useRef('')
   const videoRef = React.useCallback(
-    (video: HTMLVideoElement | null) => {
-      onVideoChange(video)
-      dispatch({
-        type: MediaActionTypes.MEDIA_ELEMENT_CHANGE_REQUEST,
-        detail: video
+    (video: HTMLVideoElement) => {
+      const changeVideo = (nextVideo: HTMLVideoElement | null) => {
+        onVideoChange(nextVideo)
+        dispatch({
+          type: MediaActionTypes.MEDIA_ELEMENT_CHANGE_REQUEST,
+          detail: nextVideo
+        })
+      }
+
+      changeVideo(video)
+      const stopListeningToTaps = listenToVideoTaps(video, () => {
+        dispatch({
+          type: video.paused
+            ? MediaActionTypes.MEDIA_PLAY_REQUEST
+            : MediaActionTypes.MEDIA_PAUSE_REQUEST
+        })
       })
+
+      return () => {
+        stopListeningToTaps()
+        changeVideo(null)
+      }
     },
     [dispatch, onVideoChange]
   )
@@ -115,12 +174,6 @@ const MemeVideoElement = ({
   ) => {
     if (autoPlay) {
       void playOrReportBlocked(event.currentTarget, onAutoplayBlocked)
-    }
-  }
-
-  const handleTouchTap = () => {
-    if (pointerTypeRef.current === 'touch') {
-      togglePlay()
     }
   }
 
@@ -143,10 +196,6 @@ const MemeVideoElement = ({
       onLoadStart={onLoadStart}
       onPlaying={onStart}
       onLoadedMetadata={handleLoadedMetadata}
-      onPointerDown={(event) => {
-        pointerTypeRef.current = event.pointerType
-      }}
-      onClick={handleTouchTap}
     />
   )
 }

@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import { expect, type Page } from '@playwright/test'
 import {
   AI_SEARCH_STAGE_KEYS,
   AI_SEARCH_STAGE_LINGER_MS,
@@ -23,7 +23,12 @@ export const getSubmitButton = (page: Page) => {
   return page.getByRole('button', { name: m.ai_search_submit() })
 }
 
+const waitForSubmittableForm = async (page: Page) => {
+  await expect(getSubmitButton(page)).toBeEnabled()
+}
+
 export const submitPrompt = async (page: Page, prompt: string) => {
+  await waitForSubmittableForm(page)
   await getPromptField(page).fill('')
   await getPromptField(page).fill(prompt)
   await getSubmitButton(page).click()

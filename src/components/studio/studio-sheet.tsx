@@ -6,6 +6,7 @@ import { StudioEditor } from '~/components/studio/studio-editor'
 import studioCss from '~/components/studio/studio.css?url'
 import { useSheetDialog } from '~/components/studio/use-sheet-dialog'
 import { useSheetDrag } from '~/components/studio/use-sheet-drag'
+import { useSheetEntrance } from '~/components/studio/use-sheet-entrance'
 import { useSheetKeyboard } from '~/components/studio/use-sheet-keyboard'
 import { useStudio } from '~/components/studio/use-studio'
 import { LOGO_PATH, SITE_NAME } from '~/constants/branding'
@@ -84,6 +85,7 @@ export const StudioSheet = ({ meme, onClose }: StudioSheetProps) => {
   const studio = useStudio(meme)
   const dialogRef = useSheetDialog(onClose)
   const sheetRef = useSheetKeyboard()
+  const hasEntered = useSheetEntrance(sheetRef)
   const scrimRef = React.useRef<HTMLDivElement>(null)
   const titleId = React.useId()
 
@@ -109,7 +111,11 @@ export const StudioSheet = ({ meme, onClose }: StudioSheetProps) => {
       <div ref={sheetRef} className="studio-sheet">
         <span aria-hidden="true" className="studio-sheet-grabber" />
         <StudioHeader meme={meme} titleId={titleId} onClose={onClose} />
-        <StudioEditor studio={studio} meme={meme} />
+        <StudioEditor
+          studio={studio}
+          meme={meme}
+          canStartPlayback={hasEntered}
+        />
       </div>
     </dialog>
   )

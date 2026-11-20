@@ -84,4 +84,72 @@ test.describe('the player', () => {
       })
       .toBe(false)
   })
+
+  test('a click on the Video pauses and plays it', async ({ page }) => {
+    await page.goto(PLAYABLE_MEME_PATHNAME)
+
+    const video = page
+      .getByTestId('meme-video-player')
+      .getByTestId('meme-video')
+
+    await expect
+      .poll(() => {
+        return readVideoIsPaused(video)
+      })
+      .toBe(false)
+
+    await video.click()
+
+    await expect
+      .poll(() => {
+        return readVideoIsPaused(video)
+      })
+      .toBe(true)
+
+    await video.click()
+
+    await expect
+      .poll(() => {
+        return readVideoIsPaused(video)
+      })
+      .toBe(false)
+  })
+
+  test('shows the controls of a paused Video only under the mouse, with nothing in the middle', async ({
+    page
+  }) => {
+    await page.goto(PLAYABLE_MEME_PATHNAME)
+
+    const player = page.getByTestId('meme-video-player')
+    const pauseButton = player.getByRole('button', {
+      name: m.meme_pause_video(),
+      exact: true
+    })
+    const playButton = player.getByRole('button', {
+      name: m.meme_play_video(),
+      exact: true
+    })
+    const readControlsOpacity = () => {
+      return playButton.evaluate((button) => {
+        const controls = button.closest('.meme-player-chrome')
+
+        return controls ? getComputedStyle(controls).opacity : null
+      })
+    }
+
+    await expect(pauseButton).toBeVisible()
+    await player.hover()
+    await pauseButton.click()
+
+    await expect(playButton).toHaveCount(1)
+    await expect.poll(readControlsOpacity).toBe('1')
+
+    await page.mouse.move(0, 0)
+
+    await expect.poll(readControlsOpacity).toBe('0')
+
+    await player.hover()
+
+    await expect.poll(readControlsOpacity).toBe('1')
+  })
 })

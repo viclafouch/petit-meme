@@ -6,6 +6,12 @@ export const readVideoIsPaused = (video: Locator) => {
   })
 }
 
+export const readVideoIsMuted = (video: Locator) => {
+  return video.evaluate((element: HTMLVideoElement) => {
+    return element.muted
+  })
+}
+
 export const readVideoCurrentTime = (video: Locator) => {
   return video.evaluate((element: HTMLVideoElement) => {
     return element.currentTime

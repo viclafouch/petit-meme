@@ -2,15 +2,11 @@ import { expect, type Locator, type Page } from '@playwright/test'
 import { m } from '~/paraglide/messages'
 import { E2E_NAMED_MEMES } from './content'
 import { test } from './fixtures'
-import { readVideoIsPaused } from './video'
+import { readVideoIsPaused, readVideoIsMuted } from './video'
 
 const MEME_PATHNAME = `/memes/${E2E_NAMED_MEMES.mostViewed.id}`
 
 const RIGHT_OF_CENTER = { x: 0.8, y: 0.55 }
-
-const tapAt = async (page: Page, x: number, y: number) => {
-  await page.touchscreen.tap(x, y)
-}
 
 const readBox = async (locator: Locator) => {
   const box = await locator.boundingBox()
@@ -22,6 +18,21 @@ const readBox = async (locator: Locator) => {
   return box
 }
 
+const tapCenterOf = async (page: Page, locator: Locator) => {
+  const box = await readBox(locator)
+
+  await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2)
+}
+
+const tapRightOfCenter = async (page: Page, player: Locator) => {
+  const box = await readBox(player)
+
+  await page.touchscreen.tap(
+    box.x + box.width * RIGHT_OF_CENTER.x,
+    box.y + box.height * RIGHT_OF_CENTER.y
+  )
+}
+
 const expectPaused = async (video: Locator, isPaused: boolean) => {
   await expect
     .poll(() => {
@@ -30,84 +41,93 @@ const expectPaused = async (video: Locator, isPaused: boolean) => {
     .toBe(isPaused)
 }
 
+const expectShown = async (centerButton: Locator, isShown: boolean) => {
+  await expect(centerButton).toHaveCSS('opacity', isShown ? '1' : '0')
+}
+
+const getPlayer = (page: Page) => {
+  const player = page.getByTestId('meme-video-player')
+
+  return {
+    player,
+    video: player.getByTestId('meme-video'),
+    pauseButton: player.getByRole('button', {
+      name: m.meme_pause_video(),
+      exact: true
+    }),
+    playButton: player.getByRole('button', {
+      name: m.meme_play_video(),
+      exact: true
+    }),
+    muteButton: player.getByRole('button', {
+      name: m.meme_mute(),
+      exact: true
+    })
+  }
+}
+
 test.describe('the player on a phone', () => {
-  test('pauses and plays with a tap on the Video', async ({ page }) => {
-    await page.goto(MEME_PATHNAME)
-
-    const video = page
-      .getByTestId('meme-video-player')
-      .getByTestId('meme-video')
-
-    await expectPaused(video, false)
-
-    await video.tap()
-
-    await expectPaused(video, true)
-
-    await video.tap()
-
-    await expectPaused(video, false)
-  })
-
-  test('answers a tap anywhere outside its controls, and only the control under the finger', async ({
+  test('a tap on the Video shows the controls, and another hides them, without pausing', async ({
     page
   }) => {
     await page.goto(MEME_PATHNAME)
 
-    const player = page.getByTestId('meme-video-player')
-    const video = player.getByTestId('meme-video')
-    const muteButton = player.getByRole('button', {
-      name: m.meme_mute(),
-      exact: true
-    })
-    const fullscreenButton = player.getByRole('button', {
-      name: m.meme_fullscreen(),
-      exact: true
-    })
+    const { player, video, pauseButton } = getPlayer(page)
 
     await expectPaused(video, false)
-    await expect(player).toHaveAttribute('userinactive')
+    await expectShown(pauseButton, false)
 
-    const muteBox = await readBox(muteButton)
+    await tapRightOfCenter(page, player)
 
-    await tapAt(
-      page,
-      muteBox.x + muteBox.width / 2,
-      muteBox.y + muteBox.height / 2
-    )
-
-    await expectPaused(video, true)
-    await expect(player).toHaveAttribute('mediapaused')
-
-    await tapAt(
-      page,
-      muteBox.x + muteBox.width / 2,
-      muteBox.y + muteBox.height / 2
-    )
-
-    await expect(
-      player.getByRole('button', { name: m.meme_unmute(), exact: true })
-    ).toBeVisible()
-    await expectPaused(video, true)
-
-    const fullscreenBox = await readBox(fullscreenButton)
-
-    await tapAt(
-      page,
-      fullscreenBox.x - fullscreenBox.width,
-      fullscreenBox.y + fullscreenBox.height / 2
-    )
-
+    await expectShown(pauseButton, true)
     await expectPaused(video, false)
 
-    const playerBox = await readBox(player)
+    await tapRightOfCenter(page, player)
 
-    await tapAt(
-      page,
-      playerBox.x + playerBox.width * RIGHT_OF_CENTER.x,
-      playerBox.y + playerBox.height * RIGHT_OF_CENTER.y
-    )
+    await expectShown(pauseButton, false)
+    await expectPaused(video, false)
+  })
+
+  test('pauses and plays from the button in the middle, the only play button', async ({
+    page
+  }) => {
+    await page.goto(MEME_PATHNAME)
+
+    const { player, video, pauseButton, playButton } = getPlayer(page)
+
+    await expectPaused(video, false)
+    await expect(pauseButton).toHaveCount(1)
+
+    await tapRightOfCenter(page, player)
+    await expectShown(pauseButton, true)
+    await tapCenterOf(page, pauseButton)
 
     await expectPaused(video, true)
+    await expectShown(playButton, true)
+
+    await tapCenterOf(page, playButton)
+
+    await expectPaused(video, false)
+  })
+
+  test('a tap over a hidden control only shows the controls', async ({
+    page
+  }) => {
+    await page.goto(MEME_PATHNAME)
+
+    const { video, pauseButton, muteButton } = getPlayer(page)
+
+    await expectPaused(video, false)
+    await expectShown(pauseButton, false)
+
+    await tapCenterOf(page, muteButton)
+
+    await expectShown(pauseButton, true)
+    await expectPaused(video, false)
+    await expect
+      .poll(() => {
+        return readVideoIsMuted(video)
+      })
+      .toBe(false)
   })
 })

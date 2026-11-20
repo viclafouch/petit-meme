@@ -16,6 +16,10 @@ import {
 import { useSpinDelay } from 'spin-delay'
 import { Slider } from '@base-ui/react/slider'
 import { ClientOnly } from '@tanstack/react-router'
+import {
+  listenToVideoTaps,
+  useControlsVisibility
+} from '~/components/meme/use-controls-visibility'
 import { VideoPlaybackError } from '~/components/meme/video-playback-error'
 import { VideoPlayer } from '~/components/ui/kibo-ui/video-player'
 import {
@@ -86,51 +90,6 @@ type MemeVideoElementProps = {
   onAutoplayBlocked: () => void
 }
 
-const listenToVideoTaps = (video: HTMLVideoElement, onTap: () => void) => {
-  const player = video.closest<HTMLElement>('media-controller')
-
-  if (!player) {
-    return () => {}
-  }
-
-  let isVideoTap = false
-  const listeners = new AbortController()
-  const { signal } = listeners
-
-  player.addEventListener(
-    'pointerdown',
-    (event) => {
-      isVideoTap = event.pointerType === 'touch' && event.target === video
-    },
-    { signal }
-  )
-  player.addEventListener(
-    'pointercancel',
-    () => {
-      isVideoTap = false
-    },
-    { signal }
-  )
-  player.addEventListener(
-    'click',
-    (event) => {
-      if (!isVideoTap) {
-        return
-      }
-
-      isVideoTap = false
-      event.stopPropagation()
-      event.preventDefault()
-      onTap()
-    },
-    { signal, capture: true }
-  )
-
-  return () => {
-    listeners.abort()
-  }
-}
-
 const MemeVideoElement = ({
   title,
   autoPlay,
@@ -143,28 +102,12 @@ const MemeVideoElement = ({
 }: MemeVideoElementProps) => {
   const dispatch = useMediaDispatch()
   const videoRef = React.useCallback(
-    (video: HTMLVideoElement) => {
-      const changeVideo = (nextVideo: HTMLVideoElement | null) => {
-        onVideoChange(nextVideo)
-        dispatch({
-          type: MediaActionTypes.MEDIA_ELEMENT_CHANGE_REQUEST,
-          detail: nextVideo
-        })
-      }
-
-      changeVideo(video)
-      const stopListeningToTaps = listenToVideoTaps(video, () => {
-        dispatch({
-          type: video.paused
-            ? MediaActionTypes.MEDIA_PLAY_REQUEST
-            : MediaActionTypes.MEDIA_PAUSE_REQUEST
-        })
+    (video: HTMLVideoElement | null) => {
+      onVideoChange(video)
+      dispatch({
+        type: MediaActionTypes.MEDIA_ELEMENT_CHANGE_REQUEST,
+        detail: video
       })
-
-      return () => {
-        stopListeningToTaps()
-        changeVideo(null)
-      }
     },
     [dispatch, onVideoChange]
   )
@@ -205,12 +148,14 @@ type PlayerButtonProps = {
   onClick: () => void
   children: React.ReactNode
   isPressed?: boolean
+  className?: string
 }
 
 const PlayerButton = ({
   label,
   onClick,
   isPressed,
+  className,
   children
 }: PlayerButtonProps) => {
   return (
@@ -219,7 +164,7 @@ const PlayerButton = ({
         render={
           <button
             type="button"
-            className="icon-button"
+            className={cn('icon-button', className)}
             aria-label={label}
             aria-pressed={isPressed}
             onClick={onClick}
@@ -435,12 +380,17 @@ const FullscreenButton = () => {
   )
 }
 
-const PlayButton = () => {
+type PlayButtonProps = {
+  className?: string
+}
+
+const PlayButton = ({ className }: PlayButtonProps) => {
   const { isPaused, togglePlay } = usePlayback()
 
   return (
     <PlayerButton
       label={isPaused ? m.meme_play_video() : m.meme_pause_video()}
+      className={className}
       onClick={togglePlay}
     >
       {isPaused ? (
@@ -478,23 +428,83 @@ const MuteButton = () => {
   )
 }
 
+const CenterPlayButton = () => {
+  const { isPaused, togglePlay } = usePlayback()
+
+  return (
+    <button
+      type="button"
+      className="meme-player-center"
+      aria-label={isPaused ? m.meme_play_video() : m.meme_pause_video()}
+      onClick={togglePlay}
+    >
+      {isPaused ? (
+        <Play aria-hidden="true" className="meme-player-center-play" />
+      ) : (
+        <Pause aria-hidden="true" />
+      )}
+    </button>
+  )
+}
+
 type PlayerControlsProps = {
   video: HTMLVideoElement | null
   hasFullscreen: boolean
 }
 
 const PlayerControls = ({ video, hasFullscreen }: PlayerControlsProps) => {
+  const { isPaused } = usePlayback()
+  const { controlsRef, isShown } = useControlsVisibility({
+    video,
+    isPaused
+  })
+
   return (
-    <div className="meme-player-chrome">
-      <Scrubber video={video} />
-      <div className="flex items-center gap-1">
-        <PlayButton />
-        <MuteButton />
-        <TimeDisplay />
-        <span className="flex-1" />
-        {hasFullscreen ? <FullscreenButton /> : null}
+    <div
+      ref={controlsRef}
+      className="meme-player-controls"
+      data-shown={isShown || undefined}
+    >
+      <CenterPlayButton />
+      <div className="meme-player-chrome">
+        <Scrubber video={video} />
+        <div className="meme-player-bar">
+          <PlayButton className="meme-player-bar-play" />
+          <MuteButton />
+          <TimeDisplay />
+          <span className="flex-1" />
+          {hasFullscreen ? <FullscreenButton /> : null}
+        </div>
       </div>
     </div>
+  )
+}
+
+type TapToPlayProps = {
+  video: HTMLVideoElement | null
+  isAwaitingAutoplay: boolean
+}
+
+const TapToPlay = ({ video, isAwaitingAutoplay }: TapToPlayProps) => {
+  const { isPaused, togglePlay } = usePlayback()
+  const handleTap = React.useEffectEvent(togglePlay)
+
+  React.useEffect(() => {
+    if (!video) {
+      return () => {}
+    }
+
+    return listenToVideoTaps(video, handleTap)
+  }, [video])
+
+  if (!isPaused || isAwaitingAutoplay) {
+    return null
+  }
+
+  return (
+    <span aria-hidden="true" className="meme-player-paused">
+      <Play />
+    </span>
   )
 }
 
@@ -518,20 +528,6 @@ export const MemePlayerTransport = ({
         <TimeDisplay />
       </ClientOnly>
     </div>
-  )
-}
-
-const PausedIndicator = () => {
-  const { isPaused } = usePlayback()
-
-  if (!isPaused) {
-    return null
-  }
-
-  return (
-    <span aria-hidden="true" className="meme-player-paused">
-      <Play />
-    </span>
   )
 }
 
@@ -645,13 +641,14 @@ export const MemePlayer = ({
       />
       {children}
       <ClientOnly>
-        {isAwaitingAutoplay ? null : <PausedIndicator />}
         <LoadingIndicator
           isAwaitingAutoplay={isAwaitingAutoplay && hasLoadStarted}
         />
         {hasControls ? (
           <PlayerControls video={video} hasFullscreen={hasFullscreen} />
-        ) : null}
+        ) : (
+          <TapToPlay video={video} isAwaitingAutoplay={isAwaitingAutoplay} />
+        )}
       </ClientOnly>
       {playbackFailure ? (
         <VideoPlaybackError onRetry={playbackFailure.handleRetry} />

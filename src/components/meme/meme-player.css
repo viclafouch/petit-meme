@@ -17,7 +17,7 @@
   .meme-player {
     --media-background-color: transparent !important;
 
-    &[userinactive]:not([mediapaused]) {
+    &[data-started]:has(> .meme-player-controls:not([data-shown])) {
       cursor: none;
     }
   }
@@ -66,18 +66,111 @@
     }
   }
 
+  .meme-player-controls {
+    --meme-player-controls-opacity: 0;
+    --meme-player-controls-pointer-events: none;
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-controls);
+    color: --theme(--color-white);
+    opacity: 1;
+    pointer-events: none;
+
+    &[data-shown] {
+      --meme-player-controls-opacity: 1;
+      --meme-player-controls-pointer-events: auto;
+    }
+
+    .meme-player:not([data-started]) & {
+      --meme-player-scrim-opacity: 0;
+    }
+
+    @variant pointer-coarse {
+      &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: var(--color-shade-soft);
+        opacity: var(
+          --meme-player-scrim-opacity,
+          var(--meme-player-controls-opacity)
+        );
+        transition: opacity var(--duration-base) var(--ease-out-strong);
+      }
+
+      &:not([data-shown]) .meme-scrubber-control {
+        --meme-scrubber-track-scale: 0.5;
+        --meme-scrubber-thumb-scale: 0;
+      }
+    }
+
+    @variant motion-reduce {
+      &::before {
+        transition: none;
+      }
+    }
+  }
+
+  .meme-player-center {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    display: grid;
+    place-items: center;
+    width: --spacing(16);
+    height: --spacing(16);
+    border-radius: var(--radius-pill);
+    background: var(--color-shade);
+    opacity: var(--meme-player-controls-opacity);
+    pointer-events: var(--meme-player-controls-pointer-events);
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+    transition:
+      opacity var(--duration-base) var(--ease-out-strong),
+      scale var(--duration-press) var(--ease-out-strong);
+
+    @apply press;
+
+    & svg {
+      width: --spacing(7);
+      height: --spacing(7);
+      fill: currentColor;
+    }
+
+    & .meme-player-center-play {
+      margin-inline-start: --spacing(0.75);
+    }
+
+    &:focus-visible {
+      @apply focus-ring;
+    }
+
+    .meme-player:not([data-started], [data-awaiting-autoplay]) & {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .meme-player[data-started] & {
+      @variant pointer-fine {
+        display: none;
+      }
+    }
+
+    @variant motion-reduce {
+      transition: none;
+    }
+  }
+
   .meme-player-chrome {
     position: absolute;
     inset-inline: 0;
     bottom: 0;
-    z-index: var(--z-controls);
     display: flex;
     flex-direction: column;
     padding: --spacing(12) --spacing(3) --spacing(2.5);
     background: var(--gradient-player-chrome);
-    color: --theme(--color-white);
-    --meme-player-controls-pointer-events: auto;
-    pointer-events: none;
+    opacity: var(--meme-player-controls-opacity);
     transition: opacity var(--duration-base) var(--ease-out-strong);
 
     & :is(button, .meme-scrubber-control) {
@@ -87,26 +180,47 @@
     & .meme-scrubber-control {
       align-items: end;
       padding-block-end: --spacing(1);
+    }
 
-      @variant pointer-coarse {
+    .meme-player:not([data-started]) & {
+      visibility: hidden;
+    }
+
+    @variant pointer-coarse {
+      flex-direction: column-reverse;
+      padding: 0 --spacing(1);
+      background: none;
+      opacity: 1;
+
+      & .meme-scrubber-control {
         height: --spacing(8);
         padding-block-end: --spacing(1.5);
       }
     }
 
-    .meme-player[data-awaiting-autoplay] & {
-      --meme-player-controls-pointer-events: none;
-      opacity: 0;
-      transition: none;
-    }
-
-    .meme-player[userinactive]:not([mediapaused]) & {
-      --meme-player-controls-pointer-events: none;
-      opacity: 0;
-    }
-
     @variant motion-reduce {
       transition: none;
+    }
+  }
+
+  .meme-player-bar {
+    display: flex;
+    align-items: center;
+    gap: --spacing(1);
+
+    @variant pointer-coarse {
+      opacity: var(--meme-player-controls-opacity);
+      transition: opacity var(--duration-base) var(--ease-out-strong);
+
+      @variant motion-reduce {
+        transition: none;
+      }
+    }
+  }
+
+  .meme-player-bar-play {
+    @variant pointer-coarse {
+      display: none;
     }
   }
 

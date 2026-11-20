@@ -26,7 +26,7 @@ import {
   type CaptionLayout
 } from '~/helpers/caption'
 import { getWatermarkMargin } from '~/helpers/watermark'
-import { buildVideoFirstFrameUrl } from '~/lib/bunny-public-urls'
+import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import {
   loadCaptionFonts,
   measureCaptionText
@@ -371,7 +371,7 @@ export const CaptionStage = ({
         renderFrame(
           <>
             <img
-              src={buildVideoFirstFrameUrl(meme.bunnyId)}
+              src={buildVideoImageUrl(meme.bunnyId)}
               alt=""
               className="studio-video-poster"
               decoding="async"

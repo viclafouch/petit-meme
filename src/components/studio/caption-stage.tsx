@@ -1,5 +1,6 @@
 import React from 'react'
 import { MediaProvider } from 'media-chrome/react/media-store'
+import { usePrefetchQuery } from '@tanstack/react-query'
 import { MemePlayer, MemePlayerTransport } from '~/components/meme/meme-player'
 import { useMemeHls } from '~/components/meme/use-meme-hls'
 import {
@@ -30,6 +31,7 @@ import {
   loadCaptionFonts,
   measureCaptionText
 } from '~/lib/studio/caption-canvas'
+import { getMemePlaybackUrlQueryOpts } from '~/queries/meme'
 
 const CARET_LINE_TEXT = '\u200B'
 const IOS_NO_ZOOM_FONT_PX = 16
@@ -221,16 +223,20 @@ const getWatermarkStyle = (meme: StudioMeme) => {
 type StagePlaybackProps = {
   meme: StudioMeme
   watermark: React.ReactNode
+  canStartPlayback: boolean
   renderFrame: (media: React.ReactNode) => React.ReactNode
 }
 
 const StagePlayback = ({
   meme,
   watermark,
+  canStartPlayback,
   renderFrame
 }: StagePlaybackProps) => {
+  usePrefetchQuery(getMemePlaybackUrlQueryOpts(meme.id))
   const { video, videoCallbackRef, playbackFailure } = useMemeHls({
-    memeId: meme.id
+    memeId: meme.id,
+    isEnabled: canStartPlayback
   })
 
   return (
@@ -258,6 +264,7 @@ type CaptionStageProps = {
   meme: StudioMeme
   caption: Caption
   showWatermark: boolean
+  canStartPlayback?: boolean
   openSlots?: CaptionSlot[]
   field?: CaptionFieldProps
 }
@@ -266,6 +273,7 @@ export const CaptionStage = ({
   meme,
   caption,
   showWatermark,
+  canStartPlayback = false,
   openSlots = NO_OPEN_SLOTS,
   field
 }: CaptionStageProps) => {
@@ -356,6 +364,7 @@ export const CaptionStage = ({
         <StagePlayback
           meme={meme}
           watermark={watermark}
+          canStartPlayback={canStartPlayback}
           renderFrame={renderFrame}
         />
       ) : (

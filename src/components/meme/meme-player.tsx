@@ -33,7 +33,7 @@ import memePlayerCss from './meme-player.css?url'
 
 const SCRUBBER_STEP_SECONDS = 0.01
 
-const LOADING_SPINNER_DELAY = { delay: 700, minDuration: 300 }
+const LOADING_SPINNER_DELAY = { delay: 700, minDuration: 300, ssr: false }
 
 const PLAYBACK_PROGRESS_PROPERTY = '--meme-scrubber-progress'
 
@@ -81,6 +81,7 @@ type MemeVideoElementProps = {
   muted: boolean
   preload: VideoPreload
   onVideoChange: (video: HTMLVideoElement | null) => void
+  onLoadStart: () => void
   onStart: () => void
   onAutoplayBlocked: () => void
 }
@@ -91,6 +92,7 @@ const MemeVideoElement = ({
   muted,
   preload,
   onVideoChange,
+  onLoadStart,
   onStart,
   onAutoplayBlocked
 }: MemeVideoElementProps) => {
@@ -138,6 +140,7 @@ const MemeVideoElement = ({
       autoPlay={autoPlay}
       muted={muted}
       loop
+      onLoadStart={onLoadStart}
       onPlaying={onStart}
       onLoadedMetadata={handleLoadedMetadata}
       onPointerDown={(event) => {
@@ -542,7 +545,11 @@ export const MemePlayer = ({
   const [blockedBunnyId, setBlockedBunnyId] = React.useState<string | null>(
     null
   )
+  const [loadStartedBunnyId, setLoadStartedBunnyId] = React.useState<
+    string | null
+  >(null)
   const hasStarted = startedBunnyId === bunnyId
+  const hasLoadStarted = loadStartedBunnyId === bunnyId
   const isAwaitingAutoplay =
     autoPlay && !hasStarted && blockedBunnyId !== bunnyId
 
@@ -569,6 +576,9 @@ export const MemePlayer = ({
         muted={muted}
         preload={preload}
         onVideoChange={handleVideoChange}
+        onLoadStart={() => {
+          setLoadStartedBunnyId(bunnyId)
+        }}
         onStart={() => {
           setStartedBunnyId(bunnyId)
         }}
@@ -587,7 +597,9 @@ export const MemePlayer = ({
       {children}
       <ClientOnly>
         {isAwaitingAutoplay ? null : <PausedIndicator />}
-        <LoadingIndicator isAwaitingAutoplay={isAwaitingAutoplay} />
+        <LoadingIndicator
+          isAwaitingAutoplay={isAwaitingAutoplay && hasLoadStarted}
+        />
         {hasControls ? (
           <PlayerControls video={video} hasFullscreen={hasFullscreen} />
         ) : null}

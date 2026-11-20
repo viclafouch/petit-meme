@@ -5,7 +5,7 @@ const DISMISS_VELOCITY_PX_PER_MS = 0.5
 const START_THRESHOLD_PX = 6
 const UPWARD_RESISTANCE = 0.15
 const SHEET_EASE = 'var(--ease-drawer)'
-const SETTLE_MS = 500
+const SETTLE_TIMING = `var(--duration-sheet) ${SHEET_EASE}`
 const DISMISS_MS = 280
 
 type DragState = {
@@ -170,11 +170,11 @@ export const useSheetDrag = ({
         return
       }
 
-      sheet.style.transition = `transform ${SETTLE_MS}ms ${SHEET_EASE}`
+      sheet.style.transition = `transform ${SETTLE_TIMING}`
       sheet.style.transform = 'translate3d(0, 0, 0)'
 
       if (scrim !== null) {
-        scrim.style.transition = `opacity ${SETTLE_MS}ms ${SHEET_EASE}`
+        scrim.style.transition = `opacity ${SETTLE_TIMING}`
         scrim.style.opacity = '1'
       }
     }

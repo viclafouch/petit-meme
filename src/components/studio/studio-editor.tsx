@@ -142,9 +142,14 @@ const SlotRow = ({
 type StudioEditorProps = {
   studio: Studio
   meme: StudioMeme
+  canStartPlayback: boolean
 }
 
-export const StudioEditor = ({ studio, meme }: StudioEditorProps) => {
+export const StudioEditor = ({
+  studio,
+  meme,
+  canStartPlayback
+}: StudioEditorProps) => {
   const slots = useOpenSlots(studio.caption)
   const inputsRef = React.useRef(new Map<CaptionSlot, HTMLTextAreaElement>())
   const { openSlots } = slots
@@ -194,6 +199,7 @@ export const StudioEditor = ({ studio, meme }: StudioEditorProps) => {
           caption={studio.caption}
           openSlots={openSlots}
           showWatermark={!studio.isPremium}
+          canStartPlayback={canStartPlayback}
           field={{
             placeholder: m.studio_caption_placeholder(),
             onChange: studio.setText,

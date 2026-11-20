@@ -14,6 +14,21 @@
   font-display: block;
 }
 
+@property --vv-height {
+  syntax: '*';
+  inherits: false;
+}
+
+@property --vv-top {
+  syntax: '*';
+  inherits: false;
+}
+
+@property --rest-height {
+  syntax: '*';
+  inherits: false;
+}
+
 html:has(.studio[open]) {
   overflow: hidden;
   scrollbar-gutter: stable;
@@ -87,8 +102,11 @@ html:has(.studio[open]) {
     position: absolute;
     inset: 0;
     background: var(--color-shade);
-    -webkit-backdrop-filter: blur(--theme(--blur-sm));
-    backdrop-filter: blur(--theme(--blur-sm));
+
+    @variant pointer-fine {
+      -webkit-backdrop-filter: blur(--theme(--blur-sm));
+      backdrop-filter: blur(--theme(--blur-sm));
+    }
 
     .studio[data-entering] & {
       transition: opacity var(--duration-base) ease-out;
@@ -117,7 +135,7 @@ html:has(.studio[open]) {
     box-shadow: var(--shadow-sheet);
 
     .studio[data-entering] & {
-      transition: transform var(--duration-slow) var(--ease-out-strong);
+      transition: transform var(--duration-sheet) var(--ease-drawer);
 
       @starting-style {
         transform: translateY(100%);

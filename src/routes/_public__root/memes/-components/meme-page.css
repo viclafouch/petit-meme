@@ -55,7 +55,7 @@
     --meme-site-banner-height: 0px;
     --meme-edit-row-height: 0px;
     --meme-rail-width: --spacing(100);
-    --meme-grid-max-width: --spacing(440);
+    --meme-page-max-width: --spacing(440);
     --meme-stage-max-height: calc(
       100svh - var(--navbar-space) - var(--meme-stage-chrome-height)
     );
@@ -85,13 +85,13 @@
     }
   }
 
-  .meme-grid {
+  .meme-page-layout {
     @variant lg {
       display: grid;
       grid-template-columns: minmax(0, 1fr) var(--meme-rail-width);
       align-items: start;
       gap: --spacing(6);
-      max-width: var(--meme-grid-max-width);
+      max-width: var(--meme-page-max-width);
       margin-inline: auto;
     }
   }

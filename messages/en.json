@@ -290,9 +290,6 @@
     }
   ],
   "meme_categories_none": "No category",
-  "meme_category_news": "What's New",
-  "meme_category_popular": "Popular",
-  "meme_category_trending": "Trending",
   "meme_content_locale_EN": "English",
   "meme_content_locale_FR": "French",
   "meme_content_locale_UNIVERSAL": "Universal",
@@ -307,9 +304,7 @@
   "meme_export_video_detail_original": "MP4 · no watermark",
   "meme_export_video_detail_watermarked": "MP4 · with watermark",
   "meme_exit_fullscreen": "Exit fullscreen",
-  "meme_filter_languages": "Languages",
   "meme_fullscreen": "Fullscreen",
-  "meme_grid_columns": "Grid columns",
   "meme_link_copied": "Link copied",
   "meme_link_copy_error": "Failed to copy link",
   "meme_list_label": "Memes",
@@ -320,19 +315,14 @@
   "meme_pending_banner_edit": "Open in admin",
   "meme_pause_video": "Pause",
   "meme_play_video": "Play video",
-  "meme_play_video_named": "Play “{title}”",
   "meme_open_options_named": "Options for “{title}”",
   "common_breadcrumb": "Breadcrumbs",
   "legal_table_label": "Table, scrolls horizontally",
   "meme_video_playback_error": "The video could not be played.",
   "embed_watch_on_site": "Watch on Petit Meme",
-  "meme_ai_search_cta": "AI",
-  "meme_ai_search_cta_mobile": "Search with AI",
   "meme_related": "Similar memes",
   "meme_related_empty": "No similar memes yet, try shuffle.",
   "meme_remove_bookmark": "Remove from favorites",
-  "meme_search_description": "Type, click, laugh: discover all memes in one place.",
-  "meme_search_placeholder": "Search by keywords, tags...",
   "meme_seo_category_description": "Browse the best {title} video memes on Petit Meme. Watch, share, and generate your favorite meme videos. Free and accessible to everyone!",
   "meme_seo_category_title": "{title} memes",
   "meme_seo_library_description": "Discover the largest meme library: create, explore, and share legendary memes on Petit Meme. Free and accessible to everyone!",
@@ -380,7 +370,6 @@
   "nav_memes": "Memes",
   "nav_menu": "Menu",
   "nav_my_bookmarks": "My favorites",
-  "nav_plans": "Subscriptions",
   "nav_reels": "Reels",
   "nav_search": "Search",
   "nav_settings": "Settings",
@@ -447,10 +436,8 @@
   "pricing_yearly": "Annual",
   "pricing_yearly_breakdown": "i.e. ~{price}/mo",
   "search_ask_ai": "Describe your meme to the AI",
-  "search_browse_categories": "No idea? Pick a category",
   "search_no_results": "No memes for “{query}”",
   "search_placeholder": "Search for a meme…",
-  "search_see_all_results": "See all results",
   "sentry_add_screenshot": "Add screenshot",
   "sentry_email_label": "Your email",
   "sentry_email_placeholder": "your.email@example.com",
@@ -665,5 +652,83 @@
   "app_page_install_step_scan": "Scan the code: the page opens on your phone.",
   "app_page_install_step_android_install": "Tap “{label}”.",
   "app_page_install_step_android_confirm": "Confirm with “Install”.",
-  "app_page_install_note": "Free, no account needed. Remove it like any other app."
+  "app_page_install_note": "Free, no account needed. Remove it like any other app.",
+  "meme_library_count": [
+    {
+      "declarations": [
+        "input count",
+        "input formattedCount",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{formattedCount} meme",
+        "countPlural=other": "{formattedCount} memes"
+      }
+    }
+  ],
+  "meme_library_query_title": "“{query}”",
+  "meme_sort_label": "Sort memes",
+  "meme_sort_trending": "Trending",
+  "meme_sort_new": "New",
+  "meme_sort_popular": "Most viewed",
+  "meme_sort_relevance": "Relevance",
+  "category_family_MOOD": "Moods",
+  "category_family_REPLY": "Replies",
+  "category_family_THEME": "Themes",
+  "category_family_SOURCE": "Sources",
+  "category_family_OTHER": "Other",
+  "category_show_more": [
+    {
+      "declarations": [
+        "input count",
+        "input formattedCount",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{formattedCount} more",
+        "countPlural=other": "{formattedCount} more"
+      }
+    }
+  ],
+  "meme_load_more": "Show more memes",
+  "meme_empty_title": "No memes here yet",
+  "meme_empty_category_hint": "Pick another category to see more.",
+  "meme_empty_ai_hint": "Describe the scene in your own words and the AI finds the meme.",
+  "meme_empty_see_all": "See all memes",
+  "meme_format_mobile": "Mobile format",
+  "meme_new_badge": "New",
+  "search_label": "Search for a meme",
+  "search_clear": "Clear the search",
+  "search_group_moods": "Search by mood",
+  "search_group_trending": "Trending now",
+  "search_group_categories": "Categories",
+  "search_group_memes": "Memes",
+  "search_group_more": "Go further",
+  "search_see_all_count": [
+    {
+      "declarations": [
+        "input query",
+        "input count",
+        "input formattedCount",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "See the result for “{query}”",
+        "countPlural=other": "See the {formattedCount} results for “{query}”"
+      }
+    }
+  ],
+  "search_ask_ai_query": "Ask the AI: “{query}”",
+  "search_ai_no_match": "No title matches",
+  "search_ai_describe": "Describe the scene",
+  "category_filter_clear": "{title}, clear the filter"
 }

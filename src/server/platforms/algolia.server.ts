@@ -101,7 +101,7 @@ const buildAlgoliaContentLocaleFilter = (
 }
 
 export const buildAlgoliaPublishedFilter = (
-  contentLocales: MemeContentLocale[] | undefined
+  contentLocales?: MemeContentLocale[]
 ) => {
   const filters = [`status:${MemeStatus.PUBLISHED}`]
 

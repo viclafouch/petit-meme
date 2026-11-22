@@ -1,17 +1,17 @@
-import React from 'react'
 import { User } from 'lucide-react'
 import { motion, useScroll, useTransform } from 'motion/react'
 import { type LinkOptions, Link, useRouteContext } from '@tanstack/react-router'
 import { ThemeSwitcher } from '~/components/animate-ui/theme-switcher'
-import { InstallAppButton } from '~/components/install/install-app-button'
 import { LanguageSwitcher } from '~/components/layout/language-switcher'
 import { UserDropdown } from '~/components/layout/user-dropdown'
-import { Button, buttonVariants } from '~/components/ui/button'
+import { PremiumNavButton } from '~/components/premium/premium-nav-button'
+import { NavbarSearch } from '~/components/search/navbar-search'
+import { Button } from '~/components/ui/button'
 import { LOGO_PATH } from '~/constants/branding'
 import { useNeedsScrollFadeFallback } from '~/hooks/use-scroll-fade'
-import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
 import { useDialogStore } from '~/stores/dialog.store'
+import navbarCss from './navbar.css?url'
 
 type NavigationLink = {
   to: LinkOptions['to']
@@ -24,13 +24,9 @@ const NAVBAR_SCROLL_FADE_RANGE = 180
 const NAVBAR_BACKDROP_CLASS_NAME =
   'navbar-scroll-fade absolute inset-0 bg-background'
 
-const NAVIGATION_LINK_CLASS_NAME =
-  'flex items-center rounded-md px-3 py-1.5 text-sm font-medium transition-[color,background-color,box-shadow] outline-none hover:bg-muted focus-visible:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50'
-
 const getNavigationLinks = (): NavigationLink[] => {
   return [
     { to: '/memes', label: m.nav_memes(), preload: 'viewport' },
-    { to: '/pricing', label: m.nav_plans(), preload: 'viewport' },
     { to: '/app', label: m.nav_app(), preload: 'intent' }
   ]
 }
@@ -48,79 +44,80 @@ const NavbarScrollFadeFallback = () => {
   )
 }
 
-export const Navbar = () => {
+const AccountAction = () => {
   const dialogStore = useDialogStore()
   const { user } = useRouteContext({ from: '__root__' })
-  const navigationLinks = getNavigationLinks()
+
+  if (user) {
+    return <UserDropdown user={user} />
+  }
+
+  return (
+    <Button
+      onClick={(event) => {
+        event.preventDefault()
+        dialogStore.actions.showDialog('auth')
+      }}
+      variant="default"
+      size="lg"
+    >
+      <User aria-hidden="true" />
+      {m.nav_sign_in()}
+    </Button>
+  )
+}
+
+export const Navbar = () => {
   const needsFallback = useNeedsScrollFadeFallback()
 
   return (
-    <header className="relative h-(--navbar-height) pr-[env(safe-area-inset-right,0px)] pl-[env(safe-area-inset-left,0px)]">
+    <header className="navbar">
+      <link rel="stylesheet" href={navbarCss} precedence="default" />
       {needsFallback ? (
         <NavbarScrollFadeFallback />
       ) : (
         <div className={NAVBAR_BACKDROP_CLASS_NAME} aria-hidden="true" />
       )}
-      <div className="container relative flex h-full items-center justify-between gap-4">
-        <div className="flex flex-1 items-center justify-start gap-2">
-          <Link
-            to="/"
-            className={cn(
-              buttonVariants({ variant: 'ghost', size: 'icon' }),
-              'dark:hover:bg-accent text-accent-foreground p-1'
-            )}
-          >
+      <div className="navbar-inner">
+        <div className="navbar-start">
+          <Link to="/" className="navbar-logo" aria-label={m.common_logo_alt()}>
             <img
               src={LOGO_PATH}
-              alt={m.common_logo_alt()}
+              alt=""
               width={28}
               height={28}
               decoding="async"
             />
           </Link>
+          <nav className="navbar-links" aria-label={m.nav_menu()}>
+            <ul>
+              {getNavigationLinks().map((link) => {
+                return (
+                  <li key={link.to}>
+                    <Link
+                      to={link.to}
+                      preload={link.preload}
+                      className="navbar-link"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
+          </nav>
         </div>
-        <nav className="max-lg:hidden" aria-label={m.nav_menu()}>
-          <ul className="flex items-center">
-            {navigationLinks.map((link) => {
-              return (
-                <li key={link.to}>
-                  <Link
-                    to={link.to}
-                    preload={link.preload}
-                    className={NAVIGATION_LINK_CLASS_NAME}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              )
-            })}
-          </ul>
-        </nav>
-        <div className="flex flex-1 items-center justify-end gap-3">
-          <InstallAppButton
-            surface="header"
-            size="sm"
-            variant="secondary"
-            className="touch-tap lg:hidden"
-          />
+        <div className="navbar-center">
+          <NavbarSearch />
+        </div>
+        <div className="navbar-end">
+          <div className="max-lg:hidden">
+            <PremiumNavButton />
+          </div>
           <LanguageSwitcher />
           <ThemeSwitcher className="max-lg:hidden" />
           <div className="max-lg:hidden">
-            {user ? (
-              <UserDropdown user={user} />
-            ) : (
-              <Button
-                onClick={(event) => {
-                  event.preventDefault()
-                  dialogStore.actions.showDialog('auth')
-                }}
-                variant="default"
-                size="lg"
-              >
-                <User aria-hidden="true" />
-                {m.nav_sign_in()}
-              </Button>
-            )}
+            <AccountAction />
           </div>
         </div>
       </div>

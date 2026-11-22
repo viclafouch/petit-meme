@@ -4,6 +4,7 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { MemesList } from '~/components/meme/memes-list'
 import { buttonVariants } from '~/components/ui/button'
+import { ALL_CATEGORY_SLUG } from '~/constants/meme'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
 import { listTrendingMemesQueryOpts } from '~/queries/meme'
@@ -26,7 +27,8 @@ export const BestMemes = () => {
           </div>
           <Link
             className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}
-            to="/memes"
+            to="/memes/category/$slug"
+            params={{ slug: ALL_CATEGORY_SLUG }}
           >
             <span>{m.home_best_browse_all()}</span>
             <ChevronRight size={16} />

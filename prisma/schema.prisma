@@ -29,13 +29,24 @@ model Bookmark {
   @@map("user_bookmark")
 }
 
+enum CategoryFamily {
+  MOOD
+  REPLY
+  THEME
+  SOURCE
+
+  @@map("category_family")
+}
+
 model Category {
-  id        String   @id @default(cuid())
+  id        String          @id @default(cuid())
   title     String
-  slug      String   @unique
-  keywords  String[] @default([])
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  slug      String          @unique
+  keywords  String[]        @default([])
+  family    CategoryFamily?
+  emoji     String?
+  createdAt DateTime        @default(now()) @map("created_at")
+  updatedAt DateTime        @updatedAt @map("updated_at")
 
   memes        MemeCategory[]
   translations CategoryTranslation[]

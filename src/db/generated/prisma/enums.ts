@@ -17,6 +17,16 @@ export const UserLocale = {
 export type UserLocale = (typeof UserLocale)[keyof typeof UserLocale]
 
 
+export const CategoryFamily = {
+  MOOD: 'MOOD',
+  REPLY: 'REPLY',
+  THEME: 'THEME',
+  SOURCE: 'SOURCE'
+} as const
+
+export type CategoryFamily = (typeof CategoryFamily)[keyof typeof CategoryFamily]
+
+
 export const MemeStatus = {
   PENDING: 'PENDING',
   PUBLISHED: 'PUBLISHED',

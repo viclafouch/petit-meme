@@ -10,8 +10,6 @@ import {
 import { DAY, DAYS_PER_WEEK } from '~/constants/time'
 import type { Prisma } from '~/db/generated/prisma/client'
 import { MemeContentLocale, MemeStatus } from '~/db/generated/prisma/enums'
-import { FILTERABLE_CONTENT_LOCALES } from '~/helpers/i18n-content'
-import { m } from '~/paraglide/messages'
 
 const MEME_VIDEO_SELECT = {
   id: true,
@@ -47,46 +45,17 @@ export const MEME_TRANSLATION_SELECT = {
 
 export const DEFAULT_MEME_TITLE = 'Sans titre'
 
-export const TRENDING_CATEGORY_SLUG = 'trending'
 export const ALL_CATEGORY_SLUG = 'all'
-export const NEWS_CATEGORY_SLUG = 'news'
-export const POPULAR_CATEGORY_SLUG = 'popular'
 
-export const VIRTUAL_CATEGORY_SLUGS = new Set([
-  TRENDING_CATEGORY_SLUG,
-  NEWS_CATEGORY_SLUG,
-  POPULAR_CATEGORY_SLUG
-])
+export const MEMES_SORTS = ['relevance', 'trending', 'new', 'popular'] as const
 
-type VirtualCategory = {
-  id: string
-  title: string
-  slug: string
-  keywords: string[]
-}
+export type MemesSort = (typeof MEMES_SORTS)[number]
 
-export const getVirtualCategories = (): VirtualCategory[] => {
-  return [
-    {
-      id: 'virtual-trending',
-      title: m.meme_category_trending(),
-      slug: TRENDING_CATEGORY_SLUG,
-      keywords: []
-    },
-    {
-      id: 'virtual-news',
-      title: m.meme_category_news(),
-      slug: NEWS_CATEGORY_SLUG,
-      keywords: []
-    },
-    {
-      id: 'virtual-popular',
-      title: m.meme_category_popular(),
-      slug: POPULAR_CATEGORY_SLUG,
-      keywords: []
-    }
-  ]
-}
+export const LEGACY_SORT_CATEGORY_SLUGS = {
+  trending: 'trending',
+  news: 'new',
+  popular: 'popular'
+} as const satisfies Record<string, MemesSort>
 
 export const MEME_EXPORT_MODES = [
   'download',
@@ -103,12 +72,6 @@ export const MEME_VIDEO_INTENTS = [
 export type MemeVideoIntent = (typeof MEME_VIDEO_INTENTS)[number]
 
 export const MEMES_PER_PAGE = 30
-
-export const MEME_GRID_COLUMNS = {
-  SMALL: 4,
-  MEDIUM: 5,
-  LARGE: 6
-} as const satisfies Record<string, number>
 
 export const RELATED_MEMES_COUNT = 20
 
@@ -161,29 +124,27 @@ export const MemeStatusMeta = {
 
 export const CATEGORY_SLUG_REGEX = /^[\da-z-]{1,60}$/u
 
-export const MEMES_SEARCH_SCHEMA = z.object({
+const SEARCH_QUERY_SCHEMA = z
+  .string()
+  .max(SEARCH_QUERY_MAX_LENGTH)
+  .optional()
   // oxlint-disable-next-line promise/prefer-await-to-then, unicorn/no-useless-undefined -- Zod's catch() sets the parse fallback, it is no promise, and undefined is the fallback value
-  query: z.string().max(SEARCH_QUERY_MAX_LENGTH).optional().catch(undefined),
-  page: z.coerce
-    .number()
-    .int()
-    .min(1)
-    .max(SEARCH_PARAM_MAX_PAGE)
-    .optional()
-    // oxlint-disable-next-line promise/prefer-await-to-then -- Zod's catch() sets the parse fallback, it is no promise
-    .catch(1),
-  status: z.enum(MemeStatus).optional(),
-  contentLocale: z.enum(MemeContentLocale).optional(),
-  contentLocales: z
-    .string()
-    .refine((value) => {
-      return value.split(',').every((part) => {
-        return (FILTERABLE_CONTENT_LOCALES as readonly string[]).includes(part)
-      })
-    })
-    .optional()
-    // oxlint-disable-next-line promise/prefer-await-to-then, unicorn/no-useless-undefined -- Zod's catch() sets the parse fallback, it is no promise, and undefined is the fallback value
-    .catch(undefined)
+  .catch(undefined)
+
+const SEARCH_PAGE_SCHEMA = z.coerce
+  .number()
+  .int()
+  .min(1)
+  .max(SEARCH_PARAM_MAX_PAGE)
+  .optional()
+  // oxlint-disable-next-line promise/prefer-await-to-then -- Zod's catch() sets the parse fallback, it is no promise
+  .catch(1)
+
+export const MEMES_SEARCH_SCHEMA = z.object({
+  query: SEARCH_QUERY_SCHEMA,
+  page: SEARCH_PAGE_SCHEMA,
+  // oxlint-disable-next-line promise/prefer-await-to-then, unicorn/no-useless-undefined -- Zod's catch() sets the parse fallback, it is no promise, and undefined is the fallback value
+  sort: z.enum(MEMES_SORTS).optional().catch(undefined)
 })
 
 export const MEMES_FILTERS_SCHEMA = z.object({
@@ -223,7 +184,11 @@ export const MAX_SIZE_MEME_FILE_IN_BYTES =
 
 export type MemesFilters = z.infer<typeof MEMES_FILTERS_SCHEMA>
 
-export const ADMIN_MEMES_FILTERS_SCHEMA = MEMES_SEARCH_SCHEMA.extend({
+export const ADMIN_MEMES_FILTERS_SCHEMA = z.object({
+  query: SEARCH_QUERY_SCHEMA,
+  page: SEARCH_PAGE_SCHEMA,
+  status: z.enum(MemeStatus).optional(),
+  contentLocale: z.enum(MemeContentLocale).optional(),
   // oxlint-disable-next-line promise/prefer-await-to-then, unicorn/no-useless-undefined -- Zod's catch() sets the parse fallback, it is no promise, and undefined is the fallback value
   ready: z.boolean().optional().catch(undefined)
 })

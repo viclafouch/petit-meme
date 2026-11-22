@@ -9,6 +9,10 @@ import { expectVisibleAfterReload, repeatUntilVisible } from './hydration'
 const BOOKMARKED_MEME_PATHNAME = `/memes/${E2E_NAMED_MEMES.mostViewed.id}`
 const UNBOOKMARKED_MEME_PATHNAME = `/memes/${E2E_NAMED_MEMES.universal.id}`
 
+const TOGGLED_FROM_CARD_MEME = E2E_NAMED_MEMES.english
+
+const CARD_MENU_TOGGLE_COUNT = 4
+
 test.describe('a signed in User', () => {
   test.use({ storageState: resolveStorageStatePath('bookmark') })
 
@@ -37,6 +41,62 @@ test.describe('a signed in User', () => {
     }, addButton)
 
     await expectVisibleAfterReload(page, addButton)
+  })
+
+  test('toggles a Bookmark from a card menu as often as they like, and the menu stays open', async ({
+    page
+  }) => {
+    let settledToggleCount = 0
+
+    page.on('response', (response) => {
+      const request = response.request()
+
+      if (
+        request.method() === 'POST' &&
+        (request.postData() ?? '').includes(TOGGLED_FROM_CARD_MEME.id)
+      ) {
+        settledToggleCount += 1
+      }
+    })
+
+    await page.goto('/memes/category/all')
+
+    const optionsButton = page.getByRole('button', {
+      name: m.meme_open_options_named({ title: TOGGLED_FROM_CARD_MEME.title })
+    })
+    const menu = page.getByRole('menu')
+    const addItem = menu.getByRole('menuitem', { name: m.meme_add_bookmark() })
+    const removeItem = menu.getByRole('menuitem', {
+      name: m.meme_remove_bookmark()
+    })
+
+    await repeatUntilVisible(() => {
+      return optionsButton.click()
+    }, addItem)
+
+    await addItem.click()
+    await expect(removeItem).toBeVisible()
+
+    await removeItem.click()
+    await expect(addItem).toBeVisible()
+
+    await addItem.click()
+    await expect(removeItem).toBeVisible()
+
+    await removeItem.click()
+    await expect(addItem).toBeVisible()
+
+    await expect
+      .poll(() => {
+        return settledToggleCount
+      })
+      .toBe(CARD_MENU_TOGGLE_COUNT)
+
+    await page.reload()
+
+    await repeatUntilVisible(() => {
+      return optionsButton.click()
+    }, addItem)
   })
 })
 

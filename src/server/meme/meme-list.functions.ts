@@ -3,28 +3,18 @@ import { createServerFn } from '@tanstack/react-start'
 import {
   MEMES_FILTERS_SCHEMA,
   MEMES_PER_PAGE,
-  NEWS_CATEGORY_SLUG,
-  POPULAR_CATEGORY_SLUG,
   RECOMMEND_RELATED_CACHE_TTL,
   RECOMMEND_TRENDING_CACHE_TTL,
   RELATED_MEMES_COUNT,
-  TRENDING_CATEGORY_SLUG,
   TRENDING_MEMES_COUNT,
-  VIRTUAL_CATEGORY_SLUGS
+  type MemesSort
 } from '~/constants/meme'
 import { THIRTY_DAYS_MS } from '~/constants/time'
-import {
-  MemeContentLocale as MemeContentLocaleEnum,
-  MemeStatus,
-  type MemeContentLocale
-} from '~/db/generated/prisma/enums'
-import {
-  parseContentLocalesParam,
-  resolveVisibleContentLocales,
-  VISIBLE_CONTENT_LOCALES
-} from '~/helpers/i18n-content'
+import { MemeStatus } from '~/db/generated/prisma/enums'
+import { VISIBLE_CONTENT_LOCALES } from '~/helpers/i18n-content'
+import { resolveMemesSort } from '~/helpers/memes-sort'
 import { algoliaLogger } from '~/lib/logger'
-import { baseLocale, getLocale, type Locale } from '~/paraglide/runtime'
+import { getLocale, type Locale } from '~/paraglide/runtime'
 import {
   countMemes,
   recommendMemes,
@@ -45,105 +35,56 @@ import {
   safeAlgoliaOp
 } from '~/server/platforms/algolia.server'
 
-type ResolveSearchIndexParams = {
-  category: string | undefined
-  hasQuery: boolean
-  locale: Locale
-  contentLocales: MemeContentLocale[] | undefined
-}
+const SORT_INDEX_RESOLVERS = {
+  relevance: resolveAlgoliaIndexName,
+  trending: resolveAlgoliaIndexName,
+  new: resolveAlgoliaReplicaRecent,
+  popular: resolveAlgoliaReplicaPopular
+} as const satisfies Record<MemesSort, (locale: Locale) => string>
 
-type ListTrendingCategoryMemesParams = {
-  locale: Locale
-  contentLocales: MemeContentLocale[] | undefined
-  contentLocalesParam: string | undefined
-  query: string | undefined
-  page: number
-}
+const buildCategoryFilters = (category: string | undefined) => {
+  const filters = [buildAlgoliaPublishedFilter()]
 
-const resolveEffectiveLocale = (
-  locale: Locale,
-  contentLocales: MemeContentLocale[] | undefined
-) => {
-  return contentLocales?.includes(MemeContentLocaleEnum.FR)
-    ? baseLocale
-    : locale
-}
-
-const resolveSearchIndex = ({
-  category,
-  hasQuery,
-  locale,
-  contentLocales
-}: ResolveSearchIndexParams) => {
-  const effectiveLocale = resolveEffectiveLocale(locale, contentLocales)
-
-  if (hasQuery) {
-    return resolveAlgoliaIndexName(effectiveLocale)
-  }
-
-  if (category === POPULAR_CATEGORY_SLUG) {
-    return resolveAlgoliaReplicaPopular(effectiveLocale)
-  }
-
-  if (category === NEWS_CATEGORY_SLUG) {
-    return resolveAlgoliaReplicaRecent(effectiveLocale)
-  }
-
-  return resolveAlgoliaIndexName(effectiveLocale)
-}
-
-const buildSearchFilters = (
-  category: string | undefined,
-  contentLocales: MemeContentLocale[] | undefined
-) => {
-  const filters = [buildAlgoliaPublishedFilter(contentLocales)]
-
-  if (category === NEWS_CATEGORY_SLUG) {
-    filters.push(`publishedAtTime >= ${Date.now() - THIRTY_DAYS_MS}`)
-  } else if (category && !VIRTUAL_CATEGORY_SLUGS.has(category)) {
+  if (category) {
     filters.push(`categorySlugs:"${category}"`)
   }
 
   return filters.join(' AND ')
 }
 
-const listTrendingCategoryMemes = async ({
-  locale,
-  contentLocales,
-  contentLocalesParam,
-  query,
-  page
-}: ListTrendingCategoryMemesParams) => {
+const listTrendingMemesPage = async (locale: Locale, page: number) => {
   const firstPageIds = await findTrendingFirstPageIds(
-    resolveVisibleContentLocales(locale, contentLocales)
+    VISIBLE_CONTENT_LOCALES[locale]
   )
+  const indexName = resolveAlgoliaIndexName(locale)
   const filters = [
-    buildAlgoliaPublishedFilter(contentLocales),
+    buildAlgoliaPublishedFilter(),
     buildAlgoliaExclusionFilter(firstPageIds)
   ]
     .filter(Boolean)
     .join(' AND ')
-  const indexName = resolveAlgoliaIndexName(
-    resolveEffectiveLocale(locale, contentLocales)
-  )
 
   if (page <= 1) {
     const [memes, remainingCount] = await Promise.all([
       findMemesInOrder(firstPageIds, locale),
-      countMemes({ indexName, filters })
+      countMemes({
+        cacheKey: `trending-remaining:${indexName}`,
+        indexName,
+        filters
+      })
     ])
 
     return {
       memes,
-      query,
       queryID: undefined,
-      page: 0,
-      totalPages: 1 + Math.ceil(remainingCount / MEMES_PER_PAGE)
+      page: 1,
+      total: firstPageIds.length + remainingCount,
+      hasNextPage: remainingCount > 0
     }
   }
 
   const trendingPage = await searchMemes({
-    cacheKey: `trending-page:${indexName}:${page}:${contentLocalesParam ?? ''}`,
+    cacheKey: `trending-page:${indexName}:${page}`,
     indexName,
     query: '',
     page: page - 2,
@@ -154,10 +95,10 @@ const listTrendingCategoryMemes = async ({
 
   return {
     memes: trendingPage.memes,
-    query,
     queryID: trendingPage.queryID,
-    page: trendingPage.page + 1,
-    totalPages: trendingPage.totalPages + 1
+    page,
+    total: firstPageIds.length + trendingPage.totalHits,
+    hasNextPage: page - 1 < trendingPage.totalPages
   }
 }
 
@@ -165,45 +106,31 @@ export const listMemes = createServerFn({ method: 'GET' })
   .validator(MEMES_FILTERS_SCHEMA)
   .handler(async ({ data }) => {
     const locale = getLocale()
-    const hasQuery = Boolean(data.query)
-    const contentLocales = !data.contentLocales
-      ? undefined
-      : parseContentLocalesParam(data.contentLocales, locale)
+    const page = data.page ?? 1
+    const sort = resolveMemesSort(data)
 
-    if (data.category === TRENDING_CATEGORY_SLUG && !hasQuery) {
-      return listTrendingCategoryMemes({
-        locale,
-        contentLocales,
-        contentLocalesParam: data.contentLocales,
-        query: data.query,
-        page: data.page ?? 1
-      })
+    if (sort === 'trending' && !data.query && !data.category) {
+      return listTrendingMemesPage(locale, page)
     }
 
-    const indexName = resolveSearchIndex({
-      category: data.category,
-      hasQuery,
-      locale,
-      contentLocales
-    })
-
+    const indexName = SORT_INDEX_RESOLVERS[sort](locale)
     const searchPage = await searchMemes({
-      cacheKey: `${indexName}:${data.query ?? ''}:${data.page ?? 1}:${data.category ?? ''}:${data.contentLocales ?? ''}`,
+      cacheKey: `${indexName}:${data.query ?? ''}:${page}:${data.category ?? ''}`,
       indexName,
       query: data.query,
-      page: data.page === undefined || data.page === 0 ? 0 : data.page - 1,
+      page: page - 1,
       hitsPerPage: MEMES_PER_PAGE,
-      filters: buildSearchFilters(data.category, contentLocales),
+      filters: buildCategoryFilters(data.category),
       userToken: readConsentedAlgoliaUserToken(),
-      isHighlighted: hasQuery
+      isHighlighted: Boolean(data.query)
     })
 
     return {
       memes: searchPage.memes,
-      query: data.query,
       queryID: searchPage.queryID,
-      page: searchPage.page,
-      totalPages: searchPage.totalPages
+      page,
+      total: searchPage.totalHits,
+      hasNextPage: page < searchPage.totalPages
     }
   })
 

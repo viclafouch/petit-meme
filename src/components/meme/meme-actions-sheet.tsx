@@ -1,6 +1,7 @@
 import React from 'react'
-import { ArrowRight, ChevronRight, Clapperboard, Star } from 'lucide-react'
+import { ArrowRight, ChevronRight, Clapperboard } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
+import { BookmarkStar } from '~/components/meme/bookmark-star'
 import {
   MemeExportPanelBody,
   MemeExportSheetHeader
@@ -112,19 +113,26 @@ export const MemeActionsSheet = ({
             })}
           </div>
           <div className={SHEET_GROUP_CLASS_NAME}>
-            <DrawerClose
-              disabled={bookmarkAction.isPending}
+            <button
+              type="button"
               className={SHEET_ROW_CLASS_NAME}
               onClick={() => {
+                if (bookmarkAction.isSignedIn) {
+                  bookmarkAction.selectBookmark()
+
+                  return
+                }
+
                 runAfterClose(bookmarkAction.selectBookmark)
+                setIsOpen(false)
               }}
             >
-              <Star
-                data-active={bookmarkAction.isMemeBookmarked}
-                className="data-[active=true]:fill-current"
+              <BookmarkStar
+                isActive={bookmarkAction.isMemeBookmarked}
+                className="size-5 [&_svg]:size-5"
               />
               {bookmarkAction.label}
-            </DrawerClose>
+            </button>
             <DrawerClose
               className={SHEET_ROW_CLASS_NAME}
               onClick={() => {
@@ -134,13 +142,17 @@ export const MemeActionsSheet = ({
               <Clapperboard />
               {m.meme_open_studio()}
             </DrawerClose>
-            <DrawerClose
-              render={<Link to="/memes/$memeId" params={{ memeId: meme.id }} />}
+            <Link
+              to="/memes/$memeId"
+              params={{ memeId: meme.id }}
               className={SHEET_ROW_CLASS_NAME}
+              onClick={() => {
+                setIsOpen(false)
+              }}
             >
               <ArrowRight />
               {m.meme_details()}
-            </DrawerClose>
+            </Link>
           </div>
         </div>
       </DrawerContent>

@@ -1,4 +1,5 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
+import { ALL_CATEGORY_SLUG } from '~/constants/meme'
 import { m } from '~/paraglide/messages'
 import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
 import { BookmarksPage } from './-components/bookmarks-page'
@@ -7,7 +8,10 @@ export const Route = createFileRoute('/_public__root/_default/bookmarks')({
   component: BookmarksPage,
   beforeLoad: ({ context }) => {
     if (!context.user) {
-      throw redirect({ to: '/memes' })
+      throw redirect({
+        to: '/memes/category/$slug',
+        params: { slug: ALL_CATEGORY_SLUG }
+      })
     }
   },
   loader: async ({ context }) => {

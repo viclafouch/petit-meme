@@ -779,10 +779,6 @@ export type MemeCreatekeywordsInput = {
   set: string[]
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
 export type MemeUpdatekeywordsInput = {
   set?: string[]
   push?: string | string[]

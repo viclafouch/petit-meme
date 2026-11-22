@@ -1,0 +1,197 @@
+@reference '../../styles.css';
+
+@layer theme, base, components, utilities;
+
+@layer components {
+  .navbar {
+    position: relative;
+    height: var(--navbar-height);
+    padding-inline: env(safe-area-inset-left, 0px)
+      env(safe-area-inset-right, 0px);
+  }
+
+  .navbar-inner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: --spacing(3);
+    height: 100%;
+    max-width: --spacing(440);
+    margin-inline: auto;
+    padding-inline: --spacing(4);
+
+    @variant lg {
+      gap: --spacing(6);
+      padding-inline: clamp(--spacing(6), 3vw, --spacing(12));
+    }
+  }
+
+  .navbar-start,
+  .navbar-end {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    min-width: max-content;
+
+    @variant lg {
+      flex: 1 1 0;
+    }
+  }
+
+  .navbar-start {
+    gap: --spacing(4);
+  }
+
+  .navbar-end {
+    justify-content: flex-end;
+    gap: --spacing(2);
+
+    @variant lg {
+      gap: --spacing(3);
+    }
+  }
+
+  .navbar-center {
+    display: flex;
+    flex: 0 1 --spacing(160);
+    justify-content: center;
+    min-width: 0;
+
+    @variant max-lg {
+      display: none;
+    }
+
+    & > * {
+      flex: 1;
+    }
+  }
+
+  .navbar-logo {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: --spacing(10);
+    height: --spacing(10);
+    border-radius: var(--radius-pill);
+    transition: background-color var(--duration-fast) ease-out;
+
+    @variant mouse {
+      &:hover {
+        background: --theme(--color-accent);
+      }
+    }
+
+    &:focus-visible {
+      @apply focus-ring;
+    }
+  }
+
+  .navbar-links {
+    @variant max-lg {
+      display: none;
+    }
+
+    & ul {
+      display: flex;
+      gap: --spacing(1);
+    }
+  }
+
+  .navbar-link {
+    display: flex;
+    align-items: center;
+    height: --spacing(9);
+    padding-inline: --spacing(3);
+    border-radius: var(--radius-pill);
+    color: --theme(--color-muted-foreground);
+    font-size: --theme(--text-sm);
+    font-weight: --theme(--font-weight-medium);
+    white-space: nowrap;
+    transition:
+      color var(--duration-fast) ease-out,
+      background-color var(--duration-fast) ease-out;
+
+    &[data-status='active'] {
+      background: --theme(--color-secondary);
+      color: --theme(--color-foreground);
+    }
+
+    @variant mouse {
+      &:hover {
+        color: --theme(--color-foreground);
+      }
+    }
+
+    &:focus-visible {
+      @apply focus-ring;
+    }
+  }
+
+  .navbar-premium {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    gap: --spacing(1.5);
+    height: --spacing(9);
+    padding-inline: --spacing(3.5);
+    overflow: hidden;
+    border-radius: var(--radius-pill);
+    background: var(--gradient-premium);
+    color: var(--color-premium-foreground);
+    font-size: --theme(--text-sm);
+    font-weight: --theme(--font-weight-bold);
+    white-space: nowrap;
+    box-shadow: var(--shadow-premium);
+    transition:
+      scale var(--duration-press) var(--ease-out-strong),
+      box-shadow var(--duration-fast) ease-out;
+
+    & svg {
+      flex-shrink: 0;
+      width: --spacing(4);
+      height: --spacing(4);
+      fill: currentColor;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: linear-gradient(
+        110deg,
+        transparent 30%,
+        var(--color-premium-sheen) 50%,
+        transparent 70%
+      );
+      translate: -110% 0;
+    }
+
+    @variant mouse {
+      &:hover {
+        box-shadow: var(--shadow-premium-hover);
+      }
+
+      @variant motion-safe {
+        &:hover::after {
+          translate: 110% 0;
+          transition: translate var(--duration-sheen) var(--ease-out-strong);
+        }
+      }
+    }
+
+    &:active {
+      scale: var(--scale-press);
+    }
+
+    &:focus-visible {
+      @apply focus-ring;
+    }
+
+    @variant motion-reduce {
+      transition: none;
+    }
+  }
+}

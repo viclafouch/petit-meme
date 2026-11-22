@@ -290,9 +290,6 @@
     }
   ],
   "meme_categories_none": "Aucune catégorie",
-  "meme_category_news": "Nouveautés",
-  "meme_category_popular": "Populaires",
-  "meme_category_trending": "Tendances",
   "meme_content_locale_EN": "Anglais",
   "meme_content_locale_FR": "Français",
   "meme_content_locale_UNIVERSAL": "Universel",
@@ -307,9 +304,7 @@
   "meme_export_video_detail_original": "MP4 · sans watermark",
   "meme_export_video_detail_watermarked": "MP4 · avec watermark",
   "meme_exit_fullscreen": "Quitter le plein écran",
-  "meme_filter_languages": "Langues",
   "meme_fullscreen": "Plein écran",
-  "meme_grid_columns": "Colonnes de la grille",
   "meme_link_copied": "Lien copié",
   "meme_link_copy_error": "Impossible de copier le lien",
   "meme_list_label": "Mèmes",
@@ -320,19 +315,14 @@
   "meme_pending_banner_edit": "Ouvrir dans l'admin",
   "meme_pause_video": "Mettre en pause",
   "meme_play_video": "Lire la vidéo",
-  "meme_play_video_named": "Lire « {title} »",
   "meme_open_options_named": "Options de « {title} »",
   "common_breadcrumb": "Fil d'Ariane",
   "legal_table_label": "Tableau, défilable horizontalement",
   "meme_video_playback_error": "Impossible de lire la vidéo.",
   "embed_watch_on_site": "Voir sur Petit Meme",
-  "meme_ai_search_cta": "IA",
-  "meme_ai_search_cta_mobile": "Chercher avec l'IA",
   "meme_related": "Memes similaires",
   "meme_related_empty": "Pas encore de mème similaire, tente le hasard.",
   "meme_remove_bookmark": "Retirer des favoris",
-  "meme_search_description": "Tape, clique, rigole : découvre tous les mèmes en un seul endroit.",
-  "meme_search_placeholder": "Rechercher par mots-clés, tags...",
   "meme_seo_category_description": "Retrouvez les meilleurs mèmes vidéo de la catégorie {title} sur Petit Meme. Parcourez, partagez et générez vos vidéos préférées. Gratuit et accessible à tous !",
   "meme_seo_category_title": "Mèmes {title}",
   "meme_seo_library_description": "Découvre la plus grande bibliothèque de mèmes : crée, explore et partage des mèmes légendaires sur Petit Meme. Gratuit et accessible à tous !",
@@ -380,7 +370,6 @@
   "nav_memes": "Mèmes",
   "nav_menu": "Menu",
   "nav_my_bookmarks": "Mes favoris",
-  "nav_plans": "Abonnements",
   "nav_reels": "Reels",
   "nav_search": "Recherche",
   "nav_settings": "Paramètres",
@@ -447,10 +436,8 @@
   "pricing_yearly": "Annuel",
   "pricing_yearly_breakdown": "soit ~{price}/mois",
   "search_ask_ai": "Décris ton mème à l'IA",
-  "search_browse_categories": "Pas d'idée ? Pioche une catégorie",
   "search_no_results": "Aucun mème pour « {query} »",
   "search_placeholder": "Cherche un mème…",
-  "search_see_all_results": "Voir tous les résultats",
   "sentry_add_screenshot": "Ajouter une capture",
   "sentry_email_label": "Ton email",
   "sentry_email_placeholder": "ton.email@exemple.fr",
@@ -665,5 +652,83 @@
   "app_page_install_step_scan": "Scanne le code : la page s'ouvre sur ton téléphone.",
   "app_page_install_step_android_install": "Touche « {label} ».",
   "app_page_install_step_android_confirm": "Confirme avec « Installer ».",
-  "app_page_install_note": "Gratuite et sans compte. Tu la retires comme n'importe quelle app."
+  "app_page_install_note": "Gratuite et sans compte. Tu la retires comme n'importe quelle app.",
+  "meme_library_count": [
+    {
+      "declarations": [
+        "input count",
+        "input formattedCount",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{formattedCount} mème",
+        "countPlural=other": "{formattedCount} mèmes"
+      }
+    }
+  ],
+  "meme_library_query_title": "« {query} »",
+  "meme_sort_label": "Trier les mèmes",
+  "meme_sort_trending": "Tendances",
+  "meme_sort_new": "Nouveautés",
+  "meme_sort_popular": "Les plus vus",
+  "meme_sort_relevance": "Pertinence",
+  "category_family_MOOD": "Humeurs",
+  "category_family_REPLY": "Pour répondre",
+  "category_family_THEME": "Thèmes",
+  "category_family_SOURCE": "Sources",
+  "category_family_OTHER": "Autres",
+  "category_show_more": [
+    {
+      "declarations": [
+        "input count",
+        "input formattedCount",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{formattedCount} de plus",
+        "countPlural=other": "{formattedCount} de plus"
+      }
+    }
+  ],
+  "meme_load_more": "Voir plus de mèmes",
+  "meme_empty_title": "Aucun mème ici pour l’instant",
+  "meme_empty_category_hint": "Choisis une autre catégorie pour élargir.",
+  "meme_empty_ai_hint": "Décris la scène avec tes mots, l’IA retrouve le mème.",
+  "meme_empty_see_all": "Voir tous les mèmes",
+  "meme_format_mobile": "Format mobile",
+  "meme_new_badge": "Nouveau",
+  "search_label": "Chercher un mème",
+  "search_clear": "Effacer la recherche",
+  "search_group_moods": "Chercher par humeur",
+  "search_group_trending": "Tendances du moment",
+  "search_group_categories": "Catégories",
+  "search_group_memes": "Mèmes",
+  "search_group_more": "Aller plus loin",
+  "search_see_all_count": [
+    {
+      "declarations": [
+        "input query",
+        "input count",
+        "input formattedCount",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "Voir le résultat pour « {query} »",
+        "countPlural=other": "Voir les {formattedCount} résultats pour « {query} »"
+      }
+    }
+  ],
+  "search_ask_ai_query": "Demander à l’IA : « {query} »",
+  "search_ai_no_match": "Aucun titre ne correspond",
+  "search_ai_describe": "Décris la scène",
+  "category_filter_clear": "{title}, retirer le filtre"
 }

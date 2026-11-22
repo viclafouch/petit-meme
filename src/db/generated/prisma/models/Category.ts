@@ -28,6 +28,8 @@ export type CategoryMinAggregateOutputType = {
   id: string | null
   title: string | null
   slug: string | null
+  family: $Enums.CategoryFamily | null
+  emoji: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -36,6 +38,8 @@ export type CategoryMaxAggregateOutputType = {
   id: string | null
   title: string | null
   slug: string | null
+  family: $Enums.CategoryFamily | null
+  emoji: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -45,6 +49,8 @@ export type CategoryCountAggregateOutputType = {
   title: number
   slug: number
   keywords: number
+  family: number
+  emoji: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -55,6 +61,8 @@ export type CategoryMinAggregateInputType = {
   id?: true
   title?: true
   slug?: true
+  family?: true
+  emoji?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -63,6 +71,8 @@ export type CategoryMaxAggregateInputType = {
   id?: true
   title?: true
   slug?: true
+  family?: true
+  emoji?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -72,6 +82,8 @@ export type CategoryCountAggregateInputType = {
   title?: true
   slug?: true
   keywords?: true
+  family?: true
+  emoji?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -154,6 +166,8 @@ export type CategoryGroupByOutputType = {
   title: string
   slug: string
   keywords: string[]
+  family: $Enums.CategoryFamily | null
+  emoji: string | null
   createdAt: Date
   updatedAt: Date
   _count: CategoryCountAggregateOutputType | null
@@ -184,6 +198,8 @@ export type CategoryWhereInput = {
   title?: Prisma.StringFilter<"Category"> | string
   slug?: Prisma.StringFilter<"Category"> | string
   keywords?: Prisma.StringNullableListFilter<"Category">
+  family?: Prisma.EnumCategoryFamilyNullableFilter<"Category"> | $Enums.CategoryFamily | null
+  emoji?: Prisma.StringNullableFilter<"Category"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Category"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Category"> | Date | string
   memes?: Prisma.MemeCategoryListRelationFilter
@@ -195,6 +211,8 @@ export type CategoryOrderByWithRelationInput = {
   title?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   keywords?: Prisma.SortOrder
+  family?: Prisma.SortOrderInput | Prisma.SortOrder
+  emoji?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   memes?: Prisma.MemeCategoryOrderByRelationAggregateInput
@@ -209,6 +227,8 @@ export type CategoryWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.CategoryWhereInput | Prisma.CategoryWhereInput[]
   title?: Prisma.StringFilter<"Category"> | string
   keywords?: Prisma.StringNullableListFilter<"Category">
+  family?: Prisma.EnumCategoryFamilyNullableFilter<"Category"> | $Enums.CategoryFamily | null
+  emoji?: Prisma.StringNullableFilter<"Category"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Category"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Category"> | Date | string
   memes?: Prisma.MemeCategoryListRelationFilter
@@ -220,6 +240,8 @@ export type CategoryOrderByWithAggregationInput = {
   title?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   keywords?: Prisma.SortOrder
+  family?: Prisma.SortOrderInput | Prisma.SortOrder
+  emoji?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.CategoryCountOrderByAggregateInput
@@ -235,6 +257,8 @@ export type CategoryScalarWhereWithAggregatesInput = {
   title?: Prisma.StringWithAggregatesFilter<"Category"> | string
   slug?: Prisma.StringWithAggregatesFilter<"Category"> | string
   keywords?: Prisma.StringNullableListFilter<"Category">
+  family?: Prisma.EnumCategoryFamilyNullableWithAggregatesFilter<"Category"> | $Enums.CategoryFamily | null
+  emoji?: Prisma.StringNullableWithAggregatesFilter<"Category"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Category"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Category"> | Date | string
 }
@@ -244,6 +268,8 @@ export type CategoryCreateInput = {
   title: string
   slug: string
   keywords?: Prisma.CategoryCreatekeywordsInput | string[]
+  family?: $Enums.CategoryFamily | null
+  emoji?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   memes?: Prisma.MemeCategoryCreateNestedManyWithoutCategoryInput
@@ -255,6 +281,8 @@ export type CategoryUncheckedCreateInput = {
   title: string
   slug: string
   keywords?: Prisma.CategoryCreatekeywordsInput | string[]
+  family?: $Enums.CategoryFamily | null
+  emoji?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   memes?: Prisma.MemeCategoryUncheckedCreateNestedManyWithoutCategoryInput
@@ -266,6 +294,8 @@ export type CategoryUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   keywords?: Prisma.CategoryUpdatekeywordsInput | string[]
+  family?: Prisma.NullableEnumCategoryFamilyFieldUpdateOperationsInput | $Enums.CategoryFamily | null
+  emoji?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memes?: Prisma.MemeCategoryUpdateManyWithoutCategoryNestedInput
@@ -277,6 +307,8 @@ export type CategoryUncheckedUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   keywords?: Prisma.CategoryUpdatekeywordsInput | string[]
+  family?: Prisma.NullableEnumCategoryFamilyFieldUpdateOperationsInput | $Enums.CategoryFamily | null
+  emoji?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memes?: Prisma.MemeCategoryUncheckedUpdateManyWithoutCategoryNestedInput
@@ -288,6 +320,8 @@ export type CategoryCreateManyInput = {
   title: string
   slug: string
   keywords?: Prisma.CategoryCreatekeywordsInput | string[]
+  family?: $Enums.CategoryFamily | null
+  emoji?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -297,6 +331,8 @@ export type CategoryUpdateManyMutationInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   keywords?: Prisma.CategoryUpdatekeywordsInput | string[]
+  family?: Prisma.NullableEnumCategoryFamilyFieldUpdateOperationsInput | $Enums.CategoryFamily | null
+  emoji?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -306,6 +342,8 @@ export type CategoryUncheckedUpdateManyInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   keywords?: Prisma.CategoryUpdatekeywordsInput | string[]
+  family?: Prisma.NullableEnumCategoryFamilyFieldUpdateOperationsInput | $Enums.CategoryFamily | null
+  emoji?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -323,6 +361,8 @@ export type CategoryCountOrderByAggregateInput = {
   title?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   keywords?: Prisma.SortOrder
+  family?: Prisma.SortOrder
+  emoji?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -331,6 +371,8 @@ export type CategoryMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   slug?: Prisma.SortOrder
+  family?: Prisma.SortOrder
+  emoji?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -339,6 +381,8 @@ export type CategoryMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   slug?: Prisma.SortOrder
+  family?: Prisma.SortOrder
+  emoji?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -355,6 +399,14 @@ export type CategoryCreatekeywordsInput = {
 export type CategoryUpdatekeywordsInput = {
   set?: string[]
   push?: string | string[]
+}
+
+export type NullableEnumCategoryFamilyFieldUpdateOperationsInput = {
+  set?: $Enums.CategoryFamily | null
+}
+
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
 }
 
 export type CategoryCreateNestedOneWithoutMemesInput = {
@@ -390,6 +442,8 @@ export type CategoryCreateWithoutMemesInput = {
   title: string
   slug: string
   keywords?: Prisma.CategoryCreatekeywordsInput | string[]
+  family?: $Enums.CategoryFamily | null
+  emoji?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   translations?: Prisma.CategoryTranslationCreateNestedManyWithoutCategoryInput
@@ -400,6 +454,8 @@ export type CategoryUncheckedCreateWithoutMemesInput = {
   title: string
   slug: string
   keywords?: Prisma.CategoryCreatekeywordsInput | string[]
+  family?: $Enums.CategoryFamily | null
+  emoji?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   translations?: Prisma.CategoryTranslationUncheckedCreateNestedManyWithoutCategoryInput
@@ -426,6 +482,8 @@ export type CategoryUpdateWithoutMemesInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   keywords?: Prisma.CategoryUpdatekeywordsInput | string[]
+  family?: Prisma.NullableEnumCategoryFamilyFieldUpdateOperationsInput | $Enums.CategoryFamily | null
+  emoji?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   translations?: Prisma.CategoryTranslationUpdateManyWithoutCategoryNestedInput
@@ -436,6 +494,8 @@ export type CategoryUncheckedUpdateWithoutMemesInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   keywords?: Prisma.CategoryUpdatekeywordsInput | string[]
+  family?: Prisma.NullableEnumCategoryFamilyFieldUpdateOperationsInput | $Enums.CategoryFamily | null
+  emoji?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   translations?: Prisma.CategoryTranslationUncheckedUpdateManyWithoutCategoryNestedInput
@@ -446,6 +506,8 @@ export type CategoryCreateWithoutTranslationsInput = {
   title: string
   slug: string
   keywords?: Prisma.CategoryCreatekeywordsInput | string[]
+  family?: $Enums.CategoryFamily | null
+  emoji?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   memes?: Prisma.MemeCategoryCreateNestedManyWithoutCategoryInput
@@ -456,6 +518,8 @@ export type CategoryUncheckedCreateWithoutTranslationsInput = {
   title: string
   slug: string
   keywords?: Prisma.CategoryCreatekeywordsInput | string[]
+  family?: $Enums.CategoryFamily | null
+  emoji?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   memes?: Prisma.MemeCategoryUncheckedCreateNestedManyWithoutCategoryInput
@@ -482,6 +546,8 @@ export type CategoryUpdateWithoutTranslationsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   keywords?: Prisma.CategoryUpdatekeywordsInput | string[]
+  family?: Prisma.NullableEnumCategoryFamilyFieldUpdateOperationsInput | $Enums.CategoryFamily | null
+  emoji?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memes?: Prisma.MemeCategoryUpdateManyWithoutCategoryNestedInput
@@ -492,6 +558,8 @@ export type CategoryUncheckedUpdateWithoutTranslationsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   keywords?: Prisma.CategoryUpdatekeywordsInput | string[]
+  family?: Prisma.NullableEnumCategoryFamilyFieldUpdateOperationsInput | $Enums.CategoryFamily | null
+  emoji?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memes?: Prisma.MemeCategoryUncheckedUpdateManyWithoutCategoryNestedInput
@@ -542,6 +610,8 @@ export type CategorySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   title?: boolean
   slug?: boolean
   keywords?: boolean
+  family?: boolean
+  emoji?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   memes?: boolean | Prisma.Category$memesArgs<ExtArgs>
@@ -554,6 +624,8 @@ export type CategorySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   title?: boolean
   slug?: boolean
   keywords?: boolean
+  family?: boolean
+  emoji?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["category"]>
@@ -563,6 +635,8 @@ export type CategorySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   title?: boolean
   slug?: boolean
   keywords?: boolean
+  family?: boolean
+  emoji?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["category"]>
@@ -572,11 +646,13 @@ export type CategorySelectScalar = {
   title?: boolean
   slug?: boolean
   keywords?: boolean
+  family?: boolean
+  emoji?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type CategoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "slug" | "keywords" | "createdAt" | "updatedAt", ExtArgs["result"]["category"]>
+export type CategoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "slug" | "keywords" | "family" | "emoji" | "createdAt" | "updatedAt", ExtArgs["result"]["category"]>
 export type CategoryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   memes?: boolean | Prisma.Category$memesArgs<ExtArgs>
   translations?: boolean | Prisma.Category$translationsArgs<ExtArgs>
@@ -596,6 +672,8 @@ export type $CategoryPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     title: string
     slug: string
     keywords: string[]
+    family: $Enums.CategoryFamily | null
+    emoji: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["category"]>
@@ -1027,6 +1105,8 @@ export interface CategoryFieldRefs {
   readonly title: Prisma.FieldRef<"Category", 'String'>
   readonly slug: Prisma.FieldRef<"Category", 'String'>
   readonly keywords: Prisma.FieldRef<"Category", 'String[]'>
+  readonly family: Prisma.FieldRef<"Category", 'CategoryFamily'>
+  readonly emoji: Prisma.FieldRef<"Category", 'String'>
   readonly createdAt: Prisma.FieldRef<"Category", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Category", 'DateTime'>
 }

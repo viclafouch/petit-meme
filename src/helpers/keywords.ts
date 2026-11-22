@@ -13,7 +13,7 @@ export function normalizeKeywords(keywords: string[]) {
   })
 }
 
-function splitIntoSearchWords(text: string) {
+export function splitIntoSearchWords(text: string) {
   return text
     .normalize('NFD')
     .replaceAll(/\p{M}/gu, '')

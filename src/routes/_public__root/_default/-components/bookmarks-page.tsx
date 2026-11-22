@@ -3,6 +3,7 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { MemesList } from '~/components/meme/memes-list'
 import { buttonVariants } from '~/components/ui/button'
+import { ALL_CATEGORY_SLUG } from '~/constants/meme'
 import { m } from '~/paraglide/messages'
 import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
 import {
@@ -17,7 +18,11 @@ const BookmarksEmpty = () => {
       <p className="text-sm text-muted-foreground text-balance">
         {m.settings_bookmarks_empty_description()}
       </p>
-      <Link to="/memes" className={buttonVariants({ variant: 'outline' })}>
+      <Link
+        to="/memes/category/$slug"
+        params={{ slug: ALL_CATEGORY_SLUG }}
+        className={buttonVariants({ variant: 'outline' })}
+      >
         {m.settings_bookmarks_empty_cta()}
       </Link>
     </div>
@@ -37,7 +42,10 @@ export const BookmarksPage = () => {
         {bookmarkedMemesQuery.data.bookmarks.length === 0 ? (
           <BookmarksEmpty />
         ) : (
-          <MemesList memes={bookmarkedMemesQuery.data.bookmarks} />
+          <MemesList
+            memes={bookmarkedMemesQuery.data.bookmarks}
+            titleTag="h2"
+          />
         )}
       </div>
     </div>

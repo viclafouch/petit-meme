@@ -133,6 +133,7 @@
   --duration-sheet: 450ms;
   --duration-sparkle: 700ms;
   --duration-spin: 800ms;
+  --duration-sheen: 700ms;
   --scale-press: 0.97;
   --scale-enter: 0.97;
   --focus-color: oklch(0.52 0.105 223);
@@ -200,6 +201,20 @@
     var(--color-brand-cyan-light) 45%,
     var(--color-brand-violet-light)
   );
+  --gradient-premium: linear-gradient(
+    135deg,
+    oklch(0.92 0.1 92),
+    oklch(0.81 0.15 78) 45%,
+    oklch(0.72 0.15 60)
+  );
+  --color-premium-foreground: oklch(0.27 0.06 60);
+  --color-premium-sheen: oklch(1 0 0 / 55%);
+  --shadow-premium:
+    inset 0 1px 0 oklch(1 0 0 / 60%), 0 0 0 1px oklch(0.55 0.12 65 / 50%),
+    0 6px 20px -6px oklch(0.8 0.15 78 / 70%);
+  --shadow-premium-hover:
+    inset 0 1px 0 oklch(1 0 0 / 60%), 0 0 0 1px oklch(0.55 0.12 65 / 60%),
+    0 8px 28px -6px oklch(0.8 0.15 78 / 90%);
 
   @media (width >= 64rem) {
     --tab-bar-space: 0px;
@@ -340,6 +355,11 @@
       animation: navbar-fade-to-solid linear both;
       animation-timeline: scroll(root);
       animation-range: 0px 180px;
+    }
+
+    @variant max-lg {
+      opacity: 1 !important;
+      animation: none;
     }
   }
 

@@ -1,4 +1,5 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
+import { ALL_CATEGORY_SLUG } from '~/constants/meme'
 import { getRandomMeme } from '~/server/meme/meme.functions'
 
 export const Route = createFileRoute('/_public__root/_default/random/')({
@@ -17,7 +18,8 @@ export const Route = createFileRoute('/_public__root/_default/random/')({
     }
 
     throw redirect({
-      to: '/memes'
+      to: '/memes/category/$slug',
+      params: { slug: ALL_CATEGORY_SLUG }
     })
   }
 })

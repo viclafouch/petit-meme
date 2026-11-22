@@ -2,7 +2,7 @@ import { expect, type Page } from '@playwright/test'
 import { SITE_NAME } from '~/constants/branding'
 import { COOKIE_LOCALE_BANNER_DISMISSED_KEY } from '~/constants/cookie'
 import { HTTP_STATUS } from '~/constants/http'
-import { MEMES_PER_PAGE, TRENDING_CATEGORY_SLUG } from '~/constants/meme'
+import { ALL_CATEGORY_SLUG, MEMES_PER_PAGE } from '~/constants/meme'
 import { PREMIUM_PLAN_PRICING } from '~/constants/plan'
 import { MONTHS_IN_YEAR } from '~/constants/time'
 import { getLocaleDisplayName } from '~/helpers/locale'
@@ -27,7 +27,7 @@ import {
 import { E2E_STRIPE_PRICE_IDS, resolveStorageStatePath } from './env'
 import { test } from './fixtures'
 import { repeatUntilVisible } from './hydration'
-import { getMemeLink, getMemePlayLinks } from './library'
+import { getMemeLink, getMemeCardLinks } from './library'
 import { E2E_ENGLISH_LOCALE } from './locales'
 import { findStripeCustomerLocales } from './stripe-customer'
 import { buildE2eUrl, localizePathname } from './urls'
@@ -36,10 +36,10 @@ const IN_ENGLISH = { locale: E2E_ENGLISH_LOCALE } as const satisfies {
   locale: Locale
 }
 
-const FRENCH_TRENDING_PATHNAME = `/memes/category/${TRENDING_CATEGORY_SLUG}`
+const FRENCH_ALL_MEMES_PATHNAME = `/memes/category/${ALL_CATEGORY_SLUG}`
 
-const ENGLISH_TRENDING_PATHNAME = localizePathname(
-  FRENCH_TRENDING_PATHNAME,
+const ENGLISH_ALL_MEMES_PATHNAME = localizePathname(
+  FRENCH_ALL_MEMES_PATHNAME,
   E2E_ENGLISH_LOCALE
 )
 
@@ -203,22 +203,22 @@ test.describe('the English journey', () => {
       .getByRole('link', { name: m.home_hero_cta_discover({}, IN_ENGLISH) })
       .click()
 
-    await expect(page).toHaveURL(ENGLISH_TRENDING_PATHNAME)
+    await expect(page).toHaveURL(ENGLISH_ALL_MEMES_PATHNAME)
   })
 
-  test('the English library opens on the trending Category and fills a page', async ({
+  test('the English library opens on every Meme and fills a page', async ({
     page
   }) => {
     const response = await page.goto(ENGLISH_LIBRARY_PATHNAME)
 
     expect(response?.status()).toBe(HTTP_STATUS.OK)
-    await expect(page).toHaveURL(ENGLISH_TRENDING_PATHNAME)
+    await expect(page).toHaveURL(ENGLISH_ALL_MEMES_PATHNAME)
     await expect(
       page.getByRole('heading', {
-        name: m.meme_category_trending({}, IN_ENGLISH)
+        name: m.meme_all_memes({}, IN_ENGLISH)
       })
     ).toBeVisible()
-    await expect(getMemePlayLinks(page, E2E_ENGLISH_LOCALE)).toHaveCount(
+    await expect(getMemeCardLinks(page, E2E_ENGLISH_LOCALE)).toHaveCount(
       MEMES_PER_PAGE
     )
   })
@@ -236,19 +236,12 @@ test.describe('the English journey', () => {
   test('the second English page holds exactly what the first one left out', async ({
     page
   }) => {
-    await page.goto(ENGLISH_TRENDING_PATHNAME)
-
-    await expect(getMemeLink(page, UNIVERSAL_MEME_IN_ENGLISH)).toBeVisible()
-
-    await page
-      .getByRole('navigation', { name: m.common_pagination({}, IN_ENGLISH) })
-      .getByRole('link', { name: SECOND_PAGE_NUMBER, exact: true })
-      .click()
-
-    await expect(page).toHaveURL(
-      `${ENGLISH_TRENDING_PATHNAME}?page=${SECOND_PAGE_NUMBER}`
+    const response = await page.goto(
+      `${ENGLISH_ALL_MEMES_PATHNAME}?page=${SECOND_PAGE_NUMBER}`
     )
-    await expect(getMemePlayLinks(page, E2E_ENGLISH_LOCALE)).toHaveCount(
+
+    expect(response?.status()).toBe(HTTP_STATUS.OK)
+    await expect(getMemeCardLinks(page, E2E_ENGLISH_LOCALE)).toHaveCount(
       E2E_ENGLISH_SECOND_PAGE_MEMES.length
     )
 
@@ -315,19 +308,19 @@ test.describe('the English journey', () => {
   test('the language switcher moves the page, and the choice outranks the URL', async ({
     page
   }) => {
-    await page.goto(FRENCH_TRENDING_PATHNAME)
+    await page.goto(FRENCH_ALL_MEMES_PATHNAME)
     await switchToEnglish(page)
 
-    await expect(page).toHaveURL(ENGLISH_TRENDING_PATHNAME)
+    await expect(page).toHaveURL(ENGLISH_ALL_MEMES_PATHNAME)
     await expect(
       page.getByRole('heading', {
-        name: m.meme_category_trending({}, IN_ENGLISH)
+        name: m.meme_all_memes({}, IN_ENGLISH)
       })
     ).toBeVisible()
 
-    await page.goto(FRENCH_TRENDING_PATHNAME)
+    await page.goto(FRENCH_ALL_MEMES_PATHNAME)
 
-    await expect(page).toHaveURL(ENGLISH_TRENDING_PATHNAME)
+    await expect(page).toHaveURL(ENGLISH_ALL_MEMES_PATHNAME)
   })
 
   test('an English page offers the browser its own language', async ({
@@ -400,10 +393,10 @@ test.describe('the English journey', () => {
     test.use({ storageState: resolveStorageStatePath('localeSwitch') })
 
     test('gives the new language to the Stripe customer', async ({ page }) => {
-      await page.goto(FRENCH_TRENDING_PATHNAME)
+      await page.goto(FRENCH_ALL_MEMES_PATHNAME)
       await switchToEnglish(page)
 
-      await expect(page).toHaveURL(ENGLISH_TRENDING_PATHNAME)
+      await expect(page).toHaveURL(ENGLISH_ALL_MEMES_PATHNAME)
       await expect
         .poll(() => {
           return findStripeCustomerLocales(E2E_ROLES.localeSwitch.id)

@@ -49,6 +49,7 @@ export const useBookmarkAction = ({
   }
 
   return {
+    isSignedIn: Boolean(user),
     isMemeBookmarked,
     isPending,
     label: isMemeBookmarked ? m.meme_remove_bookmark() : m.meme_add_bookmark(),

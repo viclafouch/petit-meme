@@ -9,7 +9,7 @@ import { useMemeExport } from '~/components/meme/use-meme-export'
 import { useMemeHls } from '~/components/meme/use-meme-hls'
 import { useRegisterMemeView } from '~/components/meme/use-register-meme-view'
 import type { MemeDerivedFormat } from '~/constants/bunny'
-import { TRENDING_CATEGORY_SLUG, type MemeExportMode } from '~/constants/meme'
+import { ALL_CATEGORY_SLUG, type MemeExportMode } from '~/constants/meme'
 import { MemeStatus } from '~/db/generated/prisma/enums'
 import { formatDate, formatRelativeTime } from '~/helpers/date'
 import { formatCount } from '~/helpers/number'
@@ -148,7 +148,7 @@ const MemeDetails = ({ meme }: MemeDetailsProps) => {
               <li key={keyword}>
                 <Link
                   to="/memes/category/$slug"
-                  params={{ slug: TRENDING_CATEGORY_SLUG }}
+                  params={{ slug: ALL_CATEGORY_SLUG }}
                   search={{ query: keyword }}
                   className="pill pill-sm pill-outline meme-keyword"
                   title={keyword}
@@ -223,7 +223,7 @@ export const MemePage = () => {
 
   return (
     <div className="meme-page">
-      <div className="meme-grid">
+      <div className="meme-page-layout">
         <div className="relative isolate min-w-0">
           <div aria-hidden="true" className="meme-glow" />
           {meme.status === MemeStatus.PUBLISHED ? null : (

@@ -10,6 +10,7 @@ import {
   FormMessage
 } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
+import { matchIsCategoryEmoji } from '~/constants/category'
 import { CATEGORY_FORM_SCHEMA } from '~/constants/category-form'
 import { getErrorMessage } from '~/helpers/error'
 import {
@@ -22,6 +23,10 @@ import { captureWithFeature } from '~/lib/sentry'
 import { locales, type Locale } from '~/paraglide/runtime'
 import { KeywordsField } from '~/routes/admin/-components/keywords-field'
 import { useKeywordsField } from '~/routes/admin/-components/use-keywords-field'
+import {
+  CategoryEmojiField,
+  CategoryFamilyField
+} from '~/routes/admin/categories/-components/category-identity-fields'
 import {
   createCategory,
   updateCategory
@@ -90,6 +95,8 @@ export const CategoryForm = ({
       type === 'edit'
         ? {
             slug: category.slug,
+            family: category.family,
+            emoji: matchIsCategoryEmoji(category.emoji) ? category.emoji : null,
             translations: buildLocaleRecord((locale) => {
               const translation = findTranslationByLocale(
                 category.translations,
@@ -104,6 +111,8 @@ export const CategoryForm = ({
           }
         : {
             slug: '',
+            family: null,
+            emoji: null,
             translations: buildLocaleRecord(() => {
               return {
                 title: '',
@@ -179,6 +188,28 @@ export const CategoryForm = ({
                 />
                 <FormMessage />
               </FormItem>
+            )
+          }}
+        />
+        <form.Field
+          name="family"
+          children={(field) => {
+            return (
+              <CategoryFamilyField
+                value={field.state.value}
+                onValueChange={field.handleChange}
+              />
+            )
+          }}
+        />
+        <form.Field
+          name="emoji"
+          children={(field) => {
+            return (
+              <CategoryEmojiField
+                value={field.state.value}
+                onValueChange={field.handleChange}
+              />
             )
           }}
         />

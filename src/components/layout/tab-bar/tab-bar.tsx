@@ -1,8 +1,8 @@
 import { Clapperboard, House, LayoutGrid } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { AccountDrawer } from '~/components/layout/tab-bar/account-drawer'
-import { SearchDrawer } from '~/components/layout/tab-bar/search-drawer'
 import { TAB_ITEM_CLASS } from '~/components/layout/tab-bar/tab-item-class'
+import { SearchSheet } from '~/components/search/search-sheet'
 import { m } from '~/paraglide/messages'
 
 export const TabBar = () => {
@@ -37,7 +37,7 @@ export const TabBar = () => {
           </Link>
         </li>
         <li>
-          <SearchDrawer />
+          <SearchSheet />
         </li>
         <li>
           <AccountDrawer />

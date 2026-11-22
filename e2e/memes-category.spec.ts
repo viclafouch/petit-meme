@@ -1,15 +1,13 @@
 import { expect } from '@playwright/test'
 import { HTTP_STATUS } from '~/constants/http'
-import { NEWS_CATEGORY_SLUG } from '~/constants/meme'
 import {
   E2E_CATEGORIES,
   E2E_MEMES,
   E2E_NAMED_MEMES,
-  E2E_RECENT_MEMES,
   type E2eCategory
 } from './content'
 import { test } from './fixtures'
-import { getMemeLink, getMemePlayLinks } from './library'
+import { getMemeLink, getMemeCardLinks } from './library'
 
 const CATS_CATEGORY = E2E_CATEGORIES.chats
 const POLITICS_CATEGORY = E2E_CATEGORIES.politique
@@ -34,7 +32,7 @@ test.describe('the Categories', () => {
     await expect(
       page.getByRole('heading', { name: CATS_CATEGORY.title })
     ).toBeVisible()
-    await expect(getMemePlayLinks(page)).toHaveCount(
+    await expect(getMemeCardLinks(page)).toHaveCount(
       countMemesOfCategory(CATS_CATEGORY)
     )
   })
@@ -65,28 +63,12 @@ test.describe('the Categories', () => {
       .click()
 
     await expect(page).toHaveURL(`/memes/category/${POLITICS_CATEGORY.slug}`)
-    await expect(getMemePlayLinks(page)).toHaveCount(
+    await expect(getMemeCardLinks(page)).toHaveCount(
       countMemesOfCategory(POLITICS_CATEGORY)
     )
     await expect(
       getMemeLink(page, E2E_NAMED_MEMES.recentlyPublished)
     ).toBeVisible()
-    await expect(getMemeLink(page, E2E_NAMED_MEMES.mostViewed)).toBeHidden()
-  })
-
-  test('the news Category keeps what was published lately', async ({
-    page
-  }) => {
-    await page.goto(`/memes/category/${NEWS_CATEGORY_SLUG}`)
-
-    await expect(getMemePlayLinks(page)).toHaveCount(E2E_RECENT_MEMES.length)
-
-    await Promise.all(
-      E2E_RECENT_MEMES.map((meme) => {
-        return expect(getMemeLink(page, meme)).toBeVisible()
-      })
-    )
-
     await expect(getMemeLink(page, E2E_NAMED_MEMES.mostViewed)).toBeHidden()
   })
 
@@ -99,6 +81,6 @@ test.describe('the Categories', () => {
     await expect(
       page.getByRole('heading', { name: `${HTTP_STATUS.NOT_FOUND}` })
     ).toBeVisible()
-    await expect(getMemePlayLinks(page)).toHaveCount(0)
+    await expect(getMemeCardLinks(page)).toHaveCount(0)
   })
 })

@@ -14,33 +14,24 @@ export const buildNamedMemeActionPattern = (
   return new RegExp(`^${RegExp.escape(prefix)}`, 'u')
 }
 
-export const getMemePlayLinks = (page: Page, locale: Locale = E2E_LOCALE) => {
-  return page.getByRole('link', {
-    name: buildNamedMemeActionPattern((inputs) => {
-      return m.meme_play_video_named(inputs, { locale })
-    })
+export const getMemeList = (page: Page, locale: Locale = E2E_LOCALE) => {
+  return page.getByRole('list', {
+    name: m.meme_list_label({}, { locale }),
+    exact: true
   })
+}
+
+export const getMemeCardLinks = (page: Page, locale: Locale = E2E_LOCALE) => {
+  return getMemeList(page, locale).getByRole('link')
 }
 
 export const getMemeLink = (page: Page, meme: E2eMeme) => {
   return page.getByRole('link', { name: meme.title, exact: true })
 }
 
-export const getMemeList = (page: Page) => {
-  return page.getByRole('list', { name: m.meme_list_label(), exact: true })
-}
-
-export const getMemeTitleLinks = (page: Page) => {
-  return getMemeList(page)
-    .getByRole('link')
-    .filter({
-      hasNotText: buildNamedMemeActionPattern(m.meme_play_video_named)
-    })
-}
-
-export const getFirstMemePlayLink = (page: Page) => {
+export const getFirstMemeCardLink = (page: Page) => {
   // oxlint-disable-next-line playwright/no-nth-methods -- any Meme of the list will do: the first one is the one a Visitor reaches first
-  return getMemePlayLinks(page).first()
+  return getMemeCardLinks(page).first()
 }
 
 const getReels = (page: Page) => {

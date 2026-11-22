@@ -2,7 +2,7 @@ import { ErrorBoundary } from 'react-error-boundary'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { buttonVariants } from '~/components/ui/button'
-import { NEWS_CATEGORY_SLUG } from '~/constants/meme'
+import { ALL_CATEGORY_SLUG } from '~/constants/meme'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
 import { countRecentMemesQueryOpts } from '~/queries/meme'
@@ -95,7 +95,8 @@ const AnnouncementQuery = () => {
     <Announcement
       linkOptions={{
         to: '/memes/category/$slug',
-        params: { slug: NEWS_CATEGORY_SLUG }
+        params: { slug: ALL_CATEGORY_SLUG },
+        search: { sort: 'new' }
       }}
       text={m.home_hero_announcement({
         count: String(recentMemesCountQuery.data)
@@ -132,7 +133,8 @@ export const Hero = () => {
               }),
               'rounded-full before:rounded-full'
             )}
-            to="/memes"
+            to="/memes/category/$slug"
+            params={{ slug: ALL_CATEGORY_SLUG }}
           >
             {m.home_hero_cta_discover()}{' '}
             <span className="font-normal italic">{m.home_hero_cta_free()}</span>

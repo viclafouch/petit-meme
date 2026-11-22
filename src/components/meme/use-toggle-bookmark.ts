@@ -14,6 +14,8 @@ import { getMemeQueryOpts } from '~/queries/meme'
 import { toggleBookmark } from '~/server/bookmark/bookmark.functions'
 import { useDialogStore } from '~/stores/dialog.store'
 
+const TOGGLE_BOOKMARK_MUTATION_KEY = ['toggle-bookmark'] as const
+
 type UseToggleBookmarkParams = {
   meme: MemeWithVideo
   bookmarks: MemeWithVideo[] | undefined
@@ -43,6 +45,8 @@ export function useToggleBookmark({
   }, [bookmarks, meme.id])
 
   const toggleMutation = useMutation({
+    mutationKey: TOGGLE_BOOKMARK_MUTATION_KEY,
+    scope: { id: `toggle-bookmark:${meme.id}` },
     mutationFn: toggleBookmark,
     onMutate: async () => {
       const isBookmarkedAfterToggle = !isMemeBookmarked
@@ -97,6 +101,13 @@ export function useToggleBookmark({
       toast.error(m.error_bookmark_update())
     },
     onSettled: () => {
+      if (
+        queryClient.isMutating({ mutationKey: TOGGLE_BOOKMARK_MUTATION_KEY }) >
+        1
+      ) {
+        return null
+      }
+
       return Promise.all([
         queryClient.invalidateQueries(getMemeQueryOpts(meme.id)),
         queryClient.invalidateQueries(listBookmarkedMemesQueryOpts())

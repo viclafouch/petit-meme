@@ -35,6 +35,26 @@ export const listMemesQueryOpts = (filters: MemesFilters) => {
 
 listMemesQueryOpts.all = ['memes-list'] as const
 
+export const listMemesPagesQueryOpts = (
+  filters: Omit<MemesFilters, 'page'>,
+  firstPage: number
+) => {
+  return infiniteQueryOptions({
+    queryKey: [...listMemesPagesQueryOpts.all, filters, firstPage],
+    queryFn: ({ pageParam }) => {
+      return listMemes({ data: { ...filters, page: pageParam } })
+    },
+    initialPageParam: firstPage,
+    getNextPageParam: (lastPage) => {
+      return lastPage.hasNextPage ? lastPage.page + 1 : undefined
+    },
+    staleTime: FIVE_MINUTES_MS,
+    refetchOnWindowFocus: false
+  })
+}
+
+listMemesPagesQueryOpts.all = ['memes-pages'] as const
+
 export const getMemePlaybackUrlQueryOpts = (memeId: Meme['id']) => {
   return queryOptions({
     queryKey: [...getMemePlaybackUrlQueryOpts.all, memeId],

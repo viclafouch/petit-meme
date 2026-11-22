@@ -15,7 +15,7 @@ test.describe('the seed', () => {
   })
 
   test('the seeded Memes reach the library', async ({ page }) => {
-    await page.goto('/memes/category/trending')
+    await page.goto('/memes/category/all')
 
     await expect(
       page.getByRole('link', {

@@ -63,6 +63,8 @@ const buildCategory = ({
     title,
     keywords,
     translations,
+    family: null,
+    emoji: null,
     createdAt: CREATED_AT,
     updatedAt: CREATED_AT
   }

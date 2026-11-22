@@ -31,7 +31,7 @@ import { readVideoCurrentTime, readVideoIsPaused } from './video'
 const STUDIO_MEME = E2E_NAMED_MEMES.mostViewed
 const MEME_PATHNAME = `/memes/${STUDIO_MEME.id}`
 const STUDIO_PATHNAME = `${MEME_PATHNAME}/studio`
-const LIBRARY_PATHNAME = '/memes/category/trending'
+const LIBRARY_PATHNAME = '/memes/category/all'
 const CAPTION_TEXT = 'Le e2e a parlé'
 const RENDER_TIMEOUT_MS = 60_000
 const EXPORT_TEST_TIMEOUT_MS = 120_000

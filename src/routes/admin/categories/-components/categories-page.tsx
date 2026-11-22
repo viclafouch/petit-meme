@@ -1,8 +1,10 @@
 import { Plus } from 'lucide-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
+import { CategoryEmojiImage } from '~/components/category/category-emoji-image'
 import { Badge } from '~/components/ui/badge'
 import { Container } from '~/components/ui/container'
 import { INITIAL_PAGINATION } from '~/constants/admin'
+import { CATEGORY_FAMILY_LABELS } from '~/constants/category'
 import { formatDate } from '~/helpers/date'
 import { baseLocale, getLocale } from '~/paraglide/runtime'
 import { listCategoriesQueryOpts } from '~/queries/category'
@@ -17,7 +19,30 @@ const columnHelper = createAppColumnHelper<CategoryListItem>()
 
 const columns = columnHelper.columns([
   columnHelper.accessor('title', {
-    header: 'Titre'
+    header: 'Titre',
+    cell: (info) => {
+      return (
+        <span className="flex items-center gap-2">
+          <CategoryEmojiImage
+            emoji={info.row.original.emoji}
+            className="size-5"
+          />
+          {info.getValue()}
+        </span>
+      )
+    }
+  }),
+  columnHelper.accessor('family', {
+    header: 'Famille',
+    cell: (info) => {
+      const family = info.getValue()
+
+      return family ? (
+        CATEGORY_FAMILY_LABELS[family]
+      ) : (
+        <span className="text-muted-foreground">Autres</span>
+      )
+    }
   }),
   columnHelper.accessor('slug', {
     header: 'Slug',

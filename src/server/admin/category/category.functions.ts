@@ -67,6 +67,8 @@ export const createCategory = createServerFn({ method: 'POST' })
       data: {
         title: sourceTranslation.title,
         slug: data.slug,
+        family: data.family,
+        emoji: data.emoji,
         keywords: sourceTranslation.keywords,
         translations: {
           create: buildCategoryTranslations(data.translations)
@@ -89,7 +91,7 @@ export const updateCategory = createServerFn({ method: 'POST' })
     return UPDATE_CATEGORY_SCHEMA.parse(data)
   })
   .handler(async ({ data, context }) => {
-    const { id, slug, translations } = data
+    const { id, slug, family, emoji, translations } = data
     const sourceTranslation = translations[baseLocale]
 
     const category = await prismaClient.category.update({
@@ -97,6 +99,8 @@ export const updateCategory = createServerFn({ method: 'POST' })
       data: {
         title: sourceTranslation.title,
         slug,
+        family,
+        emoji,
         keywords: sourceTranslation.keywords,
         translations: {
           upsert: buildCategoryTranslations(translations).map((translation) => {

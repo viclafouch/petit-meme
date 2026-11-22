@@ -59,7 +59,7 @@ test.describe('a Meme page', () => {
       .click()
 
     await expect(page).toHaveURL(
-      `/memes/category/trending?query=${PLAYABLE_MEME_KEYWORD}`
+      `/memes/category/all?query=${PLAYABLE_MEME_KEYWORD}`
     )
   })
 

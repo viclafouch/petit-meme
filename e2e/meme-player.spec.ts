@@ -3,10 +3,10 @@ import { m } from '~/paraglide/messages'
 import { E2E_NAMED_MEMES } from './content'
 import { test } from './fixtures'
 import { repeatUntilNavigated } from './hydration'
-import { getFirstMemePlayLink } from './library'
+import { getFirstMemeCardLink } from './library'
 import { readVideoIsPaused } from './video'
 
-const LIBRARY_PATHNAME = '/memes/category/trending'
+const LIBRARY_PATHNAME = '/memes/category/all'
 const PLAYABLE_MEME = E2E_NAMED_MEMES.mostViewed
 const PLAYABLE_MEME_PATHNAME = `/memes/${PLAYABLE_MEME.id}`
 
@@ -14,7 +14,7 @@ test.describe('the player', () => {
   test('a Meme of the library opens on its own page', async ({ page }) => {
     await page.goto(LIBRARY_PATHNAME)
 
-    const playLink = getFirstMemePlayLink(page)
+    const playLink = getFirstMemeCardLink(page)
     const memePathname = await playLink.getAttribute('href')
 
     await repeatUntilNavigated(

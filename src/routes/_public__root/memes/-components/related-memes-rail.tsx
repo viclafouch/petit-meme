@@ -10,6 +10,7 @@ import {
 } from '@tanstack/react-router'
 import { Badge } from '~/components/ui/badge'
 import { Skeleton } from '~/components/ui/skeleton'
+import { ALL_CATEGORY_SLUG } from '~/constants/meme'
 import { formatClockDuration } from '~/helpers/duration'
 import { formatCount } from '~/helpers/number'
 import { useIsCoarsePointer } from '~/hooks/use-is-coarse-pointer'
@@ -262,7 +263,10 @@ const RandomMemeButton = ({ memeId }: RandomMemeButtonProps) => {
           state: nextSeenState
         })
       } else {
-        void navigate({ to: '/memes' })
+        void navigate({
+          to: '/memes/category/$slug',
+          params: { slug: ALL_CATEGORY_SLUG }
+        })
       }
     }
   })

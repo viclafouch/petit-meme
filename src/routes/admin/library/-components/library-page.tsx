@@ -3,7 +3,6 @@ import { Plus } from 'lucide-react'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import { SearchInput } from '~/components/form/search-input'
-import { Paginator } from '~/components/meme/filters/paginator'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { Container } from '~/components/ui/container'
@@ -16,6 +15,7 @@ import { MemeListItem } from '~/routes/admin/-components/meme-list-item'
 import { MemesFilterContentLocale } from '~/routes/admin/-components/memes-filter-content-locale'
 import { NewMemeButton } from '~/routes/admin/-components/new-meme-button'
 import { PageHeader } from '~/routes/admin/-components/page-header'
+import { Paginator } from '~/routes/admin/-components/paginator'
 
 const routeApi = getRouteApi('/admin/library/')
 

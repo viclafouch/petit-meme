@@ -16,4 +16,4 @@ Each Meme has a content language:
 - **English**: understood by English speakers. It needs its English record.
 - **Universal**: understood by anyone, French or English speaker, because it carries no language. It needs both records, and the translation is automatic.
 
-The content language decides where a Meme shows. The French site shows French, English and universal Memes, because a French speaker often gets an English meme. The English site shows English and universal Memes only, because the reverse rarely holds. A Visitor can narrow the library to one language.
+The content language decides where a Meme shows. The French site shows French, English and universal Memes, because a French speaker often gets an English meme. The English site shows English and universal Memes only, because the reverse rarely holds.

@@ -4,7 +4,7 @@ import { TRENDING_MEMES_COUNT } from '~/constants/meme'
 import { m } from '~/paraglide/messages'
 import { E2E_RECENT_MEMES } from './content'
 import { test } from './fixtures'
-import { getFirstMemePlayLink, getMemePlayLinks } from './library'
+import { getFirstMemeCardLink, getMemeCardLinks } from './library'
 
 test.describe('the home page', () => {
   test('opens on Memes', async ({ page }) => {
@@ -13,7 +13,7 @@ test.describe('the home page', () => {
     expect(response?.status()).toBe(HTTP_STATUS.OK)
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
     await expect(page.getByText(m.home_best_subtitle())).toBeVisible()
-    await expect(getMemePlayLinks(page)).toHaveCount(TRENDING_MEMES_COUNT)
+    await expect(getMemeCardLinks(page)).toHaveCount(TRENDING_MEMES_COUNT)
   })
 
   test('the hero leads to the library and to the plans', async ({ page }) => {
@@ -21,7 +21,7 @@ test.describe('the home page', () => {
 
     await page.getByRole('link', { name: m.home_hero_cta_discover() }).click()
 
-    await expect(page).toHaveURL('/memes/category/trending')
+    await expect(page).toHaveURL('/memes/category/all')
 
     await page.goBack()
     await page.getByRole('link', { name: m.home_hero_cta_premium() }).click()
@@ -36,8 +36,8 @@ test.describe('the home page', () => {
 
     await page.getByRole('link', { name: m.home_best_browse_all() }).click()
 
-    await expect(page).toHaveURL('/memes/category/trending')
-    await expect(getFirstMemePlayLink(page)).toBeVisible()
+    await expect(page).toHaveURL('/memes/category/all')
+    await expect(getFirstMemeCardLink(page)).toBeVisible()
   })
 
   test('the announcement counts what was published lately and leads to it', async ({
@@ -55,6 +55,6 @@ test.describe('the home page', () => {
     await expect(announcement).toBeVisible()
     await announcement.click()
 
-    await expect(page).toHaveURL('/memes/category/news')
+    await expect(page).toHaveURL('/memes/category/all?sort=new')
   })
 })

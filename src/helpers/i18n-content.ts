@@ -78,65 +78,10 @@ export const VISIBLE_CONTENT_LOCALES: Record<Locale, MemeContentLocale[]> = {
   en: ['EN', 'UNIVERSAL']
 }
 
-export const FILTERABLE_CONTENT_LOCALES = [
-  MemeContentLocaleEnum.FR,
-  MemeContentLocaleEnum.EN
-] as const satisfies readonly MemeContentLocale[]
-
-const DEFAULT_CONTENT_LOCALE_FILTER = {
-  fr: [MemeContentLocaleEnum.FR, MemeContentLocaleEnum.EN],
-  en: [MemeContentLocaleEnum.EN]
-} as const satisfies Record<Locale, readonly MemeContentLocale[]>
-
-export const matchIsDefaultContentLocaleFilter = (
-  contentLocales: MemeContentLocale[],
-  locale: Locale
-): boolean => {
-  const defaults = DEFAULT_CONTENT_LOCALE_FILTER[locale]
-
-  return (
-    contentLocales.length === defaults.length &&
-    defaults.every((cl) => {
-      return contentLocales.includes(cl)
-    })
-  )
-}
-
-export const parseContentLocalesParam = (
-  param: string | undefined,
-  locale: Locale
-): MemeContentLocale[] => {
-  if (!param) {
-    return [...DEFAULT_CONTENT_LOCALE_FILTER[locale]]
-  }
-
-  return param.split(',').filter(matchIsMemeContentLocale)
-}
-
-export const serializeContentLocalesParam = (
-  contentLocales: MemeContentLocale[],
-  locale: Locale
-): string | undefined => {
-  return matchIsDefaultContentLocaleFilter(contentLocales, locale)
-    ? undefined
-    : contentLocales.join(',')
-}
-
 export const contentLocalesWithUniversal = (
   contentLocales: MemeContentLocale[]
 ): MemeContentLocale[] => {
   return removeDuplicates([...contentLocales, MemeContentLocaleEnum.UNIVERSAL])
-}
-
-export const resolveVisibleContentLocales = (
-  locale: Locale,
-  contentLocales: MemeContentLocale[] | undefined
-): MemeContentLocale[] => {
-  if (!contentLocales) {
-    return VISIBLE_CONTENT_LOCALES[locale]
-  }
-
-  return contentLocalesWithUniversal(contentLocales)
 }
 
 const findSiteLocalesShowing = (contentLocale: MemeContentLocale) => {

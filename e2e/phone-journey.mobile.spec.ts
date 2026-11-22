@@ -12,12 +12,14 @@ import { E2E_NAMED_MEMES, E2E_UNIQUE_SEARCH_WORD } from './content'
 import { resolveStorageStatePath } from './env'
 import { test } from './fixtures'
 import { repeatUntilVisible } from './hydration'
-import { getFirstMemePlayLink, getMemeLink, getMemePlayLinks } from './library'
+import { getFirstMemeCardLink, getMemeLink, getMemeCardLinks } from './library'
 import { readVideoDuration } from './video'
 
 const PLAYABLE_MEME_PATHNAME = `/memes/${E2E_NAMED_MEMES.mostViewed.id}`
 
-const LIBRARY_PATHNAME = '/memes/category/trending'
+const LIBRARY_PATHNAME = '/memes/category/all'
+
+const FAR_DOWN_CARD_INDEX = 19
 
 const ALGOLIA_INSIGHTS_EVENTS_URL =
   /insights\.(?:[a-z]+\.)?algolia\.io\/1\/events/u
@@ -44,7 +46,7 @@ test.describe('the phone journey', () => {
 
     await memesLink.click()
 
-    await expect(page).toHaveURL('/memes/category/trending')
+    await expect(page).toHaveURL('/memes/category/all')
     await expect(memesLink).toHaveAttribute('aria-current', 'page')
     await expect(page.getByRole('contentinfo')).toBeHidden()
   })
@@ -86,17 +88,44 @@ test.describe('the phone journey', () => {
     }, searchDrawer)
 
     await searchDrawer
-      .getByRole('searchbox', { name: m.nav_search() })
+      .getByRole('searchbox', { name: m.search_label() })
       .fill('cookie')
     await searchDrawer
-      .getByRole('link', {
-        name: E2E_NAMED_MEMES.mostViewed.title,
-        exact: true
-      })
+      .getByRole('region', { name: m.search_group_memes() })
+      .getByRole('button')
+      .filter({ hasText: E2E_NAMED_MEMES.mostViewed.title })
       .click()
 
     await expect(page).toHaveURL(PLAYABLE_MEME_PATHNAME)
     await expect(searchDrawer).toBeHidden()
+  })
+
+  test('the search tab shows every result of what was typed', async ({
+    page
+  }) => {
+    await page.goto('/')
+
+    const searchSheet = page.getByRole('dialog', { name: m.nav_search() })
+
+    await repeatUntilVisible(() => {
+      return page
+        .getByTestId('tab-bar')
+        .getByRole('button', { name: m.nav_search(), exact: true })
+        .click()
+    }, searchSheet)
+
+    const searchField = searchSheet.getByRole('searchbox', {
+      name: m.search_label()
+    })
+
+    await searchField.fill(E2E_UNIQUE_SEARCH_WORD)
+    await searchField.press('Enter')
+
+    await expect(page).toHaveURL(
+      `/memes/category/all?query=${E2E_UNIQUE_SEARCH_WORD}`
+    )
+    await expect(searchSheet).toBeHidden()
+    await expect(getMemeLink(page, E2E_NAMED_MEMES.searchTarget)).toBeVisible()
   })
 
   test('a Visitor signs in from the account tab', async ({ page }) => {
@@ -130,8 +159,8 @@ test.describe('the phone journey', () => {
   }) => {
     await page.goto(LIBRARY_PATHNAME)
 
-    // oxlint-disable-next-line playwright/no-nth-methods -- the last Meme sits furthest down the list: its scroll position is the one to restore
-    const lastPlayLink = getMemePlayLinks(page).last()
+    // oxlint-disable-next-line playwright/no-nth-methods -- a Meme far down the first page, clear of the end of the list where the next page starts loading
+    const lastPlayLink = getMemeCardLinks(page).nth(FAR_DOWN_CARD_INDEX)
     const memePathname = await lastPlayLink.getAttribute('href')
 
     await lastPlayLink.scrollIntoViewIfNeeded()
@@ -175,7 +204,7 @@ test.describe('the phone journey', () => {
     })
     await page.goto(LIBRARY_PATHNAME)
 
-    const firstPlayLink = getFirstMemePlayLink(page)
+    const firstPlayLink = getFirstMemeCardLink(page)
     const memePathname = await firstPlayLink.getAttribute('href')
     const memeId = memePathname?.split('/').at(-1)
 
@@ -256,7 +285,7 @@ test.describe('the phone journey of a Premium on the AI search', () => {
       timeout: AI_SEARCH_RESULTS_TIMEOUT_MS
     })
 
-    await getFirstMemePlayLink(page).tap()
+    await getFirstMemeCardLink(page).tap()
 
     await expect(
       page.getByRole('heading', {

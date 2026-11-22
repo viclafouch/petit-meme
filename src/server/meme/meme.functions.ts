@@ -8,7 +8,6 @@ import {
   MEME_EXPORT_MODES,
   MEME_FULL_INCLUDE,
   MEME_VIDEO_INTENTS,
-  MEMES_SEARCH_SCHEMA,
   type MemeVideoIntent
 } from '~/constants/meme'
 import {
@@ -29,8 +28,7 @@ import { truncateToUtcDay } from '~/helpers/date'
 import {
   localizeCategory,
   localizeMeme,
-  parseContentLocalesParam,
-  resolveVisibleContentLocales
+  VISIBLE_CONTENT_LOCALES
 } from '~/helpers/i18n-content'
 import { withDefaultMemeTitle } from '~/helpers/meme'
 import { extractClientIp } from '~/helpers/request'
@@ -140,8 +138,7 @@ export const getMemePlaybackUrl = createServerFn({ method: 'GET' })
   })
 
 const RANDOM_MEME_SCHEMA = z.object({
-  exceptId: z.string().optional(),
-  contentLocales: MEMES_SEARCH_SCHEMA.shape.contentLocales
+  exceptId: z.string().optional()
 })
 
 export const getRandomMeme = createServerFn({ method: 'GET' })
@@ -149,16 +146,9 @@ export const getRandomMeme = createServerFn({ method: 'GET' })
     return RANDOM_MEME_SCHEMA.parse(data)
   })
   .handler(async ({ data }) => {
-    const locale = getLocale()
-    const parsedContentLocales = !data.contentLocales
-      ? undefined
-      : parseContentLocalesParam(data.contentLocales, locale)
-
     const whereCondition = {
       status: MemeStatus.PUBLISHED,
-      contentLocale: {
-        in: resolveVisibleContentLocales(locale, parsedContentLocales)
-      },
+      contentLocale: { in: VISIBLE_CONTENT_LOCALES[getLocale()] },
       ...(!data.exceptId ? {} : { id: { not: data.exceptId } })
     }
 

@@ -86,7 +86,7 @@ const CapMeter = () => {
         className="h-1.5 w-20 overflow-hidden rounded-full bg-foreground/10"
       >
         <span
-          className="block h-full origin-left scale-x-(--bookmark-cap-ratio) rounded-full bg-bookmark-fill transition-[scale] duration-(--duration-base) ease-out motion-reduce:transition-none"
+          className="block h-full origin-left scale-x-(--bookmark-cap-ratio) rounded-full bg-foreground transition-[scale] duration-(--duration-base) ease-out motion-reduce:transition-none"
           style={{
             '--bookmark-cap-ratio': Math.min(
               1,
@@ -109,21 +109,18 @@ const CapReachedBanner = () => {
   return (
     <aside
       aria-labelledby="bookmark-cap-reached"
-      className="mb-6 flex flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl bg-(image:--gradient-premium) px-4 py-3.5 text-(--color-premium-foreground) shadow-(--shadow-premium) sm:px-5"
+      className="mb-6 flex flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl bg-secondary px-4 py-3.5 sm:px-5"
     >
-      <Crown aria-hidden="true" className="size-6 shrink-0 fill-current" />
+      <Crown aria-hidden="true" className="size-6 shrink-0" />
       <div className="min-w-0 flex-[1_1_14rem]">
         <h2 id="bookmark-cap-reached" className="font-bricolage font-semibold">
           {m.bookmark_cap_reached_title({ cap: FREE_CAPS.bookmark })}
         </h2>
-        <p className="text-sm text-pretty">
+        <p className="text-sm text-pretty text-muted-foreground">
           {m.bookmark_cap_reached_description()}
         </p>
       </div>
-      <Link
-        to="/pricing"
-        className="pill pill-sm bg-(--color-premium-foreground) text-white mouse:hover:not-disabled:bg-(--color-premium-foreground)/90"
-      >
+      <Link to="/pricing" className="pill pill-sm pill-brand">
         {m.nav_upgrade_premium()}
       </Link>
     </aside>
@@ -182,7 +179,7 @@ const BookmarksIntro = () => {
   return (
     <section
       aria-labelledby="bookmarks-intro"
-      className="grid items-center gap-x-10 gap-y-12 rounded-3xl bg-(image:--gradient-bookmark-glow) px-5 pt-14 pb-8 inset-ring inset-ring-foreground/6 sm:px-8 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)] lg:px-12 lg:py-12"
+      className="grid items-center gap-x-10 gap-y-12 rounded-3xl bg-foreground/3 px-5 pt-14 pb-8 inset-ring inset-ring-foreground/6 sm:px-8 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)] lg:px-12 lg:py-12"
     >
       {demoMeme ? <DemoCard meme={demoMeme} /> : null}
       <div className="flex max-w-prose flex-col gap-5">
@@ -201,7 +198,7 @@ const BookmarksIntro = () => {
           {BENEFITS.map((benefit) => {
             return (
               <li key={benefit.label()} className="flex items-center gap-3">
-                <span className="grid size-8 shrink-0 place-items-center rounded-full bg-bookmark-surface text-bookmark-foreground [&_svg]:size-4">
+                <span className="grid size-8 shrink-0 place-items-center rounded-full bg-foreground/6 [&_svg]:size-4">
                   <benefit.icon aria-hidden="true" />
                 </span>
                 {benefit.label()}

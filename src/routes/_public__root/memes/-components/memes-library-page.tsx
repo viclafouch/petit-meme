@@ -9,14 +9,15 @@ import {
   useMemesViewEvent
 } from '~/components/meme/meme-grid'
 import { LoadingSpinner } from '~/components/ui/spinner'
-import { ALL_CATEGORY_SLUG, MEMES_PER_PAGE } from '~/constants/meme'
+import { ALL_CATEGORY_SLUG } from '~/constants/meme'
 import { serializeJsonLd } from '~/helpers/json-ld'
-import { resolveMemesSort } from '~/helpers/memes-sort'
+import { resolveLibraryFilters } from '~/helpers/memes-sort'
 import { formatCount } from '~/helpers/number'
 import { buildBreadcrumbJsonLd, buildCategoryJsonLd } from '~/lib/seo/json-ld'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { listMemesPagesQueryOpts } from '~/queries/meme'
+import { flattenUniqueCards } from '~/routes/_public__root/memes/-lib/library'
 import { CategoryDirectory, QuickCategories } from './category-directory'
 import { MemesSortControl } from './memes-sort-control'
 
@@ -30,11 +31,11 @@ const useLibraryPages = () => {
 
   return useSuspenseInfiniteQuery(
     listMemesPagesQueryOpts(
-      {
+      resolveLibraryFilters({
+        slug,
         query: search.query,
-        sort: resolveMemesSort(search),
-        category: slug === ALL_CATEGORY_SLUG ? undefined : slug
-      },
+        sort: search.sort
+      }),
       search.page ?? 1
     )
   )
@@ -56,9 +57,14 @@ const LibraryTitle = ({ total }: LibraryTitleProps) => {
     : (category?.title ?? m.meme_all_memes())
 
   return (
-    <div className="memes-library-title">
-      <h1>{title}</h1>
-      <p aria-live="polite">
+    <div className="flex min-w-0 flex-[1_1_15rem] flex-wrap items-baseline gap-x-3">
+      <h1 className="min-w-0 font-bricolage text-xl leading-[1.1] font-semibold tracking-[-0.02em] wrap-anywhere lg:text-3xl">
+        {title}
+      </h1>
+      <p
+        aria-live="polite"
+        className="text-sm whitespace-nowrap text-muted-foreground tabular-nums"
+      >
         {m.meme_library_count({
           count: total,
           formattedCount: formatCount(total, getLocale(), 'standard')
@@ -78,14 +84,14 @@ const EmptyLibrary = () => {
   const isCategory = slug !== ALL_CATEGORY_SLUG && !query
 
   return (
-    <output className="memes-library-empty">
-      <p className="memes-library-empty-title">
+    <output className="flex flex-col items-center gap-2 rounded-2xl px-4 py-16 text-center inset-ring inset-ring-foreground/6">
+      <p className="max-w-full font-bricolage text-lg font-semibold wrap-anywhere">
         {query ? m.search_no_results({ query }) : m.meme_empty_title()}
       </p>
-      <p className="memes-library-empty-hint">
+      <p className="text-sm text-muted-foreground">
         {isCategory ? m.meme_empty_category_hint() : m.meme_empty_ai_hint()}
       </p>
-      <div className="memes-library-empty-actions">
+      <div className="mt-3 flex flex-wrap justify-center gap-2">
         {isCategory ? (
           <Link
             to="/memes/category/$slug"
@@ -182,9 +188,9 @@ const LoadMore = ({
   }, [isFetching, hasFailed])
 
   return (
-    <div ref={sentinelRef} className="memes-library-more">
+    <div ref={sentinelRef} className="flex flex-col items-center gap-3 pt-10">
       {hasFailed ? (
-        <p role="alert" className="memes-library-empty-hint">
+        <p role="alert" className="text-sm text-muted-foreground">
           {m.error_search_timeout()}
         </p>
       ) : null}
@@ -208,30 +214,6 @@ const LoadMore = ({
       </Link>
     </div>
   )
-}
-
-type LibraryPage = ReturnType<typeof useLibraryPages>['data']['pages'][number]
-
-const flattenUniqueCards = (pages: LibraryPage[]) => {
-  const seenIds = new Set<string>()
-
-  return pages.flatMap((page) => {
-    return page.memes.flatMap((meme, indexInPage) => {
-      if (seenIds.has(meme.id)) {
-        return []
-      }
-
-      seenIds.add(meme.id)
-
-      return [
-        {
-          meme,
-          queryID: page.queryID,
-          position: (page.page - 1) * MEMES_PER_PAGE + indexInPage + 1
-        }
-      ]
-    })
-  })
 }
 
 const LibraryGrid = () => {
@@ -283,8 +265,8 @@ const LibraryHeader = () => {
   const total = pagesQuery.data.pages[0]?.total ?? 0
 
   return (
-    <header className="memes-library-head">
-      <div className="memes-library-head-row">
+    <header className="pb-3 lg:pb-8">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <LibraryTitle total={total} />
         <MemesSortControl />
       </div>
@@ -294,13 +276,13 @@ const LibraryHeader = () => {
 
 export const MemesLibraryPage = () => {
   return (
-    <div className="memes-library">
+    <div className="mx-auto w-full max-w-440 px-3 pt-5 pb-10 sm:px-4 lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:items-start lg:gap-8 lg:px-[clamp(1.5rem,3vw,3rem)] lg:pt-10 lg:pb-12">
       <aside className="memes-library-sidebar max-lg:hidden">
         <CategoryDirectory />
       </aside>
-      <div className="memes-library-main">
+      <div className="min-w-0">
         <LibraryHeader />
-        <div className="memes-library-quick lg:hidden">
+        <div className="sticky top-(--navbar-space) z-(--z-controls) -mx-3 mb-4 bg-background px-3 py-1 sm:-mx-4 sm:px-4 lg:hidden">
           <QuickCategories />
         </div>
         <LibraryGrid />

@@ -2,7 +2,7 @@ import { useNavigate, useRouteContext } from '@tanstack/react-router'
 import { AI_SEARCH_PROMPT_STORAGE_KEY } from '~/constants/ai-search'
 import { ALL_CATEGORY_SLUG } from '~/constants/meme'
 import { sendClickEvent } from '~/lib/algolia-insights'
-import type { SearchSuggestion } from './use-search-suggestions'
+import type { SearchSuggestion } from './search-suggestion-groups'
 
 export const useSearchNavigation = () => {
   const navigate = useNavigate()

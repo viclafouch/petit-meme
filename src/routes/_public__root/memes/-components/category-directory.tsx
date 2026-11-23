@@ -9,9 +9,7 @@ import {
   DrawerTitle,
   DrawerTrigger
 } from '~/components/ui/drawer'
-import { CATEGORY_FAMILIES } from '~/constants/category'
 import { ALL_CATEGORY_SLUG } from '~/constants/meme'
-import type { CategoryFamily } from '~/db/generated/prisma/enums'
 import { formatCount } from '~/helpers/number'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
@@ -19,20 +17,15 @@ import {
   countLibraryMemesQueryOpts,
   listCategoriesQueryOpts
 } from '~/queries/category'
-import type { listCategories } from '~/server/category/category.functions'
+import {
+  groupByFamily,
+  type LibraryCategory,
+  sortByMemeCount
+} from '~/routes/_public__root/memes/-lib/library'
 
 const FAMILY_PREVIEW_COUNT = 8
 
 const categoryRouteApi = getRouteApi('/_public__root/memes/category/$slug')
-
-const FAMILY_TITLES = {
-  MOOD: m.category_family_MOOD,
-  REPLY: m.category_family_REPLY,
-  THEME: m.category_family_THEME,
-  SOURCE: m.category_family_SOURCE
-} as const satisfies Record<CategoryFamily, () => string>
-
-type LibraryCategory = Awaited<ReturnType<typeof listCategories>>[number]
 
 const useLibraryCategories = () => {
   return useSuspenseQuery(listCategoriesQueryOpts(getLocale())).data
@@ -47,45 +40,6 @@ const useActiveSlug = () => {
   })
 
   return query ? undefined : slug
-}
-
-const sortByMemeCount = (categories: LibraryCategory[]) => {
-  return categories.toSorted((first, second) => {
-    return second.memeCount - first.memeCount
-  })
-}
-
-type LibraryCategoryGroup = {
-  id: CategoryFamily | 'OTHER'
-  title: string
-  categories: LibraryCategory[]
-}
-
-const groupByFamily = (categories: LibraryCategory[]) => {
-  const families = CATEGORY_FAMILIES.map((family): LibraryCategoryGroup => {
-    return {
-      id: family,
-      title: FAMILY_TITLES[family](),
-      categories: sortByMemeCount(
-        categories.filter((category) => {
-          return category.family === family
-        })
-      )
-    }
-  })
-  const others: LibraryCategoryGroup = {
-    id: 'OTHER',
-    title: m.category_family_OTHER(),
-    categories: sortByMemeCount(
-      categories.filter((category) => {
-        return category.family === null
-      })
-    )
-  }
-
-  return [...families, others].filter((family) => {
-    return family.categories.length > 0
-  })
 }
 
 type CategoryLinkProps = {
@@ -116,19 +70,19 @@ const CategoryLink = ({
       }}
       aria-current={isActive ? 'page' : undefined}
       data-empty={count === 0 || undefined}
-      className="category-directory-link"
+      className="flex min-h-9 w-full items-center gap-2.5 rounded-md px-2 text-sm transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--focus-color) pointer-coarse:min-h-11 data-empty:text-muted-foreground aria-[current=page]:bg-secondary aria-[current=page]:font-semibold mouse:hover:not-aria-[current=page]:bg-foreground/6"
       onClick={onNavigate}
     >
       {emoji === undefined ? null : (
-        <CategoryEmojiImage
-          emoji={emoji}
-          className="category-directory-emoji"
-        />
+        <CategoryEmojiImage emoji={emoji} className="size-5" />
       )}
-      <span className="category-directory-label" title={title}>
+      <span className="min-w-0 flex-1 truncate" title={title}>
         {title}
       </span>
-      <span className="category-directory-count" aria-hidden="true">
+      <span
+        className="shrink-0 text-xs text-muted-foreground tabular-nums"
+        aria-hidden="true"
+      >
         {formatCount(count, getLocale(), 'compact')}
       </span>
     </Link>
@@ -159,8 +113,11 @@ const CategoryFamilySection = ({
   const hiddenCount = categories.length - visibleCount
 
   return (
-    <section aria-labelledby={headingId} className="category-directory-family">
-      <h2 id={headingId} className="category-directory-heading">
+    <section aria-labelledby={headingId}>
+      <h2
+        id={headingId}
+        className="px-2 pb-1 text-xs font-medium text-muted-foreground"
+      >
         {title}
       </h2>
       <ul>
@@ -182,7 +139,7 @@ const CategoryFamilySection = ({
       {hiddenCount > 0 ? (
         <button
           type="button"
-          className="category-directory-more"
+          className="mt-1 cursor-pointer rounded-md px-2 py-1.5 text-xs font-medium text-muted-foreground focus-visible:focus-ring mouse:hover:text-foreground"
           onClick={() => {
             setIsExpanded(true)
           }}
@@ -209,7 +166,7 @@ export const CategoryDirectory = ({ onNavigate }: CategoryDirectoryProps) => {
   const activeSlug = useActiveSlug()
 
   return (
-    <nav aria-label={m.meme_categories_label()} className="category-directory">
+    <nav aria-label={m.meme_categories_label()} className="flex flex-col gap-5">
       <CategoryLink
         slug={ALL_CATEGORY_SLUG}
         title={m.meme_all_memes()}
@@ -242,8 +199,8 @@ const CategoriesDrawer = () => {
         {m.meme_categories_label()}
       </DrawerTrigger>
       <DrawerContent showCloseButton={false}>
-        <div className="category-sheet">
-          <DrawerTitle className="category-sheet-title">
+        <div className="flex min-h-0 flex-col gap-4 overflow-y-auto overscroll-contain px-4 pt-2 pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
+          <DrawerTitle className="font-bricolage text-lg font-semibold">
             {m.meme_categories_label()}
           </DrawerTitle>
           <CategoryDirectory
@@ -257,10 +214,10 @@ const CategoriesDrawer = () => {
   )
 }
 
-const centerInStrip = (item: HTMLLIElement | null) => {
+const revealInStrip = (item: HTMLLIElement | null) => {
   item?.scrollIntoView({
     block: 'nearest',
-    inline: 'center',
+    inline: 'nearest',
     behavior: 'instant'
   })
 }
@@ -273,7 +230,10 @@ export const QuickCategories = () => {
   })
 
   return (
-    <ul className="quick-categories" aria-label={m.meme_categories_label()}>
+    <ul
+      className="scrollbar-hidden -mx-3 flex scroll-px-3 gap-1.5 overflow-x-auto overscroll-x-contain px-3 py-1 sm:-mx-4 sm:px-4 [&>li]:shrink-0"
+      aria-label={m.meme_categories_label()}
+    >
       <li>
         <CategoriesDrawer />
       </li>
@@ -281,7 +241,11 @@ export const QuickCategories = () => {
         const isActive = category.slug === activeSlug
 
         return (
-          <li key={category.id} ref={isActive ? centerInStrip : undefined}>
+          <li
+            key={category.id}
+            ref={isActive ? revealInStrip : undefined}
+            className={isActive ? '[scroll-initial-target:nearest]' : undefined}
+          >
             <Link
               to="/memes/category/$slug"
               params={{ slug: isActive ? ALL_CATEGORY_SLUG : category.slug }}
@@ -297,12 +261,9 @@ export const QuickCategories = () => {
                   : undefined
               }
               data-active={isActive || undefined}
-              className="pill pill-sm quick-category"
+              className="pill pill-sm data-active:bg-foreground data-active:text-background"
             >
-              <CategoryEmojiImage
-                emoji={category.emoji}
-                className="quick-category-emoji"
-              />
+              <CategoryEmojiImage emoji={category.emoji} className="size-4.5" />
               {category.title}
             </Link>
           </li>

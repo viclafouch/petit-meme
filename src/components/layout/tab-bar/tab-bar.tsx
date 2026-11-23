@@ -2,10 +2,14 @@ import { Clapperboard, House, LayoutGrid } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { AccountDrawer } from '~/components/layout/tab-bar/account-drawer'
 import { TAB_ITEM_CLASS } from '~/components/layout/tab-bar/tab-item-class'
+import { useIsLibraryActive } from '~/components/layout/use-is-library-active'
 import { SearchSheet } from '~/components/search/search-sheet'
+import { ALL_CATEGORY_SLUG } from '~/constants/meme'
 import { m } from '~/paraglide/messages'
 
 export const TabBar = () => {
+  const isLibraryActive = useIsLibraryActive()
+
   return (
     <nav
       data-testid="tab-bar"
@@ -25,7 +29,13 @@ export const TabBar = () => {
           </Link>
         </li>
         <li>
-          <Link to="/memes" preload="intent" className={TAB_ITEM_CLASS}>
+          <Link
+            to="/memes/category/$slug"
+            params={{ slug: ALL_CATEGORY_SLUG }}
+            preload="intent"
+            className={TAB_ITEM_CLASS}
+            aria-current={isLibraryActive ? 'page' : undefined}
+          >
             <LayoutGrid aria-hidden="true" />
             {m.nav_memes()}
           </Link>

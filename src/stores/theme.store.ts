@@ -11,8 +11,16 @@ type ThemeState = {
 export const THEME_CHANNEL_NAME = 'ui-theme'
 
 const applyThemeClass = (theme: Theme) => {
-  document.documentElement.classList.remove('light', 'dark')
-  document.documentElement.classList.add(theme)
+  const root = document.documentElement
+
+  root.dataset.themeSwitching = ''
+  root.classList.remove('light', 'dark')
+  root.classList.add(theme)
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      delete root.dataset.themeSwitching
+    })
+  })
 }
 
 const broadcastTheme = (theme: Theme) => {

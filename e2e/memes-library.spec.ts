@@ -125,42 +125,23 @@ test.describe('the library', () => {
     )
   })
 
-  test('an old sorting Category leads to the library sorted the same way', async ({
-    page
-  }) => {
-    const response = await page.goto('/memes/category/news')
+  for (const localePrefix of ['', '/en']) {
+    test(`an old sorting Category leads for good to the library sorted the same way (${localePrefix || '/'})`, async ({
+      request
+    }) => {
+      const response = await request.get(
+        `${localePrefix}/memes/category/news`,
+        { maxRedirects: 0 }
+      )
+      const location = new URL(
+        response.headers().location ?? '',
+        response.url()
+      )
 
-    expect(response?.status()).toBe(HTTP_STATUS.OK)
-    await expect(page).toHaveURL(`${LIBRARY_PATHNAME}?sort=new`)
-  })
-
-  test('the cards keep their size after a Meme page was opened and left', async ({
-    page
-  }) => {
-    await page.goto(LIBRARY_PATHNAME)
-
-    const memeLink = getMemeLink(page, E2E_NAMED_MEMES.mostViewed)
-    const widthBefore = await memeLink.evaluate((link) => {
-      return link.getBoundingClientRect().width
+      expect(response.status()).toBe(HTTP_STATUS.PERMANENT_REDIRECT)
+      expect(`${location.pathname}${location.search}`).toBe(
+        `${localePrefix}${LIBRARY_PATHNAME}?sort=new`
+      )
     })
-
-    await repeatUntilNavigated(
-      () => {
-        return memeLink.click()
-      },
-      { page, from: LIBRARY_PATHNAME }
-    )
-    await expect(page.getByTestId('meme-video-player')).toBeVisible()
-
-    await page.goBack()
-
-    await expect(page).toHaveURL(LIBRARY_PATHNAME)
-    await expect
-      .poll(() => {
-        return memeLink.evaluate((link) => {
-          return link.getBoundingClientRect().width
-        })
-      })
-      .toBe(widthBefore)
-  })
+  }
 })

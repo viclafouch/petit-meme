@@ -5,6 +5,7 @@ import { E2E_NAMED_MEMES } from './content'
 import { resolveStorageStatePath } from './env'
 import { test } from './fixtures'
 import { expectVisibleAfterReload, repeatUntilVisible } from './hydration'
+import { matchIsServerFunctionRequest } from './server-functions'
 
 const BOOKMARKED_MEME_PATHNAME = `/memes/${E2E_NAMED_MEMES.mostViewed.id}`
 const UNBOOKMARKED_MEME_PATHNAME = `/memes/${E2E_NAMED_MEMES.universal.id}`
@@ -52,7 +53,7 @@ test.describe('a signed in User', () => {
       const request = response.request()
 
       if (
-        request.method() === 'POST' &&
+        matchIsServerFunctionRequest(request) &&
         (request.postData() ?? '').includes(TOGGLED_FROM_CARD_MEME.id)
       ) {
         settledToggleCount += 1

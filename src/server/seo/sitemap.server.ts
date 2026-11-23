@@ -5,6 +5,7 @@ import { baseLocale, type Locale, locales } from '~/paraglide/runtime'
 
 export type SitemapPage = {
   pathname: string
+  locales?: readonly Locale[]
   lastmod?: string
   image?: SitemapImageParams
   video?: SitemapVideoParams
@@ -73,7 +74,11 @@ const buildHreflangLinks = (
     ...targetLocales.map((locale) => {
       return `    <xhtml:link rel="alternate" hreflang="${locale}" href="${buildUrl(pathname, locale)}" />`
     }),
-    `    <xhtml:link rel="alternate" hreflang="x-default" href="${buildUrl(pathname, baseLocale)}" />`
+    ...(targetLocales.includes(baseLocale)
+      ? [
+          `    <xhtml:link rel="alternate" hreflang="x-default" href="${buildUrl(pathname, baseLocale)}" />`
+        ]
+      : [])
   ].join('\n')
 }
 
@@ -137,12 +142,12 @@ export const buildUrlEntry = ({
 
 export const buildLocalizedEntries = (pages: readonly SitemapPage[]) => {
   return pages
-    .flatMap(({ pathname, ...content }) => {
-      return locales.map((locale) => {
+    .flatMap(({ pathname, locales: pageLocales = locales, ...content }) => {
+      return pageLocales.map((locale) => {
         return buildUrlEntry({
           ...content,
           loc: buildUrl(pathname, locale),
-          hreflang: { pathname, locales }
+          hreflang: { pathname, locales: pageLocales }
         })
       })
     })

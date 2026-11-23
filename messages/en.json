@@ -323,8 +323,8 @@
   "meme_related": "Similar memes",
   "meme_related_empty": "No similar memes yet, try shuffle.",
   "meme_remove_bookmark": "Remove from favorites",
-  "meme_seo_category_description": "Browse the best {title} video memes on Petit Meme. Watch, share, and generate your favorite meme videos. Free and accessible to everyone!",
-  "meme_seo_category_title": "{title} memes",
+  "meme_seo_category_description": "{title} video memes to watch, download and share for free on Petit Meme, no account needed.",
+  "meme_seo_category_title": "{title} video memes to download",
   "meme_seo_library_description": "Discover the largest meme library: create, explore, and share legendary memes on Petit Meme. Free and accessible to everyone!",
   "meme_seo_library_title": "Online meme library",
   "meme_share": "Share",
@@ -730,5 +730,41 @@
   "search_ask_ai_query": "Ask the AI: “{query}”",
   "search_ai_no_match": "No title matches",
   "search_ai_describe": "Describe the scene",
-  "category_filter_clear": "{title}, clear the filter"
+  "category_filter_clear": "{title}, clear the filter",
+  "meme_seo_category_examples": [
+    {
+      "declarations": [
+        "input count",
+        "input formattedCount",
+        "input title",
+        "input examples",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{formattedCount} {title} video meme: {examples}. Watch, download and share it for free, no account needed.",
+        "countPlural=other": "{formattedCount} {title} video memes, including {examples}. Watch, download and share them for free, no account needed."
+      }
+    }
+  ],
+  "meme_seo_library_examples": [
+    {
+      "declarations": [
+        "input count",
+        "input formattedCount",
+        "input examples",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{formattedCount} video meme: {examples}. Watch, download and share it for free, no account needed.",
+        "countPlural=other": "{formattedCount} video memes, including {examples}. Watch, download and share them for free, no account needed."
+      }
+    }
+  ],
+  "meme_seo_quoted_title": "“{title}”"
 }

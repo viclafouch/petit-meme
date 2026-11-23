@@ -46,7 +46,7 @@ const websiteSearchAction = {
   '@type': 'SearchAction',
   target: {
     '@type': 'EntryPoint',
-    urlTemplate: `${websiteOrigin}/memes?query={search_term_string}`
+    urlTemplate: `${websiteOrigin}/memes/category/all?query={search_term_string}`
   },
   'query-input': 'required name=search_term_string'
 } satisfies WithActionConstraints<SearchAction>

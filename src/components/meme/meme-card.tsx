@@ -311,7 +311,7 @@ export const MemeCard = React.memo(
           title={meme.title}
           queryID={queryID}
           authenticatedUserToken={authenticatedUserToken}
-          className="absolute top-1.5 right-1.5 z-(--z-floating) mouse:not-data-active:opacity-0 mouse:not-data-active:focus-visible:opacity-100 mouse:not-data-active:in-[.meme-card:hover]:opacity-100 mouse:not-data-active:in-[.meme-card:focus-within]:opacity-100"
+          className="meme-card-bookmark absolute top-1.5 right-1.5 z-(--z-floating)"
         />
         <MemeCardMenu
           meme={meme}

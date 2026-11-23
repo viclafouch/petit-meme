@@ -1,43 +1,33 @@
+import type { QueryClient } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { buildSeo } from '~/lib/seo/meta'
 import { m } from '~/paraglide/messages'
-import {
-  listBookmarkIdsQueryOpts,
-  listBookmarksQueryOpts
-} from '~/queries/bookmark'
+import { listBookmarksQueryOpts } from '~/queries/bookmark'
 import { listTrendingMemesQueryOpts } from '~/queries/meme'
 import { BookmarksPage } from './-components/bookmarks-page'
+
+const settleTrendingMemes = (queryClient: QueryClient) => {
+  return Promise.allSettled([
+    queryClient.query({ ...listTrendingMemesQueryOpts(), staleTime: 'static' })
+  ])
+}
 
 export const Route = createFileRoute('/_public__root/memes/_library/bookmarks')(
   {
     loader: async ({ context }) => {
-      const trendingMemes = Promise.allSettled([
-        context.queryClient.query({
-          ...listTrendingMemesQueryOpts(),
-          staleTime: 'static'
-        })
-      ])
-
       if (!context.user) {
-        await trendingMemes
+        await settleTrendingMemes(context.queryClient)
 
         return
       }
 
-      const [bookmarksPages] = await Promise.all([
-        context.queryClient.infiniteQuery({
-          ...listBookmarksQueryOpts(),
-          staleTime: 'static'
-        }),
-        context.queryClient.query({
-          ...listBookmarkIdsQueryOpts(),
-          staleTime: 'static'
-        })
-      ])
-      const total = bookmarksPages.pages[0]?.total ?? 0
+      const bookmarksPages = await context.queryClient.infiniteQuery({
+        ...listBookmarksQueryOpts(),
+        staleTime: 'static'
+      })
 
-      if (total === 0) {
-        await trendingMemes
+      if (bookmarksPages.pages[0]?.total === 0) {
+        await settleTrendingMemes(context.queryClient)
       }
     },
     head: () => {

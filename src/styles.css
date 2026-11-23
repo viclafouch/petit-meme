@@ -469,6 +469,8 @@
   --text-3xs: 0.5rem;
   --text-2xs: 0.625rem;
   --animate-background-shine: background-shine 2s linear infinite;
+  --animate-bookmark-ping: ping var(--duration-ping) var(--ease-out-strong)
+    var(--duration-slow) 3 both;
   --animate-stars-drift: stars-drift linear infinite;
   --animate-aurora-drift: aurora-drift linear infinite;
 
@@ -803,8 +805,13 @@ input:autofill {
       min-height: --spacing(11);
     }
 
+    &[data-active] {
+      background: --theme(--color-foreground);
+      color: --theme(--color-background);
+    }
+
     @variant mouse {
-      &:hover:not(:disabled) {
+      &:hover:not(:disabled, [data-active]) {
         background: --theme(--color-secondary-hover);
       }
     }

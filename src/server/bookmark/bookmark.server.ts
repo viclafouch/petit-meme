@@ -1,6 +1,11 @@
 import type { Prisma } from '~/db/generated/prisma/client'
 import { MemeStatus } from '~/db/generated/prisma/enums'
 
+export const VISIBLE_BOOKMARKS_ORDER_BY = [
+  { createdAt: 'desc' },
+  { id: 'desc' }
+] as const satisfies Prisma.BookmarkOrderByWithRelationInput[]
+
 export const buildVisibleBookmarksWhere = (userId: string) => {
   return {
     userId,

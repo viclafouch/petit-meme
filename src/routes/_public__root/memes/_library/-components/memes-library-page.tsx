@@ -2,20 +2,16 @@ import { Sparkles } from 'lucide-react'
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
 import { getRouteApi, Link } from '@tanstack/react-router'
 import { useMemesViewEvent } from '~/components/meme/meme-grid'
-import { LoadingSpinner } from '~/components/ui/spinner'
 import { ALL_CATEGORY_SLUG } from '~/constants/meme'
 import { serializeJsonLd } from '~/helpers/json-ld'
 import { resolveLibraryFilters } from '~/helpers/memes-sort'
-import { formatCount } from '~/helpers/number'
 import { buildBreadcrumbJsonLd, buildCategoryJsonLd } from '~/lib/seo/json-ld'
 import { m } from '~/paraglide/messages'
-import { getLocale } from '~/paraglide/runtime'
 import { listMemesPagesQueryOpts } from '~/queries/meme'
 import { flattenUniqueCards } from '~/routes/_public__root/memes/-lib/library'
-import { LibraryStrip } from './library-layout'
-import { MemeCardGrid } from './meme-card-grid'
+import { LibraryHeader, LibraryStrip } from './library-layout'
+import { LoadMore, MemeCardGrid } from './meme-card-grid'
 import { MemesSortControl } from './memes-sort-control'
-import { useLoadMoreWhenVisible } from './use-load-more-when-visible'
 
 const categoryRouteApi = getRouteApi(
   '/_public__root/memes/_library/category/$slug'
@@ -34,39 +30,6 @@ const useLibraryPages = () => {
       }),
       search.page ?? 1
     )
-  )
-}
-
-type LibraryTitleProps = {
-  total: number
-}
-
-const LibraryTitle = ({ total }: LibraryTitleProps) => {
-  const { category } = categoryRouteApi.useLoaderData()
-  const query = categoryRouteApi.useSearch({
-    select: (search) => {
-      return search.query
-    }
-  })
-  const title = query
-    ? m.meme_library_query_title({ query })
-    : (category?.title ?? m.meme_all_memes())
-
-  return (
-    <div className="flex min-w-0 flex-[1_1_15rem] flex-wrap items-baseline gap-x-3">
-      <h1 className="min-w-0 font-bricolage text-xl leading-[1.1] font-semibold tracking-[-0.02em] wrap-anywhere lg:text-3xl">
-        {title}
-      </h1>
-      <p
-        aria-live="polite"
-        className="text-sm whitespace-nowrap text-muted-foreground tabular-nums"
-      >
-        {m.meme_library_count({
-          count: total,
-          formattedCount: formatCount(total, getLocale(), 'standard')
-        })}
-      </p>
-    </div>
   )
 }
 
@@ -143,55 +106,6 @@ const LibraryJsonLd = () => {
   )
 }
 
-type LoadMoreProps = {
-  nextPage: number
-  isFetching: boolean
-  hasFailed: boolean
-  onLoadMore: () => void
-}
-
-const LoadMore = ({
-  nextPage,
-  isFetching,
-  hasFailed,
-  onLoadMore
-}: LoadMoreProps) => {
-  const search = categoryRouteApi.useSearch()
-  const sentinelRef = useLoadMoreWhenVisible({
-    isFetching,
-    hasFailed,
-    onLoadMore
-  })
-
-  return (
-    <div ref={sentinelRef} className="flex flex-col items-center gap-3 pt-10">
-      {hasFailed ? (
-        <p role="alert" className="text-sm text-muted-foreground">
-          {m.error_search_timeout()}
-        </p>
-      ) : null}
-      <Link
-        to="."
-        search={{ ...search, page: nextPage }}
-        preload={false}
-        resetScroll={false}
-        className="pill pill-sm"
-        aria-disabled={isFetching || undefined}
-        onClick={(event) => {
-          event.preventDefault()
-
-          if (!isFetching) {
-            onLoadMore()
-          }
-        }}
-      >
-        {isFetching ? <LoadingSpinner /> : null}
-        {hasFailed ? m.common_retry() : m.meme_load_more()}
-      </Link>
-    </div>
-  )
-}
-
 const LibraryGrid = () => {
   const pagesQuery = useLibraryPages()
   const cards = flattenUniqueCards(pagesQuery.data.pages)
@@ -210,36 +124,55 @@ const LibraryGrid = () => {
     >
       {pagesQuery.hasNextPage && lastPage ? (
         <LoadMore
-          nextPage={lastPage.page + 1}
           isFetching={pagesQuery.isFetchingNextPage}
           hasFailed={pagesQuery.isFetchNextPageError}
+          failedMessage={m.error_search_timeout()}
           onLoadMore={() => {
             void pagesQuery.fetchNextPage()
           }}
+          render={
+            <Link
+              to="."
+              search={(previous) => {
+                return { ...previous, page: lastPage.page + 1 }
+              }}
+              preload={false}
+              resetScroll={false}
+            />
+          }
         />
       ) : null}
     </MemeCardGrid>
   )
 }
 
-const LibraryHeader = () => {
+const LibraryPageHeader = () => {
   const pagesQuery = useLibraryPages()
-  const total = pagesQuery.data.pages[0]?.total ?? 0
+  const { category } = categoryRouteApi.useLoaderData()
+  const query = categoryRouteApi.useSearch({
+    select: (search) => {
+      return search.query
+    }
+  })
 
   return (
-    <header className="pb-3 lg:pb-8">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <LibraryTitle total={total} />
-        <MemesSortControl />
-      </div>
-    </header>
+    <LibraryHeader
+      title={
+        query
+          ? m.meme_library_query_title({ query })
+          : (category?.title ?? m.meme_all_memes())
+      }
+      count={pagesQuery.data.pages[0]?.total ?? 0}
+    >
+      <MemesSortControl />
+    </LibraryHeader>
   )
 }
 
 export const MemesLibraryPage = () => {
   return (
     <>
-      <LibraryHeader />
+      <LibraryPageHeader />
       <LibraryStrip />
       <LibraryGrid />
       <LibraryJsonLd />

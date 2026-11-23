@@ -3,7 +3,6 @@ import { LayoutGrid, Star } from 'lucide-react'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import {
   Link,
-  useMatchRoute,
   useParams,
   useRouteContext,
   useSearch
@@ -19,7 +18,7 @@ import { ALL_CATEGORY_SLUG } from '~/constants/meme'
 import { formatCount } from '~/helpers/number'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
-import { listBookmarkIdsQueryOpts } from '~/queries/bookmark'
+import { countBookmarksQueryOpts } from '~/queries/bookmark'
 import {
   countLibraryMemesQueryOpts,
   listCategoriesQueryOpts
@@ -51,24 +50,16 @@ const useActiveSlug = () => {
   return query ? undefined : slug
 }
 
-const useBookmarkCount = () => {
-  const { user } = useRouteContext({ from: '__root__' })
-
-  return useQuery({
-    ...listBookmarkIdsQueryOpts(),
-    enabled: Boolean(user),
-    select: (memeIds) => {
-      return memeIds.length
-    }
-  }).data
-}
-
 type BookmarksLinkProps = {
   onNavigate?: () => void
 }
 
 const BookmarksLink = ({ onNavigate }: BookmarksLinkProps) => {
-  const count = useBookmarkCount()
+  const { user } = useRouteContext({ from: '__root__' })
+  const count = useQuery({
+    ...countBookmarksQueryOpts(),
+    enabled: Boolean(user)
+  }).data
 
   return (
     <Link
@@ -284,8 +275,6 @@ const revealInStrip = (item: HTMLLIElement | null) => {
 export const QuickCategories = () => {
   const categories = useLibraryCategories()
   const activeSlug = useActiveSlug()
-  const matchRoute = useMatchRoute()
-  const isBookmarksActive = Boolean(matchRoute({ to: '/memes/bookmarks' }))
   const sortedCategories = sortByMemeCount(categories).filter((category) => {
     return category.memeCount > 0 || category.slug === activeSlug
   })
@@ -300,15 +289,9 @@ export const QuickCategories = () => {
       </li>
       <li>
         <Link
-          to={isBookmarksActive ? '/memes/category/$slug' : '/memes/bookmarks'}
-          params={{ slug: ALL_CATEGORY_SLUG }}
-          aria-label={
-            isBookmarksActive
-              ? m.category_filter_clear({ title: m.bookmark_strip_label() })
-              : undefined
-          }
-          data-active={isBookmarksActive || undefined}
-          className="pill pill-sm data-active:bg-foreground data-active:text-background"
+          to="/memes/bookmarks"
+          activeProps={{ 'data-active': true }}
+          className="pill pill-sm"
         >
           <Star
             aria-hidden="true"
@@ -341,7 +324,7 @@ export const QuickCategories = () => {
                   : undefined
               }
               data-active={isActive || undefined}
-              className="pill pill-sm data-active:bg-foreground data-active:text-background"
+              className="pill pill-sm"
             >
               <CategoryEmojiImage emoji={category.emoji} className="size-4.5" />
               {category.title}

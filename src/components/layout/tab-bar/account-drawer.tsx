@@ -46,7 +46,7 @@ import { changeLocale } from '~/lib/change-locale'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
 import { getLocale, locales, type Locale } from '~/paraglide/runtime'
-import { listBookmarkIdsQueryOpts } from '~/queries/bookmark'
+import { countBookmarksQueryOpts } from '~/queries/bookmark'
 import { getPremiumSubscriptionQueryOpts } from '~/queries/subscription'
 import { useCookieConsentStore } from '~/stores/cookie-consent.store'
 import { useDialogStore } from '~/stores/dialog.store'
@@ -202,12 +202,7 @@ type UserSectionsProps = InstallAfterCloseProps & {
 const UserSections = ({ user, onInstall }: UserSectionsProps) => {
   const { goToBillingPortal } = useStripeCheckout()
   const { signOut } = useSignOut()
-  const bookmarkCountQuery = useQuery({
-    ...listBookmarkIdsQueryOpts(),
-    select: (memeIds) => {
-      return memeIds.length
-    }
-  })
+  const bookmarkCountQuery = useQuery(countBookmarksQueryOpts())
   const premiumSubscriptionQuery = useQuery(getPremiumSubscriptionQueryOpts())
   const isPremium = useIsPremium()
 

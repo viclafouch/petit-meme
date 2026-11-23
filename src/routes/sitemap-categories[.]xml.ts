@@ -1,5 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { prismaClient } from '~/db/client.server'
+import { locales } from '~/paraglide/runtime'
+import { readCachedCategoryMemeCounts } from '~/server/category/category.server'
 import {
   buildLocalizedEntries,
   buildSitemapResponse,
@@ -12,17 +14,42 @@ export const Route = createFileRoute('/sitemap-categories.xml')({
   server: {
     handlers: {
       GET: async () => {
-        const categories = await prismaClient.category.findMany({
-          select: { slug: true, updatedAt: true }
-        })
+        const [categories, countsByLocale] = await Promise.all([
+          prismaClient.category.findMany({
+            select: { id: true, slug: true, updatedAt: true }
+          }),
+          Promise.all(
+            locales.map(async (locale) => {
+              return {
+                locale,
+                counts: await readCachedCategoryMemeCounts(locale)
+              }
+            })
+          )
+        ])
 
         const pages: SitemapPage[] = [
           { pathname: '/memes/category/all' },
-          ...categories.map((category): SitemapPage => {
-            return {
-              pathname: `/memes/category/${category.slug}`,
-              lastmod: formatIsoDate(category.updatedAt)
+          ...categories.flatMap((category): SitemapPage[] => {
+            const visibleLocales = countsByLocale
+              .filter(({ counts }) => {
+                return (counts.byCategory.get(category.id) ?? 0) > 0
+              })
+              .map(({ locale }) => {
+                return locale
+              })
+
+            if (visibleLocales.length === 0) {
+              return []
             }
+
+            return [
+              {
+                pathname: `/memes/category/${category.slug}`,
+                locales: visibleLocales,
+                lastmod: formatIsoDate(category.updatedAt)
+              }
+            ]
           })
         ]
 

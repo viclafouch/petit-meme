@@ -45,7 +45,7 @@ export function useToggleBookmark({
   }, [bookmarks, meme.id])
 
   const toggleMutation = useMutation({
-    mutationKey: TOGGLE_BOOKMARK_MUTATION_KEY,
+    mutationKey: [...TOGGLE_BOOKMARK_MUTATION_KEY, meme.id],
     scope: { id: `toggle-bookmark:${meme.id}` },
     mutationFn: toggleBookmark,
     onMutate: async () => {
@@ -101,16 +101,22 @@ export function useToggleBookmark({
       toast.error(m.error_bookmark_update())
     },
     onSettled: () => {
-      if (
-        queryClient.isMutating({ mutationKey: TOGGLE_BOOKMARK_MUTATION_KEY }) >
-        1
-      ) {
-        return null
-      }
+      const isLastToggleOfMeme =
+        queryClient.isMutating({
+          mutationKey: [...TOGGLE_BOOKMARK_MUTATION_KEY, meme.id]
+        }) === 1
+      const isLastToggle =
+        queryClient.isMutating({
+          mutationKey: TOGGLE_BOOKMARK_MUTATION_KEY
+        }) === 1
 
       return Promise.all([
-        queryClient.invalidateQueries(getMemeQueryOpts(meme.id)),
-        queryClient.invalidateQueries(listBookmarkedMemesQueryOpts())
+        isLastToggleOfMeme
+          ? queryClient.invalidateQueries(getMemeQueryOpts(meme.id))
+          : null,
+        isLastToggle
+          ? queryClient.invalidateQueries(listBookmarkedMemesQueryOpts())
+          : null
       ])
     }
   })

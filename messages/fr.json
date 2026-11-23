@@ -323,8 +323,8 @@
   "meme_related": "Memes similaires",
   "meme_related_empty": "Pas encore de mème similaire, tente le hasard.",
   "meme_remove_bookmark": "Retirer des favoris",
-  "meme_seo_category_description": "Retrouvez les meilleurs mèmes vidéo de la catégorie {title} sur Petit Meme. Parcourez, partagez et générez vos vidéos préférées. Gratuit et accessible à tous !",
-  "meme_seo_category_title": "Mèmes {title}",
+  "meme_seo_category_description": "Mèmes {title} en vidéo à regarder, télécharger et partager gratuitement sur Petit Meme, sans compte.",
+  "meme_seo_category_title": "Mèmes {title} en vidéo à télécharger",
   "meme_seo_library_description": "Découvre la plus grande bibliothèque de mèmes : crée, explore et partage des mèmes légendaires sur Petit Meme. Gratuit et accessible à tous !",
   "meme_seo_library_title": "Bibliothèque de mèmes en ligne",
   "meme_share": "Partager",
@@ -730,5 +730,41 @@
   "search_ask_ai_query": "Demander à l’IA : « {query} »",
   "search_ai_no_match": "Aucun titre ne correspond",
   "search_ai_describe": "Décris la scène",
-  "category_filter_clear": "{title}, retirer le filtre"
+  "category_filter_clear": "{title}, retirer le filtre",
+  "meme_seo_category_examples": [
+    {
+      "declarations": [
+        "input count",
+        "input formattedCount",
+        "input title",
+        "input examples",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{formattedCount} mème {title} en vidéo : {examples}. À regarder, télécharger et partager gratuitement, sans compte.",
+        "countPlural=other": "{formattedCount} mèmes {title} en vidéo, dont {examples}. À regarder, télécharger et partager gratuitement, sans compte."
+      }
+    }
+  ],
+  "meme_seo_library_examples": [
+    {
+      "declarations": [
+        "input count",
+        "input formattedCount",
+        "input examples",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{formattedCount} mème vidéo : {examples}. À regarder, télécharger et partager gratuitement, sans compte.",
+        "countPlural=other": "{formattedCount} mèmes vidéo, dont {examples}. À regarder, télécharger et partager gratuitement, sans compte."
+      }
+    }
+  ],
+  "meme_seo_quoted_title": "« {title} »"
 }

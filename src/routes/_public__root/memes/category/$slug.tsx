@@ -1,10 +1,11 @@
 import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
+import { HTTP_STATUS } from '~/constants/http'
 import {
   ALL_CATEGORY_SLUG,
   LEGACY_SORT_CATEGORY_SLUGS,
   MEMES_SEARCH_SCHEMA
 } from '~/constants/meme'
-import { resolveMemesSort } from '~/helpers/memes-sort'
+import { resolveLibraryFilters } from '~/helpers/memes-sort'
 import { buildSeo } from '~/lib/seo/meta'
 import { buildOgImage } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages'
@@ -17,6 +18,7 @@ import { listMemesPagesQueryOpts } from '~/queries/meme'
 import { prefetchPublicPageQueries } from '~/routes/_public__root/-lib/prefetch-public-page-queries'
 import { MemesLibraryPage } from '~/routes/_public__root/memes/-components/memes-library-page'
 import memesLibraryCss from '~/routes/_public__root/memes/-components/memes-library.css?url'
+import { buildLibraryDescription } from '~/routes/_public__root/memes/-lib/library'
 
 const findLegacySort = (slug: string) => {
   return Object.entries(LEGACY_SORT_CATEGORY_SLUGS).find(([legacySlug]) => {
@@ -43,7 +45,7 @@ export const Route = createFileRoute('/_public__root/memes/category/$slug')({
           sort: legacySort === 'trending' ? undefined : legacySort
         },
         replace: true,
-        statusCode: 308
+        statusCode: HTTP_STATUS.PERMANENT_REDIRECT
       })
     }
   },
@@ -66,21 +68,39 @@ export const Route = createFileRoute('/_public__root/memes/category/$slug')({
       throw notFound()
     }
 
-    await Promise.all([
+    const firstPageNumber = deps.page ?? 1
+    const [libraryCount, memesPages] = await Promise.all([
       context.queryClient.query(countLibraryMemesQueryOpts(getLocale())),
       context.queryClient.infiniteQuery(
         listMemesPagesQueryOpts(
-          {
+          resolveLibraryFilters({
+            slug: params.slug,
             query: deps.query,
-            sort: resolveMemesSort(deps),
-            category: isAllCategory ? undefined : params.slug
-          },
-          deps.page ?? 1
+            sort: deps.sort
+          }),
+          firstPageNumber
         )
       )
     ])
+    const firstPageMemes = memesPages.pages[0]?.memes ?? []
+    const isEmpty = firstPageMemes.length === 0
 
-    return { category }
+    if (isEmpty && firstPageNumber > 1) {
+      throw notFound()
+    }
+
+    return {
+      category,
+      isEmpty,
+      description: buildLibraryDescription({
+        categoryTitle: category?.title,
+        count: category ? category.memeCount : libraryCount,
+        exampleTitles: firstPageMemes.map((meme) => {
+          return meme.title
+        }),
+        locale: getLocale()
+      })
+    }
   },
   head: ({ loaderData, match }) => {
     const category = loaderData?.category
@@ -94,14 +114,18 @@ export const Route = createFileRoute('/_public__root/memes/category/$slug')({
 
     if (!category) {
       const title = m.meme_seo_library_title()
-      const description = m.meme_seo_library_description()
       const seo = buildSeo({
         title,
         pathname: `/memes/category/${ALL_CATEGORY_SLUG}${pageSuffix}`,
-        description,
-        noindex: isSearch,
+        description: loaderData?.description,
+        noindex: isSearch || loaderData?.isEmpty,
         image: buildOgImage(
-          { type: 'category', title, subtitle: description, locale },
+          {
+            type: 'category',
+            title,
+            subtitle: m.meme_seo_library_description(),
+            locale
+          },
           title
         )
       })
@@ -109,20 +133,17 @@ export const Route = createFileRoute('/_public__root/memes/category/$slug')({
       return { ...seo, links: [...seo.links, ...links] }
     }
 
-    const description = m.meme_seo_category_description({
-      title: category.title
-    })
     const seo = buildSeo({
       title: m.meme_seo_category_title({ title: category.title }),
       pathname: `/memes/category/${category.slug}${pageSuffix}`,
-      description,
-      noindex: isSearch,
+      description: loaderData?.description,
+      noindex: isSearch || loaderData?.isEmpty,
       keywords: category.keywords.join(', '),
       image: buildOgImage(
         {
           type: 'category',
           title: category.title,
-          subtitle: description,
+          subtitle: m.meme_seo_category_description({ title: category.title }),
           locale
         },
         category.title

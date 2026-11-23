@@ -15,6 +15,7 @@ import {
   SHEET_TITLE_CLASS_NAME
 } from '~/components/meme/meme-sheet'
 import { useBookmarkAction } from '~/components/meme/use-bookmark-action'
+import { useCloseWhenDialogOpens } from '~/components/meme/use-close-when-dialog-opens'
 import { useIsPremium } from '~/components/premium/use-is-premium'
 import {
   Drawer,
@@ -51,6 +52,10 @@ export const MemeActionsSheet = ({
 }: MemeActionsSheetProps) => {
   const [isOpen, setIsOpen] = React.useState(false)
   const isPremium = useIsPremium()
+
+  useCloseWhenDialogOpens(() => {
+    setIsOpen(false)
+  })
   const { runAfterClose, handleOpenChangeComplete } = useActionAfterClose()
   const bookmarkAction = useBookmarkAction({
     meme,

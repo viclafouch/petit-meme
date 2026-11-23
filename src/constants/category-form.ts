@@ -1,6 +1,10 @@
 import { z } from 'zod'
 import { CATEGORY_EMOJIS } from '~/constants/category'
-import { CATEGORY_SLUG_REGEX } from '~/constants/meme'
+import {
+  ALL_CATEGORY_SLUG,
+  CATEGORY_SLUG_REGEX,
+  LEGACY_SORT_CATEGORY_SLUGS
+} from '~/constants/meme'
 import { CategoryFamily } from '~/db/generated/prisma/enums'
 import { buildLocaleRecord } from '~/helpers/i18n-content'
 
@@ -19,8 +23,18 @@ const CATEGORY_TRANSLATION_SCHEMA = z.object({
     .max(CATEGORY_KEYWORDS_MAX_COUNT)
 })
 
+const RESERVED_CATEGORY_SLUGS = new Set<string>([
+  ALL_CATEGORY_SLUG,
+  ...Object.keys(LEGACY_SORT_CATEGORY_SLUGS)
+])
+
 export const CATEGORY_FORM_SCHEMA = z.object({
-  slug: z.string().regex(CATEGORY_SLUG_REGEX),
+  slug: z
+    .string()
+    .regex(CATEGORY_SLUG_REGEX)
+    .refine((slug) => {
+      return !RESERVED_CATEGORY_SLUGS.has(slug)
+    }),
   family: z.enum(CategoryFamily).nullable(),
   emoji: z.enum(CATEGORY_EMOJIS).nullable(),
   translations: z.object(

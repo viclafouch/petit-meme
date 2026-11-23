@@ -48,7 +48,7 @@ export const listMemesPagesQueryOpts = (
     getNextPageParam: (lastPage) => {
       return lastPage.hasNextPage ? lastPage.page + 1 : undefined
     },
-    staleTime: FIVE_MINUTES_MS,
+    staleTime: THIRTY_MINUTES_MS,
     refetchOnWindowFocus: false
   })
 }

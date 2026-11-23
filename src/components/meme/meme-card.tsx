@@ -13,6 +13,7 @@ import type { ThumbnailPriority } from '~/components/meme/meme-grid'
 import { MemeHighlightedTitle } from '~/components/meme/meme-highlighted-title'
 import { MemeLanguageBadge } from '~/components/meme/meme-language-badge'
 import { useBookmarkAction } from '~/components/meme/use-bookmark-action'
+import { useCloseWhenDialogOpens } from '~/components/meme/use-close-when-dialog-opens'
 import { useMemeExport } from '~/components/meme/use-meme-export'
 import { useOpenStudioSheet } from '~/components/studio/use-studio-history'
 import {
@@ -41,6 +42,7 @@ import {
   buildVideoImageUrl,
   buildVideoPreviewUrl
 } from '~/lib/bunny-public-urls'
+import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 
@@ -50,6 +52,12 @@ const WIDESCREEN_RATIO = WIDESCREEN_WIDTH / WIDESCREEN_HEIGHT
 const WIDESCREEN_TOLERANCE = 0.15
 const PORTRAIT_MAX_RATIO = 0.9
 const NEW_MEME_MAX_AGE_MS = DAYS_PER_WEEK * DAY
+
+const MEME_CARD_MENU_CLASS_NAME =
+  'relative z-(--z-floating) col-start-2 row-start-2 -mt-1 -me-1.5 grid size-7 touch-manipulation place-items-center rounded-full text-muted-foreground after:absolute after:-inset-1.5 focus-visible:focus-ring data-popup-open:bg-foreground/10 mouse:hover:bg-foreground/10 mouse:hover:text-foreground [&_svg]:size-4'
+
+const MEME_CARD_BADGE_CLASS_NAME =
+  'inline-flex h-5 items-center gap-1 whitespace-nowrap rounded-sm bg-shade-strong px-1.5 text-xs leading-none font-medium text-white tabular-nums has-[>svg]:px-1 [&_svg]:size-3.5'
 
 type MemeCardMeme = MemeWithVideo & {
   highlightedTitle?: HighlightedText
@@ -83,6 +91,7 @@ const MemeCardMenu = ({
   authenticatedUserToken
 }: MemeCardMenuProps) => {
   const isCoarsePointer = useIsCoarsePointer()
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false)
   const shareMutation = useMemeExport({ mode: 'share', queryID })
   const downloadMutation = useMemeExport({ mode: 'download', queryID })
   const openStudioSheet = useOpenStudioSheet()
@@ -114,6 +123,10 @@ const MemeCardMenu = ({
 
   const optionsLabel = m.meme_open_options_named({ title: meme.title })
 
+  useCloseWhenDialogOpens(() => {
+    setIsMenuOpen(false)
+  })
+
   if (isCoarsePointer) {
     return (
       <MemeActionsSheet
@@ -126,7 +139,7 @@ const MemeCardMenu = ({
           <button
             type="button"
             aria-label={optionsLabel}
-            className="meme-card-menu"
+            className={MEME_CARD_MENU_CLASS_NAME}
           />
         }
       >
@@ -136,8 +149,11 @@ const MemeCardMenu = ({
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className="meme-card-menu" aria-label={optionsLabel}>
+    <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+      <DropdownMenuTrigger
+        className={MEME_CARD_MENU_CLASS_NAME}
+        aria-label={optionsLabel}
+      >
         <EllipsisVertical aria-hidden="true" />
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-auto min-w-56" align="end">
@@ -204,11 +220,11 @@ export const MemeCard = React.memo(
 
     return (
       <article
-        className="meme-card"
+        className="meme-card relative grid grid-cols-[minmax(0,1fr)_auto] grid-rows-[auto_auto_1fr] gap-x-1"
         data-fit={isWidescreen ? 'cover' : 'contain'}
         style={{ '--meme-ratio': ratio }}
       >
-        <div className="meme-card-thumb">
+        <div className="meme-card-thumb relative isolate col-span-full mb-2 aspect-video overflow-hidden rounded-lg bg-stage [&>img]:absolute [&>img]:inset-0 [&>img]:size-full">
           {isWidescreen ? null : (
             <img
               src={thumbnailUrl}
@@ -216,7 +232,7 @@ export const MemeCard = React.memo(
               aria-hidden="true"
               loading={priority === 'lazy' ? 'lazy' : undefined}
               decoding="async"
-              className="meme-card-fill"
+              className="scale-120 object-cover [filter:var(--filter-backdrop-thumb)]"
             />
           )}
           <img
@@ -225,7 +241,7 @@ export const MemeCard = React.memo(
             loading={priority === 'lazy' ? 'lazy' : undefined}
             fetchPriority={priority === 'lcp' ? 'high' : undefined}
             decoding="async"
-            className="meme-card-image"
+            className={isWidescreen ? 'object-cover' : 'object-contain'}
           />
           <img
             src={buildVideoPreviewUrl(meme.video.bunnyId)}
@@ -235,28 +251,41 @@ export const MemeCard = React.memo(
             decoding="async"
             className="meme-card-preview"
           />
-          <span className="meme-card-badges">
+          <span className="absolute top-1.5 left-1.5 z-(--z-floating) flex gap-1">
             {isNew ? (
-              <span className="meme-card-badge meme-card-badge-new">
+              <span
+                className={cn(
+                  MEME_CARD_BADGE_CLASS_NAME,
+                  'bg-(image:--gradient-brand) font-semibold text-brand-foreground'
+                )}
+              >
                 {m.meme_new_badge()}
               </span>
             ) : null}
             {isPortrait ? (
-              <span className="meme-card-badge" title={m.meme_format_mobile()}>
+              <span
+                className={MEME_CARD_BADGE_CLASS_NAME}
+                title={m.meme_format_mobile()}
+              >
                 <Smartphone aria-hidden="true" />
                 <span className="sr-only">{m.meme_format_mobile()}</span>
               </span>
             ) : null}
           </span>
-          <span className="meme-card-badge meme-card-duration">
+          <span
+            className={cn(
+              MEME_CARD_BADGE_CLASS_NAME,
+              'absolute right-1.5 bottom-1.5 z-(--z-floating)'
+            )}
+          >
             {formatClockDuration(meme.video.duration, locale)}
           </span>
         </div>
-        <TitleTag className="meme-card-title">
+        <TitleTag className="col-start-1 text-sm leading-[1.3] font-semibold text-pretty wrap-anywhere">
           <Link
             to="/memes/$memeId"
             params={{ memeId: meme.id }}
-            className="meme-card-link"
+            className="meme-card-link line-clamp-2 min-h-[2lh] outline-none after:absolute after:inset-0 after:z-(--z-raised)"
             onClick={handleTrackClick}
           >
             <MemeHighlightedTitle
@@ -265,7 +294,7 @@ export const MemeCard = React.memo(
             />
           </Link>
         </TitleTag>
-        <p className="meme-card-meta">
+        <p className="col-span-full mt-1 flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground tabular-nums">
           <span>
             {m.meme_views({
               count: meme.viewCount,

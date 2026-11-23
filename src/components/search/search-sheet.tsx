@@ -13,13 +13,17 @@ import {
 import { Input } from '~/components/ui/input'
 import { m } from '~/paraglide/messages'
 import { SearchSuggestionContent } from './search-suggestion'
-import searchCss from './search.css?url'
-import { useSearchNavigation } from './use-search-navigation'
+import {
+  SUGGESTION_GROUP_CLASS_NAMES,
+  SUGGESTION_HEADING_CLASS_NAMES,
+  SUGGESTION_ITEM_CLASS_NAMES
+} from './search-suggestion-classes'
 import {
   SEARCH_GROUP_LABELS,
-  useSearchSuggestions,
   type SearchSuggestion
-} from './use-search-suggestions'
+} from './search-suggestion-groups'
+import { useSearchNavigation } from './use-search-navigation'
+import { useSearchSuggestions } from './use-search-suggestions'
 
 const SWIPE_BLUR_THRESHOLD_PX = 10
 
@@ -93,18 +97,21 @@ export const SearchSheet = () => {
             return blurInputWhenSwiped(popup, inputRef.current)
           }}
         >
-          <link rel="stylesheet" href={searchCss} precedence="default" />
           <DrawerTitle className="sr-only">{m.nav_search()}</DrawerTitle>
-          <search className="search-sheet-bar">
+          <search className="shrink-0 px-4 pt-2 pb-3">
             <form
+              className="flex items-center gap-2"
               onSubmit={(event) => {
                 event.preventDefault()
                 closeSearchSheet()
                 showResults(inputValue.trim())
               }}
             >
-              <div className="search-sheet-field">
-                <Search aria-hidden="true" />
+              <div className="relative flex flex-1 items-center">
+                <Search
+                  aria-hidden="true"
+                  className="pointer-events-none absolute left-3.5 size-4 text-muted-foreground"
+                />
                 <Input
                   ref={inputRef}
                   className="h-11 rounded-full border-0 bg-secondary pr-4 pl-10 text-base text-foreground shadow-none focus-visible:ring-0 focus-visible:inset-ring focus-visible:inset-ring-ring dark:bg-secondary"
@@ -124,16 +131,18 @@ export const SearchSheet = () => {
               </DrawerClose>
             </form>
           </search>
-          <div className="search-sheet-body" aria-busy={isPending || undefined}>
+          <div
+            className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 pb-[calc(1rem+env(safe-area-inset-bottom,0px)+var(--drawer-keyboard-inset,0px))] transition-opacity aria-busy:opacity-60"
+            aria-busy={isPending || undefined}
+          >
             {groups.map((group) => {
               return (
                 <section
                   key={group.id}
-                  className="search-suggestion-group"
-                  data-layout={group.layout}
+                  className={SUGGESTION_GROUP_CLASS_NAMES[group.layout]}
                   aria-label={SEARCH_GROUP_LABELS[group.id]()}
                 >
-                  <h2 className="search-suggestion-heading">
+                  <h2 className={SUGGESTION_HEADING_CLASS_NAMES[group.layout]}>
                     {SEARCH_GROUP_LABELS[group.id]()}
                   </h2>
                   <ul>
@@ -142,7 +151,9 @@ export const SearchSheet = () => {
                         <li key={suggestion.id}>
                           <button
                             type="button"
-                            className="search-suggestion"
+                            className={
+                              SUGGESTION_ITEM_CLASS_NAMES[group.layout]
+                            }
                             data-kind={suggestion.kind}
                             onClick={() => {
                               handleSelect(suggestion)

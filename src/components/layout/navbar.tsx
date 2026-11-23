@@ -1,34 +1,55 @@
 import { User } from 'lucide-react'
 import { motion, useScroll, useTransform } from 'motion/react'
-import { type LinkOptions, Link, useRouteContext } from '@tanstack/react-router'
+import { Link, useRouteContext } from '@tanstack/react-router'
 import { ThemeSwitcher } from '~/components/animate-ui/theme-switcher'
 import { LanguageSwitcher } from '~/components/layout/language-switcher'
+import { useIsLibraryActive } from '~/components/layout/use-is-library-active'
 import { UserDropdown } from '~/components/layout/user-dropdown'
 import { PremiumNavButton } from '~/components/premium/premium-nav-button'
 import { NavbarSearch } from '~/components/search/navbar-search'
 import { Button } from '~/components/ui/button'
 import { LOGO_PATH } from '~/constants/branding'
+import { ALL_CATEGORY_SLUG } from '~/constants/meme'
+import { useIsLargeScreen } from '~/hooks/use-is-large-screen'
 import { useNeedsScrollFadeFallback } from '~/hooks/use-scroll-fade'
 import { m } from '~/paraglide/messages'
 import { useDialogStore } from '~/stores/dialog.store'
 import navbarCss from './navbar.css?url'
 
-type NavigationLink = {
-  to: LinkOptions['to']
-  label: string
-  preload: LinkOptions['preload']
-}
-
 const NAVBAR_SCROLL_FADE_RANGE = 180
 
 const NAVBAR_BACKDROP_CLASS_NAME =
-  'navbar-scroll-fade absolute inset-0 bg-background'
+  'navbar-scroll-fade absolute inset-0 bg-background max-lg:animate-none max-lg:opacity-100'
 
-const getNavigationLinks = (): NavigationLink[] => {
-  return [
-    { to: '/memes', label: m.nav_memes(), preload: 'viewport' },
-    { to: '/app', label: m.nav_app(), preload: 'intent' }
-  ]
+const NAVBAR_LINK_CLASS_NAME =
+  'flex h-9 items-center whitespace-nowrap rounded-full px-3 text-sm font-medium text-muted-foreground transition-colors focus-visible:focus-ring mouse:hover:text-foreground data-[status=active]:bg-secondary data-[status=active]:text-foreground'
+
+const NavigationLinks = () => {
+  const isLibraryActive = useIsLibraryActive()
+
+  return (
+    <nav className="max-lg:hidden" aria-label={m.nav_menu()}>
+      <ul className="flex gap-1">
+        <li>
+          <Link
+            to="/memes/category/$slug"
+            params={{ slug: ALL_CATEGORY_SLUG }}
+            preload="viewport"
+            className={NAVBAR_LINK_CLASS_NAME}
+            data-status={isLibraryActive ? 'active' : undefined}
+            aria-current={isLibraryActive ? 'page' : undefined}
+          >
+            {m.nav_memes()}
+          </Link>
+        </li>
+        <li>
+          <Link to="/app" preload="intent" className={NAVBAR_LINK_CLASS_NAME}>
+            {m.nav_app()}
+          </Link>
+        </li>
+      </ul>
+    </nav>
+  )
 }
 
 const NavbarScrollFadeFallback = () => {
@@ -69,18 +90,23 @@ const AccountAction = () => {
 
 export const Navbar = () => {
   const needsFallback = useNeedsScrollFadeFallback()
+  const isLargeScreen = useIsLargeScreen()
 
   return (
-    <header className="navbar">
+    <header className="relative h-(--navbar-height) pr-[env(safe-area-inset-right,0px)] pl-[env(safe-area-inset-left,0px)]">
       <link rel="stylesheet" href={navbarCss} precedence="default" />
-      {needsFallback ? (
+      {needsFallback && isLargeScreen ? (
         <NavbarScrollFadeFallback />
       ) : (
         <div className={NAVBAR_BACKDROP_CLASS_NAME} aria-hidden="true" />
       )}
-      <div className="navbar-inner">
-        <div className="navbar-start">
-          <Link to="/" className="navbar-logo" aria-label={m.common_logo_alt()}>
+      <div className="relative mx-auto flex h-full max-w-440 items-center justify-between gap-3 px-4 lg:gap-6 lg:px-[clamp(1.5rem,3vw,3rem)]">
+        <div className="flex min-w-max shrink-0 items-center gap-4 lg:flex-1">
+          <Link
+            to="/"
+            className="grid size-10 shrink-0 place-items-center rounded-full transition-colors focus-visible:focus-ring mouse:hover:bg-accent"
+            aria-label={m.common_logo_alt()}
+          >
             <img
               src={LOGO_PATH}
               alt=""
@@ -89,28 +115,12 @@ export const Navbar = () => {
               decoding="async"
             />
           </Link>
-          <nav className="navbar-links" aria-label={m.nav_menu()}>
-            <ul>
-              {getNavigationLinks().map((link) => {
-                return (
-                  <li key={link.to}>
-                    <Link
-                      to={link.to}
-                      preload={link.preload}
-                      className="navbar-link"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                )
-              })}
-            </ul>
-          </nav>
+          <NavigationLinks />
         </div>
-        <div className="navbar-center">
+        <div className="flex min-w-0 flex-[0_1_40rem] justify-center max-lg:hidden">
           <NavbarSearch />
         </div>
-        <div className="navbar-end">
+        <div className="flex min-w-max shrink-0 items-center justify-end gap-2 lg:flex-1 lg:gap-3">
           <div className="max-lg:hidden">
             <PremiumNavButton />
           </div>

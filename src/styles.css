@@ -348,6 +348,11 @@
   :where(h1, h2, h3) {
     text-wrap: balance;
   }
+  :root[data-theme-switching] *,
+  :root[data-theme-switching] *::before,
+  :root[data-theme-switching] *::after {
+    transition: none !important;
+  }
   .navbar-scroll-fade {
     opacity: 0;
 
@@ -355,11 +360,6 @@
       animation: navbar-fade-to-solid linear both;
       animation-timeline: scroll(root);
       animation-range: 0px 180px;
-    }
-
-    @variant max-lg {
-      opacity: 1 !important;
-      animation: none;
     }
   }
 
@@ -707,6 +707,15 @@
   width: min(100cqw, 100cqh * var(--video-ratio, 100));
   height: min(100cqh, 100cqw / var(--video-ratio, 0.01));
   object-fit: contain;
+}
+@utility scrollbar-hidden {
+  scrollbar-width: none;
+
+  @supports not (scrollbar-width: none) {
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
 }
 @utility touch-tap {
   user-select: none;

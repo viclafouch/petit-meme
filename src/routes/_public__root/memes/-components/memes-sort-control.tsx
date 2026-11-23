@@ -4,7 +4,7 @@ import { Radio } from '@base-ui/react/radio'
 import { RadioGroup } from '@base-ui/react/radio-group'
 import { getRouteApi } from '@tanstack/react-router'
 import { MEMES_SORTS, type MemesSort } from '~/constants/meme'
-import { resolveMemesSort } from '~/helpers/memes-sort'
+import { resolveLibraryFilters, resolveMemesSort } from '~/helpers/memes-sort'
 import { m } from '~/paraglide/messages'
 
 const categoryRouteApi = getRouteApi('/_public__root/memes/category/$slug')
@@ -25,17 +25,25 @@ const SORT_LABELS = {
 } as const satisfies Record<MemesSort, () => string>
 
 export const MemesSortControl = () => {
+  const { slug } = categoryRouteApi.useParams()
   const search = categoryRouteApi.useSearch()
   const navigate = categoryRouteApi.useNavigate()
-  const resolvedSort = resolveMemesSort(search)
+  const { category, sort: resolvedSort } = resolveLibraryFilters({
+    slug,
+    query: search.query,
+    sort: search.sort
+  })
   const [sort, setSort] = React.useState(resolvedSort)
   const [previousResolvedSort, setPreviousResolvedSort] =
     React.useState(resolvedSort)
   const pillId = React.useId()
   const isReducedMotion = useReducedMotion()
-  const defaultSort = resolveMemesSort({ query: search.query })
+  const defaultSort = resolveMemesSort({ query: search.query, category })
   const sorts = MEMES_SORTS.filter((option) => {
-    return resolveMemesSort({ sort: option, query: search.query }) === option
+    return (
+      resolveMemesSort({ sort: option, query: search.query, category }) ===
+      option
+    )
   })
 
   if (previousResolvedSort !== resolvedSort) {
@@ -64,15 +72,19 @@ export const MemesSortControl = () => {
       aria-label={m.meme_sort_label()}
       value={sort}
       onValueChange={handleValueChange}
-      className="memes-sort"
+      className="scrollbar-hidden isolate inline-flex max-w-full overflow-x-auto rounded-full bg-secondary p-0.5"
     >
       {sorts.map((option) => {
         return (
-          <Radio.Root key={option} value={option} className="memes-sort-item">
+          <Radio.Root
+            key={option}
+            value={option}
+            className="relative inline-flex h-8 shrink-0 cursor-pointer touch-manipulation items-center rounded-full px-3 text-label font-medium whitespace-nowrap text-foreground/65 transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--focus-color) active:scale-(--scale-press) pointer-coarse:h-9 data-checked:text-foreground mouse:hover:text-foreground"
+          >
             {option === sort ? (
               <motion.span
                 layoutId={pillId}
-                className="memes-sort-pill"
+                className="absolute inset-0 -z-1 rounded-full bg-background shadow-[0_1px_2px_var(--color-shade-faint)] ring-1 ring-foreground/6"
                 transition={isReducedMotion ? PILL_INSTANT : PILL_SPRING}
               />
             ) : null}

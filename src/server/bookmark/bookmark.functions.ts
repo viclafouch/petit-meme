@@ -17,11 +17,14 @@ import { authLogger } from '~/lib/logger'
 import { getLocale } from '~/paraglide/runtime'
 import { recordActivityEvent } from '~/server/activity/activity.server'
 import { userRequiredMiddleware } from '~/server/auth/auth.middleware'
-import { buildVisibleBookmarksWhere } from '~/server/bookmark/bookmark.server'
+import {
+  buildVisibleBookmarksWhere,
+  VISIBLE_BOOKMARKS_ORDER_BY
+} from '~/server/bookmark/bookmark.server'
 import { throwCapReached } from '~/server/cap/cap.server'
 import { matchIsUserPremium } from '~/server/subscription/subscription.server'
 
-type ToggleUserBookmarkParams = {
+type CreateUserBookmarkParams = {
   user: SessionUser
   memeId: Meme['id']
 }
@@ -33,7 +36,7 @@ export const listBookmarkIds = createServerFn({ method: 'GET' })
   .handler(async ({ context }) => {
     const bookmarks = await prismaClient.bookmark.findMany({
       where: buildVisibleBookmarksWhere(context.user.id),
-      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      orderBy: VISIBLE_BOOKMARKS_ORDER_BY,
       select: { memeId: true }
     })
 
@@ -53,7 +56,7 @@ export const listBookmarks = createServerFn({ method: 'GET' })
       prismaClient.bookmark.count({ where }),
       prismaClient.bookmark.findMany({
         where,
-        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        orderBy: VISIBLE_BOOKMARKS_ORDER_BY,
         skip: (page - 1) * MEMES_PER_PAGE,
         take: MEMES_PER_PAGE,
         select: {
@@ -78,20 +81,21 @@ export const listBookmarks = createServerFn({ method: 'GET' })
     }
   })
 
-const toggleUserBookmark = createServerOnlyFn(
-  async ({ user, memeId }: ToggleUserBookmarkParams) => {
-    const where = { userId_memeId: { userId: user.id, memeId } }
+const BOOKMARK_UPDATE_SCHEMA = z.object({
+  memeId: z.string(),
+  isBookmarked: z.boolean()
+})
 
+const createUserBookmark = createServerOnlyFn(
+  async ({ user, memeId }: CreateUserBookmarkParams) => {
     return prismaClient.$transaction(async (transaction) => {
       const bookmark = await transaction.bookmark.findUnique({
-        where,
+        where: { userId_memeId: { userId: user.id, memeId } },
         select: { id: true }
       })
 
       if (bookmark) {
-        await transaction.bookmark.delete({ where })
-
-        return { isBookmarked: false }
+        return { isCreated: false }
       }
 
       const bookmarkCount = await transaction.bookmark.count({
@@ -111,17 +115,25 @@ const toggleUserBookmark = createServerOnlyFn(
         data: { userId: user.id, memeId }
       })
 
-      return { isBookmarked: true }
+      return { isCreated: true }
     })
   }
 )
 
-export const toggleBookmark = createServerFn({ method: 'POST' })
+export const updateBookmark = createServerFn({ method: 'POST' })
   .validator((data) => {
-    return z.string().parse(data)
+    return BOOKMARK_UPDATE_SCHEMA.parse(data)
   })
   .middleware([userRequiredMiddleware])
-  .handler(async ({ data: memeId, context }) => {
+  .handler(async ({ data: { memeId, isBookmarked }, context }) => {
+    if (!isBookmarked) {
+      await prismaClient.bookmark.deleteMany({
+        where: { userId: context.user.id, memeId }
+      })
+
+      return { isBookmarked }
+    }
+
     const meme = await prismaClient.meme.findUnique({
       where: { id: memeId },
       select: { id: true }
@@ -131,17 +143,12 @@ export const toggleBookmark = createServerFn({ method: 'POST' })
       throw notFound()
     }
 
-    const { isBookmarked } = await toggleUserBookmark({
+    const { isCreated } = await createUserBookmark({
       user: context.user,
       memeId
     })
 
-    authLogger.debug(
-      { userId: context.user.id, memeId, isBookmarked },
-      'Bookmark toggled'
-    )
-
-    if (isBookmarked) {
+    if (isCreated) {
       recordActivityEvent({
         type: ActivityEventType.BOOKMARK_ADDED,
         actor: context.user,

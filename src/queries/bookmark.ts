@@ -21,6 +21,15 @@ export const listBookmarkIdsQueryOpts = () => {
 
 listBookmarkIdsQueryOpts.all = [...BOOKMARK_QUERY_KEY, 'ids'] as const
 
+export const countBookmarksQueryOpts = () => {
+  return queryOptions({
+    ...listBookmarkIdsQueryOpts(),
+    select: (memeIds) => {
+      return memeIds.length
+    }
+  })
+}
+
 export const listBookmarksQueryOpts = () => {
   return infiniteQueryOptions({
     queryKey: [...listBookmarksQueryOpts.all],
@@ -37,5 +46,3 @@ export const listBookmarksQueryOpts = () => {
 }
 
 listBookmarksQueryOpts.all = [...BOOKMARK_QUERY_KEY, 'pages'] as const
-
-export const bookmarkQueryKey = BOOKMARK_QUERY_KEY

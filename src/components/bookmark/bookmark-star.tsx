@@ -1,6 +1,6 @@
-import React from 'react'
 import { Star } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { useActivationCount } from '~/hooks/use-activation-count'
 import { cn } from '~/lib/utils'
 
 const SPARK_COUNT = 6
@@ -21,19 +21,7 @@ type BookmarkStarProps = {
 
 export const BookmarkStar = ({ isActive, className }: BookmarkStarProps) => {
   const isReducedMotion = useReducedMotion()
-  const [previousIsActive, setPreviousIsActive] = React.useState(isActive)
-  const [burstCount, setBurstCount] = React.useState(0)
-
-  if (previousIsActive !== isActive) {
-    setPreviousIsActive(isActive)
-
-    if (isActive) {
-      setBurstCount((count) => {
-        return count + 1
-      })
-    }
-  }
-
+  const burstCount = useActivationCount(isActive)
   const isBursting = isActive && burstCount > 0 && !isReducedMotion
 
   return (

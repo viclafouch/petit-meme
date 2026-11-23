@@ -1,3 +1,4 @@
+import React from 'react'
 import { Crown, Send, Smartphone, Zap } from 'lucide-react'
 import {
   useQuery,
@@ -7,25 +8,19 @@ import {
 import { Link, useRouteContext } from '@tanstack/react-router'
 import { BookmarkCardButton } from '~/components/bookmark/bookmark-card-button'
 import { useIsPremium } from '~/components/premium/use-is-premium'
-import { LoadingSpinner } from '~/components/ui/spinner'
 import { ALL_CATEGORY_SLUG, type MemeWithVideo } from '~/constants/meme'
 import { buildCapState, FREE_CAPS } from '~/helpers/cap'
-import { formatCount } from '~/helpers/number'
 import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import { m } from '~/paraglide/messages'
-import { getLocale } from '~/paraglide/runtime'
 import {
-  listBookmarkIdsQueryOpts,
+  countBookmarksQueryOpts,
   listBookmarksQueryOpts
 } from '~/queries/bookmark'
 import { listTrendingMemesQueryOpts } from '~/queries/meme'
 import { flattenUniqueCards } from '~/routes/_public__root/memes/-lib/library'
 import { useDialogStore } from '~/stores/dialog.store'
-import { LibraryStrip } from './library-layout'
-import { MemeCardGrid } from './meme-card-grid'
-import { useLoadMoreWhenVisible } from './use-load-more-when-visible'
-
-const STARTER_BOOKMARK_COUNT = 3
+import { LibraryHeader, LibraryStrip } from './library-layout'
+import { LoadMore, MemeCardGrid } from './meme-card-grid'
 
 const BENEFITS = [
   { icon: Zap, label: m.bookmark_intro_benefit_find },
@@ -33,87 +28,39 @@ const BENEFITS = [
   { icon: Smartphone, label: m.bookmark_intro_benefit_devices }
 ] as const
 
-const useBookmarkCap = () => {
-  const isPremium = useIsPremium()
-  const usedCount = useSuspenseQuery(listBookmarkIdsQueryOpts()).data.length
-
-  return {
-    usedCount,
-    ...buildCapState({ kind: 'bookmark', usedCount, isPremium })
-  }
+type CapMeterProps = {
+  usedCount: number
 }
 
-type BookmarksTitleProps = {
-  count?: number
-}
-
-const BookmarksTitle = ({ count }: BookmarksTitleProps) => {
-  return (
-    <div className="flex min-w-0 flex-[1_1_15rem] flex-wrap items-baseline gap-x-3">
-      <h1 className="min-w-0 font-bricolage text-xl leading-[1.1] font-semibold tracking-[-0.02em] lg:text-3xl">
-        {m.nav_my_bookmarks()}
-      </h1>
-      {count ? (
-        <p
-          aria-live="polite"
-          className="text-sm whitespace-nowrap text-muted-foreground tabular-nums"
-        >
-          {m.meme_library_count({
-            count,
-            formattedCount: formatCount(count, getLocale(), 'standard')
-          })}
-        </p>
-      ) : null}
-    </div>
-  )
-}
-
-const CapMeter = () => {
-  const cap = useBookmarkCap()
-
-  if (cap.isPremium) {
-    return null
-  }
+const CapMeter = ({ usedCount }: CapMeterProps) => {
+  const labelId = React.useId()
 
   return (
     <p className="flex items-center gap-2.5 text-sm text-muted-foreground tabular-nums">
-      {m.bookmark_cap_meter({
-        count: cap.usedCount,
-        cap: FREE_CAPS.bookmark
-      })}
-      <span
-        aria-hidden="true"
-        className="h-1.5 w-20 overflow-hidden rounded-full bg-foreground/10"
-      >
-        <span
-          className="block h-full origin-left scale-x-(--bookmark-cap-ratio) rounded-full bg-foreground transition-[scale] duration-(--duration-base) ease-out motion-reduce:transition-none"
-          style={{
-            '--bookmark-cap-ratio': Math.min(
-              1,
-              cap.usedCount / FREE_CAPS.bookmark
-            )
-          }}
-        />
+      <span id={labelId}>
+        {m.bookmark_cap_meter({ count: usedCount, cap: FREE_CAPS.bookmark })}
       </span>
+      <progress
+        aria-labelledby={labelId}
+        value={Math.min(usedCount, FREE_CAPS.bookmark)}
+        max={FREE_CAPS.bookmark}
+        className="bookmark-cap-meter h-1.5 w-20 rounded-full bg-foreground/10"
+      />
     </p>
   )
 }
 
-const CapReachedBanner = () => {
-  const cap = useBookmarkCap()
-
-  if (!cap.isReached) {
-    return null
-  }
+const CapReachedNotice = () => {
+  const titleId = React.useId()
 
   return (
     <aside
-      aria-labelledby="bookmark-cap-reached"
+      aria-labelledby={titleId}
       className="mb-6 flex flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl bg-secondary px-4 py-3.5 sm:px-5"
     >
       <Crown aria-hidden="true" className="size-6 shrink-0" />
-      <div className="min-w-0 flex-[1_1_14rem]">
-        <h2 id="bookmark-cap-reached" className="font-bricolage font-semibold">
+      <div className="min-w-0 grow basis-56">
+        <h2 id={titleId} className="font-bricolage font-semibold">
           {m.bookmark_cap_reached_title({ cap: FREE_CAPS.bookmark })}
         </h2>
         <p className="text-sm text-pretty text-muted-foreground">
@@ -133,7 +80,7 @@ type DemoCardProps = {
 
 const DemoCard = ({ meme }: DemoCardProps) => {
   return (
-    <figure className="relative mx-auto w-full max-w-72 -rotate-2 lg:mx-0">
+    <figure className="relative mx-auto w-full max-w-72 shrink-0 -rotate-2 lg:mx-0">
       <div className="relative aspect-video overflow-hidden rounded-xl bg-stage shadow-(--shadow-stage)">
         <img
           src={buildVideoImageUrl(meme.video.bunnyId)}
@@ -145,10 +92,10 @@ const DemoCard = ({ meme }: DemoCardProps) => {
         <BookmarkCardButton
           memeId={meme.id}
           title={meme.title}
-          className="bookmarks-demo-star absolute top-2 right-2 z-(--z-floating)"
+          className="absolute top-2 right-2 z-(--z-floating) before:absolute before:inset-0 before:rounded-full before:border-2 before:border-current before:opacity-0 data-active:before:hidden motion-safe:before:animate-bookmark-ping"
         />
       </div>
-      <figcaption className="mt-2 line-clamp-2 text-sm leading-[1.3] font-semibold text-pretty">
+      <figcaption className="mt-2 line-clamp-2 text-sm leading-snug font-semibold text-pretty">
         {meme.title}
       </figcaption>
       <span
@@ -161,32 +108,27 @@ const DemoCard = ({ meme }: DemoCardProps) => {
   )
 }
 
-const useTrendingMemes = () => {
-  const trendingQuery = useQuery(listTrendingMemesQueryOpts())
-
-  return {
-    memes: trendingQuery.data ?? [],
-    updatedAt: trendingQuery.dataUpdatedAt
-  }
+type BookmarksIntroProps = {
+  demoMeme: MemeWithVideo | undefined
+  isFree: boolean
 }
 
-const BookmarksIntro = () => {
+const BookmarksIntro = ({ demoMeme, isFree }: BookmarksIntroProps) => {
   const { user } = useRouteContext({ from: '__root__' })
   const dialogStore = useDialogStore()
-  const isPremium = useIsPremium()
-  const [demoMeme] = useTrendingMemes().memes
+  const titleId = React.useId()
 
   return (
     <section
-      aria-labelledby="bookmarks-intro"
-      className="grid items-center gap-x-10 gap-y-12 rounded-3xl bg-foreground/3 px-5 pt-14 pb-8 inset-ring inset-ring-foreground/6 sm:px-8 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)] lg:px-12 lg:py-12"
+      aria-labelledby={titleId}
+      className="flex flex-col gap-x-10 gap-y-12 rounded-3xl bg-foreground/3 px-5 pt-14 pb-8 inset-ring inset-ring-foreground/6 sm:px-8 lg:flex-row lg:items-center lg:px-12 lg:py-12"
     >
       {demoMeme ? <DemoCard meme={demoMeme} /> : null}
       <div className="flex max-w-prose flex-col gap-5">
         <div className="flex flex-col gap-2">
           <h2
-            id="bookmarks-intro"
-            className="font-bricolage text-2xl leading-[1.1] font-semibold tracking-[-0.02em] text-balance lg:text-4xl"
+            id={titleId}
+            className="font-bricolage text-2xl leading-tight font-semibold tracking-tight text-balance lg:text-4xl"
           >
             {m.bookmark_intro_title()}
           </h2>
@@ -206,7 +148,7 @@ const BookmarksIntro = () => {
             )
           })}
         </ul>
-        {user && !isPremium ? (
+        {isFree ? (
           <p className="text-sm text-muted-foreground">
             {m.bookmark_intro_free_cap({ cap: FREE_CAPS.bookmark })}
           </p>
@@ -236,90 +178,64 @@ const BookmarksIntro = () => {
   )
 }
 
-const BookmarkSuggestions = () => {
-  const trending = useTrendingMemes()
+type BookmarkSuggestionsProps = {
+  memes: MemeWithVideo[]
+  now: number
+}
 
-  if (trending.memes.length === 0) {
-    return null
-  }
+const BookmarkSuggestions = ({ memes, now }: BookmarkSuggestionsProps) => {
+  const titleId = React.useId()
 
   return (
-    <section aria-labelledby="bookmark-suggestions" className="mt-12">
+    <section aria-labelledby={titleId} className="mt-12">
       <h2
-        id="bookmark-suggestions"
+        id={titleId}
         className="mb-4 font-bricolage text-lg font-semibold lg:text-xl"
       >
         {m.bookmark_suggestions_title()}
       </h2>
       <MemeCardGrid
-        cards={trending.memes.map((meme, index) => {
+        layout="row"
+        cards={memes.map((meme, index) => {
           return { meme, position: index + 1 }
         })}
-        now={trending.updatedAt}
+        now={now}
         label={m.bookmark_suggestions_title()}
       />
     </section>
   )
 }
 
-type LoadMoreButtonProps = {
-  isFetching: boolean
-  hasFailed: boolean
-  onLoadMore: () => void
-}
-
-const LoadMoreButton = ({
-  isFetching,
-  hasFailed,
-  onLoadMore
-}: LoadMoreButtonProps) => {
-  const sentinelRef = useLoadMoreWhenVisible({
-    isFetching,
-    hasFailed,
-    onLoadMore
-  })
-
-  return (
-    <div ref={sentinelRef} className="flex flex-col items-center gap-3 pt-10">
-      {hasFailed ? (
-        <p role="alert" className="text-sm text-muted-foreground">
-          {m.error_bookmark_load()}
-        </p>
-      ) : null}
-      <button
-        type="button"
-        className="pill pill-sm"
-        aria-disabled={isFetching || undefined}
-        onClick={() => {
-          if (!isFetching) {
-            onLoadMore()
-          }
-        }}
-      >
-        {isFetching ? <LoadingSpinner /> : null}
-        {hasFailed ? m.common_retry() : m.meme_load_more()}
-      </button>
-    </div>
-  )
-}
-
 const SignedInBookmarks = () => {
   const pagesQuery = useSuspenseInfiniteQuery(listBookmarksQueryOpts())
+  const usedCount = useSuspenseQuery(countBookmarksQueryOpts()).data
+  const trendingQuery = useQuery(listTrendingMemesQueryOpts())
+  const isPremium = useIsPremium()
+  const { isReached } = buildCapState({
+    kind: 'bookmark',
+    usedCount,
+    isPremium
+  })
+  const [demoMeme, ...suggestedMemes] = trendingQuery.data ?? []
   const cards = flattenUniqueCards(pagesQuery.data.pages)
-  const total = pagesQuery.data.pages[0]?.total ?? 0
 
   return (
     <>
-      <header className="pb-3 lg:pb-8">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <BookmarksTitle count={total} />
-          <CapMeter />
-        </div>
-      </header>
+      <LibraryHeader title={m.nav_my_bookmarks()} count={usedCount}>
+        {isPremium ? null : <CapMeter usedCount={usedCount} />}
+      </LibraryHeader>
       <LibraryStrip />
-      <CapReachedBanner />
+      {isReached ? <CapReachedNotice /> : null}
       {cards.length === 0 ? (
-        <BookmarksIntro />
+        <>
+          <BookmarksIntro demoMeme={demoMeme} isFree={!isPremium} />
+          {suggestedMemes.length > 0 ? (
+            <BookmarkSuggestions
+              memes={suggestedMemes}
+              now={trendingQuery.dataUpdatedAt}
+            />
+          ) : null}
+        </>
       ) : (
         <MemeCardGrid
           cards={cards}
@@ -327,9 +243,10 @@ const SignedInBookmarks = () => {
           label={m.nav_my_bookmarks()}
         >
           {pagesQuery.hasNextPage ? (
-            <LoadMoreButton
+            <LoadMore
               isFetching={pagesQuery.isFetchingNextPage}
               hasFailed={pagesQuery.isFetchNextPageError}
+              failedMessage={m.error_bookmark_load()}
               onLoadMore={() => {
                 void pagesQuery.fetchNextPage()
               }}
@@ -337,7 +254,18 @@ const SignedInBookmarks = () => {
           ) : null}
         </MemeCardGrid>
       )}
-      {total < STARTER_BOOKMARK_COUNT ? <BookmarkSuggestions /> : null}
+    </>
+  )
+}
+
+const VisitorBookmarks = () => {
+  const [demoMeme] = useQuery(listTrendingMemesQueryOpts()).data ?? []
+
+  return (
+    <>
+      <LibraryHeader title={m.nav_my_bookmarks()} />
+      <LibraryStrip />
+      <BookmarksIntro demoMeme={demoMeme} isFree={false} />
     </>
   )
 }
@@ -345,17 +273,5 @@ const SignedInBookmarks = () => {
 export const BookmarksPage = () => {
   const { user } = useRouteContext({ from: '__root__' })
 
-  if (user) {
-    return <SignedInBookmarks />
-  }
-
-  return (
-    <>
-      <header className="pb-3 lg:pb-8">
-        <BookmarksTitle />
-      </header>
-      <LibraryStrip />
-      <BookmarksIntro />
-    </>
-  )
+  return user ? <SignedInBookmarks /> : <VisitorBookmarks />
 }

@@ -1,7 +1,7 @@
 import { toast } from 'sonner'
 import {
   type InfiniteData,
-  useMutation,
+  type QueryClient,
   useQuery,
   useQueryClient
 } from '@tanstack/react-query'
@@ -11,23 +11,23 @@ import { getAppErrorCode } from '~/constants/error'
 import type { Meme } from '~/db/generated/prisma/client'
 import { buildCapState } from '~/helpers/cap'
 import { getErrorMessage } from '~/helpers/error'
+import { useSyncedMutation } from '~/hooks/use-synced-mutation'
 import { sendConversionEvent } from '~/lib/algolia-insights'
 import { snoozePremiumReminder } from '~/lib/premium-reminder'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages'
 import {
-  bookmarkQueryKey,
   listBookmarkIdsQueryOpts,
   listBookmarksQueryOpts
 } from '~/queries/bookmark'
 import { getMemeQueryOpts } from '~/queries/meme'
 import {
   type listBookmarks,
-  toggleBookmark
+  updateBookmark
 } from '~/server/bookmark/bookmark.functions'
 import { useDialogStore } from '~/stores/dialog.store'
 
-const TOGGLE_BOOKMARK_MUTATION_KEY = ['toggle-bookmark'] as const
+const UPDATE_BOOKMARK_MUTATION_KEY = ['update-bookmark'] as const
 
 type BookmarksPage = Awaited<ReturnType<typeof listBookmarks>>
 
@@ -35,6 +35,12 @@ type UseBookmarkParams = {
   memeId: Meme['id']
   queryID?: string
   authenticatedUserToken?: string
+}
+
+type ApplyBookmarkParams = {
+  queryClient: QueryClient
+  memeId: Meme['id']
+  isBookmarked: boolean
 }
 
 const withoutMeme = (
@@ -61,6 +67,30 @@ const withoutMeme = (
   }
 }
 
+const applyBookmark = ({
+  queryClient,
+  memeId,
+  isBookmarked
+}: ApplyBookmarkParams) => {
+  queryClient.setQueryData(listBookmarkIdsQueryOpts().queryKey, (old) => {
+    if (!old) {
+      return old
+    }
+
+    const others = old.filter((id) => {
+      return id !== memeId
+    })
+
+    return isBookmarked ? [memeId, ...others] : others
+  })
+
+  if (!isBookmarked) {
+    queryClient.setQueryData(listBookmarksQueryOpts().queryKey, (old) => {
+      return withoutMeme(old, memeId)
+    })
+  }
+}
+
 export const useBookmark = ({
   memeId,
   queryID,
@@ -73,66 +103,35 @@ export const useBookmark = ({
   const isPremium = useIsPremium()
   const matchRoute = useMatchRoute()
   const isOnBookmarksPage = Boolean(matchRoute({ to: '/memes/bookmarks' }))
-  const isBookmarkedQuery = useQuery({
-    ...listBookmarkIdsQueryOpts(),
-    enabled: isSignedIn,
-    select: (memeIds) => {
-      return memeIds.includes(memeId)
-    }
-  })
-  const isBookmarked = isBookmarkedQuery.data ?? false
-
-  const readBookmarkIds = () => {
-    return queryClient.getQueryData(listBookmarkIdsQueryOpts().queryKey) ?? []
-  }
+  const isBookmarked =
+    useQuery({
+      ...listBookmarkIdsQueryOpts(),
+      enabled: isSignedIn,
+      select: (memeIds) => {
+        return memeIds.includes(memeId)
+      }
+    }).data ?? false
 
   const openUpsell = () => {
     snoozePremiumReminder()
     dialogStore.actions.showDialog('bookmark-upsell')
   }
 
-  const toggleMutation = useMutation({
-    mutationKey: [...TOGGLE_BOOKMARK_MUTATION_KEY, memeId],
-    scope: { id: `toggle-bookmark:${memeId}` },
-    mutationFn: toggleBookmark,
-    onMutate: async () => {
-      const isAdding = !readBookmarkIds().includes(memeId)
-
-      await queryClient.cancelQueries({ queryKey: bookmarkQueryKey })
-
-      queryClient.setQueryData(listBookmarkIdsQueryOpts().queryKey, (old) => {
-        if (!old) {
-          return old
-        }
-
-        const others = old.filter((id) => {
-          return id !== memeId
-        })
-
-        return isAdding ? [memeId, ...others] : others
+  const updateMutation = useSyncedMutation({
+    mutationKey: UPDATE_BOOKMARK_MUTATION_KEY,
+    scope: { id: `${UPDATE_BOOKMARK_MUTATION_KEY.join(':')}:${memeId}` },
+    syncedQueryKeys: [
+      listBookmarkIdsQueryOpts.all,
+      listBookmarksQueryOpts.all,
+      getMemeQueryOpts.all
+    ],
+    mutationFn: (nextIsBookmarked: boolean) => {
+      return updateBookmark({
+        data: { memeId, isBookmarked: nextIsBookmarked }
       })
-
-      if (!isAdding) {
-        queryClient.setQueryData(listBookmarksQueryOpts().queryKey, (old) => {
-          return withoutMeme(old, memeId)
-        })
-      }
-
-      return { isAdding }
     },
-    onSuccess: (_result, _variables, context) => {
-      if (context.isAdding || !isOnBookmarksPage) {
-        return
-      }
-
-      toast(m.bookmark_removed(), {
-        action: {
-          label: m.common_undo(),
-          onClick: () => {
-            toggleMutation.mutate({ data: memeId })
-          }
-        }
-      })
+    onMutate: (nextIsBookmarked) => {
+      applyBookmark({ queryClient, memeId, isBookmarked: nextIsBookmarked })
     },
     onError: (error) => {
       const errorCode = getAppErrorCode(error)
@@ -157,27 +156,39 @@ export const useBookmark = ({
 
       captureWithFeature(error, 'bookmark')
       toast.error(m.error_bookmark_update())
-    },
-    onSettled: () => {
-      const isLastToggleOfMeme =
-        queryClient.isMutating({
-          mutationKey: [...TOGGLE_BOOKMARK_MUTATION_KEY, memeId]
-        }) === 1
-      const isLastToggle =
-        queryClient.isMutating({
-          mutationKey: TOGGLE_BOOKMARK_MUTATION_KEY
-        }) === 1
-
-      return Promise.all([
-        isLastToggleOfMeme
-          ? queryClient.invalidateQueries(getMemeQueryOpts(memeId))
-          : null,
-        isLastToggle
-          ? queryClient.invalidateQueries({ queryKey: bookmarkQueryKey })
-          : null
-      ])
     }
   })
+
+  const commitRemoval = () => {
+    updateMutation.mutate(false)
+  }
+
+  const removeWithUndo = () => {
+    const previousIds = queryClient.getQueryData(
+      listBookmarkIdsQueryOpts().queryKey
+    )
+    const previousPages = queryClient.getQueryData(
+      listBookmarksQueryOpts().queryKey
+    )
+    applyBookmark({ queryClient, memeId, isBookmarked: false })
+    toast(m.bookmark_removed(), {
+      onAutoClose: commitRemoval,
+      onDismiss: commitRemoval,
+      action: {
+        label: m.common_undo(),
+        onClick: () => {
+          queryClient.setQueryData(
+            listBookmarkIdsQueryOpts().queryKey,
+            previousIds
+          )
+          queryClient.setQueryData(
+            listBookmarksQueryOpts().queryKey,
+            previousPages
+          )
+        }
+      }
+    })
+  }
 
   const toggle = () => {
     if (!isSignedIn) {
@@ -186,34 +197,44 @@ export const useBookmark = ({
       return
     }
 
-    if (!isBookmarked) {
-      const { isReached } = buildCapState({
-        kind: 'bookmark',
-        usedCount: readBookmarkIds().length,
-        isPremium
-      })
-
-      if (isReached) {
-        openUpsell()
+    if (isBookmarked) {
+      if (isOnBookmarksPage) {
+        removeWithUndo()
 
         return
       }
 
-      sendConversionEvent({
-        queryID,
-        objectID: memeId,
-        eventName: 'Meme Bookmarked',
-        authenticatedUserToken
-      })
+      commitRemoval()
+
+      return
     }
 
-    toggleMutation.mutate({ data: memeId })
+    const { isReached } = buildCapState({
+      kind: 'bookmark',
+      usedCount:
+        queryClient.getQueryData(listBookmarkIdsQueryOpts().queryKey)?.length ??
+        0,
+      isPremium
+    })
+
+    if (isReached) {
+      openUpsell()
+
+      return
+    }
+
+    sendConversionEvent({
+      queryID,
+      objectID: memeId,
+      eventName: 'Meme Bookmarked',
+      authenticatedUserToken
+    })
+    updateMutation.mutate(true)
   }
 
   return {
     isSignedIn,
     isBookmarked,
-    isPending: toggleMutation.isPending,
     label: isBookmarked ? m.meme_remove_bookmark() : m.meme_add_bookmark(),
     toggle
   }

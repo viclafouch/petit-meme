@@ -37,6 +37,22 @@
     & > li {
       min-width: 0;
     }
+
+    &[data-layout='row'] {
+      grid-template-columns: none;
+      grid-auto-columns: calc(
+        (100% - (var(--meme-grid-cols) - 1) * var(--meme-grid-gap-x)) /
+          var(--meme-grid-cols)
+      );
+      grid-auto-flow: column;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+
+      & > li {
+        scroll-snap-align: start;
+      }
+    }
   }
 
   .meme-card-thumb {
@@ -55,6 +71,18 @@
 
       .meme-card:has(.meme-card-link:active) & {
         scale: 1;
+      }
+    }
+  }
+
+  .meme-card-bookmark {
+    @variant mouse {
+      &:not([data-active]) {
+        opacity: 0;
+      }
+
+      .meme-card:is(:hover, :focus-within) &:not([data-active]) {
+        opacity: 1;
       }
     }
   }

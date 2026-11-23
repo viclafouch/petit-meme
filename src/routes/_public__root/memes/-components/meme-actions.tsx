@@ -1,4 +1,3 @@
-import React from 'react'
 import { Clapperboard, Download, Pencil, Star } from 'lucide-react'
 import { Link, useRouteContext } from '@tanstack/react-router'
 import { useBookmark } from '~/components/bookmark/use-bookmark'
@@ -9,6 +8,7 @@ import type { MemeDerivedFormat } from '~/constants/bunny'
 import type { MemeExportMode, MemeWithVideo } from '~/constants/meme'
 import { MESSAGING_APPS, type MessagingApp } from '~/constants/messaging-apps'
 import { matchIsUserAdmin } from '~/helpers/role'
+import { useActivationCount } from '~/hooks/use-activation-count'
 import { m } from '~/paraglide/messages'
 
 const SHARE_AVATAR_APP_IDS = [
@@ -79,24 +79,16 @@ type BookmarkButtonProps = {
 
 const BookmarkButton = ({ meme }: BookmarkButtonProps) => {
   const bookmark = useBookmark({ memeId: meme.id })
-  const [burstCount, setBurstCount] = React.useState(0)
-
-  const handleBookmark = () => {
-    if (bookmark.isSignedIn && !bookmark.isBookmarked) {
-      setBurstCount((count) => {
-        return count + 1
-      })
-    }
-
-    bookmark.toggle()
-  }
+  const burstCount = useActivationCount(bookmark.isBookmarked)
 
   return (
     <button
       type="button"
       className="pill meme-pill-bookmark"
       aria-pressed={bookmark.isBookmarked}
-      onClick={handleBookmark}
+      onClick={() => {
+        bookmark.toggle()
+      }}
     >
       <span className="relative grid place-items-center">
         <Star aria-hidden="true" />

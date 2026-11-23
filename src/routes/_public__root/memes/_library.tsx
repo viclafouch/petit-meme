@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { getLocale } from '~/paraglide/runtime'
+import { listBookmarkIdsQueryOpts } from '~/queries/bookmark'
 import {
   countLibraryMemesQueryOpts,
   listCategoriesQueryOpts
@@ -20,7 +21,13 @@ export const Route = createFileRoute('/_public__root/memes/_library')({
         ...listCategoriesQueryOpts(getLocale()),
         staleTime: 'static'
       }),
-      context.queryClient.query(countLibraryMemesQueryOpts(getLocale()))
+      context.queryClient.query(countLibraryMemesQueryOpts(getLocale())),
+      context.user
+        ? context.queryClient.query({
+            ...listBookmarkIdsQueryOpts(),
+            staleTime: 'static'
+          })
+        : null
     ])
   },
   head: () => {

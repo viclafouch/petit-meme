@@ -95,31 +95,24 @@
   }
 }
 
-@keyframes bookmarks-demo-ping {
-  from {
-    opacity: 0.9;
-    scale: 1;
-  }
-
-  to {
-    opacity: 0;
-    scale: 1.9;
-  }
-}
-
 @layer components {
-  .bookmarks-demo-star:not([data-active])::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border: 2px solid currentColor;
-    border-radius: inherit;
-    opacity: 0;
-    pointer-events: none;
+  .bookmark-cap-meter {
+    appearance: none;
+    border: 0 solid;
+    overflow: clip;
 
-    @variant motion-safe {
-      animation: bookmarks-demo-ping var(--duration-ping) var(--ease-out-strong)
-        var(--duration-slow) 3;
+    &::-webkit-progress-bar {
+      background: transparent;
+    }
+
+    &::-webkit-progress-value {
+      background: var(--foreground);
+      transition: inline-size var(--duration-base) ease-out;
+    }
+
+    &::-moz-progress-bar {
+      background: var(--foreground);
+      transition: inline-size var(--duration-base) ease-out;
     }
   }
 }

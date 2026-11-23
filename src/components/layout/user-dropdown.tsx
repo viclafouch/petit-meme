@@ -28,7 +28,7 @@ import {
 import { UserAvatar } from '~/components/user/user-avatar'
 import { matchIsUserAdmin, type SessionUser } from '~/helpers/role'
 import { m } from '~/paraglide/messages'
-import { listBookmarkIdsQueryOpts } from '~/queries/bookmark'
+import { countBookmarksQueryOpts } from '~/queries/bookmark'
 import { getPremiumSubscriptionQueryOpts } from '~/queries/subscription'
 
 type UserDropdownProps = {
@@ -40,12 +40,7 @@ export const UserDropdown = ({ user }: UserDropdownProps) => {
   const { goToBillingPortal } = useStripeCheckout()
   const { signOut } = useSignOut()
 
-  const bookmarkCountQuery = useQuery({
-    ...listBookmarkIdsQueryOpts(),
-    select: (memeIds) => {
-      return memeIds.length
-    }
-  })
+  const bookmarkCountQuery = useQuery(countBookmarksQueryOpts())
   const premiumSubscriptionQuery = useQuery(getPremiumSubscriptionQueryOpts())
   const isPremium = useIsPremium()
 

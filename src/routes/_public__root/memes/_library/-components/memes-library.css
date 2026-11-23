@@ -1,4 +1,4 @@
-@reference '../../../../styles.css';
+@reference '../../../../../styles.css';
 
 @layer theme, base, components, utilities;
 
@@ -91,6 +91,35 @@
       animation-range:
         0 var(--category-directory-fade-size),
         calc(100% - var(--category-directory-fade-size)) 100%;
+    }
+  }
+}
+
+@keyframes bookmarks-demo-ping {
+  from {
+    opacity: 0.9;
+    scale: 1;
+  }
+
+  to {
+    opacity: 0;
+    scale: 1.9;
+  }
+}
+
+@layer components {
+  .bookmarks-demo-star:not([data-active])::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 2px solid var(--color-bookmark-fill);
+    border-radius: inherit;
+    opacity: 0;
+    pointer-events: none;
+
+    @variant motion-safe {
+      animation: bookmarks-demo-ping var(--duration-ping) var(--ease-out-strong)
+        var(--duration-slow) 3;
     }
   }
 }

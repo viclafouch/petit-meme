@@ -6,7 +6,7 @@ Four audiences use Petit Meme. Each one keeps everything the audience before it 
 
 Anyone, with no account. A Visitor browses the whole library and watches every Meme. A Visitor also downloads or shares the video with the watermark, and searches the library. The consent banner is the only thing that interrupts them.
 
-Some features need an account: bookmarks, the Studio, the AI search, proposals. When a Visitor reaches for one, Petit Meme asks them to sign in. Saying no leaves them where they were.
+Some features need an account: bookmarks, the Studio, the AI search, proposals. When a Visitor reaches for one, Petit Meme asks them to sign in. Saying no leaves them where they were. The bookmarks stay in sight in the library: a Visitor who opens them learns what they are for before being asked to sign in.
 
 ## User
 

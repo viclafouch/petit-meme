@@ -7,10 +7,10 @@ It started from the Creator's own need: find a video meme fast and send it to fr
 ## What it does
 
 - **Watch.** The home page opens on a video that plays. Each Meme has its own page, and on a phone the Reels chain the Memes one after the other.
-- **Find.** A search on every page, categories grouped by mood, reply, theme and source, the trending Memes, related Memes and a random Meme. Signed-in Users also get an AI search that understands a description in plain words.
+- **Find.** The library opens on every Meme, sorted by trend, by newest or by most viewed, with the categories beside it, grouped by mood, reply, theme and source. A search on every page, the trending Memes, related Memes and a random Meme. Signed-in Users also get an AI search that understands a description in plain words.
 - **Take away.** Every Meme exports as a video, by download or through the phone's share sheet. Premium also exports its sound.
 - **Make your own.** The Studio adds a caption to a Meme and exports the result.
-- **Keep.** Signed-in Users bookmark the Memes they want to find again.
+- **Keep.** Signed-in Users star the Memes they want to find again, from any Meme. Their bookmarks sit in the library, next to the categories, so finding one again takes a tap.
 - **Install.** Petit Meme installs as an app on the phone's home screen, with no app store. It opens full screen, and a lost connection shows a page that waits for the network instead of the browser's error.
 
 ## Who runs it
@@ -28,7 +28,7 @@ Most are between 15 and 40. Both need the meme as a file. The terms of use let t
 
 ## How it makes money
 
-A Premium subscription, monthly or yearly. Premium lifts the caps and adds comfort: the video without the watermark, the sound, unlimited Studio and AI search. Nothing in the library sits behind it. See [the offer](offer.md).
+A Premium subscription, monthly or yearly. Premium lifts the caps and adds comfort: the video without the watermark, the sound, unlimited bookmarks, Studio and AI search. Nothing in the library sits behind it. See [the offer](offer.md).
 
 ## Where it stands
 

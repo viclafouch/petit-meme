@@ -22,7 +22,7 @@ import { useSearchSuggestions } from './use-search-suggestions'
 
 const useCurrentQuery = () => {
   const categoryMatch = useMatch({
-    from: '/_public__root/memes/category/$slug',
+    from: '/_public__root/memes/_library/category/$slug',
     shouldThrow: false
   })
 

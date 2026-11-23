@@ -6,13 +6,14 @@ import {
   Smartphone
 } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
-import { BookmarkStar } from '~/components/meme/bookmark-star'
+import { BookmarkCardButton } from '~/components/bookmark/bookmark-card-button'
+import { BookmarkStar } from '~/components/bookmark/bookmark-star'
+import { useBookmark } from '~/components/bookmark/use-bookmark'
 import { MemeActionsSheet } from '~/components/meme/meme-actions-sheet'
 import { MemeExportSubmenu } from '~/components/meme/meme-export-menu'
 import type { ThumbnailPriority } from '~/components/meme/meme-grid'
 import { MemeHighlightedTitle } from '~/components/meme/meme-highlighted-title'
 import { MemeLanguageBadge } from '~/components/meme/meme-language-badge'
-import { useBookmarkAction } from '~/components/meme/use-bookmark-action'
 import { useCloseWhenDialogOpens } from '~/components/meme/use-close-when-dialog-opens'
 import { useMemeExport } from '~/components/meme/use-meme-export'
 import { useOpenStudioSheet } from '~/components/studio/use-studio-history'
@@ -95,8 +96,8 @@ const MemeCardMenu = ({
   const shareMutation = useMemeExport({ mode: 'share', queryID })
   const downloadMutation = useMemeExport({ mode: 'download', queryID })
   const openStudioSheet = useOpenStudioSheet()
-  const bookmarkAction = useBookmarkAction({
-    meme,
+  const bookmark = useBookmark({
+    memeId: meme.id,
     queryID,
     authenticatedUserToken
   })
@@ -169,13 +170,13 @@ const MemeCardMenu = ({
           {m.meme_open_studio()}
         </DropdownMenuItem>
         <DropdownMenuItem
-          closeOnClick={!bookmarkAction.isSignedIn}
+          closeOnClick={!bookmark.isSignedIn}
           onClick={() => {
-            bookmarkAction.selectBookmark()
+            bookmark.toggle()
           }}
         >
-          <BookmarkStar isActive={bookmarkAction.isMemeBookmarked} />
-          {bookmarkAction.label}
+          <BookmarkStar isActive={bookmark.isBookmarked} />
+          {bookmark.label}
         </DropdownMenuItem>
         <DropdownMenuLinkItem
           render={<Link to="/memes/$memeId" params={{ memeId: meme.id }} />}
@@ -305,6 +306,13 @@ export const MemeCard = React.memo(
             <MemeLanguageBadge contentLocale={meme.contentLocale} />
           ) : null}
         </p>
+        <BookmarkCardButton
+          memeId={meme.id}
+          title={meme.title}
+          queryID={queryID}
+          authenticatedUserToken={authenticatedUserToken}
+          className="absolute top-1.5 right-1.5 z-(--z-floating) mouse:not-data-active:opacity-0 mouse:not-data-active:focus-visible:opacity-100 mouse:not-data-active:in-[.meme-card:hover]:opacity-100 mouse:not-data-active:in-[.meme-card:focus-within]:opacity-100"
+        />
         <MemeCardMenu
           meme={meme}
           queryID={queryID}

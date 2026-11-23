@@ -1,7 +1,8 @@
 import React from 'react'
 import { ArrowRight, ChevronRight, Clapperboard } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
-import { BookmarkStar } from '~/components/meme/bookmark-star'
+import { BookmarkStar } from '~/components/bookmark/bookmark-star'
+import { useBookmark } from '~/components/bookmark/use-bookmark'
 import {
   MemeExportPanelBody,
   MemeExportSheetHeader
@@ -14,7 +15,6 @@ import {
   SHEET_ROW_CLASS_NAME,
   SHEET_TITLE_CLASS_NAME
 } from '~/components/meme/meme-sheet'
-import { useBookmarkAction } from '~/components/meme/use-bookmark-action'
 import { useCloseWhenDialogOpens } from '~/components/meme/use-close-when-dialog-opens'
 import { useIsPremium } from '~/components/premium/use-is-premium'
 import {
@@ -57,8 +57,8 @@ export const MemeActionsSheet = ({
     setIsOpen(false)
   })
   const { runAfterClose, handleOpenChangeComplete } = useActionAfterClose()
-  const bookmarkAction = useBookmarkAction({
-    meme,
+  const bookmark = useBookmark({
+    memeId: meme.id,
     queryID,
     authenticatedUserToken
   })
@@ -122,21 +122,21 @@ export const MemeActionsSheet = ({
               type="button"
               className={SHEET_ROW_CLASS_NAME}
               onClick={() => {
-                if (bookmarkAction.isSignedIn) {
-                  bookmarkAction.selectBookmark()
+                if (bookmark.isSignedIn) {
+                  bookmark.toggle()
 
                   return
                 }
 
-                runAfterClose(bookmarkAction.selectBookmark)
+                runAfterClose(bookmark.toggle)
                 setIsOpen(false)
               }}
             >
               <BookmarkStar
-                isActive={bookmarkAction.isMemeBookmarked}
+                isActive={bookmark.isBookmarked}
                 className="size-5 [&_svg]:size-5"
               />
-              {bookmarkAction.label}
+              {bookmark.label}
             </button>
             <DrawerClose
               className={SHEET_ROW_CLASS_NAME}

@@ -5,7 +5,7 @@ import { buildSeo } from '~/lib/seo/meta'
 import { buildOgImage } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
-import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
+import { listBookmarkIdsQueryOpts } from '~/queries/bookmark'
 import {
   countRecentMemesQueryOpts,
   listTrendingMemesQueryOpts
@@ -28,7 +28,7 @@ export const Route = createFileRoute('/_public__root/')({
       }),
       context.user
         ? context.queryClient.query({
-            ...listBookmarkedMemesQueryOpts(),
+            ...listBookmarkIdsQueryOpts(),
             staleTime: 'static'
           })
         : undefined

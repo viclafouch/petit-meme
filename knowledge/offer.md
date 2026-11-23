@@ -4,7 +4,7 @@ Petit Meme has two plans: Free and Premium. Free keeps the whole library. Premiu
 
 ## What Free keeps
 
-Every Meme, watched, downloaded and shared, with no account. The downloaded video carries a watermark. With an account, bookmarks, Studio captions and AI searches come with a cap.
+Every Meme, watched, downloaded and shared, with no account. The downloaded video carries a watermark. With an account, bookmarks, Studio captions and AI searches come with a cap. A cap only stops the next one: a free User keeps every bookmark already saved, even past the cap after Premium ends, and the bookmarks page says when the cap is reached.
 
 ## What Premium adds
 

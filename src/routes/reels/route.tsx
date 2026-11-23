@@ -3,7 +3,7 @@ import { buildSeo } from '~/lib/seo/meta'
 import { buildOgImage } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
-import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
+import { listBookmarkIdsQueryOpts } from '~/queries/bookmark'
 import { listReelsQueryOpts } from '~/queries/meme'
 import { getPremiumSubscriptionQueryOpts } from '~/queries/subscription'
 import { ReelsPage } from './-components/reels-page'
@@ -14,7 +14,7 @@ export const Route = createFileRoute('/reels')({
     if (context.user) {
       void Promise.allSettled([
         context.queryClient.query({
-          ...listBookmarkedMemesQueryOpts(),
+          ...listBookmarkIdsQueryOpts(),
           staleTime: 'static'
         }),
         context.queryClient.query({

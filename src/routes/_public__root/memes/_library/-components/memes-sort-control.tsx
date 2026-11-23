@@ -7,7 +7,9 @@ import { MEMES_SORTS, type MemesSort } from '~/constants/meme'
 import { resolveLibraryFilters, resolveMemesSort } from '~/helpers/memes-sort'
 import { m } from '~/paraglide/messages'
 
-const categoryRouteApi = getRouteApi('/_public__root/memes/category/$slug')
+const categoryRouteApi = getRouteApi(
+  '/_public__root/memes/_library/category/$slug'
+)
 
 const PILL_SPRING = {
   type: 'spring',

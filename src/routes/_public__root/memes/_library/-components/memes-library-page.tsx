@@ -1,13 +1,7 @@
-import React from 'react'
 import { Sparkles } from 'lucide-react'
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
 import { getRouteApi, Link } from '@tanstack/react-router'
-import { MemeCard } from '~/components/meme/meme-card'
-import memeCardCss from '~/components/meme/meme-card.css?url'
-import {
-  toThumbnailPriority,
-  useMemesViewEvent
-} from '~/components/meme/meme-grid'
+import { useMemesViewEvent } from '~/components/meme/meme-grid'
 import { LoadingSpinner } from '~/components/ui/spinner'
 import { ALL_CATEGORY_SLUG } from '~/constants/meme'
 import { serializeJsonLd } from '~/helpers/json-ld'
@@ -18,12 +12,14 @@ import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { listMemesPagesQueryOpts } from '~/queries/meme'
 import { flattenUniqueCards } from '~/routes/_public__root/memes/-lib/library'
-import { CategoryDirectory, QuickCategories } from './category-directory'
+import { LibraryStrip } from './library-layout'
+import { MemeCardGrid } from './meme-card-grid'
 import { MemesSortControl } from './memes-sort-control'
+import { useLoadMoreWhenVisible } from './use-load-more-when-visible'
 
-const categoryRouteApi = getRouteApi('/_public__root/memes/category/$slug')
-
-const LOAD_MORE_ROOT_MARGIN = '0px 0px 50% 0px'
+const categoryRouteApi = getRouteApi(
+  '/_public__root/memes/_library/category/$slug'
+)
 
 const useLibraryPages = () => {
   const { slug } = categoryRouteApi.useParams()
@@ -161,31 +157,11 @@ const LoadMore = ({
   onLoadMore
 }: LoadMoreProps) => {
   const search = categoryRouteApi.useSearch()
-  const sentinelRef = React.useRef<HTMLDivElement>(null)
-  const onLoadMoreEvent = React.useEffectEvent(onLoadMore)
-
-  React.useEffect(() => {
-    const sentinel = sentinelRef.current
-
-    if (!sentinel || isFetching || hasFailed) {
-      return () => {}
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          onLoadMoreEvent()
-        }
-      },
-      { rootMargin: LOAD_MORE_ROOT_MARGIN }
-    )
-
-    observer.observe(sentinel)
-
-    return () => {
-      observer.disconnect()
-    }
-  }, [isFetching, hasFailed])
+  const sentinelRef = useLoadMoreWhenVisible({
+    isFetching,
+    hasFailed,
+    onLoadMore
+  })
 
   return (
     <div ref={sentinelRef} className="flex flex-col items-center gap-3 pt-10">
@@ -227,25 +203,11 @@ const LibraryGrid = () => {
   }
 
   return (
-    <div className="meme-grid-wrap">
-      <link rel="stylesheet" href={memeCardCss} precedence="default" />
-      <ul className="meme-grid" aria-label={m.meme_list_label()}>
-        {cards.map((card, index) => {
-          return (
-            <li key={card.meme.id}>
-              <MemeCard
-                meme={card.meme}
-                now={pagesQuery.dataUpdatedAt}
-                titleTag="h2"
-                queryID={card.queryID}
-                position={card.position}
-                authenticatedUserToken={authenticatedUserToken}
-                priority={toThumbnailPriority(index)}
-              />
-            </li>
-          )
-        })}
-      </ul>
+    <MemeCardGrid
+      cards={cards}
+      now={pagesQuery.dataUpdatedAt}
+      authenticatedUserToken={authenticatedUserToken}
+    >
       {pagesQuery.hasNextPage && lastPage ? (
         <LoadMore
           nextPage={lastPage.page + 1}
@@ -256,7 +218,7 @@ const LibraryGrid = () => {
           }}
         />
       ) : null}
-    </div>
+    </MemeCardGrid>
   )
 }
 
@@ -276,18 +238,11 @@ const LibraryHeader = () => {
 
 export const MemesLibraryPage = () => {
   return (
-    <div className="mx-auto w-full max-w-440 px-3 pt-5 pb-10 sm:px-4 lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:items-start lg:gap-8 lg:px-[clamp(1.5rem,3vw,3rem)] lg:pt-10 lg:pb-12">
-      <aside className="memes-library-sidebar max-lg:hidden">
-        <CategoryDirectory />
-      </aside>
-      <div className="min-w-0">
-        <LibraryHeader />
-        <div className="sticky top-(--navbar-space) z-(--z-controls) -mx-3 mb-4 bg-background px-3 py-1 sm:-mx-4 sm:px-4 lg:hidden">
-          <QuickCategories />
-        </div>
-        <LibraryGrid />
-        <LibraryJsonLd />
-      </div>
-    </div>
+    <>
+      <LibraryHeader />
+      <LibraryStrip />
+      <LibraryGrid />
+      <LibraryJsonLd />
+    </>
   )
 }

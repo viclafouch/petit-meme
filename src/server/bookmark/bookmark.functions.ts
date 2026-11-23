@@ -2,10 +2,14 @@ import { z } from 'zod'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
-import { MEME_TRANSLATION_SELECT, MEME_VIDEO_INCLUDE } from '~/constants/meme'
+import {
+  MEME_TRANSLATION_SELECT,
+  MEME_VIDEO_INCLUDE,
+  MEMES_PER_PAGE
+} from '~/constants/meme'
 import { prismaClient } from '~/db/client.server'
 import type { Meme } from '~/db/generated/prisma/client'
-import { ActivityEventType, MemeStatus } from '~/db/generated/prisma/enums'
+import { ActivityEventType } from '~/db/generated/prisma/enums'
 import { FREE_CAPS } from '~/helpers/cap'
 import { localizeMemes } from '~/helpers/i18n-content'
 import type { SessionUser } from '~/helpers/role'
@@ -13,6 +17,7 @@ import { authLogger } from '~/lib/logger'
 import { getLocale } from '~/paraglide/runtime'
 import { recordActivityEvent } from '~/server/activity/activity.server'
 import { userRequiredMiddleware } from '~/server/auth/auth.middleware'
+import { buildVisibleBookmarksWhere } from '~/server/bookmark/bookmark.server'
 import { throwCapReached } from '~/server/cap/cap.server'
 import { matchIsUserPremium } from '~/server/subscription/subscription.server'
 
@@ -21,35 +26,55 @@ type ToggleUserBookmarkParams = {
   memeId: Meme['id']
 }
 
-export const listBookmarkedMemes = createServerFn({ method: 'GET' })
+const BOOKMARKS_PAGE_SCHEMA = z.number().int().min(1)
+
+export const listBookmarkIds = createServerFn({ method: 'GET' })
   .middleware([userRequiredMiddleware])
   .handler(async ({ context }) => {
-    const isPremium = await matchIsUserPremium(context.user)
-
     const bookmarks = await prismaClient.bookmark.findMany({
-      where: {
-        userId: context.user.id,
-        meme: { status: MemeStatus.PUBLISHED }
-      },
-      orderBy: { createdAt: 'desc' },
-      take: isPremium ? undefined : FREE_CAPS.bookmark,
-      select: {
-        meme: {
-          include: {
-            ...MEME_VIDEO_INCLUDE,
-            translations: { select: MEME_TRANSLATION_SELECT }
-          }
-        }
-      }
+      where: buildVisibleBookmarksWhere(context.user.id),
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      select: { memeId: true }
     })
 
+    return bookmarks.map((bookmark) => {
+      return bookmark.memeId
+    })
+  })
+
+export const listBookmarks = createServerFn({ method: 'GET' })
+  .validator((data) => {
+    return BOOKMARKS_PAGE_SCHEMA.parse(data)
+  })
+  .middleware([userRequiredMiddleware])
+  .handler(async ({ data: page, context }) => {
+    const where = buildVisibleBookmarksWhere(context.user.id)
+    const [total, bookmarks] = await Promise.all([
+      prismaClient.bookmark.count({ where }),
+      prismaClient.bookmark.findMany({
+        where,
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        skip: (page - 1) * MEMES_PER_PAGE,
+        take: MEMES_PER_PAGE,
+        select: {
+          meme: {
+            include: {
+              ...MEME_VIDEO_INCLUDE,
+              translations: { select: MEME_TRANSLATION_SELECT }
+            }
+          }
+        }
+      })
+    ])
     const memes = bookmarks.map((bookmark) => {
       return bookmark.meme
     })
 
     return {
-      bookmarks: localizeMemes(memes, getLocale()),
-      count: bookmarks.length
+      memes: localizeMemes(memes, getLocale()),
+      page,
+      total,
+      hasNextPage: page * MEMES_PER_PAGE < total
     }
   })
 
@@ -70,7 +95,7 @@ const toggleUserBookmark = createServerOnlyFn(
       }
 
       const bookmarkCount = await transaction.bookmark.count({
-        where: { userId: user.id }
+        where: buildVisibleBookmarksWhere(user.id)
       })
 
       if (

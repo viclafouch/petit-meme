@@ -5,6 +5,7 @@ import { prismaClient } from '~/db/client.server'
 import { buildCapState, type CapKind } from '~/helpers/cap'
 import { truncateToUtcMonth } from '~/helpers/date'
 import type { SessionUser } from '~/helpers/role'
+import { buildVisibleBookmarksWhere } from '~/server/bookmark/bookmark.server'
 import { throwWithStatus } from '~/server/http/http.server'
 import { matchIsUserPremium } from '~/server/subscription/subscription.server'
 
@@ -21,7 +22,9 @@ type CapReachedError = {
 
 const COUNT_CAP_USE = {
   bookmark: (userId) => {
-    return prismaClient.bookmark.count({ where: { userId } })
+    return prismaClient.bookmark.count({
+      where: buildVisibleBookmarksWhere(userId)
+    })
   },
   generation: async (userId) => {
     const { generationCount } = await prismaClient.user.findUniqueOrThrow({

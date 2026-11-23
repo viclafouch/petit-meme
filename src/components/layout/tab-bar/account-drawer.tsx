@@ -46,7 +46,7 @@ import { changeLocale } from '~/lib/change-locale'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
 import { getLocale, locales, type Locale } from '~/paraglide/runtime'
-import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
+import { listBookmarkIdsQueryOpts } from '~/queries/bookmark'
 import { getPremiumSubscriptionQueryOpts } from '~/queries/subscription'
 import { useCookieConsentStore } from '~/stores/cookie-consent.store'
 import { useDialogStore } from '~/stores/dialog.store'
@@ -202,7 +202,12 @@ type UserSectionsProps = InstallAfterCloseProps & {
 const UserSections = ({ user, onInstall }: UserSectionsProps) => {
   const { goToBillingPortal } = useStripeCheckout()
   const { signOut } = useSignOut()
-  const bookmarkedMemesQuery = useQuery(listBookmarkedMemesQueryOpts())
+  const bookmarkCountQuery = useQuery({
+    ...listBookmarkIdsQueryOpts(),
+    select: (memeIds) => {
+      return memeIds.length
+    }
+  })
   const premiumSubscriptionQuery = useQuery(getPremiumSubscriptionQueryOpts())
   const isPremium = useIsPremium()
 
@@ -224,12 +229,12 @@ const UserSections = ({ user, onInstall }: UserSectionsProps) => {
         </div>
       </div>
       <div className={SECTION_CLASS}>
-        <AccountLink to="/bookmarks">
+        <AccountLink to="/memes/bookmarks">
           <Star />
           {m.nav_my_bookmarks()}
-          {bookmarkedMemesQuery.data?.count ? (
+          {bookmarkCountQuery.data ? (
             <span className="ml-auto text-sm text-muted-foreground tabular-nums">
-              {bookmarkedMemesQuery.data.count}
+              {bookmarkCountQuery.data}
             </span>
           ) : null}
         </AccountLink>
@@ -312,9 +317,7 @@ export const AccountDrawer = () => {
     })
   }
 
-  const isAccountPage = Boolean(
-    matchRoute({ to: '/settings' }) || matchRoute({ to: '/bookmarks' })
-  )
+  const isAccountPage = Boolean(matchRoute({ to: '/settings' }))
 
   return (
     <Drawer

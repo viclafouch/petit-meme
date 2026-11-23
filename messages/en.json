@@ -493,11 +493,6 @@
   "settings_delete_account": "Delete my account",
   "settings_delete_account_description": "Permanently delete your account and all your data",
   "settings_download_data": "Download my data",
-  "settings_bookmarks_description": "Your favorite memes, always at hand: find them here.",
-  "settings_bookmarks_empty_cta": "Browse the memes",
-  "settings_bookmarks_empty_description": "Add a meme to your favorites, and it waits for you here.",
-  "settings_bookmarks_heading": "Favorites",
-  "settings_bookmarks_title": "Petit Meme - Favorites",
   "settings_member_since": "Member since {date}",
   "settings_page_title": "Petit Meme - Settings",
   "settings_password_description": "Change your password",
@@ -766,5 +761,23 @@
       }
     }
   ],
-  "meme_seo_quoted_title": "“{title}”"
+  "meme_seo_quoted_title": "“{title}”",
+  "common_undo": "Undo",
+  "bookmark_removed": "Removed from favorites",
+  "bookmark_card_label": "Favorite: {title}",
+  "bookmark_strip_label": "Favorites",
+  "bookmark_seo_title": "My favorites",
+  "bookmark_cap_meter": "{count} / {cap} favorites",
+  "bookmark_cap_reached_title": "All {cap} favorites are taken",
+  "bookmark_cap_reached_description": "With Premium, keep as many Memes as you like, without the watermark and with the sound.",
+  "bookmark_intro_title": "Your Memes, ready to send",
+  "bookmark_intro_description": "Tap the star on a Meme: it waits here, one tap away from the chat.",
+  "bookmark_intro_benefit_find": "The Meme that answers everything, found in a second",
+  "bookmark_intro_benefit_send": "Sent without searching for it twice",
+  "bookmark_intro_benefit_devices": "On your phone and on your computer",
+  "bookmark_intro_free_cap": "{cap} free favorites, unlimited with Premium.",
+  "bookmark_intro_sign_in": "Sign in to start",
+  "bookmark_intro_try": "Tap the star",
+  "bookmark_suggestions_title": "Trending Memes to keep",
+  "error_bookmark_load": "Couldn't load more of your favorites."
 }

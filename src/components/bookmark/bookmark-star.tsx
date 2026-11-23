@@ -1,3 +1,4 @@
+import React from 'react'
 import { Star } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { cn } from '~/lib/utils'
@@ -20,6 +21,20 @@ type BookmarkStarProps = {
 
 export const BookmarkStar = ({ isActive, className }: BookmarkStarProps) => {
   const isReducedMotion = useReducedMotion()
+  const [previousIsActive, setPreviousIsActive] = React.useState(isActive)
+  const [burstCount, setBurstCount] = React.useState(0)
+
+  if (previousIsActive !== isActive) {
+    setPreviousIsActive(isActive)
+
+    if (isActive) {
+      setBurstCount((count) => {
+        return count + 1
+      })
+    }
+  }
+
+  const isBursting = isActive && burstCount > 0 && !isReducedMotion
 
   return (
     <span
@@ -34,18 +49,18 @@ export const BookmarkStar = ({ isActive, className }: BookmarkStarProps) => {
         className="grid place-items-center"
         initial={false}
         animate={{
-          scale: isActive && !isReducedMotion ? [1, STAR_POP_SCALE, 1] : 1
+          scale: isBursting ? [1, STAR_POP_SCALE, 1] : 1
         }}
         transition={{ duration: STAR_POP_DURATION_S, ease: 'easeOut' }}
       >
         <Star className="size-4" />
       </motion.span>
       <AnimatePresence initial={false}>
-        {isActive && !isReducedMotion
+        {isBursting
           ? SPARK_ANGLES.map((angle, index) => {
               return (
                 <motion.span
-                  key={angle}
+                  key={`${burstCount}:${angle}`}
                   className="pointer-events-none absolute size-1 rounded-full bg-bookmark-spark"
                   initial={{ x: 0, y: 0, scale: 0, opacity: 0 }}
                   animate={{

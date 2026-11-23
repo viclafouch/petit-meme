@@ -28,7 +28,7 @@ import {
 import { UserAvatar } from '~/components/user/user-avatar'
 import { matchIsUserAdmin, type SessionUser } from '~/helpers/role'
 import { m } from '~/paraglide/messages'
-import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
+import { listBookmarkIdsQueryOpts } from '~/queries/bookmark'
 import { getPremiumSubscriptionQueryOpts } from '~/queries/subscription'
 
 type UserDropdownProps = {
@@ -40,7 +40,12 @@ export const UserDropdown = ({ user }: UserDropdownProps) => {
   const { goToBillingPortal } = useStripeCheckout()
   const { signOut } = useSignOut()
 
-  const bookmarkedMemesQuery = useQuery(listBookmarkedMemesQueryOpts())
+  const bookmarkCountQuery = useQuery({
+    ...listBookmarkIdsQueryOpts(),
+    select: (memeIds) => {
+      return memeIds.length
+    }
+  })
   const premiumSubscriptionQuery = useQuery(getPremiumSubscriptionQueryOpts())
   const isPremium = useIsPremium()
 
@@ -102,12 +107,12 @@ export const UserDropdown = ({ user }: UserDropdownProps) => {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuLinkItem render={<Link to="/bookmarks" />}>
+          <DropdownMenuLinkItem render={<Link to="/memes/bookmarks" />}>
             <Star />
             {m.nav_my_bookmarks()}
-            {bookmarkedMemesQuery.data?.count ? (
+            {bookmarkCountQuery.data ? (
               <span className="ml-auto text-xs text-muted-foreground tabular-nums">
-                {bookmarkedMemesQuery.data.count}
+                {bookmarkCountQuery.data}
               </span>
             ) : null}
           </DropdownMenuLinkItem>

@@ -22,6 +22,7 @@ import { Route as SitemapStaticDotxmlRouteImport } from './routes/sitemap-static
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as Public__rootIndexRouteImport } from './routes/_public__root/index'
 import { Route as Public__rootDefaultRouteRouteImport } from './routes/_public__root/_default/route'
+import { Route as Public__rootBookmarksRouteImport } from './routes/_public__root/bookmarks'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminDownloaderRouteImport } from './routes/admin/downloader'
 import { Route as AdminServicesRouteImport } from './routes/admin/services'
@@ -30,7 +31,6 @@ import { Route as ApiMemeFillRouteImport } from './routes/api/meme-fill'
 import { Route as ApiOembedRouteImport } from './routes/api/oembed'
 import { Route as ApiOgRouteImport } from './routes/api/og'
 import { Route as EmbedMemeIdRouteImport } from './routes/embed/$memeId'
-import { Route as Public__rootDefaultBookmarksRouteImport } from './routes/_public__root/_default/bookmarks'
 import { Route as Public__rootDefaultDmcaRouteImport } from './routes/_public__root/_default/dmca'
 import { Route as Public__rootDefaultMentionsLegalesRouteImport } from './routes/_public__root/_default/mentions-legales'
 import { Route as Public__rootDefaultPrivacyRouteImport } from './routes/_public__root/_default/privacy'
@@ -39,6 +39,7 @@ import { Route as Public__rootDefaultTermsOfUseRouteImport } from './routes/_pub
 import { Route as Public__rootDefaultVerifyEmailRouteImport } from './routes/_public__root/_default/verify-email'
 import { Route as Public__rootMemesIndexRouteImport } from './routes/_public__root/memes/index'
 import { Route as Public__rootMemesMemeIdRouteImport } from './routes/_public__root/memes/$memeId'
+import { Route as Public__rootMemesLibraryRouteImport } from './routes/_public__root/memes/_library'
 import { Route as AdminActivityIndexRouteImport } from './routes/admin/activity/index'
 import { Route as AdminActivityIpRouteImport } from './routes/admin/activity/$ip'
 import { Route as AdminAiSearchIndexRouteImport } from './routes/admin/ai-search/index'
@@ -66,7 +67,8 @@ import { Route as Public__rootDefaultRandomIndexRouteImport } from './routes/_pu
 import { Route as Public__rootDefaultSettingsIndexRouteImport } from './routes/_public__root/_default/settings/index'
 import { Route as Public__rootDefaultSubmitIndexRouteImport } from './routes/_public__root/_default/submit/index'
 import { Route as Public__rootMemesMemeIdStudioRouteImport } from './routes/_public__root/memes/$memeId.studio'
-import { Route as Public__rootMemesCategorySlugRouteImport } from './routes/_public__root/memes/category/$slug'
+import { Route as Public__rootMemesLibraryBookmarksRouteImport } from './routes/_public__root/memes/_library/bookmarks'
+import { Route as Public__rootMemesLibraryCategorySlugRouteImport } from './routes/_public__root/memes/_library/category/$slug'
 
 const Public__rootRouteRoute = Public__rootRouteRouteImport.update({
   id: '/_public__root',
@@ -132,6 +134,11 @@ const Public__rootDefaultRouteRoute =
     id: '/_default',
     getParentRoute: () => Public__rootRouteRoute,
   } as any)
+const Public__rootBookmarksRoute = Public__rootBookmarksRouteImport.update({
+  id: '/bookmarks',
+  path: '/bookmarks',
+  getParentRoute: () => Public__rootRouteRoute,
+} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -172,12 +179,6 @@ const EmbedMemeIdRoute = EmbedMemeIdRouteImport.update({
   path: '/embed/$memeId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const Public__rootDefaultBookmarksRoute =
-  Public__rootDefaultBookmarksRouteImport.update({
-    id: '/bookmarks',
-    path: '/bookmarks',
-    getParentRoute: () => Public__rootDefaultRouteRoute,
-  } as any)
 const Public__rootDefaultDmcaRoute = Public__rootDefaultDmcaRouteImport.update({
   id: '/dmca',
   path: '/dmca',
@@ -223,6 +224,12 @@ const Public__rootMemesMemeIdRoute = Public__rootMemesMemeIdRouteImport.update({
   path: '/memes/$memeId',
   getParentRoute: () => Public__rootRouteRoute,
 } as any)
+const Public__rootMemesLibraryRoute =
+  Public__rootMemesLibraryRouteImport.update({
+    id: '/memes/_library',
+    path: '/memes',
+    getParentRoute: () => Public__rootRouteRoute,
+  } as any)
 const AdminActivityIndexRoute = AdminActivityIndexRouteImport.update({
   id: '/activity/',
   path: '/activity/',
@@ -370,11 +377,17 @@ const Public__rootMemesMemeIdStudioRoute =
     path: '/studio',
     getParentRoute: () => Public__rootMemesMemeIdRoute,
   } as any)
-const Public__rootMemesCategorySlugRoute =
-  Public__rootMemesCategorySlugRouteImport.update({
-    id: '/memes/category/$slug',
-    path: '/memes/category/$slug',
-    getParentRoute: () => Public__rootRouteRoute,
+const Public__rootMemesLibraryBookmarksRoute =
+  Public__rootMemesLibraryBookmarksRouteImport.update({
+    id: '/bookmarks',
+    path: '/bookmarks',
+    getParentRoute: () => Public__rootMemesLibraryRoute,
+  } as any)
+const Public__rootMemesLibraryCategorySlugRoute =
+  Public__rootMemesLibraryCategorySlugRouteImport.update({
+    id: '/category/$slug',
+    path: '/category/$slug',
+    getParentRoute: () => Public__rootMemesLibraryRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -389,6 +402,7 @@ export interface FileRoutesByFullPath {
   '/sitemap-memes.xml': typeof SitemapMemesDotxmlRoute
   '/sitemap-static.xml': typeof SitemapStaticDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/bookmarks': typeof Public__rootBookmarksRoute
   '/admin/downloader': typeof AdminDownloaderRoute
   '/admin/services': typeof AdminServicesRoute
   '/api/bunny': typeof ApiBunnyRoute
@@ -398,13 +412,13 @@ export interface FileRoutesByFullPath {
   '/embed/$memeId': typeof EmbedMemeIdRoute
   '/admin/': typeof AdminIndexRoute
   '/settings': typeof Public__rootDefaultSettingsRouteRouteWithChildren
-  '/bookmarks': typeof Public__rootDefaultBookmarksRoute
   '/dmca': typeof Public__rootDefaultDmcaRoute
   '/mentions-legales': typeof Public__rootDefaultMentionsLegalesRoute
   '/privacy': typeof Public__rootDefaultPrivacyRoute
   '/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
   '/verify-email': typeof Public__rootDefaultVerifyEmailRoute
   '/memes/$memeId': typeof Public__rootMemesMemeIdRouteWithChildren
+  '/memes': typeof Public__rootMemesLibraryRouteWithChildren
   '/admin/activity/$ip': typeof AdminActivityIpRoute
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
@@ -428,12 +442,13 @@ export interface FileRoutesByFullPath {
   '/password/create-new': typeof Public__rootDefaultPasswordCreateNewRoute
   '/password/reset': typeof Public__rootDefaultPasswordResetRoute
   '/memes/$memeId/studio': typeof Public__rootMemesMemeIdStudioRoute
-  '/memes/category/$slug': typeof Public__rootMemesCategorySlugRoute
+  '/memes/bookmarks': typeof Public__rootMemesLibraryBookmarksRoute
   '/app/': typeof Public__rootDefaultAppIndexRoute
   '/pricing/': typeof Public__rootDefaultPricingIndexRoute
   '/random/': typeof Public__rootDefaultRandomIndexRoute
   '/settings/': typeof Public__rootDefaultSettingsIndexRoute
   '/submit/': typeof Public__rootDefaultSubmitIndexRoute
+  '/memes/category/$slug': typeof Public__rootMemesLibraryCategorySlugRoute
 }
 export interface FileRoutesByTo {
   '/reels': typeof ReelsRouteRoute
@@ -446,6 +461,7 @@ export interface FileRoutesByTo {
   '/sitemap-static.xml': typeof SitemapStaticDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/': typeof Public__rootIndexRoute
+  '/bookmarks': typeof Public__rootBookmarksRoute
   '/admin/downloader': typeof AdminDownloaderRoute
   '/admin/services': typeof AdminServicesRoute
   '/api/bunny': typeof ApiBunnyRoute
@@ -454,13 +470,13 @@ export interface FileRoutesByTo {
   '/api/og': typeof ApiOgRoute
   '/embed/$memeId': typeof EmbedMemeIdRoute
   '/admin': typeof AdminIndexRoute
-  '/bookmarks': typeof Public__rootDefaultBookmarksRoute
   '/dmca': typeof Public__rootDefaultDmcaRoute
   '/mentions-legales': typeof Public__rootDefaultMentionsLegalesRoute
   '/privacy': typeof Public__rootDefaultPrivacyRoute
   '/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
   '/verify-email': typeof Public__rootDefaultVerifyEmailRoute
   '/memes/$memeId': typeof Public__rootMemesMemeIdRouteWithChildren
+  '/memes': typeof Public__rootMemesIndexRoute
   '/admin/activity/$ip': typeof AdminActivityIpRoute
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
@@ -472,7 +488,6 @@ export interface FileRoutesByTo {
   '/api/cron/sync-bunny-titles': typeof ApiCronSyncBunnyTitlesRoute
   '/api/cron/verification-reminder': typeof ApiCronVerificationReminderRoute
   '/api/cron/weekly-recap': typeof ApiCronWeeklyRecapRoute
-  '/memes': typeof Public__rootMemesIndexRoute
   '/admin/activity': typeof AdminActivityIndexRoute
   '/admin/ai-search': typeof AdminAiSearchIndexRoute
   '/admin/categories': typeof AdminCategoriesIndexRoute
@@ -484,12 +499,13 @@ export interface FileRoutesByTo {
   '/password/create-new': typeof Public__rootDefaultPasswordCreateNewRoute
   '/password/reset': typeof Public__rootDefaultPasswordResetRoute
   '/memes/$memeId/studio': typeof Public__rootMemesMemeIdStudioRoute
-  '/memes/category/$slug': typeof Public__rootMemesCategorySlugRoute
+  '/memes/bookmarks': typeof Public__rootMemesLibraryBookmarksRoute
   '/app': typeof Public__rootDefaultAppIndexRoute
   '/pricing': typeof Public__rootDefaultPricingIndexRoute
   '/random': typeof Public__rootDefaultRandomIndexRoute
   '/settings': typeof Public__rootDefaultSettingsIndexRoute
   '/submit': typeof Public__rootDefaultSubmitIndexRoute
+  '/memes/category/$slug': typeof Public__rootMemesLibraryCategorySlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -505,6 +521,7 @@ export interface FileRoutesById {
   '/sitemap-static.xml': typeof SitemapStaticDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_public__root/_default': typeof Public__rootDefaultRouteRouteWithChildren
+  '/_public__root/bookmarks': typeof Public__rootBookmarksRoute
   '/admin/downloader': typeof AdminDownloaderRoute
   '/admin/services': typeof AdminServicesRoute
   '/api/bunny': typeof ApiBunnyRoute
@@ -515,13 +532,13 @@ export interface FileRoutesById {
   '/_public__root/': typeof Public__rootIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/_public__root/_default/settings': typeof Public__rootDefaultSettingsRouteRouteWithChildren
-  '/_public__root/_default/bookmarks': typeof Public__rootDefaultBookmarksRoute
   '/_public__root/_default/dmca': typeof Public__rootDefaultDmcaRoute
   '/_public__root/_default/mentions-legales': typeof Public__rootDefaultMentionsLegalesRoute
   '/_public__root/_default/privacy': typeof Public__rootDefaultPrivacyRoute
   '/_public__root/_default/terms-of-use': typeof Public__rootDefaultTermsOfUseRoute
   '/_public__root/_default/verify-email': typeof Public__rootDefaultVerifyEmailRoute
   '/_public__root/memes/$memeId': typeof Public__rootMemesMemeIdRouteWithChildren
+  '/_public__root/memes/_library': typeof Public__rootMemesLibraryRouteWithChildren
   '/admin/activity/$ip': typeof AdminActivityIpRoute
   '/admin/library/$memeId': typeof AdminLibraryMemeIdRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
@@ -545,12 +562,13 @@ export interface FileRoutesById {
   '/_public__root/_default/password/create-new': typeof Public__rootDefaultPasswordCreateNewRoute
   '/_public__root/_default/password/reset': typeof Public__rootDefaultPasswordResetRoute
   '/_public__root/memes/$memeId/studio': typeof Public__rootMemesMemeIdStudioRoute
-  '/_public__root/memes/category/$slug': typeof Public__rootMemesCategorySlugRoute
+  '/_public__root/memes/_library/bookmarks': typeof Public__rootMemesLibraryBookmarksRoute
   '/_public__root/_default/app/': typeof Public__rootDefaultAppIndexRoute
   '/_public__root/_default/pricing/': typeof Public__rootDefaultPricingIndexRoute
   '/_public__root/_default/random/': typeof Public__rootDefaultRandomIndexRoute
   '/_public__root/_default/settings/': typeof Public__rootDefaultSettingsIndexRoute
   '/_public__root/_default/submit/': typeof Public__rootDefaultSubmitIndexRoute
+  '/_public__root/memes/_library/category/$slug': typeof Public__rootMemesLibraryCategorySlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -566,6 +584,7 @@ export interface FileRouteTypes {
     | '/sitemap-memes.xml'
     | '/sitemap-static.xml'
     | '/sitemap.xml'
+    | '/bookmarks'
     | '/admin/downloader'
     | '/admin/services'
     | '/api/bunny'
@@ -575,13 +594,13 @@ export interface FileRouteTypes {
     | '/embed/$memeId'
     | '/admin/'
     | '/settings'
-    | '/bookmarks'
     | '/dmca'
     | '/mentions-legales'
     | '/privacy'
     | '/terms-of-use'
     | '/verify-email'
     | '/memes/$memeId'
+    | '/memes'
     | '/admin/activity/$ip'
     | '/admin/library/$memeId'
     | '/admin/users/$userId'
@@ -605,12 +624,13 @@ export interface FileRouteTypes {
     | '/password/create-new'
     | '/password/reset'
     | '/memes/$memeId/studio'
-    | '/memes/category/$slug'
+    | '/memes/bookmarks'
     | '/app/'
     | '/pricing/'
     | '/random/'
     | '/settings/'
     | '/submit/'
+    | '/memes/category/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/reels'
@@ -623,6 +643,7 @@ export interface FileRouteTypes {
     | '/sitemap-static.xml'
     | '/sitemap.xml'
     | '/'
+    | '/bookmarks'
     | '/admin/downloader'
     | '/admin/services'
     | '/api/bunny'
@@ -631,13 +652,13 @@ export interface FileRouteTypes {
     | '/api/og'
     | '/embed/$memeId'
     | '/admin'
-    | '/bookmarks'
     | '/dmca'
     | '/mentions-legales'
     | '/privacy'
     | '/terms-of-use'
     | '/verify-email'
     | '/memes/$memeId'
+    | '/memes'
     | '/admin/activity/$ip'
     | '/admin/library/$memeId'
     | '/admin/users/$userId'
@@ -649,7 +670,6 @@ export interface FileRouteTypes {
     | '/api/cron/sync-bunny-titles'
     | '/api/cron/verification-reminder'
     | '/api/cron/weekly-recap'
-    | '/memes'
     | '/admin/activity'
     | '/admin/ai-search'
     | '/admin/categories'
@@ -661,12 +681,13 @@ export interface FileRouteTypes {
     | '/password/create-new'
     | '/password/reset'
     | '/memes/$memeId/studio'
-    | '/memes/category/$slug'
+    | '/memes/bookmarks'
     | '/app'
     | '/pricing'
     | '/random'
     | '/settings'
     | '/submit'
+    | '/memes/category/$slug'
   id:
     | '__root__'
     | '/_public__root'
@@ -681,6 +702,7 @@ export interface FileRouteTypes {
     | '/sitemap-static.xml'
     | '/sitemap.xml'
     | '/_public__root/_default'
+    | '/_public__root/bookmarks'
     | '/admin/downloader'
     | '/admin/services'
     | '/api/bunny'
@@ -691,13 +713,13 @@ export interface FileRouteTypes {
     | '/_public__root/'
     | '/admin/'
     | '/_public__root/_default/settings'
-    | '/_public__root/_default/bookmarks'
     | '/_public__root/_default/dmca'
     | '/_public__root/_default/mentions-legales'
     | '/_public__root/_default/privacy'
     | '/_public__root/_default/terms-of-use'
     | '/_public__root/_default/verify-email'
     | '/_public__root/memes/$memeId'
+    | '/_public__root/memes/_library'
     | '/admin/activity/$ip'
     | '/admin/library/$memeId'
     | '/admin/users/$userId'
@@ -721,12 +743,13 @@ export interface FileRouteTypes {
     | '/_public__root/_default/password/create-new'
     | '/_public__root/_default/password/reset'
     | '/_public__root/memes/$memeId/studio'
-    | '/_public__root/memes/category/$slug'
+    | '/_public__root/memes/_library/bookmarks'
     | '/_public__root/_default/app/'
     | '/_public__root/_default/pricing/'
     | '/_public__root/_default/random/'
     | '/_public__root/_default/settings/'
     | '/_public__root/_default/submit/'
+    | '/_public__root/memes/_library/category/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -849,6 +872,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Public__rootDefaultRouteRouteImport
       parentRoute: typeof Public__rootRouteRoute
     }
+    '/_public__root/bookmarks': {
+      id: '/_public__root/bookmarks'
+      path: '/bookmarks'
+      fullPath: '/bookmarks'
+      preLoaderRoute: typeof Public__rootBookmarksRouteImport
+      parentRoute: typeof Public__rootRouteRoute
+    }
     '/admin/': {
       id: '/admin/'
       path: '/'
@@ -905,13 +935,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EmbedMemeIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_public__root/_default/bookmarks': {
-      id: '/_public__root/_default/bookmarks'
-      path: '/bookmarks'
-      fullPath: '/bookmarks'
-      preLoaderRoute: typeof Public__rootDefaultBookmarksRouteImport
-      parentRoute: typeof Public__rootDefaultRouteRoute
-    }
     '/_public__root/_default/dmca': {
       id: '/_public__root/_default/dmca'
       path: '/dmca'
@@ -966,6 +989,13 @@ declare module '@tanstack/react-router' {
       path: '/memes/$memeId'
       fullPath: '/memes/$memeId'
       preLoaderRoute: typeof Public__rootMemesMemeIdRouteImport
+      parentRoute: typeof Public__rootRouteRoute
+    }
+    '/_public__root/memes/_library': {
+      id: '/_public__root/memes/_library'
+      path: '/memes'
+      fullPath: '/memes'
+      preLoaderRoute: typeof Public__rootMemesLibraryRouteImport
       parentRoute: typeof Public__rootRouteRoute
     }
     '/admin/activity/': {
@@ -1157,12 +1187,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Public__rootMemesMemeIdStudioRouteImport
       parentRoute: typeof Public__rootMemesMemeIdRoute
     }
-    '/_public__root/memes/category/$slug': {
-      id: '/_public__root/memes/category/$slug'
-      path: '/memes/category/$slug'
+    '/_public__root/memes/_library/bookmarks': {
+      id: '/_public__root/memes/_library/bookmarks'
+      path: '/bookmarks'
+      fullPath: '/memes/bookmarks'
+      preLoaderRoute: typeof Public__rootMemesLibraryBookmarksRouteImport
+      parentRoute: typeof Public__rootMemesLibraryRoute
+    }
+    '/_public__root/memes/_library/category/$slug': {
+      id: '/_public__root/memes/_library/category/$slug'
+      path: '/category/$slug'
       fullPath: '/memes/category/$slug'
-      preLoaderRoute: typeof Public__rootMemesCategorySlugRouteImport
-      parentRoute: typeof Public__rootRouteRoute
+      preLoaderRoute: typeof Public__rootMemesLibraryCategorySlugRouteImport
+      parentRoute: typeof Public__rootMemesLibraryRoute
     }
   }
 }
@@ -1184,7 +1221,6 @@ const Public__rootDefaultSettingsRouteRouteWithChildren =
 
 interface Public__rootDefaultRouteRouteChildren {
   Public__rootDefaultSettingsRouteRoute: typeof Public__rootDefaultSettingsRouteRouteWithChildren
-  Public__rootDefaultBookmarksRoute: typeof Public__rootDefaultBookmarksRoute
   Public__rootDefaultDmcaRoute: typeof Public__rootDefaultDmcaRoute
   Public__rootDefaultMentionsLegalesRoute: typeof Public__rootDefaultMentionsLegalesRoute
   Public__rootDefaultPrivacyRoute: typeof Public__rootDefaultPrivacyRoute
@@ -1204,7 +1240,6 @@ const Public__rootDefaultRouteRouteChildren: Public__rootDefaultRouteRouteChildr
   {
     Public__rootDefaultSettingsRouteRoute:
       Public__rootDefaultSettingsRouteRouteWithChildren,
-    Public__rootDefaultBookmarksRoute: Public__rootDefaultBookmarksRoute,
     Public__rootDefaultDmcaRoute: Public__rootDefaultDmcaRoute,
     Public__rootDefaultMentionsLegalesRoute:
       Public__rootDefaultMentionsLegalesRoute,
@@ -1244,20 +1279,40 @@ const Public__rootMemesMemeIdRouteWithChildren =
     Public__rootMemesMemeIdRouteChildren,
   )
 
+interface Public__rootMemesLibraryRouteChildren {
+  Public__rootMemesLibraryBookmarksRoute: typeof Public__rootMemesLibraryBookmarksRoute
+  Public__rootMemesLibraryCategorySlugRoute: typeof Public__rootMemesLibraryCategorySlugRoute
+}
+
+const Public__rootMemesLibraryRouteChildren: Public__rootMemesLibraryRouteChildren =
+  {
+    Public__rootMemesLibraryBookmarksRoute:
+      Public__rootMemesLibraryBookmarksRoute,
+    Public__rootMemesLibraryCategorySlugRoute:
+      Public__rootMemesLibraryCategorySlugRoute,
+  }
+
+const Public__rootMemesLibraryRouteWithChildren =
+  Public__rootMemesLibraryRoute._addFileChildren(
+    Public__rootMemesLibraryRouteChildren,
+  )
+
 interface Public__rootRouteRouteChildren {
   Public__rootDefaultRouteRoute: typeof Public__rootDefaultRouteRouteWithChildren
+  Public__rootBookmarksRoute: typeof Public__rootBookmarksRoute
   Public__rootIndexRoute: typeof Public__rootIndexRoute
   Public__rootMemesMemeIdRoute: typeof Public__rootMemesMemeIdRouteWithChildren
+  Public__rootMemesLibraryRoute: typeof Public__rootMemesLibraryRouteWithChildren
   Public__rootMemesIndexRoute: typeof Public__rootMemesIndexRoute
-  Public__rootMemesCategorySlugRoute: typeof Public__rootMemesCategorySlugRoute
 }
 
 const Public__rootRouteRouteChildren: Public__rootRouteRouteChildren = {
   Public__rootDefaultRouteRoute: Public__rootDefaultRouteRouteWithChildren,
+  Public__rootBookmarksRoute: Public__rootBookmarksRoute,
   Public__rootIndexRoute: Public__rootIndexRoute,
   Public__rootMemesMemeIdRoute: Public__rootMemesMemeIdRouteWithChildren,
+  Public__rootMemesLibraryRoute: Public__rootMemesLibraryRouteWithChildren,
   Public__rootMemesIndexRoute: Public__rootMemesIndexRoute,
-  Public__rootMemesCategorySlugRoute: Public__rootMemesCategorySlugRoute,
 }
 
 const Public__rootRouteRouteWithChildren =

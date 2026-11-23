@@ -10,7 +10,7 @@ export type LibraryCategory = Awaited<ReturnType<typeof listCategories>>[number]
 
 type CardsPage<TMeme extends { id: string }> = {
   memes: TMeme[]
-  queryID: string | undefined
+  queryID?: string
   page: number
 }
 

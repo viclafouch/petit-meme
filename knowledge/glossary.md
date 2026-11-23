@@ -13,7 +13,8 @@ One word, one meaning, across the product, the administration and these document
 
 - **Meme**: one short video in the library, with its record.
 - **Record**: the title, description, keywords, categories, content language and translations of a Meme.
-- **Category**: a group of Memes on one theme.
+- **Library**: every Published Meme, browsed by category and sorted by trend, newest or most viewed.
+- **Category**: a group of Memes on one subject, filed under a family: mood, reply, theme or source.
 - **Content language**: French, English or universal. It decides on which site a Meme shows.
 - **Universal Meme**: a Meme that carries no language, understood by French and English speakers alike.
 - **Status**: where a Meme stands. Pending, Published or Archived.
@@ -32,7 +33,7 @@ One word, one meaning, across the product, the administration and these document
 - **Download** and **share**: the two kinds of export. Copying a Meme's link counts as a share.
 - **Video**: the exported video file. **Sound**: the exported audio file, Premium only.
 - **Watermark**: the mark on the free video. Premium gets the video without it.
-- **Bookmark**: a Meme a User saved to find again.
+- **Bookmark**: a Meme a User saved to find again, with the star on the Meme. The screens call them favourites, and they sit in the library beside the categories.
 - **Studio**: where a User adds a caption to a Meme and exports the result.
 - **Caption**: the text a User adds in the Studio. Memes themselves carry no subtitles.
 - **Generation**: one captioned video made in the Studio.

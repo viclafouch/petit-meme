@@ -493,11 +493,6 @@
   "settings_delete_account": "Supprimer mon compte",
   "settings_delete_account_description": "Supprimer définitivement votre compte et toutes vos données",
   "settings_download_data": "Télécharger mes données",
-  "settings_bookmarks_description": "Tes mèmes préférés, toujours sous la main : retrouve-les ici.",
-  "settings_bookmarks_empty_cta": "Découvrir les mèmes",
-  "settings_bookmarks_empty_description": "Ajoute un mème à tes favoris, il t'attendra ici.",
-  "settings_bookmarks_heading": "Favoris",
-  "settings_bookmarks_title": "Petit Meme - Favoris",
   "settings_member_since": "Membre depuis le {date}",
   "settings_page_title": "Petit Meme - Paramètres",
   "settings_password_description": "Modifier votre mot de passe",
@@ -766,5 +761,23 @@
       }
     }
   ],
-  "meme_seo_quoted_title": "« {title} »"
+  "meme_seo_quoted_title": "« {title} »",
+  "common_undo": "Annuler",
+  "bookmark_removed": "Retiré des favoris",
+  "bookmark_card_label": "Favori : {title}",
+  "bookmark_strip_label": "Favoris",
+  "bookmark_seo_title": "Mes favoris",
+  "bookmark_cap_meter": "{count} / {cap} favoris",
+  "bookmark_cap_reached_title": "Tes {cap} favoris sont pris",
+  "bookmark_cap_reached_description": "Avec Premium, garde autant de mèmes que tu veux, sans filigrane et avec le son.",
+  "bookmark_intro_title": "Tes mèmes, prêts à partir",
+  "bookmark_intro_description": "Touche l'étoile d'un mème : il t'attend ici, à un tap de la conversation.",
+  "bookmark_intro_benefit_find": "Le mème qui répond à tout, retrouvé en une seconde",
+  "bookmark_intro_benefit_send": "Envoyé sans le chercher une deuxième fois",
+  "bookmark_intro_benefit_devices": "Sur ton téléphone comme sur ton ordi",
+  "bookmark_intro_free_cap": "{cap} favoris gratuits, illimités avec Premium.",
+  "bookmark_intro_sign_in": "Se connecter pour commencer",
+  "bookmark_intro_try": "Touche l'étoile",
+  "bookmark_suggestions_title": "Les mèmes du moment, à garder",
+  "error_bookmark_load": "Impossible de charger la suite de tes favoris."
 }

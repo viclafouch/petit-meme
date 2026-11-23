@@ -1,17 +1,15 @@
 import React from 'react'
 import { Clapperboard, Download, Pencil, Star } from 'lucide-react'
-import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link, useRouteContext } from '@tanstack/react-router'
+import { useBookmark } from '~/components/bookmark/use-bookmark'
 import { MessagingAppIcon } from '~/components/icon/messaging-app-icon'
 import { MemeExportPanel } from '~/components/meme/meme-export-panel'
-import { useBookmarkAction } from '~/components/meme/use-bookmark-action'
 import { markStudioEntry } from '~/components/studio/use-studio-history'
 import type { MemeDerivedFormat } from '~/constants/bunny'
 import type { MemeExportMode, MemeWithVideo } from '~/constants/meme'
 import { MESSAGING_APPS, type MessagingApp } from '~/constants/messaging-apps'
 import { matchIsUserAdmin } from '~/helpers/role'
 import { m } from '~/paraglide/messages'
-import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
 
 const SHARE_AVATAR_APP_IDS = [
   'messenger',
@@ -75,35 +73,34 @@ const Sparkles = () => {
   })
 }
 
-type BookmarkPillProps = {
+type BookmarkButtonProps = {
   meme: MemeWithVideo
 }
 
-const BookmarkPill = ({ meme }: BookmarkPillProps) => {
-  const bookmark = useBookmarkAction({ meme })
+const BookmarkButton = ({ meme }: BookmarkButtonProps) => {
+  const bookmark = useBookmark({ memeId: meme.id })
   const [burstCount, setBurstCount] = React.useState(0)
 
   const handleBookmark = () => {
-    if (!bookmark.isMemeBookmarked) {
+    if (bookmark.isSignedIn && !bookmark.isBookmarked) {
       setBurstCount((count) => {
         return count + 1
       })
     }
 
-    bookmark.selectBookmark()
+    bookmark.toggle()
   }
 
   return (
     <button
       type="button"
       className="pill meme-pill-bookmark"
-      aria-pressed={bookmark.isMemeBookmarked}
-      disabled={bookmark.isPending}
+      aria-pressed={bookmark.isBookmarked}
       onClick={handleBookmark}
     >
       <span className="relative grid place-items-center">
         <Star aria-hidden="true" />
-        {bookmark.isMemeBookmarked && burstCount > 0 ? (
+        {bookmark.isBookmarked && burstCount > 0 ? (
           <span
             key={burstCount}
             className="absolute inset-0 grid place-items-center"
@@ -112,45 +109,8 @@ const BookmarkPill = ({ meme }: BookmarkPillProps) => {
           </span>
         ) : null}
       </span>
-      {bookmark.isMemeBookmarked ? m.meme_bookmarked() : m.meme_bookmark()}
+      {bookmark.isBookmarked ? m.meme_bookmarked() : m.meme_bookmark()}
     </button>
-  )
-}
-
-type SignedInBookmarkPillProps = {
-  meme: MemeWithVideo
-}
-
-const SignedInBookmarkPill = ({ meme }: SignedInBookmarkPillProps) => {
-  useSuspenseQuery(listBookmarkedMemesQueryOpts())
-
-  return <BookmarkPill meme={meme} />
-}
-
-const BookmarkPillPlaceholder = () => {
-  return (
-    <button type="button" className="pill meme-pill-bookmark" disabled>
-      <Star aria-hidden="true" />
-      {m.meme_bookmark()}
-    </button>
-  )
-}
-
-type BookmarkButtonProps = {
-  meme: MemeWithVideo
-}
-
-const BookmarkButton = ({ meme }: BookmarkButtonProps) => {
-  const { user } = useRouteContext({ from: '__root__' })
-
-  if (!user) {
-    return <BookmarkPill meme={meme} />
-  }
-
-  return (
-    <React.Suspense fallback={<BookmarkPillPlaceholder />}>
-      <SignedInBookmarkPill meme={meme} />
-    </React.Suspense>
   )
 }
 

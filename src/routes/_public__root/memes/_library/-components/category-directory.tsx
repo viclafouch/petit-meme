@@ -1,7 +1,13 @@
 import React from 'react'
-import { LayoutGrid } from 'lucide-react'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { getRouteApi, Link } from '@tanstack/react-router'
+import { LayoutGrid, Star } from 'lucide-react'
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
+import {
+  Link,
+  useMatchRoute,
+  useParams,
+  useRouteContext,
+  useSearch
+} from '@tanstack/react-router'
 import { CategoryEmojiImage } from '~/components/category/category-emoji-image'
 import {
   Drawer,
@@ -13,6 +19,7 @@ import { ALL_CATEGORY_SLUG } from '~/constants/meme'
 import { formatCount } from '~/helpers/number'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
+import { listBookmarkIdsQueryOpts } from '~/queries/bookmark'
 import {
   countLibraryMemesQueryOpts,
   listCategoriesQueryOpts
@@ -25,21 +32,66 @@ import {
 
 const FAMILY_PREVIEW_COUNT = 8
 
-const categoryRouteApi = getRouteApi('/_public__root/memes/category/$slug')
+const DIRECTORY_LINK_CLASS_NAME =
+  'flex min-h-9 w-full items-center gap-2.5 rounded-md px-2 text-sm transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--focus-color) pointer-coarse:min-h-11 data-empty:text-muted-foreground aria-[current=page]:bg-secondary aria-[current=page]:font-semibold mouse:hover:not-aria-[current=page]:bg-foreground/6'
 
 const useLibraryCategories = () => {
   return useSuspenseQuery(listCategoriesQueryOpts(getLocale())).data
 }
 
 const useActiveSlug = () => {
-  const { slug } = categoryRouteApi.useParams()
-  const query = categoryRouteApi.useSearch({
+  const { slug } = useParams({ strict: false })
+  const query = useSearch({
+    strict: false,
     select: (search) => {
       return search.query
     }
   })
 
   return query ? undefined : slug
+}
+
+const useBookmarkCount = () => {
+  const { user } = useRouteContext({ from: '__root__' })
+
+  return useQuery({
+    ...listBookmarkIdsQueryOpts(),
+    enabled: Boolean(user),
+    select: (memeIds) => {
+      return memeIds.length
+    }
+  }).data
+}
+
+type BookmarksLinkProps = {
+  onNavigate?: () => void
+}
+
+const BookmarksLink = ({ onNavigate }: BookmarksLinkProps) => {
+  const count = useBookmarkCount()
+
+  return (
+    <Link
+      to="/memes/bookmarks"
+      activeProps={{ 'aria-current': 'page' }}
+      className={DIRECTORY_LINK_CLASS_NAME}
+      onClick={onNavigate}
+    >
+      <Star
+        aria-hidden="true"
+        className="size-5 fill-bookmark-fill stroke-bookmark-stroke p-0.5"
+      />
+      <span className="min-w-0 flex-1 truncate">{m.nav_my_bookmarks()}</span>
+      {count === undefined ? null : (
+        <span
+          className="shrink-0 text-xs text-muted-foreground tabular-nums"
+          aria-hidden="true"
+        >
+          {formatCount(count, getLocale(), 'compact')}
+        </span>
+      )}
+    </Link>
+  )
 }
 
 type CategoryLinkProps = {
@@ -70,7 +122,7 @@ const CategoryLink = ({
       }}
       aria-current={isActive ? 'page' : undefined}
       data-empty={count === 0 || undefined}
-      className="flex min-h-9 w-full items-center gap-2.5 rounded-md px-2 text-sm transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--focus-color) pointer-coarse:min-h-11 data-empty:text-muted-foreground aria-[current=page]:bg-secondary aria-[current=page]:font-semibold mouse:hover:not-aria-[current=page]:bg-foreground/6"
+      className={DIRECTORY_LINK_CLASS_NAME}
       onClick={onNavigate}
     >
       {emoji === undefined ? null : (
@@ -167,13 +219,20 @@ export const CategoryDirectory = ({ onNavigate }: CategoryDirectoryProps) => {
 
   return (
     <nav aria-label={m.meme_categories_label()} className="flex flex-col gap-5">
-      <CategoryLink
-        slug={ALL_CATEGORY_SLUG}
-        title={m.meme_all_memes()}
-        count={totalCount}
-        isActive={activeSlug === ALL_CATEGORY_SLUG}
-        onNavigate={onNavigate}
-      />
+      <ul>
+        <li>
+          <CategoryLink
+            slug={ALL_CATEGORY_SLUG}
+            title={m.meme_all_memes()}
+            count={totalCount}
+            isActive={activeSlug === ALL_CATEGORY_SLUG}
+            onNavigate={onNavigate}
+          />
+        </li>
+        <li>
+          <BookmarksLink onNavigate={onNavigate} />
+        </li>
+      </ul>
       {groupByFamily(categories).map((family) => {
         return (
           <CategoryFamilySection
@@ -225,6 +284,8 @@ const revealInStrip = (item: HTMLLIElement | null) => {
 export const QuickCategories = () => {
   const categories = useLibraryCategories()
   const activeSlug = useActiveSlug()
+  const matchRoute = useMatchRoute()
+  const isBookmarksActive = Boolean(matchRoute({ to: '/memes/bookmarks' }))
   const sortedCategories = sortByMemeCount(categories).filter((category) => {
     return category.memeCount > 0 || category.slug === activeSlug
   })
@@ -236,6 +297,25 @@ export const QuickCategories = () => {
     >
       <li>
         <CategoriesDrawer />
+      </li>
+      <li>
+        <Link
+          to={isBookmarksActive ? '/memes/category/$slug' : '/memes/bookmarks'}
+          params={{ slug: ALL_CATEGORY_SLUG }}
+          aria-label={
+            isBookmarksActive
+              ? m.category_filter_clear({ title: m.bookmark_strip_label() })
+              : undefined
+          }
+          data-active={isBookmarksActive || undefined}
+          className="pill pill-sm data-active:bg-foreground data-active:text-background"
+        >
+          <Star
+            aria-hidden="true"
+            className="fill-bookmark-fill stroke-bookmark-stroke"
+          />
+          {m.bookmark_strip_label()}
+        </Link>
       </li>
       {sortedCategories.map((category) => {
         const isActive = category.slug === activeSlug

@@ -1,6 +1,6 @@
 import type { QueryClient } from '@tanstack/react-query'
 import { getLocale } from '~/paraglide/runtime'
-import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
+import { listBookmarkIdsQueryOpts } from '~/queries/bookmark'
 import { listCategoriesQueryOpts } from '~/queries/category'
 import { getPremiumSubscriptionQueryOpts } from '~/queries/subscription'
 
@@ -16,7 +16,7 @@ export const prefetchPublicPageQueries = ({
   const userQueries = isSignedIn
     ? [
         queryClient.query({
-          ...listBookmarkedMemesQueryOpts(),
+          ...listBookmarkIdsQueryOpts(),
           staleTime: 'static'
         }),
         queryClient.query({

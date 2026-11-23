@@ -1,82 +1,32 @@
-import React from 'react'
-import type { User } from 'better-auth'
+import type React from 'react'
 import { Star } from 'lucide-react'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { useRouteContext } from '@tanstack/react-router'
 import { IconButtonStars } from '~/components/animate-ui/buttons/icon-button-stars'
-import { useToggleBookmark } from '~/components/meme/use-toggle-bookmark'
+import { useBookmark } from '~/components/bookmark/use-bookmark'
 import type { MemeWithVideo } from '~/constants/meme'
 import { m } from '~/paraglide/messages'
-import { listBookmarkedMemesQueryOpts } from '~/queries/bookmark'
-import { useDialogStore } from '~/stores/dialog.store'
 
 type ToggleBookmarkButtonProps = {
   meme: MemeWithVideo
 } & Partial<React.ComponentProps<typeof IconButtonStars>>
 
-type AuthBookmarkButtonProps = {
-  user: User
-} & ToggleBookmarkButtonProps
-
-const AuthBookmarkButton = ({
-  user,
+export const ToggleBookmarkButton = ({
   meme,
   ...restProps
-}: AuthBookmarkButtonProps) => {
-  const bookmarkedMemesQuery = useSuspenseQuery(listBookmarkedMemesQueryOpts())
-
-  const { isMemeBookmarked, toggleBookmark } = useToggleBookmark({
-    meme,
-    bookmarks: bookmarkedMemesQuery.data.bookmarks
-  })
-
-  const handleToggleBookmark = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault()
-    toggleBookmark()
-  }
+}: ToggleBookmarkButtonProps) => {
+  const bookmark = useBookmark({ memeId: meme.id })
 
   return (
     <IconButtonStars
       {...restProps}
-      active={isMemeBookmarked}
-      onClick={handleToggleBookmark}
+      active={bookmark.isBookmarked}
+      onClick={(event) => {
+        event.preventDefault()
+        bookmark.toggle()
+      }}
       aria-label={m.meme_add_bookmark()}
-      aria-pressed={isMemeBookmarked}
+      aria-pressed={bookmark.isBookmarked}
     >
       <Star />
     </IconButtonStars>
   )
 }
-
-const ToggleBookmarkButton = ({
-  meme,
-  ...restProps
-}: ToggleBookmarkButtonProps) => {
-  const dialogStore = useDialogStore()
-  const { user } = useRouteContext({ from: '__root__' })
-
-  if (!user) {
-    return (
-      <IconButtonStars
-        active={false}
-        {...restProps}
-        onClick={(event) => {
-          event.preventDefault()
-          dialogStore.actions.showDialog('auth')
-        }}
-        aria-label={m.meme_add_bookmark()}
-        aria-pressed={false}
-      >
-        <Star />
-      </IconButtonStars>
-    )
-  }
-
-  return (
-    <React.Suspense fallback={<div />}>
-      <AuthBookmarkButton user={user} meme={meme} {...restProps} />
-    </React.Suspense>
-  )
-}
-
-export { ToggleBookmarkButton }

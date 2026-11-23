@@ -15,10 +15,8 @@ import {
   listCategoriesQueryOpts
 } from '~/queries/category'
 import { listMemesPagesQueryOpts } from '~/queries/meme'
-import { prefetchPublicPageQueries } from '~/routes/_public__root/-lib/prefetch-public-page-queries'
-import { MemesLibraryPage } from '~/routes/_public__root/memes/-components/memes-library-page'
-import memesLibraryCss from '~/routes/_public__root/memes/-components/memes-library.css?url'
 import { buildLibraryDescription } from '~/routes/_public__root/memes/-lib/library'
+import { MemesLibraryPage } from '~/routes/_public__root/memes/_library/-components/memes-library-page'
 
 const findLegacySort = (slug: string) => {
   return Object.entries(LEGACY_SORT_CATEGORY_SLUGS).find(([legacySlug]) => {
@@ -26,7 +24,9 @@ const findLegacySort = (slug: string) => {
   })?.[1]
 }
 
-export const Route = createFileRoute('/_public__root/memes/category/$slug')({
+export const Route = createFileRoute(
+  '/_public__root/memes/_library/category/$slug'
+)({
   validateSearch: (search) => {
     return MEMES_SEARCH_SCHEMA.parse(search)
   },
@@ -50,11 +50,6 @@ export const Route = createFileRoute('/_public__root/memes/category/$slug')({
     }
   },
   loader: async ({ context, params, deps }) => {
-    prefetchPublicPageQueries({
-      queryClient: context.queryClient,
-      isSignedIn: Boolean(context.user)
-    })
-
     const categories = await context.queryClient.query({
       ...listCategoriesQueryOpts(getLocale()),
       staleTime: 'static'
@@ -110,8 +105,6 @@ export const Route = createFileRoute('/_public__root/memes/category/$slug')({
       match.search.page && match.search.page > 1
         ? `?page=${match.search.page}`
         : ''
-    const links = [{ rel: 'stylesheet', href: memesLibraryCss }]
-
     if (!category) {
       const title = m.meme_seo_library_title()
       const seo = buildSeo({
@@ -130,7 +123,7 @@ export const Route = createFileRoute('/_public__root/memes/category/$slug')({
         )
       })
 
-      return { ...seo, links: [...seo.links, ...links] }
+      return seo
     }
 
     const seo = buildSeo({
@@ -150,7 +143,7 @@ export const Route = createFileRoute('/_public__root/memes/category/$slug')({
       )
     })
 
-    return { ...seo, links: [...seo.links, ...links] }
+    return seo
   },
   component: MemesLibraryPage
 })

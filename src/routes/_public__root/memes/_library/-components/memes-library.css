@@ -112,7 +112,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    border: 2px solid var(--color-bookmark-fill);
+    border: 2px solid currentColor;
     border-radius: inherit;
     opacity: 0;
     pointer-events: none;

@@ -177,7 +177,6 @@
   "cookie_title": "Cookies",
   "error_already_subscribed": "Vous avez déjà un abonnement en cours !",
   "error_back_to_site": "Retourner au site",
-  "error_bookmark_update": "Erreur lors de la mise à jour du favori",
   "error_description": "Nous sommes désolés, mais le site web a rencontré un problème inattendu.",
   "error_details_heading": "Détails de l'erreur",
   "error_details_label": "Détails :",
@@ -762,8 +761,6 @@
     }
   ],
   "meme_seo_quoted_title": "« {title} »",
-  "common_undo": "Annuler",
-  "bookmark_removed": "Retiré des favoris",
   "bookmark_card_label": "Favori : {title}",
   "bookmark_strip_label": "Favoris",
   "bookmark_seo_title": "Mes favoris",
@@ -772,12 +769,12 @@
   "bookmark_cap_reached_description": "Avec Premium, garde autant de mèmes que tu veux, sans filigrane et avec le son.",
   "bookmark_intro_title": "Tes mèmes, prêts à partir",
   "bookmark_intro_description": "Touche l'étoile d'un mème : il t'attend ici, à un tap de la conversation.",
-  "bookmark_intro_benefit_find": "Le mème qui répond à tout, retrouvé en une seconde",
-  "bookmark_intro_benefit_send": "Envoyé sans le chercher une deuxième fois",
-  "bookmark_intro_benefit_devices": "Sur ton téléphone comme sur ton ordi",
+  "bookmark_intro_benefit_find": "Le bon mème en un tap",
+  "bookmark_intro_benefit_send": "Envoyé sans le rechercher",
+  "bookmark_intro_benefit_devices": "Sur ton téléphone et ton ordi",
   "bookmark_intro_free_cap": "{cap} favoris gratuits, illimités avec Premium.",
   "bookmark_intro_sign_in": "Se connecter pour commencer",
-  "bookmark_intro_try": "Touche l'étoile",
   "bookmark_suggestions_title": "Les mèmes du moment, à garder",
-  "error_bookmark_load": "Impossible de charger la suite de tes favoris."
+  "error_bookmark_load": "Impossible de charger la suite de tes favoris.",
+  "bookmark_demo_title": "Pedro Pascal rit puis pleure"
 }

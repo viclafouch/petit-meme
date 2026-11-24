@@ -1,16 +1,14 @@
 import React from 'react'
-import { Crown, Send, Smartphone, Zap } from 'lucide-react'
+import { Crown, Send, Smartphone, Star, Zap } from 'lucide-react'
 import {
   useQuery,
   useSuspenseInfiniteQuery,
   useSuspenseQuery
 } from '@tanstack/react-query'
 import { Link, useRouteContext } from '@tanstack/react-router'
-import { BookmarkCardButton } from '~/components/bookmark/bookmark-card-button'
 import { useIsPremium } from '~/components/premium/use-is-premium'
 import { ALL_CATEGORY_SLUG, type MemeWithVideo } from '~/constants/meme'
 import { buildCapState, FREE_CAPS } from '~/helpers/cap'
-import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import { m } from '~/paraglide/messages'
 import {
   countBookmarksQueryOpts,
@@ -74,46 +72,51 @@ const CapReachedNotice = () => {
   )
 }
 
-type DemoCardProps = {
-  meme: MemeWithVideo
-}
+const DEMO_SPARK_COUNT = 6
 
-const DemoCard = ({ meme }: DemoCardProps) => {
+const DemoCard = () => {
   return (
-    <figure className="relative mx-auto w-full max-w-72 shrink-0 -rotate-2 lg:mx-0">
-      <div className="relative aspect-video overflow-hidden rounded-xl bg-stage shadow-(--shadow-stage)">
-        <img
-          src={buildVideoImageUrl(meme.video.bunnyId)}
-          alt=""
-          fetchPriority="high"
-          decoding="async"
-          className="size-full object-cover"
-        />
-        <BookmarkCardButton
-          memeId={meme.id}
-          title={meme.title}
-          className="absolute top-2 right-2 z-(--z-floating) before:absolute before:inset-0 before:rounded-full before:border-2 before:border-current before:opacity-0 data-active:before:hidden motion-safe:before:animate-bookmark-ping"
-        />
+    <figure
+      aria-hidden="true"
+      className="relative mx-auto w-full max-w-72 shrink-0 -rotate-2 lg:mx-0"
+    >
+      <div className="bookmark-demo-glow absolute -inset-3 z-(--z-behind) rounded-3xl" />
+      <div className="bookmark-demo-frame relative rounded-xl bg-foreground/8 p-0.5">
+        <div className="relative aspect-video overflow-hidden bg-stage">
+          <img
+            src="/images/bookmark-demo.webp"
+            alt=""
+            fetchPriority="high"
+            decoding="async"
+            className="size-full object-cover"
+          />
+          <span className="bookmark-chip absolute top-2 right-2">
+            <Star className="size-4" />
+            <Star className="bookmark-demo-star-on absolute size-4 fill-bookmark-fill stroke-bookmark-stroke" />
+            {Array.from({ length: DEMO_SPARK_COUNT }, (_, index) => {
+              return (
+                <span
+                  key={index}
+                  className="bookmark-demo-spark"
+                  style={{ '--spark-turn': index / DEMO_SPARK_COUNT }}
+                />
+              )
+            })}
+          </span>
+        </div>
       </div>
-      <figcaption className="mt-2 line-clamp-2 text-sm leading-snug font-semibold text-pretty">
-        {meme.title}
+      <figcaption className="mt-3 line-clamp-2 text-sm leading-snug font-semibold text-pretty">
+        {m.bookmark_demo_title()}
       </figcaption>
-      <span
-        aria-hidden="true"
-        className="absolute -top-9 right-0 rounded-full bg-foreground px-2.5 py-1 text-xs font-semibold text-background after:absolute after:top-full after:right-4 after:border-6 after:border-transparent after:border-t-foreground"
-      >
-        {m.bookmark_intro_try()}
-      </span>
     </figure>
   )
 }
 
 type BookmarksIntroProps = {
-  demoMeme: MemeWithVideo | undefined
   isFree: boolean
 }
 
-const BookmarksIntro = ({ demoMeme, isFree }: BookmarksIntroProps) => {
+const BookmarksIntro = ({ isFree }: BookmarksIntroProps) => {
   const { user } = useRouteContext({ from: '__root__' })
   const dialogStore = useDialogStore()
   const titleId = React.useId()
@@ -123,7 +126,7 @@ const BookmarksIntro = ({ demoMeme, isFree }: BookmarksIntroProps) => {
       aria-labelledby={titleId}
       className="flex flex-col gap-x-10 gap-y-12 rounded-3xl bg-foreground/3 px-5 pt-14 pb-8 inset-ring inset-ring-foreground/6 sm:px-8 lg:flex-row lg:items-center lg:px-12 lg:py-12"
     >
-      {demoMeme ? <DemoCard meme={demoMeme} /> : null}
+      <DemoCard />
       <div className="flex max-w-prose flex-col gap-5">
         <div className="flex flex-col gap-2">
           <h2
@@ -211,13 +214,13 @@ const SignedInBookmarks = () => {
   const usedCount = useSuspenseQuery(countBookmarksQueryOpts()).data
   const trendingQuery = useQuery(listTrendingMemesQueryOpts())
   const isPremium = useIsPremium()
+  const trendingMemes = trendingQuery.data ?? []
+  const cards = flattenUniqueCards(pagesQuery.data.pages)
   const { isReached } = buildCapState({
     kind: 'bookmark',
-    usedCount,
+    usedCount: pagesQuery.data.pages[0]?.total ?? 0,
     isPremium
   })
-  const [demoMeme, ...suggestedMemes] = trendingQuery.data ?? []
-  const cards = flattenUniqueCards(pagesQuery.data.pages)
 
   return (
     <>
@@ -228,10 +231,10 @@ const SignedInBookmarks = () => {
       {isReached ? <CapReachedNotice /> : null}
       {cards.length === 0 ? (
         <>
-          <BookmarksIntro demoMeme={demoMeme} isFree={!isPremium} />
-          {suggestedMemes.length > 0 ? (
+          <BookmarksIntro isFree={!isPremium} />
+          {trendingMemes.length > 0 ? (
             <BookmarkSuggestions
-              memes={suggestedMemes}
+              memes={trendingMemes}
               now={trendingQuery.dataUpdatedAt}
             />
           ) : null}
@@ -259,13 +262,11 @@ const SignedInBookmarks = () => {
 }
 
 const VisitorBookmarks = () => {
-  const [demoMeme] = useQuery(listTrendingMemesQueryOpts()).data ?? []
-
   return (
     <>
       <LibraryHeader title={m.nav_my_bookmarks()} />
       <LibraryStrip />
-      <BookmarksIntro demoMeme={demoMeme} isFree={false} />
+      <BookmarksIntro isFree={false} />
     </>
   )
 }

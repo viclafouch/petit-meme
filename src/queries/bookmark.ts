@@ -2,11 +2,14 @@ import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
 import { PRIVATE_QUERY_META } from '~/constants/query'
 import { FIVE_MINUTES_MS } from '~/constants/time'
 import {
+  type BookmarksPageParam,
   listBookmarkIds,
   listBookmarks
 } from '~/server/bookmark/bookmark.functions'
 
 const BOOKMARK_QUERY_KEY = ['bookmark'] as const
+
+const FIRST_BOOKMARKS_PAGE: BookmarksPageParam = { page: 1, after: null }
 
 export const listBookmarkIdsQueryOpts = () => {
   return queryOptions({
@@ -37,11 +40,13 @@ export const listBookmarksQueryOpts = () => {
     queryFn: ({ pageParam }) => {
       return listBookmarks({ data: pageParam })
     },
-    initialPageParam: 1,
+    initialPageParam: FIRST_BOOKMARKS_PAGE,
     getNextPageParam: (lastPage) => {
-      return lastPage.hasNextPage ? lastPage.page + 1 : undefined
+      return lastPage.next ?? undefined
     },
-    staleTime: FIVE_MINUTES_MS
+    staleTime: FIVE_MINUTES_MS,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false
   })
 }
 

@@ -28,7 +28,7 @@ export const BookmarkCardButton = ({
       aria-pressed={bookmark.isBookmarked}
       data-active={bookmark.isBookmarked || undefined}
       className={cn(
-        'grid size-8 touch-manipulation place-items-center rounded-full bg-shade-strong text-white transition duration-(--duration-fast) ease-out after:absolute after:-inset-1.5 focus-visible:focus-ring press motion-reduce:transition-none mouse:hover:bg-shade',
+        'bookmark-chip touch-manipulation transition duration-(--duration-fast) ease-out after:absolute after:-inset-1.5 focus-visible:focus-ring press motion-reduce:transition-none mouse:hover:bg-shade',
         className
       )}
       onClick={() => {

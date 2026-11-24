@@ -29,7 +29,12 @@ type CreateUserBookmarkParams = {
   memeId: Meme['id']
 }
 
-const BOOKMARKS_PAGE_SCHEMA = z.number().int().min(1)
+const BOOKMARKS_PAGE_SCHEMA = z.object({
+  page: z.number().int().min(1),
+  after: z.object({ createdAt: z.iso.datetime(), id: z.string() }).nullable()
+})
+
+export type BookmarksPageParam = z.infer<typeof BOOKMARKS_PAGE_SCHEMA>
 
 export const listBookmarkIds = createServerFn({ method: 'GET' })
   .middleware([userRequiredMiddleware])
@@ -50,16 +55,25 @@ export const listBookmarks = createServerFn({ method: 'GET' })
     return BOOKMARKS_PAGE_SCHEMA.parse(data)
   })
   .middleware([userRequiredMiddleware])
-  .handler(async ({ data: page, context }) => {
+  .handler(async ({ data: { page, after }, context }) => {
     const where = buildVisibleBookmarksWhere(context.user.id)
     const [total, bookmarks] = await Promise.all([
       prismaClient.bookmark.count({ where }),
       prismaClient.bookmark.findMany({
-        where,
+        where: after
+          ? {
+              ...where,
+              OR: [
+                { createdAt: { lt: new Date(after.createdAt) } },
+                { createdAt: new Date(after.createdAt), id: { lt: after.id } }
+              ]
+            }
+          : where,
         orderBy: VISIBLE_BOOKMARKS_ORDER_BY,
-        skip: (page - 1) * MEMES_PER_PAGE,
-        take: MEMES_PER_PAGE,
+        take: MEMES_PER_PAGE + 1,
         select: {
+          id: true,
+          createdAt: true,
           meme: {
             include: {
               ...MEME_VIDEO_INCLUDE,
@@ -69,7 +83,9 @@ export const listBookmarks = createServerFn({ method: 'GET' })
         }
       })
     ])
-    const memes = bookmarks.map((bookmark) => {
+    const pageBookmarks = bookmarks.slice(0, MEMES_PER_PAGE)
+    const lastBookmark = pageBookmarks.at(-1)
+    const memes = pageBookmarks.map((bookmark) => {
       return bookmark.meme
     })
 
@@ -77,7 +93,16 @@ export const listBookmarks = createServerFn({ method: 'GET' })
       memes: localizeMemes(memes, getLocale()),
       page,
       total,
-      hasNextPage: page * MEMES_PER_PAGE < total
+      next:
+        bookmarks.length > MEMES_PER_PAGE && lastBookmark
+          ? {
+              page: page + 1,
+              after: {
+                createdAt: lastBookmark.createdAt.toISOString(),
+                id: lastBookmark.id
+              }
+            }
+          : null
     }
   })
 

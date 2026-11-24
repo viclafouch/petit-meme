@@ -10,6 +10,15 @@ const SIGN_IN_MAX = AUTH_RATE_LIMIT.customRules['/sign-in/email'].max
 const PASSWORD_RESET_MAX =
   AUTH_RATE_LIMIT.customRules['/request-password-reset'].max
 
+const INSTANT_PASSWORD_HASHING = {
+  hash: (password: string) => {
+    return Promise.resolve(password)
+  },
+  verify: ({ hash, password }: { hash: string; password: string }) => {
+    return Promise.resolve(hash === password)
+  }
+}
+
 const createSharedDatabase = () => {
   return { user: [], session: [], account: [], verification: [], rateLimit: [] }
 }
@@ -20,7 +29,7 @@ const createInstance = (database: ReturnType<typeof createSharedDatabase>) => {
     baseURL: BASE_URL,
     basePath: AUTH_BASE_PATH,
     database: memoryAdapter(database),
-    emailAndPassword: { enabled: true },
+    emailAndPassword: { enabled: true, password: INSTANT_PASSWORD_HASHING },
     rateLimit: { ...AUTH_RATE_LIMIT, enabled: true }
   })
 }

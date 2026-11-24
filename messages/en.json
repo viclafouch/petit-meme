@@ -177,7 +177,6 @@
   "cookie_title": "Cookies",
   "error_already_subscribed": "You already have an active subscription!",
   "error_back_to_site": "Return to website",
-  "error_bookmark_update": "Error updating favorite",
   "error_description": "We're sorry, but the website encountered an unexpected problem.",
   "error_details_heading": "Error details",
   "error_details_label": "Details:",
@@ -762,8 +761,6 @@
     }
   ],
   "meme_seo_quoted_title": "“{title}”",
-  "common_undo": "Undo",
-  "bookmark_removed": "Removed from favorites",
   "bookmark_card_label": "Favorite: {title}",
   "bookmark_strip_label": "Favorites",
   "bookmark_seo_title": "My favorites",
@@ -772,12 +769,12 @@
   "bookmark_cap_reached_description": "With Premium, keep as many Memes as you like, without the watermark and with the sound.",
   "bookmark_intro_title": "Your Memes, ready to send",
   "bookmark_intro_description": "Tap the star on a Meme: it waits here, one tap away from the chat.",
-  "bookmark_intro_benefit_find": "The Meme that answers everything, found in a second",
-  "bookmark_intro_benefit_send": "Sent without searching for it twice",
-  "bookmark_intro_benefit_devices": "On your phone and on your computer",
+  "bookmark_intro_benefit_find": "The right Meme in one tap",
+  "bookmark_intro_benefit_send": "Sent without searching again",
+  "bookmark_intro_benefit_devices": "On your phone and computer",
   "bookmark_intro_free_cap": "{cap} free favorites, unlimited with Premium.",
   "bookmark_intro_sign_in": "Sign in to start",
-  "bookmark_intro_try": "Tap the star",
   "bookmark_suggestions_title": "Trending Memes to keep",
-  "error_bookmark_load": "Couldn't load more of your favorites."
+  "error_bookmark_load": "Couldn't load more of your favorites.",
+  "bookmark_demo_title": "Pedro Pascal laughs then cries"
 }

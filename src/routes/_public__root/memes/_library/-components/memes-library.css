@@ -116,3 +116,150 @@
     }
   }
 }
+
+@keyframes bookmark-demo-turn {
+  to {
+    rotate: 1turn;
+  }
+}
+
+@keyframes bookmark-demo-breathe {
+  from {
+    opacity: var(--opacity-glow-dim);
+  }
+
+  to {
+    opacity: var(--opacity-glow);
+  }
+}
+
+@keyframes bookmark-demo-star {
+  0%,
+  10% {
+    opacity: 0;
+    scale: 0.6;
+  }
+
+  14% {
+    opacity: 1;
+    scale: 1.3;
+  }
+
+  20%,
+  84% {
+    opacity: 1;
+    scale: 1;
+  }
+
+  90%,
+  100% {
+    opacity: 0;
+    scale: 1;
+  }
+}
+
+@keyframes bookmark-demo-spark {
+  0%,
+  11% {
+    opacity: 0;
+    scale: 0;
+    translate: 0 0;
+  }
+
+  15% {
+    opacity: 1;
+    scale: 1;
+  }
+
+  24%,
+  100% {
+    opacity: 0;
+    scale: 0;
+    translate: 0 calc(--spacing(3.5) * -1);
+  }
+}
+
+@layer components {
+  .bookmark-demo-glow {
+    background:
+      radial-gradient(60% 80% at 15% 30%, var(--aurora-green), transparent 70%),
+      radial-gradient(50% 70% at 55% 90%, var(--aurora-teal), transparent 70%),
+      radial-gradient(
+        55% 75% at 90% 20%,
+        var(--aurora-violet),
+        transparent 70%
+      ),
+      radial-gradient(40% 60% at 70% 50%, var(--aurora-pink), transparent 70%);
+    filter: blur(--spacing(6));
+    opacity: var(--opacity-glow-dim);
+
+    @variant motion-safe {
+      animation: bookmark-demo-breathe var(--duration-aurora-cycle) ease-in-out
+        infinite alternate;
+    }
+  }
+
+  .bookmark-demo-frame {
+    isolation: isolate;
+    overflow: clip;
+
+    & > * {
+      border-radius: calc(var(--radius-xl) - --spacing(0.5));
+    }
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset-block-start: 50%;
+      inset-inline-start: 50%;
+      z-index: var(--z-behind);
+      inline-size: 120%;
+      aspect-ratio: 1;
+      translate: -50% -50%;
+      background: conic-gradient(
+        in oklch,
+        transparent 0 10%,
+        var(--color-brand-green) 22%,
+        var(--color-brand-cyan) 34%,
+        transparent 46% 58%,
+        var(--color-brand-violet) 70%,
+        var(--color-brand-pink) 82%,
+        transparent 94%
+      );
+
+      @variant motion-safe {
+        animation: bookmark-demo-turn var(--duration-aurora-cycle) linear
+          infinite;
+      }
+    }
+  }
+
+  .bookmark-demo-star-on {
+    @variant motion-safe {
+      animation: bookmark-demo-star var(--duration-bookmark-demo)
+        var(--ease-out-strong) infinite;
+    }
+  }
+
+  .bookmark-demo-spark {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    rotate: calc(var(--spark-turn) * 1turn);
+
+    &::before {
+      content: '';
+      inline-size: --spacing(1);
+      block-size: --spacing(1);
+      border-radius: var(--radius-pill);
+      background: var(--color-bookmark-spark);
+      opacity: 0;
+
+      @variant motion-safe {
+        animation: bookmark-demo-spark var(--duration-bookmark-demo)
+          var(--ease-out-strong) infinite;
+      }
+    }
+  }
+}

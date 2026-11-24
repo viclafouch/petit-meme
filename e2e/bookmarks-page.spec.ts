@@ -6,7 +6,7 @@ import { getAuthDialogSignInButton } from './auth-flows'
 import { E2E_NAMED_MEMES } from './content'
 import { resolveStorageStatePath } from './env'
 import { test } from './fixtures'
-import { repeatUntilVisible } from './hydration'
+import { expectVisibleAfterReload, repeatUntilVisible } from './hydration'
 
 const BOOKMARKS_PATHNAME = '/memes/bookmarks'
 
@@ -51,7 +51,7 @@ test.describe('a signed in User', () => {
     ).toBeHidden()
   })
 
-  test('takes a Meme out of their bookmarks, and brings it back', async ({
+  test('unstars a Meme in place, with no notification, and finds it gone on the next visit', async ({
     page
   }) => {
     await page.goto(BOOKMARKS_PATHNAME)
@@ -62,23 +62,46 @@ test.describe('a signed in User', () => {
       name: meme.title,
       exact: true
     })
-    const undoButton = page.getByRole('button', { name: m.common_undo() })
+    const starButton = (isPressed: boolean) => {
+      return bookmarkList.getByRole('button', {
+        name: m.bookmark_card_label({ title: meme.title }),
+        pressed: isPressed
+      })
+    }
+    const remainingCount = page.getByText(
+      m.meme_library_count({ count: 1, formattedCount: '1' })
+    )
 
     await repeatUntilVisible(() => {
-      return bookmarkList
-        .getByRole('button', {
-          name: m.bookmark_card_label({ title: meme.title }),
-          pressed: true
-        })
-        .click()
-    }, undoButton)
-
-    await expect(memeLink).toBeHidden()
-
-    await undoButton.click()
+      return starButton(true).click()
+    }, starButton(false))
 
     await expect(memeLink).toBeVisible()
-    await page.reload()
+    await expect(bookmarkList.getByRole('article')).toHaveCount(
+      BOOKMARKED_MEMES.length
+    )
+    await expect(
+      page.getByRole('region', { name: /Notifications/u }).getByRole('listitem')
+    ).toHaveCount(0)
+
+    await expectVisibleAfterReload(page, remainingCount)
+    await expect(memeLink).toBeHidden()
+
+    await page.goto(`/memes/${meme.id}`)
+
+    const bookmarkedButton = page.getByRole('button', {
+      name: m.meme_bookmarked(),
+      pressed: true
+    })
+
+    await repeatUntilVisible(() => {
+      return page
+        .getByRole('button', { name: m.meme_bookmark(), pressed: false })
+        .click()
+    }, bookmarkedButton)
+    await expectVisibleAfterReload(page, bookmarkedButton)
+
+    await page.goto(BOOKMARKS_PATHNAME)
     await expect(memeLink).toBeVisible()
   })
 })

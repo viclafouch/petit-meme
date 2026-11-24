@@ -134,13 +134,16 @@
   --duration-sparkle: 700ms;
   --duration-spin: 800ms;
   --duration-sheen: 700ms;
-  --duration-ping: 1600ms;
+  --duration-bookmark-demo: 5s;
+  --duration-aurora-cycle: 6s;
   --scale-press: 0.97;
   --scale-enter: 0.97;
   --focus-color: oklch(0.52 0.105 223);
   --opacity-disabled: 50%;
   --opacity-placeholder: 55%;
   --opacity-dashed: 28%;
+  --opacity-glow-dim: 45%;
+  --opacity-glow: 85%;
   --focus-width: 2px;
   --focus-offset: 2px;
   --dash-width: 1.5px;
@@ -185,6 +188,10 @@
     radial-gradient(34% 26% at 58% 88%, rgb(214 41 118 / 0.2), transparent);
 
   --bookmark-foreground: oklch(0.55 0.13 75);
+  --aurora-green: rgb(52 211 153 / 0.6);
+  --aurora-teal: rgb(34 211 238 / 0.5);
+  --aurora-violet: rgb(167 139 250 / 0.5);
+  --aurora-pink: rgb(244 114 182 / 0.35);
   --chip-surface-tone: 0.7 0.14;
   --chip-surface-alpha: 16%;
   --chip-surface-alpha-hover: 28%;
@@ -278,6 +285,10 @@
   color-scheme: dark;
   --focus-color: var(--color-brand-cyan);
   --bookmark-foreground: oklch(0.86 0.15 90);
+  --aurora-green: rgb(16 185 129 / 0.55);
+  --aurora-teal: rgb(8 145 178 / 0.55);
+  --aurora-violet: rgb(124 58 237 / 0.55);
+  --aurora-pink: rgb(219 39 119 / 0.35);
   --chip-text-tone: 0.85 0.11;
   --shadow-stage:
     0 0 0 1px oklch(1 0 0 / 0.12), 0 1px 2px oklch(0 0 0 / 0.5),
@@ -421,6 +432,7 @@
   --color-brand-green-light: #6ee7b7;
   --color-brand-cyan-light: #67e8f9;
   --color-brand-violet-light: #c4b5fd;
+  --color-brand-pink: #f472b6;
   --color-brand-foreground: oklch(0.18 0 0);
   --text-md: 0.9375rem;
   --text-md--line-height: calc(1.25 / 0.9375);
@@ -469,8 +481,6 @@
   --text-3xs: 0.5rem;
   --text-2xs: 0.625rem;
   --animate-background-shine: background-shine 2s linear infinite;
-  --animate-bookmark-ping: ping var(--duration-ping) var(--ease-out-strong)
-    var(--duration-slow) 3 both;
   --animate-stars-drift: stars-drift linear infinite;
   --animate-aurora-drift: aurora-drift linear infinite;
 
@@ -514,6 +524,16 @@
 
 @utility container {
   @apply mx-auto max-w-6xl px-4 xl:px-6;
+}
+
+@utility bookmark-chip {
+  display: grid;
+  place-items: center;
+  width: --spacing(8);
+  height: --spacing(8);
+  border-radius: var(--radius-pill);
+  background: var(--color-shade-strong);
+  color: --theme(--color-white);
 }
 
 @utility amber-badge {
@@ -596,20 +616,9 @@
   );
 }
 @utility aurora {
-  --aurora-green: rgb(52 211 153 / 0.6);
-  --aurora-teal: rgb(34 211 238 / 0.5);
-  --aurora-violet: rgb(167 139 250 / 0.5);
-  --aurora-pink: rgb(244 114 182 / 0.35);
   position: relative;
   isolation: isolate;
   overflow: hidden;
-
-  @variant dark {
-    --aurora-green: rgb(16 185 129 / 0.55);
-    --aurora-teal: rgb(8 145 178 / 0.55);
-    --aurora-violet: rgb(124 58 237 / 0.55);
-    --aurora-pink: rgb(219 39 119 / 0.35);
-  }
 
   &::before,
   &::after {

@@ -3,6 +3,15 @@ import { SERVICE_WORKER_PATHNAME } from '~/constants/pwa'
 import { HOUR } from '~/constants/time'
 import { captureWithFeature } from '~/lib/sentry'
 
+const UNREACHABLE_SCRIPT_MESSAGE =
+  /An unknown error occurred when fetching the script|bad HTTP response code \(407\)|^Script .+ load failed$|^Rejected$/u
+
+const matchIsScriptUnreachable = (error: unknown) => {
+  const message = error instanceof Error ? error.message : String(error)
+
+  return UNREACHABLE_SCRIPT_MESSAGE.test(message)
+}
+
 const checkForUpdate = async (registration: ServiceWorkerRegistration) => {
   try {
     await registration.update()
@@ -36,7 +45,9 @@ const registerWorker = async () => {
       updateViaCache: 'none'
     })
   } catch (error) {
-    captureWithFeature(error, 'service-worker')
+    if (!matchIsScriptUnreachable(error)) {
+      captureWithFeature(error, 'service-worker')
+    }
 
     return null
   }

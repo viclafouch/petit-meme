@@ -44,6 +44,29 @@ const csrfMiddleware = createCsrfMiddleware({
   }
 })
 
+const UNKNOWN_SERVER_FN_MESSAGE = 'Server function info not found for '
+
+const matchIsUnknownServerFnError = (error: unknown) => {
+  return (
+    error instanceof Error &&
+    error.message.startsWith(UNKNOWN_SERVER_FN_MESSAGE)
+  )
+}
+
+const unknownServerFnMiddleware = createMiddleware().server(
+  async ({ next, handlerType }) => {
+    try {
+      return await next()
+    } catch (error) {
+      if (handlerType === 'serverFn' && matchIsUnknownServerFnError(error)) {
+        return new Response('Not Found', { status: 404 })
+      }
+
+      throw error
+    }
+  }
+)
+
 const unexpectedErrorLogMiddleware = createMiddleware({
   type: 'function'
 }).server(async ({ next, serverFnMeta }) => {
@@ -66,7 +89,11 @@ export const startInstance = createStart(() => {
     defaultSsr: true,
     serializationAdapters: [appErrorAdapter],
     serverFns: { fetch: serverFnFetch },
-    requestMiddleware: [sentryGlobalRequestMiddleware, csrfMiddleware],
+    requestMiddleware: [
+      sentryGlobalRequestMiddleware,
+      csrfMiddleware,
+      unknownServerFnMiddleware
+    ],
     functionMiddleware: [
       sentryGlobalFunctionMiddleware,
       unexpectedErrorLogMiddleware

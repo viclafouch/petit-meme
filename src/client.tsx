@@ -33,8 +33,12 @@ const ZOD_LOCALE_IMPORTS = {
   () => Promise<{ default: () => { localeError: z.core.$ZodErrorMap } }>
 >
 
-const zodLocaleModule = await ZOD_LOCALE_IMPORTS[getLocale()]()
-z.config(zodLocaleModule.default())
+const configureZodLocale = async () => {
+  const zodLocaleModule = await ZOD_LOCALE_IMPORTS[getLocale()]()
+  z.config(zodLocaleModule.default())
+}
+
+void Promise.allSettled([configureZodLocale()])
 
 hydrateRoot(document, <StartClient />, {
   onUncaughtError: reportReactError,

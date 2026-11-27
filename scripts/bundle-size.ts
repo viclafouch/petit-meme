@@ -8,6 +8,7 @@ import {
   bundleReportSchema,
   checkBudget,
   formatKb,
+  KB_UNIT,
   measureBundle,
   readBuiltAssetSize,
   readBundleBudget,
@@ -63,7 +64,7 @@ if (options.update) {
       [
         `${BUDGET_FILE} keeps ${keptViolations.length === 1 ? 'a budget' : 'budgets'} below the measured size, since --update only lowers them:`,
         ...keptViolations.map((violation) => {
-          return `  ${violation.name}: ${formatKb(violation.bytes)} measured, ${violation.budgetKb} kB budget`
+          return `  ${violation.name}: ${formatKb(violation.bytes)} measured, ${violation.budgetKb}${KB_UNIT} budget`
         }),
         'Cut the growth, or raise them on purpose with --allow-growth and say why in the pull request.'
       ].join('\n')

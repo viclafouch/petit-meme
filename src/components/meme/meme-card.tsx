@@ -27,6 +27,7 @@ import {
 } from '~/components/ui/dropdown-menu'
 import type { MemeDerivedFormat } from '~/constants/bunny'
 import type { MemeExportMode, MemeWithVideo } from '~/constants/meme'
+import { MEME_LINK_PRELOAD_DELAY_MS } from '~/constants/navigation'
 import { DAY, DAYS_PER_WEEK } from '~/constants/time'
 import { formatClockDuration } from '~/helpers/duration'
 import type { HighlightedText } from '~/helpers/highlight'
@@ -200,6 +201,7 @@ export const MemeCard = React.memo(
     authenticatedUserToken
   }: MemeCardProps) => {
     const locale = getLocale()
+    const isCoarsePointer = useIsCoarsePointer()
     const ratio = readVideoRatio(meme)
     const isWidescreen =
       Math.abs(ratio - WIDESCREEN_RATIO) <= WIDESCREEN_TOLERANCE
@@ -286,6 +288,8 @@ export const MemeCard = React.memo(
           <Link
             to="/memes/$memeId"
             params={{ memeId: meme.id }}
+            preload={isCoarsePointer ? false : 'intent'}
+            preloadDelay={MEME_LINK_PRELOAD_DELAY_MS}
             className="meme-card-link line-clamp-2 min-h-[2lh] outline-none after:absolute after:inset-0 after:z-(--z-raised)"
             onClick={handleTrackClick}
           >

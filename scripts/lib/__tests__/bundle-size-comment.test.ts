@@ -64,9 +64,11 @@ describe('formatComment', () => {
 
     expect(comment).toContain('### 📦 Startup JS · ❌ Over budget')
     expect(comment).toContain(
-      '> [!CAUTION]\n> **`/memes/$memeId`** ships **41.0 kB**, 9.0 kB over its 32 kB budget.'
+      '> [!CAUTION]\n> **`/memes/$memeId`** ships **41.0\u00A0kB**, 9.0\u00A0kB over its 32\u00A0kB budget.'
     )
-    expect(comment).toContain('| `player` | 🔴 +11.0 kB | `/memes/$memeId` |')
+    expect(comment).toContain(
+      '| `player` | 🔴\u00A0+11.0\u00A0kB | `/memes/$memeId` |'
+    )
     expect(comment).toContain(
       'gh run download 42 --name bundle-size --dir /tmp/main-bundle-size'
     )
@@ -106,13 +108,49 @@ describe('formatComment', () => {
       runUrl: undefined
     })
 
-    expect(comment).toContain('| `router` | ⚪ +10.0 kB | every route |')
-    expect(comment).toContain('| `entry` | 🟢 −15.0 kB | every route |')
+    expect(comment).toContain(
+      '| `router` | ⚪\u00A0+10.0\u00A0kB | every route |'
+    )
+    expect(comment).toContain(
+      '| `entry` | 🟢\u00A0−15.0\u00A0kB | every route |'
+    )
     expect(comment).not.toContain('🔴')
     expect(toAgentData(comment)).toMatchObject({
       chunkChanges: [
         { chunk: 'entry', deltaBytes: -15_000, isRegression: false },
         { chunk: 'router', deltaBytes: 10_000, isRegression: false }
+      ]
+    })
+  })
+
+  it('should show a chunk Rolldown renamed as one row', () => {
+    const renamedReport: BundleReport = {
+      ...MAIN_REPORT,
+      shell: {
+        bytes: 150_000,
+        chunks: { entry: 100_000, react: 300, createServerFn: 49_700 }
+      }
+    }
+    const comment = formatComment({
+      report: renamedReport,
+      budget: BUDGET,
+      baseBudget: BUDGET,
+      base: BASE,
+      runUrl: undefined
+    })
+
+    expect(comment).toContain(
+      '| `react` → `createServerFn` | ⚪\u00A0renamed | every route |'
+    )
+    expect(comment).not.toContain('| `createServerFn` |')
+    expect(toAgentData(comment)).toMatchObject({
+      chunkChanges: [
+        {
+          chunk: 'createServerFn',
+          renamedFrom: 'react',
+          deltaBytes: 0,
+          isRegression: false
+        }
       ]
     })
   })
@@ -131,7 +169,7 @@ describe('formatComment', () => {
     })
 
     expect(comment).toContain('### 📦 Startup JS · ⚠️ Heavier, within budget')
-    expect(comment).toContain('> `/memes/$memeId` grows by +11.0 kB.')
+    expect(comment).toContain('> `/memes/$memeId` grows by +11.0\u00A0kB.')
   })
 
   it('should flag in red every budget raised against main', () => {
@@ -149,10 +187,10 @@ describe('formatComment', () => {
 
     expect(comment).toContain('### 📦 Startup JS · 🔴 Budget raised')
     expect(comment).toContain(
-      '> [!CAUTION]\n> 🔴 **`/memes/$memeId`** raises its route JS budget from 32 kB to 43 kB.\n> 🔴 **`/`** raises its first-view CSS budget from 33 kB to 35 kB.'
+      '> [!CAUTION]\n> 🔴 **`/memes/$memeId`** raises its route JS budget from 32\u00A0kB to 43\u00A0kB.\n> 🔴 **`/`** raises its first-view CSS budget from 33\u00A0kB to 35\u00A0kB.'
     )
     expect(comment).toContain(
-      '| `/memes/$memeId` | 41.0 kB | 🔴 +11.0 kB | 🔴 43 kB, was 32 kB · 2.0 kB left |'
+      '| `/memes/$memeId` | 41.0\u00A0kB | 🔴\u00A0+11.0\u00A0kB | 🔴\u00A043\u00A0kB, was 32\u00A0kB · 2.0\u00A0kB left |'
     )
     expect(toAgentData(comment)).toMatchObject({
       verdict: 'raised',
@@ -187,9 +225,9 @@ describe('formatComment', () => {
         '>',
         '> | | Now | Goal | Distance |',
         '> | --- | --: | --: | --- |',
-        '> | Startup JS of `/memes/$memeId`, the heaviest route | 191.0 kB | 60 kB | 🟩🟥🟥🟥 3.2× |',
-        '> | **Shell** (every route) | 150.0 kB | 60 kB | 🟩🟥🟥 2.5× |',
-        '> | Route JS of `/memes/$memeId` | 41.0 kB | 16 kB | 🟩🟥🟥 2.6× |'
+        '> | Startup JS of `/memes/$memeId`, the heaviest route | 191.0\u00A0kB | 60\u00A0kB | 🟩🟥🟥🟥 3.2× |',
+        '> | **Shell** (every route) | 150.0\u00A0kB | 60\u00A0kB | 🟩🟥🟥 2.5× |',
+        '> | Route JS of `/memes/$memeId` | 41.0\u00A0kB | 16\u00A0kB | 🟩🟥🟥 2.6× |'
       ].join('\n')
     )
   })

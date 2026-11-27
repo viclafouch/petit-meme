@@ -11,7 +11,8 @@ import { bunnyLogger } from '~/lib/logger'
 import { fetchWithZod } from '~/server/http/fetch.server'
 import {
   signVideoFileUrl,
-  signVideoPlaybackUrl
+  signVideoPlaybackUrl,
+  toSharedExpiresAt
 } from '~/server/platforms/bunny-token.server'
 
 export const buildLibraryApiUrl = createServerOnlyFn(
@@ -68,7 +69,7 @@ const signVideoStreamUrl = (videoId: string, expiresAt: number) => {
 export const buildSignedStreamUrl = createServerOnlyFn((videoId: string) => {
   return signVideoStreamUrl(
     videoId,
-    getUnixTimeInSeconds() + PLAYBACK_TOKEN_TTL_SECONDS
+    toSharedExpiresAt(getUnixTimeInSeconds(), PLAYBACK_TOKEN_TTL_SECONDS)
   )
 })
 

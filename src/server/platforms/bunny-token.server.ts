@@ -1,3 +1,5 @@
+import { ONE_HOUR_IN_SECONDS } from '~/constants/time'
+
 type SignBunnyUrlParams = {
   url: string
   securityKey: string
@@ -26,6 +28,13 @@ export const signBunnyUrl = async ({
   }
 
   return `${origin}/bcdn_token=${token}&token_path=${encodeURIComponent(directoryPath)}&expires=${expires}${pathname}`
+}
+
+export const toSharedExpiresAt = (nowInSeconds: number, ttlSeconds: number) => {
+  return (
+    Math.ceil(nowInSeconds / ONE_HOUR_IN_SECONDS) * ONE_HOUR_IN_SECONDS +
+    ttlSeconds
+  )
 }
 
 type SignVideoFileParams = {

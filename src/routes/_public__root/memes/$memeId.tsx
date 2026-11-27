@@ -9,32 +9,60 @@ import { buildVideoFirstFrameUrl } from '~/lib/bunny-public-urls'
 import { getCrawlerStreamUrl } from '~/lib/crawler-video'
 import { buildBreadcrumbJsonLd, buildMemeJsonLd } from '~/lib/seo/json-ld'
 import { buildMemeSeo } from '~/lib/seo/meta'
+import { warmVideoStream } from '~/lib/video'
 import { m } from '~/paraglide/messages'
 import {
   getMemePlaybackUrlQueryOpts,
   getMemeQueryOpts,
+  getMemeWithPlaybackUrlQueryOpts,
   listRelatedMemesQueryOpts
 } from '~/queries/meme'
 import { readSeenMemeIds } from '~/routes/_public__root/memes/-lib/seen-memes'
 import { MemePage } from './-components/meme-page'
 import memePageCss from './-components/meme-page.css?url'
 
-const prefetchPlaybackUrl = createIsomorphicFn()
-  .client((queryClient: QueryClient, memeId: string) => {
-    void Promise.allSettled([
-      queryClient.query(getMemePlaybackUrlQueryOpts(memeId))
-    ])
-  })
-  .server(() => {})
+type QueryMemeParams = {
+  queryClient: QueryClient
+  memeId: string
+  isPreload: boolean
+}
 
-const preloadFirstFrame = createIsomorphicFn()
-  .client((bunnyId: string) => {
-    preloadResource(buildVideoFirstFrameUrl(bunnyId), {
+const warmPlayback = async ({
+  queryClient,
+  memeId,
+  isPreload
+}: QueryMemeParams) => {
+  const playbackUrl = await queryClient.query(
+    getMemePlaybackUrlQueryOpts(memeId)
+  )
+
+  if (isPreload) {
+    warmVideoStream(playbackUrl)
+  }
+}
+
+const queryMeme = createIsomorphicFn()
+  .server(({ queryClient, memeId }: QueryMemeParams) => {
+    return queryClient.query({
+      ...getMemeQueryOpts(memeId),
+      staleTime: 'static'
+    })
+  })
+  .client(async ({ queryClient, memeId, isPreload }: QueryMemeParams) => {
+    const meme = await queryClient.query({
+      ...getMemeWithPlaybackUrlQueryOpts(memeId),
+      staleTime: 'static'
+    })
+
+    preloadResource(buildVideoFirstFrameUrl(meme.video.bunnyId), {
       as: 'image',
       fetchPriority: 'high'
     })
+
+    void Promise.allSettled([warmPlayback({ queryClient, memeId, isPreload })])
+
+    return meme
   })
-  .server(() => {})
 
 const buildMemePageLinks = () => {
   return [
@@ -55,14 +83,11 @@ export const Route = createFileRoute('/_public__root/memes/$memeId')({
   component: MemePage,
   pendingMs: 1000,
   loader: async ({ params, context, preload, location }) => {
-    prefetchPlaybackUrl(context.queryClient, params.memeId)
-
-    const meme = await context.queryClient.query({
-      ...getMemeQueryOpts(params.memeId),
-      staleTime: 'static'
+    const meme = await queryMeme({
+      queryClient: context.queryClient,
+      memeId: params.memeId,
+      isPreload: preload
     })
-
-    preloadFirstFrame(meme.video.bunnyId)
 
     if (!preload) {
       void Promise.allSettled([

@@ -1,6 +1,8 @@
 import type { LinkOptions } from '@tanstack/react-router'
 import { m } from '~/paraglide/messages'
 
+export const MEME_LINK_PRELOAD_DELAY_MS = 200
+
 export type LegalLink = {
   to: LinkOptions['to']
   label: string

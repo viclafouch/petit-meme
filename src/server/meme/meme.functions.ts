@@ -93,29 +93,47 @@ const matchCanRequestViewMeme = createServerOnlyFn(
   }
 )
 
+const findViewableMeme = createServerOnlyFn(async (memeId: string) => {
+  const meme = await prismaClient.meme.findUnique({
+    where: { id: memeId },
+    include: MEME_FULL_INCLUDE
+  })
+
+  if (!meme || !(await matchCanRequestViewMeme(meme.status))) {
+    throw notFound()
+  }
+
+  const locale = getLocale()
+  return {
+    ...withDefaultMemeTitle(localizeMeme(meme, locale)),
+    categories: meme.categories.map((memeCategory) => {
+      return {
+        ...memeCategory,
+        category: localizeCategory(memeCategory.category, locale)
+      }
+    })
+  }
+})
+
 export const getMeme = createServerFn({ method: 'GET' })
   .validator((data) => {
     return z.string().parse(data)
   })
+  .handler(({ data: memeId }) => {
+    return findViewableMeme(memeId)
+  })
+
+export const getMemeWithPlaybackUrl = createServerFn({ method: 'GET' })
+  .validator((data) => {
+    return z.string().parse(data)
+  })
+  .middleware([createRateLimitMiddleware(RATE_LIMIT_PLAYBACK)])
   .handler(async ({ data: memeId }) => {
-    const meme = await prismaClient.meme.findUnique({
-      where: { id: memeId },
-      include: MEME_FULL_INCLUDE
-    })
+    const meme = await findViewableMeme(memeId)
 
-    if (!meme || !(await matchCanRequestViewMeme(meme.status))) {
-      throw notFound()
-    }
-
-    const locale = getLocale()
     return {
-      ...withDefaultMemeTitle(localizeMeme(meme, locale)),
-      categories: meme.categories.map((memeCategory) => {
-        return {
-          ...memeCategory,
-          category: localizeCategory(memeCategory.category, locale)
-        }
-      })
+      meme,
+      playbackUrl: await buildSignedStreamUrl(meme.video.bunnyId)
     }
   })
 

@@ -4,13 +4,11 @@ import { useDebouncedCallback } from '@tanstack/react-pacer'
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
 import { Button } from '~/components/ui/button'
 import { buildVideoFirstFrameUrl } from '~/lib/bunny-public-urls'
+import { matchIsDataSaverOn } from '~/lib/data-saver'
 import { m } from '~/paraglide/messages'
 import { listReelsQueryOpts } from '~/queries/meme'
 import { findReelSnapshotImage } from '~/routes/reels/-lib/reel-snapshot'
-import {
-  matchIsDataSaverOn,
-  type ReelsSound
-} from '~/routes/reels/-lib/reels-playback'
+import type { ReelsSound } from '~/routes/reels/-lib/reels-playback'
 import { rememberNextUnseenReel } from '~/routes/reels/-lib/reels-position'
 import { Reel, type ReelLoading } from './reel'
 import { ReelsTopBar } from './reels-top-bar'

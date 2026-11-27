@@ -21,7 +21,7 @@ import { readSeenMemeIds } from '~/routes/_public__root/memes/-lib/seen-memes'
 import { MemePage } from './-components/meme-page'
 import memePageCss from './-components/meme-page.css?url'
 
-type QueryMemeParams = {
+type MemeLoaderParams = {
   queryClient: QueryClient
   memeId: string
   isPreload: boolean
@@ -31,7 +31,7 @@ const warmPlayback = async ({
   queryClient,
   memeId,
   isPreload
-}: QueryMemeParams) => {
+}: MemeLoaderParams) => {
   const playbackUrl = await queryClient.query(
     getMemePlaybackUrlQueryOpts(memeId)
   )
@@ -42,13 +42,13 @@ const warmPlayback = async ({
 }
 
 const queryMeme = createIsomorphicFn()
-  .server(({ queryClient, memeId }: QueryMemeParams) => {
+  .server(({ queryClient, memeId }: MemeLoaderParams) => {
     return queryClient.query({
       ...getMemeQueryOpts(memeId),
       staleTime: 'static'
     })
   })
-  .client(async ({ queryClient, memeId, isPreload }: QueryMemeParams) => {
+  .client(async ({ queryClient, memeId, isPreload }: MemeLoaderParams) => {
     const meme = await queryClient.query({
       ...getMemeWithPlaybackUrlQueryOpts(memeId),
       staleTime: 'static'

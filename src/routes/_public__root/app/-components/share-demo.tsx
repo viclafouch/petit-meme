@@ -5,10 +5,7 @@ import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import APP_SCREENS from '~/routes/_public__root/app/-lib/app-screens.json'
-import {
-  DEMO_ASSET_PATHS,
-  PHONE_FRAME_RATIOS
-} from '~/routes/_public__root/app/-lib/demo'
+import { DEMO_ASSET_PATHS } from '~/routes/_public__root/app/-lib/demo'
 import { PhoneFrame } from './phone-frame'
 
 const VIDEO_SHARE_MOMENT = 0.055
@@ -252,10 +249,7 @@ type ShareDemoProps = {
 
 export const ShareDemo = ({ className }: ShareDemoProps) => {
   return (
-    <figure
-      className={cn('share-demo', className)}
-      style={{ '--phone-frame-ratio': PHONE_FRAME_RATIOS.iphone }}
-    >
+    <figure className={cn('share-demo', className)}>
       <figcaption className="sr-only">{m.app_page_demo_label()}</figcaption>
       <PhoneFrame platform="iphone" screenClassName="bg-[#0a0a0a]">
         <MemeScreen />

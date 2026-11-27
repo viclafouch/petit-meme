@@ -461,7 +461,7 @@
   --color-bookmark-spark: oklch(0.88 0.16 90);
 
   --text-label: 0.8125rem;
-  --text-display: clamp(2.75rem, 0.5rem + 5.5vw, 6.75rem);
+  --text-display: clamp(2.75rem, 0.5rem + 6.5vw, 6.875rem);
 
   --radius-pill: calc(infinity * 1px);
 

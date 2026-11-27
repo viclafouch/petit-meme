@@ -7,7 +7,7 @@ import { buildOgImage } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { getPremiumSubscriptionQueryOpts } from '~/queries/subscription'
-import { getPricingFaqItems } from './-components/constants'
+import { getPricingFaqItems } from './-components/faq-items'
 import { PricingPage } from './-components/pricing-page'
 
 export const Route = createFileRoute('/_public__root/_default/pricing/')({

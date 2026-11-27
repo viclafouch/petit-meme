@@ -1,21 +1,15 @@
 import React from 'react'
-import { TriangleAlertIcon } from 'lucide-react'
-import * as Sentry from '@sentry/tanstackstart-react'
+import { ChevronDownIcon, TriangleAlertIcon } from 'lucide-react'
 import { useQueryErrorResetBoundary } from '@tanstack/react-query'
 import {
   type ErrorComponentProps as RouterErrorComponentProps,
   Link,
   useRouter
 } from '@tanstack/react-router'
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger
-} from '~/components/ui/accordion'
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
 import { Button, buttonVariants } from '~/components/ui/button'
 import { IS_PRODUCTION } from '~/constants/env'
+import { captureException } from '~/lib/sentry'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
 
@@ -27,7 +21,7 @@ export const ErrorComponent = ({ error }: ErrorComponentProps) => {
   const queryErrorResetBoundary = useQueryErrorResetBoundary()
 
   React.useEffect(() => {
-    Sentry.captureException(error)
+    captureException(error)
   }, [error])
 
   React.useEffect(() => {
@@ -60,25 +54,22 @@ export const ErrorComponent = ({ error }: ErrorComponentProps) => {
             {m.error_back_to_site()}
           </Link>
           {!IS_PRODUCTION && error instanceof Error ? (
-            <Accordion className="w-full">
-              <AccordionItem value="error-details">
-                <AccordionTrigger>{m.error_details_heading()}</AccordionTrigger>
-                <AccordionContent>
-                  <div className="rounded-md bg-muted p-4">
-                    <h3 className="mb-2 font-semibold">
-                      {m.error_details_label()}
-                    </h3>
-                    <p className="mb-4 text-sm">{error.message}</p>
-                    <h3 className="mb-2 font-semibold">
-                      {m.error_trace_label()}
-                    </h3>
-                    <pre className="overflow-x-auto whitespace-pre-wrap text-xs">
-                      {error.stack}
-                    </pre>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+            <details className="group w-full">
+              <summary className="flex cursor-pointer list-none items-center gap-2 rounded-md py-4 font-medium focus-visible:focus-ring mouse:hover:underline [&::-webkit-details-marker]:hidden">
+                <ChevronDownIcon className="size-4 shrink-0 -rotate-90 text-muted-foreground transition-transform duration-(--duration-fast) ease-out group-open:rotate-0 motion-reduce:transition-none" />
+                {m.error_details_heading()}
+              </summary>
+              <div className="rounded-md bg-muted p-4">
+                <h3 className="mb-2 font-semibold">
+                  {m.error_details_label()}
+                </h3>
+                <p className="mb-4 text-sm">{error.message}</p>
+                <h3 className="mb-2 font-semibold">{m.error_trace_label()}</h3>
+                <pre className="overflow-x-auto whitespace-pre-wrap text-xs">
+                  {error.stack}
+                </pre>
+              </div>
+            </details>
           ) : null}
         </div>
       </div>

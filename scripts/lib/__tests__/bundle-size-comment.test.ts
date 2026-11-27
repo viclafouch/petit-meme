@@ -80,7 +80,39 @@ describe('formatComment', () => {
         { name: '/memes/$memeId', beforeBytes: 30_000, afterBytes: 41_000 }
       ],
       chunkChanges: [
-        { chunk: 'player', deltaBytes: 11_000, loadedBy: ['/memes/$memeId'] }
+        {
+          chunk: 'player',
+          deltaBytes: 11_000,
+          loadedBy: ['/memes/$memeId'],
+          isRegression: true
+        }
+      ]
+    })
+  })
+
+  it('should keep a chunk neutral when it grows while no route loading it gets heavier', () => {
+    const rechunkedReport: BundleReport = {
+      ...MAIN_REPORT,
+      shell: {
+        bytes: 145_000,
+        chunks: { entry: 85_000, react: 50_000, router: 10_000 }
+      }
+    }
+    const comment = formatComment({
+      report: rechunkedReport,
+      budget: BUDGET,
+      baseBudget: BUDGET,
+      base: BASE,
+      runUrl: undefined
+    })
+
+    expect(comment).toContain('| `router` | ⚪ +10.0 kB | every route |')
+    expect(comment).toContain('| `entry` | 🟢 −15.0 kB | every route |')
+    expect(comment).not.toContain('🔴')
+    expect(toAgentData(comment)).toMatchObject({
+      chunkChanges: [
+        { chunk: 'entry', deltaBytes: -15_000, isRegression: false },
+        { chunk: 'router', deltaBytes: 10_000, isRegression: false }
       ]
     })
   })

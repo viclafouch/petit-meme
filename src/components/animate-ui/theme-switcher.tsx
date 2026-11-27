@@ -1,7 +1,7 @@
 import React from 'react'
 import { Moon, Sun } from 'lucide-react'
 import type { TargetAndTransition, Transition } from 'motion/react'
-import { motion } from 'motion/react'
+import * as motion from 'motion/react-m'
 import { Switch } from '@base-ui/react/switch'
 import { useSelector } from '@tanstack/react-store'
 import { cn } from '~/lib/utils'

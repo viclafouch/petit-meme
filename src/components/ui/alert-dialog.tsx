@@ -1,7 +1,21 @@
 import * as React from 'react'
 import { AlertDialog as AlertDialogPrimitive } from '@base-ui/react/alert-dialog'
+import { mergeProps } from '@base-ui/react/merge-props'
 import { Button } from '~/components/ui/button'
+import { preloadOnIntent } from '~/components/ui/preload-on-intent'
+import { lazyComponent } from '~/lib/lazy-component'
 import { cn } from '~/lib/utils'
+import type { AlertDialogPopupProps } from './alert-dialog-popup'
+
+const loadAlertDialogPopup = async () => {
+  return import('./alert-dialog-popup')
+}
+
+const LazyAlertDialogPopup = lazyComponent(async () => {
+  const { AlertDialogPopup } = await loadAlertDialogPopup()
+
+  return AlertDialogPopup
+})
 
 function AlertDialog({ ...props }: AlertDialogPrimitive.Root.Props) {
   return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />
@@ -9,7 +23,10 @@ function AlertDialog({ ...props }: AlertDialogPrimitive.Root.Props) {
 
 function AlertDialogTrigger({ ...props }: AlertDialogPrimitive.Trigger.Props) {
   return (
-    <AlertDialogPrimitive.Trigger data-slot="alert-dialog-trigger" {...props} />
+    <AlertDialogPrimitive.Trigger
+      data-slot="alert-dialog-trigger"
+      {...mergeProps(preloadOnIntent(loadAlertDialogPopup), props)}
+    />
   )
 }
 
@@ -19,41 +36,12 @@ function AlertDialogPortal({ ...props }: AlertDialogPrimitive.Portal.Props) {
   )
 }
 
-function AlertDialogOverlay({
-  className,
-  ...props
-}: AlertDialogPrimitive.Backdrop.Props) {
-  return (
-    <AlertDialogPrimitive.Backdrop
-      data-slot="alert-dialog-overlay"
-      className={cn(
-        'fixed inset-0 isolate z-50 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0',
-        className
-      )}
-      {...props}
-    />
-  )
-}
-
-function AlertDialogContent({
-  className,
-  size = 'default',
-  ...props
-}: AlertDialogPrimitive.Popup.Props & {
-  size?: 'default' | 'sm'
-}) {
+function AlertDialogContent(props: AlertDialogPopupProps) {
   return (
     <AlertDialogPortal>
-      <AlertDialogOverlay />
-      <AlertDialogPrimitive.Popup
-        data-slot="alert-dialog-content"
-        data-size={size}
-        className={cn(
-          'group/alert-dialog-content fixed top-1/2 left-1/2 z-50 grid w-full -translate-x-1/2 -translate-y-1/2 gap-6 rounded-xl bg-popover p-6 text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none data-[size=default]:max-w-xs data-[size=sm]:max-w-xs data-[size=default]:sm:max-w-lg data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95',
-          className
-        )}
-        {...props}
-      />
+      <React.Suspense fallback={null}>
+        <LazyAlertDialogPopup {...props} />
+      </React.Suspense>
     </AlertDialogPortal>
   )
 }
@@ -157,7 +145,6 @@ export {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogOverlay,
   AlertDialogPortal,
   AlertDialogTitle,
   AlertDialogTrigger

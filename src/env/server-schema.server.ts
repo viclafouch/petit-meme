@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { clientEnvSchema } from './client-schema.ts'
 
 const SECRET_MIN_LENGTH = 32
 const TOKEN_MIN_LENGTH = 16
@@ -6,7 +7,8 @@ const TOKEN_MIN_LENGTH = 16
 export const baseEnvSchema = {
   LOG_LEVEL: z
     .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace'])
-    .optional()
+    .optional(),
+  VITE_SENTRY_DSN: clientEnvSchema.VITE_SENTRY_DSN
 }
 
 export const serverEnvSchema = {

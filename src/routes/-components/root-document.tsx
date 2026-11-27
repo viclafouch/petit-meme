@@ -1,5 +1,5 @@
 import React from 'react'
-import { MotionConfig } from 'motion/react'
+import { LazyMotion, MotionConfig } from 'motion/react'
 import {
   ClientOnly,
   getRouteApi,
@@ -20,6 +20,12 @@ import { getLocale, getTextDirection } from '~/paraglide/runtime'
 import { WebAnalytics } from './web-analytics'
 
 const rootRouteApi = getRouteApi('__root__')
+
+const loadMotionFeatures = async () => {
+  const { motionFeatures } = await import('~/lib/motion-features')
+
+  return motionFeatures
+}
 
 const DevToolbar = import.meta.env.DEV
   ? React.lazy(async () => {
@@ -55,39 +61,41 @@ export const RootDocument = ({ children }: RootDocumentProps) => {
           {`document.documentElement.className = ${JSON.stringify(documentTheme)};`}
         </ScriptOnce>
         <MotionConfig reducedMotion="user">
-          <ThemeProvider initialTheme={_storedTheme}>
-            <CookieConsentProvider storedConsent={_consentState}>
-              <DialogProvider>
-                {children}
-                <DialogOutlet />
-                <ClientOnly>
-                  <Toaster
-                    richColors
-                    closeButton
-                    toastOptions={{ closeButtonAriaLabel: m.common_close() }}
-                    offset={{ bottom: 'var(--toast-offset-bottom)' }}
-                    mobileOffset={{ bottom: 'var(--toast-offset-bottom)' }}
-                  />
-                </ClientOnly>
-                {embedMatch ? null : (
+          <LazyMotion features={loadMotionFeatures} strict>
+            <ThemeProvider initialTheme={_storedTheme}>
+              <CookieConsentProvider storedConsent={_consentState}>
+                <DialogProvider>
+                  {children}
+                  <DialogOutlet />
                   <ClientOnly>
-                    <CookieBanner />
+                    <Toaster
+                      richColors
+                      closeButton
+                      toastOptions={{ closeButtonAriaLabel: m.common_close() }}
+                      offset={{ bottom: 'var(--toast-offset-bottom)' }}
+                      mobileOffset={{ bottom: 'var(--toast-offset-bottom)' }}
+                    />
                   </ClientOnly>
-                )}
-                <CookieSettings />
-                {DevToolbar ? (
-                  <ClientOnly>
-                    <React.Suspense>
-                      <DevToolbar />
-                    </React.Suspense>
-                  </ClientOnly>
-                ) : null}
-                {clientEnv.VITE_VERCEL_ENV === 'production' ? (
-                  <WebAnalytics />
-                ) : null}
-              </DialogProvider>
-            </CookieConsentProvider>
-          </ThemeProvider>
+                  {embedMatch ? null : (
+                    <ClientOnly>
+                      <CookieBanner />
+                    </ClientOnly>
+                  )}
+                  <CookieSettings />
+                  {DevToolbar ? (
+                    <ClientOnly>
+                      <React.Suspense>
+                        <DevToolbar />
+                      </React.Suspense>
+                    </ClientOnly>
+                  ) : null}
+                  {clientEnv.VITE_VERCEL_ENV === 'production' ? (
+                    <WebAnalytics />
+                  ) : null}
+                </DialogProvider>
+              </CookieConsentProvider>
+            </ThemeProvider>
+          </LazyMotion>
         </MotionConfig>
         <Scripts />
       </body>

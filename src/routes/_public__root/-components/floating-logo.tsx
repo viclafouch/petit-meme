@@ -1,5 +1,6 @@
 import React from 'react'
-import { type Variants, motion, useReducedMotion } from 'motion/react'
+import { type Variants, useReducedMotion } from 'motion/react'
+import * as motion from 'motion/react-m'
 import { type Logo, LogoCarousel } from '~/components/ui/logo-carousel'
 
 const MEME_LOGOS = [

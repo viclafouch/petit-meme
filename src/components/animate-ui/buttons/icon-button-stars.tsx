@@ -1,6 +1,7 @@
 /* oxlint-disable id-length */
 import * as React from 'react'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence } from 'motion/react'
+import * as motion from 'motion/react-m'
 import { Button } from '~/components/ui/button'
 import { cn } from '~/lib/utils'
 

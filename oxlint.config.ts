@@ -80,7 +80,9 @@ export default defineConfig({
   rules: {
     'import/no-namespace': [
       'error',
-      { ignore: ['@radix-ui/*', '@sentry/tanstackstart-react'] }
+      {
+        ignore: ['@radix-ui/*', '@sentry/tanstackstart-react', 'motion/react-m']
+      }
     ],
     'viclafouch/app-folders': 'off',
     'viclafouch/env-file': 'off',

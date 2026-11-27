@@ -20,8 +20,6 @@ export const SENTRY_DATA_COLLECTION = {
   graphQL: { document: false, variables: false }
 } satisfies SentryDataCollection
 
-export const SENTRY_APPLICATION_KEY = 'petit-meme'
-
 export const SENTRY_ORG = 'viclafouch'
 
 export const SENTRY_PROJECT = 'petit-meme'

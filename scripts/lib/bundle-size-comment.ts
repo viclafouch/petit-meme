@@ -41,6 +41,7 @@ type ChunkChange = {
   chunk: string
   deltaBytes: number
   loadedBy: string[]
+  isRegression: boolean
 }
 
 type RouteChange = {
@@ -177,7 +178,10 @@ const listChunkChanges = (
   const changeByChunk = new Map<string, ChunkChange>()
 
   for (const line of lines) {
-    const beforeChunks: JsSize['chunks'] = toBaseSize(base, line)?.chunks ?? {}
+    const baseSize = toBaseSize(base, line)
+    const beforeChunks: JsSize['chunks'] = baseSize?.chunks ?? {}
+    const isLineHeavier =
+      line.size.bytes - (baseSize?.bytes ?? 0) >= UNCHANGED_DELTA_BYTES
     const chunkNames = new Set([
       ...Object.keys(beforeChunks),
       ...Object.keys(line.size.chunks)
@@ -194,10 +198,12 @@ const listChunkChanges = (
       const change = changeByChunk.get(chunk) ?? {
         chunk,
         deltaBytes,
-        loadedBy: []
+        loadedBy: [],
+        isRegression: false
       }
 
       change.loadedBy.push(line.isShell ? SHELL_SCOPE : line.name)
+      change.isRegression ||= deltaBytes > 0 && isLineHeavier
 
       if (Math.abs(deltaBytes) > Math.abs(change.deltaBytes)) {
         change.deltaBytes = deltaBytes
@@ -229,12 +235,18 @@ const formatLoadedBy = (loadedBy: readonly string[]) => {
   )
 }
 
+const formatChunkDelta = (change: ChunkChange) => {
+  return change.deltaBytes > 0 && !change.isRegression
+    ? `⚪ ${formatSignedKb(change.deltaBytes)}`
+    : formatDelta(change.deltaBytes, 0)
+}
+
 const formatChunkTable = (changes: readonly ChunkChange[]) => {
   return [
     '| Chunk | vs main | Loaded by |',
     '| --- | --: | --- |',
     ...changes.slice(0, VISIBLE_CHUNK_CHANGES).map((change) => {
-      return `| \`${change.chunk}\` | ${formatDelta(change.deltaBytes, 0)} | ${formatLoadedBy(change.loadedBy)} |`
+      return `| \`${change.chunk}\` | ${formatChunkDelta(change)} | ${formatLoadedBy(change.loadedBy)} |`
     })
   ]
 }
@@ -447,7 +459,7 @@ const formatAgentBrief = ({
     '',
     '**What this measures.** The Brotli size of each JS file the server-rendered page of a route modulepreloads, read from the TanStack Start manifest of `pnpm run build:e2e`. The shell is what the root route preloads on every page. Route JS is what a route adds on top, each file counted once. Startup JS is both. Sizes in the data are bytes.',
     '',
-    `**Rules.** Budgets live in \`${BUDGET_FILE}\` as a one-way ratchet: the size when last updated, plus ${BUDGET_HEADROOM}. \`${UPDATE_COMMAND}\` only lowers them, and \`${ALLOW_GROWTH_FLAG}\` raises them, flagged in red against main. Never raise one to turn the check green. Chunk names drop the Rolldown hash: \`meme-card\` stands for \`meme-card-<hash>.js\`. First-view CSS is gated apart, by \`e2e/first-view.spec.ts\` against \`firstViewCss\`.`,
+    `**Rules.** Budgets live in \`${BUDGET_FILE}\` as a one-way ratchet: the size when last updated, plus ${BUDGET_HEADROOM}. \`${UPDATE_COMMAND}\` only lowers them, and \`${ALLOW_GROWTH_FLAG}\` raises them, flagged in red against main. Never raise one to turn the check green. Chunk names drop the Rolldown hash: \`meme-card\` stands for \`meme-card-<hash>.js\`. A chunk that grows while no route loading it gets heavier shows ⚪, with \`isRegression: false\`: Rolldown renamed or merged it, and only red chunks explain a heavier route. First-view CSS is gated apart, by \`e2e/first-view.spec.ts\` against \`firstViewCss\`.`,
     '',
     '**Reproduce**',
     '',

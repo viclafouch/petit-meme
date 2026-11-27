@@ -1,5 +1,6 @@
 import { User } from 'lucide-react'
-import { motion, useScroll, useTransform } from 'motion/react'
+import { useScroll, useTransform } from 'motion/react'
+import * as motion from 'motion/react-m'
 import { Link, useRouteContext } from '@tanstack/react-router'
 import { ThemeSwitcher } from '~/components/animate-ui/theme-switcher'
 import { LanguageSwitcher } from '~/components/layout/language-switcher'

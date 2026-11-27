@@ -1,6 +1,7 @@
 import React from 'react'
 import { SparklesIcon } from 'lucide-react'
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { AnimatePresence, useReducedMotion } from 'motion/react'
+import * as motion from 'motion/react-m'
 import { toast } from 'sonner'
 import {
   useMutation,

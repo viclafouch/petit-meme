@@ -1,8 +1,8 @@
 import React from 'react'
 import { MessageSquarePlus } from 'lucide-react'
-import { motion } from 'motion/react'
-import * as Sentry from '@sentry/tanstackstart-react'
+import * as motion from 'motion/react-m'
 import { ClientOnly } from '@tanstack/react-router'
+import { waitForSentry } from '~/lib/sentry-client'
 import { m } from '~/paraglide/messages'
 
 const APPEAR_DELAY_SECONDS = 3
@@ -20,18 +20,47 @@ const APPEAR_ANIMATION = {
   }
 }
 
+const loadAttachFeedback = async () => {
+  try {
+    const sentryClient = await waitForSentry()
+
+    if (!sentryClient) {
+      return null
+    }
+
+    const { attachFeedback } = await import('~/lib/sentry-feedback')
+
+    return attachFeedback
+  } catch {
+    return null
+  }
+}
+
+const attachFeedbackOnceLoaded = async (
+  node: HTMLButtonElement,
+  signal: AbortSignal
+) => {
+  const attachFeedback = await loadAttachFeedback()
+
+  if (!attachFeedback || signal.aborted) {
+    return
+  }
+
+  signal.addEventListener('abort', attachFeedback(node), { once: true })
+}
+
 const feedbackRef = (node: HTMLButtonElement | null) => {
   if (!node) {
     return () => {}
   }
 
-  const feedback = Sentry.getFeedback()
+  const controller = new AbortController()
 
-  if (!feedback) {
-    return () => {}
+  void attachFeedbackOnceLoaded(node, controller.signal)
+
+  return () => {
+    controller.abort()
   }
-
-  return feedback.attachTo(node)
 }
 
 const FeedbackWidgetInner = () => {

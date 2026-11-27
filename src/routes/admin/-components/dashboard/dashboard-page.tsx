@@ -1,6 +1,8 @@
+import React from 'react'
 import { ArrowRight } from 'lucide-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { getRouteApi, Link } from '@tanstack/react-router'
+import { lazyComponent } from '~/lib/lazy-component'
 import { listAdminRecentActivityQueryOpts } from '~/queries/admin/activity'
 import {
   getAdminDashboardChartQueryOpts,
@@ -24,9 +26,14 @@ import {
 import { PeriodSelector } from './period-selector'
 import { TotalsSection } from './totals-section'
 import { TrendingMemes } from './trending-memes'
-import { TrendsChart } from './trends-chart'
 
 const routeApi = getRouteApi('/admin/')
+
+const LazyTrendsChart = lazyComponent(async () => {
+  const { TrendsChart } = await import('./trends-chart')
+
+  return TrendsChart
+})
 
 type ChartContentProps = {
   period: DashboardPeriod
@@ -35,7 +42,7 @@ type ChartContentProps = {
 const ChartContent = ({ period }: ChartContentProps) => {
   const chartQuery = useSuspenseQuery(getAdminDashboardChartQueryOpts(period))
 
-  return <TrendsChart data={chartQuery.data} period={period} />
+  return <LazyTrendsChart data={chartQuery.data} period={period} />
 }
 
 const TotalsContent = () => {

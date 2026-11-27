@@ -1,5 +1,6 @@
 import type React from 'react'
-import { motion, useScroll, useTransform } from 'motion/react'
+import { useScroll, useTransform } from 'motion/react'
+import * as motion from 'motion/react-m'
 import { useIsLargeScreen } from '~/hooks/use-is-large-screen'
 import { useNeedsCssFallback } from '~/hooks/use-needs-css-fallback'
 import { useNeedsScrollFadeFallback } from '~/hooks/use-scroll-fade'

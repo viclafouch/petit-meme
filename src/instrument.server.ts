@@ -6,7 +6,6 @@ import {
   SENTRY_TRACES_SAMPLE_RATE
 } from '~/constants/sentry'
 import { baseEnv } from '~/env/base.server'
-import { clientEnv } from '~/env/client'
 import { dropExpectedError } from '~/lib/expected-error'
 
 const deploymentEnv =
@@ -16,11 +15,12 @@ const FULL_SAMPLE_RATE = 1
 const DROP_SAMPLE_RATE = 0
 
 Sentry.init({
-  dsn: clientEnv.VITE_SENTRY_DSN,
+  dsn: baseEnv.VITE_SENTRY_DSN,
   environment: deploymentEnv,
   enabled: deploymentEnv === 'production',
   dataCollection: SENTRY_DATA_COLLECTION,
   integrations: [
+    Sentry.serveTunnelIntegration(),
     Sentry.pinoIntegration(),
     Sentry.extraErrorDataIntegration(),
     Sentry.zodErrorsIntegration()

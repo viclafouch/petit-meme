@@ -1,5 +1,6 @@
 import React from 'react'
-import { LayoutGroup, motion, useReducedMotion } from 'motion/react'
+import { LayoutGroup, useReducedMotion } from 'motion/react'
+import * as motion from 'motion/react-m'
 import { Radio } from '@base-ui/react/radio'
 import { RadioGroup } from '@base-ui/react/radio-group'
 import { ANNUAL_DISCOUNT_PERCENT, type BillingPeriod } from '~/constants/plan'

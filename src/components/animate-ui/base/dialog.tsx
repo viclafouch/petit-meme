@@ -1,9 +1,11 @@
 import * as React from 'react'
-import { X } from 'lucide-react'
-import { AnimatePresence, motion, type Transition } from 'motion/react'
+import { AnimatePresence } from 'motion/react'
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
+import { mergeProps } from '@base-ui/react/merge-props'
+import { preloadOnIntent } from '~/components/ui/preload-on-intent'
+import { lazyComponent } from '~/lib/lazy-component'
 import { cn } from '~/lib/utils'
-import { m } from '~/paraglide/messages'
+import type { DialogPopupProps } from './dialog-popup'
 
 type DialogContextType = {
   isOpen: boolean
@@ -57,7 +59,12 @@ const Dialog = ({
 type DialogTriggerProps = DialogPrimitive.Trigger.Props
 
 const DialogTrigger = (props: DialogTriggerProps) => {
-  return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />
+  return (
+    <DialogPrimitive.Trigger
+      data-slot="dialog-trigger"
+      {...mergeProps(preloadOnIntent(loadDialogPopup), props)}
+    />
+  )
 }
 
 type DialogCloseProps = DialogPrimitive.Close.Props
@@ -66,78 +73,28 @@ const DialogClose = (props: DialogCloseProps) => {
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />
 }
 
-type FlipDirection = 'top' | 'bottom' | 'left' | 'right'
-
-type DialogContentProps = Omit<DialogPrimitive.Popup.Props, 'render'> & {
-  from?: FlipDirection
-  transition?: Transition
+const loadDialogPopup = async () => {
+  return import('./dialog-popup')
 }
 
-const DialogContent = ({
-  className,
-  children,
-  from = 'top',
-  transition = { type: 'spring', stiffness: 150, damping: 25 },
-  ...props
-}: DialogContentProps) => {
-  const { isOpen } = useDialog()
+const LazyDialogPopup = lazyComponent(async () => {
+  const { DialogPopup } = await loadDialogPopup()
 
-  const initialRotation = from === 'top' || from === 'left' ? '20deg' : '-20deg'
-  const isVertical = from === 'top' || from === 'bottom'
-  const rotateAxis = isVertical ? 'rotateX' : 'rotateY'
+  return DialogPopup
+})
+
+type DialogContentProps = DialogPopupProps
+
+const DialogContent = (props: DialogContentProps) => {
+  const { isOpen } = useDialog()
 
   return (
     <AnimatePresence>
       {isOpen ? (
         <DialogPrimitive.Portal keepMounted data-slot="dialog-portal">
-          <DialogPrimitive.Backdrop
-            data-slot="dialog-overlay"
-            className="fixed inset-0 z-50 bg-black/80"
-            render={
-              <motion.div
-                key="dialog-overlay"
-                initial={{ opacity: 0, filter: 'blur(4px)' }}
-                animate={{ opacity: 1, filter: 'blur(0px)' }}
-                exit={{ opacity: 0, filter: 'blur(4px)' }}
-                transition={{ duration: 0.2, ease: 'easeInOut' }}
-              />
-            }
-          />
-          <DialogPrimitive.Popup
-            data-slot="dialog-content"
-            className={cn(
-              'fixed left-[50%] top-[50%] z-50 grid w-[calc(100%-2rem)] max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg rounded-xl outline-none',
-              className
-            )}
-            render={
-              <motion.div
-                key="dialog-content"
-                initial={{
-                  opacity: 0,
-                  filter: 'blur(4px)',
-                  transform: `perspective(500px) ${rotateAxis}(${initialRotation}) scale(0.8)`
-                }}
-                animate={{
-                  opacity: 1,
-                  filter: 'blur(0px)',
-                  transform: `perspective(500px) ${rotateAxis}(0deg) scale(1)`
-                }}
-                exit={{
-                  opacity: 0,
-                  filter: 'blur(4px)',
-                  transform: `perspective(500px) ${rotateAxis}(${initialRotation}) scale(0.8)`
-                }}
-                transition={transition}
-              />
-            }
-            {...props}
-          >
-            {children}
-            <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none">
-              <X className="size-4" aria-hidden="true" />
-              <span className="sr-only">{m.common_close()}</span>
-            </DialogPrimitive.Close>
-          </DialogPrimitive.Popup>
+          <React.Suspense fallback={null}>
+            <LazyDialogPopup {...props} />
+          </React.Suspense>
         </DialogPrimitive.Portal>
       ) : null}
     </AnimatePresence>

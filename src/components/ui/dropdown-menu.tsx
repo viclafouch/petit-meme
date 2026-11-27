@@ -1,7 +1,21 @@
 import * as React from 'react'
 import { CheckIcon, ChevronRightIcon } from 'lucide-react'
 import { Menu as MenuPrimitive } from '@base-ui/react/menu'
+import { mergeProps } from '@base-ui/react/merge-props'
+import { preloadOnIntent } from '~/components/ui/preload-on-intent'
+import { lazyComponent } from '~/lib/lazy-component'
 import { cn } from '~/lib/utils'
+import type { DropdownMenuPopupProps } from './dropdown-menu-popup'
+
+const loadDropdownMenuPopup = async () => {
+  return import('./dropdown-menu-popup')
+}
+
+const LazyDropdownMenuPopup = lazyComponent(async () => {
+  const { DropdownMenuPopup } = await loadDropdownMenuPopup()
+
+  return DropdownMenuPopup
+})
 
 function DropdownMenu({ ...props }: MenuPrimitive.Root.Props) {
   return <MenuPrimitive.Root data-slot="dropdown-menu" {...props} />
@@ -12,39 +26,20 @@ function DropdownMenuPortal({ ...props }: MenuPrimitive.Portal.Props) {
 }
 
 function DropdownMenuTrigger({ ...props }: MenuPrimitive.Trigger.Props) {
-  return <MenuPrimitive.Trigger data-slot="dropdown-menu-trigger" {...props} />
+  return (
+    <MenuPrimitive.Trigger
+      data-slot="dropdown-menu-trigger"
+      {...mergeProps(preloadOnIntent(loadDropdownMenuPopup), props)}
+    />
+  )
 }
 
-function DropdownMenuContent({
-  align = 'start',
-  alignOffset = 0,
-  side = 'bottom',
-  sideOffset = 4,
-  className,
-  ...props
-}: MenuPrimitive.Popup.Props &
-  Pick<
-    MenuPrimitive.Positioner.Props,
-    'align' | 'alignOffset' | 'side' | 'sideOffset'
-  >) {
+function DropdownMenuContent(props: DropdownMenuPopupProps) {
   return (
     <MenuPrimitive.Portal>
-      <MenuPrimitive.Positioner
-        className="isolate z-50 outline-none"
-        align={align}
-        alignOffset={alignOffset}
-        side={side}
-        sideOffset={sideOffset}
-      >
-        <MenuPrimitive.Popup
-          data-slot="dropdown-menu-content"
-          className={cn(
-            'z-50 max-h-(--available-height) w-(--anchor-width) min-w-32 origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-md bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 duration-100 outline-none data-[side=bottom]:slide-in-from-top-2 data-[side=inline-end]:slide-in-from-left-2 data-[side=inline-start]:slide-in-from-right-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:overflow-hidden data-closed:fade-out-0',
-            className
-          )}
-          {...props}
-        />
-      </MenuPrimitive.Positioner>
+      <React.Suspense fallback={null}>
+        <LazyDropdownMenuPopup {...props} />
+      </React.Suspense>
     </MenuPrimitive.Portal>
   )
 }
@@ -135,7 +130,7 @@ function DropdownMenuSubTrigger({
         "flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground data-inset:pl-8 data-popup-open:bg-accent data-popup-open:text-accent-foreground data-open:bg-accent data-open:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
       )}
-      {...props}
+      {...mergeProps(preloadOnIntent(loadDropdownMenuPopup), props)}
     >
       {children}
       <ChevronRightIcon className="ml-auto" />

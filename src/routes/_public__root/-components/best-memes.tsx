@@ -1,5 +1,6 @@
 import { ChevronRight } from 'lucide-react'
-import { motion, useReducedMotion } from 'motion/react'
+import { useReducedMotion } from 'motion/react'
+import * as motion from 'motion/react-m'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { MemesList } from '~/components/meme/memes-list'
@@ -22,9 +23,9 @@ export const BestMemes = () => {
     >
       <div className="flex flex-col gap-1">
         <div className="flex items-center justify-between">
-          <div className="text-left text-base font-medium">
+          <h2 className="text-left text-base font-medium">
             {m.home_best_title()}
-          </div>
+          </h2>
           <Link
             className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}
             to="/memes/category/$slug"

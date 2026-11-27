@@ -1,7 +1,6 @@
 import React from 'react'
 import { EllipsisVertical } from 'lucide-react'
 import { toast } from 'sonner'
-import * as Sentry from '@sentry/tanstackstart-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Button } from '~/components/ui/button'
 import {
@@ -18,6 +17,7 @@ import {
   DropdownMenuTrigger
 } from '~/components/ui/dropdown-menu'
 import { getErrorMessage } from '~/helpers/error'
+import { captureException } from '~/lib/sentry'
 import { listCategoriesQueryOpts } from '~/queries/category'
 import { ConfirmAlertDialog } from '~/routes/admin/-components/confirm-alert-dialog'
 import { CategoryForm } from '~/routes/admin/categories/-components/category-form'
@@ -64,7 +64,7 @@ export const CategoryDropdown = ({ category }: CategoryDropdownProps) => {
     },
     onSuccess: handleDeleteSuccess,
     onError: (error) => {
-      Sentry.captureException(error, {
+      captureException(error, {
         tags: { feature: 'admin-category-delete' }
       })
     }

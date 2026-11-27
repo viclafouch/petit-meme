@@ -1,5 +1,6 @@
 import { Star } from 'lucide-react'
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { AnimatePresence, useReducedMotion } from 'motion/react'
+import * as motion from 'motion/react-m'
 import { useActivationCount } from '~/hooks/use-activation-count'
 import { cn } from '~/lib/utils'
 

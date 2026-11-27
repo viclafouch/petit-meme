@@ -132,6 +132,10 @@ export const applyBreakUiMeme = (
   meme: WatchedMeme,
   dataset: BreakUiDataset
 ): WatchedMeme => {
+  if (!IS_BREAK_UI_ENABLED) {
+    return meme
+  }
+
   if (dataset === 'worst') {
     return {
       ...meme,
@@ -179,6 +183,10 @@ export const applyBreakUiRelatedMemes = (
   relatedMemes: RelatedMeme[],
   dataset: BreakUiDataset
 ): RelatedMeme[] => {
+  if (!IS_BREAK_UI_ENABLED) {
+    return relatedMemes
+  }
+
   const [template] = relatedMemes
 
   if (dataset === 'empty' || !template) {

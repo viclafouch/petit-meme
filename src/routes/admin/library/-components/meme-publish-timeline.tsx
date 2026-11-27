@@ -7,10 +7,10 @@ import {
 } from 'lucide-react'
 import {
   MotionConfig,
-  motion,
   type TargetAndTransition,
   type Transition
 } from 'motion/react'
+import * as motion from 'motion/react-m'
 import { Link } from '@tanstack/react-router'
 import { Progress } from '~/components/animate-ui/base/progress'
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'

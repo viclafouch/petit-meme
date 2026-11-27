@@ -1,5 +1,6 @@
 import { CheckIcon, LoaderCircleIcon } from 'lucide-react'
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { AnimatePresence, useReducedMotion } from 'motion/react'
+import * as motion from 'motion/react-m'
 import { EASE_OUT } from '~/constants/motion'
 import { m } from '~/paraglide/messages'
 import type { Stage } from '~/routes/_public__root/_default/memes/-components/use-ai-search-stages'

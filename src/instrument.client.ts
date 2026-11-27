@@ -1,9 +1,17 @@
-import * as Sentry from '@sentry/tanstackstart-react'
+import {
+  addIntegration,
+  captureException,
+  init,
+  reactErrorHandler,
+  setTag,
+  setUser,
+  tanstackRouterBrowserTracingIntegration
+} from '@sentry/tanstackstart-react'
+import type { AnyRouter } from '@tanstack/react-router'
 import {
   AUTOMATED_BROWSER_USER_AGENT,
   BROWSER_NETWORK_ERRORS,
   BROWSER_NOISE_ERRORS,
-  SENTRY_APPLICATION_KEY,
   SENTRY_DATA_COLLECTION,
   SENTRY_IGNORE_ERRORS,
   SENTRY_TRACES_SAMPLE_RATE
@@ -11,11 +19,7 @@ import {
 import { clientEnv } from '~/env/client'
 import { getDisplayMode, subscribeToDisplayMode } from '~/lib/display-mode'
 import { dropExpectedError } from '~/lib/expected-error'
-import {
-  getFeedbackOptions,
-  scrubSensitiveBreadcrumbs,
-  SENSITIVE_API_PATTERNS
-} from '~/lib/sentry'
+import { scrubSensitiveBreadcrumbs } from '~/lib/sentry-breadcrumbs'
 
 const isAutomatedBrowser =
   navigator.webdriver || AUTOMATED_BROWSER_USER_AGENT.test(navigator.userAgent)
@@ -23,21 +27,14 @@ const isAutomatedBrowser =
 const isSentryEnabled =
   clientEnv.VITE_VERCEL_ENV === 'production' && !isAutomatedBrowser
 
-Sentry.init({
+init({
   dsn: clientEnv.VITE_SENTRY_DSN,
   environment: clientEnv.VITE_VERCEL_ENV,
+  tunnel: true,
   enabled: isSentryEnabled,
   dataCollection: SENTRY_DATA_COLLECTION,
-  integrations: [
-    Sentry.feedbackIntegration(getFeedbackOptions()),
-    Sentry.thirdPartyErrorFilterIntegration({
-      filterKeys: [SENTRY_APPLICATION_KEY],
-      behaviour: 'drop-error-if-exclusively-contains-third-party-frames'
-    })
-  ],
   tracesSampleRate: SENTRY_TRACES_SAMPLE_RATE,
-  replaysSessionSampleRate: 0,
-  replaysOnErrorSampleRate: 1,
+  allowUrls: [window.location.origin],
   denyUrls: [/extensions\//iu, /^chrome:\/\//iu, /^chrome-extension:\/\//iu],
   ignoreErrors: [
     ...SENTRY_IGNORE_ERRORS,
@@ -52,31 +49,14 @@ Sentry.init({
 })
 
 subscribeToDisplayMode(() => {
-  Sentry.setTag('display_mode', getDisplayMode())
+  setTag('display_mode', getDisplayMode())
 })
 
-const addReplayIntegration = async () => {
-  try {
-    const { replayIntegration } = await import('@sentry/browser')
-
-    Sentry.addIntegration(
-      replayIntegration({
-        maskAllText: true,
-        blockAllMedia: false,
-        networkDetailDenyUrls: SENSITIVE_API_PATTERNS
-      })
-    )
-  } catch (error) {
-    Sentry.captureException(error)
+export const sentryClient = {
+  captureException,
+  setUser,
+  reportReactError: reactErrorHandler(),
+  trackRouterNavigation: (router: AnyRouter) => {
+    addIntegration(tanstackRouterBrowserTracingIntegration(router))
   }
-}
-
-if (isSentryEnabled) {
-  window.addEventListener(
-    'load',
-    () => {
-      void addReplayIntegration()
-    },
-    { once: true }
-  )
 }

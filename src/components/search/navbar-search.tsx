@@ -1,10 +1,10 @@
 import React from 'react'
 import { Search, X } from 'lucide-react'
 import { Autocomplete } from '@base-ui/react/autocomplete'
-import { useHotkey } from '@tanstack/react-hotkeys'
 import { useMatch } from '@tanstack/react-router'
 import { Kbd } from '~/components/ui/kbd'
 import { useIsLargeScreen } from '~/hooks/use-is-large-screen'
+import { lazyComponent } from '~/lib/lazy-component'
 import { m } from '~/paraglide/messages'
 import { SearchSuggestionContent } from './search-suggestion'
 import {
@@ -19,6 +19,12 @@ import {
 } from './search-suggestion-groups'
 import { useSearchNavigation } from './use-search-navigation'
 import { useSearchSuggestions } from './use-search-suggestions'
+
+const LazyNavbarSearchHotkeys = lazyComponent(async () => {
+  const { NavbarSearchHotkeys } = await import('./navbar-search-hotkeys')
+
+  return NavbarSearchHotkeys
+})
 
 const useCurrentQuery = () => {
   const categoryMatch = useMatch({
@@ -50,15 +56,6 @@ export const NavbarSearch = () => {
     inputRef.current?.select()
   }
 
-  useHotkey('/', focusSearch, {
-    enabled: isLargeScreen,
-    meta: { name: m.search_label() }
-  })
-  useHotkey('Mod+K', focusSearch, {
-    enabled: isLargeScreen,
-    meta: { name: m.search_label() }
-  })
-
   const closeAndBlur = () => {
     setIsOpen(false)
     inputRef.current?.blur()
@@ -76,6 +73,11 @@ export const NavbarSearch = () => {
 
   return (
     <search className="min-w-0 flex-1">
+      {isLargeScreen ? (
+        <React.Suspense fallback={null}>
+          <LazyNavbarSearchHotkeys onFocusSearch={focusSearch} />
+        </React.Suspense>
+      ) : null}
       <form
         onSubmit={(event) => {
           event.preventDefault()

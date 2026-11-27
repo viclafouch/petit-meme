@@ -9,7 +9,6 @@ import {
 } from '~/constants/plan'
 import { getErrorMessage } from '~/helpers/error'
 import { createLatch, type LatchEnd } from '~/helpers/promise'
-import { authClient } from '~/lib/auth-client'
 import { yieldToMain } from '~/lib/main-thread'
 import { captureWithFeature } from '~/lib/sentry'
 import { m } from '~/paraglide/messages'
@@ -18,6 +17,7 @@ import { getPremiumSubscriptionQueryOpts } from '~/queries/subscription'
 import { useDialogStore } from '~/stores/dialog.store'
 
 const openBillingPortal = async () => {
+  const { authClient } = await import('~/lib/auth-client')
   const { error } = await authClient.subscription.billingPortal({
     locale: getLocale(),
     returnUrl: '/settings'
@@ -48,6 +48,7 @@ const startCheckout = async (
     return showAlreadySubscribed()
   }
 
+  const { authClient } = await import('~/lib/auth-client')
   const { error } = await authClient.subscription.upgrade({
     plan: PREMIUM_PLAN_NAME,
     annual: billingPeriod === 'yearly',

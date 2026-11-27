@@ -1,13 +1,12 @@
-import {
-  type ClickedObjectIDs,
-  type ClickedObjectIDsAfterSearch,
-  type ConvertedObjectIDs,
-  type ConvertedObjectIDsAfterSearch,
-  type EventsItems,
-  type ViewedObjectIDs,
-  insightsClient
+import type {
+  ClickedObjectIDs,
+  ClickedObjectIDsAfterSearch,
+  ConvertedObjectIDs,
+  ConvertedObjectIDsAfterSearch,
+  EventsItems,
+  InsightsClient,
+  ViewedObjectIDs
 } from '@algolia/client-insights'
-import * as Sentry from '@sentry/tanstackstart-react'
 import { createClientOnlyFn } from '@tanstack/react-start'
 import { ALGOLIA_FAIL_FAST_ON_RATE_LIMIT } from '~/constants/algolia'
 import { COOKIE_ALGOLIA_USER_TOKEN_KEY } from '~/constants/cookie'
@@ -15,18 +14,37 @@ import { clientEnv } from '~/env/client'
 import { readClientCookie } from '~/lib/cookie'
 import { matchIsAnalyticsConsentGiven } from '~/lib/cookie-consent'
 import { runInBackground } from '~/lib/main-thread'
+import { captureException } from '~/lib/sentry'
 import { getLocale } from '~/paraglide/runtime'
 
-const algoliaInsights = insightsClient(
-  clientEnv.VITE_ALGOLIA_APP_ID,
-  clientEnv.VITE_ALGOLIA_INSIGHTS_KEY,
-  undefined,
-  ALGOLIA_FAIL_FAST_ON_RATE_LIMIT
-)
+let algoliaInsightsPromise: Promise<InsightsClient> | null = null
+
+const createAlgoliaInsights = async () => {
+  try {
+    const { insightsClient } = await import('@algolia/client-insights')
+
+    return insightsClient(
+      clientEnv.VITE_ALGOLIA_APP_ID,
+      clientEnv.VITE_ALGOLIA_INSIGHTS_KEY,
+      undefined,
+      ALGOLIA_FAIL_FAST_ON_RATE_LIMIT
+    )
+  } catch (error) {
+    algoliaInsightsPromise = null
+
+    throw error
+  }
+}
+
+const getAlgoliaInsights = () => {
+  algoliaInsightsPromise ??= createAlgoliaInsights()
+
+  return algoliaInsightsPromise
+}
 
 function logInsightsError(error: unknown) {
   console.warn('[Algolia Insights]', error)
-  Sentry.captureException(error)
+  captureException(error)
 }
 
 function getUserToken() {
@@ -46,7 +64,9 @@ function getInsightsIndex() {
 const pushEvent = (event: EventsItems) => {
   runInBackground(async () => {
     try {
-      await algoliaInsights.pushEvents({ events: [event] })
+      const insights = await getAlgoliaInsights()
+
+      await insights.pushEvents({ events: [event] })
     } catch (error) {
       logInsightsError(error)
     }

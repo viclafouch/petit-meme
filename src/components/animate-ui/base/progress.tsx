@@ -1,5 +1,6 @@
 import * as React from 'react'
-import { motion, type Transition } from 'motion/react'
+import { type Transition } from 'motion/react'
+import * as motion from 'motion/react-m'
 import { Progress as ProgressPrimitive } from '@base-ui/react/progress'
 import { cn } from '~/lib/utils'
 

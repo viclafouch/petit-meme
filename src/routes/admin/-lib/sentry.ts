@@ -22,10 +22,6 @@ export const buildSentryUserLinks = (userId: string) => {
       href: buildSentryUrl('/issues/', { query: userQuery })
     },
     {
-      label: 'Replays',
-      href: buildSentryUrl('/explore/replays/', { query: userQuery })
-    },
-    {
       label: 'Logs',
       href: buildSentryUrl('/explore/logs/', { logsQuery: userQuery })
     }

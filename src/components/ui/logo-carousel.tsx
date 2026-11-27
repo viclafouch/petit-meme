@@ -1,6 +1,7 @@
 /* oxlint-disable id-length */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence } from 'motion/react'
+import * as motion from 'motion/react-m'
 
 export type Logo = {
   name: string

@@ -1,11 +1,11 @@
 import React from 'react'
-import * as Sentry from '@sentry/tanstackstart-react'
 import {
   type ErrorComponentProps,
   HeadContent,
   Scripts
 } from '@tanstack/react-router'
 import { IS_PRODUCTION } from '~/constants/env'
+import { captureException } from '~/lib/sentry'
 import { m } from '~/paraglide/messages'
 import { getLocale, getTextDirection, localizeHref } from '~/paraglide/runtime'
 
@@ -34,7 +34,7 @@ export const RootErrorComponent = ({
   reset
 }: RootErrorComponentProps) => {
   React.useEffect(() => {
-    Sentry.captureException(error)
+    captureException(error)
   }, [error])
 
   return (

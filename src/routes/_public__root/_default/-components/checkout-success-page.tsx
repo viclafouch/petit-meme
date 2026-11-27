@@ -1,5 +1,6 @@
 import React from 'react'
-import { motion, useReducedMotion } from 'motion/react'
+import { useReducedMotion } from 'motion/react'
+import * as motion from 'motion/react-m'
 import { Link } from '@tanstack/react-router'
 import { buttonVariants } from '~/components/ui/button'
 import { m } from '~/paraglide/messages'

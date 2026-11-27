@@ -1,11 +1,7 @@
 import React from 'react'
 import { Eye, MonitorSmartphone } from 'lucide-react'
-import {
-  type Variants,
-  motion,
-  useInView,
-  useReducedMotion
-} from 'motion/react'
+import { type Variants, useInView, useReducedMotion } from 'motion/react'
+import * as motion from 'motion/react-m'
 import { Badge } from '~/components/ui/badge'
 import { m } from '~/paraglide/messages'
 import { PageHeading2 } from '~/routes/_public__root/-components/page-headers'
@@ -65,7 +61,7 @@ const mobileVariants: Variants = {
 const infoVariants: Variants = {
   offscreen: {
     y: 100,
-    opacity: 0.1
+    opacity: 0
   },
   onscreen: {
     y: 0,

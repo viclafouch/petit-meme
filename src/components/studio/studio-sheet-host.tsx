@@ -3,11 +3,12 @@ import {
   useCloseStudio,
   useStudioSheetMeme
 } from '~/components/studio/use-studio-history'
+import { lazyComponent } from '~/lib/lazy-component'
 
-const LazyStudioSheet = React.lazy(async () => {
+const LazyStudioSheet = lazyComponent(async () => {
   const { StudioSheet } = await import('~/components/studio/studio-sheet')
 
-  return { default: StudioSheet }
+  return StudioSheet
 })
 
 export const StudioSheetHost = () => {

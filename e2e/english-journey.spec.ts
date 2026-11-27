@@ -26,7 +26,7 @@ import {
 } from './content'
 import { E2E_STRIPE_PRICE_IDS, resolveStorageStatePath } from './env'
 import { test } from './fixtures'
-import { repeatUntilVisible } from './hydration'
+import { repeatUntilNavigated, repeatUntilVisible } from './hydration'
 import { getMemeLink, getMemeCardLinks } from './library'
 import { E2E_ENGLISH_LOCALE } from './locales'
 import { findStripeCustomerLocales } from './stripe-customer'
@@ -339,11 +339,16 @@ test.describe('the English journey', () => {
       )
     ).toBeVisible()
 
-    await page
-      .getByRole('button', {
-        name: m.locale_banner_switch({ language: frenchName }, IN_ENGLISH)
-      })
-      .click()
+    await repeatUntilNavigated(
+      () => {
+        return page
+          .getByRole('button', {
+            name: m.locale_banner_switch({ language: frenchName }, IN_ENGLISH)
+          })
+          .click()
+      },
+      { page, from: ENGLISH_HOME_PATHNAME }
+    )
 
     await expect(page).toHaveURL('/')
     await expect

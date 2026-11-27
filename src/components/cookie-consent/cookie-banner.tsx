@@ -1,6 +1,7 @@
 import React from 'react'
 import { Cookie } from 'lucide-react'
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { AnimatePresence, useReducedMotion } from 'motion/react'
+import * as motion from 'motion/react-m'
 import { Link } from '@tanstack/react-router'
 import { useSelector } from '@tanstack/react-store'
 import { Button } from '~/components/ui/button'

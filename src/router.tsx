@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/tanstackstart-react'
 import { QueryClient } from '@tanstack/react-query'
 import { createRouter } from '@tanstack/react-router'
 import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
@@ -8,6 +7,7 @@ import { NotFound } from '~/components/app/not-found'
 import { IS_PRODUCTION } from '~/constants/env'
 import { SECOND, FIVE_MINUTES_MS } from '~/constants/time'
 import { matchIsRateLimitError } from '~/helpers/error'
+import { trackRouterNavigation } from '~/lib/sentry-client'
 import {
   deLocalizeUrl,
   isExcludedByRouteStrategy,
@@ -79,9 +79,7 @@ export function getRouter() {
   })
 
   if (!router.isServer) {
-    Sentry.addIntegration(
-      Sentry.tanstackRouterBrowserTracingIntegration(router)
-    )
+    trackRouterNavigation(router)
   }
 
   setupRouterSsrQueryIntegration({

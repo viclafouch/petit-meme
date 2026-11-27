@@ -1,7 +1,7 @@
 import React from 'react'
-import * as Sentry from '@sentry/tanstackstart-react'
 import { SECOND } from '~/constants/time'
 import type { Meme } from '~/db/generated/prisma/client'
+import { captureException } from '~/lib/sentry'
 import { lowPriorityServerFnFetch } from '~/lib/server-fn-fetch'
 import { recordMemeView } from '~/server/meme/meme.functions'
 
@@ -85,7 +85,7 @@ export function useRegisterMemeView({
           fetch: lowPriorityServerFnFetch
         })
       } catch (error) {
-        Sentry.captureException(error)
+        captureException(error)
       }
     }
 

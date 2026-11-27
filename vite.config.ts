@@ -22,17 +22,12 @@ import {
   OFFLINE_PAGE_PATH_BY_LOCALE,
   SERVICE_WORKER_PATHNAME
 } from './src/constants/pwa.ts'
-import {
-  SENTRY_APPLICATION_KEY,
-  SENTRY_ORG,
-  SENTRY_PROJECT
-} from './src/constants/sentry.ts'
+import { SENTRY_ORG, SENTRY_PROJECT } from './src/constants/sentry.ts'
 import { applyDeploymentSiteUrl } from './src/env/deployment-url.ts'
+import { nativeUrlPattern } from './vite-plugins/native-url-pattern.ts'
 import { scrollDrivenCssGuard } from './vite-plugins/scroll-driven-css-guard.ts'
 
 const E2E_SENTRY_RELEASE = createHash('sha1').update('e2e').digest('hex')
-
-const E2E_SENTRY_TUNNEL_ROUTE = '/e2e-sentry-tunnel'
 
 const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
@@ -172,6 +167,8 @@ const DEV_TOOLBAR_ALIASES = [
   }
 ]
 
+const ADMIN_ROUTE_ID_PREFIX = '/admin'
+
 const BUILD_ANALYSIS_DEVTOOLS = {
   apply: 'build',
   environments: ['client']
@@ -227,6 +224,7 @@ export default defineConfig(async ({ command, mode }) => {
     plugins: [
       tailwindcss(),
       scrollDrivenCssGuard(),
+      nativeUrlPattern(),
       tanstackStart({
         importProtection: {
           client: {
@@ -238,7 +236,20 @@ export default defineConfig(async ({ command, mode }) => {
         },
         router: {
           quoteStyle: 'single',
-          semicolons: false
+          semicolons: false,
+          codeSplittingOptions: {
+            splitBehavior: ({ routeId }) => {
+              if (!routeId.startsWith(ADMIN_ROUTE_ID_PREFIX)) {
+                return
+              }
+
+              return [
+                ['loader', 'component'],
+                ['errorComponent'],
+                ['notFoundComponent']
+              ]
+            }
+          }
         }
       }),
       react({ compiler: true }),
@@ -293,7 +304,6 @@ export default defineConfig(async ({ command, mode }) => {
       sentryTanstackStart({
         org: SENTRY_ORG,
         project: SENTRY_PROJECT,
-        applicationKey: SENTRY_APPLICATION_KEY,
         authToken: serverEnv.SENTRY_AUTH_TOKEN,
         release: {
           name:
@@ -307,7 +317,6 @@ export default defineConfig(async ({ command, mode }) => {
         bundleSizeOptimizations: {
           excludeChannelInjection: true
         },
-        tunnelRoute: mode === 'e2e' ? E2E_SENTRY_TUNNEL_ROUTE : true,
         autoInstrumentMiddleware: false
       })
     ]

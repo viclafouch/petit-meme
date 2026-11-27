@@ -1,7 +1,20 @@
 import * as Sentry from '@sentry/tanstackstart-react'
 import { wrapMiddlewaresWithSentry } from '@sentry/tanstackstart-react'
+import { createIsomorphicFn } from '@tanstack/react-start'
 import { IS_DEVELOPMENT } from '~/constants/env'
-import { m } from '~/paraglide/messages'
+import { whenSentryLoads } from '~/lib/sentry-client'
+
+type CaptureContext = Parameters<typeof Sentry.captureException>[1]
+
+export const captureException = createIsomorphicFn()
+  .server((exception: unknown, captureContext?: CaptureContext) => {
+    Sentry.captureException(exception, captureContext)
+  })
+  .client((exception: unknown, captureContext?: CaptureContext) => {
+    void whenSentryLoads((sentryClient) => {
+      sentryClient.captureException(exception, captureContext)
+    })
+  })
 
 export type SentryFeature =
   | 'stripe-checkout'
@@ -57,7 +70,7 @@ export const captureWithFeature = (error: unknown, feature: SentryFeature) => {
     console.error(`[${feature}]`, error)
   }
 
-  Sentry.captureException(error, { tags: { feature } })
+  captureException(error, { tags: { feature } })
 }
 
 type SentryMiddleware = Parameters<typeof wrapMiddlewaresWithSentry>[0][string]
@@ -71,78 +84,4 @@ export const wrapMiddlewareWithSentry = <TMiddleware extends SentryMiddleware>(
   })
 
   return wrappedMiddleware
-}
-
-type FeedbackOptions = NonNullable<
-  Parameters<typeof Sentry.feedbackIntegration>[0]
->
-
-const SENSITIVE_API_PATHS = [
-  '/api/auth/',
-  '/api/stripe/'
-] as const satisfies readonly string[]
-
-export const SENSITIVE_API_PATTERNS = SENSITIVE_API_PATHS.map((path) => {
-  return new RegExp(path.replaceAll('/', String.raw`\/`), 'u')
-})
-
-export const getFeedbackOptions = (): FeedbackOptions => {
-  return {
-    colorScheme: 'system',
-    autoInject: false,
-    showBranding: false,
-    showName: false,
-    showEmail: true,
-    isEmailRequired: false,
-    enableScreenshot: true,
-    triggerLabel: m.sentry_trigger_label(),
-    triggerAriaLabel: m.sentry_trigger_aria(),
-    formTitle: m.sentry_form_title(),
-    submitButtonLabel: m.sentry_submit(),
-    cancelButtonLabel: m.common_cancel(),
-    confirmButtonLabel: m.common_confirm(),
-    addScreenshotButtonLabel: m.sentry_add_screenshot(),
-    removeScreenshotButtonLabel: m.sentry_remove_screenshot(),
-    emailLabel: m.sentry_email_label(),
-    emailPlaceholder: m.sentry_email_placeholder(),
-    messageLabel: m.sentry_message_label(),
-    messagePlaceholder: m.sentry_message_placeholder(),
-    successMessageText: m.sentry_success(),
-    isRequiredLabel: m.sentry_required(),
-    themeLight: {
-      accentBackground: 'oklch(0.205 0 0)',
-      accentForeground: '#ffffff'
-    },
-    themeDark: {
-      accentBackground: 'oklch(0.922 0 0)',
-      accentForeground: '#000000'
-    }
-  }
-}
-
-const matchIsSensitiveApiUrl = (url: string) => {
-  return SENSITIVE_API_PATHS.some((path) => {
-    return url.includes(path)
-  })
-}
-
-export const scrubSensitiveBreadcrumbs = (breadcrumb: Sentry.Breadcrumb) => {
-  const isNetworkBreadcrumb =
-    breadcrumb.category === 'xhr' || breadcrumb.category === 'fetch'
-
-  if (!isNetworkBreadcrumb) {
-    return breadcrumb
-  }
-
-  const breadcrumbData: Record<string, unknown> = breadcrumb.data ?? {}
-  const { url, method } = breadcrumbData
-
-  if (typeof url !== 'string' || !matchIsSensitiveApiUrl(url)) {
-    return breadcrumb
-  }
-
-  return {
-    ...breadcrumb,
-    data: { url, method }
-  }
 }

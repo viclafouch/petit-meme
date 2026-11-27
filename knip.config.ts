@@ -4,6 +4,7 @@ export default defineConfig({
   entry: [
     'vite.config.ts',
     'src/service-worker/sw.ts',
+    'src/instrument.server.ts',
     'src/**/*.dev.ts',
     'src/**/*.dev.server.ts',
     'playwright.config.ts',

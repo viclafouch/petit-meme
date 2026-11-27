@@ -1,6 +1,6 @@
 import React from 'react'
 import { Bookmark, Eye, type LucideIcon, Tag } from 'lucide-react'
-import { motion } from 'motion/react'
+import * as motion from 'motion/react-m'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { Badge } from '~/components/ui/badge'

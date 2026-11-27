@@ -19,7 +19,7 @@ export const PublicLayout = () => {
   const isStudioOpen = useIsStudioOpen()
 
   return (
-    <StarsBackground animated={isHomePage}>
+    <StarsBackground>
       <div
         data-public-shell
         className="z-10 relative min-h-dvh flex flex-col pt-[env(safe-area-inset-top,0px)] pb-(--tab-bar-space)"

@@ -136,6 +136,9 @@
   --duration-sheen: 700ms;
   --duration-bookmark-demo: 5s;
   --duration-aurora-cycle: 6s;
+  --duration-aurora-breathe: 14s;
+  --duration-star-drift: 60s;
+  --duration-meteor-cycle: 120s;
   --scale-press: 0.97;
   --scale-enter: 0.97;
   --focus-color: oklch(0.52 0.105 223);
@@ -144,6 +147,9 @@
   --opacity-dashed: 28%;
   --opacity-glow-dim: 45%;
   --opacity-glow: 85%;
+  --opacity-star-far: 60%;
+  --opacity-aurora-sky-dim: 20%;
+  --opacity-aurora-sky: 40%;
   --focus-width: 2px;
   --focus-offset: 2px;
   --dash-width: 1.5px;
@@ -482,7 +488,6 @@
   --text-3xs: 0.5rem;
   --text-2xs: 0.625rem;
   --animate-background-shine: background-shine 2s linear infinite;
-  --animate-stars-drift: stars-drift linear infinite;
   --animate-aurora-drift: aurora-drift linear infinite;
 
   @keyframes background-shine {
@@ -500,15 +505,6 @@
     }
     to {
       translate: -50% 0;
-    }
-  }
-
-  @keyframes stars-drift {
-    from {
-      translate: 0 0;
-    }
-    to {
-      translate: 0 -2000px;
     }
   }
 }

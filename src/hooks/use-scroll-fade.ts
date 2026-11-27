@@ -1,20 +1,8 @@
-import React from 'react'
-import { subscribeToNothing } from '~/helpers/external-store'
+import { useNeedsCssFallback } from '~/hooks/use-needs-css-fallback'
 
-const getNeedsFallbackSnapshot = () => {
-  return !CSS.supports(
-    '(animation-timeline: scroll()) and (animation-range: 0% 100%)'
-  )
-}
-
-const getServerNeedsFallbackSnapshot = () => {
-  return false
-}
+const SCROLL_FADE_SUPPORT =
+  '(animation-timeline: scroll()) and (animation-range: 0% 100%)'
 
 export const useNeedsScrollFadeFallback = (): boolean => {
-  return React.useSyncExternalStore(
-    subscribeToNothing,
-    getNeedsFallbackSnapshot,
-    getServerNeedsFallbackSnapshot
-  )
+  return useNeedsCssFallback(SCROLL_FADE_SUPPORT)
 }

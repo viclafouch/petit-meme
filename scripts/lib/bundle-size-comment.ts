@@ -113,7 +113,9 @@ const formatLineTable = (
         formatStatus(line),
         formatName(line),
         formatKb(line.size.bytes),
-        formatDelta(line.size.bytes, toBaseSize(base, line)?.bytes),
+        base === undefined
+          ? '—'
+          : formatDelta(line.size.bytes, toBaseSize(base, line)?.bytes),
         formatBudget(line),
         line.isShell ? '—' : formatKb(shellBytes + line.size.bytes)
       ]

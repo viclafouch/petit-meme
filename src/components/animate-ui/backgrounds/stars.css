@@ -1,0 +1,196 @@
+@reference '../../../styles.css';
+
+@layer theme, base, components, utilities;
+
+@layer components {
+  .stars {
+    --star: random(0px, 100vw) random(0px, 100vh);
+    --stars-2: var(--star), var(--star);
+    --stars-4: var(--stars-2), var(--stars-2);
+    --stars-8: var(--stars-4), var(--stars-4);
+    --stars-16: var(--stars-8), var(--stars-8);
+    --stars-32: var(--stars-16), var(--stars-16);
+    --stars-64: var(--stars-32), var(--stars-32);
+    --stars-128: var(--stars-64), var(--stars-64);
+    position: fixed;
+    inset: 0;
+    overflow: clip;
+    contain: strict;
+    pointer-events: none;
+    color: --theme(--color-white);
+  }
+
+  .stars-dots {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: var(--radius-pill);
+    box-shadow: var(--stars-fallback);
+  }
+
+  .stars-far {
+    width: --spacing(0.25);
+    height: --spacing(0.25);
+    opacity: var(--opacity-star-far);
+
+    @supports (top: random(0px, 1px)) {
+      box-shadow: var(--stars-32), var(--stars-16);
+    }
+  }
+
+  .stars-drift {
+    @supports ((animation-timeline: scroll()) and (animation-range: 0% 100%)) {
+      animation: stars-fade-with-depth linear both;
+      animation-timeline: scroll(root);
+      animation-range: 50vh 200vh;
+    }
+  }
+
+  .stars-layer {
+    &::after {
+      content: '';
+      position: absolute;
+      top: 100vh;
+      left: 0;
+      width: inherit;
+      height: inherit;
+      border-radius: inherit;
+      box-shadow: inherit;
+    }
+
+    @variant motion-safe {
+      animation: stars-drift var(--stars-drift-duration) linear infinite;
+    }
+  }
+
+  .stars-layer-small {
+    --stars-drift-duration: var(--duration-star-drift);
+    width: --spacing(0.25);
+    height: --spacing(0.25);
+
+    @supports (top: random(0px, 1px)) {
+      box-shadow: var(--stars-128), var(--stars-32);
+    }
+  }
+
+  .stars-layer-medium {
+    --stars-drift-duration: calc(var(--duration-star-drift) * 2);
+    width: --spacing(0.5);
+    height: --spacing(0.5);
+
+    @supports (top: random(0px, 1px)) {
+      box-shadow: var(--stars-64);
+    }
+  }
+
+  .stars-layer-large {
+    --stars-drift-duration: calc(var(--duration-star-drift) * 3);
+    width: --spacing(0.75);
+    height: --spacing(0.75);
+
+    @supports (top: random(0px, 1px)) {
+      box-shadow: var(--stars-32);
+    }
+  }
+
+  .stars-meteor {
+    position: absolute;
+    width: --spacing(35);
+    height: 1px;
+    border-radius: var(--radius-pill);
+    background: linear-gradient(to right, transparent, currentColor);
+    rotate: 155deg;
+    opacity: 0;
+
+    @variant motion-safe {
+      animation: stars-meteor var(--duration-meteor-cycle) linear
+        var(--stars-meteor-delay) infinite;
+    }
+  }
+
+  .stars-meteor-early {
+    @supports not (top: random(0px, 1px)) {
+      --stars-meteor-delay: 8s;
+      top: 22vh;
+      left: 78vw;
+    }
+
+    @supports (top: random(0px, 1px)) {
+      --stars-meteor-delay: random(3s, 15s);
+      top: random(18vh, 48vh);
+      left: random(40vw, 96vw);
+    }
+  }
+
+  .stars-meteor-late {
+    @supports not (top: random(0px, 1px)) {
+      --stars-meteor-delay: 68s;
+      top: 30vh;
+      left: 56vw;
+    }
+
+    @supports (top: random(0px, 1px)) {
+      --stars-meteor-delay: random(50s, 90s);
+      top: random(18vh, 48vh);
+      left: random(40vw, 96vw);
+    }
+  }
+
+  .stars-aurora {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 100vh;
+    pointer-events: none;
+    background:
+      radial-gradient(38% 55% at 14% 0%, var(--aurora-green), transparent 70%),
+      radial-gradient(30% 45% at 46% 0%, var(--aurora-teal), transparent 70%),
+      radial-gradient(34% 60% at 72% 0%, var(--aurora-violet), transparent 70%),
+      radial-gradient(22% 40% at 94% 0%, var(--aurora-pink), transparent 70%);
+    opacity: var(--opacity-aurora-sky-dim);
+
+    @variant motion-safe {
+      animation: stars-aurora-breathe var(--duration-aurora-breathe) ease-in-out
+        infinite alternate;
+    }
+  }
+
+  @keyframes stars-drift {
+    to {
+      translate: 0 -100vh;
+    }
+  }
+
+  @keyframes stars-fade-with-depth {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes stars-meteor {
+    0% {
+      opacity: 0;
+      translate: 0 0;
+    }
+    0.3% {
+      opacity: 1;
+    }
+    1%,
+    100% {
+      opacity: 0;
+      translate: --spacing(-72) --spacing(34);
+    }
+  }
+
+  @keyframes stars-aurora-breathe {
+    from {
+      opacity: var(--opacity-aurora-sky-dim);
+    }
+    to {
+      opacity: var(--opacity-aurora-sky);
+    }
+  }
+}

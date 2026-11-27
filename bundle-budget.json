@@ -1,0 +1,49 @@
+{
+  "goal": {
+    "startupJs": 150,
+    "routeJs": 50,
+    "firstViewCss": 20
+  },
+  "shellJs": 494,
+  "routeJs": {
+    "/": 193,
+    "/admin": 144,
+    "/admin/activity": 112,
+    "/admin/activity/$ip": 112,
+    "/admin/ai-search": 103,
+    "/admin/categories": 142,
+    "/admin/downloader": 111,
+    "/admin/library": 143,
+    "/admin/library/$memeId": 228,
+    "/admin/proposals": 113,
+    "/admin/services": 88,
+    "/admin/users": 127,
+    "/admin/users/$userId": 139,
+    "/app": 167,
+    "/checkout/success": 155,
+    "/dmca": 160,
+    "/embed/$memeId": 80,
+    "/memes/$memeId": 242,
+    "/memes/$memeId/studio": 260,
+    "/memes/ai-search": 210,
+    "/memes/bookmarks": 191,
+    "/memes/category/$slug": 190,
+    "/mentions-legales": 160,
+    "/password/create-new": 181,
+    "/password/reset": 181,
+    "/pricing": 167,
+    "/privacy": 160,
+    "/reels": 135,
+    "/settings": 195,
+    "/submit": 201,
+    "/terms-of-use": 160,
+    "/verify-email": 181
+  },
+  "firstViewCss": {
+    "/": 36,
+    "/app": 36,
+    "/memes/$memeId": 39,
+    "/memes/category/$slug": 37,
+    "/pricing": 35
+  }
+}

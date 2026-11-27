@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url'
 import { nitro } from 'nitro/vite'
-import { defineConfig, loadEnv } from 'vite'
+import { defineConfig, loadEnv, type UserConfig } from 'vite'
 import { paraglideVitePlugin } from '@inlang/paraglide-js'
 import { sentryTanstackStart } from '@sentry/tanstackstart-react/vite'
 import tailwindcss from '@tailwindcss/vite'
@@ -167,6 +167,11 @@ const DEV_TOOLBAR_ALIASES = [
   }
 ]
 
+const BUILD_ANALYSIS_DEVTOOLS = {
+  apply: 'build',
+  environments: ['client']
+} satisfies UserConfig['devtools']
+
 const BROWSER_FLOOR_TARGETS = [
   'chrome111',
   'edge111',
@@ -202,6 +207,7 @@ export default defineConfig(async ({ command, mode }) => {
     build: {
       target: BROWSER_FLOOR_TARGETS
     },
+    devtools: processEnvironment.DEVTOOLS ? BUILD_ANALYSIS_DEVTOOLS : false,
     server: {
       port: 3000,
       strictPort: true

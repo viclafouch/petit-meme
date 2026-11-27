@@ -1,9 +1,9 @@
 import {
   type BaseReport,
   type ChunkChange,
+  EVERY_ROUTE_SCOPE,
+  findStartupSize,
   listChunkChanges,
-  SHELL_SCOPE,
-  toBaseSize,
   UNCHANGED_DELTA_BYTES
 } from './bundle-size-chunk-changes.ts'
 import {
@@ -13,6 +13,7 @@ import {
   type BudgetLine,
   type BudgetViolation,
   type BundleBudget,
+  type BundleReport,
   checkBudget,
   formatKb,
   KB_UNIT,
@@ -39,7 +40,6 @@ const MEASURE_COMMAND = 'pnpm run build:e2e && pnpm run bundle-size'
 
 type RouteChange = {
   name: string
-  isShell: boolean
   beforeBytes: number | undefined
   afterBytes: number
 }
@@ -141,18 +141,22 @@ const formatLineTable = ({
   shellBytes
 }: LineTableParams) => {
   return [
-    '| | Route | Route JS | vs main | Budget | Startup JS |',
-    '| :-: | --- | --: | --: | --- | --: |',
+    '| | Route | Route JS | Budget | Startup JS | vs main |',
+    '| :-: | --- | --: | --- | --: | --: |',
     ...lines.map((line) => {
+      const startupBytes = shellBytes + line.size.bytes
       const cells = [
         formatStatus(line),
         formatName(line),
         formatKb(line.size.bytes),
-        base === undefined
-          ? '—'
-          : formatDelta(line.size.bytes, toBaseSize(base, line)?.bytes),
         formatBudget(line, findRaisedJsBudget(raisedBudgets, line)),
-        line.isShell ? '—' : formatKb(shellBytes + line.size.bytes)
+        line.isShell ? '—' : formatKb(startupBytes),
+        base === undefined || line.isShell
+          ? '—'
+          : formatDelta(
+              startupBytes,
+              findStartupSize(base.report, line.name)?.bytes
+            )
       ]
 
       return `| ${cells.join(' | ')} |`
@@ -172,7 +176,7 @@ const formatTruncatedList = (items: readonly string[]) => {
 const formatLoadedBy = (loadedBy: readonly string[]) => {
   return formatTruncatedList(
     loadedBy.map((scope) => {
-      return scope === SHELL_SCOPE ? 'every route' : `\`${scope}\``
+      return scope === EVERY_ROUTE_SCOPE ? scope : `\`${scope}\``
     })
   )
 }
@@ -207,31 +211,25 @@ const formatChunkTable = (changes: readonly ChunkChange[]) => {
 }
 
 const listRouteChanges = (
-  lines: readonly BudgetLine[],
+  report: BundleReport,
   base: BaseReport | undefined
 ): RouteChange[] => {
   if (base === undefined) {
     return []
   }
 
-  return lines.flatMap((line) => {
-    const beforeBytes = toBaseSize(base, line)?.bytes
+  return Object.keys(report.routes).flatMap((name) => {
+    const afterBytes = findStartupSize(report, name)?.bytes ?? 0
+    const beforeBytes = findStartupSize(base.report, name)?.bytes
 
     if (
       beforeBytes !== undefined &&
-      Math.abs(line.size.bytes - beforeBytes) < UNCHANGED_DELTA_BYTES
+      Math.abs(afterBytes - beforeBytes) < UNCHANGED_DELTA_BYTES
     ) {
       return []
     }
 
-    return [
-      {
-        name: line.name,
-        isShell: line.isShell,
-        beforeBytes,
-        afterBytes: line.size.bytes
-      }
-    ]
+    return [{ name, beforeBytes, afterBytes }]
   })
 }
 
@@ -303,7 +301,7 @@ const HEADLINE_BY_VERDICT = {
   pass: '✅ No heavier'
 } as const satisfies Record<Verdict, string>
 
-const UNCOMPARED_HEADLINE = '✅ Within budget'
+const WITHIN_BUDGET_HEADLINE = '✅ Within budget'
 
 const formatNameList = (names: readonly string[]) => {
   return names
@@ -412,9 +410,9 @@ const formatAgentBrief = ({
     '<details>',
     '<summary>🤖 Agent brief</summary>',
     '',
-    '**What this measures.** The Brotli size of each JS file the server-rendered page of a route modulepreloads, read from the TanStack Start manifest of `pnpm run build:e2e`. The shell is what the root route preloads on every page. Route JS is what a route adds on top, each file counted once. Startup JS is both. Sizes in the data are bytes.',
+    '**What this measures.** The Brotli size of each JS file the server-rendered page of a route modulepreloads, read from the TanStack Start manifest of `pnpm run build:e2e`. The shell is what the root route preloads on every page. Route JS is what a route adds on top, each file counted once. Startup JS is both, and every comparison with main runs on it: Rolldown moves code between the shell and the routes from one build to the next, and only the startup JS of a page tells what its visitor downloads. Sizes in the data are bytes.',
     '',
-    `**Rules.** Budgets live in \`${BUDGET_FILE}\` as a one-way ratchet: the size when last updated, plus ${BUDGET_HEADROOM}. \`${UPDATE_COMMAND}\` only lowers them, and \`${ALLOW_GROWTH_FLAG}\` raises them, flagged in red against main. Never raise one to turn the check green. Chunk names drop the Rolldown hash: \`meme-card\` stands for \`meme-card-<hash>.js\`. A chunk that grows while no route loading it gets heavier shows ⚪, with \`isRegression: false\`: Rolldown renamed or merged it, and only red chunks explain a heavier route. A chunk Rolldown renamed reads \`old\` → \`new\`, with \`renamedFrom\`. First-view CSS is gated apart, by \`e2e/first-view.spec.ts\` against \`firstViewCss\`.`,
+    `**Rules.** Budgets live in \`${BUDGET_FILE}\` as a one-way ratchet: the size when last updated, plus ${BUDGET_HEADROOM}. \`${UPDATE_COMMAND}\` only lowers them, and \`${ALLOW_GROWTH_FLAG}\` raises them, flagged in red against main. Never raise one to turn the check green. Chunk names drop the Rolldown hash: \`meme-card\` stands for \`meme-card-<hash>.js\`. Two chunks with the same name add up, and a chunk loaded by every route reads \`every route\`. A chunk that grows while no route loading it gets heavier shows ⚪, with \`isRegression: false\`: Rolldown renamed or merged it, and only red chunks explain a heavier route. A chunk Rolldown renamed reads \`old\` → \`new\`, with \`renamedFrom\`. First-view CSS is gated apart, by \`e2e/first-view.spec.ts\` against \`firstViewCss\`.`,
     '',
     '**Reproduce**',
     '',
@@ -534,14 +532,17 @@ export const formatComment = ({
   const raisedBudgets =
     baseBudget === undefined ? [] : listRaisedBudgets({ budget, baseBudget })
   const looseLines = listLooseBudgetLines({ report, budget })
-  const routeChanges = listRouteChanges(lines, base)
+  const routeChanges = listRouteChanges(report, base)
   const growingChanges = routeChanges.filter((change) => {
     return (
       change.beforeBytes !== undefined &&
       change.afterBytes - change.beforeBytes >= GROWTH_WARNING_BYTES
     )
   })
-  const chunkChanges = base === undefined ? [] : listChunkChanges(lines, base)
+  const chunkChanges = base === undefined ? [] : listChunkChanges(report, base)
+  const hasHeavierRoute = routeChanges.some((change) => {
+    return change.afterBytes > (change.beforeBytes ?? 0)
+  })
   const verdict = toVerdict({
     violations,
     raisedBudgets,
@@ -567,7 +568,7 @@ export const formatComment = ({
 
   return [
     COMMENT_MARKER,
-    `### 📦 Startup JS · ${verdict === 'pass' && base === undefined ? UNCOMPARED_HEADLINE : HEADLINE_BY_VERDICT[verdict]}`,
+    `### 📦 Startup JS · ${verdict === 'pass' && (base === undefined || hasHeavierRoute) ? WITHIN_BUDGET_HEADLINE : HEADLINE_BY_VERDICT[verdict]}`,
     '',
     `<sub>Brotli · ${lines.length - 1} routes · ${base === undefined ? 'no main report yet' : `against main at \`${base.label}\``}${runUrl === undefined ? '' : ` · [workflow run](${runUrl})`}</sub>`,
     '',
@@ -576,7 +577,7 @@ export const formatComment = ({
       ? toAlert(
           'WARNING',
           growingChanges.map((change) => {
-            return `${formatName(change)} grows by ${formatSignedKb(change.afterBytes - (change.beforeBytes ?? 0))}.`
+            return `\`${change.name}\` grows by ${formatSignedKb(change.afterBytes - (change.beforeBytes ?? 0))}.`
           })
         )
       : []),

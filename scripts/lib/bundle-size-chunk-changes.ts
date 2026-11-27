@@ -1,7 +1,7 @@
-import type { BudgetLine, BundleReport, JsSize } from './bundle-size.ts'
+import type { BundleReport, JsSize } from './bundle-size.ts'
 
 export const UNCHANGED_DELTA_BYTES = 100
-export const SHELL_SCOPE = 'shell'
+export const EVERY_ROUTE_SCOPE = 'every route'
 const RENAME_TOLERANCE = 0.02
 
 export type BaseReport = {
@@ -18,8 +18,22 @@ export type ChunkChange = {
   renamedFrom?: string
 }
 
-export const toBaseSize = (base: BaseReport | undefined, line: BudgetLine) => {
-  return line.isShell ? base?.report.shell : base?.report.routes[line.name]
+const addChunkSizes = (sizeA: JsSize, sizeB: JsSize): JsSize => {
+  const chunks = { ...sizeA.chunks }
+
+  for (const [chunk, bytes] of Object.entries(sizeB.chunks)) {
+    chunks[chunk] = (chunks[chunk] ?? 0) + bytes
+  }
+
+  return { bytes: sizeA.bytes + sizeB.bytes, chunks }
+}
+
+export const findStartupSize = (report: BundleReport, routeName: string) => {
+  const routeSize = report.routes[routeName]
+
+  return routeSize === undefined
+    ? undefined
+    : addChunkSizes(report.shell, routeSize)
 }
 
 const matchIsSameScope = (changeA: ChunkChange, changeB: ChunkChange) => {
@@ -74,24 +88,31 @@ const pairRenamedChunks = (changes: readonly ChunkChange[]) => {
 }
 
 export const listChunkChanges = (
-  lines: readonly BudgetLine[],
+  report: BundleReport,
   base: BaseReport
 ): ChunkChange[] => {
   const changeByChunk = new Map<string, ChunkChange>()
+  const routeNames = Object.keys(report.routes)
 
-  for (const line of lines) {
-    const baseSize = toBaseSize(base, line)
-    const beforeChunks: JsSize['chunks'] = baseSize?.chunks ?? {}
-    const isLineHeavier =
-      line.size.bytes - (baseSize?.bytes ?? 0) >= UNCHANGED_DELTA_BYTES
+  for (const routeName of routeNames) {
+    const afterSize = findStartupSize(report, routeName)
+    const beforeSize = findStartupSize(base.report, routeName)
+
+    if (afterSize === undefined) {
+      continue
+    }
+
+    const beforeChunks: JsSize['chunks'] = beforeSize?.chunks ?? {}
+    const isRouteHeavier =
+      afterSize.bytes - (beforeSize?.bytes ?? 0) >= UNCHANGED_DELTA_BYTES
     const chunkNames = new Set([
       ...Object.keys(beforeChunks),
-      ...Object.keys(line.size.chunks)
+      ...Object.keys(afterSize.chunks)
     ])
 
     for (const chunk of chunkNames) {
       const deltaBytes =
-        (line.size.chunks[chunk] ?? 0) - (beforeChunks[chunk] ?? 0)
+        (afterSize.chunks[chunk] ?? 0) - (beforeChunks[chunk] ?? 0)
 
       if (Math.abs(deltaBytes) < UNCHANGED_DELTA_BYTES) {
         continue
@@ -104,8 +125,8 @@ export const listChunkChanges = (
         isRegression: false
       }
 
-      change.loadedBy.push(line.isShell ? SHELL_SCOPE : line.name)
-      change.isRegression ||= deltaBytes > 0 && isLineHeavier
+      change.loadedBy.push(routeName)
+      change.isRegression ||= deltaBytes > 0 && isRouteHeavier
 
       if (Math.abs(deltaBytes) > Math.abs(change.deltaBytes)) {
         change.deltaBytes = deltaBytes
@@ -115,8 +136,14 @@ export const listChunkChanges = (
     }
   }
 
+  const changes = [...changeByChunk.values()].map((change) => {
+    return change.loadedBy.length === routeNames.length
+      ? { ...change, loadedBy: [EVERY_ROUTE_SCOPE] }
+      : change
+  })
+
   return pairRenamedChunks(
-    [...changeByChunk.values()].toSorted((changeA, changeB) => {
+    changes.toSorted((changeA, changeB) => {
       return Math.abs(changeB.deltaBytes) - Math.abs(changeA.deltaBytes)
     })
   )

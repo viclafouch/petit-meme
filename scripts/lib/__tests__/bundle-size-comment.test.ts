@@ -79,7 +79,7 @@ describe('formatComment', () => {
         { kind: 'over', name: '/memes/$memeId', bytes: 41_000, budgetKb: 32 }
       ],
       routeChanges: [
-        { name: '/memes/$memeId', beforeBytes: 30_000, afterBytes: 41_000 }
+        { name: '/memes/$memeId', beforeBytes: 180_000, afterBytes: 191_000 }
       ],
       chunkChanges: [
         {
@@ -190,7 +190,7 @@ describe('formatComment', () => {
       '> [!CAUTION]\n> 🔴 **`/memes/$memeId`** raises its route JS budget from 32\u00A0kB to 43\u00A0kB.\n> 🔴 **`/`** raises its first-view CSS budget from 33\u00A0kB to 35\u00A0kB.'
     )
     expect(comment).toContain(
-      '| `/memes/$memeId` | 41.0\u00A0kB | 🔴\u00A0+11.0\u00A0kB | 🔴\u00A043\u00A0kB, was 32\u00A0kB · 2.0\u00A0kB left |'
+      '| `/memes/$memeId` | 41.0\u00A0kB | 🔴\u00A043\u00A0kB, was 32\u00A0kB · 2.0\u00A0kB left | 191.0\u00A0kB | 🔴\u00A0+11.0\u00A0kB |'
     )
     expect(toAgentData(comment)).toMatchObject({
       verdict: 'raised',
@@ -274,5 +274,54 @@ describe('formatComment', () => {
     expect(comment).toContain('> [!NOTE]')
     expect(comment).not.toContain('🆕')
     expect(comment).toContain('pnpm run bundle-size\npnpm run build:analyze')
+  })
+})
+
+describe('formatComment against main', () => {
+  it('should net out code Rolldown moved from the shell into every route', () => {
+    const movedReport: BundleReport = {
+      shell: { bytes: 149_000, chunks: { entry: 99_000, react: 50_000 } },
+      routes: {
+        '/': { bytes: 21_000, chunks: { home: 20_000, entry: 1000 } },
+        '/memes/$memeId': {
+          bytes: 31_000,
+          chunks: { meme: 25_000, card: 5000, entry: 1000 }
+        }
+      }
+    }
+    const comment = formatComment({
+      report: movedReport,
+      budget: BUDGET,
+      baseBudget: BUDGET,
+      base: BASE,
+      runUrl: undefined
+    })
+
+    expect(comment).toContain('### 📦 Startup JS · ✅ No heavier')
+    expect(comment).toContain('No route changed against main.')
+    expect(comment).not.toContain('🔴')
+    expect(toAgentData(comment)).toMatchObject({ chunkChanges: [] })
+  })
+
+  it('should not call a route that grows below the warning no heavier', () => {
+    const slightlyGrownReport: BundleReport = {
+      ...MAIN_REPORT,
+      routes: {
+        ...MAIN_REPORT.routes,
+        '/': { bytes: 20_500, chunks: { home: 20_500 } }
+      }
+    }
+    const comment = formatComment({
+      report: slightlyGrownReport,
+      budget: BUDGET,
+      baseBudget: BUDGET,
+      base: BASE,
+      runUrl: undefined
+    })
+
+    expect(comment).toContain('### 📦 Startup JS · ✅ Within budget')
+    expect(comment).toContain(
+      '| ✅ | `/` | 20.5\u00A0kB | 22\u00A0kB · 1.5\u00A0kB left | 170.5\u00A0kB | 🔴\u00A0+0.5\u00A0kB |'
+    )
   })
 })

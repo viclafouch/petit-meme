@@ -1,14 +1,21 @@
 import {
+  type BaseReport,
+  type ChunkChange,
+  listChunkChanges,
+  SHELL_SCOPE,
+  toBaseSize,
+  UNCHANGED_DELTA_BYTES
+} from './bundle-size-chunk-changes.ts'
+import {
   BUDGET_FILE,
   BUDGET_HEADROOM,
   type BudgetedReport,
   type BudgetLine,
   type BudgetViolation,
   type BundleBudget,
-  type BundleReport,
   checkBudget,
   formatKb,
-  type JsSize,
+  KB_UNIT,
   listLooseBudgetLines,
   listRaisedBudgets,
   matchIsLineFailing,
@@ -19,30 +26,16 @@ import {
 
 export const COMMENT_MARKER = '<!-- bundle-size-report -->'
 
-const UNCHANGED_DELTA_BYTES = 100
+const MARKER_GAP = '\u00A0'
 const GROWTH_WARNING_BYTES = 1000
 const VISIBLE_CHUNK_CHANGES = 10
 const VISIBLE_LIST_ITEMS = 3
 const AGENT_CHUNK_CHANGES = 40
-const SHELL_SCOPE = 'shell'
 const FAR_FROM_GOAL_RATIO = 2
 const VISIBLE_GOAL_SQUARES = 10
 const UPDATE_COMMAND = 'pnpm run bundle-size --update'
 const ALLOW_GROWTH_FLAG = '--allow-growth'
 const MEASURE_COMMAND = 'pnpm run build:e2e && pnpm run bundle-size'
-
-type BaseReport = {
-  report: BundleReport
-  label: string
-  runId: string | undefined
-}
-
-type ChunkChange = {
-  chunk: string
-  deltaBytes: number
-  loadedBy: string[]
-  isRegression: boolean
-}
 
 type RouteChange = {
   name: string
@@ -65,10 +58,6 @@ type FormatCommentParams = BudgetedReport & {
   runUrl: string | undefined
 }
 
-const toBaseSize = (base: BaseReport | undefined, line: BudgetLine) => {
-  return line.isShell ? base?.report.shell : base?.report.routes[line.name]
-}
-
 const formatSignedKb = (deltaBytes: number) => {
   return `${deltaBytes > 0 ? '+' : '−'}${formatKb(Math.abs(deltaBytes))}`
 }
@@ -84,7 +73,7 @@ const formatDelta = (afterBytes: number, beforeBytes: number | undefined) => {
     return '·'
   }
 
-  return `${deltaBytes > 0 ? '🔴' : '🟢'} ${formatSignedKb(deltaBytes)}`
+  return `${deltaBytes > 0 ? '🔴' : '🟢'}${MARKER_GAP}${formatSignedKb(deltaBytes)}`
 }
 
 const formatName = ({
@@ -122,8 +111,8 @@ const formatBudget = (
   const marginBytes = toBudgetBytes(line.budgetKb) - line.size.bytes
   const budget =
     raisedBudget === undefined
-      ? `${line.budgetKb} kB`
-      : `🔴 ${line.budgetKb} kB, was ${raisedBudget.beforeKb} kB`
+      ? `${line.budgetKb}${KB_UNIT}`
+      : `🔴${MARKER_GAP}${line.budgetKb}${KB_UNIT}, was ${raisedBudget.beforeKb}${KB_UNIT}`
 
   return marginBytes < 0
     ? `${budget} · **${formatKb(-marginBytes)} over**`
@@ -171,53 +160,6 @@ const formatLineTable = ({
   ]
 }
 
-const listChunkChanges = (
-  lines: readonly BudgetLine[],
-  base: BaseReport
-): ChunkChange[] => {
-  const changeByChunk = new Map<string, ChunkChange>()
-
-  for (const line of lines) {
-    const baseSize = toBaseSize(base, line)
-    const beforeChunks: JsSize['chunks'] = baseSize?.chunks ?? {}
-    const isLineHeavier =
-      line.size.bytes - (baseSize?.bytes ?? 0) >= UNCHANGED_DELTA_BYTES
-    const chunkNames = new Set([
-      ...Object.keys(beforeChunks),
-      ...Object.keys(line.size.chunks)
-    ])
-
-    for (const chunk of chunkNames) {
-      const deltaBytes =
-        (line.size.chunks[chunk] ?? 0) - (beforeChunks[chunk] ?? 0)
-
-      if (Math.abs(deltaBytes) < UNCHANGED_DELTA_BYTES) {
-        continue
-      }
-
-      const change = changeByChunk.get(chunk) ?? {
-        chunk,
-        deltaBytes,
-        loadedBy: [],
-        isRegression: false
-      }
-
-      change.loadedBy.push(line.isShell ? SHELL_SCOPE : line.name)
-      change.isRegression ||= deltaBytes > 0 && isLineHeavier
-
-      if (Math.abs(deltaBytes) > Math.abs(change.deltaBytes)) {
-        change.deltaBytes = deltaBytes
-      }
-
-      changeByChunk.set(chunk, change)
-    }
-  }
-
-  return [...changeByChunk.values()].toSorted((changeA, changeB) => {
-    return Math.abs(changeB.deltaBytes) - Math.abs(changeA.deltaBytes)
-  })
-}
-
 const formatTruncatedList = (items: readonly string[]) => {
   const visibleItems = items.slice(0, VISIBLE_LIST_ITEMS)
   const hiddenCount = items.length - visibleItems.length
@@ -236,9 +178,22 @@ const formatLoadedBy = (loadedBy: readonly string[]) => {
 }
 
 const formatChunkDelta = (change: ChunkChange) => {
+  if (
+    change.renamedFrom !== undefined &&
+    Math.abs(change.deltaBytes) < UNCHANGED_DELTA_BYTES
+  ) {
+    return `⚪${MARKER_GAP}renamed`
+  }
+
   return change.deltaBytes > 0 && !change.isRegression
-    ? `⚪ ${formatSignedKb(change.deltaBytes)}`
+    ? `⚪${MARKER_GAP}${formatSignedKb(change.deltaBytes)}`
     : formatDelta(change.deltaBytes, 0)
+}
+
+const formatChunkName = (change: ChunkChange) => {
+  return change.renamedFrom === undefined
+    ? `\`${change.chunk}\``
+    : `\`${change.renamedFrom}\` → \`${change.chunk}\``
 }
 
 const formatChunkTable = (changes: readonly ChunkChange[]) => {
@@ -246,7 +201,7 @@ const formatChunkTable = (changes: readonly ChunkChange[]) => {
     '| Chunk | vs main | Loaded by |',
     '| --- | --: | --- |',
     ...changes.slice(0, VISIBLE_CHUNK_CHANGES).map((change) => {
-      return `| \`${change.chunk}\` | ${formatChunkDelta(change)} | ${formatLoadedBy(change.loadedBy)} |`
+      return `| ${formatChunkName(change)} | ${formatChunkDelta(change)} | ${formatLoadedBy(change.loadedBy)} |`
     })
   ]
 }
@@ -283,11 +238,11 @@ const listRouteChanges = (
 const formatViolation = (violation: BudgetViolation) => {
   switch (violation.kind) {
     case 'over':
-      return `**\`${violation.name}\`** ships **${formatKb(violation.bytes)}**, ${formatKb(violation.bytes - toBudgetBytes(violation.budgetKb))} over its ${violation.budgetKb} kB budget.`
+      return `**\`${violation.name}\`** ships **${formatKb(violation.bytes)}**, ${formatKb(violation.bytes - toBudgetBytes(violation.budgetKb))} over its ${violation.budgetKb}${KB_UNIT} budget.`
     case 'missing':
       return `**\`${violation.name}\`** is a new route with no budget yet (${formatKb(violation.bytes)}).`
     case 'stale':
-      return `**\`${violation.name}\`** keeps a ${violation.budgetKb} kB budget but no longer exists.`
+      return `**\`${violation.name}\`** keeps a ${violation.budgetKb}${KB_UNIT} budget but no longer exists.`
     default:
       return violation satisfies never
   }
@@ -299,7 +254,7 @@ const formatRaisedBudget = (raisedBudget: RaisedBudget) => {
       ? '**Shell**'
       : `**\`${raisedBudget.name}\`**`
 
-  return `🔴 ${name} raises its ${RAISED_BUDGET_LABEL_BY_KIND[raisedBudget.kind]} from ${raisedBudget.beforeKb} kB to ${raisedBudget.afterKb} kB.`
+  return `🔴 ${name} raises its ${RAISED_BUDGET_LABEL_BY_KIND[raisedBudget.kind]} from ${raisedBudget.beforeKb}${KB_UNIT} to ${raisedBudget.afterKb}${KB_UNIT}.`
 }
 
 const toAlert = (kind: string, lines: readonly string[]) => {
@@ -459,7 +414,7 @@ const formatAgentBrief = ({
     '',
     '**What this measures.** The Brotli size of each JS file the server-rendered page of a route modulepreloads, read from the TanStack Start manifest of `pnpm run build:e2e`. The shell is what the root route preloads on every page. Route JS is what a route adds on top, each file counted once. Startup JS is both. Sizes in the data are bytes.',
     '',
-    `**Rules.** Budgets live in \`${BUDGET_FILE}\` as a one-way ratchet: the size when last updated, plus ${BUDGET_HEADROOM}. \`${UPDATE_COMMAND}\` only lowers them, and \`${ALLOW_GROWTH_FLAG}\` raises them, flagged in red against main. Never raise one to turn the check green. Chunk names drop the Rolldown hash: \`meme-card\` stands for \`meme-card-<hash>.js\`. A chunk that grows while no route loading it gets heavier shows ⚪, with \`isRegression: false\`: Rolldown renamed or merged it, and only red chunks explain a heavier route. First-view CSS is gated apart, by \`e2e/first-view.spec.ts\` against \`firstViewCss\`.`,
+    `**Rules.** Budgets live in \`${BUDGET_FILE}\` as a one-way ratchet: the size when last updated, plus ${BUDGET_HEADROOM}. \`${UPDATE_COMMAND}\` only lowers them, and \`${ALLOW_GROWTH_FLAG}\` raises them, flagged in red against main. Never raise one to turn the check green. Chunk names drop the Rolldown hash: \`meme-card\` stands for \`meme-card-<hash>.js\`. A chunk that grows while no route loading it gets heavier shows ⚪, with \`isRegression: false\`: Rolldown renamed or merged it, and only red chunks explain a heavier route. A chunk Rolldown renamed reads \`old\` → \`new\`, with \`renamedFrom\`. First-view CSS is gated apart, by \`e2e/first-view.spec.ts\` against \`firstViewCss\`.`,
     '',
     '**Reproduce**',
     '',
@@ -557,7 +512,7 @@ const formatGoal = ({ report, budget }: BudgetedReport) => {
     '| | Now | Goal | Distance |',
     '| --- | --: | --: | --- |',
     ...rows.map((row) => {
-      return `| ${row.label} | ${formatKb(row.bytes)} | ${row.goalKb} kB | ${formatGoalDistance(row)} |`
+      return `| ${row.label} | ${formatKb(row.bytes)} | ${row.goalKb}${KB_UNIT} | ${formatGoalDistance(row)} |`
     })
   ])
 }

@@ -15,7 +15,11 @@ import {
   listRelatedMemes,
   listTrendingMemes
 } from '~/server/meme/meme-list.functions'
-import { getMeme, getMemePlaybackUrl } from '~/server/meme/meme.functions'
+import {
+  getMeme,
+  getMemePlaybackUrl,
+  getMemeWithPlaybackUrl
+} from '~/server/meme/meme.functions'
 import { listReels } from '~/server/meme/reels.functions'
 
 type GetRelatedMemesQueryOptsParams = {
@@ -92,6 +96,24 @@ export const getMemeQueryOpts = (memeId: Meme['id']) => {
 }
 
 getMemeQueryOpts.all = ['meme'] as const
+
+export const getMemeWithPlaybackUrlQueryOpts = (memeId: Meme['id']) => {
+  return queryOptions({
+    ...getMemeQueryOpts(memeId),
+    queryFn: async ({ client }) => {
+      const { meme, playbackUrl } = await getMemeWithPlaybackUrl({
+        data: memeId
+      })
+
+      client.setQueryData(
+        getMemePlaybackUrlQueryOpts(memeId).queryKey,
+        playbackUrl
+      )
+
+      return meme
+    }
+  })
+}
 
 export const countRecentMemesQueryOpts = () => {
   return queryOptions({

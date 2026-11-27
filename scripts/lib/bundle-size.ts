@@ -14,7 +14,8 @@ const START_MANIFEST_FILE = /(?:^|\/)_tanstack-start-manifest_[^/]*\.mjs$/u
 const CHUNK_HASH_SUFFIX = /-[\w-]{8}\.js$/u
 
 export const BUDGET_FILE = 'bundle-budget.json'
-export const BUDGET_HEADROOM = `${BUDGET_HEADROOM_KB} kB`
+export const KB_UNIT = '\u00A0kB'
+export const BUDGET_HEADROOM = `${BUDGET_HEADROOM_KB}${KB_UNIT}`
 
 const startManifestSchema = z.object({
   routes: z.record(
@@ -107,7 +108,7 @@ export const toBrotliSize = (content: Uint8Array) => {
 }
 
 export const formatKb = (bytes: number) => {
-  return `${(bytes / BYTES_PER_KB).toFixed(1)} kB`
+  return `${(bytes / BYTES_PER_KB).toFixed(1)}${KB_UNIT}`
 }
 
 export const toBudgetBytes = (budgetKb: number) => {

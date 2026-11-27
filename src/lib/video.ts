@@ -1,6 +1,8 @@
 import hlsWorkerUrl from 'hls.js/dist/hls.worker.js?url'
 import { createClientOnlyFn } from '@tanstack/react-start'
 import { HLS_MIME_TYPE, PLAYABLE_BUNNY_STATUSES } from '~/constants/bunny'
+import { COARSE_POINTER_QUERY } from '~/constants/media-query'
+import { matchIsDataSaverOn } from '~/lib/data-saver'
 
 const MEDIA_ERROR_RECOVERY_INTERVAL_MS = 5_000
 
@@ -53,6 +55,20 @@ export const preloadHls = createClientOnlyFn(() => {
   }
 
   void loadHls()
+})
+
+const readPlaylist = async (playlistUrl: string) => {
+  const response = await fetch(playlistUrl)
+
+  return response.text()
+}
+
+export const warmVideoStream = createClientOnlyFn((videoSrc: string) => {
+  if (matchIsDataSaverOn() || window.matchMedia(COARSE_POINTER_QUERY).matches) {
+    return
+  }
+
+  void Promise.allSettled([readPlaylist(videoSrc)])
 })
 
 type AttachHlsSourceParams = {

@@ -5,8 +5,7 @@ import { DefaultLoading } from '~/components/app/default-loading'
 import { ErrorComponent } from '~/components/app/error-component'
 import { NotFound } from '~/components/app/not-found'
 import { IS_PRODUCTION } from '~/constants/env'
-import { SECOND, FIVE_MINUTES_MS } from '~/constants/time'
-import { matchIsRateLimitError } from '~/helpers/error'
+import { FIVE_MINUTES_MS } from '~/constants/time'
 import { trackRouterNavigation } from '~/lib/sentry-client'
 import {
   deLocalizeUrl,
@@ -16,8 +15,6 @@ import {
 import { routeTree } from './routeTree.gen'
 
 const QUERY_STALE_TIME_MS = 30_000
-const RATE_LIMIT_MAX_RETRIES = 3
-const MAX_RETRY_DELAY_MS = 10_000
 
 export function getRouter() {
   const queryClient = new QueryClient({
@@ -26,18 +23,7 @@ export function getRouter() {
         staleTime: QUERY_STALE_TIME_MS,
         gcTime: FIVE_MINUTES_MS,
         refetchOnWindowFocus: IS_PRODUCTION,
-        retry: (failureCount, error) => {
-          return (
-            matchIsRateLimitError(error) &&
-            failureCount < RATE_LIMIT_MAX_RETRIES
-          )
-        },
-        retryDelay: (attemptIndex) => {
-          return Math.min(
-            SECOND * 2 ** attemptIndex + Math.random() * SECOND,
-            MAX_RETRY_DELAY_MS
-          )
-        }
+        retry: false
       },
       mutations: {
         retry: false,

@@ -11,6 +11,7 @@ import {
 import { Badge } from '~/components/ui/badge'
 import { Skeleton } from '~/components/ui/skeleton'
 import { ALL_CATEGORY_SLUG } from '~/constants/meme'
+import { MEME_LINK_PRELOAD_DELAY_MS } from '~/constants/navigation'
 import { formatClockDuration } from '~/helpers/duration'
 import { formatCount } from '~/helpers/number'
 import { useIsCoarsePointer } from '~/hooks/use-is-coarse-pointer'
@@ -127,6 +128,7 @@ const RelatedMemeItem = ({
         params={{ memeId: meme.id }}
         state={nextSeenState}
         preload={isPreloaded ? 'intent' : false}
+        preloadDelay={MEME_LINK_PRELOAD_DELAY_MS}
         className="meme-rail-item"
         onClick={handleClick}
       >

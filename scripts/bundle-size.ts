@@ -7,6 +7,7 @@ import {
   buildBudget,
   bundleReportSchema,
   checkBudget,
+  formatKb,
   measureBundle,
   readBuiltAssetSize,
   readBundleBudget,
@@ -20,6 +21,8 @@ const { values: options } = parseArgs({
     base: { type: 'string' },
     'base-label': { type: 'string', default: 'main' },
     'base-run': { type: 'string' },
+    'base-budget': { type: 'string' },
+    'allow-growth': { type: 'boolean', default: false },
     'run-url': { type: 'string' },
     update: { type: 'boolean', default: false }
   }
@@ -40,15 +43,41 @@ const report = measureBundle({
 const budget = readBundleBudget()
 
 if (options.update) {
-  writeFileSync(
-    BUDGET_FILE,
-    `${JSON.stringify(buildBudget({ report, budget }), null, 2)}\n`
+  const updatedBudget = buildBudget({
+    report,
+    budget,
+    allowGrowth: options['allow-growth']
+  })
+  const keptViolations = checkBudget({ report, budget: updatedBudget }).filter(
+    (violation) => {
+      return violation.kind === 'over'
+    }
   )
-  console.log(`${BUDGET_FILE} now holds the current sizes`)
+
+  writeFileSync(BUDGET_FILE, `${JSON.stringify(updatedBudget, null, 2)}\n`)
+
+  if (keptViolations.length === 0) {
+    console.log(`${BUDGET_FILE} now holds the current sizes`)
+  } else {
+    console.error(
+      [
+        `${BUDGET_FILE} keeps ${keptViolations.length === 1 ? 'a budget' : 'budgets'} below the measured size, since --update only lowers them:`,
+        ...keptViolations.map((violation) => {
+          return `  ${violation.name}: ${formatKb(violation.bytes)} measured, ${violation.budgetKb} kB budget`
+        }),
+        'Cut the growth, or raise them on purpose with --allow-growth and say why in the pull request.'
+      ].join('\n')
+    )
+    process.exitCode = 1
+  }
 } else {
   const comment = formatComment({
     report,
     budget,
+    baseBudget:
+      options['base-budget'] === undefined
+        ? undefined
+        : readBundleBudget(options['base-budget']),
     base:
       options.base === undefined
         ? undefined

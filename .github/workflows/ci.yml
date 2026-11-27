@@ -90,7 +90,10 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
+      # The parent commit holds the budgets of main, to flag every one this change raises.
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 2
       - uses: pnpm/setup@v3
         with:
           runtime: node@24
@@ -118,9 +121,17 @@ jobs:
             } >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Read the budgets of main
+        id: main-budget
+        run: |
+          if git show HEAD^1:bundle-budget.json > "$RUNNER_TEMP/main-budget.json"; then
+            echo "budget=$RUNNER_TEMP/main-budget.json" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Measure the startup JS of every route
         id: measure
         env:
+          MAIN_BUDGET: ${{ steps.main-budget.outputs.budget }}
           MAIN_REPORT: ${{ steps.main-report.outputs.report }}
           MAIN_RUN_ID: ${{ steps.main-report.outputs.run-id }}
           MAIN_COMMIT: ${{ steps.main-report.outputs.commit }}
@@ -128,6 +139,7 @@ jobs:
         run: >-
           pnpm run bundle-size --run-url "$RUN_URL"
           ${MAIN_REPORT:+--base "$MAIN_REPORT" --base-label "$MAIN_COMMIT" --base-run "$MAIN_RUN_ID"}
+          ${MAIN_BUDGET:+--base-budget "$MAIN_BUDGET"}
 
       - name: Publish the report
         if: ${{ !cancelled() && steps.measure.outcome != 'skipped' }}

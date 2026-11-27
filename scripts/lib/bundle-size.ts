@@ -88,6 +88,13 @@ export type BudgetViolation =
   | { kind: 'missing'; name: string; bytes: number }
   | { kind: 'stale'; name: string; budgetKb: number }
 
+export type RaisedBudget = {
+  kind: 'shellJs' | 'routeJs' | 'firstViewCss'
+  name: string
+  beforeKb: number
+  afterKb: number
+}
+
 type StartupHrefs = {
   shell: readonly string[]
   routes: Record<string, readonly string[]>
@@ -292,21 +299,77 @@ const toTightBudgetKb = (bytes: number) => {
   return Math.ceil(bytes / BYTES_PER_KB) + BUDGET_HEADROOM_KB
 }
 
+type BuildBudgetParams = BudgetedReport & {
+  allowGrowth: boolean
+}
+
 export const buildBudget = ({
   report,
-  budget
-}: BudgetedReport): BundleBudget => {
+  budget,
+  allowGrowth
+}: BuildBudgetParams): BundleBudget => {
+  const toUpdatedBudgetKb = (bytes: number, budgetKb: number | undefined) => {
+    const tightBudgetKb = toTightBudgetKb(bytes)
+
+    return budgetKb === undefined || allowGrowth
+      ? tightBudgetKb
+      : Math.min(budgetKb, tightBudgetKb)
+  }
+
   const routeJs = Object.fromEntries(
     Object.entries(report.routes)
       .toSorted(([routeA], [routeB]) => {
         return routeA.localeCompare(routeB)
       })
       .map(([routePath, size]) => {
-        return [routePath, toTightBudgetKb(size.bytes)]
+        return [
+          routePath,
+          toUpdatedBudgetKb(size.bytes, budget.routeJs[routePath])
+        ]
       })
   )
 
-  return { ...budget, shellJs: toTightBudgetKb(report.shell.bytes), routeJs }
+  return {
+    ...budget,
+    shellJs: toUpdatedBudgetKb(report.shell.bytes, budget.shellJs),
+    routeJs
+  }
+}
+
+type ListRaisedBudgetsParams = {
+  budget: BundleBudget
+  baseBudget: BundleBudget
+}
+
+export const listRaisedBudgets = ({
+  budget,
+  baseBudget
+}: ListRaisedBudgetsParams): RaisedBudget[] => {
+  const toRaised = (
+    kind: RaisedBudget['kind'],
+    kbByRoute: Record<string, number>,
+    baseKbByRoute: Record<string, number>
+  ) => {
+    return Object.entries(kbByRoute).flatMap(
+      ([name, afterKb]): RaisedBudget[] => {
+        const beforeKb = baseKbByRoute[name]
+
+        return beforeKb === undefined || afterKb <= beforeKb
+          ? []
+          : [{ kind, name, beforeKb, afterKb }]
+      }
+    )
+  }
+
+  return [
+    ...toRaised(
+      'shellJs',
+      { Shell: budget.shellJs },
+      { Shell: baseBudget.shellJs }
+    ),
+    ...toRaised('routeJs', budget.routeJs, baseBudget.routeJs),
+    ...toRaised('firstViewCss', budget.firstViewCss, baseBudget.firstViewCss)
+  ]
 }
 
 export const listLooseBudgetLines = ({ report, budget }: BudgetedReport) => {
@@ -318,8 +381,8 @@ export const listLooseBudgetLines = ({ report, budget }: BudgetedReport) => {
   })
 }
 
-export const readBundleBudget = () => {
-  return bundleBudgetSchema.parse(JSON.parse(readFileSync(BUDGET_FILE, 'utf8')))
+export const readBundleBudget = (path = BUDGET_FILE) => {
+  return bundleBudgetSchema.parse(JSON.parse(readFileSync(path, 'utf8')))
 }
 
 const findStartManifestPath = () => {

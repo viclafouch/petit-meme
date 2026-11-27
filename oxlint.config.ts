@@ -32,6 +32,8 @@ const FILES_RUN_IN_TERMINAL = ['scripts/**', 'prisma/seed.ts', 'prisma/seed/**']
 
 const FILES_RUN_BY_NODE = [
   'scripts/check-env.ts',
+  'scripts/bundle-size.ts',
+  'scripts/lib/bundle-size-comment.ts',
   'e2e/fake-anthropic.ts',
   'vite.config.ts',
   'vite-plugins/*.ts',

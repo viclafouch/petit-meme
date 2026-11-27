@@ -76,3 +76,82 @@ jobs:
           key: turbo-unit-${{ runner.os }}-${{ github.sha }}
           restore-keys: turbo-unit-${{ runner.os }}-
       - run: pnpm turbo run test
+
+  # The build reads the e2e environment but runs no migration, so the test
+  # database keeps sleeping. Fork pull requests get no secrets to build with.
+  bundle-size:
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/setup@v3
+        with:
+          runtime: node@24
+          cache: true
+
+      - name: Write the e2e environment file
+        env:
+          E2E_ENV_FILE: ${{ secrets.E2E_ENV_FILE }}
+        run: printf '%s\n' "$E2E_ENV_FILE" > .env.e2e
+
+      - run: pnpm run build:e2e
+
+      - name: Download the latest main report
+        id: main-report
+        run: |
+          main_run=$(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?name=bundle-size&per_page=50" \
+            --jq '[.artifacts[] | select(.workflow_run.head_branch == "main" and (.expired | not))][0] // empty | .workflow_run | "\(.id) \(.head_sha[0:7])"')
+          if [ -n "$main_run" ]; then
+            read -r run_id commit <<< "$main_run"
+            gh run download "$run_id" --name bundle-size --dir "$RUNNER_TEMP/main-bundle-size"
+            {
+              echo "report=$RUNNER_TEMP/main-bundle-size/report.json"
+              echo "run-id=$run_id"
+              echo "commit=$commit"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Measure the startup JS of every route
+        id: measure
+        env:
+          MAIN_REPORT: ${{ steps.main-report.outputs.report }}
+          MAIN_RUN_ID: ${{ steps.main-report.outputs.run-id }}
+          MAIN_COMMIT: ${{ steps.main-report.outputs.commit }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: >-
+          pnpm run bundle-size --run-url "$RUN_URL"
+          ${MAIN_REPORT:+--base "$MAIN_REPORT" --base-label "$MAIN_COMMIT" --base-run "$MAIN_RUN_ID"}
+
+      - name: Publish the report
+        if: ${{ !cancelled() && steps.measure.outcome != 'skipped' }}
+        run: cat .output/bundle-size/comment.md >> "$GITHUB_STEP_SUMMARY"
+
+      # One comment per pull request, found by the marker the report opens with,
+      # so each run edits it instead of piling up new ones.
+      - name: Comment the report on the pull request
+        if: ${{ !cancelled() && steps.measure.outcome != 'skipped' && github.event_name == 'pull_request' }}
+        env:
+          PULL_REQUEST: ${{ github.event.pull_request.number }}
+        run: |
+          comment_id=$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PULL_REQUEST/comments" \
+            --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | startswith("<!-- bundle-size-report -->"))) | .id' | head -n 1)
+          if [ -n "$comment_id" ]; then
+            gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$comment_id" -F body=@.output/bundle-size/comment.md > /dev/null
+          else
+            gh pr comment "$PULL_REQUEST" --body-file .output/bundle-size/comment.md
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() && steps.measure.outcome != 'skipped' && github.event_name == 'push' }}
+        with:
+          name: bundle-size
+          path: .output/bundle-size/report.json
+          include-hidden-files: true
+          retention-days: 90

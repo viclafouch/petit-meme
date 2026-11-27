@@ -11,7 +11,7 @@ import { getLocale } from '~/paraglide/runtime'
 import { AppPage } from './-components/app-page'
 import appPageCss from './-components/app-page.css?url'
 
-export const Route = createFileRoute('/_public__root/_default/app/')({
+export const Route = createFileRoute('/_public__root/app/')({
   component: AppPage,
   head: () => {
     const locale = getLocale()

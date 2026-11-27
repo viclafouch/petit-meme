@@ -5,17 +5,11 @@ import {
   countLibraryMemesQueryOpts,
   listCategoriesQueryOpts
 } from '~/queries/category'
-import { prefetchPublicPageQueries } from '~/routes/_public__root/-lib/prefetch-public-page-queries'
 import { LibraryLayout } from './_library/-components/library-layout'
 import memesLibraryCss from './_library/-components/memes-library.css?url'
 
 export const Route = createFileRoute('/_public__root/memes/_library')({
   loader: async ({ context }) => {
-    prefetchPublicPageQueries({
-      queryClient: context.queryClient,
-      isSignedIn: Boolean(context.user)
-    })
-
     await Promise.all([
       context.queryClient.query({
         ...listCategoriesQueryOpts(getLocale()),

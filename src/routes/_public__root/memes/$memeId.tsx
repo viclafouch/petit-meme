@@ -15,7 +15,6 @@ import {
   getMemeQueryOpts,
   listRelatedMemesQueryOpts
 } from '~/queries/meme'
-import { prefetchPublicPageQueries } from '~/routes/_public__root/-lib/prefetch-public-page-queries'
 import { readSeenMemeIds } from '~/routes/_public__root/memes/-lib/seen-memes'
 import { MemePage } from './-components/meme-page'
 import memePageCss from './-components/meme-page.css?url'
@@ -57,10 +56,6 @@ export const Route = createFileRoute('/_public__root/memes/$memeId')({
   pendingMs: 1000,
   loader: async ({ params, context, preload, location }) => {
     prefetchPlaybackUrl(context.queryClient, params.memeId)
-    prefetchPublicPageQueries({
-      queryClient: context.queryClient,
-      isSignedIn: Boolean(context.user)
-    })
 
     const meme = await context.queryClient.query({
       ...getMemeQueryOpts(params.memeId),

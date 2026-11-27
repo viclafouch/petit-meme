@@ -15,7 +15,7 @@ import { APP_SCREEN_SIZE, buildAppScreenPath } from '~/helpers/web-app-assets'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
-import { DEMO_CLOCK } from '~/routes/_public__root/_default/app/-lib/demo'
+import { DEMO_CLOCK } from '~/routes/_public__root/app/-lib/demo'
 import { PhoneFrame } from './phone-frame'
 
 const HOME_SCREENS = {
@@ -171,7 +171,7 @@ export const LaunchDemo = ({
       <div className="launch-demo-app absolute inset-0 z-20 overflow-hidden bg-black">
         <AppIcon
           size={192}
-          className="absolute top-1/2 left-1/2 w-[34%] -translate-1/2 rounded-none ring-0"
+          className="absolute top-1/2 left-1/2 aspect-square w-[34%] -translate-1/2 rounded-none ring-0"
         />
         <img
           src={buildAppScreenPath(locale, 'home')}
@@ -180,8 +180,11 @@ export const LaunchDemo = ({
           height={APP_SCREEN_SIZE.height}
           loading="lazy"
           decoding="async"
+          style={{
+            '--app-screen-ratio': `${APP_SCREEN_SIZE.width} / ${APP_SCREEN_SIZE.height}`
+          }}
           className={cn(
-            'launch-demo-content absolute inset-x-0 w-full',
+            'launch-demo-content absolute inset-x-0 aspect-(--app-screen-ratio) w-full',
             HOME_SCREENS[platform].contentClassName
           )}
         />

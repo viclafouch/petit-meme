@@ -100,7 +100,7 @@ export const Navbar = () => {
       ) : (
         <div className={NAVBAR_BACKDROP_CLASS_NAME} aria-hidden="true" />
       )}
-      <div className="relative mx-auto flex h-full max-w-440 items-center justify-between gap-3 px-4 lg:gap-6 lg:px-[clamp(1.5rem,3vw,3rem)]">
+      <div className="relative container-wide flex h-full items-center justify-between gap-3 lg:gap-6">
         <div className="flex min-w-max shrink-0 items-center gap-4 lg:flex-1">
           <Link
             to="/"

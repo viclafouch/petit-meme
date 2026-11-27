@@ -37,6 +37,7 @@ import { Route as Public__rootDefaultPrivacyRouteImport } from './routes/_public
 import { Route as Public__rootDefaultSettingsRouteRouteImport } from './routes/_public__root/_default/settings/route'
 import { Route as Public__rootDefaultTermsOfUseRouteImport } from './routes/_public__root/_default/terms-of-use'
 import { Route as Public__rootDefaultVerifyEmailRouteImport } from './routes/_public__root/_default/verify-email'
+import { Route as Public__rootAppIndexRouteImport } from './routes/_public__root/app/index'
 import { Route as Public__rootMemesIndexRouteImport } from './routes/_public__root/memes/index'
 import { Route as Public__rootMemesMemeIdRouteImport } from './routes/_public__root/memes/$memeId'
 import { Route as Public__rootMemesLibraryRouteImport } from './routes/_public__root/memes/_library'
@@ -57,7 +58,6 @@ import { Route as ApiCronSyncAlgoliaRouteImport } from './routes/api/cron/sync-a
 import { Route as ApiCronSyncBunnyTitlesRouteImport } from './routes/api/cron/sync-bunny-titles'
 import { Route as ApiCronVerificationReminderRouteImport } from './routes/api/cron/verification-reminder'
 import { Route as ApiCronWeeklyRecapRouteImport } from './routes/api/cron/weekly-recap'
-import { Route as Public__rootDefaultAppIndexRouteImport } from './routes/_public__root/_default/app/index'
 import { Route as Public__rootDefaultCheckoutSuccessRouteImport } from './routes/_public__root/_default/checkout.success'
 import { Route as Public__rootDefaultMemesAiSearchRouteImport } from './routes/_public__root/_default/memes/ai-search'
 import { Route as Public__rootDefaultPasswordCreateNewRouteImport } from './routes/_public__root/_default/password.create-new'
@@ -214,6 +214,11 @@ const Public__rootDefaultVerifyEmailRoute =
     path: '/verify-email',
     getParentRoute: () => Public__rootDefaultRouteRoute,
   } as any)
+const Public__rootAppIndexRoute = Public__rootAppIndexRouteImport.update({
+  id: '/app/',
+  path: '/app/',
+  getParentRoute: () => Public__rootRouteRoute,
+} as any)
 const Public__rootMemesIndexRoute = Public__rootMemesIndexRouteImport.update({
   id: '/memes/',
   path: '/memes/',
@@ -317,12 +322,6 @@ const ApiCronWeeklyRecapRoute = ApiCronWeeklyRecapRouteImport.update({
   path: '/api/cron/weekly-recap',
   getParentRoute: () => rootRouteImport,
 } as any)
-const Public__rootDefaultAppIndexRoute =
-  Public__rootDefaultAppIndexRouteImport.update({
-    id: '/app/',
-    path: '/app/',
-    getParentRoute: () => Public__rootDefaultRouteRoute,
-  } as any)
 const Public__rootDefaultCheckoutSuccessRoute =
   Public__rootDefaultCheckoutSuccessRouteImport.update({
     id: '/checkout/success',
@@ -430,6 +429,7 @@ export interface FileRoutesByFullPath {
   '/api/cron/sync-bunny-titles': typeof ApiCronSyncBunnyTitlesRoute
   '/api/cron/verification-reminder': typeof ApiCronVerificationReminderRoute
   '/api/cron/weekly-recap': typeof ApiCronWeeklyRecapRoute
+  '/app/': typeof Public__rootAppIndexRoute
   '/memes/': typeof Public__rootMemesIndexRoute
   '/admin/activity/': typeof AdminActivityIndexRoute
   '/admin/ai-search/': typeof AdminAiSearchIndexRoute
@@ -443,7 +443,6 @@ export interface FileRoutesByFullPath {
   '/password/reset': typeof Public__rootDefaultPasswordResetRoute
   '/memes/$memeId/studio': typeof Public__rootMemesMemeIdStudioRoute
   '/memes/bookmarks': typeof Public__rootMemesLibraryBookmarksRoute
-  '/app/': typeof Public__rootDefaultAppIndexRoute
   '/pricing/': typeof Public__rootDefaultPricingIndexRoute
   '/random/': typeof Public__rootDefaultRandomIndexRoute
   '/settings/': typeof Public__rootDefaultSettingsIndexRoute
@@ -488,6 +487,7 @@ export interface FileRoutesByTo {
   '/api/cron/sync-bunny-titles': typeof ApiCronSyncBunnyTitlesRoute
   '/api/cron/verification-reminder': typeof ApiCronVerificationReminderRoute
   '/api/cron/weekly-recap': typeof ApiCronWeeklyRecapRoute
+  '/app': typeof Public__rootAppIndexRoute
   '/admin/activity': typeof AdminActivityIndexRoute
   '/admin/ai-search': typeof AdminAiSearchIndexRoute
   '/admin/categories': typeof AdminCategoriesIndexRoute
@@ -500,7 +500,6 @@ export interface FileRoutesByTo {
   '/password/reset': typeof Public__rootDefaultPasswordResetRoute
   '/memes/$memeId/studio': typeof Public__rootMemesMemeIdStudioRoute
   '/memes/bookmarks': typeof Public__rootMemesLibraryBookmarksRoute
-  '/app': typeof Public__rootDefaultAppIndexRoute
   '/pricing': typeof Public__rootDefaultPricingIndexRoute
   '/random': typeof Public__rootDefaultRandomIndexRoute
   '/settings': typeof Public__rootDefaultSettingsIndexRoute
@@ -550,6 +549,7 @@ export interface FileRoutesById {
   '/api/cron/sync-bunny-titles': typeof ApiCronSyncBunnyTitlesRoute
   '/api/cron/verification-reminder': typeof ApiCronVerificationReminderRoute
   '/api/cron/weekly-recap': typeof ApiCronWeeklyRecapRoute
+  '/_public__root/app/': typeof Public__rootAppIndexRoute
   '/_public__root/memes/': typeof Public__rootMemesIndexRoute
   '/admin/activity/': typeof AdminActivityIndexRoute
   '/admin/ai-search/': typeof AdminAiSearchIndexRoute
@@ -563,7 +563,6 @@ export interface FileRoutesById {
   '/_public__root/_default/password/reset': typeof Public__rootDefaultPasswordResetRoute
   '/_public__root/memes/$memeId/studio': typeof Public__rootMemesMemeIdStudioRoute
   '/_public__root/memes/_library/bookmarks': typeof Public__rootMemesLibraryBookmarksRoute
-  '/_public__root/_default/app/': typeof Public__rootDefaultAppIndexRoute
   '/_public__root/_default/pricing/': typeof Public__rootDefaultPricingIndexRoute
   '/_public__root/_default/random/': typeof Public__rootDefaultRandomIndexRoute
   '/_public__root/_default/settings/': typeof Public__rootDefaultSettingsIndexRoute
@@ -612,6 +611,7 @@ export interface FileRouteTypes {
     | '/api/cron/sync-bunny-titles'
     | '/api/cron/verification-reminder'
     | '/api/cron/weekly-recap'
+    | '/app/'
     | '/memes/'
     | '/admin/activity/'
     | '/admin/ai-search/'
@@ -625,7 +625,6 @@ export interface FileRouteTypes {
     | '/password/reset'
     | '/memes/$memeId/studio'
     | '/memes/bookmarks'
-    | '/app/'
     | '/pricing/'
     | '/random/'
     | '/settings/'
@@ -670,6 +669,7 @@ export interface FileRouteTypes {
     | '/api/cron/sync-bunny-titles'
     | '/api/cron/verification-reminder'
     | '/api/cron/weekly-recap'
+    | '/app'
     | '/admin/activity'
     | '/admin/ai-search'
     | '/admin/categories'
@@ -682,7 +682,6 @@ export interface FileRouteTypes {
     | '/password/reset'
     | '/memes/$memeId/studio'
     | '/memes/bookmarks'
-    | '/app'
     | '/pricing'
     | '/random'
     | '/settings'
@@ -731,6 +730,7 @@ export interface FileRouteTypes {
     | '/api/cron/sync-bunny-titles'
     | '/api/cron/verification-reminder'
     | '/api/cron/weekly-recap'
+    | '/_public__root/app/'
     | '/_public__root/memes/'
     | '/admin/activity/'
     | '/admin/ai-search/'
@@ -744,7 +744,6 @@ export interface FileRouteTypes {
     | '/_public__root/_default/password/reset'
     | '/_public__root/memes/$memeId/studio'
     | '/_public__root/memes/_library/bookmarks'
-    | '/_public__root/_default/app/'
     | '/_public__root/_default/pricing/'
     | '/_public__root/_default/random/'
     | '/_public__root/_default/settings/'
@@ -977,6 +976,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Public__rootDefaultVerifyEmailRouteImport
       parentRoute: typeof Public__rootDefaultRouteRoute
     }
+    '/_public__root/app/': {
+      id: '/_public__root/app/'
+      path: '/app'
+      fullPath: '/app/'
+      preLoaderRoute: typeof Public__rootAppIndexRouteImport
+      parentRoute: typeof Public__rootRouteRoute
+    }
     '/_public__root/memes/': {
       id: '/_public__root/memes/'
       path: '/memes'
@@ -1117,13 +1123,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCronWeeklyRecapRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_public__root/_default/app/': {
-      id: '/_public__root/_default/app/'
-      path: '/app'
-      fullPath: '/app/'
-      preLoaderRoute: typeof Public__rootDefaultAppIndexRouteImport
-      parentRoute: typeof Public__rootDefaultRouteRoute
-    }
     '/_public__root/_default/checkout/success': {
       id: '/_public__root/_default/checkout/success'
       path: '/checkout/success'
@@ -1230,7 +1229,6 @@ interface Public__rootDefaultRouteRouteChildren {
   Public__rootDefaultMemesAiSearchRoute: typeof Public__rootDefaultMemesAiSearchRoute
   Public__rootDefaultPasswordCreateNewRoute: typeof Public__rootDefaultPasswordCreateNewRoute
   Public__rootDefaultPasswordResetRoute: typeof Public__rootDefaultPasswordResetRoute
-  Public__rootDefaultAppIndexRoute: typeof Public__rootDefaultAppIndexRoute
   Public__rootDefaultPricingIndexRoute: typeof Public__rootDefaultPricingIndexRoute
   Public__rootDefaultRandomIndexRoute: typeof Public__rootDefaultRandomIndexRoute
   Public__rootDefaultSubmitIndexRoute: typeof Public__rootDefaultSubmitIndexRoute
@@ -1254,7 +1252,6 @@ const Public__rootDefaultRouteRouteChildren: Public__rootDefaultRouteRouteChildr
       Public__rootDefaultPasswordCreateNewRoute,
     Public__rootDefaultPasswordResetRoute:
       Public__rootDefaultPasswordResetRoute,
-    Public__rootDefaultAppIndexRoute: Public__rootDefaultAppIndexRoute,
     Public__rootDefaultPricingIndexRoute: Public__rootDefaultPricingIndexRoute,
     Public__rootDefaultRandomIndexRoute: Public__rootDefaultRandomIndexRoute,
     Public__rootDefaultSubmitIndexRoute: Public__rootDefaultSubmitIndexRoute,
@@ -1303,6 +1300,7 @@ interface Public__rootRouteRouteChildren {
   Public__rootIndexRoute: typeof Public__rootIndexRoute
   Public__rootMemesMemeIdRoute: typeof Public__rootMemesMemeIdRouteWithChildren
   Public__rootMemesLibraryRoute: typeof Public__rootMemesLibraryRouteWithChildren
+  Public__rootAppIndexRoute: typeof Public__rootAppIndexRoute
   Public__rootMemesIndexRoute: typeof Public__rootMemesIndexRoute
 }
 
@@ -1312,6 +1310,7 @@ const Public__rootRouteRouteChildren: Public__rootRouteRouteChildren = {
   Public__rootIndexRoute: Public__rootIndexRoute,
   Public__rootMemesMemeIdRoute: Public__rootMemesMemeIdRouteWithChildren,
   Public__rootMemesLibraryRoute: Public__rootMemesLibraryRouteWithChildren,
+  Public__rootAppIndexRoute: Public__rootAppIndexRoute,
   Public__rootMemesIndexRoute: Public__rootMemesIndexRoute,
 }
 

@@ -4,6 +4,7 @@ import {
   type BundleBudget,
   checkBudget,
   listLooseBudgetLines,
+  listRaisedBudgets,
   listStartupHrefs,
   measureBundle,
   toChunkName
@@ -156,12 +157,46 @@ describe('buildBudget', () => {
     expect(
       buildBudget({
         report: {
-          shell: { bytes: 150_200, chunks: {} },
+          shell: { bytes: 140_200, chunks: {} },
           routes: { '/reels': { bytes: 9000, chunks: {} } }
         },
-        budget: BUDGET
+        budget: BUDGET,
+        allowGrowth: false
       })
-    ).toStrictEqual({ ...BUDGET, shellJs: 153, routeJs: { '/reels': 11 } })
+    ).toStrictEqual({ ...BUDGET, shellJs: 143, routeJs: { '/reels': 11 } })
+  })
+
+  it('should keep a budget the measured size would raise, unless growth is allowed', () => {
+    const grownReport = {
+      shell: { bytes: 160_000, chunks: {} },
+      routes: { '/settings': { bytes: 18_500, chunks: {} } }
+    }
+
+    expect(
+      buildBudget({ report: grownReport, budget: BUDGET, allowGrowth: false })
+    ).toStrictEqual({ ...BUDGET, shellJs: 152, routeJs: { '/settings': 19 } })
+    expect(
+      buildBudget({ report: grownReport, budget: BUDGET, allowGrowth: true })
+    ).toStrictEqual({ ...BUDGET, shellJs: 162, routeJs: { '/settings': 21 } })
+  })
+})
+
+describe('listRaisedBudgets', () => {
+  it('should list every budget above the one on main, CSS included', () => {
+    expect(
+      listRaisedBudgets({
+        budget: {
+          ...BUDGET,
+          shellJs: 160,
+          routeJs: { ...BUDGET.routeJs, '/settings': 18, '/reels': 30 },
+          firstViewCss: { '/': 40 }
+        },
+        baseBudget: BUDGET
+      })
+    ).toStrictEqual([
+      { kind: 'shellJs', name: 'Shell', beforeKb: 152, afterKb: 160 },
+      { kind: 'firstViewCss', name: '/', beforeKb: 33, afterKb: 40 }
+    ])
   })
 })
 

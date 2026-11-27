@@ -4,12 +4,15 @@ import {
   type BudgetedReport,
   type BudgetLine,
   type BudgetViolation,
+  type BundleBudget,
   type BundleReport,
   checkBudget,
   formatKb,
   type JsSize,
   listLooseBudgetLines,
+  listRaisedBudgets,
   matchIsLineFailing,
+  type RaisedBudget,
   toBudgetBytes,
   toBudgetLines
 } from './bundle-size.ts'
@@ -22,7 +25,10 @@ const VISIBLE_CHUNK_CHANGES = 10
 const VISIBLE_LIST_ITEMS = 3
 const AGENT_CHUNK_CHANGES = 40
 const SHELL_SCOPE = 'shell'
+const FAR_FROM_GOAL_RATIO = 2
+const VISIBLE_GOAL_SQUARES = 10
 const UPDATE_COMMAND = 'pnpm run bundle-size --update'
+const ALLOW_GROWTH_FLAG = '--allow-growth'
 const MEASURE_COMMAND = 'pnpm run build:e2e && pnpm run bundle-size'
 
 type BaseReport = {
@@ -44,9 +50,16 @@ type RouteChange = {
   afterBytes: number
 }
 
-type Verdict = 'fail' | 'grow' | 'tighten' | 'pass'
+type Verdict = 'fail' | 'raised' | 'grow' | 'tighten' | 'pass'
+
+type GoalRow = {
+  label: string
+  bytes: number
+  goalKb: number
+}
 
 type FormatCommentParams = BudgetedReport & {
+  baseBudget: BundleBudget | undefined
   base: BaseReport | undefined
   runUrl: string | undefined
 }
@@ -80,16 +93,40 @@ const formatName = ({
   return isShell ? '**Shell** (every route)' : `\`${name}\``
 }
 
-const formatBudget = (line: BudgetLine) => {
+const RAISED_BUDGET_LABEL_BY_KIND = {
+  shellJs: 'JS budget',
+  routeJs: 'route JS budget',
+  firstViewCss: 'first-view CSS budget'
+} as const satisfies Record<RaisedBudget['kind'], string>
+
+const findRaisedJsBudget = (
+  raisedBudgets: readonly RaisedBudget[],
+  line: BudgetLine
+) => {
+  return raisedBudgets.find((raisedBudget) => {
+    return line.isShell
+      ? raisedBudget.kind === 'shellJs'
+      : raisedBudget.kind === 'routeJs' && raisedBudget.name === line.name
+  })
+}
+
+const formatBudget = (
+  line: BudgetLine,
+  raisedBudget: RaisedBudget | undefined
+) => {
   if (line.budgetKb === undefined) {
     return line.isShell ? '—' : '**no budget**'
   }
 
   const marginBytes = toBudgetBytes(line.budgetKb) - line.size.bytes
+  const budget =
+    raisedBudget === undefined
+      ? `${line.budgetKb} kB`
+      : `🔴 ${line.budgetKb} kB, was ${raisedBudget.beforeKb} kB`
 
   return marginBytes < 0
-    ? `${line.budgetKb} kB · **${formatKb(-marginBytes)} over**`
-    : `${line.budgetKb} kB · ${formatKb(marginBytes)} left`
+    ? `${budget} · **${formatKb(-marginBytes)} over**`
+    : `${budget} · ${formatKb(marginBytes)} left`
 }
 
 const formatStatus = (line: BudgetLine) => {
@@ -100,11 +137,19 @@ const formatStatus = (line: BudgetLine) => {
   return line.budgetKb === undefined ? '🆕' : '❌'
 }
 
-const formatLineTable = (
-  lines: readonly BudgetLine[],
-  base: BaseReport | undefined,
+type LineTableParams = {
+  lines: readonly BudgetLine[]
+  base: BaseReport | undefined
+  raisedBudgets: readonly RaisedBudget[]
   shellBytes: number
-) => {
+}
+
+const formatLineTable = ({
+  lines,
+  base,
+  raisedBudgets,
+  shellBytes
+}: LineTableParams) => {
   return [
     '| | Route | Route JS | vs main | Budget | Startup JS |',
     '| :-: | --- | --: | --: | --- | --: |',
@@ -116,7 +161,7 @@ const formatLineTable = (
         base === undefined
           ? '—'
           : formatDelta(line.size.bytes, toBaseSize(base, line)?.bytes),
-        formatBudget(line),
+        formatBudget(line, findRaisedJsBudget(raisedBudgets, line)),
         line.isShell ? '—' : formatKb(shellBytes + line.size.bytes)
       ]
 
@@ -236,23 +281,44 @@ const formatViolation = (violation: BudgetViolation) => {
   }
 }
 
+const formatRaisedBudget = (raisedBudget: RaisedBudget) => {
+  const name =
+    raisedBudget.kind === 'shellJs'
+      ? '**Shell**'
+      : `**\`${raisedBudget.name}\`**`
+
+  return `🔴 ${name} raises its ${RAISED_BUDGET_LABEL_BY_KIND[raisedBudget.kind]} from ${raisedBudget.beforeKb} kB to ${raisedBudget.afterKb} kB.`
+}
+
 const toAlert = (kind: string, lines: readonly string[]) => {
   return [
     `> [!${kind}]`,
     ...lines.map((line) => {
-      return `> ${line}`
+      return line === '' ? '>' : `> ${line}`
     }),
     ''
   ]
 }
 
-const toVerdict = (
-  violations: readonly BudgetViolation[],
-  growingChanges: readonly RouteChange[],
+type VerdictParams = {
+  violations: readonly BudgetViolation[]
+  raisedBudgets: readonly RaisedBudget[]
+  growingChanges: readonly RouteChange[]
   looseLines: readonly BudgetLine[]
-): Verdict => {
+}
+
+const toVerdict = ({
+  violations,
+  raisedBudgets,
+  growingChanges,
+  looseLines
+}: VerdictParams): Verdict => {
   if (violations.length > 0) {
     return 'fail'
+  }
+
+  if (raisedBudgets.length > 0) {
+    return 'raised'
   }
 
   if (growingChanges.length > 0) {
@@ -264,16 +330,35 @@ const toVerdict = (
 
 const HEADLINE_BY_VERDICT = {
   fail: '❌ Over budget',
-  grow: '⚠️ Within budget, but growing',
-  tighten: '✅ Within budget, and lighter',
-  pass: '✅ Within budget'
+  raised: '🔴 Budget raised',
+  grow: '⚠️ Heavier, within budget',
+  tighten: '✅ Lighter',
+  pass: '✅ No heavier'
 } as const satisfies Record<Verdict, string>
 
-const toAgentPrompt = (
-  verdict: Verdict,
-  violations: readonly BudgetViolation[],
+const UNCOMPARED_HEADLINE = '✅ Within budget'
+
+const formatNameList = (names: readonly string[]) => {
+  return names
+    .map((name) => {
+      return `\`${name}\``
+    })
+    .join(', ')
+}
+
+type AgentPromptParams = {
+  verdict: Verdict
+  violations: readonly BudgetViolation[]
+  raisedBudgets: readonly RaisedBudget[]
   growingChanges: readonly RouteChange[]
-) => {
+}
+
+const toAgentPrompt = ({
+  verdict,
+  violations,
+  raisedBudgets,
+  growingChanges
+}: AgentPromptParams) => {
   switch (verdict) {
     case 'fail':
       return [
@@ -284,16 +369,26 @@ const toAgentPrompt = (
           .join(', ')}.`,
         'For a route over budget, read `chunkChanges` in the data below to see which chunks grew, then run `pnpm run build:analyze` and use the Chunks graph path selector in Vite DevTools to find the import that pulls them into the route. Move that code behind a dynamic import, swap it for a lighter dependency, or take it out of the route.',
         `For a route with no budget or a stale one, run \`${UPDATE_COMMAND}\` and commit \`${BUDGET_FILE}\`.`,
-        `Raise a budget only when the growth is intended, with \`${UPDATE_COMMAND}\`, and say why in the PR description.`,
+        `\`${UPDATE_COMMAND}\` only lowers budgets. Raise one only when the growth is intended, with \`${UPDATE_COMMAND} ${ALLOW_GROWTH_FLAG}\`, and say why in the PR description.`,
         `Done when \`${MEASURE_COMMAND}\` exits 0.`
+      ].join('\n')
+    case 'raised':
+      return [
+        `This change raises ${raisedBudgets.length === 1 ? 'a budget' : `${raisedBudgets.length} budgets`} against main: ${formatNameList(
+          raisedBudgets.map((raisedBudget) => {
+            return raisedBudget.name
+          })
+        )}. See \`raisedBudgets\` in the data below.`,
+        'Keep a raise only when the growth is intended, and say why in the PR description.',
+        `Otherwise restore main's budgets with \`git checkout origin/main -- ${BUDGET_FILE}\`, then cut the growth until \`${MEASURE_COMMAND}\` exits 0.`
       ].join('\n')
     case 'grow':
       return [
-        `This change grows the startup JS of ${growingChanges.length} ${growingChanges.length === 1 ? 'route' : 'routes'} while staying within budget: ${growingChanges
-          .map((change) => {
-            return `\`${change.name}\``
+        `This change grows the startup JS of ${growingChanges.length} ${growingChanges.length === 1 ? 'route' : 'routes'} while staying within budget: ${formatNameList(
+          growingChanges.map((change) => {
+            return change.name
           })
-          .join(', ')}.`,
+        )}.`,
         'Check that each growth in `chunkChanges` is code the first view needs. Code a later interaction needs belongs behind a dynamic import.'
       ].join('\n')
     case 'tighten':
@@ -305,24 +400,29 @@ const toAgentPrompt = (
   }
 }
 
-type AgentBriefParams = {
-  verdict: Verdict
-  violations: readonly BudgetViolation[]
+type AgentBriefParams = AgentPromptParams & {
   routeChanges: readonly RouteChange[]
-  growingChanges: readonly RouteChange[]
   chunkChanges: readonly ChunkChange[]
   base: BaseReport | undefined
+  hasBaseBudget: boolean
 }
 
 const formatAgentBrief = ({
   verdict,
   violations,
+  raisedBudgets,
   routeChanges,
   growingChanges,
   chunkChanges,
-  base
+  base,
+  hasBaseBudget
 }: AgentBriefParams) => {
-  const prompt = toAgentPrompt(verdict, violations, growingChanges)
+  const prompt = toAgentPrompt({
+    verdict,
+    violations,
+    raisedBudgets,
+    growingChanges
+  })
   const data = {
     verdict,
     base:
@@ -330,9 +430,16 @@ const formatAgentBrief = ({
         ? null
         : { commit: base.label, runId: base.runId ?? null },
     violations,
+    raisedBudgets,
     routeChanges,
     chunkChanges: chunkChanges.slice(0, AGENT_CHUNK_CHANGES)
   }
+  const compareOptions = [
+    ...(base?.runId === undefined
+      ? []
+      : ['--base /tmp/main-bundle-size/report.json']),
+    ...(hasBaseBudget ? ['--base-budget /tmp/main-budget.json'] : [])
+  ]
 
   return [
     '<details>',
@@ -340,18 +447,21 @@ const formatAgentBrief = ({
     '',
     '**What this measures.** The Brotli size of each JS file the server-rendered page of a route modulepreloads, read from the TanStack Start manifest of `pnpm run build:e2e`. The shell is what the root route preloads on every page. Route JS is what a route adds on top, each file counted once. Startup JS is both. Sizes in the data are bytes.',
     '',
-    `**Rules.** Budgets live in \`${BUDGET_FILE}\` as a ratchet: the size when last updated, plus ${BUDGET_HEADROOM}. Never raise one to turn the check green. Chunk names drop the Rolldown hash: \`meme-card\` stands for \`meme-card-<hash>.js\`. First-view CSS is gated apart, by \`e2e/first-view.spec.ts\` against \`firstViewCss\`.`,
+    `**Rules.** Budgets live in \`${BUDGET_FILE}\` as a one-way ratchet: the size when last updated, plus ${BUDGET_HEADROOM}. \`${UPDATE_COMMAND}\` only lowers them, and \`${ALLOW_GROWTH_FLAG}\` raises them, flagged in red against main. Never raise one to turn the check green. Chunk names drop the Rolldown hash: \`meme-card\` stands for \`meme-card-<hash>.js\`. First-view CSS is gated apart, by \`e2e/first-view.spec.ts\` against \`firstViewCss\`.`,
     '',
     '**Reproduce**',
     '',
     '```sh',
     'pnpm run build:e2e',
     ...(base?.runId === undefined
-      ? ['pnpm run bundle-size']
+      ? []
       : [
-          `gh run download ${base.runId} --name bundle-size --dir /tmp/main-bundle-size`,
-          'pnpm run bundle-size --base /tmp/main-bundle-size/report.json'
+          `gh run download ${base.runId} --name bundle-size --dir /tmp/main-bundle-size`
         ]),
+    ...(hasBaseBudget
+      ? [`git show origin/main:${BUDGET_FILE} > /tmp/main-budget.json`]
+      : []),
+    ['pnpm run bundle-size', ...compareOptions].join(' '),
     'pnpm run build:analyze',
     '```',
     '',
@@ -368,22 +478,34 @@ const formatAgentBrief = ({
   ]
 }
 
-type HighlightedLinesParams = {
-  lines: readonly BudgetLine[]
-  base: BaseReport | undefined
-  shellBytes: number
-}
-
-const formatHighlightedLines = ({
-  lines,
-  base,
-  shellBytes
-}: HighlightedLinesParams) => {
-  if (lines.length > 0) {
-    return [...formatLineTable(lines, base, shellBytes), '']
+const formatHighlightedLines = (params: LineTableParams) => {
+  if (params.lines.length > 0) {
+    return [...formatLineTable(params), '']
   }
 
-  return base === undefined ? [] : ['No route changed against main.', '']
+  return params.base === undefined ? [] : ['No route changed against main.', '']
+}
+
+const toGoalRatio = ({ bytes, goalKb }: GoalRow) => {
+  return bytes / toBudgetBytes(goalKb)
+}
+
+const formatGoalDistance = (row: GoalRow) => {
+  const ratio = toGoalRatio(row)
+  const squareCount = Math.min(Math.ceil(ratio), VISIBLE_GOAL_SQUARES)
+  const squares = `🟩${'🟥'.repeat(Math.max(squareCount - 1, 0))}${Math.ceil(ratio) > VISIBLE_GOAL_SQUARES ? '…' : ''}`
+
+  return `${squares} ${ratio.toFixed(1)}×`
+}
+
+const toGoalAlert = (worstRatio: number) => {
+  if (worstRatio >= FAR_FROM_GOAL_RATIO) {
+    return { kind: 'CAUTION', title: 'Far from the goal.' }
+  }
+
+  return worstRatio > 1
+    ? { kind: 'WARNING', title: 'Above the goal.' }
+    : { kind: 'TIP', title: 'Within the goal.' }
 }
 
 const formatGoal = ({ report, budget }: BudgetedReport) => {
@@ -398,19 +520,40 @@ const formatGoal = ({ report, budget }: BudgetedReport) => {
   }
 
   const [heaviestName, heaviestSize] = heaviestRoute
-  const heaviestStartupBytes = report.shell.bytes + heaviestSize.bytes
-  const timesOverGoal =
-    heaviestStartupBytes / toBudgetBytes(budget.goal.startupJs)
-
-  return [
-    `🎯 **Goal**: ${budget.goal.startupJs} kB of startup JS, ${budget.goal.routeJs} kB of route JS, ${budget.goal.firstViewCss} kB of first-view CSS. The heaviest route, \`${heaviestName}\`, starts with ${formatKb(heaviestStartupBytes)}, ${timesOverGoal.toFixed(1)}× the goal.`,
-    ''
+  const rows: GoalRow[] = [
+    {
+      label: `Startup JS of \`${heaviestName}\`, the heaviest route`,
+      bytes: report.shell.bytes + heaviestSize.bytes,
+      goalKb: budget.goal.startupJs
+    },
+    {
+      label: formatName({ name: 'Shell', isShell: true }),
+      bytes: report.shell.bytes,
+      goalKb: budget.goal.startupJs
+    },
+    {
+      label: `Route JS of \`${heaviestName}\``,
+      bytes: heaviestSize.bytes,
+      goalKb: budget.goal.routeJs
+    }
   ]
+  const { kind, title } = toGoalAlert(Math.max(...rows.map(toGoalRatio)))
+
+  return toAlert(kind, [
+    `**${title}** 🟩 is the goal, each 🟥 one more goal’s worth.`,
+    '',
+    '| | Now | Goal | Distance |',
+    '| --- | --: | --: | --- |',
+    ...rows.map((row) => {
+      return `| ${row.label} | ${formatKb(row.bytes)} | ${row.goalKb} kB | ${formatGoalDistance(row)} |`
+    })
+  ])
 }
 
 export const formatComment = ({
   report,
   budget,
+  baseBudget,
   base,
   runUrl
 }: FormatCommentParams) => {
@@ -421,6 +564,8 @@ export const formatComment = ({
     )
   })
   const violations = checkBudget({ report, budget })
+  const raisedBudgets =
+    baseBudget === undefined ? [] : listRaisedBudgets({ budget, baseBudget })
   const looseLines = listLooseBudgetLines({ report, budget })
   const routeChanges = listRouteChanges(lines, base)
   const growingChanges = routeChanges.filter((change) => {
@@ -430,7 +575,12 @@ export const formatComment = ({
     )
   })
   const chunkChanges = base === undefined ? [] : listChunkChanges(lines, base)
-  const verdict = toVerdict(violations, growingChanges, looseLines)
+  const verdict = toVerdict({
+    violations,
+    raisedBudgets,
+    growingChanges,
+    looseLines
+  })
   const changedNames = new Set(
     routeChanges.map((change) => {
       return change.name
@@ -439,20 +589,23 @@ export const formatComment = ({
   const highlightedLines = lines.filter((line) => {
     return (
       matchIsLineFailing(line) ||
+      findRaisedJsBudget(raisedBudgets, line) !== undefined ||
       (base !== undefined && changedNames.has(line.name))
     )
   })
+  const cautions = [
+    ...violations.map(formatViolation),
+    ...raisedBudgets.map(formatRaisedBudget)
+  ]
 
   return [
     COMMENT_MARKER,
-    `### 📦 Startup JS · ${HEADLINE_BY_VERDICT[verdict]}`,
+    `### 📦 Startup JS · ${verdict === 'pass' && base === undefined ? UNCOMPARED_HEADLINE : HEADLINE_BY_VERDICT[verdict]}`,
     '',
     `<sub>Brotli · ${lines.length - 1} routes · ${base === undefined ? 'no main report yet' : `against main at \`${base.label}\``}${runUrl === undefined ? '' : ` · [workflow run](${runUrl})`}</sub>`,
     '',
-    ...(violations.length > 0
-      ? toAlert('CAUTION', violations.map(formatViolation))
-      : []),
-    ...(verdict === 'grow'
+    ...(cautions.length > 0 ? toAlert('CAUTION', cautions) : []),
+    ...(growingChanges.length > 0 && violations.length === 0
       ? toAlert(
           'WARNING',
           growingChanges.map((change) => {
@@ -477,6 +630,7 @@ export const formatComment = ({
     ...formatHighlightedLines({
       lines: highlightedLines,
       base,
+      raisedBudgets,
       shellBytes: report.shell.bytes
     }),
     ...(chunkChanges.length === 0
@@ -486,17 +640,24 @@ export const formatComment = ({
     '<details>',
     `<summary>📋 Every route</summary>`,
     '',
-    ...formatLineTable(lines, base, report.shell.bytes),
+    ...formatLineTable({
+      lines,
+      base,
+      raisedBudgets,
+      shellBytes: report.shell.bytes
+    }),
     '',
     '</details>',
     '',
     ...formatAgentBrief({
       verdict,
       violations,
+      raisedBudgets,
       routeChanges,
       growingChanges,
       chunkChanges,
-      base
+      base,
+      hasBaseBudget: baseBudget !== undefined
     }),
     ''
   ].join('\n')

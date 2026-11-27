@@ -46,6 +46,7 @@ describe('formatComment', () => {
       formatComment({
         report: MAIN_REPORT,
         budget: BUDGET,
+        baseBudget: BUDGET,
         base: BASE,
         runUrl: undefined
       }).startsWith(COMMENT_MARKER)
@@ -56,6 +57,7 @@ describe('formatComment', () => {
     const comment = formatComment({
       report: GROWN_REPORT,
       budget: BUDGET,
+      baseBudget: BUDGET,
       base: BASE,
       runUrl: 'https://github.com/run/1'
     })
@@ -84,31 +86,107 @@ describe('formatComment', () => {
   })
 
   it('should warn about growth that stays within budget', () => {
+    const roomyBudget = {
+      ...BUDGET,
+      routeJs: { ...BUDGET.routeJs, '/memes/$memeId': 45 }
+    }
+    const comment = formatComment({
+      report: GROWN_REPORT,
+      budget: roomyBudget,
+      baseBudget: roomyBudget,
+      base: BASE,
+      runUrl: undefined
+    })
+
+    expect(comment).toContain('### 📦 Startup JS · ⚠️ Heavier, within budget')
+    expect(comment).toContain('> `/memes/$memeId` grows by +11.0 kB.')
+  })
+
+  it('should flag in red every budget raised against main', () => {
     const comment = formatComment({
       report: GROWN_REPORT,
       budget: {
         ...BUDGET,
-        routeJs: { ...BUDGET.routeJs, '/memes/$memeId': 45 }
+        routeJs: { ...BUDGET.routeJs, '/memes/$memeId': 43 },
+        firstViewCss: { '/': 35 }
       },
+      baseBudget: BUDGET,
+      base: BASE,
+      runUrl: undefined
+    })
+
+    expect(comment).toContain('### 📦 Startup JS · 🔴 Budget raised')
+    expect(comment).toContain(
+      '> [!CAUTION]\n> 🔴 **`/memes/$memeId`** raises its route JS budget from 32 kB to 43 kB.\n> 🔴 **`/`** raises its first-view CSS budget from 33 kB to 35 kB.'
+    )
+    expect(comment).toContain(
+      '| `/memes/$memeId` | 41.0 kB | 🔴 +11.0 kB | 🔴 43 kB, was 32 kB · 2.0 kB left |'
+    )
+    expect(toAgentData(comment)).toMatchObject({
+      verdict: 'raised',
+      raisedBudgets: [
+        {
+          kind: 'routeJs',
+          name: '/memes/$memeId',
+          beforeKb: 32,
+          afterKb: 43
+        },
+        { kind: 'firstViewCss', name: '/', beforeKb: 33, afterKb: 35 }
+      ]
+    })
+  })
+
+  it('should keep the distance to the goal in sight, red while far from it', () => {
+    const comment = formatComment({
+      report: GROWN_REPORT,
+      budget: {
+        ...BUDGET,
+        goal: { startupJs: 60, routeJs: 16, firstViewCss: 20 }
+      },
+      baseBudget: BUDGET,
       base: BASE,
       runUrl: undefined
     })
 
     expect(comment).toContain(
-      '### 📦 Startup JS · ⚠️ Within budget, but growing'
+      [
+        '> [!CAUTION]',
+        '> **Far from the goal.** 🟩 is the goal, each 🟥 one more goal’s worth.',
+        '>',
+        '> | | Now | Goal | Distance |',
+        '> | --- | --: | --: | --- |',
+        '> | Startup JS of `/memes/$memeId`, the heaviest route | 191.0 kB | 60 kB | 🟩🟥🟥🟥 3.2× |',
+        '> | **Shell** (every route) | 150.0 kB | 60 kB | 🟩🟥🟥 2.5× |',
+        '> | Route JS of `/memes/$memeId` | 41.0 kB | 16 kB | 🟩🟥🟥 2.6× |'
+      ].join('\n')
     )
-    expect(comment).toContain('> `/memes/$memeId` grows by +11.0 kB.')
+  })
+
+  it('should turn the distance to the goal green once the site reaches it', () => {
+    const comment = formatComment({
+      report: MAIN_REPORT,
+      budget: {
+        ...BUDGET,
+        goal: { startupJs: 200, routeJs: 50, firstViewCss: 20 }
+      },
+      baseBudget: BUDGET,
+      base: BASE,
+      runUrl: undefined
+    })
+
+    expect(comment).toContain('> [!TIP]\n> **Within the goal.**')
   })
 
   it('should say when nothing changed, and leave the prompt out', () => {
     const comment = formatComment({
       report: MAIN_REPORT,
       budget: BUDGET,
+      baseBudget: BUDGET,
       base: BASE,
       runUrl: undefined
     })
 
-    expect(comment).toContain('### 📦 Startup JS · ✅ Within budget')
+    expect(comment).toContain('### 📦 Startup JS · ✅ No heavier')
     expect(comment).toContain('No route changed against main.')
     expect(comment).not.toContain('**Prompt**')
   })
@@ -117,10 +195,12 @@ describe('formatComment', () => {
     const comment = formatComment({
       report: MAIN_REPORT,
       budget: BUDGET,
+      baseBudget: undefined,
       base: undefined,
       runUrl: undefined
     })
 
+    expect(comment).toContain('### 📦 Startup JS · ✅ Within budget')
     expect(comment).toContain('> [!NOTE]')
     expect(comment).not.toContain('🆕')
     expect(comment).toContain('pnpm run bundle-size\npnpm run build:analyze')

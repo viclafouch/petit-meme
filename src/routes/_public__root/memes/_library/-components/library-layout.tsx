@@ -49,7 +49,7 @@ export const LibraryStrip = () => {
 
 export const LibraryLayout = () => {
   return (
-    <div className="mx-auto w-full max-w-440 px-3 pt-5 pb-10 sm:px-4 lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:items-start lg:gap-8 lg:px-[clamp(1.5rem,3vw,3rem)] lg:pt-10 lg:pb-12">
+    <div className="container-wide pt-5 pb-10 max-sm:px-3 lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:items-start lg:gap-8 lg:pt-10 lg:pb-12">
       <aside className="memes-library-sidebar max-lg:hidden">
         <CategoryDirectory />
       </aside>

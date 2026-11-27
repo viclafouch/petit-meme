@@ -4,8 +4,11 @@ import { APP_SCREEN_SIZE, buildAppScreenPath } from '~/helpers/web-app-assets'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
-import APP_SCREENS from '~/routes/_public__root/_default/app/-lib/app-screens.json'
-import { DEMO_ASSET_PATHS } from '~/routes/_public__root/_default/app/-lib/demo'
+import APP_SCREENS from '~/routes/_public__root/app/-lib/app-screens.json'
+import {
+  DEMO_ASSET_PATHS,
+  PHONE_FRAME_RATIOS
+} from '~/routes/_public__root/app/-lib/demo'
 import { PhoneFrame } from './phone-frame'
 
 const VIDEO_SHARE_MOMENT = 0.055
@@ -128,7 +131,7 @@ const SoundBubble = () => {
           strokeLinecap="round"
         />
       </svg>
-      <span className="text-[2.4cqw] text-black/60 tabular-nums">0:11</span>
+      <span className="text-[2.4cqw] text-black/75 tabular-nums">0:11</span>
     </div>
   )
 }
@@ -170,7 +173,7 @@ const ChatScreen = ({
       </div>
       <div className="absolute inset-x-0 bottom-0 flex items-center gap-[2.5cqw] px-[3.5cqw] pt-[2cqw] pb-[7cqw]">
         <Plus className="size-[5.5cqw] text-white/70" />
-        <span className="flex h-[8.5cqw] flex-1 items-center rounded-full border border-white/15 px-[3.5cqw] text-[3.2cqw] text-white/40">
+        <span className="flex h-[8.5cqw] flex-1 items-center rounded-full border border-white/15 px-[3.5cqw] text-[3.2cqw] text-white/55">
           {m.app_page_demo_composer()}
         </span>
         <Mic className="size-[5cqw] text-white/70" />
@@ -249,7 +252,10 @@ type ShareDemoProps = {
 
 export const ShareDemo = ({ className }: ShareDemoProps) => {
   return (
-    <figure className={cn('share-demo', className)}>
+    <figure
+      className={cn('share-demo', className)}
+      style={{ '--phone-frame-ratio': PHONE_FRAME_RATIOS.iphone }}
+    >
       <figcaption className="sr-only">{m.app_page_demo_label()}</figcaption>
       <PhoneFrame platform="iphone" screenClassName="bg-[#0a0a0a]">
         <MemeScreen />

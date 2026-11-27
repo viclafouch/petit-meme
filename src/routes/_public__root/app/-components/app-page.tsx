@@ -16,13 +16,16 @@ import { InstallGuideSteps } from '~/components/install/install-guide-steps'
 import { MESSAGING_APPS } from '~/constants/messaging-apps'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
-import { AppQrCode } from './app-qr-code'
+import { AppQrCode, AppQrCodeImage } from './app-qr-code'
 import { PhoneInstallAction } from './install-action'
 import { LaunchDemo } from './launch-demo'
 import { ShareDemo } from './share-demo'
 
 const SECTION_HEADING_CLASS_NAME =
   'font-bricolage text-3xl leading-heading font-semibold text-balance sm:text-4xl'
+
+const SPLIT_GRID_CLASS_NAME =
+  'grid items-center lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]'
 
 const HERO_GLOW_CLASS_NAME =
   'bg-[radial-gradient(28%_42%_at_72%_45%,rgb(251_200_80/0.30),transparent),radial-gradient(26%_36%_at_30%_56%,rgb(122_178_200/0.24),transparent),radial-gradient(20%_22%_at_62%_76%,rgb(214_41_118/0.16),transparent)]'
@@ -37,7 +40,12 @@ const Hero = () => {
           HERO_GLOW_CLASS_NAME
         )}
       />
-      <div className="grid items-center justify-center gap-x-16 gap-y-12 lg:min-h-[calc(100svh-var(--navbar-height)-6rem)] lg:grid-cols-[minmax(0,34rem)_20rem]">
+      <div
+        className={cn(
+          SPLIT_GRID_CLASS_NAME,
+          'gap-x-16 gap-y-12 lg:min-h-[calc(100svh-var(--navbar-space)-6rem)]'
+        )}
+      >
         <div className="flex flex-col items-start gap-6 sm:gap-7">
           <div className="flex items-center gap-3">
             <AppIcon size={112} className="size-14 shadow-lg" />
@@ -48,7 +56,7 @@ const Hero = () => {
               </p>
             </div>
           </div>
-          <p className="max-w-[13ch] font-bricolage text-[2.75rem] leading-[0.95] font-bold tracking-tight text-balance sm:text-6xl xl:text-7xl">
+          <p className="max-w-[13ch] font-bricolage text-display leading-[0.95] font-bold tracking-tight text-balance">
             {m.app_page_heading()}
           </p>
           <p className="max-w-[44ch] text-muted-foreground text-pretty pointer-coarse:order-last sm:text-lg">
@@ -75,7 +83,7 @@ const Hero = () => {
           </div>
           <AppQrCode className="mt-2 pointer-coarse:hidden" />
         </div>
-        <ShareDemo className="mx-auto w-64 sm:w-72 lg:w-full" />
+        <ShareDemo className="mx-auto w-64 sm:w-72 lg:w-[clamp(16rem,(100svh-var(--navbar-space)-11rem)*var(--phone-frame-ratio),24rem)]" />
       </div>
     </section>
   )
@@ -83,7 +91,12 @@ const Hero = () => {
 
 const Destinations = () => {
   return (
-    <section className="grid items-center gap-10 [contain-intrinsic-size:auto_none_auto_400px] [content-visibility:auto] lg:grid-cols-2">
+    <section
+      className={cn(
+        SPLIT_GRID_CLASS_NAME,
+        'gap-10 [contain-intrinsic-size:auto_none_auto_400px] [content-visibility:auto]'
+      )}
+    >
       <div className="flex flex-col gap-4">
         <h2 className={SECTION_HEADING_CLASS_NAME}>
           {m.app_page_destinations_heading()}
@@ -100,7 +113,10 @@ const Destinations = () => {
                 key={app.id}
                 className="flex flex-col items-center gap-2 text-sm font-medium"
               >
-                <MessagingAppIcon app={app} className="w-14 shadow-md" />
+                <MessagingAppIcon
+                  app={app}
+                  className="w-14 shadow-md xl:w-16"
+                />
                 {app.name}
               </li>
             )
@@ -200,13 +216,13 @@ const Platforms = () => {
             <LaunchDemo
               platform="android"
               delay="0s"
-              className="platform-phone-reveal relative mt-10 -mr-6 w-44 sm:w-56"
+              className="platform-phone-reveal relative mt-10 -mr-6 w-44 sm:w-56 xl:w-64"
               style={{ '--phone-tilt': '-6deg' }}
             />
             <LaunchDemo
               platform="iphone"
               delay="5s"
-              className="platform-phone-reveal relative z-10 -ml-6 w-44 sm:w-56"
+              className="platform-phone-reveal relative z-10 -ml-6 w-44 sm:w-56 xl:w-64"
               style={{ '--phone-tilt': '5deg' }}
             />
           </div>
@@ -248,27 +264,28 @@ const InstallSteps = () => {
   ]
 
   return (
-    <section className="flex flex-col gap-10 [contain-intrinsic-size:auto_none_auto_450px] [content-visibility:auto] pointer-coarse:hidden">
-      <h2 className={SECTION_HEADING_CLASS_NAME}>
-        {m.app_page_install_heading()}
-      </h2>
-      <div className="grid gap-10 md:grid-cols-2">
-        {columns.map(({ title, steps }) => {
-          return (
-            <div key={title} className="flex flex-col gap-5">
-              <h3 className="text-xl font-semibold">{title}</h3>
-              <InstallGuideSteps steps={steps} className="max-w-md gap-4" />
-            </div>
-          )
-        })}
+    <section className="grid gap-10 [contain-intrinsic-size:auto_none_auto_450px] [content-visibility:auto] pointer-coarse:hidden md:grid-cols-2 xl:grid-cols-3 xl:gap-16">
+      <div className="flex flex-col items-start gap-8 md:col-span-2 xl:col-span-1">
+        <h2 className={SECTION_HEADING_CLASS_NAME}>
+          {m.app_page_install_heading()}
+        </h2>
+        <AppQrCodeImage alt="" className="max-xl:hidden" />
       </div>
+      {columns.map(({ title, steps }) => {
+        return (
+          <div key={title} className="flex flex-col gap-5">
+            <h3 className="text-xl font-semibold">{title}</h3>
+            <InstallGuideSteps steps={steps} className="max-w-md gap-4" />
+          </div>
+        )
+      })}
     </section>
   )
 }
 
 export const AppPage = () => {
   return (
-    <div className="flex flex-col gap-28 lg:gap-36">
+    <div className="container-wide flex flex-col gap-28 pt-10 pb-10 sm:pt-12 lg:gap-36 lg:pb-16">
       <Hero />
       <Destinations />
       <Platforms />

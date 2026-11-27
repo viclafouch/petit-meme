@@ -1,6 +1,9 @@
 import type React from 'react'
 import { cn } from '~/lib/utils'
-import { DEMO_CLOCK } from '~/routes/_public__root/_default/app/-lib/demo'
+import {
+  DEMO_CLOCK,
+  PHONE_FRAME_RATIOS
+} from '~/routes/_public__root/app/-lib/demo'
 
 const SignalIcon = () => {
   return (
@@ -70,7 +73,7 @@ const PLATFORM_DESIGNS = {
   iphone: {
     Hardware: IphoneHardware,
     frameClassName:
-      'aspect-[71.6/147.6] rounded-[15.5cqw] bg-linear-to-b from-zinc-500 via-zinc-700 to-zinc-500 p-[0.7cqw]',
+      'rounded-[15.5cqw] bg-linear-to-b from-zinc-500 via-zinc-700 to-zinc-500 p-[0.7cqw]',
     bezelClassName: 'rounded-[14.8cqw] p-[3.1cqw]',
     screenClassName: 'rounded-[11.8cqw]',
     statusBarClassName: 'h-[12.5cqw] px-[9cqw] text-[3.9cqw]',
@@ -79,7 +82,7 @@ const PLATFORM_DESIGNS = {
   },
   android: {
     Hardware: AndroidHardware,
-    frameClassName: 'aspect-[72/154] rounded-[11cqw] bg-zinc-800 p-[0.6cqw]',
+    frameClassName: 'rounded-[11cqw] bg-zinc-800 p-[0.6cqw]',
     bezelClassName: 'rounded-[10.4cqw] p-[2.4cqw]',
     screenClassName: 'rounded-[8cqw]',
     statusBarClassName: 'h-[9cqw] px-[6cqw] text-[3.3cqw]',
@@ -109,11 +112,11 @@ export const PhoneFrame = ({
     <div
       aria-hidden="true"
       className={cn('@container', className)}
-      style={style}
+      style={{ '--phone-frame-ratio': PHONE_FRAME_RATIOS[platform], ...style }}
     >
       <div
         className={cn(
-          'relative shadow-[0_2.5cqw_8cqw_-2cqw_rgb(0_0_0/0.55),0_0_0_0.35cqw_rgb(255_255_255/0.08)]',
+          'relative aspect-(--phone-frame-ratio) shadow-[0_2.5cqw_8cqw_-2cqw_rgb(0_0_0/0.55),0_0_0_0.35cqw_rgb(255_255_255/0.08)]',
           design.frameClassName
         )}
       >

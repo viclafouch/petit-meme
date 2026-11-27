@@ -461,6 +461,7 @@
   --color-bookmark-spark: oklch(0.88 0.16 90);
 
   --text-label: 0.8125rem;
+  --text-display: clamp(2.75rem, 0.5rem + 5.5vw, 6.75rem);
 
   --radius-pill: calc(infinity * 1px);
 
@@ -524,6 +525,10 @@
 
 @utility container {
   @apply mx-auto max-w-6xl px-4 xl:px-6;
+}
+
+@utility container-wide {
+  @apply mx-auto w-full max-w-440 px-4 lg:px-[clamp(1.5rem,3vw,3rem)];
 }
 
 @utility bookmark-chip {

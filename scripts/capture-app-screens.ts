@@ -21,7 +21,7 @@ const WEBP_QUALITY = 72
 const SETTLE_DELAY_MS = 1500
 
 const RECTS_FILE_PATH = path.resolve(
-  'src/routes/_public__root/_default/app/-lib/app-screens.json'
+  'src/routes/_public__root/app/-lib/app-screens.json'
 )
 
 type Rect = {

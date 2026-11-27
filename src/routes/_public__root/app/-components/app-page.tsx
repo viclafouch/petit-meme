@@ -16,6 +16,7 @@ import { InstallGuideSteps } from '~/components/install/install-guide-steps'
 import { MESSAGING_APPS } from '~/constants/messaging-apps'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
+import { PHONE_FRAME_RATIOS } from '~/routes/_public__root/app/-lib/demo'
 import { AppQrCode, AppQrCodeImage } from './app-qr-code'
 import { PhoneInstallAction } from './install-action'
 import { LaunchDemo } from './launch-demo'
@@ -29,6 +30,27 @@ const SPLIT_GRID_CLASS_NAME =
 
 const HERO_GLOW_CLASS_NAME =
   'bg-[radial-gradient(28%_42%_at_72%_45%,rgb(251_200_80/0.30),transparent),radial-gradient(26%_36%_at_30%_56%,rgb(122_178_200/0.24),transparent),radial-gradient(20%_22%_at_62%_76%,rgb(214_41_118/0.16),transparent)]'
+
+const HERO_DESTINATION_COUNT = 5
+
+const HeroDestinations = () => {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-y-0 right-full me-4 w-[clamp(14rem,18vw,22rem)] max-xl:hidden"
+    >
+      {MESSAGING_APPS.slice(0, HERO_DESTINATION_COUNT).map((app) => {
+        return (
+          <MessagingAppIcon
+            key={app.id}
+            app={app}
+            className="hero-destination"
+          />
+        )
+      })}
+    </div>
+  )
+}
 
 const Hero = () => {
   return (
@@ -56,13 +78,13 @@ const Hero = () => {
               </p>
             </div>
           </div>
-          <p className="max-w-[13ch] font-bricolage text-display leading-[0.95] font-bold tracking-tight text-balance">
+          <p className="max-w-[12ch] font-bricolage text-display leading-[0.95] font-bold tracking-tight text-balance">
             {m.app_page_heading()}
           </p>
           <p className="max-w-[44ch] text-muted-foreground text-pretty pointer-coarse:order-last sm:text-lg">
             {m.app_page_lead()}
           </p>
-          <div className="flex items-center gap-3 pointer-coarse:order-last">
+          <div className="flex items-center gap-3 pointer-coarse:order-last xl:hidden">
             <span aria-hidden="true" className="flex -space-x-1.5">
               {MESSAGING_APPS.map((app) => {
                 return (
@@ -83,7 +105,13 @@ const Hero = () => {
           </div>
           <AppQrCode className="mt-2 pointer-coarse:hidden" />
         </div>
-        <ShareDemo className="mx-auto w-64 sm:w-72 lg:w-[clamp(16rem,(100svh-var(--navbar-space)-11rem)*var(--phone-frame-ratio),24rem)]" />
+        <div
+          className="relative mx-auto w-64 sm:w-72 lg:w-[clamp(16rem,(100svh-var(--navbar-space)-11rem)*var(--phone-frame-ratio),24rem)]"
+          style={{ '--phone-frame-ratio': PHONE_FRAME_RATIOS.iphone }}
+        >
+          <HeroDestinations />
+          <ShareDemo className="app-hero-phone" />
+        </div>
       </div>
     </section>
   )

@@ -161,6 +161,15 @@
   }
 }
 
+@keyframes hero-destination-float {
+  from {
+    translate: 0 -0.375rem;
+  }
+  to {
+    translate: 0 0.375rem;
+  }
+}
+
 @keyframes platform-phone-reveal {
   from {
     opacity: 0;
@@ -257,6 +266,66 @@
     @variant motion-safe {
       animation: launch-demo-content var(--launch-cycle) ease
         var(--launch-delay, 0s) infinite both;
+    }
+  }
+
+  .app-hero-phone {
+    @variant lg {
+      transform: perspective(--spacing(450)) rotateY(-20deg) rotateX(6deg)
+        rotateZ(3deg);
+    }
+  }
+
+  .hero-destination {
+    position: absolute;
+    box-shadow: 0 1.25rem 2rem -0.75rem rgb(0 0 0 / 0.55);
+
+    @variant motion-safe {
+      animation: hero-destination-float 5s ease-in-out infinite alternate both;
+    }
+
+    &:nth-child(even) {
+      animation-duration: 6s;
+    }
+
+    &:nth-child(1) {
+      top: 10%;
+      left: 55%;
+      width: --spacing(17);
+      rotate: -10deg;
+      animation-delay: -1.2s;
+    }
+
+    &:nth-child(2) {
+      top: 30%;
+      left: 8%;
+      width: --spacing(13);
+      rotate: 8deg;
+      animation-delay: -3.4s;
+    }
+
+    &:nth-child(3) {
+      top: 49%;
+      left: 58%;
+      width: --spacing(19);
+      rotate: -4deg;
+      animation-delay: -0.6s;
+    }
+
+    &:nth-child(4) {
+      top: 68%;
+      left: 14%;
+      width: --spacing(14);
+      rotate: 10deg;
+      animation-delay: -2.6s;
+    }
+
+    &:nth-child(5) {
+      top: 85%;
+      left: 54%;
+      width: --spacing(15);
+      rotate: -8deg;
+      animation-delay: -4.1s;
     }
   }
 

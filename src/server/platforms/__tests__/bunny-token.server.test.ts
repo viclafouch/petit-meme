@@ -38,20 +38,22 @@ describe('signBunnyUrl', () => {
 
 describe('toSharedExpiresAt', () => {
   const HOUR_START = 1_800_000_000
-  const TTL_SECONDS = PLAYBACK_TOKEN_TTL_SECONDS
 
   it('should give every signature inside the same hour the same expiry', () => {
-    expect(toSharedExpiresAt(HOUR_START + 1, TTL_SECONDS)).toBe(
-      toSharedExpiresAt(HOUR_START + ONE_HOUR_IN_SECONDS - 1, TTL_SECONDS)
+    expect(toSharedExpiresAt(HOUR_START + 1, PLAYBACK_TOKEN_TTL_SECONDS)).toBe(
+      toSharedExpiresAt(
+        HOUR_START + ONE_HOUR_IN_SECONDS - 1,
+        PLAYBACK_TOKEN_TTL_SECONDS
+      )
     )
   })
 
   it('should keep a signature valid for at least the TTL', () => {
-    expect(toSharedExpiresAt(HOUR_START + 1, TTL_SECONDS)).toBe(
-      HOUR_START + ONE_HOUR_IN_SECONDS + TTL_SECONDS
+    expect(toSharedExpiresAt(HOUR_START + 1, PLAYBACK_TOKEN_TTL_SECONDS)).toBe(
+      HOUR_START + ONE_HOUR_IN_SECONDS + PLAYBACK_TOKEN_TTL_SECONDS
     )
-    expect(toSharedExpiresAt(HOUR_START, TTL_SECONDS)).toBe(
-      HOUR_START + TTL_SECONDS
+    expect(toSharedExpiresAt(HOUR_START, PLAYBACK_TOKEN_TTL_SECONDS)).toBe(
+      HOUR_START + PLAYBACK_TOKEN_TTL_SECONDS
     )
   })
 })

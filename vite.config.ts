@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { fileURLToPath } from 'node:url'
 import { nitro } from 'nitro/vite'
 import { defineConfig, loadEnv, type UserConfig } from 'vite'
@@ -28,6 +29,10 @@ import {
 } from './src/constants/sentry.ts'
 import { applyDeploymentSiteUrl } from './src/env/deployment-url.ts'
 import { scrollDrivenCssGuard } from './vite-plugins/scroll-driven-css-guard.ts'
+
+const E2E_SENTRY_RELEASE = createHash('sha1').update('e2e').digest('hex')
+
+const E2E_SENTRY_TUNNEL_ROUTE = '/e2e-sentry-tunnel'
 
 const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
@@ -291,7 +296,10 @@ export default defineConfig(async ({ command, mode }) => {
         applicationKey: SENTRY_APPLICATION_KEY,
         authToken: serverEnv.SENTRY_AUTH_TOKEN,
         release: {
-          name: serverEnv.VERCEL_GIT_COMMIT_SHA
+          name:
+            mode === 'e2e'
+              ? E2E_SENTRY_RELEASE
+              : serverEnv.VERCEL_GIT_COMMIT_SHA
         },
         sourcemaps: {
           filesToDeleteAfterUpload: ['.vercel/output/**/*.map']
@@ -299,7 +307,7 @@ export default defineConfig(async ({ command, mode }) => {
         bundleSizeOptimizations: {
           excludeChannelInjection: true
         },
-        tunnelRoute: true,
+        tunnelRoute: mode === 'e2e' ? E2E_SENTRY_TUNNEL_ROUTE : true,
         autoInstrumentMiddleware: false
       })
     ]

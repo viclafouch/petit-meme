@@ -122,6 +122,7 @@ describe('formatComment', () => {
     })
 
     expect(comment).toContain('> [!NOTE]')
+    expect(comment).not.toContain('🆕')
     expect(comment).toContain('pnpm run bundle-size\npnpm run build:analyze')
   })
 })

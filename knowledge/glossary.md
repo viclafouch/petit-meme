@@ -33,7 +33,7 @@ One word, one meaning, across the product, the administration and these document
 - **Download** and **share**: the two kinds of export. Copying a Meme's link counts as a share.
 - **Video**: the exported video file. **Sound**: the exported audio file, Premium only.
 - **Watermark**: the mark on the free video. Premium gets the video without it.
-- **Bookmark**: a Meme a User saved to find again, with the star on the Meme. The screens call them favourites, and they sit in the library beside the categories.
+- **Bookmark**: a Meme a User saved to find again, with the star on the Meme. The screens call them favourites, and they live in the library.
 - **Studio**: where a User adds a caption to a Meme and exports the result.
 - **Caption**: the text a User adds in the Studio. Memes themselves carry no subtitles.
 - **Generation**: one captioned video made in the Studio.
@@ -45,7 +45,7 @@ One word, one meaning, across the product, the administration and these document
 ## The look
 
 - **Glow**: a soft spot of colour behind a page.
-- **Aurora**: the coloured banner above the header, for an announcement.
+- **Aurora**: the coloured banner that carries an announcement across the site.
 
 ## The offer
 

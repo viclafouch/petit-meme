@@ -9,7 +9,7 @@ The pull request opens as `AGENTS.md` describes `go pr`, and its body carries **
 
 ## 1. Check the knowledge
 
-`knowledge/` holds the vision, and a change can outgrow it. When the branch shifts what a person sees, does or pays, re-read the topics it touches. A topic it now contradicts, or a wish Victor keeps repeating that the change answers, earns one question to Victor: should `knowledge/` change, with the line you would write. A bug fix, a refactor or tooling skips this step.
+`knowledge/` holds the vision, and a change can outgrow it. When the branch shifts what a person can do or pays, re-read the topics it touches. A topic it now contradicts, or a wish Victor keeps repeating that the change answers, earns one question to Victor: should `knowledge/` change, with the line you would write, one that survives a redesign. A bug fix, a refactor or tooling skips this step.
 
 Done when the step is skipped, or Victor has answered and an approved line sits on the branch.
 
@@ -76,12 +76,11 @@ The body references each media by its path relative to `body.md`, and `--attach`
 
 ```sh
 gh pr create --title "<title>" --body-file .artifacts/<branch>/body.md --attach .artifacts/<branch>/<media> --assignee @me --label <label>
-gh pr merge <number> --auto --rebase
 ```
 
 The labels are those of the closed issues. The media go to this pull request only.
 
-Done when `gh pr view --json body` shows a `user-attachments` URL for each media and no local path left, and auto-merge is armed.
+Done when `gh pr view --json body` shows a `user-attachments` URL for each media and no local path left.
 
 ## 6. Land
 

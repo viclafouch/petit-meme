@@ -312,7 +312,11 @@ export const buildBudget = ({
   const toUpdatedBudgetKb = (bytes: number, budgetKb: number | undefined) => {
     const tightBudgetKb = toTightBudgetKb(bytes)
 
-    return budgetKb === undefined || allowGrowth
+    if (budgetKb === undefined) {
+      return tightBudgetKb
+    }
+
+    return allowGrowth && matchIsOverBudget(bytes, budgetKb)
       ? tightBudgetKb
       : Math.min(budgetKb, tightBudgetKb)
   }

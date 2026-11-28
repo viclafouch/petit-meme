@@ -14,9 +14,25 @@ Before editing files for a substantial task:
 
 A video meme library, live with real accounts, subscriptions and invoices, and no staging: `main` deploys to production once its checks pass. Victor, the Creator, is its only developer. The site is small, so a breaking change is cheap and the clean fix beats the compatible one.
 
+## Before the first edit
+
+Every session, whatever the task, before any file changes:
+
+1. Read every file in `knowledge/`.
+2. Load with the Skill tool each skill whose trigger the task meets:
+   - Anything a browser runs (HTML, CSS, client JS, a component): `modern-web-guidance`.
+   - A screen created or reshaped: `frontend-design`.
+   - Motion: `animate`, plus `animation-performance` for a dropped frame or the choice of a property.
+   - Phone layout, touch, a PWA: `mobile-native`.
+   - A drag, a swipe, a sheet: `gestures`.
+
+   Pass the task as `args`: without one, the design skills answer with a greeting.
+
+Done when your first reply names the skills loaded, or says none applies.
+
 ## Product
 
-`knowledge/` is Victor's product brain: the vision, the audiences, the offer, the words. Every task starts by reading all of it.
+`knowledge/` is Victor's product brain: the vision, the audiences, the offer, the words.
 
 Raw video URLs stay out of the DOM, the sitemap, the structured data and every API response.
 
@@ -24,9 +40,11 @@ Raw video URLs stay out of the DOM, the sitemap, the structured data and every A
 
 Before anything that runs on a schedule, holds a connection or calls a paid API on a hot path, answer out loud: does the database still sleep, and how many calls a month does it cost. Cache before paying per call.
 
+Each route ships the least JS and CSS it can. A budget in `bundle-budget.json` rises only on Victor's word, named in the pull request.
+
 ## Environments
 
-- **A UI change is done once you have seen it render and it holds up.** Serve the app, reusing the port when a server already runs, and audit the pages you touched with the `chrome-devtools` MCP at phone and desktop widths: console, accessibility, Core Web Vitals. You own what the audit finds: fix it in the same task, until the audit comes back clean.
+- **A UI change is done once you have seen it render and it holds up.** Serve the app, reusing the port when a server already runs, and audit the pages you touched with the `chrome-devtools` MCP at phone and desktop widths: console, accessibility, Core Web Vitals. A visual effect is also checked in WebKit. You own what the audit finds: fix it in the same task, until the audit comes back clean.
 - **Victor's phone is his.** Never connect to it on your own. When only a real phone can settle a check (software keyboard, viewport, touch, PWA), recommend that Victor runs `/phone`.
 - **Use the CLIs and MCPs yourself** before handing Victor a command or a dashboard step.
 - **Read production freely, write it only when Victor asks.** Production migrations stay Victor's. Before a write, say which environment the command hits: database tooling aims at production by default.
@@ -42,14 +60,14 @@ The most common defect here is a change that works on the tested path and is mis
 - **Both directions**: a way in comes with the way out. A dialog that opens meets one already open.
 - **Server and client**: the same route renders on the server and hydrates on the client.
 - **Phone and desktop**: layout, touch targets, native share, the video player.
-- **Discoverability**: a new public route needs its sitemap entry, metadata and structured data.
+- **Discoverability**: a new public route needs its sitemap entry, metadata, structured data and OG image. A page whose look changes gets its OG image redrawn to match, with `OG_VERSION` bumped.
 - **Emails**: a flow that changes an account state usually sends one.
 
 ## Scope and Git
 
 - Asked for the avatar feature, deliver the avatar feature. List what you saw along the way once, ranked, and let Victor pick. A "fais tout" covers everything listed, and nothing past it.
 - Plans live in the conversation and in GitHub issues. Research reports stay out of the repository.
-- Commit and push on Victor's word only. "push" sends one commit straight to `main`. "go pr" opens a pull request, assigned to Victor, with the labels of the issue it closes, and auto-merge armed in rebase mode.
+- Commit and push on Victor's word only. "push" sends one commit straight to `main`. "go pr" opens a pull request, assigned to Victor, with the labels of the issue it closes. Victor merges it, in rebase mode.
 
 ## Docs
 
@@ -59,9 +77,6 @@ The most common defect here is a change that works on the tested path and is mis
 ## Taste
 
 Victor likes simple systems and code that looks obvious. Find the real constraint, then write the smallest thing that makes the correct behaviour unsurprising.
-
-- Writes that must all land run one after the other, so a failure stops the next one.
-- A CI or config file may keep a comment that states a constraint the file cannot show.
 
 ## Reporting back
 

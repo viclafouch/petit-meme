@@ -1,27 +1,44 @@
 # Coding standards
 
-The conventions no tool checks. Formatting, lint and file names belong to the tooling.
+How Victor's code reads, checked in review. The tooling, the TanStack docs and the skills `AGENTS.md` loads cover the rest.
 
-## One name per concept
+## Placement
 
-A domain is a glossary word in the singular (`meme`, `bookmark`, `cap`), and it names the same slice in every layer: `src/server/<domain>`, `src/queries/<domain>.ts`, `src/components/<domain>`. Code only the administration uses sits under `admin/` in its layer, and code one route uses sits beside that route in `-components/` or `-lib/`. Shared code takes the most specific home that fits: pure functions in `helpers/`, browser and infrastructure code in `lib/`, values and shared schemas in `constants/`, outside services in `server/platforms/`.
+- A domain is a singular glossary word, the same in every layer: `src/server/<domain>`, `src/queries/<domain>.ts`, `src/components/<domain>`.
+- Administration-only code: `admin/` in its layer.
+- Code of one route: beside it, in `-components/` or `-lib/`.
+- Pure functions: `helpers/`. Browser and infrastructure: `lib/`. Values and shared schemas: `constants/`. Outside services: `server/platforms/`.
+- Tests: `__tests__/` beside their source, through its interface.
 
-## Names say what happens
+## Files
 
-- A server function opens on its verb: `get`, `list`, `count`, `create`, `update`, `delete`, `toggle`, or a domain verb (`ban`, `grant`, `export`) where CRUD would mislead. An administration read adds `Admin` (`listAdminUsers`), and a query option is its function name plus `QueryOpts`.
-- Inside a `.server.ts` file, `find` reads the database, `fetch` calls a service, `build` and `to` compute, `match` answers a boolean.
-- `.functions.ts` holds server functions importable anywhere, `.server.ts` stays on the server, `.middleware.ts` holds middlewares. Browser-only code a server-rendered component imports wraps its body in `createClientOnlyFn` under a plain `.ts` name, since a `.client.ts` import breaks the production build.
+- Middlewares: `.middleware.ts`.
+- Browser-only code a server-rendered component imports: a plain `.ts` wrapped in `createClientOnlyFn`.
 
-## Deep modules
+## Names
 
-A module is a small interface over its mechanics: callers of the Meme index pass a query and get Memes, never Algolia hits. Logic written twice becomes one function. Functions are arrow functions bound to a `const`. A test sits in `__tests__/` beside its source and drives the interface.
+- Server functions open on a verb: `get`, `list`, `count`, `create`, `update`, `delete`, `toggle`, or a domain verb (`ban`, `grant`, `export`).
+- Administration reads add `Admin`: `listAdminUsers`. Query options add `QueryOpts`.
+- In `.server.ts`: `find` reads the database, `fetch` calls a service, `build` and `to` compute, `match` returns a boolean.
 
-## The theme decides
+## Code
 
-`src/styles.css` is the design system. Every colour, size, radius, shadow, duration, easing, z-index and breakpoint is a named token there, and shared controls are its primitives: `.pill`, `.icon-button`, `focus-ring`. A component composes tokens and primitives, and a missing value joins the theme first. Code passes CSS only what comes from data, such as caption sizes, the frame ratio and export constants, as custom properties.
+- Functions: arrow functions bound to a `const`.
+- A module hides its mechanics: the Meme index returns Memes, never Algolia hits.
+- A route's `head` and `scripts` only read its loader.
+- Writes that must all land run one after the other.
 
-A stylesheet one surface needs ships with that surface. It starts with `@reference` and the layer order, keeps its rules in `@layer components` except those overriding a page it does not own, and writes breakpoints and input capabilities as Tailwind variants. Sizes run on the spacing scale, `px` draws hairlines, `cqw` follows a video frame.
+## Styles
 
-## Motion and browsers
+- Every colour, size, radius, shadow, duration, easing, z-index and breakpoint is a token in `src/styles.css`. A missing value joins it first.
+- Shared controls are its primitives: `.pill`, `.icon-button`, `focus-ring`.
+- A skill's raw value becomes a token, its media query a Tailwind variant.
+- Tailwind by default: a style goes in its element's classes.
+- A stylesheet only for what a class cannot say: `@keyframes` and what they animate, a style an element takes from another element, a selector many elements share.
+- A stylesheet belongs to one surface, opens with `@reference` and the layer order, and keeps its rules in `@layer components` unless they override a page it does not own.
+- Custom properties carry only data: caption sizes, frame ratio, export constants.
+- Sizes: the spacing scale. `px`: hairlines. `cqw`: a video frame.
 
-CSS carries every motion it can express, and the motion library takes gestures, springs and values interrupted mid-flight. An animation moves `transform` and `opacity` to hold 60 FPS on a phone. The browser floor is the build target: a newer feature ships with a fallback that renders the same, and a visual effect is checked in both WebKit and Chromium.
+## Browsers
+
+- The floor is `BROWSER_FLOOR_TARGETS`, the custom policy for `modern-web-guidance`: a newer feature ships a fallback that renders the same.

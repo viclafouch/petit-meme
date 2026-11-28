@@ -7,10 +7,10 @@ It started from the Creator's own need: find a video meme fast and send it to fr
 ## What it does
 
 - **Watch.** Each Meme has its own page, and on a phone the Reels chain the Memes one after the other.
-- **Find.** The library opens on every Meme, sorted by trend, by newest or by most viewed, with the categories beside it, grouped by mood, reply, theme and source. A search on every page, the trending Memes, related Memes and a random Meme. Signed-in Users also get an AI search that understands a description in plain words.
+- **Find.** The library opens on every Meme, sorted by trend, by newest or by most viewed, and browses by category, grouped by mood, reply, theme and source. A search on every page, the trending Memes, related Memes and a random Meme. Signed-in Users also get an AI search that understands a description in plain words.
 - **Take away.** Every Meme exports as a video, by download or through the phone's share sheet. Premium also exports its sound.
 - **Make your own.** The Studio adds a caption to a Meme and exports the result.
-- **Keep.** Signed-in Users star the Memes they want to find again, from any Meme. Their bookmarks sit in the library, next to the categories, so finding one again takes a tap.
+- **Keep.** Signed-in Users star the Memes they want to find again, from any Meme. Their bookmarks live in the library, so finding one again takes a tap.
 - **Install.** Petit Meme installs as an app on the phone's home screen, with no app store. It opens full screen, and a lost connection shows a page that waits for the network instead of the browser's error.
 
 ## Who runs it

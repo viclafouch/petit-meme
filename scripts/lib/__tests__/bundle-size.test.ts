@@ -177,7 +177,18 @@ describe('buildBudget', () => {
     ).toStrictEqual({ ...BUDGET, shellJs: 152, routeJs: { '/settings': 19 } })
     expect(
       buildBudget({ report: grownReport, budget: BUDGET, allowGrowth: true })
-    ).toStrictEqual({ ...BUDGET, shellJs: 162, routeJs: { '/settings': 21 } })
+    ).toStrictEqual({ ...BUDGET, shellJs: 162, routeJs: { '/settings': 19 } })
+  })
+
+  it('should raise only the budgets the measured size goes over, when growth is allowed', () => {
+    const report = {
+      shell: { bytes: 150_500, chunks: {} },
+      routes: { '/settings': { bytes: 25_000, chunks: {} } }
+    }
+
+    expect(
+      buildBudget({ report, budget: BUDGET, allowGrowth: true })
+    ).toStrictEqual({ ...BUDGET, shellJs: 152, routeJs: { '/settings': 27 } })
   })
 })
 

@@ -1,12 +1,13 @@
 import type React from 'react'
 import { ChevronLeft, Mic, Phone, Play, Plus, Video } from 'lucide-react'
+import APP_SCREENS from '~/components/install/app-screens.json'
+import { DEMO_ASSET_PATHS } from '~/constants/app-demo'
 import { APP_SCREEN_SIZE, buildAppScreenPath } from '~/helpers/web-app-assets'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
-import APP_SCREENS from '~/routes/_public__root/app/-lib/app-screens.json'
-import { DEMO_ASSET_PATHS } from '~/routes/_public__root/app/-lib/demo'
 import { PhoneFrame } from './phone-frame'
+import shareDemoCss from './share-demo.css?url'
 
 const VIDEO_SHARE_MOMENT = 0.055
 const SOUND_SHARE_MOMENT = 0.455
@@ -250,6 +251,7 @@ type ShareDemoProps = {
 export const ShareDemo = ({ className }: ShareDemoProps) => {
   return (
     <figure className={cn('share-demo', className)}>
+      <link rel="stylesheet" href={shareDemoCss} precedence="default" />
       <figcaption className="sr-only">{m.app_page_demo_label()}</figcaption>
       <PhoneFrame platform="iphone" screenClassName="bg-[#0a0a0a]">
         <MemeScreen />

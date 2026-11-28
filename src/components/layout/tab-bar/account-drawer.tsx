@@ -90,6 +90,9 @@ const LegalSection = ({ onManageCookies }: LegalSectionProps) => {
       aria-label={m.nav_legal()}
       className={cn(SECTION_CLASS, 'flex-row flex-wrap gap-x-4 gap-y-0 px-2')}
     >
+      <Link to="/faq" onClick={closeAccountDrawer} className={LEGAL_LINK_CLASS}>
+        {m.footer_faq()}
+      </Link>
       {getLegalLinks().map((link) => {
         return (
           <Link

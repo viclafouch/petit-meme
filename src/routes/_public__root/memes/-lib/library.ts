@@ -1,6 +1,7 @@
 import { CATEGORY_FAMILIES } from '~/constants/category'
 import { MEMES_PER_PAGE } from '~/constants/meme'
 import type { CategoryFamily } from '~/db/generated/prisma/enums'
+import { sortByMemeCount } from '~/helpers/category'
 import { formatCount } from '~/helpers/number'
 import { m } from '~/paraglide/messages'
 import type { Locale } from '~/paraglide/runtime'
@@ -20,12 +21,6 @@ const FAMILY_TITLES = {
   THEME: m.category_family_THEME,
   SOURCE: m.category_family_SOURCE
 } as const satisfies Record<CategoryFamily, () => string>
-
-export const sortByMemeCount = (categories: LibraryCategory[]) => {
-  return categories.toSorted((first, second) => {
-    return second.memeCount - first.memeCount
-  })
-}
 
 type LibraryCategoryGroup = {
   id: CategoryFamily | 'OTHER'

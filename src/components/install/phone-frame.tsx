@@ -1,9 +1,6 @@
 import type React from 'react'
+import { DEMO_CLOCK, PHONE_FRAME_RATIOS } from '~/constants/app-demo'
 import { cn } from '~/lib/utils'
-import {
-  DEMO_CLOCK,
-  PHONE_FRAME_RATIOS
-} from '~/routes/_public__root/app/-lib/demo'
 
 const SignalIcon = () => {
   return (

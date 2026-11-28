@@ -8,19 +8,20 @@ import {
 } from 'lucide-react'
 import { MessagingAppIcon } from '~/components/icon/messaging-app-icon'
 import { AppIcon } from '~/components/install/app-icon'
+import { AppQrCode, AppQrCodeImage } from '~/components/install/app-qr-code'
+import { PhoneInstallAction } from '~/components/install/install-action'
 import {
   getInstallGuide,
   type InstallGuideStep
 } from '~/components/install/install-guide'
 import { InstallGuideSteps } from '~/components/install/install-guide-steps'
+import { ShareDemo } from '~/components/install/share-demo'
+import { ShareDestinations } from '~/components/install/share-destinations'
+import { PHONE_FRAME_RATIOS } from '~/constants/app-demo'
 import { MESSAGING_APPS } from '~/constants/messaging-apps'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
-import { PHONE_FRAME_RATIOS } from '~/routes/_public__root/app/-lib/demo'
-import { AppQrCode, AppQrCodeImage } from './app-qr-code'
-import { PhoneInstallAction } from './install-action'
 import { LaunchDemo } from './launch-demo'
-import { ShareDemo } from './share-demo'
 
 const SECTION_HEADING_CLASS_NAME =
   'font-bricolage text-3xl leading-heading font-semibold text-balance sm:text-4xl'
@@ -28,39 +29,12 @@ const SECTION_HEADING_CLASS_NAME =
 const SPLIT_GRID_CLASS_NAME =
   'grid items-center lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]'
 
-const HERO_GLOW_CLASS_NAME =
-  'bg-[radial-gradient(28%_42%_at_72%_45%,rgb(251_200_80/0.30),transparent),radial-gradient(26%_36%_at_30%_56%,rgb(122_178_200/0.24),transparent),radial-gradient(20%_22%_at_62%_76%,rgb(214_41_118/0.16),transparent)]'
-
-const HERO_DESTINATION_COUNT = 5
-
-const HeroDestinations = () => {
-  return (
-    <div
-      aria-hidden="true"
-      className="pointer-events-none absolute inset-y-0 right-full me-4 w-[clamp(14rem,18vw,22rem)] max-xl:hidden"
-    >
-      {MESSAGING_APPS.slice(0, HERO_DESTINATION_COUNT).map((app) => {
-        return (
-          <MessagingAppIcon
-            key={app.id}
-            app={app}
-            className="hero-destination"
-          />
-        )
-      })}
-    </div>
-  )
-}
-
 const Hero = () => {
   return (
     <section className="relative isolate">
       <span
         aria-hidden="true"
-        className={cn(
-          'pointer-events-none absolute -inset-x-4 -inset-y-10 -z-10',
-          HERO_GLOW_CLASS_NAME
-        )}
+        className="pointer-events-none absolute -inset-x-4 -inset-y-10 -z-10 bg-(image:--gradient-glow-app)"
       />
       <div
         className={cn(
@@ -109,7 +83,7 @@ const Hero = () => {
           className="relative mx-auto w-64 sm:w-72 lg:w-[clamp(16rem,(100svh-var(--navbar-space)-11rem)*var(--phone-frame-ratio),24rem)]"
           style={{ '--phone-frame-ratio': PHONE_FRAME_RATIOS.iphone }}
         >
-          <HeroDestinations />
+          <ShareDestinations className="inset-y-0 right-full me-4 w-[clamp(14rem,18vw,22rem)]" />
           <ShareDemo className="app-hero-phone" />
         </div>
       </div>

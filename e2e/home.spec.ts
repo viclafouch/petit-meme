@@ -6,7 +6,7 @@ import { m } from '~/paraglide/messages'
 import { HOME_TRENDING_COUNT } from '~/routes/_public__root/-lib/home'
 import { E2E_RECENT_MEMES } from './content'
 import { test } from './fixtures'
-import { getFirstMemeCardLink, getMemeCardLinks } from './library'
+import { getFirstMemeCardLink } from './library'
 
 test.describe('the home page', () => {
   test('opens on Memes', async ({ page }) => {
@@ -17,9 +17,11 @@ test.describe('the home page', () => {
     await expect(
       page.getByRole('heading', { level: 2, name: m.home_trending_title() })
     ).toBeVisible()
-    await expect(getMemeCardLinks(page)).toHaveCount(
-      Math.min(TRENDING_MEMES_COUNT, HOME_TRENDING_COUNT)
-    )
+    await expect(
+      page
+        .getByRole('list', { name: m.home_trending_list_label(), exact: true })
+        .getByRole('link')
+    ).toHaveCount(Math.min(TRENDING_MEMES_COUNT, HOME_TRENDING_COUNT))
   })
 
   test('the hero leads to the library and to the plans', async ({ page }) => {

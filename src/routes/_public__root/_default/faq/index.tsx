@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { serializeJsonLd } from '~/helpers/json-ld'
@@ -5,20 +6,27 @@ import { buildFaqJsonLd } from '~/lib/seo/json-ld'
 import { buildSeo } from '~/lib/seo/meta'
 import { buildOgImage } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages'
-import { getLocale } from '~/paraglide/runtime'
-import { getFaqItems } from './-components/faq-items'
+import { getLocale, locales } from '~/paraglide/runtime'
 import { FaqPage } from './-components/faq-page'
+import { getFaqItems } from './-lib/faq-items'
 
-const loadFaqItems = createServerFn({ method: 'GET' }).handler(() => {
-  return getFaqItems()
-})
+const listFaqItems = createServerFn({ method: 'GET' })
+  .validator((data: unknown) => {
+    return z.object({ locale: z.enum(locales) }).parse(data)
+  })
+  .handler(({ data }) => {
+    return getFaqItems(data.locale)
+  })
 
 export const Route = createFileRoute('/_public__root/_default/faq/')({
   component: FaqPage,
   staleTime: Infinity,
   preloadStaleTime: Infinity,
-  loader: () => {
-    return loadFaqItems()
+  loaderDeps: () => {
+    return { locale: getLocale() }
+  },
+  loader: ({ deps }) => {
+    return listFaqItems({ data: { locale: deps.locale } })
   },
   scripts: ({ loaderData }) => {
     if (!loaderData) {

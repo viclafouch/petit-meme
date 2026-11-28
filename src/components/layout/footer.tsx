@@ -6,11 +6,11 @@ import { CookieTrigger } from '~/components/cookie-consent/cookie-trigger'
 import { AppIcon } from '~/components/install/app-icon'
 import { ALL_CATEGORY_SLUG } from '~/constants/meme'
 import { getLegalLinks } from '~/constants/navigation'
+import { sortByMemeCount } from '~/helpers/category'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { listCategoriesQueryOpts } from '~/queries/category'
-import { sortByMemeCount } from '~/routes/_public__root/memes/-lib/library'
 import { useCookieConsentStore } from '~/stores/cookie-consent.store'
 
 const FOOTER_CATEGORY_COUNT = 6
@@ -31,7 +31,7 @@ type FooterColumnProps = {
 
 const FooterColumn = ({ title, links, children }: FooterColumnProps) => {
   return (
-    <nav aria-label={title} className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3">
       <h2 className="text-sm font-semibold">{title}</h2>
       <ul className="flex flex-col gap-2">
         {links.map((link) => {
@@ -45,7 +45,7 @@ const FooterColumn = ({ title, links, children }: FooterColumnProps) => {
         })}
         {children}
       </ul>
-    </nav>
+    </div>
   )
 }
 
@@ -119,7 +119,10 @@ export const Footer = ({ className }: FooterProps) => {
 
   return (
     <footer className={cn('relative border-t bg-background/40', className)}>
-      <div className="container-wide grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.4fr)_repeat(4,minmax(0,1fr))]">
+      <nav
+        aria-label={m.footer_sitemap_label()}
+        className="container-wide grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.4fr)_repeat(4,minmax(0,1fr))]"
+      >
         <div className="flex max-w-xs flex-col gap-3 sm:col-span-2 lg:col-span-1">
           <AppIcon size={96} className="size-10" />
           <p className="text-sm text-muted-foreground text-pretty">
@@ -139,7 +142,7 @@ export const Footer = ({ className }: FooterProps) => {
             </li>
           ) : null}
         </FooterColumn>
-      </div>
+      </nav>
     </footer>
   )
 }

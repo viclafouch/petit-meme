@@ -13,7 +13,7 @@ export const PremiumNavButton = () => {
   return (
     <Link
       to="/pricing"
-      className="navbar-premium relative isolate inline-flex h-9 items-center gap-1.5 overflow-hidden whitespace-nowrap rounded-full bg-(image:--gradient-premium) px-3.5 text-sm font-bold text-(--color-premium-foreground) shadow-(--shadow-premium) focus-visible:focus-ring active:scale-(--scale-press) mouse:hover:shadow-(--shadow-premium-hover) [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:fill-current"
+      className="pill-premium inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 text-sm focus-visible:focus-ring active:scale-(--scale-press) [&_svg]:size-4 [&_svg]:shrink-0"
     >
       <Crown aria-hidden="true" />
       {m.nav_upgrade_premium()}

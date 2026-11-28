@@ -6,7 +6,12 @@ import {
   MEMES_SEARCH_SCHEMA
 } from '~/constants/meme'
 import { resolveLibraryFilters } from '~/helpers/memes-sort'
+import { buildCategoryCrumb } from '~/lib/seo/json-ld'
 import { buildSeo } from '~/lib/seo/meta'
+import {
+  getBreadcrumbJsonLd,
+  renderJsonLdScripts
+} from '~/lib/seo/page-json-ld'
 import { buildOgImage } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
@@ -87,6 +92,7 @@ export const Route = createFileRoute(
     return {
       category,
       isEmpty,
+      jsonLd: getBreadcrumbJsonLd([buildCategoryCrumb(category)]),
       description: buildLibraryDescription({
         categoryTitle: category?.title,
         count: category ? category.memeCount : libraryCount,
@@ -97,6 +103,7 @@ export const Route = createFileRoute(
       })
     }
   },
+  scripts: renderJsonLdScripts,
   head: ({ loaderData, match }) => {
     const category = loaderData?.category
     const locale = getLocale()

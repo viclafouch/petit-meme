@@ -24,10 +24,8 @@ import { getAppErrorCode } from '~/constants/error'
 import { EASE_OUT } from '~/constants/motion'
 import { buildReachedCapState } from '~/helpers/cap'
 import { getErrorMessage } from '~/helpers/error'
-import { serializeJsonLd } from '~/helpers/json-ld'
 import { snoozePremiumReminder } from '~/lib/premium-reminder'
 import { captureWithFeature } from '~/lib/sentry'
-import { buildBreadcrumbJsonLd } from '~/lib/seo/json-ld'
 import { m } from '~/paraglide/messages'
 import { getAiSearchQuotaQueryOpts } from '~/queries/ai-search'
 import {
@@ -158,16 +156,8 @@ export const AiSearchPage = () => {
     }
   }, [form])
 
-  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
-    { name: m.meme_breadcrumb_home(), pathname: '/' },
-    { name: m.ai_search_seo_title(), pathname: '/memes/ai-search' }
-  ])
-
   return (
     <PageContainer as="main">
-      <script type="application/ld+json">
-        {serializeJsonLd(breadcrumbJsonLd)}
-      </script>
       <PageHeader>
         <PageHeading>{m.ai_search_title()}</PageHeading>
         <PageDescription>{m.ai_search_description()}</PageDescription>

@@ -1,9 +1,11 @@
 import { z } from 'zod'
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { serializeJsonLd } from '~/helpers/json-ld'
-import { buildFaqJsonLd } from '~/lib/seo/json-ld'
 import { buildSeo } from '~/lib/seo/meta'
+import {
+  getBreadcrumbJsonLd,
+  renderJsonLdScripts
+} from '~/lib/seo/page-json-ld'
 import { buildOgImage } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages'
 import { getLocale, locales } from '~/paraglide/runtime'
@@ -25,21 +27,13 @@ export const Route = createFileRoute('/_public__root/_default/faq/')({
   loaderDeps: () => {
     return { locale: getLocale() }
   },
-  loader: ({ deps }) => {
-    return listFaqItems({ data: { locale: deps.locale } })
-  },
-  scripts: ({ loaderData }) => {
-    if (!loaderData) {
-      return []
+  loader: async ({ deps }) => {
+    return {
+      faqItems: await listFaqItems({ data: { locale: deps.locale } }),
+      jsonLd: getBreadcrumbJsonLd([{ name: m.faq_title(), pathname: '/faq' }])
     }
-
-    return [
-      {
-        type: 'application/ld+json',
-        children: serializeJsonLd(buildFaqJsonLd({ faqItems: loaderData }))
-      }
-    ]
   },
+  scripts: renderJsonLdScripts,
   head: () => {
     return buildSeo({
       title: m.seo_faq_title(),

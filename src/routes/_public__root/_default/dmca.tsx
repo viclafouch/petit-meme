@@ -1,6 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { buildSeo } from '~/lib/seo/meta'
+import {
+  getBreadcrumbJsonLd,
+  renderJsonLdScripts
+} from '~/lib/seo/page-json-ld'
 import { buildOgImage } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages'
 import { getLocale, type Locale } from '~/paraglide/runtime'
@@ -25,9 +29,15 @@ export const Route = createFileRoute('/_public__root/_default/dmca')({
   component: DmcaPage,
   staleTime: Infinity,
   preloadStaleTime: Infinity,
-  loader: () => {
-    return loadMarkdown()
+  loader: async () => {
+    return {
+      markdown: await loadMarkdown(),
+      jsonLd: getBreadcrumbJsonLd([
+        { name: m.legal_dmca_title(), pathname: '/dmca' }
+      ])
+    }
   },
+  scripts: renderJsonLdScripts,
   head: () => {
     const locale = getLocale()
     const title = m.legal_dmca_title()

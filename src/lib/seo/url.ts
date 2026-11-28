@@ -101,7 +101,3 @@ export const buildUrl = (pathname: string, locale?: Locale): string => {
     return websiteOrigin
   }
 }
-
-export const buildMemeUrl = (memeId: string) => {
-  return `${websiteOrigin}/memes/${memeId}`
-}

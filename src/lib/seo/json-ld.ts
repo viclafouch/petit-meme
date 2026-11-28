@@ -1,428 +1,59 @@
-import type {
-  BreadcrumbList,
-  CollectionPage,
-  FAQPage,
-  Graph,
-  ImageObject,
-  ItemList,
-  ListItem,
-  Offer,
-  Organization,
-  PriceSpecification,
-  Product,
-  SearchAction,
-  VideoObject,
-  WebApplication,
-  WebPage,
-  WebSite,
-  WithActionConstraints,
-  InteractionCounter,
-  WithContext
-} from 'schema-dts'
+import type { BreadcrumbList, Graph, ListItem } from 'schema-dts'
 import { LOGO_PATH, SITE_NAME } from '~/constants/branding'
-import { HLS_MIME_TYPE } from '~/constants/bunny'
-import type { FaqItem } from '~/constants/faq'
-import type { MemeWithVideo } from '~/constants/meme'
-import { THUMBNAIL_RATIOS } from '~/constants/og'
-import type { Plan } from '~/constants/plan'
-import { ONE_HOUR_IN_SECONDS, SECONDS_PER_MINUTE } from '~/constants/time'
-import type { CategoryModel } from '~/db/generated/prisma/models'
-import { convertCentsToEuros } from '~/helpers/number'
-import { buildScreenshotPath } from '~/helpers/web-app-assets'
-import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
-import {
-  buildEmbedUrl,
-  buildMemeUrl,
-  buildUrl,
-  buildThumbnailUrl,
-  websiteOrigin
-} from '~/lib/seo/url'
+import { ALL_CATEGORY_SLUG } from '~/constants/meme'
+import { serializeJsonLd } from '~/helpers/json-ld'
+import { buildUrl, websiteOrigin } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 
-const websiteId = `${websiteOrigin}/#website`
+export const ORGANIZATION_ID = `${websiteOrigin}/#organization`
 
-const websiteSearchAction = {
-  '@type': 'SearchAction',
-  target: {
-    '@type': 'EntryPoint',
-    urlTemplate: `${websiteOrigin}/memes/category/all?query={search_term_string}`
-  },
-  'query-input': 'required name=search_term_string'
-} satisfies WithActionConstraints<SearchAction>
+export const SITE_IDENTITY = {
+  name: SITE_NAME,
+  alternateName: 'Petit Mème',
+  url: `${websiteOrigin}/`
+} as const
 
-const buildWatchCounter = (viewCount: number) => {
-  return {
-    '@type': 'InteractionCounter',
-    interactionType: { '@type': 'WatchAction' },
-    userInteractionCount: viewCount
-  } satisfies InteractionCounter
-}
+export const SITE_LOGO_URL = `${websiteOrigin}${LOGO_PATH}`
 
-const formatSchemaDuration = (totalSeconds: number) => {
-  if (totalSeconds <= 0) {
-    return 'PT0S'
-  }
-
-  const hours = Math.floor(totalSeconds / ONE_HOUR_IN_SECONDS)
-  const minutes = Math.floor(
-    (totalSeconds % ONE_HOUR_IN_SECONDS) / SECONDS_PER_MINUTE
-  )
-  const seconds = totalSeconds % SECONDS_PER_MINUTE
-
-  const parts = [
-    hours > 0 ? `${hours}H` : '',
-    minutes > 0 ? `${minutes}M` : '',
-    seconds > 0 || (hours === 0 && minutes === 0) ? `${seconds}S` : ''
-  ]
-
-  return `PT${parts.join('')}`
-}
-
-type SchemaGraph = Graph & { '@context': 'https://schema.org' }
-
-const buildThumbnailUrls = (meme: MemeWithVideo) => {
-  return [
-    buildVideoImageUrl(meme.video.bunnyId),
-    ...THUMBNAIL_RATIOS.map((ratio) => {
-      return buildThumbnailUrl(meme.id, ratio)
-    })
-  ]
-}
-
-export const buildMemeJsonLd = (
-  meme: MemeWithVideo,
-  crawlerStreamUrl: string | null
-): SchemaGraph => {
-  const memeUrl = buildMemeUrl(meme.id)
-  const thumbnailUrl = buildVideoImageUrl(meme.video.bunnyId)
-
-  return {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'WebPage',
-        '@id': `${memeUrl}#webpage`,
-        url: memeUrl,
-        isPartOf: { '@id': websiteId },
-        primaryImageOfPage: {
-          '@type': 'ImageObject',
-          contentUrl: thumbnailUrl
-        } satisfies ImageObject,
-        mainEntity: { '@id': `${memeUrl}#video` }
-      } satisfies WebPage,
-      {
-        '@type': 'VideoObject',
-        '@id': `${memeUrl}#video`,
-        name: meme.title,
-        description: meme.description,
-        thumbnailUrl: buildThumbnailUrls(meme),
-        uploadDate: meme.createdAt.toISOString(),
-        embedUrl: buildEmbedUrl(meme.id),
-        duration: formatSchemaDuration(meme.video.duration),
-        requiresSubscription: false,
-        videoQuality: 'HD',
-        keywords: meme.keywords.join(', '),
-        ...(crawlerStreamUrl === null
-          ? {}
-          : { contentUrl: crawlerStreamUrl, encodingFormat: HLS_MIME_TYPE }),
-        interactionStatistic: buildWatchCounter(meme.viewCount)
-      } satisfies VideoObject
-    ]
-  }
-}
-
-export const buildCategoryJsonLd = (
-  category: Pick<CategoryModel, 'slug' | 'title'> | undefined,
-  { page, memes }: { page: number; memes: MemeWithVideo[] }
-): SchemaGraph => {
-  const basePath = category
-    ? `/memes/category/${category.slug}`
-    : '/memes/category/all'
-  const categoryUrl = `${websiteOrigin}${basePath}${page > 1 ? `?page=${page}` : ''}`
-  const title = category ? category.title : m.meme_all_memes()
-  const description = category
-    ? m.seo_category_page_description({ page: String(page), title })
-    : m.seo_category_all_description({ page: String(page) })
-
-  return {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'CollectionPage',
-        '@id': `${categoryUrl}#webpage`,
-        url: categoryUrl,
-        name: m.seo_category_page_name({ title, page: String(page) }),
-        description,
-        isPartOf: { '@id': websiteId },
-        mainEntity: { '@id': `${categoryUrl}#itemlist` }
-      } satisfies CollectionPage,
-      {
-        '@type': 'ItemList',
-        '@id': `${categoryUrl}#itemlist`,
-        numberOfItems: memes.length,
-        itemListElement: memes.map((meme, index): ListItem => {
-          return {
-            '@type': 'ListItem',
-            position: index + 1,
-            item: {
-              '@type': 'VideoObject',
-              '@id': `${buildMemeUrl(meme.id)}#video`,
-              name: meme.title,
-              description: meme.description,
-              embedUrl: buildEmbedUrl(meme.id),
-              thumbnailUrl: buildThumbnailUrls(meme),
-              uploadDate: meme.publishedAt?.toISOString(),
-              url: buildMemeUrl(meme.id),
-              interactionStatistic: buildWatchCounter(meme.viewCount)
-            } satisfies VideoObject
-          }
-        })
-      } satisfies ItemList
-    ]
-  }
-}
-
-type BuildFaqPageJsonLdParams = {
-  faqItems: readonly FaqItem[]
-  pageUrl: string
-}
-
-const buildFaqPageJsonLd = ({
-  faqItems,
-  pageUrl
-}: BuildFaqPageJsonLdParams): FAQPage => {
-  return {
-    '@type': 'FAQPage',
-    '@id': `${pageUrl}#faq`,
-    mainEntity: faqItems.map((item) => {
-      return {
-        '@type': 'Question',
-        name: item.question,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: item.answer
-        }
-      }
-    })
-  } satisfies FAQPage
-}
-
-export const buildHomeJsonLd = (): SchemaGraph => {
-  const homeUrl = buildUrl('/', getLocale())
-
-  return {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'WebSite',
-        '@id': websiteId,
-        url: websiteOrigin,
-        name: SITE_NAME,
-        publisher: { '@id': `${websiteOrigin}/#organization` },
-        potentialAction: websiteSearchAction
-      } satisfies WebSite,
-      {
-        '@type': 'Organization',
-        '@id': `${websiteOrigin}/#organization`,
-        name: SITE_NAME,
-        url: websiteOrigin,
-        logo: `${websiteOrigin}${LOGO_PATH}`,
-        description: m.seo_home_description()
-      } satisfies Organization,
-      {
-        '@type': 'WebPage',
-        '@id': `${homeUrl}#webpage`,
-        url: homeUrl,
-        name: m.seo_home_page_name(),
-        inLanguage: getLocale(),
-        isPartOf: { '@id': websiteId },
-        about: { '@id': `${websiteOrigin}/#organization` },
-        description: m.seo_home_description()
-      } satisfies WebPage
-    ]
-  }
-}
-
-type BuildFaqJsonLdParams = {
-  faqItems: readonly FaqItem[]
-}
-
-export const buildFaqJsonLd = ({
-  faqItems
-}: BuildFaqJsonLdParams): SchemaGraph => {
-  const faqUrl = buildUrl('/faq', getLocale())
-
-  return {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'WebPage',
-        '@id': `${faqUrl}#webpage`,
-        url: faqUrl,
-        name: m.seo_faq_title(),
-        inLanguage: getLocale(),
-        isPartOf: { '@id': websiteId },
-        description: m.seo_faq_description()
-      } satisfies WebPage,
-      buildFaqPageJsonLd({ faqItems, pageUrl: faqUrl })
-    ]
-  }
-}
-
-type BreadcrumbItem = {
+export type Crumb = {
   name: string
   pathname: string
 }
 
-export const buildBreadcrumbJsonLd = (
-  items: readonly BreadcrumbItem[]
-): WithContext<BreadcrumbList> => {
+type CrumbCategory = {
+  slug: string
+  title: string
+}
+
+export const serializeJsonLdGraph = (nodes: Graph['@graph']) => {
+  return serializeJsonLd({ '@context': 'https://schema.org', '@graph': nodes })
+}
+
+export const buildCategoryCrumb = (category?: CrumbCategory): Crumb => {
   return {
-    '@context': 'https://schema.org',
+    name: category?.title ?? m.meme_all_memes(),
+    pathname: `/memes/category/${category?.slug ?? ALL_CATEGORY_SLUG}`
+  }
+}
+
+export const buildBreadcrumbNode = (
+  crumbs: readonly Crumb[]
+): BreadcrumbList => {
+  const locale = getLocale()
+  const trail = [{ name: m.meme_breadcrumb_home(), pathname: '/' }, ...crumbs]
+
+  return {
     '@type': 'BreadcrumbList',
-    itemListElement: items.map((item, index): ListItem => {
+    itemListElement: trail.map((crumb, index): ListItem => {
+      const isCurrentPage = index === trail.length - 1
+
       return {
         '@type': 'ListItem',
         position: index + 1,
-        name: item.name,
-        item: buildUrl(item.pathname)
+        name: crumb.name,
+        ...(isCurrentPage ? {} : { item: buildUrl(crumb.pathname, locale) })
       }
     })
-  }
-}
-
-type BuildPlanOfferParams = {
-  plan: Plan
-  priceInCents: number
-  nameSuffix: string
-  unitCode: string
-  offerUrl: string
-}
-
-const buildPlanOffer = ({
-  plan,
-  priceInCents,
-  nameSuffix,
-  unitCode,
-  offerUrl
-}: BuildPlanOfferParams): Offer => {
-  const priceEuros = convertCentsToEuros(priceInCents).toFixed(2)
-
-  return {
-    '@type': 'Offer',
-    name: `${plan.title}${nameSuffix}`,
-    description: plan.description,
-    price: priceEuros,
-    priceCurrency: 'EUR',
-    url: offerUrl,
-    availability: 'https://schema.org/InStock',
-    priceSpecification: {
-      '@type': 'UnitPriceSpecification',
-      price: priceEuros,
-      priceCurrency: 'EUR',
-      referenceQuantity: {
-        '@type': 'QuantitativeValue',
-        value: 1,
-        unitCode
-      }
-    } satisfies PriceSpecification
-  }
-}
-
-type BuildPricingJsonLdParams = {
-  plans: Plan[]
-  faqItems: readonly FaqItem[]
-}
-
-export const buildPricingJsonLd = ({
-  plans,
-  faqItems
-}: BuildPricingJsonLdParams): SchemaGraph => {
-  const pricingUrl = `${websiteOrigin}/pricing`
-  const title = m.seo_pricing_title()
-  const description = m.seo_pricing_description()
-
-  const monthlyPrices = plans.map((plan) => {
-    return convertCentsToEuros(plan.pricing.monthly.priceInCents)
-  })
-
-  return {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'WebPage',
-        '@id': `${pricingUrl}#webpage`,
-        url: pricingUrl,
-        name: title,
-        description,
-        isPartOf: { '@id': websiteId }
-      } satisfies WebPage,
-      {
-        '@type': 'Product',
-        '@id': `${pricingUrl}#product`,
-        name: m.seo_pricing_subscription_name(),
-        image: `${websiteOrigin}${LOGO_PATH}`,
-        description,
-        offers: {
-          '@type': 'AggregateOffer',
-          priceCurrency: 'EUR',
-          offerCount: plans.length,
-          lowPrice: Math.min(...monthlyPrices).toFixed(2),
-          highPrice: Math.max(...monthlyPrices).toFixed(2),
-          offers: plans.flatMap((plan): Offer[] => {
-            const monthlyOffer = buildPlanOffer({
-              plan,
-              priceInCents: plan.pricing.monthly.priceInCents,
-              nameSuffix: '',
-              unitCode: 'MON',
-              offerUrl: pricingUrl
-            })
-
-            const hasAnnualPrice = plan.pricing.yearly.priceInCents > 0
-
-            if (!hasAnnualPrice) {
-              return [monthlyOffer]
-            }
-
-            const annualOffer = buildPlanOffer({
-              plan,
-              priceInCents: plan.pricing.yearly.priceInCents,
-              nameSuffix: m.seo_pricing_annual_suffix(),
-              unitCode: 'ANN',
-              offerUrl: pricingUrl
-            })
-
-            return [monthlyOffer, annualOffer]
-          })
-        }
-      } satisfies Product,
-      buildFaqPageJsonLd({ faqItems, pageUrl: pricingUrl })
-    ]
-  }
-}
-
-export const buildWebApplicationJsonLd = (): WithContext<WebApplication> => {
-  const locale = getLocale()
-  const appUrl = buildUrl('/app', locale)
-
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'WebApplication',
-    '@id': `${appUrl}#webapplication`,
-    name: SITE_NAME,
-    url: appUrl,
-    description: m.app_page_description(),
-    applicationCategory: 'EntertainmentApplication',
-    operatingSystem: 'Android, iOS, Windows, macOS, ChromeOS',
-    browserRequirements: 'Requires a modern web browser',
-    image: `${websiteOrigin}/android-chrome-512x512.png`,
-    screenshot: `${websiteOrigin}${buildScreenshotPath({ locale, formFactor: 'narrow', name: 'home' })}`,
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'EUR'
-    },
-    publisher: { '@id': `${websiteOrigin}/#organization` }
   }
 }

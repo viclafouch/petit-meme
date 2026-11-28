@@ -10,7 +10,7 @@ import {
 const faqRouteApi = getRouteApi('/_public__root/_default/faq/')
 
 export const FaqPage = () => {
-  const faqItems = faqRouteApi.useLoaderData()
+  const { faqItems } = faqRouteApi.useLoaderData()
 
   return (
     <div className="container flex max-w-3xl flex-col gap-12 py-10 sm:py-16">

@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { serializeJsonLd } from '~/helpers/json-ld'
-import { buildHomeJsonLd } from '~/lib/seo/json-ld'
 import { buildSeo } from '~/lib/seo/meta'
+import { renderJsonLdScripts } from '~/lib/seo/page-json-ld'
 import { buildOgImage } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
@@ -15,6 +14,7 @@ import {
 import { HomePage } from './-components/home-page'
 import homeCss from './-components/home.css?url'
 import { NEW_MEMES_FILTERS } from './-lib/home'
+import { getHomeJsonLd } from './-lib/home-json-ld'
 
 export const Route = createFileRoute('/_public__root/')({
   component: HomePage,
@@ -44,6 +44,8 @@ export const Route = createFileRoute('/_public__root/')({
           })
         : undefined
     ])
+
+    return { jsonLd: getHomeJsonLd() }
   },
   head: () => {
     const locale = getLocale()
@@ -59,12 +61,5 @@ export const Route = createFileRoute('/_public__root/')({
       links: [...seo.links, { rel: 'stylesheet', href: homeCss }]
     }
   },
-  scripts: () => {
-    return [
-      {
-        type: 'application/ld+json',
-        children: serializeJsonLd(buildHomeJsonLd())
-      }
-    ]
-  }
+  scripts: renderJsonLdScripts
 })

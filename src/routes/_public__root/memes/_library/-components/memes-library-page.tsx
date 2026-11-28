@@ -4,9 +4,7 @@ import { getRouteApi, Link } from '@tanstack/react-router'
 import { LoadMore, MemeCardGrid } from '~/components/meme/meme-card-grid'
 import { useMemesViewEvent } from '~/components/meme/meme-grid'
 import { ALL_CATEGORY_SLUG } from '~/constants/meme'
-import { serializeJsonLd } from '~/helpers/json-ld'
 import { resolveLibraryFilters } from '~/helpers/memes-sort'
-import { buildBreadcrumbJsonLd, buildCategoryJsonLd } from '~/lib/seo/json-ld'
 import { m } from '~/paraglide/messages'
 import { listMemesPagesQueryOpts } from '~/queries/meme'
 import { flattenUniqueCards } from '~/routes/_public__root/memes/-lib/library'
@@ -66,43 +64,6 @@ const EmptyLibrary = () => {
         </Link>
       </div>
     </output>
-  )
-}
-
-const LibraryJsonLd = () => {
-  const { category } = categoryRouteApi.useLoaderData()
-  const pagesQuery = useLibraryPages()
-  const [firstPage] = pagesQuery.data.pages
-
-  if (!firstPage) {
-    return null
-  }
-
-  const categoryName = category?.title ?? m.meme_all_memes()
-  const categorySlug = category?.slug ?? ALL_CATEGORY_SLUG
-
-  return (
-    <>
-      <script type="application/ld+json">
-        {serializeJsonLd(
-          buildCategoryJsonLd(category, {
-            page: firstPage.page,
-            memes: firstPage.memes
-          })
-        )}
-      </script>
-      <script type="application/ld+json">
-        {serializeJsonLd(
-          buildBreadcrumbJsonLd([
-            { name: m.meme_breadcrumb_home(), pathname: '/' },
-            {
-              name: categoryName,
-              pathname: `/memes/category/${categorySlug}`
-            }
-          ])
-        )}
-      </script>
-    </>
   )
 }
 
@@ -175,7 +136,6 @@ export const MemesLibraryPage = () => {
       <LibraryPageHeader />
       <LibraryStrip />
       <LibraryGrid />
-      <LibraryJsonLd />
     </>
   )
 }

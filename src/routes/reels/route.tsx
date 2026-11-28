@@ -1,5 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { buildSeo } from '~/lib/seo/meta'
+import {
+  getBreadcrumbJsonLd,
+  renderJsonLdScripts
+} from '~/lib/seo/page-json-ld'
 import { buildOgImage } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
@@ -25,7 +29,14 @@ export const Route = createFileRoute('/reels')({
     }
 
     await context.queryClient.infiniteQuery(listReelsQueryOpts())
+
+    return {
+      jsonLd: getBreadcrumbJsonLd([
+        { name: m.seo_reels_title(), pathname: '/reels' }
+      ])
+    }
   },
+  scripts: renderJsonLdScripts,
   head: () => {
     const locale = getLocale()
 

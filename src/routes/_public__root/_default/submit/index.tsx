@@ -1,7 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { serializeJsonLd } from '~/helpers/json-ld'
-import { buildBreadcrumbJsonLd } from '~/lib/seo/json-ld'
 import { buildSeo } from '~/lib/seo/meta'
+import {
+  getBreadcrumbJsonLd,
+  renderJsonLdScripts
+} from '~/lib/seo/page-json-ld'
 import { buildOgImage } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
@@ -21,7 +23,14 @@ export const Route = createFileRoute('/_public__root/_default/submit/')({
         staleTime: 'static'
       })
     }
+
+    return {
+      jsonLd: getBreadcrumbJsonLd([
+        { name: m.submit_heading(), pathname: '/submit' }
+      ])
+    }
   },
+  scripts: renderJsonLdScripts,
   head: () => {
     const locale = getLocale()
 
@@ -39,18 +48,7 @@ export const Route = createFileRoute('/_public__root/_default/submit/')({
           },
           m.submit_heading()
         )
-      }),
-      scripts: [
-        {
-          type: 'application/ld+json',
-          children: serializeJsonLd(
-            buildBreadcrumbJsonLd([
-              { name: m.meme_breadcrumb_home(), pathname: '/' },
-              { name: m.submit_heading(), pathname: '/submit' }
-            ])
-          )
-        }
-      ]
+      })
     }
   }
 })

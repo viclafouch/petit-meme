@@ -4,19 +4,17 @@ import { createFileRoute } from '@tanstack/react-router'
 import { createIsomorphicFn } from '@tanstack/react-start'
 import { MemeStatus } from '~/db/generated/prisma/enums'
 import { clientEnv } from '~/env/client'
-import { serializeJsonLd } from '~/helpers/json-ld'
 import { buildVideoFirstFrameUrl } from '~/lib/bunny-public-urls'
-import { getCrawlerStreamUrl } from '~/lib/crawler-video'
-import { buildBreadcrumbJsonLd, buildMemeJsonLd } from '~/lib/seo/json-ld'
 import { buildMemeSeo } from '~/lib/seo/meta'
+import { renderJsonLdScripts } from '~/lib/seo/page-json-ld'
 import { warmVideoStream } from '~/lib/video'
-import { m } from '~/paraglide/messages'
 import {
   getMemePlaybackUrlQueryOpts,
   getMemeQueryOpts,
   getMemeWithPlaybackUrlQueryOpts,
   listRelatedMemesQueryOpts
 } from '~/queries/meme'
+import { getMemeJsonLd } from '~/routes/_public__root/memes/-lib/meme-json-ld'
 import { readSeenMemeIds } from '~/routes/_public__root/memes/-lib/seen-memes'
 import { MemePage } from './-components/meme-page'
 import memePageCss from './-components/meme-page.css?url'
@@ -97,49 +95,16 @@ export const Route = createFileRoute('/_public__root/memes/$memeId')({
       ])
     }
 
-    const crawlerStreamUrl =
-      meme.status === MemeStatus.PUBLISHED
-        ? await getCrawlerStreamUrl(meme.video.bunnyId)
-        : null
+    const jsonLd =
+      meme.status === MemeStatus.PUBLISHED ? await getMemeJsonLd(meme) : null
 
     return {
       meme,
-      crawlerStreamUrl,
+      jsonLd,
       seenMemeIds: readSeenMemeIds(location.state)
     }
   },
-  scripts: ({ loaderData }) => {
-    if (loaderData?.meme.status === MemeStatus.PUBLISHED) {
-      const { meme } = loaderData
-      const categoryName =
-        meme.categories[0]?.category.title ?? m.meme_breadcrumb_fallback()
-      const categorySlug = meme.categories[0]?.category.slug ?? 'all'
-
-      return [
-        {
-          type: 'application/ld+json',
-          children: serializeJsonLd(
-            buildMemeJsonLd(meme, loaderData.crawlerStreamUrl)
-          )
-        },
-        {
-          type: 'application/ld+json',
-          children: serializeJsonLd(
-            buildBreadcrumbJsonLd([
-              { name: m.meme_breadcrumb_home(), pathname: '/' },
-              {
-                name: categoryName,
-                pathname: `/memes/category/${categorySlug}`
-              },
-              { name: meme.title, pathname: `/memes/${meme.id}` }
-            ])
-          )
-        }
-      ]
-    }
-
-    return []
-  },
+  scripts: renderJsonLdScripts,
   head: ({ loaderData, match }) => {
     if (loaderData?.meme) {
       const seo = buildMemeSeo(loaderData.meme, {

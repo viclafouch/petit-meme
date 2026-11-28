@@ -41,7 +41,7 @@
     "/verify-email": 149
   },
   "firstViewCss": {
-    "/": 36,
+    "/": 39,
     "/app": 36,
     "/memes/$memeId": 39,
     "/memes/category/$slug": 37,

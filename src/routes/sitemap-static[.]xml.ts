@@ -11,6 +11,7 @@ const STATIC_PAGES = [
   { pathname: '/pricing' },
   { pathname: '/reels' },
   { pathname: '/app' },
+  { pathname: '/faq' },
   { pathname: '/submit' },
   { pathname: '/terms-of-use' },
   { pathname: '/privacy' },

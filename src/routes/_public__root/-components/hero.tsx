@@ -1,24 +1,31 @@
 import { ErrorBoundary } from 'react-error-boundary'
+import { ChevronRight, Crown } from 'lucide-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
-import { buttonVariants } from '~/components/ui/button'
+import { IntroOncePerSessionScript } from '~/components/app/intro-once-per-session-script'
 import { ALL_CATEGORY_SLUG } from '~/constants/meme'
+import { formatCount } from '~/helpers/number'
+import { useIntroOncePerSession } from '~/hooks/use-intro-once-per-session'
+import { buildVideoImageUrl } from '~/lib/bunny-public-urls'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
-import { countRecentMemesQueryOpts } from '~/queries/meme'
-import { FloatingLogos } from './floating-logo'
+import { getLocale } from '~/paraglide/runtime'
+import { countRecentMemesQueryOpts, listMemesQueryOpts } from '~/queries/meme'
+import { NEW_MEMES_FILTERS } from '~/routes/_public__root/-lib/home'
+import { FloatingLogos } from './floating-logos'
 import {
-  Announcement,
   PageActions,
   PageDescription,
   PageHeader,
   PageHeading
 } from './page-headers'
 
+const HERO_INTRO_KEY = 'home-hero'
 const HEADING_WORD_STAGGER_MS = 55
+const BADGE_THUMBNAIL_COUNT = 3
 
 const RISE_IN_CLASS_NAME =
-  'animate-in fade-in slide-in-from-bottom-5 fill-mode-both motion-reduce:animate-none'
+  'hero-intro animate-in fade-in slide-in-from-bottom-5 fill-mode-both motion-reduce:animate-none'
 
 const ENTRANCE_CLASS_NAME = cn(
   RISE_IN_CLASS_NAME,
@@ -27,16 +34,11 @@ const ENTRANCE_CLASS_NAME = cn(
 
 const HEADING_WORD_CLASS_NAME = cn(
   RISE_IN_CLASS_NAME,
-  'inline-block whitespace-pre blur-in-[12px] duration-1000'
+  'hero-word inline-block whitespace-pre blur-in-[12px] duration-1000'
 )
 
-type HeadingPart = {
-  text: string
-  isEmphasized: boolean
-}
-
 const HeroHeading = () => {
-  const parts: HeadingPart[] = [
+  const parts = [
     { text: m.home_hero_h1_1(), isEmphasized: true },
     { text: m.home_hero_h1_2(), isEmphasized: false },
     { text: m.home_hero_h1_3(), isEmphasized: true },
@@ -71,6 +73,7 @@ const HeroHeading = () => {
           return (
             <span
               key={word.position}
+              data-word={word.text}
               className={cn(
                 HEADING_WORD_CLASS_NAME,
                 word.isEmphasized && 'text-foreground'
@@ -78,9 +81,7 @@ const HeroHeading = () => {
               style={{
                 animationDelay: `${word.position * HEADING_WORD_STAGGER_MS}ms`
               }}
-            >
-              {word.text}
-            </span>
+            />
           )
         })}
       </span>
@@ -88,76 +89,113 @@ const HeroHeading = () => {
   )
 }
 
-const AnnouncementQuery = () => {
-  const recentMemesCountQuery = useSuspenseQuery(countRecentMemesQueryOpts())
+const NewMemesBadge = () => {
+  const recentCountQuery = useSuspenseQuery(countRecentMemesQueryOpts())
+  const newMemesQuery = useSuspenseQuery(listMemesQueryOpts(NEW_MEMES_FILTERS))
+  if (recentCountQuery.data === 0) {
+    return null
+  }
 
-  return recentMemesCountQuery.data > 0 ? (
-    <Announcement
-      linkOptions={{
-        to: '/memes/category/$slug',
-        params: { slug: ALL_CATEGORY_SLUG },
-        search: { sort: 'new' }
-      }}
-      text={m.home_hero_announcement({
-        count: String(recentMemesCountQuery.data)
-      })}
-    />
-  ) : null
+  const countParams = {
+    count: recentCountQuery.data,
+    formattedCount: formatCount(recentCountQuery.data, getLocale(), 'standard')
+  }
+
+  return (
+    <Link
+      to="/memes/category/$slug"
+      params={{ slug: ALL_CATEGORY_SLUG }}
+      search={{ sort: 'new' }}
+      className="new-memes-badge group"
+    >
+      <span className="new-memes-badge-content">
+        <span aria-hidden="true" className="flex -space-x-2">
+          {newMemesQuery.data.memes
+            .slice(0, BADGE_THUMBNAIL_COUNT)
+            .map((meme) => {
+              return (
+                <span
+                  key={meme.id}
+                  className="new-memes-badge-thumb"
+                  style={{
+                    backgroundImage: `url("${buildVideoImageUrl(meme.video.bunnyId)}")`
+                  }}
+                />
+              )
+            })}
+        </span>
+        <span>
+          <strong className="bg-(image:--gradient-brand) bg-clip-text font-bold text-transparent">
+            {m.home_hero_new_memes(countParams)}
+          </strong>
+          <span className="max-sm:sr-only">
+            {' '}
+            {m.home_hero_new_memes_added(countParams)}
+          </span>
+        </span>
+        <ChevronRight
+          aria-hidden="true"
+          className="size-4 text-muted-foreground transition-transform duration-(--duration-fast) mouse:group-hover:translate-x-0.5"
+        />
+      </span>
+    </Link>
+  )
 }
 
 export const Hero = () => {
+  useIntroOncePerSession(HERO_INTRO_KEY)
+
   return (
-    <PageHeader as="div" className="container">
-      <div className={cn(ENTRANCE_CLASS_NAME, 'delay-500')}>
-        <ErrorBoundary fallback={null}>
-          <AnnouncementQuery />
-        </ErrorBoundary>
-      </div>
-      <HeroHeading />
-      <PageDescription className={cn(ENTRANCE_CLASS_NAME, 'delay-800')}>
-        {m.home_hero_description()}
-      </PageDescription>
-      <PageActions className="w-full max-w-sm md:max-w-none justify-center">
-        <div
-          className={cn(
-            ENTRANCE_CLASS_NAME,
-            'delay-1100 flex gap-2 flex-col md:flex-row w-full justify-center'
-          )}
-        >
-          <Link
-            viewTransition
-            className={cn(
-              buttonVariants({
-                size: 'xl',
-                variant: 'defaultWithOutline'
-              }),
-              'rounded-full before:rounded-full'
-            )}
-            to="/memes/category/$slug"
-            params={{ slug: ALL_CATEGORY_SLUG }}
-          >
-            {m.home_hero_cta_discover()}{' '}
-            <span className="font-normal italic">{m.home_hero_cta_free()}</span>
-          </Link>
-          <Link
-            viewTransition
-            className={cn(
-              buttonVariants({
-                size: 'xl',
-                variant: 'secondaryWithOutline'
-              }),
-              'rounded-full before:rounded-full'
-            )}
-            to="/pricing"
-          >
-            {m.home_hero_cta_premium()}{' '}
-            <span aria-hidden="true" className="text-base">
-              🎉
-            </span>
-          </Link>
+    <PageHeader
+      as="div"
+      className="home-hero container isolate min-h-[calc(100svh-var(--navbar-space)-var(--tab-bar-space))] justify-center pt-10 pb-20 lg:py-16"
+    >
+      <IntroOncePerSessionScript introKey={HERO_INTRO_KEY} />
+      <div className="relative flex w-full flex-col items-center gap-6">
+        <span
+          aria-hidden="true"
+          className="home-hero-glow pointer-events-none absolute -inset-x-24 -top-32 -bottom-24 -z-10"
+        />
+        <div className={cn(ENTRANCE_CLASS_NAME, 'delay-500')}>
+          <ErrorBoundary fallback={null}>
+            <NewMemesBadge />
+          </ErrorBoundary>
         </div>
-      </PageActions>
-      <div className="contents max-md:hidden">
+        <HeroHeading />
+        <PageDescription className={cn(ENTRANCE_CLASS_NAME, 'delay-800')}>
+          {m.home_hero_description()}
+        </PageDescription>
+        <PageActions className="w-full max-w-sm justify-center md:max-w-none">
+          <div
+            className={cn(
+              ENTRANCE_CLASS_NAME,
+              'flex w-full flex-col justify-center gap-3 delay-1100 md:flex-row'
+            )}
+          >
+            <Link
+              viewTransition
+              className="pill pill-brand min-h-13 px-7 text-base shadow-[0_12px_40px_-12px_var(--color-brand-cyan)]"
+              to="/memes/category/$slug"
+              params={{ slug: ALL_CATEGORY_SLUG }}
+            >
+              {m.home_hero_cta_discover()}{' '}
+              <span className="font-medium italic">
+                {m.home_hero_cta_free()}
+              </span>
+            </Link>
+            <Link
+              viewTransition
+              className="navbar-premium relative isolate inline-flex min-h-13 items-center justify-center gap-2 overflow-hidden rounded-full bg-(image:--gradient-premium) px-7 text-base font-bold whitespace-nowrap text-(--color-premium-foreground) shadow-(--shadow-premium) focus-visible:focus-ring active:scale-(--scale-press) mouse:hover:shadow-(--shadow-premium-hover)"
+              to="/pricing"
+            >
+              <Crown
+                aria-hidden="true"
+                className="size-5 shrink-0 fill-current"
+              />
+              {m.home_hero_cta_premium()}
+            </Link>
+          </div>
+        </PageActions>
         <FloatingLogos />
       </div>
     </PageHeader>

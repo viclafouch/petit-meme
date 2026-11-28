@@ -1,7 +1,9 @@
 import { expect } from '@playwright/test'
 import { HTTP_STATUS } from '~/constants/http'
 import { TRENDING_MEMES_COUNT } from '~/constants/meme'
+import { formatCount } from '~/helpers/number'
 import { m } from '~/paraglide/messages'
+import { HOME_TRENDING_COUNT } from '~/routes/_public__root/-lib/home'
 import { E2E_RECENT_MEMES } from './content'
 import { test } from './fixtures'
 import { getFirstMemeCardLink, getMemeCardLinks } from './library'
@@ -12,8 +14,12 @@ test.describe('the home page', () => {
 
     expect(response?.status()).toBe(HTTP_STATUS.OK)
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
-    await expect(page.getByText(m.home_best_subtitle())).toBeVisible()
-    await expect(getMemeCardLinks(page)).toHaveCount(TRENDING_MEMES_COUNT)
+    await expect(
+      page.getByRole('heading', { level: 2, name: m.home_trending_title() })
+    ).toBeVisible()
+    await expect(getMemeCardLinks(page)).toHaveCount(
+      Math.min(TRENDING_MEMES_COUNT, HOME_TRENDING_COUNT)
+    )
   })
 
   test('the hero leads to the library and to the plans', async ({ page }) => {
@@ -29,14 +35,23 @@ test.describe('the home page', () => {
     await expect(page).toHaveURL('/pricing')
   })
 
-  test('the Memes section hands over to the whole library', async ({
+  test('the trending section hands over to the whole library', async ({
     page
   }) => {
     await page.goto('/')
 
-    await page.getByRole('link', { name: m.home_best_browse_all() }).click()
+    const [libraryLabelStart, libraryLabelEnd] = m
+      .home_trending_all({ count: 2, formattedCount: '\u0000' })
+      .split('\u0000')
 
-    await expect(page).toHaveURL('/memes/category/all')
+    await page
+      .getByRole('link', {
+        name: new RegExp(`^${libraryLabelStart}.+${libraryLabelEnd}$`, 'u')
+      })
+      .filter({ visible: true })
+      .click()
+
+    await expect(page).toHaveURL('/memes/category/all?sort=trending')
     await expect(getFirstMemeCardLink(page)).toBeVisible()
   })
 
@@ -45,10 +60,10 @@ test.describe('the home page', () => {
   }) => {
     await page.goto('/')
 
+    const count = E2E_RECENT_MEMES.length
+    const formattedCount = formatCount(count, 'fr', 'standard')
     const announcement = page.getByRole('link', {
-      name: m.home_hero_announcement({
-        count: String(E2E_RECENT_MEMES.length)
-      }),
+      name: `${m.home_hero_new_memes({ count, formattedCount })} ${m.home_hero_new_memes_added({ count, formattedCount })}`,
       exact: true
     })
 

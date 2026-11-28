@@ -50,6 +50,7 @@ const OG_DEFAULT_TITLES = {
   fr: {
     'ai-search': 'Recherche IA',
     app: "L'application Petit Meme",
+    faq: 'Questions fréquentes',
     pricing: 'Tarifs',
     reels: 'Reels',
     submit: 'Proposer un mème'
@@ -57,6 +58,7 @@ const OG_DEFAULT_TITLES = {
   en: {
     'ai-search': 'AI Search',
     app: 'The Petit Meme application',
+    faq: 'Frequently asked questions',
     pricing: 'Pricing',
     reels: 'Reels',
     submit: 'Suggest a meme'

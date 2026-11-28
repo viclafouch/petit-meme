@@ -19,6 +19,7 @@ type MemeCardGridProps = {
   authenticatedUserToken?: string
   label?: string
   layout?: 'row'
+  titleTag?: MemeCardProps['titleTag']
   children?: React.ReactNode
 }
 
@@ -28,6 +29,7 @@ export const MemeCardGrid = ({
   authenticatedUserToken,
   label = m.meme_list_label(),
   layout,
+  titleTag = 'h2',
   children
 }: MemeCardGridProps) => {
   return (
@@ -44,7 +46,7 @@ export const MemeCardGrid = ({
               <MemeCard
                 meme={card.meme}
                 now={now}
-                titleTag="h2"
+                titleTag={titleTag}
                 queryID={card.queryID}
                 position={card.position}
                 authenticatedUserToken={authenticatedUserToken}

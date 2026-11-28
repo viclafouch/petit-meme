@@ -59,6 +59,7 @@ import { Route as ApiCronSyncBunnyTitlesRouteImport } from './routes/api/cron/sy
 import { Route as ApiCronVerificationReminderRouteImport } from './routes/api/cron/verification-reminder'
 import { Route as ApiCronWeeklyRecapRouteImport } from './routes/api/cron/weekly-recap'
 import { Route as Public__rootDefaultCheckoutSuccessRouteImport } from './routes/_public__root/_default/checkout.success'
+import { Route as Public__rootDefaultFaqIndexRouteImport } from './routes/_public__root/_default/faq/index'
 import { Route as Public__rootDefaultMemesAiSearchRouteImport } from './routes/_public__root/_default/memes/ai-search'
 import { Route as Public__rootDefaultPasswordCreateNewRouteImport } from './routes/_public__root/_default/password.create-new'
 import { Route as Public__rootDefaultPasswordResetRouteImport } from './routes/_public__root/_default/password.reset'
@@ -328,6 +329,12 @@ const Public__rootDefaultCheckoutSuccessRoute =
     path: '/checkout/success',
     getParentRoute: () => Public__rootDefaultRouteRoute,
   } as any)
+const Public__rootDefaultFaqIndexRoute =
+  Public__rootDefaultFaqIndexRouteImport.update({
+    id: '/faq/',
+    path: '/faq/',
+    getParentRoute: () => Public__rootDefaultRouteRoute,
+  } as any)
 const Public__rootDefaultMemesAiSearchRoute =
   Public__rootDefaultMemesAiSearchRouteImport.update({
     id: '/memes/ai-search',
@@ -443,6 +450,7 @@ export interface FileRoutesByFullPath {
   '/password/reset': typeof Public__rootDefaultPasswordResetRoute
   '/memes/$memeId/studio': typeof Public__rootMemesMemeIdStudioRoute
   '/memes/bookmarks': typeof Public__rootMemesLibraryBookmarksRoute
+  '/faq/': typeof Public__rootDefaultFaqIndexRoute
   '/pricing/': typeof Public__rootDefaultPricingIndexRoute
   '/random/': typeof Public__rootDefaultRandomIndexRoute
   '/settings/': typeof Public__rootDefaultSettingsIndexRoute
@@ -500,6 +508,7 @@ export interface FileRoutesByTo {
   '/password/reset': typeof Public__rootDefaultPasswordResetRoute
   '/memes/$memeId/studio': typeof Public__rootMemesMemeIdStudioRoute
   '/memes/bookmarks': typeof Public__rootMemesLibraryBookmarksRoute
+  '/faq': typeof Public__rootDefaultFaqIndexRoute
   '/pricing': typeof Public__rootDefaultPricingIndexRoute
   '/random': typeof Public__rootDefaultRandomIndexRoute
   '/settings': typeof Public__rootDefaultSettingsIndexRoute
@@ -563,6 +572,7 @@ export interface FileRoutesById {
   '/_public__root/_default/password/reset': typeof Public__rootDefaultPasswordResetRoute
   '/_public__root/memes/$memeId/studio': typeof Public__rootMemesMemeIdStudioRoute
   '/_public__root/memes/_library/bookmarks': typeof Public__rootMemesLibraryBookmarksRoute
+  '/_public__root/_default/faq/': typeof Public__rootDefaultFaqIndexRoute
   '/_public__root/_default/pricing/': typeof Public__rootDefaultPricingIndexRoute
   '/_public__root/_default/random/': typeof Public__rootDefaultRandomIndexRoute
   '/_public__root/_default/settings/': typeof Public__rootDefaultSettingsIndexRoute
@@ -625,6 +635,7 @@ export interface FileRouteTypes {
     | '/password/reset'
     | '/memes/$memeId/studio'
     | '/memes/bookmarks'
+    | '/faq/'
     | '/pricing/'
     | '/random/'
     | '/settings/'
@@ -682,6 +693,7 @@ export interface FileRouteTypes {
     | '/password/reset'
     | '/memes/$memeId/studio'
     | '/memes/bookmarks'
+    | '/faq'
     | '/pricing'
     | '/random'
     | '/settings'
@@ -744,6 +756,7 @@ export interface FileRouteTypes {
     | '/_public__root/_default/password/reset'
     | '/_public__root/memes/$memeId/studio'
     | '/_public__root/memes/_library/bookmarks'
+    | '/_public__root/_default/faq/'
     | '/_public__root/_default/pricing/'
     | '/_public__root/_default/random/'
     | '/_public__root/_default/settings/'
@@ -1130,6 +1143,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Public__rootDefaultCheckoutSuccessRouteImport
       parentRoute: typeof Public__rootDefaultRouteRoute
     }
+    '/_public__root/_default/faq/': {
+      id: '/_public__root/_default/faq/'
+      path: '/faq'
+      fullPath: '/faq/'
+      preLoaderRoute: typeof Public__rootDefaultFaqIndexRouteImport
+      parentRoute: typeof Public__rootDefaultRouteRoute
+    }
     '/_public__root/_default/memes/ai-search': {
       id: '/_public__root/_default/memes/ai-search'
       path: '/memes/ai-search'
@@ -1229,6 +1249,7 @@ interface Public__rootDefaultRouteRouteChildren {
   Public__rootDefaultMemesAiSearchRoute: typeof Public__rootDefaultMemesAiSearchRoute
   Public__rootDefaultPasswordCreateNewRoute: typeof Public__rootDefaultPasswordCreateNewRoute
   Public__rootDefaultPasswordResetRoute: typeof Public__rootDefaultPasswordResetRoute
+  Public__rootDefaultFaqIndexRoute: typeof Public__rootDefaultFaqIndexRoute
   Public__rootDefaultPricingIndexRoute: typeof Public__rootDefaultPricingIndexRoute
   Public__rootDefaultRandomIndexRoute: typeof Public__rootDefaultRandomIndexRoute
   Public__rootDefaultSubmitIndexRoute: typeof Public__rootDefaultSubmitIndexRoute
@@ -1252,6 +1273,7 @@ const Public__rootDefaultRouteRouteChildren: Public__rootDefaultRouteRouteChildr
       Public__rootDefaultPasswordCreateNewRoute,
     Public__rootDefaultPasswordResetRoute:
       Public__rootDefaultPasswordResetRoute,
+    Public__rootDefaultFaqIndexRoute: Public__rootDefaultFaqIndexRoute,
     Public__rootDefaultPricingIndexRoute: Public__rootDefaultPricingIndexRoute,
     Public__rootDefaultRandomIndexRoute: Public__rootDefaultRandomIndexRoute,
     Public__rootDefaultSubmitIndexRoute: Public__rootDefaultSubmitIndexRoute,

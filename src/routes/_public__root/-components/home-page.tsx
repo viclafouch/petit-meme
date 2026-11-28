@@ -1,28 +1,31 @@
-import { BestMemes } from './best-memes'
-import { Faq } from './faq'
+import React from 'react'
+import { lazyComponent } from '~/lib/lazy-component'
 import { Hero } from './hero'
-import { InstallBlock } from './install-block'
-import { PageContainer } from './page-headers'
-import { Responsive } from './responsive'
+import { HomeTrending } from './home-trending'
+
+const HomeStudio = lazyComponent(async () => {
+  const homeStudioModule = await import('./home-studio')
+
+  return homeStudioModule.HomeStudio
+})
+
+const HomeMobile = lazyComponent(async () => {
+  const homeMobileModule = await import('./home-mobile')
+
+  return homeMobileModule.HomeMobile
+})
 
 export const HomePage = () => {
   return (
-    <PageContainer>
-      <section className="flex w-full flex-col py-30 pb-10 sm:pt-42">
-        <Hero />
-        <div className="container lg:mt-36 mt-24">
-          <BestMemes />
-          <div className="mt-16 lg:hidden">
-            <InstallBlock />
-          </div>
-          <div className="mt-16 hidden lg:block">
-            <Responsive />
-          </div>
-          <div className="mt-16 [contain-intrinsic-size:auto_none_auto_500px] [content-visibility:auto] lg:mt-40">
-            <Faq />
-          </div>
-        </div>
-      </section>
-    </PageContainer>
+    <div className="flex flex-1 flex-col">
+      <Hero />
+      <div className="container-wide flex flex-col gap-16 pb-24 lg:gap-24">
+        <HomeTrending />
+        <React.Suspense fallback={<div className="home-fullscreen" />}>
+          <HomeStudio />
+          <HomeMobile />
+        </React.Suspense>
+      </div>
+    </div>
   )
 }

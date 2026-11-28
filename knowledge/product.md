@@ -6,7 +6,7 @@ It started from the Creator's own need: find a video meme fast and send it to fr
 
 ## What it does
 
-- **Watch.** The home page opens on a video that plays. Each Meme has its own page, and on a phone the Reels chain the Memes one after the other.
+- **Watch.** Each Meme has its own page, and on a phone the Reels chain the Memes one after the other.
 - **Find.** The library opens on every Meme, sorted by trend, by newest or by most viewed, with the categories beside it, grouped by mood, reply, theme and source. A search on every page, the trending Memes, related Memes and a random Meme. Signed-in Users also get an AI search that understands a description in plain words.
 - **Take away.** Every Meme exports as a video, by download or through the phone's share sheet. Premium also exports its sound.
 - **Make your own.** The Studio adds a caption to a Meme and exports the result.

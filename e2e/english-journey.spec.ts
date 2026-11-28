@@ -57,6 +57,13 @@ const ENGLISH_CHECKOUT_SUCCESS_PATHNAME = localizePathname(
   E2E_ENGLISH_LOCALE
 )
 
+const getEnglishTrendingHeading = (page: Page) => {
+  return page.getByRole('heading', {
+    level: 2,
+    name: m.home_trending_title({}, IN_ENGLISH)
+  })
+}
+
 const UNIVERSAL_MEME_IN_ENGLISH = localizeE2eMeme(
   E2E_NAMED_MEMES.universal,
   E2E_ENGLISH_LOCALE
@@ -195,9 +202,7 @@ test.describe('the English journey', () => {
         return readDocumentLanguage(page)
       })
       .toStrictEqual([E2E_ENGLISH_LOCALE])
-    await expect(
-      page.getByText(m.home_best_subtitle({}, IN_ENGLISH))
-    ).toBeVisible()
+    await expect(getEnglishTrendingHeading(page)).toBeVisible()
 
     await page
       .getByRole('link', { name: m.home_hero_cta_discover({}, IN_ENGLISH) })
@@ -379,9 +384,7 @@ test.describe('the English journey', () => {
         m.locale_banner_available({ language: frenchName }, IN_ENGLISH)
       )
     ).toBeVisible()
-    await expect(
-      page.getByText(m.home_best_subtitle({}, IN_ENGLISH))
-    ).toBeVisible()
+    await expect(getEnglishTrendingHeading(page)).toBeVisible()
   })
 
   test('an English landing keeps English for the next visit', async ({

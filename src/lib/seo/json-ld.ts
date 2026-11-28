@@ -208,13 +208,9 @@ const buildFaqPageJsonLd = ({
   } satisfies FAQPage
 }
 
-type BuildHomeJsonLdParams = {
-  faqItems: readonly FaqItem[]
-}
+export const buildHomeJsonLd = (): SchemaGraph => {
+  const homeUrl = buildUrl('/', getLocale())
 
-export const buildHomeJsonLd = ({
-  faqItems
-}: BuildHomeJsonLdParams): SchemaGraph => {
   return {
     '@context': 'https://schema.org',
     '@graph': [
@@ -236,14 +232,40 @@ export const buildHomeJsonLd = ({
       } satisfies Organization,
       {
         '@type': 'WebPage',
-        '@id': `${websiteOrigin}/#webpage`,
-        url: websiteOrigin,
+        '@id': `${homeUrl}#webpage`,
+        url: homeUrl,
         name: m.seo_home_page_name(),
+        inLanguage: getLocale(),
         isPartOf: { '@id': websiteId },
         about: { '@id': `${websiteOrigin}/#organization` },
         description: m.seo_home_description()
+      } satisfies WebPage
+    ]
+  }
+}
+
+type BuildFaqJsonLdParams = {
+  faqItems: readonly FaqItem[]
+}
+
+export const buildFaqJsonLd = ({
+  faqItems
+}: BuildFaqJsonLdParams): SchemaGraph => {
+  const faqUrl = buildUrl('/faq', getLocale())
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebPage',
+        '@id': `${faqUrl}#webpage`,
+        url: faqUrl,
+        name: m.seo_faq_title(),
+        inLanguage: getLocale(),
+        isPartOf: { '@id': websiteId },
+        description: m.seo_faq_description()
       } satisfies WebPage,
-      buildFaqPageJsonLd({ faqItems, pageUrl: websiteOrigin })
+      buildFaqPageJsonLd({ faqItems, pageUrl: faqUrl })
     ]
   }
 }

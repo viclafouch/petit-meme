@@ -1,5 +1,4 @@
 import React from 'react'
-import { type LinkOptions, Link } from '@tanstack/react-router'
 import { cn } from '~/lib/utils'
 
 type PageContainerProps = {
@@ -62,26 +61,6 @@ export const PageHeading = ({
   )
 }
 
-type PageHeading2Props = React.HTMLAttributes<HTMLHeadingElement>
-
-export const PageHeading2 = ({
-  className,
-  children,
-  ...props
-}: PageHeading2Props) => {
-  return (
-    <h2
-      className={cn(
-        'font-bricolage text-foreground max-w-4xl text-center text-2xl leading-display font-semibold text-balance sm:text-3xl lg:text-4xl mx-auto',
-        className
-      )}
-      {...props}
-    >
-      {children}
-    </h2>
-  )
-}
-
 type PageDescriptionProps = React.HTMLAttributes<HTMLParagraphElement>
 
 export const PageDescription = ({
@@ -119,40 +98,5 @@ export const PageActions = ({
     >
       {children}
     </div>
-  )
-}
-
-type AnnouncementProps = {
-  linkOptions: LinkOptions
-  text: string
-  className?: string
-  actionText?: string
-}
-
-export const Announcement = ({
-  className,
-  linkOptions,
-  text,
-  actionText
-}: AnnouncementProps) => {
-  return (
-    <Link
-      {...linkOptions}
-      className={cn(
-        'bg-muted/50 border-border focus-visible:focus-ring relative flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-semibold',
-        className
-      )}
-    >
-      <div className="relative size-2">
-        <div className="bg-foreground size-2 rounded-full" />
-        <div className="bg-foreground absolute inset-0 size-2 animate-ping rounded-full" />
-      </div>
-      <p>
-        {text}{' '}
-        {actionText ? (
-          <strong className="ml-1 font-bold">{actionText}</strong>
-        ) : null}
-      </p>
-    </Link>
   )
 }

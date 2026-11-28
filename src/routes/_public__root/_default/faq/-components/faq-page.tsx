@@ -1,15 +1,16 @@
 import { ChevronRight } from 'lucide-react'
-import { Link } from '@tanstack/react-router'
+import { getRouteApi, Link } from '@tanstack/react-router'
 import { ALL_CATEGORY_SLUG } from '~/constants/meme'
 import { m } from '~/paraglide/messages'
 import {
   PageDescription,
   PageHeading
 } from '~/routes/_public__root/-components/page-headers'
-import { getFaqItems } from './faq-items'
+
+const faqRouteApi = getRouteApi('/_public__root/_default/faq/')
 
 export const FaqPage = () => {
-  const faqItems = getFaqItems()
+  const faqItems = faqRouteApi.useLoaderData()
 
   return (
     <div className="container flex max-w-3xl flex-col gap-12 py-10 sm:py-16">

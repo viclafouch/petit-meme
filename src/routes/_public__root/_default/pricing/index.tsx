@@ -1,14 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { getFreePlan, getPremiumPlan } from '~/constants/plan'
-import { serializeJsonLd } from '~/helpers/json-ld'
-import { buildPricingJsonLd } from '~/lib/seo/json-ld'
 import { buildSeo } from '~/lib/seo/meta'
+import { renderJsonLdScripts } from '~/lib/seo/page-json-ld'
 import { buildOgImage } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
 import { getPremiumSubscriptionQueryOpts } from '~/queries/subscription'
-import { getPricingFaqItems } from './-components/faq-items'
 import { PricingPage } from './-components/pricing-page'
+import { getPricingJsonLd } from './-lib/pricing-json-ld'
 
 export const Route = createFileRoute('/_public__root/_default/pricing/')({
   component: PricingPage,
@@ -17,20 +15,10 @@ export const Route = createFileRoute('/_public__root/_default/pricing/')({
       ...getPremiumSubscriptionQueryOpts(),
       staleTime: 'static'
     })
+
+    return { jsonLd: getPricingJsonLd() }
   },
-  scripts: () => {
-    return [
-      {
-        type: 'application/ld+json',
-        children: serializeJsonLd(
-          buildPricingJsonLd({
-            plans: [getFreePlan(), getPremiumPlan()],
-            faqItems: getPricingFaqItems()
-          })
-        )
-      }
-    ]
-  },
+  scripts: renderJsonLdScripts,
   head: () => {
     const locale = getLocale()
 

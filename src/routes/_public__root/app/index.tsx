@@ -1,10 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { serializeJsonLd } from '~/helpers/json-ld'
-import {
-  buildBreadcrumbJsonLd,
-  buildWebApplicationJsonLd
-} from '~/lib/seo/json-ld'
 import { buildSeo } from '~/lib/seo/meta'
+import {
+  getBreadcrumbJsonLd,
+  renderJsonLdScripts
+} from '~/lib/seo/page-json-ld'
 import { buildOgImage } from '~/lib/seo/url'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
@@ -13,6 +12,14 @@ import appPageCss from './-components/app-page.css?url'
 
 export const Route = createFileRoute('/_public__root/app/')({
   component: AppPage,
+  loader: () => {
+    return {
+      jsonLd: getBreadcrumbJsonLd([
+        { name: m.app_page_title(), pathname: '/app' }
+      ])
+    }
+  },
+  scripts: renderJsonLdScripts,
   head: () => {
     const locale = getLocale()
 
@@ -33,22 +40,7 @@ export const Route = createFileRoute('/_public__root/app/')({
 
     return {
       ...seo,
-      links: [...seo.links, { rel: 'stylesheet', href: appPageCss }],
-      scripts: [
-        {
-          type: 'application/ld+json',
-          children: serializeJsonLd(buildWebApplicationJsonLd())
-        },
-        {
-          type: 'application/ld+json',
-          children: serializeJsonLd(
-            buildBreadcrumbJsonLd([
-              { name: m.meme_breadcrumb_home(), pathname: '/' },
-              { name: m.app_page_title(), pathname: '/app' }
-            ])
-          )
-        }
-      ]
+      links: [...seo.links, { rel: 'stylesheet', href: appPageCss }]
     }
   }
 })

@@ -4,9 +4,9 @@
     "routeJs": 50,
     "firstViewCss": 20
   },
-  "shellJs": 297,
+  "shellJs": 292,
   "routeJs": {
-    "/": 159,
+    "/": 158,
     "/admin": 84,
     "/admin/activity": 86,
     "/admin/activity/$ip": 86,
@@ -28,7 +28,7 @@
     "/memes/$memeId/studio": 227,
     "/memes/ai-search": 176,
     "/memes/bookmarks": 158,
-    "/memes/category/$slug": 159,
+    "/memes/category/$slug": 158,
     "/mentions-legales": 129,
     "/password/create-new": 162,
     "/password/reset": 162,

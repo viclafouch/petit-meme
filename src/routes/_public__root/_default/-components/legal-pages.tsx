@@ -27,18 +27,40 @@ const LegalMarkdown = ({ markdown }: LegalMarkdownProps) => {
   )
 }
 
+const selectMarkdown = (data: { markdown: string }) => {
+  return data.markdown
+}
+
 export const DmcaPage = () => {
-  return <LegalMarkdown markdown={dmcaRouteApi.useLoaderData()} />
+  return (
+    <LegalMarkdown
+      markdown={dmcaRouteApi.useLoaderData({ select: selectMarkdown })}
+    />
+  )
 }
 
 export const PrivacyPage = () => {
-  return <LegalMarkdown markdown={privacyRouteApi.useLoaderData()} />
+  return (
+    <LegalMarkdown
+      markdown={privacyRouteApi.useLoaderData({ select: selectMarkdown })}
+    />
+  )
 }
 
 export const TermsOfUsePage = () => {
-  return <LegalMarkdown markdown={termsOfUseRouteApi.useLoaderData()} />
+  return (
+    <LegalMarkdown
+      markdown={termsOfUseRouteApi.useLoaderData({ select: selectMarkdown })}
+    />
+  )
 }
 
 export const MentionsLegalesPage = () => {
-  return <LegalMarkdown markdown={mentionsLegalesRouteApi.useLoaderData()} />
+  return (
+    <LegalMarkdown
+      markdown={mentionsLegalesRouteApi.useLoaderData({
+        select: selectMarkdown
+      })}
+    />
+  )
 }

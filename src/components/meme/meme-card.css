@@ -38,6 +38,16 @@
       min-width: 0;
     }
 
+    &[data-layout='showcase'] {
+      @container meme-grid (width >= 30rem) {
+        --meme-grid-cols: 2;
+      }
+
+      @container meme-grid (width >= 48rem) {
+        --meme-grid-cols: 5;
+      }
+    }
+
     &[data-layout='row'] {
       grid-template-columns: none;
       grid-auto-columns: calc(

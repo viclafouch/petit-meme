@@ -1,4 +1,5 @@
 import { CategoryFamily } from '~/db/generated/prisma/enums'
+import { sortByMemeCount } from '~/helpers/category'
 import { splitIntoSearchWords } from '~/helpers/keywords'
 import { m } from '~/paraglide/messages'
 import type { listCategories } from '~/server/category/category.functions'
@@ -66,12 +67,6 @@ const toMemeSuggestions = (
 ): SearchSuggestion[] => {
   return memes.slice(0, count).map((meme, index) => {
     return { kind: 'meme', id: meme.id, meme, position: index + 1, queryID }
-  })
-}
-
-const sortByMemeCount = (categories: SuggestedCategory[]) => {
-  return categories.toSorted((first, second) => {
-    return second.memeCount - first.memeCount
   })
 }
 

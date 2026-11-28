@@ -10,6 +10,8 @@
 
 @custom-variant mouse (@media (hover: hover) and (pointer: fine));
 
+@custom-variant intro-seen (&:where([data-intro-seen] *));
+
 @font-face {
   font-family: 'Bricolage Grotesque';
   font-style: normal;
@@ -139,6 +141,11 @@
   --duration-aurora-breathe: 14s;
   --duration-star-drift: 60s;
   --duration-meteor-cycle: 120s;
+  --duration-entrance: 600ms;
+  --duration-badge-spin: 4s;
+  --duration-studio-demo: 16s;
+  --duration-floating-logo-stagger: 200ms;
+  --delay-floating-logos: 1s;
   --scale-press: 0.97;
   --scale-enter: 0.97;
   --focus-color: oklch(0.52 0.105 223);
@@ -169,6 +176,9 @@
   --shadow-raised:
     0 0 0 1px var(--color-veil), 0 18px 40px -16px var(--color-shade-strong);
   --shadow-knob: 0 1px 4px var(--color-shade-soft);
+  --shadow-brand-glow: 0 12px 40px -12px var(--color-brand-cyan);
+  --shadow-badge: 0 12px 36px -14px var(--color-brand-violet);
+  --shadow-badge-hover: 0 14px 44px -12px var(--color-brand-cyan);
   --shadow-avatar-ring: 0 0 0 2px var(--secondary);
   --shadow-stage:
     0 0 0 1px oklch(0 0 0 / 0.08), 0 1px 2px oklch(0 0 0 / 0.12),
@@ -192,6 +202,14 @@
     radial-gradient(34% 30% at 82% 22%, rgb(251 200 80 / 0.3), transparent),
     radial-gradient(30% 36% at 14% 58%, rgb(122 178 200 / 0.26), transparent),
     radial-gradient(34% 26% at 58% 88%, rgb(214 41 118 / 0.2), transparent);
+  --gradient-glow-app:
+    radial-gradient(28% 42% at 72% 45%, rgb(251 200 80 / 0.3), transparent),
+    radial-gradient(26% 36% at 30% 56%, rgb(122 178 200 / 0.24), transparent),
+    radial-gradient(20% 22% at 62% 76%, rgb(214 41 118 / 0.16), transparent);
+  --gradient-glow-studio:
+    radial-gradient(32% 42% at 74% 48%, rgb(167 139 250 / 0.3), transparent),
+    radial-gradient(22% 30% at 88% 82%, rgb(244 114 182 / 0.22), transparent),
+    radial-gradient(24% 30% at 18% 30%, rgb(34 211 238 / 0.12), transparent);
 
   --bookmark-foreground: oklch(0.55 0.13 75);
   --aurora-green: rgb(52 211 153 / 0.6);
@@ -860,6 +878,54 @@ input:autofill {
       &:hover:not(:disabled) {
         background: var(--gradient-brand-hover);
       }
+    }
+  }
+
+  .pill-premium {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: var(--gradient-premium);
+    color: var(--color-premium-foreground);
+    font-weight: --theme(--font-weight-bold);
+    box-shadow: var(--shadow-premium);
+    transition:
+      scale var(--duration-press) var(--ease-out-strong),
+      box-shadow var(--duration-fast) ease-out;
+
+    & svg {
+      fill: currentColor;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: var(--z-behind);
+      background: linear-gradient(
+        110deg,
+        transparent 30%,
+        var(--color-premium-sheen) 50%,
+        transparent 70%
+      );
+      translate: -110% 0;
+    }
+
+    @variant mouse {
+      &:hover {
+        box-shadow: var(--shadow-premium-hover);
+      }
+
+      @variant motion-safe {
+        &:hover::after {
+          translate: 110% 0;
+          transition: translate var(--duration-sheen) var(--ease-out-strong);
+        }
+      }
+    }
+
+    @variant motion-reduce {
+      transition: none;
     }
   }
 

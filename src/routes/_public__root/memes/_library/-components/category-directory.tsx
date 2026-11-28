@@ -15,6 +15,7 @@ import {
   DrawerTrigger
 } from '~/components/ui/drawer'
 import { ALL_CATEGORY_SLUG } from '~/constants/meme'
+import { sortByMemeCount } from '~/helpers/category'
 import { formatCount } from '~/helpers/number'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
@@ -25,8 +26,7 @@ import {
 } from '~/queries/category'
 import {
   groupByFamily,
-  type LibraryCategory,
-  sortByMemeCount
+  type LibraryCategory
 } from '~/routes/_public__root/memes/-lib/library'
 
 const FAMILY_PREVIEW_COUNT = 8

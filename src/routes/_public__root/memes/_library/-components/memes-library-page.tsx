@@ -1,6 +1,7 @@
 import { Sparkles } from 'lucide-react'
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
 import { getRouteApi, Link } from '@tanstack/react-router'
+import { LoadMore, MemeCardGrid } from '~/components/meme/meme-card-grid'
 import { useMemesViewEvent } from '~/components/meme/meme-grid'
 import { ALL_CATEGORY_SLUG } from '~/constants/meme'
 import { serializeJsonLd } from '~/helpers/json-ld'
@@ -10,7 +11,6 @@ import { m } from '~/paraglide/messages'
 import { listMemesPagesQueryOpts } from '~/queries/meme'
 import { flattenUniqueCards } from '~/routes/_public__root/memes/-lib/library'
 import { LibraryHeader, LibraryStrip } from './library-layout'
-import { LoadMore, MemeCardGrid } from './meme-card-grid'
 import { MemesSortControl } from './memes-sort-control'
 
 const categoryRouteApi = getRouteApi(

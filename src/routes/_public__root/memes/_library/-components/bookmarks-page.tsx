@@ -6,6 +6,7 @@ import {
   useSuspenseQuery
 } from '@tanstack/react-query'
 import { Link, useRouteContext } from '@tanstack/react-router'
+import { LoadMore, MemeCardGrid } from '~/components/meme/meme-card-grid'
 import { useIsPremium } from '~/components/premium/use-is-premium'
 import { ALL_CATEGORY_SLUG, type MemeWithVideo } from '~/constants/meme'
 import { buildCapState, FREE_CAPS } from '~/helpers/cap'
@@ -18,7 +19,6 @@ import { listTrendingMemesQueryOpts } from '~/queries/meme'
 import { flattenUniqueCards } from '~/routes/_public__root/memes/-lib/library'
 import { useDialogStore } from '~/stores/dialog.store'
 import { LibraryHeader, LibraryStrip } from './library-layout'
-import { LoadMore, MemeCardGrid } from './meme-card-grid'
 
 const BENEFITS = [
   { icon: Zap, label: m.bookmark_intro_benefit_find },

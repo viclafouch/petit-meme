@@ -21,7 +21,11 @@ export const HomePage = () => {
       <Hero />
       <div className="container-wide flex flex-col gap-16 pb-24 lg:gap-24">
         <HomeTrending />
-        <React.Suspense fallback={<div className="home-fullscreen" />}>
+        <React.Suspense
+          fallback={
+            <div className="min-h-[calc(100svh-var(--navbar-space)-var(--tab-bar-space))]" />
+          }
+        >
           <HomeStudio />
           <HomeMobile />
         </React.Suspense>

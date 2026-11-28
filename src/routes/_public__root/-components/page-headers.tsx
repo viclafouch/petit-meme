@@ -23,7 +23,7 @@ export const PageContainer = ({
 
 type PageHeaderProps = {
   as?: React.ElementType
-} & React.HTMLAttributes<HTMLDivElement>
+} & React.ComponentPropsWithRef<'div'>
 
 export const PageHeader = ({
   className,

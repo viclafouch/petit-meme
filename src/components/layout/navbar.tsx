@@ -15,7 +15,6 @@ import { useIsLargeScreen } from '~/hooks/use-is-large-screen'
 import { useNeedsScrollFadeFallback } from '~/hooks/use-scroll-fade'
 import { m } from '~/paraglide/messages'
 import { useDialogStore } from '~/stores/dialog.store'
-import navbarCss from './navbar.css?url'
 
 const NAVBAR_SCROLL_FADE_RANGE = 180
 
@@ -95,7 +94,6 @@ export const Navbar = () => {
 
   return (
     <header className="relative h-(--navbar-height) pr-[env(safe-area-inset-right,0px)] pl-[env(safe-area-inset-left,0px)]">
-      <link rel="stylesheet" href={navbarCss} precedence="default" />
       {needsFallback && isLargeScreen ? (
         <NavbarScrollFadeFallback />
       ) : (

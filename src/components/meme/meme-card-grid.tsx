@@ -18,7 +18,7 @@ type MemeCardGridProps = {
   now: number
   authenticatedUserToken?: string
   label?: string
-  layout?: 'row'
+  layout?: 'row' | 'showcase'
   titleTag?: MemeCardProps['titleTag']
   children?: React.ReactNode
 }

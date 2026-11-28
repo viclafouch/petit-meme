@@ -1,5 +1,6 @@
 import { expect } from '@playwright/test'
 import { HTTP_STATUS } from '~/constants/http'
+import { m } from '~/paraglide/messages'
 import {
   E2E_CATEGORIES,
   E2E_MEMES,
@@ -59,6 +60,7 @@ test.describe('the Categories', () => {
     await page.goto(CATS_CATEGORY_PATHNAME)
 
     await page
+      .getByRole('navigation', { name: m.meme_categories_label() })
       .getByRole('link', { name: POLITICS_CATEGORY.title, exact: true })
       .click()
 

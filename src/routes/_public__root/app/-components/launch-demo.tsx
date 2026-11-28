@@ -9,14 +9,14 @@ import {
 } from 'lucide-react'
 import { MessagingAppIcon } from '~/components/icon/messaging-app-icon'
 import { AppIcon } from '~/components/install/app-icon'
+import { PhoneFrame } from '~/components/install/phone-frame'
+import { DEMO_CLOCK } from '~/constants/app-demo'
 import { SITE_NAME } from '~/constants/branding'
 import { MESSAGING_APPS } from '~/constants/messaging-apps'
 import { APP_SCREEN_SIZE, buildAppScreenPath } from '~/helpers/web-app-assets'
 import { cn } from '~/lib/utils'
 import { m } from '~/paraglide/messages'
 import { getLocale } from '~/paraglide/runtime'
-import { DEMO_CLOCK } from '~/routes/_public__root/app/-lib/demo'
-import { PhoneFrame } from './phone-frame'
 
 const HOME_SCREENS = {
   android: {

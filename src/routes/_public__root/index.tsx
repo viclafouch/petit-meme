@@ -1,5 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router'
-import studioCss from '~/components/studio/studio.css?url'
 import { serializeJsonLd } from '~/helpers/json-ld'
 import { buildHomeJsonLd } from '~/lib/seo/json-ld'
 import { buildSeo } from '~/lib/seo/meta'
@@ -13,7 +12,6 @@ import {
   listMemesQueryOpts,
   listTrendingMemesQueryOpts
 } from '~/queries/meme'
-import appPageCss from '~/routes/_public__root/app/-components/app-page.css?url'
 import { HomePage } from './-components/home-page'
 import homeCss from './-components/home.css?url'
 import { NEW_MEMES_FILTERS } from './-lib/home'
@@ -58,12 +56,7 @@ export const Route = createFileRoute('/_public__root/')({
 
     return {
       ...seo,
-      links: [
-        ...seo.links,
-        { rel: 'stylesheet', href: homeCss },
-        { rel: 'stylesheet', href: appPageCss },
-        { rel: 'stylesheet', href: studioCss }
-      ]
+      links: [...seo.links, { rel: 'stylesheet', href: homeCss }]
     }
   },
   scripts: () => {

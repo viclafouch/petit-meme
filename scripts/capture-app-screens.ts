@@ -20,9 +20,7 @@ const HOME_OUTPUT_WIDTH = 480
 const WEBP_QUALITY = 72
 const SETTLE_DELAY_MS = 1500
 
-const RECTS_FILE_PATH = path.resolve(
-  'src/routes/_public__root/app/-lib/app-screens.json'
-)
+const RECTS_FILE_PATH = path.resolve('src/components/install/app-screens.json')
 
 type Rect = {
   x: number

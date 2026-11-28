@@ -869,5 +869,6 @@
   "footer_submit": "Proposer un mème",
   "seo_faq_title": "Questions fréquentes sur les mèmes vidéo",
   "seo_faq_description": "Comment télécharger un mème vidéo, l’envoyer sur WhatsApp ou Instagram, ajouter du texte avec le Studio, installer l’app : toutes les réponses sur Petit Mème.",
-  "home_hero_new_memes_badge_og": "Nouveaux mèmes ajoutés récemment"
+  "home_hero_new_memes_badge_og": "Nouveaux mèmes ajoutés récemment",
+  "footer_sitemap_label": "Plan du site"
 }

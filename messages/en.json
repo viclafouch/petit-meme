@@ -197,22 +197,6 @@
   "footer_privacy": "Privacy",
   "footer_terms": "Terms",
   "footer_app": "The app",
-  "home_best_browse_all": "Browse all",
-  "home_best_subtitle": "The best memes right now.",
-  "home_best_title": "Memes",
-  "home_faq_a1": "Petit Mème is an online library that gathers the best video memes from the web. You can browse them, save your favorites and easily share them with your friends.",
-  "home_faq_a2": "Yes. Access to video memes is completely free. Paid features only cover additional services, such as watermark-free downloads or advanced customization options.",
-  "home_faq_a3": "The videos come from the internet and social media. Petit Mème does not own the rights to these videos: they are made available for viewing only.",
-  "home_faq_a4": "Not at the moment. Only the site administrator can add new memes. But this feature may evolve in the future.",
-  "home_faq_a5": "If you own a video and would like it removed, you can contact us directly by email.",
-  "home_faq_a6": "Petit Mème does not resell videos and does not claim to own the rights. Access is free and intended for personal use, as found on social media. Premium features only cover additional services (unlimited favorites, watermark-free downloads, etc.) and do not grant any commercial rights to the videos.",
-  "home_faq_q1": "What is Petit Mème?",
-  "home_faq_q2": "Are the videos free?",
-  "home_faq_q3": "Where do the videos come from?",
-  "home_faq_q4": "Can I upload my own memes?",
-  "home_faq_q5": "What if a video belongs to me or I want it removed?",
-  "home_faq_q6": "Is this legal?",
-  "home_hero_announcement": "{count} new memes added recently!",
   "home_hero_cta_discover": "Discover —",
   "home_hero_cta_free": "it's free",
   "home_hero_cta_premium": "Premium mode",
@@ -221,15 +205,7 @@
   "home_hero_h1_2": " video meme library, ",
   "home_hero_h1_3": "ready to make",
   "home_hero_h1_4": " the ",
-  "home_hero_h1_5": "Internet",
-  "home_responsive_badge": "Cross-platform app",
-  "home_responsive_card_text": "Perfectly adapts to all screen sizes",
-  "home_responsive_description": "Petit Mème adapts to you: a smooth and responsive experience on mobile, tablet and desktop, and as an app on your phone's home screen.",
-  "home_responsive_heading": "Your app, everywhere",
-  "home_responsive_label": "Responsive",
-  "home_install_heading": "Petit Meme on your home screen",
-  "home_install_description": "Install the app: it opens full screen, with no browser bar, and your next meme is one tap away.",
-  "home_install_learn_more": "How it works",
+  "home_hero_h1_5": "Internet laugh",
   "legal_dmca_description": "DMCA procedure for content removal requests on Petit Meme.",
   "legal_dmca_title": "DMCA",
   "legal_mentions_description": "Legal notice for the Petit Meme website. Information about the publisher, hosting provider and intellectual property.",
@@ -452,7 +428,7 @@
   "seo_category_all_description": "Discover page {page} of our complete collection of video memes.",
   "seo_category_page_description": "Discover page {page} of the best video memes in the {title} category.",
   "seo_category_page_name": "{title} - Page {page}",
-  "seo_home_description": "Discover Petit Meme, the platform where you can browse, create and share memes for free. Explore our library of funny videos and images, save your favorites and enjoy always up-to-date content.",
+  "seo_home_description": "Petit Mème, the free video meme library: watch, download as MP4 and send the best memes on WhatsApp, Instagram or Snapchat in one gesture, and add your caption with the Studio.",
   "seo_home_keywords": "library,memes,free,video memes",
   "seo_home_page_name": "Petit Meme - The best video memes",
   "seo_home_title": "Your video meme library, ready to make the Internet laugh",
@@ -776,5 +752,122 @@
   "bookmark_intro_sign_in": "Sign in to start",
   "bookmark_suggestions_title": "Trending Memes to keep",
   "error_bookmark_load": "Couldn't load more of your favorites.",
-  "bookmark_demo_title": "Pedro Pascal laughs then cries"
+  "bookmark_demo_title": "Pedro Pascal laughs then cries",
+  "home_hero_new_memes": [
+    {
+      "declarations": [
+        "input count",
+        "input formattedCount",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{formattedCount} new meme",
+        "countPlural=other": "{formattedCount} new memes"
+      }
+    }
+  ],
+  "home_hero_new_memes_added": [
+    {
+      "declarations": [
+        "input count",
+        "input formattedCount",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "added recently",
+        "countPlural=other": "added recently"
+      }
+    }
+  ],
+  "home_trending_title": "What’s going around right now",
+  "home_trending_description": "The most watched and shared video memes right now. Tap one to watch it, then send it in one gesture.",
+  "home_trending_list_label": "Trending memes",
+  "home_trending_all": [
+    {
+      "declarations": [
+        "input count",
+        "input formattedCount",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "The library’s meme",
+        "countPlural=other": "All {formattedCount} memes"
+      }
+    }
+  ],
+  "home_studio_title": "Your caption on any meme",
+  "home_studio_lead": "The Petit Mème Studio writes your text right onto the video. Pick a style, watch the result live, and download a custom video meme, ready to send.",
+  "home_studio_feature_slots_title": "Top, bottom, or both",
+  "home_studio_feature_slots_text": "Type your line: it fits itself onto the video, without spilling over.",
+  "home_studio_feature_looks_title": "Four styles",
+  "home_studio_feature_looks_text": "White or black band, classic Impact meme, or subtitle.",
+  "home_studio_feature_export_title": "An MP4 in seconds",
+  "home_studio_feature_export_text": "The video is made in your browser, ready for TikTok, Reels or your chat.",
+  "home_studio_feature_access_title": "On every meme",
+  "home_studio_feature_access_text": "Free with an account, unlimited with Premium.",
+  "home_studio_cta": "Try the Studio",
+  "home_studio_demo_label": "Studio demo: a caption typed at the top and bottom of a meme, three styles tried, then the video downloaded.",
+  "home_studio_demo_top": "Me at work",
+  "home_studio_demo_bottom": "at 4:59 pm",
+  "home_studio_demo_download": "Download",
+  "home_studio_demo_file": "me-at-work.mp4 · ready to post",
+  "home_mobile_title": "A meme sent in one gesture",
+  "home_mobile_lead": "Add Petit Mème to your home screen, no app store needed: it opens full screen, like an app, and every meme goes to WhatsApp, Instagram, Messenger, Snapchat, Discord or Telegram.",
+  "home_mobile_step_open_title": "Open a meme",
+  "home_mobile_step_open_text": "From the app on your home screen, the video starts on the first tap.",
+  "home_mobile_step_share_title": "Tap Share",
+  "home_mobile_step_share_text": "Your phone’s share sheet opens with the video itself, not a link.",
+  "home_mobile_step_send_title": "Pick the chat",
+  "home_mobile_step_send_text": "The meme arrives like a video from your gallery and plays on its own.",
+  "home_mobile_app_link": "All about the app",
+  "faq_title": "Frequently asked questions",
+  "faq_description": "Everything you need to know to watch, download, share and customize video memes on Petit Mème.",
+  "faq_q_what": "What is Petit Mème?",
+  "faq_a_what": "Petit Mème is a library of video memes in French and English. Every meme is picked by hand, titled and filed by mood, reply, theme and source, so you find the right one fast.",
+  "faq_q_free": "Is Petit Mème free?",
+  "faq_a_free": "Yes. The whole library can be watched, downloaded and shared for free. Premium removes the watermark, adds the sound of every meme and lifts the limits on favorites, the Studio and AI search.",
+  "faq_q_account": "Do I need an account?",
+  "faq_a_account": "Not to watch, download or share. A free account, with email, X or Discord, unlocks favorites, the Studio, AI search and meme suggestions.",
+  "faq_q_share": "How do I send a meme on WhatsApp, Instagram or Snapchat?",
+  "faq_a_share": "Open the meme and tap Share: your phone’s share sheet opens with the video, ready for WhatsApp, Instagram, Messenger, Snapchat, Discord or Telegram. On a computer, copy the link or download the video.",
+  "faq_q_download": "How do I download a video meme?",
+  "faq_a_download": "Open the meme and choose Download: you get an MP4 file. The free version carries a watermark, Premium downloads the original without it and the sound on its own.",
+  "faq_q_studio": "How do I add text to a meme?",
+  "faq_a_studio": "Open the Studio from any meme, write your text at the top, the bottom or both, pick a style (white or black band, Impact or subtitle), then download or share the video.",
+  "faq_q_app": "Do I need to install an app?",
+  "faq_a_app": "No, the website is enough. You can also add Petit Mème to your phone’s home screen from the browser: it then opens full screen, like an app, without any app store.",
+  "faq_q_premium": "What does Premium include?",
+  "faq_a_premium": "The video without the watermark, the sound of every meme, unlimited favorites, Studio and AI search, and no more invitations to subscribe. Billed monthly or yearly, and cancelled in one click.",
+  "faq_q_propose": "Can I suggest a meme?",
+  "faq_a_propose": "Yes, with an account: paste the meme’s link on the Suggest a meme page. Every suggestion is reviewed before it joins the library.",
+  "faq_q_source": "Where do the videos come from?",
+  "faq_a_source": "They come from the internet and social media, mostly X. Petit Mème does not own the rights to these videos: it gathers them for discovery.",
+  "faq_q_takedown": "A video belongs to me: how do I get it removed?",
+  "faq_a_takedown": "Send a removal request by following the DMCA procedure on its dedicated page. A valid request takes the meme off the site.",
+  "faq_takedown_link": "See the DMCA procedure",
+  "footer_tagline": "The video meme library to watch, download and send in one gesture.",
+  "footer_memes_heading": "Memes",
+  "footer_categories_heading": "Categories",
+  "footer_site_heading": "Petit Mème",
+  "footer_legal_heading": "Legal",
+  "footer_all_memes": "All memes",
+  "footer_new_memes": "New",
+  "footer_trending_memes": "Trending",
+  "footer_ai_search": "AI search",
+  "footer_random_meme": "A random meme",
+  "footer_premium": "Premium",
+  "footer_faq": "FAQ",
+  "footer_submit": "Suggest a meme",
+  "seo_faq_title": "Frequently asked questions about video memes",
+  "seo_faq_description": "How to download a video meme, send it on WhatsApp or Instagram, add text with the Studio, install the app: every answer on Petit Mème.",
+  "home_hero_new_memes_badge_og": "New memes added recently"
 }

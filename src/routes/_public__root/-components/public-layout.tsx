@@ -1,15 +1,22 @@
+import React from 'react'
 import { getRouteApi, Outlet, useMatchRoute } from '@tanstack/react-router'
 import { StarsBackground } from '~/components/animate-ui/backgrounds/stars'
 import { SentryFeedbackWidget } from '~/components/app/sentry-feedback-widget'
-import { Footer } from '~/components/layout/footer'
 import { Navbar } from '~/components/layout/navbar'
 import { SiteBanners } from '~/components/layout/site-banners'
 import { TabBar } from '~/components/layout/tab-bar/tab-bar'
 import { StudioSheetHost } from '~/components/studio/studio-sheet-host'
 import { useIsStudioOpen } from '~/components/studio/use-studio-history'
+import { lazyComponent } from '~/lib/lazy-component'
 import { m } from '~/paraglide/messages'
 
 const publicRouteApi = getRouteApi('/_public__root')
+
+const Footer = lazyComponent(async () => {
+  const footerModule = await import('~/components/layout/footer')
+
+  return footerModule.Footer
+})
 
 export const PublicLayout = () => {
   const { _suggestedLocale, _announcementDismissed } =
@@ -47,7 +54,9 @@ export const PublicLayout = () => {
         >
           <Outlet />
         </main>
-        <Footer className={isHomePage ? undefined : 'max-lg:hidden'} />
+        <React.Suspense fallback={null}>
+          <Footer className={isHomePage ? undefined : 'max-lg:hidden'} />
+        </React.Suspense>
       </div>
       <TabBar />
       <StudioSheetHost />

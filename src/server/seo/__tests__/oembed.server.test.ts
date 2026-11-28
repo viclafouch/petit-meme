@@ -118,7 +118,7 @@ describe('the oEmbed endpoint', () => {
         width: 640,
         height: 360,
         thumbnail_url:
-          'https://www.petit-meme.io/api/og?type=meme&id=meme-id&v=4',
+          'https://www.petit-meme.io/api/og?type=meme&id=meme-id&v=5',
         thumbnail_width: 1200,
         thumbnail_height: 630
       })

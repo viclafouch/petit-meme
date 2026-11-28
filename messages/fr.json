@@ -197,22 +197,6 @@
   "footer_privacy": "Confidentialité",
   "footer_terms": "Conditions",
   "footer_app": "L'app",
-  "home_best_browse_all": "Tout parcourir",
-  "home_best_subtitle": "Les meilleurs mèmes du moment.",
-  "home_best_title": "Mèmes",
-  "home_faq_a1": "Petit Mème est une bibliothèque en ligne qui rassemble les meilleurs mèmes vidéo du web. Tu peux les parcourir, les sauvegarder en favoris et les partager facilement avec tes amis.",
-  "home_faq_a2": "Oui. L'accès aux vidéos mèmes est entièrement gratuit. Les fonctionnalités payantes concernent uniquement des services supplémentaires, comme le téléchargement sans watermark ou des options avancées de personnalisation.",
-  "home_faq_a3": "Les vidéos proviennent d'Internet et des réseaux sociaux. Petit Mème ne détient pas les droits sur ces vidéos : elles sont mises à disposition uniquement pour le visionnage.",
-  "home_faq_a4": "Non, pas pour l'instant. Seul l'administrateur du site peut ajouter de nouveaux mèmes. Mais cette fonctionnalité pourrait évoluer à l'avenir.",
-  "home_faq_a5": "Si tu es propriétaire d'une vidéo et que tu souhaites son retrait, tu peux nous contacter directement par mail.",
-  "home_faq_a6": "Petit Mème ne revend pas les vidéos et ne prétend pas en détenir les droits. L'accès est gratuit et destiné à un usage personnel, comme on le retrouve sur les réseaux sociaux. Les fonctionnalités premium concernent uniquement des services additionnels (favoris illimités, téléchargement sans watermark, etc.) et ne confèrent aucun droit commercial sur les vidéos.",
-  "home_faq_q1": "Qu'est-ce que Petit Mème ?",
-  "home_faq_q2": "Est-ce que les vidéos sont gratuites ?",
-  "home_faq_q3": "D'où viennent les vidéos ?",
-  "home_faq_q4": "Puis-je uploader mes propres mèmes ?",
-  "home_faq_q5": "Que faire si une vidéo m'appartient ou si je veux qu'elle soit supprimée ?",
-  "home_faq_q6": "Est-ce légal ?",
-  "home_hero_announcement": "{count} nouveaux mèmes ajoutés récemment !",
   "home_hero_cta_discover": "Découvrir —",
   "home_hero_cta_free": "c'est gratuit",
   "home_hero_cta_premium": "Mode premium",
@@ -222,14 +206,6 @@
   "home_hero_h1_3": "prête à faire",
   "home_hero_h1_4": " rire ",
   "home_hero_h1_5": "Internet",
-  "home_responsive_badge": "Application multiplateforme",
-  "home_responsive_card_text": "S'adapte parfaitement à toutes les tailles d'écran",
-  "home_responsive_description": "Petit Mème s'adapte à toi : une expérience fluide et réactive sur mobile, tablette et ordinateur, et en app sur l'écran d'accueil de ton téléphone.",
-  "home_responsive_heading": "Ton application, partout",
-  "home_responsive_label": "Responsive",
-  "home_install_heading": "Petit Meme sur ton écran d'accueil",
-  "home_install_description": "Installe l'app : elle s'ouvre en plein écran, sans barre de navigateur, et ton prochain mème est à une touche.",
-  "home_install_learn_more": "Comment ça marche",
   "legal_dmca_description": "Procédure DMCA pour les demandes de retrait de contenu sur Petit Meme.",
   "legal_dmca_title": "DMCA",
   "legal_mentions_description": "Mentions légales du site Petit Meme. Informations sur l'éditeur, l'hébergeur et la propriété intellectuelle.",
@@ -452,7 +428,7 @@
   "seo_category_all_description": "Découvrez la page {page} de notre collection complète de mèmes vidéo.",
   "seo_category_page_description": "Découvrez la page {page} des meilleurs mèmes vidéo de la catégorie {title}.",
   "seo_category_page_name": "{title} - Page {page}",
-  "seo_home_description": "Découvre Petit Meme, la plateforme où tu peux parcourir, créer et partager des mèmes gratuitement. Explore notre bibliothèque de vidéos et images humoristiques, sauvegarde tes favoris et amuse-toi avec des contenus toujours à jour.",
+  "seo_home_description": "Petit Mème, la banque de mèmes vidéo gratuite : regarde, télécharge en MP4 et envoie les meilleurs mèmes sur WhatsApp, Instagram ou Snapchat en un geste, et ajoute ta légende avec le Studio.",
   "seo_home_keywords": "banque,memes,gratuit,francais",
   "seo_home_page_name": "Petit Meme - Les meilleurs mèmes vidéo",
   "seo_home_title": "Ta banque de mèmes vidéo, prête à faire rire Internet",
@@ -776,5 +752,122 @@
   "bookmark_intro_sign_in": "Se connecter pour commencer",
   "bookmark_suggestions_title": "Les mèmes du moment, à garder",
   "error_bookmark_load": "Impossible de charger la suite de tes favoris.",
-  "bookmark_demo_title": "Pedro Pascal rit puis pleure"
+  "bookmark_demo_title": "Pedro Pascal rit puis pleure",
+  "home_hero_new_memes": [
+    {
+      "declarations": [
+        "input count",
+        "input formattedCount",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{formattedCount} nouveau mème",
+        "countPlural=other": "{formattedCount} nouveaux mèmes"
+      }
+    }
+  ],
+  "home_hero_new_memes_added": [
+    {
+      "declarations": [
+        "input count",
+        "input formattedCount",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "ajouté récemment",
+        "countPlural=other": "ajoutés récemment"
+      }
+    }
+  ],
+  "home_trending_title": "Ce qui circule en ce moment",
+  "home_trending_description": "Les mèmes vidéo les plus regardés et partagés en ce moment. Touche-en un pour le regarder, puis envoie-le en un geste.",
+  "home_trending_list_label": "Mèmes tendance",
+  "home_trending_all": [
+    {
+      "declarations": [
+        "input count",
+        "input formattedCount",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "Le mème de la bibliothèque",
+        "countPlural=other": "Les {formattedCount} mèmes"
+      }
+    }
+  ],
+  "home_studio_title": "Ta légende sur n’importe quel mème",
+  "home_studio_lead": "Le Studio de Petit Mème écrit ton texte directement sur la vidéo. Choisis ton style, regarde le résultat en direct, et télécharge un mème vidéo personnalisé, prêt à envoyer.",
+  "home_studio_feature_slots_title": "En haut, en bas, ou les deux",
+  "home_studio_feature_slots_text": "Tape ta phrase : elle se cale toute seule sur la vidéo, sans déborder.",
+  "home_studio_feature_looks_title": "Quatre styles",
+  "home_studio_feature_looks_text": "Bandeau blanc ou noir, Impact façon mème classique, ou sous-titre.",
+  "home_studio_feature_export_title": "Un MP4 en quelques secondes",
+  "home_studio_feature_export_text": "La vidéo se crée dans ton navigateur, prête pour TikTok, Reels ou ta conversation.",
+  "home_studio_feature_access_title": "Sur tous les mèmes",
+  "home_studio_feature_access_text": "Gratuit avec un compte, sans limite avec Premium.",
+  "home_studio_cta": "Essayer le Studio",
+  "home_studio_demo_label": "Démo du Studio : une légende tapée en haut et en bas d’un mème, trois styles essayés, puis la vidéo téléchargée.",
+  "home_studio_demo_top": "Moi au boulot",
+  "home_studio_demo_bottom": "à 17h59",
+  "home_studio_demo_download": "Télécharger",
+  "home_studio_demo_file": "moi-au-boulot.mp4 · prête à poster",
+  "home_mobile_title": "Un mème envoyé en un geste",
+  "home_mobile_lead": "Installe Petit Mème sur ton écran d’accueil, sans passer par un store : il s’ouvre en plein écran, comme une app, et chaque mème part vers WhatsApp, Instagram, Messenger, Snapchat, Discord ou Telegram.",
+  "home_mobile_step_open_title": "Ouvre un mème",
+  "home_mobile_step_open_text": "Depuis l’app sur ton écran d’accueil, la vidéo démarre au premier tap.",
+  "home_mobile_step_share_title": "Touche Partager",
+  "home_mobile_step_share_text": "La feuille de partage de ton téléphone s’ouvre avec la vidéo, pas un lien.",
+  "home_mobile_step_send_title": "Choisis la conversation",
+  "home_mobile_step_send_text": "Le mème arrive comme une vidéo de ta galerie et se lance tout seul.",
+  "home_mobile_app_link": "Tout savoir sur l’app",
+  "faq_title": "Questions fréquentes",
+  "faq_description": "Tout ce qu’il faut savoir pour regarder, télécharger, partager et personnaliser des mèmes vidéo sur Petit Mème.",
+  "faq_q_what": "Qu’est-ce que Petit Mème ?",
+  "faq_a_what": "Petit Mème est une bibliothèque de mèmes vidéo en français et en anglais. Chaque mème est choisi à la main, titré et rangé par humeur, par réponse, par thème et par source, pour retrouver vite celui qui tombe juste.",
+  "faq_q_free": "Est-ce que Petit Mème est gratuit ?",
+  "faq_a_free": "Oui. Toute la bibliothèque se regarde, se télécharge et se partage gratuitement. Premium retire le watermark, ajoute le son de chaque mème et lève les limites des favoris, du Studio et de la recherche IA.",
+  "faq_q_account": "Faut-il créer un compte ?",
+  "faq_a_account": "Non pour regarder, télécharger et partager. Un compte gratuit, par e-mail, X ou Discord, débloque les favoris, le Studio, la recherche IA et les propositions de mèmes.",
+  "faq_q_share": "Comment envoyer un mème sur WhatsApp, Instagram ou Snapchat ?",
+  "faq_a_share": "Ouvre le mème et touche Partager : la feuille de partage de ton téléphone s’ouvre avec la vidéo, prête pour WhatsApp, Instagram, Messenger, Snapchat, Discord ou Telegram. Sur ordinateur, copie le lien ou télécharge la vidéo.",
+  "faq_q_download": "Comment télécharger un mème vidéo ?",
+  "faq_a_download": "Ouvre le mème et choisis Télécharger : tu récupères un fichier MP4. La version gratuite porte un watermark, Premium télécharge l’original sans watermark et le son seul.",
+  "faq_q_studio": "Comment ajouter du texte sur un mème ?",
+  "faq_a_studio": "Ouvre le Studio depuis n’importe quel mème, écris ton texte en haut, en bas ou les deux, choisis un style (bandeau blanc ou noir, Impact ou sous-titre), puis télécharge ou partage la vidéo.",
+  "faq_q_app": "Faut-il installer une application ?",
+  "faq_a_app": "Non, le site suffit. Tu peux aussi ajouter Petit Mème à l’écran d’accueil de ton téléphone depuis le navigateur : il s’ouvre alors en plein écran, comme une app, sans passer par un store.",
+  "faq_q_premium": "Que comprend Premium ?",
+  "faq_a_premium": "La vidéo sans watermark, le son de chaque mème, des favoris, un Studio et une recherche IA sans limite, et plus aucune invitation à t’abonner. Il se prend au mois ou à l’année, et s’annule en un clic.",
+  "faq_q_propose": "Puis-je proposer un mème ?",
+  "faq_a_propose": "Oui, avec un compte : colle le lien du mème dans la page Proposer un mème. Chaque proposition est vérifiée avant de rejoindre la bibliothèque.",
+  "faq_q_source": "D’où viennent les vidéos ?",
+  "faq_a_source": "Elles viennent d’Internet et des réseaux sociaux, surtout de X. Petit Mème ne détient pas les droits de ces vidéos : il les rassemble pour les faire découvrir.",
+  "faq_q_takedown": "Une vidéo m’appartient : comment la faire retirer ?",
+  "faq_a_takedown": "Envoie une demande de retrait en suivant la procédure DMCA décrite sur la page dédiée. Une demande valide retire le mème du site.",
+  "faq_takedown_link": "Voir la procédure DMCA",
+  "footer_tagline": "La banque de mèmes vidéo à regarder, télécharger et envoyer en un geste.",
+  "footer_memes_heading": "Mèmes",
+  "footer_categories_heading": "Catégories",
+  "footer_site_heading": "Petit Mème",
+  "footer_legal_heading": "Légal",
+  "footer_all_memes": "Tous les mèmes",
+  "footer_new_memes": "Nouveautés",
+  "footer_trending_memes": "Tendances",
+  "footer_ai_search": "Recherche IA",
+  "footer_random_meme": "Un mème au hasard",
+  "footer_premium": "Premium",
+  "footer_faq": "Questions fréquentes",
+  "footer_submit": "Proposer un mème",
+  "seo_faq_title": "Questions fréquentes sur les mèmes vidéo",
+  "seo_faq_description": "Comment télécharger un mème vidéo, l’envoyer sur WhatsApp ou Instagram, ajouter du texte avec le Studio, installer l’app : toutes les réponses sur Petit Mème.",
+  "home_hero_new_memes_badge_og": "Nouveaux mèmes ajoutés récemment"
 }

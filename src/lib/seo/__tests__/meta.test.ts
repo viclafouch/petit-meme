@@ -33,7 +33,7 @@ const PUBLISHED_MEME = {
 } as const satisfies MemeWithVideo & MemeWithCategories
 
 const MEME_IMAGE_URL =
-  'https://www.petit-meme.io/api/og?type=meme&id=meme-id&v=4'
+  'https://www.petit-meme.io/api/og?type=meme&id=meme-id&v=5'
 
 const MEME_IMAGE_ALT_BY_LOCALE = {
   fr: 'Mème vidéo : Meme title',
@@ -41,7 +41,7 @@ const MEME_IMAGE_ALT_BY_LOCALE = {
 } as const satisfies Record<Locale, string>
 
 const PRICING_IMAGE_URL =
-  'https://www.petit-meme.io/api/og?type=pricing&locale=en&v=4'
+  'https://www.petit-meme.io/api/og?type=pricing&locale=en&v=5'
 
 const PENDING_MEME = {
   ...PUBLISHED_MEME,

@@ -9,11 +9,12 @@ import {
 
 export const websiteOrigin = clientEnv.VITE_SITE_URL
 
-const OG_VERSION = 4
+const OG_VERSION = 5
 
 export const OG_DEFAULTED_TYPE_VALUES = [
   'ai-search',
   'app',
+  'faq',
   'pricing',
   'reels',
   'submit'

@@ -1,6 +1,6 @@
 # Petit Meme knowledge base
 
-The life of Petit Meme, for someone who never opens the code. It holds the vision: what Petit Meme wants to be, for whom, and why. How the site or the code is built stays out, and so do prices, quotas and counts.
+The life of Petit Meme, for someone who never opens the code. It holds the vision: what Petit Meme wants to be, for whom, and why. A line belongs here when it survives a redesign: what a person can do and why, never where a thing sits on the screen or how it looks. How the code is built stays out, and so do prices, quotas and counts.
 
 Read in this order.
 

@@ -6,7 +6,7 @@ Petit Meme has one developer, the Creator, and no staging environment. A change 
 
 1. **The change is written.** A bigger topic starts from a GitHub issue, which holds the plan and its "Done when". A small change goes without one.
 2. **Checks run before the commit.** Types, lint, unused code, unit tests and formatting run on the Creator's machine.
-3. **The change goes out, on the Creator's word.** A bigger topic goes through a pull request, which merges on its own once the checks pass. A small change goes straight to the main branch.
+3. **The change goes out, on the Creator's word.** A bigger topic goes through a pull request, which the Creator merges once the checks pass. A small change goes straight to the main branch.
 4. **The checks run again.** The same checks, plus the end-to-end tests in a real browser against a test database.
 5. **Production follows.** Vercel builds every change, but holds production on the previous version until every check is green. A red check leaves production untouched.
 
